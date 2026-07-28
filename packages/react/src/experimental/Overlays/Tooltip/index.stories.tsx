@@ -3,10 +3,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { Tooltip } from "./index"
 
-const meta: Meta<typeof Tooltip> = {
+const meta = {
   title: "Tooltip",
   component: Tooltip,
   tags: ["autodocs", "experimental"],
@@ -15,11 +16,11 @@ const meta: Meta<typeof Tooltip> = {
       <div className="flex h-32 items-center justify-center p-6">{Story()}</div>
     ),
   ],
-}
+} satisfies Meta<typeof Tooltip>
 
 export default meta
 
-type Story = StoryObj<typeof Tooltip>
+type Story = StoryObj<typeof meta>
 
 export const Basic: Story = {
   args: {
@@ -27,6 +28,11 @@ export const Basic: Story = {
     description: "View a breakdown of planned working hours.",
     children: <F0Button variant="outline" label="Planned hours" />,
   },
+}
+
+export const Snapshot: Story = {
+  args: Basic.args,
+  parameters: withSnapshot({}),
 }
 
 export const WithShortcut: Story = {

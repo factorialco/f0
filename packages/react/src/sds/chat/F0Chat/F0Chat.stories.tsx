@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0Chat } from "./F0Chat"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
@@ -653,7 +655,7 @@ const DocumentConversation = (): ReactNode => {
 const meta = {
   title: "F0Chat",
   component: F0Chat,
-  tags: ["experimental"],
+  tags: ["!autodocs", "experimental"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof F0Chat>
 
@@ -662,6 +664,11 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => <Conversation initialCount={40} />,
+}
+
+export const Snapshot: Story = {
+  render: () => <Conversation initialCount={12} />,
+  parameters: withSnapshot({}),
 }
 
 /** Composer micro-interaction QA. Try, in order: hover a message → Reply (the

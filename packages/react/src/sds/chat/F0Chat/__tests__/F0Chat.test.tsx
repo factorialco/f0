@@ -6,11 +6,15 @@ import {
   screen,
   userEvent,
   waitFor,
+  within,
 } from "@/testing/test-utils"
+import { getEmojiLabel } from "@/lib/emojis"
 
 import { F0Chat } from "../F0Chat"
+import { resolveMockReactionUsers } from "../mocks/MockChatApp"
+import { initialConvState, SEED_BY_ID, SEEDS } from "../mocks/mockSeeds"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
-import { type F0ChatMessage, type F0ChatRuntime } from "../types"
+import { isUserMessage, type F0ChatMessage, type F0ChatRuntime } from "../types"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -417,7 +421,95 @@ describe("F0Chat", () => {
     expect(screen.getByText(/no messages yet/i)).toBeInTheDocument()
   })
 
-  it("shows the interpolated 'Read by N' count for my read message in a group", () => {
+  it("seeds reader identities on every group message in the application mock", () => {
+    for (const seed of SEEDS.filter((item) => item.type === "group")) {
+      const messages = initialConvState(seed).messages.filter(isUserMessage)
+
+      for (const message of messages) {
+        expect(message.readBy?.length).toBeGreaterThan(0)
+        expect(
+          message.readBy?.some((reader) => reader.id === message.author.id)
+        ).toBe(false)
+      }
+    }
+  })
+
+  it("resolves complete and fallback reaction users in the application mock", () => {
+    const seed = SEED_BY_ID.get("grp-reporting")
+    if (!seed) throw new Error("Expected grp-reporting mock seed")
+
+    const messages = initialConvState(seed).messages
+    const message = messages
+      .filter(isUserMessage)
+      .find((item) => item.reactions?.some(({ emoji }) => emoji === "🎉"))
+    if (!message) throw new Error("Expected a seeded reaction message")
+
+    expect(
+      resolveMockReactionUsers(seed, messages, message.id, "🎉").map(
+        ({ name }) => name
+      )
+    ).toEqual(["Grace Liang", "Marcus Bennett", "Sam Okafor"])
+    expect(resolveMockReactionUsers(seed, messages, message.id, "👍")).toEqual(
+      []
+    )
+    expect(resolveMockReactionUsers(seed, messages, "missing", "🎉")).toEqual(
+      []
+    )
+
+    const fallbackMessages = messages.map((item) =>
+      isUserMessage(item) && item.id === message.id
+        ? {
+            ...item,
+            reactions: [{ emoji: "🎉", count: 2, reactedByMe: false }],
+          }
+        : item
+    )
+    expect(
+      resolveMockReactionUsers(seed, fallbackMessages, message.id, "🎉").map(
+        ({ name }) => name
+      )
+    ).toEqual(["Grace Liang", "Marcus Bennett"])
+  })
+
+  it("shows reader identities in group message info and derives their count", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            readBy: [
+              { id: "grace", name: "Grace Liang" },
+              { id: "marcus", name: "Marcus Bennett" },
+            ],
+            readByCount: 99,
+          },
+        ],
+      })
+    )
+    expect(screen.getByText(/read by 2/i)).toBeInTheDocument()
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /message actions/i })
+    )
+    await userEvent.click(screen.getByRole("button", { name: /^Info$/i }))
+
+    const readers = screen.getByRole("list", { name: /read by 2/i })
+    expect(within(readers).getByText("Grace Liang")).toBeInTheDocument()
+    expect(within(readers).getByText("Marcus Bennett")).toBeInTheDocument()
+  })
+
+  it("keeps the legacy group read count as a fallback", () => {
     renderChat(
       makeRuntime({
         channel: {
@@ -439,8 +531,52 @@ describe("F0Chat", () => {
         ],
       })
     )
-    // i18n.t("chat.readBy.other", { count: 3 }) → "Read by 3".
     expect(screen.getByText(/read by 3/i)).toBeInTheDocument()
+  })
+
+  it("loads reaction users once across repeated hovers", async () => {
+    const loadReactionUsers = vi.fn().mockResolvedValue([
+      { id: "grace", name: "Grace Liang" },
+      { id: "marcus", name: "Marcus Bennett" },
+    ])
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "m-reaction",
+            author: { id: "other", name: "María José" },
+            body: "Great launch",
+            createdAt: now,
+            isMine: false,
+            reactions: [
+              {
+                emoji: "👍",
+                count: 2,
+                reactedByMe: false,
+              },
+            ],
+          },
+        ],
+        loadReactionUsers,
+      })
+    )
+
+    const reaction = screen.getByRole("button", {
+      name: `${getEmojiLabel("👍")}: 2`,
+    })
+    expect(reaction).toHaveAttribute("aria-pressed", "false")
+    await userEvent.hover(reaction)
+    await waitFor(() =>
+      expect(loadReactionUsers).toHaveBeenCalledWith("m-reaction", "👍")
+    )
+    await userEvent.unhover(reaction)
+    await userEvent.hover(reaction)
+    expect(
+      await screen.findAllByText("Grace Liang, Marcus Bennett")
+    ).not.toHaveLength(0)
+    await userEvent.unhover(reaction)
+    await userEvent.hover(reaction)
+    expect(loadReactionUsers).toHaveBeenCalledTimes(1)
   })
 
   it("names the typing users in a group (interpolated label)", () => {

@@ -137,6 +137,10 @@ export type F0ChatReaction = {
   emoji: string
   count: number
   reactedByMe: boolean
+  /**
+   * People who reacted with this emoji. Hosts may omit this initial list and
+   * provide {@link F0ChatRuntime.loadReactionUsers} to resolve it lazily.
+   */
   users?: F0ChatUser[]
 }
 
@@ -211,9 +215,14 @@ export type F0ChatMessage = {
    */
   mentionedEveryone?: boolean
   /**
-   * Group read receipts — how many other members have read this message.
-   * Approximated by counting members whose last-read pointer is at/after this
-   * message (Stream exposes no per-message reader list).
+   * Group read receipts — the other members who have read this message.
+   * Hosts derive this from their transport's per-member read pointers.
+   */
+  readBy?: F0ChatUser[]
+  /**
+   * Group read-receipt count for hosts that cannot provide reader identities.
+   * Prefer `readBy` when identities are available; F0 derives its count from
+   * `readBy.length`.
    */
   readByCount?: number
   /**
@@ -445,6 +454,16 @@ export type F0ChatRuntime = {
   retryMessage: (id: string) => void | Promise<void>
   loadOlder: () => void
   toggleReaction: (messageId: string, emoji: string) => void | Promise<void>
+  /**
+   * Resolve the complete user list for one reaction on demand. F0 calls this
+   * when the reaction receives pointer hover or keyboard focus and caches the
+   * result while its count is unchanged. Omit when every reaction already
+   * carries its complete {@link F0ChatReaction.users} list.
+   */
+  loadReactionUsers?: (
+    messageId: string,
+    emoji: string
+  ) => Promise<F0ChatUser[]>
   /**
    * Delete a message that exists server-side (soft delete → tombstone, or hard
    * delete → removed from `messages`).

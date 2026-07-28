@@ -7,6 +7,7 @@ import {
   type F0ChatItem,
   type F0ChatLinkPreview,
   type F0ChatMention,
+  type F0ChatReaction,
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
@@ -119,6 +120,10 @@ type MessageLine = {
   linkPreviews?: F0ChatLinkPreview[]
   /** Attachments (images, files, shared locations) for the media demos. */
   attachments?: F0ChatAttachment[]
+  /** Group members who read this message. */
+  readBy?: F0ChatUser[]
+  /** Reactions shown under the message. */
+  reactions?: F0ChatReaction[]
 }
 
 /** A membership event in the transcript — becomes a centered system row. */
@@ -654,6 +659,15 @@ export const SEEDS: Seed[] = [
         from: ME,
         body: "And the kickoff deck — no client-side preview for ppt, stays a chip",
         min: 10 * MIN,
+        readBy: [GRACE, MARCUS, SAM],
+        reactions: [
+          {
+            emoji: "🎉",
+            count: 3,
+            reactedByMe: false,
+            users: [GRACE, MARCUS, SAM],
+          },
+        ],
         attachments: [
           {
             kind: "file",
@@ -972,6 +986,12 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       }
     }
     const isMine = line.from.id === ME.id
+    const groupReaders =
+      seed.type === "group"
+        ? [...seed.participants, ME].filter(
+            (participant) => participant.id !== line.from.id
+          )
+        : undefined
     return {
       id: nextId(),
       author: line.from,
@@ -985,6 +1005,8 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       mentionedEveryone: line.mentionedEveryone,
       linkPreviews: line.linkPreviews,
       attachments: line.attachments,
+      readBy: line.readBy ?? groupReaders,
+      reactions: line.reactions,
     }
   })
   // Second pass: resolve reply references now that every message has an id.

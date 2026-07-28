@@ -247,7 +247,7 @@ describe("live content transitions", () => {
       makeRuntime({ messages: [withReactions([reaction("👍")])] })
     )
     expect(
-      screen.getByRole("button", { name: getEmojiLabel("👍") })
+      screen.getByRole("button", { name: `${getEmojiLabel("👍")}: 1` })
     ).toBeInTheDocument()
 
     // A second emoji pops in next to the first.
@@ -261,7 +261,7 @@ describe("live content transitions", () => {
       </F0ChatProvider>
     )
     expect(
-      screen.getByRole("button", { name: getEmojiLabel("❤️") })
+      screen.getByRole("button", { name: `${getEmojiLabel("❤️")}: 1` })
     ).toBeInTheDocument()
 
     // Removing one leaves the other (the exit resolves instantly in tests).
@@ -274,11 +274,13 @@ describe("live content transitions", () => {
     )
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: getEmojiLabel("👍") })
+        screen.queryByRole("button", {
+          name: `${getEmojiLabel("👍")}: 1`,
+        })
       ).not.toBeInTheDocument()
     )
     expect(
-      screen.getByRole("button", { name: getEmojiLabel("❤️") })
+      screen.getByRole("button", { name: `${getEmojiLabel("❤️")}: 1` })
     ).toBeInTheDocument()
   })
 

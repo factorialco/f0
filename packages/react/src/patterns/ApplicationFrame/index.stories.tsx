@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useCallback, useEffect, useRef, useState } from "react"
+import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -24,6 +25,8 @@ import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
 import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { getEmojiLabel } from "@/lib/emojis"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -516,7 +519,7 @@ const WelcomeCards = () => {
   return <WelcomeScreenCardsRow cards={cards} />
 }
 
-const meta: Meta<typeof ApplicationFrame> = {
+const meta = {
   title: "App shell/ApplicationFrame",
   component: ApplicationFrame,
   tags: ["autodocs", "experimental"],
@@ -761,11 +764,11 @@ const meta: Meta<typeof ApplicationFrame> = {
     sidebar: <TabbedSidebar />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
-}
+} satisfies Meta<typeof ApplicationFrame>
 
 export default meta
 
-type Story = StoryObj<typeof ApplicationFrame>
+type Story = StoryObj<typeof meta>
 
 const mockChatSlots = {
   chatHeader: <MockConnectedChatHeader />,
@@ -1505,4 +1508,99 @@ export const CommunicationsBlankStates: Story = {
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
+}
+
+/**
+ * A group conversation with real-world message receipts and reactions. The
+ * final message is mine and carries the identities of its three readers and
+ * three reaction users, matching the transport-agnostic production contract.
+ */
+export const CommunicationsReceiptsAndReactions: Story = {
+  name: "Communications — readers and reaction users",
+  tags: ["f0chat-receipts"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvas, canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+    await step("Show the people behind a reaction", async () => {
+      const reaction = await canvas.findByRole("button", {
+        name: `${getEmojiLabel("🎉")}: 3`,
+      })
+      const addReaction = canvas.getByRole("button", { name: /add reaction/i })
+
+      addReaction.focus()
+      await userEvent.tab({ shift: true })
+      await expect(reaction).toHaveFocus()
+      const reactionTooltips = await page.findAllByText(
+        "Grace Liang, Marcus Bennett, Sam Okafor",
+        {},
+        { timeout: 3_000 }
+      )
+      const tooltipId = reaction.getAttribute("aria-describedby")
+      const visibleTooltip = tooltipId
+        ? canvasElement.ownerDocument.getElementById(tooltipId)
+        : null
+      await expect(reactionTooltips.length).toBeGreaterThan(0)
+      await expect(tooltipId).toBeTruthy()
+      await expect(visibleTooltip).toHaveTextContent(
+        "Grace Liang, Marcus Bennett, Sam Okafor"
+      )
+      await expect(visibleTooltip!).toBeVisible()
+      await userEvent.tab()
+    })
+
+    await step("Show the people who read a group message", async () => {
+      const message = await canvas.findByText(/And the kickoff deck/)
+      await userEvent.hover(message)
+      const actionButtons = await canvas.findAllByRole("button", {
+        name: /message actions/i,
+      })
+      await userEvent.click(actionButtons.at(-1)!)
+      await userEvent.click(
+        await page.findByRole("button", {
+          name: /^Info$/i,
+        })
+      )
+
+      const readers = await page.findByRole(
+        "list",
+        { name: /Read by 3/i },
+        { timeout: 3_000 }
+      )
+      await expect(within(readers).getByText("Grace Liang")).toBeVisible()
+      await expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
+      await expect(within(readers).getByText("Sam Okafor")).toBeVisible()
+    })
+  },
+}
+
+export const Snapshot: Story = {
+  ...CommunicationsReceiptsAndReactions,
+  name: "Snapshot",
+  play: undefined,
+  parameters: withSnapshot({}),
 }

@@ -1,0 +1,154 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Chat.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# F0Chat
+
+F0Chat renders a transport-agnostic direct or group conversation. The host provides messages, membership, receipts, reactions, and mutations through `F0ChatRuntime`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Group receipt and reaction contracts
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Field</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>message.readBy</code>
+        </td>
+        <td>
+          <code>F0ChatUser[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Other group members who read the message. F0 derives the displayed
+          count from this list.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>message.readByCount</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Count fallback for hosts that cannot provide reader identities.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>runtime.loadReactionUsers</code>
+        </td>
+        <td>
+          <code>
+            (messageId: string, emoji: string) =&gt; Promise&lt;F0ChatUser[]&gt;
+          </code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Resolves complete reaction membership on first hover or keyboard
+          focus.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0Chat when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Product communications</td>
+        <td>A host integration supplies conversation state and mutations.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Static activity history</td>
+        <td>A timeline or activity-feed pattern.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Derive readBy from transport read pointers and exclude the message author.",
+  }}
+  dont={{
+    description:
+      "Treat delivery acknowledgement as proof that a member read the message.",
+  }}
+/>
+
+### Behavior
+
+- WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
+- WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
+- WHEN reaction users are incomplete and `loadReactionUsers` exists → THEN F0 loads and caches identities by channel, message, emoji, and reaction count.
+- WHEN the reaction count or channel changes → THEN F0 invalidates the related identity cache.
+
+### Usage examples
+
+**Group communications**
+
+Use a group runtime to provide member mentions, read receipts, and reaction membership.
+
+<Canvas of={Stories.Group} />
+
+## Accessibility
+
+### Keyboard interaction
+
+The message action menu opens the Info panel with standard button navigation. Reader lists become focusable when their bounded height makes them independently scrollable.
+
+### Screen reader behavior
+
+Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name.

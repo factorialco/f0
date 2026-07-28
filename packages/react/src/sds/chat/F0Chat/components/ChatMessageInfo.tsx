@@ -2,7 +2,9 @@ import { type ReactNode } from "react"
 
 import { ArrowLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { cn, focusRing } from "@/lib/utils"
 
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
@@ -27,8 +29,8 @@ const InfoRow = ({
 
 /**
  * Message-info panel shown in place of the actions menu (a back arrow returns to
- * it). Deliberately minimal for v1: delivered + read times for DMs, and just the
- * "Read by N" count for groups (no per-person reader list).
+ * it). Shows delivered + read times for DMs and the reader identities for group
+ * messages when the host provides them.
  */
 export const ChatMessageInfoView = ({
   message,
@@ -46,6 +48,11 @@ export const ChatMessageInfoView = ({
   const now = new Date()
 
   const isGroup = channel.type === "group"
+  const readByCount = message.readBy?.length ?? message.readByCount ?? 0
+  const readByLabel = i18n.t(
+    readByCount === 1 ? "chat.readBy.one" : "chat.readBy.other",
+    { count: readByCount }
+  )
 
   return (
     <div className="flex flex-col">
@@ -64,16 +71,46 @@ export const ChatMessageInfoView = ({
       </div>
 
       <div className="flex flex-col gap-4 px-3 py-3">
+        <InfoRow
+          label={i18n.chat.delivered}
+          value={formatSeparator(new Date(message.createdAt), now, labels)}
+        />
         {message.isMine &&
           (isGroup ? (
-            <InfoRow
-              label={i18n.t(
-                (message.readByCount ?? 0) === 1
-                  ? "chat.readBy.one"
-                  : "chat.readBy.other",
-                { count: message.readByCount ?? 0 }
+            <div className="flex flex-col gap-2">
+              <InfoRow label={readByLabel} />
+              {message.readBy && message.readBy.length > 0 && (
+                <ul
+                  aria-label={readByLabel}
+                  className={cn(
+                    "m-0 flex max-h-64 list-none flex-col gap-1 overflow-y-auto rounded p-0",
+                    focusRing("focus-visible:ring-inset")
+                  )}
+                  tabIndex={0}
+                >
+                  {message.readBy.map((user) => (
+                    <li
+                      key={user.id}
+                      className="flex items-center gap-2 rounded-md px-0 py-1.5"
+                    >
+                      <F0Avatar
+                        size="sm"
+                        avatar={
+                          user.avatar ?? {
+                            type: "person",
+                            firstName: user.name,
+                            lastName: "",
+                          }
+                        }
+                      />
+                      <span className="text-base font-normal text-f1-foreground">
+                        {user.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               )}
-            />
+            </div>
           ) : (
             message.readAt && (
               <InfoRow
@@ -82,10 +119,6 @@ export const ChatMessageInfoView = ({
               />
             )
           ))}
-        <InfoRow
-          label={i18n.chat.delivered}
-          value={formatSeparator(new Date(message.createdAt), now, labels)}
-        />
       </div>
     </div>
   )

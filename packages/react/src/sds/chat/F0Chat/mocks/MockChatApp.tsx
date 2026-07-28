@@ -10,6 +10,7 @@ import {
   isUserMessage,
   type F0ChatAttachment,
   type F0ChatEditInput,
+  type F0ChatItem,
   type F0ChatRuntime,
   type F0ChatSearchResult,
   type F0ChatSendInput,
@@ -43,6 +44,24 @@ export const MockChatAppProvider = ({
   )
 }
 
+export const resolveMockReactionUsers = (
+  seed: Seed | undefined,
+  messages: F0ChatItem[],
+  messageId: string,
+  emoji: string
+): F0ChatUser[] => {
+  const message = messages.find(
+    (item) => isUserMessage(item) && item.id === messageId
+  )
+  if (!seed || !message || !isUserMessage(message)) return []
+
+  const reaction = message.reactions?.find((item) => item.emoji === emoji)
+  if (!reaction) return []
+  if (reaction.users?.length === reaction.count) return reaction.users
+
+  return seed.participants.slice(0, reaction.count)
+}
+
 /** F0ChatRuntime for one conversation, backed by the shared store. */
 export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const app = useMockChatApp()
@@ -69,6 +88,16 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (messageId: string, emoji: string) =>
       app.toggleReaction(convId, messageId, emoji),
     [app, convId]
+  )
+  const loadReactionUsers = useCallback(
+    async (messageId: string, emoji: string): Promise<F0ChatUser[]> =>
+      resolveMockReactionUsers(
+        seed,
+        app.states[convId]?.messages ?? [],
+        messageId,
+        emoji
+      ),
+    [app.states, convId, seed]
   )
   const deleteMessage = useCallback(
     (messageId: string) => app.deleteMessage(convId, messageId),
@@ -191,6 +220,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     retryMessage,
     loadOlder,
     toggleReaction,
+    loadReactionUsers,
     deleteMessage,
     deleteFailedMessage,
     editMessage,

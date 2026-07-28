@@ -34,17 +34,16 @@ export const MessageStatus = ({
 
   let label = time
   if (message.isMine) {
+    const readByCount = message.readBy?.length ?? message.readByCount
     // sending/sent/delivered fall through to the bare time: the label never
     // changes when the ack lands (same string, same key below) — zero flicker.
     if (message.status === "failed") label = `${i18n.chat.notSent} · ${time}`
     else if (message.status === "read")
       label =
-        isGroup && message.readByCount
+        isGroup && readByCount != null
           ? i18n.t(
-              message.readByCount === 1
-                ? "chat.readBy.one"
-                : "chat.readBy.other",
-              { count: message.readByCount }
+              readByCount === 1 ? "chat.readBy.one" : "chat.readBy.other",
+              { count: readByCount }
             )
           : `${i18n.chat.read} ${time}`
   }
