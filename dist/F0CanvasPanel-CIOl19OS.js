@@ -123751,7 +123751,7 @@ const nU1 = ({
   }, [!!e, t, n]), r;
 }, L13 = (e, t) => !!t && (e ?? []).some((n) => t(n) === void 0), w13 = (e, t) => {
   const n = y2(!1), r = y2(t);
-  return r.current !== t && (r.current = t, n.current = !1), e && (n.current = !0), n.current;
+  return r.current !== t ? (r.current = t, n.current = !1, !1) : (e && (n.current = !0), n.current);
 }, M13 = ({
   fetchedTotal: e,
   paginationTotal: t,
