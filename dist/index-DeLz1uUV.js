@@ -22776,7 +22776,10 @@ const Qr = (t) => t.id ?? t.label ?? "column", J_ = (t) => [...t].sort((e, n) =>
     fetchedTotal: e.selectableTotal,
     paginationTotal: fe,
     hasNonSelectableRows: ge
-  }), _e = te.checked && !te.indeterminate || bt, ke = !!e.allPagesSelection && (!te.checked || te.indeterminate) && C?.total !== void 0 && // paginationTotal is an upper bound on the selectable total, so this still
+  }), _e = te.checked && !te.indeterminate || bt, ke = !!e.allPagesSelection && (!te.checked || te.indeterminate) && C?.total !== void 0 && // A count of exactly 0 means the consumer knows nothing in this dataset is
+  // selectable: offering "select all" would promise a selection that can't
+  // exist, and the resulting empty selection shows no bulk-action bar.
+  ue !== 0 && // paginationTotal is an upper bound on the selectable total, so this still
   // gates correctly when the exact selectable count is unknown.
   fe > te.selectedCount, Ne = _.length + (R ? z : 0), ot = te.selectedCount === 1 ? x.status.selected.singular : x.status.selected.plural;
   return /* @__PURE__ */ m("div", { className: "flex h-full min-h-0 flex-col gap-4", children: /* @__PURE__ */ P(kt ? WG : Dl, { children: [
