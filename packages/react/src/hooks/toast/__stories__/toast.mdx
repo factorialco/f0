@@ -28,7 +28,7 @@ A toast is a single row:
 - **Title** — the outcome, in one line (two at most).
 - **Description** _(optional)_ — a short second line of context.
 - **Actions** _(optional)_ — up to one **button** (primary, on the trailing edge) and one **link** (navigation, to the button's left), inline.
-- **Close (✕)** — the alternative to an action: shown **only when there's no action**, so the two are never adjacent.
+- **Close (✕)** — a manual dismiss, shown **only when there's no action**. When there is one, the action is the interaction and the toast auto-dismisses anyway, so a second control would just compete with it.
 
 Icon and controls are vertically centred for a single line and **align to the top** when there's a description.
 
@@ -130,8 +130,8 @@ If a toast's text is long enough to truncate, that's the signal it shouldn't be 
 - **Position** — bottom-centre of the content area (the same column as the action bar); never covers the sidebar.
 - **Width** — a fixed **384px** on desktop. Height is variable; keep the text to one or two lines.
 - **Responsive** — from the `sm` breakpoint (**640px**) upward the toast is 384px. **Below it** (mobile) it switches to **full-width**, filling the content column with a small margin so the message stays readable on a narrow screen. It never stretches wider than 384px on desktop. _Try it in the **Responsive** story and resize the viewport._
-- **Close** — shown only when there's no action, so the action and the dismiss control can't be mis-clicked for each other.
-- **Duration** — 5s by default, 10s with an action (time to reach Undo/Retry). Auto-dismissing toasts **pause on hover and focus**.
+- **Close** — the X is a fallback manual dismiss, shown only when there's no action. With an action, that's the primary interaction and the toast auto-dismisses on its own, so a separate close would compete with the action rather than help.
+- **Duration** — 5s by default, 10s with an action (time to reach Undo/Retry). Auto-dismissing toasts **pause on hover**.
 - **Persistence** — a toast is transient and auto-dismisses. Only a **loading** toast stays open (until it resolves in place); pass `persistent: true` for the rare case that must wait. A persistent _condition_ (offline, session expired) is **not a toast** — use an `F0Alert` / banner.
 - **Async** — resolve a toast by re-opening with the same `id`; it updates in place. An action resolves **its own** toast (closes it or updates it in place) — never opens a new one while the current is leaving.
 - **Stacking** — several toasts stack at the same corner: up to **3 are shown at once** (**2** on mobile), and any extra collapse behind them and expand when you hover the stack. Toasts are **not** deduplicated automatically — reuse a stable `id` (see API) to update one in place instead of stacking a duplicate.
@@ -186,7 +186,7 @@ const id = toasts.open({
 - Errors and warnings use `role="alert"` / `aria-live="assertive"`; other variants use `role="status"` / `aria-live="polite"`.
 - Toasts auto-dismiss by default and **pause on hover** (WCAG 2.2.1, _Timing Adjustable_) — what matters isn't a fixed number of seconds but that the user can pause the timer. More important toasts get more time (those with an action last longer), and loading toasts stay until they resolve.
 - **Keyboard & focus** — a toast is non-modal and **never steals focus**; the page keeps whatever focus it had. Its close (✕) and any action are in the tab order and activate with Enter/Space.
-- A toast carries at most one button and one link — keep interactive content minimal, since it's non-modal and auto-dismisses. The close (✕) is the dismissal affordance, and only when there's no action.
+- A toast carries at most one button and one link — keep interactive content minimal, since it's non-modal and auto-dismisses. The close (✕) is offered as a manual dismiss only when there's no action; when there is one, the action is the single control and the toast auto-dismisses on its own.
 
 ## API
 
