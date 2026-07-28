@@ -389,11 +389,10 @@ export interface F0AnalyticsDashboardProps<
    */
   defaultFilters?: FiltersState<Filters>
   /**
-   * Applied dashboard-level filter values.
-   * When provided, filter state is controlled by the consumer: reflect
-   * `onFiltersChange` back into this prop or applied filters will not move.
-   * Decide controlled vs uncontrolled before first render — switching modes
-   * mid-life desyncs state (standard React controlled-input semantics).
+   * Applied dashboard-level filter values. Providing this prop makes filter
+   * state controlled: reflect every `onFiltersChange` value back into it or the
+   * applied filters will not move. Takes precedence over `defaultFilters`, and
+   * must not be switched on or off after the first render.
    */
   filtersValue?: FiltersState<Filters>
   /**
