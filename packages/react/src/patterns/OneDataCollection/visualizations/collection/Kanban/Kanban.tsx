@@ -469,6 +469,7 @@ export const KanbanCollection = <
               let selectedCount = 0
               let unselectedCount = 0
               for (const lane of board.lanes) {
+                if (lane.id === undefined) continue
                 const status = lanesUseSelectable.get(lane.id)
                   ?.groupAllSelectedStatus[board.key]
                 selectedCount += status?.selectedCount ?? 0
@@ -494,11 +495,12 @@ export const KanbanCollection = <
                     selectable={groupSelectable}
                     select={groupSelect}
                     onSelectChange={(checked) =>
-                      board.lanes.forEach((lane) =>
+                      board.lanes.forEach((lane) => {
+                        if (lane.id === undefined) return
                         lanesUseSelectable
                           .get(lane.id)
                           ?.handleSelectGroupChange(board.key, checked)
-                      )
+                      })
                     }
                     open={openGroups[board.key]}
                     onOpenChange={(open) => setGroupOpen(board.key, open)}
