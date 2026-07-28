@@ -27,6 +27,11 @@ export type KanbanVisualizationOptions<
   _Sortings extends SortingsDefinition,
 > = {
   lanes: ReadonlyArray<KanbanLaneDefinition>
+  /** Per-group columns: when grouping is active, each group's board renders the
+   * lanes this returns instead of the global `lanes` (lane ids must exist in
+   * `source.lanes`). Enables the onboarding case where each policy version has
+   * its own phases. NOTE: API shape pending Foundations review. */
+  getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>
   title?: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
