@@ -76,6 +76,12 @@ describe("F0VideoPlayer", () => {
       expect(region).toHaveAttribute("tabindex", "0")
     })
 
+    it("marks the root node with data-f0-component-name", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      const region = screen.getByRole("region", { name: /video player/i })
+      expect(region).toHaveAttribute("data-f0-component-name", "F0VideoPlayer")
+    })
+
     it("renders the controls only once the video has loaded", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} />)
       // Controls are not in the DOM before load (avoids focusable-but-hidden).

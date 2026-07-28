@@ -1,3 +1,4 @@
+import { Component } from "@/lib/component/component"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
@@ -13,5 +14,8 @@ import { F0VideoPlayerInternal } from "./internal"
  * `onMilestone`, `onComplete`, `restrictForwardSeek`).
  */
 export const F0VideoPlayer = withDataTestId(
-  experimentalComponent("F0VideoPlayer", F0VideoPlayerInternal)
+  experimentalComponent(
+    "F0VideoPlayer",
+    Component({ name: "F0VideoPlayer", type: "info" }, F0VideoPlayerInternal)
+  )
 )

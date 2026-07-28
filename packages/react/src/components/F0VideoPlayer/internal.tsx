@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import { forwardRef, useCallback, useEffect, useRef } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -25,18 +26,25 @@ import { F0VideoPlayerProps } from "./types"
  *   useRestrictForwardSeek  → blocks seeking past the furthest-watched point.
  *   <Controls>              → presentation only; interactions delegated back here.
  */
-export function F0VideoPlayerInternal({
-  src,
-  autoPlay = false,
-  autoFocus = false,
-  restrictForwardSeek = false,
-  onTrackAction,
-  onMilestone,
-  onComplete,
-  ...dataAttributes
-}: F0VideoPlayerProps) {
+export const F0VideoPlayerInternal = forwardRef<
+  HTMLDivElement,
+  F0VideoPlayerProps
+>(function F0VideoPlayerInternal(
+  {
+    src,
+    autoPlay = false,
+    autoFocus = false,
+    restrictForwardSeek = false,
+    onTrackAction,
+    onMilestone,
+    onComplete,
+    ...dataAttributes
+  },
+  forwardedRef
+) {
   const { t } = useI18n()
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const composedWrapperRef = useComposedRefs(wrapperRef, forwardedRef)
 
   const video = useVideoState(src)
 
@@ -78,7 +86,7 @@ export function F0VideoPlayerInternal({
 
   return (
     <div
-      ref={wrapperRef}
+      ref={composedWrapperRef}
       className={cn(
         "group relative h-full w-full overflow-hidden rounded-[inherit]",
         "[&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:bg-[#000]",
@@ -134,4 +142,4 @@ export function F0VideoPlayerInternal({
       )}
     </div>
   )
-}
+})
