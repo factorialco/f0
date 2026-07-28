@@ -1,0 +1,102 @@
+name: 🧪 Azure Preflight (temporary)
+# TEMPORARY diagnostic — delete before merging #4857.
+#
+# Answers one question: can a GitHub-hosted runner reach the Azure OpenAI
+# resource `platform-dx-ai` with the existing DX_AI_WORKFLOWS_API_KEY?
+# The agentic checks used to run on a self-hosted runner, so if that resource
+# has an IP allow-list or private-endpoint-only access, moving to hosted
+# runners would fail — and it would fail as three opaque OpenCode retries,
+# not as a clear network error. This makes the failure mode explicit.
+#
+# No paths filter, so it runs on this CI-only PR.
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  preflight:
+    name: Azure reachability from a hosted runner
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Egress IP of this runner
+        run: |-
+          echo "Runner egress IP: $(curl -s --max-time 10 https://api.ipify.org || echo '<unavailable>')"
+          echo "(If Azure rejects us, this is the IP that would need allow-listing —"
+          echo " and it is ephemeral, which is why allow-listing is not a real fix.)"
+
+      - name: Authenticated request to the Azure endpoint
+        env:
+          AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
+          AZURE_RESOURCE_NAME: platform-dx-ai
+        run: |-
+          set -uo pipefail
+
+          if [[ -z "${AZURE_API_KEY}" ]]; then
+            echo "::error::DX_AI_WORKFLOWS_API_KEY is empty — secret not available to this job"
+            exit 1
+          fi
+
+          URL="https://${AZURE_RESOURCE_NAME}.openai.azure.com/openai/models?api-version=2024-10-21"
+          BODY=$(mktemp)
+          STATUS=$(curl -sS -o "${BODY}" -w '%{http_code}' --max-time 30 \
+            -H "api-key: ${AZURE_API_KEY}" \
+            "${URL}" || echo "000")
+
+          echo "HTTP ${STATUS} from ${URL}"
+          echo "--- response body (first 500 chars) ---"
+          head -c 500 "${BODY}"; echo
+          echo "---"
+
+          # The response body carries no credentials; only the request does, and
+          # GitHub masks the secret in logs regardless.
+          case "${STATUS}" in
+            200)
+              echo "::notice::Reachable and authenticated. No IP restriction blocking hosted runners."
+              ;;
+            401)
+              echo "::error::Reached Azure but the key was rejected (401). Network is fine; the secret is wrong or expired."
+              exit 1
+              ;;
+            403)
+              echo "::error::403 — this is the signature of an Azure network ACL / private-endpoint-only resource."
+              echo "::error::Hosted runners cannot be allow-listed practically (ephemeral IPs across thousands of rotating GitHub ranges)."
+              exit 1
+              ;;
+            000)
+              echo "::error::Connection failed or timed out — network-level block."
+              exit 1
+              ;;
+            *)
+              echo "::warning::Unexpected status ${STATUS}. Reached the service (not blocked), but this path may not be the right one for this resource. The end-to-end OpenCode step below is authoritative."
+              ;;
+          esac
+
+      - name: End-to-end OpenCode call against the real model
+        env:
+          AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
+          AZURE_RESOURCE_NAME: platform-dx-ai
+          OPENCODE_CONFIG_CONTENT: >-
+            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
+            5.3 Codex"}}}}}
+        run: |-
+          set -uo pipefail
+          npm install -g opencode-ai@1.15.5
+
+          OUT=$(mktemp)
+          opencode run \
+            --model "azure-cognitive-services/gpt-5.3-codex" \
+            -- "Reply with exactly this token and nothing else: PREFLIGHT_OK" \
+            2>&1 | tee "${OUT}"
+          EXIT=${PIPESTATUS[0]}
+
+          echo "opencode exit: ${EXIT}"
+          if grep -q "PREFLIGHT_OK" "${OUT}"; then
+            echo "::notice::End-to-end OK — provider config, model name, auth and egress all work from a hosted runner."
+          else
+            echo "::error::OpenCode could not complete a trivial call. This is exactly what the 4 agentic checks would hit."
+            exit 1
+          fi
