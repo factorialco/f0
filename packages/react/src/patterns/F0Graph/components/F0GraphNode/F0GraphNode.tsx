@@ -48,6 +48,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       nodeId,
       ariaOwns,
       avatar,
+      avatarShape = "circle",
       title,
       subtitle,
       tags,
@@ -243,7 +244,10 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 along with the avatar. */}
             <div
               className={cn(
-                "flex  shrink-0 items-center justify-center overflow-hidden rounded-full",
+                "flex shrink-0 items-center justify-center overflow-hidden",
+                // Square keeps the avatar's own rounded-square silhouette
+                // (Teams / Job Catalog); circle clips to the classic org-chart dot.
+                avatarShape === "square" ? "rounded-md" : "rounded-full",
                 isDot &&
                   (state === "selected" || state === "highlighted") &&
                   "ring-2 ring-f1-background-selected ring-offset-0",
@@ -263,7 +267,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               }}
             >
               {loading ? (
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton
+                  className={cn(
+                    "h-10 w-10",
+                    avatarShape === "square" ? "rounded-md" : "rounded-full"
+                  )}
+                />
               ) : (
                 avatar && <F0Avatar size="lg" avatar={avatar} />
               )}

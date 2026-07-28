@@ -221,6 +221,31 @@ describe("F0GraphNode", () => {
     expect(getPill().className).toContain("opacity-40")
   })
 
+  it("avatarShape sets the avatar silhouette (circle by default, rounded-md when square)", () => {
+    // Avatar wrapper = content row's first child (same node the ring test walks to).
+    const getAvatarWrapper = () => {
+      const pill = screen.getByRole("treeitem").firstElementChild as HTMLElement
+      const contentRow = pill.children[1] as HTMLElement
+      return contentRow.firstElementChild as HTMLElement
+    }
+
+    const { rerender } = render(
+      <F0GraphNode variant="detail" avatar={personAvatar} title="Alice" />
+    )
+    expect(getAvatarWrapper().className).toContain("rounded-full")
+
+    rerender(
+      <F0GraphNode
+        variant="detail"
+        avatar={personAvatar}
+        title="Alice"
+        avatarShape="square"
+      />
+    )
+    expect(getAvatarWrapper().className).toContain("rounded-md")
+    expect(getAvatarWrapper().className).not.toContain("rounded-full")
+  })
+
   it("forwards tabIndex prop to treeitem", () => {
     const { rerender } = render(<F0GraphNode tabIndex={0} />)
     expect(screen.getByRole("treeitem")).toHaveAttribute("tabindex", "0")

@@ -57,6 +57,7 @@ export const GraphCollection = <
   title,
   subtitle,
   avatar,
+  avatarShape,
   tags,
   nodeActions,
   nodeTagTypes,
@@ -285,6 +286,7 @@ export const GraphCollection = <
                 // (two-phase hydration); `ctx.dataLoading` is undefined otherwise.
                 loading={ctx.dataLoading}
                 avatar={avatar?.(node.data)}
+                avatarShape={avatarShape}
                 title={title(node.data)}
                 subtitle={subtitle?.(node.data)}
                 tags={orderedTags?.(node.data)}

@@ -6,6 +6,7 @@ import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typin
 import type {
   F0GraphNodeTag,
   F0GraphNodeTagColumn,
+  GraphNodeAvatarShape,
   ZoomPreset,
 } from "@/patterns/F0Graph"
 import type {
@@ -32,6 +33,13 @@ export type GraphVisualizationOptions<
   subtitle?: (record: R) => string
   /** Avatar shown on the leading side of the node pill. */
   avatar?: (record: R) => AvatarVariant
+  /**
+   * Silhouette applied to every node avatar. `"circle"` (default) clips avatars
+   * to a full circle — the classic org-chart look. `"square"` keeps the
+   * avatar's own rounded-square silhouette (radius `md`), matching the square
+   * node icons used in Teams and Job Catalog. Uniform across the graph.
+   */
+  avatarShape?: GraphNodeAvatarShape
   /**
    * Tags rendered in the node metadata row. A tag may set `column` to place it
    * in its own show/hide column independent of its visual `type` (e.g. a second
