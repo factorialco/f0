@@ -247,7 +247,7 @@ describe("F0GraphNode", () => {
     // Avatar → rounded square; pill → rounded rectangle. Neither is a full circle.
     expect(getAvatarWrapper().className).toContain("rounded-md")
     expect(getAvatarWrapper().className).not.toContain("rounded-full")
-    expect(getPill().className).toContain("rounded-xl")
+    expect(getPill().className).toContain("rounded-2xl")
     expect(getPill().className).not.toContain("rounded-full")
   })
 

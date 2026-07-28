@@ -174,9 +174,9 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           className={cn(
             "group/pill relative inline-flex max-w-full flex-col items-stretch",
             "outline-none",
-            // Square avatar → square (rounded) node pill so the whole node reads
-            // as a card; the default circular avatar keeps the pill silhouette.
-            avatarShape === "square" ? "rounded-xl" : "rounded-full",
+            // Square avatar → square (rounded, 20px) node pill so the whole node
+            // reads as a card; the default circular avatar keeps the pill silhouette.
+            avatarShape === "square" ? "rounded-2xl" : "rounded-full",
             // Selection / highlight rings stay on the wrapper so they wrap
             // the layout box (which matches the visible compact/detail pill).
             // For dot variant the ring is moved to the avatar (see below).
@@ -192,7 +192,9 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             // otherwise it would frame the hidden box, not the visible dot.
             !isDot &&
               "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0",
-            "px-2.5 py-2",
+            // 10px padding on every side for the square (card) node; the
+            // circular pill keeps its original tighter vertical padding.
+            avatarShape === "square" ? "p-2.5" : "px-2.5 py-2",
             "min-h-11"
           )}
           style={{
@@ -210,7 +212,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             aria-hidden
             className={cn(
               "pointer-events-none absolute inset-0 border border-solid bg-f1-background",
-              avatarShape === "square" ? "rounded-xl" : "rounded-full",
+              avatarShape === "square" ? "rounded-2xl" : "rounded-full",
               // Backdrop-blur is only enabled in compact/detail. In dot the
               // chrome is invisible (opacity 0), but Chrome/Safari still
               // rasterize the backdrop filter every frame for every node \u2014
