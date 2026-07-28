@@ -80,10 +80,10 @@ audio with Spanish subtitles:
 Each dimension offered in a **single** language keeps its plain on/off toggle in
 the control bar (the CC and AD buttons; the audio track always plays). Once a
 dimension has **several** languages, its toggle is replaced by a **settings
-gear** (YouTube-style) that holds a section per multi-language dimension —
-picking a language selects it (and, for subtitles/description, turns the feature
-on), and an "Off" row turns it off. Switching any of them preserves the playback
-position.
+gear** (YouTube-style): its first level lists each multi-language dimension with
+its current selection, and every one opens a submenu of languages — picking a
+language selects it (and, for subtitles/description, turns the feature on), and
+an "Off" row turns it off. Switching any of them preserves the playback position.
 
 `defaultLanguage` sets the initial choice (matched by primary subtag, then the
 viewer's browser language, then the first provided); language names come from
@@ -94,7 +94,8 @@ viewer's browser language, then the first provided); language names come from
 <Canvas of={Stories.WithLocalizedAudio} />
 
 With several languages across all three dimensions — audio track, subtitles and
-audio description — the gear collects one section apiece:
+audio description — the gear's first level lists the three, each opening its own
+language submenu:
 
 <Canvas of={Stories.MaxLocalized} />
 

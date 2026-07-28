@@ -434,13 +434,16 @@ describe("F0VideoPlayer", () => {
         screen.queryByRole("button", { name: "Captions" })
       ).not.toBeInTheDocument()
       await user.click(screen.getByRole("button", { name: "Settings" }))
+      // The gear's first level is a "Subtitles" submenu; opening it lists the
+      // languages plus an "Off" row.
+      const subtitles = screen.getByRole("menuitem", { name: /subtitles/i })
+      await user.click(subtitles)
       expect(
         screen.getByRole("menuitemradio", { name: /english/i })
       ).toBeInTheDocument()
       expect(
         screen.getByRole("menuitemradio", { name: /spanish|español/i })
       ).toBeInTheDocument()
-      // An "Off" row is offered so captions can be disabled from the gear.
       expect(
         screen.getByRole("menuitemradio", { name: /^off$/i })
       ).toBeInTheDocument()
@@ -463,6 +466,8 @@ describe("F0VideoPlayer", () => {
       )
       fireEvent.loadedData(getVideo())
       await user.click(screen.getByRole("button", { name: "Settings" }))
+      // Audio-track languages live under an "Audio" submenu in the gear.
+      await user.click(screen.getByRole("menuitem", { name: /audio/i }))
       expect(
         screen.getByRole("menuitemradio", { name: /english/i })
       ).toBeInTheDocument()
