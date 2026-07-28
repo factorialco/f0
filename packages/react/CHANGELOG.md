@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.61.0](https://github.com/factorialco/f0/compare/f0-react-v4.60.1...f0-react-v4.61.0) (2026-07-28)
+
+
+### Features
+
+* **OneDataCollection:** paginate search preview (infinite scroll) + focus first row for Enter-to-select ([#4833](https://github.com/factorialco/f0/issues/4833)) ([1d66320](https://github.com/factorialco/f0/commit/1d6632031118eeb79ac8913f9501d9ed343e2d0f))
+
 ## [4.60.1](https://github.com/factorialco/f0/compare/f0-react-v4.60.0...f0-react-v4.60.1) (2026-07-28)
 
 
