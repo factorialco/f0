@@ -660,6 +660,13 @@ declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };

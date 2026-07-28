@@ -402,6 +402,13 @@ export declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };
@@ -555,7 +562,7 @@ declare type AiChatProviderReturnValue = {
     panelContentSide: "left" | "right";
     /** Set which edge hosted panel content docks to. */
     setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "chatOverlay" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -586,6 +593,7 @@ declare interface AiChatState {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    chatOverlay?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
@@ -2930,7 +2938,7 @@ export declare interface F0ActionItemProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
+export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, overlay: overlayProp, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
  * The AI chat credits / settings popover button, on its own. Use it to surface
@@ -3063,12 +3071,17 @@ export declare interface F0AiChatProps {
     messages?: ReactNode;
     /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
     input?: ReactNode;
+    /**
+     * Host-provided content rendered above the complete chat surface. F0
+     * supplies the scoped backdrop and makes the chat beneath it inert.
+     */
+    overlay?: ReactNode;
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, chatOverlay, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
