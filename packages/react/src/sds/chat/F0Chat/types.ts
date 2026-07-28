@@ -60,7 +60,11 @@ export type F0ChatChannel = {
    * factorial sources these from its own data (e.g. HR vacation status).
    */
   statuses?: F0ChatChannelStatus[]
-  /** Group only. */
+  /**
+   * Group only. Total channel members, including the current user. F0 compares
+   * `memberCount - 1` with the unique other members in `readBy` (or its count
+   * fallback) before showing the all-read footer state.
+   */
   memberCount?: number
   /** DM only — the counterpart, used for the header identity hover card. */
   user?: F0ChatUser
@@ -151,7 +155,10 @@ export type F0ChatReaction = {
  * shows a tappable critical alert whose menu is reduced to Retry / Delete.
  * `delivered` (reached the counterpart's device, not read yet) is for backends
  * that distinguish it — Stream doesn't, so the factorial adapter never emits it
- * and those messages go straight from `sent` to `read`.
+ * and those messages go straight from `sent` to `read`. In groups, `read`
+ * should only be emitted when all other channel members have read the message;
+ * F0 also guards that transition with `channel.memberCount` and the available
+ * `readBy` / `readByCount`.
  */
 export type F0ChatMessageStatus =
   | "sending"

@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps, useCallback, useEffect, useRef, useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -74,7 +81,13 @@ import {
   ThreadListSkeleton,
   useChatHistory,
 } from "@/kits/ai/F0AiChatHistory"
-import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
+import {
+  F0Chat,
+  F0ChatProvider,
+  isUserMessage,
+  type F0ChatRuntime,
+} from "@/sds/chat/F0Chat"
+import { MessageStatus } from "@/sds/chat/F0Chat/components/MessageStatus"
 import {
   MockChatAppProvider,
   useConversationRuntime,
@@ -966,8 +979,40 @@ export const WithAiAssistant: Story = {
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
  * fullscreen/close to the panel via `useAiChat()`.
  */
-const MockChatPanel = ({ convId }: { convId: string }) => {
+const MockChatPanel = ({
+  convId,
+  receiptPreview,
+}: {
+  convId: string
+  receiptPreview?: "partial"
+}) => {
   const runtime = useConversationRuntime(convId)
+  const previewMessageId = useRef<string | null>(null)
+  if (receiptPreview === "partial" && previewMessageId.current == null) {
+    const lastOwnMessage = [...runtime.messages]
+      .reverse()
+      .find((item) => isUserMessage(item) && item.isMine)
+    previewMessageId.current = lastOwnMessage?.id ?? null
+  }
+
+  const previewRuntime = useMemo<F0ChatRuntime>(() => {
+    if (receiptPreview !== "partial" || previewMessageId.current == null)
+      return runtime
+
+    return {
+      ...runtime,
+      messages: runtime.messages.map((item) =>
+        isUserMessage(item) && item.id === previewMessageId.current
+          ? {
+              ...item,
+              status: "read",
+              readBy: item.readBy?.slice(0, 2),
+              readByCount: undefined,
+            }
+          : item
+      ),
+    }
+  }, [receiptPreview, runtime])
   // Header actions are PER CHANNEL, derived from my role there (what a real
   // host derives from its permission system): admin channels get Edit group
   // (an F0Dialog owned by the host, prefilled with the group name + member
@@ -987,7 +1032,7 @@ const MockChatPanel = ({ convId }: { convId: string }) => {
   const isFullscreen = visualizationMode === "fullscreen"
 
   return (
-    <F0ChatProvider runtime={runtime}>
+    <F0ChatProvider runtime={previewRuntime}>
       <F0Chat
         isFullscreen={isFullscreen}
         onToggleFullscreen={() =>
@@ -1307,6 +1352,7 @@ const OneHistoryTab = ({
 const ConversationsSidebarInner = ({
   initialTab = "home",
   autoOpenConvId,
+  receiptPreview,
   forceEmpty = false,
   withOneTab = true,
   tabsPersistKey,
@@ -1314,6 +1360,8 @@ const ConversationsSidebarInner = ({
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
   autoOpenConvId?: string
+  /** Override the opened conversation to preview an incomplete receipt. */
+  receiptPreview?: "partial"
   /** Demo-only: render both lists (Messages + One) empty to show the blank states. */
   forceEmpty?: boolean
   /** Show the "One" tab. Off when the AI chat is reached from the page
@@ -1339,10 +1387,12 @@ const ConversationsSidebarInner = ({
     (convId: string) => {
       setPanelContent({
         id: convId,
-        content: <MockChatPanel convId={convId} />,
+        content: (
+          <MockChatPanel convId={convId} receiptPreview={receiptPreview} />
+        ),
       })
     },
-    [setPanelContent]
+    [receiptPreview, setPanelContent]
   )
 
   // Demo convenience: open a conversation straight away (e.g. the mentions story
@@ -1454,12 +1504,14 @@ const ConversationsSidebarInner = ({
 const ConversationsSidebar = ({
   initialTab,
   autoOpenConvId,
+  receiptPreview,
   forceEmpty,
   withOneTab,
   tabsPersistKey,
 }: {
   initialTab?: string
   autoOpenConvId?: string
+  receiptPreview?: "partial"
   forceEmpty?: boolean
   withOneTab?: boolean
   tabsPersistKey?: string
@@ -1469,6 +1521,7 @@ const ConversationsSidebar = ({
       <ConversationsSidebarInner
         initialTab={initialTab}
         autoOpenConvId={autoOpenConvId}
+        receiptPreview={receiptPreview}
         forceEmpty={forceEmpty}
         withOneTab={withOneTab}
         tabsPersistKey={tabsPersistKey}
@@ -1511,6 +1564,70 @@ export const CommunicationsBlankStates: Story = {
 }
 
 /**
+ * The final group message has only two of the expected 45 receipts. The footer
+ * remains "Sent · time"; reader identities stay available from message Info.
+ */
+export const CommunicationsPartialReceipts: Story = {
+  name: "Communications — partial readers (sent)",
+  tags: ["f0chat-receipts"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+              receiptPreview="partial"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvas, canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+    await step("Keep an incomplete group receipt at sent", async () => {
+      const status = await canvas.findByRole("status")
+      await waitFor(() => expect(status).toHaveTextContent(/^Sent · /i))
+      await expect(status).toHaveAttribute("aria-live", "polite")
+      await expect(status).toHaveAttribute("aria-atomic", "true")
+      await expect(canvas.queryByText(/^Read by 2$/i)).not.toBeInTheDocument()
+    })
+
+    await step("Keep partial reader identities in message Info", async () => {
+      const message = await canvas.findByText(/And the kickoff deck/)
+      await userEvent.hover(message)
+      const actionButtons = await canvas.findAllByRole("button", {
+        name: /message actions/i,
+      })
+      await userEvent.click(actionButtons.at(-1)!)
+      await userEvent.click(
+        await page.findByRole("button", {
+          name: /^Info$/i,
+        })
+      )
+
+      const readers = await page.findByRole("list", { name: /Read by 2/i })
+      await expect(readers).toHaveTextContent("Grace Liang")
+      await expect(readers).toHaveTextContent("Marcus Bennett")
+    })
+  },
+}
+
+/**
  * A group conversation with real-world message receipts and reactions. The
  * final message is mine and carries 45 reader identities, forcing the reader
  * info panel to scroll as a whole, plus three reaction users.
@@ -1546,6 +1663,14 @@ export const CommunicationsReceiptsAndReactions: Story = {
   ),
   play: async ({ canvas, canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
+    await step("Summarize the completed group receipt", async () => {
+      const status = await canvas.findByRole("status")
+      await waitFor(() => expect(status).toHaveTextContent(/^Read · /i))
+      await expect(status).toHaveAttribute("aria-live", "polite")
+      await expect(status).toHaveAttribute("aria-atomic", "true")
+      await expect(canvas.queryByText(/^Read by 45$/i)).not.toBeInTheDocument()
+    })
+
     await step("Show the people behind a reaction", async () => {
       const reaction = await canvas.findByRole("button", {
         name: `${getEmojiLabel("🎉")}: 3`,
@@ -1618,8 +1743,98 @@ export const CommunicationsReceiptsAndReactions: Story = {
   },
 }
 
+const ReceiptStatusComparison = () => {
+  const runtime = useConversationRuntime("grp-reporting")
+  const message = [...runtime.messages]
+    .reverse()
+    .find((item) => isUserMessage(item) && item.isMine)
+  if (!message || !isUserMessage(message)) return null
+
+  const partialMessage = {
+    ...message,
+    status: "read" as const,
+    readBy: message.readBy?.slice(0, 2),
+    readByCount: undefined,
+  }
+
+  return (
+    <F0ChatProvider runtime={runtime}>
+      <div className="mx-auto grid w-full max-w-xl gap-4 p-8">
+        <h2 className="text-xl font-semibold text-f1-foreground">
+          Group receipt footer states
+        </h2>
+        <section
+          aria-labelledby="partial-receipts-title"
+          className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4"
+        >
+          <h3
+            id="partial-receipts-title"
+            className="font-medium text-f1-foreground"
+          >
+            Partial group receipts
+          </h3>
+          <MessageStatus message={partialMessage} isGroup />
+        </section>
+        <section
+          aria-labelledby="completed-receipts-title"
+          className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4"
+        >
+          <h3
+            id="completed-receipts-title"
+            className="font-medium text-f1-foreground"
+          >
+            Completed group receipts
+          </h3>
+          <MessageStatus message={message} isGroup />
+        </section>
+      </div>
+    </F0ChatProvider>
+  )
+}
+
 export const Snapshot: Story = {
-  ...CommunicationsReceiptsAndReactions,
   name: "Snapshot",
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+            />
+          }
+        >
+          <Page {...PageStories.Default.args} header={communicationsPageHeader}>
+            <ReceiptStatusComparison />
+          </Page>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvas, step }) => {
+    await step("Show partial and completed group receipt footers", async () => {
+      const partial = within(
+        await canvas.findByRole("region", { name: "Partial group receipts" })
+      )
+      const completed = within(
+        await canvas.findByRole("region", { name: "Completed group receipts" })
+      )
+
+      await waitFor(() =>
+        expect(partial.getByRole("status")).toHaveTextContent(/^Sent · /i)
+      )
+      await waitFor(() =>
+        expect(completed.getByRole("status")).toHaveTextContent(/^Read · /i)
+      )
+    })
+  },
   parameters: withSnapshot({}),
 }

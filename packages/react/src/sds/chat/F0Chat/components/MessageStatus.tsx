@@ -6,16 +6,15 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { formatStatusTime } from "../utils/natural-time"
 
 /**
- * Footer under the conversation's last message: its time, plus — when the
- * message is mine and READ — the read state ("Read hh:mm", or "Read by N" in
- * groups). iMessage-style: only the latest message carries this line.
- * Optimistic on purpose (WhatsApp): sending/sent/delivered all show the bare
- * time — success isn't announced, a slow send is the SendingClock's job
- * (500ms) and a failure is the loud one ("Not sent" + retry alert).
+ * Footer under the conversation's last message. My settled messages show
+ * "Sent · hh:mm" until the read state is reached; group messages only advance
+ * to "Read · hh:mm" once every other channel member appears in the receipt
+ * count. Reader identities and counts remain available in the Info panel.
  */
 export const MessageStatus = ({
   message,
@@ -26,6 +25,7 @@ export const MessageStatus = ({
 }): ReactNode => {
   const i18n = useI18n()
   const reducedMotion = useReducedMotion()
+  const { channel } = useF0Chat()
 
   const time = formatStatusTime(new Date(message.createdAt), new Date(), {
     today: i18n.date.groups.today,
@@ -35,21 +35,31 @@ export const MessageStatus = ({
   let label = time
   if (message.isMine) {
     const readByCount = message.readBy?.length ?? message.readByCount
-    // sending/sent/delivered fall through to the bare time: the label never
-    // changes when the ack lands (same string, same key below) — zero flicker.
+    const expectedGroupReaders =
+      isGroup && channel.memberCount != null
+        ? Math.max(0, channel.memberCount - 1)
+        : undefined
+    const hasCompleteGroupReceipts =
+      expectedGroupReaders == null ||
+      expectedGroupReaders === 0 ||
+      (readByCount != null && readByCount >= expectedGroupReaders)
+    const isRead =
+      message.status === "read" && (!isGroup || hasCompleteGroupReceipts)
+    const isSettled =
+      message.status === "sent" ||
+      message.status === "delivered" ||
+      message.status === "read"
+
     if (message.status === "failed") label = `${i18n.chat.notSent} · ${time}`
-    else if (message.status === "read")
-      label =
-        isGroup && readByCount != null
-          ? i18n.t(
-              readByCount === 1 ? "chat.readBy.one" : "chat.readBy.other",
-              { count: readByCount }
-            )
-          : `${i18n.chat.read} ${time}`
+    else if (isSettled)
+      label = `${isRead ? i18n.chat.read : i18n.chat.sent} · ${time}`
   }
 
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
       className={cn(
         "px-1 pt-1 text-sm text-f1-foreground-secondary",
         message.isMine ? "text-right" : "text-left"

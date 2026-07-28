@@ -30,6 +30,23 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
     <tbody>
       <tr>
         <td>
+          <code>channel.memberCount</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Total group members, including the current user. F0 expects{" "}
+          <code>readBy</code> and <code>readByCount</code> to contain unique
+          other members, and compares them with <code>memberCount - 1</code>{" "}
+          before showing the all-read footer state. Without a member count, F0
+          trusts the host-provided message status.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <code>message.readBy</code>
         </td>
         <td>
@@ -131,6 +148,9 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 ### Behavior
 
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
+- WHEN a sent group message is still missing readers → THEN its footer shows `Sent · time` without exposing a count.
+- WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.
+- WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent · time`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
 - WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
 - WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
 - WHEN reaction users are incomplete and `loadReactionUsers` exists → THEN F0 loads and caches identities by channel, message, emoji, and reaction count.
@@ -152,4 +172,4 @@ The message action menu opens the Info panel with standard button navigation. It
 
 ### Screen reader behavior
 
-Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name.
+Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces asynchronous transitions from “Sent” to “Read” together with the message time.

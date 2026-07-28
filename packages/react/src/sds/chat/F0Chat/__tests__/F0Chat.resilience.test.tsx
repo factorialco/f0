@@ -330,7 +330,7 @@ describe("typing dots", () => {
     renderChat(
       makeRuntime({ typingUsers: [{ id: "other", name: "María José" }] })
     )
-    const bubble = screen.getByRole("status")
+    const bubble = screen.getByRole("status", { name: "Writing…" })
     expect(bubble.querySelectorAll(".animate-typing-dot")).toHaveLength(3)
   })
 })

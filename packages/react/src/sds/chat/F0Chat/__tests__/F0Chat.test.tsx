@@ -24,6 +24,7 @@ import {
 import { useMockChatStore } from "../mocks/useMockChatApp"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { isUserMessage, type F0ChatMessage, type F0ChatRuntime } from "../types"
+import { formatClock } from "../utils/natural-time"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -134,7 +135,82 @@ describe("F0Chat", () => {
 
   it("shows the read status under the last message (mine)", () => {
     renderChat(makeRuntime())
-    expect(screen.getByText(/^Read/)).toBeInTheDocument()
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent(`Read · ${formatClock(new Date(now))}`)
+    expect(status).toHaveAttribute("aria-live", "polite")
+    expect(status).toHaveAttribute("aria-atomic", "true")
+  })
+
+  it("shows sent with the time until a direct message is read", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "sent-message",
+            author: { id: "me", name: "Me" },
+            body: "Waiting for the receipt",
+            createdAt: now,
+            isMine: true,
+            status: "sent",
+          },
+        ],
+      })
+    )
+
+    expect(
+      screen.getByText(`Sent · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+  })
+
+  it("updates the stable live region from sent to read", () => {
+    const message: F0ChatMessage = {
+      id: "live-status-message",
+      author: { id: "me", name: "Me" },
+      body: "Waiting for the receipt",
+      createdAt: now,
+      isMine: true,
+      status: "sent",
+    }
+    const { rerender } = renderChat(
+      makeRuntime({
+        messages: [message],
+      })
+    )
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent(`Sent · ${formatClock(new Date(now))}`)
+
+    rerender(
+      <F0ChatProvider
+        runtime={makeRuntime({
+          messages: [{ ...message, status: "read" }],
+        })}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(screen.getByRole("status")).toBe(status)
+    expect(status).toHaveTextContent(`Read · ${formatClock(new Date(now))}`)
+  })
+
+  it("keeps the legacy bare time when the message status is omitted", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "legacy-message",
+            author: { id: "me", name: "Me" },
+            body: "No delivery status",
+            createdAt: now,
+            isMine: true,
+          },
+        ],
+      })
+    )
+
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent(formatClock(new Date(now)))
+    expect(status).not.toHaveTextContent(/Sent|Read/)
   })
 
   it("deletes a message from its actions menu", async () => {
@@ -549,7 +625,7 @@ describe("F0Chat", () => {
     ).toEqual(["Grace Liang", "Marcus Bennett"])
   })
 
-  it("shows reader identities in group message info and derives their count", async () => {
+  it("keeps a group message sent until every channel member has read it", async () => {
     renderChat(
       makeRuntime({
         channel: {
@@ -557,6 +633,7 @@ describe("F0Chat", () => {
           type: "group",
           title: "Product Team",
           avatar: { type: "team", name: "Product Team" },
+          memberCount: 4,
         },
         messages: [
           {
@@ -575,7 +652,10 @@ describe("F0Chat", () => {
         ],
       })
     )
-    expect(screen.getByText(/read by 2/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(`Sent · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/read by 2/i)).not.toBeInTheDocument()
 
     await userEvent.click(
       screen.getByRole("button", { name: /message actions/i })
@@ -591,7 +671,96 @@ describe("F0Chat", () => {
     expect(within(readers).getByText("Marcus Bennett")).toBeInTheDocument()
   })
 
-  it("keeps the legacy group read count as a fallback", () => {
+  it("shows read with the time once every channel member has read it", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 3,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            readBy: [
+              { id: "grace", name: "Grace Liang" },
+              { id: "marcus", name: "Marcus Bennett" },
+            ],
+          },
+        ],
+      })
+    )
+
+    expect(
+      screen.getByText(`Read · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/read by 2/i)).not.toBeInTheDocument()
+  })
+
+  it("keeps a known group sent when receipt data is unavailable", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 3,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Sent · ${formatClock(new Date(now))}`
+    )
+  })
+
+  it("shows a single-member group as read without receipt rows", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Personal notes",
+          avatar: { type: "team", name: "Personal notes" },
+          memberCount: 1,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "No other readers are expected",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Read · ${formatClock(new Date(now))}`
+    )
+  })
+
+  it("trusts the group message status when member count is unavailable", () => {
     renderChat(
       makeRuntime({
         channel: {
@@ -608,11 +777,49 @@ describe("F0Chat", () => {
             createdAt: now,
             isMine: true,
             status: "read",
+            readByCount: 2,
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Read · ${formatClock(new Date(now))}`
+    )
+  })
+
+  it("keeps the legacy group read count inside the info panel", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 4,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
             readByCount: 3,
           },
         ],
       })
     )
+    expect(
+      screen.getByText(`Read · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/read by 3/i)).not.toBeInTheDocument()
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /message actions/i })
+    )
+    await userEvent.click(screen.getByRole("button", { name: /^Info$/i }))
     expect(screen.getByText(/read by 3/i)).toBeInTheDocument()
   })
 
