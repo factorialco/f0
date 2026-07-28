@@ -80,4 +80,10 @@ describe("languageLabel", () => {
   it("derives a language name from the locale", () => {
     expect(languageLabel({ locale: "en" }, "en")).toBe("English")
   })
+
+  it("capitalises a lowercased endonym", () => {
+    // Intl.DisplayNames returns "español" in its own locale; the option label
+    // should read "Español".
+    expect(languageLabel({ locale: "es" }, "es")).toBe("Español")
+  })
 })

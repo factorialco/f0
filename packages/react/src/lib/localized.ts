@@ -81,10 +81,12 @@ export function languageLabel(
 ): string {
   if (option.label) return option.label
   try {
-    const names = new Intl.DisplayNames([displayLocale ?? option.locale], {
-      type: "language",
-    })
-    return names.of(option.locale) ?? option.locale
+    const locale = displayLocale ?? option.locale
+    const names = new Intl.DisplayNames([locale], { type: "language" })
+    const name = names.of(option.locale) ?? option.locale
+    // Endonyms come lowercased for many languages ("español", "français");
+    // capitalise the first letter so the options read as proper labels.
+    return name.charAt(0).toLocaleUpperCase(locale) + name.slice(1)
   } catch {
     return option.locale
   }

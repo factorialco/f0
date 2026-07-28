@@ -16,6 +16,12 @@ import {
 // description). Locales never collide with it in practice.
 const OFF = "off"
 
+// Roomier padding/type than the compact defaults, matching the survey question
+// menu's rhythm (the shared classes win over the primitives' via tailwind-merge).
+const ITEM_CLASS = "py-2 pr-4 text-base font-medium"
+const LABEL_CLASS =
+  "px-3 pb-1 pt-2 text-sm font-medium text-f1-foreground-secondary"
+
 export interface SettingsMenuProps {
   /**
    * Element the menu portals into. Set to the player wrapper so the menu stays
@@ -77,7 +83,11 @@ export function SettingsMenu({
 
   const options = (list: LanguageOption[]) =>
     list.map((option) => (
-      <DropdownMenuRadioItem key={option.locale} value={option.locale}>
+      <DropdownMenuRadioItem
+        key={option.locale}
+        value={option.locale}
+        className={ITEM_CLASS}
+      >
         {languageLabel(option)}
       </DropdownMenuRadioItem>
     ))
@@ -104,11 +114,11 @@ export function SettingsMenu({
         container={containerRef.current}
         side="top"
         align="end"
-        className="min-w-[12rem]"
+        className="min-w-[13rem] p-1"
       >
         {showAudio && (
           <>
-            <DropdownMenuLabel className="text-f1-foreground-secondary">
+            <DropdownMenuLabel className={LABEL_CLASS}>
               {t("videoPlayer.audio")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
@@ -123,7 +133,7 @@ export function SettingsMenu({
         {showCaptions && (
           <>
             {showAudio && <DropdownMenuSeparator />}
-            <DropdownMenuLabel className="text-f1-foreground-secondary">
+            <DropdownMenuLabel className={LABEL_CLASS}>
               {t("videoPlayer.subtitles")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
@@ -134,7 +144,7 @@ export function SettingsMenu({
               )}
             >
               {options(captionLanguages)}
-              <DropdownMenuRadioItem value={OFF}>
+              <DropdownMenuRadioItem value={OFF} className={ITEM_CLASS}>
                 {t("videoPlayer.off")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
@@ -144,7 +154,7 @@ export function SettingsMenu({
         {showAudioDescription && (
           <>
             {(showAudio || showCaptions) && <DropdownMenuSeparator />}
-            <DropdownMenuLabel className="text-f1-foreground-secondary">
+            <DropdownMenuLabel className={LABEL_CLASS}>
               {t("videoPlayer.audioDescription")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
@@ -155,7 +165,7 @@ export function SettingsMenu({
               )}
             >
               {options(audioDescriptionLanguages)}
-              <DropdownMenuRadioItem value={OFF}>
+              <DropdownMenuRadioItem value={OFF} className={ITEM_CLASS}>
                 {t("videoPlayer.off")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
