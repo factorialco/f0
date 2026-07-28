@@ -12,6 +12,7 @@ import {
   useState,
 } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { Skeleton } from "@/ui/skeleton"
 import { Document, Page, type PDFDocumentProxy } from "@/ui/pdf"
@@ -147,6 +148,11 @@ const PdfViewerBase = forwardRef<
   const containerRef = useRef<HTMLDivElement>(null)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const pageElements = useRef<(HTMLElement | null)[]>([])
+  // Whether the user has driven zoom yet. Gates the transition so the initial
+  // page-fit (and any programmatic rescale) never animates on load.
+  const zoomInteracted = useRef(false)
+  // Respect the OS "reduce motion" setting: skip the zoom transition entirely.
+  const reduceMotion = useReducedMotion()
 
   const totalPages =
     pagesToDisplay.length > 0 ? pagesToDisplay.length : pdf?.numPages
@@ -203,11 +209,14 @@ const PdfViewerBase = forwardRef<
           ? (container.clientWidth - PAGE_VIEWPORT_PADDING) / pageWidth
           : (container.clientHeight - toolbarHeight - PAGE_VIEWPORT_PADDING) /
             pageHeight
+      // Guard: a hidden / zero-height container (tab, drawer, collapsed panel)
+      // yields 0 or a negative value here, which would poison the zoom transform.
+      if (!Number.isFinite(computed) || computed <= 0) return
 
-      // Fit changes rasterize immediately (no transform gap), so they never
-      // flash or animate on load.
+      // Only move the target scale; renderScale catches up (debounced) so a fit
+      // change animates via the transform, like manual zoom. The page box is
+      // reserved at the target size (see render), so layout stays correct.
       setScale(computed)
-      setRenderScale(computed)
       setSelectedScale(value)
     },
     [pages, currentPage, rotation]
@@ -215,6 +224,7 @@ const PdfViewerBase = forwardRef<
 
   const onScaleChange = useCallback(
     (value: F0PdfScale) => {
+      zoomInteracted.current = true
       if (value === "page-width" || value === "page-fit") {
         applyDynamicScale(value)
         return
@@ -227,6 +237,7 @@ const PdfViewerBase = forwardRef<
 
   const zoomTo = useCallback((value: number | undefined) => {
     if (value === undefined) return
+    zoomInteracted.current = true
     setScale(value)
     const match = fixedScales.find((option) => Number(option) === value)
     if (match) setSelectedScale(match)
@@ -337,6 +348,17 @@ const PdfViewerBase = forwardRef<
     return () => clearTimeout(id)
   }, [scale, renderScale])
 
+  // Zoom transform: the page box is reserved at the TARGET size (see the render),
+  // so layout, scroll and neighbouring pages stay correct throughout the gesture;
+  // only the canvas is scaled from its rendered size up/down to the target while
+  // renderScale (and the crisp re-raster) catches up, settling this back to 1.
+  // Guarded so a zero / NaN scale can never produce a non-finite transform.
+  const zoomRatioRaw = scale / renderScale
+  const zoomRatio =
+    Number.isFinite(zoomRatioRaw) && zoomRatioRaw > 0 ? zoomRatioRaw : 1
+  const zoomAnimating =
+    zoomInteracted.current && renderScale !== scale && !reduceMotion
+
   return (
     <div
       ref={ref}
@@ -384,52 +406,73 @@ const PdfViewerBase = forwardRef<
                 const pageNumber =
                   (pagesToDisplay.length > 0 ? pagesToDisplay[index] : index) +
                   1
+                // Per-page intrinsic size (swapped when the page is quarter-turned).
+                const metrics = pages[index] ?? sampleMetrics
+                const ow = metrics?.originalWidth ?? 595
+                const oh = metrics?.originalHeight ?? 842
+                const quarterTurned = rotation === 90 || rotation === 270
+                const baseWidth = quarterTurned ? oh : ow
+                const baseHeight = quarterTurned ? ow : oh
                 return (
                   <div
                     key={index}
                     className="F0PdfViewer__page mx-auto w-fit px-4 pt-4 last:pb-4"
-                    style={{
-                      // Manual zoom scales the already-rendered page (GPU, no
-                      // canvas rebuild) until renderScale catches up. Fit changes
-                      // keep scale === renderScale, so this stays at 1 with no
-                      // transition (no animation on load).
-                      transformOrigin: "top center",
-                      transform: `scale(${scale / renderScale})`,
-                      transition:
-                        renderScale === scale
-                          ? "none"
-                          : "transform 180ms cubic-bezier(0.2, 0, 0, 1)",
-                    }}
                   >
-                    <Page
+                    {/* Sizer holds the box at the TARGET size (and owns the frame
+                        + clip), so layout, scroll and neighbouring pages already
+                        match the final zoom while the canvas is still rendered at
+                        renderScale underneath. offsetTop/Height (paging and
+                        visible-page tracking) read this target-sized box, never
+                        the transformed canvas. */}
+                    <div
+                      ref={(element) => {
+                        pageElements.current[index] = element
+                      }}
                       className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
-                      pageNumber={pageNumber}
-                      scale={renderScale}
-                      rotate={rotation}
-                      loading={
-                        <Skeleton
-                          style={{
-                            width: pageSkeletonWidth,
-                            height: pageSkeletonHeight,
+                      style={{
+                        width: baseWidth * scale,
+                        height: baseHeight * scale,
+                      }}
+                    >
+                      {/* Only the canvas is transformed: from its rendered size up
+                          or down to the target, anchored top-left so it fills the
+                          sizer exactly. Settled / initial fit stay at 1. */}
+                      <div
+                        style={{
+                          transformOrigin: "top left",
+                          transform: `scale(${zoomRatio})`,
+                          transition: zoomAnimating
+                            ? "transform 180ms cubic-bezier(0.2, 0, 0, 1)"
+                            : "none",
+                        }}
+                      >
+                        <Page
+                          pageNumber={pageNumber}
+                          scale={renderScale}
+                          rotate={rotation}
+                          loading={
+                            <Skeleton
+                              style={{
+                                width: baseWidth * renderScale,
+                                height: baseHeight * renderScale,
+                              }}
+                            />
+                          }
+                          renderForms
+                          renderTextLayer
+                          onLoadSuccess={(loadedPage) => {
+                            setPages((current) => {
+                              const next = [...current]
+                              next[index] = {
+                                originalWidth: loadedPage.originalWidth,
+                                originalHeight: loadedPage.originalHeight,
+                              }
+                              return next
+                            })
                           }}
                         />
-                      }
-                      renderForms
-                      renderTextLayer
-                      inputRef={(reference) => {
-                        pageElements.current[index] = reference
-                      }}
-                      onLoadSuccess={(loadedPage) => {
-                        setPages((current) => {
-                          const next = [...current]
-                          next[index] = {
-                            originalWidth: loadedPage.originalWidth,
-                            originalHeight: loadedPage.originalHeight,
-                          }
-                          return next
-                        })
-                      }}
-                    />
+                      </div>
+                    </div>
                   </div>
                 )
               })}
