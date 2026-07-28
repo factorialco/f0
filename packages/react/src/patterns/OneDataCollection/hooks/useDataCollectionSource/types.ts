@@ -121,11 +121,12 @@ export type SearchPreviewPage<R extends RecordType> = {
 export type SearchPreview<R extends RecordType> = {
   /**
    * Fetch one page of matches for `query`. `page` starts at 0 and increments as
-   * the user scrolls the dropdown to the bottom. Return a bare array for a
-   * single, non-paginated page (treated as `hasMore: false`), or a
-   * `SearchPreviewPage` to drive infinite scroll across pages.
+   * the user scrolls the dropdown to the bottom; it is optional so existing
+   * non-paginated consumers keep the plain `(query) => Promise<R[]>` shape.
+   * Return a bare array for a single, non-paginated page (treated as
+   * `hasMore: false`), or a `SearchPreviewPage` to drive infinite scroll.
    */
-  search: (query: string, page: number) => Promise<R[] | SearchPreviewPage<R>>
+  search: (query: string, page?: number) => Promise<R[] | SearchPreviewPage<R>>
   getId: (record: R) => string
   render: (record: R) => SearchPreviewResultData
   onSelect: (record: R) => void
