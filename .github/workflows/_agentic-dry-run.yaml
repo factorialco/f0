@@ -90,6 +90,17 @@ jobs:
       - name: Install OpenCode CLI
         if: steps.copy-trusted.outputs.trusted == 'true'
         run: npm install -g opencode-ai@1.15.5
+      - name: Compose OpenCode config
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: |-
+          CONFIG=$(jq -nc --arg own_config "${HOME}/.config/opencode/*" '{
+            snapshot: false,
+            small_model: "azure-cognitive-services/gpt-5.3-codex",
+            permission: { external_directory: { "/tmp/*": "allow", ($own_config): "allow" } },
+            provider: { "azure-cognitive-services": { models: { "gpt-5.3-codex": { name: "GPT 5.3 Codex" } } } }
+          }')
+          echo "OPENCODE_CONFIG_CONTENT=${CONFIG}" >> "$GITHUB_ENV"
+          echo "OpenCode config: ${CONFIG}"
       - id: run-agentic-check
         name: Run Agentic Check
         if: steps.copy-trusted.outputs.trusted == 'true'
@@ -98,9 +109,6 @@ jobs:
           PR_NUMBER: ${{ env.TARGET_PR }}
           AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
           AZURE_RESOURCE_NAME: platform-dx-ai
-          OPENCODE_CONFIG_CONTENT: >-
-            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
-            5.3 Codex"}}}}}
         run: bash .github/scripts/agentic-check.sh
       - name: Report outcome
         if: always() && steps.copy-trusted.outputs.trusted == 'true'
@@ -113,7 +121,4 @@ jobs:
         env:
           AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
           AZURE_RESOURCE_NAME: platform-dx-ai
-          OPENCODE_CONFIG_CONTENT: >-
-            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
-            5.3 Codex"}}}}}
         run: opencode stats || echo "opencode stats failed (non-fatal)"
