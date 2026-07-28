@@ -515,6 +515,14 @@ then the first provided).
 
 <Canvas of={Stories.CardWithLocalizedContent} />
 
+The spoken audio can be localized too: pass `src` as a per-locale list of dubbed
+recordings and an **Audio** section appears in the kebab menu to switch the
+spoken language, independent of the detail-content language. Switching preserves
+the playback position. (The bare `F0AudioPlayer` shows the same choice as a
+small inline selector.)
+
+<Canvas of={Stories.CardWithLocalizedAudio} />
+
 `summary` and `transcription` are independent — pass just one to show a single
 tab (here, transcription only):
 

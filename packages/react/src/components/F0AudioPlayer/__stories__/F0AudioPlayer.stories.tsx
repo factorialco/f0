@@ -192,6 +192,27 @@ export const CardWithLocalizedContent: StoryObj<typeof F0AudioPlayerCard> = {
   },
 }
 
+/**
+ * Localized (dubbed) audio: pass a per-locale `src` list and an "Audio" section
+ * appears in the kebab menu to switch the spoken language, independent of the
+ * detail-content language. Switching preserves the playback position.
+ *
+ * There's no dubbed rendition of the sample, so both entries point at the same
+ * file (a labeled stand-in) — the selector demonstrates the source swap.
+ */
+export const CardWithLocalizedAudio: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    defaultLanguage: "en",
+    src: [
+      { locale: "en", value: SAMPLE_SRC },
+      { locale: "es", value: SAMPLE_SRC },
+    ],
+  },
+}
+
 // Transcription only — no summary. `content.summary` is omitted, so the card
 // shows a single Transcription tab (no Summary tab).
 export const CardWithTranscriptionOnly: StoryObj<typeof F0AudioPlayerCard> = {

@@ -20,6 +20,7 @@ import { PlaybackMenu } from "./components/PlaybackMenu"
 import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
 import type { AudioPlayerDetailTab, F0AudioPlayerCardProps } from "./types"
+import { preserveAudioPosition, useAudioLanguage } from "./useAudioLanguage"
 import { useDerivedTranscription } from "./useDerivedTranscription"
 import { usePlayerController } from "./usePlayerController"
 import { getDataAttributes } from "./utils"
@@ -49,9 +50,21 @@ const F0AudioPlayerCardBase = forwardRef<
   } = props
 
   const i18n = useI18n()
-  const controller = usePlayerController(props)
+  // Resolve the (possibly localized) dubbed-audio `src` to the selected
+  // language before handing it to the controller, which drives one `<audio>`.
+  const audioLang = useAudioLanguage(src, defaultLanguage)
+  const controller = usePlayerController({
+    ...props,
+    src: audioLang.resolvedSrc,
+  })
   const dataAttributes = getDataAttributes(props)
   const shouldReduceMotion = useReducedMotion()
+
+  // Swap the audio track without losing the playhead or play state.
+  const changeAudioLanguage = (locale: string) => {
+    preserveAudioPosition(controller.audioRef.current)
+    audioLang.setLocale(locale)
+  }
 
   // Legacy path: the deprecated `details` tab array is only used when the
   // structured `content` prop is absent — `content` always wins.
@@ -167,7 +180,10 @@ const F0AudioPlayerCardBase = forwardRef<
       <audio
         ref={controller.audioRef}
         src={controller.currentSrc}
-        preload={preload ?? (typeof src === "function" ? "none" : "metadata")}
+        preload={
+          preload ??
+          (typeof audioLang.resolvedSrc === "function" ? "none" : "metadata")
+        }
         autoPlay={autoPlay}
       />
 
@@ -190,7 +206,10 @@ const F0AudioPlayerCardBase = forwardRef<
             )}
           </div>
         </div>
-        {(hasDetails || controller.playbackRates.length > 0 || actions) && (
+        {(hasDetails ||
+          controller.playbackRates.length > 0 ||
+          audioLang.languages.length > 1 ||
+          actions) && (
           <div className="flex shrink-0 items-center gap-2">
             {hasDetails && (
               <F0Button
@@ -201,13 +220,18 @@ const F0AudioPlayerCardBase = forwardRef<
                 aria-expanded={isExpanded}
               />
             )}
-            {(controller.playbackRates.length > 0 || actions) && (
+            {(controller.playbackRates.length > 0 ||
+              audioLang.languages.length > 1 ||
+              actions) && (
               <PlaybackMenu
                 playbackRate={controller.playbackRate}
                 playbackRates={controller.playbackRates}
                 onRateChange={controller.setPlaybackRate}
                 disabled={disabled}
                 extraItems={actions}
+                audioLanguages={audioLang.languages}
+                audioLanguage={audioLang.activeLocale}
+                onAudioLanguageChange={changeAudioLanguage}
               />
             )}
           </div>
@@ -255,6 +279,7 @@ const F0AudioPlayerCardBase = forwardRef<
                 value={activeLocale}
                 options={languages}
                 onChange={setSelectedLocale}
+                kind={i18n.audioPlayer.language}
               />
             </div>
           )}

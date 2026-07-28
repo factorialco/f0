@@ -359,6 +359,30 @@ describe("F0AudioPlayerCard", () => {
     expect(screen.queryByText("Resumen en español")).not.toBeInTheDocument()
   })
 
+  it("offers dubbed audio languages in the kebab and swaps the source", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0AudioPlayerCard
+        title="AI Call"
+        defaultLanguage="en"
+        src={[
+          { locale: "en", value: "en.mp3" },
+          { locale: "es", value: "es.mp3" },
+        ]}
+      />
+    )
+    // Default language ("en") is the loaded source.
+    expect(getAudio()).toHaveAttribute("src", "en.mp3")
+
+    await user.click(screen.getByRole("button", { name: "Recording options" }))
+    expect(
+      screen.getByRole("menuitem", { name: /english/i })
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole("menuitem", { name: /spanish|español/i }))
+    // Selecting a language swaps the dubbed track.
+    expect(getAudio()).toHaveAttribute("src", "es.mp3")
+  })
+
   it("flags a card with no transcription for the a11y check", () => {
     render(<F0AudioPlayerCard src="test.mp3" title="AI Call" />)
     expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(

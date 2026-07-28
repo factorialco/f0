@@ -64,6 +64,7 @@ export const defaultTranslations = {
     summary: "Summary",
     transcription: "Transcription",
     language: "Language",
+    audio: "Audio",
   },
   actions: {
     add: "Add",

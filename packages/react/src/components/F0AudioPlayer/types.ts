@@ -68,8 +68,20 @@ export interface F0AudioPlayerProps
    * the URL the first time playback is requested. Use the function form for
    * on-demand credentials (e.g. presigned URLs) so the URL is only fetched on
    * user intent.
+   *
+   * Localizable — pass a per-locale list of dubbed recordings to offer
+   * selectable audio languages; a language selector then appears (in the card's
+   * kebab menu, or inline on the bare player).
    */
-  src: string | (() => Promise<string>)
+  src: Localized<string | (() => Promise<string>)>
+
+  /**
+   * Initial language for localized content — the audio `src` and, on the card,
+   * the detail `content` (summary/transcription). Matched against the provided
+   * locales exactly or by primary subtag, then the viewer's browser language,
+   * then the first provided. Only relevant when more than one language is given.
+   */
+  defaultLanguage?: string
 
   /**
    * Known total duration in seconds. Lets the player show the total time and an
@@ -189,14 +201,6 @@ export interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
    * deprecated `details` prop when both are set.
    */
   content?: AudioPlayerContent
-
-  /**
-   * Initial language for localized `content` (summary/transcription). Matched
-   * against the provided locales exactly or by primary subtag; falls back to the
-   * viewer's browser language, then the first provided. Only relevant when
-   * `content` carries more than one language.
-   */
-  defaultLanguage?: string
 
   /**
    * Tabbed detail content revealed by a "View detail" toggle in the header

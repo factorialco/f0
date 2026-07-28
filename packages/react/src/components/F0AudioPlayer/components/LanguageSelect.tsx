@@ -3,7 +3,6 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Check } from "@/icons/app"
 import { type LanguageOption, languageLabel } from "@/lib/localized"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
@@ -12,21 +11,28 @@ export interface LanguageSelectProps {
   value: string
   options: LanguageOption[]
   onChange: (locale: string) => void
+  /**
+   * What this selector controls — e.g. "Language" (detail content) or "Audio"
+   * (dubbed track). Shown as the tooltip and prefixed into the accessible name
+   * (which still contains the visible language, so it stays label-in-name safe).
+   */
+  kind: string
 }
 
 /**
- * Language selector for the audio card's localized detail content
- * (summary / transcription). Card-themed dropdown — trigger shows the active
- * language name, the menu lists all provided languages.
+ * Card-themed language dropdown — the trigger shows the active language name,
+ * the menu lists all provided languages. Used for the detail content language
+ * and the audio-track language.
  */
 export function LanguageSelect({
   value,
   options,
   onChange,
+  kind,
 }: LanguageSelectProps) {
-  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const active = options.find((o) => o.locale === value)
+  const activeName = active ? languageLabel(active) : value
 
   const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const items = Array.from(
@@ -63,8 +69,9 @@ export function LanguageSelect({
         <F0Button
           variant="outline"
           size="sm"
-          label={active ? languageLabel(active) : t("audioPlayer.language")}
-          tooltip={t("audioPlayer.language")}
+          label={activeName}
+          aria-label={`${kind}: ${activeName}`}
+          tooltip={kind}
         />
       </PopoverTrigger>
       <PopoverContent
@@ -75,7 +82,7 @@ export function LanguageSelect({
           "border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
         )}
         role="menu"
-        aria-label={t("audioPlayer.language")}
+        aria-label={kind}
         onKeyDown={handleMenuKeyDown}
       >
         {options.map((option) => {
