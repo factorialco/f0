@@ -22,34 +22,91 @@ import { describe, expect, it } from "vitest"
  * `.storybook/preview.tsx`), which narrows the exemption to the one node
  * instead of blinding a whole story.
  *
- * Scope covers both per-story parameters **and** `.storybook/` global
- * parameters — a global disable would silence a rule library-wide, which is
- * worse than any single story doing it.
+ * Scope covers per-story parameters **and** `.storybook/` global parameters — a
+ * global disable would silence a rule library-wide, which is worse than any
+ * single story doing it.
  */
 
 const packageRoot = join(__dirname, "../../..")
 
 /**
- * Find axe rule descriptors that disable a rule. Matches both the compact
- * (`rules: [{ id: "x", enabled: false }]`) and expanded object forms by
- * checking whether an `enabled: false` sits inside a `rules:` array that also
- * carries an `id:`. Scoped this way so unrelated `enabled: false` config (e.g.
- * a component's own `aiPromotion` prop, or a React context default) is not
- * flagged.
+ * Extract the body of every `a11y: { ... }` object in `content`, by matching
+ * braces.
  *
- * Returns the disabled rule ids, for a useful failure message.
+ * Detection is deliberately scoped to these blocks rather than searching for
+ * any `rules:` array: `rules` is a generic name that other, unrelated APIs use
+ * (`src/lib/text.ts` has its own `Rules` type for text formatting), so an
+ * unscoped match would flag non-a11y config and fail a PR with a misleading
+ * accessibility error.
+ *
+ * Brace counting ignores string and comment contents, so a `{` inside a
+ * selector or a comment cannot unbalance it.
+ */
+export const extractA11yBlocks = (content: string): string[] => {
+  const blocks: string[] = []
+  const opener = /a11y\s*:\s*\{/g
+
+  // Only the match position matters — `opener.lastIndex` is where the block
+  // body starts — so the match object itself is not needed.
+  while (opener.exec(content) !== null) {
+    let i = opener.lastIndex
+    let depth = 1
+    let quote: string | null = null
+    let comment: "line" | "block" | null = null
+
+    while (i < content.length && depth > 0) {
+      const ch = content[i]
+      const next = content[i + 1]
+
+      if (comment === "line") {
+        if (ch === "\n") comment = null
+      } else if (comment === "block") {
+        if (ch === "*" && next === "/") (i++, (comment = null))
+      } else if (quote) {
+        if (ch === "\\") i++
+        else if (ch === quote) quote = null
+      } else if (ch === "/" && next === "/") {
+        comment = "line"
+        i++
+      } else if (ch === "/" && next === "*") {
+        comment = "block"
+        i++
+      } else if (ch === '"' || ch === "'" || ch === "`") {
+        quote = ch
+      } else if (ch === "{") {
+        depth++
+      } else if (ch === "}") {
+        depth--
+      }
+      i++
+    }
+    blocks.push(content.slice(opener.lastIndex, i - 1))
+  }
+  return blocks
+}
+
+/**
+ * Rule ids disabled inside an `a11y` block. Matches both the compact
+ * (`rules: [{ id: "x", enabled: false }]`) and expanded object forms.
+ *
+ * Only `rules` arrays count — `a11y: { disable: true }` is deliberately out of
+ * scope: CI never consults it (`test-runner.ts` runs axe regardless), so it
+ * suppresses only the addon panel, and every current usage already sits beside
+ * a gated `skipCi`.
  */
 export const findDisabledRules = (content: string): string[] => {
   const hits: string[] = []
-  const re = /rules\s*:\s*\[([\s\S]*?)\]/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(content)) !== null) {
-    const body = m[1]
-    if (!/enabled\s*:\s*false/.test(body)) continue
-    const ids = [...body.matchAll(/id\s*:\s*["']([^"']+)["']/g)].map(
-      (x) => x[1]
-    )
-    hits.push(...(ids.length > 0 ? ids : ["<unknown rule>"]))
+  for (const block of extractA11yBlocks(content)) {
+    const re = /rules\s*:\s*\[([\s\S]*?)\]/g
+    let m: RegExpExecArray | null
+    while ((m = re.exec(block)) !== null) {
+      const body = m[1]
+      if (!/enabled\s*:\s*false/.test(body)) continue
+      const ids = [...body.matchAll(/id\s*:\s*["']([^"']+)["']/g)].map(
+        (x) => x[1]
+      )
+      hits.push(...(ids.length > 0 ? ids : ["<unknown rule>"]))
+    }
   }
   return hits
 }
@@ -85,8 +142,8 @@ const findSuppressions = (files: string[]): Record<string, string[]> => {
   return results
 }
 
-describe("findDisabledRules (detector)", () => {
-  it("catches the compact single-line form", () => {
+describe("findDisabledRules — catches a11y suppressions", () => {
+  it("the compact single-line form", () => {
     expect(
       findDisabledRules(
         `parameters: { a11y: { config: { rules: [{ id: "svg-img-alt", enabled: false }] } } }`
@@ -94,7 +151,78 @@ describe("findDisabledRules (detector)", () => {
     ).toEqual(["svg-img-alt"])
   })
 
-  it("catches the expanded multi-line form", () => {
+  it("the expanded multi-line form", () => {
+    expect(
+      findDisabledRules(`
+        parameters: {
+          a11y: {
+            config: {
+              rules: [
+                {
+                  id: "color-contrast",
+                  enabled: false,
+                },
+              ],
+            },
+          },
+        }
+      `)
+    ).toEqual(["color-contrast"])
+  })
+
+  it("several disabled rules in one array", () => {
+    expect(
+      findDisabledRules(
+        `a11y: { config: { rules: [{ id: "a", enabled: false }, { id: "b", enabled: false }] } }`
+      )
+    ).toEqual(["a", "b"])
+  })
+
+  it("single-quoted ids and loose spacing", () => {
+    expect(
+      findDisabledRules(
+        `a11y : { config : { rules : [ { id : 'target-size' , enabled : false } ] } }`
+      )
+    ).toEqual(["target-size"])
+  })
+
+  it("more than one a11y block in a file", () => {
+    expect(
+      findDisabledRules(`
+        export const A = { parameters: { a11y: { config: { rules: [{ id: "one", enabled: false }] } } } }
+        export const B = { parameters: { a11y: { config: { rules: [{ id: "two", enabled: false }] } } } }
+      `)
+    ).toEqual(["one", "two"])
+  })
+
+  it("a suppression sitting beside other a11y keys", () => {
+    expect(
+      findDisabledRules(`
+        a11y: {
+          test: "todo",
+          config: { rules: [{ id: "region", enabled: false }] },
+        },
+      `)
+    ).toEqual(["region"])
+  })
+
+  it("reports a placeholder when the disabled rule has no id", () => {
+    expect(
+      findDisabledRules(`a11y: { config: { rules: [{ enabled: false }] } }`)
+    ).toEqual(["<unknown rule>"])
+  })
+})
+
+describe("findDisabledRules — does not flag legitimate config", () => {
+  it("allows enabling a rule", () => {
+    expect(
+      findDisabledRules(
+        `a11y: { config: { rules: [{ id: "color-contrast", enabled: true }] } }`
+      )
+    ).toEqual([])
+  })
+
+  it("allows reconfiguring an enabled rule with a selector (preview.tsx pattern)", () => {
     expect(
       findDisabledRules(`
         a11y: {
@@ -102,79 +230,78 @@ describe("findDisabledRules (detector)", () => {
             rules: [
               {
                 id: "color-contrast",
-                enabled: false,
+                enabled: true,
+                selector: "*:not([data-a11y-color-contrast-ignore])",
               },
             ],
           },
         },
       `)
-    ).toEqual(["color-contrast"])
-  })
-
-  it("catches several disabled rules in one array", () => {
-    expect(
-      findDisabledRules(
-        `rules: [{ id: "a", enabled: false }, { id: "b", enabled: false }]`
-      )
-    ).toEqual(["a", "b"])
-  })
-
-  it("catches single-quoted ids and tolerant spacing", () => {
-    expect(
-      findDisabledRules(`rules : [ { id : 'target-size' , enabled : false } ]`)
-    ).toEqual(["target-size"])
-  })
-
-  it("catches more than one rules array in a file", () => {
-    expect(
-      findDisabledRules(`
-        const a = { rules: [{ id: "one", enabled: false }] }
-        const b = { rules: [{ id: "two", enabled: false }] }
-      `)
-    ).toEqual(["one", "two"])
-  })
-
-  it("allows enabling a rule", () => {
-    expect(
-      findDisabledRules(`rules: [{ id: "color-contrast", enabled: true }]`)
     ).toEqual([])
   })
 
-  it("allows reconfiguring an enabled rule with a selector (preview.tsx pattern)", () => {
+  it("allows an empty rules array", () => {
+    expect(findDisabledRules(`a11y: { config: { rules: [] } }`)).toEqual([])
+  })
+
+  it("ignores a11y.disable (out of scope — CI ignores it)", () => {
+    expect(findDisabledRules(`a11y: { skipCi: true, disable: true }`)).toEqual(
+      []
+    )
+  })
+})
+
+describe("findDisabledRules — does not flag non-a11y config", () => {
+  it("ignores a `rules` array outside any a11y block", () => {
+    // `rules` is a generic name. src/lib/text.ts has its own Rules type, and a
+    // component could gain a `rules` prop — neither is an axe suppression.
     expect(
-      findDisabledRules(`
-        rules: [
-          {
-            id: "color-contrast",
-            enabled: true,
-            selector: "*:not([data-a11y-color-contrast-ignore])",
-          },
-        ],
-      `)
+      findDisabledRules(
+        `args: { validation: { rules: [{ id: "required", enabled: false }] } }`
+      )
+    ).toEqual([])
+  })
+
+  it("ignores a text-formatting rules object", () => {
+    expect(
+      findDisabledRules(
+        `args: { rules: { disallowEmpty: false, enabled: false } }`
+      )
     ).toEqual([])
   })
 
   it("ignores unrelated enabled: false config", () => {
-    // e.g. ApplicationFrame's aiPromotion prop, or a React context default —
-    // no `rules:` array, so not an axe suppression.
+    expect(
+      findDisabledRules(`aiPromotion: { enabled: false, greeting: "Hey" }`)
+    ).toEqual([])
+  })
+
+  it("does not leak past the end of an a11y block", () => {
+    // The disable sits AFTER the a11y block closes, so it must not be picked up.
     expect(
       findDisabledRules(`
-        aiPromotion: {
-          enabled: false,
-          greeting: "Hey",
-        },
+        parameters: {
+          a11y: { test: "todo" },
+          chart: { rules: [{ id: "gridlines", enabled: false }] },
+        }
       `)
     ).toEqual([])
   })
 
-  it("ignores a rules array with no disabled entry", () => {
-    expect(findDisabledRules(`rules: [{ id: "region" }]`)).toEqual([])
-  })
-
-  it("reports a placeholder when the disabled rule has no id", () => {
-    expect(findDisabledRules(`rules: [{ enabled: false }]`)).toEqual([
-      "<unknown rule>",
-    ])
+  it("is not confused by braces inside strings or comments", () => {
+    expect(
+      findDisabledRules(`
+        a11y: {
+          // a brace in a comment: {
+          config: {
+            rules: [
+              { id: "color-contrast", enabled: true, selector: "div{}" },
+            ],
+          },
+        },
+        other: { rules: [{ id: "nope", enabled: false }] },
+      `)
+    ).toEqual([])
   })
 })
 
