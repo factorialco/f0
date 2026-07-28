@@ -10,10 +10,13 @@ import type Reporter from "axe-playwright/dist/types"
 import { appendFileSync, readFileSync } from "fs"
 import { join } from "path"
 
+// NOTE: the `.ts` extension is required — the test-runner's loader does not
+// resolve extensionless sibling imports (Storybook warns "extensionless imports
+// detected" and the module fails to load at runtime).
 import {
   A11Y_CI_CONTEXT,
   A11Y_RUN_ONLY,
-} from "../src/lib/storybook-utils/a11yAxeConfig"
+} from "../src/lib/storybook-utils/a11yAxeConfig.ts"
 
 // Story files grandfathered to skip axe while their violations are burned
 // down (Path to AA). Maps file → number of allowed skip call-sites; counts
