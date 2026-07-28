@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.56.5](https://github.com/factorialco/f0/compare/f0-react-v4.56.4...f0-react-v4.56.5) (2026-07-28)
+
+
+### Bug Fixes
+
+* **SurveyFormBuilder:** [FCT-59912] fix Add-option contrast + enforce a11y ([#4764](https://github.com/factorialco/f0/issues/4764)) ([d9af07c](https://github.com/factorialco/f0/commit/d9af07ca72983bf2c9a30cf90d36104fc8ba3099))
+
 ## [4.56.4](https://github.com/factorialco/f0/compare/f0-react-v4.56.3...f0-react-v4.56.4) (2026-07-27)
 
 
