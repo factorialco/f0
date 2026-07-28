@@ -1,7 +1,10 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
+import { F0Button } from "@/components/F0Button"
 import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 
@@ -106,7 +109,7 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return <div className="flex h-[700px] flex-1">{children}</div>
+  return <div className="flex h-[700px] w-[480px]">{children}</div>
 }
 
 const meta = {
@@ -115,7 +118,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs", "experimental"],
   decorators: [
     (Story) => {
       return (
@@ -177,6 +180,88 @@ const ChatWithMock = () => (
 
 export const Default: Story = {
   render: () => <ChatWithMock />,
+}
+
+const ChatWithHostOverlay = () => {
+  const [overlayOpen, setOverlayOpen] = useState(true)
+
+  return (
+    <F0AiChat
+      header={<MockConnectedChatHeader />}
+      messages={<MockConnectedMessagesContainer />}
+      input={<MockConnectedChatInput />}
+      overlay={
+        overlayOpen ? (
+          <section
+            role="dialog"
+            aria-labelledby="host-overlay-title"
+            aria-describedby="host-overlay-description"
+            className="flex w-full max-w-[344px] flex-col gap-3 rounded-xl bg-f1-background p-4 shadow-lg"
+          >
+            <div className="flex flex-col gap-1">
+              <h2
+                id="host-overlay-title"
+                className="text-lg font-medium text-f1-foreground"
+              >
+                Discover a new workflow
+              </h2>
+              <p
+                id="host-overlay-description"
+                className="text-base text-f1-foreground-secondary"
+              >
+                Host applications provide the content and actions shown above
+                the chat.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <F0Button variant="outline" label="Open workflow" />
+              <F0Button
+                variant="ghost"
+                label="Dismiss"
+                onClick={() => setOverlayOpen(false)}
+              />
+            </div>
+          </section>
+        ) : undefined
+      }
+    />
+  )
+}
+
+export const WithHostOverlay: Story = {
+  render: () => <ChatWithHostOverlay />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Show the host overlay inside the chat", async () => {
+      const dialog = canvas.getByRole("dialog", {
+        name: "Discover a new workflow",
+      })
+
+      await expect(dialog).toBeInTheDocument()
+      await waitFor(() => {
+        expect(dialog.getBoundingClientRect().width).toBeGreaterThan(0)
+      })
+    })
+  },
+}
+
+export const HostOverlayDismissal: Story = {
+  tags: ["no-sidebar"],
+  render: () => <ChatWithHostOverlay />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(canvas.getByRole("button", { name: "Dismiss" }))
+    await expect(
+      canvas.queryByRole("dialog", { name: "Discover a new workflow" })
+    ).not.toBeInTheDocument()
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => <ChatWithHostOverlay />,
 }
 
 /**
