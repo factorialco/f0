@@ -116,6 +116,7 @@ export const TableCollection = <
   visualizationSettings,
   fromVisualization = "table",
   summaryPlaceholder = "-",
+  nested,
 }: CollectionProps<
   R,
   Filters,
@@ -418,11 +419,9 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
-
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <TableWrapper>
+      <NestedDataProvider nested={nested}>
         <div
           className={cn(
             "min-h-0",
@@ -1039,7 +1038,7 @@ export const TableCollection = <
           setPage={setPage}
           className="pb-4"
         />
-      </TableWrapper>
+      </NestedDataProvider>
     </div>
   )
 }
