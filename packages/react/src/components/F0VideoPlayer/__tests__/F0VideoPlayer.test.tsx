@@ -414,7 +414,8 @@ describe("F0VideoPlayer", () => {
       ).not.toBeInTheDocument()
     })
 
-    it("offers a language selector for localized captions and defaults correctly", () => {
+    it("moves localized captions into the settings gear (no bar CC toggle)", async () => {
+      const user = userEvent.setup()
       render(
         <F0VideoPlayer
           src={VIDEO_SRC}
@@ -428,9 +429,20 @@ describe("F0VideoPlayer", () => {
         />
       )
       fireEvent.loadedData(getVideo())
-      // Trigger's accessible name is the active language (label-in-name safe).
+      // Several languages → no inline CC toggle; language choice lives in the gear.
       expect(
-        screen.getByRole("button", { name: /english/i })
+        screen.queryByRole("button", { name: "Captions" })
+      ).not.toBeInTheDocument()
+      await user.click(screen.getByRole("button", { name: "Settings" }))
+      expect(
+        screen.getByRole("menuitemradio", { name: /english/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("menuitemradio", { name: /spanish|español/i })
+      ).toBeInTheDocument()
+      // An "Off" row is offered so captions can be disabled from the gear.
+      expect(
+        screen.getByRole("menuitemradio", { name: /^off$/i })
       ).toBeInTheDocument()
       // Default language ("en") is the rendered track.
       expect(
@@ -438,7 +450,8 @@ describe("F0VideoPlayer", () => {
       ).toHaveAttribute("src", "https://example.com/en.vtt")
     })
 
-    it("offers a separate audio-language selector for a localized src", () => {
+    it("offers audio-track languages in the settings gear for a localized src", async () => {
+      const user = userEvent.setup()
       render(
         <F0VideoPlayer
           defaultLanguage="en"
@@ -449,15 +462,18 @@ describe("F0VideoPlayer", () => {
         />
       )
       fireEvent.loadedData(getVideo())
-      // Audio selector present (accessible name "Audio: <language>").
+      await user.click(screen.getByRole("button", { name: "Settings" }))
       expect(
-        screen.getByRole("button", { name: /audio: /i })
+        screen.getByRole("menuitemradio", { name: /english/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("menuitemradio", { name: /spanish|español/i })
       ).toBeInTheDocument()
       // Default audio language is the rendered source.
       expect(getVideo()).toHaveAttribute("src", "https://example.com/en.mp4")
     })
 
-    it("shows no language selector for single-language captions", () => {
+    it("keeps single-language captions as a bar toggle with no settings gear", () => {
       render(
         <F0VideoPlayer
           src={VIDEO_SRC}
@@ -465,8 +481,12 @@ describe("F0VideoPlayer", () => {
         />
       )
       fireEvent.loadedData(getVideo())
+      // One language → the CC toggle stays in the bar; no gear appears.
       expect(
-        screen.queryByRole("button", { name: /english|language/i })
+        screen.getByRole("button", { name: "Captions" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Settings" })
       ).not.toBeInTheDocument()
     })
 

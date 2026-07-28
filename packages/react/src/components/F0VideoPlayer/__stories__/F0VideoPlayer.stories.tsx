@@ -109,9 +109,11 @@ const bigBuckBunnyCaptionsEs = [
 ].join("\n")
 
 /**
- * Localized captions: pass a per-locale list and a language selector appears in
- * the controls. The selection drives all localized content together (here just
- * captions); `defaultLanguage` sets the initial choice.
+ * Localized captions: pass a per-locale list. With more than one language the
+ * inline "CC" toggle is replaced by a settings gear (YouTube-style) whose
+ * "Subtitles" section lists the languages plus an "Off" row — picking a language
+ * turns captions on, "Off" turns them off. `defaultLanguage` sets the initial
+ * choice. (A single caption language stays a plain CC on/off toggle instead.)
  */
 export const WithLocalizedCaptions: Story = {
   args: {
@@ -126,10 +128,11 @@ export const WithLocalizedCaptions: Story = {
 }
 
 /**
- * Localized (dubbed) audio: pass a per-locale `src` list and a separate "Audio"
- * selector appears, independent of the subtitle language — so a viewer can pick
- * the spoken language and the caption language separately. Switching preserves
- * the playback position.
+ * Localized (dubbed) audio: pass a per-locale `src` list. Every dimension
+ * offered in several languages — here the audio track and the subtitles —
+ * collects into the settings gear, each in its own section, so the audio and
+ * caption languages are chosen independently. Switching preserves the playback
+ * position.
  *
  * There's no dubbed rendition of the sample, so both entries point at the same
  * file (a labeled stand-in) — the selector demonstrates the source swap.

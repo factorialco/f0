@@ -10,8 +10,8 @@ import {
   AudioDescriptionLineIcon,
 } from "./AudioDescriptionToggleIcons"
 import { CaptionsFilledIcon, CaptionsLineIcon } from "./CaptionsToggleIcons"
-import { LanguageMenu } from "./LanguageMenu"
 import { PlaybackRateMenu } from "./PlaybackRateMenu"
+import { hasSettingsMenu, SettingsMenu } from "./SettingsMenu"
 import { Seekbar } from "./Seekbar"
 import { VolumeControl } from "./VolumeControl"
 
@@ -38,20 +38,34 @@ export interface ControlsProps {
   silent: boolean
   /** Keep the controls visible during playback instead of auto-hiding them. */
   persist: boolean
-  /** Audio (dubbed `src`) languages (empty / single = no picker). */
+  /**
+   * Language dimensions. Each is offered as an on/off toggle in the bar when it
+   * has a single language, or moved into the settings gear (with the others)
+   * when it has several. The audio track has no on/off — only a language.
+   */
   audioLanguages: LanguageOption[]
   audioLanguage: string | undefined
   onAudioLanguageChange: (locale: string) => void
-  /** Subtitle/text (captions/descriptions) languages (empty / single = no picker). */
-  subtitleLanguages: LanguageOption[]
-  subtitleLanguage: string | undefined
-  onSubtitleLanguageChange: (locale: string) => void
+  captionLanguages: LanguageOption[]
+  captionLanguage: string | undefined
+  /** Select a caption language (also turns captions on) — used by the gear. */
+  onCaptionLanguageChange: (locale: string) => void
+  /** Turn captions off — used by the gear's "Off" row. */
+  onCaptionsOff: () => void
+  audioDescriptionLanguages: LanguageOption[]
+  audioDescriptionLanguage: string | undefined
+  /** Select an audio-description language (also turns it on) — used by the gear. */
+  onAudioDescriptionLanguageChange: (locale: string) => void
+  /** Turn audio description off — used by the gear's "Off" row. */
+  onAudioDescriptionOff: () => void
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
   onPlaybackRateChange: (rate: PlaybackRate) => void
   onToggleFullscreen: () => void
+  /** Toggle captions on/off — used by the bar toggle (single-language case). */
   onToggleCaptions: () => void
+  /** Toggle audio description on/off — used by the bar toggle (single-language case). */
   onToggleAudioDescription: () => void
   onSeek: (time: number) => void
 }
@@ -77,9 +91,14 @@ export function Controls({
   audioLanguages,
   audioLanguage,
   onAudioLanguageChange,
-  subtitleLanguages,
-  subtitleLanguage,
-  onSubtitleLanguageChange,
+  captionLanguages,
+  captionLanguage,
+  onCaptionLanguageChange,
+  onCaptionsOff,
+  audioDescriptionLanguages,
+  audioDescriptionLanguage,
+  onAudioDescriptionLanguageChange,
+  onAudioDescriptionOff,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
@@ -90,6 +109,19 @@ export function Controls({
   onSeek,
 }: ControlsProps) {
   const { t } = useI18n()
+
+  // A single-language feature keeps its own on/off toggle in the bar; once it's
+  // offered in several languages the toggle moves into the settings gear (where
+  // picking a language turns it on and an "Off" row turns it off), so the bar
+  // isn't cluttered with a toggle *and* a language picker for the same feature.
+  const captionsInBar = captionsAvailable && captionLanguages.length <= 1
+  const audioDescriptionInBar =
+    audioDescriptionAvailable && audioDescriptionLanguages.length <= 1
+  const showSettings = hasSettingsMenu({
+    audioLanguages: audioLanguages.length,
+    captionLanguages: captionLanguages.length,
+    audioDescriptionLanguages: audioDescriptionLanguages.length,
+  })
 
   return (
     <div
@@ -148,7 +180,7 @@ export function Controls({
         containerRef={containerRef}
       />
 
-      {captionsAvailable && (
+      {captionsInBar && (
         // Filled glyph when captions are on, line glyph when off; `aria-pressed`
         // conveys the state to assistive tech (the label stays stable).
         <F0Button
@@ -162,7 +194,7 @@ export function Controls({
         />
       )}
 
-      {audioDescriptionAvailable && (
+      {audioDescriptionInBar && (
         // Filled "AD" badge when on, line badge when off — the same on/off
         // language as captions, legible over video. `hideLabel` gives the
         // captions-style tooltip from the label; `aria-pressed` conveys state.
@@ -181,23 +213,22 @@ export function Controls({
         />
       )}
 
-      {subtitleLanguages.length > 1 && subtitleLanguage && (
-        <LanguageMenu
-          value={subtitleLanguage}
-          options={subtitleLanguages}
-          onChange={onSubtitleLanguageChange}
+      {showSettings && (
+        <SettingsMenu
           containerRef={containerRef}
-          kind={t("videoPlayer.subtitles")}
-        />
-      )}
-
-      {audioLanguages.length > 1 && audioLanguage && (
-        <LanguageMenu
-          value={audioLanguage}
-          options={audioLanguages}
-          onChange={onAudioLanguageChange}
-          containerRef={containerRef}
-          kind={t("videoPlayer.audio")}
+          audioLanguages={audioLanguages}
+          audioLanguage={audioLanguage}
+          onAudioLanguageChange={onAudioLanguageChange}
+          captionLanguages={captionLanguages}
+          captionLanguage={captionLanguage}
+          captionsOn={captionsOn}
+          onCaptionLanguageChange={onCaptionLanguageChange}
+          onCaptionsOff={onCaptionsOff}
+          audioDescriptionLanguages={audioDescriptionLanguages}
+          audioDescriptionLanguage={audioDescriptionLanguage}
+          audioDescriptionOn={audioDescriptionOn}
+          onAudioDescriptionLanguageChange={onAudioDescriptionLanguageChange}
+          onAudioDescriptionOff={onAudioDescriptionOff}
         />
       )}
 

@@ -52,9 +52,12 @@ export function F0VideoPlayerInternal({
   const { t } = useI18n()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // Two independent language selections: the audio (dubbed `src`) track, and the
-  // text (captions/descriptions/described source). Each has its own selector so
-  // a viewer can, say, watch English audio with Spanish subtitles.
+  // Three independent language selections, each driven by its own control: the
+  // audio (dubbed `src`) track, the captions, and the audio description
+  // (descriptions text + described source). A viewer can, say, watch English
+  // audio with Spanish captions. A dimension offered in one language is a plain
+  // on/off toggle in the bar; offered in several, its selection moves into the
+  // settings gear (see Controls).
   const audioLanguages = useMemo(() => collectLanguages(src), [src])
   const [audioLocale, setAudioLocale] = useState(() =>
     defaultLocale(audioLanguages, defaultLanguage)
@@ -64,30 +67,40 @@ export function F0VideoPlayerInternal({
     : defaultLocale(audioLanguages, defaultLanguage)
   const resolvedSrc = resolveLocalized(src, activeAudioLocale) ?? ""
 
-  const subtitleLanguages = useMemo(
-    () =>
-      collectLanguages(
-        content?.captions,
-        content?.descriptions,
-        content?.describedSrc
-      ),
-    [content?.captions, content?.descriptions, content?.describedSrc]
+  const captionLanguages = useMemo(
+    () => collectLanguages(content?.captions),
+    [content?.captions]
   )
-  const [textLocale, setTextLocale] = useState(() =>
-    defaultLocale(subtitleLanguages, defaultLanguage)
+  const [captionLocale, setCaptionLocale] = useState(() =>
+    defaultLocale(captionLanguages, defaultLanguage)
   )
-  const activeTextLocale = subtitleLanguages.some(
-    (l) => l.locale === textLocale
+  const activeCaptionLocale = captionLanguages.some(
+    (l) => l.locale === captionLocale
   )
-    ? textLocale
-    : defaultLocale(subtitleLanguages, defaultLanguage)
+    ? captionLocale
+    : defaultLocale(captionLanguages, defaultLanguage)
+  const captionsSrc = resolveLocalized(content?.captions, activeCaptionLocale)
 
-  const captionsSrc = resolveLocalized(content?.captions, activeTextLocale)
+  const audioDescriptionLanguages = useMemo(
+    () => collectLanguages(content?.descriptions, content?.describedSrc),
+    [content?.descriptions, content?.describedSrc]
+  )
+  const [audioDescriptionLocale, setAudioDescriptionLocale] = useState(() =>
+    defaultLocale(audioDescriptionLanguages, defaultLanguage)
+  )
+  const activeAudioDescriptionLocale = audioDescriptionLanguages.some(
+    (l) => l.locale === audioDescriptionLocale
+  )
+    ? audioDescriptionLocale
+    : defaultLocale(audioDescriptionLanguages, defaultLanguage)
   const descriptionsSrc = resolveLocalized(
     content?.descriptions,
-    activeTextLocale
+    activeAudioDescriptionLocale
   )
-  const describedSrc = resolveLocalized(content?.describedSrc, activeTextLocale)
+  const describedSrc = resolveLocalized(
+    content?.describedSrc,
+    activeAudioDescriptionLocale
+  )
 
   // While audio description is on, play the described rendition (if provided).
   const [audioDescriptionOn, setAudioDescriptionOn] = useState(false)
@@ -129,6 +142,33 @@ export function F0VideoPlayerInternal({
     // Only the described-source path swaps the source; the WebVTT path doesn't.
     if (describedSrc) preservePositionAcrossSwap()
     setAudioDescriptionOn((on) => !on)
+  }, [describedSrc, preservePositionAcrossSwap])
+
+  // Settings-gear handlers: picking a language turns the feature on and selects
+  // it; the "Off" row turns it off. Explicit set-on / set-off (not a toggle) so
+  // re-picking the current row is idempotent.
+  const selectCaptionLanguage = useCallback(
+    (locale: string) => {
+      setCaptionLocale(locale)
+      if (!captions.showing) captions.toggle()
+    },
+    [captions]
+  )
+  const disableCaptions = useCallback(() => {
+    if (captions.showing) captions.toggle()
+  }, [captions])
+
+  const selectAudioDescriptionLanguage = useCallback(
+    (locale: string) => {
+      if (describedSrc) preservePositionAcrossSwap()
+      setAudioDescriptionLocale(locale)
+      setAudioDescriptionOn(true)
+    },
+    [describedSrc, preservePositionAcrossSwap]
+  )
+  const disableAudioDescription = useCallback(() => {
+    if (describedSrc) preservePositionAcrossSwap()
+    setAudioDescriptionOn(false)
   }, [describedSrc, preservePositionAcrossSwap])
 
   useVideoTracking({ video: video.videoElement, onTrackAction })
@@ -327,9 +367,14 @@ export function F0VideoPlayerInternal({
           audioLanguages={audioLanguages}
           audioLanguage={activeAudioLocale}
           onAudioLanguageChange={changeAudioLanguage}
-          subtitleLanguages={subtitleLanguages}
-          subtitleLanguage={activeTextLocale}
-          onSubtitleLanguageChange={setTextLocale}
+          captionLanguages={captionLanguages}
+          captionLanguage={activeCaptionLocale}
+          onCaptionLanguageChange={selectCaptionLanguage}
+          onCaptionsOff={disableCaptions}
+          audioDescriptionLanguages={audioDescriptionLanguages}
+          audioDescriptionLanguage={activeAudioDescriptionLocale}
+          onAudioDescriptionLanguageChange={selectAudioDescriptionLanguage}
+          onAudioDescriptionOff={disableAudioDescription}
           onTogglePlay={video.togglePlay}
           onToggleMute={video.toggleMute}
           onVolumeChange={video.setVolume}

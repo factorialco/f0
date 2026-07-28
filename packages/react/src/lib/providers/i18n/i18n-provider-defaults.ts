@@ -923,6 +923,8 @@ export const defaultTranslations = {
     audioDescription: "Audio description",
     audio: "Audio",
     subtitles: "Subtitles",
+    settings: "Settings",
+    off: "Off",
   },
 } as const
 
