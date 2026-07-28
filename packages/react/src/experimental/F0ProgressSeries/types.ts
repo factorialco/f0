@@ -4,6 +4,27 @@ export const f0ProgressSeriesSizes = ["sm", "md", "lg"] as const
 export type F0ProgressSeriesSize = (typeof f0ProgressSeriesSizes)[number]
 
 /**
+ * The `--chart-*` tokens `getColor` can resolve (see `f0-core`'s `base.css`).
+ * Same set as `F0SegmentedBar`'s `SegmentColorToken`; the two are not shared yet
+ * because `kits/F0DataChart` already owns the `ChartColorToken` name for a
+ * different palette (`baseColors`). Unifying them is tracked separately.
+ */
+export const f0ProgressSeriesColors = [
+  "categorical-1",
+  "categorical-2",
+  "categorical-3",
+  "categorical-4",
+  "categorical-5",
+  "categorical-6",
+  "categorical-7",
+  "categorical-8",
+  "feedback-positive",
+  "feedback-neutral",
+  "feedback-negative",
+] as const
+export type F0ProgressSeriesColor = (typeof f0ProgressSeriesColors)[number]
+
+/**
  * One progress bar in the series — e.g. a period (Q1, Jan, 2026…). Each bar is
  * an independent progress bar (its own track + proportional fill), unlike a
  * category bar where the segments are parts of a single whole.
@@ -17,10 +38,10 @@ export interface F0ProgressSeriesBar {
   /** Target. Defaults to 100. */
   max?: number
   /**
-   * f0 color token for the fill (resolved via `getColor`). Defaults to
-   * `"categorical-1"`. Ignored when `canceled` is set.
+   * f0 chart color token for the fill. Defaults to `"categorical-1"`. Ignored
+   * when `canceled` is set.
    */
-  color?: string
+  color?: F0ProgressSeriesColor
   /** Renders a hatched grey bar (e.g. a cancelled period). */
   canceled?: boolean
   /** Title shown under the bar (e.g. "Q1", "Jan", "2026"). Optional. */

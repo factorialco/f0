@@ -16,20 +16,22 @@ import {
 
 import {
   F0ProgressSeriesBar,
+  F0ProgressSeriesColor,
   F0ProgressSeriesProps,
   F0ProgressSeriesSize,
 } from "./types"
 
 export type {
   F0ProgressSeriesBar,
+  F0ProgressSeriesColor,
   F0ProgressSeriesOptions,
   F0ProgressSeriesProps,
   F0ProgressSeriesSize,
 } from "./types"
-export { f0ProgressSeriesSizes } from "./types"
+export { f0ProgressSeriesColors, f0ProgressSeriesSizes } from "./types"
 
 const DEFAULT_MAX_LABELS = 4
-const DEFAULT_COLOR = "categorical-1"
+const DEFAULT_COLOR: F0ProgressSeriesColor = "categorical-1"
 /** Opacity of the lighter "overachievement" shade drawn past the target. */
 const OVERACHIEVEMENT_OPACITY = 0.5
 /** Past this many bars the row switches to a tighter, squarer rhythm. */
@@ -86,7 +88,13 @@ function formatPair(
  *   percentage") — base color up to the target, then a lighter shade of the
  *   same color for the overachievement. E.g. 158% → ~63% solid + ~37% lighter.
  */
-function BarFill({ pct, color }: { pct: number; color: string }) {
+function BarFill({
+  pct,
+  color,
+}: {
+  pct: number
+  color: F0ProgressSeriesColor
+}) {
   const base = getColor(color)
 
   if (pct <= 100) {

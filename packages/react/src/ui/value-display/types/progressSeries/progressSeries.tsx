@@ -11,6 +11,7 @@ import { ValueDisplayRendererContext } from "../../renderers"
 
 export type {
   F0ProgressSeriesBar as ProgressSeriesBar,
+  F0ProgressSeriesColor as ProgressSeriesColor,
   F0ProgressSeriesSize as ProgressSeriesSize,
 } from "@/experimental/F0ProgressSeries"
 

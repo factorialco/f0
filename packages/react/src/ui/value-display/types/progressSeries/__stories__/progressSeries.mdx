@@ -20,7 +20,7 @@ type value = {
   bars: Array<{
     value: number | undefined  // attained; undefined / non-finite (or max <= 0) → empty bar (track only)
     max?: number               // target; defaults to 100
-    color?: string             // f0 color token for the fill; defaults to "categorical-1"
+    color?: ProgressSeriesColor // chart token: categorical-1..8 | feedback-positive|neutral|negative
     canceled?: boolean         // hatched grey bar (e.g. a cancelled period)
     label?: string             // title shown under the bar (e.g. "Q1"); optional
     caption?: string           // short text under the bar; defaults to the computed %; pass "" to hide
