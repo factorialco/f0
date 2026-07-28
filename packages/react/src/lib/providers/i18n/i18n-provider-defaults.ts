@@ -625,6 +625,10 @@ export const defaultTranslations = {
       description: "Try a different date or fewer filters",
     },
   },
+  progressSeries: {
+    noData: "No data",
+    canceled: "Canceled",
+  },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
