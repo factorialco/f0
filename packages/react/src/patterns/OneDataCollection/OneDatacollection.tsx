@@ -21,9 +21,11 @@ import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
+  hasNonSelectableRecords,
   OnSelectItemsCallback,
   RecordType,
   resolveSelectableTotal,
+  useHasNonSelectableRows,
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
@@ -890,16 +892,20 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
-  // Whether any loaded record fails the `selectable` predicate. Once that's
-  // true, totalItems (every record, selectable or not) can't stand in for the
-  // selectable total.
-  const [hasNonSelectableRows, setHasNonSelectableRows] = useState(false)
+  // Whether the last loaded page contained a record that fails the `selectable`
+  // predicate. Once that's true, totalItems (every record, selectable or not)
+  // can't stand in for the selectable total.
+  const [pageHasNonSelectableRows, setPageHasNonSelectableRows] =
+    useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   const allItemsSelectedTotal = resolveSelectableTotal({
     fetchedTotal: source.selectableTotal,
     paginationTotal: totalItems,
-    hasNonSelectableRows,
+    hasNonSelectableRows: useHasNonSelectableRows(
+      pageHasNonSelectableRows,
+      JSON.stringify([source.currentFilters, source.debouncedCurrentSearch])
+    ),
   })
 
   const elementsRightActions = useMemo(
@@ -950,9 +956,8 @@ const OneDataCollectionComp = <
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
-    setHasNonSelectableRows(
-      !!source.selectable &&
-        (data ?? []).some((item) => source.selectable?.(item) === undefined)
+    setPageHasNonSelectableRows(
+      hasNonSelectableRecords(data, source.selectable)
     )
     setFirstDataLoaded(true)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))

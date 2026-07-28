@@ -3,7 +3,11 @@ import { userEvent } from "@testing-library/user-event"
 import { describe, expect, test, vi } from "vitest"
 
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
-import { zeroRender as render } from "@/testing/test-utils"
+import { useHasNonSelectableRows } from "@/hooks/datasource"
+import {
+  zeroRender as render,
+  zeroRenderHook as renderHook,
+} from "@/testing/test-utils"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
@@ -72,6 +76,35 @@ const renderCollection = (fetchSelectableTotal?: () => Promise<number>) =>
       <Harness fetchSelectableTotal={fetchSelectableTotal} />
     </TestWrapper>
   )
+
+describe("useHasNonSelectableRows", () => {
+  test("stays true after paging onto a fully-selectable page", () => {
+    // paginationInfo.total has already been proven wrong for this query; a page
+    // that happens to be fully selectable doesn't make it right again.
+    const { result, rerender } = renderHook(
+      ({ page, query }: { page: boolean; query: string }) =>
+        useHasNonSelectableRows(page, query),
+      { initialProps: { page: true, query: "filters-a" } }
+    )
+    expect(result.current).toBe(true)
+
+    rerender({ page: false, query: "filters-a" })
+    expect(result.current).toBe(true)
+  })
+
+  test("resets when the query changes", () => {
+    const { result, rerender } = renderHook(
+      ({ page, query }: { page: boolean; query: string }) =>
+        useHasNonSelectableRows(page, query),
+      { initialProps: { page: true, query: "filters-a" } }
+    )
+    expect(result.current).toBe(true)
+
+    // Different filters mean a different dataset: nothing is known about it yet.
+    rerender({ page: false, query: "filters-b" })
+    expect(result.current).toBe(false)
+  })
+})
 
 describe("select all with no selectable rows on the current page", () => {
   test("offers the cross-page CTA and disables the inert header checkbox", async () => {

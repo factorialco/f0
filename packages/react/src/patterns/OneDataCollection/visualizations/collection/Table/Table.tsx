@@ -24,7 +24,9 @@ import {
   SortingsDefinition,
   SortingsState,
   useGroups,
+  hasNonSelectableRecords,
   resolveSelectableTotal,
+  useHasNonSelectableRows,
   useSelectable,
 } from "@/hooks/datasource"
 import { Add } from "@/icons/app"
@@ -269,6 +271,14 @@ export const TableCollection = <
     getRenderedSelectableEntries: selectionRegistry.getEntries,
     renderedSelectableCount: selectionRegistry.ids.length,
   })
+
+  // Must sit above the loading early-return below: it holds state across
+  // renders, so it can't be called conditionally.
+  const hasNonSelectableRows = useHasNonSelectableRows(
+    hasNonSelectableRecords(data?.records, source.selectable),
+    JSON.stringify([source.currentFilters, source.debouncedCurrentSearch])
+  )
+
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
@@ -410,8 +420,7 @@ export const TableCollection = <
   const selectableTotal = resolveSelectableTotal({
     fetchedTotal: source.selectableTotal,
     paginationTotal,
-    hasNonSelectableRows:
-      (data?.records.length ?? 0) > currentPageSelectableIds.length,
+    hasNonSelectableRows,
   })
 
   // True when the header checkbox should render as fully-checked: either the
