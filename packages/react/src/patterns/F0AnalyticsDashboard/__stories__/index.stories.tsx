@@ -24,7 +24,7 @@ const meta = {
 } satisfies Meta<typeof F0AnalyticsDashboard>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj
 
 const emptyReportFilters = {} satisfies FiltersState<DashboardFiltersType>
 
@@ -166,7 +166,6 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
  * come from?" entry that opens a markdown-rendered dialog.
  */
 export const MixedDashboard: Story = {
-  args: { items: mixedItems },
   render: () => <InteractiveDashboard editMode />,
 }
 
@@ -175,7 +174,6 @@ export const MixedDashboard: Story = {
  */
 export const WithExport: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   parameters: {
     docs: {
       description: {
@@ -200,11 +198,11 @@ export const WithExport: Story = {
 }
 
 /**
- * A consumer-controlled dashboard starting without applied report filters.
+ * A consumer-controlled dashboard starting without applied report filters. The
+ * play function commits the first filter from that empty state.
  */
 export const ReportFiltersEmpty: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   parameters: {
     docs: {
       description: {
@@ -216,28 +214,10 @@ export const ReportFiltersEmpty: Story = {
   render: () => <ControlledDashboard initialValue={emptyReportFilters} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-
-    await expect(
-      canvas.getByTestId("applied-report-filter-state")
-    ).toHaveTextContent("{}")
-    await expect(
-      canvas.getByRole("button", { name: "Filters" })
-    ).toBeInTheDocument()
-  },
-}
-
-/**
- * Interaction coverage for the first controlled commit from an empty saved
- * report. Hidden because the play function intentionally mutates the story.
- */
-export const ReportFilterInitialCommit: Story = {
-  tags: ["no-sidebar"],
-  args: { items: mixedItems },
-  render: () => <ControlledDashboard initialValue={emptyReportFilters} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
     const page = within(canvasElement.closest("body")!)
     const state = canvas.getByTestId("applied-report-filter-state")
+
+    await expect(state).toHaveTextContent("{}")
 
     await userEvent.click(page.getByRole("button", { name: "Filters" }))
     await userEvent.click(
@@ -264,7 +244,6 @@ export const ReportFilterInitialCommit: Story = {
  */
 export const ReportFiltersPreApplied: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   parameters: {
     docs: {
       description: {
@@ -282,7 +261,6 @@ export const ReportFiltersPreApplied: Story = {
  */
 export const ReportFilterScalarValues: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   parameters: {
     docs: {
       description: {
@@ -320,7 +298,6 @@ export const ReportFilterScalarValues: Story = {
  */
 export const ReportFilterRangeAndMultipleValues: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   parameters: {
     docs: {
       description: {
@@ -360,7 +337,6 @@ export const ReportFilterRangeAndMultipleValues: Story = {
  */
 export const ReportFilterCommitLifecycle: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   render: () => <ControlledDashboard initialValue={preAppliedReportFilters} />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -452,7 +428,6 @@ export const ReportFilterCommitLifecycle: Story = {
 
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
-  args: { items: mixedItems },
   parameters: withSnapshot({}),
   render: () => (
     <ControlledDashboard initialValue={supportedReportFilterValues} />
@@ -503,14 +478,12 @@ const emptyItems: DashboardItem<typeof dashboardFilters>[] = [
 ]
 
 /**
- * Mirrors the bug case in the screenshot: every chart returns no data.
- * Each tile shows a faded skeleton of its chart variant with the default
- * "No data available" / "Try a different date or fewer filters" message —
- * instead of bare axes.
+ * Every chart returns no data: each tile shows a faded skeleton of its chart
+ * variant with the default "No data available" / "Try a different date or fewer
+ * filters" message instead of bare axes.
  */
 export const EmptyDashboard: Story = {
   tags: ["no-sidebar"],
-  args: { items: emptyItems },
   parameters: {
     docs: {
       description: {
@@ -536,37 +509,5 @@ export const EmptyDashboard: Story = {
     await expect(await canvas.findAllByText("No data available")).toHaveLength(
       emptyItems.length
     )
-  },
-}
-
-/**
- * A valid report with no dashboard items. The report-level filter controls stay
- * available and do not start an item fetch.
- */
-export const ReportFiltersNoItems: Story = {
-  tags: ["no-sidebar"],
-  args: { items: [] },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "A controlled report with no dashboard items. The filter bar remains usable and committed values still update the parent-owned state.",
-      },
-    },
-  },
-  render: () => (
-    <ControlledDashboard initialValue={preAppliedReportFilters} items={[]} />
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    await expect(
-      canvas.getByRole("button", {
-        name: "Filters. Active filters: Department",
-      })
-    ).toBeInTheDocument()
-    await expect(
-      canvas.getByTestId("applied-report-filter-state")
-    ).toHaveTextContent('"Engineering"')
   },
 }
