@@ -173,7 +173,10 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         <div
           className={cn(
             "group/pill relative inline-flex max-w-full flex-col items-stretch",
-            "outline-none rounded-full",
+            "outline-none",
+            // Square avatar → square (rounded) node pill so the whole node reads
+            // as a card; the default circular avatar keeps the pill silhouette.
+            avatarShape === "square" ? "rounded-xl" : "rounded-full",
             // Selection / highlight rings stay on the wrapper so they wrap
             // the layout box (which matches the visible compact/detail pill).
             // For dot variant the ring is moved to the avatar (see below).
@@ -206,7 +209,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-0 rounded-full border border-solid bg-f1-background",
+              "pointer-events-none absolute inset-0 border border-solid bg-f1-background",
+              avatarShape === "square" ? "rounded-xl" : "rounded-full",
               // Backdrop-blur is only enabled in compact/detail. In dot the
               // chrome is invisible (opacity 0), but Chrome/Safari still
               // rasterize the backdrop filter every frame for every node \u2014
