@@ -902,10 +902,10 @@ const OneDataCollectionComp = <
   const allItemsSelectedTotal = resolveSelectableTotal({
     fetchedTotal: source.selectableTotal,
     paginationTotal: totalItems,
-    hasNonSelectableRows: useHasNonSelectableRows(
-      pageHasNonSelectableRows,
-      JSON.stringify([source.currentFilters, source.debouncedCurrentSearch])
-    ),
+    hasNonSelectableRows: useHasNonSelectableRows(pageHasNonSelectableRows, {
+      filters: source.currentFilters,
+      search: source.debouncedCurrentSearch,
+    }),
   })
 
   const elementsRightActions = useMemo(

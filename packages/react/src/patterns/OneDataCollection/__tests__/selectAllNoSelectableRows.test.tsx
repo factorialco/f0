@@ -82,26 +82,26 @@ describe("useHasNonSelectableRows", () => {
     // paginationInfo.total has already been proven wrong for this query; a page
     // that happens to be fully selectable doesn't make it right again.
     const { result, rerender } = renderHook(
-      ({ page, query }: { page: boolean; query: string }) =>
-        useHasNonSelectableRows(page, query),
-      { initialProps: { page: true, query: "filters-a" } }
+      ({ page, filters }: { page: boolean; filters: object }) =>
+        useHasNonSelectableRows(page, { filters, search: undefined }),
+      { initialProps: { page: true, filters: { a: 1 } } }
     )
     expect(result.current).toBe(true)
 
-    rerender({ page: false, query: "filters-a" })
+    rerender({ page: false, filters: { a: 1 } })
     expect(result.current).toBe(true)
   })
 
   test("resets when the query changes", () => {
     const { result, rerender } = renderHook(
-      ({ page, query }: { page: boolean; query: string }) =>
-        useHasNonSelectableRows(page, query),
-      { initialProps: { page: true, query: "filters-a" } }
+      ({ page, filters }: { page: boolean; filters: object }) =>
+        useHasNonSelectableRows(page, { filters, search: undefined }),
+      { initialProps: { page: true, filters: { a: 1 } } }
     )
     expect(result.current).toBe(true)
 
     // Different filters mean a different dataset: nothing is known about it yet.
-    rerender({ page: false, query: "filters-b" })
+    rerender({ page: false, filters: { b: 2 } })
     expect(result.current).toBe(false)
   })
 
@@ -109,17 +109,31 @@ describe("useHasNonSelectableRows", () => {
     // Filters change before the new records arrive, so the rows still on screen
     // — and the flag derived from them — belong to the previous query.
     const { result, rerender } = renderHook(
-      ({ page, query }: { page: boolean; query: string }) =>
-        useHasNonSelectableRows(page, query),
-      { initialProps: { page: true, query: "filters-a" } }
+      ({ page, filters }: { page: boolean; filters: object }) =>
+        useHasNonSelectableRows(page, { filters, search: undefined }),
+      { initialProps: { page: true, filters: { a: 1 } } }
     )
     expect(result.current).toBe(true)
 
-    rerender({ page: true, query: "filters-b" })
+    rerender({ page: true, filters: { b: 2 } })
     expect(result.current).toBe(false)
 
     // Once the new page has actually loaded, its evidence counts again.
-    rerender({ page: true, query: "filters-b" })
+    rerender({ page: true, filters: { b: 2 } })
+    expect(result.current).toBe(true)
+  })
+
+  test("survives a filter state rebuilt with a different key order", () => {
+    // Same filters, different insertion order — same dataset, so what we know
+    // about it must not be thrown away.
+    const { result, rerender } = renderHook(
+      ({ page, filters }: { page: boolean; filters: object }) =>
+        useHasNonSelectableRows(page, { filters, search: undefined }),
+      { initialProps: { page: true, filters: { a: 1, b: 2 } } }
+    )
+    expect(result.current).toBe(true)
+
+    rerender({ page: false, filters: { b: 2, a: 1 } })
     expect(result.current).toBe(true)
   })
 })
@@ -160,6 +174,21 @@ describe("select all with no selectable rows on the current page", () => {
     expect(
       screen.queryByRole("button", { name: `Select all ${TOTAL} items` })
     ).not.toBeInTheDocument()
+  })
+
+  test("survives a callback that throws synchronously", async () => {
+    // Not an async function, so it throws instead of rejecting — that must not
+    // escape the effect and take the collection down.
+    const throwing = (() => {
+      throw new Error("count failed")
+    }) as unknown as () => Promise<number>
+
+    renderCollection(throwing)
+
+    // Falls back to the unknown-total label instead of crashing.
+    expect(
+      await screen.findByRole("button", { name: "Select all items" })
+    ).toBeInTheDocument()
   })
 
   test("uses the consumer-provided selectable total when available", async () => {

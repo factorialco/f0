@@ -6,6 +6,7 @@ import {
 } from "@/patterns/OneFilterPicker/types"
 
 import { SelectableTotalOptions } from "./types"
+import { stableStringify } from "./utils"
 
 /**
  * Resolves the consumer-provided count of selectable items for the current
@@ -47,7 +48,11 @@ export const useSelectableTotal = <Filters extends FiltersDefinition>({
     let stale = false
     setTotal(undefined)
 
-    fetchTotal({ filters, search })
+    // Called inside a `then` so a consumer callback that throws synchronously
+    // (rather than rejecting) lands in the catch below instead of escaping the
+    // effect and taking the whole collection down with it.
+    Promise.resolve()
+      .then(() => fetchTotal({ filters, search }))
       .then((value) => {
         if (!stale) setTotal(value)
       })
@@ -88,8 +93,12 @@ export const hasNonSelectableRecords = <R>(
  */
 export const useHasNonSelectableRows = (
   pageHasNonSelectableRows: boolean,
-  queryKey: string
+  query: { filters: unknown; search: string | undefined }
 ): boolean => {
+  // Stable stringify: two filter states with the same values but a different key
+  // order are the same dataset, and must not drop what we know about it.
+  const queryKey = stableStringify([query.filters, query.search])
+
   const seenRef = useRef(false)
   const queryKeyRef = useRef(queryKey)
 

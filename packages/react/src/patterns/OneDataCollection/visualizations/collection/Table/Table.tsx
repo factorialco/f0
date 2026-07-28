@@ -276,7 +276,10 @@ export const TableCollection = <
   // renders, so it can't be called conditionally.
   const hasNonSelectableRows = useHasNonSelectableRows(
     hasNonSelectableRecords(data?.records, source.selectable),
-    JSON.stringify([source.currentFilters, source.debouncedCurrentSearch])
+    {
+      filters: source.currentFilters,
+      search: source.debouncedCurrentSearch,
+    }
   )
 
   const summaryData = useMemo(() => {
