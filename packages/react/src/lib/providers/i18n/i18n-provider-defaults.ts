@@ -103,6 +103,11 @@ export const defaultTranslations = {
       allOnPage: "All {{count}} items on this page are selected",
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected",
+      // Used when the selectable total is unknown: `selectable` is a
+      // client-side predicate, so without `fetchSelectableTotal` a collection
+      // with non-selectable rows has no honest number to show.
+      selectAllItemsUnknownTotal: "Select all items",
+      allItemsSelectedUnknownTotal: "All items selected",
     },
     noItemsSelected: "No items selected",
   },

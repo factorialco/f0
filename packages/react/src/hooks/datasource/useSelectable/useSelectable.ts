@@ -96,9 +96,13 @@ export function useSelectable<
     if (isPageOnlySelection) {
       return data.records?.length || 0
     }
-    const base = paginationInfo
-      ? paginationInfo.total
-      : (data.records?.length ?? 0)
+    // paginationInfo.total counts every record, selectable or not, so with a
+    // partially-selectable dataset checkedCount could never reach it and
+    // areAllKnownItemsSelected would never turn true. A consumer-provided
+    // selectable count fixes that; without one this keeps the old behaviour.
+    const base =
+      source.selectableTotal ??
+      (paginationInfo ? paginationInfo.total : (data.records?.length ?? 0))
     // nested/tree tables: paginationInfo.total counts top-level rows, not the selectable children
     return Math.max(base, renderedSelectableCount)
   }, [
@@ -106,6 +110,7 @@ export function useSelectable<
     data.records?.length,
     isPageOnlySelection,
     renderedSelectableCount,
+    source.selectableTotal,
   ])
 
   const currentPageIdentifier = useMemo(() => {

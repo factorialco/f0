@@ -991,6 +991,47 @@ export const WithCrossPageSelection: Story = {
   },
 }
 
+export const WithCrossPageSelectionAndNoSelectableRowsOnPage: Story = {
+  render: () => {
+    const paginatedMockUsers = generateMockUsers(50)
+    // Page 1 is entirely non-selectable. The header checkbox has nothing to act
+    // on, so the "Select all N items" CTA is offered on its own.
+    const lockedIds = new Set(
+      paginatedMockUsers.slice(0, 10).map((user) => user.id)
+    )
+
+    return (
+      <ExampleComponent
+        selectable={(item) => (lockedIds.has(item.id) ? undefined : item.id)}
+        // Without this the CTA would have to say "Select all items" with no
+        // number: paginationInfo.total is 50, but only 40 are selectable.
+        fetchSelectableTotal={async () =>
+          paginatedMockUsers.length - lockedIds.size
+        }
+        allPagesSelection={true}
+        dataAdapter={createDataAdapter({
+          data: paginatedMockUsers,
+          delay: 500,
+          paginationType: "pages",
+          perPage: 10,
+        })}
+        bulkActions={({ allSelected, selectedCount }) => ({
+          primary: [
+            {
+              label: allSelected
+                ? "Delete all items"
+                : `Delete ${selectedCount} selected item${selectedCount > 1 ? "s" : ""}`,
+              icon: Delete,
+              id: "delete-all",
+              critical: true,
+            },
+          ],
+        })}
+      />
+    )
+  },
+}
+
 export const WithInfiniteScrollSelection: Story = {
   render: () => {
     const paginatedMockUsers = generateMockUsers(50)

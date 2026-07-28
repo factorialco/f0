@@ -1341,6 +1341,7 @@ export const ExampleComponent = ({
   presets: presetsOverride,
   frozenColumns = 0,
   selectable,
+  fetchSelectableTotal,
   defaultSelectedItems,
   allPagesSelection,
   bulkActions,
@@ -1406,6 +1407,7 @@ export const ExampleComponent = ({
   >
   defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
+  fetchSelectableTotal?: () => Promise<number>
   allPagesSelection?: boolean
   bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
@@ -1532,6 +1534,7 @@ export const ExampleComponent = ({
         },
       ],
       selectable,
+      fetchSelectableTotal,
       defaultSelectedItems,
       allPagesSelection,
       bulkActions,

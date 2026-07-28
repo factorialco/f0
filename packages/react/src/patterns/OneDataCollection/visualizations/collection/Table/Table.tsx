@@ -24,6 +24,7 @@ import {
   SortingsDefinition,
   SortingsState,
   useGroups,
+  resolveSelectableTotal,
   useSelectable,
 } from "@/hooks/datasource"
 import { Add } from "@/icons/app"
@@ -391,11 +392,27 @@ export const TableCollection = <
     currentPageSelectableIds.length > 0 &&
     currentPageSelectableIds.every((id) => selectedItems.has(id))
 
+  // A page where `source.selectable` returns undefined for every record. The
+  // header checkbox can't act on anything there, and the cross-page CTA is
+  // gated behind having a selection — so without this the user is trapped and
+  // can never reach "select all items".
+  const hasNoSelectableRowsOnPage =
+    (data?.records.length ?? 0) > 0 && currentPageSelectableIds.length === 0
+
   // nested/tree tables: paginationInfo.total counts top-level rows, not selectable children
-  const selectableTotal = Math.max(
+  const paginationTotal = Math.max(
     paginationInfo?.total ?? 0,
     currentPageSelectableIds.length
   )
+
+  // Undefined when no honest number exists — the labels drop the count rather
+  // than showing paginationInfo.total, which includes non-selectable records.
+  const selectableTotal = resolveSelectableTotal({
+    fetchedTotal: source.selectableTotal,
+    paginationTotal,
+    hasNonSelectableRows:
+      (data?.records.length ?? 0) > currentPageSelectableIds.length,
+  })
 
   // True when the header checkbox should render as fully-checked: either the
   // Gmail-style "select across all pages" CTA is active, or every selectable
@@ -408,7 +425,9 @@ export const TableCollection = <
     !!source.allPagesSelection &&
     (!allSelectedStatus.checked || allSelectedStatus.indeterminate) &&
     paginationInfo?.total !== undefined &&
-    selectableTotal > allSelectedStatus.selectedCount
+    // paginationTotal is an upper bound on the selectable total, so this still
+    // gates correctly when the exact selectable count is unknown.
+    paginationTotal > allSelectedStatus.selectedCount
 
   const selectionHeaderColSpan =
     columns.length + (showItemActions ? actionColCount : 0)
@@ -520,7 +539,13 @@ export const TableCollection = <
                         onCheckedChange={handleSelectAll}
                         title={i18n.actions.selectAll}
                         hideLabel
-                        disabled={data?.records.length === 0}
+                        // Inert with nothing selectable on the page; stays
+                        // enabled once a cross-page selection exists so it can
+                        // still clear it.
+                        disabled={
+                          data?.records.length === 0 ||
+                          (hasNoSelectableRowsOnPage && !hasSelection)
+                        }
                       />
                     </div>
                   </TableHead>
@@ -597,7 +622,8 @@ export const TableCollection = <
                     </>
                   ))}
               </TableRow>
-              {hasSelection &&
+              {(hasSelection ||
+                (hasNoSelectableRowsOnPage && showSelectAllOption)) &&
                 source.selectable &&
                 !!source.allPagesSelection && (
                   <TableRow>
@@ -606,32 +632,44 @@ export const TableCollection = <
                       className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
                     >
                       <div className="flex items-center gap-3">
-                        <HighlightedCount
-                          text={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? t("status.selected.allItemsSelected", {
-                                  total: selectableTotal,
-                                })
-                              : allPageRowsSelected
-                                ? t("status.selected.allOnPage", {
-                                    count: allSelectedStatus.selectedCount,
-                                  })
-                                : `${allSelectedStatus.selectedCount} ${selectedText}`
-                          }
-                          count={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? selectableTotal
-                              : allSelectedStatus.selectedCount
-                          }
-                        />
+                        {hasSelection && (
+                          <HighlightedCount
+                            text={
+                              allSelectedStatus.checked &&
+                              !allSelectedStatus.indeterminate
+                                ? selectableTotal !== undefined
+                                  ? t("status.selected.allItemsSelected", {
+                                      total: selectableTotal,
+                                    })
+                                  : t(
+                                      "status.selected.allItemsSelectedUnknownTotal"
+                                    )
+                                : allPageRowsSelected
+                                  ? t("status.selected.allOnPage", {
+                                      count: allSelectedStatus.selectedCount,
+                                    })
+                                  : `${allSelectedStatus.selectedCount} ${selectedText}`
+                            }
+                            count={
+                              allSelectedStatus.checked &&
+                              !allSelectedStatus.indeterminate
+                                ? (selectableTotal ?? 0)
+                                : allSelectedStatus.selectedCount
+                            }
+                          />
+                        )}
                         {showSelectAllOption && (
                           <F0Button
                             variant="outline"
-                            label={t("status.selected.selectAllItems", {
-                              total: selectableTotal,
-                            })}
+                            label={
+                              selectableTotal !== undefined
+                                ? t("status.selected.selectAllItems", {
+                                    total: selectableTotal,
+                                  })
+                                : t(
+                                    "status.selected.selectAllItemsUnknownTotal"
+                                  )
+                            }
                             onClick={() => handleSelectAllItems(true)}
                             size="sm"
                           />

@@ -23,6 +23,7 @@ import {
   GroupingDefinition,
   OnSelectItemsCallback,
   RecordType,
+  resolveSelectableTotal,
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
@@ -889,7 +890,17 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
+  // Whether any loaded record fails the `selectable` predicate. Once that's
+  // true, totalItems (every record, selectable or not) can't stand in for the
+  // selectable total.
+  const [hasNonSelectableRows, setHasNonSelectableRows] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  const allItemsSelectedTotal = resolveSelectableTotal({
+    fetchedTotal: source.selectableTotal,
+    paginationTotal: totalItems,
+    hasNonSelectableRows,
+  })
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -931,6 +942,7 @@ const OneDataCollectionComp = <
     filters,
     isInitialLoading: isInitialLoadingFromCallback,
     search,
+    data,
   }: Parameters<OnLoadDataCallback<R, Filters>>[0]) => {
     if (isInitialLoadingFromCallback) {
       return
@@ -938,6 +950,10 @@ const OneDataCollectionComp = <
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
+    setHasNonSelectableRows(
+      !!source.selectable &&
+        (data ?? []).some((item) => source.selectable?.(item) === undefined)
+    )
     setFirstDataLoaded(true)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
@@ -1810,7 +1826,7 @@ const OneDataCollectionComp = <
               onUnselect={() => clearSelectedItemsFunc?.()}
               allPagesSelection={!!source.allPagesSelection}
               isAllItemsSelected={isAllItemsSelected}
-              totalItems={totalItems}
+              totalItems={allItemsSelectedTotal}
             />
           )}
         </>
