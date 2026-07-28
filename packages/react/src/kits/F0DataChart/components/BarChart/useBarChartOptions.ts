@@ -45,6 +45,80 @@ function hasTargets(series: F0DataChartBarSeries): boolean {
   )
 }
 
+const BAR_CORNER_RADIUS = 4
+
+/**
+ * Corner radii (`[top-left, top-right, bottom-right, bottom-left]`) rounding
+ * only the end of the bar that points away from the zero line. Negative bars
+ * grow in the opposite direction, so they need the opposite corners.
+ */
+function barCornerRadius(isVertical: boolean, isNegative: boolean): number[] {
+  if (isVertical) {
+    return isNegative
+      ? [0, 0, BAR_CORNER_RADIUS, BAR_CORNER_RADIUS]
+      : [BAR_CORNER_RADIUS, BAR_CORNER_RADIUS, 0, 0]
+  }
+  return isNegative
+    ? [BAR_CORNER_RADIUS, 0, 0, BAR_CORNER_RADIUS]
+    : [0, BAR_CORNER_RADIUS, BAR_CORNER_RADIUS, 0]
+}
+
+/** Resolves the corner radii of a single bar segment */
+type BorderRadiusResolver = (
+  seriesIndex: number,
+  dataIndex: number,
+  value: number
+) => number[] | number
+
+/**
+ * Builds a per-bar corner radius resolver, needed only when some value is
+ * negative: the series-level radius can't express two directions at once.
+ *
+ * ECharts stacks positive and negative values away from the zero line in
+ * opposite directions, so a stacked category has up to two outer segments —
+ * the last series contributing a positive value and the last one contributing
+ * a negative value — and only those two get rounded.
+ */
+function buildBorderRadiusResolver(
+  series: F0DataChartBarSeries[],
+  isVertical: boolean,
+  stacked: boolean
+): BorderRadiusResolver | undefined {
+  const hasNegativeValues = series.some((s) =>
+    s.data.some((point) => getValue(point) < 0)
+  )
+  if (!hasNegativeValues) {
+    return undefined
+  }
+
+  if (!stacked) {
+    return (_seriesIndex, _dataIndex, value) =>
+      barCornerRadius(isVertical, value < 0)
+  }
+
+  const outerPositive = new Map<number, number>()
+  const outerNegative = new Map<number, number>()
+  series.forEach((s, seriesIndex) => {
+    s.data.forEach((point, dataIndex) => {
+      const value = getValue(point)
+      if (value > 0) {
+        outerPositive.set(dataIndex, seriesIndex)
+      } else if (value < 0) {
+        outerNegative.set(dataIndex, seriesIndex)
+      }
+    })
+  })
+
+  return (seriesIndex, dataIndex, value) => {
+    if (value === 0) return 0
+    const isNegative = value < 0
+    const outer = isNegative ? outerNegative : outerPositive
+    return outer.get(dataIndex) === seriesIndex
+      ? barCornerRadius(isVertical, isNegative)
+      : 0
+  }
+}
+
 /**
  * Build ECharts series entries for a single F0DataChartBarSeries.
  *
@@ -59,7 +133,8 @@ function buildSeriesEntries(
   showLabels: boolean,
   stacked: boolean,
   isLastSeries: boolean,
-  labelColor: string
+  labelColor: string,
+  resolveBorderRadius: BorderRadiusResolver | undefined
 ): echarts.BarSeriesOption[] {
   const color = resolveColor(series, index)
   const hasTargetData = hasTargets(series)
@@ -73,29 +148,32 @@ function buildSeriesEntries(
       ? `stack-${index}`
       : undefined
 
-  // Build per-item data: use plain numbers when no per-bar color overrides
-  // exist, otherwise produce ECharts data items with per-item itemStyle
-  const hasPerBarColors = series.data.some(
-    (d) => getPointColor(d) !== undefined
-  )
+  // Build per-item data: use plain numbers unless the point needs its own
+  // itemStyle (per-bar color override or a direction-specific corner radius)
+  const mainData = series.data.map((point, dataIndex) => {
+    const value = getValue(point)
+    const pointColor = getPointColor(point)
+    const pointBorderRadius = resolveBorderRadius?.(index, dataIndex, value)
+    if (pointColor === undefined && pointBorderRadius === undefined) {
+      return value
+    }
+    return {
+      value,
+      itemStyle: {
+        ...(pointColor !== undefined && { color: pointColor }),
+        ...(pointBorderRadius !== undefined && {
+          borderRadius: pointBorderRadius,
+        }),
+      },
+    }
+  })
 
-  const mainData = hasPerBarColors
-    ? series.data.map((point) => {
-        const pointColor = getPointColor(point)
-        if (pointColor === undefined) {
-          return getValue(point)
-        }
-        return {
-          value: getValue(point),
-          itemStyle: { color: pointColor },
-        }
-      })
-    : series.data.map(getValue)
-
-  // Round only the far end (away from the axis):
+  // Round only the far end (away from the zero line):
   // - Vertical: top corners rounded, bottom flat against x-axis
   // - Horizontal: right corners rounded, left flat against y-axis
-  const borderRadius = isVertical ? [4, 4, 0, 0] : [0, 4, 4, 0]
+  // Negative bars grow the other way, so `resolveBorderRadius` overrides this
+  // per data point.
+  const borderRadius = barCornerRadius(isVertical, false)
   // Stacked series that aren't the last one get no rounding (sandwiched)
   const effectiveBorderRadius = stacked && !isLastSeries ? 0 : borderRadius
 
@@ -247,6 +325,12 @@ export function useBarChartOptions(
     const effectiveShowLegend = responsive.showLegend && showLegend
     const { showCategoryAxis, showValueAxis } = responsive
 
+    const resolveBorderRadius = buildBorderRadiusResolver(
+      series,
+      isVertical,
+      stacked
+    )
+
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
       buildSeriesEntries(
@@ -256,7 +340,8 @@ export function useBarChartOptions(
         showLabels,
         stacked,
         i === series.length - 1,
-        theme.colors.foregroundSecondary
+        theme.colors.foregroundSecondary,
+        resolveBorderRadius
       )
     )
 
