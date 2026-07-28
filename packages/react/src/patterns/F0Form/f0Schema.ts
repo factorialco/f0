@@ -21,6 +21,7 @@ import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0FileConfig } from "./fields/file/types"
 import type { F0NumberConfig } from "./fields/number/types"
 import type { F0PeriodConfig } from "./fields/period/types"
+import type { F0PhoneConfig } from "./fields/phone/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0SelectConfig } from "./fields/select/types"
 import type {
@@ -95,6 +96,7 @@ export type F0FieldType =
   | "datetime"
   | "daterange"
   | "period"
+  | "phone"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -223,6 +225,7 @@ export type {
   F0TimeConfig,
   F0DateRangeConfig,
   F0PeriodConfig,
+  F0PhoneConfig,
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
@@ -473,6 +476,14 @@ export type F0RichTextFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for phone fields (form value is a `{ prefix, number }` pair)
+ */
+export type F0PhoneFieldConfig = F0BaseConfig &
+  F0PhoneConfig & {
+    fieldType: "phone"
+  }
+
+/**
  * Config for file fields (single file upload, form value is a string identifier)
  */
 export type F0StringFileConfig = F0BaseConfig &
@@ -505,7 +516,7 @@ export type F0EntitiesListFieldConfig = F0BaseConfig &
   }
 
 /**
- * Config for object fields (richtext, daterange, or custom)
+ * Config for object fields (richtext, daterange, phone, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
@@ -513,6 +524,7 @@ export type F0EntitiesListFieldConfig = F0BaseConfig &
 export type F0ObjectConfig<TValue = unknown, TConfig = undefined> =
   | F0RichTextFieldConfig
   | F0DateRangeFieldConfig
+  | F0PhoneFieldConfig
   | F0CustomFieldConfig<TValue, TConfig>
 
 /**

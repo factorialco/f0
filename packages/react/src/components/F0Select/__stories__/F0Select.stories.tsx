@@ -62,7 +62,8 @@ const meta: Meta = {
       description: {
         component:
           "<p>Renders an select input field with a list of options to choose from.</p>" +
-          "<p>The list is virtualized so can handle large amount of items</p>",
+          "<p>The list is virtualized so can handle large amount of items</p>" +
+          "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
   },
@@ -335,6 +336,41 @@ export const Default: Story = {
     label: "Select a theme",
     value: undefined,
     placeholder: undefined,
+  },
+}
+
+export const WithMetadata: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`metadata` renders a short token next to the option label, in secondary color, without affecting the single-line row height — unlike `description`, which renders as a stacked second line. " +
+          "It is a strictly typed union: each variant carries semantics the component can validate (e.g. `dialCode` warns in development unless the value matches `+` followed by 1–4 digits), so option data stays structured instead of being folded into the label string. " +
+          "New variants (e.g. currency or locale codes) should be added to `F0SelectItemMetadata` as concrete use cases appear.",
+      },
+    },
+  },
+  args: {
+    label: "Select a country",
+    value: undefined,
+    placeholder: undefined,
+    options: [
+      {
+        value: "es",
+        label: "Spain",
+        metadata: { type: "dialCode", dialCode: "+34" },
+      },
+      {
+        value: "de",
+        label: "Germany",
+        metadata: { type: "dialCode", dialCode: "+49" },
+      },
+      {
+        value: "kr",
+        label: "South Korea",
+        metadata: { type: "dialCode", dialCode: "+82" },
+      },
+    ],
   },
 }
 

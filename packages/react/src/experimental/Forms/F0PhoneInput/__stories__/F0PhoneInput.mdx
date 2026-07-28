@@ -1,0 +1,201 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0PhoneInput.stories"
+
+<Meta of={Stories} />
+
+# F0PhoneInput
+
+`F0PhoneInput` is the writable phone-number field for forms — a single composed input with an embedded, searchable country selector (flag + dial code) and as-you-type national formatting. It emits a **structured value** — the dial code and the national number as separate parts — so consumers never split or join phone numbers themselves.
+
+---
+
+## Overview
+
+### Anatomy
+
+<Canvas of={Stories.Default} />
+
+- **Country selector**: embedded trigger showing the selected country's flag and dial code. Opens a searchable dropdown (by country name or dial code) with pinned countries first when configured. Each option renders the dial code through [F0Select](?path=/docs/components-select--documentation)'s typed `metadata` slot — a short secondary-color token next to the label — keeping rows single-line and the dial code structured data rather than part of the label string.
+- **Number input**: a `type="tel"` input with as-you-type formatting for the selected country. The default placeholder is a national example number (`612 34 56 78`) when a country is selected, and an international one (`+34 612 34 56 78`) while none is — so the empty field teaches the `+prefix number` format exactly when the user needs it.
+- **Label, hint, status message**: standard input chrome.
+
+<Controls of={Stories.Default} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- The user enters a phone number that will be dialed, messaged, or stored — the structured `{ prefix, number }` output keeps the data unambiguous.
+- International audiences: users type their number in the national format they know, and the country selector carries the dial code.
+
+#### When NOT to use
+
+- Free-form text that merely resembles a number (IDs, extensions alone). Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
+- Displaying a phone number read-only — render the formatted string instead.
+
+#### F0PhoneInput vs `F0TextInput type="tel"`
+
+`type="tel"` on [F0TextInput](?path=/docs/components-inputs-text-input--documentation) only changes the mobile keyboard and autofill hints — the value stays a single free-form string, with no country model, formatting, or validation. Reach for it only when the consumer genuinely stores one unstructured string and cannot hold a dial code separately (legacy schemas). Whenever the number will be dialed, messaged, or synced — i.e. whenever a `{ prefix, number }` pair can be stored — use `F0PhoneInput`. They stay separate components because they differ in both value model (structured pair vs string) and anatomy (composite with an embedded selector vs single input), the same line that separates `F0NumberInput` and `F0DatePicker` from text inputs.
+
+### Content best practices
+
+- Leave `placeholder` unset unless you have a good reason: the component shows a real example number for the selected country, which teaches the expected format better than static copy.
+- Keep validation consumer-side: the component reports `isValid` in the change metadata but never blocks input.
+
+---
+
+## Behavior
+
+### Value model
+
+The value is `{ prefix, number } | undefined`:
+
+- `prefix` — the dial code including `+` (e.g. `"+34"`).
+- `number` — the national significant number, digits only (no trunk prefix, no formatting).
+- `undefined` — the field is empty.
+
+`onChange` also receives metadata: `{ country, e164, isValid, isPossible }`.
+
+### Input normalization
+
+Incoming values are normalized, so legacy data renders correctly:
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Stored value</th>
+        <th>Resolution</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>{'{ prefix: "+34", number: "674897945" }'}</code>
+        </td>
+        <td>Joined and parsed — Spain selected, national format shown</td>
+      </tr>
+      <tr>
+        <td>
+          <code>{'{ prefix: undefined, number: "+34674897945" }'}</code>
+        </td>
+        <td>
+          A full international number stored in <code>number</code> wins over
+          the prefix and resolves the country
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>{'{ prefix: "+44", number: "07400123456" }'}</code>
+        </td>
+        <td>
+          Trunk prefixes are stripped when parsing (<code>07400…</code> →{" "}
+          <code>+447400…</code>)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>{'{ prefix: undefined, number: "674897945" }'}</code>
+        </td>
+        <td>
+          Needs <code>defaultCountry</code> to be representable; otherwise the
+          field renders empty and the stored value is preserved until the user
+          edits
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Unknown dial codes (<code>+999…</code>)
+        </td>
+        <td>
+          Passed through untouched with a fallback globe icon — nothing crashes,
+          nothing is silently rewritten
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Country detection
+
+- Typing or pasting a full international number (`+44 7400 123456`) switches the selected country automatically.
+- **No country selected** (no `defaultCountry`, empty value): the trigger shows a globe icon, the placeholder shows an international example (`+34 612 34 56 78`) teaching the `+prefix number` convention, and typed digits are treated as international — typing `34674897945` auto-prepends the `+` and selects Spain. The same globe renders for countries without a flag asset.
+- Dial codes shared by several countries (`+1`, `+44`…) resolve from the number's leading digits when possible; an explicit selection always wins.
+- `allowedCountries` restricts both the dropdown and automatic detection.
+
+<Canvas of={Stories.NoDefaultCountry} />
+
+### Prefilled values
+
+<Canvas of={Stories.Prefilled} />
+
+<Canvas of={Stories.LegacyFullNumber} />
+
+### Pinned countries
+
+Countries listed in `pinnedCountries` appear first in the dropdown, separated from the rest:
+
+<Canvas of={Stories.PinnedCountries} />
+
+### States
+
+<Canvas of={Stories.WithError} />
+
+<Canvas of={Stories.Disabled} />
+
+<Canvas of={Stories.Clearable} />
+
+---
+
+## Code
+
+### Standalone
+
+```tsx
+import { F0PhoneInput } from "@factorialco/f0-react/experimental"
+;<F0PhoneInput
+  label="Phone number"
+  defaultCountry="es"
+  pinnedCountries={["es", "gb", "us", "fr", "de", "it", "pt"]}
+  value={value}
+  onChange={(value, meta) => {
+    setValue(value)
+    // meta: { country: "es", e164: "+34674897945", isValid: true, isPossible: true }
+  }}
+/>
+```
+
+### As an F0Form field
+
+```tsx
+import { f0FormField } from "@factorialco/f0-react"
+import { z } from "zod"
+
+const schema = z.object({
+  phone: f0FormField(
+    z
+      .object({
+        prefix: z.string().optional(),
+        number: z.string(),
+      })
+      .optional(),
+    {
+      fieldType: "phone",
+      label: "Phone number",
+      defaultCountry: "es",
+      pinnedCountries: ["es", "gb", "us", "fr", "de", "it", "pt"],
+    }
+  ),
+})
+```
+
+### Accessibility
+
+- The number input is `type="tel"` with `autocomplete="tel"`; autofilled international numbers are parsed like pasted ones.
+- The country selector is a keyboard-navigable listbox with localized country names; the search box matches names and dial codes.
+- Phone numbers render `dir="ltr"` even in RTL locales.

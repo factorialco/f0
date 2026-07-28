@@ -7,7 +7,24 @@ import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 
-import { F0SelectItemObject } from "../types"
+import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
+
+const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
+
+const metadataText = (metadata: F0SelectItemMetadata): string => {
+  switch (metadata.type) {
+    case "dialCode":
+      if (
+        process.env.NODE_ENV !== "production" &&
+        !DIAL_CODE_PATTERN.test(metadata.dialCode)
+      ) {
+        console.warn(
+          `[F0Select] metadata dialCode "${metadata.dialCode}" is not a valid dial code (expected "+" followed by 1-4 digits).`
+        )
+      }
+      return metadata.dialCode
+  }
+}
 
 export const SelectItem = <T extends string, R>({
   item,
@@ -34,9 +51,16 @@ export const SelectItem = <T extends string, R>({
         )}
         {!isStatusTag && (
           <div className="flex min-w-0 flex-1 flex-col">
-            <OneEllipsis lines={2} className="font-medium">
-              {item.label}
-            </OneEllipsis>
+            <div className="flex min-w-0 items-baseline gap-1.5">
+              <OneEllipsis lines={2} className="font-medium">
+                {item.label}
+              </OneEllipsis>
+              {item.metadata && (
+                <span className="whitespace-nowrap text-f1-foreground-secondary">
+                  {metadataText(item.metadata)}
+                </span>
+              )}
+            </div>
             {item.description && (
               <OneEllipsis lines={2} className="text-f1-foreground-secondary">
                 {item.description}

@@ -135,6 +135,64 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
+  it("renders metadata as secondary text next to the label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "es",
+            label: "Spain",
+            metadata: { type: "dialCode", dialCode: "+34" },
+          },
+          {
+            value: "kr",
+            label: "South Korea",
+            metadata: { type: "dialCode", dialCode: "+82" },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    const dialCode = screen.getByText("+34")
+    expect(dialCode.className).toContain("text-f1-foreground-secondary")
+    // Metadata is a row-sibling of the label, not a stacked second line
+    expect(dialCode.parentElement?.className).not.toContain("flex-col")
+    expect(
+      within(dialCode.parentElement as HTMLElement).getByText("Spain")
+    ).toBeInTheDocument()
+    expect(screen.getByText("+82")).toBeInTheDocument()
+  })
+
+  it("warns in dev when a metadata dial code is malformed", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "xx",
+            label: "Broken",
+            metadata: { type: "dialCode", dialCode: "34" },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('dialCode "34" is not a valid dial code')
+    )
+    warn.mockRestore()
+  })
+
   it("opens even when Date.now is frozen (MockDate in stories)", async () => {
     // Regression: the open/close debounce used lodash.debounce, which decides
     // its trailing edge by reading Date.now(). Stories that freeze the clock

@@ -264,6 +264,20 @@ function configToF0Field(
       } as F0Field
     }
 
+    case "phone":
+      return {
+        ...baseProps,
+        type: "phone",
+        defaultCountry:
+          "defaultCountry" in config ? config.defaultCountry : undefined,
+        pinnedCountries:
+          "pinnedCountries" in config ? config.pinnedCountries : undefined,
+        allowedCountries:
+          "allowedCountries" in config ? config.allowedCountries : undefined,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+
     case "richtext":
       return {
         ...baseProps,

@@ -46,9 +46,11 @@ The canonical writable text field — a single-line box where text, emails, pass
       <tr>
         <td>Identifiers that look numeric but must preserve formatting</td>
         <td>
-          Phone numbers, postal codes, credit card numbers — pass the right{" "}
+          Postal codes, credit card numbers — pass the right{" "}
           <code>autocomplete</code> so the value keeps leading zeros and
-          separators
+          separators. For phone numbers use <code>F0PhoneInput</code> instead —
+          it handles country dial codes, national formatting and structured
+          output
         </td>
       </tr>
       <tr>
