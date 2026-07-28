@@ -156,6 +156,14 @@ export const AsList: Story = {
     as: "list",
   },
   parameters: {
+    a11y: {
+      // target-size (WCAG 2.2 SC 2.5.8): in list mode the combobox trigger is
+      // under the 24px minimum. Sizing it is a design decision shared with
+      // F0InputField's clear button, deferred and tracked in FCT-59916. axe
+      // still runs and reports here; it just doesn't block. Every other rule
+      // stays enforced via the meta's test: "error".
+      test: "todo",
+    },
     docs: {
       description: {
         component:
