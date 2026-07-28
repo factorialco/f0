@@ -1512,11 +1512,11 @@ export const CommunicationsBlankStates: Story = {
 
 /**
  * A group conversation with real-world message receipts and reactions. The
- * final message is mine and carries the identities of its three readers and
- * three reaction users, matching the transport-agnostic production contract.
+ * final message is mine and carries 45 reader identities, forcing the reader
+ * info panel to scroll as a whole, plus three reaction users.
  */
 export const CommunicationsReceiptsAndReactions: Story = {
-  name: "Communications — readers and reaction users",
+  name: "Communications — 40+ readers and reaction users",
   tags: ["f0chat-receipts"],
   render: (args) => (
     <MockAiChatRuntimeProvider>
@@ -1555,21 +1555,21 @@ export const CommunicationsReceiptsAndReactions: Story = {
       addReaction.focus()
       await userEvent.tab({ shift: true })
       await expect(reaction).toHaveFocus()
-      const reactionTooltips = await page.findAllByText(
-        "Grace Liang, Marcus Bennett, Sam Okafor",
-        {},
-        { timeout: 3_000 }
+      const reactionTooltips = (
+        await page.findAllByRole("tooltip", {}, { timeout: 3_000 })
+      ).filter((tooltip) =>
+        tooltip.textContent?.includes("Grace Liang, Marcus Bennett, Sam Okafor")
       )
       const tooltipId = reaction.getAttribute("aria-describedby")
-      const visibleTooltip = tooltipId
+      const describedTooltip = tooltipId
         ? canvasElement.ownerDocument.getElementById(tooltipId)
         : null
       await expect(reactionTooltips.length).toBeGreaterThan(0)
       await expect(tooltipId).toBeTruthy()
-      await expect(visibleTooltip).toHaveTextContent(
+      await expect(describedTooltip).toHaveTextContent(
         "Grace Liang, Marcus Bennett, Sam Okafor"
       )
-      await expect(visibleTooltip!).toBeVisible()
+      await expect(reactionTooltips[0]).toBeVisible()
       await userEvent.tab()
     })
 
@@ -1588,12 +1588,32 @@ export const CommunicationsReceiptsAndReactions: Story = {
 
       const readers = await page.findByRole(
         "list",
-        { name: /Read by 3/i },
+        { name: /Read by 45/i },
         { timeout: 3_000 }
       )
+      const infoPanel = page.getByRole("region", { name: /^Info$/i })
+      await expect(readers.children).toHaveLength(45)
+      await expect(infoPanel.scrollHeight).toBeGreaterThan(
+        infoPanel.clientHeight
+      )
+      await expect(readers.scrollHeight).toBe(readers.clientHeight)
+      await expect(readers).not.toHaveAttribute("tabindex")
       await expect(within(readers).getByText("Grace Liang")).toBeVisible()
       await expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
       await expect(within(readers).getByText("Sam Okafor")).toBeVisible()
+      const backButton = page.getByRole("button", { name: /back/i })
+      await expect(backButton).toHaveFocus()
+      await userEvent.tab()
+      await expect(infoPanel).toHaveFocus()
+      infoPanel.scrollTop = infoPanel.scrollHeight
+      await expect(infoPanel.scrollTop).toBeGreaterThan(0)
+      const lastReader = within(readers).getByText("Demo Reader 42")
+      const infoPanelRect = infoPanel.getBoundingClientRect()
+      const lastReaderRect = lastReader.getBoundingClientRect()
+      await expect(lastReaderRect.top).toBeGreaterThanOrEqual(infoPanelRect.top)
+      await expect(lastReaderRect.bottom).toBeLessThanOrEqual(
+        infoPanelRect.bottom
+      )
     })
   },
 }
@@ -1601,6 +1621,5 @@ export const CommunicationsReceiptsAndReactions: Story = {
 export const Snapshot: Story = {
   ...CommunicationsReceiptsAndReactions,
   name: "Snapshot",
-  play: undefined,
   parameters: withSnapshot({}),
 }

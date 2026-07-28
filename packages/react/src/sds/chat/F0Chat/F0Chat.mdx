@@ -131,6 +131,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 ### Behavior
 
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
+- WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
 - WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
 - WHEN reaction users are incomplete and `loadReactionUsers` exists → THEN F0 loads and caches identities by channel, message, emoji, and reaction count.
 - WHEN the reaction count or channel changes → THEN F0 invalidates the related identity cache.
@@ -147,7 +148,7 @@ Use a group runtime to provide member mentions, read receipts, and reaction memb
 
 ### Keyboard interaction
 
-The message action menu opens the Info panel with standard button navigation. Reader lists become focusable when their bounded height makes them independently scrollable.
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list.
 
 ### Screen reader behavior
 

@@ -1,8 +1,10 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import {
+  act,
   fireEvent,
   zeroRender as render,
+  zeroRenderHook as renderHook,
   screen,
   userEvent,
   waitFor,
@@ -12,7 +14,14 @@ import { getEmojiLabel } from "@/lib/emojis"
 
 import { F0Chat } from "../F0Chat"
 import { resolveMockReactionUsers } from "../mocks/MockChatApp"
-import { initialConvState, SEED_BY_ID, SEEDS } from "../mocks/mockSeeds"
+import {
+  groupReadersFor,
+  initialConvState,
+  ME,
+  SEED_BY_ID,
+  SEEDS,
+} from "../mocks/mockSeeds"
+import { useMockChatStore } from "../mocks/useMockChatApp"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { isUserMessage, type F0ChatMessage, type F0ChatRuntime } from "../types"
 
@@ -145,7 +154,11 @@ describe("F0Chat", () => {
     await userEvent.click(screen.getByRole("button", { name: /info/i }))
     // Menu is replaced in place by the info panel (Delivered row + Back button).
     expect(screen.getByText(/delivered/i)).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /back/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /back/i })).toHaveFocus()
+    expect(screen.getByRole("region", { name: /info/i })).toHaveAttribute(
+      "tabindex",
+      "0"
+    )
     expect(
       screen.queryByRole("button", { name: /^Reply$/i })
     ).not.toBeInTheDocument()
@@ -434,6 +447,71 @@ describe("F0Chat", () => {
     }
   })
 
+  it("seeds more than 40 readers for the application frame overflow demo", () => {
+    const seed = SEED_BY_ID.get("grp-reporting")
+    if (!seed) throw new Error("Expected grp-reporting mock seed")
+
+    const messages = initialConvState(seed).messages.filter(isUserMessage)
+
+    expect(messages.length).toBeGreaterThan(0)
+    for (const message of messages) {
+      expect(message.readBy?.length).toBeGreaterThan(40)
+    }
+
+    const firstParticipant = seed.participants[0]
+    if (!firstParticipant) throw new Error("Expected group participants")
+    const readers = groupReadersFor(
+      {
+        ...seed,
+        participants: [...seed.participants, firstParticipant],
+      },
+      ME.id
+    )
+    expect(new Set(readers?.map(({ id }) => id)).size).toBe(readers?.length)
+
+    const dmSeed = SEED_BY_ID.get("dm-eleanor")
+    if (!dmSeed) throw new Error("Expected dm-eleanor mock seed")
+    expect(groupReadersFor(dmSeed, ME.id)).toBeUndefined()
+  })
+
+  it("adds group readers only when a live message reaches the read state", async () => {
+    vi.useFakeTimers()
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.9)
+
+    try {
+      const { result } = renderHook(() => useMockChatStore())
+      act(() => {
+        result.current.send("grp-reporting", { body: "Receipt state test" })
+      })
+
+      const getSentMessage = (): F0ChatMessage => {
+        const message = result.current.states["grp-reporting"]?.messages
+          .filter(isUserMessage)
+          .find(({ body }) => body === "Receipt state test")
+        if (!message) throw new Error("Expected the live mock message")
+        return message
+      }
+
+      expect(getSentMessage().status).toBe("sending")
+      expect(getSentMessage().readBy).toBeUndefined()
+
+      await act(() => vi.advanceTimersByTimeAsync(400))
+      expect(getSentMessage().status).toBe("sent")
+      expect(getSentMessage().readBy).toBeUndefined()
+
+      await act(() => vi.advanceTimersByTimeAsync(900))
+      expect(getSentMessage().status).toBe("delivered")
+      expect(getSentMessage().readBy).toBeUndefined()
+
+      await act(() => vi.advanceTimersByTimeAsync(900))
+      expect(getSentMessage().status).toBe("read")
+      expect(getSentMessage().readBy).toHaveLength(45)
+    } finally {
+      randomSpy.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
   it("resolves complete and fallback reaction users in the application mock", () => {
     const seed = SEED_BY_ID.get("grp-reporting")
     if (!seed) throw new Error("Expected grp-reporting mock seed")
@@ -505,6 +583,10 @@ describe("F0Chat", () => {
     await userEvent.click(screen.getByRole("button", { name: /^Info$/i }))
 
     const readers = screen.getByRole("list", { name: /read by 2/i })
+    expect(screen.getByRole("region", { name: /info/i })).toHaveAttribute(
+      "tabindex",
+      "0"
+    )
     expect(within(readers).getByText("Grace Liang")).toBeInTheDocument()
     expect(within(readers).getByText("Marcus Bennett")).toBeInTheDocument()
   })

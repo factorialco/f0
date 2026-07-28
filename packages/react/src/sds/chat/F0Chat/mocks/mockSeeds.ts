@@ -101,6 +101,19 @@ const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
 // No photo — initials + colour avatar.
 const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
 
+/** Extra members for the large read-receipt demo. Together with the named
+ * participants, they make every Quarterly Reporting message expose 45 readers
+ * so the message-info list has a realistic overflow state. */
+const RECEIPT_DEMO_READERS = Array.from({ length: 42 }, (_, index) => {
+  const number = String(index + 1).padStart(2, "0")
+  return person(
+    `u_receipt_demo_${number}`,
+    "Demo",
+    `Reader ${number}`,
+    "Quarterly Reporting member"
+  )
+})
+
 // ---------------------------------------------------------------------------
 // Seeds — every conversation is deliberately different (empty, short, long,
 // DMs and multi-person groups with topical messages).
@@ -587,7 +600,7 @@ export const SEEDS: Seed[] = [
     type: "group",
     title: "Quarterly Reporting",
     avatar: groupAvatar("Quarterly Reporting", "📊"),
-    participants: [GRACE, MARCUS, SAM],
+    participants: [GRACE, MARCUS, SAM, ...RECEIPT_DEMO_READERS],
     lines: [
       {
         from: GRACE,
@@ -659,7 +672,6 @@ export const SEEDS: Seed[] = [
         from: ME,
         body: "And the kickoff deck — no client-side preview for ppt, stays a chip",
         min: 10 * MIN,
-        readBy: [GRACE, MARCUS, SAM],
         reactions: [
           {
             emoji: "🎉",
@@ -974,6 +986,23 @@ export type ConvState = {
 let seq = 0
 export const nextId = (): string => `m-${seq++}`
 
+/** Reader identities for a group message in the ApplicationFrame mock. */
+export const groupReadersFor = (
+  seed: Seed | undefined,
+  authorId: string
+): F0ChatUser[] | undefined => {
+  if (seed?.type !== "group") return undefined
+
+  const uniqueParticipants = new Map(
+    [...seed.participants, ME].map((participant) => [
+      participant.id,
+      participant,
+    ])
+  )
+  uniqueParticipants.delete(authorId)
+  return [...uniqueParticipants.values()]
+}
+
 const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
@@ -986,12 +1015,6 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       }
     }
     const isMine = line.from.id === ME.id
-    const groupReaders =
-      seed.type === "group"
-        ? [...seed.participants, ME].filter(
-            (participant) => participant.id !== line.from.id
-          )
-        : undefined
     return {
       id: nextId(),
       author: line.from,
@@ -1005,7 +1028,7 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       mentionedEveryone: line.mentionedEveryone,
       linkPreviews: line.linkPreviews,
       attachments: line.attachments,
-      readBy: line.readBy ?? groupReaders,
+      readBy: line.readBy ?? groupReadersFor(seed, line.from.id),
       reactions: line.reactions,
     }
   })
