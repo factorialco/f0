@@ -93,6 +93,11 @@ viewer's browser language, then the first provided); language names come from
 
 <Canvas of={Stories.WithLocalizedAudio} />
 
+With several languages across all three dimensions — audio track, subtitles and
+audio description — the gear collects one section apiece:
+
+<Canvas of={Stories.MaxLocalized} />
+
 When the captions live in the video file itself, no `content.captions` is needed
 — the player derives them from the file's own track and shows the same toggle:
 

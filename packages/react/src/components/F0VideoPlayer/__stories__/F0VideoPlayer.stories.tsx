@@ -153,6 +153,55 @@ export const WithLocalizedAudio: Story = {
   },
 }
 
+// Five languages for the "maximum" localized case. Real deployments rarely go
+// this far, but it exercises the settings gear with a full set per dimension.
+const MAX_LOCALES = ["en", "es", "fr", "de", "ja"] as const
+
+// Minimal per-language WebVTT — the tag in the cue text is just so each rendition
+// reads differently on screen; the menu label comes from `Intl.DisplayNames`.
+const captionVtt = (tag: string) =>
+  [
+    "WEBVTT",
+    "",
+    "1",
+    "00:00:02.500 --> 00:00:06.400",
+    `[${tag}] Serene music`,
+    "",
+  ].join("\n")
+
+const descriptionVtt = (tag: string) =>
+  [
+    "WEBVTT",
+    "",
+    "1",
+    "00:00:07.000 --> 00:00:10.000",
+    `[${tag}] A butterfly flutters over a sunlit meadow.`,
+    "",
+  ].join("\n")
+
+const localizedList = (build: (tag: string) => string) =>
+  MAX_LOCALES.map((locale) => ({ locale, value: build(locale.toUpperCase()) }))
+
+/**
+ * Maximum localization: five languages each for the audio track, captions and
+ * audio description. All three dimensions collect into the settings gear, one
+ * section apiece, each with an "Off" row where it applies.
+ *
+ * The sample has a single real rendition, so every audio entry is a labeled
+ * stand-in pointing at it — the point is to exercise the gear with a full
+ * language set per dimension.
+ */
+export const MaxLocalized: Story = {
+  args: {
+    defaultLanguage: "en",
+    src: MAX_LOCALES.map((locale) => ({ locale, value: SAMPLE_SRC })),
+    content: {
+      captions: localizedList(captionVtt),
+      descriptions: localizedList(descriptionVtt),
+    },
+  },
+}
+
 // Attaches an in-band caption track to the <video> after mount — the shape a
 // browser exposes for captions muxed into the file (no <track> element, no
 // `content` prop). Muxed captions aren't a reliably supported public sample, so

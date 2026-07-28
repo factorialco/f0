@@ -114,7 +114,10 @@ export function SettingsMenu({
         container={containerRef.current}
         side="top"
         align="end"
-        className="min-w-[13rem] p-1"
+        // Cap to the space between the trigger and the viewport edge and scroll
+        // within it — a full set of languages across all three sections can be
+        // taller than the player.
+        className="max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[13rem] overflow-y-auto p-1"
       >
         {showAudio && (
           <>
