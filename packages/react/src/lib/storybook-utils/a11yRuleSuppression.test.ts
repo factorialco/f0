@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "fs"
 import { join, relative } from "path"
+import ts from "typescript"
 import { describe, expect, it } from "vitest"
 
 /**
@@ -29,85 +30,82 @@ import { describe, expect, it } from "vitest"
 
 const packageRoot = join(__dirname, "../../..")
 
-/**
- * Extract the body of every `a11y: { ... }` object in `content`, by matching
- * braces.
- *
- * Detection is deliberately scoped to these blocks rather than searching for
- * any `rules:` array: `rules` is a generic name that other, unrelated APIs use
- * (`src/lib/text.ts` has its own `Rules` type for text formatting), so an
- * unscoped match would flag non-a11y config and fail a PR with a misleading
- * accessibility error.
- *
- * Brace counting ignores string and comment contents, so a `{` inside a
- * selector or a comment cannot unbalance it.
- */
-export const extractA11yBlocks = (content: string): string[] => {
-  const blocks: string[] = []
-  const opener = /a11y\s*:\s*\{/g
+const nameOf = (n: ts.PropertyName): string | undefined =>
+  ts.isIdentifier(n) || ts.isStringLiteral(n) ? n.text : undefined
 
-  // Only the match position matters — `opener.lastIndex` is where the block
-  // body starts — so the match object itself is not needed.
-  while (opener.exec(content) !== null) {
-    let i = opener.lastIndex
-    let depth = 1
-    let quote: string | null = null
-    let comment: "line" | "block" | null = null
-
-    while (i < content.length && depth > 0) {
-      const ch = content[i]
-      const next = content[i + 1]
-
-      if (comment === "line") {
-        if (ch === "\n") comment = null
-      } else if (comment === "block") {
-        if (ch === "*" && next === "/") (i++, (comment = null))
-      } else if (quote) {
-        if (ch === "\\") i++
-        else if (ch === quote) quote = null
-      } else if (ch === "/" && next === "/") {
-        comment = "line"
-        i++
-      } else if (ch === "/" && next === "*") {
-        comment = "block"
-        i++
-      } else if (ch === '"' || ch === "'" || ch === "`") {
-        quote = ch
-      } else if (ch === "{") {
-        depth++
-      } else if (ch === "}") {
-        depth--
-      }
-      i++
+const propValue = (
+  obj: ts.ObjectLiteralExpression,
+  name: string
+): ts.Expression | undefined => {
+  for (const p of obj.properties) {
+    if (ts.isPropertyAssignment(p) && nameOf(p.name) === name) {
+      return p.initializer
     }
-    blocks.push(content.slice(opener.lastIndex, i - 1))
   }
-  return blocks
+  return undefined
 }
 
 /**
- * Rule ids disabled inside an `a11y` block. Matches both the compact
- * (`rules: [{ id: "x", enabled: false }]`) and expanded object forms.
+ * Rule ids disabled inside an `a11y: { ... }` object.
+ *
+ * Parsed rather than pattern-matched. `rules` is a generic name that unrelated
+ * APIs use (`src/lib/text.ts` has its own `Rules` type for text formatting), so
+ * matching `rules:` textually would flag non-a11y config and fail a PR with a
+ * misleading accessibility error. Walking the AST scopes detection to real
+ * `a11y` properties and gets quoting, comments and nesting right for free.
  *
  * Only `rules` arrays count — `a11y: { disable: true }` is deliberately out of
  * scope: CI never consults it (`test-runner.ts` runs axe regardless), so it
  * suppresses only the addon panel, and every current usage already sits beside
  * a gated `skipCi`.
+ *
+ * Limitation: a rule id or `enabled` value assembled at runtime (a variable, a
+ * spread) is not resolved — the value has to be a literal to be seen.
  */
 export const findDisabledRules = (content: string): string[] => {
+  const source = ts.createSourceFile(
+    "story.tsx",
+    content,
+    ts.ScriptTarget.Latest,
+    /* setParentNodes */ false,
+    ts.ScriptKind.TSX
+  )
   const hits: string[] = []
-  for (const block of extractA11yBlocks(content)) {
-    const re = /rules\s*:\s*\[([\s\S]*?)\]/g
-    let m: RegExpExecArray | null
-    while ((m = re.exec(block)) !== null) {
-      const body = m[1]
-      if (!/enabled\s*:\s*false/.test(body)) continue
-      const ids = [...body.matchAll(/id\s*:\s*["']([^"']+)["']/g)].map(
-        (x) => x[1]
-      )
-      hits.push(...(ids.length > 0 ? ids : ["<unknown rule>"]))
+
+  /** Collect disabled ids from any `rules` array inside this a11y object. */
+  const collectFromA11y = (a11y: ts.ObjectLiteralExpression): void => {
+    const walk = (node: ts.Node): void => {
+      if (
+        ts.isPropertyAssignment(node) &&
+        nameOf(node.name) === "rules" &&
+        ts.isArrayLiteralExpression(node.initializer)
+      ) {
+        for (const el of node.initializer.elements) {
+          if (!ts.isObjectLiteralExpression(el)) continue
+          if (propValue(el, "enabled")?.kind !== ts.SyntaxKind.FalseKeyword) {
+            continue
+          }
+          const id = propValue(el, "id")
+          hits.push(id && ts.isStringLiteral(id) ? id.text : "<unknown rule>")
+        }
+      }
+      ts.forEachChild(node, walk)
     }
+    walk(a11y)
   }
+
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isPropertyAssignment(node) &&
+      nameOf(node.name) === "a11y" &&
+      ts.isObjectLiteralExpression(node.initializer)
+    ) {
+      collectFromA11y(node.initializer)
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(source)
+
   return hits
 }
 
@@ -142,48 +140,73 @@ const findSuppressions = (files: string[]): Record<string, string[]> => {
   return results
 }
 
+/**
+ * Fixtures must be valid TypeScript — the detector parses, so a bare
+ * `a11y: { ... }` fragment would be read as a labeled statement rather than an
+ * object property and would (correctly) match nothing.
+ */
+const inMeta = (body: string) => `const meta = { ${body} }`
+
 describe("findDisabledRules — catches a11y suppressions", () => {
   it("the compact single-line form", () => {
     expect(
       findDisabledRules(
-        `parameters: { a11y: { config: { rules: [{ id: "svg-img-alt", enabled: false }] } } }`
+        inMeta(
+          `parameters: { a11y: { config: { rules: [{ id: "svg-img-alt", enabled: false }] } } }`
+        )
       )
     ).toEqual(["svg-img-alt"])
   })
 
   it("the expanded multi-line form", () => {
     expect(
-      findDisabledRules(`
-        parameters: {
-          a11y: {
-            config: {
-              rules: [
-                {
-                  id: "color-contrast",
-                  enabled: false,
-                },
-              ],
+      findDisabledRules(
+        inMeta(`
+          parameters: {
+            a11y: {
+              config: {
+                rules: [
+                  {
+                    id: "color-contrast",
+                    enabled: false,
+                  },
+                ],
+              },
             },
           },
-        }
-      `)
+        `)
+      )
     ).toEqual(["color-contrast"])
   })
 
   it("several disabled rules in one array", () => {
     expect(
       findDisabledRules(
-        `a11y: { config: { rules: [{ id: "a", enabled: false }, { id: "b", enabled: false }] } }`
+        inMeta(
+          `a11y: { config: { rules: [{ id: "a", enabled: false }, { id: "b", enabled: false }] } }`
+        )
       )
     ).toEqual(["a", "b"])
   })
 
-  it("single-quoted ids and loose spacing", () => {
+  it("single-quoted ids", () => {
     expect(
       findDisabledRules(
-        `a11y : { config : { rules : [ { id : 'target-size' , enabled : false } ] } }`
+        inMeta(
+          `a11y: { config: { rules: [{ id: 'target-size', enabled: false }] } }`
+        )
       )
     ).toEqual(["target-size"])
+  })
+
+  it("quoted property names", () => {
+    expect(
+      findDisabledRules(
+        inMeta(
+          `"a11y": { "config": { "rules": [{ "id": "region", "enabled": false }] } }`
+        )
+      )
+    ).toEqual(["region"])
   })
 
   it("more than one a11y block in a file", () => {
@@ -197,18 +220,22 @@ describe("findDisabledRules — catches a11y suppressions", () => {
 
   it("a suppression sitting beside other a11y keys", () => {
     expect(
-      findDisabledRules(`
-        a11y: {
-          test: "todo",
-          config: { rules: [{ id: "region", enabled: false }] },
-        },
-      `)
+      findDisabledRules(
+        inMeta(`
+          a11y: {
+            test: "todo",
+            config: { rules: [{ id: "region", enabled: false }] },
+          },
+        `)
+      )
     ).toEqual(["region"])
   })
 
   it("reports a placeholder when the disabled rule has no id", () => {
     expect(
-      findDisabledRules(`a11y: { config: { rules: [{ enabled: false }] } }`)
+      findDisabledRules(
+        inMeta(`a11y: { config: { rules: [{ enabled: false }] } }`)
+      )
     ).toEqual(["<unknown rule>"])
   })
 })
@@ -217,37 +244,43 @@ describe("findDisabledRules — does not flag legitimate config", () => {
   it("allows enabling a rule", () => {
     expect(
       findDisabledRules(
-        `a11y: { config: { rules: [{ id: "color-contrast", enabled: true }] } }`
+        inMeta(
+          `a11y: { config: { rules: [{ id: "color-contrast", enabled: true }] } }`
+        )
       )
     ).toEqual([])
   })
 
   it("allows reconfiguring an enabled rule with a selector (preview.tsx pattern)", () => {
     expect(
-      findDisabledRules(`
-        a11y: {
-          config: {
-            rules: [
-              {
-                id: "color-contrast",
-                enabled: true,
-                selector: "*:not([data-a11y-color-contrast-ignore])",
-              },
-            ],
+      findDisabledRules(
+        inMeta(`
+          a11y: {
+            config: {
+              rules: [
+                {
+                  id: "color-contrast",
+                  enabled: true,
+                  selector: "*:not([data-a11y-color-contrast-ignore])",
+                },
+              ],
+            },
           },
-        },
-      `)
+        `)
+      )
     ).toEqual([])
   })
 
   it("allows an empty rules array", () => {
-    expect(findDisabledRules(`a11y: { config: { rules: [] } }`)).toEqual([])
+    expect(
+      findDisabledRules(inMeta(`a11y: { config: { rules: [] } }`))
+    ).toEqual([])
   })
 
   it("ignores a11y.disable (out of scope — CI ignores it)", () => {
-    expect(findDisabledRules(`a11y: { skipCi: true, disable: true }`)).toEqual(
-      []
-    )
+    expect(
+      findDisabledRules(inMeta(`a11y: { skipCi: true, disable: true }`))
+    ).toEqual([])
   })
 })
 
@@ -257,7 +290,9 @@ describe("findDisabledRules — does not flag non-a11y config", () => {
     // component could gain a `rules` prop — neither is an axe suppression.
     expect(
       findDisabledRules(
-        `args: { validation: { rules: [{ id: "required", enabled: false }] } }`
+        inMeta(
+          `args: { validation: { rules: [{ id: "required", enabled: false }] } }`
+        )
       )
     ).toEqual([])
   })
@@ -265,42 +300,45 @@ describe("findDisabledRules — does not flag non-a11y config", () => {
   it("ignores a text-formatting rules object", () => {
     expect(
       findDisabledRules(
-        `args: { rules: { disallowEmpty: false, enabled: false } }`
+        inMeta(`args: { rules: { disallowEmpty: false, enabled: false } }`)
       )
     ).toEqual([])
   })
 
   it("ignores unrelated enabled: false config", () => {
     expect(
-      findDisabledRules(`aiPromotion: { enabled: false, greeting: "Hey" }`)
+      findDisabledRules(
+        inMeta(`aiPromotion: { enabled: false, greeting: "Hey" }`)
+      )
     ).toEqual([])
   })
 
   it("does not leak past the end of an a11y block", () => {
-    // The disable sits AFTER the a11y block closes, so it must not be picked up.
     expect(
-      findDisabledRules(`
-        parameters: {
-          a11y: { test: "todo" },
-          chart: { rules: [{ id: "gridlines", enabled: false }] },
-        }
-      `)
+      findDisabledRules(
+        inMeta(`
+          parameters: {
+            a11y: { test: "todo" },
+            chart: { rules: [{ id: "gridlines", enabled: false }] },
+          },
+        `)
+      )
     ).toEqual([])
   })
 
   it("is not confused by braces inside strings or comments", () => {
     expect(
-      findDisabledRules(`
-        a11y: {
-          // a brace in a comment: {
-          config: {
-            rules: [
-              { id: "color-contrast", enabled: true, selector: "div{}" },
-            ],
+      findDisabledRules(
+        inMeta(`
+          a11y: {
+            // a brace in a comment: {
+            config: {
+              rules: [{ id: "color-contrast", enabled: true, selector: "div{}" }],
+            },
           },
-        },
-        other: { rules: [{ id: "nope", enabled: false }] },
-      `)
+          other: { rules: [{ id: "nope", enabled: false }] },
+        `)
+      )
     ).toEqual([])
   })
 })
