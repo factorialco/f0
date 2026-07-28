@@ -1,0 +1,119 @@
+name: 🧪 Agentic Dry Run (temporary)
+# TEMPORARY — delete before merging #4857.
+#
+# The agentic checks have never completed successfully in this repo, so the
+# pipeline (fetch diff → prompt → OpenCode → verdict → step summary) is unproven
+# here. This replays the real job, on a hosted runner, against a real merged
+# component PR (#4841, feat(EditableTable), +169/-3, 4 files) so we can see four
+# actual verdicts before merging.
+#
+# Side-effect free: agentic-check.sh only reads (diff comes from the REST API)
+# and only writes to GITHUB_STEP_SUMMARY / GITHUB_OUTPUT. It posts nothing.
+#
+# Deliberately faithful to the real job: same trust-model step sequence, same
+# env, same script. Only the review target is pinned.
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  TARGET_PR: "4841"
+  TARGET_HEAD_REF: refs/pull/4841/head
+  TARGET_BASE_SHA: 287f54fd1b386e50c410dd97f59688356e7f9ec2
+
+jobs:
+  dry-run:
+    name: ${{ matrix.emoji }} ${{ matrix.name }} (dry run)
+    permissions:
+      contents: read
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        id: [code-review, a11y, storybook, test-coverage]
+        include:
+          - id: code-review
+            name: Code Review
+            emoji: 🧐
+            prompt: .github/agent-prompts/code-review.md
+          - id: a11y
+            name: Accessibility
+            emoji: ♿
+            prompt: .github/agent-prompts/a11y.md
+          - id: storybook
+            name: Storybook
+            emoji: 📚
+            prompt: .github/agent-prompts/storybook.md
+          - id: test-coverage
+            name: Test Coverage
+            emoji: 🧪
+            prompt: .github/agent-prompts/test-coverage.md
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PROMPT_FILE: ${{ matrix.prompt }}
+      CHECK_NAME: ${{ matrix.name }}
+      CHECK_EMOJI: ${{ matrix.emoji }}
+      MODEL: azure-cognitive-services/gpt-5.3-codex
+    steps:
+      # Trust model, same sequence as the real job: trusted script and prompt
+      # come from the target PR's base revision, never from its head.
+      - name: Checkout base branch (trusted revision)
+        timeout-minutes: 5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ env.TARGET_BASE_SHA }}
+          fetch-depth: 1
+      - id: copy-trusted
+        name: Stash trusted script and prompt
+        run: |-
+          if [[ -f .github/scripts/agentic-check.sh ]] && [[ -f "$PROMPT_FILE" ]]; then
+            cp .github/scripts/agentic-check.sh "$RUNNER_TEMP/agentic-check.sh"
+            cp "$PROMPT_FILE" "$RUNNER_TEMP/prompt.md"
+            echo "trusted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Script or prompt not found on base branch — skipping"
+            echo "trusted=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Checkout target PR head
+        timeout-minutes: 5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ env.TARGET_HEAD_REF }}
+          fetch-depth: 1
+      - name: Restore trusted script and prompt
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: |-
+          cp "$RUNNER_TEMP/agentic-check.sh" .github/scripts/agentic-check.sh
+          cp "$RUNNER_TEMP/prompt.md" "$PROMPT_FILE"
+      - name: Install OpenCode CLI
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: npm install -g opencode-ai@1.15.5
+      - id: run-agentic-check
+        name: Run Agentic Check
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        continue-on-error: true
+        env:
+          PR_NUMBER: ${{ env.TARGET_PR }}
+          AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
+          AZURE_RESOURCE_NAME: platform-dx-ai
+          OPENCODE_CONFIG_CONTENT: >-
+            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
+            5.3 Codex"}}}}}
+        run: bash .github/scripts/agentic-check.sh
+      - name: Report outcome
+        if: always() && steps.copy-trusted.outputs.trusted == 'true'
+        run: |-
+          echo "Script step outcome: ${{ steps.run-agentic-check.outcome }}"
+          echo "Verdict: ${{ steps.run-agentic-check.outputs.verdict || '<none written>' }}"
+      - name: OpenCode stats
+        if: always() && steps.copy-trusted.outputs.trusted == 'true'
+        continue-on-error: true
+        env:
+          AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
+          AZURE_RESOURCE_NAME: platform-dx-ai
+          OPENCODE_CONFIG_CONTENT: >-
+            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
+            5.3 Codex"}}}}}
+        run: opencode stats || echo "opencode stats failed (non-fatal)"
