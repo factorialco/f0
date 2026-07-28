@@ -1913,6 +1913,14 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     "aria-expanded"?: boolean;
     /**
+     * Identifies the expandable region controlled by the button.
+     */
+    "aria-controls"?: string;
+    /**
+     * Describes the type of popup opened by the button.
+     */
+    "aria-haspopup"?: React.AriaAttributes["aria-haspopup"];
+    /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).
      */
