@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import type { RecordType } from "@/hooks/datasource"
 
@@ -52,6 +51,7 @@ const meta: Meta<typeof DropdownSingleQuestion> = {
   title: "Surveys/SurveyFormBuilder/DropdownSingleQuestion",
   component: DropdownSingleQuestion,
   tags: ["autodocs", "experimental"],
+  parameters: { a11y: { test: "error" } },
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args },
@@ -78,7 +78,6 @@ export default meta
 type Story = StoryObj<typeof DropdownSingleQuestion>
 
 export const Default: Story = {
-  parameters: withSkipA11y({}),
   args: {
     id: "question-1",
     title: "Select your department",
@@ -90,7 +89,6 @@ export const Default: Story = {
 }
 
 export const WithSearchBox: Story = {
-  parameters: withSkipA11y({}),
   args: {
     id: "question-2",
     title: "Select your currency",
@@ -102,7 +100,6 @@ export const WithSearchBox: Story = {
 }
 
 export const WithSearchBoxExplicit: Story = {
-  parameters: withSkipA11y({}),
   args: {
     id: "question-3",
     title: "Select your vendor",
@@ -116,7 +113,6 @@ export const WithSearchBoxExplicit: Story = {
 }
 
 export const WithAllowCreate: Story = {
-  parameters: withSkipA11y({}),
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args },
