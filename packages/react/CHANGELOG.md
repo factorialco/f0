@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.57.0](https://github.com/factorialco/f0/compare/f0-react-v4.56.5...f0-react-v4.57.0) (2026-07-28)
+
+
+### Features
+
+* **F0AiChat:** add host overlay slot ([#4851](https://github.com/factorialco/f0/issues/4851)) ([fb492f1](https://github.com/factorialco/f0/commit/fb492f15c020955cbb5fafebdaee4a6bd441895d))
+
 ## [4.56.5](https://github.com/factorialco/f0/compare/f0-react-v4.56.4...f0-react-v4.56.5) (2026-07-28)
 
 
