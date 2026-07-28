@@ -13034,6 +13034,15 @@ export declare type GroupRecord<RecordType> = {
  */
 export declare function hasF0Config(schema: ZodTypeAny): boolean;
 
+/**
+ * Whether any of these records fails the `selectable` predicate.
+ *
+ * Always derived from the fetched records, never from a rendered-row registry:
+ * a registry can hold lazily-loaded nested children, so its size says nothing
+ * about whether the loaded top-level rows are all selectable.
+ */
+export declare const hasNonSelectableRecords: <R>(records: R[] | undefined, selectable: ((item: R) => string | number | undefined) | undefined) => boolean;
+
 export declare interface HeaderProps {
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -17984,6 +17993,18 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
     openGroups: Record<string, boolean>;
     setGroupOpen: (key: string, open: boolean) => void;
 };
+
+/**
+ * Sticky within one filter/search combination: once a non-selectable row has
+ * been seen, `paginationInfo.total` has been proven wrong as a selectable
+ * total, and paging onto a fully-selectable page doesn't make it right again.
+ * Resets when the query changes, since that's a different dataset.
+ *
+ * A ref rather than state: the value is only ever read during a render that is
+ * already happening because the page or the query changed, so nothing needs to
+ * be re-rendered when it flips.
+ */
+export declare const useHasNonSelectableRows: (pageHasNonSelectableRows: boolean, queryKey: string) => boolean;
 
 /**
  * Returns true when the viewport width is >= 640px (Tailwind's `sm` breakpoint).
