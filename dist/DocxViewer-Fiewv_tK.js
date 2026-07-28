@@ -1,8 +1,8 @@
 import { jsxs as c, jsx as t } from "react/jsx-runtime";
 import { useRef as g, useState as h, useEffect as b } from "react";
 import { r as p } from "./docx-preview-BaRDMyPN.js";
-import { u as v, S as w } from "./F0CanvasPanel-CIOl19OS.js";
-import { u as x, D as y } from "./DocumentToolbar-DyTBm8jK.js";
+import { u as v, S as w } from "./F0CanvasPanel-YuU_KF7I.js";
+import { u as x, D as y } from "./DocumentToolbar-DJLs8e2x.js";
 const V = ({
   url: o,
   filename: d,

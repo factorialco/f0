@@ -18004,7 +18004,10 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
  * already happening because the page or the query changed, so nothing needs to
  * be re-rendered when it flips.
  */
-export declare const useHasNonSelectableRows: (pageHasNonSelectableRows: boolean, queryKey: string) => boolean;
+export declare const useHasNonSelectableRows: (pageHasNonSelectableRows: boolean, query: {
+    filters: unknown;
+    search: string | undefined;
+}) => boolean;
 
 /**
  * Returns true when the viewport width is >= 640px (Tailwind's `sm` breakpoint).
