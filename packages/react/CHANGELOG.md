@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.60.0](https://github.com/factorialco/f0/compare/f0-react-v4.59.0...f0-react-v4.60.0) (2026-07-28)
+
+
+### Features
+
+* content props + media a11y ([#4850](https://github.com/factorialco/f0/issues/4850)) ([3e06b02](https://github.com/factorialco/f0/commit/3e06b02e11ae8733c21cafd6ecea3154d78d85d9))
+
 ## [4.59.0](https://github.com/factorialco/f0/compare/f0-react-v4.58.0...f0-react-v4.59.0) (2026-07-28)
 
 
