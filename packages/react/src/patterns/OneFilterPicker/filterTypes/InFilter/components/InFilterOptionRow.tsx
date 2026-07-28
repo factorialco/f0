@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -11,6 +10,7 @@ import { cn, focusRing } from "@/lib/utils"
 
 import { InFilterOptionItem } from "../types"
 import { cacheLabel, cacheNestedLabel } from "../useLoadOptions"
+import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
 import { hasSelectedDescendant, optionMatchesSearch } from "./option-utils"
 
 export type InFilterOptionRowProps<T extends string> = {
@@ -126,22 +126,11 @@ export function InFilterOptionRow<T extends string>({
             <span className="min-w-0 flex-1">
               <OneEllipsis>{option.label}</OneEllipsis>
             </span>
-            {/* Keep the checkbox interactive so keyboard and assistive-technology
-                users can toggle the option. Stop its click from reaching the
-                mouse-friendly row handler and toggling the value twice. */}
-            <div
-              className="shrink-0"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <F0Checkbox
-                title={option.label}
-                checked={isSelected}
-                onCheckedChange={(checked) => {
-                  if (checked !== isSelected) onToggle()
-                }}
-                hideLabel
-              />
-            </div>
+            <InFilterOptionCheckbox
+              label={option.label}
+              isSelected={isSelected}
+              onToggle={onToggle}
+            />
           </div>
         </div>
       </div>

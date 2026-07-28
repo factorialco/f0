@@ -1,10 +1,10 @@
 "use client"
 
-import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
 import { InFilterOptionItem } from "../types"
+import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
 
 export type InFilterFlatOptionProps<T extends string> = {
   option: InFilterOptionItem<T>
@@ -32,19 +32,11 @@ export function InFilterFlatOption<T extends string>({
         <span className="min-w-0 flex-1">
           <OneEllipsis>{option.label}</OneEllipsis>
         </span>
-        {/* Keep the checkbox interactive so keyboard and assistive-technology
-            users can toggle the option. Stop its click from reaching the
-            mouse-friendly row handler and toggling the value twice. */}
-        <div className="shrink-0" onClick={(event) => event.stopPropagation()}>
-          <F0Checkbox
-            title={option.label}
-            checked={isSelected}
-            onCheckedChange={(checked) => {
-              if (checked !== isSelected) onToggle()
-            }}
-            hideLabel
-          />
-        </div>
+        <InFilterOptionCheckbox
+          label={option.label}
+          isSelected={isSelected}
+          onToggle={onToggle}
+        />
       </div>
     </div>
   )
