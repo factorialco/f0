@@ -677,6 +677,52 @@ The optional `styling` config controls the form layout:
 />
 ```
 
+## Submit configuration
+
+The optional `submitConfig` controls how the form is submitted and what submit affordance is rendered. In single-schema mode `label`, `icon`, `savingMessage` and `successMessageDuration` are shared by every type, and `type` picks the affordance, defaulting to `"default"`. Per-section schema mode takes a smaller config, described at the end of this section.
+
+### `type: "default"` — inline submit button
+
+A button rendered at the end of the form.
+
+- `showSubmitWhenDirty` — keep the button hidden until the form has unsaved changes. It appears on the first edit and goes away again after a successful save, so its absence reads as "nothing pending". The internal action bar still shows the Saving → Saved feedback unless you also set `hideActionBar`. Use it for pages made of several independently-savable blocks, where a permanently visible Save button is noise. Defaults to `false`.
+- `hideSubmitButton` — never render the button. For submitting from outside the form via `useF0Form`. Takes precedence over `showSubmitWhenDirty`.
+- `hideActionBar` — hide the internal loading/success feedback bar when the parent provides its own.
+
+```tsx
+<F0Form
+  name="personal-information"
+  schema={schema}
+  defaultValues={defaultValues}
+  onSubmit={onSubmit}
+  submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+/>
+```
+
+<Canvas of={Stories.ShowSubmitWhenDirty} />
+
+### `type: "action-bar"` — floating bar
+
+A bar that appears at the bottom of the viewport once the form is dirty, so it is dirty-gated by construction. Extra options: `discardable` to add a Discard button that resets the form, `discardConfig` for its label and icon, and `actionBarLabel` for the bar's own text.
+
+<Canvas of={Stories.WithActionBar} />
+
+<Canvas of={Stories.WithActionBarAndDiscard} />
+
+### `type: "autosubmit"` — debounced auto-save
+
+No button at all: the form submits itself `delay` ms (default `800`) after the last change, and the internal action bar shows the Saving → Saved feedback. `hideActionBar` suppresses that feedback.
+
+<Canvas of={Stories.Autosubmit} />
+
+<Canvas of={Stories.AutosubmitCustomDelay} />
+
+### Per-section schema mode
+
+With a per-section schema each section submits on its own, so `submitConfig` accepts `label`, `icon`, `showSubmitWhenDirty` and `hideSubmitButton` per section. Set it at the form level to apply to every section, and override it on `sections[id].submitConfig` for one.
+
+<Canvas of={Stories.PerSectionShowSubmitWhenDirty} />
+
 ## Conditional rendering
 
 Use `renderIf` to show or hide fields based on the values of other fields.

@@ -558,6 +558,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const hideSubmitButton =
     (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
     !!submitConfig?.hideSubmitButton
+  const showSubmitWhenDirty =
+    (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
+    !!submitConfig?.showSubmitWhenDirty
   const hideActionBar =
     submitConfig?.type !== "action-bar" && !!submitConfig?.hideActionBar
   const showSubmitButton = !isActionBar && !isAutosubmit && !hideSubmitButton
@@ -836,7 +839,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     const snapshot = focusSnapshotRef.current
     focusSnapshotRef.current = null
     if (!snapshot) return
-    if (!snapshot.element.isConnected) return
+    if (!snapshot.element.isConnected) {
+      // `showSubmitWhenDirty` removes the submit button on a successful save.
+      // If it was the focused element, park focus on the form so tab order
+      // resumes here instead of restarting at the top of the document.
+      if (showSubmitWhenDirty && formElementRef.current) {
+        formElementRef.current.setAttribute("tabindex", "-1")
+        formElementRef.current.focus()
+      }
+      return
+    }
     if (document.activeElement === snapshot.element) return
 
     snapshot.element.focus()
@@ -856,7 +868,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         // Ignore — the focus call above is the important part.
       }
     }
-  }, [isSubmitting])
+  }, [isSubmitting, showSubmitWhenDirty])
 
   // Auto-save: debounced auto-submit when fields change. Triggered by every
   // field in form-level autosubmit mode, or only by fields with `autoSave` when
@@ -1096,7 +1108,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       (active.tagName === "BUTTON" ||
         (active.tagName === "INPUT" &&
           (active as HTMLInputElement).type === "submit"))
-    if (!isButtonActivation) snapshotFocus()
+    // With `showSubmitWhenDirty` the submit button unmounts itself on a
+    // successful save, so a button activation is snapshotted too — otherwise
+    // focus would be dropped on the floor when it disappears.
+    if (!isButtonActivation || showSubmitWhenDirty) snapshotFocus()
     submitHandler(event)
   }
 
@@ -1178,17 +1193,19 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       )}
 
       {/* Default submit button */}
-      {!isActionBar && showSubmitButton && (
-        <div className="mt-4 flex justify-end">
-          <F0Button
-            type="submit"
-            label={submitLabel}
-            icon={submitIcon}
-            loading={isSubmitting}
-            disabled={hasErrors || isFormLoading}
-          />
-        </div>
-      )}
+      {!isActionBar &&
+        showSubmitButton &&
+        (!showSubmitWhenDirty || isDirty) && (
+          <div className="mt-4 flex justify-end">
+            <F0Button
+              type="submit"
+              label={submitLabel}
+              icon={submitIcon}
+              loading={isSubmitting}
+              disabled={hasErrors || isFormLoading}
+            />
+          </div>
+        )}
     </form>
   )
 
