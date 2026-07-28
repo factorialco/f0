@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { getDefaultParamsForQuestionType, getRatingOptions } from "../../lib"
 import {
   getCurrentRatingType,
   RATING_OPTIONS,
@@ -60,6 +61,16 @@ describe("getCurrentRatingType", () => {
     }))
     expect(getCurrentRatingType("rating", { type: "rating", options })).toBe(
       "1-10"
+    )
+  })
+
+  it('detects "0-10" rating type', () => {
+    const options = Array.from({ length: 11 }, (_, i) => ({
+      value: i,
+      label: String(i),
+    }))
+    expect(getCurrentRatingType("rating", { type: "rating", options })).toBe(
+      "0-10"
     )
   })
 
@@ -173,18 +184,78 @@ describe("shouldResetParamsOnTypeChange", () => {
 })
 
 describe("RATING_OPTIONS", () => {
-  it("contains three rating presets", () => {
-    expect(RATING_OPTIONS).toHaveLength(3)
+  it("contains four rating presets", () => {
+    expect(RATING_OPTIONS).toHaveLength(4)
   })
 
-  it('includes "1-5", "1-10", and "emojis"', () => {
+  it('includes "1-5", "1-10", "0-10", and "emojis"', () => {
     const values = RATING_OPTIONS.map((o) => o.value)
-    expect(values).toEqual(["1-5", "1-10", "emojis"])
+    expect(values).toEqual(["1-5", "1-10", "0-10", "emojis"])
   })
 
   it("has labels for each option", () => {
     for (const option of RATING_OPTIONS) {
       expect(option.label).toBeTruthy()
     }
+  })
+
+  it("can build options for every preset it offers", () => {
+    for (const option of RATING_OPTIONS) {
+      expect(getRatingOptions(option.value).length).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe("getRatingOptions", () => {
+  it('builds 1..5 for "1-5"', () => {
+    expect(getRatingOptions("1-5").map((o) => o.value)).toEqual([1, 2, 3, 4, 5])
+  })
+
+  it('builds 1..10 for "1-10"', () => {
+    expect(getRatingOptions("1-10").map((o) => o.value)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ])
+  })
+
+  it('builds 0..10 for "0-10", the eNPS scale', () => {
+    const options = getRatingOptions("0-10")
+
+    expect(options).toHaveLength(11)
+    expect(options.map((o) => o.value)).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ])
+    expect(options.map((o) => o.label)).toEqual([
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+    ])
+  })
+
+  it("round-trips every numeric preset through getCurrentRatingType", () => {
+    for (const preset of ["1-5", "1-10", "0-10"] as const) {
+      expect(
+        getCurrentRatingType("rating", {
+          type: "rating",
+          options: getRatingOptions(preset),
+        })
+      ).toBe(preset)
+    }
+  })
+})
+
+describe("getDefaultParamsForQuestionType", () => {
+  // A literal 0 would render the "0" cell of a 0-10 scale as already chosen.
+  it("leaves a new rating question unanswered", () => {
+    const params = getDefaultParamsForQuestionType("rating")
+
+    expect(params).toHaveProperty("value", undefined)
   })
 })

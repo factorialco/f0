@@ -144,7 +144,9 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
       }
     | {
         type: "rating"
-        value: number
+        // Optional so an unanswered question can be reported as having no
+        // selection. 0 cannot stand in for that on the 0-10 scale.
+        value?: number
         options?: { value: number; label: string }[]
       }
     | {

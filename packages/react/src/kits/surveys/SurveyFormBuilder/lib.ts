@@ -1,6 +1,6 @@
 import { QuestionType } from "./types"
 
-export type RatingOptionType = "1-5" | "1-10" | "emojis"
+export type RatingOptionType = "1-5" | "1-10" | "0-10" | "emojis"
 
 export const getRatingOptions = (type: RatingOptionType) => {
   switch (type) {
@@ -13,6 +13,12 @@ export const getRatingOptions = (type: RatingOptionType) => {
       return new Array(10).fill(0).map((_, index) => ({
         value: index + 1,
         label: (index + 1).toString(),
+      }))
+    // Starts at 0, which makes it the standard eNPS scale.
+    case "0-10":
+      return new Array(11).fill(0).map((_, index) => ({
+        value: index,
+        label: index.toString(),
       }))
     case "emojis":
       return [
@@ -45,6 +51,11 @@ export const detectRatingOptionType = (
     return "1-10"
   }
 
+  // If length is 11 and all labels are numeric → "0-10"
+  if (length === 11 && allNumeric) {
+    return "0-10"
+  }
+
   // If length is 5 and not all numeric (has emojis) → "emojis"
   if (length === 5 && !allNumeric) {
     return "emojis"
@@ -57,7 +68,9 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
   switch (questionType) {
     case "rating":
       return {
-        value: 0,
+        // Undefined rather than 0: on a 0-10 scale a literal 0 would render
+        // the "0" cell as already chosen on an unanswered question.
+        value: undefined,
         options: getRatingOptions("1-5"),
       }
     case "select":
