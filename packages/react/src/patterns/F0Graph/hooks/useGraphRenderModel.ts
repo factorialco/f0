@@ -12,18 +12,8 @@ import {
   useRef,
 } from "react"
 
-import {
-  BACKGROUND_DOT_GAP,
-  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-} from "../constants"
-import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
-import {
-  EXPANDER_Y_OFFSET_BY_ZOOM,
-  type CollapserNodeData,
-  type ExpanderNodeData,
-  type GraphNodeData,
-} from "../internal/ReactFlowAdapters"
+import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
   GraphEdge,
   GraphNode,
@@ -33,6 +23,17 @@ import type {
   TreeNode,
   ZoomLevel,
 } from "../types"
+
+import {
+  BACKGROUND_DOT_GAP,
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+} from "../constants"
+import {
+  EXPANDER_Y_OFFSET_BY_ZOOM,
+  type CollapserNodeData,
+  type ExpanderNodeData,
+  type GraphNodeData,
+} from "../internal/ReactFlowAdapters"
 import {
   collectVisibleNodes,
   computeLayoutBounds,
@@ -411,6 +412,24 @@ export function useGraphRenderModel<T>({
         ids.add(pn.id)
       }
     }
+    // Keep every windowed node connected to its ancestry: walk each windowed
+    // node's parent chain up to the root and materialize those ancestors too,
+    // even when they sit outside the viewport window. An edge only renders when
+    // BOTH endpoints are windowed (see `rfEdges`), and a node only renders when
+    // it is windowed (see `rfNodes`) — so without this a node whose parent
+    // scrolled off-window loses its incoming edge and looks like a detached root
+    // (the reporting line up to the CEO disappears). Bounded by tree DEPTH, not
+    // breadth: windowed siblings share ancestors, so this adds a thin spine, not
+    // a subtree. The walk stops as soon as it reaches an id already in the set,
+    // so each ancestor is visited at most once (and it is cycle-safe).
+    const base = Array.from(ids)
+    for (const startId of base) {
+      let parentId = nodeMap.get(startId)?.parentId ?? null
+      while (parentId !== null && !ids.has(parentId)) {
+        ids.add(parentId)
+        parentId = nodeMap.get(parentId)?.parentId ?? null
+      }
+    }
     return ids
   }, [
     enableNodeWindowing,
@@ -418,6 +437,7 @@ export function useGraphRenderModel<T>({
     layout.nodes,
     nodeWidthProp,
     effectiveNodeHeight,
+    nodeMap,
   ])
 
   // ── React Flow nodes ── Only the windowed nodes are materialized (all of them

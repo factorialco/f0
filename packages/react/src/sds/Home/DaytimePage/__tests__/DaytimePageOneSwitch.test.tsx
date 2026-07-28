@@ -7,7 +7,7 @@ import { DaytimePage } from "../index"
 
 // The real switches render null unless their AI context is enabled, so we stub
 // them to stable markers and assert only DaytimePage's show/hide decision.
-vi.mock("@/sds/ai/F0OneSwitch", () => ({
+vi.mock("@/kits/ai/F0OneSwitch", () => ({
   F0OneSwitch: () => <div data-testid="one-switch" />,
 }))
 vi.mock("@/experimental/AiPromotionChat/OneSwitch", () => ({

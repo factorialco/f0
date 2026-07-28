@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { NumberFilter } from "../NumberFilter"
 
 const meta = {
-  title: "FilterPicker/Filters/NumberFilter",
+  title: "Filters/FilterPicker/Filters/NumberFilter",
   component: NumberFilter,
   parameters: {
     layout: "centered",

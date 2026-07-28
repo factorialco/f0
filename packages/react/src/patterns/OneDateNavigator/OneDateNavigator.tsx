@@ -6,7 +6,10 @@ import {
   DatePickerPopup,
   DatePickerPopupProps,
 } from "@/ui/DatePickerPopup/DatePickerPopup"
-import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
+import {
+  isSameDatePickerValue,
+  reviveDatePickerValue,
+} from "@/ui/DatePickerPopup/utils"
 
 import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
 import {
@@ -37,17 +40,28 @@ function _OneDateNavigator({
   dataTestId,
   ...props
 }: OneDatePickerProps) {
+  // A `value`/`defaultValue` restored from persisted storage (e.g. a
+  // OneDataCollection `date-navigator` filter) arrives with `from`/`to` as
+  // strings after its JSON round-trip. Revive them to `Date` at the boundary so
+  // every downstream consumer — the equality check below, the trigger label,
+  // granularity math — receives real `Date` objects.
+  const revivedValue = useMemo(() => reviveDatePickerValue(value), [value])
+  const revivedDefaultValue = useMemo(
+    () => reviveDatePickerValue(defaultValue),
+    [defaultValue]
+  )
+
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
-    defaultValue ?? value
+    revivedDefaultValue ?? revivedValue
   )
 
   useEffect(() => {
-    if (isSameDatePickerValue(value, localValue)) {
+    if (isSameDatePickerValue(revivedValue, localValue)) {
       return
     }
-    setLocalValue(value || defaultValue)
+    setLocalValue(revivedValue || revivedDefaultValue)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
-  }, [value, defaultValue])
+  }, [revivedValue, revivedDefaultValue])
 
   const [compareToValue, setCompareToValue] = useState<
     DateRangeComplete | DateRangeComplete[] | undefined
@@ -88,7 +102,7 @@ function _OneDateNavigator({
       <DatePickerPopup
         onSelect={handleSelect}
         value={localValue}
-        defaultValue={defaultValue}
+        defaultValue={revivedDefaultValue}
         presets={presets}
         granularities={granularities}
         minDate={props.minDate}

@@ -5,7 +5,7 @@ import { useState } from "react"
 import { VerticalOverflowList } from "./index"
 
 const meta = {
-  title: "Components/VerticalOverflowList",
+  title: "VerticalOverflowList",
   component: VerticalOverflowList,
   tags: ["autodocs", "internal"],
   argTypes: {

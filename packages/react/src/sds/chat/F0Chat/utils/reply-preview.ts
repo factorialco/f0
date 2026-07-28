@@ -23,6 +23,8 @@ export const replyThumbnailUrl = (
 export type AttachmentSummary =
   | { kind: "photo"; count: number }
   | { kind: "file"; count: number; name?: string }
+  | { kind: "location" }
+  | { kind: "voice" }
   | { kind: "mixed"; count: number }
 
 export const summariseAttachments = (
@@ -30,8 +32,16 @@ export const summariseAttachments = (
 ): AttachmentSummary | null => {
   const images = attachments?.filter((a) => a.kind === "image") ?? []
   const files = attachments?.filter((a) => a.kind === "file") ?? []
-  if (images.length > 0 && files.length > 0)
-    return { kind: "mixed", count: images.length + files.length }
+  const locations = attachments?.filter((a) => a.kind === "location") ?? []
+  const voices = attachments?.filter((a) => a.kind === "voice") ?? []
+  const present = [images, files, locations, voices].filter(
+    (list) => list.length > 0
+  )
+  if (present.length > 1)
+    return {
+      kind: "mixed",
+      count: images.length + files.length + locations.length + voices.length,
+    }
   if (images.length > 0) return { kind: "photo", count: images.length }
   if (files.length > 0)
     return {
@@ -39,5 +49,7 @@ export const summariseAttachments = (
       count: files.length,
       name: files.length === 1 ? files[0].name : undefined,
     }
+  if (locations.length > 0) return { kind: "location" }
+  if (voices.length > 0) return { kind: "voice" }
   return null
 }

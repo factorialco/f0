@@ -1,10 +1,15 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { act } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { DATA_COLLECTION_URL_PARAM_PREFIX } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { useDataCollectionUrlSync } from "../useDataCollectionUrlSync"
+
+// The collection → URL write is debounced (URL_SYNC_DEBOUNCE_MS = 300ms), so
+// advance past it before asserting the URL. Comfortably above the debounce.
+const flushUrlSync = () => act(() => void vi.advanceTimersByTime(400))
 
 const FILTERS = {
   department: { type: "in", label: "Department", options: { options: [] } },
@@ -57,7 +62,12 @@ const hasDcParams = () =>
     k.startsWith(DATA_COLLECTION_URL_PARAM_PREFIX)
   )
 
+beforeEach(() => {
+  vi.useFakeTimers()
+})
+
 afterEach(() => {
+  vi.useRealTimers()
   window.history.replaceState(null, "", "/")
 })
 
@@ -95,6 +105,7 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
 
     const { rerender } = setup()
     rerender({ filters: { department: ["Design", "Sales"] } })
+    flushUrlSync()
 
     expect(window.location.pathname).toBe("/people")
     expect(currentParams().has("dc_id")).toBe(false)
@@ -106,10 +117,27 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
 
     const { rerender } = setup()
     rerender({ search: "ada" })
+    flushUrlSync()
     expect(currentParams().get("dc_search")).toBe("ada")
 
     rerender({ search: "" })
+    flushUrlSync()
     expect(hasDcParams()).toBe(false)
+  })
+
+  it("coalesces a burst of search changes into a single URL write", () => {
+    window.history.replaceState(null, "", "/people")
+
+    const { rerender } = setup()
+    // Simulate typing "ada" — three changes within the debounce window.
+    rerender({ search: "a" })
+    rerender({ search: "ad" })
+    rerender({ search: "ada" })
+    // Nothing written yet — the debounce hasn't settled.
+    expect(hasDcParams()).toBe(false)
+
+    flushUrlSync()
+    expect(currentParams().get("dc_search")).toBe("ada")
   })
 })
 
@@ -141,6 +169,7 @@ describe("useDataCollectionUrlSync — visualization", () => {
     expect(setVisualization).not.toHaveBeenCalled()
 
     rerender({ visualization: 0 })
+    flushUrlSync()
     expect(currentParams().has("dc_visualization")).toBe(false)
   })
 
@@ -150,9 +179,11 @@ describe("useDataCollectionUrlSync — visualization", () => {
     const { rerender } = setup({ visualizationKeys: ["table", "card", "list"] })
 
     rerender({ visualization: 2 })
+    flushUrlSync()
     expect(currentParams().get("dc_visualization")).toBe("list")
 
     rerender({ visualization: 0 })
+    flushUrlSync()
     expect(currentParams().has("dc_visualization")).toBe(false)
   })
 })
@@ -165,6 +196,7 @@ describe("useDataCollectionUrlSync — enabled regardless of id", () => {
     expect(setSearch).not.toHaveBeenCalled()
 
     rerender({ search: "changed" })
+    flushUrlSync()
     expect(currentParams().get("dc_search")).toBe("ada")
   })
 
@@ -176,6 +208,7 @@ describe("useDataCollectionUrlSync — enabled regardless of id", () => {
 
     // collection → URL
     rerender({ search: "bob" })
+    flushUrlSync()
     expect(currentParams().get("dc_search")).toBe("bob")
   })
 })

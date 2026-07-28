@@ -33,7 +33,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "FilterPicker",
+  title: "Filters/FilterPicker",
   component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
     return <OneFilterPickerComponent {...props} />
   },

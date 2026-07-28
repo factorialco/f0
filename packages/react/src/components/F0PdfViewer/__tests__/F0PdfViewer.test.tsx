@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 
+import { Cross as CrossIcon } from "@/icons/app"
 import {
   fireEvent,
   zeroRender as render,
@@ -167,6 +168,22 @@ describe("F0PdfViewer", () => {
         "90"
       )
     )
+  })
+
+  it("appends host actions after the built-in toolbar controls", async () => {
+    const onClose = vi.fn()
+    render(
+      <F0PdfViewer
+        url="/doc.pdf"
+        filename="doc.pdf"
+        actions={[{ icon: CrossIcon, label: "Close", onClick: onClose }]}
+      />
+    )
+    const close = await screen.findByRole("button", { name: "Close" })
+    fireEvent.click(close)
+    expect(onClose).toHaveBeenCalledTimes(1)
+    // Built-ins stay put alongside the custom action.
+    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
   })
 
   it("renders the skeleton variant", () => {

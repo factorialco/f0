@@ -103,7 +103,7 @@ const SelectWithHooks = ({
 }
 
 const meta = {
-  title: "Components/Select",
+  title: "Select",
   component: SelectWithHooks,
   parameters: {
     a11y: {

@@ -5,7 +5,7 @@ import { ComboChart } from "./index"
 const meta: Meta = {
   title: "Charts/ComboChart",
   component: ComboChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="w-100 h-52">

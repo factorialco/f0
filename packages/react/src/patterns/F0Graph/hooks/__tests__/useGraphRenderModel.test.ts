@@ -224,6 +224,38 @@ describe("useGraphRenderModel — node windowing", () => {
       graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
     ).toEqual(["child"])
   })
+
+  it("materializes a windowed node's ancestors so the reporting line stays connected", () => {
+    // Deep chain root → mid → leaf. Only `leaf` sits inside the viewport; its
+    // ancestors are far above it. Regression: a windowed node whose parent
+    // scrolled off-window used to lose its incoming edge and look like a detached
+    // root (an edge only renders when BOTH endpoints are windowed). The ancestor
+    // chain must be pulled in so the line up to the root survives.
+    const leaf = treeNode("leaf", "mid", 0, [], 2)
+    const mid = treeNode("mid", "root", 1, [leaf], 1)
+    const root = treeNode("root", null, 1, [mid])
+    // Rect covers only `leaf` (y≈5000); `mid` (y=2500) and `root` (y=0) are out.
+    mockViewportRect = { minX: -10, minY: 4900, maxX: 200, maxY: 5200 }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "mid"]),
+      enableNodeWindowing: true,
+      layoutEngineProp: fixedLayout({
+        root: { x: 0, y: 0 },
+        mid: { x: 0, y: 2500 },
+        leaf: { x: 0, y: 5000 },
+      }),
+    })
+    const ids = result.current.rfNodes.map((n) => n.id)
+    expect(ids).toContain("leaf")
+    expect(ids).toContain("mid")
+    expect(ids).toContain("root")
+    const hasEdge = (source: string, target: string) =>
+      result.current.rfEdges.some(
+        (e) => e.source === source && e.target === target
+      )
+    expect(hasEdge("root", "mid")).toBe(true)
+    expect(hasEdge("mid", "leaf")).toBe(true)
+  })
 })
 
 describe("useGraphRenderModel — anchor viewport compensation", () => {

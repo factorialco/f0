@@ -3,7 +3,7 @@ import { compact } from "lodash"
 import { Fragment, ReactNode, memo, useMemo } from "react"
 
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
-import { Picker } from "@/kits/Social/Reactions/Picker"
+import { Picker } from "@/sds/social/Reactions/Picker"
 import {
   AlignTextCenter,
   AlignTextJustify,

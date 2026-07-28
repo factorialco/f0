@@ -1,0 +1,105 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as ProgressSeriesStories from "./progressSeries.stories"
+
+<Meta of={ProgressSeriesStories} />
+
+### progressSeries
+
+Renders the `F0ProgressSeries` component inside a data collection: a row of
+**independent** progress bars — one per period/segment — each with its own
+track, target and proportional fill.
+
+Not to be confused with `categoryBarChart` (segments are parts of a single
+whole) or `barSeries` (vertical columns). For the full API, the standalone
+component and its design guidelines, see the **F0ProgressSeries** docs.
+
+#### Value type
+
+```
+type value = {
+  bars: Array<{
+    value: number | undefined  // attained; undefined / non-finite (or max <= 0) → empty bar (track only)
+    max?: number               // target; defaults to 100
+    color?: ProgressSeriesColor // chart token: categorical-1..8 | feedback-positive|neutral|negative
+    canceled?: boolean         // hatched grey bar (e.g. a cancelled period)
+    label?: string             // title shown under the bar (e.g. "Q1"); optional
+    caption?: string           // short text under the bar; defaults to the computed %; pass "" to hide
+    tooltip?: string           // overrides the default `label · value / max (%)`
+  }>
+  size?: "sm" | "md" | "lg"    // bar height; defaults to "md"
+  maxLabels?: number           // max labels shown, spread evenly when there are more bars; defaults to 4
+  hideTooltip?: boolean        // when true, suppresses per-bar tooltips
+  formatValue?: (value: number) => string  // formats value/max in the tooltip (currency, units…)
+  loading?: boolean            // when true, renders a skeleton until data arrives
+}
+```
+
+- **Overachievement**: past 100 % the bar fills completely and splits at
+  `100 / pct` — the base colour up to the target, then a lighter shade of the
+  same colour for the excess (158 % → ~63 % + ~37 %). The reported percentage is
+  never clamped.
+- **Labels**: at most `maxLabels` (default 4) are shown. With more bars they are
+  spread evenly — 12 bars → indices 0, 3, 6, 9 (e.g. Jan, Apr, Jul, Oct). Bars
+  without a visible label still expose their value through the tooltip and
+  accessible name.
+- **Tooltip**: built automatically as `label · value / max (percentage)`. The
+  cell only receives raw numbers, so pass `formatValue` for currencies or units
+  (a trailing unit shared by both sides is printed once: `1.700 / 3.400 €`), or
+  `tooltip` to replace the string entirely. The same text is the bar's
+  accessible name, so the detail is never sighted-only.
+- **Colour** is a generic f0 token per bar. The consumer maps its own domain to
+  a token — e.g. Goals maps period status to `feedback-positive` /
+  `feedback-neutral` / `feedback-negative`.
+- **Translations**: the "No data" and "Canceled" states come from the i18n
+  provider (`progressSeries.*`).
+
+#### Quarterly
+
+<Canvas of={ProgressSeriesStories.Quarterly} />
+
+#### WithStatusColors
+
+The Goals consumer maps each period's status to a colour token and passes
+`formatValue` so the tooltip reads `Q2 · 1.700 / 3.400 € (50%)`.
+
+<Canvas of={ProgressSeriesStories.WithStatusColors} />
+
+#### Overflow
+
+The bar fills completely and splits at the target; the caption and tooltip show
+the real percentage.
+
+<Canvas of={ProgressSeriesStories.Overflow} />
+
+#### Single
+
+A single bar behaves like the `progressBar` (Progress) value display.
+
+<Canvas of={ProgressSeriesStories.Single} />
+
+#### Monthly
+
+12 monthly bars: only 4 labels are shown, evenly spaced (Jan, Apr, Jul, Oct).
+
+<Canvas of={ProgressSeriesStories.Monthly} />
+
+#### Canceled
+
+A `canceled` bar renders as a hatched grey bar, distinct from an empty
+(track-only) bar.
+
+<Canvas of={ProgressSeriesStories.Canceled} />
+
+#### HiddenTooltip
+
+Set `hideTooltip: true` to suppress the per-bar tooltip. Bars still render and
+stay focusable.
+
+<Canvas of={ProgressSeriesStories.HiddenTooltip} />
+
+#### Loading
+
+Set `loading: true` while the row's data is still loading. The cell renders a
+skeleton the same size as the loaded bar.
+
+<Canvas of={ProgressSeriesStories.Loading} />

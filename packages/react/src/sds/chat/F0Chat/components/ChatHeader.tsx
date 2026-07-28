@@ -4,7 +4,7 @@ import { useMediaQuery } from "usehooks-ts"
 
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { EmojiImage } from "@/lib/emojis"
 import {
@@ -13,16 +13,13 @@ import {
   Maximize,
   MicrophoneNegative,
   Minimize,
-  PushPin,
-  PushPinSolid,
   Search,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatSearch } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
-import { type F0ChatChannel } from "../types"
+import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
@@ -43,6 +40,9 @@ export type ChatHeaderProps = {
   isFullscreen?: boolean
   onToggleFullscreen?: () => void
   onClose?: () => void
+  /** Host-provided actions (pin, mute, edit group…), already resolved for this
+   * channel by `F0Chat` — see {@link F0ChatHeaderAction}. */
+  actions?: F0ChatHeaderAction[]
 }
 
 /** Top bar of the chat: avatar + presence + name (+ muted) and panel actions. */
@@ -51,10 +51,10 @@ export const ChatHeader = ({
   isFullscreen,
   onToggleFullscreen,
   onClose,
+  actions,
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatSearch()
-  const { togglePin } = useF0Chat()
   // On mobile the chat already fills the screen, so the fullscreen toggle is a
   // no-op — hide it (matches F0AiChatHeader).
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
@@ -63,19 +63,28 @@ export const ChatHeader = ({
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
 
-  // Overflow menu: search, plus pin/unpin when the host supports it. Built as
-  // data so adding actions later (mute, leave…) is a one-line change.
+  // Search is the ONLY built-in action. Everything else — pin, mute, edit
+  // group… — comes from the host through `actions`, so each channel offers
+  // exactly what the user's permissions allow there.
+  const channelActions = (actions ?? []).filter(
+    (action) =>
+      !action.channelTypes || action.channelTypes.includes(channel.type)
+  )
+  // Inline without an icon can't render as an icon button → falls to the menu.
+  const isInline = (
+    action: F0ChatHeaderAction
+  ): action is F0ChatHeaderAction & { icon: IconType } =>
+    action.placement === "inline" && action.icon != null
+  const inlineActions = channelActions.filter(isInline)
+  const menuActions = channelActions.filter((action) => !isInline(action))
+
   const menuItems: DropdownItem[] = [
     { label: i18n.actions.search, icon: Search, onClick: openSearch },
-    ...(togglePin
-      ? [
-          {
-            label: channel.pinned ? i18n.chat.unpin : i18n.chat.pin,
-            icon: channel.pinned ? PushPinSolid : PushPin,
-            onClick: togglePin,
-          },
-        ]
-      : []),
+    ...menuActions.map((action) => ({
+      label: action.label,
+      icon: action.icon,
+      onClick: () => action.onClick(channel),
+    })),
   ]
 
   const identity = (
@@ -133,7 +142,18 @@ export const ChatHeader = ({
             identity
           )}
           <div className="flex shrink-0 items-center gap-0.5">
-            {/* Search + pin live behind the ellipsis overflow menu. */}
+            {/* Host actions promoted out of the overflow menu (placement: "inline"). */}
+            {inlineActions.map((action) => (
+              <ButtonInternal
+                key={action.id}
+                variant="ghost"
+                hideLabel
+                label={action.label}
+                icon={action.icon}
+                onClick={() => action.onClick(channel)}
+              />
+            ))}
+            {/* Search + the host's menu actions live behind the ellipsis menu. */}
             <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
               <ButtonInternal
                 variant="ghost"

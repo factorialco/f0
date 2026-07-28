@@ -354,7 +354,11 @@ export const CardCollection = <
   const overridenDataAdapter = useMemo(() => {
     if (source.dataAdapter.paginationType === "pages") {
       const perPage = source.dataAdapter.perPage
-      const overridenPerPage = findNextMultiple(perPage ?? 24)
+      // "auto" is resolved to a number by OneDataCollection before it reaches
+      // the visualization; fall back to the default if it wasn't.
+      const overridenPerPage = findNextMultiple(
+        typeof perPage === "number" ? perPage : 24
+      )
       return {
         ...source.dataAdapter,
         perPage: overridenPerPage,
