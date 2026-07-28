@@ -1378,6 +1378,14 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     "aria-expanded"?: boolean;
     /**
+     * Identifies the expandable region controlled by the button.
+     */
+    "aria-controls"?: string;
+    /**
+     * Describes the type of popup opened by the button.
+     */
+    "aria-haspopup"?: React.AriaAttributes["aria-haspopup"];
+    /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).
      */
@@ -4340,8 +4348,14 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
      * restrict the selectable date range in the picker.
+     *
+     * Can be a static object or a function that receives the current row item
+     * to return a per-row range (e.g. bound one date field by another field's
+     * value: `(item) => ({ minDate: parseISO(item.startDate) })`). The picker's
+     * default visible month follows `minDate`, so a per-row `minDate` also
+     * opens the calendar on that date.
      */
-    dateConfig?: DateCellConfig;
+    dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
