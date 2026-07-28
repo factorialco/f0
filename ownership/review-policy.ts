@@ -24,6 +24,12 @@
  * required check in branch protection — the workflow job itself only fails
  * on real errors. Run it with: GITHUB_TOKEN, GITHUB_REPOSITORY and
  * PR_NUMBER set (DRY_RUN=1 skips the comment, status and review requests).
+ *
+ * Requesting a review from a team needs a token with org scope: the default
+ * Actions token cannot resolve teams and answers 422 "Could not resolve to a
+ * node". Set REVIEW_REQUEST_TOKEN to a token that can (a GitHub App
+ * installation token or a PAT with `read:org`) — everything else keeps using
+ * GITHUB_TOKEN, so the comment and the status stay authored by the bot.
  */
 import fs from "node:fs"
 import path from "node:path"
@@ -36,17 +42,17 @@ const FEAT_PATTERN = /^feat(\([^)]*\))?!?:/
 const DESIGN_LABEL = "needs-design-review"
 const COMMENT_MARKER = "<!-- comment-type: review-policy -->"
 
-const { GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, DRY_RUN } = process.env
+const { GITHUB_TOKEN, REVIEW_REQUEST_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, DRY_RUN } = process.env
 if (!GITHUB_TOKEN || !GITHUB_REPOSITORY || !PR_NUMBER) {
   console.error("Missing required env vars: GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER")
   process.exit(2)
 }
 
-async function api<T>(pathname: string, init?: RequestInit): Promise<T> {
+async function api<T>(pathname: string, init?: RequestInit, token = GITHUB_TOKEN): Promise<T> {
   const response = await fetch(`https://api.github.com${pathname}`, {
     ...init,
     headers: {
-      Authorization: `Bearer ${GITHUB_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
       ...init?.headers,
@@ -280,18 +286,25 @@ if (DRY_RUN) {
 
   // Best-effort: put the PR in the queue of the teams that still need to
   // approve. The status check is the enforcement; failing to request a team
-  // review (e.g. token scope) must not fail the job on its own.
+  // review (e.g. token scope) must not fail the job on its own. One request
+  // per team, so a team GitHub cannot resolve does not drop the others.
   const alreadyRequested = pr.requested_teams.map((team) => team.slug)
   const toRequest = pending.map((r) => r.team).filter((slug) => !alreadyRequested.includes(slug))
-  if (toRequest.length > 0) {
+  for (const slug of toRequest) {
     try {
-      await api(`${prPath}/requested_reviewers`, {
-        method: "POST",
-        body: JSON.stringify({ team_reviewers: toRequest }),
-      })
-      console.log(`Requested review from: ${toRequest.join(", ")}`)
+      await api(
+        `${prPath}/requested_reviewers`,
+        { method: "POST", body: JSON.stringify({ team_reviewers: [slug] }) },
+        REVIEW_REQUEST_TOKEN || GITHUB_TOKEN
+      )
+      console.log(`Requested review from ${slug}`)
     } catch (error) {
-      console.warn(`Could not request team reviews (${(error as Error).message})`)
+      console.warn(
+        `Could not request a review from ${slug} (${(error as Error).message})` +
+          (REVIEW_REQUEST_TOKEN
+            ? ""
+            : " — REVIEW_REQUEST_TOKEN is not set, and the default Actions token cannot resolve org teams")
+      )
     }
   }
 }

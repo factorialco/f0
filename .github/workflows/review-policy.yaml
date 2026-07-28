@@ -30,5 +30,8 @@ jobs:
       - name: Evaluate review policy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Only for requesting team reviews: the default Actions token has no
+          # org scope and 422s on every team ("Could not resolve to a node")
+          REVIEW_REQUEST_TOKEN: ${{ secrets.RELEASE_PLEASE_GH_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: pnpm --filter @factorialco/f0-ownership run review-policy
