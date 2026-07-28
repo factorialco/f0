@@ -3,7 +3,7 @@ import { userEvent } from "@testing-library/user-event"
 import { describe, expect, test, vi } from "vitest"
 
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
-import { useHasNonSelectableRows } from "@/hooks/datasource"
+import { useHasNonSelectableRows, useSelectableTotal } from "@/hooks/datasource"
 import {
   zeroRender as render,
   zeroRenderHook as renderHook,
@@ -76,6 +76,32 @@ const renderCollection = (fetchSelectableTotal?: () => Promise<number>) =>
       <Harness fetchSelectableTotal={fetchSelectableTotal} />
     </TestWrapper>
   )
+
+describe("useSelectableTotal", () => {
+  test("doesn't re-count when a filter state is rebuilt with a different key order", async () => {
+    const fetchSelectableTotal = vi.fn(async () => 18)
+
+    const { rerender } = renderHook(
+      ({ filters }: { filters: object }) =>
+        useSelectableTotal({
+          fetchSelectableTotal,
+          filters: filters as never,
+          search: undefined,
+        }),
+      { initialProps: { filters: { a: 1, b: 2 } } }
+    )
+
+    await waitFor(() => expect(fetchSelectableTotal).toHaveBeenCalledTimes(1))
+
+    // Same values, different insertion order: same query, no second request.
+    rerender({ filters: { b: 2, a: 1 } })
+    expect(fetchSelectableTotal).toHaveBeenCalledTimes(1)
+
+    // A real change does re-count.
+    rerender({ filters: { a: 9, b: 2 } })
+    await waitFor(() => expect(fetchSelectableTotal).toHaveBeenCalledTimes(2))
+  })
+})
 
 describe("useHasNonSelectableRows", () => {
   test("stays true after paging onto a fully-selectable page", () => {

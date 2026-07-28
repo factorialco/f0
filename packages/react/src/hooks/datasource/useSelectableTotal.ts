@@ -34,6 +34,15 @@ export const useSelectableTotal = <Filters extends FiltersDefinition>({
   fetchRef.current = fetchSelectableTotal
   const isEnabled = !!fetchSelectableTotal
 
+  // Same identity rule as useHasNonSelectableRows: a filter state rebuilt with
+  // a different key order is the same query, so it must not spend another count
+  // request — nor blank the number out and back while that request is in
+  // flight. Read through a ref so the effect always sees the current values
+  // without depending on their identity.
+  const queryKey = stableStringify([filters, search])
+  const queryRef = useRef({ filters, search })
+  queryRef.current = { filters, search }
+
   useEffect(() => {
     const fetchTotal = fetchRef.current
     if (!fetchTotal) {
@@ -52,7 +61,7 @@ export const useSelectableTotal = <Filters extends FiltersDefinition>({
     // (rather than rejecting) lands in the catch below instead of escaping the
     // effect and taking the whole collection down with it.
     Promise.resolve()
-      .then(() => fetchTotal({ filters, search }))
+      .then(() => fetchTotal(queryRef.current))
       .then((value) => {
         if (!stale) setTotal(value)
       })
@@ -63,7 +72,7 @@ export const useSelectableTotal = <Filters extends FiltersDefinition>({
     return () => {
       stale = true
     }
-  }, [isEnabled, filters, search])
+  }, [isEnabled, queryKey])
 
   return total
 }
