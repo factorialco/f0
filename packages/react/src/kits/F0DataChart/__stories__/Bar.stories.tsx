@@ -105,6 +105,38 @@ export const MultipleSeries: Story = {
 }
 
 /**
+ * Values can be negative. Each bar is rounded on the end pointing away from
+ * the zero line, so negative bars are rounded at the bottom (on the left for
+ * horizontal orientation) and flat where they meet the axis.
+ */
+export const NegativeValues: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["Barcelona", "Paris", "Berlin", "London", "Remote"],
+    series: [{ name: "Gender pay gap", data: [24.3, 8.1, -0.4, -27.5, -35.2] }],
+    showLegend: false,
+    valueFormatter: (v) => `${v}%`,
+  },
+}
+
+/** Negative values stacked below the zero line, positive ones above it. */
+export const StackedNegativeValues: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    stacked: true,
+    categories: ["Q1", "Q2", "Q3", "Q4"],
+    series: [
+      { name: "Hires", data: [24, 18, 12, 20] },
+      { name: "Internal moves", data: [6, 4, 9, 5] },
+      { name: "Voluntary exits", data: [-8, -12, -6, -10] },
+      { name: "Involuntary exits", data: [-3, -2, -14, -4] },
+    ],
+  },
+}
+
+/**
  * Each bar has a `target` value — the gap between the actual value and the
  * target is rendered as a faded "ghost" bar above the solid one.
  */
