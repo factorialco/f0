@@ -1,2 +1,2 @@
 export { F0VideoPlayer } from "./F0VideoPlayer"
-export type { F0VideoPlayerProps } from "./types"
+export type { F0VideoPlayerProps, VideoPlayerContent } from "./types"

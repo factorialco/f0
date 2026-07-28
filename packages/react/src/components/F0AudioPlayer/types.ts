@@ -3,6 +3,7 @@ import { ReactNode } from "react"
 import { IconType } from "@/components/F0Icon"
 import { DataAttributes } from "@/global.types"
 import { WithDataTestIdProps } from "@/lib/data-testid"
+import { Localized } from "@/lib/localized"
 
 export const audioPlayerSizes = ["sm", "md"] as const
 export type F0AudioPlayerSize = (typeof audioPlayerSizes)[number]
@@ -14,6 +15,11 @@ export interface AudioPlayerMenuAction {
   critical?: boolean
 }
 
+/**
+ * @deprecated Prefer the structured `content` prop
+ * ({@link AudioPlayerContent}). The raw tab array is still honoured for now for
+ * backward compatibility, but will be removed in a future release.
+ */
 export interface AudioPlayerDetailTab {
   /** Stable value used to identify the tab. */
   value: string
@@ -23,6 +29,38 @@ export interface AudioPlayerDetailTab {
   content: ReactNode
 }
 
+/**
+ * Structured detail content for {@link F0AudioPlayerCardProps.content}.
+ *
+ * Pass a `summary` and/or a `transcription` string and the card builds the
+ * tabbed "View detail" panel for you, with labels pulled from translations
+ * (`audioPlayer.summary` / `audioPlayer.transcription`) — you no longer wire up
+ * the tabs yourself as with the deprecated `details` array.
+ *
+ * A transcription is what makes an audio-only recording accessible
+ * (WCAG 2.1 SC 1.2.1, Audio-only). When you omit `transcription`, the card
+ * still tries to derive one from the audio file's own text tracks; if none can
+ * be passed or derived, the recording is flagged in the accessibility checks.
+ *
+ * Both fields are localizable — pass a per-locale list
+ * (`[{ locale, label?, value }]`) to offer several languages, and a language
+ * selector appears in the detail panel (a single selection drives both tabs).
+ */
+export interface AudioPlayerContent {
+  /**
+   * Plain-text summary of the recording, shown in the "Summary" tab.
+   * Localizable.
+   */
+  summary?: Localized<string>
+  /**
+   * Plain-text transcription of the recording, shown in the "Transcription"
+   * tab. Line breaks are preserved. When omitted, the card attempts to derive
+   * a transcription from the audio file's embedded/attached text tracks.
+   * Localizable.
+   */
+  transcription?: Localized<string>
+}
+
 export interface F0AudioPlayerProps
   extends WithDataTestIdProps, DataAttributes {
   /**
@@ -30,8 +68,20 @@ export interface F0AudioPlayerProps
    * the URL the first time playback is requested. Use the function form for
    * on-demand credentials (e.g. presigned URLs) so the URL is only fetched on
    * user intent.
+   *
+   * Localizable — pass a per-locale list of dubbed recordings to offer
+   * selectable audio languages; a language selector then appears (in the card's
+   * kebab menu, or inline on the bare player).
    */
-  src: string | (() => Promise<string>)
+  src: Localized<string | (() => Promise<string>)>
+
+  /**
+   * Initial language for localized content — the audio `src` and, on the card,
+   * the detail `content` (summary/transcription). Matched against the provided
+   * locales exactly or by primary subtag, then the viewer's browser language,
+   * then the first provided. Only relevant when more than one language is given.
+   */
+  defaultLanguage?: string
 
   /**
    * Known total duration in seconds. Lets the player show the total time and an
@@ -144,9 +194,23 @@ export interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
   actions?: AudioPlayerMenuAction[]
 
   /**
+   * Structured detail content revealed by a "View detail" toggle in the header:
+   * a `summary` and/or a `transcription`. The card renders the tabs with
+   * translated labels. Providing a `transcription` (or shipping one in the
+   * audio file) keeps the recording accessible. Takes precedence over the
+   * deprecated `details` prop when both are set.
+   */
+  content?: AudioPlayerContent
+
+  /**
    * Tabbed detail content revealed by a "View detail" toggle in the header
    * (e.g. a Summary and a Transcript tab). When omitted or empty, no toggle and
    * no panel are rendered and the card behaves like a plain recording player.
+   *
+   * @deprecated Use the structured {@link F0AudioPlayerCardProps.content} prop
+   * instead (`{ summary, transcription }`). This raw tab array is still
+   * honoured for backward compatibility but will be removed in a future
+   * release.
    */
   details?: AudioPlayerDetailTab[]
 
