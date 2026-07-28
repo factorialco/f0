@@ -10,6 +10,11 @@ import type Reporter from "axe-playwright/dist/types"
 import { appendFileSync, readFileSync } from "fs"
 import { join } from "path"
 
+import {
+  A11Y_CI_CONTEXT,
+  A11Y_RUN_ONLY,
+} from "../src/lib/storybook-utils/a11yAxeConfig"
+
 // Story files grandfathered to skip axe while their violations are burned
 // down (Path to AA). Maps file → number of allowed skip call-sites; counts
 // may only shrink. Enforced per-count by a11ySkipAllowlist.test.ts; here we
@@ -181,22 +186,11 @@ const config: TestRunnerConfig = {
         }
       })
 
-      // Get violations without throwing an error
-      const violations = await getViolations(page, "#storybook-root", {
-        runOnly: {
-          type: "tag",
-          // WCAG 2.0, 2.1 and 2.2 at levels A and AA — matches the Plexus
-          // audit scope (UNE-EN 301549 + WCAG 2.1/2.2). AAA and axe's
-          // non-normative best-practice rules are intentionally excluded.
-          values: [
-            "wcag2a",
-            "wcag2aa",
-            "wcag21a",
-            "wcag21aa",
-            "wcag22a",
-            "wcag22aa",
-          ],
-        },
+      // Get violations without throwing an error. The rule scope is shared with
+      // the a11y addon (see src/lib/storybook-utils/a11yAxeConfig.ts) so the
+      // panel and CI cannot drift apart.
+      const violations = await getViolations(page, A11Y_CI_CONTEXT, {
+        runOnly: A11Y_RUN_ONLY,
       })
 
       // Report violations if any are found

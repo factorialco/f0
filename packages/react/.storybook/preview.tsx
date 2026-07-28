@@ -16,6 +16,7 @@ import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollectio
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { ThemeProvider } from "@/lib/providers/theme"
+import { A11Y_RUN_ONLY } from "@/lib/storybook-utils/a11yAxeConfig"
 
 import {
   getAllComponentStatuses,
@@ -137,6 +138,12 @@ const preview: Preview = {
           },
         ],
       },
+
+      // Same rule scope CI enforces (see src/lib/storybook-utils/a11yAxeConfig.ts).
+      // Without this the addon ran axe's defaults, which omit rules axe ships
+      // disabled — notably `target-size` (WCAG 2.2 SC 2.5.8) — so a story could
+      // show 0 violations in the panel and still fail CI.
+      options: { runOnly: A11Y_RUN_ONLY },
 
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
