@@ -500,7 +500,7 @@ const queryEmployees = (input: {
 const SEARCH_PAGE_SIZE = 5
 const queryEmployeeSearch = (
   query: string,
-  page: number
+  page = 0
 ): Promise<{ records: EmployeeNode[]; hasMore: boolean }> =>
   gqlRequest(() => {
     const normalized = query.toLowerCase()
