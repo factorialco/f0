@@ -366,10 +366,7 @@ const ToastsContainer = ({
     >
       <AnimatePresence>
         {hasItems && (
-          <div
-            key="toast-panel"
-            className="flex w-full flex-col p-6 sm:w-96"
-          >
+          <div key="toast-panel" className="flex w-full flex-col p-6 sm:w-96">
             {/* Stacked Toasts at the Top */}
             <div ref={stackedContainerRef}>
               <StackedToasts

@@ -65,11 +65,11 @@ If a toast's text is long enough to truncate, that's the signal it shouldn't be 
 
 **At a glance:**
 
-| Pattern                          | Use it for                                                              |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| **Toast**                        | brief feedback for an action you just took, while you're on the page    |
-| **`F0Alert` / banner**           | persistent context or must-read information tied to a region of the page |
-| **Notification** (bell / email)  | something that can arrive while you're not looking, or later            |
+| Pattern                         | Use it for                                                               |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| **Toast**                       | brief feedback for an action you just took, while you're on the page     |
+| **`F0Alert` / banner**          | persistent context or must-read information tied to a region of the page |
+| **Notification** (bell / email) | something that can arrive while you're not looking, or later             |
 
 ### Do's and don'ts
 
@@ -202,15 +202,15 @@ toasts.closeAll() // dismiss all
 
 ### ToastOptions
 
-| Option        | Type                        | Description                                                         |
-| ------------- | --------------------------- | ------------------------------------------------------------------ |
-| `title`       | `string`                    | The message (required in practice).                                |
-| `description` | `string`                    | Optional short second line.                                        |
-| `variant`     | `F0ToastVariant`            | `default` · `success` · `warning` · `error` · `loading`.           |
-| `actions`     | `button` \| `link` \| both  | Up to one button and one link. `keepOpen` stops auto-close.        |
-| `id`          | `string`                    | Reuse to update a toast in place (async resolution).               |
-| `duration`    | `number`                    | Override auto-dismiss (ms). Defaults to 5000, 10000 with an action.|
-| `persistent`  | `true`                      | Escape hatch — keep open until closed (excludes `duration`). Rare: a lasting condition belongs in an `F0Alert`, not a toast. |
+| Option        | Type                       | Description                                                                                                                  |
+| ------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `title`       | `string`                   | The message (required in practice).                                                                                          |
+| `description` | `string`                   | Optional short second line.                                                                                                  |
+| `variant`     | `F0ToastVariant`           | `default` · `success` · `warning` · `error` · `loading`.                                                                     |
+| `actions`     | `button` \| `link` \| both | Up to one button and one link. `keepOpen` stops auto-close.                                                                  |
+| `id`          | `string`                   | Reuse to update a toast in place (async resolution).                                                                         |
+| `duration`    | `number`                   | Override auto-dismiss (ms). Defaults to 5000, 10000 with an action.                                                          |
+| `persistent`  | `true`                     | Escape hatch — keep open until closed (excludes `duration`). Rare: a lasting condition belongs in an `F0Alert`, not a toast. |
 
 ### F0ToastAction
 

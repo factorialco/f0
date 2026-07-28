@@ -52,10 +52,22 @@ export const Anatomy: Story = {
 /** All five variants, stacked, at the real 384px width. */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, width: 384, maxWidth: "100%" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        width: 384,
+        maxWidth: "100%",
+      }}
+    >
       <F0Toast title="Changes saved" onClose={() => {}} />
       <F0Toast variant="success" title="Payment processed" onClose={() => {}} />
-      <F0Toast variant="warning" title="Storage almost full" onClose={() => {}} />
+      <F0Toast
+        variant="warning"
+        title="Storage almost full"
+        onClose={() => {}}
+      />
       <F0Toast variant="error" title="Upload failed" onClose={() => {}} />
       <F0Toast variant="loading" title="Updating 3 people…" />
     </div>
@@ -102,7 +114,15 @@ export const Examples: Story = {
     docs: { story: { inline: false, height: "520px" } },
   },
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: 32, maxWidth: 460 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        padding: 32,
+        maxWidth: 460,
+      }}
+    >
       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#565b64" }}>
         Click a button — the toast appears at the bottom-centre of the frame.
         Watch position, duration, the inline action, and how a loading toast
@@ -122,7 +142,11 @@ export const Examples: Story = {
         onClick={() => {
           toasts.open({
             title: "3 people deleted",
-            actions: { type: "button", label: "Undo", onClick: () => undefined },
+            actions: {
+              type: "button",
+              label: "Undo",
+              onClick: () => undefined,
+            },
           })
         }}
       />
@@ -152,7 +176,12 @@ export const Examples: Story = {
                   variant: "error",
                   title: "Still couldn't send",
                   description: "The mail server isn't responding.",
-                  actions: { type: "button", label: "Retry", keepOpen: true, onClick: () => retry(id) },
+                  actions: {
+                    type: "button",
+                    label: "Retry",
+                    keepOpen: true,
+                    onClick: () => retry(id),
+                  },
                 })
               }
             })
@@ -161,7 +190,12 @@ export const Examples: Story = {
             variant: "error",
             title: "Couldn't send",
             description: "The mail server isn't responding.",
-            actions: { type: "button", label: "Retry", keepOpen: true, onClick: () => retry(id) },
+            actions: {
+              type: "button",
+              label: "Retry",
+              keepOpen: true,
+              onClick: () => retry(id),
+            },
           })
         }}
       />
@@ -189,10 +223,19 @@ export const Responsive: Story = {
       return () => toasts.close("responsive-demo")
     }, [])
     return (
-      <div style={{ padding: 32, maxWidth: 520, color: "#565b64", fontSize: 14, lineHeight: 1.5 }}>
-        Drag the canvas edge (or use the viewport toolbar) and watch the toast at
-        the bottom: it stays a fixed <b>384px</b> from the <code>sm</code>{" "}
-        breakpoint (<b>640px</b>) upward, and switches to <b>full-width</b> below it.
+      <div
+        style={{
+          padding: 32,
+          maxWidth: 520,
+          color: "#565b64",
+          fontSize: 14,
+          lineHeight: 1.5,
+        }}
+      >
+        Drag the canvas edge (or use the viewport toolbar) and watch the toast
+        at the bottom: it stays a fixed <b>384px</b> from the <code>sm</code>{" "}
+        breakpoint (<b>640px</b>) upward, and switches to <b>full-width</b>{" "}
+        below it.
       </div>
     )
   },

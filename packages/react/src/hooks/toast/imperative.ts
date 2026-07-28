@@ -29,7 +29,11 @@ const open = (options: ToastOptions): ToastId => {
   // F0Alert / banner instead. Toasts with an action get a longer window.
   const persist = options.persistent === true || options.variant === "loading"
   toastStore.addItem({
-    duration: persist ? undefined : hasAction ? ACTION_DURATION : DEFAULT_DURATION,
+    duration: persist
+      ? undefined
+      : hasAction
+        ? ACTION_DURATION
+        : DEFAULT_DURATION,
     ...options,
     id,
     onClose: () => toastStore.removeItem(id),
