@@ -437,6 +437,10 @@ export const TableCollection = <
     !!source.allPagesSelection &&
     (!allSelectedStatus.checked || allSelectedStatus.indeterminate) &&
     paginationInfo?.total !== undefined &&
+    // A count of exactly 0 means the consumer knows nothing in this dataset is
+    // selectable: offering "select all" would promise a selection that can't
+    // exist, and the resulting empty selection shows no bulk-action bar.
+    selectableTotal !== 0 &&
     // paginationTotal is an upper bound on the selectable total, so this still
     // gates correctly when the exact selectable count is unknown.
     paginationTotal > allSelectedStatus.selectedCount

@@ -191,6 +191,21 @@ describe("select all with no selectable rows on the current page", () => {
     ).toBeInTheDocument()
   })
 
+  test("hides the CTA when the consumer reports zero selectable items", async () => {
+    // Nothing in the dataset is selectable, so "select all" would promise a
+    // selection that can't exist — and the empty selection that followed would
+    // render no bulk-action bar to undo it with.
+    renderCollection(async () => 0)
+
+    await waitFor(() => {
+      expect(screen.getByText("Row 1-0")).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /select all/i })
+    ).not.toBeInTheDocument()
+  })
+
   test("uses the consumer-provided selectable total when available", async () => {
     const fetchSelectableTotal = vi.fn(async () => SELECTABLE_TOTAL)
     renderCollection(fetchSelectableTotal)
