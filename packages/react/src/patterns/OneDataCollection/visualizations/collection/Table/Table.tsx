@@ -476,17 +476,25 @@ export const TableCollection = <
                             type="button"
                             onClick={() => toggleHeaderGroup(entry.id)}
                             aria-expanded={!entry.collapsed}
+                            // No color of its own: the header cell already sets
+                            // the shared `font-medium text-f1-foreground-secondary`,
+                            // so the group label reads like every other header.
                             className={cn(
-                              "flex max-w-full items-center gap-1 rounded-xs text-f1-foreground transition-colors hover:text-f1-foreground-secondary",
+                              "flex max-w-full items-center gap-1 rounded-xs transition-colors hover:text-f1-foreground",
                               focusRing()
                             )}
                           >
-                            <ChevronToggle
-                              open={!entry.collapsed}
-                              closedRotation={-90}
-                              openRotation={90}
-                            />
                             <span className="truncate">{entry.label}</span>
+                            {/* ChevronToggle marks its icon role="button";
+                                hidden here so it isn't a nested interactive
+                                element — `aria-expanded` conveys the state. */}
+                            <span aria-hidden="true" className="flex">
+                              <ChevronToggle
+                                open={!entry.collapsed}
+                                closedRotation={-90}
+                                openRotation={90}
+                              />
+                            </span>
                           </button>
                         ) : (
                           entry.label
