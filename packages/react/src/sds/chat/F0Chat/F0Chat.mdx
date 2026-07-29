@@ -178,6 +178,8 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 ### Behavior
 
+- WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
+- WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
 - WHEN a sent group message is still missing readers → THEN its footer shows `Sent · time` without exposing a count.
 - WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.

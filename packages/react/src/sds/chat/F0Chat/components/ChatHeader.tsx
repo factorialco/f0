@@ -62,6 +62,16 @@ export const ChatHeader = ({
   })
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
+  const showGroupFallback =
+    channel.type === "group" &&
+    (channel.avatar.type === "team" || channel.avatar.type === "company") &&
+    !channel.avatar.src
+  const identityEmoji =
+    channel.avatar.type === "emoji"
+      ? channel.avatar.emoji
+      : showGroupFallback
+        ? "＃"
+        : null
 
   // Search is the ONLY built-in action. Everything else — pin, mute, edit
   // group… — comes from the host through `actions`, so each channel offers
@@ -90,11 +100,17 @@ export const ChatHeader = ({
   const identity = (
     <div className="flex min-w-0 items-center gap-2">
       <div className="relative shrink-0 flex">
-        {channel.avatar.type === "emoji" ? (
+        {identityEmoji ? (
           // Emoji groups show the glyph alone (no avatar chrome) so it reads at
           // full size instead of shrunk inside the bordered avatar box.
-          <span className="flex size-6 items-center justify-center">
-            <EmojiImage emoji={channel.avatar.emoji} size="sm" />
+          <span
+            aria-hidden={showGroupFallback || undefined}
+            className="flex size-6 items-center justify-center"
+            data-testid={
+              showGroupFallback ? "chat-group-avatar-fallback" : undefined
+            }
+          >
+            <EmojiImage emoji={identityEmoji} size="sm" />
           </span>
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />

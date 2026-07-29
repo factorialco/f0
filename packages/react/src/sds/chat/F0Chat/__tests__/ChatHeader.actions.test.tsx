@@ -61,6 +61,57 @@ beforeAll(() => {
 })
 
 describe("ChatHeader host actions", () => {
+  it("uses a hash glyph when a group has no emoji or custom image", () => {
+    renderChat(makeRuntime())
+
+    expect(screen.getByTestId("chat-group-avatar-fallback")).toHaveTextContent(
+      "＃"
+    )
+    expect(screen.queryByRole("img", { name: "Product Team" })).toBeNull()
+  })
+
+  it("keeps an explicit group emoji instead of the hash fallback", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "emoji", emoji: "🚀" },
+        },
+      })
+    )
+
+    expect(
+      screen.queryByTestId("chat-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "🚀" })).toBeInTheDocument()
+  })
+
+  it("keeps a custom group image instead of the hash fallback", () => {
+    const { container } = renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: {
+            type: "team",
+            name: "Product Team",
+            src: "/product-team.png",
+          },
+        },
+      })
+    )
+
+    expect(
+      screen.queryByTestId("chat-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-hidden="true"]')
+    ).toBeInTheDocument()
+  })
+
   it("renders an inline action as its own icon button and fires the callback", () => {
     const onClick = vi.fn()
     const runtime = makeRuntime()

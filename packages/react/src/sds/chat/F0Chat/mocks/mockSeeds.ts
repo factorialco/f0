@@ -182,9 +182,8 @@ export type Seed = {
   myRole?: "admin" | "member" | "guest"
 }
 
-/** Group avatar: the emoji when one is given, otherwise the company avatar
- * built from the group's name (its initials). A company avatar is never passed
- * by hand — it's always this name-derived fallback. */
+/** Group avatar data: an explicit emoji when one is given; otherwise a
+ * name-derived company avatar that chat surfaces replace with the ＃ fallback. */
 const groupAvatar = (name: string, emoji?: string): AvatarVariant =>
   emoji ? { type: "emoji", emoji } : { type: "company", name }
 

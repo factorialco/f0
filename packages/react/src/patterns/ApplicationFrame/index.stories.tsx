@@ -891,6 +891,59 @@ export const CommunicationsPanelLeft: Story = {
 }
 
 /**
+ * A group without an emoji or uploaded image uses the same ＃ fallback in the
+ * conversations sidebar and the open chat header.
+ */
+export const CommunicationsGroupAvatarFallback: Story = {
+  name: "Communications — group avatar fallback",
+  tags: ["f0chat-group-avatar-fallback"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar initialTab="messages" />}
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Use the same fallback in the sidebar and header", async () => {
+      const sidebarFallback = await page.findByTestId(
+        "sidebar-group-avatar-fallback"
+      )
+      await expect(
+        sidebarFallback.getBoundingClientRect().width
+      ).toBeGreaterThan(0)
+      await expect(sidebarFallback).toHaveTextContent("＃")
+      await userEvent.click(
+        await page.findByRole("button", { name: "Leadership" })
+      )
+      const headerFallback = await page.findByTestId(
+        "chat-group-avatar-fallback"
+      )
+      await expect(
+        headerFallback.getBoundingClientRect().width
+      ).toBeGreaterThan(0)
+      await expect(headerFallback).toHaveTextContent("＃")
+    })
+  },
+}
+
+/**
  * The standalone AI assistant: no communications sidebar, the chat docked on the
  * right as a resizable side panel, with the full feature set (credits, file
  * attachments, dictation, entity refs, disclaimer + quick actions footer).
@@ -2173,7 +2226,7 @@ export const Snapshot: Story = {
           sidebar={
             <ConversationsSidebar
               initialTab="messages"
-              autoOpenConvId="grp-reporting"
+              autoOpenConvId="grp-leadership"
             />
           }
         >
@@ -2185,6 +2238,22 @@ export const Snapshot: Story = {
     </MockAiChatRuntimeProvider>
   ),
   play: async ({ canvas, step }) => {
+    await step("Show the group avatar fallback", async () => {
+      const sidebarFallback = await canvas.findByTestId(
+        "sidebar-group-avatar-fallback"
+      )
+      const headerFallback = await canvas.findByTestId(
+        "chat-group-avatar-fallback"
+      )
+
+      await expect(
+        sidebarFallback.getBoundingClientRect().width
+      ).toBeGreaterThan(0)
+      await expect(
+        headerFallback.getBoundingClientRect().width
+      ).toBeGreaterThan(0)
+    })
+
     await step("Show partial and completed group receipt footers", async () => {
       const partial = within(
         await canvas.findByRole("region", { name: "Partial group receipts" })
