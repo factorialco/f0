@@ -60,6 +60,7 @@ Five variants communicate intent. Without a `variant`, the neutral **`default`**
 - The result can arrive **while the user isn't looking** (an export that finishes tomorrow, a background job) → use the **notification** system (bell / email)
 - The information is **persistent context** tied to a region of the page → `F0Alert`
 - It reflects a **persistent condition** (offline, session expired) that lasts until it's resolved → `F0Alert` / banner, not a toast that lingers in the corner
+- It's the **validation of an open dialog's own action** (a form error, a limit like "min 2, max 4 days") → show it **inline in the dialog**, next to the field or the submit — not as a toast. A blocking dialog owns the user's focus, so its feedback belongs inside it; a toast beside or over the dialog reads as something happening "outside" that the user, still blocked, hasn't acted on.
 
 If a toast's text is long enough to truncate, that's the signal it shouldn't be a toast.
 
