@@ -196,9 +196,28 @@ export function FileFieldRenderer({
     if (!hasFormValue) return
 
     initialFilesApplied.current = true
-    setEntries(
-      resolveInitialEntries(initialFilesPool, formField.value, isMultiple)
-    )
+    setEntries((prev) => {
+      // Preserve files the user added at runtime (those backed by a File). The
+      // one-time pool sync only seeds pre-existing files, so it must never drop
+      // an in-flight or just-uploaded entry whose value isn't part of the pool
+      // (a fresh upload's value never is). Without this, uploading the first
+      // file into a field whose pool is empty (or resolves after the value is
+      // populated) wiped that file from the list.
+      const runtimeEntries = prev.filter((entry) => entry.file)
+      const runtimeValues = new Set(
+        runtimeEntries
+          .map((entry) => entry.value)
+          .filter((value): value is string => value != null)
+      )
+      const seededEntries = resolveInitialEntries(
+        initialFilesPool,
+        formField.value,
+        isMultiple
+      ).filter(
+        (entry) => entry.value == null || !runtimeValues.has(entry.value)
+      )
+      return [...seededEntries, ...runtimeEntries]
+    })
   }, [initialFilesPool, formField.value, isMultiple])
   const [validationError, setValidationError] = useState<string | null>(null)
 
