@@ -230,6 +230,41 @@ role: f0FormField.select({
 
 When using enum-inferred select fields, use `undefined` (not `""`) as the default value for empty initial state.
 
+### Select options from a data source
+
+Instead of a static `options` array, `select` and `multiSelect` accept a `source` — the same `DataSourceDefinition` abstraction that powers `OneDataCollection` and tables — together with a `mapOptions` function that turns each record into an option. Use this when options come from an API, or when the list is large enough to benefit from server-side search and pagination. `source` and `options` are mutually exclusive.
+
+```tsx
+import { createDataSourceDefinition } from "@factorialco/f0-react"
+
+// A source fetches records; `search` is passed through so filtering can happen server-side.
+const countriesSource = createDataSourceDefinition<Country>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      const records = await api.countries.list({ query: search })
+      return { records }
+    },
+  },
+})
+
+const schema = z.object({
+  country: f0FormField.select({
+    label: "Country",
+    showSearchBox: true,
+    source: countriesSource,
+    mapOptions: (c) => ({
+      value: c.id,
+      label: c.name,
+      description: c.continent,
+    }),
+  }),
+})
+```
+
+Because filtering is delegated to the source's `fetchData({ search })`, the client-side `searchFn` prop is not available in this mode. For paginated results, give the adapter `paginationType: "infinite-scroll"` and the dropdown loads more as the user scrolls. The same `source` + `mapOptions` pair works with `multiSelect` for multiple selection.
+
+<Canvas of={Stories.SelectWithDataSource} />
+
 ### `optional` flag
 
 All shortcuts that support `optional` accept it as a top-level config key instead of wrapping the schema manually:

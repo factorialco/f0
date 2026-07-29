@@ -1,5 +1,76 @@
 # Changelog
 
+## [4.62.1](https://github.com/factorialco/f0/compare/f0-react-v4.62.0...f0-react-v4.62.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Form:** block submit while a file upload is in flight ([#4886](https://github.com/factorialco/f0/issues/4886)) ([5c14106](https://github.com/factorialco/f0/commit/5c14106a5fdcce7d9dadb94d8f3527a68944a544))
+
+## [4.62.0](https://github.com/factorialco/f0/compare/f0-react-v4.61.2...f0-react-v4.62.0) (2026-07-29)
+
+
+### Features
+
+* **OneDataCollection:** optional group-header selection in Kanban ([#4885](https://github.com/factorialco/f0/issues/4885)) ([5c5896f](https://github.com/factorialco/f0/commit/5c5896f5061129b35dd0f79655381c5f58b6a0eb))
+
+## [4.61.2](https://github.com/factorialco/f0/compare/f0-react-v4.61.1...f0-react-v4.61.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* **react:** stop flagging widened unions as breaking API changes ([#4883](https://github.com/factorialco/f0/issues/4883)) ([26c05f5](https://github.com/factorialco/f0/commit/26c05f5f3d1e2aebefde4ad223399da3c41c1499))
+
+## [4.61.1](https://github.com/factorialco/f0/compare/f0-react-v4.61.0...f0-react-v4.61.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Graph:** force instant node positioning (transition: none) ([#4863](https://github.com/factorialco/f0/issues/4863)) ([eb8382a](https://github.com/factorialco/f0/commit/eb8382a3bc75c8daeeff6e591efdf17ebbde317d))
+* **Table:** unmount flat rows on removal instead of animating them out ([#4882](https://github.com/factorialco/f0/issues/4882)) ([dfd46ee](https://github.com/factorialco/f0/commit/dfd46eefa5acd2cb7aa695cbe927ab371d128dc1))
+
+## [4.61.0](https://github.com/factorialco/f0/compare/f0-react-v4.60.1...f0-react-v4.61.0) (2026-07-28)
+
+
+### Features
+
+* **OneDataCollection:** paginate search preview (infinite scroll) + focus first row for Enter-to-select ([#4833](https://github.com/factorialco/f0/issues/4833)) ([1d66320](https://github.com/factorialco/f0/commit/1d6632031118eeb79ac8913f9501d9ed343e2d0f))
+
+## [4.60.1](https://github.com/factorialco/f0/compare/f0-react-v4.60.0...f0-react-v4.60.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **F0DataChart:** round negative bars away from the zero line ([#4871](https://github.com/factorialco/f0/issues/4871)) ([da1c075](https://github.com/factorialco/f0/commit/da1c075c79de738737a433cf58d33b8dd2956fe3))
+
+## [4.60.0](https://github.com/factorialco/f0/compare/f0-react-v4.59.0...f0-react-v4.60.0) (2026-07-28)
+
+
+### Features
+
+* content props + media a11y ([#4850](https://github.com/factorialco/f0/issues/4850)) ([3e06b02](https://github.com/factorialco/f0/commit/3e06b02e11ae8733c21cafd6ecea3154d78d85d9))
+
+## [4.59.0](https://github.com/factorialco/f0/compare/f0-react-v4.58.0...f0-react-v4.59.0) (2026-07-28)
+
+
+### Features
+
+* **F0ProgressSeries:** add multi-bar progress series component ([#4842](https://github.com/factorialco/f0/issues/4842)) ([782df82](https://github.com/factorialco/f0/commit/782df828971549584c1f66e798935e32a8708e9b))
+
+## [4.58.0](https://github.com/factorialco/f0/compare/f0-react-v4.57.0...f0-react-v4.58.0) (2026-07-28)
+
+
+### Features
+
+* **OneDataCollection:** add grouping to the Kanban visualization ([#4821](https://github.com/factorialco/f0/issues/4821)) ([c676f08](https://github.com/factorialco/f0/commit/c676f08a90de2ebe97b3829412a2a0f72e6718d8))
+
+## [4.57.0](https://github.com/factorialco/f0/compare/f0-react-v4.56.5...f0-react-v4.57.0) (2026-07-28)
+
+
+### Features
+
+* **F0AiChat:** add host overlay slot ([#4851](https://github.com/factorialco/f0/issues/4851)) ([fb492f1](https://github.com/factorialco/f0/commit/fb492f15c020955cbb5fafebdaee4a6bd441895d))
+
 ## [4.56.5](https://github.com/factorialco/f0/compare/f0-react-v4.56.4...f0-react-v4.56.5) (2026-07-28)
 
 

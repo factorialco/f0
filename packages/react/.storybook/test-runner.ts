@@ -10,6 +10,14 @@ import type Reporter from "axe-playwright/dist/types"
 import { appendFileSync, readFileSync } from "fs"
 import { join } from "path"
 
+// NOTE: the `.ts` extension is required — the test-runner's loader does not
+// resolve extensionless sibling imports (Storybook warns "extensionless imports
+// detected" and the module fails to load at runtime).
+import {
+  A11Y_CI_CONTEXT,
+  A11Y_RUN_ONLY,
+} from "../src/lib/storybook-utils/a11yAxeConfig.ts"
+
 // Story files grandfathered to skip axe while their violations are burned
 // down (Path to AA). Maps file → number of allowed skip call-sites; counts
 // may only shrink. Enforced per-count by a11ySkipAllowlist.test.ts; here we
@@ -122,6 +130,106 @@ const config: TestRunnerConfig = {
       console.error("Failed to inject axe:", error)
       throw error
     }
+
+    // Custom rule: an audio-only recording needs a transcription to be
+    // accessible (WCAG 2.1 SC 1.2.1, Audio-only). axe can't detect this
+    // automatically, so F0AudioPlayerCard exposes the outcome on a
+    // `data-audio-transcription` attribute and we flag the "missing" state.
+    // The rule only matches that attribute, so it's scoped to the audio player
+    // and never touches other components. It's tagged WCAG A so it runs inside
+    // the existing `runOnly` scope; stories that intentionally omit a
+    // transcription can downgrade it with `a11y: { test: "todo" }`.
+    try {
+      await page.evaluate(() => {
+        window.axe.configure({
+          checks: [
+            {
+              id: "f0-audio-has-transcription",
+              evaluate: (node: Element) =>
+                node.getAttribute("data-audio-transcription") !== "missing",
+              metadata: {
+                impact: "serious",
+                messages: {
+                  pass: "The audio recording has a transcription available.",
+                  fail:
+                    "This audio-only recording has no transcription: none was " +
+                    "passed via `content.transcription` and none could be " +
+                    "derived from the audio file. Provide a transcription so " +
+                    "the spoken content is accessible (WCAG 2.1 SC 1.2.1).",
+                },
+              },
+            },
+          ],
+          rules: [
+            {
+              id: "f0-audio-transcription",
+              selector: "[data-audio-transcription]",
+              any: ["f0-audio-has-transcription"],
+              enabled: true,
+              // `wcag2a`/`wcag21a` keep the rule inside the runner's WCAG A/AA
+              // `runOnly` scope; `wcag121` is the success-criterion tag the CI
+              // a11y-comment mapper (see `wcagFromTags`) reads to label this as
+              // SC 1.2.1 (Audio-only) rather than leaving the criterion blank.
+              tags: ["wcag2a", "wcag21a", "wcag121"],
+              metadata: {
+                description:
+                  "Audio-only recordings must provide a transcription (WCAG 2.1 SC 1.2.1)",
+                help: "Provide a transcription for the audio recording",
+                helpUrl:
+                  "https://www.w3.org/WAI/WCAG21/Understanding/audio-only-and-video-only-prerecorded.html",
+              },
+            },
+          ],
+        })
+
+        // Sibling rule for video: prerecorded video needs captions (WCAG 2.1
+        // SC 1.2.2). Same pattern — scoped to `data-video-captions`, so it only
+        // matches F0VideoPlayer. `wcag122` is the success-criterion tag the CI
+        // a11y-comment mapper reads to label it as SC 1.2.2.
+        window.axe.configure({
+          checks: [
+            {
+              id: "f0-video-has-captions",
+              evaluate: (node: Element) =>
+                node.getAttribute("data-video-captions") !== "missing",
+              metadata: {
+                impact: "serious",
+                messages: {
+                  pass: "The video has captions available.",
+                  fail:
+                    "This prerecorded video has no captions: none were passed " +
+                    "via `content.captions` and none are embedded in the video " +
+                    "file. Provide captions so the spoken content is accessible " +
+                    "(WCAG 2.1 SC 1.2.2).",
+                },
+              },
+            },
+          ],
+          rules: [
+            {
+              id: "f0-video-captions",
+              selector: "[data-video-captions]",
+              any: ["f0-video-has-captions"],
+              enabled: true,
+              tags: ["wcag2a", "wcag21a", "wcag122"],
+              metadata: {
+                description:
+                  "Prerecorded video must provide captions (WCAG 2.1 SC 1.2.2)",
+                help: "Provide captions for the video",
+                helpUrl:
+                  "https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html",
+              },
+            },
+          ],
+        })
+      })
+    } catch (error) {
+      console.error(
+        "Failed to register the audio-transcription a11y rule:",
+        error
+      )
+      throw error
+    }
   },
   async postVisit(page, context) {
     try {
@@ -181,22 +289,11 @@ const config: TestRunnerConfig = {
         }
       })
 
-      // Get violations without throwing an error
-      const violations = await getViolations(page, "#storybook-root", {
-        runOnly: {
-          type: "tag",
-          // WCAG 2.0, 2.1 and 2.2 at levels A and AA — matches the Plexus
-          // audit scope (UNE-EN 301549 + WCAG 2.1/2.2). AAA and axe's
-          // non-normative best-practice rules are intentionally excluded.
-          values: [
-            "wcag2a",
-            "wcag2aa",
-            "wcag21a",
-            "wcag21aa",
-            "wcag22a",
-            "wcag22aa",
-          ],
-        },
+      // Get violations without throwing an error. The rule scope is shared with
+      // the a11y addon (see src/lib/storybook-utils/a11yAxeConfig.ts) so the
+      // panel and CI cannot drift apart.
+      const violations = await getViolations(page, A11Y_CI_CONTEXT, {
+        runOnly: A11Y_RUN_ONLY,
       })
 
       // Report violations if any are found

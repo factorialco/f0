@@ -12,8 +12,18 @@ export interface PlayerController extends Omit<
   playbackRates: number[]
 }
 
+/**
+ * The controller drives a single `<audio>` element, so it takes an already
+ * language-resolved source (a URL or a lazy resolver) — not the localizable
+ * `Localized<...>` shape. Callers resolve the active language first (see
+ * {@link useAudioLanguage}).
+ */
+type ControllerProps = Omit<F0AudioPlayerProps, "src"> & {
+  src: string | (() => Promise<string>)
+}
+
 export const usePlayerController = (
-  props: F0AudioPlayerProps
+  props: ControllerProps
 ): PlayerController => {
   const {
     src,

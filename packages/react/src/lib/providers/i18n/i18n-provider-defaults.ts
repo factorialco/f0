@@ -56,7 +56,15 @@ export const defaultTranslations = {
     position: "{{current}} of {{total}}",
     viewDetail: "View detail",
     hideDetail: "Hide detail",
+    viewTranscription: "View transcription",
+    hideTranscription: "Hide transcription",
+    viewSummary: "View summary",
+    hideSummary: "Hide summary",
     details: "Recording details",
+    summary: "Summary",
+    transcription: "Transcription",
+    language: "Language",
+    audio: "Audio",
   },
   actions: {
     add: "Add",
@@ -625,6 +633,10 @@ export const defaultTranslations = {
       description: "Try a different date or fewer filters",
     },
   },
+  progressSeries: {
+    noData: "No data",
+    canceled: "Canceled",
+  },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
@@ -903,6 +915,7 @@ export const defaultTranslations = {
     paused: "Paused",
     mute: "Mute",
     unmute: "Unmute",
+    noAudio: "No audio",
     volume: "Volume",
     seekLabel: "Seek",
     enterFullscreen: "Enter fullscreen",
@@ -910,6 +923,12 @@ export const defaultTranslations = {
     playbackSpeed: "Playback speed ({{rate}})",
     playbackSpeedLabel: "Playback speed",
     timeProgress: "{{current}} of {{total}}",
+    captions: "Captions",
+    audioDescription: "Audio description",
+    audio: "Audio",
+    subtitles: "Subtitles",
+    settings: "Settings",
+    off: "Off",
   },
 } as const
 
