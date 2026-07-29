@@ -541,7 +541,7 @@ export function FileFieldRenderer({
       {validationError && (
         <div className="-mt-2 flex items-center gap-1">
           <F0Icon icon={AlertCircle} color="critical" />
-          <p className="text-sm font-medium text-f1-foreground-critical">
+          <p className="text-base font-medium text-f1-foreground-critical">
             {validationError}
           </p>
         </div>
