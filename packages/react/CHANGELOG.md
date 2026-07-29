@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.62.0](https://github.com/factorialco/f0/compare/f0-react-v4.61.2...f0-react-v4.62.0) (2026-07-29)
+
+
+### Features
+
+* **OneDataCollection:** optional group-header selection in Kanban ([#4885](https://github.com/factorialco/f0/issues/4885)) ([5c5896f](https://github.com/factorialco/f0/commit/5c5896f5061129b35dd0f79655381c5f58b6a0eb))
+
 ## [4.61.2](https://github.com/factorialco/f0/compare/f0-react-v4.61.1...f0-react-v4.61.2) (2026-07-29)
 
 
