@@ -1,5 +1,6 @@
 import { composeStory } from "@storybook/react-vite"
 import { screen, waitFor } from "@testing-library/react"
+import { ComponentProps, useState } from "react"
 import { userEvent } from "storybook/test"
 import { describe, expect, test, vi } from "vitest"
 
@@ -9,6 +10,20 @@ import Meta, { WithStep } from "../__stories__/F0NumberInput.stories"
 import { F0NumberInput } from "../index"
 
 const WithStepStory = composeStory(WithStep, Meta)
+
+/**
+ * Mirrors how consumers wire the input — including the EditableTable cells,
+ * where every keystroke round-trips through the parent's state.
+ */
+function ControlledNumberInput({
+  initialValue = null,
+  ...props
+}: Omit<ComponentProps<typeof F0NumberInput>, "value" | "onChange"> & {
+  initialValue?: number | null
+}) {
+  const [value, setValue] = useState<number | null>(initialValue)
+  return <F0NumberInput {...props} value={value} onChange={setValue} />
+}
 
 describe("F0NumberInput", () => {
   test("renders the input", () => {
@@ -428,6 +443,150 @@ describe("F0NumberInput", () => {
 
       expect(input).toHaveValue("17,")
       expect(onChange).toHaveBeenLastCalledWith(17)
+    })
+  })
+
+  describe("grouping", () => {
+    test("groups the resting display and drops the separators for editing", async () => {
+      render(
+        <F0NumberInput
+          locale="en-US"
+          value={50000}
+          maxDecimals={0}
+          grouping
+          label="Salary"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      expect(input).toHaveValue("50,000")
+
+      await userEvent.click(input)
+      expect(input).toHaveValue("50000")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("50,000")
+    })
+
+    test("keeps the decimals the user typed when grouping on blur", async () => {
+      render(
+        <ControlledNumberInput
+          locale="en-US"
+          maxDecimals={2}
+          grouping
+          label="Salary"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "50000.50")
+      expect(input).toHaveValue("50000.50")
+
+      await userEvent.tab()
+      // Not "50,000.5" — re-formatting the parsed number would drop the
+      // trailing zero the user typed.
+      expect(input).toHaveValue("50,000.50")
+    })
+
+    test("shows every decimal of the value, not just Intl's default three", () => {
+      render(
+        <F0NumberInput locale="en-US" value={1.23456} grouping label="Rate" />
+      )
+
+      expect(screen.getByRole("textbox")).toHaveValue("1.23456")
+    })
+
+    test("reads a typed group separator as grouping, not as a decimal", async () => {
+      render(
+        <ControlledNumberInput
+          locale="en-US"
+          maxDecimals={2}
+          grouping
+          label="Salary"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "50,000")
+
+      expect(input).toHaveValue("50000")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("50,000")
+    })
+
+    test("follows the locale's convention for each separator", async () => {
+      render(
+        <ControlledNumberInput
+          locale="es-ES"
+          maxDecimals={2}
+          grouping
+          label="Salary"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      // In es-ES the dot groups and the comma separates decimals — the
+      // opposite of en-US, and what the resting display formats with.
+      await userEvent.type(input, "5.000,54")
+      expect(input).toHaveValue("5000,54")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("5.000,54")
+    })
+
+    test("accepts a grouped value pasted into the field", async () => {
+      render(
+        <ControlledNumberInput
+          locale="en-US"
+          maxDecimals={2}
+          grouping
+          label="Salary"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.click(input)
+      await userEvent.paste("1,234,567.8")
+
+      expect(input).toHaveValue("1234567.8")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("1,234,567.8")
+    })
+
+    test("allows the group separator in integer mode", async () => {
+      const onChange = vi.fn()
+      render(
+        <F0NumberInput
+          locale="en-US"
+          maxDecimals={0}
+          grouping
+          onChange={onChange}
+          label="Headcount"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      // Grouping carries no decimals, so the separator stays typeable even
+      // where a decimal separator is rejected.
+      await userEvent.type(input, "1,500")
+
+      expect(input).toHaveValue("1500")
+      expect(onChange).toHaveBeenLastCalledWith(1500)
+    })
+
+    test("reaches the decimal separator from either key when neither groups", async () => {
+      render(
+        <ControlledNumberInput locale="fr-FR" maxDecimals={2} label="Rate" />
+      )
+
+      const input = screen.getByRole("textbox")
+      // fr-FR groups with a space, so a numeric keypad dot still starts the
+      // decimals — and reads back as the comma fr-FR formats them with.
+      await userEvent.type(input, "1234.5")
+
+      expect(input).toHaveValue("1234,5")
     })
   })
 })

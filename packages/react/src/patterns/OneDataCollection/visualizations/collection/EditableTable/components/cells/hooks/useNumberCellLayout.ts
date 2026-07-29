@@ -1,5 +1,9 @@
 import { useMemo } from "react"
 
+import {
+  toEditableString,
+  withGroupSeparators,
+} from "@/components/F0NumberInput/internal/localeNumber"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useL10n } from "@/lib/providers/l10n"
 
@@ -31,19 +35,14 @@ export function useNumberCellLayout<R extends RecordType>(
 
   const units = resolveUnits(config, item)
   const unitsBefore = units ? config?.unitsPosition === "before" : false
-  // Grouped by default; measure the width with grouping so the grouped resting
-  // display (e.g. `1,234,567`) isn't clipped.
+  // Grouped by default; the width is measured on the same string the input
+  // renders — including the grouping separators — so it isn't clipped.
   const grouping = config?.grouping ?? true
-  const formatter = useMemo(
-    () =>
-      new Intl.NumberFormat(locale, {
-        maximumFractionDigits: config?.maxDecimals,
-        useGrouping: grouping,
-      }),
-    [locale, config?.maxDecimals, grouping]
-  )
-
-  const formatted = numericValue != null ? formatter.format(numericValue) : ""
+  const formatted = useMemo(() => {
+    if (numericValue == null) return ""
+    const editable = toEditableString(numericValue, locale, config?.maxDecimals)
+    return grouping ? withGroupSeparators(editable, locale) : editable
+  }, [numericValue, locale, config?.maxDecimals, grouping])
 
   const fullText = units
     ? unitsBefore

@@ -26,23 +26,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { InputFieldProps } from "@/components/F0InputField"
 import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"
-
-/**
- * Formats a number for display. `useGrouping` adds the locale's thousands
- * separators (e.g. `1,234,567`) — used for the resting display; while the
- * field is focused it's off so the user edits a plain, ungrouped number
- * (which keeps `extractNumber` and caret handling simple).
- */
-const formatValue = (
-  value: number,
-  locale: string,
-  maxDecimals?: number,
-  useGrouping = false
-) =>
-  new Intl.NumberFormat(locale, {
-    maximumFractionDigits: maxDecimals,
-    useGrouping,
-  }).format(value)
+import {
+  isDecimalSeparator,
+  toEditableString,
+  withGroupSeparators,
+} from "./internal/localeNumber"
 
 export interface NumberInputPopoverConfig {
   icon?: IconType
@@ -168,8 +156,9 @@ export type NumberInputInternalProps = Pick<
     /**
      * Show the locale's thousands separators in the resting display (e.g.
      * `1,234,567`). While the field is focused the number is shown ungrouped
-     * for easy editing. Off by default — enable it for amounts/quantities, but
-     * leave it off for years, IDs and other non-grouped numbers. @default false
+     * for easy editing; typing or pasting the separator works either way. Off
+     * by default — enable it for amounts/quantities, but leave it off for
+     * years, IDs and other non-grouped numbers. @default false
      */
     grouping?: boolean
     onChange?: (value: number | null) => void
@@ -218,11 +207,11 @@ export const NumberInputInternal = forwardRef<
     defaultProp: false,
     onChange: popover?.onOpenChange,
   })
-  // The resting display is grouped (thousands separators); it switches to a
-  // plain ungrouped number while the field is focused for editing.
   const [isFocused, setIsFocused] = useState(false)
+  // Always the plain, ungrouped number the user edits — the single source of
+  // truth for the value's text. Grouping is applied to it for display only.
   const [fieldValue, setFieldValue] = useState<string>(() =>
-    value != null ? formatValue(value, locale, maxDecimals, grouping) : ""
+    value != null ? toEditableString(value, locale, maxDecimals) : ""
   )
   const [draftValue, setDraftValue] = useState<number | null>(
     value != null ? value : null
@@ -289,17 +278,17 @@ export const NumberInputInternal = forwardRef<
         input.value.slice(0, start) + data + input.value.slice(end)
 
       if (
-        !extractNumber(proposedValue, { maxDecimals }) ||
-        (maxDecimals === 0 && /[.,]/.test(data))
+        !extractNumber(proposedValue, { maxDecimals, locale }) ||
+        (maxDecimals === 0 && isDecimalSeparator(data, locale))
       ) {
         e.preventDefault()
       }
     },
-    [maxDecimals]
+    [maxDecimals, locale]
   )
 
   const handleChange = (inputValue: string) => {
-    const extractedData = extractNumber(inputValue, { maxDecimals })
+    const extractedData = extractNumber(inputValue, { maxDecimals, locale })
     if (!extractedData) {
       return
     }
@@ -328,8 +317,9 @@ export const NumberInputInternal = forwardRef<
       return
     }
 
-    const clampedData = extractNumber(clampedValue.toString(), {
+    const clampedData = extractNumber(toEditableString(clampedValue, locale), {
       maxDecimals,
+      locale,
     })
     setFieldValue(clampedData?.formattedValue ?? "")
     inputOnChange?.(clampedData?.value ?? null)
@@ -339,7 +329,7 @@ export const NumberInputInternal = forwardRef<
     if (!step) return
     if (inputValue == null) {
       const initialValue = step
-      return handleChange(formatValue(initialValue, locale, maxDecimals))
+      return handleChange(toEditableString(initialValue, locale, maxDecimals))
     }
 
     const newValue = type === "increase" ? inputValue + step : inputValue - step
@@ -347,29 +337,32 @@ export const NumberInputInternal = forwardRef<
       return
     }
 
-    handleChange(formatValue(newValue, locale, maxDecimals))
+    handleChange(toEditableString(newValue, locale, maxDecimals))
   }
 
   useEffect(() => {
-    // With grouping, the resting (blurred) display shows thousands separators
-    // and the focused display drops them for editing. This branch also drives
-    // the focus/blur transitions (re-formatting when `isFocused` flips).
-    if (grouping && !isFocused) {
-      setFieldValue(
-        inputValue != null
-          ? formatValue(inputValue, locale, maxDecimals, true)
-          : ""
-      )
-      return
-    }
-    // Otherwise (grouping off, or focused): reconcile the field only when
-    // `value` changed externally, so in-progress typing isn't clobbered.
-    const extractedData = extractNumber(fieldValue, { maxDecimals })
+    // Reconcile the field only when `value` changed externally, so in-progress
+    // typing isn't clobbered — a value the user is still typing (`17,`, or the
+    // trailing zero of `50000,50`) parses to the same number and is kept.
+    const extractedData = extractNumber(fieldValue, { maxDecimals, locale })
     if (inputValue === undefined || inputValue == extractedData?.value) return
     setFieldValue(
-      inputValue != null ? formatValue(inputValue, locale, maxDecimals) : ""
+      inputValue != null
+        ? toEditableString(inputValue, locale, maxDecimals)
+        : ""
     )
-  }, [fieldValue, inputValue, locale, maxDecimals, isFocused, grouping])
+  }, [fieldValue, inputValue, locale, maxDecimals])
+
+  // Grouping is display-only: inserting separators as the user types would
+  // fight the caret. It is applied to the field's own text rather than to the
+  // parsed number, which would round away the decimals the user typed.
+  const displayValue = useMemo(
+    () =>
+      grouping && !isFocused
+        ? withGroupSeparators(fieldValue, locale)
+        : fieldValue,
+    [grouping, isFocused, fieldValue, locale]
+  )
 
   const innerStatusTypeOnly = resolvedStatus
     ? { type: resolvedStatus.type }
@@ -381,7 +374,7 @@ export const NumberInputInternal = forwardRef<
         type="text"
         ref={ref}
         id={inputId}
-        value={fieldValue}
+        value={displayValue}
         inputMode={maxDecimals === 0 ? "numeric" : "decimal"}
         onChange={handleChange}
         {...props}

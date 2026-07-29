@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest"
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "../../../../../../testing/test-utils"
@@ -8,6 +9,28 @@ import { EditableCellProps } from "../components/cells"
 import { NumberCell } from "../components/cells/NumberCell"
 
 type TestRecord = { id: string; salary: number; currency?: string }
+
+/**
+ * The table owns the cell's value, so edits only land via `onChange` — without
+ * a parent writing them back, the cell can't accumulate more than one keystroke.
+ */
+function ControlledNumberCell({
+  value: initialValue,
+  onChange,
+  ...props
+}: EditableCellProps<TestRecord>) {
+  const [value, setValue] = useState(initialValue)
+  return (
+    <NumberCell
+      {...props}
+      value={value}
+      onChange={(next) => {
+        setValue(next ?? "")
+        onChange(next)
+      }}
+    />
+  )
+}
 
 function makeEditableColumn(
   overrides: Partial<EditableCellProps<TestRecord>["editableColumn"]> = {}
@@ -46,6 +69,49 @@ describe("NumberCell", () => {
     )
 
     expect(screen.getByRole("textbox")).toHaveValue("42000")
+  })
+
+  it("keeps the decimals typed into the cell when grouping on blur", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <ControlledNumberCell
+        {...defaultProps}
+        value=""
+        editableColumn={makeEditableColumn({
+          numberConfig: { locale: "en-US", maxDecimals: 2 },
+        })}
+      />
+    )
+
+    const input = screen.getByRole("textbox")
+    await user.type(input, "50000.50")
+    expect(input).toHaveValue("50000.50")
+
+    await user.tab()
+    expect(input).toHaveValue("50,000.50")
+  })
+
+  it("accepts a grouped value typed into the cell", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+
+    render(
+      <ControlledNumberCell
+        {...defaultProps}
+        value=""
+        onChange={onChange}
+        editableColumn={makeEditableColumn({
+          numberConfig: { locale: "en-US", maxDecimals: 0 },
+        })}
+      />
+    )
+
+    const input = screen.getByRole("textbox")
+    await user.type(input, "50,000")
+
+    expect(input).toHaveValue("50000")
+    expect(onChange).toHaveBeenLastCalledWith("50000")
   })
 
   it("renders empty when value is an empty string", () => {

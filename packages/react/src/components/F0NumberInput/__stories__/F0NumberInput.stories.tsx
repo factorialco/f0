@@ -30,6 +30,15 @@ const meta = {
     maxDecimals: {
       control: { type: "number" },
     },
+    grouping: {
+      description:
+        "Show the locale's thousand separators in the resting display. Dropped while the field is focused.",
+      control: { type: "boolean" },
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     units: {
       description: "Units to append to the value",
       control: { type: "text" },
@@ -166,6 +175,26 @@ export const WithUnits: Story = {
   args: {
     label: "Insert amount",
     units: "EUR",
+  },
+}
+
+/**
+ * Thousand separators follow the locale in the resting display, and are dropped
+ * while the field is focused so the number is edited plain. Switch the `locale`
+ * control to see `en-US` (`50,000.50`) against `es-ES` (`50.000,50`), and try
+ * typing or pasting a grouped value — the separators are accepted either way.
+ */
+export const WithGrouping: Story = {
+  args: {
+    label: "Salary",
+    grouping: true,
+    maxDecimals: 2,
+    value: 50000.5,
+    units: "EUR",
+  },
+  render: (props) => {
+    const [value, setValue] = useState<number | null>(props.value ?? null)
+    return <F0NumberInput {...props} value={value} onChange={setValue} />
   },
 }
 
