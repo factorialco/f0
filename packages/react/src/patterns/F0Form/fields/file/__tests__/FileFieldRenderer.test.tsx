@@ -392,6 +392,61 @@ describe("FileFieldRenderer", () => {
     })
   })
 
+  it("shows a file-type validation error in multiple mode", async () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()).optional(), {
+        label: "Attachments",
+        fieldType: "file",
+        multiple: true,
+        accept: ["application/pdf", "image"],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-multi-type-validation"
+        schema={schema}
+        defaultValues={{ files: [] }}
+        useUpload={createMockUploadHook()}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const dropzone = screen.getByRole("button", { name: /drag and drop/i })
+    const makeCsvTransfer = () => ({
+      files: [createFile("data.csv", 1024, "text/csv")],
+      types: ["Files"],
+    })
+
+    // First unsupported drop surfaces the error.
+    fireEvent.dragOver(dropzone, { dataTransfer: makeCsvTransfer() })
+    fireEvent.drop(dropzone, { dataTransfer: makeCsvTransfer() })
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "File type not accepted. Accepted formats: PDF, Images"
+        )
+      ).toBeInTheDocument()
+    })
+
+    // A second unsupported drop must keep surfacing the error. This is the
+    // regression: the message used to be set from inside the setEntries
+    // updater, so once a prior state update was pending the updater ran after
+    // the read and the error was silently dropped on the repeat attempt.
+    fireEvent.dragOver(dropzone, { dataTransfer: makeCsvTransfer() })
+    fireEvent.drop(dropzone, { dataTransfer: makeCsvTransfer() })
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "File type not accepted. Accepted formats: PDF, Images"
+        )
+      ).toBeInTheDocument()
+    })
+
+    // No CSV entry was ever added.
+    expect(screen.queryByText("data.csv")).not.toBeInTheDocument()
+  })
+
   it("shows file size validation error", async () => {
     const schema = z.object({
       file: f0FormField(z.string().optional(), {

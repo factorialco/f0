@@ -289,56 +289,69 @@ export function FileFieldRenderer({
         return
       }
 
-      // Multiple mode: use functional updater to always read latest entries count.
-      // Validation error is captured via a local variable and scheduled after.
-      let errorMsg: string | null = null
+      // Multiple mode. Validate and build the new entries synchronously, then
+      // apply the error and merge separately. Doing the validation inside the
+      // setEntries updater would rely on React invoking that updater
+      // synchronously (eager state computation) so the captured error could be
+      // read right after — but that is not guaranteed. When the entries update
+      // is batched, the updater runs during render, after the error read, so
+      // the validation error was silently dropped (single mode never hit this
+      // because it sets the error synchronously).
+      const remaining =
+        field.maxFiles != null ? field.maxFiles - entries.length : Infinity
 
-      setEntries((prev) => {
-        const remaining =
-          field.maxFiles != null ? field.maxFiles - prev.length : Infinity
-
-        if (remaining <= 0) {
-          errorMsg = translations.maxFilesReached.replace(
+      if (remaining <= 0) {
+        setValidationError(
+          translations.maxFilesReached.replace(
             "{{maxFiles}}",
             String(field.maxFiles)
           )
-          return prev
-        }
+        )
+        return
+      }
 
-        const filesToProcess = files.slice(0, remaining)
-        if (files.length > remaining) {
-          errorMsg = translations.maxFilesReached.replace(
-            "{{maxFiles}}",
-            String(field.maxFiles)
-          )
-        }
-
-        const newEntries: FileEntry[] = []
-        for (const file of filesToProcess) {
-          const validationMsg = validateFile(file)
-          if (validationMsg) {
-            errorMsg = validationMsg
-            continue
-          }
-          if (!resolvedUseUpload) {
-            console.warn(
-              "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+      const filesToProcess = files.slice(0, remaining)
+      let errorMsg: string | null =
+        files.length > remaining
+          ? translations.maxFilesReached.replace(
+              "{{maxFiles}}",
+              String(field.maxFiles)
             )
-          }
-          newEntries.push({
-            key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-            file,
-          })
-        }
-        return [...prev, ...newEntries]
-      })
+          : null
 
-      // Apply captured error after the state update batch
+      const newEntries: FileEntry[] = []
+      for (const file of filesToProcess) {
+        const validationMsg = validateFile(file)
+        if (validationMsg) {
+          errorMsg = validationMsg
+          continue
+        }
+        if (!resolvedUseUpload) {
+          console.warn(
+            "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+          )
+        }
+        newEntries.push({
+          key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+          file,
+        })
+      }
+
       if (errorMsg !== null) {
         setValidationError(errorMsg)
       }
+      if (newEntries.length > 0) {
+        setEntries((prev) => [...prev, ...newEntries])
+      }
     },
-    [isMultiple, field.maxFiles, validateFile, resolvedUseUpload, translations]
+    [
+      isMultiple,
+      field.maxFiles,
+      validateFile,
+      resolvedUseUpload,
+      translations,
+      entries.length,
+    ]
   )
 
   const handleDragOver = useCallback(
