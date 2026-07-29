@@ -156,7 +156,15 @@ export declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly language: "Language";
+        readonly audio: "Audio";
     };
     readonly actions: {
         readonly add: "Add";
@@ -697,6 +705,10 @@ export declare const defaultTranslations: {
             readonly description: "Try a different date or fewer filters";
         };
     };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
+    };
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
@@ -988,6 +1000,7 @@ export declare const defaultTranslations: {
         readonly paused: "Paused";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
         readonly volume: "Volume";
         readonly seekLabel: "Seek";
         readonly enterFullscreen: "Enter fullscreen";
@@ -995,6 +1008,12 @@ export declare const defaultTranslations: {
         readonly playbackSpeed: "Playback speed ({{rate}})";
         readonly playbackSpeedLabel: "Playback speed";
         readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 
@@ -1069,8 +1088,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -1078,11 +1100,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

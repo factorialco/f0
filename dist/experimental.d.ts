@@ -80,6 +80,7 @@ import { PieChartProps as PieChartProps_2 } from './experimental';
 import { PopoverProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
+import { ProgressSeriesCellValue } from './types/progressSeries';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
 import { Provider } from 'react';
@@ -662,6 +663,13 @@ declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };
@@ -1130,10 +1138,6 @@ declare interface BaseHeaderProps_2 {
 
 declare type BaseMapMarkerColor = (typeof markerColors)[number];
 
-declare type BaseMapMarkerLabelPlacement = (typeof markerLabelPlacements)[number];
-
-declare type BaseMapMarkerSize = (typeof markerSizes)[number];
-
 /**
  * Represents a base structure for paginated API responses, providing
  * details about the records on the current page and pagination metadata.
@@ -1385,6 +1389,14 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * expandable region (e.g. a tree/graph expander).
      */
     "aria-expanded"?: boolean;
+    /**
+     * Identifies the expandable region controlled by the button.
+     */
+    "aria-controls"?: string;
+    /**
+     * Describes the type of popup opened by the button.
+     */
+    "aria-haspopup"?: React.AriaAttributes["aria-haspopup"];
     /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).
@@ -3307,7 +3319,15 @@ declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly language: "Language";
+        readonly audio: "Audio";
     };
     readonly actions: {
         readonly add: "Add";
@@ -3848,6 +3868,10 @@ declare const defaultTranslations: {
             readonly description: "Try a different date or fewer filters";
         };
     };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
+    };
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
@@ -4139,6 +4163,7 @@ declare const defaultTranslations: {
         readonly paused: "Paused";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
         readonly volume: "Volume";
         readonly seekLabel: "Seek";
         readonly enterFullscreen: "Enter fullscreen";
@@ -4146,6 +4171,12 @@ declare const defaultTranslations: {
         readonly playbackSpeed: "Playback speed ({{rate}})";
         readonly playbackSpeedLabel: "Playback speed";
         readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 
@@ -4367,8 +4398,14 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
      * restrict the selectable date range in the picker.
+     *
+     * Can be a static object or a function that receives the current row item
+     * to return a per-row range (e.g. bound one date field by another field's
+     * value: `(item) => ({ minDate: parseISO(item.startDate) })`). The picker's
+     * default visible month follows `minDate`, so a per-row `minDate` also
+     * opens the calendar on that date.
      */
-    dateConfig?: DateCellConfig;
+    dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -5933,9 +5970,8 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
     /**
      * Recenter on the user's location. When provided, a "locate" button renders
      * as the first control; omit it (e.g. no geolocation) for a clean toolbar.
-     * Returning a promise drives the button's loading spinner while it resolves.
      */
-    onLocate?: () => void | Promise<void>;
+    onLocate?: () => void;
     /** Override the i18n control labels (tooltips / accessible names). */
     labels?: F0MapControlLabels;
 }
@@ -5994,43 +6030,9 @@ export declare interface F0MapListProps extends WithDataTestIdProps {
     label?: string;
     /** Anchor id, so a "skip to list" link can move focus here. */
     id?: string;
-    /** @private */
+    /** Extra classes for the list container (e.g. when rendered as a fallback). */
     className?: string;
 }
-
-export declare const F0MapMarker: ForwardRefExoticComponent<F0MapMarkerProps & RefAttributes<HTMLButtonElement>>;
-
-declare interface F0MapMarkerBaseProps extends WithDataTestIdProps {
-    /**
-     * Marker size. Map-managed: `F0Map` bumps it up a step at high zoom (where
-     * POI names appear). Not meant to be set by hand. Defaults to `"md"`.
-     */
-    size?: F0MapMarkerSize;
-    /** Active state (map-managed): grows and drops the pin indicator. */
-    selected?: boolean;
-    /** Collapse to just the dot (map-managed): folds out of a selected neighbour's way. */
-    collapsed?: boolean;
-    /** Text label (e.g. the site or person name). */
-    label?: string;
-    /** Toggle the label without removing it. Defaults to `true`. */
-    showLabel?: boolean;
-    /** Label side. Map-managed: `F0Map`'s collision pass sets this. */
-    labelPlacement?: F0MapMarkerLabelPlacement;
-    onClick?: () => void;
-    ariaLabel?: string;
-    /** @private */
-    className?: string;
-}
-
-export declare type F0MapMarkerLabelPlacement = BaseMapMarkerLabelPlacement;
-
-export declare const f0MapMarkerLabelPlacements: readonly ["right", "bottom", "left", "top"];
-
-export declare type F0MapMarkerProps = F0MapMarkerBaseProps & F0MapMarkerVariantProps;
-
-export declare type F0MapMarkerSize = BaseMapMarkerSize;
-
-export declare const f0MapMarkerSizes: readonly ["sm", "md", "lg"];
 
 export declare type F0MapMarkerVariant = (typeof f0MapMarkerVariants)[number];
 
@@ -6133,8 +6135,6 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     initialViewport?: F0MapViewport;
     /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
     mapStyle?: F0MapStylePair;
-    /** Force a theme; `"auto"` (default) follows the nearest `.dark` ancestor. */
-    theme?: "auto" | "light" | "dark";
     /**
      * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
      * the map (and resets the camera), so treat it as static.
@@ -6162,11 +6162,10 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     /** Override the controls' labels (tooltips / accessible names). */
     controlLabels?: F0MapControlLabels;
     /**
-     * Proactively prompt for location permission on load so the current-location
-     * dot appears without the user acting. Defaults to `false`. Independently of
-     * this, if the user has *already* granted location (here or on another f0
-     * map - the opt-in persists), the dot always shows silently. The "locate me"
-     * control requests permission on demand.
+     * Enable the current-location feature. Defaults to `false`, in which case the
+     * map never touches geolocation. When `true`, the dot auto-shows only if the
+     * browser permission is *already* granted (never prompting on load); the
+     * "locate me" control is the only thing that requests permission on demand.
      */
     showCurrentLocation?: boolean;
     /**
@@ -6202,10 +6201,10 @@ export declare interface F0MapRoute extends F0MapLineStyle {
 }
 
 /**
- * Loading placeholder: the world's continents rendered as an f0 skeleton - the
- * same gentle `animate-pulse` and surface tone as the shared `Skeleton`
- * component, just in the shape of the world - over a plain background "ocean",
- * so the map reads as loading before the tiles fade in.
+ * Loading placeholder: a plain pulsing surface in the shared `Skeleton`
+ * component's tone. Shown while a consumer is still fetching what the map
+ * should display; the map paints its own basemap once mounted, so this needs
+ * no map-like illustration.
  */
 export declare const F0MapSkeleton: ({ dataTestId, className, }: F0MapSkeletonProps) => JSX_2.Element;
 
@@ -6317,6 +6316,85 @@ export declare interface F0NotesTextEditorSkeletonProps {
 export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0ProgressSeries: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0ProgressSeriesProps & RefAttributes<HTMLDivElement>>>;
+
+/**
+ * One progress bar in the series — e.g. a period (Q1, Jan, 2026…). Each bar is
+ * an independent progress bar (its own track + proportional fill), unlike a
+ * category bar where the segments are parts of a single whole.
+ */
+export declare interface F0ProgressSeriesBar {
+    /**
+     * Attained value. `undefined` (or a non-finite value / `max <= 0`) renders an
+     * empty/future bar: track only, no fill.
+     */
+    value: number | undefined;
+    /** Target. Defaults to 100. */
+    max?: number;
+    /**
+     * f0 chart color token for the fill. Defaults to `"categorical-1"`. Ignored
+     * when `canceled` is set.
+     */
+    color?: F0ProgressSeriesColor;
+    /** Renders a hatched grey bar (e.g. a cancelled period). */
+    canceled?: boolean;
+    /** Title shown under the bar (e.g. "Q1", "Jan", "2026"). Optional. */
+    label?: string;
+    /**
+     * Short text shown under the bar next to the label. Optional; defaults to the
+     * computed percentage (which may exceed 100%). Pass "" to hide it.
+     */
+    caption?: string;
+    /** Tooltip text. Defaults to `label · value / max (percentage)`. */
+    tooltip?: string;
+}
+
+export declare type F0ProgressSeriesColor = (typeof f0ProgressSeriesColors)[number];
+
+/**
+ * The `--chart-*` tokens `getColor` can resolve (see `f0-core`'s `base.css`).
+ * Same set as `F0SegmentedBar`'s `SegmentColorToken`; the two are not shared yet
+ * because `kits/F0DataChart` already owns the `ChartColorToken` name for a
+ * different palette (`baseColors`). Unifying them is tracked separately.
+ */
+export declare const f0ProgressSeriesColors: readonly ["categorical-1", "categorical-2", "categorical-3", "categorical-4", "categorical-5", "categorical-6", "categorical-7", "categorical-8", "feedback-positive", "feedback-neutral", "feedback-negative"];
+
+/** Shared by the component and the `progressSeries` value-display cell. */
+export declare interface F0ProgressSeriesOptions {
+    /** 1..N bars (N up to 12: half-yearly = 2, quarterly = 4, monthly = 12). */
+    bars: F0ProgressSeriesBar[];
+    /**
+     * Max labels rendered under the row. When there are more bars than this, the
+     * labels are spread evenly (e.g. 12 bars → indices 0, 3, 6, 9). Defaults to 4.
+     */
+    maxLabels?: number;
+    /** Hide the per-bar tooltips. */
+    hideTooltip?: boolean;
+    /**
+     * Formats `value`/`max` in the default tooltip — the component only knows raw
+     * numbers, so pass this to render currencies, separators, units…
+     * Defaults to `String(value)`.
+     */
+    formatValue?: (value: number) => string;
+    /**
+     * Renders a skeleton (same height as the loaded bar) instead of the series
+     * while the data is still loading.
+     */
+    loading?: boolean;
+}
+
+export declare interface F0ProgressSeriesProps extends F0ProgressSeriesOptions, WithDataTestIdProps {
+    /** Bar height. Defaults to `"md"`. */
+    size?: F0ProgressSeriesSize;
+}
+
+export declare type F0ProgressSeriesSize = (typeof f0ProgressSeriesSizes)[number];
+
+export declare const f0ProgressSeriesSizes: readonly ["sm", "md", "lg"];
 
 /**
  * @experimental This is an experimental component, use it at your own risk
@@ -7136,7 +7214,11 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     title: (record: R) => string;
     /** Secondary line of text for a node. */
     subtitle?: (record: R) => string;
-    /** Avatar shown on the leading side of the node pill. */
+    /**
+     * Avatar shown on the leading side of the node pill. Its variant also drives
+     * the node silhouette: `person` → circular dot/pill, any other variant
+     * (`team`, `icon`, …) → rounded-square card.
+     */
     avatar?: (record: R) => AvatarVariant;
     /**
      * Tags rendered in the node metadata row. A tag may set `column` to place it
@@ -7582,7 +7664,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
  */
 export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -7810,6 +7892,18 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     lanes: ReadonlyArray<KanbanLaneDefinition>;
+    /** Per-group columns: when grouping is active, each group's board renders the
+     * lanes this returns instead of the global `lanes` (lane ids must exist in
+     * `source.lanes`). Enables the onboarding case where each policy version has
+     * its own phases. NOTE: API shape pending Foundations review. */
+    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    /** Whether each group header shows a selection checkbox when the collection is
+     * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
+     * keep per-card selection while hiding the group-level checkbox — e.g. when
+     * "select a whole group" isn't a meaningful action for the consumer. Note: a
+     * collapsed group unmounts its cards, so with `false` the group's items can
+     * only be selected once the group is expanded. */
+    selectableGroups?: boolean;
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
@@ -7869,10 +7963,6 @@ declare interface LoadingStateProps {
 }
 
 declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
-
-declare const markerLabelPlacements: readonly ["right", "bottom", "left", "top"];
-
-declare const markerSizes: readonly ["sm", "md", "lg"];
 
 export declare const MAX_EXPANDED_ACTIONS = 2;
 
@@ -9581,10 +9671,26 @@ declare type SearchOptions = {
  * result calls `onSelect` (e.g. the graph view reveals/centers the node).
  */
 export declare type SearchPreview<R extends RecordType> = {
-    search: (query: string) => Promise<R[]>;
+    /**
+     * Fetch one page of matches for `query`. `page` starts at 0 and increments as
+     * the user scrolls the dropdown to the bottom; it is optional so existing
+     * non-paginated consumers keep the plain `(query) => Promise<R[]>` shape.
+     * Return a bare array for a single, non-paginated page (treated as
+     * `hasMore: false`), or a `SearchPreviewPage` to drive infinite scroll.
+     */
+    search: (query: string, page?: number) => Promise<R[] | SearchPreviewPage<R>>;
     getId: (record: R) => string;
     render: (record: R) => SearchPreviewResultData;
     onSelect: (record: R) => void;
+};
+
+/**
+ * One page of search-preview results. `hasMore` tells the dropdown whether to
+ * keep pulling further pages as the user scrolls (infinite scroll).
+ */
+export declare type SearchPreviewPage<R extends RecordType> = {
+    records: R[];
+    hasMore: boolean;
 };
 
 /** Data shown for a single row of the search preview dropdown. */
@@ -11297,6 +11403,7 @@ declare const valueDisplayRenderers: {
     readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => JSX_2.Element | null;
+    readonly progressSeries: (args: ProgressSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
@@ -11796,8 +11903,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -11805,11 +11915,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
