@@ -566,7 +566,13 @@ export function KanbanLane<TRecord extends RecordType>({
   // In "content" mode the lane hugs its cards and matches its siblings via the
   // board's items-stretch, so no explicit height is measured or applied.
   useLayoutEffect(() => {
-    if (heightMode === "content") return
+    if (heightMode === "content") {
+      // Drop any height measured in a previous "fill" render: an inline px height
+      // would shadow the `h-full` this mode relies on. No-op re-render when it is
+      // already null, so this can't loop.
+      setCalculatedHeight(null)
+      return
+    }
     const measure = measureRef.current
     const outer = outerRef.current
     if (!measure || !outer) return

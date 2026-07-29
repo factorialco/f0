@@ -304,7 +304,7 @@ export function Kanban<TRecord extends RecordType>(
       <ScrollArea
         className={cn(
           "relative w-full",
-          isContentHeight ? "" : "h-full [&>div>div]:h-full"
+          !isContentHeight && "h-full [&>div>div]:h-full"
         )}
         viewportRef={viewportRef}
       >
