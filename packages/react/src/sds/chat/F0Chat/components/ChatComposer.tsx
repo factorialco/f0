@@ -700,9 +700,8 @@ export const ChatComposer = (): ReactNode => {
             )}
           </AnimatePresence>
 
-          {/* Pending attachments render from local object URLs immediately.
-              Previewable documents, videos and images keep their visual shape
-              throughout upload; unsupported files use F0FileItem. */}
+          {/* Pending files render from local object URLs immediately. Their
+              uniform image-sized thumbnails keep the composer compact. */}
           <AnimatePresence initial={false}>
             {attachments.length > 0 && (
               <motion.div

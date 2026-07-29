@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react"
 
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0FileItem } from "@/components/F0FileItem"
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Spinner } from "@/ui/Spinner"
@@ -30,7 +30,7 @@ const PreviewProgress = (): ReactNode => (
  * Preview for an attachment waiting in the composer. Images and videos use
  * compact media thumbnails, previewable documents reuse the message snapshot,
  * and voice/location attachments keep their native representation. Unknown
- * files deliberately fall back to F0FileItem.
+ * files use the same square footprint with their file-type avatar.
  */
 export const ChatComposerAttachmentPreview = ({
   attachment,
@@ -63,7 +63,7 @@ export const ChatComposerAttachmentPreview = ({
       <figure
         aria-label={attachment.name}
         aria-busy={uploading}
-        className="group/attachment relative m-0 flex"
+        className="group/attachment relative m-0 flex h-16 w-16 shrink-0"
         data-testid="chat-composer-image-preview"
       >
         <FadeInImage
@@ -93,7 +93,7 @@ export const ChatComposerAttachmentPreview = ({
         <figure
           aria-label={attachment.name}
           aria-busy={uploading}
-          className="group/attachment relative m-0 aspect-video w-72 max-w-full overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background-secondary"
+          className="group/attachment relative m-0 box-border h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background-secondary"
           data-testid="chat-composer-video-preview"
         >
           {/* This is a silent, non-interactive visual preview. Playback and its
@@ -152,6 +152,7 @@ export const ChatComposerAttachmentPreview = ({
             cornerClass="rounded-lg"
             action={removeAction}
             previewDisabled={uploading}
+            compact
           />
           {uploading && <PreviewProgress />}
         </div>
@@ -161,18 +162,28 @@ export const ChatComposerAttachmentPreview = ({
     return (
       <div
         aria-busy={uploading}
-        className="relative flex"
+        className="group/attachment relative box-border flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background-secondary"
         data-testid="chat-composer-file-preview"
       >
-        <F0FileItem
-          size="md"
+        <F0AvatarFile
           file={{
             name: attachment.name,
             type: attachment.mimeType ?? "",
           }}
-          actions={[removeAction]}
+          size="md"
         />
+        <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+          <ButtonInternal
+            variant="outline"
+            size="sm"
+            hideLabel
+            label={removeAction.label}
+            icon={removeAction.icon}
+            onClick={removeAction.onClick}
+          />
+        </div>
         {uploading && <PreviewProgress />}
+        <span className="sr-only">{attachment.name}</span>
       </div>
     )
   }

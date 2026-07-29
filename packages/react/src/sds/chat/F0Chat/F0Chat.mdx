@@ -191,9 +191,9 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN `maxFileSizeBytes` is omitted → THEN F0 does not impose a file-size limit.
 - WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
 - WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
-- WHEN an image, video, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders a local preview immediately while the upload continues.
+- WHEN an image, video, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders an image-sized square preview immediately while the upload continues.
 - WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
-- WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the F0FileItem fallback.
+- WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the same compact square footprint with a file-type icon.
 - WHEN a pending composer attachment is removed or its upload fails → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
 - WHEN several previews exceed the composer width → THEN F0 keeps them in one focusable horizontal strip instead of growing the composer through the transcript.
 - WHEN a completed file has a video MIME type or browser video extension → THEN F0 renders it as an inline F0VideoPlayer with playback and fullscreen controls.

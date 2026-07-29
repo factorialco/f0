@@ -505,12 +505,17 @@ describe("F0Chat", () => {
       name: /photo\.png/i,
     })
     expect(localPreview.getAttribute("src")).toMatch(/^blob:/)
+    const documentPreview = screen.getByTestId("chat-composer-document-preview")
+    expect(documentPreview).toHaveTextContent("report.pdf")
     expect(
-      screen.getByTestId("chat-composer-document-preview")
-    ).toHaveTextContent("report.pdf")
-    expect(
-      screen.getByTestId("chat-composer-video-preview")
-    ).toBeInTheDocument()
+      documentPreview.querySelector('[data-testid="chat-document-attachment"]')
+    ).toHaveStyle({ width: "64px" })
+    const videoPreview = screen.getByTestId("chat-composer-video-preview")
+    expect(videoPreview).toHaveClass("h-16", "w-16")
+    expect(screen.getByTestId("chat-composer-image-preview")).toHaveClass(
+      "h-16",
+      "w-16"
+    )
     await waitFor(() =>
       expect(screen.getByRole("img", { name: /photo\.png/i })).toHaveAttribute(
         "src",

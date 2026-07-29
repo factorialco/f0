@@ -70,6 +70,7 @@ export const ChatDocumentAttachmentCard = ({
   cornerClass = "rounded-xl",
   action,
   previewDisabled = false,
+  compact = false,
 }: {
   file: F0ChatFileAttachment
   kind: ChatDocumentKind
@@ -83,6 +84,8 @@ export const ChatDocumentAttachmentCard = ({
   }
   /** Prevent opening a transient local URL before its upload completes. */
   previewDisabled?: boolean
+  /** Render as a square thumbnail in compact surfaces such as the composer. */
+  compact?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const reducedMotion = useReducedMotion()
@@ -96,8 +99,38 @@ export const ChatDocumentAttachmentCard = ({
     icon: Download,
     onClick: () => triggerDownload(file.url, file.name),
   }
+  const cardWidth = compact ? 64 : CARD_WIDTH
+  const thumbHeight = compact ? "100%" : THUMB_HEIGHT
 
   if (failed) {
+    if (compact) {
+      return (
+        <div
+          className={cn(
+            "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
+            cornerClass
+          )}
+          data-testid="chat-document-attachment"
+        >
+          <F0AvatarFile
+            file={{ name: file.name, type: file.mimeType ?? "" }}
+            size="md"
+          />
+          <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+            <ButtonInternal
+              variant="outline"
+              size="sm"
+              hideLabel
+              icon={attachmentAction.icon}
+              label={attachmentAction.label}
+              onClick={attachmentAction.onClick}
+            />
+          </div>
+          <span className="sr-only">{file.name}</span>
+        </div>
+      )
+    }
+
     return (
       <F0FileItem
         size="md"
@@ -111,39 +144,43 @@ export const ChatDocumentAttachmentCard = ({
     <div
       ref={containerRef}
       className={cn(
-        "flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
+        "group/attachment relative flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
+        compact && "box-border h-16 w-16",
         cornerClass
       )}
-      style={{ width: CARD_WIDTH }}
+      style={{ width: cardWidth }}
       data-testid="chat-document-attachment"
     >
-      <div className="flex items-center gap-2 px-2 py-2">
-        <F0AvatarFile
-          file={{ name: file.name, type: file.mimeType ?? "" }}
-          size="md"
-        />
-        <OneEllipsis className="grow text-sm font-medium text-f1-foreground">
-          {file.name}
-        </OneEllipsis>
-        <ButtonInternal
-          variant="ghost"
-          size="sm"
-          hideLabel
-          icon={attachmentAction.icon}
-          label={attachmentAction.label}
-          onClick={attachmentAction.onClick}
-        />
-      </div>
+      {!compact && (
+        <div className="flex items-center gap-2 px-2 py-2">
+          <F0AvatarFile
+            file={{ name: file.name, type: file.mimeType ?? "" }}
+            size="md"
+          />
+          <OneEllipsis className="grow text-sm font-medium text-f1-foreground">
+            {file.name}
+          </OneEllipsis>
+          <ButtonInternal
+            variant="ghost"
+            size="sm"
+            hideLabel
+            icon={attachmentAction.icon}
+            label={attachmentAction.label}
+            onClick={attachmentAction.onClick}
+          />
+        </div>
+      )}
       <button
         type="button"
         onClick={() => openDocumentPreview(file)}
         disabled={previewDisabled}
         aria-label={i18n.t("chat.openNamedDocument", { name: file.name })}
         className={cn(
-          "relative block w-full overflow-hidden border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity enabled:hover:opacity-90",
+          "relative block w-full overflow-hidden border-0 border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity enabled:hover:opacity-90",
+          !compact && "border-t",
           focusRing("focus-visible:ring-inset")
         )}
-        style={{ height: THUMB_HEIGHT }}
+        style={{ height: thumbHeight }}
       >
         {/* Skeleton lives UNDER the snapshot; the rendered content fades in
             over it (no hard swap) once the renderer paints. */}
@@ -161,7 +198,7 @@ export const ChatDocumentAttachmentCard = ({
               {kind === "pdf" && (
                 <ChatPdfThumbnail
                   url={file.url}
-                  width={CARD_WIDTH - 2}
+                  width={cardWidth - 2}
                   onError={() => setFailed(true)}
                   onRendered={() => setRendered(true)}
                 />
@@ -176,7 +213,7 @@ export const ChatDocumentAttachmentCard = ({
               {kind === "docx" && (
                 <ChatDocxThumbnail
                   url={file.url}
-                  width={CARD_WIDTH - 2}
+                  width={cardWidth - 2}
                   onError={() => setFailed(true)}
                   onRendered={() => setRendered(true)}
                 />
@@ -192,6 +229,21 @@ export const ChatDocumentAttachmentCard = ({
           </div>
         )}
       </button>
+      {compact && (
+        <>
+          <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+            <ButtonInternal
+              variant="outline"
+              size="sm"
+              hideLabel
+              icon={attachmentAction.icon}
+              label={attachmentAction.label}
+              onClick={attachmentAction.onClick}
+            />
+          </div>
+          <span className="sr-only">{file.name}</span>
+        </>
+      )}
     </div>
   )
 }
