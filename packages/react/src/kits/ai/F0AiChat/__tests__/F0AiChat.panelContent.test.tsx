@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   zeroRender as render,
@@ -15,8 +15,13 @@ import {
 } from "../providers/AiChatStateProvider"
 
 const Controls = () => {
-  const { setOpen, setPanelContent, clearPanelContent, setPanelSide } =
-    useAiChat()
+  const {
+    setOpen,
+    setPanelContent,
+    clearPanelContent,
+    setPanelSide,
+    openGame,
+  } = useAiChat()
   return (
     <div>
       <button type="button" onClick={() => setOpen(true)}>
@@ -39,6 +44,9 @@ const Controls = () => {
       </button>
       <button type="button" onClick={() => clearPanelContent()}>
         clear
+      </button>
+      <button type="button" onClick={() => openGame("pong")}>
+        open-pong
       </button>
     </div>
   )
@@ -69,6 +77,39 @@ describe("F0AiChat side-panel content", () => {
     await userEvent.click(screen.getByText("show-a"))
     expect(screen.getByText("FAKE A")).toBeInTheDocument()
     expect(screen.queryByText("CHAT MESSAGES")).not.toBeInTheDocument()
+  })
+
+  it("disables AI-only file drop while same-edge hosted content is visible", async () => {
+    render(
+      <AiChatStateProvider
+        enabled
+        chatMessages={<div>CHAT MESSAGES</div>}
+        fileAttachments={{ onUploadFiles: vi.fn() }}
+      >
+        <Controls />
+        <F0AiChat />
+      </AiChatStateProvider>
+    )
+
+    await userEvent.click(screen.getByText("open"))
+    expect(screen.getByText("Drop your files here")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("show-a"))
+    expect(screen.getByText("FAKE A")).toBeInTheDocument()
+    expect(screen.queryByText("Drop your files here")).not.toBeInTheDocument()
+  })
+
+  it("hides the AI-only Pong overlay from same-edge hosted content", async () => {
+    renderChat()
+    await userEvent.click(screen.getByText("open"))
+    await userEvent.click(screen.getByText("open-pong"))
+    expect(await screen.findByText("Pong")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("show-a"))
+    expect(screen.getByText("FAKE A")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByText("Pong")).not.toBeInTheDocument()
+    )
   })
 
   it("swaps the content (unmounts the previous one) on a new selection", async () => {

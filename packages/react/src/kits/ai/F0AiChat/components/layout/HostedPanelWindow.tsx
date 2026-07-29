@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
@@ -18,6 +19,7 @@ export const HostedPanelWindow = () => {
   const { open, panelContent, panelContentSide, restoringPanelContentId } =
     useAiChat()
   const reducedMotion = useReducedMotion()
+  const translations = useI18n()
 
   // Keep the last content mounted through the swap-out: `panelContent` clears
   // immediately, but the window holds still (exitStyle "hold") while the main
@@ -35,6 +37,7 @@ export const HostedPanelWindow = () => {
             <Skeleton
               role="status"
               aria-busy={true}
+              aria-label={translations.navigation.sidePanel.loading}
               className="h-full w-full rounded-none"
             />
           ),
@@ -47,6 +50,7 @@ export const HostedPanelWindow = () => {
       visible={open && (panelContent !== null || restoring !== null)}
       side={panelContentSide}
       exitStyle={open ? "hold" : "shrink"}
+      withAiFeatures={false}
     >
       {/* Same simultaneous crossfade as F0AiChat's view switch: changing
           conversations fades the outgoing one out while the next fades in. */}

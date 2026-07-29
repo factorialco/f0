@@ -218,10 +218,10 @@ export type AiChatMode = "chat" | "voice"
 export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in ApplicationFrame's resizable and
+ * fullscreen side panel. Only one is mounted at a time: the `id` keys the
+ * content so switching views unmounts the previous one and mounts the new.
+ * When the AI chat is enabled, removing hosted content reveals it.
  */
 export type SidePanelContent = {
   id: string

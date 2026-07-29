@@ -1,6 +1,7 @@
 import { useEffect } from "react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   zeroRender as render,
@@ -9,7 +10,7 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
-import { ApplicationFrame } from ".."
+import { ApplicationFrame, useApplicationFrameSidePanel } from ".."
 
 // Drives the panel the way the real hosts do: the sidebar mounts a
 // conversation via setPanelContent; the page header's One switch clears it
@@ -34,6 +35,44 @@ const Probe = () => {
         }}
       >
         one-switch-on
+      </button>
+    </div>
+  )
+}
+
+const SidePanelProbe = () => {
+  const { setPanelContent } = useApplicationFrameSidePanel()
+  const { enabled: aiEnabled } = useAiChat()
+
+  return (
+    <div>
+      <div>AI ENABLED: {String(aiEnabled)}</div>
+      <button
+        type="button"
+        onClick={() =>
+          setPanelContent({ id: "conv", content: <div>CONVERSATION</div> })
+        }
+      >
+        open-conv
+      </button>
+    </div>
+  )
+}
+
+const PromotionProbe = () => {
+  const { setPanelContent } = useApplicationFrameSidePanel()
+  const { enabled: promotionEnabled } = useAiPromotionChat()
+
+  return (
+    <div>
+      <div>PROMOTION ENABLED: {String(promotionEnabled)}</div>
+      <button
+        type="button"
+        onClick={() =>
+          setPanelContent({ id: "conv", content: <div>CONVERSATION</div> })
+        }
+      >
+        open-conv
       </button>
     </div>
   )
@@ -99,6 +138,78 @@ describe("ApplicationFrame split panel (conversations left, AI chat right)", () 
     // docked right (the default side).
     const conversation = screen.getByText("CONVERSATION")
     expect(conversation.closest(".right-0")).not.toBeNull()
+  })
+
+  it("hosts content when the side panel is enabled and AI is disabled", async () => {
+    const onAiVisibility = vi.fn()
+
+    render(
+      <ApplicationFrame
+        ai={{
+          enabled: false,
+          chatMessages: <div>AI CHAT</div>,
+          fileAttachments: { onUploadFiles: vi.fn() },
+          tracking: { onVisibility: onAiVisibility },
+        }}
+        sidePanel={{ enabled: true, side: "left", resizable: true }}
+        sidebar={<div>SIDEBAR</div>}
+      >
+        <SidePanelProbe />
+      </ApplicationFrame>
+    )
+
+    expect(screen.getByText("AI ENABLED: false")).toBeInTheDocument()
+    await userEvent.click(screen.getByText("open-conv"))
+
+    const conversation = screen.getByText("CONVERSATION")
+    expect(conversation.closest(".left-0")).not.toBeNull()
+    const separator = screen.getByRole("separator", {
+      name: "Resize side panel",
+    })
+    expect(separator).toHaveAttribute("aria-valuenow", "360")
+    separator.focus()
+    await userEvent.keyboard("{ArrowRight}")
+    expect(separator).toHaveAttribute("aria-valuenow", "376")
+    expect(screen.queryByText("AI CHAT")).not.toBeInTheDocument()
+    expect(screen.queryByText("Drop your files here")).not.toBeInTheDocument()
+    expect(onAiVisibility).not.toHaveBeenCalled()
+  })
+
+  it("keeps the generic side panel available with AI promotion enabled", async () => {
+    render(
+      <ApplicationFrame
+        ai={{ enabled: false }}
+        sidePanel={{ enabled: true, side: "left" }}
+        aiPromotion={{ enabled: true }}
+        sidebar={<div>SIDEBAR</div>}
+      >
+        <PromotionProbe />
+      </ApplicationFrame>
+    )
+
+    expect(screen.getByText("PROMOTION ENABLED: true")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("open-conv"))
+    expect(screen.getByText("CONVERSATION")).toBeInTheDocument()
+  })
+
+  it("does not reserve an empty gutter for persisted open state without content", () => {
+    localStorage.setItem("ONE-ai-chat-open", "true")
+
+    render(
+      <ApplicationFrame
+        ai={{ enabled: false }}
+        sidePanel={{ enabled: true, side: "left" }}
+        sidebar={<div>SIDEBAR</div>}
+      >
+        <div>PAGE</div>
+      </ApplicationFrame>
+    )
+
+    expect(screen.queryByRole("separator")).not.toBeInTheDocument()
+    const panelPaddingHost = screen.getByRole("main").parentElement
+    expect(panelPaddingHost).not.toHaveStyle({ paddingLeft: "360px" })
+    expect(panelPaddingHost).not.toHaveStyle({ paddingRight: "360px" })
   })
 
   it("restores the last conversation on reload without flashing the AI chat", async () => {

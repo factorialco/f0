@@ -5,7 +5,7 @@ import {
   motion,
   MotionConfig,
 } from "motion/react"
-import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import {
@@ -32,10 +32,33 @@ import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
 
+export const applicationFrameSidePanelSides = ["left", "right"] as const
+export type ApplicationFrameSidePanelSide =
+  (typeof applicationFrameSidePanelSides)[number]
+
+export interface ApplicationFrameSidePanelConfig {
+  enabled: boolean
+  /**
+   * Edge hosted content docks to. Falls back to `ai.panelContentSide`, then
+   * `ai.side`, then `"right"`.
+   */
+  side?: ApplicationFrameSidePanelSide
+  /**
+   * Allow the shared panel shell to be resized. Falls back to `ai.resizable`
+   * when AI is configured, otherwise `false`.
+   */
+  resizable?: boolean
+}
+
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
   aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
   banner?: React.ReactNode
+  /**
+   * Generic hosted side panel. It can be enabled independently from `ai`.
+   * Use `useApplicationFrameSidePanel` from a descendant to control it.
+   */
+  sidePanel?: ApplicationFrameSidePanelConfig
   sidebar: React.ReactNode
   children: React.ReactNode
 }
@@ -46,12 +69,14 @@ function _ApplicationFrame({
   banner,
   ai,
   aiPromotion,
+  sidePanel,
 }: ApplicationFrameProps) {
   return (
     <FrameProvider>
       <ApplicationFrameWithProvider
         ai={ai}
         aiPromotion={aiPromotion}
+        sidePanel={sidePanel}
         sidebar={sidebar}
         banner={banner}
       >
@@ -62,7 +87,7 @@ function _ApplicationFrame({
 }
 
 /**
- * Intermediate component that wraps children with the appropriate AI provider.
+ * Composes the side-panel and AI-promotion providers enabled for this frame.
  */
 function ApplicationFrameWithProvider({
   children,
@@ -70,29 +95,49 @@ function ApplicationFrameWithProvider({
   banner,
   ai,
   aiPromotion,
+  sidePanel,
 }: ApplicationFrameProps) {
-  const AiProvider = ai?.enabled
-    ? F0AiChatProvider
-    : aiPromotion?.enabled
-      ? AiPromotionChatProvider
-      : Fragment
-  const aiProps = ai?.enabled
-    ? ai
-    : aiPromotion?.enabled
-      ? aiPromotion
-      : undefined
+  const panelContentSide = sidePanel?.enabled
+    ? (sidePanel.side ?? ai?.panelContentSide)
+    : ai?.panelContentSide
+  const panelResizable = sidePanel?.enabled
+    ? (sidePanel.resizable ?? ai?.resizable)
+    : ai?.resizable
+
+  const content = (
+    <ApplicationFrameContent
+      ai={ai}
+      aiPromotion={aiPromotion}
+      sidePanel={sidePanel}
+      sidebar={sidebar}
+      banner={banner}
+    >
+      {children}
+    </ApplicationFrameContent>
+  )
+
+  const contentWithSidePanel =
+    ai?.enabled || sidePanel?.enabled ? (
+      <F0AiChatProvider
+        {...ai}
+        enabled={Boolean(ai?.enabled)}
+        panelContentSide={panelContentSide}
+        resizable={panelResizable}
+      >
+        {content}
+      </F0AiChatProvider>
+    ) : (
+      content
+    )
+
+  if (ai?.enabled || !aiPromotion?.enabled) {
+    return contentWithSidePanel
+  }
 
   return (
-    <AiProvider {...aiProps}>
-      <ApplicationFrameContent
-        ai={ai}
-        aiPromotion={aiPromotion}
-        sidebar={sidebar}
-        banner={banner}
-      >
-        {children}
-      </ApplicationFrameContent>
-    </AiProvider>
+    <AiPromotionChatProvider {...aiPromotion}>
+      {contentWithSidePanel}
+    </AiPromotionChatProvider>
   )
 }
 
@@ -174,6 +219,7 @@ function useAutoCloseSidebar(
 function ApplicationFrameContent({
   ai,
   aiPromotion,
+  sidePanel,
   children,
   sidebar,
   banner,
@@ -182,22 +228,28 @@ function ApplicationFrameContent({
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const {
-    open: isAiChatOpen,
+    open: isPanelOpenState,
     visualizationMode,
-    canvasContent,
-    canvasEntities,
-    closeCanvas,
     chatWidth,
     resizable,
     panelSide,
     panelContent,
     panelContentSide,
     restoringPanelContentId,
+    canvasContent,
+    canvasEntities,
+    closeCanvas,
   } = useAiChat()
-  const isAiChatFullscreen = visualizationMode === "fullscreen"
+  const hasPanelContent = Boolean(panelContent || restoringPanelContentId)
+  const isPanelOpen =
+    isPanelOpenState && (Boolean(ai?.enabled) || hasPanelContent)
+  const isPanelFullscreen = isPanelOpen && visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
+  const contentTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : CONTENT_TRANSITION
   // Hosts can dock the whole panel left for a chat-first experience (e.g.
   // communications); the default is right, so the standard layout is unchanged.
   const isPanelLeft = panelSide === "left"
@@ -208,30 +260,27 @@ function ApplicationFrameContent({
   // skeleton on the content side, so the layout reserves that edge from the
   // first paint.
   const isSplitPanel = panelContentSide !== panelSide
-  const hasPanelContent = Boolean(panelContent || restoringPanelContentId)
   const activeSide = hasPanelContent ? panelContentSide : panelSide
   const isActiveLeft = activeSide === "left"
 
   // Track fullscreen transitions for smooth exit animation
-  const prevFullscreenRef = useRef(isAiChatFullscreen)
-  const isEnteringFullscreen = isAiChatFullscreen && !prevFullscreenRef.current
-  const isExitingFullscreen = !isAiChatFullscreen && prevFullscreenRef.current
+  const prevFullscreenRef = useRef(isPanelFullscreen)
+  const isEnteringFullscreen = isPanelFullscreen && !prevFullscreenRef.current
+  const isExitingFullscreen = !isPanelFullscreen && prevFullscreenRef.current
   const [
     isFullscreenExitTransitionActive,
     setIsFullscreenExitTransitionActive,
   ] = useState(false)
 
   useEffect(() => {
-    if (!isAiChatFullscreen && prevFullscreenRef.current) {
+    if (!isPanelFullscreen && prevFullscreenRef.current) {
       setIsFullscreenExitTransitionActive(true)
     }
-    prevFullscreenRef.current = isAiChatFullscreen
-  }, [isAiChatFullscreen])
+    prevFullscreenRef.current = isPanelFullscreen
+  }, [isPanelFullscreen])
 
   const isInFullscreenTransition =
-    isAiChatFullscreen ||
-    isFullscreenExitTransitionActive ||
-    isExitingFullscreen
+    isPanelFullscreen || isFullscreenExitTransitionActive || isExitingFullscreen
 
   const chatContainerTransition = useMemo(() => {
     if (isEnteringFullscreen)
@@ -254,15 +303,11 @@ function ApplicationFrameContent({
   // list stays usable — don't float / auto-close the sidebar in that case.
   // Keyed on the side of the *visible* content: in split mode a left-docked
   // conversation coexists with the sidebar while the right AI chat floats it.
-  const floatsOverSidebar = isAiChatOpen && !isActiveLeft
+  const floatsOverSidebar = isPanelOpen && !isActiveLeft
 
   useEffect(() => {
-    setForceFloat(floatsOverSidebar)
-  }, [floatsOverSidebar, setForceFloat])
-
-  useEffect(() => {
-    setForceFloat(isAiPromotionChatOpen)
-  }, [isAiPromotionChatOpen, setForceFloat])
+    setForceFloat(floatsOverSidebar || isAiPromotionChatOpen)
+  }, [floatsOverSidebar, isAiPromotionChatOpen, setForceFloat])
 
   useAutoCloseSidebar(floatsOverSidebar, shouldAutoCloseSidebar)
 
@@ -323,17 +368,17 @@ function ApplicationFrameContent({
               // incoming one, which stay put underneath (z-0 vs z-10).
               animate={{
                 paddingRight:
-                  isAiChatOpen && !isSmallViewport && !isActiveLeft
+                  isPanelOpen && !isSmallViewport && !isActiveLeft
                     ? reservedChatWidth
                     : 0,
                 paddingLeft:
-                  isAiChatOpen && !isSmallViewport && isActiveLeft
+                  isPanelOpen && !isSmallViewport && isActiveLeft
                     ? reservedChatWidth
                     : 0,
               }}
               transition={{
-                paddingRight: CONTENT_TRANSITION,
-                paddingLeft: CONTENT_TRANSITION,
+                paddingRight: contentTransition,
+                paddingLeft: contentTransition,
               }}
             >
               {/* Main content */}
@@ -345,7 +390,7 @@ function ApplicationFrameContent({
                   isInFullscreenTransition
                     ? "overflow-hidden"
                     : "overflow-auto",
-                  !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
+                  !isPanelOpen && !isAiPromotionChatOpen && "xs:pr-1",
                   // Left seam so the content never sticks to the viewport edge:
                   // none when the sidebar is active (it provides the gap) or when
                   // a left-docked panel is OPEN (it reserves the space); otherwise
@@ -353,11 +398,11 @@ function ApplicationFrameContent({
                   // configured left — so a closed left panel still gets the seam.
                   sidebarState === "locked"
                     ? "pl-0"
-                    : isActiveLeft && isAiChatOpen
+                    : isActiveLeft && isPanelOpen
                       ? "pl-0"
                       : "xs:pl-1",
                   // Consistent breakpoint with the other seams (was a bare `pr-1`).
-                  isAiChatOpen && isActiveLeft && "xs:pr-1"
+                  isPanelOpen && isActiveLeft && "xs:pr-1"
                 )}
                 layoutDependency={sidebarState}
               >
@@ -410,7 +455,7 @@ function ApplicationFrameContent({
                 </div>
               )}
 
-              {ai?.enabled &&
+              {(ai?.enabled || sidePanel?.enabled) &&
                 (() => {
                   // One absolutely-positioned container per docked window. A
                   // single side (the default) keeps today's lone container;
@@ -455,7 +500,7 @@ function ApplicationFrameContent({
                       animate={{
                         width:
                           isSmallViewport ||
-                          (isAiChatFullscreen && isActivePanel)
+                          (isPanelFullscreen && isActivePanel)
                             ? "100%"
                             : reservedChatWidth,
                       }}
@@ -472,12 +517,13 @@ function ApplicationFrameContent({
 
                   return (
                     <>
-                      {panelContainer(
-                        panelSide,
-                        !isSplitPanel || !hasPanelContent,
-                        <F0AiChat />
-                      )}
-                      {isSplitPanel &&
+                      {ai?.enabled &&
+                        panelContainer(
+                          panelSide,
+                          !isSplitPanel || !hasPanelContent,
+                          <F0AiChat />
+                        )}
+                      {(!ai?.enabled || isSplitPanel) &&
                         panelContainer(
                           panelContentSide,
                           hasPanelContent,
@@ -495,3 +541,9 @@ function ApplicationFrameContent({
     </MotionConfig>
   )
 }
+
+export {
+  useApplicationFrameSidePanel,
+  type ApplicationFrameSidePanelReturnValue,
+  type ApplicationFrameSidePanelVisualizationMode,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
