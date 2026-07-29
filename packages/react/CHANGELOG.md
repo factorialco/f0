@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.3](https://github.com/factorialco/f0/compare/f0-react-v4.63.2...f0-react-v4.63.3) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Form:** keep staged uploads when applying an initialFiles pool ([#4889](https://github.com/factorialco/f0/issues/4889)) ([8707ca9](https://github.com/factorialco/f0/commit/8707ca9e110c4a74fe5bd5e17a74e673d10c6c82))
+
 ## [4.63.2](https://github.com/factorialco/f0/compare/f0-react-v4.63.1...f0-react-v4.63.2) (2026-07-29)
 
 
