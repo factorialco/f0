@@ -7,11 +7,5 @@ export type {
   F0GraphNodeTagType,
   GraphNodeVariant,
   GraphNodeState,
-  GraphNodeAvatarShape,
 } from "./types"
-export {
-  graphNodeVariants,
-  graphNodeStates,
-  graphNodeAvatarShapes,
-  tagColumn,
-} from "./types"
+export { graphNodeVariants, graphNodeStates, tagColumn } from "./types"

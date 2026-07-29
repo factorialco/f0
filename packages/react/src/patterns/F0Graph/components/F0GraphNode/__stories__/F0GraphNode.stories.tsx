@@ -12,11 +12,7 @@ import { Building, Delete, Files, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0GraphNode } from ".."
-import {
-  graphNodeAvatarShapes,
-  graphNodeStates,
-  graphNodeVariants,
-} from "../types"
+import { graphNodeStates, graphNodeVariants } from "../types"
 
 const meta = {
   component: F0GraphNode,
@@ -44,10 +40,6 @@ const meta = {
     expanded: { control: "boolean" },
     hasChildren: { control: "boolean" },
     childrenCount: { control: "number" },
-    avatarShape: {
-      control: "radio",
-      options: graphNodeAvatarShapes,
-    },
   },
 } satisfies Meta<typeof F0GraphNode>
 
@@ -76,25 +68,22 @@ const teamAvatar = {
 } as const
 
 /**
- * `avatarShape` controls the leading avatar's silhouette. `"circle"` (default)
- * clips it to a full circle — the classic org-chart person look. `"square"`
- * keeps the avatar's own rounded-square silhouette (radius `md` at size `lg`),
- * matching the square node icons used in Teams and Job Catalog.
+ * The node silhouette follows the avatar variant — no extra prop. A `person`
+ * avatar keeps the circular dot/pill (org chart); a `team`/`icon`/… avatar makes
+ * the node a rounded-square card (Teams / Job Catalog).
  */
 export const AvatarShape: Story = {
   render: () => (
     <div className="flex flex-wrap items-start gap-4">
       <F0GraphNode
-        avatar={teamAvatar}
-        title="Circle (default)"
+        avatar={personAvatar}
+        title="Person → circle"
         subtitle="Org chart look"
-        avatarShape="circle"
       />
       <F0GraphNode
         avatar={teamAvatar}
-        title="Square"
+        title="Team → square"
         subtitle="Teams / Job Catalog"
-        avatarShape="square"
       />
     </div>
   ),

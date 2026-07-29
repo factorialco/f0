@@ -51,9 +51,6 @@ export const graphNodeStates = [
 ] as const
 export type GraphNodeState = (typeof graphNodeStates)[number]
 
-export const graphNodeAvatarShapes = ["circle", "square"] as const
-export type GraphNodeAvatarShape = (typeof graphNodeAvatarShapes)[number]
-
 export interface F0GraphNodeProps {
   /** Visual variant based on zoom level */
   variant?: GraphNodeVariant
@@ -79,15 +76,13 @@ export interface F0GraphNodeProps {
   onClick?: () => void
   /** Ref callback for registering this node's DOM element (used by roving tabindex) */
   nodeRef?: (el: HTMLDivElement | null) => void
-  /** Avatar shown on the leading side of the pill. Always rendered at size `lg`. */
-  avatar?: AvatarVariant
   /**
-   * Silhouette of the leading avatar. `"circle"` (default) clips it to a full
-   * circle — the classic org-chart person look. `"square"` keeps the avatar's
-   * own rounded-square silhouette (radius `md` at size `lg`), matching the
-   * square node icons used in Teams and Job Catalog.
+   * Avatar shown on the leading side of the pill. Always rendered at size `lg`.
+   * Its variant also drives the node silhouette: a `person` avatar keeps the
+   * circular dot/pill, every other variant (`team`, `company`, `icon`, …) makes
+   * the node a rounded-square card.
    */
-  avatarShape?: GraphNodeAvatarShape
+  avatar?: AvatarVariant
   /** Primary line of text. Hidden in dot variant. */
   title?: ReactNode
   /** Secondary line of text. Hidden in compact and dot variants. */

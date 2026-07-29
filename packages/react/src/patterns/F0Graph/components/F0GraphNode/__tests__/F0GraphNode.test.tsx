@@ -221,7 +221,7 @@ describe("F0GraphNode", () => {
     expect(getPill().className).toContain("opacity-40")
   })
 
-  it("avatarShape squares both the avatar and the node pill (circle by default)", () => {
+  it("node silhouette follows the avatar variant (person → circle, team → square)", () => {
     const getPill = () =>
       screen.getByRole("treeitem").firstElementChild as HTMLElement
     // Avatar wrapper = content row's first child (same node the ring test walks to).
@@ -230,21 +230,21 @@ describe("F0GraphNode", () => {
       return contentRow.firstElementChild as HTMLElement
     }
 
+    // Person avatar → circular dot/pill.
     const { rerender } = render(
       <F0GraphNode variant="detail" avatar={personAvatar} title="Alice" />
     )
     expect(getAvatarWrapper().className).toContain("rounded-full")
     expect(getPill().className).toContain("rounded-full")
 
+    // Team avatar → rounded-square avatar + rounded-square (card) pill.
     rerender(
       <F0GraphNode
         variant="detail"
-        avatar={personAvatar}
-        title="Alice"
-        avatarShape="square"
+        avatar={{ type: "team", name: "Marketing" }}
+        title="Marketing"
       />
     )
-    // Avatar → rounded square; pill → rounded rectangle. Neither is a full circle.
     expect(getAvatarWrapper().className).toContain("rounded-md")
     expect(getAvatarWrapper().className).not.toContain("rounded-full")
     expect(getPill().className).toContain("rounded-2xl")
