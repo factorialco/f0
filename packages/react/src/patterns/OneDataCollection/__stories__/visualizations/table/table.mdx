@@ -443,6 +443,10 @@ Give columns a shared `headerGroupId` and declare the group in `headerGroups` to
 render a second, spanning header row above them. Adjacent columns sharing an id
 are merged into one spanning cell; columns without an id keep their own header.
 
+> **Migrating from `headerGroupLabels`** — the option was replaced by
+> `headerGroups`, which takes the same `{ [groupId]: label }` shape. Rename the
+> prop and you are done; no other change is needed unless you want collapsing.
+
 ```tsx
 {
   type: "table",

@@ -208,14 +208,6 @@ export type TableVisualizationOptions<
   headerGroups?: Record<string, string | HeaderGroupDefinition>
 
   /**
-   * Labels for header groups. Keys are headerGroupId values used in column
-   * definitions, values are the display labels rendered in the spanning header row.
-   * @deprecated Use `headerGroups` instead, which accepts the same
-   * `{ [groupId]: label }` shape and additionally supports collapsing.
-   */
-  headerGroupLabels?: Record<string, string>
-
-  /**
    * Called when the user collapses or expands a header group. Fires after the
    * table has applied the change; use it to persist the state, not to control
    * it.

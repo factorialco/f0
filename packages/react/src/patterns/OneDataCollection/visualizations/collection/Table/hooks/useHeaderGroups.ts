@@ -44,23 +44,17 @@ type HeaderGroupRun = {
 }
 
 /**
- * Merges the deprecated `headerGroupLabels` map and the `headerGroups` option
- * into a single definition map. `headerGroups` wins for ids present in both.
- * Returns `null` when neither option is provided.
+ * Resolves the shorthand string form and the per-group defaults into a single
+ * definition map. Returns `null` when no groups are configured.
  */
 export const normalizeHeaderGroups = (
-  headerGroups?: Record<string, string | HeaderGroupDefinition>,
-  headerGroupLabels?: Record<string, string>
+  headerGroups?: Record<string, string | HeaderGroupDefinition>
 ): NormalizedHeaderGroups | null => {
-  if (!headerGroups && !headerGroupLabels) return null
+  if (!headerGroups) return null
 
   const normalized: NormalizedHeaderGroups = {}
 
-  Object.entries(headerGroupLabels ?? {}).forEach(([groupId, label]) => {
-    normalized[groupId] = { label, defaultCollapsed: false }
-  })
-
-  Object.entries(headerGroups ?? {}).forEach(([groupId, definition]) => {
+  Object.entries(headerGroups).forEach(([groupId, definition]) => {
     normalized[groupId] =
       typeof definition === "string"
         ? { label: definition, defaultCollapsed: false }
@@ -184,8 +178,6 @@ export const computeHeaderGroups = (
 
 export type UseHeaderGroupsOptions = {
   headerGroups?: Record<string, string | HeaderGroupDefinition>
-  /** @deprecated Merged into `headerGroups`; kept for backwards compatibility. */
-  headerGroupLabels?: Record<string, string>
   onCollapsedChange?: (groupId: string, collapsed: boolean) => void
 }
 
@@ -219,15 +211,11 @@ export const useHeaderGroups = <
   Summaries extends SummariesDefinition,
 >(
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>,
-  {
-    headerGroups,
-    headerGroupLabels,
-    onCollapsedChange,
-  }: UseHeaderGroupsOptions = {}
+  { headerGroups, onCollapsedChange }: UseHeaderGroupsOptions = {}
 ): UseHeaderGroupsReturn<R, Sortings, Summaries> => {
   const definitions = useMemo(
-    () => normalizeHeaderGroups(headerGroups, headerGroupLabels),
-    [headerGroups, headerGroupLabels]
+    () => normalizeHeaderGroups(headerGroups),
+    [headerGroups]
   )
 
   // Read once: after mount the collapsed state belongs to the table, so a

@@ -110,7 +110,6 @@ export const TableCollection = <
   allowColumnReordering,
   referenceRowType,
   headerGroups: headerGroupsOption,
-  headerGroupLabels,
   onHeaderGroupCollapsedChange,
   bordered,
   rowWrapper: RowWrapper,
@@ -164,7 +163,6 @@ export const TableCollection = <
     orderedColumns,
     {
       headerGroups: headerGroupsOption,
-      headerGroupLabels,
       onCollapsedChange: onHeaderGroupCollapsedChange,
     }
   )

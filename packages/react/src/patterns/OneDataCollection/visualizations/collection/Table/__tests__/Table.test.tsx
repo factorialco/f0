@@ -315,7 +315,7 @@ describe("TableCollection", () => {
         >
           columns={groupedColumns}
           source={createTestSource()}
-          headerGroupLabels={{ identity: "Identity" }}
+          headerGroups={{ identity: "Identity" }}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
@@ -1196,19 +1196,19 @@ describe("TableCollection", () => {
       ).not.toBeInTheDocument()
     })
 
-    it("still supports the deprecated headerGroupLabels option", async () => {
-      renderTable({ headerGroupLabels: { contact: "Contact" } })
+    it("renders no group header row when headerGroups is omitted", async () => {
+      renderTable({})
 
       await waitFor(() => {
         expect(screen.getByText(testData[0].name)).toBeInTheDocument()
       })
 
+      // Without a definition the grouped columns fall back to the single-row
+      // header, so every column keeps its own label and nothing is hidden.
       expect(
-        screen.getByRole("columnheader", { name: "Contact" })
-      ).toBeInTheDocument()
-      expect(
-        screen.queryByRole("button", { name: "Contact" })
+        screen.queryByRole("columnheader", { name: "Contact" })
       ).not.toBeInTheDocument()
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
     })
   })
 
