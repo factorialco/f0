@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.2](https://github.com/factorialco/f0/compare/f0-react-v4.63.1...f0-react-v4.63.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** grey parent rows on hover in nested table ([#4818](https://github.com/factorialco/f0/issues/4818)) ([cbeeb94](https://github.com/factorialco/f0/commit/cbeeb947bfa41d4cc954c2bcbed0dc95dd893b2e))
+
 ## [4.63.1](https://github.com/factorialco/f0/compare/f0-react-v4.63.0...f0-react-v4.63.1) (2026-07-29)
 
 
