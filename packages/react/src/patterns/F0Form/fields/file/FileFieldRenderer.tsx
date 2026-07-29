@@ -206,6 +206,23 @@ export function FileFieldRenderer({
 
   const hasFiles = entries.length > 0
 
+  // An entry with a File but no resolved value (and no error) is still
+  // uploading. Only meaningful when an upload hook is present — without one
+  // the value can never resolve, so we must not block submission forever.
+  const hasPendingUploads =
+    !!resolvedUseUpload &&
+    entries.some((entry) => entry.file && !entry.value && !entry.error)
+
+  // Report this field's upload state up to the form so it can block
+  // submission until every upload settles.
+  const registerUploadState = context?.registerUploadState
+  useEffect(() => {
+    registerUploadState?.(inputId, hasPendingUploads)
+  }, [registerUploadState, inputId, hasPendingUploads])
+  useEffect(() => {
+    return () => registerUploadState?.(inputId, false)
+  }, [registerUploadState, inputId])
+
   // In single mode, hide dropzone once a file entry exists.
   // In multiple mode, hide dropzone if maxFiles limit is reached.
   const isAtLimit =

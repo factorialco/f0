@@ -246,6 +246,89 @@ describe("FileFieldRenderer", () => {
     })
   })
 
+  it("disables submit while a file is uploading and re-enables it after", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true }))
+
+    const schema = z.object({
+      file: f0FormField(z.string().min(1), {
+        label: "Document",
+        fieldType: "file",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-upload-blocks-submit"
+        schema={schema}
+        defaultValues={{ file: "" }}
+        onSubmit={onSubmit}
+        useUpload={createMockUploadHook({ delay: 50 })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const submitButton = screen.getByRole("button", { name: "Save" })
+    // No upload in flight yet — submit is enabled.
+    expect(submitButton).not.toBeDisabled()
+
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+    await userEvent.upload(input, createFile("test.pdf"))
+
+    // Upload in flight → submit blocked.
+    await waitFor(() => {
+      expect(submitButton).toBeDisabled()
+    })
+
+    // Upload settles → file value resolved and submit re-enabled.
+    await waitFor(() => {
+      expect(screen.getByText("test.pdf")).toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+
+    await userEvent.click(submitButton)
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ file: "signed_test.pdf" })
+      )
+    })
+  })
+
+  it("does not block submit when no upload hook is provided", async () => {
+    const schema = z.object({
+      file: f0FormField(z.string().optional(), {
+        label: "Document",
+        fieldType: "file",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-no-hook-submit"
+        schema={schema}
+        defaultValues={{ file: "" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+    await userEvent.upload(input, createFile("nohook.pdf"))
+
+    await waitFor(() => {
+      expect(screen.getByText("nohook.pdf")).toBeInTheDocument()
+    })
+
+    // Without an upload hook the value can never resolve, so submission must
+    // not be blocked indefinitely.
+    expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+  })
+
   it("shows accepted file types in the dropzone", () => {
     const schema = z.object({
       file: f0FormField(z.string().optional(), {
