@@ -113,6 +113,9 @@ describe("ChatDocumentAttachmentCard (text)", () => {
     ])
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("app.log")
+    expect(
+      screen.queryByRole("button", { name: "Download app.log" })
+    ).not.toBeInTheDocument()
 
     expect(await screen.findByText(/plain log line 1/)).toBeInTheDocument()
     await waitFor(() =>
@@ -185,5 +188,8 @@ describe("ChatDocumentAttachmentCard (text)", () => {
       ).not.toBeInTheDocument()
     )
     expect(screen.getByText("notes.txt")).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Download notes.txt" })
+    ).toBeInTheDocument()
   })
 })

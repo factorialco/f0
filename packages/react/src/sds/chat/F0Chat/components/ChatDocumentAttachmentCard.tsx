@@ -57,12 +57,11 @@ const useInViewport = (ref: RefObject<HTMLElement | null>): boolean => {
 }
 
 /**
- * Slack-style document card: a header (type badge + name + download) over a
- * cropped snapshot of the content — the first PDF page, the first sheet's
- * cells, the first Word page, or the first lines of text. Clicking the
- * snapshot opens the fullscreen viewer ({@link ChatDocumentPreview}); a
- * document that can't load falls back to the plain file chip so download
- * always stays available.
+ * Document card with a type badge and name over a cropped snapshot of the
+ * content — the first PDF page, the first sheet's cells, the first Word page,
+ * or the first lines of text. Clicking the snapshot opens the fullscreen
+ * viewer ({@link ChatDocumentPreview}), which owns its download action. A
+ * document that can't load falls back to the plain downloadable file chip.
  */
 export const ChatDocumentAttachmentCard = ({
   file,
@@ -76,7 +75,7 @@ export const ChatDocumentAttachmentCard = ({
   kind: ChatDocumentKind
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
-  /** Override the default download action, e.g. Remove inside the composer. */
+  /** Optional card action, e.g. Remove inside the composer. */
   action?: {
     label: string
     icon: IconType
@@ -94,7 +93,7 @@ export const ChatDocumentAttachmentCard = ({
   const inView = useInViewport(containerRef)
   const [failed, setFailed] = useState(false)
   const [rendered, setRendered] = useState(false)
-  const attachmentAction = action ?? {
+  const fallbackAction = action ?? {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
     onClick: () => triggerDownload(file.url, file.name),
@@ -121,9 +120,9 @@ export const ChatDocumentAttachmentCard = ({
               variant="outline"
               size="sm"
               hideLabel
-              icon={attachmentAction.icon}
-              label={attachmentAction.label}
-              onClick={attachmentAction.onClick}
+              icon={fallbackAction.icon}
+              label={fallbackAction.label}
+              onClick={fallbackAction.onClick}
             />
           </div>
           <span className="sr-only">{file.name}</span>
@@ -135,7 +134,7 @@ export const ChatDocumentAttachmentCard = ({
       <F0FileItem
         size="md"
         file={{ name: file.name, type: file.mimeType ?? "" }}
-        actions={[attachmentAction]}
+        actions={[fallbackAction]}
       />
     )
   }
@@ -160,14 +159,16 @@ export const ChatDocumentAttachmentCard = ({
           <OneEllipsis className="grow text-sm font-medium text-f1-foreground">
             {file.name}
           </OneEllipsis>
-          <ButtonInternal
-            variant="ghost"
-            size="sm"
-            hideLabel
-            icon={attachmentAction.icon}
-            label={attachmentAction.label}
-            onClick={attachmentAction.onClick}
-          />
+          {action && (
+            <ButtonInternal
+              variant="ghost"
+              size="sm"
+              hideLabel
+              icon={action.icon}
+              label={action.label}
+              onClick={action.onClick}
+            />
+          )}
         </div>
       )}
       <button
@@ -229,16 +230,16 @@ export const ChatDocumentAttachmentCard = ({
           </div>
         )}
       </button>
-      {compact && (
+      {compact && action && (
         <>
           <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
             <ButtonInternal
               variant="outline"
               size="sm"
               hideLabel
-              icon={attachmentAction.icon}
-              label={attachmentAction.label}
-              onClick={attachmentAction.onClick}
+              icon={action.icon}
+              label={action.label}
+              onClick={action.onClick}
             />
           </div>
           <span className="sr-only">{file.name}</span>

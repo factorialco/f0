@@ -133,6 +133,9 @@ describe("ChatDocumentAttachmentCard (sheet)", () => {
     renderChat([sheetAttachment])
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("raw-data.xlsx")
+    expect(
+      screen.queryByRole("button", { name: "Download raw-data.xlsx" })
+    ).not.toBeInTheDocument()
 
     // The lazy SheetJS chunk resolves, the workbook parses, cells appear and
     // the snapshot fades in over the skeleton.

@@ -5,6 +5,7 @@ import {
   zeroRender as render,
   screen,
   waitFor,
+  within,
 } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
@@ -26,6 +27,7 @@ vi.mock("@/components/F0VideoPlayer", () => ({
     defaultLanguage,
     silent,
     ariaLabel,
+    download,
     "data-testid": testId,
   }: {
     src: string
@@ -34,6 +36,7 @@ vi.mock("@/components/F0VideoPlayer", () => ({
     defaultLanguage?: string
     silent?: boolean
     ariaLabel?: string
+    download?: { label: string; onClick: () => void }
     "data-testid"?: string
   }) => (
     <div
@@ -57,6 +60,11 @@ vi.mock("@/components/F0VideoPlayer", () => ({
       </video>
       <button type="button">Play</button>
       <button type="button">Enter fullscreen</button>
+      {download && (
+        <button type="button" onClick={download.onClick}>
+          {download.label}
+        </button>
+      )}
     </div>
   ),
 }))
@@ -170,6 +178,26 @@ describe("ChatVideoAttachment", () => {
     expect(
       screen.getAllByRole("button", { name: "Enter fullscreen" })
     ).toHaveLength(2)
+    expect(
+      within(players[0]).getByRole("button", {
+        name: "Download walkthrough.webm",
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByRole("button", {
+        name: "Download walkthrough.webm",
+      })
+    ).toHaveLength(1)
+    expect(
+      within(players[1]).getByRole("button", {
+        name: "Download deep-dive.mp4",
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByRole("button", {
+        name: "Download deep-dive.mp4",
+      })
+    ).toHaveLength(1)
   })
 
   it("keeps an uploading video as a file chip until it completes", async () => {

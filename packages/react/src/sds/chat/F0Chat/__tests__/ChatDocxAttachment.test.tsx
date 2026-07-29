@@ -119,6 +119,9 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
     renderChat([docxAttachment])
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("offer-letter.docx")
+    expect(
+      screen.queryByRole("button", { name: "Download offer-letter.docx" })
+    ).not.toBeInTheDocument()
 
     expect(await screen.findByText("Offer of Employment")).toBeInTheDocument()
     await waitFor(() =>

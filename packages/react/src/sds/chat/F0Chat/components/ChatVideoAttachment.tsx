@@ -1,8 +1,6 @@
 import { lazy, Suspense, type ReactNode, useState } from "react"
 
-import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
-import { type IconType } from "@/components/F0Icon"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -19,29 +17,22 @@ const LazyVideoPlayer = lazy(() =>
 
 /**
  * An inline chat video powered by F0VideoPlayer. The player owns playback,
- * keyboard shortcuts, speed, volume, captions and fullscreen; chat only adds
- * message sizing/corners and preserves the attachment download action.
+ * keyboard shortcuts, speed, volume, captions, download and fullscreen; chat
+ * adds the file-specific download action, message sizing and chained corners.
  */
 export const ChatVideoAttachment = ({
   file,
   cornerClass,
   className,
-  action,
 }: {
   file: F0ChatFileAttachment
   cornerClass: string
   /** Optional sizing override for compact surfaces such as the composer. */
   className?: string
-  /** Override the default download action, e.g. Remove inside the composer. */
-  action?: {
-    label: string
-    icon: IconType
-    onClick: () => void
-  }
 }): ReactNode => {
   const i18n = useI18n()
   const [failed, setFailed] = useState(false)
-  const attachmentAction = action ?? {
+  const downloadAction = {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
     onClick: () => triggerDownload(file.url, file.name),
@@ -52,7 +43,7 @@ export const ChatVideoAttachment = ({
       <F0FileItem
         size="md"
         file={{ name: file.name, type: file.mimeType ?? "" }}
-        actions={[attachmentAction]}
+        actions={[downloadAction]}
       />
     )
   }
@@ -90,19 +81,14 @@ export const ChatVideoAttachment = ({
           content={file.videoContent}
           defaultLanguage={file.videoDefaultLanguage}
           silent={file.videoSilent}
+          download={{
+            label: downloadAction.label,
+            onClick: downloadAction.onClick,
+          }}
           data-testid="chat-video-player"
         />
       </Suspense>
 
-      <span className="shadow-sm absolute right-2 top-2 z-10 flex rounded bg-f1-background">
-        <ButtonInternal
-          variant="outline"
-          hideLabel
-          icon={attachmentAction.icon}
-          label={attachmentAction.label}
-          onClick={attachmentAction.onClick}
-        />
-      </span>
       <figcaption className="sr-only">{file.name}</figcaption>
     </figure>
   )

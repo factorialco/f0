@@ -162,6 +162,9 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
     expect(
       screen.getByRole("button", { name: "Open report.pdf" })
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Download report.pdf" })
+    ).not.toBeInTheDocument()
     // The snapshot renders the first page once the lazy chunk resolves, and
     // fades in over the card's skeleton once the page reports its paint.
     await waitFor(() =>
@@ -199,6 +202,7 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
         { timeout: 5000 }
       )
     ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
 
     // Close via the top-band pill (the backdrop shares the same label).
     const closeButtons = screen.getAllByRole("button", { name: "Close" })

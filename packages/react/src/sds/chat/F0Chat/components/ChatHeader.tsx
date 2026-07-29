@@ -105,7 +105,7 @@ export const ChatHeader = ({
           // full size instead of shrunk inside the bordered avatar box.
           <span
             aria-hidden={showGroupFallback || undefined}
-            className="flex size-6 items-center justify-center"
+            className="flex size-5 text-lg items-center font-medium justify-center text-f1-foreground-secondary"
             data-testid={
               showGroupFallback ? "chat-group-avatar-fallback" : undefined
             }

@@ -5,6 +5,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -25,6 +26,10 @@ import { cn } from "@/lib/utils"
 import { Picker } from "@/sds/social/Reactions/Picker"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
+import {
+  replaceClosedEmojiShortcode,
+  useEmojiAutocomplete,
+} from "../hooks/useEmojiAutocomplete"
 import {
   MENTION_EVERYONE_ID,
   type MentionEntry,
@@ -50,8 +55,12 @@ import {
   microExitTransition,
 } from "../utils/chat-motion"
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
+import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
 import { ChatEditChip } from "./ChatEditChip"
-import { ChatMentionPopover } from "./ChatMentionPopover"
+import {
+  ChatMentionPopover,
+  getChatMentionOptionId,
+} from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
 
@@ -123,25 +132,48 @@ export const ChatComposer = (): ReactNode => {
   const attachmentStripRef = useRef<HTMLDivElement>(null)
   const localPreviewUrlsRef = useRef(new Set<string>())
 
+  const emojiAutocomplete = useEmojiAutocomplete({
+    inputValue: value,
+    setInputValue: setValue,
+    cursorPosition,
+    setCursorPosition,
+    textareaRef,
+  })
   // Mentions are available wherever the host provides a member search — both
-  // DMs (mention either person) and groups. The `@here` (everyone) option only
-  // makes sense in a group, so it's offered there only.
+  // DMs (mention either person) and groups. Emoji lookup owns the active token
+  // while open, so member searches pause until it closes.
   const mentionsEnabled = !!searchMembers
   const mentions = useMentions({
     inputValue: value,
     setInputValue: setValue,
     cursorPosition,
     textareaRef,
-    enabled: mentionsEnabled,
+    enabled: mentionsEnabled && !emojiAutocomplete.isOpen,
     searchMembers,
     everyoneLabel:
       channel.type === "group" ? i18n.chat.mentionEveryone : undefined,
   })
+  const closeEmojiAutocomplete = emojiAutocomplete.close
+  const handleEmojiAutocompleteKeyDown = emojiAutocomplete.handleKeyDown
+  const mentionReactId = useId()
+  const mentionListboxId = `chat-mention-autocomplete-${mentionReactId.replace(/:/g, "")}`
+  const activeMentionCandidate =
+    mentions.results[mentions.selectedIndex] ?? mentions.results[0]
+  const activeMentionOptionId =
+    mentions.isOpen && activeMentionCandidate
+      ? getChatMentionOptionId(mentionListboxId, activeMentionCandidate)
+      : undefined
+
+  useEffect(() => {
+    if (emojiAutocomplete.isOpen) mentions.dismissCurrentTrigger()
+  }, [emojiAutocomplete.isOpen, mentions.dismissCurrentTrigger])
   const highlightSegments = useMemo(
     () =>
       buildHighlightSegments(value, mentions.mentions, {
         cursorPosition,
-        inlineCompletion: mentions.inlineCompletion,
+        inlineCompletion: emojiAutocomplete.isOpen
+          ? null
+          : mentions.inlineCompletion,
         currentUserId,
       }),
     [
@@ -149,6 +181,7 @@ export const ChatComposer = (): ReactNode => {
       mentions.mentions,
       cursorPosition,
       mentions.inlineCompletion,
+      emojiAutocomplete.isOpen,
       currentUserId,
     ]
   )
@@ -296,12 +329,23 @@ export const ChatComposer = (): ReactNode => {
 
   const handleChange = useCallback(
     (next: string, cursorPos: number) => {
-      setValue(next)
-      setCursorPosition(cursorPos)
+      const replacement = replaceClosedEmojiShortcode(next, cursorPos)
+      const nextValue = replacement?.value ?? next
+      const nextCursorPosition = replacement?.cursorPosition ?? cursorPos
+      setValue(nextValue)
+      setCursorPosition(nextCursorPosition)
       onInputActivity()
+      if (replacement) {
+        requestAnimationFrame(() => {
+          textareaRef.current?.setSelectionRange(
+            nextCursorPosition,
+            nextCursorPosition
+          )
+        })
+      }
       // Clearing the text means typing stopped NOW — don't leave the
       // counterpart's dots hanging until the transport's timeout.
-      if (next.trim().length === 0) void stopTyping?.()
+      if (nextValue.trim().length === 0) void stopTyping?.()
     },
     [onInputActivity, stopTyping]
   )
@@ -575,6 +619,7 @@ export const ChatComposer = (): ReactNode => {
       const caret = start + emoji.length
       setValue((prev) => prev.slice(0, start) + emoji + prev.slice(end))
       setCursorPosition(caret)
+      closeEmojiAutocomplete()
       onInputActivity()
       requestAnimationFrame(() => {
         const node = textareaRef.current
@@ -584,11 +629,17 @@ export const ChatComposer = (): ReactNode => {
         }
       })
     },
-    [onInputActivity]
+    [closeEmojiAutocomplete, onInputActivity]
   )
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      // Enter confirms the active IME composition. It must never select an
+      // autocomplete option or send the message while composition is active.
+      if (e.nativeEvent.isComposing) return
+      // Emoji shortcode suggestions take precedence when the active caret token
+      // starts with `:`; Enter/Tab select instead of sending the message.
+      if (handleEmojiAutocompleteKeyDown(e)) return
       // The mention popover consumes navigation keys first (↑↓/Enter/Tab/Esc).
       if (mentions.handleKeyDown(e)) return
       // Escape backs out of an edit (when the popover didn't claim it).
@@ -602,7 +653,13 @@ export const ChatComposer = (): ReactNode => {
         handleSend()
       }
     },
-    [handleSend, mentions, isEditing, cancelEdit]
+    [
+      handleSend,
+      handleEmojiAutocompleteKeyDown,
+      mentions,
+      isEditing,
+      cancelEdit,
+    ]
   )
 
   const startRecording = useCallback(() => {
@@ -617,8 +674,19 @@ export const ChatComposer = (): ReactNode => {
       {/* Centered, width-capped to match the message column in fullscreen. */}
       <div className="mx-auto w-full max-w-content">
         <div className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background">
+          <ChatEmojiAutocomplete
+            isOpen={emojiAutocomplete.isOpen}
+            results={emojiAutocomplete.results}
+            selectedIndex={emojiAutocomplete.selectedIndex}
+            position={emojiAutocomplete.popoverPosition}
+            listboxId={emojiAutocomplete.listboxId}
+            label={i18n.chat.addEmoji}
+            onSelect={emojiAutocomplete.selectCandidate}
+            onHighlight={emojiAutocomplete.setSelectedIndex}
+          />
           <ChatMentionPopover
-            isOpen={mentions.isOpen}
+            isOpen={mentions.isOpen && !emojiAutocomplete.isOpen}
+            listboxId={mentionListboxId}
             results={mentions.results}
             isLoading={mentions.isLoading}
             selectedIndex={mentions.selectedIndex}
@@ -785,13 +853,26 @@ export const ChatComposer = (): ReactNode => {
             highlightRef={highlightRef}
             value={value}
             placeholder={isRecording ? i18n.chat.listening : placeholder}
+            accessibleLabel={placeholder}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
+            onBlur={closeEmojiAutocomplete}
             onCursorUpdate={updateCursorPosition}
             onScroll={syncHighlightScroll}
             highlightSegments={highlightSegments}
             hasOverlay={hasOverlay}
+            isAutocompleteOpen={emojiAutocomplete.isOpen || mentions.isOpen}
+            autocompleteListboxId={
+              emojiAutocomplete.isOpen
+                ? emojiAutocomplete.listboxId
+                : mentions.isOpen
+                  ? mentionListboxId
+                  : undefined
+            }
+            activeAutocompleteOptionId={
+              emojiAutocomplete.activeDescendantId ?? activeMentionOptionId
+            }
           />
 
           {/* Recording row ↔ action row: both stacked in the same grid cell

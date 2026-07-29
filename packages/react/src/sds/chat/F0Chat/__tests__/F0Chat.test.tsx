@@ -417,6 +417,158 @@ describe("F0Chat", () => {
     )
   })
 
+  it("selects an emoji with Enter before sending the completed message", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smil")
+    const listbox = screen.getByRole("listbox", { name: /add emoji/i })
+    const selectedOption = within(listbox).getByRole("option", {
+      selected: true,
+    })
+    expect(input).toHaveAttribute("aria-expanded", "true")
+    expect(input).toHaveAttribute("aria-controls", listbox.id)
+    expect(input).toHaveAttribute("aria-activedescendant", selectedOption.id)
+
+    await userEvent.keyboard("{Enter}")
+    expect(input).toHaveValue("😄 ")
+    expect(input).toHaveAttribute("aria-expanded", "false")
+    expect(input).not.toHaveAttribute("aria-activedescendant")
+    expect(sendMessage).not.toHaveBeenCalled()
+
+    await userEvent.keyboard("{Enter}")
+    expect(sendMessage).toHaveBeenCalledOnce()
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ body: "😄" })
+    )
+  })
+
+  it("does not select or send when Enter confirms an IME composition", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smil")
+    fireEvent.compositionStart(input)
+    fireEvent.keyDown(input, {
+      key: "Enter",
+      code: "Enter",
+      isComposing: true,
+    })
+
+    expect(input).toHaveValue(":smil")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("selects the hovered emoji with the pointer and keeps composer focus", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":sm")
+    const listbox = screen.getByRole("listbox", { name: /add emoji/i })
+    const smiley = within(listbox).getByRole("option", {
+      name: /:smiley:/,
+    })
+
+    await userEvent.hover(smiley)
+    expect(smiley).toHaveAttribute("aria-selected", "true")
+    await userEvent.click(smiley)
+
+    expect(input).toHaveValue("😃 ")
+    expect(input).toHaveFocus()
+    expect(input).toHaveProperty("selectionStart", 3)
+    expect(
+      screen.queryByRole("listbox", { name: /add emoji/i })
+    ).not.toBeInTheDocument()
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("closes emoji autocomplete when the composer loses focus", async () => {
+    renderChat(makeRuntime())
+    const input = screen.getByPlaceholderText(/write something here/i)
+    await userEvent.type(input, ":sm")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /attach file/i }))
+    expect(
+      screen.queryByRole("listbox", { name: /add emoji/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("converts a closed emoji alias in place without sending", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "Great :thumbsup:")
+
+    expect(input).toHaveValue("Great 👍")
+    expect(input).toHaveProperty("selectionStart", 8)
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("keeps mention selection working when emoji autocomplete is enabled", async () => {
+    const sendMessage = vi.fn()
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "group-1",
+          type: "group",
+          title: "Product",
+          avatar: { type: "team", name: "Product" },
+        },
+        searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+        sendMessage,
+      })
+    )
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "@Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+    await userEvent.keyboard("{Enter}")
+
+    expect(input).toHaveValue("@Ana García ")
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("gives an active emoji query precedence over a pending mention", async () => {
+    const sendMessage = vi.fn()
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "group-1",
+          type: "group",
+          title: "Product",
+          avatar: { type: "team", name: "Product" },
+        },
+        searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+        sendMessage,
+      })
+    )
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "@Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+    await userEvent.type(input, " :smil")
+
+    screen.getByRole("listbox", { name: /add emoji/i })
+    expect(screen.getAllByRole("listbox")).toHaveLength(1)
+    await userEvent.keyboard("{Enter}")
+
+    expect(input).toHaveValue("@Ana 😄 ")
+    expect(sendMessage).not.toHaveBeenCalled()
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 250))
+    })
+    expect(screen.queryAllByRole("listbox")).toHaveLength(0)
+  })
+
   it("shows an emoji picker button in the composer", () => {
     renderChat(makeRuntime())
     expect(
@@ -531,14 +683,21 @@ describe("F0Chat", () => {
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
     // Each pending attachment carries its own remove action.
-    const removeButtons = screen.getAllByRole("button", { name: /^remove /i })
-    expect(removeButtons).toHaveLength(3)
+    const removePhoto = screen.getByRole("button", {
+      name: "Remove photo.png",
+    })
+    expect(
+      screen.getByRole("button", { name: "Remove walkthrough.webm" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Remove report.pdf" })
+    ).toBeInTheDocument()
     const attachmentStrip = screen.getByRole("region", {
       name: "3 attachments",
     })
     expect(attachmentStrip).toHaveAttribute("tabindex", "0")
     expect(attachmentStrip).toHaveClass("flex-nowrap", "overflow-x-auto")
-    await userEvent.click(removeButtons[0])
+    await userEvent.click(removePhoto)
     expect(
       screen.queryByRole("img", { name: /photo\.png/i })
     ).not.toBeInTheDocument()

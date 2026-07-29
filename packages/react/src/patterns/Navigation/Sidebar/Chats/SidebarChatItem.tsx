@@ -113,7 +113,7 @@ export const SidebarChatItem = ({
               // shrunk inside the bordered avatar box.
               <span
                 aria-hidden={showGroupFallback || undefined}
-                className="flex size-5 items-center justify-center"
+                className="flex size-5 text-lg font-medium items-center justify-center text-f1-foreground-secondary"
                 data-testid={
                   showGroupFallback
                     ? "sidebar-group-avatar-fallback"
