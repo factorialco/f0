@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.5](https://github.com/factorialco/f0/compare/f0-react-v4.63.4...f0-react-v4.63.5) (2026-07-29)
+
+
+### Bug Fixes
+
+* **react:** detect breaking API changes behind array props ([#4899](https://github.com/factorialco/f0/issues/4899)) ([9131861](https://github.com/factorialco/f0/commit/91318614ddf0272e375d370b08ade59334eebd1f))
+
 ## [4.63.4](https://github.com/factorialco/f0/compare/f0-react-v4.63.3...f0-react-v4.63.4) (2026-07-29)
 
 
