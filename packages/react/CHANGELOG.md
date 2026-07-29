@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.61.1](https://github.com/factorialco/f0/compare/f0-react-v4.61.0...f0-react-v4.61.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Graph:** force instant node positioning (transition: none) ([#4863](https://github.com/factorialco/f0/issues/4863)) ([eb8382a](https://github.com/factorialco/f0/commit/eb8382a3bc75c8daeeff6e591efdf17ebbde317d))
+* **Table:** unmount flat rows on removal instead of animating them out ([#4882](https://github.com/factorialco/f0/issues/4882)) ([dfd46ee](https://github.com/factorialco/f0/commit/dfd46eefa5acd2cb7aa695cbe927ab371d128dc1))
+
 ## [4.61.0](https://github.com/factorialco/f0/compare/f0-react-v4.60.1...f0-react-v4.61.0) (2026-07-28)
 
 
