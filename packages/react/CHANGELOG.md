@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.0](https://github.com/factorialco/f0/compare/f0-react-v4.62.1...f0-react-v4.63.0) (2026-07-29)
+
+
+### Features
+
+* **value-display:** support 15 base-color palette in categoryBarChart ([#4526](https://github.com/factorialco/f0/issues/4526)) ([cfa722c](https://github.com/factorialco/f0/commit/cfa722cd3825bec8a5679093d758df4826d5a380))
+
 ## [4.62.1](https://github.com/factorialco/f0/compare/f0-react-v4.62.0...f0-react-v4.62.1) (2026-07-29)
 
 
