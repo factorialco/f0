@@ -563,6 +563,60 @@ describe("KanbanCollection - grouping", () => {
     expect(selectAllB()).toHaveAttribute("aria-checked", "false")
   })
 
+  it("hides the group-header checkbox when selectableGroups is false but keeps card selection", async () => {
+    const people: GroupPerson[] = [
+      { id: 1, name: "John", group: "A", lane: "todo" },
+      { id: 2, name: "Jane", group: "A", lane: "doing" },
+      { id: 3, name: "Bob", group: "B", lane: "doing" },
+    ]
+
+    const source = {
+      ...createGroupedSource(people),
+      selectable: (p: GroupPerson) => p.id,
+      lanes: [
+        { id: "todo", filters: { lane: ["todo"] } },
+        { id: "doing", filters: { lane: ["doing"] } },
+      ],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        GroupPerson,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<GroupPerson>,
+        TestNavigationFilters,
+        GroupingDefinition<GroupPerson>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        selectableGroups={false}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    const groupA = await screen.findByTestId("kanban-group-A")
+    await waitFor(() => {
+      expect(within(groupA).getAllByTestId("card")).toHaveLength(2)
+    })
+
+    // The group header has no "Select all" checkbox...
+    expect(
+      within(groupA).queryByRole("checkbox", { name: "Select all" })
+    ).not.toBeInTheDocument()
+    // ...but the cards are still selectable (their own checkboxes render).
+    expect(within(groupA).getAllByRole("checkbox").length).toBeGreaterThan(0)
+  })
+
   // Onboarding case: each version renders its own phases; a version with no
   // people is simply not shown (standard data-driven grouping).
   it("renders each shown version with its own columns and omits empty versions", async () => {

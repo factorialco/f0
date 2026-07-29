@@ -55,6 +55,7 @@ export const KanbanCollection = <
   onLoadError,
   onLoadData,
   getLanesForGroup,
+  selectableGroups,
 }: KanbanCollectionProps<
   R,
   Filters,
@@ -465,7 +466,8 @@ export const KanbanCollection = <
               // board's lanes' status for this group into one tri-state, and fan
               // the toggle out to each lane (same primitives Card/List use, just
               // summed across the board's columns).
-              const groupSelectable = source.selectable !== undefined
+              const groupSelectable =
+                selectableGroups !== false && source.selectable !== undefined
               let selectedCount = 0
               let unselectedCount = 0
               for (const lane of board.lanes) {

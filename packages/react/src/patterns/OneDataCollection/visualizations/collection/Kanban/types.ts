@@ -32,6 +32,11 @@ export type KanbanVisualizationOptions<
    * `source.lanes`). Enables the onboarding case where each policy version has
    * its own phases. NOTE: API shape pending Foundations review. */
   getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>
+  /** Whether each group header shows a selection checkbox when the collection is
+   * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
+   * keep per-card selection while hiding the group-level checkbox — e.g. when
+   * "select a whole group" isn't a meaningful action for the consumer. */
+  selectableGroups?: boolean
   title?: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
