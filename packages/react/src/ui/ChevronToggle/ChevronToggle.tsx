@@ -39,7 +39,7 @@ export const ChevronToggle = ({
       )}
       onClick={onClick}
     >
-      <F0Icon icon={ChevronDown} size={size} role="button" />
+      <F0Icon icon={ChevronDown} size={size} aria-hidden />
     </motion.div>
   )
 }

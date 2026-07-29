@@ -5,6 +5,7 @@ import { F0Text } from "@/components/F0Text"
 import { Metadata } from "@/experimental/Information/Headers/Metadata"
 import Marker from "@/icons/app/Marker"
 import { cn } from "@/lib/utils"
+import { Collapse } from "@/ui/Collapse"
 
 import type {
   F0TimelineRowNestedtaskProps,
@@ -13,7 +14,6 @@ import type {
 
 import { Actions } from "./Actions"
 import { NestedtaskHeader } from "./NestedtaskHeader"
-import { TimelineCollapse } from "./TimelineCollapse"
 import { TimelineRowLayout } from "./TimelineRowLayout"
 
 const NestedItem = ({ props }: { props: F0TimelineRowTaskProps }) => {
@@ -72,7 +72,7 @@ export const NestedtaskRow = ({
           <Metadata items={metadata} />
         </div>
       )}
-      <TimelineCollapse open={isExpanded}>
+      <Collapse open={isExpanded}>
         <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
           {content !== undefined
             ? content
@@ -80,7 +80,7 @@ export const NestedtaskRow = ({
                 <NestedItem key={`${item.title}-${index}`} props={item} />
               ))}
         </div>
-      </TimelineCollapse>
+      </Collapse>
       {hasActions && (
         <div className="pl-9">
           <Actions

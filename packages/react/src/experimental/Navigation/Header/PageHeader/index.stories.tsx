@@ -187,6 +187,28 @@ export const WithBreadcrumbs: Story = {
   },
 }
 
+export const WithLongBreadcrumb: Story = {
+  args: {
+    module: {
+      name: "My purchase requests",
+      href: "/my-spending-requests",
+      id: "my_spending" as const,
+    },
+    breadcrumbs: [
+      {
+        id: "request",
+        label: "I need a MacBook Pro for a designer joining next month",
+        href: "/my-spending-requests/41",
+      },
+    ],
+    statusTag: {
+      text: "Pending approval",
+      variant: "warning",
+    },
+    actions: defaultActions,
+  },
+}
+
 export const WithSelectBreadcrumb: Story = {
   args: {
     module: defaultModule,

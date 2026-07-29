@@ -1,0 +1,316 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import { NodePreview } from "./components/workflow-real/NodePreview"
+import { NodeRow, StateCell } from "./components/workflow-real/NodeLayout"
+
+<Meta title="Patterns/Procurement Workflows" />
+
+# Procurement Workflows
+
+The visual editor for building procurement approval flows. A workflow is a canvas of
+connected nodes, each one a step a Purchase Request passes through on its way from
+submission to a final decision. This page catalogs every node type and the visual
+states each one can take.
+
+These previews render the **real** node components from
+`frontend/src/modules/workflows/components/Node/` — the same `FlowNodeBasic` card,
+category badges, icons, colors and multi-action list used in production. They are
+mounted here through a small `NodePreview` wrapper that feeds them a synthetic
+ReactFlow node, so what you see is byte-for-byte the editor's own rendering.
+
+## Anatomy
+
+Every node is a colored category badge above a white card. The badge identifies the
+node type by color and icon; the card holds a title and a short description.
+
+<Unstyled>
+  <div style={{ padding: "20px 0" }}>
+    <NodePreview
+      category="approvals"
+      title="Manager approval"
+      description="The requester's manager approves before the flow continues."
+    />
+  </div>
+</Unstyled>
+
+## Node types
+
+There are six node types. Trigger opens every workflow; the rest are dropped onto the
+canvas as steps.
+
+<Unstyled>
+  <NodeRow>
+    <NodePreview
+      category="trigger"
+      title="Form submitted"
+      description="Fires when a requester submits the procurement form."
+    />
+    <NodePreview
+      category="task"
+      title="Request invoice"
+      description="Ask the requester to upload the supplier invoice."
+    />
+    <NodePreview
+      category="approvals"
+      title="Finance review"
+      description="Finance approves before the purchase order is created."
+    />
+  </NodeRow>
+  <NodeRow>
+    <NodePreview
+      category="condition"
+      title="Check amount"
+      description="Branches the flow on the request amount."
+    />
+    <NodePreview
+      category="terminate"
+      title="Rejected"
+      description="Terminates the flow with an outcome."
+    />
+  </NodeRow>
+</Unstyled>
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Type</th>
+        <th className="text-left">Color</th>
+        <th className="text-left">Icon</th>
+        <th className="text-left">Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Trigger</code>
+        </td>
+        <td>Pink</td>
+        <td>Lightbulb</td>
+        <td>
+          Entry point — fires when the form is submitted. One per workflow,
+          read-only.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Action</code>
+        </td>
+        <td>Blue</td>
+        <td>CheckCircle</td>
+        <td>A task: request a document, download a file, complete a form.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Approval</code>
+        </td>
+        <td>Purple</td>
+        <td>ThumbsUp</td>
+        <td>A reviewer must approve or reject the request.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Multi-action</code>
+        </td>
+        <td>Orange</td>
+        <td>Group</td>
+        <td>Runs several actions and approvals in parallel.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Condition</code>
+        </td>
+        <td>Teal</td>
+        <td>Organization</td>
+        <td>Branches the flow on amount or trigger-form values.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>End</code>
+        </td>
+        <td>Grey</td>
+        <td>CrossedCircle</td>
+        <td>Terminates the flow with an outcome.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Multi-action
+
+A multi-action bundles several actions and approvals that run in parallel. The card
+lists each sub-action with its own icon, title and description; the flow continues
+only once all of them complete.
+
+<Unstyled>
+  <div style={{ padding: "20px 0" }}>
+    <NodePreview
+      category="multiAction"
+      title="Collect documents & checks"
+      description="Run document, verification and acknowledgement steps in parallel."
+      parallelTasks={[
+        {
+          type: "task",
+          title: "Request invoice",
+          description: "Ask the requester to upload the supplier invoice.",
+        },
+        {
+          type: "task",
+          title: "Verify budget availability",
+          description: "Finance verifies there is budget for this request.",
+        },
+        {
+          type: "approvals",
+          title: "Collect supplier details",
+          description: "Gather supplier banking and contact information.",
+        },
+      ]}
+    />
+  </div>
+</Unstyled>
+
+## States
+
+Every node renders in four visual states. The example below shows them on an Approval
+node; each node type uses its own category color for the selected and hover borders.
+
+<Unstyled>
+  <NodeRow>
+    <StateCell label="Default">
+      <NodePreview
+        category="approvals"
+        title="Manager approval"
+        description="The requester's manager approves the request."
+      />
+    </StateCell>
+    <StateCell label="Selected">
+      <NodePreview
+        category="approvals"
+        title="Manager approval"
+        description="The requester's manager approves the request."
+        selected
+      />
+    </StateCell>
+  </NodeRow>
+  <NodeRow>
+    <StateCell label="Hover">
+      <NodePreview
+        category="approvals"
+        title="Manager approval"
+        description="The requester's manager approves the request."
+      />
+    </StateCell>
+    <StateCell label="Invalid">
+      <NodePreview
+        category="approvals"
+        title="Manager approval"
+        description="The requester's manager approves the request."
+        isValid={false}
+        validationError="Select at least one approver."
+      />
+    </StateCell>
+  </NodeRow>
+</Unstyled>
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Appearance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Default</code>
+        </td>
+        <td>
+          Badge in its light category color; card border matches the category.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Selected</code>
+        </td>
+        <td>
+          Badge fills with the solid category color and its label turns white;
+          the card draws a saturated border. Indicates the node the
+          configuration panel is editing.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Hover</code>
+        </td>
+        <td>
+          Card border deepens to a mid-tone of the category color while the
+          pointer is over the node. (Hover the card above to see it live.)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Invalid</code>
+        </td>
+        <td>
+          Card border turns red, the badge drops to a neutral outline, and a red
+          Error pill appears next to the title with the validation message in its
+          tooltip.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### States across every node type
+
+Each node type keeps its category color through every state. Selected fills the badge
+and saturates the border; invalid is red for all of them.
+
+<Unstyled>
+  <NodeRow>
+    <StateCell label="Trigger / selected">
+      <NodePreview
+        category="trigger"
+        title="Form submitted"
+        description="Fires when a requester submits the form."
+        selected
+      />
+    </StateCell>
+    <StateCell label="Action / selected">
+      <NodePreview
+        category="task"
+        title="Request invoice"
+        description="Ask the requester to upload the invoice."
+        selected
+      />
+    </StateCell>
+    <StateCell label="Condition / selected">
+      <NodePreview
+        category="condition"
+        title="Check amount"
+        description="Branches the flow on the request amount."
+        selected
+      />
+    </StateCell>
+  </NodeRow>
+  <NodeRow>
+    <StateCell label="End / selected">
+      <NodePreview
+        category="terminate"
+        title="Rejected"
+        description="Terminates the flow."
+        selected
+      />
+    </StateCell>
+    <StateCell label="Action / invalid">
+      <NodePreview
+        category="task"
+        title="Request invoice"
+        description="Ask the requester to upload the invoice."
+        isValid={false}
+        validationError="Choose a document to request."
+      />
+    </StateCell>
+  </NodeRow>
+</Unstyled>

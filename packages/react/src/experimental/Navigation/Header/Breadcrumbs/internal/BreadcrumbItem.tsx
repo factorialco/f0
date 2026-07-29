@@ -6,6 +6,7 @@ import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
 import { BreadcrumbItemType } from "@/experimental/Navigation/Header/Breadcrumbs/types"
 import { Link } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import {
   BreadcrumbPage,
@@ -70,9 +71,13 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
           (isOnly || isFirst) && (
             <F0AvatarModule module={item.module} size={isOnly ? "lg" : "sm"} />
           )}
-        <span className="truncate">
+        {/* Cap the label width so a long crumb (e.g. a resource title) truncates
+          instead of stretching the header and pushing the actions/toggle off-screen.
+          OneEllipsis surfaces the full text in a tooltip on hover, but only when the
+          label is actually truncated. The large "only" crumb keeps its full width. */}
+        <OneEllipsis className={cn(!isOnly && "max-w-[16rem]")}>
           {!isLoading && "label" in item ? item.label : ""}
-        </span>
+        </OneEllipsis>
       </motion.div>
     )
 
