@@ -30,12 +30,14 @@ export function KanbanLane<TRecord extends RecordType>({
   id,
   getLaneResourceIndexById,
   onMove,
+  heightMode = "fill",
   ...laneProps
 }: {
   id?: string
   getLaneResourceIndexById?: (id: string) => number
   onMove?: (param: KanbanOnMoveParam) => Promise<TRecord>
   allowReorder?: boolean
+  heightMode?: "fill" | "content"
 } & LaneProps<TRecord>) {
   const laneRef = useRef<HTMLDivElement | null>(null)
   const outerRef = useRef<HTMLDivElement | null>(null)
@@ -560,8 +562,11 @@ export function KanbanLane<TRecord extends RecordType>({
       window.removeEventListener("kanban-test-move", handler as EventListener)
   }, [id, onMove])
 
-  // Calculate dynamic height based on content and container
+  // Calculate dynamic height based on content and container.
+  // In "content" mode the lane hugs its cards and matches its siblings via the
+  // board's items-stretch, so no explicit height is measured or applied.
   useLayoutEffect(() => {
+    if (heightMode === "content") return
     const measure = measureRef.current
     const outer = outerRef.current
     if (!measure || !outer) return
@@ -646,12 +651,17 @@ export function KanbanLane<TRecord extends RecordType>({
       }
       resizeObserver.disconnect()
     }
-  }, [laneProps.items.length, laneProps.loading, showEmptyLanePlaceholder])
+  }, [
+    laneProps.items.length,
+    laneProps.loading,
+    showEmptyLanePlaceholder,
+    heightMode,
+  ])
 
   return (
     <div
       ref={outerRef}
-      className="relative rounded"
+      className={cn("relative rounded", heightMode === "content" && "h-full")}
       style={{
         height: calculatedHeight ? `${calculatedHeight}px` : undefined,
       }}

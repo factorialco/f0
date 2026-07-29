@@ -19,6 +19,8 @@ export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
 ): JSX.Element {
   const { lanes, renderCard, getKey, className, dnd, onCreate } = props
+  const heightMode = props.heightMode ?? "fill"
+  const isContentHeight = heightMode === "content"
 
   // Local source-of-truth for lanes to orchestrate moves centrally
   const [localLanes, setLocalLanes] = useState(
@@ -292,12 +294,26 @@ export function Kanban<TRecord extends RecordType>(
   }
 
   return (
-    <div className={cn("relative h-full w-full px-6", className)}>
+    <div
+      className={cn(
+        "relative w-full px-6",
+        !isContentHeight && "h-full",
+        className
+      )}
+    >
       <ScrollArea
-        className={"relative h-full w-full [&>div>div]:h-full"}
+        className={cn(
+          "relative w-full",
+          isContentHeight ? "" : "h-full [&>div>div]:h-full"
+        )}
         viewportRef={viewportRef}
       >
-        <div className="relative mb-2 flex h-full items-start gap-2">
+        <div
+          className={cn(
+            "relative mb-2 flex gap-2",
+            isContentHeight ? "items-stretch" : "h-full items-start"
+          )}
+        >
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
               const liveLane = lanes.find((l) => l.id === lane.id)
@@ -315,6 +331,7 @@ export function Kanban<TRecord extends RecordType>(
                 >
                   <KanbanLane<TRecord>
                     id={lane.id}
+                    heightMode={heightMode}
                     getLaneResourceIndexById={
                       lane.id
                         ? (id) => getIndexById(lane.id as string, id)
