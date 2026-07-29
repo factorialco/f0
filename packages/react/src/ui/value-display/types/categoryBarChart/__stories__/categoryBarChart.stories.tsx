@@ -115,9 +115,9 @@ export const GenderDistribution: Story = {
   type: "categoryBarChart",
   value: {
     dataPoints: [
-      { name: "Female", value: 12 },
-      { name: "Male", value: 8 },
-      { name: "Non-binary", value: 2 },
+      { name: "Female", value: 12 },     // categorical-1
+      { name: "Male", value: 8 },        // categorical-2
+      { name: "Non-binary", value: 2 },  // categorical-3
     ],
   },
 }`,
@@ -305,9 +305,9 @@ export const WithCustomColors: Story = {
         type: "categoryBarChart",
         value: {
           dataPoints: [
-            { name: "A", value: 40, color: "categorical-1" },
-            { name: "B", value: 30, color: "categorical-3" },
-            { name: "C", value: 20, color: "categorical-5" },
+            { name: "A", value: 40, color: "viridian" },
+            { name: "B", value: 30, color: "yellow" },
+            { name: "C", value: 20, color: "barbie" },
           ],
         },
       }),
@@ -316,13 +316,50 @@ export const WithCustomColors: Story = {
   parameters: {
     docs: {
       source: {
-        code: `{
+        code: `// Base-color tokens from the 15-color F0DataChart palette
+{
   type: "categoryBarChart",
   value: {
     dataPoints: [
-      { name: "A", value: 40, color: "categorical-1" },
-      { name: "B", value: 30, color: "categorical-3" },
-      { name: "C", value: 20, color: "categorical-5" },
+      { name: "A", value: 40, color: "viridian" },
+      { name: "B", value: 30, color: "yellow" },
+      { name: "C", value: 20, color: "barbie" },
+    ],
+  },
+}`,
+      },
+    },
+  },
+}
+
+export const LegacyColors: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Category",
+      render: () => ({
+        type: "categoryBarChart",
+        value: {
+          dataPoints: [
+            { name: "Categorical", value: 40, color: "categorical-3" },
+            { name: "Positive", value: 30, color: "feedback-positive" },
+            { name: "Negative", value: 20, color: "feedback-negative" },
+          ],
+        },
+      }),
+    },
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `// Legacy kits/Charts tokens are still supported (categorical-* / feedback-*)
+{
+  type: "categoryBarChart",
+  value: {
+    dataPoints: [
+      { name: "Categorical", value: 40, color: "categorical-3" },
+      { name: "Positive", value: 30, color: "feedback-positive" },
+      { name: "Negative", value: 20, color: "feedback-negative" },
     ],
   },
 }`,
