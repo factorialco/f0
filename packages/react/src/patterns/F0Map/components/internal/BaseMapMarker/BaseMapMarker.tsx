@@ -240,6 +240,14 @@ interface BaseMapMarkerBaseProps extends WithDataTestIdProps {
   labelPlacement?: BaseMapMarkerLabelPlacement
   onClick?: () => void
   ariaLabel?: string
+  /**
+   * Render the interactive marker outside the tab order and hidden from
+   * assistive tech (`tabIndex={-1}` + `aria-hidden`) while keeping it
+   * mouse-clickable. The map uses this so its ~N canvas pins don't duplicate
+   * the operable `F0MapList` for keyboard and screen-reader users - the list is
+   * the single operable path. Defaults to `false`.
+   */
+  presentational?: boolean
   /** @private */
   className?: string
 }
@@ -270,6 +278,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
       labelPlacement = "right",
       onClick,
       ariaLabel,
+      presentational = false,
       dataTestId,
       className,
     } = props
@@ -606,8 +615,12 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           <button
             ref={ref}
             type="button"
-            aria-label={ariaLabel}
-            aria-pressed={selected}
+            // Presentational pins stay mouse-clickable but leave the tab order
+            // and AT tree, so the operable `F0MapList` is the single path for
+            // keyboard / screen-reader users (no duplicated marker + list item).
+            {...(presentational
+              ? { tabIndex: -1, "aria-hidden": true }
+              : { "aria-label": ariaLabel, "aria-pressed": selected })}
             onClick={onClick}
             className={cn(
               // Hover grows from the center (transform-only, no extra layout).

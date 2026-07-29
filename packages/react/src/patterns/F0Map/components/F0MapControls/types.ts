@@ -20,9 +20,8 @@ export interface F0MapControlsProps extends WithDataTestIdProps {
   /**
    * Recenter on the user's location. When provided, a "locate" button renders
    * as the first control; omit it (e.g. no geolocation) for a clean toolbar.
-   * Returning a promise drives the button's loading spinner while it resolves.
    */
-  onLocate?: () => void | Promise<void>
+  onLocate?: () => void
   /** Override the i18n control labels (tooltips / accessible names). */
   labels?: F0MapControlLabels
 }

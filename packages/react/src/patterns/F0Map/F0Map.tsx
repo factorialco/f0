@@ -130,11 +130,10 @@ export interface F0MapProps extends WithDataTestIdProps {
   /** Override the controls' labels (tooltips / accessible names). */
   controlLabels?: F0MapControlLabels
   /**
-   * Proactively prompt for location permission on load so the current-location
-   * dot appears without the user acting. Defaults to `false`. Independently of
-   * this, if the user has *already* granted location (here or on another f0
-   * map - the opt-in persists), the dot always shows silently. The "locate me"
-   * control requests permission on demand.
+   * Enable the current-location feature. Defaults to `false`, in which case the
+   * map never touches geolocation. When `true`, the dot auto-shows only if the
+   * browser permission is *already* granted (never prompting on load); the
+   * "locate me" control is the only thing that requests permission on demand.
    */
   showCurrentLocation?: boolean
   /**
@@ -301,8 +300,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     )
   }, [markers.length])
 
-  // Current location: auto-shown when `showCurrentLocation` and the user has
-  // already opted in; the locate control requests permission on demand.
+  // Current location: gated entirely by `showCurrentLocation`. When on, the dot
+  // auto-shows only if permission is already granted; the locate control is the
+  // only thing that prompts. When off, no geolocation happens at all.
   const { coords: currentLocation, request: requestLocation } =
     useCurrentLocation(showCurrentLocation)
 

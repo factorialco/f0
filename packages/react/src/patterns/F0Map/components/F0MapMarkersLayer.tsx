@@ -337,8 +337,11 @@ export const F0MapMarkersLayer = ({
                     selected={selectedId === point.id}
                     collapsed={collapsed}
                     onClick={() => onSelect(point.id)}
-                    // A marker whose label is hidden would otherwise be an
-                    // unnamed button.
+                    // Pins are click targets only: keyboard / screen-reader
+                    // users operate the map through `F0MapList`, so the canvas
+                    // pins stay out of the tab order and AT tree rather than
+                    // duplicating every point as both a button and a list item.
+                    presentational
                     ariaLabel={point.label ?? i18n.map.unnamedLocation}
                   />
                 </motion.span>

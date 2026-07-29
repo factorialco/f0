@@ -59,6 +59,12 @@ interface F0MapMarkerBaseProps extends WithDataTestIdProps {
   labelPlacement?: F0MapMarkerLabelPlacement
   onClick?: () => void
   ariaLabel?: string
+  /**
+   * Render the pin outside the tab order and hidden from assistive tech while
+   * keeping it mouse-clickable (map-managed: the map relies on its operable
+   * `F0MapList` instead of the canvas pins). Defaults to `false`.
+   */
+  presentational?: boolean
   /** @private */
   className?: string
 }
@@ -132,6 +138,7 @@ const F0MapMarkerBase = forwardRef<HTMLButtonElement, F0MapMarkerProps>(
         labelPlacement={props.labelPlacement}
         onClick={props.onClick}
         ariaLabel={props.ariaLabel}
+        presentational={props.presentational}
         dataTestId={props.dataTestId}
         className={props.className}
       />

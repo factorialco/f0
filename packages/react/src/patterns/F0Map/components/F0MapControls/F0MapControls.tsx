@@ -1,7 +1,7 @@
 import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { Add, FitView, Minus, SearchPerson } from "@/icons/app"
+import { Add, FitView, Minus, Target } from "@/icons/app"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
@@ -66,7 +66,7 @@ export const F0MapControls = forwardRef<HTMLDivElement, F0MapControlsProps>(
                     variant="ghost"
                     size="md"
                     label={labels?.locate ?? i18n.map.controls.locate}
-                    icon={SearchPerson}
+                    icon={Target}
                     hideLabel
                     onClick={onLocate}
                   />

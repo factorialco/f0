@@ -34,7 +34,7 @@ export interface F0MapListProps extends WithDataTestIdProps {
   label?: string
   /** Anchor id, so a "skip to list" link can move focus here. */
   id?: string
-  /** @private */
+  /** Extra classes for the list container (e.g. when rendered as a fallback). */
   className?: string
 }
 
