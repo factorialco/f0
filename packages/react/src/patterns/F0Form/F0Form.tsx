@@ -694,6 +694,30 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
+  // Track file fields with in-flight uploads. Submission is blocked until the
+  // set empties so a form is never submitted with a file that hasn't finished
+  // uploading (its form value isn't set until the upload completes).
+  const [uploadingFieldIds, setUploadingFieldIds] = useState<Set<string>>(
+    () => new Set()
+  )
+  const registerUploadState = useCallback(
+    (id: string, isUploading: boolean) => {
+      setUploadingFieldIds((prev) => {
+        if (isUploading === prev.has(id)) return prev
+        const next = new Set(prev)
+        if (isUploading) next.add(id)
+        else next.delete(id)
+        return next
+      })
+    },
+    []
+  )
+  const hasPendingUploads = uploadingFieldIds.size > 0
+  // Mirror into a ref so the submit handler can guard against non-button
+  // submits (Enter key, autosubmit) without being re-created every render.
+  const hasPendingUploadsRef = useRef(hasPendingUploads)
+  hasPendingUploadsRef.current = hasPendingUploads
+
   const [actionBarStatus, setActionBarStatus] =
     useState<ActionBarStatus>("idle")
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
@@ -738,6 +762,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Handle form submission with status flow: idle -> loading -> success -> idle
   const handleSubmit = async (data: TValues) => {
+    // Block submission while any file field still has an upload in flight.
+    // Covers non-button submit paths (Enter key, autosubmit); the visible
+    // submit controls are also disabled via `hasPendingUploads`.
+    if (hasPendingUploadsRef.current) return
+
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
       successTimerRef.current = null
@@ -1071,6 +1100,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     }),
     [
@@ -1080,6 +1110,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       props.renderCustomField,
       isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     ]
   )
@@ -1185,7 +1216,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             label={submitLabel}
             icon={submitIcon}
             loading={isSubmitting}
-            disabled={hasErrors || isFormLoading}
+            disabled={hasErrors || isFormLoading || hasPendingUploads}
           />
         </div>
       )}
@@ -1227,6 +1258,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             isDirty={isDirty}
             actionBarStatus={actionBarStatus}
             hasErrors={hasErrors}
+            hasPendingUploads={hasPendingUploads}
             errorCount={errorCount}
             resolvedActionBarLabel={resolvedActionBarLabel}
             submitLabel={submitLabel}
