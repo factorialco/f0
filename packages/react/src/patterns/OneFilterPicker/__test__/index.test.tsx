@@ -6,7 +6,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type { FiltersDefinition } from "../types"
 
-import { OneFilterPicker } from "../index"
+import { ChipsList, Controls, OneFilterPicker, Root } from "../index"
 
 /**
  * OverflowList renders items in both a hidden measurement container
@@ -168,45 +168,71 @@ describe("Filters", () => {
       expect(onChange).not.toHaveBeenCalled()
     })
 
-    it("correctly removes a filter when handleRemoveFilter is called", () => {
-      const onChange = vi.fn()
-
-      // Create a simplified version of the Filters component that just exposes handleRemoveFilter
-      function TestFilters() {
-        const filters = {
-          department: ["engineering"],
-          search: "test",
-        }
-
-        // This is the same implementation as in the Filters component
-        const handleRemoveFilter = (key: keyof typeof filters) => {
-          const newValue = { ...filters }
-          delete newValue[key]
-          onChange(newValue)
-        }
-
-        // Call the function directly to test it
-        handleRemoveFilter("department")
-
-        return null
-      }
-
-      // Render the test component
-      render(<TestFilters />)
-
-      // Verify the onChange was called with the correct arguments
-      expect(onChange).toHaveBeenCalledWith({
-        search: "test",
-      })
-    })
-
-    // Keep the original test but mark it as skipped for now
-    it.skip("allows removing individual filters while preserving others", async () => {
+    it("updates applied filters optimistically when the host does not echo the value", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
 
-      // Render with initial filters
-      const { rerender } = render(
+      render(
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+      )
+
+      await openFilterPopover(user)
+      await user.click(screen.getByText("Engineering"))
+      await user.click(screen.getByRole("button", { name: "Apply filters" }))
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        department: ["engineering"],
+      })
+      expect(
+        await screen.findByRole("button", {
+          name: "Department: Engineering",
+        })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", {
+          name: "Close",
+          description: "Department: Engineering",
+        })
+      ).toBeInTheDocument()
+
+      await user.click(screen.getByRole("button", { name: "Clear" }))
+
+      expect(onChange).toHaveBeenLastCalledWith({})
+      expect(
+        screen.queryByRole("button", { name: "Department: Engineering" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("keeps the compound picker API optimistic by default", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
+        <Root filters={definition} value={{}} onChange={onChange}>
+          <Controls />
+          <ChipsList />
+        </Root>
+      )
+
+      await openFilterPopover(user)
+      await user.click(screen.getByText("Engineering"))
+      await user.click(screen.getByRole("button", { name: "Apply filters" }))
+
+      expect(onChange).toHaveBeenCalledWith({
+        department: ["engineering"],
+      })
+      expect(
+        await screen.findByRole("button", {
+          name: "Department: Engineering",
+        })
+      ).toBeInTheDocument()
+    })
+
+    it("removes individual filters optimistically while preserving others", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
         <OneFilterPicker
           filters={definition}
           value={{
@@ -217,32 +243,72 @@ describe("Filters", () => {
         />
       )
 
-      // Find all close buttons in the document
-      const closeButtons = screen.getAllByRole("button", { name: /^Close:/ })
+      await user.click(
+        await screen.findByRole("button", {
+          name: "Close",
+          description: "Department: Engineering",
+        })
+      )
 
-      // Click the first close button (assuming it's the department filter's close button)
-      await user.click(closeButtons[0])
-
-      // Verify only department was removed
       expect(onChange).toHaveBeenCalledWith({
         search: "test",
       })
+      expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
+      expect(screen.getByText(/search:/i)).toBeInTheDocument()
+    })
 
-      // Simulate the update
-      rerender(
+    it("re-seeds optimistic state when the value prop changes", async () => {
+      const onChange = vi.fn()
+      const { rerender } = render(
         <OneFilterPicker
           filters={definition}
-          value={{
-            search: "test",
-          }}
+          value={{ department: ["engineering"] }}
           onChange={onChange}
         />
       )
 
-      // Verify department filter is gone
-      expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
-      expect(screen.getByText(/search:/i)).toBeInTheDocument()
+      expect(
+        await screen.findByRole("button", {
+          name: "Department: Engineering",
+        })
+      ).toBeInTheDocument()
+
+      rerender(
+        <OneFilterPicker
+          filters={definition}
+          value={{ department: ["design"] }}
+          onChange={onChange}
+        />
+      )
+
+      expect(
+        await screen.findByRole("button", { name: "Department: Design" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Department: Engineering" })
+      ).not.toBeInTheDocument()
     })
+
+    it.each(["inline", "compact"] as const)(
+      "keeps the trigger name stable and describes active filters in %s mode",
+      (mode) => {
+        render(
+          <OneFilterPicker
+            filters={definition}
+            value={{ department: ["engineering"] }}
+            onChange={vi.fn()}
+            mode={mode}
+          />
+        )
+
+        expect(
+          screen.getByRole("button", {
+            name: "Filters",
+            description: "Active filters: Department",
+          })
+        ).toBeInTheDocument()
+      }
+    )
   })
 })
 
@@ -303,6 +369,9 @@ describe("Presets", () => {
 
     // Verify the preset's filter was applied
     expect(onChange).toHaveBeenCalledWith({ department: ["engineering"] })
+    expect(presetElement.closest("label")).toHaveClass(
+      "bg-f1-background-selected-secondary"
+    )
   })
 
   it("marks a preset as selected when its filter matches the current filters", async () => {

@@ -1,7 +1,16 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import isEqual from "lodash/isEqual"
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
+import {
+  type ComponentPropsWithoutRef,
+  forwardRef,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -42,6 +51,26 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
 }
 
 const DEFAULT_FORM_HEIGHT = 388
+
+function AccessibleDescription({ id, text }: { id: string; text: string }) {
+  // `title` participates in the referenced description without adding a text
+  // node that would change existing consumer queries.
+  return <span id={id} title={text} className="sr-only" />
+}
+
+type DescribedFilterButtonProps = ComponentPropsWithoutRef<
+  typeof ButtonInternal
+> &
+  Pick<React.AriaAttributes, "aria-describedby">
+
+// Keep this standard ARIA attribute local to filter triggers instead of
+// widening the exported F0Button contract.
+const DescribedFilterButton = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  DescribedFilterButtonProps
+>((props, ref) => <ButtonInternal {...props} ref={ref} />)
+
+DescribedFilterButton.displayName = "DescribedFilterButton"
 
 export function FiltersControls<Filters extends FiltersDefinition>({
   filters,
@@ -198,6 +227,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return maxHeight
   }, [filters])
   const id = useId()
+  const activeFiltersDescriptionId = `${id}-active-filters-description`
 
   const activeFilters = useMemo(
     () => getActiveFilterKeys(filtersForValue, value, i18n),
@@ -227,13 +257,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
-          <ButtonInternal
+          <DescribedFilterButton
             variant="outline"
             label={i18n.filters.label}
-            aria-label={
-              activeFiltersTooltip
-                ? `${i18n.filters.label}. ${activeFiltersTooltip}`
-                : i18n.filters.label
+            aria-describedby={
+              activeFiltersTooltip ? activeFiltersDescriptionId : undefined
+            }
+            append={
+              activeFiltersTooltip ? (
+                <AccessibleDescription
+                  id={activeFiltersDescriptionId}
+                  text={activeFiltersTooltip}
+                />
+              ) : undefined
             }
             icon={Filter}
             pressed={isOpen}
@@ -345,13 +381,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
-          <ButtonInternal
+          <DescribedFilterButton
             variant="outline"
             label={i18n.filters.label}
-            aria-label={
-              activeFiltersTooltip
-                ? `${i18n.filters.label}. ${activeFiltersTooltip}`
-                : i18n.filters.label
+            aria-describedby={
+              activeFiltersTooltip ? activeFiltersDescriptionId : undefined
+            }
+            append={
+              activeFiltersTooltip ? (
+                <AccessibleDescription
+                  id={activeFiltersDescriptionId}
+                  text={activeFiltersTooltip}
+                />
+              ) : undefined
             }
             icon={Filter}
             pressed={isOpen}
@@ -430,13 +472,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     <div className="flex items-center gap-2">
       <Popover open={isOpen} onOpenChange={onOpenChange} modal>
         <PopoverTrigger asChild>
-          <ButtonInternal
+          <DescribedFilterButton
             variant="outline"
             label={i18n.filters.label}
-            aria-label={
-              activeFiltersTooltip
-                ? `${i18n.filters.label}. ${activeFiltersTooltip}`
-                : i18n.filters.label
+            aria-describedby={
+              activeFiltersTooltip ? activeFiltersDescriptionId : undefined
+            }
+            append={
+              activeFiltersTooltip ? (
+                <AccessibleDescription
+                  id={activeFiltersDescriptionId}
+                  text={activeFiltersTooltip}
+                />
+              ) : undefined
             }
             icon={Filter}
             pressed={isOpen}

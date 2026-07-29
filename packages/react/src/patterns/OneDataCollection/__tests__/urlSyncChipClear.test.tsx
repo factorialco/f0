@@ -27,7 +27,7 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
       expect(window.location.search).toContain("dc_department=Engineering")
     )
 
-    const close = await screen.findByRole("button", { name: /^Close:/ })
+    const close = await screen.findByRole("button", { name: "Close" })
     await userEvent.click(close)
 
     await waitFor(() =>
@@ -55,11 +55,11 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
       expect(window.location.search).toContain("dc_salary=1000..5000")
     })
 
-    // Clear the *first* chip (department).
-    const closeButtons = await screen.findAllByRole("button", {
-      name: /^Close:/,
+    const close = await screen.findByRole("button", {
+      name: "Close",
+      description: "Department: Engineering",
     })
-    await userEvent.click(closeButtons[0])
+    await userEvent.click(close)
 
     await waitFor(() => {
       expect(window.location.search).not.toContain("dc_department")
@@ -80,7 +80,7 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
       expect(window.location.search).toContain("dc_searchStrict=ann")
     )
 
-    const close = await screen.findByRole("button", { name: /^Close:/ })
+    const close = await screen.findByRole("button", { name: "Close" })
     await userEvent.click(close)
 
     await waitFor(() =>
@@ -102,7 +102,7 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
       expect(window.location.search).toContain("dc_department=Engineering")
     )
 
-    const close = await screen.findByRole("button", { name: /^Close:/ })
+    const close = await screen.findByRole("button", { name: "Close" })
     await userEvent.click(close)
 
     await waitFor(() =>
@@ -116,7 +116,7 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
     render(<ExampleComponent id="people/v1" />)
 
     // Chip rendered from the URL-loaded filter.
-    const close = await screen.findByRole("button", { name: /^Close:/ })
+    const close = await screen.findByRole("button", { name: "Close" })
     expect(window.location.search).toContain("dc_department=Engineering")
 
     await userEvent.click(close)

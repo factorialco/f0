@@ -154,7 +154,9 @@ Review multiple selected options, a date range, and a numeric range. Boolean and
 
 **With dashboard export**
 
-The export control and every dashboard item consume the same applied report filter value.
+The export control uses the applied report filter value for participating
+items. Items with `useDashboardFilters=false` are exported with an empty filter
+object, matching their on-screen fetch behavior.
 
 <Canvas of={Stories.WithExport} />
 
@@ -204,6 +206,6 @@ The filter bar remains usable when valid report filters return empty chart data.
 
 ### Screen reader behavior
 
-- The filter trigger names the applied filter labels, while a visible counter shows how many report filters are active.
+- The filter trigger keeps the stable name "Filters"; applied filter labels are exposed as its accessible description, while a visible counter shows how many report filters are active.
 - The filter popover has a dialog name, and filter options expose native checkbox semantics.
-- Applied filter removal buttons include the filter label and selected value in their accessible names.
+- Applied filter removal buttons keep the stable name "Close"; the filter label and selected value are exposed as their accessible descriptions.

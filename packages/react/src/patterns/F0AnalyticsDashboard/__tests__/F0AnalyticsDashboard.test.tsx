@@ -72,7 +72,8 @@ describe("F0AnalyticsDashboard report filters", () => {
     expect(fetchData).toHaveBeenCalledTimes(1)
 
     const trigger = screen.getByRole("button", {
-      name: "Filters. Active filters: Department",
+      name: "Filters",
+      description: "Active filters: Department",
     })
     expect(within(trigger).getByText("1")).toBeInTheDocument()
 
@@ -111,7 +112,8 @@ describe("F0AnalyticsDashboard report filters", () => {
 
     await user.click(
       screen.getByRole("button", {
-        name: "Filters. Active filters: Department",
+        name: "Filters",
+        description: "Active filters: Department",
       })
     )
     await user.click(screen.getByRole("checkbox", { name: "Sales" }))
@@ -122,22 +124,30 @@ describe("F0AnalyticsDashboard report filters", () => {
     })
     expect(fetchData).toHaveBeenCalledTimes(1)
     expect(
-      screen.getByRole("button", {
-        name: "Filters. Active filters: Department",
-      })
+      screen.getByRole("button", { name: "Department: Engineering" })
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Department: Engineering +1" })
+    ).not.toBeInTheDocument()
 
     await user.click(
       await screen.findByRole("button", {
-        name: "Close: Department: Engineering",
+        name: "Close",
+        description: "Department: Engineering",
       })
     )
     expect(onFiltersChange).toHaveBeenLastCalledWith({})
+    expect(
+      screen.getByRole("button", { name: "Department: Engineering" })
+    ).toBeInTheDocument()
 
     await user.click(getVisibleByText("Sales only"))
     expect(onFiltersChange).toHaveBeenLastCalledWith({
       department: ["sales"],
     })
+    expect(
+      screen.getByRole("button", { name: "Department: Engineering" })
+    ).toBeInTheDocument()
 
     rerender(
       <F0AnalyticsDashboard
@@ -152,6 +162,12 @@ describe("F0AnalyticsDashboard report filters", () => {
       expect(fetchData).toHaveBeenLastCalledWith({ department: ["sales"] })
     )
     expect(fetchData).toHaveBeenCalledTimes(2)
+    expect(
+      await screen.findByRole("button", { name: "Department: Sales" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Department: Engineering" })
+    ).not.toBeInTheDocument()
   })
 
   it("prefers a controlled value over default filters", async () => {
@@ -184,8 +200,14 @@ describe("F0AnalyticsDashboard report filters", () => {
       />
     )
 
+    expect(
+      await screen.findByRole("button", { name: "Department: Engineering" })
+    ).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Clear" }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({})
+    expect(
+      screen.getByRole("button", { name: "Department: Engineering" })
+    ).toBeInTheDocument()
   })
 })

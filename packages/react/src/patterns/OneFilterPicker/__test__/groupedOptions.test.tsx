@@ -90,7 +90,8 @@ describe("OneFilterPicker - grouped (nested) options", () => {
     )
 
     const trigger = screen.getByRole("button", {
-      name: "Filters. Active filters: Space",
+      name: "Filters",
+      description: "Active filters: Space",
     })
     expect(trigger).toHaveTextContent("1")
   })

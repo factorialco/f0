@@ -14,6 +14,7 @@ import { FiltersControls as FiltersControlsComponent } from "./components/Filter
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
 import { isPresetSelected } from "./internal/isPresetSelected"
+import { FilterPickerStateModeContext } from "./internal/stateMode"
 import { PresetsDefinition } from "./types"
 
 /**
@@ -23,11 +24,7 @@ import { PresetsDefinition } from "./types"
 export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   /** The definition of available filters and their configurations */
   filters?: Definition
-  /**
-   * Current state of applied filters. Fully controlled: the picker renders
-   * exclusively from this prop, so `onChange` must be reflected back into it
-   * (synchronously) or chips and applied state will not update.
-   */
+  /** Current state of applied filters */
   value: FiltersState<Definition>
   /** Optional preset configurations that users can select */
   presets?: PresetsDefinition<Definition>
@@ -133,6 +130,9 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   onOpenChange,
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
+  // Optimistic commits are the shipped public contract. Only source-internal
+  // consumers such as F0AnalyticsDashboard opt into strict controlled state.
+  const stateMode = useContext(FilterPickerStateModeContext)
   const defaultFilters = useRef(value)
 
   const { emitFilterChange, emitPresetClick } = useEventEmitter({
@@ -145,8 +145,18 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     onOpenChange?.(isFiltersOpen)
   }, [isFiltersOpen, onOpenChange])
 
+  const [localFiltersValue, setLocalFiltersValue] = useState(value)
+
+  useEffect(() => {
+    setLocalFiltersValue(value ?? {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
+  }, [JSON.stringify(filters), JSON.stringify(value)])
+
+  const currentFiltersValue =
+    stateMode === "controlled" ? value : localFiltersValue
+
   const removeFilterValue = (key: keyof Definition) => {
-    const newFilters = { ...value }
+    const newFilters = { ...currentFiltersValue }
     delete newFilters[key]
 
     // Also clear nested child filter keys to avoid orphaned values
@@ -158,10 +168,16 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
       })
     }
 
+    if (stateMode === "optimistic") {
+      setLocalFiltersValue(newFilters as FiltersState<Definition>)
+    }
     props.onChange(newFilters as FiltersState<Definition>)
   }
 
   const setFiltersValue = (filters: FiltersState<Definition>) => {
+    if (stateMode === "optimistic") {
+      setLocalFiltersValue(filters)
+    }
     props.onChange(filters)
   }
 
@@ -172,7 +188,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
         mode,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
         presetsLoading,
-        value,
+        value: currentFiltersValue,
         filters: filters,
         removeFilterValue,
         setFiltersValue: (value: FiltersState<FiltersDefinition>) =>

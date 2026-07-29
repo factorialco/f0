@@ -60,6 +60,8 @@ const supportedReportFilterValues = {
   ...rangeAndMultipleReportFilterValues,
 } satisfies FiltersState<DashboardFiltersType>
 
+const reportFilterItems = mixedItems.slice(0, 1)
+
 const ReportFilterState = ({
   value,
 }: {
@@ -232,7 +234,8 @@ export const ReportFiltersEmpty: Story = {
     )
     await expect(state).toHaveTextContent('"Engineering"')
     const trigger = await page.findByRole("button", {
-      name: "Filters. Active filters: Department",
+      name: "Filters",
+      description: "Active filters: Department",
     })
     await expect(within(trigger).getByText("1")).toBeInTheDocument()
   },
@@ -273,7 +276,9 @@ export const ReportFilterScalarValues: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const trigger = canvas.getByRole("button", {
-      name: "Filters. Active filters: Status, Employee search, Review date, Exact salary",
+      name: "Filters",
+      description:
+        "Active filters: Status, Employee search, Review date, Exact salary",
     })
 
     await expect(within(trigger).getByText("4")).toBeInTheDocument()
@@ -312,7 +317,8 @@ export const ReportFilterRangeAndMultipleValues: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const trigger = canvas.getByRole("button", {
-      name: "Filters. Active filters: Department, Date range, Salary range",
+      name: "Filters",
+      description: "Active filters: Department, Date range, Salary range",
     })
 
     await expect(within(trigger).getByText("3")).toBeInTheDocument()
@@ -337,7 +343,12 @@ export const ReportFilterRangeAndMultipleValues: Story = {
  */
 export const ReportFilterCommitLifecycle: Story = {
   tags: ["no-sidebar"],
-  render: () => <ControlledDashboard initialValue={preAppliedReportFilters} />,
+  render: () => (
+    <ControlledDashboard
+      initialValue={preAppliedReportFilters}
+      items={reportFilterItems}
+    />
+  ),
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     const page = within(canvasElement.closest("body")!)
@@ -352,7 +363,8 @@ export const ReportFilterCommitLifecycle: Story = {
     await step("Dismiss rolls a draft change back", async () => {
       await userEvent.click(
         page.getByRole("button", {
-          name: "Filters. Active filters: Department",
+          name: "Filters",
+          description: "Active filters: Department",
         })
       )
       await userEvent.click(
@@ -369,7 +381,8 @@ export const ReportFilterCommitLifecycle: Story = {
     await step("Apply commits and updates the filter counter", async () => {
       await userEvent.click(
         await page.findByRole("button", {
-          name: "Filters. Active filters: Department",
+          name: "Filters",
+          description: "Active filters: Department",
         })
       )
       await userEvent.click(
@@ -380,7 +393,8 @@ export const ReportFilterCommitLifecycle: Story = {
       await waitForFilterDialogToClose()
       await waitFor(() => expect(state).toHaveTextContent('"Product"'))
       const trigger = await page.findByRole("button", {
-        name: "Filters. Active filters: Department",
+        name: "Filters",
+        description: "Active filters: Department",
       })
       await expect(within(trigger).getByText("1")).toBeInTheDocument()
     })
@@ -398,7 +412,8 @@ export const ReportFilterCommitLifecycle: Story = {
     await step("Chip removal clears the committed filter", async () => {
       await userEvent.click(
         page.getByRole("button", {
-          name: "Filters. Active filters: Department",
+          name: "Filters",
+          description: "Active filters: Department",
         })
       )
       await userEvent.click(
@@ -409,7 +424,10 @@ export const ReportFilterCommitLifecycle: Story = {
       await waitFor(() => expect(state).toHaveTextContent('"Engineering"'))
 
       await userEvent.click(
-        await page.findByRole("button", { name: /^Close: Department:/ })
+        await page.findByRole("button", {
+          name: "Close",
+          description: /^Department:/,
+        })
       )
       await waitFor(() => expect(state).toHaveTextContent("{}"))
       await expect(
@@ -503,7 +521,8 @@ export const EmptyDashboard: Story = {
 
     await expect(
       canvas.getByRole("button", {
-        name: "Filters. Active filters: Department",
+        name: "Filters",
+        description: "Active filters: Department",
       })
     ).toBeInTheDocument()
     await expect(await canvas.findAllByText("No data available")).toHaveLength(
