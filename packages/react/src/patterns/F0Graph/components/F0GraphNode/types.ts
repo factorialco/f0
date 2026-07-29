@@ -76,7 +76,12 @@ export interface F0GraphNodeProps {
   onClick?: () => void
   /** Ref callback for registering this node's DOM element (used by roving tabindex) */
   nodeRef?: (el: HTMLDivElement | null) => void
-  /** Avatar shown on the leading side of the pill. Always rendered at size `lg`. */
+  /**
+   * Avatar shown on the leading side of the pill. Always rendered at size `lg`.
+   * Its variant also drives the node silhouette: a `person` avatar keeps the
+   * circular dot/pill, every other variant (`team`, `company`, `icon`, …) makes
+   * the node a rounded-square card.
+   */
   avatar?: AvatarVariant
   /** Primary line of text. Hidden in dot variant. */
   title?: ReactNode
