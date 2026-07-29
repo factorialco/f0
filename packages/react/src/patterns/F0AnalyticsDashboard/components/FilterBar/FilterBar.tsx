@@ -4,7 +4,7 @@ import type {
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
 
-import { OneFilterPicker } from "@/patterns/OneFilterPicker"
+import { ControlledOneFilterPicker } from "@/patterns/OneFilterPicker/internal/ControlledOneFilterPicker"
 
 interface FilterBarProps<Filters extends FiltersDefinition> {
   filters?: Filters
@@ -34,12 +34,13 @@ export function FilterBar<Filters extends FiltersDefinition>({
   }
 
   return (
-    <OneFilterPicker
+    <ControlledOneFilterPicker
       filters={filters}
       value={value}
       presets={presets}
       presetsLoading={presetsLoading}
       onChange={onChange}
+      displayCounter
     />
   )
 }
