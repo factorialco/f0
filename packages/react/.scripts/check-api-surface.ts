@@ -42,6 +42,13 @@
  * a change to a shared base, the reshaped variants are aligned and compared
  * structurally so a real breaking prop change is still caught.
  *
+ * Array and tuple types are unwrapped to their element type and compared
+ * structurally, wrapped in an `array` marker so a `T` ↔ `T[]` change still
+ * reads as a shape change. Without this, an array-typed prop collapses to an
+ * opaque `T[]` string and any breaking change to a type reachable *only*
+ * through it — e.g. the visualization options behind OneDataCollection's
+ * `visualizations` array — would be hidden.
+ *
  * The shared translations dictionary (`TranslationsType` / `TranslationShape`
  * / `TranslationKey`, plus the inlined `defaultTranslations` object) is
  * recognized and compared by its key paths instead of structurally. That
@@ -84,9 +91,14 @@ export const ENTRIES = ["f0", "experimental", "ai", "component-status"] as const
 export type Entry = (typeof ENTRIES)[number]
 
 /** How deep to expand object/signature types before treating them as opaque
- * leaves. Bounds the work while still reaching component props
- * (export → call signature → props object → member). */
-const MAX_DEPTH = 4
+ * leaves. Bounds the work while still reaching props nested a few containers
+ * deep — the deepest chain we guard is OneDataCollection's
+ * export → call signature → props object → `visualizations` array → element →
+ * visualization variant → `options` → member. Arrays are unwrapped (see
+ * {@link buildApiItem}) and each container costs one level, so this must clear
+ * that chain. Raising it expands more of every export's type tree, so keep it
+ * to the shallowest value that reaches the props we care about. */
+const MAX_DEPTH = 7
 
 /**
  * A normalized, structural representation of a type used for comparison.
@@ -94,6 +106,7 @@ const MAX_DEPTH = 4
  *    of object shapes are flattened into this (the checker merges members).
  *  - `callable`: a function/component, compared signature by signature.
  *  - `union`: a union, compared variant by variant (pairwise by position).
+ *  - `array`: an array/tuple, compared by its unwrapped element type.
  *  - `translations`: the shared translations dictionary, compared by its
  *    dot-separated key paths and summarized once per analysis.
  *  - `opaque`: anything else (primitive, external type, non-object
@@ -116,6 +129,7 @@ export type ApiItem =
       }>
     }
   | { k: "union"; members: ApiItem[] }
+  | { k: "array"; element: ApiItem }
   | { k: "translations"; keys: string[] }
   | { k: "opaque"; text: string }
 
@@ -645,6 +659,34 @@ function buildApiItem(
   const props = type.getProperties()
   const indexInfos = checker.getIndexInfosOfType(type)
   const isObjectLike = props.length > 0 || indexInfos.length > 0
+
+  // Array/tuple types are lib (external) objects that would otherwise collapse
+  // to an opaque `T[]` string, hiding breaking changes to their element's
+  // shape — e.g. a prop removed from a type nested inside OneDataCollection's
+  // `visualizations` array. Unwrap the numeric-index element type and compare
+  // it structurally; the `array` wrapper is kept so a `T` ↔ `T[]` change still
+  // reads as a shape change. Only lib arrays are unwrapped here — a local
+  // object type carrying a numeric index signature still goes through the
+  // object branch below, so its `index` string is compared as before.
+  if (isObjectType && isExternal(type, dirAbsolute)) {
+    const elementType = indexInfos.find(
+      (info) => !!(info.keyType.flags & ts.TypeFlags.Number)
+    )?.type
+    if (elementType) {
+      const next = new Set(visited).add(type)
+      return {
+        k: "array",
+        element: buildApiItem(
+          elementType,
+          checker,
+          dirAbsolute,
+          depth - 1,
+          next
+        ),
+      }
+    }
+  }
+
   if (isObjectType && isObjectLike && !isExternal(type, dirAbsolute)) {
     const next = new Set(visited).add(type)
     const members: Record<
@@ -831,6 +873,8 @@ export function itemSignature(item: ApiItem): string {
       return `T:${item.keys.join(",")}`
     case "union":
       return `U:[${item.members.map(itemSignature).sort().join("|")}]`
+    case "array":
+      return `A:${itemSignature(item.element)}`
     case "callable":
       return `C:[${item.sigs
         .map(
@@ -898,6 +942,12 @@ function classifyItem(
     return before.text !== after.text
       ? [`${path || "type"} changed: \`${before.text}\` → \`${after.text}\``]
       : []
+  }
+
+  if (before.k === "array" && after.k === "array") {
+    // Same array-ness on both sides: the delta is entirely in the element
+    // shape. (A `T` ↔ `T[]` change is caught by the kind mismatch above.)
+    return classifyItem(before.element, after.element, at(path, "[]"), tx)
   }
 
   if (before.k === "union" && after.k === "union") {
