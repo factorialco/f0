@@ -1747,9 +1747,9 @@ export const CommunicationsVideoAttachments: Story = {
 /**
  * Composer attachment gallery. Selecting seven files at once shows immediate
  * local previews for image, video, PDF, spreadsheet, Word and text content
- * while a regular PowerPoint keeps a file icon fallback. Every file uses the
- * same compact square footprint as an image, and that shape remains stable
- * when the simulated upload replaces each local URL.
+ * while a regular PowerPoint keeps a file icon fallback. Files use the same
+ * compact square footprint as an image; video keeps that height but uses a
+ * wider 16:9 thumbnail. Each shape remains stable when local URLs are replaced.
  */
 export const CommunicationsComposerAttachmentPreviews: Story = {
   name: "Communications — composer attachment previews",
@@ -1859,16 +1859,18 @@ export const CommunicationsComposerAttachmentPreviews: Story = {
       ).toHaveLength(7)
 
       const strip = page.getByTestId("chat-composer-attachments")
-      const compactPreviews = [
+      const squarePreviews = [
         page.getByTestId("chat-composer-image-preview"),
-        page.getByTestId("chat-composer-video-preview"),
         ...page.getAllByTestId("chat-composer-document-preview"),
         page.getByTestId("chat-composer-file-preview"),
       ]
-      for (const preview of compactPreviews) {
+      for (const preview of squarePreviews) {
         await expect(preview.getBoundingClientRect().width).toBe(64)
         await expect(preview.getBoundingClientRect().height).toBe(64)
       }
+      const videoPreview = page.getByTestId("chat-composer-video-preview")
+      await expect(videoPreview.getBoundingClientRect().width).toBe(112)
+      await expect(videoPreview.getBoundingClientRect().height).toBe(64)
       await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth)
       strip.scrollLeft = strip.scrollWidth
       await expect(strip.scrollLeft).toBeGreaterThan(0)

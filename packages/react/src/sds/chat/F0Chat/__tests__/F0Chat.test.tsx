@@ -511,7 +511,7 @@ describe("F0Chat", () => {
       documentPreview.querySelector('[data-testid="chat-document-attachment"]')
     ).toHaveStyle({ width: "64px" })
     const videoPreview = screen.getByTestId("chat-composer-video-preview")
-    expect(videoPreview).toHaveClass("h-16", "w-16")
+    expect(videoPreview).toHaveClass("h-16", "w-28")
     expect(screen.getByTestId("chat-composer-image-preview")).toHaveClass(
       "h-16",
       "w-16"

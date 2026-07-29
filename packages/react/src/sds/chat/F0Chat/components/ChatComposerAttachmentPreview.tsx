@@ -93,7 +93,7 @@ export const ChatComposerAttachmentPreview = ({
         <figure
           aria-label={attachment.name}
           aria-busy={uploading}
-          className="group/attachment relative m-0 box-border h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background-secondary"
+          className="group/attachment relative m-0 box-border h-16 w-28 shrink-0 overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background-secondary"
           data-testid="chat-composer-video-preview"
         >
           {/* This is a silent, non-interactive visual preview. Playback and its
