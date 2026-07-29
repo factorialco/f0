@@ -15,14 +15,14 @@ const SvgMaximizeHorizontal = (
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M14 12L19 12M19 12L16 9M19 12L16 15"
+      d="M14.12 12L21.9 12M21.9 12L19.07 9.17M21.9 12L19.07 14.83"
       vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M10 12L5 12M5 12L8 9M5 12L8 15"
+      d="M9.88 12L2.1 12M2.1 12L4.93 9.17M2.1 12L4.93 14.83"
       vectorEffect="non-scaling-stroke"
     />
   </svg>

@@ -476,13 +476,16 @@ export const TableCollection = <
                             type="button"
                             onClick={() => toggleHeaderGroup(entry.id)}
                             aria-expanded={!entry.collapsed}
-                            // `text-inherit` is load-bearing: the reset gives
-                            // buttons `font: inherit` but not `color`, so
-                            // without it the label falls back to the UA
-                            // buttontext and reads darker than every other
-                            // header instead of the cell's secondary tone.
+                            // The label has to read exactly like the
+                            // non-collapsible headers around it. `text-inherit`
+                            // is load-bearing: the reset gives buttons
+                            // `font: inherit` but not `color`, so without it
+                            // they fall back to the UA buttontext and render
+                            // darker. `font-medium` restates the weight the
+                            // header cell sets, so a reset change can't drift
+                            // it either.
                             className={cn(
-                              "flex max-w-full items-center gap-1 rounded-xs text-inherit transition-colors hover:text-f1-foreground",
+                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-inherit transition-colors hover:text-f1-foreground",
                               focusRing()
                             )}
                           >
