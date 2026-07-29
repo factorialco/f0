@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.65.1](https://github.com/factorialco/f0/compare/f0-react-v4.65.0...f0-react-v4.65.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0ClarifyingPanel:** let custom answer grow multiline instead of clipping ([#4907](https://github.com/factorialco/f0/issues/4907)) ([2f09396](https://github.com/factorialco/f0/commit/2f09396055174c7a6523cc9c13fddd6d23afb6c4))
+
 ## [4.65.0](https://github.com/factorialco/f0/compare/f0-react-v4.64.0...f0-react-v4.65.0) (2026-07-29)
 
 
