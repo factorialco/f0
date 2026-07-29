@@ -29,10 +29,18 @@
  * rollup noise (the `F0TextInputProps_2` suffixes / dangling `./types` imports)
  * instead of diffing raw `.d.ts` text.
  *
- * Unions are compared variant-by-variant (pairwise) and intersections of
+ * Unions are compared as *sets* of structural variants, and intersections of
  * object shapes are flattened into one merged member set — so an optional
  * prop added to a base type that feeds a union of prop variants (the
  * `F0SelectProps` shape) classifies as additive, not as "the union changed".
+ *
+ * A union that only *gains* variants is a widening and is treated as safe:
+ * accepting more values (e.g. a `CountryCode` union that grows when countries
+ * are added, or a new `"phone"` field type) does not break a consumer passing
+ * one of the existing values, the same way a new optional prop is safe. Only a
+ * *removed* variant (narrowing) is breaking. When every variant is reshaped by
+ * a change to a shared base, the reshaped variants are aligned and compared
+ * structurally so a real breaking prop change is still caught.
  *
  * The shared translations dictionary (`TranslationsType` / `TranslationShape`
  * / `TranslationKey`, plus the inlined `defaultTranslations` object) is
@@ -47,7 +55,12 @@
  * unions/intersections) are compared by their normalized string, so a
  * *widening* of a leaf type (e.g. a prop `string` → `string | number`, which
  * is safe for an input) is reported as breaking. Object/parameter shape
- * changes — the common case — are classified precisely.
+ * changes — the common case — are classified precisely. Variance is not
+ * tracked, so a widened union is assumed to sit in an input position (a prop
+ * value the consumer passes in), where widening is safe; a union that only
+ * grows in a covariant output position (a value the consumer reads back and
+ * exhaustively switches over) is under-reported rather than flagged. This
+ * matches how the check already treats a new optional prop as safe.
  *
  * Usage:
  *   tsx .scripts/check-api-surface.ts --base <dir> --head <dir> [--json]
@@ -803,6 +816,44 @@ function translationsToObjectItem(keys: string[]): ApiItem {
 }
 
 /**
+ * A canonical, order-independent string signature of an {@link ApiItem}, used
+ * to match union variants across the two sides as a set. Two variants with the
+ * same signature are structurally identical; object members are sorted by name
+ * and union members by their own signatures so member/variant ordering does not
+ * affect the result.
+ */
+export function itemSignature(item: ApiItem): string {
+  switch (item.k) {
+    case "opaque":
+      return `O:${item.text}`
+    case "translations":
+      // keys are already sorted at construction time
+      return `T:${item.keys.join(",")}`
+    case "union":
+      return `U:[${item.members.map(itemSignature).sort().join("|")}]`
+    case "callable":
+      return `C:[${item.sigs
+        .map(
+          (s) =>
+            `(${s.params
+              .map((p) => `${p.optional ? "?" : ""}${itemSignature(p.type)}`)
+              .join(",")})=>${itemSignature(s.ret)}`
+        )
+        .join(";")}]`
+    case "object": {
+      const members = Object.keys(item.members)
+        .sort()
+        .map((name) => {
+          const m = item.members[name]
+          return `${name}${m.optional ? "?" : ""}${m.readonly ? "R" : ""}:${itemSignature(m.type)}`
+        })
+        .join(";")
+      return `{${members}}${item.index ? `[${item.index}]` : ""}`
+    }
+  }
+}
+
+/**
  * Structural breaking-change comparison. Variance is modelled the way a
  * consumer experiences component props: adding an optional member or relaxing
  * a required member to optional is safe; removing a member, retyping it, adding
@@ -850,19 +901,72 @@ function classifyItem(
   }
 
   if (before.k === "union" && after.k === "union") {
-    if (before.members.length !== after.members.length) {
+    // Match variants across the two sides as a multiset of structural
+    // signatures. Variants present on both sides are unchanged; what is left
+    // over is the actual delta.
+    const remainingHead = new Map<string, number>()
+    for (const m of after.members) {
+      const s = itemSignature(m)
+      remainingHead.set(s, (remainingHead.get(s) ?? 0) + 1)
+    }
+    const unmatchedBase: ApiItem[] = []
+    for (const m of before.members) {
+      const s = itemSignature(m)
+      const n = remainingHead.get(s) ?? 0
+      if (n > 0) remainingHead.set(s, n - 1)
+      else unmatchedBase.push(m)
+    }
+    const remainingBase = new Map<string, number>()
+    for (const m of before.members) {
+      const s = itemSignature(m)
+      remainingBase.set(s, (remainingBase.get(s) ?? 0) + 1)
+    }
+    const unmatchedHead: ApiItem[] = []
+    for (const m of after.members) {
+      const s = itemSignature(m)
+      const n = remainingBase.get(s) ?? 0
+      if (n > 0) remainingBase.set(s, n - 1)
+      else unmatchedHead.push(m)
+    }
+
+    // Every base variant still has a twin on the head side: the union only
+    // gained variants (widening) or is unchanged. Safe, like a new optional
+    // prop — accepting more values doesn't break a consumer passing an
+    // existing one.
+    if (unmatchedBase.length === 0) return []
+
+    // Base variants disappeared and nothing reshaped took their place: a pure
+    // narrowing. Removing accepted values is breaking.
+    if (unmatchedHead.length === 0) {
       return [
-        `${path || "type"} union variants changed (${before.members.length} → ${after.members.length})`,
+        `${path || "type"} union variants removed (${before.members.length} → ${after.members.length})`,
       ]
     }
-    // Variants are compared at the same path so identical reasons coming
-    // from a change in a shared base dedupe into a single line.
+
+    // Both sides carry unmatched variants — the shape a shared base being
+    // changed produces (every variant is reshaped, so none matches exactly).
+    // Align the reshaped variants pairwise and compare them structurally, so a
+    // real breaking prop change is still caught while an additive one is not.
+    // Identical reasons from each variant dedupe into a single line.
     const reasons = new Set<string>()
-    before.members.forEach((b, i) => {
-      for (const reason of classifyItem(b, after.members[i], path, tx)) {
+    const paired = Math.min(unmatchedBase.length, unmatchedHead.length)
+    for (let i = 0; i < paired; i++) {
+      for (const reason of classifyItem(
+        unmatchedBase[i],
+        unmatchedHead[i],
+        path,
+        tx
+      )) {
         reasons.add(reason)
       }
-    })
+    }
+    // Leftover base variants with no head counterpart were removed (breaking);
+    // leftover head variants are additive and safe.
+    if (unmatchedBase.length > unmatchedHead.length) {
+      reasons.add(
+        `${path || "type"} union variants removed (${before.members.length} → ${after.members.length})`
+      )
+    }
     return [...reasons]
   }
 
