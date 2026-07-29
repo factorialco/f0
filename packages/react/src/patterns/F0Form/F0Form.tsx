@@ -725,6 +725,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const autosubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const actionBarRef = useRef<F0ActionBarRef | null>(null)
 
+  // Tracks whether the component is still mounted. Guards state updates that
+  // are reached through an async path (`await onSubmit(...)`) or a timer
+  // callback: if the form unmounts while a submit is in flight, the unmount
+  // cleanup below has already run — a timer scheduled *after* the await would
+  // never be captured/cleared, and its callback (or the post-await setState)
+  // would run against a torn-down tree. See the unmount effect that flips this.
+  const isMountedRef = useRef(true)
+
   /**
    * Snapshot of the focused input element + caret position taken before a
    * non-button submit (Enter key or autosubmit debounce). Restored after the
@@ -784,6 +792,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     const result = await onSubmit(cleanedData)
 
+    // The form may have unmounted while `onSubmit` was in flight. The unmount
+    // cleanup has already run, so any state update here — or a timer scheduled
+    // below — would leak past teardown. Bail out.
+    if (!isMountedRef.current) return
+
     if (result.success) {
       form.reset(form.getValues())
       resetErrorNavigation()
@@ -791,6 +804,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       setActionBarStatus("success")
 
       successTimerRef.current = setTimeout(() => {
+        if (!isMountedRef.current) return
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
@@ -812,11 +826,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
       }
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
+        autosubmitTimerRef.current = null
       }
     }
   }, [])
@@ -917,6 +934,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
+        if (!isMountedRef.current) return
         // Re-check dirtiness at fire time (RHF's `isDirty` has settled by now,
         // unlike inside the synchronous watch callback): skip a save when the
         // form is back to its last-saved state — e.g. a row was added then
