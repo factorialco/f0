@@ -254,9 +254,11 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 along with the avatar. */}
             <div
               className={cn(
-                "flex shrink-0 items-center justify-center overflow-hidden",
-                // Square keeps the avatar's own rounded-square silhouette
-                // (Teams / Job Catalog); circle clips to the classic org-chart dot.
+                "flex shrink-0 items-center justify-center",
+                // No clipping here: F0Avatar owns its own silhouette (person is a
+                // circle, team/company/icon/… are rounded squares at their own
+                // radius). The radius below is only the shape of the dot-mode
+                // selection/focus ring, so it hugs the scaled avatar.
                 isSquareAvatar ? "rounded-md" : "rounded-full",
                 isDot &&
                   (state === "selected" || state === "highlighted") &&
