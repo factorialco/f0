@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Icon } from "@/components/F0Icon"
 import {
   OneTable,
   TableBody,
@@ -26,12 +27,11 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { Add } from "@/icons/app"
+import { Add, ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
-import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
@@ -476,23 +476,36 @@ export const TableCollection = <
                             type="button"
                             onClick={() => toggleHeaderGroup(entry.id)}
                             aria-expanded={!entry.collapsed}
-                            // No color of its own: the header cell already sets
-                            // the shared `font-medium text-f1-foreground-secondary`,
-                            // so the group label reads like every other header.
+                            // `text-inherit` is load-bearing: the reset gives
+                            // buttons `font: inherit` but not `color`, so
+                            // without it the label falls back to the UA
+                            // buttontext and reads darker than every other
+                            // header instead of the cell's secondary tone.
                             className={cn(
-                              "flex max-w-full items-center gap-1 rounded-xs transition-colors hover:text-f1-foreground",
+                              "flex max-w-full items-center gap-1 rounded-xs text-inherit transition-colors hover:text-f1-foreground",
                               focusRing()
                             )}
                           >
                             <span className="truncate">{entry.label}</span>
-                            {/* ChevronToggle marks its icon role="button";
-                                hidden here so it isn't a nested interactive
-                                element — `aria-expanded` conveys the state. */}
-                            <span aria-hidden="true" className="flex">
-                              <ChevronToggle
-                                open={!entry.collapsed}
-                                closedRotation={-90}
-                                openRotation={90}
+                            {/* Facing chevrons hint at the action, not the
+                                state: `<>` pushes the group open, `><` pulls
+                                it shut. Hidden from AT — `aria-expanded`
+                                already conveys the state. */}
+                            <span
+                              aria-hidden="true"
+                              className="flex items-center -space-x-2"
+                            >
+                              <F0Icon
+                                size="xs"
+                                icon={
+                                  entry.collapsed ? ChevronLeft : ChevronRight
+                                }
+                              />
+                              <F0Icon
+                                size="xs"
+                                icon={
+                                  entry.collapsed ? ChevronRight : ChevronLeft
+                                }
                               />
                             </span>
                           </button>
