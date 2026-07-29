@@ -908,7 +908,12 @@ export const CommunicationsGroupAvatarFallback: Story = {
             chatHeader: <MockConnectedChatHeader compact />,
           }}
           aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar initialTab="messages" />}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+            />
+          }
         >
           <Page
             {...PageStories.Default.args}
@@ -922,16 +927,22 @@ export const CommunicationsGroupAvatarFallback: Story = {
     const page = within(canvasElement.closest("body")!)
 
     await step("Use the same fallback in the sidebar and header", async () => {
-      const sidebarFallback = await page.findByTestId(
-        "sidebar-group-avatar-fallback"
-      )
-      await expect(
-        sidebarFallback.getBoundingClientRect().width
-      ).toBeGreaterThan(0)
-      await expect(sidebarFallback).toHaveTextContent("＃")
-      await userEvent.click(
-        await page.findByRole("button", { name: "Leadership" })
-      )
+      for (const groupName of [
+        "Quarterly Reporting",
+        "Release War Room",
+        "Leadership",
+      ]) {
+        const group = await page.findByRole("button", { name: groupName })
+        const sidebarFallback = within(group).getByTestId(
+          "sidebar-group-avatar-fallback"
+        )
+
+        await expect(
+          sidebarFallback.getBoundingClientRect().width
+        ).toBeGreaterThan(0)
+        await expect(sidebarFallback).toHaveTextContent("＃")
+      }
+
       const headerFallback = await page.findByTestId(
         "chat-group-avatar-fallback"
       )
@@ -2239,7 +2250,10 @@ export const Snapshot: Story = {
   ),
   play: async ({ canvas, step }) => {
     await step("Show the group avatar fallback", async () => {
-      const sidebarFallback = await canvas.findByTestId(
+      const leadership = await canvas.findByRole("button", {
+        name: "Leadership",
+      })
+      const sidebarFallback = within(leadership).getByTestId(
         "sidebar-group-avatar-fallback"
       )
       const headerFallback = await canvas.findByTestId(

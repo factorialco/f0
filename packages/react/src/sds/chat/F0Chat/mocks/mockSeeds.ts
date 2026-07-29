@@ -598,7 +598,7 @@ export const SEEDS: Seed[] = [
     id: "grp-reporting",
     type: "group",
     title: "Quarterly Reporting",
-    avatar: groupAvatar("Quarterly Reporting", "📊"),
+    avatar: groupAvatar("Quarterly Reporting"),
     participants: [GRACE, MARCUS, SAM, ...RECEIPT_DEMO_READERS],
     lines: [
       {
@@ -893,7 +893,7 @@ export const SEEDS: Seed[] = [
     id: "grp-release",
     type: "group",
     title: "Release War Room",
-    avatar: groupAvatar("Release War Room", "🔥"),
+    avatar: groupAvatar("Release War Room"),
     participants: [MARCUS, GRACE],
     multiTyping: true,
     lines: [
