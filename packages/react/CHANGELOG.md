@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.65.0](https://github.com/factorialco/f0/compare/f0-react-v4.64.0...f0-react-v4.65.0) (2026-07-29)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** control report filters ([#4697](https://github.com/factorialco/f0/issues/4697)) ([aee81a1](https://github.com/factorialco/f0/commit/aee81a1ef5b35351dd920cf859c3ac9ef54388de))
+
 ## [4.64.0](https://github.com/factorialco/f0/compare/f0-react-v4.63.6...f0-react-v4.64.0) (2026-07-29)
 
 
