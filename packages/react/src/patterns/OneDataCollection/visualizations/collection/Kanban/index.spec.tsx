@@ -613,8 +613,10 @@ describe("KanbanCollection - grouping", () => {
     expect(
       within(groupA).queryByRole("checkbox", { name: "Select all" })
     ).not.toBeInTheDocument()
-    // ...but the cards are still selectable (their own checkboxes render).
-    expect(within(groupA).getAllByRole("checkbox").length).toBeGreaterThan(0)
+    // ...but the cards are still selectable: exactly one checkbox per card (2),
+    // so a regression that also hid card selection (0) or re-added the group
+    // checkbox (3) would fail here.
+    expect(within(groupA).getAllByRole("checkbox")).toHaveLength(2)
   })
 
   // Onboarding case: each version renders its own phases; a version with no

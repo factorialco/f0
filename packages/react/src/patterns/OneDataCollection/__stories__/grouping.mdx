@@ -195,4 +195,10 @@ group header shows its own item count.
 Note: pagination and infinite scroll apply per board, not per lane inside a
 group — grouped lanes render the records that have already been fetched.
 
+When the collection is selectable, each group header shows a checkbox that
+selects every item in that group (parity with the Card and List
+visualizations). Pass `selectableGroups={false}` in the Kanban visualization
+options to hide the group-level checkbox while keeping per-card selection —
+useful when "select a whole group" isn't a meaningful action for the consumer.
+
 <Canvas of={KanbanStories.KanbanWithGrouping} />
