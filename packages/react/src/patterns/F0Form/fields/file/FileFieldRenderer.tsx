@@ -213,7 +213,9 @@ export function FileFieldRenderer({
         initialFilesPool,
         formField.value,
         isMultiple
-      ).filter((entry) => !runtimeValues.has(entry.value))
+      ).filter(
+        (entry) => entry.value == null || !runtimeValues.has(entry.value)
+      )
       return [...seededEntries, ...runtimeEntries]
     })
   }, [initialFilesPool, formField.value, isMultiple])
