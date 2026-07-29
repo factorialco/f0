@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.6](https://github.com/factorialco/f0/compare/f0-react-v4.63.5...f0-react-v4.63.6) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Form:** guard post-unmount setState from submit timers ([#4901](https://github.com/factorialco/f0/issues/4901)) ([0196e91](https://github.com/factorialco/f0/commit/0196e917bf4a97e489948dc2b8b59ac2b0b4ba51))
+
 ## [4.63.5](https://github.com/factorialco/f0/compare/f0-react-v4.63.4...f0-react-v4.63.5) (2026-07-29)
 
 
