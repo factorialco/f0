@@ -179,10 +179,10 @@ export const WithUnits: Story = {
 }
 
 /**
- * Thousand separators follow the locale in the resting display, and are dropped
- * while the field is focused so the number is edited plain. Switch the `locale`
- * control to see `en-US` (`50,000.50`) against `es-ES` (`50.000,50`), and try
- * typing or pasting a grouped value — the separators are accepted either way.
+ * Thousand separators follow the locale while the field is at rest, and are
+ * dropped while it is focused. Switch the `locale` control to compare `en-US`
+ * (`50,000.50`) with `es-ES` (`50.000,50`), and try typing or pasting a grouped
+ * value — the separators are accepted either way.
  */
 export const WithGrouping: Story = {
   args: {

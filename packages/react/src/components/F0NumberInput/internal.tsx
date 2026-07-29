@@ -208,8 +208,7 @@ export const NumberInputInternal = forwardRef<
     onChange: popover?.onOpenChange,
   })
   const [isFocused, setIsFocused] = useState(false)
-  // Always the plain, ungrouped number the user edits — the single source of
-  // truth for the value's text. Grouping is applied to it for display only.
+  // Always the plain ungrouped number: the single source of truth for the text.
   const [fieldValue, setFieldValue] = useState<string>(() =>
     value != null ? toEditableString(value, locale, maxDecimals) : ""
   )
@@ -341,9 +340,8 @@ export const NumberInputInternal = forwardRef<
   }
 
   useEffect(() => {
-    // Reconcile the field only when `value` changed externally, so in-progress
-    // typing isn't clobbered — a value the user is still typing (`17,`, or the
-    // trailing zero of `50000,50`) parses to the same number and is kept.
+    // Reconcile only when `value` changed externally, so in-progress typing
+    // isn't clobbered: `17,` and `50000,50` parse to the number already held.
     const extractedData = extractNumber(fieldValue, { maxDecimals, locale })
     if (inputValue === undefined || inputValue == extractedData?.value) return
     setFieldValue(
@@ -353,9 +351,7 @@ export const NumberInputInternal = forwardRef<
     )
   }, [fieldValue, inputValue, locale, maxDecimals])
 
-  // Grouping is display-only: inserting separators as the user types would
-  // fight the caret. It is applied to the field's own text rather than to the
-  // parsed number, which would round away the decimals the user typed.
+  // Display-only: inserting separators as the user types would fight the caret.
   const displayValue = useMemo(
     () =>
       grouping && !isFocused

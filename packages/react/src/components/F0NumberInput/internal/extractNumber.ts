@@ -18,13 +18,10 @@ export interface Options {
    */
   maxDecimals?: number
   /**
-   * When set, parsing follows the locale's own conventions: its thousands
-   * separator is accepted and dropped (so a grouped `50,000` can be typed or
-   * pasted in en-US), and the decimal separator is normalised to the locale's
-   * own, so the field always reads back the way the locale formats numbers.
-   *
-   * Without a locale both `.` and `,` are read as decimal separators and
-   * echoed back as typed.
+   * When set, parsing follows the locale's conventions: its thousands separator
+   * is accepted and dropped, and the decimal separator is normalised to the
+   * locale's own. Without it both `.` and `,` are read as decimal separators
+   * and echoed back as typed.
    */
   locale?: string
 }
@@ -66,8 +63,7 @@ export function extractNumber(
   const localeDecimalSeparator = locale
     ? getNumberSeparators(locale).decimal
     : undefined
-  // Whichever separator was typed reads back as the locale's own, so the field
-  // never shows a separator the locale wouldn't format with.
+  // Whichever separator was typed reads back as the locale's own.
   const decimalSeparator = separator
     ? (localeDecimalSeparator ?? separator)
     : ""

@@ -35,8 +35,8 @@ export function useNumberCellLayout<R extends RecordType>(
 
   const units = resolveUnits(config, item)
   const unitsBefore = units ? config?.unitsPosition === "before" : false
-  // Grouped by default; the width is measured on the same string the input
-  // renders — including the grouping separators — so it isn't clipped.
+  // Grouped by default; measured on the same string the input renders so the
+  // separators aren't clipped.
   const grouping = config?.grouping ?? true
   const formatted = useMemo(() => {
     if (numericValue == null) return ""

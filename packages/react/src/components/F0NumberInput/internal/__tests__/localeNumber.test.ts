@@ -13,7 +13,6 @@ describe("getNumberSeparators", () => {
     expect(getNumberSeparators("en-US")).toEqual({ group: ",", decimal: "." })
     expect(getNumberSeparators("es-ES")).toEqual({ group: ".", decimal: "," })
     expect(getNumberSeparators("fr-FR").decimal).toBe(",")
-    // fr-FR groups with a (narrow) no-break space, not a dot or comma.
     expect(getNumberSeparators("fr-FR").group).toMatch(/\s/)
   })
 })
@@ -50,9 +49,9 @@ describe("stripGroupSeparators", () => {
   })
 
   test("drops any whitespace when the locale groups with a space", () => {
-    // Pasted values carry the no-break space Intl emits; a typed one can only
-    // carry a plain space. Both group in fr-FR.
-    expect(stripGroupSeparators("1 234 567,8", "fr-FR")).toBe("1234567,8")
+    expect(stripGroupSeparators("1\u202f234\u202f567,8", "fr-FR")).toBe(
+      "1234567,8"
+    )
     expect(stripGroupSeparators("1 234 567,8", "fr-FR")).toBe("1234567,8")
   })
 })
@@ -64,7 +63,6 @@ describe("toEditableString", () => {
   })
 
   test("keeps every decimal the value carries when maxDecimals is unset", () => {
-    // Intl caps fraction digits at 3 by default, which would round this away.
     expect(toEditableString(1.23456, "en-US")).toBe("1.23456")
   })
 
@@ -87,7 +85,6 @@ describe("withGroupSeparators", () => {
   })
 
   test("follows the locale's own grouping rules", () => {
-    // en-IN groups in lakhs/crores rather than in threes.
     expect(withGroupSeparators("1234567", "en-IN")).toBe("12,34,567")
   })
 

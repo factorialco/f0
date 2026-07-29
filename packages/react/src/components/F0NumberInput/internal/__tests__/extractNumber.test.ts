@@ -309,8 +309,6 @@ describe("extractNumber", () => {
       const options: Options = { maxDecimals: 2, locale: "fr-FR" }
 
       test("reads either key as the decimal separator", () => {
-        // Neither `.` nor `,` groups in fr-FR, so a numeric keypad `.` still
-        // reaches the comma the locale formats decimals with.
         expect(extractNumber("1234,5", options)).toEqual({
           formattedValue: "1234,5",
           value: 1234.5,

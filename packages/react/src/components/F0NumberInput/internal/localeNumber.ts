@@ -1,25 +1,18 @@
 /**
  * Locale-aware helpers shared by the number input's parsing (`extractNumber`)
- * and its display.
- *
- * The field keeps a *plain* string as its editing value — the locale's decimal
- * separator, no thousands separators — and grouping is layered on top of that
- * string for the resting (blurred) display. Grouping the string instead of
- * re-formatting the parsed number is what keeps the decimals the user typed
- * intact: `Intl.NumberFormat` rounds to `maximumFractionDigits` (3 when
- * unset), which turns `50000.50` into `50,000.5` and `1.23456` into `1.235`.
+ * and its display. Grouping is applied to the field's own string rather than to
+ * the parsed number, because `Intl.NumberFormat` rounds to
+ * `maximumFractionDigits` (3 when unset) and would drop decimals the user typed.
  */
 
-/** The characters a locale uses to separate groups and decimals. */
 export interface NumberSeparators {
   group: string
   decimal: string
 }
 
 interface LocaleNumberFormat extends NumberSeparators {
-  /** Characters that start the decimal part in this locale. */
   decimalSeparators: string[]
-  /** Matches a complete or partially typed number in this locale. */
+  /** Matches a complete or partially typed number ("", "-", "17,"). */
   pattern: RegExp
 }
 
@@ -41,9 +34,9 @@ function getLocaleNumberFormat(locale: string): LocaleNumberFormat {
   const group = parts.find((part) => part.type === "group")?.value ?? ","
   const decimal = parts.find((part) => part.type === "decimal")?.value ?? "."
 
-  // Both `.` and `,` start the decimal part unless the locale groups with
-  // them: `,` groups in en-US and `.` groups in es-ES, while fr-FR groups with
-  // a space so either key still reaches its comma decimal separator.
+  // Both `.` and `,` start the decimal part unless the locale groups with them:
+  // `,` groups in en-US, `.` groups in es-ES, and fr-FR groups with neither so
+  // either key reaches its comma.
   const decimalSeparators = [decimal, ".", ","].filter(
     (char, index, chars) => char !== group && chars.indexOf(char) === index
   )
@@ -68,25 +61,22 @@ export function getNumberSeparators(locale: string): NumberSeparators {
   return { group, decimal }
 }
 
-/** Whether typing `char` should start the decimal part in this locale. */
 export function isDecimalSeparator(char: string, locale: string): boolean {
   return getLocaleNumberFormat(locale).decimalSeparators.includes(char)
 }
 
-/** Matches a complete or partially typed number ("", "-", "17,") in `locale`. */
 export function getNumberPattern(locale: string): RegExp {
   return getLocaleNumberFormat(locale).pattern
 }
 
 /**
- * Drops the locale's thousands separators, which carry no value: `50,000`
- * (en-US) and `50.000` (es-ES) both mean fifty thousand. This is what lets a
- * grouped number be typed or pasted straight into the field.
+ * Drops the locale's thousands separators, which carry no value — this is what
+ * lets a grouped number be typed or pasted straight into the field.
  */
 export function stripGroupSeparators(input: string, locale: string): string {
   const { group } = getLocaleNumberFormat(locale)
-  // fr-FR and ru-RU group with (narrow) no-break spaces, which paste easily
-  // but can't be typed — any whitespace stands in for them.
+  // fr-FR and ru-RU group with no-break spaces, which paste easily but can't be
+  // typed — any whitespace stands in for them.
   return /\s/.test(group)
     ? input.replace(/\s/g, "")
     : input.split(group).join("")
@@ -94,10 +84,7 @@ export function stripGroupSeparators(input: string, locale: string): string {
 
 const MAX_FRACTION_DIGITS = 20
 
-/**
- * How many decimals the value actually carries, so `toEditableString` can show
- * all of them rather than falling back to Intl's default cap of 3.
- */
+/** Lets `toEditableString` show every decimal instead of Intl's default 3. */
 function countDecimals(value: number): number {
   const decimals = String(value).split(".")[1]
   return decimals ? Math.min(decimals.length, MAX_FRACTION_DIGITS) : 0
@@ -105,7 +92,7 @@ function countDecimals(value: number): number {
 
 /**
  * Renders a number the way the field holds it while being edited: the locale's
- * decimal separator, no grouping, and no decimals silently dropped.
+ * decimal separator, no grouping.
  */
 export function toEditableString(
   value: number,
@@ -136,9 +123,8 @@ const INTEGER_PART = /^(-?)([0-9]+)$/
 
 /**
  * Adds the locale's thousands separators to an editable string, leaving its
- * decimals exactly as typed — trailing zeros and a dangling separator
- * included. Input with nothing to group (`""`, `"-"`, `".45"`) is returned
- * untouched.
+ * decimals exactly as typed — trailing zeros and a dangling separator included.
+ * Input with nothing to group (`""`, `"-"`, `".45"`) is returned untouched.
  */
 export function withGroupSeparators(
   editableValue: string,

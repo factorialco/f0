@@ -10,10 +10,7 @@ import { NumberCell } from "../components/cells/NumberCell"
 
 type TestRecord = { id: string; salary: number; currency?: string }
 
-/**
- * The table owns the cell's value, so edits only land via `onChange` — without
- * a parent writing them back, the cell can't accumulate more than one keystroke.
- */
+/** The table owns the cell's value, so edits only land via `onChange`. */
 function ControlledNumberCell({
   value: initialValue,
   onChange,

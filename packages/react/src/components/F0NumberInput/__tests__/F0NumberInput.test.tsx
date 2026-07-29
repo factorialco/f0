@@ -11,10 +11,7 @@ import { F0NumberInput } from "../index"
 
 const WithStepStory = composeStory(WithStep, Meta)
 
-/**
- * Mirrors how consumers wire the input — including the EditableTable cells,
- * where every keystroke round-trips through the parent's state.
- */
+/** Every keystroke round-trips through the parent's state, as in real usage. */
 function ControlledNumberInput({
   initialValue = null,
   ...props
@@ -483,8 +480,6 @@ describe("F0NumberInput", () => {
       expect(input).toHaveValue("50000.50")
 
       await userEvent.tab()
-      // Not "50,000.5" — re-formatting the parsed number would drop the
-      // trailing zero the user typed.
       expect(input).toHaveValue("50,000.50")
     })
 
@@ -526,8 +521,7 @@ describe("F0NumberInput", () => {
       )
 
       const input = screen.getByRole("textbox")
-      // In es-ES the dot groups and the comma separates decimals — the
-      // opposite of en-US, and what the resting display formats with.
+
       await userEvent.type(input, "5.000,54")
       expect(input).toHaveValue("5000,54")
 
@@ -568,8 +562,6 @@ describe("F0NumberInput", () => {
       )
 
       const input = screen.getByRole("textbox")
-      // Grouping carries no decimals, so the separator stays typeable even
-      // where a decimal separator is rejected.
       await userEvent.type(input, "1,500")
 
       expect(input).toHaveValue("1500")
@@ -582,8 +574,6 @@ describe("F0NumberInput", () => {
       )
 
       const input = screen.getByRole("textbox")
-      // fr-FR groups with a space, so a numeric keypad dot still starts the
-      // decimals — and reads back as the comma fr-FR formats them with.
       await userEvent.type(input, "1234.5")
 
       expect(input).toHaveValue("1234,5")
