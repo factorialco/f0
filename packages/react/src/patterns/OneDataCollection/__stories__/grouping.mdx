@@ -202,3 +202,10 @@ options to hide the group-level checkbox while keeping per-card selection —
 useful when "select a whole group" isn't a meaningful action for the consumer.
 
 <Canvas of={KanbanStories.KanbanWithGrouping} />
+
+### Kanban grouping with the group checkbox hidden
+
+`selectableGroups={false}` on a grouped, selectable Kanban keeps per-card
+selection (and bulk actions) while hiding the per-group "Select all" checkbox.
+
+<Canvas of={KanbanStories.KanbanWithGroupingHiddenGroupSelect} />
