@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.64.0](https://github.com/factorialco/f0/compare/f0-react-v4.63.6...f0-react-v4.64.0) (2026-07-29)
+
+
+### Features
+
+* **F0Graph:** [FCT-59984] add avatarShape option for square node avatars ([#4872](https://github.com/factorialco/f0/issues/4872)) ([44aad04](https://github.com/factorialco/f0/commit/44aad0445c4debb83e20f692fb846f812cfa2bd2))
+
 ## [4.63.6](https://github.com/factorialco/f0/compare/f0-react-v4.63.5...f0-react-v4.63.6) (2026-07-29)
 
 
