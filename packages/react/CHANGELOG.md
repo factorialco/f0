@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.4](https://github.com/factorialco/f0/compare/f0-react-v4.63.3...f0-react-v4.63.4) (2026-07-29)
+
+
+### Bug Fixes
+
+* **value-display:** align country avatar size with other entity cells ([#4847](https://github.com/factorialco/f0/issues/4847)) ([140b989](https://github.com/factorialco/f0/commit/140b989c99786088b7639971394ca8a7a1e287fd))
+
 ## [4.63.3](https://github.com/factorialco/f0/compare/f0-react-v4.63.2...f0-react-v4.63.3) (2026-07-29)
 
 
