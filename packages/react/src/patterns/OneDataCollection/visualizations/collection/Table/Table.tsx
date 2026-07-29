@@ -27,7 +27,7 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { Add, ChevronLeft, ChevronRight } from "@/icons/app"
+import { Add, MaximizeHorizontal, MinimizeHorizontal } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
@@ -487,27 +487,18 @@ export const TableCollection = <
                             )}
                           >
                             <span className="truncate">{entry.label}</span>
-                            {/* Facing chevrons hint at the action, not the
-                                state: `<>` pushes the group open, `><` pulls
-                                it shut. Hidden from AT — `aria-expanded`
-                                already conveys the state. */}
-                            <span
+                            {/* Hints at the action, not the state: arrows out
+                                to open the group, in to shut it. Hidden from
+                                AT — `aria-expanded` conveys the state. */}
+                            <F0Icon
                               aria-hidden="true"
-                              className="flex items-center -space-x-2"
-                            >
-                              <F0Icon
-                                size="xs"
-                                icon={
-                                  entry.collapsed ? ChevronLeft : ChevronRight
-                                }
-                              />
-                              <F0Icon
-                                size="xs"
-                                icon={
-                                  entry.collapsed ? ChevronRight : ChevronLeft
-                                }
-                              />
-                            </span>
+                              size="sm"
+                              icon={
+                                entry.collapsed
+                                  ? MaximizeHorizontal
+                                  : MinimizeHorizontal
+                              }
+                            />
                           </button>
                         ) : (
                           entry.label
