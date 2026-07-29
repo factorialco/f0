@@ -2,6 +2,21 @@ import { type F0DocumentKind } from "@/components/F0PdfViewer"
 
 import { type F0ChatFileAttachment } from "../types"
 
+/** Compact binary size used in composer validation messages. */
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) {
+    const kilobytes = bytes / 1024
+    return `${Number.isInteger(kilobytes) ? kilobytes : kilobytes.toFixed(1)} KB`
+  }
+  if (bytes < 1024 * 1024 * 1024) {
+    const megabytes = bytes / (1024 * 1024)
+    return `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)} MB`
+  }
+  const gigabytes = bytes / (1024 * 1024 * 1024)
+  return `${Number.isInteger(gigabytes) ? gigabytes : gigabytes.toFixed(1)} GB`
+}
+
 /**
  * Document families with an in-chat preview (Slack-style snapshot card + the
  * fullscreen F0PdfViewer, which routes by this same kind). Anything else —

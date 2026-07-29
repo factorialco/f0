@@ -7,8 +7,9 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { cn, focusRing } from "@/lib/utils"
 
 import { useF0Chat } from "../providers/F0ChatProvider"
-import { type F0ChatMessage } from "../types"
+import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { formatSeparator } from "../utils/natural-time"
+import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
 const InfoRow = ({
   label,
@@ -26,6 +27,43 @@ const InfoRow = ({
     )}
   </div>
 )
+
+const ReaderIdentity = ({ user }: { user: F0ChatUser }): ReactNode => {
+  const className = cn(
+    "flex w-full items-center gap-2 rounded-md px-0 py-1.5 text-f1-foreground no-underline",
+    focusRing("focus-visible:ring-inset")
+  )
+  const content = (
+    <>
+      <F0Avatar
+        size="sm"
+        avatar={
+          user.avatar ?? {
+            type: "person",
+            firstName: user.name,
+            lastName: "",
+          }
+        }
+      />
+      <span className="text-base font-normal">{user.name}</span>
+      {user.subtitle && <span className="sr-only">, {user.subtitle}</span>}
+    </>
+  )
+
+  return (
+    <ChatUserHoverCard user={user}>
+      {user.profileHref ? (
+        <a className={className} href={user.profileHref}>
+          {content}
+        </a>
+      ) : (
+        <span className={className} tabIndex={0}>
+          {content}
+        </span>
+      )}
+    </ChatUserHoverCard>
+  )
+}
 
 /**
  * Message-info panel shown in place of the actions menu (a back arrow returns to
@@ -101,23 +139,8 @@ export const ChatMessageInfoView = ({
                     role="list"
                   >
                     {message.readBy.map((user) => (
-                      <li
-                        key={user.id}
-                        className="flex items-center gap-2 rounded-md px-0 py-1.5"
-                      >
-                        <F0Avatar
-                          size="sm"
-                          avatar={
-                            user.avatar ?? {
-                              type: "person",
-                              firstName: user.name,
-                              lastName: "",
-                            }
-                          }
-                        />
-                        <span className="text-base font-normal text-f1-foreground">
-                          {user.name}
-                        </span>
+                      <li key={user.id}>
+                        <ReaderIdentity user={user} />
                       </li>
                     ))}
                   </ul>

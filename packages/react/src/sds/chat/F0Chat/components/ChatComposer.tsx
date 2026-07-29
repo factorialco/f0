@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import {
+  type ClipboardEvent,
   type KeyboardEvent,
   type ReactNode,
   useCallback,
@@ -45,6 +46,7 @@ import {
   microEnterTransition,
   microExitTransition,
 } from "../utils/chat-motion"
+import { formatFileSize } from "../utils/attachments"
 import { ChatEditChip } from "./ChatEditChip"
 import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
@@ -72,6 +74,7 @@ export const ChatComposer = (): ReactNode => {
     uploadFiles,
     transcribe,
     maxFiles,
+    maxFileSizeBytes,
     channel,
     searchMembers,
     currentUserId,
@@ -145,8 +148,11 @@ export const ChatComposer = (): ReactNode => {
 
   // Transient error flashed in the textarea (too many files, upload/voice
   // failure), auto-cleared after a few seconds — same pattern as the AI chat.
-  const { error: transientError, show: showTransientError } =
-    useTransientError()
+  const {
+    error: transientError,
+    show: showTransientError,
+    clear: clearTransientError,
+  } = useTransientError()
 
   // Mirror the attachment count in a ref so the upload handler can read the
   // current total without depending on it (keeps its identity stable).
@@ -278,6 +284,7 @@ export const ChatComposer = (): ReactNode => {
   const handleUpload = useCallback(
     async (files: File[]) => {
       if (files.length === 0 || !uploadFiles || !canUpload) return
+      clearTransientError()
       // Reject the whole batch when it would exceed the cap — a transient banner
       // is friendlier than silently truncating the user's selection.
       if (
@@ -286,6 +293,21 @@ export const ChatComposer = (): ReactNode => {
       ) {
         showTransientError(
           i18n.chat.tooManyFilesError.replace("{{maxFiles}}", String(maxFiles))
+        )
+        return
+      }
+      // Keep validation transport-agnostic and reject the whole batch before
+      // starting any upload when one file exceeds the host-provided cap.
+      if (
+        maxFileSizeBytes !== undefined &&
+        files.some((file) => file.size > maxFileSizeBytes)
+      ) {
+        showTransientError(
+          i18n.chat.fileTooLargeError.replace(
+            "{{maxFileSize}}",
+            formatFileSize(maxFileSizeBytes)
+          ),
+          { persistent: true }
         )
         return
       }
@@ -319,8 +341,11 @@ export const ChatComposer = (): ReactNode => {
       uploadFiles,
       canUpload,
       maxFiles,
+      maxFileSizeBytes,
+      clearTransientError,
       showTransientError,
       i18n.chat.tooManyFilesError,
+      i18n.chat.fileTooLargeError,
       i18n.chat.fileUploadError,
     ]
   )
@@ -329,6 +354,20 @@ export const ChatComposer = (): ReactNode => {
   useEffect(() => {
     registerFileDropHandler((files) => void handleUpload(files))
   }, [registerFileDropHandler, handleUpload])
+
+  const handlePaste = useCallback(
+    (event: ClipboardEvent<HTMLTextAreaElement>) => {
+      if (!canUpload) return
+      const files = Array.from(event.clipboardData.files)
+      if (files.length === 0) return
+
+      // File pastes (Cmd/Ctrl+V) become attachments. Text-only clipboard
+      // content keeps the textarea's native paste behavior.
+      event.preventDefault()
+      void handleUpload(files)
+    },
+    [canUpload, handleUpload]
+  )
 
   const isEditing = editingMessage !== null
 
@@ -532,14 +571,14 @@ export const ChatComposer = (): ReactNode => {
             ) : null}
           </AnimatePresence>
 
-          {/* Transient error (too many files, upload/voice failure) — flashed
-              briefly, then fades out. Same pattern as the AI chat. */}
+          {/* Composer error. Upload/voice failures fade out; validation errors
+              may persist until the next corrective attachment attempt. */}
           <AnimatePresence initial={false}>
             {transientError && (
               <motion.div
                 key="transient-error"
                 role="alert"
-                aria-live="polite"
+                aria-atomic="true"
                 className="p-1"
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -700,6 +739,7 @@ export const ChatComposer = (): ReactNode => {
             placeholder={isRecording ? i18n.chat.listening : placeholder}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             onCursorUpdate={updateCursorPosition}
             onScroll={syncHighlightScroll}
             highlightSegments={highlightSegments}

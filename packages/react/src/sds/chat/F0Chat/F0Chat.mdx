@@ -14,7 +14,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 <Controls of={Stories.Default} />
 
-### Group receipt and reaction contracts
+### Receipt, reaction, and upload contracts
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -86,6 +86,20 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
           focus.
         </td>
       </tr>
+      <tr>
+        <td>
+          <code>runtime.maxFileSizeBytes</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>Unlimited</td>
+        <td>—</td>
+        <td>
+          Maximum size of each selected, dropped, or pasted file, in bytes. The
+          ApplicationFrame mock uses <code>100 * 1024 * 1024</code> (100 MB).
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -152,9 +166,14 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.
 - WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent · time`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
 - WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
+- WHEN hovering or focusing a reader identity in message Info → THEN F0 displays the same profile card used by message authors; readers with a profile are links, preserving a persistent keyboard and touch action.
 - WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
 - WHEN reaction users are incomplete and `loadReactionUsers` exists → THEN F0 loads and caches identities by channel, message, emoji, and reaction count.
 - WHEN the reaction count or channel changes → THEN F0 invalidates the related identity cache.
+- WHEN any selected, dropped, or pasted file exceeds `maxFileSizeBytes` → THEN F0 rejects the whole batch before upload and displays the configured limit.
+- WHEN `maxFileSizeBytes` is omitted → THEN F0 does not impose a file-size limit.
+- WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
+- WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
 
 ### Usage examples
 

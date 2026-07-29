@@ -506,8 +506,9 @@ export const defaultTranslations = {
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
-    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
     fileUploadError: "Upload failed",
     micPermissionDenied:
       "Microphone access is blocked. Allow it in your browser settings to dictate.",

@@ -30,6 +30,7 @@ import {
   useMockChatApp,
   useMockChatStore,
 } from "./useMockChatApp"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 
 export const MockChatAppProvider = ({
   children,
@@ -233,6 +234,8 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
     maxFiles: 5,
+    // ApplicationFrame demonstrates a 100 MB per-file upload limit.
+    maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     transcribe: mockTranscribe,
     markRead,
     searchMessages,

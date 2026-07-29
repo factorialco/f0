@@ -505,6 +505,97 @@ describe("F0Chat", () => {
     expect(screen.getByText("report.pdf")).toBeInTheDocument()
   })
 
+  it("rejects a whole batch when one file exceeds the configured size limit", async () => {
+    vi.useFakeTimers()
+    try {
+      const maxFileSizeBytes = 100 * 1024 * 1024
+      const uploadFiles = vi.fn().mockResolvedValue([])
+      const { container } = renderChat(
+        makeRuntime({ uploadFiles, maxFileSizeBytes })
+      )
+      const fileInput =
+        container.querySelector<HTMLInputElement>("input[type=file]")!
+      const withinLimit = new File(["small"], "notes.txt", {
+        type: "text/plain",
+      })
+      const tooLarge = new File(["small"], "archive.zip", {
+        type: "application/zip",
+      })
+      Object.defineProperty(tooLarge, "size", {
+        value: maxFileSizeBytes + 1,
+      })
+
+      fireEvent.change(fileInput, {
+        target: { files: [withinLimit, tooLarge] },
+      })
+
+      expect(uploadFiles).not.toHaveBeenCalled()
+      expect(
+        screen.getByText("Each file must be 100 MB or smaller")
+      ).toBeInTheDocument()
+
+      act(() => vi.advanceTimersByTime(4_000))
+      expect(
+        screen.getByText("Each file must be 100 MB or smaller")
+      ).toBeInTheDocument()
+
+      vi.useRealTimers()
+      const atLimit = new File(["small"], "at-limit.zip", {
+        type: "application/zip",
+      })
+      Object.defineProperty(atLimit, "size", { value: maxFileSizeBytes })
+      fireEvent.change(fileInput, { target: { files: [atLimit] } })
+
+      expect(uploadFiles).toHaveBeenCalledWith([atLimit])
+      await waitFor(() =>
+        expect(
+          screen.queryByText("Each file must be 100 MB or smaller")
+        ).not.toBeInTheDocument()
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("attaches pasted files without intercepting text-only paste", async () => {
+    const maxFileSizeBytes = 100 * 1024 * 1024
+    const uploadFiles = vi.fn().mockResolvedValue([])
+    renderChat(makeRuntime({ uploadFiles, maxFileSizeBytes }))
+    const textarea = screen.getByPlaceholderText("Write something here..")
+    const pastedFile = new File(["pasted"], "pasted-notes.txt", {
+      type: "text/plain",
+    })
+    const oversizedFile = new File(["large"], "oversized-paste.zip", {
+      type: "application/zip",
+    })
+    Object.defineProperty(oversizedFile, "size", {
+      value: maxFileSizeBytes + 1,
+    })
+
+    expect(
+      fireEvent.paste(textarea, {
+        clipboardData: { files: [pastedFile, oversizedFile] },
+      })
+    ).toBe(false)
+    expect(uploadFiles).not.toHaveBeenCalled()
+    expect(
+      screen.getByText("Each file must be 100 MB or smaller")
+    ).toBeInTheDocument()
+
+    expect(
+      fireEvent.paste(textarea, {
+        clipboardData: { files: [pastedFile] },
+      })
+    ).toBe(false)
+    await waitFor(() => expect(uploadFiles).toHaveBeenCalledWith([pastedFile]))
+
+    expect(
+      fireEvent.paste(textarea, {
+        clipboardData: { files: [] },
+      })
+    ).toBe(true)
+  })
+
   it("renders the empty state when there are no messages", () => {
     renderChat(makeRuntime({ messages: [] }))
     expect(screen.getByText(/no messages yet/i)).toBeInTheDocument()
@@ -644,8 +735,17 @@ describe("F0Chat", () => {
             isMine: true,
             status: "read",
             readBy: [
-              { id: "grace", name: "Grace Liang" },
-              { id: "marcus", name: "Marcus Bennett" },
+              {
+                id: "grace",
+                name: "Grace Liang",
+                subtitle: "Data Analyst",
+                profileHref: "/people/grace",
+              },
+              {
+                id: "marcus",
+                name: "Marcus Bennett",
+                subtitle: "Engineering Manager",
+              },
             ],
             readByCount: 99,
           },
@@ -663,12 +763,45 @@ describe("F0Chat", () => {
     await userEvent.click(screen.getByRole("button", { name: /^Info$/i }))
 
     const readers = screen.getByRole("list", { name: /read by 2/i })
-    expect(screen.getByRole("region", { name: /info/i })).toHaveAttribute(
-      "tabindex",
-      "0"
+    const infoPanel = screen.getByRole("region", { name: /info/i })
+    expect(infoPanel).toHaveAttribute("tabindex", "0")
+    const grace = within(readers).getByRole("link", {
+      name: /Grace Liang/i,
+    })
+    const marcus = within(readers).getByText("Marcus Bennett").parentElement!
+    expect(grace).toHaveAttribute("href", "/people/grace")
+    expect(marcus).toHaveAttribute("tabindex", "0")
+    expect(
+      within(readers).queryByRole("link", { name: /Marcus Bennett/i })
+    ).not.toBeInTheDocument()
+
+    await userEvent.hover(grace)
+    expect(await screen.findByText("Data Analyst")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /view profile/i })).toHaveAttribute(
+      "href",
+      "/people/grace"
     )
-    expect(within(readers).getByText("Grace Liang")).toBeInTheDocument()
-    expect(within(readers).getByText("Marcus Bennett")).toBeInTheDocument()
+    await userEvent.unhover(grace)
+    await waitFor(() =>
+      expect(screen.queryByText("Data Analyst")).not.toBeInTheDocument()
+    )
+
+    const backButton = screen.getByRole("button", { name: /back/i })
+    expect(backButton).toHaveFocus()
+    await userEvent.tab()
+    expect(infoPanel).toHaveFocus()
+    await userEvent.tab()
+    expect(grace).toHaveFocus()
+    expect(await screen.findByText("Data Analyst")).toBeInTheDocument()
+
+    await userEvent.tab()
+    expect(marcus).toHaveFocus()
+    expect(await screen.findByText("Engineering Manager")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("link", { name: /view profile/i })
+      ).not.toBeInTheDocument()
+    )
   })
 
   it("shows read with the time once every channel member has read it", () => {

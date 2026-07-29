@@ -93,6 +93,7 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "@/sds/chat/F0Chat/mocks/constants"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { Action } from "@/ui/Action"
@@ -1564,6 +1565,99 @@ export const CommunicationsBlankStates: Story = {
 }
 
 /**
+ * The communications composer is configured with the mock runtime's 100 MB
+ * per-file limit. Selecting an oversized file rejects it before upload and
+ * keeps the composer usable.
+ */
+export const CommunicationsFileSizeLimit: Story = {
+  name: "Communications — 100 MB file limit",
+  tags: ["f0chat-files"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Reject a file over the 100 MB limit", async () => {
+      await page.findByRole("button", { name: /attach file/i })
+      const fileInput = canvasElement
+        .closest("body")!
+        .querySelector<HTMLInputElement>('input[type="file"]')!
+      const tooLarge = new File(["small"], "oversized-archive.zip", {
+        type: "application/zip",
+      })
+      Object.defineProperty(tooLarge, "size", {
+        value: MOCK_MAX_FILE_SIZE_BYTES + 1,
+      })
+
+      await userEvent.upload(fileInput, tooLarge)
+
+      await page.findByText("Each file must be 100 MB or smaller")
+      await waitFor(() =>
+        expect(
+          page.getByText("Each file must be 100 MB or smaller")
+        ).toBeVisible()
+      )
+      const validationAlert = page
+        .getByText("Each file must be 100 MB or smaller")
+        .closest('[role="alert"]')!
+      await expect(validationAlert).toHaveTextContent(
+        "Each file must be 100 MB or smaller"
+      )
+      await expect(
+        page.queryByText("oversized-archive.zip")
+      ).not.toBeInTheDocument()
+    })
+
+    await step("Paste a file into the composer", async () => {
+      const textarea = page.getByPlaceholderText("Write something here..")
+      const pastedFile = new File(["pasted"], "pasted-notes.txt", {
+        type: "text/plain",
+      })
+      const clipboardData = new DataTransfer()
+      clipboardData.items.add(pastedFile)
+      textarea.focus()
+
+      const pasteEvent = new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      })
+      await expect(textarea.dispatchEvent(pasteEvent)).toBe(false)
+      await expect(textarea).toHaveFocus()
+
+      await page.findByText("pasted-notes.txt", {}, { timeout: 3_000 })
+      await waitFor(() =>
+        expect(page.getByText("pasted-notes.txt")).toBeVisible()
+      )
+    })
+  },
+}
+
+/**
  * The final group message has only two of the expected 45 receipts. The footer
  * remains "Sent · time"; reader identities stay available from message Info.
  */
@@ -1600,8 +1694,13 @@ export const CommunicationsPartialReceipts: Story = {
   play: async ({ canvas, canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
     await step("Keep an incomplete group receipt at sent", async () => {
-      const status = await canvas.findByRole("status")
-      await waitFor(() => expect(status).toHaveTextContent(/^Sent · /i))
+      const receiptLabel = await canvas.findByText(
+        /^Sent · /i,
+        {},
+        { timeout: 3_000 }
+      )
+      const status = receiptLabel.closest<HTMLElement>('[role="status"]')!
+      await expect(status).toHaveTextContent(/^Sent · /i)
       await expect(status).toHaveAttribute("aria-live", "polite")
       await expect(status).toHaveAttribute("aria-atomic", "true")
       await expect(canvas.queryByText(/^Read by 2$/i)).not.toBeInTheDocument()
@@ -1664,8 +1763,13 @@ export const CommunicationsReceiptsAndReactions: Story = {
   play: async ({ canvas, canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
     await step("Summarize the completed group receipt", async () => {
-      const status = await canvas.findByRole("status")
-      await waitFor(() => expect(status).toHaveTextContent(/^Read · /i))
+      const receiptLabel = await canvas.findByText(
+        /^Read · /i,
+        {},
+        { timeout: 3_000 }
+      )
+      const status = receiptLabel.closest<HTMLElement>('[role="status"]')!
+      await expect(status).toHaveTextContent(/^Read · /i)
       await expect(status).toHaveAttribute("aria-live", "polite")
       await expect(status).toHaveAttribute("aria-atomic", "true")
       await expect(canvas.queryByText(/^Read by 45$/i)).not.toBeInTheDocument()
@@ -1694,7 +1798,11 @@ export const CommunicationsReceiptsAndReactions: Story = {
       await expect(describedTooltip).toHaveTextContent(
         "Grace Liang, Marcus Bennett, Sam Okafor"
       )
-      await expect(reactionTooltips[0]).toBeVisible()
+      const visibleReactionTooltip =
+        reactionTooltips.find((tooltip) => tooltip !== describedTooltip) ??
+        describedTooltip
+      await expect(visibleReactionTooltip).toBeDefined()
+      await expect(visibleReactionTooltip!).toBeVisible()
       await userEvent.tab()
     })
 
@@ -1723,13 +1831,30 @@ export const CommunicationsReceiptsAndReactions: Story = {
       )
       await expect(readers.scrollHeight).toBe(readers.clientHeight)
       await expect(readers).not.toHaveAttribute("tabindex")
-      await expect(within(readers).getByText("Grace Liang")).toBeVisible()
+      const grace = within(readers).getByRole("link", {
+        name: /Grace Liang/i,
+      })
+      await expect(grace).toHaveAttribute("href", "/people/u_grace")
       await expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
       await expect(within(readers).getByText("Sam Okafor")).toBeVisible()
       const backButton = page.getByRole("button", { name: /back/i })
       await expect(backButton).toHaveFocus()
+
+      await userEvent.hover(grace)
+      await waitFor(() => expect(page.getByText("Data Analyst")).toBeVisible())
+      await expect(
+        page.getByRole("link", { name: /view profile/i })
+      ).toHaveAttribute("href", "/people/u_grace")
+      await userEvent.unhover(grace)
+      await waitFor(() =>
+        expect(page.queryByText("Data Analyst")).not.toBeInTheDocument()
+      )
+
       await userEvent.tab()
       await expect(infoPanel).toHaveFocus()
+      await userEvent.tab()
+      await expect(grace).toHaveFocus()
+      await waitFor(() => expect(page.getByText("Data Analyst")).toBeVisible())
       infoPanel.scrollTop = infoPanel.scrollHeight
       await expect(infoPanel.scrollTop).toBeGreaterThan(0)
       const lastReader = within(readers).getByText("Demo Reader 42")

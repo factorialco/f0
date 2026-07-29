@@ -1,0 +1,1 @@
+export const MOCK_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024

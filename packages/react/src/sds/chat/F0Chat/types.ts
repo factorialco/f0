@@ -519,6 +519,13 @@ export type F0ChatRuntime = {
    */
   maxFiles?: number
   /**
+   * Maximum size in bytes for each file selected, dropped, or pasted into the
+   * composer. When any file exceeds the limit, the composer rejects the whole
+   * batch before calling `uploadFiles` and keeps the validation error visible
+   * until the next attachment attempt. Omit for no size limit.
+   */
+  maxFileSizeBytes?: number
+  /**
    * Optional voice dictation — same signature as the AI chat (streams partials).
    * Not part of the Stream transport; a host wires it to its own speech service
    * (the Stream adapter omits it, so the mic button stays hidden there).

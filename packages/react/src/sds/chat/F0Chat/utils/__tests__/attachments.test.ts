@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
 
 import { type F0ChatFileAttachment } from "../../types"
-import { documentPreviewKind, withinPreviewSizeLimit } from "../attachments"
+import {
+  documentPreviewKind,
+  formatFileSize,
+  withinPreviewSizeLimit,
+} from "../attachments"
 
 const file = (
   overrides: Partial<F0ChatFileAttachment>
@@ -10,6 +14,18 @@ const file = (
   url: "https://cdn.example.com/doc",
   name: "document",
   ...overrides,
+})
+
+describe("formatFileSize", () => {
+  it("formats byte, kilobyte, megabyte, and gigabyte limits compactly", () => {
+    expect(formatFileSize(512)).toBe("512 B")
+    expect(formatFileSize(1024)).toBe("1 KB")
+    expect(formatFileSize(1536)).toBe("1.5 KB")
+    expect(formatFileSize(100 * 1024 * 1024)).toBe("100 MB")
+    expect(formatFileSize(1.5 * 1024 * 1024)).toBe("1.5 MB")
+    expect(formatFileSize(2 * 1024 * 1024 * 1024)).toBe("2 GB")
+    expect(formatFileSize(1.5 * 1024 * 1024 * 1024)).toBe("1.5 GB")
+  })
 })
 
 describe("documentPreviewKind", () => {
