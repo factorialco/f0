@@ -3,6 +3,11 @@ import { CSSProperties } from "react"
 
 import { Skeleton } from "@/ui/skeleton"
 import {
+  type ChartColorToken,
+  chartColorTokens,
+  resolveChartColorToken,
+} from "@/kits/F0DataChart/utils/colors"
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -13,10 +18,54 @@ import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { cn } from "@/lib/utils"
 
+/**
+ * Legacy `kits/Charts` color tokens, resolved as `hsl(var(--chart-*))`.
+ * Kept for backward compatibility alongside the F0DataChart base-color palette.
+ */
+const LEGACY_CHART_COLORS = [
+  "categorical-1",
+  "categorical-2",
+  "categorical-3",
+  "categorical-4",
+  "categorical-5",
+  "categorical-6",
+  "categorical-7",
+  "categorical-8",
+  "feedback-negative",
+  "feedback-neutral",
+  "feedback-positive",
+] as const
+
+type LegacyChartColor = (typeof LEGACY_CHART_COLORS)[number]
+
+/**
+ * A segment color. Accepts both color systems:
+ * - a 15-palette base-color token (`"viridian"`, `"yellow"`, `"barbie"`, …),
+ *   resolved through `kits/F0DataChart`; or
+ * - a legacy `kits/Charts` token (`"categorical-1"…"categorical-8"`,
+ *   `"feedback-positive"`, …), resolved as a CSS `--chart-*` variable.
+ */
+export type CategoryBarColor = ChartColorToken | LegacyChartColor
+
+const BASE_COLOR_TOKENS = new Set<string>(chartColorTokens)
+
+/** Resolve a segment color from either supported palette. */
+function resolveSegmentColor(color: CategoryBarColor): string {
+  return BASE_COLOR_TOKENS.has(color)
+    ? resolveChartColorToken(color as ChartColorToken)
+    : getColor(color)
+}
+
 export interface CategoryBarDataPoint {
   name: string
   value: number
-  color?: string
+  /**
+   * Color of the segment. Supports both the 15 chromatic F0 base-color tokens
+   * (e.g. `"viridian"`, `"yellow"`, `"barbie"`) and the legacy chart tokens
+   * (`"categorical-1"…"categorical-8"`, `"feedback-*"`). When omitted, a color
+   * is auto-assigned by index from the shared chart palette.
+   */
+  color?: CategoryBarColor
 }
 
 export interface CategoryBarChartCellValue {
@@ -117,7 +166,7 @@ export const CategoryBarChartCell = (
           {dataPoints.map((point, index) => {
             const percentage = (point.value / total) * 100
             const color = point.color
-              ? getColor(point.color)
+              ? resolveSegmentColor(point.color)
               : getCategoricalColor(index)
 
             if (percentage === 0) return null

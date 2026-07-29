@@ -112,6 +112,15 @@ export interface F0VideoPlayerProps extends DataAttributes {
   /** Focus the player on mount so keyboard shortcuts work immediately. Default `false`. */
   autoFocus?: boolean
   /**
+   * Optional download action rendered inside the player controls. Native media
+   * downloads remain disabled, so embedded surfaces that allow saving the
+   * source can expose an explicit, keyboard-accessible action here.
+   */
+  download?: {
+    label: string
+    onClick: () => void
+  }
+  /**
    * Prevent seeking past the furthest point already watched. Renders a marker at
    * that position and blocks the cursor beyond it. Default `false`.
    */

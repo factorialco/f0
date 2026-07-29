@@ -44,6 +44,7 @@ export function F0VideoPlayerInternal({
   defaultLanguage,
   autoPlay = false,
   autoFocus = false,
+  download,
   restrictForwardSeek = false,
   onTrackAction,
   onMilestone,
@@ -384,6 +385,7 @@ export function F0VideoPlayerInternal({
           onToggleCaptions={captions.toggle}
           onToggleAudioDescription={toggleAudioDescription}
           onSeek={seek}
+          download={download}
         />
       )}
     </div>

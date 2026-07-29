@@ -117,6 +117,31 @@ describe("F0VideoPlayer", () => {
       fireEvent.loadedData(getVideo())
       expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument()
     })
+
+    it("renders an optional download inside the loaded player controls", async () => {
+      const onDownload = vi.fn()
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          download={{ label: "Download demo.mp4", onClick: onDownload }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Download demo.mp4" })
+      ).not.toBeInTheDocument()
+
+      fireEvent.loadedData(getVideo())
+      const downloadButton = screen.getByRole("button", {
+        name: "Download demo.mp4",
+      })
+      downloadButton.focus()
+      await user.keyboard(" ")
+
+      expect(onDownload).toHaveBeenCalledOnce()
+      expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
+    })
   })
 
   describe("advanced controls (always disabled)", () => {

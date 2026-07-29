@@ -49,6 +49,11 @@ player. The parent receives playback information through the callbacks:
   10s" and "97%". Short videos complete at 97%; long videos in their final 10s.
 - **`restrictForwardSeek`** — prevents seeking past the furthest-watched point and
   renders a marker at that position.
+- **`download`** — adds an explicit download action to the player controls.
+  Native media downloads stay disabled; use this when the embedding surface
+  lets viewers save the source.
+
+<Canvas of={Stories.Downloadable} />
 
 ## Captions
 
@@ -184,6 +189,7 @@ Actions panel below.
 
 - Advanced browser behaviours are always disabled: the native context menu (and
   its "Save video as…" download), Picture-in-Picture, remote playback and drag.
-  This is intentional for embedded product video; there is no opt-in for v1.
+  Embedding surfaces can opt into a controlled download button through
+  `download`; the remaining browser behaviours stay unavailable.
 - The playback-speed menu portals into the player wrapper (not `document.body`)
   so it stays visible and interactive in fullscreen.

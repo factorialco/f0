@@ -19,7 +19,7 @@ interface OptionsListProps {
   customAnswerText: string | undefined
   isCustomAnswerActive: boolean
   canProceed: boolean
-  customInputRef: Ref<HTMLInputElement>
+  customInputRef: Ref<HTMLTextAreaElement>
   /** When true, auto-focus the first option when the list mounts */
   autoFocus?: boolean
   onToggleOption: (optionId: string) => void
