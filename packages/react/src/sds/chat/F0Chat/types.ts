@@ -1,5 +1,6 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { type IconType } from "@/components/F0Icon"
+import { type VideoPlayerContent } from "@/components/F0VideoPlayer"
 import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
 
 /** A participant in a conversation. */
@@ -86,6 +87,17 @@ export type F0ChatFileAttachment = {
   name: string
   size?: number
   mimeType?: string
+  /** Poster used when a video file renders through the inline F0VideoPlayer. */
+  thumbnailUrl?: string
+  /**
+   * Optional captions/audio-description sources for video files. Passed
+   * directly to F0VideoPlayer; ignored for non-video files.
+   */
+  videoContent?: VideoPlayerContent
+  /** Initial locale for localized video audio and accessibility content. */
+  videoDefaultLanguage?: string
+  /** Declare that a video file has no audio, so captions are not required. */
+  videoSilent?: boolean
   /** 0–100 while uploading; undefined once done. */
   progress?: number
 }

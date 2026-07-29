@@ -130,7 +130,9 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
 
   it("opens the fullscreen viewer on click", async () => {
     renderChat([docxAttachment])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open offer-letter.docx" })
+    )
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument()
     // The viewer renders its own copy of the document (generous timeout: the
@@ -160,7 +162,9 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
       ).not.toBeInTheDocument()
     )
     expect(screen.getByText("offer-letter.docx")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Download offer-letter.docx" })
+    ).toBeInTheDocument()
   })
 
   it("never offers a preview for binary .doc files", () => {

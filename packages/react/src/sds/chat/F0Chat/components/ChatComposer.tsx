@@ -12,19 +12,17 @@ import {
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0FileItem } from "@/components/F0FileItem"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
-import { Picker } from "@/sds/social/Reactions/Picker"
-import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
-import { containsEmojis } from "@/lib/text"
-import { cn } from "@/lib/utils"
 import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/RecordingWaveform"
 import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
-import { Skeleton } from "@/ui/skeleton"
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
+import { containsEmojis } from "@/lib/text"
+import { cn } from "@/lib/utils"
+import { Picker } from "@/sds/social/Reactions/Picker"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
 import {
@@ -39,28 +37,56 @@ import {
   useChatReply,
 } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
-import { type F0ChatAttachment } from "../types"
+import {
+  type F0ChatAttachment,
+  type F0ChatFileAttachment,
+  type F0ChatImageAttachment,
+} from "../types"
+import { formatFileSize } from "../utils/attachments"
 import {
   EASE_OUT_SWIFT,
   layoutTransition,
   microEnterTransition,
   microExitTransition,
 } from "../utils/chat-motion"
-import { formatFileSize } from "../utils/attachments"
+import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
 import { ChatEditChip } from "./ChatEditChip"
 import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
-import { FadeInImage } from "./FadeInImage"
 
-/** A pending composer attachment: a skeleton while it uploads, then a square
- * image preview or an F0FileItem chip once the runtime resolves it. */
+type UploadingAttachment = {
+  id: string
+  status: "uploading"
+  attachment: F0ChatFileAttachment | F0ChatImageAttachment
+}
+
+/** An attachment shown immediately from a local URL while its upload resolves. */
 type PendingAttachment =
-  | { id: string; status: "uploading"; name: string; isImage: boolean }
+  | UploadingAttachment
   | { id: string; status: "ready"; attachment: F0ChatAttachment }
 
 const isImagePending = (att: PendingAttachment): boolean =>
-  att.status === "uploading" ? att.isImage : att.attachment.kind === "image"
+  att.attachment.kind === "image"
+
+const localAttachmentFromFile = (
+  file: File,
+  url: string
+): F0ChatFileAttachment | F0ChatImageAttachment =>
+  file.type.startsWith("image/")
+    ? {
+        kind: "image",
+        url,
+        name: file.name,
+        mimeType: file.type,
+      }
+    : {
+        kind: "file",
+        url,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type,
+      }
 
 /** Composer: auto-growing textarea (no aura), attach, voice dictation, send.
  * Drag & drop is owned by the whole panel (F0Chat) and bridged here. */
@@ -94,6 +120,8 @@ export const ChatComposer = (): ReactNode => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const attachmentStripRef = useRef<HTMLDivElement>(null)
+  const localPreviewUrlsRef = useRef(new Set<string>())
 
   // Mentions are available wherever the host provides a member search — both
   // DMs (mention either person) and groups. The `@here` (everyone) option only
@@ -133,6 +161,21 @@ export const ChatComposer = (): ReactNode => {
     containsEmojis(value)
   // Monotonic id for pending attachments (avoids Date.now/random in render).
   const attachmentSeq = useRef(0)
+
+  const releaseLocalPreview = useCallback((url: string) => {
+    if (!localPreviewUrlsRef.current.delete(url)) return
+    URL.revokeObjectURL(url)
+  }, [])
+
+  useEffect(
+    () => () => {
+      for (const url of localPreviewUrlsRef.current) {
+        URL.revokeObjectURL(url)
+      }
+      localPreviewUrlsRef.current.clear()
+    },
+    []
+  )
 
   const isUploading = attachments.some((a) => a.status === "uploading")
 
@@ -311,14 +354,17 @@ export const ChatComposer = (): ReactNode => {
         )
         return
       }
-      // Show a skeleton per file immediately, then swap each for its chip once
-      // the runtime resolves the upload (or drop them + flash an error if it fails).
-      const pending = files.map((file) => ({
-        id: `att-${attachmentSeq.current++}`,
-        status: "uploading" as const,
-        name: file.name,
-        isImage: file.type.startsWith("image/"),
-      }))
+      // Render every previewable format immediately from a local object URL,
+      // then swap it for the host attachment without changing its stable key.
+      const pending = files.map((file): UploadingAttachment => {
+        const url = URL.createObjectURL(file)
+        localPreviewUrlsRef.current.add(url)
+        return {
+          id: `att-${attachmentSeq.current++}`,
+          status: "uploading",
+          attachment: localAttachmentFromFile(file, url),
+        }
+      })
       setAttachments((prev) => [...prev, ...pending])
       const pendingIds = new Set(pending.map((p) => p.id))
       try {
@@ -328,12 +374,22 @@ export const ChatComposer = (): ReactNode => {
           status: "ready",
           attachment,
         }))
-        setAttachments((prev) => [
-          ...prev.filter((a) => !pendingIds.has(a.id)),
-          ...ready,
-        ])
+        setAttachments((prev) => {
+          const readyById = new Map(ready.map((item) => [item.id, item]))
+          return prev.flatMap((item) => {
+            if (!pendingIds.has(item.id)) return [item]
+            const replacement = readyById.get(item.id)
+            return replacement ? [replacement] : []
+          })
+        })
+        for (const item of pending) {
+          releaseLocalPreview(item.attachment.url)
+        }
       } catch {
         setAttachments((prev) => prev.filter((a) => !pendingIds.has(a.id)))
+        for (const item of pending) {
+          releaseLocalPreview(item.attachment.url)
+        }
         showTransientError(i18n.chat.fileUploadError)
       }
     },
@@ -347,7 +403,37 @@ export const ChatComposer = (): ReactNode => {
       i18n.chat.tooManyFilesError,
       i18n.chat.fileTooLargeError,
       i18n.chat.fileUploadError,
+      releaseLocalPreview,
     ]
+  )
+
+  const removeAttachment = useCallback(
+    (id: string) => {
+      const item = attachments.find((attachment) => attachment.id === id)
+      if (item?.status === "uploading") {
+        releaseLocalPreview(item.attachment.url)
+      }
+      setAttachments((prev) =>
+        prev.filter((attachment) => attachment.id !== id)
+      )
+      requestAnimationFrame(() => {
+        const strip = attachmentStripRef.current
+        if (strip) strip.focus()
+        else textareaRef.current?.focus()
+      })
+    },
+    [attachments, releaseLocalPreview]
+  )
+
+  const releaseUploadingPreviews = useCallback(
+    (items: PendingAttachment[]) => {
+      for (const item of items) {
+        if (item.status === "uploading") {
+          releaseLocalPreview(item.attachment.url)
+        }
+      }
+    },
+    [releaseLocalPreview]
   )
 
   // Files dropped anywhere on the panel (F0Chat owns the drop zone) land here.
@@ -378,8 +464,15 @@ export const ChatComposer = (): ReactNode => {
     mentions.seedMentions([])
     setValue("")
     setCursorPosition(0)
+    releaseUploadingPreviews(attachments)
     setAttachments([])
-  }, [setEditingMessage, mentions.close, mentions.seedMentions])
+  }, [
+    setEditingMessage,
+    mentions.close,
+    mentions.seedMentions,
+    releaseUploadingPreviews,
+    attachments,
+  ])
 
   // Entering edit mode reloads the message into the composer — text, existing
   // attachments (as ready chips) and its mentions — then focuses at the end.
@@ -387,13 +480,14 @@ export const ChatComposer = (): ReactNode => {
     if (!editingMessage) return
     setValue(editingMessage.body)
     setCursorPosition(editingMessage.body.length)
-    setAttachments(
-      (editingMessage.attachments ?? []).map((attachment) => ({
+    setAttachments((prev) => {
+      releaseUploadingPreviews(prev)
+      return (editingMessage.attachments ?? []).map((attachment) => ({
         id: `att-${attachmentSeq.current++}`,
         status: "ready" as const,
         attachment,
       }))
-    )
+    })
     const entries: MentionEntry[] = [
       ...(editingMessage.mentions ?? []).map((m) => ({
         id: m.id,
@@ -420,6 +514,7 @@ export const ChatComposer = (): ReactNode => {
     channel.type,
     i18n.chat.mentionEveryone,
     mentions.seedMentions,
+    releaseUploadingPreviews,
   ])
 
   const handleSend = useCallback(() => {
@@ -605,12 +700,9 @@ export const ChatComposer = (): ReactNode => {
             )}
           </AnimatePresence>
 
-          {/* Pending attachments — a skeleton while uploading, then a square
-              image preview (matching the message thumbnails) or an F0FileItem
-              chip, each with a remove action. Each chip fades in and shrinks
-              out (`layout` slides the neighbours into the gap); the whole row
-              collapses when the last one goes (or the message sends). The
-              skeleton→ready swap crossfades inside the chip's stable key. */}
+          {/* Pending attachments render from local object URLs immediately.
+              Previewable documents, videos and images keep their visual shape
+              throughout upload; unsupported files use F0FileItem. */}
           <AnimatePresence initial={false}>
             {attachments.length > 0 && (
               <motion.div
@@ -625,16 +717,26 @@ export const ChatComposer = (): ReactNode => {
                 }}
               >
                 <div
+                  ref={attachmentStripRef}
+                  role="region"
+                  tabIndex={0}
+                  aria-label={i18n.t(
+                    attachments.length === 1
+                      ? "chat.attachmentCount.one"
+                      : "chat.attachmentCount.other",
+                    { count: attachments.length }
+                  )}
                   aria-live="polite"
                   aria-busy={isUploading}
-                  className="flex flex-wrap items-end gap-1 px-1 pt-1"
+                  className="flex flex-nowrap items-end gap-1 overflow-x-auto px-1 pt-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
+                  data-testid="chat-composer-attachments"
                 >
                   <AnimatePresence initial={false} mode="popLayout">
                     {orderedAttachments.map((att) => (
                       <motion.div
                         key={att.id}
                         layout="position"
-                        className="flex"
+                        className="flex shrink-0"
                         initial={
                           shouldReduceMotion
                             ? false
@@ -658,69 +760,16 @@ export const ChatComposer = (): ReactNode => {
                         }}
                       >
                         <motion.div
-                          key={att.status}
                           className="flex"
                           initial={shouldReduceMotion ? false : { opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.15 }}
                         >
-                          {att.status === "uploading" ? (
-                            <Skeleton
-                              className={cn(
-                                att.isImage
-                                  ? "h-16 w-16 rounded-lg"
-                                  : "h-9 w-36 rounded"
-                              )}
-                            />
-                          ) : att.attachment.kind === "image" ? (
-                            <div className="group/attachment relative flex">
-                              <FadeInImage
-                                src={
-                                  att.attachment.thumbnailUrl ??
-                                  att.attachment.url
-                                }
-                                alt={att.attachment.name}
-                                className="h-16 w-16 rounded-lg border border-solid border-f1-border-secondary object-cover"
-                              />
-                              {/* Remove is hidden until hover; focus also
-                                  reveals it so it stays reachable by keyboard. */}
-                              <div className="absolute right-1 top-1 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
-                                <ButtonInternal
-                                  variant="outline"
-                                  size="sm"
-                                  hideLabel
-                                  label={i18n.chat.removeFile}
-                                  icon={Cross}
-                                  onClick={() =>
-                                    setAttachments((prev) =>
-                                      prev.filter((a) => a.id !== att.id)
-                                    )
-                                  }
-                                />
-                              </div>
-                            </div>
-                          ) : att.attachment.kind === "file" ? (
-                            <F0FileItem
-                              size="md"
-                              file={{
-                                name: att.attachment.name,
-                                type: att.attachment.mimeType ?? "",
-                              }}
-                              actions={[
-                                {
-                                  label: i18n.chat.removeFile,
-                                  icon: Cross,
-                                  onClick: () =>
-                                    setAttachments((prev) =>
-                                      prev.filter((a) => a.id !== att.id)
-                                    ),
-                                },
-                              ]}
-                            />
-                          ) : // Locations never sit in the composer (uploads
-                          // only) — the narrowing here just satisfies the
-                          // widened attachment union.
-                          null}
+                          <ChatComposerAttachmentPreview
+                            attachment={att.attachment}
+                            uploading={att.status === "uploading"}
+                            onRemove={() => removeAttachment(att.id)}
+                          />
                         </motion.div>
                       </motion.div>
                     ))}

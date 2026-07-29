@@ -17,7 +17,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 ### Receipt, reaction, and upload contracts
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Field</th>
@@ -100,6 +100,23 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
           ApplicationFrame mock uses <code>100 * 1024 * 1024</code> (100 MB).
         </td>
       </tr>
+      <tr>
+        <td>
+          <code>file.thumbnailUrl</code>, <code>file.videoContent</code>,{" "}
+          <code>file.videoDefaultLanguage</code>, <code>file.videoSilent</code>
+        </td>
+        <td>
+          <code>string</code>, <code>VideoPlayerContent</code>,{" "}
+          <code>string</code>, <code>boolean</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Optional poster, accessible caption/description sources, initial
+          language, and genuine no-audio declaration forwarded to F0VideoPlayer
+          when a file has a video MIME type or supported video extension.
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -111,7 +128,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 **When to use**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -130,7 +147,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 **When not to use**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -174,6 +191,14 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN `maxFileSizeBytes` is omitted → THEN F0 does not impose a file-size limit.
 - WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
 - WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
+- WHEN an image, video, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders a local preview immediately while the upload continues.
+- WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
+- WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the F0FileItem fallback.
+- WHEN a pending composer attachment is removed or its upload fails → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
+- WHEN several previews exceed the composer width → THEN F0 keeps them in one focusable horizontal strip instead of growing the composer through the transcript.
+- WHEN a completed file has a video MIME type or browser video extension → THEN F0 renders it as an inline F0VideoPlayer with playback and fullscreen controls.
+- WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
+- WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
 
 ### Usage examples
 
@@ -183,12 +208,25 @@ Use a group runtime to provide member mentions, read receipts, and reaction memb
 
 <Canvas of={Stories.Group} />
 
+**Video attachments**
+
+Videos play directly inside the conversation. The host can provide a poster,
+captions, audio descriptions, and localized sources through the file attachment.
+
+<Canvas of={Stories.WithVideoAttachments} />
+
 ## Accessibility
 
 ### Keyboard interaction
 
-The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list.
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is also focusable, supports horizontal keyboard scrolling, and receives focus after removing an attachment.
 
 ### Screen reader behavior
 
 Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces asynchronous transitions from “Sent” to “Read” together with the message time.
+
+Attachment actions include the filename in their accessible names. Each video
+player is contained in a figure named after its file and exposes a contextual
+player-region name. Prerecorded videos should provide both
+`videoContent.captions` and audio descriptions where the visuals convey
+meaning; use `videoSilent` only when the source genuinely has no audio.

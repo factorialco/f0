@@ -506,6 +506,7 @@ export const defaultTranslations = {
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
+    removeNamedFile: "Remove {{name}}",
     // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
@@ -554,6 +555,7 @@ export const defaultTranslations = {
     reply: "Reply",
     react: "Add reaction",
     download: "Download",
+    downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
     // Editing your own message (within the edit window). `editing` heads the
     // composer chip; `edited` is the muted marker after an edited message body.
@@ -571,7 +573,10 @@ export const defaultTranslations = {
     previousImage: "Previous image",
     nextImage: "Next image",
     openDocument: "Open document",
+    openNamedDocument: "Open {{name}}",
     documentPreview: "Document preview",
+    videoPlayerLabel: "Video player: {{name}}",
+    loadingVideo: "Loading video: {{name}}",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",

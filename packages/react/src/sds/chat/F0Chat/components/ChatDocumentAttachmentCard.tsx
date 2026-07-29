@@ -13,11 +13,12 @@ import {
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
+import { type IconType } from "@/components/F0Icon"
 import { Download } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useReducedMotion } from "@/lib/a11y"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useChatDocumentPreview } from "../providers/ChatUIProvider"
@@ -67,11 +68,21 @@ export const ChatDocumentAttachmentCard = ({
   file,
   kind,
   cornerClass = "rounded-xl",
+  action,
+  previewDisabled = false,
 }: {
   file: F0ChatFileAttachment
   kind: ChatDocumentKind
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
+  /** Override the default download action, e.g. Remove inside the composer. */
+  action?: {
+    label: string
+    icon: IconType
+    onClick: () => void
+  }
+  /** Prevent opening a transient local URL before its upload completes. */
+  previewDisabled?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const reducedMotion = useReducedMotion()
@@ -80,19 +91,18 @@ export const ChatDocumentAttachmentCard = ({
   const inView = useInViewport(containerRef)
   const [failed, setFailed] = useState(false)
   const [rendered, setRendered] = useState(false)
+  const attachmentAction = action ?? {
+    label: i18n.t("chat.downloadNamedFile", { name: file.name }),
+    icon: Download,
+    onClick: () => triggerDownload(file.url, file.name),
+  }
 
   if (failed) {
     return (
       <F0FileItem
         size="md"
         file={{ name: file.name, type: file.mimeType ?? "" }}
-        actions={[
-          {
-            label: i18n.chat.download,
-            icon: Download,
-            onClick: () => triggerDownload(file.url, file.name),
-          },
-        ]}
+        actions={[attachmentAction]}
       />
     )
   }
@@ -107,7 +117,7 @@ export const ChatDocumentAttachmentCard = ({
       style={{ width: CARD_WIDTH }}
       data-testid="chat-document-attachment"
     >
-      <div className="flex items-center gap-2 py-2 px-2">
+      <div className="flex items-center gap-2 px-2 py-2">
         <F0AvatarFile
           file={{ name: file.name, type: file.mimeType ?? "" }}
           size="md"
@@ -119,16 +129,20 @@ export const ChatDocumentAttachmentCard = ({
           variant="ghost"
           size="sm"
           hideLabel
-          icon={Download}
-          label={i18n.chat.download}
-          onClick={() => triggerDownload(file.url, file.name)}
+          icon={attachmentAction.icon}
+          label={attachmentAction.label}
+          onClick={attachmentAction.onClick}
         />
       </div>
       <button
         type="button"
         onClick={() => openDocumentPreview(file)}
-        aria-label={i18n.chat.openDocument}
-        className="relative block w-full overflow-hidden border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity hover:opacity-90"
+        disabled={previewDisabled}
+        aria-label={i18n.t("chat.openNamedDocument", { name: file.name })}
+        className={cn(
+          "relative block w-full overflow-hidden border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity enabled:hover:opacity-90",
+          focusRing("focus-visible:ring-inset")
+        )}
         style={{ height: THUMB_HEIGHT }}
       >
         {/* Skeleton lives UNDER the snapshot; the rendered content fades in

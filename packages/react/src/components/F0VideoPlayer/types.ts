@@ -54,6 +54,9 @@ export interface VideoPlayerContent {
 }
 
 export interface F0VideoPlayerProps extends DataAttributes {
+  /** Accessible name for this player region. Defaults to "Video player". */
+  ariaLabel?: string
+
   /**
    * Video source URL. Localizable — pass a per-locale list of dubbed renditions
    * to offer selectable audio languages; an "Audio" selector then appears,

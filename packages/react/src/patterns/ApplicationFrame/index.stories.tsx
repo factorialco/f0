@@ -28,12 +28,37 @@ import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
+import { useAiChat } from "@/kits/ai/F0AiChat"
+import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+  useMockAiChatRuntime,
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
+import {
+  type CandidateProfile,
+  type ExpenseProfile,
+  type F0AiChatWelcomeCard,
+  type JobPostingProfile,
+  type RequisitionProfile,
+  type PersonProfile,
+  type UploadedFile,
+  type VacancyProfile,
+} from "@/kits/ai/F0AiChat/types"
+import { F0AiChatCreditsButton } from "@/kits/ai/F0AiChatHeader"
+import {
+  ThreadItem,
+  ThreadListSkeleton,
+  useChatHistory,
+} from "@/kits/ai/F0AiChatHistory"
+import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
+import { getEmojiLabel } from "@/lib/emojis"
 import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { getEmojiLabel } from "@/lib/emojis"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -55,32 +80,6 @@ import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
-import { DaytimePage } from "@/sds/Home/DaytimePage"
-import { useAiChat } from "@/kits/ai/F0AiChat"
-import {
-  MockAiChatRuntimeProvider,
-  MockConnectedChatHeader,
-  MockConnectedChatInput,
-  MockConnectedMessagesContainer,
-  useMockAiChatRuntime,
-} from "@/kits/ai/F0AiChat/__stories__/_mock"
-import {
-  type CandidateProfile,
-  type ExpenseProfile,
-  type F0AiChatWelcomeCard,
-  type JobPostingProfile,
-  type RequisitionProfile,
-  type PersonProfile,
-  type UploadedFile,
-  type VacancyProfile,
-} from "@/kits/ai/F0AiChat/types"
-import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
-import { F0AiChatCreditsButton } from "@/kits/ai/F0AiChatHeader"
-import {
-  ThreadItem,
-  ThreadListSkeleton,
-  useChatHistory,
-} from "@/kits/ai/F0AiChatHistory"
 import {
   F0Chat,
   F0ChatProvider,
@@ -88,14 +87,15 @@ import {
   type F0ChatRuntime,
 } from "@/sds/chat/F0Chat"
 import { MessageStatus } from "@/sds/chat/F0Chat/components/MessageStatus"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "@/sds/chat/F0Chat/mocks/constants"
 import {
   MockChatAppProvider,
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
-import { MOCK_MAX_FILE_SIZE_BYTES } from "@/sds/chat/F0Chat/mocks/constants"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
+import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
@@ -1658,6 +1658,223 @@ export const CommunicationsFileSizeLimit: Story = {
 }
 
 /**
+ * The final group message combines two inline videos and a regular file. Each
+ * F0VideoPlayer takes the full conversation width up to its 36rem media limit,
+ * stacks vertically, and exposes its own playback and fullscreen controls.
+ */
+export const CommunicationsVideoAttachments: Story = {
+  name: "Communications — inline video attachments",
+  tags: ["f0chat-videos"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvas, step }) => {
+    await step("Render both videos as wide inline players", async () => {
+      const players = await canvas.findAllByRole(
+        "region",
+        { name: /Video player:/ },
+        { timeout: 5_000 }
+      )
+      await expect(players).toHaveLength(2)
+
+      const widths = players.map(
+        (player) => player.getBoundingClientRect().width
+      )
+      for (const width of widths) {
+        await expect(width).toBeGreaterThan(0)
+        await expect(width).toBeLessThanOrEqual(576)
+      }
+      await expect(Math.abs(widths[0] - widths[1])).toBeLessThanOrEqual(1)
+
+      const cards = players.map(
+        (player) =>
+          player.closest<HTMLElement>('[data-testid="chat-video-attachment"]')!
+      )
+      for (const [index, player] of players.entries()) {
+        const card = cards[index]
+        const column = card.parentElement!
+        await expect(
+          Math.abs(
+            card.getBoundingClientRect().width -
+              Math.min(column.getBoundingClientRect().width, 576)
+          )
+        ).toBeLessThanOrEqual(1)
+
+        const controls = within(player)
+        await expect(
+          controls.getByRole("button", { name: "Play" })
+        ).toBeVisible()
+        await expect(
+          controls.getByRole("button", { name: "Enter fullscreen" })
+        ).toBeVisible()
+        const video = player.querySelector("video")
+        await expect(video).not.toBeNull()
+        await expect(video!).toHaveAttribute("src", "/Big_Buck_Bunny_alt.webm")
+        await expect(video!).toHaveAttribute("poster", "/video-poster.webp")
+      }
+      await expect(cards[1].getBoundingClientRect().top).toBeGreaterThanOrEqual(
+        cards[0].getBoundingClientRect().bottom
+      )
+
+      await expect(canvas.getByText("kickoff-deck.pptx")).toBeVisible()
+    })
+  },
+}
+
+/**
+ * Composer attachment gallery. Selecting seven files at once shows immediate
+ * local previews for image, video, PDF, spreadsheet, Word and text content
+ * while a regular PowerPoint keeps the F0FileItem fallback. The preview shape
+ * remains stable when the simulated upload replaces each local URL.
+ */
+export const CommunicationsComposerAttachmentPreviews: Story = {
+  name: "Communications — composer attachment previews",
+  tags: ["f0chat-composer-attachments"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-reporting"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Preview every supported composer attachment", async () => {
+      await page.findByRole("button", { name: /attach file/i })
+      const [videoBlob, imageBlob, pdfBlob, sheetBlob, docxBlob, textBlob] =
+        await Promise.all(
+          [
+            "/Big_Buck_Bunny_alt.webm",
+            "/video-poster.webp",
+            "/f0-pdf-viewer-sample.pdf",
+            "/f0-document-sample.xlsx",
+            "/f0-document-sample.docx",
+            "/f0-document-sample.md",
+          ].map(async (url) => (await fetch(url)).blob())
+        )
+      const files = [
+        new File([videoBlob], "walkthrough.webm", { type: "video/webm" }),
+        new File([imageBlob], "cover.webp", { type: "image/webp" }),
+        new File([pdfBlob], "quarterly-report.pdf", {
+          type: "application/pdf",
+        }),
+        new File([sheetBlob], "raw-data.xlsx", {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+        new File([docxBlob], "offer-letter.docx", {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }),
+        new File([textBlob], "RELEASE-NOTES.md", { type: "text/markdown" }),
+        new File(["deck"], "kickoff-deck.pptx", {
+          type: "application/vnd.ms-powerpoint",
+        }),
+      ]
+      const fileInput = canvasElement
+        .closest("body")!
+        .querySelector<HTMLInputElement>('input[type="file"]')!
+
+      await userEvent.upload(fileInput, files)
+
+      await expect(
+        await page.findByTestId("chat-composer-image-preview")
+      ).toBeVisible()
+      await expect(
+        page.getByTestId("chat-composer-video-preview")
+      ).toBeVisible()
+      await expect(
+        page.getAllByTestId("chat-composer-document-preview")
+      ).toHaveLength(4)
+      await expect(
+        page.getByTestId("chat-composer-file-preview")
+      ).toHaveTextContent("kickoff-deck.pptx")
+      await expect(
+        page.getAllByTestId("chat-composer-attachment-uploading")
+      ).toHaveLength(7)
+
+      await waitFor(
+        () =>
+          expect(
+            page.queryAllByTestId("chat-composer-attachment-uploading")
+          ).toHaveLength(0),
+        { timeout: 4_000 }
+      )
+      await expect(
+        page.getAllByTestId("chat-composer-image-preview")
+      ).toHaveLength(1)
+      await expect(
+        page.getAllByTestId("chat-composer-video-preview")
+      ).toHaveLength(1)
+      await expect(
+        page.getAllByTestId("chat-composer-document-preview")
+      ).toHaveLength(4)
+      await expect(
+        page.getAllByTestId("chat-composer-file-preview")
+      ).toHaveLength(1)
+      await expect(
+        page.getAllByRole("button", { name: /^Remove /i })
+      ).toHaveLength(7)
+
+      const strip = page.getByTestId("chat-composer-attachments")
+      await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth)
+      strip.scrollLeft = strip.scrollWidth
+      await expect(strip.scrollLeft).toBeGreaterThan(0)
+      const lastAttachment = page.getByTestId("chat-composer-file-preview")
+      const stripRect = strip.getBoundingClientRect()
+      const lastAttachmentRect = lastAttachment.getBoundingClientRect()
+      await expect(lastAttachmentRect.left).toBeGreaterThanOrEqual(
+        stripRect.left
+      )
+      await expect(lastAttachmentRect.right).toBeLessThanOrEqual(
+        stripRect.right
+      )
+    })
+  },
+}
+
+/**
  * The final group message has only two of the expected 45 receipts. The footer
  * remains "Sent · time"; reader identities stay available from message Info.
  */
@@ -1798,11 +2015,21 @@ export const CommunicationsReceiptsAndReactions: Story = {
       await expect(describedTooltip).toHaveTextContent(
         "Grace Liang, Marcus Bennett, Sam Okafor"
       )
-      const visibleReactionTooltip =
-        reactionTooltips.find((tooltip) => tooltip !== describedTooltip) ??
-        describedTooltip
-      await expect(visibleReactionTooltip).toBeDefined()
-      await expect(visibleReactionTooltip!).toBeVisible()
+      await waitFor(() => {
+        const visibleReactionTooltip = page
+          .getAllByRole("tooltip")
+          .filter((tooltip) =>
+            tooltip.textContent?.includes(
+              "Grace Liang, Marcus Bennett, Sam Okafor"
+            )
+          )
+          .find((tooltip) => {
+            const rect = tooltip.getBoundingClientRect()
+            return rect.width > 0 && rect.height > 0
+          })
+        expect(visibleReactionTooltip).toBeDefined()
+        expect(visibleReactionTooltip!).toBeVisible()
+      })
       await userEvent.tab()
     })
 
@@ -1837,7 +2064,7 @@ export const CommunicationsReceiptsAndReactions: Story = {
       await expect(grace).toHaveAttribute("href", "/people/u_grace")
       await expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
       await expect(within(readers).getByText("Sam Okafor")).toBeVisible()
-      const backButton = page.getByRole("button", { name: /back/i })
+      const backButton = page.getByRole("button", { name: /^back$/i })
       await expect(backButton).toHaveFocus()
 
       await userEvent.hover(grace)

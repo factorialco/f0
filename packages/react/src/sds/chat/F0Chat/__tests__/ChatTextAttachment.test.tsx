@@ -131,7 +131,7 @@ describe("ChatDocumentAttachmentCard (text)", () => {
         mimeType: "text/markdown",
       },
     ])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open CHANGELOG.md" }))
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument()
     // The heading renders as an actual <h1> (generous timeout: the viewer
@@ -155,7 +155,7 @@ describe("ChatDocumentAttachmentCard (text)", () => {
         mimeType: "text/plain",
       },
     ])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open app.log" }))
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument()
     await waitFor(

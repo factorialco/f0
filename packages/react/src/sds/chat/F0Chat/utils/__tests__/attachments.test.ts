@@ -4,6 +4,7 @@ import { type F0ChatFileAttachment } from "../../types"
 import {
   documentPreviewKind,
   formatFileSize,
+  isVideoFileAttachment,
   withinPreviewSizeLimit,
 } from "../attachments"
 
@@ -25,6 +26,31 @@ describe("formatFileSize", () => {
     expect(formatFileSize(1.5 * 1024 * 1024)).toBe("1.5 MB")
     expect(formatFileSize(2 * 1024 * 1024 * 1024)).toBe("2 GB")
     expect(formatFileSize(1.5 * 1024 * 1024 * 1024)).toBe("1.5 GB")
+  })
+})
+
+describe("isVideoFileAttachment", () => {
+  it("recognizes video MIME types and browser-supported file extensions", () => {
+    expect(
+      isVideoFileAttachment(file({ name: "recording", mimeType: "video/mp4" }))
+    ).toBe(true)
+    expect(
+      isVideoFileAttachment(
+        file({
+          name: "walkthrough.webm",
+          mimeType: "application/octet-stream",
+        })
+      )
+    ).toBe(true)
+    expect(
+      isVideoFileAttachment(
+        file({
+          name: "download",
+          url: "https://cdn.example.com/walkthrough.mov?token=123",
+        })
+      )
+    ).toBe(true)
+    expect(isVideoFileAttachment(file({ name: "report.pdf" }))).toBe(false)
   })
 })
 

@@ -11,6 +11,7 @@ import {
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./constants"
 
 // ---------------------------------------------------------------------------
 // People
@@ -592,9 +593,8 @@ export const SEEDS: Seed[] = [
     ],
   },
   // GROUP — document attachments of every previewable kind (pdf, xlsx, csv,
-  // docx, md, txt) plus a non-previewable deck that stays a plain chip. The
-  // sample files live in `public/`, same as the F0Chat "Document attachments"
-  // story.
+  // docx, md, txt), two inline videos in one message, and a non-previewable deck
+  // that stays a plain chip. The sample files live in `public/`.
   {
     id: "grp-reporting",
     type: "group",
@@ -670,7 +670,7 @@ export const SEEDS: Seed[] = [
       },
       {
         from: ME,
-        body: "And the kickoff deck — no client-side preview for ppt, stays a chip",
+        body: "And the kickoff deck — plus two walkthrough videos",
         min: 10 * MIN,
         reactions: [
           {
@@ -681,6 +681,28 @@ export const SEEDS: Seed[] = [
           },
         ],
         attachments: [
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "quarterly-walkthrough.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "chart-deep-dive.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
           {
             kind: "file",
             url: "#",

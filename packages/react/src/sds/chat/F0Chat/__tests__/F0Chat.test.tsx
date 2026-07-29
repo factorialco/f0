@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
+import { getEmojiLabel } from "@/lib/emojis"
 import {
   act,
   fireEvent,
@@ -10,7 +11,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-import { getEmojiLabel } from "@/lib/emojis"
 
 import { F0Chat } from "../F0Chat"
 import { resolveMockReactionUsers } from "../mocks/MockChatApp"
@@ -23,7 +23,12 @@ import {
 } from "../mocks/mockSeeds"
 import { useMockChatStore } from "../mocks/useMockChatApp"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
-import { isUserMessage, type F0ChatMessage, type F0ChatRuntime } from "../types"
+import {
+  isUserMessage,
+  type F0ChatAttachment,
+  type F0ChatMessage,
+  type F0ChatRuntime,
+} from "../types"
 import { formatClock } from "../utils/natural-time"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
@@ -230,7 +235,7 @@ describe("F0Chat", () => {
     await userEvent.click(screen.getByRole("button", { name: /info/i }))
     // Menu is replaced in place by the info panel (Delivered row + Back button).
     expect(screen.getByText(/delivered/i)).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /back/i })).toHaveFocus()
+    expect(screen.getByRole("button", { name: /^back$/i })).toHaveFocus()
     expect(screen.getByRole("region", { name: /info/i })).toHaveAttribute(
       "tabindex",
       "0"
@@ -465,14 +470,20 @@ describe("F0Chat", () => {
     expect(screen.getByText("deck.pptx")).toBeInTheDocument()
   })
 
-  it("previews uploaded images as square thumbnails and other files as chips", async () => {
-    // The pdf uploads first — images must still render grouped at the front.
+  it("previews images, videos, and documents immediately in the composer", async () => {
+    // The documents upload first — images must still render grouped at the front.
     const uploadFiles = vi.fn().mockResolvedValue([
       {
         kind: "file",
         url: "blob:doc",
         name: "report.pdf",
         mimeType: "application/pdf",
+      },
+      {
+        kind: "file",
+        url: "blob:video",
+        name: "walkthrough.webm",
+        mimeType: "video/webm",
       },
       { kind: "image", url: "blob:img", name: "photo.png" },
     ])
@@ -483,26 +494,285 @@ describe("F0Chat", () => {
       target: {
         files: [
           new File(["doc"], "report.pdf", { type: "application/pdf" }),
+          new File(["video"], "walkthrough.webm", { type: "video/webm" }),
           new File(["img"], "photo.png", { type: "image/png" }),
         ],
       },
     })
-    // The image resolves to an inline square preview, the pdf to a file chip.
-    const preview = await screen.findByRole("img", { name: /photo\.png/i })
-    expect(preview).toHaveAttribute("src", "blob:img")
-    const chip = screen.getByText("report.pdf")
-    // The image preview comes before the file chip despite uploading second.
+    // Local object URLs make every supported preview visible before the upload
+    // promise swaps them for the host-provided URLs.
+    const localPreview = await screen.findByRole("img", {
+      name: /photo\.png/i,
+    })
+    expect(localPreview.getAttribute("src")).toMatch(/^blob:/)
     expect(
-      preview.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING
+      screen.getByTestId("chat-composer-document-preview")
+    ).toHaveTextContent("report.pdf")
+    expect(
+      screen.getByTestId("chat-composer-video-preview")
+    ).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.getByRole("img", { name: /photo\.png/i })).toHaveAttribute(
+        "src",
+        "blob:img"
+      )
+    )
+
+    // The image preview comes before the document despite uploading last.
+    const preview = screen.getByRole("img", { name: /photo\.png/i })
+    const document = screen.getByText("report.pdf")
+    expect(
+      preview.compareDocumentPosition(document) &
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
     // Each pending attachment carries its own remove action.
-    const removeButtons = screen.getAllByRole("button", { name: /^remove$/i })
-    expect(removeButtons).toHaveLength(2)
+    const removeButtons = screen.getAllByRole("button", { name: /^remove /i })
+    expect(removeButtons).toHaveLength(3)
+    const attachmentStrip = screen.getByRole("region", {
+      name: "3 attachments",
+    })
+    expect(attachmentStrip).toHaveAttribute("tabindex", "0")
+    expect(attachmentStrip).toHaveClass("flex-nowrap", "overflow-x-auto")
     await userEvent.click(removeButtons[0])
     expect(
       screen.queryByRole("img", { name: /photo\.png/i })
     ).not.toBeInTheDocument()
-    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+    await waitFor(() => expect(attachmentStrip).toHaveFocus())
+    expect(document).toBeInTheDocument()
+  })
+
+  it("removes a local preview without restoring it when upload finishes", async () => {
+    let resolveUpload: (attachments: F0ChatAttachment[]) => void = () => {}
+    const uploadFiles = vi.fn(
+      () =>
+        new Promise<F0ChatAttachment[]>((resolve) => {
+          resolveUpload = resolve
+        })
+    )
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL")
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["video"], "walkthrough.webm", { type: "video/webm" }),
+        ],
+      },
+    })
+
+    const preview = await screen.findByTestId("chat-composer-video-preview")
+    const localUrl = preview.querySelector("video")?.getAttribute("src")
+    expect(localUrl).toMatch(/^blob:/)
+    expect(
+      screen.getByTestId("chat-composer-attachment-uploading")
+    ).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: /^remove /i }))
+    expect(preview).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("Write something here..")
+      ).toHaveFocus()
+    )
+    expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
+
+    act(() => {
+      resolveUpload([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/walkthrough.webm",
+          name: "walkthrough.webm",
+          mimeType: "video/webm",
+        },
+      ])
+    })
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("chat-composer-video-preview")
+      ).not.toBeInTheDocument()
+    )
+    revokeObjectUrl.mockRestore()
+  })
+
+  it("releases the local preview URL after a successful upload", async () => {
+    let resolveUpload: (attachments: F0ChatAttachment[]) => void = () => {}
+    const uploadFiles = vi.fn(
+      () =>
+        new Promise<F0ChatAttachment[]>((resolve) => {
+          resolveUpload = resolve
+        })
+    )
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL")
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["video"], "walkthrough.webm", { type: "video/webm" }),
+        ],
+      },
+    })
+
+    const localVideo = (
+      await screen.findByTestId("chat-composer-video-preview")
+    ).querySelector("video")!
+    const localUrl = localVideo.getAttribute("src")
+    expect(localUrl).toMatch(/^blob:/)
+    const removeButton = screen.getByRole("button", {
+      name: "Remove walkthrough.webm",
+    })
+    removeButton.focus()
+
+    act(() => {
+      resolveUpload([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/walkthrough.webm",
+          name: "walkthrough.webm",
+          mimeType: "video/webm",
+        },
+      ])
+    })
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("chat-composer-video-preview").querySelector("video")
+      ).toHaveAttribute("src", "https://cdn.example.com/walkthrough.webm")
+    )
+    expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
+    expect(removeButton).toHaveFocus()
+    revokeObjectUrl.mockRestore()
+  })
+
+  it("preserves attachment order when concurrent uploads resolve out of order", async () => {
+    const resolvers = new Map<
+      string,
+      (attachments: F0ChatAttachment[]) => void
+    >()
+    const uploadFiles = vi.fn(
+      (files: File[]) =>
+        new Promise<F0ChatAttachment[]>((resolve) => {
+          resolvers.set(files[0]!.name, resolve)
+        })
+    )
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+    const first = new File(["first"], "first-batch.zip", {
+      type: "application/zip",
+    })
+    const second = new File(["second"], "second-batch.zip", {
+      type: "application/zip",
+    })
+
+    fireEvent.change(fileInput, { target: { files: [first] } })
+    fireEvent.change(fileInput, { target: { files: [second] } })
+    await screen.findByText("second-batch.zip")
+
+    act(() => {
+      resolvers.get("second-batch.zip")?.([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/second-batch.zip",
+          name: "second-batch.zip",
+          mimeType: "application/zip",
+        },
+      ])
+    })
+    await waitFor(() =>
+      expect(
+        screen.getAllByTestId("chat-composer-attachment-uploading")
+      ).toHaveLength(1)
+    )
+
+    act(() => {
+      resolvers.get("first-batch.zip")?.([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/first-batch.zip",
+          name: "first-batch.zip",
+          mimeType: "application/zip",
+        },
+      ])
+    })
+    await waitFor(() =>
+      expect(
+        screen.queryAllByTestId("chat-composer-attachment-uploading")
+      ).toHaveLength(0)
+    )
+
+    const firstName = screen.getByText("first-batch.zip")
+    const secondName = screen.getByText("second-batch.zip")
+    expect(
+      firstName.compareDocumentPosition(secondName) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("releases local preview URLs when an upload fails", async () => {
+    let rejectUpload: (error: Error) => void = () => {}
+    const uploadFiles = vi.fn(
+      () =>
+        new Promise<F0ChatAttachment[]>((_resolve, reject) => {
+          rejectUpload = reject
+        })
+    )
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL")
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [new File(["image"], "cover.webp", { type: "image/webp" })],
+      },
+    })
+
+    const localImage = await screen.findByRole("img", {
+      name: "cover.webp",
+    })
+    const localUrl = localImage.getAttribute("src")
+    expect(localUrl).toMatch(/^blob:/)
+
+    act(() => rejectUpload(new Error("network failure")))
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("chat-composer-image-preview")
+      ).not.toBeInTheDocument()
+    )
+    expect(screen.getByText("Upload failed")).toBeInTheDocument()
+    expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
+    revokeObjectUrl.mockRestore()
+  })
+
+  it("keeps an oversized preview document as an F0FileItem", async () => {
+    const uploadFiles = vi.fn(() => new Promise<F0ChatAttachment[]>(() => {}))
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+    const oversizedSheet = new File(["sheet"], "large-report.xlsx", {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+    Object.defineProperty(oversizedSheet, "size", {
+      value: 11 * 1024 * 1024,
+    })
+
+    fireEvent.change(fileInput, {
+      target: { files: [oversizedSheet] },
+    })
+
+    expect(
+      await screen.findByTestId("chat-composer-file-preview")
+    ).toHaveTextContent("large-report.xlsx")
+    expect(
+      screen.queryByTestId("chat-composer-document-preview")
+    ).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /^remove /i }))
   })
 
   it("rejects a whole batch when one file exceeds the configured size limit", async () => {
@@ -786,7 +1056,7 @@ describe("F0Chat", () => {
       expect(screen.queryByText("Data Analyst")).not.toBeInTheDocument()
     )
 
-    const backButton = screen.getByRole("button", { name: /back/i })
+    const backButton = screen.getByRole("button", { name: /^back$/i })
     expect(backButton).toHaveFocus()
     await userEvent.tab()
     expect(infoPanel).toHaveFocus()

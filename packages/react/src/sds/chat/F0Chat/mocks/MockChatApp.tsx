@@ -2,8 +2,8 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
-import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { MicrophoneNegative, PalmTree } from "@/icons/app"
+import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
 import {
@@ -16,6 +16,7 @@ import {
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 import {
   type Seed,
   ME,
@@ -30,7 +31,6 @@ import {
   useMockChatApp,
   useMockChatStore,
 } from "./useMockChatApp"
-import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 
 export const MockChatAppProvider = ({
   children,
@@ -127,6 +127,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
                       name: file.name,
                       size: file.size,
                       mimeType: file.type,
+                      thumbnailUrl: file.type.startsWith("video/")
+                        ? "/video-poster.webp"
+                        : undefined,
                     }
               })
             ),
@@ -233,7 +236,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
-    maxFiles: 5,
+    maxFiles: 8,
     // ApplicationFrame demonstrates a 100 MB per-file upload limit.
     maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     transcribe: mockTranscribe,

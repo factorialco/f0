@@ -160,7 +160,7 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("report.pdf")
     expect(
-      screen.getByRole("button", { name: "Open document" })
+      screen.getByRole("button", { name: "Open report.pdf" })
     ).toBeInTheDocument()
     // The snapshot renders the first page once the lazy chunk resolves, and
     // fades in over the card's skeleton once the page reports its paint.
@@ -187,7 +187,7 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
 
   it("opens the fullscreen viewer on click and closes it", async () => {
     renderChat([pdfAttachment])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open report.pdf" }))
 
     // The dialog announces the file and the (lazy) F0PdfViewer toolbar appears
     // (generous timeout: the viewer chunk resolves through React.lazy).
@@ -224,6 +224,8 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
       ).not.toBeInTheDocument()
     )
     expect(screen.getByText("broken.pdf")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Download broken.pdf" })
+    ).toBeInTheDocument()
   })
 })

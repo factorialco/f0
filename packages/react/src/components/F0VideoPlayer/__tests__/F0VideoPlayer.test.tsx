@@ -8,8 +8,8 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import { F0VideoPlayer } from "../F0VideoPlayer"
 import { volumeIcon } from "../components/VolumeControl"
+import { F0VideoPlayer } from "../F0VideoPlayer"
 
 const VIDEO_SRC = "https://example.com/video.mp4"
 
@@ -68,6 +68,15 @@ describe("F0VideoPlayer", () => {
     it("sets the poster when provided", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} poster="poster.webp" />)
       expect(getVideo()).toHaveAttribute("poster", "poster.webp")
+    })
+
+    it("accepts a contextual accessible name", () => {
+      render(
+        <F0VideoPlayer src={VIDEO_SRC} ariaLabel="Video player: demo.mp4" />
+      )
+      expect(
+        screen.getByRole("region", { name: "Video player: demo.mp4" })
+      ).toBeInTheDocument()
     })
 
     it("shows a center play overlay while paused and hides it during playback", () => {

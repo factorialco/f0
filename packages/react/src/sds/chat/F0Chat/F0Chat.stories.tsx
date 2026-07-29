@@ -5,6 +5,7 @@ import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Chat } from "./F0Chat"
+import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
@@ -279,7 +280,7 @@ const StormHud = ({
   }, [commitsRef])
 
   return (
-    <div className="absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 font-mono text-xs text-f1-foreground shadow-md">
+    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-xs text-f1-foreground shadow-md">
       <div>
         {fps} fps · {eventsPerSecond} ev/s
       </div>
@@ -652,6 +653,70 @@ const DocumentConversation = (): ReactNode => {
   )
 }
 
+/**
+ * Videos play directly in the conversation through F0VideoPlayer. Several
+ * videos in one message stack vertically instead of shrinking into a grid, so
+ * every player uses the available width up to the chat media limit. The
+ * built-in player controls provide inline playback and fullscreen.
+ */
+const VideoConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 4,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "video-1",
+        author: ana,
+        body: "Two cuts from today’s walkthrough",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "walkthrough.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "deep-dive.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "#",
+            name: "source-deck.pptx",
+            mimeType: "application/vnd.ms-powerpoint",
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 const meta = {
   title: "F0Chat",
   component: F0Chat,
@@ -702,6 +767,13 @@ export const GroupMembershipEvents: Story = {
 export const WithDocumentAttachments: Story = {
   name: "Document attachments",
   render: () => <DocumentConversation />,
+}
+
+/** Inline video attachments: each F0VideoPlayer stays wide, multiple videos
+ * stack vertically, and the player itself provides playback and fullscreen. */
+export const WithVideoAttachments: Story = {
+  name: "Video attachments",
+  render: () => <VideoConversation />,
 }
 
 /** Resilient sending under a bad connection: instant bubble, delayed sending
