@@ -1012,4 +1012,34 @@ describe("FileFieldRenderer — async initialFiles", () => {
     // Server file NOT injected since user already added a file
     expect(screen.queryByText("server_file.pdf")).not.toBeInTheDocument()
   })
+
+  it("keeps a user-uploaded file when the initialFiles pool is empty (multiple)", async () => {
+    // Deterministic repro: an empty pool resolves before the user interacts, so
+    // the one-time sync runs when the first upload populates the form value. It
+    // must not drop that upload just because its value isn't in the (empty) pool.
+    const initialFiles = () =>
+      new Promise<InitialFile[]>((resolve) => setTimeout(() => resolve([]), 10))
+
+    render(
+      <AsyncInitialFilesForm
+        defaultValues={{ document: "", attachments: [] }}
+        initialFiles={initialFiles}
+      />
+    )
+
+    // Let the (empty) pool resolve so the sync's loading guard clears.
+    await vi.advanceTimersByTimeAsync(20)
+
+    // Upload into the multiple "attachments" field (second file input).
+    const inputs = document.querySelectorAll('input[type="file"]')
+    await userEvent.upload(
+      inputs[1] as HTMLInputElement,
+      createFile("added.pdf")
+    )
+
+    // Let the upload complete and the one-time initialFiles sync run.
+    await vi.advanceTimersByTimeAsync(20)
+
+    expect(screen.getByText("added.pdf")).toBeInTheDocument()
+  })
 })
