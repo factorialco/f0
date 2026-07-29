@@ -28,9 +28,10 @@ import {
 } from "@/hooks/datasource"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
+import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
@@ -108,7 +109,9 @@ export const TableCollection = <
   allowColumnHiding,
   allowColumnReordering,
   referenceRowType,
+  headerGroups: headerGroupsOption,
   headerGroupLabels,
+  onHeaderGroupCollapsedChange,
   bordered,
   rowWrapper: RowWrapper,
   cellRenderer,
@@ -147,12 +150,23 @@ export const TableCollection = <
   const { settings } = useDataCollectionSettings()
 
   // Sorted and hidden columns
-  const { columns } = useColumns(
+  const { columns: orderedColumns } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
     allowColumnHiding
+  )
+
+  // Header groups own the collapsed state and drop the columns hidden by a
+  // collapsed group, so everything downstream renders off `columns` unchanged.
+  const { columns, headerGroups, toggleHeaderGroup } = useHeaderGroups(
+    orderedColumns,
+    {
+      headerGroups: headerGroupsOption,
+      headerGroupLabels,
+      onCollapsedChange: onHeaderGroupCollapsedChange,
+    }
   )
 
   const {
@@ -348,8 +362,6 @@ export const TableCollection = <
     !!source.selectable
   )
 
-  const headerGroups = useHeaderGroups(columns, headerGroupLabels)
-
   const tableWithChildren = data?.records.some((item) =>
     source.itemsWithChildren?.(item)
   )
@@ -459,7 +471,26 @@ export const TableCollection = <
                         className={borderClass}
                         key={`header-group-${entry.id}-${entryIndex}`}
                       >
-                        {entry.label}
+                        {entry.collapsible ? (
+                          <button
+                            type="button"
+                            onClick={() => toggleHeaderGroup(entry.id)}
+                            aria-expanded={!entry.collapsed}
+                            className={cn(
+                              "flex max-w-full items-center gap-1 rounded-xs text-f1-foreground transition-colors hover:text-f1-foreground-secondary",
+                              focusRing()
+                            )}
+                          >
+                            <ChevronToggle
+                              open={!entry.collapsed}
+                              closedRotation={-90}
+                              openRotation={90}
+                            />
+                            <span className="truncate">{entry.label}</span>
+                          </button>
+                        ) : (
+                          entry.label
+                        )}
                       </TableHead>
                     ) : (
                       <TableHead

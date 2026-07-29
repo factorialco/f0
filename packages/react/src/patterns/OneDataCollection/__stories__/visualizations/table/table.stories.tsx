@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
+import { expect, userEvent, within } from "storybook/test"
 import { useState, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
@@ -629,7 +629,7 @@ export const TableWithGroupedHeaders: Story = {
             type: "table",
             options: {
               ...baseOptions,
-              headerGroupLabels: {
+              headerGroups: {
                 personal: "Personal Information",
                 employment: "Employment Details",
               },
@@ -685,6 +685,159 @@ export const TableWithGroupedHeaders: Story = {
         ]}
       />
     )
+  },
+}
+
+export const TableWithCollapsibleHeaderGroups: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A header group becomes collapsible as soon as its definition declares `collapsedColumns`: the ids of the columns that stay visible while the group is collapsed. Everything else in the group is hidden until the user expands it. Groups declared as a plain string (`headcount` here) stay purely visual.",
+      },
+    },
+  },
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        team: "Engineering",
+        headcount: 42,
+        janSalaries: "€310,400",
+        janBonuses: "€24,000",
+        janTotal: "€334,400",
+        febSalaries: "€318,900",
+        febBonuses: "€12,500",
+        febTotal: "€331,400",
+      },
+      {
+        id: 2,
+        team: "Design",
+        headcount: 11,
+        janSalaries: "€78,200",
+        janBonuses: "€4,000",
+        janTotal: "€82,200",
+        febSalaries: "€80,100",
+        febBonuses: "€2,000",
+        febTotal: "€82,100",
+      },
+      {
+        id: 3,
+        team: "Sales",
+        headcount: 27,
+        janSalaries: "€164,700",
+        janBonuses: "€38,900",
+        janTotal: "€203,600",
+        febSalaries: "€169,300",
+        febBonuses: "€41,200",
+        febTotal: "€210,500",
+      },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: {
+                headcount: "Headcount",
+                january: {
+                  label: "January",
+                  // Only the total stays visible while the group is collapsed
+                  collapsedColumns: ["jan-total"],
+                },
+                february: {
+                  label: "February",
+                  collapsedColumns: ["feb-total"],
+                  defaultCollapsed: true,
+                },
+              },
+              onHeaderGroupCollapsedChange: (groupId, collapsed) => {
+                console.log(`Header group "${groupId}" collapsed:`, collapsed)
+              },
+              columns: [
+                {
+                  label: "Team",
+                  id: "team",
+                  render: (item) => item.team,
+                },
+                {
+                  label: "People",
+                  id: "people",
+                  align: "right",
+                  headerGroupId: "headcount",
+                  render: (item) => `${item.headcount}`,
+                },
+                {
+                  label: "Salaries",
+                  id: "jan-salaries",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janSalaries,
+                },
+                {
+                  label: "Bonuses",
+                  id: "jan-bonuses",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janBonuses,
+                },
+                {
+                  label: "Total",
+                  id: "jan-total",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janTotal,
+                },
+                {
+                  label: "Salaries",
+                  id: "feb-salaries",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febSalaries,
+                },
+                {
+                  label: "Bonuses",
+                  id: "feb-bonuses",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febBonuses,
+                },
+                {
+                  label: "Total",
+                  id: "feb-total",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febTotal,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // February starts collapsed: only its total column is rendered.
+    const february = await canvas.findByRole("button", { name: "February" })
+    expect(february).toHaveAttribute("aria-expanded", "false")
+    expect(canvas.queryByText("€318,900")).not.toBeInTheDocument()
+
+    await userEvent.click(february)
+
+    await expect(await canvas.findByText("€318,900")).toBeInTheDocument()
+    expect(february).toHaveAttribute("aria-expanded", "true")
   },
 }
 

@@ -1021,6 +1021,197 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("collapsible header groups", () => {
+    const groupedColumns: TableColumnDefinition<
+      Person,
+      SortingsDefinition,
+      SummariesDefinition
+    >[] = [
+      { label: "Name", id: "name", render: (item: Person) => item.name },
+      {
+        label: "Email",
+        id: "email",
+        headerGroupId: "contact",
+        render: (item: Person) => item.email,
+      },
+      {
+        label: "Display",
+        id: "display",
+        headerGroupId: "contact",
+        render: (item: Person) => item.displayName,
+      },
+    ]
+
+    const renderTable = (
+      props: Partial<
+        React.ComponentProps<
+          typeof TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+        >
+      >
+    ) =>
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          {...props}
+        />
+      )
+
+    it("renders no toggle for groups without collapsedColumns", async () => {
+      renderTable({ headerGroups: { contact: "Contact" } })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen.getByRole("columnheader", { name: "Contact" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Contact" })
+      ).not.toBeInTheDocument()
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+    })
+
+    it("hides every column but the collapsedColumns when collapsed by default", async () => {
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(screen.getByRole("button", { name: "Contact" })).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      )
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(
+        screen.queryByText(testData[0].displayName)
+      ).not.toBeInTheDocument()
+    })
+
+    it("reveals the hidden columns when the group toggle is clicked", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+      expect(screen.getByRole("button", { name: "Contact" })).toHaveAttribute(
+        "aria-expanded",
+        "true"
+      )
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith(
+        "contact",
+        false
+      )
+    })
+
+    it("collapses an expanded group and reports the change", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(testData[0].displayName)
+        ).not.toBeInTheDocument()
+      })
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith("contact", true)
+    })
+
+    it("keeps the first column of the group when collapsedColumns is empty", async () => {
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: [],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // A header spanning zero columns would stretch across the rest of the
+      // row, so the group always keeps at least one column.
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(
+        screen.queryByText(testData[0].displayName)
+      ).not.toBeInTheDocument()
+    })
+
+    it("still supports the deprecated headerGroupLabels option", async () => {
+      renderTable({ headerGroupLabels: { contact: "Contact" } })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen.getByRole("columnheader", { name: "Contact" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Contact" })
+      ).not.toBeInTheDocument()
+    })
+  })
+
   describe("summary placeholders", () => {
     type SummaryTestDefinitions = {
       salary: {
