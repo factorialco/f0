@@ -1,9 +1,11 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
+
 import {
   getCountries,
   getCountryCallingCode,
   parsePhoneNumberFromString,
 } from "libphonenumber-js"
+import metadata from "libphonenumber-js/min/metadata"
 
 import type { CountryCode } from "@/lib/countries"
 
@@ -12,24 +14,18 @@ import type { F0PhoneInputChangeMeta, F0PhoneInputValue } from "../types"
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
 
 /**
- * Deterministic tie-break for dial codes shared by several territories,
- * used only when the number itself cannot resolve the exact country.
+ * libphonenumber metadata lists the main country of a calling code first
+ * (+44 → GB over GG/IM/JE) — the standard tie-break when the number itself
+ * cannot resolve the exact territory.
  */
-const MAIN_COUNTRY_FOR_DIAL_CODE: Record<string, PhoneCountry> = {
-  "1": "US",
-  "7": "RU",
-  "39": "IT",
-  "44": "GB",
-  "47": "NO",
-  "61": "AU",
-  "64": "NZ",
-  "212": "MA",
-  "262": "RE",
-  "290": "SH",
-  "358": "FI",
-  "590": "GP",
-  "596": "MQ",
-  "599": "CW",
+const mainCountryForCallingCode = (
+  callingCode: string,
+  allowed?: PhoneCountry[]
+): PhoneCountry | undefined => {
+  const group = metadata.country_calling_codes[callingCode]
+  if (!group) return undefined
+  if (!allowed) return group[0]
+  return group.find((country) => allowed.includes(country))
 }
 
 const onlyDigits = (value: string): string => value.replace(/\D/g, "")
@@ -54,11 +50,25 @@ export const countryForDialCode = (
   dialCode: string
 ): PhoneCountry | undefined => {
   if (!DIAL_CODE_PATTERN.test(dialCode.trim())) return undefined
-  const digits = onlyDigits(dialCode)
-  return (
-    MAIN_COUNTRY_FOR_DIAL_CODE[digits] ??
-    getCountries().find((country) => getCountryCallingCode(country) === digits)
-  )
+  return mainCountryForCallingCode(onlyDigits(dialCode))
+}
+
+/**
+ * Main country for a partial international number whose exact territory is
+ * not derivable yet ("+44" or "+4479" → GB). Calling codes are prefix-free,
+ * so the first prefix found in the metadata is the number's calling code.
+ */
+export const countryForPartialE164 = (
+  partialE164: string,
+  allowed?: PhoneCountry[]
+): PhoneCountry | undefined => {
+  if (!partialE164.startsWith("+")) return undefined
+  const digits = onlyDigits(partialE164)
+  for (let length = 1; length <= Math.min(3, digits.length); length++) {
+    const country = mainCountryForCallingCode(digits.slice(0, length), allowed)
+    if (country) return country
+  }
+  return undefined
 }
 
 /**

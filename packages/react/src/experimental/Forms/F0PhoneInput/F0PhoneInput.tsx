@@ -1,22 +1,26 @@
-import { useControllableState } from "@radix-ui/react-use-controllable-state"
-import { cva } from "cva"
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-import { forwardRef, useId, useMemo, useRef, useState } from "react"
-import RPNInput from "react-phone-number-input"
 import type { Labels, Value } from "react-phone-number-input"
 
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
+import { cva } from "cva"
+import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react"
+import RPNInput from "react-phone-number-input"
+
+import { F0Icon } from "@/components/F0Icon"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
-import { F0Icon } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
 
+import type { F0PhoneInputProps, F0PhoneInputValue } from "./types"
+
 import { CountrySelect } from "./components/CountrySelect"
 import { PhoneNumberInput } from "./components/PhoneNumberInput"
 import {
   buildMeta,
+  countryForPartialE164,
   countryForValue,
   e164ToValue,
   toCountryCode,
@@ -27,7 +31,6 @@ import {
   exampleInternationalPlaceholder,
   exampleNationalPlaceholder,
 } from "./lib/placeholder"
-import type { F0PhoneInputProps, F0PhoneInputValue } from "./types"
 
 const containerVariants = cva({
   base: [
@@ -199,6 +202,20 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       return allowed
     }, [allowedCountries])
 
+    // react-phone-number-input leaves the country unresolved when the typed
+    // digits form a dial code shared by several territories (+44 → GB/GG/IM/JE).
+    // Select the group's main country, exactly as if the user picked it from
+    // the dropdown — an exact match later (e.g. a full Guernsey number) still
+    // wins over the tie-break.
+    const selectCountryRef = useRef<((next?: PhoneCountry) => void) | null>(
+      null
+    )
+    useEffect(() => {
+      if (country || !e164) return
+      const detected = countryForPartialE164(e164, countries)
+      if (detected) selectCountryRef.current?.(detected)
+    }, [country, e164, countries])
+
     // Legacy `hint`/`error` shortcuts, mirroring F0InputField's semantics
     let effectiveStatus = status
     if (hint) {
@@ -255,7 +272,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
             labels={labels}
             initialValueFormat="national"
             countrySelectComponent={CountrySelect}
-            countrySelectProps={{ size }}
+            countrySelectProps={{ size, selectCountryRef }}
             inputComponent={PhoneNumberInput}
             placeholder={
               placeholder ??

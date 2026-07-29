@@ -125,7 +125,7 @@ Incoming values are normalized, so legacy data renders correctly:
 
 - Typing or pasting a full international number (`+44 7400 123456`) switches the selected country automatically.
 - **No country selected** (no `defaultCountry`, empty value): the trigger shows a globe icon, the placeholder shows an international example (`+34 612 34 56 78`) teaching the `+prefix number` convention, and typed digits are treated as international — typing `34674897945` auto-prepends the `+` and selects Spain. The same globe renders for countries without a flag asset.
-- Dial codes shared by several countries (`+1`, `+44`…) resolve from the number's leading digits when possible; an explicit selection always wins.
+- Typing a dial code shared by several countries (`+1`, `+44`…) selects the group's main country right away (`+44` → United Kingdom, the first country libphonenumber lists for the calling code) and absorbs the dial code into the trigger, exactly as if picked from the dropdown. The exact country still wins once the number disambiguates it — a full Guernsey number flips `+44` from United Kingdom to Guernsey — and an explicit selection is always kept.
 - `allowedCountries` restricts both the dropdown and automatic detection.
 
 <Canvas of={Stories.NoDefaultCountry} />

@@ -1,17 +1,20 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-import { useMemo } from "react"
+
+import { useEffect, useMemo } from "react"
+
+import type { F0SelectItemProps } from "@/components/F0Select"
+import type { CountryCode } from "@/lib/countries"
 
 import { F0Icon } from "@/components/F0Icon"
-import type { F0SelectItemProps } from "@/components/F0Select"
 import { F0Select } from "@/components/F0Select"
 import { flagsMap } from "@/flags"
 import { ChevronDown } from "@/icons/app"
-import type { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { dialCodeFor, toCountryCode } from "../lib/phone"
 import type { PhoneInputSize } from "../types"
+
+import { dialCodeFor, toCountryCode } from "../lib/phone"
 import { CountryFlag } from "./CountryFlag"
 
 /**
@@ -30,6 +33,14 @@ type CountrySelectProps = {
   disabled?: boolean
   readOnly?: boolean
   size: PhoneInputSize
+  /**
+   * Exposes `onChange` (react-phone-number-input's internal country setter)
+   * to F0PhoneInput, which has no other handle on the library's country state
+   * — used to auto-select the main country of a shared dial code.
+   */
+  selectCountryRef?: React.MutableRefObject<
+    ((value?: PhoneCountry) => void) | null
+  >
 }
 
 export const CountrySelect = ({
@@ -39,8 +50,17 @@ export const CountrySelect = ({
   disabled,
   readOnly,
   size,
+  selectCountryRef,
 }: CountrySelectProps) => {
   const i18n = useI18n()
+
+  useEffect(() => {
+    if (!selectCountryRef) return undefined
+    selectCountryRef.current = onChange
+    return () => {
+      selectCountryRef.current = null
+    }
+  }, [selectCountryRef, onChange])
 
   const selectOptions = useMemo(
     () =>

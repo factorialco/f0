@@ -137,6 +137,28 @@ describe("F0PhoneInput", () => {
     )
   })
 
+  it("selects the main country when a shared dial code is typed", async () => {
+    const onCountryChange = vi.fn()
+    render(<F0PhoneInput label="Phone" onCountryChange={onCountryChange} />)
+
+    await userEvent.type(getInput(), "+44")
+
+    await waitFor(() => expect(onCountryChange).toHaveBeenLastCalledWith("gb"))
+    expect(within(getCountryTrigger()).getByText("+44")).toBeInTheDocument()
+    // The dial code is absorbed into the trigger, as on a manual selection
+    expect(getInput().value).toBe("")
+  })
+
+  it("still resolves the exact country once the full number disambiguates it", async () => {
+    const onCountryChange = vi.fn()
+    render(<F0PhoneInput label="Phone" onCountryChange={onCountryChange} />)
+
+    // +44 7911 is a Guernsey range: GB is tie-broken first, GG wins at the end
+    await userEvent.type(getInput(), "+447911123456")
+
+    await waitFor(() => expect(onCountryChange).toHaveBeenLastCalledWith("gg"))
+  })
+
   it("shows a globe and no dial code when no country is selected", () => {
     render(<F0PhoneInput label="Phone" />)
 

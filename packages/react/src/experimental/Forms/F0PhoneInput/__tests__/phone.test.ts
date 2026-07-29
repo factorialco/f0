@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildMeta,
   countryForDialCode,
+  countryForPartialE164,
   countryForValue,
   e164ToValue,
   valueToE164,
@@ -115,6 +116,33 @@ describe("countryForDialCode", () => {
     expect(countryForDialCode("+999")).toBeUndefined()
     expect(countryForDialCode("34")).toBeUndefined()
     expect(countryForDialCode("")).toBeUndefined()
+  })
+})
+
+describe("countryForPartialE164", () => {
+  it("resolves the main country of a shared dial code", () => {
+    expect(countryForPartialE164("+1")).toBe("US")
+    expect(countryForPartialE164("+7")).toBe("RU")
+    expect(countryForPartialE164("+44")).toBe("GB")
+  })
+
+  it("resolves past the dial code while the number is still ambiguous", () => {
+    expect(countryForPartialE164("+4479")).toBe("GB")
+  })
+
+  it("resolves unique dial codes", () => {
+    expect(countryForPartialE164("+34")).toBe("ES")
+  })
+
+  it("respects an allowlist, falling back to other group members", () => {
+    expect(countryForPartialE164("+44", ["GG", "JE"])).toBe("GG")
+    expect(countryForPartialE164("+44", ["ES"])).toBeUndefined()
+  })
+
+  it("returns undefined for incomplete or non-international input", () => {
+    expect(countryForPartialE164("+")).toBeUndefined()
+    expect(countryForPartialE164("+2")).toBeUndefined()
+    expect(countryForPartialE164("44")).toBeUndefined()
   })
 })
 
