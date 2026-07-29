@@ -476,16 +476,17 @@ export const TableCollection = <
                             type="button"
                             onClick={() => toggleHeaderGroup(entry.id)}
                             aria-expanded={!entry.collapsed}
-                            // The label has to read exactly like the
-                            // non-collapsible headers around it. `text-inherit`
-                            // is load-bearing: the reset gives buttons
-                            // `font: inherit` but not `color`, so without it
-                            // they fall back to the UA buttontext and render
-                            // darker. `font-medium` restates the weight the
-                            // header cell sets, so a reset change can't drift
-                            // it either.
+                            // Restates the header cell's own typography so the
+                            // label reads exactly like the non-collapsible
+                            // headers around it. The colour can't be left to
+                            // inherit: preflight is off and ress gives buttons
+                            // `font: inherit` but not `color`, so the label
+                            // would fall back to the UA buttontext and render
+                            // darker. `text-inherit` is no help either — the
+                            // theme replaces Tailwind's palette and has no
+                            // `inherit` key, so that utility doesn't exist.
                             className={cn(
-                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-inherit transition-colors hover:text-f1-foreground",
+                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary transition-colors hover:text-f1-foreground",
                               focusRing()
                             )}
                           >
