@@ -6,6 +6,8 @@ import {
   countryForPartialE164,
   countryForValue,
   e164ToValue,
+  isPossiblePhoneValue,
+  isValidPhoneValue,
   valueToE164,
 } from "../lib/phone"
 
@@ -162,6 +164,39 @@ describe("countryForValue", () => {
     expect(
       countryForValue({ prefix: undefined, number: "674897945" })
     ).toBeUndefined()
+  })
+})
+
+describe("isValidPhoneValue / isPossiblePhoneValue", () => {
+  it("accepts a number matching the country's patterns", () => {
+    expect(isValidPhoneValue({ prefix: "+34", number: "674897945" })).toBe(true)
+    expect(isPossiblePhoneValue({ prefix: "+34", number: "674897945" })).toBe(
+      true
+    )
+  })
+
+  it("distinguishes possible (length) from valid (pattern)", () => {
+    // Right length for a NANPA number, but area codes cannot start with 1
+    const value = { prefix: "+1", number: "1234567890" }
+    expect(isPossiblePhoneValue(value)).toBe(true)
+    expect(isValidPhoneValue(value)).toBe(false)
+  })
+
+  it("rejects too-short numbers on both checks", () => {
+    expect(isValidPhoneValue({ prefix: "+34", number: "67" })).toBe(false)
+    expect(isPossiblePhoneValue({ prefix: "+34", number: "67" })).toBe(false)
+  })
+
+  it("validates legacy values holding a full international number", () => {
+    expect(
+      isValidPhoneValue({ prefix: undefined, number: "+34674897945" })
+    ).toBe(true)
+  })
+
+  it("rejects empty values", () => {
+    expect(isValidPhoneValue(undefined)).toBe(false)
+    expect(isValidPhoneValue({ prefix: "+34", number: "" })).toBe(false)
+    expect(isPossiblePhoneValue(undefined)).toBe(false)
   })
 })
 

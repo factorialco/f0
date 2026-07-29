@@ -79,6 +79,15 @@ return <F0Form formDefinition={formDefinition} />
         <td>✓</td>
       </tr>
       <tr>
+        <td>`f0FormField.phone(config)`</td>
+        <td>
+          `z.object({ prefix, number })` validated with libphonenumber
+          (`validate: "valid" | "possible" | false`, default `"valid"`)
+        </td>
+        <td>phone input (`F0PhoneInput`)</td>
+        <td>✓</td>
+      </tr>
+      <tr>
         <td>`f0FormField.url(config)`</td>
         <td>`z.string().url()`</td>
         <td>text input (url)</td>

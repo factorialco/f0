@@ -149,6 +149,27 @@ export const e164ToValue = (
   return { prefix: undefined, number: e164 }
 }
 
+/**
+ * Standalone validators for the structured pair, matching the `isValid` /
+ * `isPossible` flags of the change meta: "valid" checks the country's number
+ * patterns, "possible" only checks the length. For form schemas.
+ */
+export const isValidPhoneValue = (
+  value: F0PhoneInputValue | undefined
+): boolean => {
+  const e164 = valueToE164(value)
+  if (!e164) return false
+  return parsePhoneNumberFromString(e164)?.isValid() ?? false
+}
+
+export const isPossiblePhoneValue = (
+  value: F0PhoneInputValue | undefined
+): boolean => {
+  const e164 = valueToE164(value)
+  if (!e164) return false
+  return parsePhoneNumberFromString(e164)?.isPossible() ?? false
+}
+
 export const buildMeta = (
   e164: string | undefined,
   country: PhoneCountry | undefined

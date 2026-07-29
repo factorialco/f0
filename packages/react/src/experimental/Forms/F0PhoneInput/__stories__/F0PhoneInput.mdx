@@ -172,27 +172,30 @@ import { F0PhoneInput } from "@factorialco/f0-react/experimental"
 
 ### As an F0Form field
 
+The `f0FormField.phone` shortcut builds the `{ prefix, number }` Zod schema
+and validates the number with libphonenumber (the same metadata the input
+formats with):
+
 ```tsx
 import { f0FormField } from "@factorialco/f0-react"
 import { z } from "zod"
 
 const schema = z.object({
-  phone: f0FormField(
-    z
-      .object({
-        prefix: z.string().optional(),
-        number: z.string(),
-      })
-      .optional(),
-    {
-      fieldType: "phone",
-      label: "Phone number",
-      defaultCountry: "es",
-      pinnedCountries: ["es", "gb", "us", "fr", "de", "it", "pt"],
-    }
-  ),
+  phone: f0FormField.phone({
+    label: "Phone number",
+    defaultCountry: "es",
+    pinnedCountries: ["es", "gb", "us", "fr", "de", "it", "pt"],
+    optional: true,
+  }),
 })
 ```
+
+- `validate` controls strictness: `"valid"` (default) checks the country's
+  number patterns, `"possible"` only checks the length, `false` disables
+  validation. `invalidMessage` overrides the error copy.
+- Outside F0Form, the same checks are exported as `isValidPhoneValue` and
+  `isPossiblePhoneValue` — they take the `{ prefix, number }` pair directly
+  and mirror the `isValid` / `isPossible` flags of the change meta.
 
 ### Accessibility
 
