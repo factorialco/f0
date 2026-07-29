@@ -414,6 +414,86 @@ describe("check-api-surface — unions and intersections", () => {
   })
 })
 
+describe("check-api-surface — arrays are unwrapped, not opaque", () => {
+  it("flags a prop removed from an array element type", () => {
+    const diff = f0(
+      `
+      export declare type Row = { id: string; label: string };
+      export declare const Grid: (props: { rows: Row[] }) => unknown;
+      `,
+      `
+      export declare type Row = { id: string };
+      export declare const Grid: (props: { rows: Row[] }) => unknown;
+      `
+    )
+    const changed = diff.breaking.find((b) => b.name === "Grid")
+    expect(changed?.kind).toBe("changed")
+    expect(changed?.reasons?.some((r) => r.includes("label"))).toBe(true)
+  })
+
+  it("flags a required prop added to an array element type", () => {
+    const diff = f0(
+      `export declare const Grid: (props: { rows: ReadonlyArray<{ id: string }> }) => unknown;`,
+      `export declare const Grid: (props: { rows: ReadonlyArray<{ id: string; tenant: string }> }) => unknown;`
+    )
+    const changed = diff.breaking.find((b) => b.name === "Grid")
+    expect(changed?.reasons?.some((r) => /required.*tenant/i.test(r))).toBe(
+      true
+    )
+  })
+
+  it("treats an optional prop added to an array element type as safe", () => {
+    const diff = f0(
+      `export declare const Grid: (props: { rows: Array<{ id: string }> }) => unknown;`,
+      `export declare const Grid: (props: { rows: Array<{ id: string; hint?: string }> }) => unknown;`
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
+  it("treats an unchanged array-typed prop as no change", () => {
+    const surface = `
+      export declare type Row = { id: string; label: string };
+      export declare const Grid: (props: { rows: Row[] }) => unknown;
+    `
+    expect(f0(surface, surface).breaking).toHaveLength(0)
+  })
+
+  it("flags a scalar prop widened to an array (T → T[])", () => {
+    const diff = f0(
+      `export declare type Row = { tag: string };`,
+      `export declare type Row = { tag: string[] };`
+    )
+    const changed = diff.breaking.find((b) => b.name === "Row")
+    expect(changed?.kind).toBe("changed")
+    expect(changed?.reasons?.some((r) => /tag/.test(r))).toBe(true)
+  })
+
+  it("catches a removed prop nested behind an array of a discriminated union (the OneDataCollection `visualizations` shape)", () => {
+    // Mirrors how `headerGroupLabels` reaches the public surface: only through
+    // `OneDataCollection` props → `visualizations` array → a `"table"` variant
+    // → `options` → the prop. Opaque-array handling hid its removal entirely.
+    const surface = (tableOptions: string) => `
+      export declare type TableOptions = ${tableOptions};
+      export declare type CardOptions = { pageSize?: number };
+      export declare type Visualization =
+        | { type: "table"; options: TableOptions }
+        | { type: "card"; options: CardOptions };
+      export declare const Collection: (props: {
+        visualizations?: ReadonlyArray<Visualization>;
+      }) => unknown;
+    `
+    const diff = f0(
+      surface("{ id: string; headerGroupLabels?: Record<string, string> }"),
+      surface("{ id: string; headerGroups?: Record<string, string> }")
+    )
+    const changed = diff.breaking.find((b) => b.name === "Collection")
+    expect(changed?.kind).toBe("changed")
+    expect(
+      changed?.reasons?.some((r) => r.includes("headerGroupLabels"))
+    ).toBe(true)
+  })
+})
+
 describe("check-api-surface — translations are summarized, not listed per export", () => {
   // The real translations dictionary is large; the structural fallback for
   // the inlined `defaultTranslations` object requires that scale, so the
