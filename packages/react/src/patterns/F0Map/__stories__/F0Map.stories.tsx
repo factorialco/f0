@@ -65,7 +65,6 @@ const meta = {
     ),
   ],
   argTypes: {
-    theme: { control: "inline-radio", options: ["auto", "light", "dark"] },
     projection: { control: "inline-radio", options: ["mercator", "globe"] },
     interactive: { control: "boolean" },
     loading: { control: "boolean" },
@@ -91,20 +90,13 @@ type Story = StoryObj<typeof meta>
 /** Follows the app theme via the nearest `.dark` ancestor. */
 export const Default: Story = {
   args: {
-    theme: "light",
     interactive: true,
     loading: false,
   },
 }
 
-/** Forced light theme. */
-export const Light: Story = {
-  args: { theme: "light" },
-}
-
-/** Forced dark theme, rendered inside a `.dark` island. */
+/** Dark theme, auto-detected from a `.dark` ancestor island. */
 export const Dark: Story = {
-  args: { theme: "dark" },
   decorators: [
     (Story) => (
       <div className="dark h-[600px] w-full bg-f1-background">
@@ -117,7 +109,6 @@ export const Dark: Story = {
 /** Regional view over the Spanish meseta - green land, tan cropland (landcover farmland, z8+). */
 export const Terrain: Story = {
   args: {
-    theme: "light",
     initialViewport: { center: [-3.9, 40.2], zoom: 8.4 },
   },
 }
@@ -128,7 +119,55 @@ export const Terrain: Story = {
  * flip placement to avoid colliding with other markers/labels.
  */
 export const WithMarkers: Story = {
-  args: { theme: "light", markers: BARCELONA },
+  args: { markers: BARCELONA },
+}
+
+// One of each product-semantic marker variant, spread across Spain so none of
+// them cluster - the reference for how every variant renders on the map.
+const ALL_VARIANTS: F0MapPoint[] = [
+  {
+    id: "default",
+    coordinates: [-3.7, 40.42],
+    variant: "default",
+    label: "Default",
+  },
+  {
+    id: "workplace",
+    coordinates: [2.17, 41.39],
+    variant: "workplace",
+    label: "Workplace",
+  },
+  {
+    id: "employee",
+    coordinates: [-0.38, 39.47],
+    variant: "employee",
+    firstName: "Ada",
+    lastName: "Lovelace",
+    label: "Employee",
+  },
+  {
+    id: "company",
+    coordinates: [-5.98, 37.39],
+    variant: "company",
+    name: "Acme Corp",
+    label: "Company",
+  },
+  {
+    id: "stop",
+    coordinates: [-8.54, 42.88],
+    variant: "stop",
+    letter: "A",
+    label: "Stop",
+  },
+]
+
+/**
+ * Every product-semantic marker variant on one map: `default`, `workplace`,
+ * `employee`, `company` and `stop`. Workplace and company render as rounded
+ * squares (the entity shape); default, employee and stop stay circular.
+ */
+export const MarkerVariants: Story = {
+  args: { markers: ALL_VARIANTS },
 }
 
 // A dense field of workplaces around Barcelona so clustering kicks in at city zoom.
@@ -144,7 +183,7 @@ const DENSE: F0MapPoint[] = Array.from({ length: 40 }, (_, i) => ({
  * (zoom into the cluster's bounds) and split apart as you zoom in.
  */
 export const WithClusters: Story = {
-  args: { theme: "light", markers: DENSE },
+  args: { markers: DENSE },
 }
 
 // Clusters of different sizes scattered across the world, so every per-count
@@ -213,7 +252,6 @@ const WORLD: F0MapPoint[] = CITIES.flatMap(({ name, at, n }) =>
  */
 export const WorldClusters: Story = {
   args: {
-    theme: "light",
     markers: WORLD,
     initialViewport: { center: [10, 25], zoom: 1.4 },
   },
@@ -221,11 +259,11 @@ export const WorldClusters: Story = {
 
 /**
  * Current location: click the "locate me" control (bottom-left) to grant browser
- * permission - a malibu "you are here" dot drops in and the map flies to it. The
- * opt-in persists, so on later visits the dot appears automatically.
+ * permission - a malibu "you are here" dot drops in and the map flies to it. On
+ * later visits, if permission is already granted, the dot appears automatically.
  */
 export const CurrentLocation: Story = {
-  args: { theme: "light", markers: BARCELONA, showCurrentLocation: true },
+  args: { markers: BARCELONA, showCurrentLocation: true },
 }
 
 // A route: an ordered path drawn through its points exactly as given (F0Map
@@ -261,7 +299,6 @@ const ROUTE_ENDS: F0MapPoint[] = [
  */
 export const Routes: Story = {
   args: {
-    theme: "light",
     markers: ROUTE_ENDS,
     routes: [{ id: "commute", coordinates: ROUTE_PATH, width: 4 }],
     onRouteClick: () => {},
@@ -305,7 +342,6 @@ const ARC_MARKERS: F0MapPoint[] = [
  */
 export const Arcs: Story = {
   args: {
-    theme: "light",
     markers: ARC_MARKERS,
     arcs: ARC_TARGETS.map((t) => ({
       id: `bcn-${t.id}`,
@@ -326,7 +362,6 @@ export const Arcs: Story = {
  */
 export const Globe: Story = {
   args: {
-    theme: "light",
     markers: WORLD,
     projection: "globe",
     initialViewport: { center: [10, 25], zoom: 1.4 },
@@ -355,7 +390,6 @@ export const Snapshot: Story = {
  */
 export const SelectionFromList: Story = {
   args: {
-    theme: "light",
     markers: [
       {
         id: "a",

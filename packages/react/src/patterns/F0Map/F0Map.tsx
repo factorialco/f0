@@ -101,8 +101,6 @@ export interface F0MapProps extends WithDataTestIdProps {
   initialViewport?: F0MapViewport
   /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
   mapStyle?: F0MapStylePair
-  /** Force a theme; `"auto"` (default) follows the nearest `.dark` ancestor. */
-  theme?: "auto" | "light" | "dark"
   /**
    * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
    * the map (and resets the camera), so treat it as static.
@@ -216,7 +214,6 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     fitToMarkers,
     initialViewport,
     mapStyle = f0MapStyles,
-    theme = "auto",
     interactive = true,
     gestureHandling = "cooperative",
     minZoom,
@@ -255,7 +252,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     },
     [darkContextRef]
   )
-  const isDark = theme === "auto" ? isDarkContext : theme === "dark"
+  // Theme always follows the app: the nearest `.dark` ancestor, observed live so
+  // a theme toggle restyles the map without a reload (see the style-swap effect).
+  const isDark = isDarkContext
   const style = isDark ? mapStyle.dark : mapStyle.light
 
   // Selection (controlled when the prop is set - `null` means "none selected",
@@ -503,11 +502,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           aria-label={ariaLabel ?? i18n.map.region}
           className={cn(
             "f0-map relative h-full w-full overflow-hidden",
-            // The resolved theme cascades to every DOM overlay (controls,
-            // markers, list, banners): forcing `theme="dark"` outside a dark
-            // island must swap their tokens along with the tiles, so the two
-            // can never disagree. Harmless when a `.dark` ancestor already set
-            // it (auto mode).
+            // Re-assert the detected theme on the container so every DOM
+            // overlay (controls, markers, list, banners) swaps its tokens along
+            // with the tiles and the two can never disagree. Harmless when a
+            // `.dark` ancestor already set it.
             isDark && "dark",
             !fullScreen &&
               "rounded-2xl border border-solid border-f1-border-secondary",

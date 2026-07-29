@@ -1,18 +1,16 @@
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
-import { WORLD_LAND_PATH } from "./styles/worldPath"
-
 export interface F0MapSkeletonProps extends WithDataTestIdProps {
   /** @private */
   className?: string
 }
 
 /**
- * Loading placeholder: the world's continents rendered as an f0 skeleton - the
- * same gentle `animate-pulse` and surface tone as the shared `Skeleton`
- * component, just in the shape of the world - over a plain background "ocean",
- * so the map reads as loading before the tiles fade in.
+ * Loading placeholder: a plain pulsing surface in the shared `Skeleton`
+ * component's tone. Shown while a consumer is still fetching what the map
+ * should display; the map paints its own basemap once mounted, so this needs
+ * no map-like illustration.
  */
 export const F0MapSkeleton = ({
   dataTestId,
@@ -23,21 +21,9 @@ export const F0MapSkeleton = ({
       aria-busy="true"
       aria-live="polite"
       className={cn(
-        "relative h-full w-full overflow-hidden bg-f1-background",
+        "h-full w-full animate-pulse bg-f1-background-secondary",
         className
       )}
-    >
-      <svg
-        viewBox="0 0 360 170"
-        preserveAspectRatio="xMidYMid slice"
-        className="absolute inset-0 h-full w-full animate-pulse"
-        aria-hidden
-      >
-        {/* Continents use neutral-10 - the same underlying tone the shared
-            skeleton's bg-f1-background-secondary resolves to. SVG `fill` can't
-            take a Tailwind background utility, hence the raw var. */}
-        <path d={WORLD_LAND_PATH} className="[fill:hsl(var(--neutral-10))]" />
-      </svg>
-    </div>
+    />
   </DataTestIdWrapper>
 )

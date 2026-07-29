@@ -395,9 +395,11 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
         />
       ) : null
 
-    // Team/company avatars are rounded squares, not circles: the head wraps
-    // around the avatar's own shape (squircle border) instead of clipping it.
-    const squircle = variant === "team" || variant === "company"
+    // Rounded-square head (the "team" shape) for entity markers: team / company
+    // avatars wrap their own squircle, and icon markers (e.g. workplaces) match
+    // them. Person avatars, plain color dots and letter stops stay circular.
+    const squircle =
+      variant === "team" || variant === "company" || variant === "icon"
 
     // One head for every variant: a face with a scaled white border (f0 white
     // token). The shadow lives on the pin group below, not here, so the head +

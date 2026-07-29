@@ -14,23 +14,15 @@ export type {
   F0MapLineColor,
 } from "./types"
 /**
- * The opinionated, product-semantic marker (default / workplace / employee /
- * company). Each variant fixes its own color and behavior; `F0Map` renders
- * these for its points, and they can be used standalone on a custom map. The
- * fully-flexible engine behind them (`BaseMapMarker`) stays internal.
+ * Product-semantic marker variant identity, used to describe a point's marker
+ * (`default` / `workplace` / `employee` / `company` / `stop`). `F0Map` owns
+ * rendering markers for its points, so the marker component itself is internal
+ * and not exposed - see the `MarkerVariants` story for how each one looks.
  */
-export {
-  F0MapMarker,
-  f0MapMarkerVariants,
-  f0MapMarkerSizes,
-  f0MapMarkerLabelPlacements,
-} from "./components/F0MapMarker"
+export { f0MapMarkerVariants } from "./components/F0MapMarker"
 export type {
-  F0MapMarkerProps,
   F0MapMarkerVariant,
   F0MapMarkerVariantProps,
-  F0MapMarkerSize,
-  F0MapMarkerLabelPlacement,
 } from "./components/F0MapMarker"
 /** The map's navigation toolbar (locate / fit / zoom). `F0Map` renders it, but
  * it's exported for custom compositions. */

@@ -42,8 +42,9 @@ export function Example() {
 | Story             | What it shows                                         |
 | ----------------- | ----------------------------------------------------- |
 | `Default`         | Empty map at a city-level view                        |
-| `Light` / `Dark`  | The two themed styles                                 |
-| `WithMarkers`     | The marker variants (workplace, employee, company, …) |
+| `Dark`            | The dark theme, auto-detected from a `.dark` island   |
+| `WithMarkers`     | Mixed marker variants on a city map                   |
+| `MarkerVariants`  | Every marker variant (default/workplace/…) on one map |
 | `WithClusters`    | Distance clustering that expands on zoom / click      |
 | `WorldClusters`   | Clustering at world scale                             |
 | `CurrentLocation` | The "you are here" dot + the locate control           |
@@ -94,6 +95,7 @@ size, label placement, selection) stays uniform across the map.
 - **`employee`** - a person avatar (its own identity color).
 - **`company`** - a company avatar.
 - **`default`** - a plain colored pin.
+- **`stop`** - a lettered route stop (A, B, C…) matching the route/arc lines.
 - **`current_location`** - the "you are here" dot (see below).
 
 Selecting a marker grows it to a pinned, lifted state; neighbors it would cover
@@ -153,8 +155,8 @@ page scroll. Use `"greedy"` for a dedicated/full-screen map.
 
 `fullScreen={false}` (default) frames the map as a card - rounded corners and a
 subtle border, controls inset 16px. `fullScreen` drops the frame for an
-edge-to-edge map. Theme follows the nearest `.dark` ancestor unless `theme` is
-forced.
+edge-to-edge map. Theme always follows the nearest `.dark` ancestor, restyling
+live when the app theme toggles.
 
 `projection="globe"` renders the world as a 3D sphere at low zoom and eases
 into a flat mercator view as you zoom in - best for a world-scale view (drag to
@@ -260,18 +262,17 @@ Clustering is automatic (no prop) - see [Clustering](#clustering).
 
 ### Presentation & interaction
 
-| Prop                  | Type                          | Default         | Description                                                 |
-| --------------------- | ----------------------------- | --------------- | ----------------------------------------------------------- |
-| `theme`               | `"auto" \| "light" \| "dark"` | `"auto"`        | Force a theme; `auto` follows the nearest `.dark` ancestor. |
-| `mapStyle`            | `F0MapStylePair`              | f0 styles       | Light/dark style pair override.                             |
-| `interactive`         | `boolean`                     | `true`          | Allow pan/zoom.                                             |
-| `gestureHandling`     | `"cooperative" \| "greedy"`   | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe).   |
-| `fullScreen`          | `boolean`                     | `false`         | `false` frames as a card; `true` is edge-to-edge.           |
-| `projection`          | `"mercator" \| "globe"`       | `"mercator"`    | `"globe"` renders the world as a 3D sphere.                 |
-| `showControls`        | `boolean`                     | `true`          | Show the locate / fit / zoom toolbar (when interactive).    |
-| `showCurrentLocation` | `boolean`                     | `false`         | Show the "you are here" dot when location is granted.       |
-| `loading`             | `boolean`                     | `false`         | Show the skeleton instead of the map.                       |
-| `ariaLabel`           | `string`                      | `"Map"` (i18n)  | Accessible name for the map region.                         |
+| Prop                  | Type                        | Default         | Description                                               |
+| --------------------- | --------------------------- | --------------- | --------------------------------------------------------- |
+| `mapStyle`            | `F0MapStylePair`            | f0 styles       | Light/dark style pair override.                           |
+| `interactive`         | `boolean`                   | `true`          | Allow pan/zoom.                                           |
+| `gestureHandling`     | `"cooperative" \| "greedy"` | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe). |
+| `fullScreen`          | `boolean`                   | `false`         | `false` frames as a card; `true` is edge-to-edge.         |
+| `projection`          | `"mercator" \| "globe"`     | `"mercator"`    | `"globe"` renders the world as a 3D sphere.               |
+| `showControls`        | `boolean`                   | `true`          | Show the locate / fit / zoom toolbar (when interactive).  |
+| `showCurrentLocation` | `boolean`                   | `false`         | Show the "you are here" dot when location is granted.     |
+| `loading`             | `boolean`                   | `false`         | Show the skeleton instead of the map.                     |
+| `ariaLabel`           | `string`                    | `"Map"` (i18n)  | Accessible name for the map region.                       |
 
 ### Imperative handle (`ref`)
 
