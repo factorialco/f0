@@ -1,5 +1,175 @@
 # Changelog
 
+## [4.64.0](https://github.com/factorialco/f0/compare/f0-react-v4.63.6...f0-react-v4.64.0) (2026-07-29)
+
+
+### Features
+
+* **F0Graph:** [FCT-59984] add avatarShape option for square node avatars ([#4872](https://github.com/factorialco/f0/issues/4872)) ([44aad04](https://github.com/factorialco/f0/commit/44aad0445c4debb83e20f692fb846f812cfa2bd2))
+
+## [4.63.6](https://github.com/factorialco/f0/compare/f0-react-v4.63.5...f0-react-v4.63.6) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Form:** guard post-unmount setState from submit timers ([#4901](https://github.com/factorialco/f0/issues/4901)) ([0196e91](https://github.com/factorialco/f0/commit/0196e917bf4a97e489948dc2b8b59ac2b0b4ba51))
+
+## [4.63.5](https://github.com/factorialco/f0/compare/f0-react-v4.63.4...f0-react-v4.63.5) (2026-07-29)
+
+
+### Bug Fixes
+
+* **react:** detect breaking API changes behind array props ([#4899](https://github.com/factorialco/f0/issues/4899)) ([9131861](https://github.com/factorialco/f0/commit/91318614ddf0272e375d370b08ade59334eebd1f))
+
+## [4.63.4](https://github.com/factorialco/f0/compare/f0-react-v4.63.3...f0-react-v4.63.4) (2026-07-29)
+
+
+### Bug Fixes
+
+* **value-display:** align country avatar size with other entity cells ([#4847](https://github.com/factorialco/f0/issues/4847)) ([140b989](https://github.com/factorialco/f0/commit/140b989c99786088b7639971394ca8a7a1e287fd))
+
+## [4.63.3](https://github.com/factorialco/f0/compare/f0-react-v4.63.2...f0-react-v4.63.3) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Form:** keep staged uploads when applying an initialFiles pool ([#4889](https://github.com/factorialco/f0/issues/4889)) ([8707ca9](https://github.com/factorialco/f0/commit/8707ca9e110c4a74fe5bd5e17a74e673d10c6c82))
+
+## [4.63.2](https://github.com/factorialco/f0/compare/f0-react-v4.63.1...f0-react-v4.63.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** grey parent rows on hover in nested table ([#4818](https://github.com/factorialco/f0/issues/4818)) ([cbeeb94](https://github.com/factorialco/f0/commit/cbeeb947bfa41d4cc954c2bcbed0dc95dd893b2e))
+
+## [4.63.1](https://github.com/factorialco/f0/compare/f0-react-v4.63.0...f0-react-v4.63.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **value-display:** even vertical padding on avatar table cells ([#4887](https://github.com/factorialco/f0/issues/4887)) ([4a09486](https://github.com/factorialco/f0/commit/4a0948663421bb1f3ed60f1237f1cfc978d0ab36))
+
+## [4.63.0](https://github.com/factorialco/f0/compare/f0-react-v4.62.1...f0-react-v4.63.0) (2026-07-29)
+
+
+### Features
+
+* **value-display:** support 15 base-color palette in categoryBarChart ([#4526](https://github.com/factorialco/f0/issues/4526)) ([cfa722c](https://github.com/factorialco/f0/commit/cfa722cd3825bec8a5679093d758df4826d5a380))
+
+## [4.62.1](https://github.com/factorialco/f0/compare/f0-react-v4.62.0...f0-react-v4.62.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Form:** block submit while a file upload is in flight ([#4886](https://github.com/factorialco/f0/issues/4886)) ([5c14106](https://github.com/factorialco/f0/commit/5c14106a5fdcce7d9dadb94d8f3527a68944a544))
+
+## [4.62.0](https://github.com/factorialco/f0/compare/f0-react-v4.61.2...f0-react-v4.62.0) (2026-07-29)
+
+
+### Features
+
+* **OneDataCollection:** optional group-header selection in Kanban ([#4885](https://github.com/factorialco/f0/issues/4885)) ([5c5896f](https://github.com/factorialco/f0/commit/5c5896f5061129b35dd0f79655381c5f58b6a0eb))
+
+## [4.61.2](https://github.com/factorialco/f0/compare/f0-react-v4.61.1...f0-react-v4.61.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* **react:** stop flagging widened unions as breaking API changes ([#4883](https://github.com/factorialco/f0/issues/4883)) ([26c05f5](https://github.com/factorialco/f0/commit/26c05f5f3d1e2aebefde4ad223399da3c41c1499))
+
+## [4.61.1](https://github.com/factorialco/f0/compare/f0-react-v4.61.0...f0-react-v4.61.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **F0Graph:** force instant node positioning (transition: none) ([#4863](https://github.com/factorialco/f0/issues/4863)) ([eb8382a](https://github.com/factorialco/f0/commit/eb8382a3bc75c8daeeff6e591efdf17ebbde317d))
+* **Table:** unmount flat rows on removal instead of animating them out ([#4882](https://github.com/factorialco/f0/issues/4882)) ([dfd46ee](https://github.com/factorialco/f0/commit/dfd46eefa5acd2cb7aa695cbe927ab371d128dc1))
+
+## [4.61.0](https://github.com/factorialco/f0/compare/f0-react-v4.60.1...f0-react-v4.61.0) (2026-07-28)
+
+
+### Features
+
+* **OneDataCollection:** paginate search preview (infinite scroll) + focus first row for Enter-to-select ([#4833](https://github.com/factorialco/f0/issues/4833)) ([1d66320](https://github.com/factorialco/f0/commit/1d6632031118eeb79ac8913f9501d9ed343e2d0f))
+
+## [4.60.1](https://github.com/factorialco/f0/compare/f0-react-v4.60.0...f0-react-v4.60.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **F0DataChart:** round negative bars away from the zero line ([#4871](https://github.com/factorialco/f0/issues/4871)) ([da1c075](https://github.com/factorialco/f0/commit/da1c075c79de738737a433cf58d33b8dd2956fe3))
+
+## [4.60.0](https://github.com/factorialco/f0/compare/f0-react-v4.59.0...f0-react-v4.60.0) (2026-07-28)
+
+
+### Features
+
+* content props + media a11y ([#4850](https://github.com/factorialco/f0/issues/4850)) ([3e06b02](https://github.com/factorialco/f0/commit/3e06b02e11ae8733c21cafd6ecea3154d78d85d9))
+
+## [4.59.0](https://github.com/factorialco/f0/compare/f0-react-v4.58.0...f0-react-v4.59.0) (2026-07-28)
+
+
+### Features
+
+* **F0ProgressSeries:** add multi-bar progress series component ([#4842](https://github.com/factorialco/f0/issues/4842)) ([782df82](https://github.com/factorialco/f0/commit/782df828971549584c1f66e798935e32a8708e9b))
+
+## [4.58.0](https://github.com/factorialco/f0/compare/f0-react-v4.57.0...f0-react-v4.58.0) (2026-07-28)
+
+
+### Features
+
+* **OneDataCollection:** add grouping to the Kanban visualization ([#4821](https://github.com/factorialco/f0/issues/4821)) ([c676f08](https://github.com/factorialco/f0/commit/c676f08a90de2ebe97b3829412a2a0f72e6718d8))
+
+## [4.57.0](https://github.com/factorialco/f0/compare/f0-react-v4.56.5...f0-react-v4.57.0) (2026-07-28)
+
+
+### Features
+
+* **F0AiChat:** add host overlay slot ([#4851](https://github.com/factorialco/f0/issues/4851)) ([fb492f1](https://github.com/factorialco/f0/commit/fb492f15c020955cbb5fafebdaee4a6bd441895d))
+
+## [4.56.5](https://github.com/factorialco/f0/compare/f0-react-v4.56.4...f0-react-v4.56.5) (2026-07-28)
+
+
+### Bug Fixes
+
+* **SurveyFormBuilder:** [FCT-59912] fix Add-option contrast + enforce a11y ([#4764](https://github.com/factorialco/f0/issues/4764)) ([d9af07c](https://github.com/factorialco/f0/commit/d9af07ca72983bf2c9a30cf90d36104fc8ba3099))
+
+## [4.56.4](https://github.com/factorialco/f0/compare/f0-react-v4.56.3...f0-react-v4.56.4) (2026-07-27)
+
+
+### Bug Fixes
+
+* **ResourceHeader:** use secondary border token for bottom rule ([#4839](https://github.com/factorialco/f0/issues/4839)) ([3a08ea4](https://github.com/factorialco/f0/commit/3a08ea49958fc4a3b1647005f2e3d9cfcdc2522c))
+
+## [4.56.3](https://github.com/factorialco/f0/compare/f0-react-v4.56.2...f0-react-v4.56.3) (2026-07-27)
+
+
+### Bug Fixes
+
+* **EditableTable:** span disabled background across cell hint ([#4848](https://github.com/factorialco/f0/issues/4848)) ([1bf81e3](https://github.com/factorialco/f0/commit/1bf81e336326e945ebe0d78d7d52c4c4362424a2))
+
+## [4.56.2](https://github.com/factorialco/f0/compare/f0-react-v4.56.1...f0-react-v4.56.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* **ai:** welcome suggestions popover closes when switching to the last group ([#4653](https://github.com/factorialco/f0/issues/4653)) ([d640b12](https://github.com/factorialco/f0/commit/d640b12e36c335619635d0aba45bbc18a97b2205))
+
+## [4.56.1](https://github.com/factorialco/f0/compare/f0-react-v4.56.0...f0-react-v4.56.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* **component-status:** auto-run the a11y audit in the maturity tooltip ([#4845](https://github.com/factorialco/f0/issues/4845)) ([1297ce7](https://github.com/factorialco/f0/commit/1297ce7c9e178aa5194e6647417cf922102f1eaf))
+
+## [4.56.0](https://github.com/factorialco/f0/compare/f0-react-v4.55.0...f0-react-v4.56.0) (2026-07-27)
+
+
+### Features
+
+* **EditableTable:** support per-row dateConfig function for date cells ([#4841](https://github.com/factorialco/f0/issues/4841)) ([7712310](https://github.com/factorialco/f0/commit/77123108ddda3b8bb9e6c93a21b18c1ce7248c2f))
+* **F0AiChatHeader:** support header actions ([#4837](https://github.com/factorialco/f0/issues/4837)) ([f8bda8e](https://github.com/factorialco/f0/commit/f8bda8e2476b4d50228ce62cf3951be33e995aec))
+
 ## [4.55.0](https://github.com/factorialco/f0/compare/f0-react-v4.54.0...f0-react-v4.55.0) (2026-07-24)
 
 

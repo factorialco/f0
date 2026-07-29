@@ -5,24 +5,15 @@ import * as Stories from "./F0VideoPlayer.stories"
 
 # F0VideoPlayer
 
-<span
-  style={{
-    display: "inline-block",
-    padding: "2px 8px",
-    borderRadius: 4,
-    background: "#FEF3C7",
-    color: "#92400E",
-    fontSize: 12,
-    fontWeight: 600,
-  }}
->
-  Experimental
-</span>
-
 A video player built on a native `<video>` element: play/pause, an interactive
 seekbar, a custom volume slider, a playback-speed menu, fullscreen, keyboard
 shortcuts and full a11y. Analytics, watch-% milestones and forward-seek
 restriction are built in — enabled with plain props.
+
+While paused, a centered play button and the controls bar are both shown, so a
+still frame or `poster` reads as a video without hovering. During playback the
+controls auto-hide and reveal again on hover or keyboard focus — set
+`persistControls` to keep them visible the whole time instead.
 
 ## Anatomy
 
@@ -56,7 +47,133 @@ player. The parent receives playback information through the callbacks:
 - **`restrictForwardSeek`** — prevents seeking past the furthest-watched point and
   renders a marker at that position.
 
+## Captions
+
+Pass `content.captions` to show captions over the video during playback. Accepts
+either a **WebVTT URL** or a **raw WebVTT string** (the player turns raw VTT into
+a same-origin blob track, so no CORS setup is needed — a remote URL instead
+requires the video host to allow cross-origin reads). When `captions` is omitted,
+the player uses any caption/subtitle track embedded in the video file. Either way
+a **captions toggle** appears in the controls (a filled glyph when on, a line
+glyph when off) to show/hide them.
+
+Prerecorded video needs captions to be accessible ([WCAG 2.1 SC 1.2.2](https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html)).
+A player with no captions — neither passed nor embedded — is flagged by the
+`f0-video-captions` rule in the Storybook accessibility checks; stories that
+intentionally omit them are marked `a11y: { test: "todo" }`. Availability is
+load-verified — a caption URL that fails to load or resolves to an empty track
+counts as missing, not available.
+
+<Canvas of={Stories.WithCaptions} />
+
+**Localization.** `src` and every `content` field (captions, descriptions,
+described source) accept either a single value or a per-locale list —
+`captions: [{ locale: "en", value }, { locale: "es", label?, value }]`. Three
+dimensions are localized independently, so a viewer can watch, say, English
+audio with Spanish subtitles:
+
+- **Audio track** — the dubbed `src`.
+- **Subtitles** — the captions.
+- **Audio description** — the descriptions track and described source together
+  (each falls back to its first entry for languages it doesn't provide).
+
+Each dimension offered in a **single** language keeps its plain on/off toggle in
+the control bar (the CC and AD buttons; the audio track always plays). Once a
+dimension has **several** languages, its toggle is replaced by a **settings
+gear** (YouTube-style): its first level lists each multi-language dimension with
+its current selection, and every one opens a submenu of languages — picking a
+language selects it (and, for subtitles/description, turns the feature on), and
+an "Off" row turns it off. Switching any of them preserves the playback position.
+
+`defaultLanguage` sets the initial choice (matched by primary subtag, then the
+viewer's browser language, then the first provided); language names come from
+`Intl.DisplayNames` unless you pass an explicit `label`.
+
+<Canvas of={Stories.WithLocalizedCaptions} />
+
+<Canvas of={Stories.WithLocalizedAudio} />
+
+With several languages across all three dimensions — audio track, subtitles and
+audio description — the gear's first level lists the three, each opening its own
+language submenu:
+
+<Canvas of={Stories.MaxLocalized} />
+
+When the captions live in the video file itself, no `content.captions` is needed
+— the player derives them from the file's own track and shows the same toggle:
+
+<Canvas of={Stories.WithEmbeddedCaptions} />
+
+### Silent (video-only) videos
+
+Some videos have no audio at all — a silent animation, a screen recording, a
+looping background clip. Captions (SC 1.2.2) don't apply to them, so requiring
+captions would be wrong.
+
+Set **`silent`** to declare a video has no audio. Then the player:
+
+- marks `data-video-captions="no-audio"`, so the captions a11y rule doesn't flag
+  it (no caption source needed);
+- drops any sound — the video is force-muted even if its file happens to carry
+  an audio track — and shows a **disabled, muted volume control** as a cue that
+  there's nothing to hear.
+
+Browsers can't reliably detect the absence of audio before playback (Chrome
+doesn't expose it pre-play), so this is declared explicitly rather than sniffed.
+
+`silent` only removes the _captions_ requirement — a video-only clip with
+meaningful visuals may still need a text or audio alternative (SC 1.2.1). Audio
+description is a natural fit: a silent video can still carry one, and the
+description audio plays even though the video itself is silent. Use
+`content.descriptions` (spoken through the browser, independent of the muted
+video) or a described source — see [Audio description](#audio-description) below.
+
+<Canvas of={Stories.SilentVideoOnly} />
+
+## Audio description
+
+Audio description conveys on-screen visual information as audio ([WCAG 2.1 SC 1.2.5](https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded.html),
+Level AA — required only when the video has meaningful visual-only content). It's
+the mirror of captions and fully independent: a separate **audio-description**
+toggle (a filled "AD" badge when on, a line badge when off), and
+both AD and captions can be on at once. Provide it in either of two ways:
+
+- **`content.describedSrc`** — a pre-produced rendition with description mixed
+  into the audio. The audio-description toggle swaps to it, preserving position and play
+  state; captions keep working. Highest quality; assumed to match `src`'s length.
+- **`content.descriptions`** — a WebVTT `kind="descriptions"` script (URL or raw
+  VTT). Delivered at runtime: the video pauses on each cue so the description can
+  be spoken (extended audio description) via the browser's speech synthesis, then
+  resumes. Used only when `describedSrc` is absent.
+
+When `content.descriptions` is provided, the description text is also shown
+on-screen (top, distinct italic style) whenever captions are on — so
+deaf/hard-of-hearing viewers can **read** the audio description too, not just
+hear it. This needs the WebVTT script: a described audio track (`describedSrc`)
+carries no text, so pair it with `descriptions` to get both.
+
+Unlike captions, a missing audio description is **not** auto-flagged — AD is only
+required when there's visual-only information, so it stays opt-in.
+
+<Canvas of={Stories.WithAudioDescriptions} />
+
+<Canvas of={Stories.WithDescribedAudioTrack} />
+
 ## LMS configuration
+
+The player's built-in behaviours were designed for LMS / e-learning (Learning
+Management System) use — the trainings context it was extracted from. This story
+turns them on together to show a typical lesson-video setup:
+
+- **`restrictForwardSeek`** keeps learners from skipping ahead of the
+  furthest-watched point (a marker shows where that is).
+- **`onTrackAction`** drives analytics / session keep-alive (play, pause, and a
+  recurring heartbeat).
+- **`onMilestone`** (25 / 50 / 75 %) and **`onComplete`** report progress and
+  "watched enough", so the LMS can record completion.
+
+All of it is plain props — no external wiring. The callbacks are logged to the
+Actions panel below.
 
 <Canvas of={Stories.LMSConfiguration} />
 

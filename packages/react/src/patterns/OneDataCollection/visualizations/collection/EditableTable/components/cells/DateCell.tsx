@@ -22,8 +22,12 @@ export function DateCell<R extends RecordType>({
   isLastColumn,
   onChange,
   hint,
+  item,
 }: EditableCellProps<R>) {
-  const dateConfig = editableColumn.dateConfig
+  const dateConfig =
+    typeof editableColumn.dateConfig === "function"
+      ? editableColumn.dateConfig(item)
+      : editableColumn.dateConfig
 
   const datePickerValue = useMemo<DatePickerValue | undefined>(() => {
     if (!value) return undefined

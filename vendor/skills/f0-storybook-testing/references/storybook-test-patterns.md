@@ -77,9 +77,38 @@ play: async ({ canvasElement }) => {
 
 ## a11y Tests (automatic via axe-playwright)
 
-axe runs on **every story** automatically after render. Tags checked: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`.
+axe runs on **every story** automatically after render. Tags checked: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22a`, `wcag22aa` — WCAG 2.0/2.1/2.2 at levels A and AA. AAA and axe's non-normative `best-practice` rules are intentionally excluded.
 
-Default on violation: **test fails**.
+The tag list lives in **one** place, `src/lib/storybook-utils/a11yAxeConfig.ts`, and is imported by the CI test-runner, the Storybook a11y addon (`preview.tsx`) and the docs-panel a11y row (`A11yRow.tsx`). Don't inline it at a call-site — the three surfaces used to drift apart.
+
+Default on violation: **test fails** (`test: "error"`) — but note `preview.tsx` currently sets a global `test: "todo"`, so in practice a story only blocks CI if it opts into `"error"`.
+
+### The addon panel is not a CI predictor
+
+A story can look clean in the Storybook Accessibility panel and still fail CI. Four things differ; only the first is now aligned:
+
+| | Addon panel | CI test-runner | Aligned? |
+| --- | --- | --- | --- |
+| **Rule set** | shared tag list | shared tag list | ✅ yes |
+| **State** | whatever is on screen right now | each story from its own `args`, **then** its play function | ❌ no |
+| **Scope** | whole document | `#storybook-root` | ❌ no |
+| **Viewport** | your canvas size | 1280x720 | ❌ no |
+
+Consequences worth knowing:
+
+- **State.** CI evaluates every story from its declared `args`. A story that presets a value renders UI you would not see by opening the component's default story — e.g. `F0Select`'s `Clearable` sets `value: "dark"`, so the clear button is present on load and its `target-size` violation fires without any interaction.
+- **Scope.** Portaled content (dropdowns, tooltips, dialogs, listboxes) mounts **outside** `#storybook-root`, so **CI does not scan it** and the addon does. The two miss different things.
+- **Viewport.** Geometry-dependent rules (`target-size`, `scrollable-region-focusable`) legitimately disagree between a narrow canvas and 1280x720.
+
+**Before flipping a file to `test: "error"`, run the real thing:**
+
+```bash
+pnpm --filter @factorialco/f0-react test-storybook -- --testPathPatterns <Component>
+```
+
+Same runner, same rules, same scope, same viewport, every story, play functions included. Checking the panel — or only the default story — is not sufficient evidence.
+
+For files still listed in `.storybook/a11y-skip-allowlist.json`, even that won't help: the test-runner returns early, so those stories are **not measured at all**. "CI never reported it" is not evidence a skipped file is clean.
 
 ### Configuring a11y behaviour per story
 

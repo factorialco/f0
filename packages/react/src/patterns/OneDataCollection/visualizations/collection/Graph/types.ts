@@ -30,7 +30,11 @@ export type GraphVisualizationOptions<
   title: (record: R) => string
   /** Secondary line of text for a node. */
   subtitle?: (record: R) => string
-  /** Avatar shown on the leading side of the node pill. */
+  /**
+   * Avatar shown on the leading side of the node pill. Its variant also drives
+   * the node silhouette: `person` → circular dot/pill, any other variant
+   * (`team`, `icon`, …) → rounded-square card.
+   */
   avatar?: (record: R) => AvatarVariant
   /**
    * Tags rendered in the node metadata row. A tag may set `column` to place it

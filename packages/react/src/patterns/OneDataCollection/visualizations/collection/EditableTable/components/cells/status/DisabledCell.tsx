@@ -23,7 +23,7 @@ export function DisabledCell<R extends RecordType>({
         iconColor="secondary"
         // px only (no vertical padding) so the disabled cell matches the 48px
         // height of editable/display-only cells and rows stay aligned.
-        className="min-h-12 bg-f1-background-disabled [&_*]:text-f1-foreground-secondary"
+        className="min-h-12 [&_*]:text-f1-foreground-secondary"
       />
     </BaseCell>
   )
