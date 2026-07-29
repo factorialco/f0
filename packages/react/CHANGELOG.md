@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.63.1](https://github.com/factorialco/f0/compare/f0-react-v4.63.0...f0-react-v4.63.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **value-display:** even vertical padding on avatar table cells ([#4887](https://github.com/factorialco/f0/issues/4887)) ([4a09486](https://github.com/factorialco/f0/commit/4a0948663421bb1f3ed60f1237f1cfc978d0ab36))
+
 ## [4.63.0](https://github.com/factorialco/f0/compare/f0-react-v4.62.1...f0-react-v4.63.0) (2026-07-29)
 
 
