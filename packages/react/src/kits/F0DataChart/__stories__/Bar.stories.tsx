@@ -137,6 +137,27 @@ export const StackedNegativeValues: Story = {
 }
 
 /**
+ * All values are positive, but not every series has data in every category —
+ * e.g. "Involuntary exits" is 0 for most offices. The outer-most non-zero
+ * segment of each bar is rounded, whichever series that happens to be for
+ * that category, instead of always the last series in the array.
+ */
+export const StackedWithMissingCategories: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    stacked: true,
+    categories: ["Barcelona", "Paris", "Berlin", "London", "Remote"],
+    series: [
+      { name: "Working from home", data: [14, 13, 0, 0, 0] },
+      { name: "Paid — Vacation", data: [12, 10, 25, 28, 26] },
+      { name: "Paid — Compensation", data: [0, 2, 0, 0, 0] },
+      { name: "Involuntary exits", data: [0, 2, 2, 0, 0] },
+    ],
+  },
+}
+
+/**
  * Each bar has a `target` value — the gap between the actual value and the
  * target is rendered as a faded "ghost" bar above the solid one.
  */

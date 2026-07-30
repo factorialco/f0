@@ -214,4 +214,25 @@ describe("BarChart — corner rounding", () => {
     expect(getBorderRadii(2)).toEqual([0])
     expect(getBorderRadii(3)).toEqual([[0, 0, 4, 4]])
   })
+
+  it("rounds the true outer segment of an all-positive stack, even when the last series is 0 for that category", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1", "Q2"]}
+        series={[
+          { name: "Hires", data: [10, 8] },
+          { name: "Internal moves", data: [5, 4] },
+          { name: "Exits", data: [3, 0] },
+        ]}
+      />
+    )
+
+    // Q1: "Exits" (last series) is the outer segment → rounded, others flat
+    // Q2: "Exits" is 0, so "Internal moves" is the true outer segment
+    expect(getBorderRadii(0)).toEqual([0, 0])
+    expect(getBorderRadii(1)).toEqual([0, [4, 4, 0, 0]])
+    expect(getBorderRadii(2)).toEqual([[4, 4, 0, 0], 0])
+  })
 })
