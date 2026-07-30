@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.67.0](https://github.com/factorialco/f0/compare/f0-react-v4.66.2...f0-react-v4.67.0) (2026-07-30)
+
+
+### Features
+
+* **F0EmojiPicker:** add selectable emoji action ([#4910](https://github.com/factorialco/f0/issues/4910)) ([020a296](https://github.com/factorialco/f0/commit/020a2968bb9e1d08137a8d44c2e6d14399b772c6))
+* **F0VideoPlayer:** add controlled download action ([#4911](https://github.com/factorialco/f0/issues/4911)) ([0e66976](https://github.com/factorialco/f0/commit/0e669769adf42d7d4b1279b989b4ce8a44bee4fe))
+
 ## [4.66.2](https://github.com/factorialco/f0/compare/f0-react-v4.66.1...f0-react-v4.66.2) (2026-07-30)
 
 
