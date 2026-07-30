@@ -364,15 +364,83 @@ function typeParameterText(sym: ts.Symbol): string {
 const TYPE_TO_STRING_FLAGS =
   ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.WriteArrayAsGenericType
 
+const normalizedTypeTextCache = new Map<string, string>()
+const typeNodePrinter = ts.createPrinter({ removeComments: true })
+
+/**
+ * TypeScript may render equivalent unions in a different order when unrelated
+ * declarations move in an api-extractor rollup. Opaque types preserve that
+ * rendered text, so canonicalize every union node before comparing it. Parsing
+ * the whole type lets this reach unions nested inside external generic types
+ * without changing intersection order or other potentially meaningful syntax.
+ */
+function canonicalizeUnionOrder(typeText: string): string {
+  if (!typeText.includes("|")) return typeText
+
+  const cached = normalizedTypeTextCache.get(typeText)
+  if (cached !== undefined) return cached
+
+  const sourceFile = ts.createSourceFile(
+    "__api_surface_type__.ts",
+    `type __ApiSurfaceType = ${typeText}`,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TS
+  )
+  const statement = sourceFile.statements[0]
+  if (
+    sourceFile.parseDiagnostics.length > 0 ||
+    !ts.isTypeAliasDeclaration(statement)
+  ) {
+    normalizedTypeTextCache.set(typeText, typeText)
+    return typeText
+  }
+
+  const result = ts.transform<ts.TypeNode>(statement.type, [
+    (context) => {
+      const visit: ts.Visitor = (node) => {
+        const visited = ts.visitEachChild(node, visit, context)
+        if (!ts.isUnionTypeNode(visited)) return visited
+
+        const sortedTypes = [...visited.types]
+          .map((type) => ({
+            text: typeNodePrinter.printNode(
+              ts.EmitHint.Unspecified,
+              type,
+              sourceFile
+            ),
+            type,
+          }))
+          .sort((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0))
+          .map(({ type }) => type)
+
+        return context.factory.updateUnionTypeNode(visited, sortedTypes)
+      }
+
+      return (root) => ts.visitNode(root, visit) as ts.TypeNode
+    },
+  ])
+  const normalized = typeNodePrinter.printNode(
+    ts.EmitHint.Unspecified,
+    result.transformed[0],
+    sourceFile
+  )
+  result.dispose()
+  normalizedTypeTextCache.set(typeText, normalized)
+  return normalized
+}
+
 /**
  * Normalize a type string so it is comparable across the two analyzed dirs:
  *  - strip `import("<abs path>").` qualifiers — the path is base-dir vs
  *    head-dir specific and would make every cross-referenced type look changed;
  *  - strip per-program unique-id suffixes on computed/internal names
  *    (e.g. `__@iterator@968`), which differ run-to-run.
+ *  - canonicalize union-member order, including unions nested in opaque types.
  */
 export function normalize(s: string): string {
-  return s.replace(/import\("[^"]*"\)\./g, "").replace(/@\d+/g, "")
+  const stableText = s.replace(/import\("[^"]*"\)\./g, "").replace(/@\d+/g, "")
+  return canonicalizeUnionOrder(stableText)
 }
 
 /** A type declared only outside the analyzed dir (React/DOM/lib) — referenced
