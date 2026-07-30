@@ -52,7 +52,11 @@ import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { useColumns } from "./hooks/useColums"
-import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
+import {
+  getCollapseFadeClass,
+  groupBorderClass,
+  useHeaderGroups,
+} from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
@@ -159,13 +163,15 @@ export const TableCollection = <
 
   // Header groups own the collapsed state and drop the columns hidden by a
   // collapsed group, so everything downstream renders off `columns` unchanged.
-  const { columns, headerGroups, toggleHeaderGroup } = useHeaderGroups(
-    orderedColumns,
-    {
-      headerGroups: headerGroupsOption,
-      onCollapsedChange: onHeaderGroupCollapsedChange,
-    }
-  )
+  const {
+    columns,
+    headerGroups,
+    toggleHeaderGroup,
+    isTransitioning: isHeaderGroupTransitioning,
+  } = useHeaderGroups(orderedColumns, {
+    headerGroups: headerGroupsOption,
+    onCollapsedChange: onHeaderGroupCollapsedChange,
+  })
 
   const {
     data,
@@ -437,7 +443,8 @@ export const TableCollection = <
           className={cn(
             "min-h-0",
             bordered &&
-              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
+              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent",
+            getCollapseFadeClass(isHeaderGroupTransitioning)
           )}
         >
           <OneTable loading={isLoading}>
@@ -458,9 +465,14 @@ export const TableCollection = <
                     </TableHead>
                   )}
                   {headerGroups.map((entry, entryIndex) => {
+                    // A collapsible group is clickable, so it keeps the cell's
+                    // hover highlight — the same one a sortable column header
+                    // shows. Everything else in this row is inert and opts out.
+                    const isClickable =
+                      entry.type === "group" && entry.collapsible
                     const borderClass = cn(
                       groupBorderClass,
-                      "hover:after:bg-transparent"
+                      !isClickable && "hover:after:bg-transparent"
                     )
                     return entry.type === "group" ? (
                       <TableHead

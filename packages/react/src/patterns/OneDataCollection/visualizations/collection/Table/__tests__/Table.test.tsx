@@ -1211,6 +1211,71 @@ describe("TableCollection", () => {
       expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
     })
 
+    it("answers the toggle immediately but swaps the columns behind a fade", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      const toggle = screen.getByRole("button", { name: "Contact" })
+      await userEvent.click(toggle)
+
+      // The control answers the click at once...
+      expect(toggle).toHaveAttribute("aria-expanded", "false")
+      // ...while the columns are still there, dimmed, mid-fade.
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      const fadeWrapper = toggle.closest(".min-h-0")
+      expect(fadeWrapper?.classList.contains("opacity-50")).toBe(true)
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(testData[0].displayName)
+        ).not.toBeInTheDocument()
+      })
+    })
+
+    it("gives a collapsible group header the hover highlight, and an inert one none", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Clickable, so it keeps the cell highlight a sortable header shows.
+      // Matched on class tokens, not substrings: the cell also carries a
+      // checkbox-scoped `...:hover:after:bg-transparent` that a substring
+      // check would trip over.
+      const collapsible = screen
+        .getByRole("button", { name: "Contact" })
+        .closest("th")
+      expect(
+        collapsible?.classList.contains("hover:after:bg-f1-background-hover")
+      ).toBe(true)
+      expect(
+        collapsible?.classList.contains("hover:after:bg-transparent")
+      ).toBe(false)
+    })
+
+    it("opts an inert group header out of the hover highlight", async () => {
+      renderTable({ headerGroups: { contact: "Contact" } })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const inert = screen.getByRole("columnheader", { name: "Contact" })
+      expect(inert.classList.contains("hover:after:bg-transparent")).toBe(true)
+    })
+
     describe("interaction with sorting", () => {
       const sortableColumns: TableColumnDefinition<
         Person,

@@ -1,10 +1,28 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
+import { useReducedMotion } from "@/lib/a11y"
 
 import { SummariesDefinition } from "../../../../summary"
 import { ColId, HeaderGroupDefinition, TableColumnDefinition } from "../types"
 import { getColumnId } from "./useColums"
+
+/**
+ * How long the table stays dimmed before the columns are swapped. Kept in step
+ * with `collapseFadeClass`, and matched to the fade the table plays while a
+ * sorting is being applied.
+ */
+const COLLAPSE_FADE_MS = 150
+
+/**
+ * Mirrors the dimming `OneTable` applies while it is loading. The transition
+ * has to stay on the element at all times — applied only while dimmed, the
+ * fade back to full opacity would have nothing to animate and would snap.
+ */
+export const getCollapseFadeClass = (isTransitioning: boolean) =>
+  isTransitioning
+    ? "transition-opacity duration-150 select-none opacity-50"
+    : "transition-opacity duration-150"
 
 export type HeaderGroupSpan = {
   type: "group"
@@ -199,6 +217,12 @@ export type UseHeaderGroupsReturn<
   headerGroups: HeaderGroupEntry[] | null
   /** Collapses an expanded group, or expands a collapsed one. */
   toggleHeaderGroup: (groupId: string) => void
+  /**
+   * True while a toggle is mid-fade. Render the table with
+   * {@link collapseFadeClass} so the columns swap behind a dim, the way they do
+   * while a sorting is being applied.
+   */
+  isTransitioning: boolean
 }
 
 /**
@@ -230,10 +254,25 @@ export const useHeaderGroups = <
       )
   )
 
+  // What the user has asked for, which can run ahead of `collapsedGroups` while
+  // the fade plays. The toggle's icon reads from this so it flips on click
+  // rather than a beat later.
+  const [intent, setIntent] = useState<ReadonlySet<string>>(collapsedGroups)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
+  const pendingCommit = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(
+    () => () => {
+      if (pendingCommit.current) clearTimeout(pendingCommit.current)
+    },
+    []
+  )
+
   const toggleHeaderGroup = useCallback(
     (groupId: string) => {
-      const collapsed = !collapsedGroups.has(groupId)
-      const next = new Set(collapsedGroups)
+      const collapsed = !intent.has(groupId)
+      const next = new Set(intent)
 
       if (collapsed) {
         next.add(groupId)
@@ -241,10 +280,25 @@ export const useHeaderGroups = <
         next.delete(groupId)
       }
 
-      setCollapsedGroups(next)
+      setIntent(next)
+      if (pendingCommit.current) clearTimeout(pendingCommit.current)
+
+      if (shouldReduceMotion) {
+        setCollapsedGroups(next)
+      } else {
+        // Swap the columns at the dimmest point of the fade, the same shape of
+        // transition the table plays while a sorting is being applied, so the
+        // change is never seen landing at full opacity.
+        setIsTransitioning(true)
+        pendingCommit.current = setTimeout(() => {
+          setCollapsedGroups(next)
+          setIsTransitioning(false)
+        }, COLLAPSE_FADE_MS)
+      }
+
       onCollapsedChange?.(groupId, collapsed)
     },
-    [collapsedGroups, onCollapsedChange]
+    [intent, onCollapsedChange, shouldReduceMotion]
   )
 
   const visibleColumns = useMemo(() => {
@@ -264,12 +318,16 @@ export const useHeaderGroups = <
     if (!definitions) return null
     if (!visibleColumns.some((column) => column.headerGroupId)) return null
 
-    return computeHeaderGroups(visibleColumns, definitions, collapsedGroups)
-  }, [visibleColumns, definitions, collapsedGroups])
+    // Built from `intent`, not the committed set, so the toggle's icon and
+    // aria-expanded answer the click immediately even though the columns only
+    // swap once the fade reaches its dimmest point.
+    return computeHeaderGroups(visibleColumns, definitions, intent)
+  }, [visibleColumns, definitions, intent])
 
   return {
     columns: visibleColumns,
     headerGroups: entries,
     toggleHeaderGroup,
+    isTransitioning,
   }
 }
