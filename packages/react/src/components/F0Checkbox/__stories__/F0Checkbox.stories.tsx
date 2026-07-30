@@ -14,6 +14,7 @@ const meta = {
   title: "Checkbox",
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
     docs: {
       description: {
         component: "A checkbox component that is used to select items.",
