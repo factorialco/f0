@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.68.0](https://github.com/factorialco/f0/compare/f0-react-v4.67.0...f0-react-v4.68.0) (2026-07-30)
+
+
+### Features
+
+* **F0Chat:** show reader and reaction users ([#4881](https://github.com/factorialco/f0/issues/4881)) ([e58f3b7](https://github.com/factorialco/f0/commit/e58f3b74781868d0bb31dc344514ccf31cc14514))
+
 ## [4.67.0](https://github.com/factorialco/f0/compare/f0-react-v4.66.2...f0-react-v4.67.0) (2026-07-30)
 
 
