@@ -574,9 +574,13 @@ export function buildAxes({
     xAxis: (isVertical
       ? { ...categoryAxis }
       : { ...valueAxis }) as echarts.EChartsOption["xAxis"],
+    // ECharts draws category index 0 at the BOTTOM of a Y axis, which flips
+    // the data order visually (server-sorted desc reads as asc). `inverse`
+    // keeps rows reading top-to-bottom in data order, mirroring how vertical
+    // bars read left-to-right.
     yAxis: (isVertical
       ? { ...valueAxis }
-      : { ...categoryAxis }) as echarts.EChartsOption["yAxis"],
+      : { ...categoryAxis, inverse: true }) as echarts.EChartsOption["yAxis"],
   }
 }
 
