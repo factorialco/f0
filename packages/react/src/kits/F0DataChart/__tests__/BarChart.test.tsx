@@ -288,8 +288,9 @@ describe("BarChart — label placement", () => {
     )
     const series = getMainSeries()[0]
     expect(series?.label?.position).toBe("inside")
-    expect(series?.label?.color).toBe("#000000")
-    expect(series?.emphasis?.label?.color).toBe("#000000")
+    // Palette teal is a mid-tone fill → white text
+    expect(series?.label?.color).toBe("#ffffff")
+    expect(series?.emphasis?.label?.color).toBe("#ffffff")
   })
 
   it("places labels above the bar in the neutral colour when not stacked", () => {

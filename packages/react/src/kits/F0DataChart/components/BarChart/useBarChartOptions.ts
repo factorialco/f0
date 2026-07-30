@@ -28,7 +28,12 @@ const HORIZONTAL_LABEL_GAP = 8
 const ARIA_MAX_SERIES = 10
 const ARIA_MAX_VALUES_PER_SERIES = 20
 
-/** Pick the black/white foreground with the higher contrast against a hex fill. */
+/**
+ * Pick the black/white foreground for text on a colored fill. Prefers white on
+ * mid-tone fills (the strict WCAG crossover at 0.179 reads as "black too
+ * eagerly" on saturated mid-tones like teal or purple); black only wins on
+ * genuinely light fills (e.g. yellow), where white text would be illegible.
+ */
 function readableLabelColor(background: string): "#000000" | "#ffffff" {
   const hex = background.replace("#", "")
   const normalized =
@@ -50,7 +55,7 @@ function readableLabelColor(background: string): "#000000" | "#ffffff" {
     0.7152 * (channels[1] ?? 0) +
     0.0722 * (channels[2] ?? 0)
 
-  return luminance > 0.179 ? "#000000" : "#ffffff"
+  return luminance > 0.4 ? "#000000" : "#ffffff"
 }
 
 function resolveGridRightSpace(
