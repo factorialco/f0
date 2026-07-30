@@ -143,6 +143,44 @@
   @apply text-f1-foreground decoration-f1-border-hover hover:decoration-f1-border-bold cursor-pointer font-medium underline decoration-1 underline-offset-[5px];
 }
 
+/* Font sizes carried by the textStyle mark. A class rather than an inline style
+   because the sanitizer read-only content passes through allows `class` but not
+   `style`. */
+.rich-text-editor-container .f0-fs-12,
+.rich-text-display-container .f0-fs-12 {
+  @apply text-[12px] leading-[16px];
+}
+
+.rich-text-editor-container .f0-fs-14,
+.rich-text-display-container .f0-fs-14 {
+  @apply text-[14px] leading-[20px];
+}
+
+.rich-text-editor-container .f0-fs-16,
+.rich-text-display-container .f0-fs-16 {
+  @apply text-[16px] leading-[24px];
+}
+
+.rich-text-editor-container .f0-fs-18,
+.rich-text-display-container .f0-fs-18 {
+  @apply text-[18px] leading-[26px];
+}
+
+.rich-text-editor-container .f0-fs-20,
+.rich-text-display-container .f0-fs-20 {
+  @apply text-[20px] leading-[28px];
+}
+
+.rich-text-editor-container .f0-fs-24,
+.rich-text-display-container .f0-fs-24 {
+  @apply text-[24px] leading-[32px];
+}
+
+.rich-text-editor-container .f0-fs-29,
+.rich-text-display-container .f0-fs-29 {
+  @apply text-[29px] leading-[39px];
+}
+
 .rich-text-editor-container strong,
 .rich-text-display-container strong {
   @apply font-semibold;
