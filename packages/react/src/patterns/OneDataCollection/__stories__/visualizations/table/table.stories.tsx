@@ -1063,16 +1063,16 @@ export const TableWithCollapsibleHeaderGroupsAndSorting: Story = {
     await waitFor(() => expect(firstTeam()).toContain("Design"))
 
     // Collapsing hides the sorted column, but the order it produced survives.
-    // February stays expanded, so one "Bonuses" header remains — its own.
     await userEvent.click(january)
-    await waitFor(() =>
-      expect(january).toHaveAttribute("aria-expanded", "false")
-    )
-    expect(bonusesHeaders()).toHaveLength(1)
-    expect(bonusesHeaders()[0].closest("th")).not.toHaveAttribute(
-      "aria-sort",
-      "ascending"
-    )
+
+    // The toggle answers the click straight away, while the columns only swap
+    // once the fade reaches its dimmest point — so the count has to be waited
+    // for separately rather than inferred from aria-expanded.
+    expect(january).toHaveAttribute("aria-expanded", "false")
+
+    // February stays expanded, so one "Bonuses" header remains — its own.
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(1))
+    expect(bonusesHeaders()[0]).not.toHaveAttribute("aria-sort", "ascending")
     expect(firstTeam()).toContain("Design")
 
     // Expanding restores January's column with its indicator intact.
