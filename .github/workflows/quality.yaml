@@ -85,6 +85,21 @@ jobs:
         run: pnpm --filter @factorialco/f0-react-native run lint
       - name: Check typescript
         run: pnpm --filter @factorialco/f0-react-native exec tsc --noEmit
+  stable-dod:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Stable Definition of Done"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      # Pure filesystem scan of src/ — no build or Storybook needed.
+      - name: Check the stable DoD ratchet
+        run: pnpm --filter @factorialco/f0-react run check:stable-dod
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch

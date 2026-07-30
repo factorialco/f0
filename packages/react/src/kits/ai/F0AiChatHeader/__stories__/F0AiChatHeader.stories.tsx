@@ -6,13 +6,22 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AiChatHeader } from "../F0AiChatHeader"
 
+// Shared across WithHeaderAction / Compact / Snapshot, so it must be reset per
+// story: WithHeaderAction.play asserts an exact call count and CI retries or a
+// second visit would otherwise inflate it.
+const openRoutines = fn()
+
 const meta = {
   title: "AI/F0AiChatHeader",
   component: F0AiChatHeader,
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
   tags: ["!autodocs", "stable"],
+  beforeEach: () => {
+    openRoutines.mockClear()
+  },
   decorators: [
     (Story) => (
       <div className="w-[480px] rounded-md border border-solid border-f1-border bg-f1-background">
@@ -33,8 +42,6 @@ const SAMPLE_CREDITS = {
   planName: "Enterprise",
   upgradePlanUrl: "https://example.com/upgrade",
 }
-
-const openRoutines = fn()
 
 export const Legacy: Story = {
   args: {
@@ -103,9 +110,16 @@ export const WithHeaderAction: Story = {
 
     await step("Shows the localized action tooltip", async () => {
       await userEvent.hover(action)
-      await expect(await page.findByRole("tooltip")).toHaveTextContent(
-        "Routines"
+      // TooltipInternal opens on a 700ms timer (delay default in
+      // experimental/Overlays/Tooltip), so the 1000ms default findBy timeout
+      // leaves ~300ms of headroom and loses the race under CI load. Wait
+      // explicitly instead of relying on the default.
+      const tooltip = await page.findByRole(
+        "tooltip",
+        {},
+        { timeout: 5000, interval: 50 }
       )
+      await expect(tooltip).toHaveTextContent("Routines")
     })
 
     await step("Invokes the header action", async () => {
