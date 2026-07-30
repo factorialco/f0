@@ -23,6 +23,7 @@ import {
   REPLIES,
   SEED_BY_ID,
   SEEDS,
+  groupReadersFor,
   initialConvState,
   nextId,
   pickRandomTypers,
@@ -242,7 +243,11 @@ export const useMockChatStore = (): MockChatAppValue => {
                 isUserMessage(m) &&
                 m.isMine &&
                 (m.status === "sent" || m.status === "delivered")
-                  ? { ...m, status: "read" }
+                  ? {
+                      ...m,
+                      status: "read",
+                      readBy: groupReadersFor(replySeed, m.author.id),
+                    }
                   : m
             ),
             ...typers.map(
@@ -252,6 +257,7 @@ export const useMockChatStore = (): MockChatAppValue => {
                 body: REPLIES[(s.messages.length + i) % REPLIES.length],
                 createdAt: new Date(Date.now() + i).toISOString(),
                 isMine: false,
+                readBy: groupReadersFor(replySeed, responder.id),
               })
             ),
           ],
@@ -386,6 +392,7 @@ export const useMockChatStore = (): MockChatAppValue => {
             ? new Date(oldest.createdAt).getTime()
             : Date.now()
           const responder = SEED_BY_ID.get(convId)?.participants[0] ?? ME
+          const seed = SEED_BY_ID.get(convId)
           const page: F0ChatMessage[] = Array.from({ length: 12 }, (_, i) => {
             const author = i % 2 === 0 ? responder : ME
             const isMine = author.id === ME.id
@@ -396,6 +403,7 @@ export const useMockChatStore = (): MockChatAppValue => {
               createdAt: new Date(base - (12 - i) * 5 * 60_000).toISOString(),
               isMine,
               status: isMine ? "read" : undefined,
+              readBy: groupReadersFor(seed, author.id),
             }
           })
           return { ...s, messages: [...page, ...s.messages] }

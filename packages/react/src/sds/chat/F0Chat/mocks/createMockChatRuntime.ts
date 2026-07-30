@@ -14,6 +14,7 @@ import {
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 
 /** Seed describing a fake conversation the mock runtime should simulate. */
 export type MockChatSeed = {
@@ -508,6 +509,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
                 name: file.name,
                 size: file.size,
                 mimeType: file.type,
+                thumbnailUrl: file.type.startsWith("video/")
+                  ? "/video-poster.webp"
+                  : undefined,
               }
         })
       ),
@@ -603,7 +607,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
-    maxFiles: 5,
+    maxFiles: 8,
+    // F0Chat stories use the same 100 MB per-file limit as ApplicationFrame.
+    maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     // Same streaming dictation mock the AI chat / RichText stories use.
     transcribe: mockTranscribe,
     markRead,

@@ -131,7 +131,7 @@ export const exampleGroups: SidebarChatGroup[] = [
       {
         id: "devops-sre",
         label: "DevOps & SRE",
-        // No emoji → company avatar built from the group name (its initials).
+        // No emoji or image → the shared chat fallback is a ＃ glyph.
         avatar: { type: "company", name: "DevOps & SRE" },
         unreadCount: 2,
       },

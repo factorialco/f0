@@ -80,6 +80,15 @@ export const SidebarChatItem = ({
 
   // Status — people only; the consumer provides the emoji/icon + label.
   const status = chat.avatar?.type === "person" ? chat.status : undefined
+  const showGroupFallback =
+    (chat.avatar?.type === "team" || chat.avatar?.type === "company") &&
+    !chat.avatar.src
+  const identityEmoji =
+    chat.avatar?.type === "emoji"
+      ? chat.avatar.emoji
+      : showGroupFallback
+        ? "＃"
+        : null
 
   return (
     <div className="group/row relative">
@@ -99,11 +108,19 @@ export const SidebarChatItem = ({
           <Dots />
         ) : chat.avatar ? (
           <div className="relative flex flex-shrink-0 items-center">
-            {chat.avatar.type === "emoji" ? (
+            {identityEmoji ? (
               // Emoji groups show the glyph alone (no avatar chrome) so it isn't
               // shrunk inside the bordered avatar box.
-              <span className="flex size-5 items-center justify-center">
-                <EmojiImage emoji={chat.avatar.emoji} size="sm" />
+              <span
+                aria-hidden={showGroupFallback || undefined}
+                className="flex size-5 text-lg font-medium items-center justify-center text-f1-foreground-secondary"
+                data-testid={
+                  showGroupFallback
+                    ? "sidebar-group-avatar-fallback"
+                    : undefined
+                }
+              >
+                <EmojiImage emoji={identityEmoji} size="sm" />
               </span>
             ) : (
               <F0Avatar size="xs" avatar={chat.avatar} />

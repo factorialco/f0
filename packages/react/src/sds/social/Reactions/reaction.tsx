@@ -1,7 +1,7 @@
 import NumberFlow from "@number-flow/react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { EmojiImage, getEmojiLabel, useEmojiConfetti } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
@@ -15,6 +15,8 @@ export interface ReactionProps {
   initialCount: number
   hasReacted?: boolean
   users?: User[]
+  /** Resolve the complete user list on first hover or keyboard focus. */
+  loadUsers?: () => Promise<User[]>
   onInteraction?: (emoji: string) => void
   size?: "sm" | "md" | "lg"
 }
@@ -24,13 +26,49 @@ export function Reaction({
   initialCount,
   hasReacted = false,
   users,
+  loadUsers,
   onInteraction,
   size = "md",
 }: ReactionProps) {
   const [isActive, setIsActive] = useState(hasReacted)
   const [count, setCount] = useState(initialCount)
+  const [resolvedUsers, setResolvedUsers] = useState(users)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const usersRequestRef = useRef<Promise<User[]> | null>(null)
+  const usersRequestGenerationRef = useRef(0)
   const { fireEmojiConfetti } = useEmojiConfetti()
+
+  useEffect(() => {
+    usersRequestGenerationRef.current += 1
+    setResolvedUsers(users)
+    usersRequestRef.current = null
+  }, [emoji, initialCount, users])
+
+  const loadFullUsers = () => {
+    if (
+      !loadUsers ||
+      usersRequestRef.current ||
+      (resolvedUsers?.length ?? 0) >= initialCount
+    ) {
+      return
+    }
+
+    const request = loadUsers()
+    const requestGeneration = usersRequestGenerationRef.current
+    usersRequestRef.current = request
+    void request
+      .then((nextUsers) => {
+        if (usersRequestGenerationRef.current === requestGeneration) {
+          setResolvedUsers(nextUsers)
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (usersRequestRef.current === request) {
+          usersRequestRef.current = null
+        }
+      })
+  }
 
   const handleClick = (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -46,7 +84,8 @@ export function Reaction({
     }
   }
 
-  const tooltipContent = users?.map((user) => user.name).join(", ") || ""
+  const tooltipContent =
+    resolvedUsers?.map((user) => user.name).join(", ") || ""
 
   const button = (
     <Action
@@ -62,7 +101,8 @@ export function Reaction({
         isActive &&
           "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
       )}
-      aria-label={getEmojiLabel(emoji)}
+      aria-label={`${getEmojiLabel(emoji)}: ${count}`}
+      aria-pressed={isActive}
       prepend={<EmojiImage emoji={emoji} size={size} />}
     >
       <NumberFlow
@@ -79,8 +119,13 @@ export function Reaction({
     </Action>
   )
 
-  return tooltipContent ? (
-    <Tooltip label={tooltipContent}>{button}</Tooltip>
+  return tooltipContent || loadUsers ? (
+    <TooltipInternal
+      label={tooltipContent || getEmojiLabel(emoji)}
+      onOpen={loadFullUsers}
+    >
+      {button}
+    </TooltipInternal>
   ) : (
     button
   )
