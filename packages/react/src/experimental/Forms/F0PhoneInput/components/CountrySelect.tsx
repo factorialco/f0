@@ -1,6 +1,6 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import type { F0SelectItemProps } from "@/components/F0Select"
 import type { CountryCode } from "@/lib/countries"
@@ -53,6 +53,7 @@ export const CountrySelect = ({
   selectCountryRef,
 }: CountrySelectProps) => {
   const i18n = useI18n()
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     if (!selectCountryRef) return undefined
@@ -105,6 +106,7 @@ export const CountrySelect = ({
         options={selectOptions}
         value={value}
         onChange={(next) => onChange(next)}
+        onOpenChange={setOpen}
         disabled={disabled || readOnly}
         showSearchBox
         searchBoxPlaceholder={i18n.phoneInput.searchCountry}
@@ -136,12 +138,15 @@ export const CountrySelect = ({
               {dialCodeFor(value)}
             </span>
           )}
-          <F0Icon
-            icon={ChevronDown}
-            size="sm"
-            color="default"
+          <span
+            className={cn(
+              "flex origin-center items-center transition-transform duration-200",
+              open && "rotate-180"
+            )}
             aria-hidden="true"
-          />
+          >
+            <F0Icon icon={ChevronDown} size="sm" color="default" />
+          </span>
         </span>
       </F0Select>
     </div>
