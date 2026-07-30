@@ -1,0 +1,1020 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./Card.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Card } from "../F0Card"
+import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
+import { Briefcase, Calendar, Envelope, ExternalLink, Office } from "@/icons/app"
+
+<Meta of={Stories} />
+
+# Card
+
+Summarises a single record — an employee, a candidate, a document, a project, a
+board item — as a self-contained surface with an avatar, a title, a description,
+metadata rows, an optional image and a footer of actions. For a filterable,
+paginated collection of records use `OneDataCollection` with its card
+visualization; for page-level or section-level messaging use `F0Alert`; for a
+free-form panel with custom layout use `Card` from `@/ui/Card`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+A card renders its regions in a fixed order, and each one is optional except the
+header:
+
+- **Image band** — shown when `image` is set. Sits flush with the card edges and
+  hosts the options cluster as an overlay.
+- **Header** — `avatar` plus `title` and `description`. The description is
+  clamped to 3 lines (2 when `compact`).
+- **Options cluster** — the `⋯` dropdown (`otherActions`), the selection
+  checkbox (`selectable`) and the bookmark toggle (`bookmark`). It sits at the
+  top-right of the header, or over the image when `image` is set.
+- **Metadata rows** — one row per `metadata` entry: a tooltipped icon plus a
+  value rendered by the shared value-display renderers (text, date, amount,
+  status, tag, tagList, avatarList, progressBar, file, folder…).
+- **Children slot** — free-form content between the metadata and the footer.
+- **Footer** — built from `primaryAction` and `secondaryActions`, separated by a
+  top border.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>title</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Name of the record. Also used as the image <code>alt</code>, as the
+          overlay link's <code>aria-label</code> and as the fallback label of the
+          selection checkbox and the bookmark toggle — always pass it.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>description</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          One line of context under the title. Truncated with an ellipsis after 3
+          lines (2 when <code>compact</code>).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>avatar</code>
+        </td>
+        <td>
+          <code>CardAvatarVariant</code> — <code>AvatarVariant</code> |{" "}
+          <code>{`{ type: "emoji"; emoji }`}</code> |{" "}
+          <code>{`{ type: "file"; file }`}</code> |{" "}
+          <code>{`{ type: "icon"; icon }`}</code> |{" "}
+          <code>{`{ type: "module"; module }`}</code> |{" "}
+          <code>{`{ type: "alert"; variant }`}</code> |{" "}
+          <code>{`{ type: "date"; date }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Leading avatar. Rendered <code>lg</code> above the title, or{" "}
+          <code>sm</code> inline with it when <code>compact</code>. With an{" "}
+          <code>image</code> it overlaps the bottom edge of the image band.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>metadata</code>
+        </td>
+        <td>
+          <code>CardMetadata[]</code> —{" "}
+          <code>{`{ icon?: IconType; property: { type, label, value } }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Display-only rows. <code>label</code> is the tooltip on the icon, not
+          visible text — name the field, not the value. <code>type: "file"</code>{" "}
+          takes no icon.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>children</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Extra content between the metadata and the footer. Interactive elements
+          inside keep working even when the card is a link.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>compact</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Denser layout: smaller padding, a small inline avatar, a single-line
+          title and smaller footer buttons.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>image</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Image URL rendered as a band above the header. Moves the options
+          cluster onto the image as a translucent overlay.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>imageFit</code>
+        </td>
+        <td>
+          <code>
+            "contain" | "cover" | "fit-width" | "fit-height" | "scale-down"
+          </code>
+        </td>
+        <td>
+          <code>"fit-width"</code>
+        </td>
+        <td>—</td>
+        <td>
+          How the image fills the band. Use <code>"cover"</code> when cropping is
+          acceptable and the band must be fully covered.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>imageSize</code>
+        </td>
+        <td>
+          <code>"xs" | "sm" | "md" | "lg" | "xl"</code>
+        </td>
+        <td>
+          <code>"sm"</code>
+        </td>
+        <td>—</td>
+        <td>
+          Fixed height of the image band (96px to 256px). Ignored when{" "}
+          <code>imageAspectRatio="video"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>imageAspectRatio</code>
+        </td>
+        <td>
+          <code>"default" | "video"</code>
+        </td>
+        <td>
+          <code>"default"</code>
+        </td>
+        <td>—</td>
+        <td>
+          <code>"video"</code> constrains the band to 16:9 so cards in a grid
+          keep identical media proportions at any column width.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>blurredBackground</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>true</code>
+        </td>
+        <td>—</td>
+        <td>
+          Fills the empty space around an image that does not cover the band with
+          a blurred copy of it. No effect with <code>imageFit="cover"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>primaryAction</code>
+        </td>
+        <td>
+          <code>{`{ label: string; icon?: IconType; onClick: () => void; variant?: "default" | "outline" }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Main action, pinned at the trailing edge of the footer.{" "}
+          <code>variant="outline"</code> keeps the position without full primary
+          weight.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>secondaryActions</code>
+        </td>
+        <td>
+          <code>CardSecondaryAction[]</code> —{" "}
+          <code>{`{ label; icon?; onClick }[]`}</code> |{" "}
+          <code>CardSecondaryLink</code> —{" "}
+          <code>{`{ label; href; target?; disabled? }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Leading footer content. As an array they render as outline buttons — on
+          desktop every button after the first is icon-only. As a single object
+          with <code>href</code> it renders one text link.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>otherActions</code>
+        </td>
+        <td>
+          <code>DropdownItem[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Items of the <code>⋯</code> dropdown in the options cluster. Supports
+          separators and <code>critical</code> items.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>link</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Destination of a full-card overlay link. The whole body navigates; the
+          footer and the children slot do not.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onClick</code>
+        </td>
+        <td>
+          <code>{`() => void`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Called when the card body is activated. Use it instead of{" "}
+          <code>link</code> when navigation is handled in code (e.g. a
+          drag-and-drop board item).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>selectable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Renders the selection checkbox in the options cluster.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>selected</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Selected state. Fully controlled — tints the card and keeps the
+          checkbox visible without hover.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onSelect</code>
+        </td>
+        <td>
+          <code>{`(selected: boolean) => void`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Called with the next selected state. Required for the checkbox to do
+          anything.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>bookmark</code>
+        </td>
+        <td>
+          <code>{`{ bookmarked: boolean; onBookmarkChange: (bookmarked: boolean) => void; label?: string }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Save toggle in the options cluster: outline icon when unsaved, filled
+          when saved. Controlled. <code>label</code> is its accessible name and
+          falls back to <code>title</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>alert</code>
+        </td>
+        <td>
+          <code>CardAlertProps</code> —{" "}
+          <code>{`{ variant: "info" | "warning" | "critical" | "positive"; title: string; icon?; visible? }`}</code>{" "}
+          plus either{" "}
+          <code>{`{ dismissible: true; onDismiss }`}</code> or{" "}
+          <code>{`{ action: { label; disabled?; onClick | href } }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Coloured header strip above the card plus a matching 2px border. Use it
+          for a condition attached to this record, not to the page.{" "}
+          <code>dismissible</code> and <code>action</code> are mutually
+          exclusive.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>fullHeight</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Stretches the card to its container's height so cards in a grid row
+          align, regardless of content length.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>subtleBorder</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Softer border (<code>border-f1-border-secondary</code>). Use on dense
+          grids where the default border reads as noise.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dataTestId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Test hook applied to the card root. Prefer it over class-based
+          selectors in tests.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+`F0Card.Skeleton` renders the loading placeholder. It accepts only `compact` and
+is not configured through the props above.
+
+### Densities
+
+<Canvas of={Stories.Compact} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Layout</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>default</code>
+        </td>
+        <td>
+          16px padding, large avatar stacked above the title, description up to 3
+          lines, medium footer buttons.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>compact</code>
+        </td>
+        <td>
+          12px padding, small avatar inline with a single-line title, description
+          up to 2 lines, small footer buttons. Fits sidebars, drawers and
+          multi-column boards.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Alert variants
+
+<Canvas of={Stories.AlertVariants} />
+
+Each variant tints the header strip and forces a 2px border on the card in the
+matching colour, so the affected record is identifiable while scanning a grid.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Variant</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>info</code>
+        </td>
+        <td>
+          Context about this record that needs no action ("Imported from
+          Workday")
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>warning</code>
+        </td>
+        <td>
+          Something will go wrong if the record is left as it is ("Contract
+          expires in 5 days")
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>critical</code>
+        </td>
+        <td>
+          A process on this record already failed or data is at risk ("Payslip
+          delivery failed")
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>positive</code>
+        </td>
+        <td>
+          A process on this record completed ("Time off approved for the whole
+          period")
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0Card when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Employee or candidate summary in a grid</td>
+        <td>
+          A person needs to be recognisable at a glance — avatar, name, role,
+          location — before opening the full profile
+        </td>
+      </tr>
+      <tr>
+        <td>Document or file entry</td>
+        <td>
+          The record is a file and the type must be obvious — pass{" "}
+          <code>{`avatar={{ type: "file", file }}`}</code> or a{" "}
+          <code>file</code> metadata property
+        </td>
+      </tr>
+      <tr>
+        <td>Project, goal or budget tile</td>
+        <td>
+          Progress is part of the summary — a <code>progressBar</code> metadata
+          row shows completion without opening the record
+        </td>
+      </tr>
+      <tr>
+        <td>A record carries a condition that must stay visible</td>
+        <td>
+          The message belongs to this record, not to the page — pass{" "}
+          <code>alert</code> so the border and strip mark the card while scanning
+        </td>
+      </tr>
+      <tr>
+        <td>Draggable item on a board or kanban lane</td>
+        <td>
+          Drag-and-drop owns the pointer, so navigation goes through{" "}
+          <code>onClick</code> instead of <code>link</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A list of records with filters, search, sorting or pagination</td>
+        <td>
+          <code>OneDataCollection</code> with the card visualization — it renders
+          F0Card for you and owns the data layer
+        </td>
+      </tr>
+      <tr>
+        <td>One record per row, scanned by column</td>
+        <td>
+          <code>OneDataCollection</code> with the table visualization
+        </td>
+      </tr>
+      <tr>
+        <td>Message about the page or section, not about one record</td>
+        <td>
+          <code>F0Alert</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Decision that must be resolved before continuing</td>
+        <td>
+          <code>F0Dialog</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Free-form panel: custom layout, long form content, charts</td>
+        <td>
+          <code>Card</code>, <code>CardHeader</code> and <code>CardContent</code>{" "}
+          from <code>@/ui/Card</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  stacked
+  do={{
+    description:
+      "Match the alert variant to what has actually happened to the record.",
+    guidelines: [
+      'variant="info" — context only, nothing to do',
+      'variant="warning" — something will go wrong if the record is left as it is',
+      'variant="critical" — a process already failed or data is at risk',
+      'variant="positive" — a process on this record completed',
+    ],
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <F0Card
+          avatar={{ type: "person", firstName: "Marta", lastName: "Ruiz" }}
+          title="Marta Ruiz"
+          description="Design Engineer · Barcelona"
+          alert={{ variant: "warning", title: "Contract expires in 5 days" }}
+          metadata={[
+            {
+              icon: Calendar,
+              property: {
+                type: "text",
+                label: "End date",
+                value: "12 Aug 2026",
+              },
+            },
+          ]}
+        />
+      </I18nProvider>
+    ),
+  }}
+  dont={{
+    description:
+      "Don't escalate the variant to attract attention. Critical on every card leaves nothing to prioritise, and the coloured border is what people scan first.",
+    guidelines: [
+      "Don't use critical when nothing has failed yet",
+      "Don't use an alert for something that applies to every card on the page — that belongs in F0Alert",
+    ],
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <F0Card
+          avatar={{ type: "person", firstName: "Marta", lastName: "Ruiz" }}
+          title="Marta Ruiz"
+          description="Design Engineer · Barcelona"
+          alert={{ variant: "critical", title: "Contract expires in 5 days" }}
+          metadata={[
+            {
+              icon: Calendar,
+              property: {
+                type: "text",
+                label: "End date",
+                value: "12 Aug 2026",
+              },
+            },
+          ]}
+        />
+      </I18nProvider>
+    ),
+  }}
+/>
+
+<DoDonts
+  stacked
+  do={{
+    description:
+      "Keep the footer to one primary action plus one secondary, and move the rest into otherActions.",
+    guidelines: [
+      "One primaryAction — the thing the card exists to trigger",
+      "One secondaryActions entry, or a single link when the alternative is just navigation",
+      "Everything else goes in the ⋯ dropdown, where items keep their labels",
+    ],
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <F0Card
+          title="Time off request"
+          description="Marta Ruiz · 12–16 Aug · 5 days"
+          primaryAction={{ label: "Approve", onClick: () => {} }}
+          secondaryActions={[{ label: "View request", onClick: () => {} }]}
+        />
+      </I18nProvider>
+    ),
+  }}
+  dont={{
+    description:
+      "Don't stack several secondary actions in the footer. On desktop every secondary button after the first drops its label and becomes icon-only, so the actions stop being readable.",
+    guidelines: [
+      "Don't rely on icons alone to explain an action",
+      "Don't add a secondary action without an icon in position two or later — it renders as an empty button",
+    ],
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <F0Card
+          title="Time off request"
+          description="Marta Ruiz · 12–16 Aug · 5 days"
+          primaryAction={{ label: "Approve", onClick: () => {} }}
+          secondaryActions={[
+            { label: "View request", icon: ExternalLink, onClick: () => {} },
+            { label: "Reject", icon: Envelope, onClick: () => {} },
+            { label: "Reassign", icon: Briefcase, onClick: () => {} },
+          ]}
+        />
+      </I18nProvider>
+    ),
+  }}
+/>
+
+### Content best practices
+
+- **Title**: the record's own name, sentence case, no period. Never the name of
+  the concept the card represents
+  - **Correct:** "Marta Ruiz", "Q3 payroll closing", "Employment contract.pdf"
+  - **Incorrect:** "Employee card", "Payroll", "Document"
+- **Description**: one line of context that the title does not already give
+  - **Correct:** "Design Engineer · Barcelona", "Closes 31 Oct · 214 employees"
+  - **Incorrect:** "Marta Ruiz", "This is a card about an employee"
+- **Metadata label**: the tooltip on the icon, so it must name the field, not
+  repeat the value
+  - **Correct:** `label: "Start date"` with `value: "3 May 2024"`
+  - **Incorrect:** `label: "3 May 2024"`
+- **Primary action label**: verb-first, no articles
+  - **Correct:** "Approve", "Refer", "Request signature"
+  - **Incorrect:** "OK", "Action", "Click to approve"
+- **Secondary link label**: describes the destination
+  - **Correct:** "View request", "See all payslips"
+  - **Incorrect:** "Click here", "More"
+- **Bookmark label**: names the object being saved, because the button is
+  icon-only
+  - **Correct:** `label: "Save candidate"`
+  - **Incorrect:** omitting it when `title` alone reads as a person's name
+
+<DoDonts
+  stacked
+  do={{
+    description:
+      "Title the record, describe it with information the title does not carry, and label the action with the verb it performs.",
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <F0Card
+          avatar={{ type: "person", firstName: "Marta", lastName: "Ruiz" }}
+          title="Marta Ruiz"
+          description="Design Engineer · Barcelona"
+          metadata={[
+            {
+              icon: Office,
+              property: {
+                type: "tag",
+                label: "Team",
+                value: { label: "Product Design" },
+              },
+            },
+          ]}
+          primaryAction={{ label: "Approve", onClick: () => {} }}
+        />
+      </I18nProvider>
+    ),
+  }}
+  dont={{
+    description:
+      "Don't title the card with the type of record and then spend the description on the name. The card becomes unscannable in a grid and the action says nothing about what it does.",
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <F0Card
+          avatar={{ type: "person", firstName: "Marta", lastName: "Ruiz" }}
+          title="Employee card"
+          description="Marta Ruiz"
+          metadata={[
+            {
+              icon: Office,
+              property: {
+                type: "tag",
+                label: "Product Design",
+                value: { label: "Product Design" },
+              },
+            },
+          ]}
+          primaryAction={{ label: "OK", onClick: () => {} }}
+        />
+      </I18nProvider>
+    ),
+  }}
+/>
+
+### Behavior
+
+- The card body is clickable as a whole only when `link` or `onClick` is set.
+  Without either, it keeps the default cursor and the header gets no
+  `role="button"`.
+- `link` renders a full-card overlay link, so the title, the description, the
+  metadata rows and the empty space all navigate — not just the title.
+- The footer sits above the overlay link and stops click propagation. Clicking
+  anywhere in the footer band never navigates the card; only its own buttons or
+  link act.
+- The children slot also stops propagation. Pointer events are re-enabled for
+  `a`, `button`, `input`, `select`, `textarea`, `[role="button"]` and
+  `[tabindex]` inside it, so interactive children keep working inside a linked
+  card.
+- Metadata clicks bubble up and navigate the card, except when the target is an
+  `a[href]`, a form field or an `aria-haspopup` trigger — so `tagList` and
+  `avatarList` overflow popovers keep their own behaviour.
+- `alert` wraps the card in an outer element and the forwarded `ref` moves to
+  that wrapper while the alert is visible. Dismissal is fully controlled: the
+  `onDismiss` callback does nothing on its own until the parent flips `visible`
+  (or drops `alert`).
+- `imageSize` is ignored when `imageAspectRatio="video"`, and
+  `blurredBackground` only applies to `contain`, `fit-width`, `fit-height` and
+  `scale-down` — never to `cover`, which already fills the band.
+- The options cluster fades in on hover from the `sm` breakpoint up, and stays
+  visible while the dropdown is open, the card is selected or the card is
+  bookmarked. On mobile it is always visible.
+- On desktop, secondary actions after the first render icon-only
+  (`hideLabel`); on mobile all footer buttons render full width with labels.
+
+### Usage examples
+
+**Actions in the footer**
+
+A primary action plus secondary actions, separated from the body by a border.
+Keep the primary as the one thing the card exists to trigger.
+
+<Canvas of={Stories.WithActions} />
+
+**Whole card as a link**
+
+`link` makes the entire body navigate. Pass `title` too — it becomes the
+accessible name of the overlay link.
+
+<Canvas of={Stories.WithLink} />
+
+```tsx
+<F0Card
+  title="Marta Ruiz"
+  description="Design Engineer · Barcelona"
+  link="/employees/marta-ruiz"
+/>
+```
+
+**Bulk selection**
+
+`selectable` shows the checkbox; `selected` and `onSelect` are controlled by the
+list that owns the selection.
+
+<Canvas of={Stories.Selectable} />
+
+```tsx
+const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+<F0Card
+  title={employee.fullName}
+  selectable
+  selected={selectedIds.includes(employee.id)}
+  onSelect={(selected) =>
+    setSelectedIds((ids) =>
+      selected ? [...ids, employee.id] : ids.filter((id) => id !== employee.id)
+    )
+  }
+/>
+```
+
+**Save for later**
+
+The bookmark toggle stays visible while active, so saved records are
+recognisable without hovering.
+
+<Canvas of={Stories.Bookmarkable} />
+
+**Media header**
+
+`imageAspectRatio="video"` with `imageFit="cover"` keeps every card in a grid at
+the same 16:9 media proportion whatever the source image is.
+
+<Canvas of={Stories.WithAspectRatio16x9} />
+
+**Interactive content inside a linked card**
+
+Links, switches and form fields inside `children` keep their own behaviour and
+do not trigger card navigation.
+
+<Canvas of={Stories.WithInteractiveChildren} />
+
+**Per-record alert with controlled dismiss**
+
+`dismissible` renders the close button, but hiding the alert is the parent's
+job — keep `visible` in state.
+
+<Canvas of={Stories.WithDismissibleAlert} />
+
+```tsx
+const [visible, setVisible] = useState(true)
+
+<F0Card
+  title="Marta Ruiz"
+  alert={{
+    variant: "critical",
+    title: "Contract expires soon",
+    dismissible: true,
+    visible,
+    onDismiss: () => setVisible(false),
+  }}
+/>
+```
+
+**Loading placeholder**
+
+Render `F0Card.Skeleton` while the record loads, with the same `compact` value
+as the real card so the layout does not shift.
+
+<Canvas of={Stories.Skeleton} />
+
+```tsx
+{isLoading ? <F0Card.Skeleton /> : <F0Card {...cardProps} />}
+```
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Moves through the card's focusable elements in DOM order: the overlay
+          link (when <code>link</code> is set), the options cluster (
+          <code>⋯</code>, checkbox, bookmark), interactive children, then the
+          footer actions
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd>
+        </td>
+        <td>
+          Navigates from the focused overlay link, and activates the focused
+          header of an interactive card
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Space</kbd>
+        </td>
+        <td>
+          Activates the focused header of an interactive card; toggles the
+          selection checkbox and the bookmark button
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>
+          Closes the <code>⋯</code> dropdown and returns focus to its trigger
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- With `link`, the overlay link takes `title` as its `aria-label`. A card with
+  `link` and no `title` ships an unlabelled link — always pass `title`.
+- The header receives `role="button"` and an `aria-label` of `title` only while
+  the card is interactive (`link` or `onClick`). A display-only card stays a
+  plain region.
+- The three options are icon-only with hidden labels: the `⋯` trigger uses the
+  translated "Other actions" label, the checkbox uses `title`, and the bookmark
+  uses `bookmark.label`, then `title`, then the translated "Save". Pass
+  `bookmark.label` whenever `title` alone would not say what is being saved —
+  "Save candidate", not "Marta Ruiz".
+- The alert strip renders `role="alert"` for `critical` and `warning`, and
+  `role="status"` for `info` and `positive`, so it is announced when it appears.
+  Do not wrap the card in an extra `aria-live` region.
+- The alert icon is decorative — the alert `title` must carry the meaning on its
+  own.
+- The image uses `title` as its `alt`. There is no separate alt prop, so a card
+  with an image needs a `title` that describes the record.
+- `F0Card.Skeleton` sets `aria-busy="true"` and `aria-live="polite"`, so the
+  transition from placeholder to loaded content is announced.
