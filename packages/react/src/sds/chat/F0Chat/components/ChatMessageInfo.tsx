@@ -9,7 +9,6 @@ import { cn, focusRing } from "@/lib/utils"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { formatSeparator } from "../utils/natural-time"
-import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
 const InfoRow = ({
   label,
@@ -29,12 +28,8 @@ const InfoRow = ({
 )
 
 const ReaderIdentity = ({ user }: { user: F0ChatUser }): ReactNode => {
-  const className = cn(
-    "flex w-full items-center gap-2 rounded-md px-0 py-1.5 text-f1-foreground no-underline",
-    focusRing("focus-visible:ring-inset")
-  )
-  const content = (
-    <>
+  return (
+    <div className="flex w-full items-center gap-2 px-0 py-1.5 text-f1-foreground">
       <F0Avatar
         size="sm"
         avatar={
@@ -46,22 +41,7 @@ const ReaderIdentity = ({ user }: { user: F0ChatUser }): ReactNode => {
         }
       />
       <span className="text-base font-normal">{user.name}</span>
-      {user.subtitle && <span className="sr-only">, {user.subtitle}</span>}
-    </>
-  )
-
-  return (
-    <ChatUserHoverCard user={user}>
-      {user.profileHref ? (
-        <a className={className} href={user.profileHref}>
-          {content}
-        </a>
-      ) : (
-        <span className={className} tabIndex={0}>
-          {content}
-        </span>
-      )}
-    </ChatUserHoverCard>
+    </div>
   )
 }
 

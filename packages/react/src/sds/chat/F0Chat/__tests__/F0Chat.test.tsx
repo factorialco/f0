@@ -1199,43 +1199,30 @@ describe("F0Chat", () => {
     const readers = screen.getByRole("list", { name: /read by 2/i })
     const infoPanel = screen.getByRole("region", { name: /info/i })
     expect(infoPanel).toHaveAttribute("tabindex", "0")
-    const grace = within(readers).getByRole("link", {
-      name: /Grace Liang/i,
-    })
-    const marcus = within(readers).getByText("Marcus Bennett").parentElement!
-    expect(grace).toHaveAttribute("href", "/people/grace")
-    expect(marcus).toHaveAttribute("tabindex", "0")
+    const graceRow = within(readers).getByText("Grace Liang").parentElement!
+    expect(graceRow).toBeVisible()
+    expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
+    expect(within(readers).queryByRole("link")).not.toBeInTheDocument()
     expect(
-      within(readers).queryByRole("link", { name: /Marcus Bennett/i })
+      readers.querySelector(
+        '[tabindex], button, a, input, select, textarea, [role="button"], [role="link"], [contenteditable="true"]'
+      )
     ).not.toBeInTheDocument()
 
-    await userEvent.hover(grace)
-    expect(await screen.findByText("Data Analyst")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /view profile/i })).toHaveAttribute(
-      "href",
-      "/people/grace"
-    )
-    await userEvent.unhover(grace)
-    await waitFor(() =>
-      expect(screen.queryByText("Data Analyst")).not.toBeInTheDocument()
-    )
+    await userEvent.hover(graceRow)
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    expect(screen.queryByText("Data Analyst")).not.toBeInTheDocument()
+    expect(screen.queryByText("Engineering Manager")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: /view profile/i })
+    ).not.toBeInTheDocument()
 
     const backButton = screen.getByRole("button", { name: /^back$/i })
     expect(backButton).toHaveFocus()
     await userEvent.tab()
     expect(infoPanel).toHaveFocus()
     await userEvent.tab()
-    expect(grace).toHaveFocus()
-    expect(await screen.findByText("Data Analyst")).toBeInTheDocument()
-
-    await userEvent.tab()
-    expect(marcus).toHaveFocus()
-    expect(await screen.findByText("Engineering Manager")).toBeInTheDocument()
-    await waitFor(() =>
-      expect(
-        screen.queryByRole("link", { name: /view profile/i })
-      ).not.toBeInTheDocument()
-    )
+    expect(readers.contains(document.activeElement)).toBe(false)
   })
 
   it("shows read with the time once every channel member has read it", () => {

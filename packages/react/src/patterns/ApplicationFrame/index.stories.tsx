@@ -2110,7 +2110,7 @@ export const CommunicationsReceiptsAndReactions: Story = {
       await userEvent.tab()
     })
 
-    await step("Show the people who read a group message", async () => {
+    await step("Show static reader identities", async () => {
       const message = await canvas.findByText(/And the kickoff deck/)
       await userEvent.hover(message)
       const actionButtons = await canvas.findAllByRole("button", {
@@ -2135,30 +2135,32 @@ export const CommunicationsReceiptsAndReactions: Story = {
       )
       await expect(readers.scrollHeight).toBe(readers.clientHeight)
       await expect(readers).not.toHaveAttribute("tabindex")
-      const grace = within(readers).getByRole("link", {
-        name: /Grace Liang/i,
-      })
-      await expect(grace).toHaveAttribute("href", "/people/u_grace")
+      const graceRow = within(readers).getByText("Grace Liang").parentElement!
+      await expect(graceRow).toBeVisible()
       await expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
       await expect(within(readers).getByText("Sam Okafor")).toBeVisible()
+      await expect(within(readers).queryByRole("link")).not.toBeInTheDocument()
+      await expect(
+        readers.querySelector(
+          '[tabindex], button, a, input, select, textarea, [role="button"], [role="link"], [contenteditable="true"]'
+        )
+      ).not.toBeInTheDocument()
       const backButton = page.getByRole("button", { name: /^back$/i })
       await expect(backButton).toHaveFocus()
 
-      await userEvent.hover(grace)
-      await waitFor(() => expect(page.getByText("Data Analyst")).toBeVisible())
+      await userEvent.hover(graceRow)
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      await expect(page.queryByText("Data Analyst")).not.toBeInTheDocument()
       await expect(
-        page.getByRole("link", { name: /view profile/i })
-      ).toHaveAttribute("href", "/people/u_grace")
-      await userEvent.unhover(grace)
-      await waitFor(() =>
-        expect(page.queryByText("Data Analyst")).not.toBeInTheDocument()
-      )
+        page.queryByRole("link", { name: /view profile/i })
+      ).not.toBeInTheDocument()
 
       await userEvent.tab()
       await expect(infoPanel).toHaveFocus()
       await userEvent.tab()
-      await expect(grace).toHaveFocus()
-      await waitFor(() => expect(page.getByText("Data Analyst")).toBeVisible())
+      await expect(readers.contains(readers.ownerDocument.activeElement)).toBe(
+        false
+      )
       infoPanel.scrollTop = infoPanel.scrollHeight
       await expect(infoPanel.scrollTop).toBeGreaterThan(0)
       const lastReader = within(readers).getByText("Demo Reader 42")

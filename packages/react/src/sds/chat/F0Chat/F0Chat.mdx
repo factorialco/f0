@@ -185,7 +185,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.
 - WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent · time`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
 - WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
-- WHEN hovering or focusing a reader identity in message Info → THEN F0 displays the same profile card used by message authors; readers with a profile are links, preserving a persistent keyboard and touch action.
+- WHEN reader identities appear in message Info → THEN each row displays only the reader avatar and name, without links or hover cards.
 - WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
 - WHEN reaction users are incomplete and `loadReactionUsers` exists → THEN F0 loads and caches identities by channel, message, emoji, and reaction count.
 - WHEN the reaction count or channel changes → THEN F0 invalidates the related identity cache.
