@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.70.0](https://github.com/factorialco/f0/compare/f0-react-v4.69.0...f0-react-v4.70.0) (2026-07-30)
+
+
+### Features
+
+* **F0DataChart:** polish bar chart labels, tooltips & grid ([#4810](https://github.com/factorialco/f0/issues/4810)) ([b56bf71](https://github.com/factorialco/f0/commit/b56bf71de3207fbd7896b6184c351769e1989f0f))
+
 ## [4.69.0](https://github.com/factorialco/f0/compare/f0-react-v4.68.1...f0-react-v4.69.0) (2026-07-30)
 
 
