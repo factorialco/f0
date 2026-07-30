@@ -189,6 +189,13 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    */
   hideSubmitButton?: boolean
   /**
+   * When true, the submit button is only visible once the form has unsaved changes.
+   * It goes back to hidden after a successful submit.
+   * Ignored when `hideSubmitButton` is true.
+   * @default false
+   */
+  showSubmitWhenDirty?: boolean
+  /**
    * When true, hides the internal action bar (loading/success feedback).
    * Useful when the parent component provides its own action bar.
    * @default false
