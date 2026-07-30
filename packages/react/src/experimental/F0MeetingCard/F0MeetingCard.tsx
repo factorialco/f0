@@ -163,11 +163,7 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
           />
         ))}
         {showsJoin && join && (
-          <MeetingJoinButton
-            join={join}
-            disabled={joinDisabled}
-            compact={compact}
-          />
+          <MeetingJoinButton join={join} disabled={joinDisabled} />
         )}
       </>
     )

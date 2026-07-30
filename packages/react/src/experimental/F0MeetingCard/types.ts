@@ -76,8 +76,9 @@ export interface F0MeetingCardProps
   /**
    * Dense layout for embedding the card inline or in a tight list: the headline
    * and the relative time sit on one line (wrapping when they don't fit),
-   * attendees shrink to `xs`, the footer band is dropped and the state travels
-   * with the headline, and the join button drops to `outline` emphasis.
+   * attendees shrink to `xs`, and the footer band is dropped so the state travels
+   * with the headline. The join button keeps the same emphasis as in the regular
+   * layout.
    * @default false
    */
   compact?: boolean

@@ -119,7 +119,7 @@ const meta: Meta<typeof F0MeetingCard> = {
     compact: {
       control: "boolean",
       description:
-        "Dense single-row layout: headline and relative time share a line, avatars shrink to `xs`, no footer band, and Join drops to `outline`.",
+        "Dense single-row layout: headline and relative time share a line, avatars shrink to `xs`, and there is no footer band.",
       table: { defaultValue: { summary: "false" } },
     },
   },
@@ -198,9 +198,9 @@ export const InProgress: Story = {
 
 /**
  * `compact` is the dense layout for embedding the card inline or in a tight
- * list: headline and relative time share one line, attendees shrink to `xs`,
- * there is no footer band, and Join drops to `outline` so it doesn't shout over
- * its host. A running meeting with no title of its own reads "Call in progress".
+ * list: headline and relative time share one line, attendees shrink to `xs`, and
+ * there is no footer band. A running meeting with no title of its own reads
+ * "Call in progress".
  */
 export const Compact: Story = {
   args: {

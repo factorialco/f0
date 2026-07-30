@@ -12,26 +12,19 @@ import type { MeetingJoin } from "../types"
 export const MeetingJoinButton = ({
   join,
   disabled,
-  compact = false,
 }: {
   join: MeetingJoin
   disabled: boolean
-  /**
-   * Drops the button to `outline` emphasis. A compact card is embedded inside
-   * denser surroundings, where a solid primary would shout over its host.
-   */
-  compact?: boolean
 }) => {
   const { meetingCard } = useI18n()
   const label = join.label ?? meetingCard.join
-  const variant = compact ? "outline" : "default"
 
   if (join.href && !disabled) {
     return (
       <F0Button
         label={label}
         icon={VideoRecorder}
-        variant={variant}
+        variant="default"
         size="sm"
         href={join.href}
       />
@@ -42,7 +35,7 @@ export const MeetingJoinButton = ({
     <F0Button
       label={label}
       icon={VideoRecorder}
-      variant={variant}
+      variant="default"
       size="sm"
       disabled={disabled}
       onClick={join.onJoin}
