@@ -1,0 +1,438 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0BigNumber.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0BigNumber } from ".."
+
+<Meta of={Stories} />
+
+# BigNumber
+
+Presents a single headline metric — headcount, payroll cost, absence rate — with
+an optional comparison against a previous period and the percentage change
+between the two. For the shape of a metric over time use `LineChartWidget` or
+`AreaChartWidget`; for the change on its own, inside a table cell or a dense
+list, use `F0TagBalance`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>Numeric | NumberWithFormatter | number</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          The headline figure. Rendered bold at <code>text-2xl</code> and
+          formatted to at most 2 decimal places. Pass an object with{" "}
+          <code>units</code> and <code>unitsPosition</code> to attach a currency
+          or unit symbol instead of writing it into the label.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Name of the metric, rendered above the figure. Omitted entirely when
+          not provided, so the figure needs a label somewhere else in the
+          surface.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>comparison</code>
+        </td>
+        <td>
+          <code>Numeric | NumberWithFormatter | number</code>
+        </td>
+        <td>—</td>
+        <td>Yes (in the type)</td>
+        <td>
+          The baseline figure the headline is measured against. When it resolves
+          to a number the balance tag renders next to the value; when it resolves
+          empty (<code>undefined</code>, <code>null</code>, or an object with no
+          value) nothing extra renders, so passing nothing is the supported way
+          to show a bare metric.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>comparisonHint</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Short text rendered outside the balance tag, naming the baseline
+          period ("vs last month"). Dropped when the comparison resolves empty.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>trend</code>
+        </td>
+        <td>
+          <code>boolean | {"{ show?: boolean; invertStatus?: boolean }"}</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Adds the period-over-period percentage and the direction arrow inside
+          the balance tag. Use the object form with{" "}
+          <code>invertStatus: true</code> for metrics where a decrease is the
+          good outcome.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dataTestId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Sets <code>data-testid</code> on the rendered root for end-to-end
+          tests.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+The rendered output has three parts, stacked and then wrapped on narrow
+containers:
+
+- **Label line** — the metric name, plain text above the figure.
+- **Value** — the formatted figure, bold and larger than everything around it.
+- **Balance tag** — `F0TagBalance` with the direction arrow, the percentage and
+  the comparison amount joined by a middle dot, plus `comparisonHint` as sibling
+  text outside the tag.
+
+Loading is a static sub-component, not a prop: render `<F0BigNumber.Skeleton />`
+while the figure is being fetched.
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use BigNumber when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Headline KPI at the top of a people or payroll dashboard</td>
+        <td>
+          One figure carries the summary and should be readable before anything
+          else on the page (total headcount, monthly payroll cost)
+        </td>
+      </tr>
+      <tr>
+        <td>A metric that has a meaningful previous period</td>
+        <td>
+          The baseline is the immediately previous period of equal length, so the
+          comparison is fair (absence rate this month vs last month)
+        </td>
+      </tr>
+      <tr>
+        <td>A metric whose direction of change carries meaning</td>
+        <td>
+          Going up or down is itself the message and should be colored
+          accordingly (voluntary turnover down, engagement score up)
+        </td>
+      </tr>
+      <tr>
+        <td>Summary figure in a widget header above a chart</td>
+        <td>
+          The chart shows the distribution and the figure states the total, so
+          the two are read together
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The shape of the metric across many periods matters</td>
+        <td>
+          <code>LineChartWidget</code> or <code>AreaChartWidget</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Only the change is needed, inside a table cell or a dense list</td>
+        <td>
+          <code>F0TagBalance</code>
+        </td>
+      </tr>
+      <tr>
+        <td>The figure sits inside running copy or an editable field</td>
+        <td>
+          <code>F0Text</code> for read-only copy, <code>F0NumberInput</code> for
+          input
+        </td>
+      </tr>
+      <tr>
+        <td>There is no comparable previous period</td>
+        <td>
+          Omit <code>comparison</code> so no balance tag renders — never invent a
+          baseline to fill the slot
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Make the comparison an honest, equal-length previous period and set the status direction to match the metric.",
+    guidelines: [
+      "Compare against the immediately previous period of the same length: this month vs last month, Q3 vs Q2",
+      "Compare the same metric under the same filters — do not switch scope between value and comparison",
+      "Set trend={{ show: true, invertStatus: true }} for metrics where a drop is good: absence rate, voluntary turnover, overtime hours, time to hire",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't leave the reader to work out what the percentage is measured against, or what a drop means.",
+    guidelines: [
+      "Don't compare a partial period against a full one — a mid-month figure against a closed month reads as a collapse",
+      "Don't leave the default status on inverted metrics — falling turnover would be colored as a negative result",
+      "Don't show trend without a comparisonHint naming the baseline period",
+    ],
+  }}
+/>
+
+### Content best practices
+
+- Name the metric and its scope in `label`, in sentence case and with no period
+  - **Correct:** "Payroll cost", "Absence rate", "Headcount · Engineering"
+  - **Incorrect:** "Total", "TOTAL PAYROLL COST", "This is the payroll cost."
+- Keep `comparisonHint` to a short prepositional phrase naming the baseline
+  - **Correct:** "vs last month", "vs Q3", "vs same month last year"
+  - **Incorrect:** "comparison", "compared to the previous month of the current
+    fiscal year"
+- Put currency and units in `value.units` with `unitsPosition`, not in the label
+  text
+  - **Correct:** `label: "Payroll cost"` with
+    `value: { value: 1284000, units: "€", unitsPosition: "prepend" }`
+  - **Incorrect:** `label: "Payroll cost in euros (€)"`
+
+<DoDonts
+  do={{
+    description:
+      "Name the metric and the baseline period, and let the units ride on the value.",
+    children: (
+      <F0BigNumber
+        label="Payroll cost"
+        value={{ value: 1284000, units: "€", unitsPosition: "prepend" }}
+        comparison={{
+          numericValue: {
+            value: 1197500,
+            units: "€",
+            unitsPosition: "prepend",
+          },
+        }}
+        comparisonHint="vs January"
+        trend
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't wrap the metric name in a sentence, drop the units from the value, or turn the hint into prose — the figure stops being readable at a glance and the baseline stays unclear.",
+    children: (
+      <F0BigNumber
+        label="Total amount of money spent on payroll in euros"
+        value={{ value: 1284000 }}
+        comparison={{ numericValue: { value: 1197500 } }}
+        comparisonHint="compared with the amount registered during the previous month"
+        trend
+      />
+    ),
+  }}
+  stacked
+/>
+
+### Behavior
+
+- WHEN `comparison` resolves to a number → THEN the balance tag renders next to
+  the value. WHEN it resolves empty → THEN only the label and the value render,
+  and `comparisonHint` is dropped with it.
+- WHEN `trend` is `true` or `{ show: true }` and both `value` and `comparison`
+  resolve to non-zero numbers → THEN the tag shows
+  `((value - comparison) / comparison) * 100` with an up or down arrow.
+- WHEN the baseline is `0` (or the value is `0`) → THEN the percentage is
+  silently dropped and the tag renders neutral with the comparison amount only.
+  A metric that starts a period at zero shows no growth figure, so state the
+  baseline in `comparisonHint` rather than relying on the percentage.
+- WHEN `trend` is omitted or `false` → THEN the comparison amount still renders
+  in the tag, with no percentage and no arrow.
+- WHEN `invertStatus` is `true` → THEN only the color flips. The arrow keeps
+  following the sign of the change, so a decrease still points down while being
+  colored as a positive result.
+- The value is formatted to at most 2 decimal places and the percentage to 0, so
+  the percentage is a rounded summary and never a precise figure.
+- Number formatting follows the locale from `L10nProvider`, which defaults to
+  English separators when no provider is present.
+- `animated` on `NumberWithFormatter` is accepted by the type but never read —
+  it has no effect on rendering.
+
+### Usage examples
+
+**Comparison without a trend**
+
+Show the previous period's figure next to the current one when the raw baseline
+is what matters and a percentage would over-dramatize a small absolute change.
+
+<Canvas of={Stories.WithComparison} />
+
+```tsx
+<F0BigNumber
+  label="Payroll cost"
+  value={{ value: 1284000, units: "€", unitsPosition: "prepend" }}
+  comparison={{
+    numericValue: { value: 1197500, units: "€", unitsPosition: "prepend" },
+  }}
+  comparisonHint="vs last month"
+/>
+```
+
+**Period-over-period change**
+
+Set `trend` when the direction and size of the change are the point — a
+dashboard tile that has to answer "is this going up or down?" at a glance.
+
+<Canvas of={Stories.WithTrend} />
+
+```tsx
+<F0BigNumber
+  label="Headcount"
+  value={412}
+  comparison={{ numericValue: { value: 388 } }}
+  comparisonHint="vs last quarter"
+  trend
+/>
+```
+
+**Metrics where a decrease is good**
+
+Absence rate, voluntary turnover, overtime hours and time to hire all improve
+when they fall. Pass `invertStatus` so the drop is colored as a positive result
+while the arrow still points down.
+
+<Canvas of={Stories.WithTrendInvertStatus} />
+
+```tsx
+<F0BigNumber
+  label="Voluntary turnover"
+  value={{ value: 4.1, units: "%", unitsPosition: "append" }}
+  comparison={{
+    numericValue: { value: 5.6, units: "%", unitsPosition: "append" },
+  }}
+  comparisonHint="vs last quarter"
+  trend={{ show: true, invertStatus: true }}
+/>
+```
+
+**Loading state**
+
+Render the skeleton while the figure is being fetched so the tile keeps its
+height and the dashboard does not shift when the data lands.
+
+<Canvas of={Stories.Skeleton} />
+
+```tsx
+function PayrollCostTile({ isLoading, cost, previousCost }: Props) {
+  if (isLoading) {
+    return <F0BigNumber.Skeleton />
+  }
+
+  return (
+    <F0BigNumber
+      label="Payroll cost"
+      value={{ value: cost, units: "€", unitsPosition: "prepend" }}
+      comparison={{
+        numericValue: {
+          value: previousCost,
+          units: "€",
+          unitsPosition: "prepend",
+        },
+      }}
+      comparisonHint="vs last month"
+      trend
+    />
+  )
+}
+```
+
+## Accessibility
+
+- `label` renders as a plain `<div>` with no heading semantics and no
+  programmatic association with the value — the two are only related by DOM
+  order. On a dashboard holding several metrics, give each tile a heading or
+  label its container so screen reader users can move between metrics instead of
+  hearing a run of bare numbers.
+- The trend is not communicated by color alone: the balance tag renders an
+  sr-only "positive balance" / "negative balance" / "neutral balance" string
+  next to its text. That string is not translated and does not name the metric,
+  so do not treat it as the metric's description.
+- `comparisonHint` renders as visible sibling text inside the same flow and is
+  announced in order after the tag. BigNumber never uses a tooltip for it, so
+  nothing here depends on hover.
+- The percentage is rounded to whole numbers. Do not make it the only place a
+  precise figure appears — put the exact value in the headline figure or in the
+  surrounding table.
+- `F0BigNumber.Skeleton` renders decorative placeholders with a `cursor-progress`
+  cursor and sets no `aria-busy` and no live region. Announce the pending state
+  at the container level, for example `aria-busy` on the widget that swaps the
+  skeleton for the figure.
