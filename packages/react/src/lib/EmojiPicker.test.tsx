@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react"
+import { render, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { EmojiPicker } from "./EmojiPicker"
@@ -72,6 +72,33 @@ describe("EmojiPicker", () => {
     expect(stub.props).toMatchObject({ set: "twitter", onEmojiSelect })
     // The seed must happen before the append, not after.
     expect(propsAtAppendTime).toMatchObject({ set: "twitter", onEmojiSelect })
+  })
+
+  it("removes listbox-only ARIA attributes from emoji buttons", async () => {
+    const stub = stubPickerElement()
+    const root = stub.attachShadow({ mode: "open" })
+    const scrollRegion = realCreateElement("div")
+    scrollRegion.className = "scroll"
+    const button = realCreateElement("button")
+    button.setAttribute("aria-label", "🥳")
+    button.setAttribute("aria-selected", "false")
+    button.setAttribute("aria-posinset", "1")
+    button.setAttribute("aria-setsize", "100")
+    scrollRegion.appendChild(button)
+    root.appendChild(scrollRegion)
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) =>
+      tag === "em-emoji-picker" ? stub : realCreateElement(tag)
+    )
+
+    render(<EmojiPicker data={{}} />)
+
+    await waitFor(() => {
+      expect(button).not.toHaveAttribute("aria-selected")
+      expect(button).not.toHaveAttribute("aria-posinset")
+      expect(button).not.toHaveAttribute("aria-setsize")
+    })
+    expect(button).toHaveAccessibleName("🥳")
+    expect(scrollRegion).toHaveAttribute("tabindex", "0")
   })
 
   it("degrades to nothing instead of crashing when the element fails to construct", () => {

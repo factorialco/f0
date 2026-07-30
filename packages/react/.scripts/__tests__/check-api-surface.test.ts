@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   analyze,
   buildCommentMarkdown,
+  normalize,
   snapshotEntry,
   type AnalysisResult,
   type EntryDiff,
@@ -258,6 +259,36 @@ describe("check-api-surface — external type resolution", () => {
     `
     expect(f0(surface, surface).breaking).toHaveLength(0)
   })
+
+  it("does not flag reordered unions nested in opaque external types", () => {
+    const surface = (refType: string) => `
+      import { RefAttributes } from "react";
+      export declare const ChartRef: RefAttributes<${refType}>;
+    `
+
+    expect(
+      f0(
+        surface("HTMLElement | SVGElement"),
+        surface("SVGElement | HTMLElement")
+      ).breaking
+    ).toHaveLength(0)
+  })
+
+  it("still flags a changed member in a reordered opaque union", () => {
+    const surface = (refType: string) => `
+      import { RefAttributes } from "react";
+      export declare const ChartRef: RefAttributes<${refType}>;
+    `
+
+    expect(
+      names(
+        f0(
+          surface("HTMLElement | SVGElement"),
+          surface("SVGElement | HTMLCanvasElement")
+        )
+      )
+    ).toContain("ChartRef")
+  })
 })
 
 describe("check-api-surface — unions and intersections", () => {
@@ -488,9 +519,9 @@ describe("check-api-surface — arrays are unwrapped, not opaque", () => {
     )
     const changed = diff.breaking.find((b) => b.name === "Collection")
     expect(changed?.kind).toBe("changed")
-    expect(
-      changed?.reasons?.some((r) => r.includes("headerGroupLabels"))
-    ).toBe(true)
+    expect(changed?.reasons?.some((r) => r.includes("headerGroupLabels"))).toBe(
+      true
+    )
   })
 })
 
@@ -637,6 +668,18 @@ describe("check-api-surface — determinism", () => {
     expect(result.hasBreaking).toBe(false)
     expect(result.breakingTotal).toBe(0)
     expect(result.addedTotal).toBe(0)
+  })
+
+  it("normalizes union order at any depth in opaque type text", () => {
+    expect(
+      normalize(
+        'ForwardRefExoticComponent<Omit<any, "ref"> & RefAttributes<HTMLElement | SVGElement>>'
+      )
+    ).toBe(
+      normalize(
+        'ForwardRefExoticComponent<Omit<any, "ref"> & RefAttributes<SVGElement | HTMLElement>>'
+      )
+    )
   })
 })
 

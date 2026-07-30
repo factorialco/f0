@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { type ListItem, type VirtuosoHandle } from "react-virtuoso"
 
 import { type ChatRow } from "../utils/grouping"
@@ -85,6 +84,10 @@ type UseChatVirtuosoReturn = {
 export const AT_BOTTOM_THRESHOLD_PX = 80
 /** Scrolled up = more than half a viewport away from the bottom. */
 const SCROLLED_UP_VIEWPORTS = 0.5
+/** A genuine bottom edge, stricter than Virtuoso's 80px at-bottom band. */
+const BOTTOM_EDGE_EPSILON_PX = 1
+/** Let a wheel gesture settle before treating a no-scroll boundary as bottom. */
+const WHEEL_BOUNDARY_SETTLE_MS = 160
 /** Farther than this (in viewports), teleport near the bottom and glide only
  * the last stretch (Telegram) instead of easing across the whole distance. */
 const FAR_TELEPORT_VIEWPORTS = 1.5
@@ -192,6 +195,7 @@ export function useChatVirtuoso({
   const [atBottom, setAtBottom] = useState(entersAtBottom)
   const [atTop, setAtTop] = useState(true)
   const [scrolledUp, setScrolledUp] = useState(false)
+  const [followPaused, setFollowPaused] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const [stickyIndex, setStickyIndex] = useState<number | null>(null)
   const atBottomRef = useRef(entersAtBottom)
@@ -203,6 +207,8 @@ export function useChatVirtuoso({
   const distanceFromBottomRef = useRef(
     entersAtBottom ? 0 : Number.POSITIVE_INFINITY
   )
+  const followPausedRef = useRef(false)
+  const wheelBoundaryTimerRef = useRef<number | null>(null)
   const keyRef = useRef(listKey)
   if (keyRef.current !== listKey) {
     keyRef.current = listKey
@@ -211,17 +217,42 @@ export function useChatVirtuoso({
     distanceFromBottomRef.current = entersAtBottom
       ? 0
       : Number.POSITIVE_INFINITY
+    followPausedRef.current = false
     setAtBottom(entersAtBottom)
     setAtTop(true)
     setScrolledUp(false)
+    setFollowPaused(false)
     setRevealed(false)
     setStickyIndex(null)
   }
 
-  const handleAtBottomChange = useCallback((isAtBottom: boolean) => {
-    atBottomRef.current = isAtBottom
-    setAtBottom(isAtBottom)
+  const pauseFollowing = useCallback(() => {
+    followPausedRef.current = true
+    setFollowPaused(true)
   }, [])
+
+  const resumeFollowing = useCallback(() => {
+    followPausedRef.current = false
+    setFollowPaused(false)
+  }, [])
+
+  const handleAtBottomChange = useCallback(
+    (isAtBottom: boolean) => {
+      atBottomRef.current = isAtBottom
+      setAtBottom(isAtBottom)
+      if (!isAtBottom) return
+
+      const el = scrollerElRef.current
+      if (
+        el &&
+        el.scrollHeight - el.scrollTop - el.clientHeight <=
+          BOTTOM_EDGE_EPSILON_PX
+      ) {
+        resumeFollowing()
+      }
+    },
+    [resumeFollowing]
+  )
 
   const handleAtTopChange = useCallback((isAtTop: boolean) => {
     setAtTop(isAtTop)
@@ -232,7 +263,8 @@ export function useChatVirtuoso({
     (isAtBottom: boolean) => followDecision(isAtBottom, reducedMotion),
     [reducedMotion]
   )
-  const followOutput = atBottom && !hasMoreNewer ? follow : false
+  const followOutput =
+    atBottom && !followPaused && !hasMoreNewer ? follow : false
 
   // ---- pagination edges ----
   const handleStartReached = useCallback(() => {
@@ -254,8 +286,10 @@ export function useChatVirtuoso({
     // pre-scroll distance and yanks an escaping reader back to the bottom.
     const sync = scrollerElRef.current
     if (sync) {
-      distanceFromBottomRef.current =
+      const distanceFromBottom =
         sync.scrollHeight - sync.scrollTop - sync.clientHeight
+      distanceFromBottomRef.current = distanceFromBottom
+      if (distanceFromBottom <= BOTTOM_EDGE_EPSILON_PX) resumeFollowing()
     }
     if (measureRafRef.current != null) return
     measureRafRef.current = requestAnimationFrame(() => {
@@ -283,7 +317,7 @@ export function useChatVirtuoso({
       }
       setStickyIndex(topIndex)
     })
-  }, [])
+  }, [resumeFollowing])
 
   // DIRECT bottom pin. NOT `autoscrollToBottom()`: that method only arms a
   // 100ms trap that fires when Virtuoso's atBottom state flips off with cause
@@ -295,6 +329,7 @@ export function useChatVirtuoso({
   const pinToBottom = useCallback(() => {
     const el = scrollerElRef.current
     if (!el) return
+    if (followPausedRef.current) return
     // Gate on the pre-growth distance (see distanceFromBottomRef), NOT on
     // Virtuoso's atBottom state — a big growth flips that state off before
     // this runs and the pin would wrongly skip.
@@ -328,7 +363,9 @@ export function useChatVirtuoso({
           prevCount: prev.count,
           count,
           // Pre-growth distance, same reasoning as pinToBottom's own gate.
-          atBottom: distanceFromBottomRef.current <= AT_BOTTOM_THRESHOLD_PX,
+          atBottom:
+            !followPausedRef.current &&
+            distanceFromBottomRef.current <= AT_BOTTOM_THRESHOLD_PX,
         })
       ) {
         pinToBottom()
@@ -362,24 +399,42 @@ export function useChatVirtuoso({
   )
 
   // The user taking over beats every re-pin (WhatsApp cancels the follow).
-  // An upward wheel tick / touch drag disables the pins IMMEDIATELY — input
-  // events land before their scroll event, so a growth re-pin arriving in
-  // that gap would read the stale ~0 distance, yank the reader back to the
-  // bottom and eat their wheel deltas: with rows re-measuring continuously
-  // (PDF thumbnails rendering in), scrolling away became impossible. The next
-  // scroll event (or touchend) re-measures the real distance and gluing
-  // resumes only if they're genuinely still at the bottom.
-  const handleWheel = useCallback((event: WheelEvent) => {
-    if (event.deltaY < 0) {
-      distanceFromBottomRef.current = Number.POSITIVE_INFINITY
-    }
-  }, [])
+  // An upward wheel intent pauses following BEFORE the native scroll lands and
+  // keeps it paused while the reader is even slightly away from the true
+  // bottom. This is deliberately separate from Virtuoso's broad 80px
+  // `atBottom` band: async document/image growth must not pull a reader back
+  // during the first few wheel ticks. A short settle only restores following
+  // when the gesture could not move because it was already at the boundary.
+  const handleWheel = useCallback(
+    (event: WheelEvent) => {
+      if (event.deltaY >= 0) return
+      pauseFollowing()
+
+      if (wheelBoundaryTimerRef.current != null) {
+        window.clearTimeout(wheelBoundaryTimerRef.current)
+      }
+      const target = scrollerElRef.current
+      wheelBoundaryTimerRef.current = window.setTimeout(() => {
+        wheelBoundaryTimerRef.current = null
+        if (!target || scrollerElRef.current !== target) return
+        const distanceFromBottom =
+          target.scrollHeight - target.scrollTop - target.clientHeight
+        distanceFromBottomRef.current = distanceFromBottom
+        if (distanceFromBottom <= BOTTOM_EDGE_EPSILON_PX) resumeFollowing()
+      }, WHEEL_BOUNDARY_SETTLE_MS)
+    },
+    [pauseFollowing, resumeFollowing]
+  )
   const handleTouchMove = useCallback(() => {
-    distanceFromBottomRef.current = Number.POSITIVE_INFINITY
-  }, [])
+    pauseFollowing()
+  }, [pauseFollowing])
 
   const handleScrollerRef = useCallback(
     (el: HTMLElement | Window | null) => {
+      if (wheelBoundaryTimerRef.current != null) {
+        window.clearTimeout(wheelBoundaryTimerRef.current)
+        wheelBoundaryTimerRef.current = null
+      }
       const prev = scrollerElRef.current
       if (prev) {
         prev.removeEventListener("scroll", measureScrollState)
@@ -392,6 +447,11 @@ export function useChatVirtuoso({
       const next = scrollerElRef.current
       observeViewportResize(next)
       if (next) {
+        const distanceFromBottom =
+          next.scrollHeight - next.scrollTop - next.clientHeight
+        distanceFromBottomRef.current = distanceFromBottom
+        if (distanceFromBottom <= BOTTOM_EDGE_EPSILON_PX) resumeFollowing()
+
         // QA hook (the Storm story HUD traces scrollTop/scrollHeight per frame).
         next.setAttribute("data-chat-viewport", "")
         next.addEventListener("scroll", measureScrollState, { passive: true })
@@ -412,11 +472,13 @@ export function useChatVirtuoso({
       handleWheel,
       measureScrollState,
       observeViewportResize,
+      resumeFollowing,
     ]
   )
 
   // ---- imperative scrolls ----
   const scrollToBottom = useCallback(() => {
+    resumeFollowing()
     const el = scrollerElRef.current
     if (
       el &&
@@ -431,7 +493,7 @@ export function useChatVirtuoso({
       align: "end",
       behavior: reducedMotion ? "auto" : "smooth",
     })
-  }, [reducedMotion])
+  }, [reducedMotion, resumeFollowing])
 
   const indexByIdRef = useRef(indexById)
   indexByIdRef.current = indexById
@@ -468,7 +530,7 @@ export function useChatVirtuoso({
   useLayoutEffect(() => {
     if (!ownGlideRef.current) return
     ownGlideRef.current = false
-    if (atBottomRef.current) return
+    if (atBottomRef.current && !followPausedRef.current) return
     scrollToBottom()
   })
 
@@ -512,6 +574,8 @@ export function useChatVirtuoso({
         cancelAnimationFrame(measureRafRef.current)
       if (revealRafRef.current != null)
         cancelAnimationFrame(revealRafRef.current)
+      if (wheelBoundaryTimerRef.current != null)
+        window.clearTimeout(wheelBoundaryTimerRef.current)
       viewportResizeObserverRef.current?.disconnect()
     },
     []

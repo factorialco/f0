@@ -79,6 +79,8 @@ export type UseMentionsReturn = {
   seedMentions: (entries: MentionEntry[]) => void
   /** Close the popover. */
   close: () => void
+  /** Dismiss the current `@` trigger until the caret leaves it. */
+  dismissCurrentTrigger: () => void
 }
 
 /**
@@ -162,7 +164,7 @@ const MIRROR_PROPERTIES = [
 ] as const
 
 /** Pixel position of the character at `index`, relative to the textarea. */
-function getCaretCoordinates(
+export function getTextareaCaretCoordinates(
   textarea: HTMLTextAreaElement,
   index: number
 ): { left: number; top: number } {
@@ -296,7 +298,10 @@ export function useMentions({
           }
         })
         .catch(() => {
-          if (currentSearchId === searchIdRef.current) setMemberResults([])
+          if (currentSearchId === searchIdRef.current) {
+            setMemberResults([])
+            setIsOpen(false)
+          }
         })
         .finally(() => {
           if (currentSearchId === searchIdRef.current) setIsLoading(false)
@@ -322,6 +327,11 @@ export function useMentions({
     setSelectedIndex(0)
     atIndexRef.current = -1
   }, [])
+
+  const dismissCurrentTrigger = useCallback(() => {
+    dismissedAtIndexRef.current = atIndexRef.current
+    close()
+  }, [close])
 
   const selectCandidate = useCallback(
     (candidate: MentionCandidate) => {
@@ -447,7 +457,7 @@ export function useMentions({
     const textarea = textareaRef.current
     if (!textarea) return null
 
-    const coords = getCaretCoordinates(textarea, atIndexRef.current)
+    const coords = getTextareaCaretCoordinates(textarea, atIndexRef.current)
     const left = textarea.offsetLeft + coords.left
     const formHeight = textarea.offsetParent
       ? (textarea.offsetParent as HTMLElement).offsetHeight
@@ -483,5 +493,6 @@ export function useMentions({
     getMentions,
     seedMentions,
     close,
+    dismissCurrentTrigger,
   }
 }

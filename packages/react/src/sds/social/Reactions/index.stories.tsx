@@ -1,19 +1,24 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
+import { getEmojiLabel } from "@/lib/emojis"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { Reactions } from "./index"
 
-const meta: Meta<typeof Reactions> = {
+const meta = {
   component: Reactions,
   title: "Reactions",
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   parameters: {
     layout: "centered",
   },
-}
+} satisfies Meta<typeof Reactions>
 
 export default meta
 
-type Story = StoryObj<typeof Reactions>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -78,6 +83,49 @@ export const Default: Story = {
         ],
       },
     ],
+  },
+}
+
+export const Snapshot: Story = {
+  args: Default.args,
+  parameters: withSnapshot({}),
+}
+
+export const LazyUsers: Story = {
+  tags: ["f0chat-receipts"],
+  args: {
+    items: [
+      {
+        emoji: "🎉",
+        initialCount: 3,
+        loadUsers: async () => [
+          { name: "Grace Liang" },
+          { name: "Marcus Bennett" },
+          { name: "Sam Okafor" },
+        ],
+      },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+    const reaction = within(canvasElement).getByRole("button", {
+      name: `${getEmojiLabel("🎉")}: 3`,
+    })
+
+    reaction.focus()
+
+    const tooltips = await page.findAllByText(
+      "Grace Liang, Marcus Bennett, Sam Okafor"
+    )
+    const tooltipId = reaction.getAttribute("aria-describedby")
+    const visibleTooltip = tooltipId
+      ? canvasElement.ownerDocument.getElementById(tooltipId)
+      : null
+    await expect(tooltips.length).toBeGreaterThan(0)
+    await expect(tooltipId).toBeTruthy()
+    await expect(visibleTooltip).toHaveTextContent(
+      "Grace Liang, Marcus Bennett, Sam Okafor"
+    )
   },
 }
 
