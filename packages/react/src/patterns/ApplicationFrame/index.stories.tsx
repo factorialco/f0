@@ -1789,10 +1789,18 @@ export const CommunicationsVideoAttachments: Story = {
 
         const controls = within(player)
         await expect(
-          controls.getByRole("button", { name: "Play" })
+          await controls.findByRole(
+            "button",
+            { name: "Play" },
+            { timeout: 5_000 }
+          )
         ).toBeVisible()
         await expect(
-          controls.getByRole("button", { name: "Enter fullscreen" })
+          await controls.findByRole(
+            "button",
+            { name: "Enter fullscreen" },
+            { timeout: 5_000 }
+          )
         ).toBeVisible()
         const video = player.querySelector("video")
         await expect(video).not.toBeNull()
