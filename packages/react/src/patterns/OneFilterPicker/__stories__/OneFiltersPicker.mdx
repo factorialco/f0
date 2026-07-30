@@ -47,9 +47,9 @@ a Clear action).
         <td>—</td>
         <td>
           Record of filter key to filter definition. The key is what lands in{" "}
-          <code>value</code> and in the serialized URL; the <code>label</code> is
-          what is read on screen. When omitted, the trigger and the chips row are
-          not rendered and only <code>children</code> is laid out.
+          <code>value</code> and in the serialized URL; the <code>label</code>{" "}
+          is what is read on screen. When omitted, the trigger and the chips row
+          are not rendered and only <code>children</code> is laid out.
         </td>
       </tr>
       <tr>
@@ -77,8 +77,8 @@ a Clear action).
         <td>—</td>
         <td>Yes</td>
         <td>
-          Fires on "Apply filters", on removing a chip, on Clear, and on clicking
-          a preset. It does not fire while editing inside the popover.
+          Fires on "Apply filters", on removing a chip, on Clear, and on
+          clicking a preset. It does not fire while editing inside the popover.
         </td>
       </tr>
       <tr>
@@ -109,8 +109,8 @@ a Clear action).
         </td>
         <td>—</td>
         <td>
-          Renders skeleton pills instead of presets. Use it while the saved views
-          of the current account are still being fetched.
+          Renders skeleton pills instead of presets. Use it while the saved
+          views of the current account are still being fetched.
         </td>
       </tr>
       <tr>
@@ -182,8 +182,9 @@ a Clear action).
         <td>—</td>
         <td>—</td>
         <td>
-          Id of the selected preset. Together with <code>onSelectPreset</code> it
-          switches preset selection from exact-filter-match to identity-based.
+          Id of the selected preset. Together with <code>onSelectPreset</code>{" "}
+          it switches preset selection from exact-filter-match to
+          identity-based.
         </td>
       </tr>
       <tr>
@@ -267,8 +268,9 @@ a Clear action).
         <td>—</td>
         <td>—</td>
         <td>
-          Trailing slot pinned to the end of the filter row. Reserved for actions
-          scoped to the collection (export, settings), not for extra filters.
+          Trailing slot pinned to the end of the filter row. Reserved for
+          actions scoped to the collection (export, settings), not for extra
+          filters.
         </td>
       </tr>
       <tr>
@@ -347,10 +349,10 @@ the URL or from the page context.
         <td>
           <code>minDate</code>, <code>maxDate</code>, <code>mode</code> (
           <code>single</code> by default, or <code>range</code>),{" "}
-          <code>view</code> (<code>day</code> by default,{" "}
-          <code>week</code>, <code>month</code>, <code>quarter</code>,{" "}
-          <code>halfyear</code>, <code>year</code>), and{" "}
-          <code>defaultSelected</code> to preselect a date in the calendar.
+          <code>view</code> (<code>day</code> by default, <code>week</code>,{" "}
+          <code>month</code>, <code>quarter</code>, <code>halfyear</code>,{" "}
+          <code>year</code>), and <code>defaultSelected</code> to preselect a
+          date in the calendar.
         </td>
       </tr>
       <tr>
@@ -363,8 +365,8 @@ the URL or from the page context.
         <td>
           <code>min</code>, <code>max</code>, <code>modes</code> (which of{" "}
           <code>range</code> / <code>single</code> are offered; the first entry
-          is the initial mode), <code>openCloseToggle</code> to let inclusive and
-          exclusive bounds be chosen.
+          is the initial mode), <code>openCloseToggle</code> to let inclusive
+          and exclusive bounds be chosen.
         </td>
       </tr>
     </tbody>
@@ -473,8 +475,8 @@ filter definition.
           <code>FiltersState&lt;Filters&gt;</code>
         </td>
         <td>
-          Filter state applied when the preset is clicked. Required. Replaces the
-          current state rather than merging into it.
+          Filter state applied when the preset is clicked. Required. Replaces
+          the current state rather than merging into it.
         </td>
       </tr>
       <tr>
@@ -505,7 +507,9 @@ filter definition.
         </td>
         <td>
           <code>
-            {"(filters: FiltersState<Filters>) => number | Promise<number | undefined> | undefined"}
+            {
+              "(filters: FiltersState<Filters>) => number | Promise<number | undefined> | undefined"
+            }
           </code>
         </td>
         <td>
@@ -616,9 +620,10 @@ example a pending-approvals row where an empty view means there is nothing to do
           <code>default</code>
         </td>
         <td>
-          Labelled trigger, popover with the filter list on the left and the form
-          of the selected filter on the right, and the chips row underneath. On
-          opening, the first filter that already has a value is preselected.
+          Labelled trigger, popover with the filter list on the left and the
+          form of the selected filter on the right, and the chips row
+          underneath. On opening, the first filter that already has a value is
+          preselected.
         </td>
       </tr>
       <tr>
@@ -646,9 +651,9 @@ example a pending-approvals row where an empty view means there is nothing to do
           <code>inline</code>
         </td>
         <td>
-          Icon-only trigger that swaps the popover for a dual-pane overlay filling
-          the container, with a back button in the header. No chips row. For
-          narrow surfaces such as a sidebar or a dialog.
+          Icon-only trigger that swaps the popover for a dual-pane overlay
+          filling the container, with a back button in the header. No chips row.
+          For narrow surfaces such as a sidebar or a dialog.
         </td>
       </tr>
     </tbody>
@@ -767,7 +772,7 @@ filters somewhere else in the view.
     guidelines: [
       "Four to six filters, ordered by how often they are used",
       'One filter per attribute: a "Start date" range instead of separate week, month and quarter variants',
-      'cache: true on stable option lists such as departments or legal entities',
+      "cache: true on stable option lists such as departments or legal entities",
       "hideSelector on keys written by the URL or by nested child options",
     ],
   }}

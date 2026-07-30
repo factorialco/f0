@@ -3,7 +3,13 @@ import * as Stories from "./Card.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { F0Card } from "../F0Card"
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
-import { Briefcase, Calendar, Envelope, ExternalLink, Office } from "@/icons/app"
+import {
+  Briefcase,
+  Calendar,
+  Envelope,
+  ExternalLink,
+  Office,
+} from "@/icons/app"
 
 <Meta of={Stories} />
 
@@ -62,8 +68,8 @@ header:
         <td>—</td>
         <td>
           Name of the record. Also used as the image <code>alt</code>, as the
-          overlay link's <code>aria-label</code> and as the fallback label of the
-          selection checkbox and the bookmark toggle — always pass it.
+          overlay link's <code>aria-label</code> and as the fallback label of
+          the selection checkbox and the bookmark toggle — always pass it.
         </td>
       </tr>
       <tr>
@@ -76,8 +82,8 @@ header:
         <td>—</td>
         <td>—</td>
         <td>
-          One line of context under the title. Truncated with an ellipsis after 3
-          lines (2 when <code>compact</code>).
+          One line of context under the title. Truncated with an ellipsis after
+          3 lines (2 when <code>compact</code>).
         </td>
       </tr>
       <tr>
@@ -113,8 +119,8 @@ header:
         <td>—</td>
         <td>
           Display-only rows. <code>label</code> is the tooltip on the icon, not
-          visible text — name the field, not the value. <code>type: "file"</code>{" "}
-          takes no icon.
+          visible text — name the field, not the value.{" "}
+          <code>type: "file"</code> takes no icon.
         </td>
       </tr>
       <tr>
@@ -127,8 +133,8 @@ header:
         <td>—</td>
         <td>—</td>
         <td>
-          Extra content between the metadata and the footer. Interactive elements
-          inside keep working even when the card is a link.
+          Extra content between the metadata and the footer. Interactive
+          elements inside keep working even when the card is a link.
         </td>
       </tr>
       <tr>
@@ -175,8 +181,8 @@ header:
         </td>
         <td>—</td>
         <td>
-          How the image fills the band. Use <code>"cover"</code> when cropping is
-          acceptable and the band must be fully covered.
+          How the image fills the band. Use <code>"cover"</code> when cropping
+          is acceptable and the band must be fully covered.
         </td>
       </tr>
       <tr>
@@ -223,8 +229,9 @@ header:
         </td>
         <td>—</td>
         <td>
-          Fills the empty space around an image that does not cover the band with
-          a blurred copy of it. No effect with <code>imageFit="cover"</code>.
+          Fills the empty space around an image that does not cover the band
+          with a blurred copy of it. No effect with{" "}
+          <code>imageFit="cover"</code>.
         </td>
       </tr>
       <tr>
@@ -255,9 +262,9 @@ header:
         <td>—</td>
         <td>—</td>
         <td>
-          Leading footer content. As an array they render as outline buttons — on
-          desktop every button after the first is icon-only. As a single object
-          with <code>href</code> it renders one text link.
+          Leading footer content. As an array they render as outline buttons —
+          on desktop every button after the first is icon-only. As a single
+          object with <code>href</code> it renders one text link.
         </td>
       </tr>
       <tr>
@@ -368,15 +375,14 @@ header:
         <td>
           <code>CardAlertProps</code> —{" "}
           <code>{`{ variant: "info" | "warning" | "critical" | "positive"; title: string; icon?; visible? }`}</code>{" "}
-          plus either{" "}
-          <code>{`{ dismissible: true; onDismiss }`}</code> or{" "}
+          plus either <code>{`{ dismissible: true; onDismiss }`}</code> or{" "}
           <code>{`{ action: { label; disabled?; onClick | href } }`}</code>
         </td>
         <td>—</td>
         <td>—</td>
         <td>
-          Coloured header strip above the card plus a matching 2px border. Use it
-          for a condition attached to this record, not to the page.{" "}
+          Coloured header strip above the card plus a matching 2px border. Use
+          it for a condition attached to this record, not to the page.{" "}
           <code>dismissible</code> and <code>action</code> are mutually
           exclusive.
         </td>
@@ -452,8 +458,8 @@ is not configured through the props above.
           <code>default</code>
         </td>
         <td>
-          16px padding, large avatar stacked above the title, description up to 3
-          lines, medium footer buttons.
+          16px padding, large avatar stacked above the title, description up to
+          3 lines, medium footer buttons.
         </td>
       </tr>
       <tr>
@@ -461,9 +467,9 @@ is not configured through the props above.
           <code>compact</code>
         </td>
         <td>
-          12px padding, small avatar inline with a single-line title, description
-          up to 2 lines, small footer buttons. Fits sidebars, drawers and
-          multi-column boards.
+          12px padding, small avatar inline with a single-line title,
+          description up to 2 lines, small footer buttons. Fits sidebars,
+          drawers and multi-column boards.
         </td>
       </tr>
     </tbody>
@@ -567,7 +573,8 @@ matching colour, so the affected record is identifiable while scanning a grid.
         <td>A record carries a condition that must stay visible</td>
         <td>
           The message belongs to this record, not to the page — pass{" "}
-          <code>alert</code> so the border and strip mark the card while scanning
+          <code>alert</code> so the border and strip mark the card while
+          scanning
         </td>
       </tr>
       <tr>
@@ -595,8 +602,8 @@ matching colour, so the affected record is identifiable while scanning a grid.
       <tr>
         <td>A list of records with filters, search, sorting or pagination</td>
         <td>
-          <code>OneDataCollection</code> with the card visualization — it renders
-          F0Card for you and owns the data layer
+          <code>OneDataCollection</code> with the card visualization — it
+          renders F0Card for you and owns the data layer
         </td>
       </tr>
       <tr>
@@ -620,8 +627,8 @@ matching colour, so the affected record is identifiable while scanning a grid.
       <tr>
         <td>Free-form panel: custom layout, long form content, charts</td>
         <td>
-          <code>Card</code>, <code>CardHeader</code> and <code>CardContent</code>{" "}
-          from <code>@/ui/Card</code>
+          <code>Card</code>, <code>CardHeader</code> and{" "}
+          <code>CardContent</code> from <code>@/ui/Card</code>
         </td>
       </tr>
     </tbody>
@@ -940,7 +947,9 @@ as the real card so the layout does not shift.
 <Canvas of={Stories.Skeleton} />
 
 ```tsx
-{isLoading ? <F0Card.Skeleton /> : <F0Card {...cardProps} />}
+{
+  isLoading ? <F0Card.Skeleton /> : <F0Card {...cardProps} />
+}
 ```
 
 ## Accessibility
