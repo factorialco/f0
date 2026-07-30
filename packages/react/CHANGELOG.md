@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.66.0](https://github.com/factorialco/f0/compare/f0-react-v4.65.1...f0-react-v4.66.0) (2026-07-30)
+
+
+### Features
+
+* **F0Form:** support showSubmitWhenDirty in single-schema mode ([#4869](https://github.com/factorialco/f0/issues/4869)) ([7d67c70](https://github.com/factorialco/f0/commit/7d67c70af276b33a5711f1f50d25d49c75a73429))
+
 ## [4.65.1](https://github.com/factorialco/f0/compare/f0-react-v4.65.0...f0-react-v4.65.1) (2026-07-29)
 
 
