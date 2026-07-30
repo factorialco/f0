@@ -31,6 +31,18 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
  */
 type F0SelectBaseProps<T extends string, R = unknown> = {
   withApplySelection?: boolean
+  /**
+   * Controls the "Cancel" button in the apply-selection footer. The
+   * deferred-apply behaviour is always preserved (changes are staged and only
+   * committed on "Apply selection"; closing the dropdown discards them). Has no
+   * effect unless `withApplySelection` is enabled in multi-select mode.
+   * - `false` (default): Cancel is always shown.
+   * - `true`: Cancel is always hidden.
+   * - `"when-empty"`: Cancel is hidden while nothing is staged and appears once
+   *   at least one item is selected — for surfaces where an explicit cancel is
+   *   only meaningful after the user has staged a change.
+   */
+  hideApplySelectionCancel?: boolean | "when-empty"
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean

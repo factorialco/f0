@@ -115,6 +115,7 @@ const F0SelectComponent = forwardRef(function Select<
     placeholder,
     onChange,
     withApplySelection = false,
+    hideApplySelectionCancel = false,
     onChangeSelectedOption,
     value,
     options = [],
@@ -1021,6 +1022,16 @@ const F0SelectComponent = forwardRef(function Select<
       .map((item) => String(item.id))
   }, [selectedState.items])
 
+  // Resolve whether the apply-selection "Cancel" button should render.
+  // `hideApplySelectionCancel` may hide it always (`true`) or only while the
+  // staged selection is empty (`"when-empty"`). Deferred apply is unaffected.
+  const hasStagedSelection =
+    selectedItemsValues.length > 0 || !!selectedState.allSelected
+  const showCancelButton =
+    hasDeferredApply &&
+    hideApplySelectionCancel !== true &&
+    !(hideApplySelectionCancel === "when-empty" && !hasStagedSelection)
+
   /**
    * Common props for the select primitive
    */
@@ -1101,7 +1112,7 @@ const F0SelectComponent = forwardRef(function Select<
             showApplyButton={showApplyButton}
             onApply={handleApply}
             onCancel={handleCancel}
-            showCancelButton={hasDeferredApply}
+            showCancelButton={showCancelButton}
           />
         ) : null
       }
