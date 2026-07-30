@@ -324,6 +324,58 @@ describe("check-api-surface — unions and intersections", () => {
     expect(changed?.reasons?.some((r) => /union variants/i.test(r))).toBe(true)
   })
 
+  it("treats a widened string-literal union (variants added) as safe", () => {
+    // The country-code case: `CountryCode` is `keyof translations.countries`,
+    // so adding countries grows every union that accepts a country code. A
+    // consumer passing an existing value is unaffected.
+    const diff = f0(
+      `
+      export declare type Flag = "es" | "us" | "fr";
+      export declare const Avatar: (props: { flag: Flag }) => unknown;
+      `,
+      `
+      export declare type Flag = "es" | "us" | "fr" | "de" | "it" | "pt";
+      export declare const Avatar: (props: { flag: Flag }) => unknown;
+      `
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
+  it("treats a new field-type variant added to a union as safe", () => {
+    // The F0FieldType case: a new `"phone"` variant added to the union.
+    const diff = f0(
+      `export declare type FieldType = "text" | "number" | "date";`,
+      `export declare type FieldType = "text" | "number" | "date" | "phone";`
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
+  it("flags a removed variant from a string-literal union (narrowing)", () => {
+    const diff = f0(
+      `export declare type Flag = "es" | "us" | "fr";`,
+      `export declare type Flag = "es" | "fr";`
+    )
+    const changed = diff.breaking.find((b) => b.name === "Flag")
+    expect(changed?.reasons?.some((r) => /union variants/i.test(r))).toBe(true)
+  })
+
+  it("treats a variant added to a union-of-object variants as safe", () => {
+    const diff = f0(
+      `
+      export declare type Shape =
+        | { kind: "a"; value: string }
+        | { kind: "b"; value: number };
+      `,
+      `
+      export declare type Shape =
+        | { kind: "a"; value: string }
+        | { kind: "b"; value: number }
+        | { kind: "c"; value: boolean };
+      `
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
   it("treats an optional prop added to a plain intersection as safe", () => {
     const diff = f0(
       `
@@ -359,6 +411,86 @@ describe("check-api-surface — unions and intersections", () => {
       `
     )
     expect(names(diff)).toContain("Row")
+  })
+})
+
+describe("check-api-surface — arrays are unwrapped, not opaque", () => {
+  it("flags a prop removed from an array element type", () => {
+    const diff = f0(
+      `
+      export declare type Row = { id: string; label: string };
+      export declare const Grid: (props: { rows: Row[] }) => unknown;
+      `,
+      `
+      export declare type Row = { id: string };
+      export declare const Grid: (props: { rows: Row[] }) => unknown;
+      `
+    )
+    const changed = diff.breaking.find((b) => b.name === "Grid")
+    expect(changed?.kind).toBe("changed")
+    expect(changed?.reasons?.some((r) => r.includes("label"))).toBe(true)
+  })
+
+  it("flags a required prop added to an array element type", () => {
+    const diff = f0(
+      `export declare const Grid: (props: { rows: ReadonlyArray<{ id: string }> }) => unknown;`,
+      `export declare const Grid: (props: { rows: ReadonlyArray<{ id: string; tenant: string }> }) => unknown;`
+    )
+    const changed = diff.breaking.find((b) => b.name === "Grid")
+    expect(changed?.reasons?.some((r) => /required.*tenant/i.test(r))).toBe(
+      true
+    )
+  })
+
+  it("treats an optional prop added to an array element type as safe", () => {
+    const diff = f0(
+      `export declare const Grid: (props: { rows: Array<{ id: string }> }) => unknown;`,
+      `export declare const Grid: (props: { rows: Array<{ id: string; hint?: string }> }) => unknown;`
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
+  it("treats an unchanged array-typed prop as no change", () => {
+    const surface = `
+      export declare type Row = { id: string; label: string };
+      export declare const Grid: (props: { rows: Row[] }) => unknown;
+    `
+    expect(f0(surface, surface).breaking).toHaveLength(0)
+  })
+
+  it("flags a scalar prop widened to an array (T → T[])", () => {
+    const diff = f0(
+      `export declare type Row = { tag: string };`,
+      `export declare type Row = { tag: string[] };`
+    )
+    const changed = diff.breaking.find((b) => b.name === "Row")
+    expect(changed?.kind).toBe("changed")
+    expect(changed?.reasons?.some((r) => /tag/.test(r))).toBe(true)
+  })
+
+  it("catches a removed prop nested behind an array of a discriminated union (the OneDataCollection `visualizations` shape)", () => {
+    // Mirrors how `headerGroupLabels` reaches the public surface: only through
+    // `OneDataCollection` props → `visualizations` array → a `"table"` variant
+    // → `options` → the prop. Opaque-array handling hid its removal entirely.
+    const surface = (tableOptions: string) => `
+      export declare type TableOptions = ${tableOptions};
+      export declare type CardOptions = { pageSize?: number };
+      export declare type Visualization =
+        | { type: "table"; options: TableOptions }
+        | { type: "card"; options: CardOptions };
+      export declare const Collection: (props: {
+        visualizations?: ReadonlyArray<Visualization>;
+      }) => unknown;
+    `
+    const diff = f0(
+      surface("{ id: string; headerGroupLabels?: Record<string, string> }"),
+      surface("{ id: string; headerGroups?: Record<string, string> }")
+    )
+    const changed = diff.breaking.find((b) => b.name === "Collection")
+    expect(changed?.kind).toBe("changed")
+    expect(changed?.reasons?.some((r) => r.includes("headerGroupLabels"))).toBe(
+      true
+    )
   })
 })
 

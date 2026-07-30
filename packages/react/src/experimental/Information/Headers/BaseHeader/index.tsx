@@ -134,7 +134,8 @@ export function BaseHeader({
         // `border-0` zeroes all sides first so this renders bottom-only even in apps that
         // don't load the Tailwind preflight border reset (otherwise `border-solid` would
         // light up all four sides at the CSS-initial `medium` width).
-        showBottomBorder && "border-0 border-b border-solid border-f1-border"
+        showBottomBorder &&
+          "border-0 border-b border-solid border-f1-border-secondary"
       )}
     >
       <div

@@ -33,6 +33,15 @@ interface UseDashboardExportResult {
   isExporting: boolean
 }
 
+function getItemFilters<Filters extends FiltersDefinition>(
+  item: { useDashboardFilters?: boolean },
+  filters: FiltersState<Filters>
+): FiltersState<Filters> {
+  return item.useDashboardFilters === false
+    ? ({} as FiltersState<Filters>)
+    : filters
+}
+
 async function buildMetricsSheet<Filters extends FiltersDefinition>(
   metricItems: DashboardMetricItem<Filters>[],
   filters: FiltersState<Filters>
@@ -44,7 +53,9 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
 
   for (const item of metricItems) {
     try {
-      const data: DashboardMetricData = await item.fetchData(filters)
+      const data: DashboardMetricData = await item.fetchData(
+        getItemFilters(item, filters)
+      )
       const row: Record<string, unknown> = {
         Metric: item.title,
         Value: data.value,
@@ -90,7 +101,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
     async (item): Promise<SheetData | null> => {
       if (item.type === "chart") {
         try {
-          const data: DashboardChartData = await item.fetchData(filters)
+          const data: DashboardChartData = await item.fetchData(
+            getItemFilters(item, filters)
+          )
           const tabular = chartDataToTabular(item.chart, data)
           return {
             name: item.title,
@@ -108,7 +121,7 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
 
       if (item.type === "collection") {
         try {
-          const sourceDef = item.createSource(filters)
+          const sourceDef = item.createSource(getItemFilters(item, filters))
           const result = await sourceDef.dataAdapter.fetchData({
             filters: {},
             sortings: [],
