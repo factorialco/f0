@@ -124,6 +124,12 @@ type F0ButtonDropdownDropdownProps<T = string> =
      * @param item The item that was clicked.
      */
     onClick: (value: T, item: ButtonDropdownItem<T>) => void
+    /**
+     * Extra classes merged onto the dropdown menu, e.g. to cap its width
+     * (`max-w-[280px]`) when an item's `description` is long. Unset by
+     * default, so the menu keeps its current sizing behavior.
+     */
+    contentClassName?: string
   }
 
 export type F0ButtonDropdownProps<T = string> =
