@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import type { F0DataChartProps } from "../types"
 
 import { F0DataChart } from "../index"
@@ -270,6 +272,131 @@ export const Minimal: Story = {
     showGrid: false,
     showLabels: true,
     showLegend: false,
+  },
+}
+
+const BAR_POLISH_SNAPSHOT_VARIANTS: {
+  label: string
+  props: F0DataChartProps
+}[] = [
+  {
+    label: "Grouped labels and sparse grid",
+    props: {
+      type: "bar",
+      categories: ["Engineering", "Design", "Product", "Sales"],
+      series: [
+        { name: "Headcount", data: [145, 89, 67, 90] },
+        { name: "Open roles", data: [12, 8, 40, 30] },
+      ],
+      showLabels: true,
+      labelFontSize: 11,
+      valueAxisSplitNumber: 2,
+      valueFormatter: (value) => `${value}`,
+    },
+  },
+  {
+    label: "Stacked labels",
+    props: {
+      type: "bar",
+      categories: ["Q1", "Q2", "Q3", "Q4"],
+      stacked: true,
+      series: [
+        { name: "Fixed", data: [120, 125, 130, 128] },
+        { name: "Variable", data: [18, 22, 15, 30] },
+        { name: "Benefits", data: [8, 9, 9, 10] },
+      ],
+      showLabels: true,
+      valueFormatter: (value) => `${value}K`,
+    },
+  },
+  {
+    label: "Horizontal categories",
+    props: {
+      type: "bar",
+      orientation: "horizontal",
+      categories: [
+        "Engineering",
+        "Design",
+        "Product",
+        "Sales",
+        "Customer support",
+      ],
+      series: [{ name: "Headcount", data: [145, 89, 67, 90, 58] }],
+      showLabels: true,
+      showLegend: false,
+    },
+  },
+  {
+    label: "Narrow stacked labels",
+    props: {
+      type: "bar",
+      orientation: "horizontal",
+      categories: ["Engineering", "Design", "Product"],
+      stacked: true,
+      series: [
+        { name: "Completed", data: [92, 45, 74] },
+        { name: "Blocked", data: [3, 2, 4] },
+        { name: "Pending review", data: [5, 53, 22] },
+      ],
+      showLabels: true,
+      valueFormatter: (value) => `${value}%`,
+    },
+  },
+]
+
+/** Consolidated Chromatic coverage for the polished bar variants. */
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="grid w-fit grid-cols-1 gap-6 p-6">
+      {BAR_POLISH_SNAPSHOT_VARIANTS.map(({ label, props }) => (
+        <div key={label} className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {label}
+          </span>
+          <div className="h-[300px] w-[720px] rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+            <F0DataChart {...props} />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+}
+
+/** Compact axis/labels with precise values preserved in the hover tooltip. */
+export const PreciseTooltip: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["January", "February", "March", "April"],
+    series: [
+      {
+        name: "Revenue",
+        data: [107_505, 93_240, 128_910, 115_780],
+      },
+    ],
+    showLabels: true,
+    valueFormatter: (value) => `${(value / 1000).toFixed(1)}K`,
+    tooltipValueFormatter: (value) => value.toLocaleString("en-US"),
+  },
+}
+
+/** Narrow stacked segments demonstrate labels disappearing before overlap. */
+export const OverflowingLabels: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    orientation: "horizontal",
+    categories: ["Engineering", "Design", "Product"],
+    stacked: true,
+    series: [
+      { name: "Completed", data: [92, 45, 74] },
+      { name: "Blocked", data: [3, 2, 4] },
+      { name: "Pending review", data: [5, 53, 22] },
+    ],
+    showLabels: true,
+    valueFormatter: (value) => `${value}%`,
   },
 }
 
