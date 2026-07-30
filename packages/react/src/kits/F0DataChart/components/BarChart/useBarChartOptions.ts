@@ -146,27 +146,33 @@ type BorderRadiusResolver = (
 ) => number[] | number
 
 /**
- * Builds a per-bar corner radius resolver, needed only when some value is
- * negative: the series-level radius can't express two directions at once.
+ * Builds a per-bar corner radius resolver.
  *
- * ECharts stacks positive and negative values away from the zero line in
- * opposite directions, so a stacked category has up to two outer segments —
- * the last series contributing a positive value and the last one contributing
- * a negative value — and only those two get rounded.
+ * Non-stacked charts only need this when some value is negative: the
+ * series-level radius can't express two directions at once. All-positive
+ * (or all-negative) non-stacked charts keep the plain series-level radius.
+ *
+ * Stacked charts always need it, even when every value is positive: ECharts
+ * stacks positive and negative values away from the zero line in opposite
+ * directions, so a category has up to two outer segments — the last series
+ * contributing a positive value and the last one contributing a negative
+ * value — and only those two get rounded. Which series that is can differ
+ * per category (e.g. the nominally "last" series is 0 for one category, so
+ * an earlier series is the one actually touching the outer edge there), so
+ * this can't be reduced to a single fixed series index.
  */
 function buildBorderRadiusResolver(
   series: F0DataChartBarSeries[],
   isVertical: boolean,
   stacked: boolean
 ): BorderRadiusResolver | undefined {
-  const hasNegativeValues = series.some((s) =>
-    s.data.some((point) => getValue(point) < 0)
-  )
-  if (!hasNegativeValues) {
-    return undefined
-  }
-
   if (!stacked) {
+    const hasNegativeValues = series.some((s) =>
+      s.data.some((point) => getValue(point) < 0)
+    )
+    if (!hasNegativeValues) {
+      return undefined
+    }
     return (_seriesIndex, _dataIndex, value) =>
       barCornerRadius(isVertical, value < 0)
   }
@@ -207,7 +213,6 @@ function buildSeriesEntries(
   isVertical: boolean,
   showLabels: boolean,
   stacked: boolean,
-  isLastSeries: boolean,
   labelColor: string,
   labelFontSize: number,
   resolveBorderRadius: BorderRadiusResolver | undefined,
@@ -259,11 +264,11 @@ function buildSeriesEntries(
   // Round only the far end (away from the zero line):
   // - Vertical: top corners rounded, bottom flat against x-axis
   // - Horizontal: right corners rounded, left flat against y-axis
-  // Negative bars grow the other way, so `resolveBorderRadius` overrides this
-  // per data point.
+  // This series-level default only applies when `resolveBorderRadius` is
+  // undefined (non-stacked, all-positive charts) — everything else
+  // (negatives, or any stacked chart) is overridden per data point below,
+  // since the direction and the outer-most segment can vary per category.
   const borderRadius = barCornerRadius(isVertical, false)
-  // Stacked series that aren't the last one get no rounding (sandwiched)
-  const effectiveBorderRadius = stacked && !isLastSeries ? 0 : borderRadius
 
   const mainSeries: echarts.BarSeriesOption = {
     name: series.name,
@@ -272,7 +277,7 @@ function buildSeriesEntries(
     stack: stackId,
     itemStyle: {
       color,
-      borderRadius: effectiveBorderRadius,
+      borderRadius,
     },
     label: {
       show: showLabels,
@@ -526,7 +531,6 @@ export function useBarChartOptions(
         isVertical,
         showLabels,
         stacked,
-        i === series.length - 1,
         theme.colors.foregroundSecondary,
         resolvedLabelFontSize,
         resolveBorderRadius,
