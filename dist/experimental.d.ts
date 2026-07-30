@@ -38,6 +38,7 @@ import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
+import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
@@ -79,6 +80,7 @@ import { PieChartProps as PieChartProps_2 } from './experimental';
 import { PopoverProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
+import { ProgressSeriesCellValue } from './types/progressSeries';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
 import { Provider } from 'react';
@@ -660,6 +662,13 @@ declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };
@@ -803,7 +812,7 @@ declare type Approver = {
     status: Status;
 };
 
-export declare const AreaChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+export declare const AreaChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "step" | "linear" | "natural" | "monotoneX";
 marginTop?: number;
 canBeBlurred?: boolean;
@@ -932,7 +941,7 @@ export declare type BannerAction = {
     icon?: IconType;
 };
 
-export declare const BarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+export declare const BarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
 label?: boolean;
 legend?: boolean;
@@ -1000,7 +1009,7 @@ declare type BaseAvatarProps = {
 
 declare type BaseAvatarProps_2 = ComponentProps<typeof BaseAvatar>;
 
-export declare const BaseBanner: WithDataTestIdReturnType_3<ForwardRefExoticComponent<BaseBannerProps & RefAttributes<HTMLDivElement>> & {
+export declare const BaseBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<BaseBannerProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: ForwardRefExoticComponent<RefAttributes<HTMLDivElement>>;
 }>;
 
@@ -1377,6 +1386,14 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * expandable region (e.g. a tree/graph expander).
      */
     "aria-expanded"?: boolean;
+    /**
+     * Identifies the expandable region controlled by the button.
+     */
+    "aria-controls"?: string;
+    /**
+     * Describes the type of popup opened by the button.
+     */
+    "aria-haspopup"?: React.AriaAttributes["aria-haspopup"];
     /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).
@@ -1934,7 +1951,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Carousel: WithDataTestIdReturnType_5<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
+export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
 
 declare interface CarouselBreakpoints {
     default?: ColumnNumber;
@@ -1959,7 +1976,7 @@ declare interface CarouselProps {
     }[];
 }
 
-export declare const CategoryBarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const CategoryBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare interface CategoryBarProps_2 {
     data: {
@@ -2016,7 +2033,7 @@ declare interface ChartComputation {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
+export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
 
 declare interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBase {
     type: "bar";
@@ -2423,7 +2440,7 @@ declare const columnWidths: {
     readonly fit: 1;
 };
 
-export declare const ComboChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+export declare const ComboChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 label?: boolean;
 legend?: boolean;
 showValueUnderLabel?: boolean;
@@ -3104,7 +3121,7 @@ declare type DateValue = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DaytimePage: WithDataTestIdReturnType_5<typeof _DaytimePage>;
+export declare const DaytimePage: WithDataTestIdReturnType_3<typeof _DaytimePage>;
 
 declare function _DaytimePage({ children, header, period, embedded, hideOneSwitch, }: DaytimePageProps): JSX_2.Element;
 
@@ -3299,7 +3316,15 @@ declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly language: "Language";
+        readonly audio: "Audio";
     };
     readonly actions: {
         readonly add: "Add";
@@ -3737,7 +3762,9 @@ declare const defaultTranslations: {
         readonly cancelRecording: "Cancel recording";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -3773,6 +3800,7 @@ declare const defaultTranslations: {
         readonly reply: "Reply";
         readonly react: "Add reaction";
         readonly download: "Download";
+        readonly downloadNamedFile: "Download {{name}}";
         readonly removeQuote: "Remove quote";
         readonly edit: "Edit";
         readonly editing: "Editing";
@@ -3786,7 +3814,10 @@ declare const defaultTranslations: {
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
         readonly openDocument: "Open document";
+        readonly openNamedDocument: "Open {{name}}";
         readonly documentPreview: "Document preview";
+        readonly videoPlayerLabel: "Video player: {{name}}";
+        readonly loadingVideo: "Loading video: {{name}}";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -3839,6 +3870,10 @@ declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+    };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -4112,6 +4147,7 @@ declare const defaultTranslations: {
         readonly paused: "Paused";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
         readonly volume: "Volume";
         readonly seekLabel: "Seek";
         readonly enterFullscreen: "Enter fullscreen";
@@ -4119,6 +4155,12 @@ declare const defaultTranslations: {
         readonly playbackSpeed: "Playback speed ({{rate}})";
         readonly playbackSpeedLabel: "Playback speed";
         readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 
@@ -4130,7 +4172,7 @@ export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
+export declare const DetailsItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
 
 export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "item";
@@ -4340,8 +4382,14 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
      * restrict the selectable date range in the picker.
+     *
+     * Can be a static object or a function that receives the current row item
+     * to return a per-row range (e.g. bound one date field by another field's
+     * value: `(item) => ({ minDate: parseISO(item.startDate) })`). The picker's
+     * default visible month follows `minDate`, so a per-row `minDate` also
+     * opens the calendar on that date.
      */
-    dateConfig?: DateCellConfig;
+    dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -4741,7 +4789,7 @@ declare interface F0AlertProps {
     onClose?: () => void;
 }
 
-declare const F0AvatarAlert: WithDataTestIdReturnType_5<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
+declare const F0AvatarAlert: WithDataTestIdReturnType_3<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
 declare type F0AvatarCompanyProps = {
     name: string;
@@ -4837,7 +4885,7 @@ declare type F0AvatarListPropsAvatars = {
     avatars: (Omit<FileAvatarVariant, "type"> & F0AvatarListExtras & Record<string, unknown>)[];
 };
 
-export declare const F0AvatarModule: WithDataTestIdReturnType_5<typeof F0AvatarModule_2>;
+export declare const F0AvatarModule: WithDataTestIdReturnType_3<typeof F0AvatarModule_2>;
 
 /**
  * Module avatar
@@ -5145,7 +5193,11 @@ export declare type F0ChatChannel = {
      * factorial sources these from its own data (e.g. HR vacation status).
      */
     statuses?: F0ChatChannelStatus[];
-    /** Group only. */
+    /**
+     * Group only. Total channel members, including the current user. F0 compares
+     * `memberCount - 1` with the unique other members in `readBy` (or its count
+     * fallback) before showing the all-read footer state.
+     */
     memberCount?: number;
     /** DM only — the counterpart, used for the header identity hover card. */
     user?: F0ChatUser;
@@ -5180,6 +5232,17 @@ export declare type F0ChatFileAttachment = {
     name: string;
     size?: number;
     mimeType?: string;
+    /** Poster used when a video file renders through the inline F0VideoPlayer. */
+    thumbnailUrl?: string;
+    /**
+     * Optional captions/audio-description sources for video files. Passed
+     * directly to F0VideoPlayer; ignored for non-video files.
+     */
+    videoContent?: VideoPlayerContent;
+    /** Initial locale for localized video audio and accessibility content. */
+    videoDefaultLanguage?: string;
+    /** Declare that a video file has no audio, so captions are not required. */
+    videoSilent?: boolean;
     /** 0–100 while uploading; undefined once done. */
     progress?: number;
 };
@@ -5312,9 +5375,14 @@ export declare type F0ChatMessage = {
      */
     mentionedEveryone?: boolean;
     /**
-     * Group read receipts — how many other members have read this message.
-     * Approximated by counting members whose last-read pointer is at/after this
-     * message (Stream exposes no per-message reader list).
+     * Group read receipts — the other members who have read this message.
+     * Hosts derive this from their transport's per-member read pointers.
+     */
+    readBy?: F0ChatUser[];
+    /**
+     * Group read-receipt count for hosts that cannot provide reader identities.
+     * Prefer `readBy` when identities are available; F0 derives its count from
+     * `readBy.length`.
      */
     readByCount?: number;
     /**
@@ -5347,7 +5415,10 @@ export declare type F0ChatMessageReply = {
  * shows a tappable critical alert whose menu is reduced to Retry / Delete.
  * `delivered` (reached the counterpart's device, not read yet) is for backends
  * that distinguish it — Stream doesn't, so the factorial adapter never emits it
- * and those messages go straight from `sent` to `read`.
+ * and those messages go straight from `sent` to `read`. In groups, `read`
+ * should only be emitted when all other channel members have read the message;
+ * F0 also guards that transition with `channel.memberCount` and the available
+ * `readBy` / `readByCount`.
  */
 export declare type F0ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
 
@@ -5381,6 +5452,10 @@ export declare type F0ChatReaction = {
     emoji: string;
     count: number;
     reactedByMe: boolean;
+    /**
+     * People who reacted with this emoji. Hosts may omit this initial list and
+     * provide {@link F0ChatRuntime.loadReactionUsers} to resolve it lazily.
+     */
     users?: F0ChatUser[];
 };
 
@@ -5442,6 +5517,13 @@ export declare type F0ChatRuntime = {
     loadOlder: () => void;
     toggleReaction: (messageId: string, emoji: string) => void | Promise<void>;
     /**
+     * Resolve the complete user list for one reaction on demand. F0 calls this
+     * when the reaction receives pointer hover or keyboard focus and caches the
+     * result while its count is unchanged. Omit when every reaction already
+     * carries its complete {@link F0ChatReaction.users} list.
+     */
+    loadReactionUsers?: (messageId: string, emoji: string) => Promise<F0ChatUser[]>;
+    /**
      * Delete a message that exists server-side (soft delete → tombstone, or hard
      * delete → removed from `messages`).
      *
@@ -5488,6 +5570,13 @@ export declare type F0ChatRuntime = {
      * textarea (mirrors the AI chat). Omit for no limit.
      */
     maxFiles?: number;
+    /**
+     * Maximum size in bytes for each file selected, dropped, or pasted into the
+     * composer. When any file exceeds the limit, the composer rejects the whole
+     * batch before calling `uploadFiles` and keeps the validation error visible
+     * until the next attachment attempt. Omit for no size limit.
+     */
+    maxFileSizeBytes?: number;
     /**
      * Optional voice dictation — same signature as the AI chat (streams partials).
      * Not part of the Stream transport; a host wires it to its own speech service
@@ -5650,6 +5739,53 @@ export declare type F0ChatVoiceAttachment = {
     mimeType?: string;
     name?: string;
 };
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0EmojiPicker: WithDataTestIdReturnType_3<    {
+({ label, value, defaultValue, onChange, clearable, disabled, locale, size, }: F0EmojiPickerProps_2): JSX_2.Element;
+displayName: string;
+}>;
+
+export declare interface F0EmojiPickerProps {
+    /**
+     * Accessible label and tooltip for the trigger button.
+     */
+    label: string;
+    /**
+     * Selected emoji. Use with `onChange` to control the component.
+     */
+    value?: string | null;
+    /**
+     * Initially selected emoji when the component is uncontrolled.
+     */
+    defaultValue?: string | null;
+    /**
+     * Called with the selected emoji, or `null` when cleared.
+     */
+    onChange?: (emoji: string | null) => void;
+    /**
+     * Allows clearing the selected emoji from the picker.
+     */
+    clearable?: boolean;
+    /**
+     * Prevents opening the picker and changing the selected emoji.
+     */
+    disabled?: boolean;
+    /**
+     * Locale used by the search and category labels in the picker.
+     */
+    locale?: string;
+    /**
+     * Size of the trigger avatar.
+     */
+    size?: F0EmojiPickerSize;
+}
+
+export declare type F0EmojiPickerSize = (typeof f0EmojiPickerSizes)[number];
+
+export declare const f0EmojiPickerSizes: readonly ["sm", "md", "lg"];
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -5938,6 +6074,85 @@ export declare interface F0NotesTextEditorSkeletonProps {
 export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0ProgressSeries: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0ProgressSeriesProps & RefAttributes<HTMLDivElement>>>;
+
+/**
+ * One progress bar in the series — e.g. a period (Q1, Jan, 2026…). Each bar is
+ * an independent progress bar (its own track + proportional fill), unlike a
+ * category bar where the segments are parts of a single whole.
+ */
+export declare interface F0ProgressSeriesBar {
+    /**
+     * Attained value. `undefined` (or a non-finite value / `max <= 0`) renders an
+     * empty/future bar: track only, no fill.
+     */
+    value: number | undefined;
+    /** Target. Defaults to 100. */
+    max?: number;
+    /**
+     * f0 chart color token for the fill. Defaults to `"categorical-1"`. Ignored
+     * when `canceled` is set.
+     */
+    color?: F0ProgressSeriesColor;
+    /** Renders a hatched grey bar (e.g. a cancelled period). */
+    canceled?: boolean;
+    /** Title shown under the bar (e.g. "Q1", "Jan", "2026"). Optional. */
+    label?: string;
+    /**
+     * Short text shown under the bar next to the label. Optional; defaults to the
+     * computed percentage (which may exceed 100%). Pass "" to hide it.
+     */
+    caption?: string;
+    /** Tooltip text. Defaults to `label · value / max (percentage)`. */
+    tooltip?: string;
+}
+
+export declare type F0ProgressSeriesColor = (typeof f0ProgressSeriesColors)[number];
+
+/**
+ * The `--chart-*` tokens `getColor` can resolve (see `f0-core`'s `base.css`).
+ * Same set as `F0SegmentedBar`'s `SegmentColorToken`; the two are not shared yet
+ * because `kits/F0DataChart` already owns the `ChartColorToken` name for a
+ * different palette (`baseColors`). Unifying them is tracked separately.
+ */
+export declare const f0ProgressSeriesColors: readonly ["categorical-1", "categorical-2", "categorical-3", "categorical-4", "categorical-5", "categorical-6", "categorical-7", "categorical-8", "feedback-positive", "feedback-neutral", "feedback-negative"];
+
+/** Shared by the component and the `progressSeries` value-display cell. */
+export declare interface F0ProgressSeriesOptions {
+    /** 1..N bars (N up to 12: half-yearly = 2, quarterly = 4, monthly = 12). */
+    bars: F0ProgressSeriesBar[];
+    /**
+     * Max labels rendered under the row. When there are more bars than this, the
+     * labels are spread evenly (e.g. 12 bars → indices 0, 3, 6, 9). Defaults to 4.
+     */
+    maxLabels?: number;
+    /** Hide the per-bar tooltips. */
+    hideTooltip?: boolean;
+    /**
+     * Formats `value`/`max` in the default tooltip — the component only knows raw
+     * numbers, so pass this to render currencies, separators, units…
+     * Defaults to `String(value)`.
+     */
+    formatValue?: (value: number) => string;
+    /**
+     * Renders a skeleton (same height as the loaded bar) instead of the series
+     * while the data is still loading.
+     */
+    loading?: boolean;
+}
+
+export declare interface F0ProgressSeriesProps extends F0ProgressSeriesOptions, WithDataTestIdProps {
+    /** Bar height. Defaults to `"md"`. */
+    size?: F0ProgressSeriesSize;
+}
+
+export declare type F0ProgressSeriesSize = (typeof f0ProgressSeriesSizes)[number];
+
+export declare const f0ProgressSeriesSizes: readonly ["sm", "md", "lg"];
 
 /**
  * @experimental This is an experimental component, use it at your own risk
@@ -6238,13 +6453,13 @@ export declare type F0SelectTagProp = string | {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0TableOfContent: WithDataTestIdReturnType_5<typeof _F0TableOfContent>;
+export declare const F0TableOfContent: WithDataTestIdReturnType_3<typeof _F0TableOfContent>;
 
 declare function _F0TableOfContent(props: TOCProps): JSX_2.Element;
 
-declare const F0TagAlert: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagBalance: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagBalance: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagBalanceProps = {
     /**
@@ -6276,7 +6491,7 @@ declare type F0TagBalanceProps = {
     formatterOptions?: undefined;
 });
 
-declare const F0TagCompany: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagCompany: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagListProps<T extends TagType_2> = {
     /**
@@ -6298,9 +6513,9 @@ declare type F0TagListProps<T extends TagType_2> = {
     remainingCount?: number;
 };
 
-declare const F0TagPerson: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagPerson: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagRaw: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagRawProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagRaw: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0TagRawProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagRawProps = {
     /**
@@ -6343,7 +6558,7 @@ declare interface F0TagStatusProps {
     additionalAccessibleText?: string;
 }
 
-declare const F0TagTeam: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagTeam: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
  * F0TextAreaInput is the writable multi-line text field for forms — a box
@@ -6757,7 +6972,11 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     title: (record: R) => string;
     /** Secondary line of text for a node. */
     subtitle?: (record: R) => string;
-    /** Avatar shown on the leading side of the node pill. */
+    /**
+     * Avatar shown on the leading side of the node pill. Its variant also drives
+     * the node silhouette: `person` → circular dot/pill, any other variant
+     * (`team`, `icon`, …) → rounded-square card.
+     */
     avatar?: (record: R) => AvatarVariant;
     /**
      * Tags rendered in the node metadata row. A tag may set `column` to place it
@@ -7203,7 +7422,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
  */
 export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -7431,6 +7650,18 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     lanes: ReadonlyArray<KanbanLaneDefinition>;
+    /** Per-group columns: when grouping is active, each group's board renders the
+     * lanes this returns instead of the global `lanes` (lane ids must exist in
+     * `source.lanes`). Enables the onboarding case where each policy version has
+     * its own phases. NOTE: API shape pending Foundations review. */
+    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    /** Whether each group header shows a selection checkbox when the collection is
+     * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
+     * keep per-card selection while hiding the group-level checkbox — e.g. when
+     * "select a whole group" isn't a meaningful action for the consumer. Note: a
+     * collapsed group unmounts its cards, so with `false` the group's items can
+     * only be selected once the group is expanded. */
+    selectableGroups?: boolean;
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
@@ -7460,7 +7691,7 @@ declare type Level = (typeof levels)[number];
 
 declare const levels: readonly ["info", "warning", "critical", "positive"];
 
-export declare const LineChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+export declare const LineChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
@@ -7487,6 +7718,26 @@ declare type ListVisualizationOptions<R extends RecordType, _Filters extends Fil
 
 declare interface LoadingStateProps {
     label: string;
+}
+
+/** A single value, or the same value provided in multiple languages. */
+declare type Localized<T> = T | LocalizedOption<T>[];
+
+/**
+ * Shared helpers for content that can be provided in one language (a plain
+ * value) or several (a list of per-locale entries) — used by the media players
+ * for captions, descriptions, transcriptions and summaries.
+ */
+declare interface LocalizedOption<T> {
+    /** BCP-47 language tag, e.g. `"en"`, `"es"`, `"en-US"`. */
+    locale: string;
+    /**
+     * Display label for the language picker. Defaults to the language name for
+     * `locale` (via `Intl.DisplayNames`), so this is only needed to override it.
+     */
+    label?: string;
+    /** The value for this locale. */
+    value: T;
 }
 
 export declare const MAX_EXPANDED_ACTIONS = 2;
@@ -8104,7 +8355,7 @@ action: BulkAction,
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OneApprovalHistory: WithDataTestIdReturnType_5<FC<OneApprovalHistoryProps>>;
+export declare const OneApprovalHistory: WithDataTestIdReturnType_3<FC<OneApprovalHistoryProps>>;
 
 declare type OneApprovalHistoryProps = {
     steps: ApprovalStep[];
@@ -8411,7 +8662,7 @@ declare interface OnePaginationProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OnePersonListItem: WithDataTestIdReturnType_5<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
+export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
 Skeleton: () => default_2.JSX.Element;
 }>;
 
@@ -8498,7 +8749,7 @@ declare interface OverflowListProps<T> {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Page: WithDataTestIdReturnType_5<typeof _Page>;
+export declare const Page: WithDataTestIdReturnType_3<typeof _Page>;
 
 declare function _Page({ children, header, embedded }: PageProps): JSX_2.Element;
 
@@ -8667,7 +8918,7 @@ declare type PersonProfile = {
 
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
-export declare const PieChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const PieChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare const PieChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: PieChartProps_2;
@@ -8826,7 +9077,7 @@ declare const privateProps_5: readonly [];
 
 declare const privateProps_6: readonly ["compact"];
 
-declare const privateProps_7: readonly ["delay"];
+declare const privateProps_7: readonly ["delay", "onOpen"];
 
 declare type ProductUpdate = {
     title: string;
@@ -8877,7 +9128,7 @@ declare type ProductUpdatesProp = {
     };
 };
 
-export declare const ProgressBarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+export declare const ProgressBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 value: number;
 max?: number;
 label?: string;
@@ -9014,7 +9265,7 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
-export declare const RadarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<RadarChartProps<ChartConfig_2> & {
+export declare const RadarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<RadarChartProps<ChartConfig_2> & {
 dataTestId?: string;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
@@ -9038,6 +9289,8 @@ declare interface ReactionProps {
     initialCount: number;
     hasReacted?: boolean;
     users?: User_2[];
+    /** Resolve the complete user list on first hover or keyboard focus. */
+    loadUsers?: () => Promise<User_2[]>;
     onInteraction?: (emoji: string) => void;
     size?: "sm" | "md" | "lg";
 }
@@ -9196,10 +9449,26 @@ declare type SearchOptions = {
  * result calls `onSelect` (e.g. the graph view reveals/centers the node).
  */
 export declare type SearchPreview<R extends RecordType> = {
-    search: (query: string) => Promise<R[]>;
+    /**
+     * Fetch one page of matches for `query`. `page` starts at 0 and increments as
+     * the user scrolls the dropdown to the bottom; it is optional so existing
+     * non-paginated consumers keep the plain `(query) => Promise<R[]>` shape.
+     * Return a bare array for a single, non-paginated page (treated as
+     * `hasMore: false`), or a `SearchPreviewPage` to drive infinite scroll.
+     */
+    search: (query: string, page?: number) => Promise<R[] | SearchPreviewPage<R>>;
     getId: (record: R) => string;
     render: (record: R) => SearchPreviewResultData;
     onSelect: (record: R) => void;
+};
+
+/**
+ * One page of search-preview results. `hasMore` tells the dropdown whether to
+ * keep pulling further pages as the user scrolls (infinite scroll).
+ */
+export declare type SearchPreviewPage<R extends RecordType> = {
+    records: R[];
+    hasMore: boolean;
 };
 
 /** Data shown for a single row of the search preview dropdown. */
@@ -9392,7 +9661,7 @@ declare const shortcutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare const Sidebar: WithDataTestIdReturnType_5<typeof _Sidebar>;
+export declare const Sidebar: WithDataTestIdReturnType_3<typeof _Sidebar>;
 
 declare function _Sidebar({ header, body, footer, onFooterDropdownClick, }: SidebarProps): JSX_2.Element;
 
@@ -9455,7 +9724,7 @@ export declare type SidebarChatAction = {
 
 export declare type SidebarChatActions = Omit<SidebarChatStore, "groups" | "activeChatId" | "unreadChatsCount">;
 
-export declare const SidebarChatBlankState: WithDataTestIdReturnType_3<typeof _SidebarChatBlankState>;
+export declare const SidebarChatBlankState: WithDataTestIdReturnType_4<typeof _SidebarChatBlankState>;
 
 /**
  * Compact blank state for a sidebar conversation list. Shared by the people
@@ -10191,7 +10460,7 @@ export declare type TableVisualizationType = "table" | "editableTable";
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tabs: WithDataTestIdReturnType_5<FC<TabsProps> & {
+export declare const Tabs: WithDataTestIdReturnType_3<FC<TabsProps> & {
 Skeleton: FC<Pick<TabsProps, "secondary">>;
 }>;
 
@@ -10452,13 +10721,14 @@ export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<Tog
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tooltip: WithDataTestIdReturnType_5<(props: TooltipProps) => default_2.JSX.Element>;
+export declare const Tooltip: WithDataTestIdReturnType_3<(props: TooltipProps) => default_2.JSX.Element>;
 
 declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
     delay?: number;
     instant?: boolean;
+    onOpen?: () => void;
 } & ({
     label: string;
     description?: string;
@@ -10912,6 +11182,7 @@ declare const valueDisplayRenderers: {
     readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => JSX_2.Element | null;
+    readonly progressSeries: (args: ProgressSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
@@ -10950,7 +11221,7 @@ export declare interface VersionAuthor {
     src?: string;
 }
 
-export declare const VerticalBarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+export declare const VerticalBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
 showRatio?: boolean;
 valueFormatter?: (value: string | number | undefined) => string | number;
@@ -10964,6 +11235,56 @@ declare const VerticalOverflowList: {
     <T>({ items, renderListItem, className, gap, minSize, onVisibleItemsChange, }: OverflowListProps<T>): JSX_2.Element;
     displayName: string;
 };
+
+/**
+ * Structured content for the video player.
+ *
+ * Every field accepts either a single value or a localized list
+ * (`[{ locale, label?, value }]`) — pass several languages and a language
+ * selector appears in the controls. A single shared selection drives captions,
+ * descriptions and the described source together (each falls back to its first
+ * entry for languages it doesn't provide). See `F0VideoPlayerProps.defaultLanguage`.
+ *
+ * `captions` are timed text shown over the video during playback (WCAG 2.1
+ * SC 1.2.2, Captions). Pass either a WebVTT resource URL or a raw WebVTT string
+ * (the player turns raw VTT into a blob track, so no CORS setup is needed); a
+ * remote URL requires the video host to allow cross-origin reads. When omitted,
+ * the player uses any caption/subtitle track embedded in the video file. A
+ * captions toggle in the controls shows/hides them (a filled glyph when on, a
+ * line glyph when off).
+ *
+ * Audio description (WCAG 2.1 SC 1.2.5) conveys on-screen visual information as
+ * audio, complementary to captions — both are independent and can be on at
+ * once. Provide it in one of two ways, toggled with the audio-description
+ * control (a filled "AD" badge when on, a line badge when off):
+ * - `describedSrc`: a pre-produced media rendition with description mixed into
+ *   the audio. Toggling swaps the source, preserving position and play state.
+ *   Highest quality; assumed the same length as `src`.
+ * - `descriptions`: a WebVTT `kind="descriptions"` script (URL or raw VTT),
+ *   delivered at runtime — the video pauses on each cue so the description can
+ *   be spoken (extended audio description), then resumes. Used only when
+ *   `describedSrc` is absent.
+ */
+declare interface VideoPlayerContent {
+    /**
+     * WebVTT URL, or raw WebVTT content, for captions shown during playback.
+     * Localizable — pass a per-locale list to offer captions in several languages.
+     */
+    captions?: Localized<string>;
+    /**
+     * A pre-produced described media source (description mixed into the audio),
+     * swapped in when audio description is enabled. Takes precedence over
+     * `descriptions`. Should match `src`'s duration so the position carries
+     * across the swap. Localizable.
+     */
+    describedSrc?: Localized<string>;
+    /**
+     * WebVTT URL, or raw WebVTT content, of a `kind="descriptions"` script.
+     * Delivered at runtime with extended (pausing) audio description when no
+     * `describedSrc` is provided. Localizable.
+     */
+    descriptions?: Localized<string>;
+}
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -11144,7 +11465,7 @@ declare type WelcomeSuggestionClickEvent = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Widget: WithDataTestIdReturnType_5<default_2.ForwardRefExoticComponent<WidgetProps & {
+export declare const Widget: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<WidgetProps & {
 children: ReactNode;
 } & default_2.RefAttributes<HTMLDivElement>> & {
 Skeleton: default_2.ForwardRefExoticComponent<WidgetSkeletonProps & default_2.RefAttributes<HTMLDivElement>>;
@@ -11169,7 +11490,7 @@ export declare type WidgetAvatarsListItemProps = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WidgetEmptyState: WithDataTestIdReturnType_5<typeof _WidgetEmptyState>;
+export declare const WidgetEmptyState: WithDataTestIdReturnType_3<typeof _WidgetEmptyState>;
 
 declare function _WidgetEmptyState({ title, description, emoji, actions, }: WidgetEmptyStateProps): JSX_2.Element;
 
@@ -11223,7 +11544,7 @@ export declare interface WidgetProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WidgetSection: WithDataTestIdReturnType_5<ForwardRefExoticComponent<    {
+export declare const WidgetSection: WithDataTestIdReturnType_3<ForwardRefExoticComponent<    {
 children?: ReactNode | undefined;
 } & {
 title?: string;

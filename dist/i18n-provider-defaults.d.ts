@@ -156,7 +156,15 @@ export declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly language: "Language";
+        readonly audio: "Audio";
     };
     readonly actions: {
         readonly add: "Add";
@@ -594,7 +602,9 @@ export declare const defaultTranslations: {
         readonly cancelRecording: "Cancel recording";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -630,6 +640,7 @@ export declare const defaultTranslations: {
         readonly reply: "Reply";
         readonly react: "Add reaction";
         readonly download: "Download";
+        readonly downloadNamedFile: "Download {{name}}";
         readonly removeQuote: "Remove quote";
         readonly edit: "Edit";
         readonly editing: "Editing";
@@ -643,7 +654,10 @@ export declare const defaultTranslations: {
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
         readonly openDocument: "Open document";
+        readonly openNamedDocument: "Open {{name}}";
         readonly documentPreview: "Document preview";
+        readonly videoPlayerLabel: "Video player: {{name}}";
+        readonly loadingVideo: "Loading video: {{name}}";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -696,6 +710,10 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+    };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -969,6 +987,7 @@ export declare const defaultTranslations: {
         readonly paused: "Paused";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
         readonly volume: "Volume";
         readonly seekLabel: "Seek";
         readonly enterFullscreen: "Enter fullscreen";
@@ -976,6 +995,12 @@ export declare const defaultTranslations: {
         readonly playbackSpeed: "Playback speed ({{rate}})";
         readonly playbackSpeedLabel: "Playback speed";
         readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 

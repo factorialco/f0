@@ -402,6 +402,13 @@ export declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };
@@ -555,7 +562,7 @@ declare type AiChatProviderReturnValue = {
     panelContentSide: "left" | "right";
     /** Set which edge hosted panel content docks to. */
     setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "chatOverlay" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -586,6 +593,7 @@ declare interface AiChatState {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    chatOverlay?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
@@ -1940,7 +1948,15 @@ export declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly language: "Language";
+        readonly audio: "Audio";
     };
     readonly actions: {
         readonly add: "Add";
@@ -2378,7 +2394,9 @@ export declare const defaultTranslations: {
         readonly cancelRecording: "Cancel recording";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -2414,6 +2432,7 @@ export declare const defaultTranslations: {
         readonly reply: "Reply";
         readonly react: "Add reaction";
         readonly download: "Download";
+        readonly downloadNamedFile: "Download {{name}}";
         readonly removeQuote: "Remove quote";
         readonly edit: "Edit";
         readonly editing: "Editing";
@@ -2427,7 +2446,10 @@ export declare const defaultTranslations: {
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
         readonly openDocument: "Open document";
+        readonly openNamedDocument: "Open {{name}}";
         readonly documentPreview: "Document preview";
+        readonly videoPlayerLabel: "Video player: {{name}}";
+        readonly loadingVideo: "Loading video: {{name}}";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -2480,6 +2502,10 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+    };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2753,6 +2779,7 @@ export declare const defaultTranslations: {
         readonly paused: "Paused";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
         readonly volume: "Volume";
         readonly seekLabel: "Seek";
         readonly enterFullscreen: "Enter fullscreen";
@@ -2760,6 +2787,12 @@ export declare const defaultTranslations: {
         readonly playbackSpeed: "Playback speed ({{rate}})";
         readonly playbackSpeedLabel: "Playback speed";
         readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 
@@ -2930,7 +2963,7 @@ export declare interface F0ActionItemProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
+export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, overlay: overlayProp, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
  * The AI chat credits / settings popover button, on its own. Use it to surface
@@ -2949,10 +2982,20 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - with-history: title acts as a thread selector (clickable) — the host
  *   wires `onOpenHistory` to mount its own history dialog.
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
+ * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
  * Decoupled from CopilotKit and `useAiChat()` — everything via props.
  */
-export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, }: F0AiChatHeaderProps) => JSX_2.Element;
+export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
+
+export declare interface F0AiChatHeaderAction {
+    /** Stable identifier used as the React key. */
+    id: string;
+    /** Already-localized accessible label and tooltip. */
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+}
 
 export declare type F0AiChatHeaderProps = {
     /**
@@ -2987,9 +3030,9 @@ export declare type F0AiChatHeaderProps = {
     /** Legacy variant gate: only renders the "new chat" button when true. */
     hasMessages?: boolean;
     /**
-     * Minimal header: render only the expand + close controls (no title, new
-     * chat or credits popover). Use when a sidebar owns the chat navigation and
-     * the credits/settings popover (see `F0AiChatCreditsButton`).
+     * Minimal header: render only header actions plus the expand and close controls
+     * (no title, new chat or credits popover). Use when a sidebar owns the chat
+     * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
      */
     compact?: boolean;
     /** Credits configuration. When present, renders the credits popover button. */
@@ -3000,6 +3043,11 @@ export declare type F0AiChatHeaderProps = {
      * with `credits`). Hosts opt in per-employee.
      */
     employeeCredits?: AiChatEmployeeCredits;
+    /**
+     * Additional actions rendered immediately before the fullscreen and close
+     * controls. F0 owns their presentation so they match the built-in actions.
+     */
+    actions?: F0AiChatHeaderAction[];
 };
 
 /**
@@ -3048,12 +3096,17 @@ export declare interface F0AiChatProps {
     messages?: ReactNode;
     /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
     input?: ReactNode;
+    /**
+     * Host-provided content rendered above the complete chat surface. F0
+     * supplies the scoped backdrop and makes the chat beneath it inert.
+     */
+    overlay?: ReactNode;
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, chatOverlay, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.

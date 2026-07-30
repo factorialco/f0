@@ -60,6 +60,16 @@ export declare interface ComponentEntry {
 }
 
 /**
+ * The maturity status badge, sized to sit inline next to a component title. On
+ * hover/focus it reveals the full maturity summary and Definition-of-Done
+ * checklist in a tooltip — the same information the `ComponentStability` panel
+ * shows, so collapsing the section loses no context.
+ *
+ * Renders nothing when the name doesn't resolve to a tracked component.
+ */
+export declare function ComponentMaturityTag({ componentName, components, className, }: ComponentStabilityProps): default_2.JSX.Element | null;
+
+/**
  * Renders a component's maturity status and Definition-of-Done checklist. All
  * text (badge label, summary, checklist labels and hints) comes from the
  * `component-status` data so Storybook and any consuming app stay identical.
