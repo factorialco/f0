@@ -123,6 +123,7 @@ import { PieChartProps } from './PieChart';
 import { PopoverContentProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './f0';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './types/progressBar';
+import { ProgressSeriesCellValue } from './types/progressSeries';
 import { Props as Props_2 } from './types';
 import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
@@ -690,6 +691,13 @@ export declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };
@@ -843,7 +851,7 @@ declare type AiChatProviderReturnValue = {
     panelContentSide: "left" | "right";
     /** Set which edge hosted panel content docks to. */
     setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "chatOverlay" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -874,6 +882,7 @@ declare interface AiChatState {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    chatOverlay?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
@@ -1133,6 +1142,13 @@ declare type AlertAction = {
     loadingState: UpsellingButtonProps["loadingState"];
     nextSteps: UpsellingButtonProps["nextSteps"];
     closeLabel: UpsellingButtonProps["closeLabel"];
+    /**
+     * Whether to show the confirmation dialog after the request resolves.
+     * Defaults to `true`. Set to `false` when `onRequest` only opens a modal or
+     * navigates instead of creating an upselling request, so the success dialog
+     * ("request sent") is not shown for an action that sent nothing.
+     */
+    showConfirmation?: UpsellingButtonProps["showConfirmation"];
 };
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
@@ -1252,6 +1268,38 @@ export declare type AttachedFile = {
     errorMessage?: string;
 };
 
+/**
+ * Structured detail content for {@link F0AudioPlayerCardProps.content}.
+ *
+ * Pass a `summary` and/or a `transcription` string and the card builds the
+ * tabbed "View detail" panel for you, with labels pulled from translations
+ * (`audioPlayer.summary` / `audioPlayer.transcription`) — you no longer wire up
+ * the tabs yourself as with the deprecated `details` array.
+ *
+ * A transcription is what makes an audio-only recording accessible
+ * (WCAG 2.1 SC 1.2.1, Audio-only). When you omit `transcription`, the card
+ * still tries to derive one from the audio file's own text tracks; if none can
+ * be passed or derived, the recording is flagged in the accessibility checks.
+ *
+ * Both fields are localizable — pass a per-locale list
+ * (`[{ locale, label?, value }]`) to offer several languages, and a language
+ * selector appears in the detail panel (a single selection drives both tabs).
+ */
+export declare interface AudioPlayerContent {
+    /**
+     * Plain-text summary of the recording, shown in the "Summary" tab.
+     * Localizable.
+     */
+    summary?: Localized<string>;
+    /**
+     * Plain-text transcription of the recording, shown in the "Transcription"
+     * tab. Line breaks are preserved. When omitted, the card attempts to derive
+     * a transcription from the audio file's embedded/attached text tracks.
+     * Localizable.
+     */
+    transcription?: Localized<string>;
+}
+
 export declare interface AudioPlayerControls extends AudioPlayerState {
     play: () => void;
     pause: () => void;
@@ -1260,6 +1308,11 @@ export declare interface AudioPlayerControls extends AudioPlayerState {
     setPlaybackRate: (rate: number) => void;
 }
 
+/**
+ * @deprecated Prefer the structured `content` prop
+ * ({@link AudioPlayerContent}). The raw tab array is still honoured for now for
+ * backward compatibility, but will be removed in a future release.
+ */
 export declare interface AudioPlayerDetailTab {
     /** Stable value used to identify the tab. */
     value: string;
@@ -1905,6 +1958,14 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * expandable region (e.g. a tree/graph expander).
      */
     "aria-expanded"?: boolean;
+    /**
+     * Identifies the expandable region controlled by the button.
+     */
+    "aria-controls"?: string;
+    /**
+     * Describes the type of popup opened by the button.
+     */
+    "aria-haspopup"?: React.AriaAttributes["aria-haspopup"];
     /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).
@@ -4505,7 +4566,15 @@ export declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly language: "Language";
+        readonly audio: "Audio";
     };
     readonly actions: {
         readonly add: "Add";
@@ -4943,7 +5012,9 @@ export declare const defaultTranslations: {
         readonly cancelRecording: "Cancel recording";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -4979,6 +5050,7 @@ export declare const defaultTranslations: {
         readonly reply: "Reply";
         readonly react: "Add reaction";
         readonly download: "Download";
+        readonly downloadNamedFile: "Download {{name}}";
         readonly removeQuote: "Remove quote";
         readonly edit: "Edit";
         readonly editing: "Editing";
@@ -4992,7 +5064,10 @@ export declare const defaultTranslations: {
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
         readonly openDocument: "Open document";
+        readonly openNamedDocument: "Open {{name}}";
         readonly documentPreview: "Document preview";
+        readonly videoPlayerLabel: "Video player: {{name}}";
+        readonly loadingVideo: "Loading video: {{name}}";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -5045,6 +5120,10 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+    };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -5318,6 +5397,7 @@ export declare const defaultTranslations: {
         readonly paused: "Paused";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
         readonly volume: "Volume";
         readonly seekLabel: "Seek";
         readonly enterFullscreen: "Enter fullscreen";
@@ -5325,6 +5405,12 @@ export declare const defaultTranslations: {
         readonly playbackSpeed: "Playback speed ({{rate}})";
         readonly playbackSpeedLabel: "Playback speed";
         readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 
@@ -5814,8 +5900,14 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
      * restrict the selectable date range in the picker.
+     *
+     * Can be a static object or a function that receives the current row item
+     * to return a per-row range (e.g. bound one date field by another field's
+     * value: `(item) => ({ minDate: parseISO(item.startDate) })`). The picker's
+     * default visible month follows `minDate`, so a per-row `minDate` also
+     * opens the calendar on that date.
      */
-    dateConfig?: DateCellConfig;
+    dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -6238,7 +6330,7 @@ export declare interface F0AiAvailableFormDefinition<TParams extends Record<stri
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
+export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, overlay: overlayProp, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
  * The AI chat credits / settings popover button, on its own. Use it to surface
@@ -6257,10 +6349,20 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - with-history: title acts as a thread selector (clickable) — the host
  *   wires `onOpenHistory` to mount its own history dialog.
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
+ * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
  * Decoupled from CopilotKit and `useAiChat()` — everything via props.
  */
-export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, }: F0AiChatHeaderProps) => JSX_2.Element;
+export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
+
+export declare interface F0AiChatHeaderAction {
+    /** Stable identifier used as the React key. */
+    id: string;
+    /** Already-localized accessible label and tooltip. */
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+}
 
 export declare type F0AiChatHeaderProps = {
     /**
@@ -6295,9 +6397,9 @@ export declare type F0AiChatHeaderProps = {
     /** Legacy variant gate: only renders the "new chat" button when true. */
     hasMessages?: boolean;
     /**
-     * Minimal header: render only the expand + close controls (no title, new
-     * chat or credits popover). Use when a sidebar owns the chat navigation and
-     * the credits/settings popover (see `F0AiChatCreditsButton`).
+     * Minimal header: render only header actions plus the expand and close controls
+     * (no title, new chat or credits popover). Use when a sidebar owns the chat
+     * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
      */
     compact?: boolean;
     /** Credits configuration. When present, renders the credits popover button. */
@@ -6308,6 +6410,11 @@ export declare type F0AiChatHeaderProps = {
      * with `credits`). Hosts opt in per-employee.
      */
     employeeCredits?: AiChatEmployeeCredits;
+    /**
+     * Additional actions rendered immediately before the fullscreen and close
+     * controls. F0 owns their presentation so they match the built-in actions.
+     */
+    actions?: F0AiChatHeaderAction[];
 };
 
 /**
@@ -6356,12 +6463,17 @@ export declare interface F0AiChatProps {
     messages?: ReactNode;
     /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
     input?: ReactNode;
+    /**
+     * Host-provided content rendered above the complete chat surface. F0
+     * supplies the scoped backdrop and makes the chat beneath it inert.
+     */
+    overlay?: ReactNode;
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, chatOverlay, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -6913,7 +7025,7 @@ export declare interface F0AlertProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AnalyticsDashboard: {
-    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
+    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
     displayName: string;
 };
 
@@ -6946,8 +7058,21 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
     presets?: PresetsDefinition<Filters>;
     /**
      * Initial filter values applied when the dashboard first renders.
+     * Used only when `filtersValue` is not provided.
      */
     defaultFilters?: FiltersState<Filters>;
+    /**
+     * Applied dashboard-level filter values. Providing this prop makes filter
+     * state controlled: reflect every `onFiltersChange` value back into it or the
+     * applied filters will not move. Takes precedence over `defaultFilters`, and
+     * must not be switched on or off after the first render.
+     */
+    filtersValue?: FiltersState<Filters>;
+    /**
+     * Called when applied dashboard-level filters change through Apply, Clear,
+     * chip removal, or preset selection.
+     */
+    onFiltersChange?: (value: FiltersState<Filters>) => void;
     /**
      * Ordered list of dashboard items to render in the grid.
      * Each item declares its type, visual config, grid span, and data fetcher.
@@ -7060,9 +7185,22 @@ export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
      */
     actions?: AudioPlayerMenuAction[];
     /**
+     * Structured detail content revealed by a "View detail" toggle in the header:
+     * a `summary` and/or a `transcription`. The card renders the tabs with
+     * translated labels. Providing a `transcription` (or shipping one in the
+     * audio file) keeps the recording accessible. Takes precedence over the
+     * deprecated `details` prop when both are set.
+     */
+    content?: AudioPlayerContent;
+    /**
      * Tabbed detail content revealed by a "View detail" toggle in the header
      * (e.g. a Summary and a Transcript tab). When omitted or empty, no toggle and
      * no panel are rendered and the card behaves like a plain recording player.
+     *
+     * @deprecated Use the structured {@link F0AudioPlayerCardProps.content} prop
+     * instead (`{ summary, transcription }`). This raw tab array is still
+     * honoured for backward compatibility but will be removed in a future
+     * release.
      */
     details?: AudioPlayerDetailTab[];
     /**
@@ -7092,8 +7230,19 @@ export declare interface F0AudioPlayerProps extends WithDataTestIdProps, DataAtt
      * the URL the first time playback is requested. Use the function form for
      * on-demand credentials (e.g. presigned URLs) so the URL is only fetched on
      * user intent.
+     *
+     * Localizable — pass a per-locale list of dubbed recordings to offer
+     * selectable audio languages; a language selector then appears (in the card's
+     * kebab menu, or inline on the bare player).
      */
-    src: string | (() => Promise<string>);
+    src: Localized<string | (() => Promise<string>)>;
+    /**
+     * Initial language for localized content — the audio `src` and, on the card,
+     * the detail `content` (summary/transcription). Matched against the provided
+     * locales exactly or by primary subtag, then the viewer's browser language,
+     * then the first provided. Only relevant when more than one language is given.
+     */
+    defaultLanguage?: string;
     /**
      * Known total duration in seconds. Lets the player show the total time and an
      * active seek bar before the audio loads (e.g. with `preload="none"`).
@@ -8143,6 +8292,45 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     orientation?: "vertical" | "horizontal";
     /** Stack all series into a single bar per category. @default false */
     stacked?: boolean;
+    /**
+     * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
+     * labels if the widest value in that category doesn't fit the bar. The whole
+     * category drops together (all-or-nothing), so a tight chart never shows a
+     * ragged, half-labelled set instead of overlapping numbers. @default true
+     */
+    hideOverflowingLabels?: boolean;
+    /**
+     * Per-side clearance in pixels the widest value must have before
+     * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
+     * Overrides the default, which is placement-based: **12** for stacked (inside)
+     * labels, **0** for labels outside the bar.
+     */
+    labelFitPadding?: number;
+    /**
+     * With {@link F0DataChartBarProps.hideOverflowingLabels} on, use the widest
+     * label as the fit reference for vertical columns and labels outside
+     * horizontal bars. If it exceeds the shared allowance, hide every label
+     * instead of leaving a ragged, partially labelled chart. Labels inside
+     * horizontal stacked segments always fit per segment because their available
+     * widths differ. Height overflow is also evaluated per bar. @default true
+     */
+    hideAllLabelsOnOverflow?: boolean;
+    /**
+     * Suggested number of segments on the value axis — lower values draw fewer
+     * grid lines. Applies to whichever axis is the value axis (Y for vertical
+     * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2
+     */
+    valueAxisSplitNumber?: number;
+    /**
+     * Font size in pixels for the value labels. @default 11
+     */
+    labelFontSize?: number;
+    /**
+     * Formatter for the values shown in the hover tooltip. Defaults to
+     * {@link F0DataChartBaseProps.valueFormatter}; set it to show precise values
+     * (e.g. "107,505") while the axis and labels stay compact ("107.5K").
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -9471,6 +9659,13 @@ declare interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
      * @default false
      */
     hideSubmitButton?: boolean;
+    /**
+     * When true, the submit button is only visible once the form has unsaved changes.
+     * It goes back to hidden after a successful submit.
+     * Ignored when `hideSubmitButton` is true.
+     * @default false
+     */
+    showSubmitWhenDirty?: boolean;
     /**
      * When true, hides the internal action bar (loading/success feedback).
      * Useful when the parent component provides its own action bar.
@@ -11919,15 +12114,69 @@ export declare const F0VideoPlayer: WithDataTestIdReturnType_3<typeof F0VideoPla
  *   useRestrictForwardSeek  → blocks seeking past the furthest-watched point.
  *   <Controls>              → presentation only; interactions delegated back here.
  */
-declare function F0VideoPlayerInternal({ src, autoPlay, autoFocus, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
+declare function F0VideoPlayerInternal({ src, poster, ariaLabel, silent, persistControls, content, defaultLanguage, autoPlay, autoFocus, download, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
 
 export declare interface F0VideoPlayerProps extends DataAttributes_2 {
-    /** Video source URL. */
-    src: string;
+    /** Accessible name for this player region. Defaults to "Video player". */
+    ariaLabel?: string;
+    /**
+     * Video source URL. Localizable — pass a per-locale list of dubbed renditions
+     * to offer selectable audio languages; an "Audio" selector then appears,
+     * independent of the subtitle/caption language.
+     */
+    src: Localized<string>;
+    /**
+     * Initial language for localized content, matched against the provided
+     * locales exactly or by primary subtag, then the viewer's browser language,
+     * then the first provided. Applies to both the audio (`src`) and the text
+     * (`content`) language selections. Only relevant when more than one language
+     * is available.
+     */
+    defaultLanguage?: string;
+    /**
+     * Image URL shown while the video loads and before playback starts (the
+     * native `<video>` poster). Cleared by the browser once playback begins.
+     */
+    poster?: string;
+    /**
+     * Marks the video as having no audio (video-only). Captions (WCAG 2.1
+     * SC 1.2.2) don't apply to silent media, so this exempts the player from the
+     * captions requirement — `data-video-captions` is set to `"no-audio"` instead
+     * of `"missing"`. Note video-only content may still need a text/audio
+     * alternative for its visual information (SC 1.2.1) — audio description still
+     * works over a silent video (its description audio plays even though the video
+     * itself is muted). Browsers can't reliably detect the absence of audio before
+     * playback, so this is declared explicitly.
+     * @default false
+     */
+    silent?: boolean;
+    /**
+     * Structured content for the player. Currently carries `captions` (a WebVTT
+     * URL or raw WebVTT string) shown over the video during playback and
+     * toggled with the "CC" control. When `captions` is omitted, captions
+     * embedded in the video file are used instead.
+     */
+    content?: VideoPlayerContent;
+    /**
+     * Keep the controls bar visible during playback instead of auto-hiding it.
+     * By default the controls show while the video is paused and auto-hide while
+     * it plays (revealing on hover or keyboard focus); set this to keep them
+     * visible the whole time. Default `false`.
+     */
+    persistControls?: boolean;
     /** Start playing on mount. Default `false`. */
     autoPlay?: boolean;
     /** Focus the player on mount so keyboard shortcuts work immediately. Default `false`. */
     autoFocus?: boolean;
+    /**
+     * Optional download action rendered inside the player controls. Native media
+     * downloads remain disabled, so embedded surfaces that allow saving the
+     * source can expose an explicit, keyboard-accessible action here.
+     */
+    download?: {
+        label: string;
+        onClick: () => void;
+    };
     /**
      * Prevent seeking past the furthest point already watched. Renders a marker at
      * that position and blocks the cursor beyond it. Default `false`.
@@ -12699,7 +12948,11 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     title: (record: R) => string;
     /** Secondary line of text for a node. */
     subtitle?: (record: R) => string;
-    /** Avatar shown on the leading side of the node pill. */
+    /**
+     * Avatar shown on the leading side of the node pill. Its variant also drives
+     * the node silhouette: `person` → circular dot/pill, any other variant
+     * (`team`, `icon`, …) → rounded-square card.
+     */
     avatar?: (record: R) => AvatarVariant;
     /**
      * Tags rendered in the node metadata row. A tag may set `column` to place it
@@ -13262,7 +13515,7 @@ export declare function injectSectionEnds(items: FlatFormItem[], inSectionQuesti
  */
 export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -13504,6 +13757,18 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     lanes: ReadonlyArray<KanbanLaneDefinition>;
+    /** Per-group columns: when grouping is active, each group's board renders the
+     * lanes this returns instead of the global `lanes` (lane ids must exist in
+     * `source.lanes`). Enables the onboarding case where each policy version has
+     * its own phases. NOTE: API shape pending Foundations review. */
+    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    /** Whether each group header shows a selection checkbox when the collection is
+     * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
+     * keep per-card selection while hiding the group-level checkbox — e.g. when
+     * "select a whole group" isn't a meaningful action for the consumer. Note: a
+     * collapsed group unmounts its cards, so with `false` the group's items can
+     * only be selected once the group is expanded. */
+    selectableGroups?: boolean;
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
@@ -13641,6 +13906,26 @@ declare type ListVisualizationOptions<R extends RecordType, _Filters extends Fil
 
 export declare interface LoadingStateProps {
     label: string;
+}
+
+/** A single value, or the same value provided in multiple languages. */
+declare type Localized<T> = T | LocalizedOption<T>[];
+
+/**
+ * Shared helpers for content that can be provided in one language (a plain
+ * value) or several (a list of per-locale entries) — used by the media players
+ * for captions, descriptions, transcriptions and summaries.
+ */
+declare interface LocalizedOption<T> {
+    /** BCP-47 language tag, e.g. `"en"`, `"es"`, `"en-US"`. */
+    locale: string;
+    /**
+     * Display label for the language picker. Defaults to the language name for
+     * `locale` (via `Intl.DisplayNames`), so this is only needed to override it.
+     */
+    label?: string;
+    /** The value for this locale. */
+    value: T;
 }
 
 export declare type LockedQuestionNotice = {
@@ -15815,10 +16100,26 @@ declare type SearchOptions = {
  * result calls `onSelect` (e.g. the graph view reveals/centers the node).
  */
 declare type SearchPreview<R extends RecordType> = {
-    search: (query: string) => Promise<R[]>;
+    /**
+     * Fetch one page of matches for `query`. `page` starts at 0 and increments as
+     * the user scrolls the dropdown to the bottom; it is optional so existing
+     * non-paginated consumers keep the plain `(query) => Promise<R[]>` shape.
+     * Return a bare array for a single, non-paginated page (treated as
+     * `hasMore: false`), or a `SearchPreviewPage` to drive infinite scroll.
+     */
+    search: (query: string, page?: number) => Promise<R[] | SearchPreviewPage<R>>;
     getId: (record: R) => string;
     render: (record: R) => SearchPreviewResultData;
     onSelect: (record: R) => void;
+};
+
+/**
+ * One page of search-preview results. `hasMore` tells the dropdown whether to
+ * keep pulling further pages as the user scrolls (infinite scroll).
+ */
+declare type SearchPreviewPage<R extends RecordType> = {
+    records: R[];
+    hasMore: boolean;
 };
 
 /** Data shown for a single row of the search preview dropdown. */
@@ -17216,7 +17517,7 @@ declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined
 
 export declare const UpsellingAlert: WithDataTestIdReturnType_4<typeof _UpsellingAlert>;
 
-declare function _UpsellingAlert({ icon, title, description, action, }: UpsellingAlertProps): JSX_2.Element;
+declare function _UpsellingAlert({ icon, title, description, action, onDismiss, }: UpsellingAlertProps): JSX_2.Element;
 
 export declare interface UpsellingAlertProps {
     /**
@@ -17235,6 +17536,16 @@ export declare interface UpsellingAlertProps {
      * The upselling action button configuration.
      */
     action: AlertAction;
+    /**
+     * Called when the user dismisses the alert. When provided, a close button is
+     * shown just to the right of the upselling action button.
+     *
+     * The consumer is responsible for deciding what happens on dismiss — for
+     * example, hiding the alert for a number of days and showing it again later
+     * by persisting the dismissal (e.g. in a cookie or local storage) and
+     * unmounting the component while it should stay hidden.
+     */
+    onDismiss?: () => void;
 }
 
 export declare const UpsellingBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
@@ -17632,6 +17943,26 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
     previousItemUrl: string | null;
 }
+
+/**
+ * Derives a transcription from the audio element's text tracks, so a recording
+ * that ships its own transcript surfaces one even when the consumer doesn't
+ * pass `content.transcription`.
+ *
+ * Tracks are read in-band-first (embedded in the file), then from out-of-band
+ * `<track>` children as a fallback — both live on `audio.textTracks`. Cues load
+ * asynchronously, so the hook watches for tracks and cue changes and re-reads
+ * until it finds text.
+ *
+ * @param audioRef   ref to the player's `<audio>` element
+ * @param currentSrc the resolved source URL; derivation restarts when it
+ *                   changes so a new file's tracks replace the old ones
+ * @param enabled    when `false`, derivation is skipped (e.g. a transcription
+ *                   was already passed explicitly) and the hook returns
+ *                   `undefined`
+ * @returns the joined cue text, or `undefined` while none is available
+ */
+export declare const useDerivedTranscription: (audioRef: RefObject<HTMLAudioElement>, currentSrc: string | undefined, enabled: boolean) => string | undefined;
 
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
@@ -18194,6 +18525,7 @@ declare const valueDisplayRenderers: {
     readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
+    readonly progressSeries: (args: ProgressSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
@@ -18222,6 +18554,56 @@ label?: boolean;
 showRatio?: boolean;
 valueFormatter?: (value: string | number | undefined) => string | number;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
+/**
+ * Structured content for the video player.
+ *
+ * Every field accepts either a single value or a localized list
+ * (`[{ locale, label?, value }]`) — pass several languages and a language
+ * selector appears in the controls. A single shared selection drives captions,
+ * descriptions and the described source together (each falls back to its first
+ * entry for languages it doesn't provide). See `F0VideoPlayerProps.defaultLanguage`.
+ *
+ * `captions` are timed text shown over the video during playback (WCAG 2.1
+ * SC 1.2.2, Captions). Pass either a WebVTT resource URL or a raw WebVTT string
+ * (the player turns raw VTT into a blob track, so no CORS setup is needed); a
+ * remote URL requires the video host to allow cross-origin reads. When omitted,
+ * the player uses any caption/subtitle track embedded in the video file. A
+ * captions toggle in the controls shows/hides them (a filled glyph when on, a
+ * line glyph when off).
+ *
+ * Audio description (WCAG 2.1 SC 1.2.5) conveys on-screen visual information as
+ * audio, complementary to captions — both are independent and can be on at
+ * once. Provide it in one of two ways, toggled with the audio-description
+ * control (a filled "AD" badge when on, a line badge when off):
+ * - `describedSrc`: a pre-produced media rendition with description mixed into
+ *   the audio. Toggling swaps the source, preserving position and play state.
+ *   Highest quality; assumed the same length as `src`.
+ * - `descriptions`: a WebVTT `kind="descriptions"` script (URL or raw VTT),
+ *   delivered at runtime — the video pauses on each cue so the description can
+ *   be spoken (extended audio description), then resumes. Used only when
+ *   `describedSrc` is absent.
+ */
+export declare interface VideoPlayerContent {
+    /**
+     * WebVTT URL, or raw WebVTT content, for captions shown during playback.
+     * Localizable — pass a per-locale list to offer captions in several languages.
+     */
+    captions?: Localized<string>;
+    /**
+     * A pre-produced described media source (description mixed into the audio),
+     * swapped in when audio description is enabled. Takes precedence over
+     * `descriptions`. Should match `src`'s duration so the position carries
+     * across the swap. Localizable.
+     */
+    describedSrc?: Localized<string>;
+    /**
+     * WebVTT URL, or raw WebVTT content, of a `kind="descriptions"` script.
+     * Delivered at runtime with extended (pausing) audio description when no
+     * `describedSrc` is provided. Localizable.
+     */
+    descriptions?: Localized<string>;
+}
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
@@ -18474,10 +18856,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -18485,8 +18865,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

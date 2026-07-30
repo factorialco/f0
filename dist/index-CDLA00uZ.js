@@ -1,8 +1,9 @@
-import { S as L, m as ye, g as Z, n as Se, o as Re, i as ke, j as _e, k as Ne, q as Ce, l as Le, r as ne, w as Fe, s as Ve, t as Te } from "./F0CanvasPanel-B7YrVJps.js";
+import { S as L, m as ye, g as Z, n as Se, o as Re, i as ke, j as _e, k as Ne, q as Ce, l as Le, w as Fe, r as Ve, s as Te } from "./F0CanvasPanel-CJ-VRurM.js";
 import { jsx as t, jsxs as y } from "react/jsx-runtime";
-import { lazy as J, forwardRef as ae, Suspense as He, useState as V, useRef as A, useMemo as te, useCallback as w, useEffect as T } from "react";
-import { e as Ee, D as Ue, P as je, c as De } from "./pdfWorker-B3Cm0WWp.js";
+import { lazy as J, forwardRef as ne, Suspense as He, useState as V, useRef as A, useMemo as te, useCallback as w, useEffect as T } from "react";
+import { e as Ee, D as Ue, P as je, c as De } from "./pdfWorker-JpfvWl8y.js";
 import { F as We } from "./Printer-B7iDPx2r.js";
+import { d as ae } from "./tooltip-O9r8Okrx.js";
 import './index.css';const Oe = ({
   label: o,
   width: a,
@@ -46,8 +47,8 @@ import './index.css';const Oe = ({
   selectedScale: l,
   scaleOptions: s,
   onPreviousPage: d,
-  onNextPage: m,
-  onZoomIn: g,
+  onNextPage: g,
+  onZoomIn: m,
   onZoomOut: v,
   onScaleChange: k,
   rotatable: P,
@@ -63,7 +64,7 @@ import './index.css';const Oe = ({
       ref: o,
       role: "toolbar",
       "aria-label": c.toolbar,
-      className: ne(
+      className: ae(
         "F0PdfViewer__surface sticky top-0 z-10 flex flex-row items-center justify-between gap-2",
         "px-6 py-4"
       ),
@@ -94,7 +95,7 @@ import './index.css';const Oe = ({
             R,
             {
               label: c.nextPage,
-              onClick: m,
+              onClick: g,
               icon: Re,
               size: "sm"
             }
@@ -113,7 +114,7 @@ import './index.css';const Oe = ({
             R,
             {
               label: c.zoomIn,
-              onClick: g,
+              onClick: m,
               icon: _e
             }
           ),
@@ -183,7 +184,7 @@ import './index.css';const Oe = ({
   if (!o) return;
   const e = URL.createObjectURL(await re(o)), i = document.createElement("a");
   i.href = e, i.download = a.length > 0 ? a : "document.pdf", document.body.appendChild(i), i.click(), i.remove(), URL.revokeObjectURL(e);
-}, nt = async (o, a, e = !0) => {
+}, at = async (o, a, e = !0) => {
   let i = o, l;
   try {
     const d = await fetch(o, {
@@ -208,28 +209,28 @@ import './index.css';const Oe = ({
   let i = null, l = 0;
   return a.forEach((s, d) => {
     if (!s) return;
-    const m = s.offsetHeight, g = s.offsetTop, v = g + m, k = o.offsetHeight - e, P = o.scrollTop + e, p = P + k;
-    if (!(P < v && p > g)) return;
+    const g = s.offsetHeight, m = s.offsetTop, v = m + g, k = o.offsetHeight - e, P = o.scrollTop + e, p = P + k;
+    if (!(P < v && p > m)) return;
     let x;
-    if (P <= g)
-      x = p > v ? m : p - g;
+    if (P <= m)
+      x = p > v ? g : p - m;
     else {
-      let h = P - g;
-      p < v && (h += v - p), x = m - h;
+      let h = P - m;
+      p < v && (h += v - p), x = g - h;
     }
     x > l && (l = x, i = d + 1);
   }), i;
 };
 Ee();
-const qe = J(() => import("./SheetViewer-Du3Q1eTC.js")), Ge = J(() => import("./DocxViewer-Dyivf4hQ.js")), Ze = J(() => import("./TextViewer-DT2RmZIA.js")), oe = 48, se = ae(
+const qe = J(() => import("./SheetViewer-7w-hHtLl.js")), Ge = J(() => import("./DocxViewer-q1cLQPb0.js")), Ze = J(() => import("./TextViewer-C9Rz4tgI.js")), oe = 48, se = ne(
   (o, a) => {
     const { kind: e = "pdf", mimeType: i, ...l } = o;
     if (e === "pdf") return /* @__PURE__ */ t(le, { ref: a, ...l });
     const {
       url: s,
       filename: d,
-      actions: m,
-      withCredentials: g = !0,
+      actions: g,
+      withCredentials: m = !0,
       page: v,
       pagesToDisplay: k,
       initialScale: P,
@@ -256,8 +257,8 @@ const qe = J(() => import("./SheetViewer-Du3Q1eTC.js")), Ge = J(() => import("./
                 {
                   url: s,
                   filename: d,
-                  withCredentials: g,
-                  actions: m
+                  withCredentials: m,
+                  actions: g
                 }
               ),
               e === "docx" && /* @__PURE__ */ t(
@@ -265,8 +266,8 @@ const qe = J(() => import("./SheetViewer-Du3Q1eTC.js")), Ge = J(() => import("./
                 {
                   url: s,
                   filename: d,
-                  withCredentials: g,
-                  actions: m
+                  withCredentials: m,
+                  actions: g
                 }
               ),
               e === "text" && /* @__PURE__ */ t(
@@ -275,8 +276,8 @@ const qe = J(() => import("./SheetViewer-Du3Q1eTC.js")), Ge = J(() => import("./
                   url: s,
                   name: d ?? "",
                   mimeType: i,
-                  withCredentials: g,
-                  actions: m
+                  withCredentials: m,
+                  actions: g
                 }
               )
             ]
@@ -287,15 +288,15 @@ const qe = J(() => import("./SheetViewer-Du3Q1eTC.js")), Ge = J(() => import("./
   }
 );
 se.displayName = "F0PdfViewer";
-const le = ae((o, a) => {
+const le = ne((o, a) => {
   const {
     url: e,
     filename: i = "document.pdf",
     page: l = 0,
     pagesToDisplay: s = [],
     initialScale: d = "page-width",
-    withCredentials: m = !0,
-    rotatable: g = !1,
+    withCredentials: g = !0,
+    rotatable: m = !1,
     initialRotation: v = 0,
     onRotationChange: k,
     onPdfLoaded: P,
@@ -312,7 +313,7 @@ const le = ae((o, a) => {
       }))
     ],
     [h.pageWidth, h.pageFit]
-  ), fe = te(() => ({ url: e, withCredentials: m }), [e, m]), F = w(
+  ), fe = te(() => ({ url: e, withCredentials: g }), [e, g]), F = w(
     (n) => {
       const r = (W ?? 1) - 1, f = Math.min(Math.max(n, 0), r), u = D.current[f], C = u?.offsetParent;
       u && C instanceof HTMLElement && (C.scrollTop = u.offsetTop - (j.current?.offsetHeight ?? 0) - 10);
@@ -340,10 +341,10 @@ const le = ae((o, a) => {
     z(n);
     const r = G.find((f) => Number(f) === n);
     r && M(r);
-  }, []), ge = w(
+  }, []), me = w(
     () => $(Me(N)),
     [N, $]
-  ), me = w(
+  ), ge = w(
     () => $(Ie(N)),
     [N, $]
   ), pe = w(() => {
@@ -414,10 +415,10 @@ const le = ae((o, a) => {
                 scaleOptions: de,
                 onPreviousPage: () => F(S - 2),
                 onNextPage: () => F(S),
-                onZoomIn: ge,
-                onZoomOut: me,
+                onZoomIn: me,
+                onZoomOut: ge,
                 onScaleChange: ue,
-                rotatable: g,
+                rotatable: m,
                 onRotate: pe,
                 onPrint: we,
                 onDownload: Pe,
@@ -497,7 +498,7 @@ const Je = () => {
       "aria-busy": "true",
       "aria-live": "polite",
       "aria-label": o.loading,
-      className: ne(
+      className: ae(
         "F0PdfViewer__surface flex h-full w-full flex-col overflow-hidden",
         "border border-solid border-f1-border-secondary"
       ),
@@ -527,7 +528,7 @@ const Je = () => {
     "F0PdfViewer",
     Te(se, Je)
   )
-), at = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+), rt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   F0PdfViewer: Qe,
   configurePdfWorker: De,
@@ -537,9 +538,9 @@ export {
   Qe as F,
   R as T,
   Ie as a,
-  nt as d,
+  at as d,
   G as f,
-  at as i,
+  rt as i,
   Me as n,
   Ke as p
 };
