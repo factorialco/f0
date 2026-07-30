@@ -39,6 +39,9 @@ vi.mock("../utils/useContainerSize", () => ({
   useContainerSize: () => containerSize,
 }))
 
+type BarDataItem = number | { value: number; itemStyle?: BarItemStyle }
+type BarItemStyle = { color?: string; borderRadius?: number | number[] }
+
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
   if (!call) throw new Error("setOption was never called")
@@ -46,7 +49,15 @@ function getLatestOption() {
     legend?: { show?: boolean }
     xAxis: { axisLabel: { show: boolean } }
     yAxis: { axisLabel: { show: boolean } }
+    series: { data: BarDataItem[]; itemStyle: BarItemStyle }[]
   }
+}
+
+/** Corner radii of every bar in a series, `undefined` for plain-number data */
+function getBorderRadii(seriesIndex: number) {
+  return getLatestOption().series[seriesIndex].data.map((item) =>
+    typeof item === "number" ? undefined : item.itemStyle?.borderRadius
+  )
 }
 
 beforeEach(() => {
@@ -103,5 +114,104 @@ describe("BarChart — responsive breakpoints", () => {
     // Horizontal bars: X = value axis (shown at md), Y = category axis (hidden at md)
     expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(false)
+  })
+})
+
+describe("BarChart — corner rounding", () => {
+  const categories = ["Jan", "Feb", "Mar"]
+
+  it("keeps the radius on the series when every value is positive", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={categories}
+        series={[{ name: "A", data: [1, 2, 3] }]}
+      />
+    )
+
+    const option = getLatestOption()
+    expect(option.series[0].data).toEqual([1, 2, 3])
+    expect(option.series[0].itemStyle.borderRadius).toEqual([4, 4, 0, 0])
+  })
+
+  it("rounds negative vertical bars at the bottom, away from the zero line", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={categories}
+        series={[{ name: "A", data: [5, -5, 0] }]}
+      />
+    )
+
+    expect(getBorderRadii(0)).toEqual([
+      [4, 4, 0, 0],
+      [0, 0, 4, 4],
+      [4, 4, 0, 0],
+    ])
+  })
+
+  it("rounds negative horizontal bars on the left, away from the zero line", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={categories}
+        series={[{ name: "A", data: [5, -5, 0] }]}
+      />
+    )
+
+    expect(getBorderRadii(0)).toEqual([
+      [0, 4, 4, 0],
+      [4, 0, 0, 4],
+      [0, 4, 4, 0],
+    ])
+  })
+
+  it("keeps per-bar color overrides alongside the negative radius", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["Jan", "Feb"]}
+        series={[
+          {
+            name: "A",
+            data: [
+              { value: 5, color: "malibu" },
+              { value: -5, color: "red" },
+            ],
+          },
+        ]}
+      />
+    )
+
+    const [positive, negative] = getLatestOption().series[0].data
+    if (typeof positive === "number" || typeof negative === "number") {
+      throw new Error("expected data items with itemStyle")
+    }
+    expect(positive.itemStyle?.color).toBeDefined()
+    expect(negative.itemStyle?.color).toBeDefined()
+    expect(negative.itemStyle?.borderRadius).toEqual([0, 0, 4, 4])
+  })
+
+  it("rounds only the outer segment of each sign when stacked", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Jan"]}
+        series={[
+          { name: "A", data: [10] },
+          { name: "B", data: [5] },
+          { name: "C", data: [-3] },
+          { name: "D", data: [-7] },
+        ]}
+      />
+    )
+
+    // A and C are sandwiched by B (positive) and D (negative) respectively
+    expect(getBorderRadii(0)).toEqual([0])
+    expect(getBorderRadii(1)).toEqual([[4, 4, 0, 0]])
+    expect(getBorderRadii(2)).toEqual([0])
+    expect(getBorderRadii(3)).toEqual([[0, 0, 4, 4]])
   })
 })

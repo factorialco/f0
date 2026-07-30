@@ -1,6 +1,7 @@
 import type { AxeResults, Result, TagValue } from "axe-core"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
+import { A11Y_WCAG_TAGS } from "../lib/storybook-utils/a11yAxeConfig"
 import type { A11yTier } from "./component-status"
 
 /**
@@ -20,14 +21,9 @@ import type { A11yTier } from "./component-status"
  * is a fresh, default-state indicator.
  */
 
-const WCAG_TAGS: TagValue[] = [
-  "wcag2a",
-  "wcag2aa",
-  "wcag21a",
-  "wcag21aa",
-  "wcag22a",
-  "wcag22aa",
-]
+// Shared with the addon (preview.tsx) and CI (test-runner.ts) so this row's
+// verdict is judged by the same rules the gate enforces.
+const WCAG_TAGS: TagValue[] = [...A11Y_WCAG_TAGS]
 
 interface Criterion {
   ruleId: string

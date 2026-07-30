@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { VolumeHigh, VolumeMid, VolumeMuted } from "@/icons/app"
-import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { F0VideoPlayer } from "../F0VideoPlayer"
 import { volumeIcon } from "../components/VolumeControl"
@@ -58,6 +63,23 @@ describe("F0VideoPlayer", () => {
     it("does not enable native controls", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} />)
       expect(getVideo()).not.toHaveAttribute("controls")
+    })
+
+    it("sets the poster when provided", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} poster="poster.webp" />)
+      expect(getVideo()).toHaveAttribute("poster", "poster.webp")
+    })
+
+    it("shows a center play overlay while paused and hides it during playback", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      expect(
+        document.querySelector("[data-video-play-overlay]")
+      ).toBeInTheDocument()
+
+      fireEvent.play(getVideo())
+      expect(
+        document.querySelector("[data-video-play-overlay]")
+      ).not.toBeInTheDocument()
     })
 
     it("enables autoplay when autoPlay is true", () => {
@@ -306,6 +328,267 @@ describe("F0VideoPlayer", () => {
     it("is high above 50%", () => {
       expect(volumeIcon(0.51, false)).toBe(VolumeHigh)
       expect(volumeIcon(1, false)).toBe(VolumeHigh)
+    })
+  })
+
+  describe("captions", () => {
+    const CAPS_URL = "https://example.com/captions.vtt"
+
+    function region(): HTMLElement {
+      return screen.getByRole("region", { name: "Video player" })
+    }
+
+    it("flags a video with no captions for the a11y check", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      expect(region()).toHaveAttribute("data-video-captions", "missing")
+    })
+
+    it("marks the video available and renders a track when captions are passed", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      // Optimistic while the track is still loading.
+      expect(region()).toHaveAttribute("data-video-captions", "available")
+      const track = getVideo().querySelector("track")
+      expect(track).toHaveAttribute("src", CAPS_URL)
+      expect(track).toHaveAttribute("kind", "captions")
+    })
+
+    it("downgrades to missing when the caption track fails to load", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      const track = getVideo().querySelector('track[kind="captions"]')!
+      // A 404 / CORS failure must not read as available.
+      fireEvent.error(track)
+      expect(region()).toHaveAttribute("data-video-captions", "missing")
+    })
+
+    it("downgrades to missing when the caption track loads with no cues", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      const track = getVideo().querySelector('track[kind="captions"]')!
+      // Loaded, but the file was empty (zero cues) → not usable captions.
+      Object.defineProperty(track, "readyState", {
+        value: 2,
+        configurable: true,
+      })
+      fireEvent.load(track)
+      expect(region()).toHaveAttribute("data-video-captions", "missing")
+    })
+
+    it("sets crossOrigin for a remote caption URL but not for raw VTT", () => {
+      const createObjectURL = vi
+        .spyOn(URL, "createObjectURL")
+        .mockReturnValue("blob:caps")
+      const { rerender } = render(
+        <F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />
+      )
+      expect(getVideo()).toHaveAttribute("crossorigin", "anonymous")
+
+      rerender(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ captions: "WEBVTT\n\n00:00.000 --> 00:01.000\nHi" }}
+        />
+      )
+      expect(getVideo()).not.toHaveAttribute("crossorigin")
+      expect(createObjectURL).toHaveBeenCalled()
+    })
+
+    it("shows a CC toggle that flips its pressed state", async () => {
+      const user = userEvent.setup()
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      fireEvent.loadedData(getVideo())
+
+      const cc = screen.getByRole("button", { name: "Captions" })
+      expect(cc).toHaveAttribute("aria-pressed", "false")
+
+      await user.click(cc)
+      expect(screen.getByRole("button", { name: "Captions" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      )
+    })
+
+    it("does not render a CC toggle when no captions are available", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      fireEvent.loadedData(getVideo())
+      expect(
+        screen.queryByRole("button", { name: "Captions" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("moves localized captions into the settings gear (no bar CC toggle)", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          defaultLanguage="en"
+          content={{
+            captions: [
+              { locale: "en", value: "https://example.com/en.vtt" },
+              { locale: "es", value: "https://example.com/es.vtt" },
+            ],
+          }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      // Several languages → no inline CC toggle; language choice lives in the gear.
+      expect(
+        screen.queryByRole("button", { name: "Captions" })
+      ).not.toBeInTheDocument()
+      await user.click(screen.getByRole("button", { name: "Settings" }))
+      // The gear's first level is a "Subtitles" submenu; opening it lists the
+      // languages plus an "Off" row.
+      const subtitles = screen.getByRole("menuitem", { name: /subtitles/i })
+      await user.click(subtitles)
+      expect(
+        screen.getByRole("menuitemradio", { name: /english/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("menuitemradio", { name: /spanish|español/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("menuitemradio", { name: /^off$/i })
+      ).toBeInTheDocument()
+      // Default language ("en") is the rendered track.
+      expect(
+        getVideo().querySelector('track[kind="captions"]')
+      ).toHaveAttribute("src", "https://example.com/en.vtt")
+    })
+
+    it("offers audio-track languages in the settings gear for a localized src", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          defaultLanguage="en"
+          src={[
+            { locale: "en", value: "https://example.com/en.mp4" },
+            { locale: "es", value: "https://example.com/es.mp4" },
+          ]}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      await user.click(screen.getByRole("button", { name: "Settings" }))
+      // Audio-track languages live under an "Audio" submenu in the gear.
+      await user.click(screen.getByRole("menuitem", { name: /audio/i }))
+      expect(
+        screen.getByRole("menuitemradio", { name: /english/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("menuitemradio", { name: /spanish|español/i })
+      ).toBeInTheDocument()
+      // Default audio language is the rendered source.
+      expect(getVideo()).toHaveAttribute("src", "https://example.com/en.mp4")
+    })
+
+    it("keeps single-language captions as a bar toggle with no settings gear", () => {
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ captions: "https://example.com/only.vtt" }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      // One language → the CC toggle stays in the bar; no gear appears.
+      expect(
+        screen.getByRole("button", { name: "Captions" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Settings" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("marks a silent video as no-audio so captions aren't required", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} silent />)
+      expect(region()).toHaveAttribute("data-video-captions", "no-audio")
+    })
+
+    it("force-mutes a silent video and shows a disabled muted volume cue", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} silent />)
+      // Sound is dropped even if the file carries an audio track.
+      expect(getVideo().muted).toBe(true)
+
+      fireEvent.loadedData(getVideo())
+      expect(screen.getByRole("button", { name: "No audio" })).toBeDisabled()
+      // No volume slider to adjust on a silent video.
+      expect(
+        screen.queryByRole("slider", { name: /volume/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("unmutes a silent video's described source so the description is heard", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          silent
+          content={{ describedSrc: "https://example.com/described.mp4" }}
+        />
+      )
+      // Silent + AD off: muted (nothing to hear).
+      expect(getVideo().muted).toBe(true)
+
+      fireEvent.loadedData(getVideo())
+      await user.click(
+        screen.getByRole("button", { name: "Audio description" })
+      )
+      // AD on via a described source → its audio must play, so unmute.
+      expect(getVideo().muted).toBe(false)
+    })
+  })
+
+  describe("audio description", () => {
+    const DESC_URL = "https://example.com/descriptions.vtt"
+    const DESCRIBED_SRC = "https://example.com/video.described.mp4"
+
+    it("offers an AD toggle and renders a descriptions track for a VTT script", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer src={VIDEO_SRC} content={{ descriptions: DESC_URL }} />
+      )
+      fireEvent.loadedData(getVideo())
+
+      const track = getVideo().querySelector('track[kind="descriptions"]')
+      expect(track).toHaveAttribute("src", DESC_URL)
+
+      const ad = screen.getByRole("button", { name: "Audio description" })
+      expect(ad).toHaveAttribute("aria-pressed", "false")
+      await user.click(ad)
+      expect(
+        screen.getByRole("button", { name: "Audio description" })
+      ).toHaveAttribute("aria-pressed", "true")
+    })
+
+    it("swaps to the described source when AD is enabled", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ describedSrc: DESCRIBED_SRC }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      expect(getVideo()).toHaveAttribute("src", VIDEO_SRC)
+      // A described source is a media rendition, not a text track.
+      expect(
+        getVideo().querySelector('track[kind="descriptions"]')
+      ).not.toBeInTheDocument()
+
+      await user.click(
+        screen.getByRole("button", { name: "Audio description" })
+      )
+      expect(getVideo()).toHaveAttribute("src", DESCRIBED_SRC)
+
+      // Controls re-render after the swapped source loads.
+      fireEvent.loadedData(getVideo())
+      expect(
+        screen.getByRole("button", { name: "Audio description" })
+      ).toHaveAttribute("aria-pressed", "true")
+    })
+
+    it("does not render an AD toggle when no description is available", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      fireEvent.loadedData(getVideo())
+      expect(
+        screen.queryByRole("button", { name: "Audio description" })
+      ).not.toBeInTheDocument()
     })
   })
 })

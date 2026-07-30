@@ -77,7 +77,7 @@ const F0ClarifyingPanelContent = ({
     isCustomAnswerActive,
   } = currentStep
 
-  const customInputRef = useRef<HTMLInputElement>(null)
+  const customInputRef = useRef<HTMLTextAreaElement>(null)
 
   const mode = selectionMode ?? "single"
   const isMultiStep = totalSteps > 1

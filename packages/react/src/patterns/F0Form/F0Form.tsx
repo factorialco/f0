@@ -694,12 +694,44 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
+  // Track file fields with in-flight uploads. Submission is blocked until the
+  // set empties so a form is never submitted with a file that hasn't finished
+  // uploading (its form value isn't set until the upload completes).
+  const [uploadingFieldIds, setUploadingFieldIds] = useState<Set<string>>(
+    () => new Set()
+  )
+  const registerUploadState = useCallback(
+    (id: string, isUploading: boolean) => {
+      setUploadingFieldIds((prev) => {
+        if (isUploading === prev.has(id)) return prev
+        const next = new Set(prev)
+        if (isUploading) next.add(id)
+        else next.delete(id)
+        return next
+      })
+    },
+    []
+  )
+  const hasPendingUploads = uploadingFieldIds.size > 0
+  // Mirror into a ref so the submit handler can guard against non-button
+  // submits (Enter key, autosubmit) without being re-created every render.
+  const hasPendingUploadsRef = useRef(hasPendingUploads)
+  hasPendingUploadsRef.current = hasPendingUploads
+
   const [actionBarStatus, setActionBarStatus] =
     useState<ActionBarStatus>("idle")
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autosubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const actionBarRef = useRef<F0ActionBarRef | null>(null)
+
+  // Tracks whether the component is still mounted. Guards state updates that
+  // are reached through an async path (`await onSubmit(...)`) or a timer
+  // callback: if the form unmounts while a submit is in flight, the unmount
+  // cleanup below has already run — a timer scheduled *after* the await would
+  // never be captured/cleared, and its callback (or the post-await setState)
+  // would run against a torn-down tree. See the unmount effect that flips this.
+  const isMountedRef = useRef(true)
 
   /**
    * Snapshot of the focused input element + caret position taken before a
@@ -738,6 +770,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Handle form submission with status flow: idle -> loading -> success -> idle
   const handleSubmit = async (data: TValues) => {
+    // Block submission while any file field still has an upload in flight.
+    // Covers non-button submit paths (Enter key, autosubmit); the visible
+    // submit controls are also disabled via `hasPendingUploads`.
+    if (hasPendingUploadsRef.current) return
+
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
       successTimerRef.current = null
@@ -755,6 +792,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     const result = await onSubmit(cleanedData)
 
+    // The form may have unmounted while `onSubmit` was in flight. The unmount
+    // cleanup has already run, so any state update here — or a timer scheduled
+    // below — would leak past teardown. Bail out.
+    if (!isMountedRef.current) return
+
     if (result.success) {
       form.reset(form.getValues())
       resetErrorNavigation()
@@ -762,6 +804,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       setActionBarStatus("success")
 
       successTimerRef.current = setTimeout(() => {
+        if (!isMountedRef.current) return
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
@@ -783,11 +826,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
       }
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
+        autosubmitTimerRef.current = null
       }
     }
   }, [])
@@ -888,6 +934,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
+        if (!isMountedRef.current) return
         // Re-check dirtiness at fire time (RHF's `isDirty` has settled by now,
         // unlike inside the synchronous watch callback): skip a save when the
         // form is back to its last-saved state — e.g. a row was added then
@@ -1071,6 +1118,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     }),
     [
@@ -1080,6 +1128,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       props.renderCustomField,
       isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     ]
   )
@@ -1185,7 +1234,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             label={submitLabel}
             icon={submitIcon}
             loading={isSubmitting}
-            disabled={hasErrors || isFormLoading}
+            disabled={hasErrors || isFormLoading || hasPendingUploads}
           />
         </div>
       )}
@@ -1227,6 +1276,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             isDirty={isDirty}
             actionBarStatus={actionBarStatus}
             hasErrors={hasErrors}
+            hasPendingUploads={hasPendingUploads}
             errorCount={errorCount}
             resolvedActionBarLabel={resolvedActionBarLabel}
             submitLabel={submitLabel}
