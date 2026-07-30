@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.69.0](https://github.com/factorialco/f0/compare/f0-react-v4.68.1...f0-react-v4.69.0) (2026-07-30)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** polish metric (KPI) widget ([#4815](https://github.com/factorialco/f0/issues/4815)) ([109ff35](https://github.com/factorialco/f0/commit/109ff359f07c909d6059cd15a12a083e37f1fdf7))
+
 ## [4.68.1](https://github.com/factorialco/f0/compare/f0-react-v4.68.0...f0-react-v4.68.1) (2026-07-30)
 
 
