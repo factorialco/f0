@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.68.1](https://github.com/factorialco/f0/compare/f0-react-v4.68.0...f0-react-v4.68.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* **F0DataChart:** invert horizontal category axis ([#4832](https://github.com/factorialco/f0/issues/4832)) ([2ed1dc0](https://github.com/factorialco/f0/commit/2ed1dc09b66219b7261e7cc76161c05add288c4a))
+
 ## [4.68.0](https://github.com/factorialco/f0/compare/f0-react-v4.67.0...f0-react-v4.68.0) (2026-07-30)
 
 
