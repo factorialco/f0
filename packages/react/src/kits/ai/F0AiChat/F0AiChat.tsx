@@ -30,6 +30,11 @@ export interface F0AiChatProps {
   messages?: ReactNode
   /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
   input?: ReactNode
+  /**
+   * Host-provided content rendered above the complete chat surface. F0
+   * supplies the scoped backdrop and makes the chat beneath it inert.
+   */
+  overlay?: ReactNode
 }
 
 const F0AiChatProviderComponent = ({
@@ -40,6 +45,7 @@ const F0AiChatProviderComponent = ({
   chatHeader,
   chatMessages,
   chatInput,
+  chatOverlay,
   welcomeScreenSuggestions,
   welcomeScreenCards,
   disclaimer,
@@ -75,6 +81,7 @@ const F0AiChatProviderComponent = ({
       chatHeader={chatHeader}
       chatMessages={chatMessages}
       chatInput={chatInput}
+      chatOverlay={chatOverlay}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       welcomeScreenCards={welcomeScreenCards}
       disclaimer={disclaimer}
@@ -103,6 +110,7 @@ const F0AiChatComponent = ({
   header: headerProp,
   messages: messagesProp,
   input: inputProp,
+  overlay: overlayProp,
 }: F0AiChatProps) => {
   const {
     enabled,
@@ -115,6 +123,7 @@ const F0AiChatComponent = ({
     chatHeader,
     chatMessages,
     chatInput,
+    chatOverlay,
     panelContent,
     panelSide,
     panelContentSide,
@@ -146,6 +155,7 @@ const F0AiChatComponent = ({
   const header = headerProp ?? chatHeader
   const messages = messagesProp ?? chatMessages
   const input = inputProp ?? chatInput
+  const overlay = overlayProp ?? chatOverlay
 
   if (!enabled) {
     return null
@@ -194,14 +204,33 @@ const F0AiChatComponent = ({
   } else {
     viewKey = "chat"
     viewContent = (
-      <div className="flex h-full w-full flex-col">
-        {header}
-        <motion.div className="flex min-h-0 flex-1 flex-col" {...contentReveal}>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            {messages}
+      <div className="relative flex h-full w-full flex-col">
+        <div
+          ref={(node) => {
+            if (overlay) {
+              node?.setAttribute("inert", "")
+            } else {
+              node?.removeAttribute("inert")
+            }
+          }}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          {header}
+          <motion.div
+            className="flex min-h-0 flex-1 flex-col"
+            {...contentReveal}
+          >
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              {messages}
+            </div>
+            {input}
+          </motion.div>
+        </div>
+        {overlay && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-f1-background-overlay p-4">
+            {overlay}
           </div>
-          {input}
-        </motion.div>
+        )}
       </div>
     )
   }

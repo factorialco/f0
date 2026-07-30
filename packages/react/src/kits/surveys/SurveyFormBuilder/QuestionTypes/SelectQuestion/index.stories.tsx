@@ -2,8 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-
 import { SelectQuestion } from "."
 import { SurveyFormBuilderProvider } from "../../Context"
 import { SurveyFormBuilderElement } from "../../types"
@@ -12,6 +10,7 @@ const meta: Meta<typeof SelectQuestion> = {
   title: "Surveys/SurveyFormBuilder/SelectQuestion",
   component: SelectQuestion,
   tags: ["autodocs", "experimental"],
+  parameters: { a11y: { test: "error" } },
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args },
@@ -34,8 +33,6 @@ export default meta
 type Story = StoryObj<typeof SelectQuestion>
 
 export const Default: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-1",
     title: "How supported do you feel by your manager and team?",
@@ -52,8 +49,6 @@ export const Default: Story = {
 }
 
 export const WithSelectedValue: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-2",
     title: "What is your primary concern?",
@@ -70,8 +65,6 @@ export const WithSelectedValue: Story = {
 }
 
 export const ManyOptions: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-3",
     title: "Which areas would you like to improve?",
@@ -90,8 +83,6 @@ export const ManyOptions: Story = {
 }
 
 export const MultiSelect: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-4",
     title: "What are your primary concerns?",
@@ -109,8 +100,6 @@ export const MultiSelect: Story = {
 }
 
 export const WithDuplicateOptions: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-5",
     title: "What are your primary concerns?",

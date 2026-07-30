@@ -38,6 +38,7 @@ export interface AiChatState {
   chatHeader?: React.ReactNode
   chatMessages?: React.ReactNode
   chatInput?: React.ReactNode
+  chatOverlay?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
@@ -231,6 +232,7 @@ export type AiChatProviderReturnValue = {
   | "chatHeader"
   | "chatMessages"
   | "chatInput"
+  | "chatOverlay"
   | "disclaimer"
   | "resizable"
   | "entityRefs"

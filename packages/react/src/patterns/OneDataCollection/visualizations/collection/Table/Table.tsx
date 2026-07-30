@@ -241,14 +241,6 @@ export const TableCollection = <
         : undefined
   const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
 
-  // Remount the flat row presence group on page-based page changes so the
-  // outgoing page doesn't animate out. Infinite scroll keeps a stable key: its
-  // rows are appended, not swapped, so they must not be torn down on load-more.
-  const flatPresenceKey =
-    paginationInfo?.type === "pages"
-      ? `flat-page-${paginationInfo.currentPage}`
-      : "flat"
-
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
     selectedItems,
@@ -755,62 +747,61 @@ export const TableCollection = <
                     </Fragment>
                   )
                 })}
-              {data?.type === "flat" && (
-                // Keying the presence group by page makes a page change remount
-                // the whole group, so the outgoing page's rows are dropped
-                // instantly instead of playing their exit animation. Inserts and
-                // deletes within a page (same key) still animate.
-                <AnimatePresence initial={false} key={flatPresenceKey}>
-                  {data.records.map((item, index) => {
-                    const rowKey = `row-${getRowKey(item, index)}`
-                    const isNew = addedRowKeys.has(rowKey)
-                    const motionRow = (
-                      <MotionRow
-                        variants={getAnimationVariants()}
-                        // Only a genuinely-inserted row plays the enter
-                        // animation; rows arriving via pagination or the initial
-                        // load appear in place, without movement.
-                        initial={isNew ? "hidden" : false}
-                        animate="visible"
-                        exit="hidden"
-                        custom={index}
-                        key={rowKey}
-                        layout
-                        isNew={isNew}
-                        groupIndex={0}
-                        source={effectiveSource}
-                        item={item}
-                        index={index}
-                        onItemCheckedChange={handleSelectItemChange}
-                        onCheckedChange={(checked) =>
-                          handleSelectItemChange(item, checked)
-                        }
-                        selectedItems={selectedItems}
-                        columns={columns}
-                        frozenColumnsLeft={frozenColumnsLeft}
-                        checkColumnWidth={checkColumnWidth}
-                        tableWithChildren={tableWithChildren}
-                        referenceRowType={referenceRowType}
-                        rowWrapper={RowWrapper}
-                        cellRenderer={cellRenderer}
-                        fromVisualization={fromVisualization}
-                        headerGroups={headerGroups}
-                        registerSelectable={selectionRegistry.register}
-                        unregisterSelectable={selectionRegistry.unregister}
-                      />
+              {data?.type === "flat" &&
+                // Deliberately not wrapped in `AnimatePresence`: a row that
+                // leaves the dataset (deleted, filtered out, re-sorted away)
+                // must unmount on the same render. An exit transition keeps it
+                // mounted — still in the DOM, still in the selection registry —
+                // for as long as it runs, so a removed row goes on answering
+                // queries and shifting row/checkbox positions. Enter and flash
+                // don't need presence tracking; `initial`/`animate` cover them.
+                data.records.map((item, index) => {
+                  const rowKey = `row-${getRowKey(item, index)}`
+                  const isNew = addedRowKeys.has(rowKey)
+                  const motionRow = (
+                    <MotionRow
+                      variants={getAnimationVariants()}
+                      // Only a genuinely-inserted row plays the enter
+                      // animation; rows arriving via pagination or the initial
+                      // load appear in place, without movement.
+                      initial={isNew ? "hidden" : false}
+                      animate="visible"
+                      custom={index}
+                      key={rowKey}
+                      layout
+                      isNew={isNew}
+                      groupIndex={0}
+                      source={effectiveSource}
+                      item={item}
+                      index={index}
+                      onItemCheckedChange={handleSelectItemChange}
+                      onCheckedChange={(checked) =>
+                        handleSelectItemChange(item, checked)
+                      }
+                      selectedItems={selectedItems}
+                      columns={columns}
+                      frozenColumnsLeft={frozenColumnsLeft}
+                      checkColumnWidth={checkColumnWidth}
+                      tableWithChildren={tableWithChildren}
+                      referenceRowType={referenceRowType}
+                      rowWrapper={RowWrapper}
+                      cellRenderer={cellRenderer}
+                      fromVisualization={fromVisualization}
+                      headerGroups={headerGroups}
+                      registerSelectable={selectionRegistry.register}
+                      unregisterSelectable={selectionRegistry.unregister}
+                    />
+                  )
+                  if (RowWrapper) {
+                    return (
+                      <RowWrapper key={rowKey} item={item} index={index}>
+                        {motionRow}
+                      </RowWrapper>
                     )
-                    if (RowWrapper) {
-                      return (
-                        <RowWrapper key={rowKey} item={item} index={index}>
-                          {motionRow}
-                        </RowWrapper>
-                      )
-                    }
+                  }
 
-                    return motionRow
-                  })}
-                </AnimatePresence>
-              )}
+                  return motionRow
+                })}
               {paginationInfo?.type === "infinite-scroll" &&
                 isLoadingMore &&
                 Array.from({ length: 5 }).map((_, rowIndex) => (
