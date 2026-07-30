@@ -57,6 +57,27 @@ describe("NonEditableCell", () => {
     ).toBeTruthy()
   })
 
+  it("renders the hint icon before the cell content when hint.hintPosition is left", () => {
+    render(
+      <NonEditableCell
+        {...defaultProps}
+        hint={{
+          icon: InfoCircleLine,
+          message: "Backfilling Jane's position",
+          hintPosition: "left",
+        }}
+      />
+    )
+
+    const button = screen.getByRole("button", {
+      name: "Backfilling Jane's position",
+    })
+    const content = screen.getByText("John Doe")
+    expect(
+      button.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
   it("renders a hint icon when hint is provided", () => {
     render(
       <NonEditableCell
