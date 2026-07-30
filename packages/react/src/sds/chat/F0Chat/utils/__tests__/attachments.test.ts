@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest"
 
 import { type F0ChatFileAttachment } from "../../types"
-import { documentPreviewKind, withinPreviewSizeLimit } from "../attachments"
+import {
+  documentPreviewKind,
+  formatFileSize,
+  isVideoFileAttachment,
+  withinPreviewSizeLimit,
+} from "../attachments"
 
 const file = (
   overrides: Partial<F0ChatFileAttachment>
@@ -10,6 +15,43 @@ const file = (
   url: "https://cdn.example.com/doc",
   name: "document",
   ...overrides,
+})
+
+describe("formatFileSize", () => {
+  it("formats byte, kilobyte, megabyte, and gigabyte limits compactly", () => {
+    expect(formatFileSize(512)).toBe("512 B")
+    expect(formatFileSize(1024)).toBe("1 KB")
+    expect(formatFileSize(1536)).toBe("1.5 KB")
+    expect(formatFileSize(100 * 1024 * 1024)).toBe("100 MB")
+    expect(formatFileSize(1.5 * 1024 * 1024)).toBe("1.5 MB")
+    expect(formatFileSize(2 * 1024 * 1024 * 1024)).toBe("2 GB")
+    expect(formatFileSize(1.5 * 1024 * 1024 * 1024)).toBe("1.5 GB")
+  })
+})
+
+describe("isVideoFileAttachment", () => {
+  it("recognizes video MIME types and browser-supported file extensions", () => {
+    expect(
+      isVideoFileAttachment(file({ name: "recording", mimeType: "video/mp4" }))
+    ).toBe(true)
+    expect(
+      isVideoFileAttachment(
+        file({
+          name: "walkthrough.webm",
+          mimeType: "application/octet-stream",
+        })
+      )
+    ).toBe(true)
+    expect(
+      isVideoFileAttachment(
+        file({
+          name: "download",
+          url: "https://cdn.example.com/walkthrough.mov?token=123",
+        })
+      )
+    ).toBe(true)
+    expect(isVideoFileAttachment(file({ name: "report.pdf" }))).toBe(false)
+  })
 })
 
 describe("documentPreviewKind", () => {

@@ -45,18 +45,63 @@ describe("ChatVoiceAttachment", () => {
   it("swaps the duration for the speed pill on hover (group classes)", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     expect(screen.getByTestId("chat-voice-time").className).toContain(
-      "group-hover/voice:hidden"
+      "group-hover/voice:invisible"
     )
     const pillWrapper = screen.getByTestId("chat-voice-rate").closest("div")
-    expect(pillWrapper?.className).toContain("hidden")
-    expect(pillWrapper?.className).toContain("group-hover/voice:flex")
+    expect(pillWrapper).toHaveClass(
+      "opacity-0",
+      "group-hover/voice:opacity-100",
+      "group-focus-within/voice:opacity-100"
+    )
   })
 
   it("keeps a fixed-width trailing slot so the waveform never resizes", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
-    expect(screen.getByTestId("chat-voice-time").className).toContain("w-12")
-    const pillWrapper = screen.getByTestId("chat-voice-rate").closest("div")
-    expect(pillWrapper?.className).toContain("w-12")
+    expect(screen.getByTestId("chat-voice-trailing")).toHaveClass(
+      "relative",
+      "w-12",
+      "shrink-0"
+    )
+  })
+
+  it("compacts the waveform before it can overlap the time", () => {
+    render(<ChatVoiceAttachment voice={VOICE} />)
+    const waveform = screen.getByTestId("chat-voice-waveform")
+    const bars = waveform.querySelectorAll("span")
+
+    expect(waveform).toHaveClass("min-w-0", "overflow-hidden", "gap-0.5")
+    expect(bars[0]).toHaveClass("min-w-px", "shrink")
+  })
+
+  it("makes the seek slider keyboard operable", () => {
+    render(<ChatVoiceAttachment voice={VOICE} />)
+    const waveform = screen.getByRole("slider", { name: "Seek" })
+    const audio = document.querySelector("audio") as HTMLAudioElement
+
+    expect(waveform).toHaveAttribute("tabindex", "0")
+    fireEvent.keyDown(waveform, { key: "End" })
+    expect(audio.currentTime).toBe(4)
+    fireEvent.keyDown(waveform, { key: "ArrowLeft" })
+    expect(audio.currentTime).toBe(3)
+    fireEvent.keyDown(waveform, { key: "Home" })
+    expect(audio.currentTime).toBe(0)
+    fireEvent.keyDown(waveform, { key: "ArrowRight" })
+    expect(audio.currentTime).toBe(1)
+  })
+
+  it("keeps playback speed keyboard-focusable when it is visually hidden", () => {
+    render(<ChatVoiceAttachment voice={VOICE} />)
+    const speed = screen.getByRole("button", {
+      name: "Playback speed: 1x",
+    })
+    const wrapper = speed.closest("div")
+
+    speed.focus()
+    expect(speed).toHaveFocus()
+    expect(wrapper).toHaveClass(
+      "group-focus-within/voice:pointer-events-auto",
+      "group-focus-within/voice:opacity-100"
+    )
   })
 
   it("cycles the playback rate 1x → 1.5x → 2x → 0.5x on the speed pill", () => {
@@ -67,6 +112,7 @@ describe("ChatVoiceAttachment", () => {
     expect(pill).toHaveTextContent("1x")
     fireEvent.click(pill)
     expect(pill).toHaveTextContent("1.5x")
+    expect(pill).toHaveAccessibleName("Playback speed: 1.5x")
     expect(audio.playbackRate).toBe(1.5)
     fireEvent.click(pill)
     expect(pill).toHaveTextContent("2x")

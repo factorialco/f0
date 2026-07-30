@@ -59,10 +59,12 @@ function getLatestOption() {
     xAxis: {
       axisLabel: { show: boolean; interval?: number }
       splitNumber?: number
+      inverse?: boolean
     }
     yAxis: {
       axisLabel: { show: boolean; interval?: number }
       splitNumber?: number
+      inverse?: boolean
     }
     aria?: {
       enabled?: boolean
@@ -162,6 +164,22 @@ describe("BarChart — responsive breakpoints", () => {
     // Horizontal bars: X = value axis (shown at md), Y = category axis (hidden at md)
     expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(false)
+  })
+
+  it("inverts the category axis on horizontal bars so rows read top-to-bottom in data order", () => {
+    render(<F0DataChart {...verticalProps} orientation="horizontal" />)
+
+    const option = getLatestOption()
+    expect(option.yAxis.inverse).toBe(true)
+    expect(option.xAxis.inverse).toBeUndefined()
+  })
+
+  it("does not invert any axis on vertical bars", () => {
+    render(<F0DataChart {...verticalProps} />)
+
+    const option = getLatestOption()
+    expect(option.xAxis.inverse).toBeUndefined()
+    expect(option.yAxis.inverse).toBeUndefined()
   })
 })
 

@@ -37,12 +37,14 @@ import { F0VideoPlayerProps } from "./types"
 export function F0VideoPlayerInternal({
   src,
   poster,
+  ariaLabel,
   silent = false,
   persistControls = false,
   content,
   defaultLanguage,
   autoPlay = false,
   autoFocus = false,
+  download,
   restrictForwardSeek = false,
   onTrackAction,
   onMilestone,
@@ -238,7 +240,7 @@ export function F0VideoPlayerInternal({
         focusRing()
       )}
       role="region"
-      aria-label={t("videoPlayer.regionLabel")}
+      aria-label={ariaLabel ?? t("videoPlayer.regionLabel")}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       // Accessibility signal for the Storybook a11y check: prerecorded video
@@ -383,6 +385,7 @@ export function F0VideoPlayerInternal({
           onToggleCaptions={captions.toggle}
           onToggleAudioDescription={toggleAudioDescription}
           onSeek={seek}
+          download={download}
         />
       )}
     </div>

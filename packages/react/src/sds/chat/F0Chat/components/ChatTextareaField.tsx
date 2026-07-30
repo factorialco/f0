@@ -10,11 +10,17 @@ type ChatTextareaFieldProps = {
   highlightRef: RefObject<HTMLDivElement>
   value: string
   placeholder: string
+  accessibleLabel: string
   onChange: (value: string, cursorPos: number) => void
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void
   onCursorUpdate: () => void
   onScroll: () => void
   highlightSegments: HighlightSegment[]
+  isAutocompleteOpen: boolean
+  autocompleteListboxId?: string
+  activeAutocompleteOptionId?: string
   /** When true, a typed `@mention` / ghost completion is shown via the overlay
    * and the textarea text is hidden (caret stays visible). */
   hasOverlay: boolean
@@ -35,11 +41,17 @@ export const ChatTextareaField = ({
   highlightRef,
   value,
   placeholder,
+  accessibleLabel,
   onChange,
   onKeyDown,
+  onPaste,
+  onBlur,
   onCursorUpdate,
   onScroll,
   highlightSegments,
+  isAutocompleteOpen,
+  autocompleteListboxId,
+  activeAutocompleteOptionId,
   hasOverlay,
 }: ChatTextareaFieldProps) => {
   return (
@@ -101,12 +113,20 @@ export const ChatTextareaField = ({
         rows={1}
         value={value}
         placeholder={placeholder}
+        aria-label={accessibleLabel}
         onChange={(e) => onChange(e.target.value, e.target.selectionStart ?? 0)}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
+        onBlur={onBlur}
         onKeyUp={onCursorUpdate}
         onClick={onCursorUpdate}
         onSelect={onCursorUpdate}
         onScroll={onScroll}
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={isAutocompleteOpen}
+        aria-controls={autocompleteListboxId}
+        aria-activedescendant={activeAutocompleteOptionId}
         className={cn(
           "col-start-1 row-start-1",
           "w-full resize-none bg-transparent outline-none",

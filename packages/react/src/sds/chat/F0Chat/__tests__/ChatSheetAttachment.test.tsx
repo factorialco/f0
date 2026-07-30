@@ -1,6 +1,5 @@
-import * as XLSX from "xlsx"
-
 import { beforeAll, describe, expect, it, vi } from "vitest"
+import * as XLSX from "xlsx"
 
 import {
   fireEvent,
@@ -134,6 +133,9 @@ describe("ChatDocumentAttachmentCard (sheet)", () => {
     renderChat([sheetAttachment])
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("raw-data.xlsx")
+    expect(
+      screen.queryByRole("button", { name: "Download raw-data.xlsx" })
+    ).not.toBeInTheDocument()
 
     // The lazy SheetJS chunk resolves, the workbook parses, cells appear and
     // the snapshot fades in over the skeleton.
@@ -147,7 +149,7 @@ describe("ChatDocumentAttachmentCard (sheet)", () => {
 
   it("opens the fullscreen grid with one tab per sheet", async () => {
     renderChat([sheetAttachment])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open raw-data.xlsx" }))
 
     // Scope to the dialog — the transcript card shows the same cells.
     const dialog = within(await screen.findByRole("dialog"))
@@ -179,7 +181,9 @@ describe("ChatDocumentAttachmentCard (sheet)", () => {
       ).not.toBeInTheDocument()
     )
     expect(screen.getByText("raw-data.xlsx")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Download raw-data.xlsx" })
+    ).toBeInTheDocument()
   })
 
   it("keeps the chip for files too big to parse client-side", () => {
