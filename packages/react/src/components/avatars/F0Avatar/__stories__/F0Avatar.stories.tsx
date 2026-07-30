@@ -16,6 +16,9 @@ const meta = {
   component: F0Avatar,
   title: "Avatars/Avatar",
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   argTypes: {
     ...getBaseAvatarArgTypes(["size"]),
     size: {
@@ -77,7 +80,6 @@ export const PersonAvatar: Story = {
               firstName: "John",
               lastName: "Doe",
               "aria-label": "John Doe",
-              "aria-labelledby": "John Doe",
             }}
           />
           <F0Avatar
