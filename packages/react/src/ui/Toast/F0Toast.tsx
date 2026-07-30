@@ -72,16 +72,20 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
   ) => {
     const i18n = useI18n()
     const [remainingTime, setRemainingTime] = useState(duration || 0)
-    const [prevDuration, setPrevDuration] = useState(duration)
+    // Key the countdown off the visible CONTENT, not just `duration`. The store
+    // replaces the item in place on the same id, and most variant pairs recompute
+    // to the same duration (success → error, both 5s) — keying only on `duration`
+    // wouldn't restart the timer, so the resolved toast would inherit the previous
+    // `remainingTime` and dismiss a few frames after it paints.
+    const contentSig = `${duration ?? ""}|${variant}|${title ?? ""}|${description ?? ""}`
+    const [prevSig, setPrevSig] = useState(contentSig)
     const [isPaused, setIsPaused] = useState(false)
 
-    // Reset the countdown when the toast is updated in place (its `duration`
-    // changes) — e.g. error → loading → success on the same id. Done DURING render
-    // (not in an effect) so `remainingTime` is never momentarily 0 while
-    // `duration > 0`: otherwise the auto-close effect below sees 0 in the commit
-    // between resolving and the reset, and dismisses the toast mid-resolution.
-    if (duration !== prevDuration) {
-      setPrevDuration(duration)
+    // Reset DURING render (not in an effect) so `remainingTime` is never
+    // momentarily 0 while `duration > 0`, which would trip the auto-close effect
+    // below and dismiss the toast mid-resolution.
+    if (contentSig !== prevSig) {
+      setPrevSig(contentSig)
       setRemainingTime(duration || 0)
     }
 
@@ -172,6 +176,10 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     )
     const isLoading = variant === "loading"
     const hasActions = buttonActions.length > 0 || linkActions.length > 0
+    // Whether the toast closes itself. If it doesn't (persistent: no timer), it
+    // MUST keep a close affordance, otherwise a persistent toast with only a
+    // keepOpen action is undismissable.
+    const willAutoDismiss = duration != null && duration > 0
 
     const handleActionClick = (
       action: ToastActionButton | ToastActionLink,
@@ -262,9 +270,11 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
             </div>
           )}
 
-          {/* Close — only when there's no action (so it's never mis-clicked for
-              the action) and not while loading */}
-          {onClose && !isLoading && !hasActions && (
+          {/* Close — the manual dismiss. Hidden when the action is the only
+              control AND the toast auto-dismisses (so the ✕ isn't adjacent to the
+              action). But a toast that WON'T auto-dismiss (persistent) always
+              keeps the ✕, even with an action, so it's never a dead-end. */}
+          {onClose && !isLoading && (!hasActions || !willAutoDismiss) && (
             <div className="dark flex-shrink-0">
               <F0Button
                 variant="outline"
