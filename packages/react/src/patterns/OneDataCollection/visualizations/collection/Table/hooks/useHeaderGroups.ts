@@ -192,8 +192,9 @@ export type UseHeaderGroupsReturn<
    */
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   /**
-   * Header group entries for the two-row header, or `null` when no columns use
-   * `headerGroupId`, signaling the single-row header should be rendered instead.
+   * Header group entries for the two-row header. `null` when no groups are
+   * configured or no visible column carries a `headerGroupId`, signalling that
+   * the single-row header should be rendered instead.
    */
   headerGroups: HeaderGroupEntry[] | null
   /** Collapses an expanded group, or expands a collapsed one. */
