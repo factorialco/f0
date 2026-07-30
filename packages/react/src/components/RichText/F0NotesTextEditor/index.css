@@ -27,12 +27,42 @@
   @apply mb-[7px] p-0 text-[19px] font-semibold leading-[26px] tracking-[-0.19px];
 }
 
+.notes-text-editor h4 {
+  @apply mb-[6px] p-0 text-[17px] font-semibold leading-[24px] tracking-[-0.17px];
+}
+
+.notes-text-editor h5 {
+  @apply mb-[6px] p-0 text-[16px] font-semibold leading-[22px] tracking-[-0.16px];
+}
+
+.notes-text-editor h6 {
+  @apply mb-[6px] p-0 text-[15px] font-semibold leading-[20px] tracking-[-0.15px];
+}
+
 .notes-text-editor ul {
   @apply m-0 mb-2 list-disc;
 }
 
 .notes-text-editor ol {
   @apply m-0 mb-2 list-decimal;
+}
+
+/* Nested lists repeat the parent marker without these; depth is otherwise
+   only conveyed by indentation. */
+.notes-text-editor ul ul {
+  list-style-type: circle;
+}
+
+.notes-text-editor ul ul ul {
+  list-style-type: square;
+}
+
+.notes-text-editor ol ol {
+  list-style-type: lower-alpha;
+}
+
+.notes-text-editor ol ol ol {
+  list-style-type: lower-roman;
 }
 
 .notes-text-editor a:not([data-type="mention"]):not(.mention) {

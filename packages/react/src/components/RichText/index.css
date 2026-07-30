@@ -124,7 +124,17 @@
 
 .rich-text-editor-container h4,
 .rich-text-display-container h4 {
-  @apply m-0 mb-2.5 p-0 text-lg font-medium;
+  @apply m-0 mb-2.5 p-0 text-base font-medium;
+}
+
+.rich-text-editor-container h5,
+.rich-text-display-container h5 {
+  @apply m-0 mb-2.5 p-0 text-sm font-semibold;
+}
+
+.rich-text-editor-container h6,
+.rich-text-display-container h6 {
+  @apply m-0 mb-2.5 p-0 text-sm font-medium;
 }
 
 .rich-text-editor-container ul,
@@ -136,6 +146,28 @@
 .rich-text-editor-container ol,
 .rich-text-display-container ol {
   @apply m-0 mb-2.5 list-decimal;
+}
+
+/* Nested lists repeat the parent marker without these; depth is otherwise
+   only conveyed by indentation. */
+.rich-text-editor-container ul ul,
+.rich-text-display-container ul ul {
+  list-style: circle;
+}
+
+.rich-text-editor-container ul ul ul,
+.rich-text-display-container ul ul ul {
+  list-style: square;
+}
+
+.rich-text-editor-container ol ol,
+.rich-text-display-container ol ol {
+  list-style: lower-alpha;
+}
+
+.rich-text-editor-container ol ol ol,
+.rich-text-display-container ol ol ol {
+  list-style: lower-roman;
 }
 
 .rich-text-editor-container a:not([data-type="mention"]):not(.mention),

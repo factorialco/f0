@@ -335,6 +335,59 @@ export const FontSizes: Story = {
   },
 }
 
+/** Three levels of the same list type, innermost first. */
+const nestedList = (type: "bulletList" | "orderedList", markers: string[]) =>
+  markers.reduceRight<Record<string, unknown> | null>((child, marker) => {
+    const paragraph = {
+      type: "paragraph",
+      content: [{ type: "text", text: `Level ${marker}` }],
+    }
+
+    return {
+      type,
+      content: [
+        { type: "listItem", content: child ? [paragraph, child] : [paragraph] },
+      ],
+    }
+  }, null)!
+
+const headingLevelsContent = {
+  type: "doc",
+  content: [
+    ...[1, 2, 3, 4, 5, 6].flatMap((level) => [
+      {
+        type: "heading",
+        attrs: { level },
+        content: [{ type: "text", text: `Heading ${level}` }],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Body text, for comparison with the heading." },
+        ],
+      },
+    ]),
+    nestedList("bulletList", ["disc", "circle", "square"]),
+    nestedList("orderedList", ["decimal", "lower-alpha", "lower-roman"]),
+  ],
+}
+
+/**
+ * Every heading level and both nested list types. Content imported from
+ * documents nests several levels deep, so h4-h6 have to read as distinct from
+ * each other and from body text, and a sub-list must not repeat its parent's
+ * marker.
+ */
+export const HeadingLevels: Story = {
+  args: {
+    ...Default.args,
+    initialEditorState: {
+      title: "Heading levels",
+      content: headingLevelsContent,
+    },
+  },
+}
+
 export const WithWarningAlert: Story = {
   args: {
     ...Default.args,
