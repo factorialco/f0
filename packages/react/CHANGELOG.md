@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.66.2](https://github.com/factorialco/f0/compare/f0-react-v4.66.1...f0-react-v4.66.2) (2026-07-30)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** make trailing tagList content fully visible in tables ([#4793](https://github.com/factorialco/f0/issues/4793)) ([d2f8da0](https://github.com/factorialco/f0/commit/d2f8da0b90bca1f0093320c0c52d3167366c243c))
+
 ## [4.66.1](https://github.com/factorialco/f0/compare/f0-react-v4.66.0...f0-react-v4.66.1) (2026-07-30)
 
 
