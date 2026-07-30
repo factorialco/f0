@@ -875,6 +875,9 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+      phone: {
+        invalid: "Enter a valid phone number",
+      },
     },
   },
   graph: {

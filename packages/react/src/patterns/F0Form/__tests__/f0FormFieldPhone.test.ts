@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 
+import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
+
 import { f0FormField, getF0Config } from "../f0Schema"
+import { createZodErrorMap } from "../zodErrorMap"
 
 describe("f0FormField.phone", () => {
   it("builds a phone field config with the given options", () => {
@@ -33,7 +36,26 @@ describe("f0FormField.phone", () => {
 
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe("Invalid phone number")
+      expect(result.error.issues[0]).toMatchObject({
+        code: "custom",
+        params: { type: "phone" },
+      })
+    }
+  })
+
+  it("localizes the invalid message through the zod error map", () => {
+    const schema = f0FormField.phone({ label: "Phone" })
+
+    const result = schema.safeParse(
+      { prefix: "+34", number: "67" },
+      { errorMap: createZodErrorMap(defaultTranslations) }
+    )
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe(
+        defaultTranslations.forms.validation.phone.invalid
+      )
     }
   })
 

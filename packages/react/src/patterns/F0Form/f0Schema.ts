@@ -1339,7 +1339,8 @@ export namespace f0FormField {
         if (!isOk) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: invalidMessage ?? "Invalid phone number",
+            params: { type: "phone" },
+            ...(invalidMessage ? { message: invalidMessage } : {}),
           })
         }
       })
