@@ -148,26 +148,31 @@
   @apply m-0 mb-2.5 list-decimal;
 }
 
-/* Nested lists repeat the parent marker without these; depth is otherwise
-   only conveyed by indentation. */
-.rich-text-editor-container ul ul,
-.rich-text-display-container ul ul {
-  list-style: circle;
+/* Nested lists repeat the parent marker without these; depth is otherwise only
+   conveyed by indentation. Selected by class, not by `ul ul`: the list classes
+   below already set a marker at specificity 0,2,0, which any element-based
+   selector loses to. */
+.rich-text-editor-container .f1-bullet-list .f1-bullet-list,
+.rich-text-display-container .f1-bullet-list .f1-bullet-list {
+  list-style-type: circle;
 }
 
-.rich-text-editor-container ul ul ul,
-.rich-text-display-container ul ul ul {
-  list-style: square;
+.rich-text-editor-container .f1-bullet-list .f1-bullet-list .f1-bullet-list,
+.rich-text-display-container .f1-bullet-list .f1-bullet-list .f1-bullet-list {
+  list-style-type: square;
 }
 
-.rich-text-editor-container ol ol,
-.rich-text-display-container ol ol {
-  list-style: lower-alpha;
+.rich-text-editor-container .f1-ordered-list .f1-ordered-list,
+.rich-text-display-container .f1-ordered-list .f1-ordered-list {
+  list-style-type: lower-alpha;
 }
 
-.rich-text-editor-container ol ol ol,
-.rich-text-display-container ol ol ol {
-  list-style: lower-roman;
+.rich-text-editor-container .f1-ordered-list .f1-ordered-list .f1-ordered-list,
+.rich-text-display-container
+  .f1-ordered-list
+  .f1-ordered-list
+  .f1-ordered-list {
+  list-style-type: lower-roman;
 }
 
 .rich-text-editor-container a:not([data-type="mention"]):not(.mention),

@@ -47,21 +47,23 @@
   @apply m-0 mb-2 list-decimal;
 }
 
-/* Nested lists repeat the parent marker without these; depth is otherwise
-   only conveyed by indentation. */
-.notes-text-editor ul ul {
+/* Nested lists repeat the parent marker without these; depth is otherwise only
+   conveyed by indentation. Selected by class, not by `ul ul`: the list classes
+   below already set a marker at specificity 0,2,0, which any element-based
+   selector loses to. */
+.notes-text-editor .f1-bullet-list .f1-bullet-list {
   list-style-type: circle;
 }
 
-.notes-text-editor ul ul ul {
+.notes-text-editor .f1-bullet-list .f1-bullet-list .f1-bullet-list {
   list-style-type: square;
 }
 
-.notes-text-editor ol ol {
+.notes-text-editor .f1-ordered-list .f1-ordered-list {
   list-style-type: lower-alpha;
 }
 
-.notes-text-editor ol ol ol {
+.notes-text-editor .f1-ordered-list .f1-ordered-list .f1-ordered-list {
   list-style-type: lower-roman;
 }
 
