@@ -26,13 +26,19 @@ import { Checkbox } from "@/ui/checkbox"
 
 import type {
   CellRendererProps,
+  ColId,
   ReferenceType,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
-import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
+import { getColumnId } from "../hooks/useColums"
+import {
+  collapsingCellClass,
+  groupBorderClass,
+  HeaderGroupEntry,
+} from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -80,6 +86,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  /** Ids of the columns opening or closing. */
+  collapsingColumnIds?: ReadonlySet<ColId>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
@@ -155,6 +163,7 @@ const RowComponentInner = <
     rowWrapper,
     fromVisualization,
     headerGroups,
+    collapsingColumnIds,
     registerSelectable,
     unregisterSelectable,
   }: RowProps<
@@ -350,7 +359,12 @@ const RowComponentInner = <
             }}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
-            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
+            className={cn(
+              cellRenderedClass,
+              isLastInGroup && groupBorderClass,
+              collapsingColumnIds?.has(getColumnId(column)) &&
+                collapsingCellClass
+            )}
           >
             {CellRenderer ? (
               <CellRenderer

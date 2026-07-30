@@ -51,9 +51,9 @@ import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
-import { useColumns } from "./hooks/useColums"
+import { getColumnId, useColumns } from "./hooks/useColums"
 import {
-  getCollapseFadeClass,
+  collapsingCellClass,
   groupBorderClass,
   useHeaderGroups,
 } from "./hooks/useHeaderGroups"
@@ -163,15 +163,11 @@ export const TableCollection = <
 
   // Header groups own the collapsed state and drop the columns hidden by a
   // collapsed group, so everything downstream renders off `columns` unchanged.
-  const {
-    columns,
-    headerGroups,
-    toggleHeaderGroup,
-    isTransitioning: isHeaderGroupTransitioning,
-  } = useHeaderGroups(orderedColumns, {
-    headerGroups: headerGroupsOption,
-    onCollapsedChange: onHeaderGroupCollapsedChange,
-  })
+  const { columns, headerGroups, toggleHeaderGroup, collapsingColumnIds } =
+    useHeaderGroups(orderedColumns, {
+      headerGroups: headerGroupsOption,
+      onCollapsedChange: onHeaderGroupCollapsedChange,
+    })
 
   const {
     data,
@@ -443,8 +439,7 @@ export const TableCollection = <
           className={cn(
             "min-h-0",
             bordered &&
-              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent",
-            getCollapseFadeClass(isHeaderGroupTransitioning)
+              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}
         >
           <OneTable loading={isLoading}>
@@ -614,7 +609,10 @@ export const TableCollection = <
                           isLastInGroup && groupBorderClass,
                           fromVisualization === "editableTable" &&
                             (index !== columns.length - 1 || showItemActions) &&
-                            "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                            "border-0 border-r-[1px] border-solid border-f1-border-secondary",
+                          collapsingColumnIds.has(
+                            getColumnId({ id: column.id, label })
+                          ) && collapsingCellClass
                         ) || undefined
                       }
                       onSortClick={
@@ -787,6 +785,7 @@ export const TableCollection = <
                                 rowWrapper={RowWrapper}
                                 cellRenderer={cellRenderer}
                                 headerGroups={headerGroups}
+                                collapsingColumnIds={collapsingColumnIds}
                                 fromVisualization={fromVisualization}
                                 registerSelectable={selectionRegistry.register}
                                 unregisterSelectable={
@@ -852,6 +851,7 @@ export const TableCollection = <
                         cellRenderer={cellRenderer}
                         fromVisualization={fromVisualization}
                         headerGroups={headerGroups}
+                        collapsingColumnIds={collapsingColumnIds}
                         registerSelectable={selectionRegistry.register}
                         unregisterSelectable={selectionRegistry.unregister}
                       />
@@ -938,7 +938,9 @@ export const TableCollection = <
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||
                                 showItemActions) &&
-                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary",
+                            collapsingColumnIds.has(getColumnId(column)) &&
+                              collapsingCellClass
                           )}
                         >
                           {cellIndex === 0 &&

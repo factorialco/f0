@@ -1211,7 +1211,7 @@ describe("TableCollection", () => {
       expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
     })
 
-    it("answers the toggle immediately but swaps the columns behind a fade", async () => {
+    it("holds the cells mounted and shrinking before dropping them", async () => {
       renderTable({
         headerGroups: {
           contact: { label: "Contact", collapsedColumns: ["email"] },
@@ -1227,15 +1227,54 @@ describe("TableCollection", () => {
 
       // The control answers the click at once...
       expect(toggle).toHaveAttribute("aria-expanded", "false")
-      // ...while the columns are still there, dimmed, mid-fade.
-      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
-      const fadeWrapper = toggle.closest(".min-h-0")
-      expect(fadeWrapper?.classList.contains("opacity-50")).toBe(true)
 
+      // ...while the cells stay mounted at zero width. That is what the
+      // transition travels along; unmounting outright would snap.
+      const cell = screen.getByText(testData[0].displayName).closest("td")
+      expect(cell).toBeInTheDocument()
+      expect(cell?.classList.contains("!w-0")).toBe(true)
+
+      // Only once the close has played out do they leave the DOM.
       await waitFor(() => {
         expect(
           screen.queryByText(testData[0].displayName)
         ).not.toBeInTheDocument()
+      })
+    })
+
+    it("mounts reopening cells shrunk so they can grow back in", async () => {
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      // Back in the DOM at once, starting from zero width so the browser has
+      // somewhere to transition from.
+      expect(
+        screen
+          .getByText(testData[0].displayName)
+          .closest("td")
+          ?.classList.contains("!w-0")
+      ).toBe(true)
+
+      await waitFor(() => {
+        expect(
+          screen
+            .getByText(testData[0].displayName)
+            .closest("td")
+            ?.classList.contains("!w-0")
+        ).toBe(false)
       })
     })
 

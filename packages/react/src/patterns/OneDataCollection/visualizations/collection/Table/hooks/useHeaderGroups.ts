@@ -7,22 +7,23 @@ import { SummariesDefinition } from "../../../../summary"
 import { ColId, HeaderGroupDefinition, TableColumnDefinition } from "../types"
 import { getColumnId } from "./useColums"
 
-/**
- * How long the table stays dimmed before the columns are swapped. Kept in step
- * with `collapseFadeClass`, and matched to the fade the table plays while a
- * sorting is being applied.
- */
-const COLLAPSE_FADE_MS = 150
+/** Kept in step with the duration baked into `collapsingCellClass`. */
+const COLLAPSE_ANIMATION_MS = 220
 
 /**
- * Mirrors the dimming `OneTable` applies while it is loading. The transition
- * has to stay on the element at all times — applied only while dimmed, the
- * fade back to full opacity would have nothing to animate and would snap.
+ * Applied to the cells of a group that is opening or closing. They stay mounted
+ * for the duration, which is what the width travels along — unmounting them
+ * outright is what made the change snap.
+ *
+ * The contents fade out in well under half the time the width takes. Matching
+ * the two leaves a sliver of clipped text riding the column shut; dropping the
+ * text early closes the column on empty space instead.
+ *
+ * `!` is load-bearing: cells size themselves through inline `style`, and only
+ * an important declaration outranks that.
  */
-export const getCollapseFadeClass = (isTransitioning: boolean) =>
-  isTransitioning
-    ? "transition-opacity duration-150 select-none opacity-50"
-    : "transition-opacity duration-150"
+export const collapsingCellClass =
+  "!w-0 !min-w-0 !max-w-0 !px-0 overflow-hidden opacity-0 [transition:opacity_80ms_ease-out,width_220ms_ease-out,min-width_220ms_ease-out,max-width_220ms_ease-out,padding_220ms_ease-out] motion-reduce:[transition:none]"
 
 export type HeaderGroupSpan = {
   type: "group"
@@ -218,11 +219,10 @@ export type UseHeaderGroupsReturn<
   /** Collapses an expanded group, or expands a collapsed one. */
   toggleHeaderGroup: (groupId: string) => void
   /**
-   * True while a toggle is mid-fade. Render the table with
-   * {@link collapseFadeClass} so the columns swap behind a dim, the way they do
-   * while a sorting is being applied.
+   * Ids of the columns currently opening or closing. Their cells should carry
+   * {@link collapsingCellClass}. Empty once nothing is in flight.
    */
-  isTransitioning: boolean
+  collapsingColumnIds: ReadonlySet<ColId>
 }
 
 /**
@@ -254,25 +254,38 @@ export const useHeaderGroups = <
       )
   )
 
-  // What the user has asked for, which can run ahead of `collapsedGroups` while
-  // the fade plays. The toggle's icon reads from this so it flips on click
-  // rather than a beat later.
-  const [intent, setIntent] = useState<ReadonlySet<string>>(collapsedGroups)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  // Groups mid-flight. Their collapsible columns stay mounted at full width so
+  // their contents can animate out before the close lands.
+  const [animatingGroups, setAnimatingGroups] = useState<ReadonlySet<string>>(
+    new Set()
+  )
   const shouldReduceMotion = useReducedMotion()
-  const pendingCommit = useRef<ReturnType<typeof setTimeout>>()
+
+  // Keyed by group, so re-toggling one group mid-flight cancels only its own
+  // pending step and leaves another group's alone.
+  const pendingSteps = useRef(new Map<string, () => void>())
 
   useEffect(
     () => () => {
-      if (pendingCommit.current) clearTimeout(pendingCommit.current)
+      pendingSteps.current.forEach((cancel) => cancel())
+      pendingSteps.current.clear()
     },
     []
   )
 
+  const settleGroup = useCallback((groupId: string) => {
+    setAnimatingGroups((current) => {
+      if (!current.has(groupId)) return current
+      const next = new Set(current)
+      next.delete(groupId)
+      return next
+    })
+  }, [])
+
   const toggleHeaderGroup = useCallback(
     (groupId: string) => {
-      const collapsed = !intent.has(groupId)
-      const next = new Set(intent)
+      const collapsed = !collapsedGroups.has(groupId)
+      const next = new Set(collapsedGroups)
 
       if (collapsed) {
         next.add(groupId)
@@ -280,54 +293,86 @@ export const useHeaderGroups = <
         next.delete(groupId)
       }
 
-      setIntent(next)
-      if (pendingCommit.current) clearTimeout(pendingCommit.current)
+      setCollapsedGroups(next)
+
+      pendingSteps.current.get(groupId)?.()
+      pendingSteps.current.delete(groupId)
 
       if (shouldReduceMotion) {
-        setCollapsedGroups(next)
+        settleGroup(groupId)
       } else {
-        // Swap the columns at the dimmest point of the fade, the same shape of
-        // transition the table plays while a sorting is being applied, so the
-        // change is never seen landing at full opacity.
-        setIsTransitioning(true)
-        pendingCommit.current = setTimeout(() => {
-          setCollapsedGroups(next)
-          setIsTransitioning(false)
-        }, COLLAPSE_FADE_MS)
+        setAnimatingGroups((current) => new Set(current).add(groupId))
+
+        if (collapsed) {
+          // Hold the columns until their contents have animated out.
+          const timeout = setTimeout(
+            () => settleGroup(groupId),
+            COLLAPSE_ANIMATION_MS
+          )
+          pendingSteps.current.set(groupId, () => clearTimeout(timeout))
+        } else {
+          // Mounted faded and shifted; release next frame so the browser has a
+          // start value to transition away from.
+          const frame = requestAnimationFrame(() =>
+            requestAnimationFrame(() => settleGroup(groupId))
+          )
+          pendingSteps.current.set(groupId, () => cancelAnimationFrame(frame))
+        }
       }
 
       onCollapsedChange?.(groupId, collapsed)
     },
-    [intent, onCollapsedChange, shouldReduceMotion]
+    [collapsedGroups, onCollapsedChange, shouldReduceMotion, settleGroup]
   )
 
+  // A collapsed group only drops its columns once it has finished animating.
+  const settledCollapsedGroups = useMemo(() => {
+    if (animatingGroups.size === 0) return collapsedGroups
+    return new Set(
+      [...collapsedGroups].filter((groupId) => !animatingGroups.has(groupId))
+    )
+  }, [collapsedGroups, animatingGroups])
+
   const visibleColumns = useMemo(() => {
-    if (!definitions || collapsedGroups.size === 0) return columns
+    if (!definitions || settledCollapsedGroups.size === 0) return columns
 
     const hidden = getCollapsedColumnIndices(
       columns,
       definitions,
-      collapsedGroups
+      settledCollapsedGroups
     )
     if (hidden.size === 0) return columns
 
     return columns.filter((_, index) => !hidden.has(index))
-  }, [columns, definitions, collapsedGroups])
+  }, [columns, definitions, settledCollapsedGroups])
+
+  const collapsingColumnIds = useMemo(() => {
+    if (!definitions || animatingGroups.size === 0) return new Set<ColId>()
+
+    const animating = getCollapsedColumnIndices(
+      visibleColumns,
+      definitions,
+      animatingGroups
+    )
+
+    return new Set(
+      [...animating].map((index) => getColumnId(visibleColumns[index]))
+    )
+  }, [visibleColumns, definitions, animatingGroups])
 
   const entries = useMemo(() => {
     if (!definitions) return null
     if (!visibleColumns.some((column) => column.headerGroupId)) return null
 
-    // Built from `intent`, not the committed set, so the toggle's icon and
-    // aria-expanded answer the click immediately even though the columns only
-    // swap once the fade reaches its dimmest point.
-    return computeHeaderGroups(visibleColumns, definitions, intent)
-  }, [visibleColumns, definitions, intent])
+    // Built from the requested state, so the toggle's icon and aria-expanded
+    // answer the click while the columns are still on their way out.
+    return computeHeaderGroups(visibleColumns, definitions, collapsedGroups)
+  }, [visibleColumns, definitions, collapsedGroups])
 
   return {
     columns: visibleColumns,
+    collapsingColumnIds,
     headerGroups: entries,
     toggleHeaderGroup,
-    isTransitioning,
   }
 }
