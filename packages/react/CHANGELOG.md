@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.70.1](https://github.com/factorialco/f0/compare/f0-react-v4.70.0...f0-react-v4.70.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* **F0DataChart:** round the true outer stack segment, not a fixed series ([#4925](https://github.com/factorialco/f0/issues/4925)) ([48b9b40](https://github.com/factorialco/f0/commit/48b9b40a8aee348b2dbda4c76dc95b3b891f3b4f))
+* **OneDataCollection:** grouped Kanban layout — align header + content-height lanes ([#4906](https://github.com/factorialco/f0/issues/4906)) ([52123fd](https://github.com/factorialco/f0/commit/52123fd8ecf8f9a7e6c5228eee14b309f6a12fb7))
+
 ## [4.70.0](https://github.com/factorialco/f0/compare/f0-react-v4.69.0...f0-react-v4.70.0) (2026-07-30)
 
 
