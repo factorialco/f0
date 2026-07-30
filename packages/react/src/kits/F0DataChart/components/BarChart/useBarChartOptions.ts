@@ -650,7 +650,10 @@ export function useBarChartOptions(
       },
     }
 
-    if (!isVertical && showLabels) {
+    // Non-stacked horizontal bars render labels BESIDE the bar end, so the
+    // grid reserves room for them on the right. Stacked labels sit inside
+    // their segments — no reservation needed, the plot keeps its full width.
+    if (!isVertical && !stacked && showLabels) {
       if (userGridRight === undefined) {
         const grid = options.grid as { right?: number }
         if (grid) {

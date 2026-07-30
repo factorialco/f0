@@ -55,6 +55,7 @@ function getLatestOption() {
   if (!call) throw new Error("setOption was never called")
   return call[0] as {
     legend?: { show?: boolean }
+    grid?: { right?: number | string }
     xAxis: {
       axisLabel: { show: boolean; interval?: number }
       splitNumber?: number
@@ -291,6 +292,32 @@ describe("BarChart — label placement", () => {
     // Palette teal is a mid-tone fill → white text
     expect(series?.label?.color).toBe("#ffffff")
     expect(series?.emphasis?.label?.color).toBe("#ffffff")
+  })
+
+  it("reserves right grid space only when horizontal labels sit beside the bar", () => {
+    // Non-stacked horizontal: labels render beside the bar end → 60px reserved
+    render(
+      <F0DataChart
+        {...base}
+        orientation="horizontal"
+        series={[{ name: "X", data: [1, 2] }]}
+      />
+    )
+    expect(getLatestOption().grid?.right).toBe(60)
+
+    // Stacked horizontal: labels render inside segments → keep the full width
+    render(
+      <F0DataChart
+        {...base}
+        orientation="horizontal"
+        stacked
+        series={[
+          { name: "X", data: [1, 2] },
+          { name: "Y", data: [3, 4] },
+        ]}
+      />
+    )
+    expect(getLatestOption().grid?.right).toBe(4)
   })
 
   it("places labels above the bar in the neutral colour when not stacked", () => {
