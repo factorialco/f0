@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.71.0](https://github.com/factorialco/f0/compare/f0-react-v4.70.2...f0-react-v4.71.0) (2026-07-31)
+
+
+### Features
+
+* **F0MeetingCard:** add experimental component ([#4904](https://github.com/factorialco/f0/issues/4904)) ([e71c988](https://github.com/factorialco/f0/commit/e71c988549649cb80b248637a68dc2e94dcfe9e4))
+
 ## [4.70.2](https://github.com/factorialco/f0/compare/f0-react-v4.70.1...f0-react-v4.70.2) (2026-07-31)
 
 
