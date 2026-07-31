@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 
 import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import { useComposerDraftScope } from "../F0AiChat/providers/ComposerDraftScope"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
 import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
@@ -108,6 +109,7 @@ export const F0AiChatTextArea = ({
   // When the textarea is rendered outside an `F0AiChatProvider` the
   // tracking ref resolves to a no-op via the provider fallback.
   const { tracking, composerDraft, setComposerDraft } = useAiChat()
+  const inComposerDraftScope = useComposerDraftScope()
   const handleSuggestionClick = useCallback(
     (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
       tracking?.onWelcomeSuggestionClick?.({
@@ -185,24 +187,37 @@ export const F0AiChatTextArea = ({
   }, [])
 
   // One-shot composer prefill: an external flow (e.g. the Analytics mode
-  // handoff) stages a draft in the provider; the textarea claims it by
-  // replacing the current input and consuming the draft. The caret/focus
-  // follow-up runs on the next render, once the controlled textarea holds
-  // the new value.
+  // handoff) stages a draft in the provider; the chat-owned textarea (the
+  // one inside ComposerDraftScope — never standalone embedded composers)
+  // claims it by replacing the current input and consuming the draft. The
+  // caret/focus follow-up runs once the controlled textarea holds the new
+  // value.
   const pendingDraftCursorRef = useRef<number | null>(null)
   useEffect(() => {
-    if (composerDraft == null) return
+    if (!inComposerDraftScope || composerDraft == null) return
+    setComposerDraft(null)
+    if (composerDraft === inputValue) {
+      // No state change will follow, so apply focus/caret directly instead
+      // of arming the ref (a stale ref would hijack the caret on the next
+      // genuine keystroke).
+      const textarea = textareaRef.current
+      textarea?.focus()
+      textarea?.setSelectionRange(composerDraft.length, composerDraft.length)
+      return
+    }
     setInputValue(composerDraft)
     setCursorPosition(composerDraft.length)
     pendingDraftCursorRef.current = composerDraft.length
-    setComposerDraft(null)
-  }, [composerDraft, setComposerDraft])
+  }, [composerDraft, setComposerDraft, inputValue, inComposerDraftScope])
   useEffect(() => {
     const cursor = pendingDraftCursorRef.current
     if (cursor == null) return
-    pendingDraftCursorRef.current = null
     const textarea = textareaRef.current
-    if (!textarea) return
+    // Consume only once the DOM textarea holds the drafted value — on the
+    // arming commit it still shows the previous value, and the next
+    // inputValue commit re-runs this effect.
+    if (!textarea || textarea.value.length < cursor) return
+    pendingDraftCursorRef.current = null
     textarea.focus()
     textarea.setSelectionRange(cursor, cursor)
   }, [inputValue])

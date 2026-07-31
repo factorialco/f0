@@ -12,6 +12,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import { ComposerDraftScope } from "./providers/ComposerDraftScope"
 import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
 
 /**
@@ -223,7 +224,7 @@ const F0AiChatComponent = ({
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               {messages}
             </div>
-            {input}
+            <ComposerDraftScope>{input}</ComposerDraftScope>
           </motion.div>
         </div>
         {overlay && (
