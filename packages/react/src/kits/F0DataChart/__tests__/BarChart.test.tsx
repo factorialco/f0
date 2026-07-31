@@ -951,11 +951,11 @@ describe("BarChart — hideOverflowingLabels", () => {
 })
 
 // ---------------------------------------------------------------------------
-// tooltipValueFormatter — the tooltip can show precise values while the
-// axis/labels stay compact.
+// Item tooltip — bar charts describe the hovered bar/segment: precise value,
+// change vs. the previous category, and (multi-series) share of the total.
 // ---------------------------------------------------------------------------
 
-describe("BarChart — tooltipValueFormatter", () => {
+describe("BarChart — item tooltip", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
     if (!call) throw new Error("setOption was never called")
@@ -973,16 +973,19 @@ describe("BarChart — tooltipValueFormatter", () => {
         tooltipValueFormatter={(v) => v.toLocaleString("en-US")}
       />
     )
-    const html = getTooltipFormatter()?.([
-      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
-    ])
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 107505,
+      dataIndex: 0,
+    })
     expect(html).toContain("107,505") // precise, grouped
     expect(html).not.toContain("K") // not the compact form
     expect(getLatestOption().aria?.enabled).toBe(true)
     expect(getLatestOption().aria?.label?.description).toContain("107,505")
   })
 
-  it("falls back to valueFormatter when no tooltipValueFormatter is given", () => {
+  it("shows full numbers (not the compact axis format) when no tooltipValueFormatter is given", () => {
     render(
       <F0DataChart
         type="bar"
@@ -991,13 +994,17 @@ describe("BarChart — tooltipValueFormatter", () => {
         valueFormatter={(v) => `${Math.round(v / 1000)}K`}
       />
     )
-    const html = getTooltipFormatter()?.([
-      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
-    ])
-    expect(html).toContain("108K")
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 107505,
+      dataIndex: 0,
+    })
+    expect(html).toContain((107505).toLocaleString())
+    expect(html).not.toContain("108K")
   })
 
-  it("formats and escapes actual and target values in target tooltips", () => {
+  it("formats and escapes values in target tooltips, and hides ghost series", () => {
     render(
       <F0DataChart
         type="bar"
@@ -1014,50 +1021,84 @@ describe("BarChart — tooltipValueFormatter", () => {
       />
     )
 
-    const html = getTooltipFormatter()?.([
-      {
-        axisValueLabel: "<script>category</script>",
-        seriesName: "<strong>Revenue</strong>",
-        value: 107505,
-        dataIndex: 0,
-        marker: '<span class="trusted-marker"></span>',
-      },
-    ])
+    const formatter = getTooltipFormatter()
+    const html = formatter?.({
+      name: "<script>category</script>",
+      seriesName: "<strong>Revenue</strong>",
+      value: 107505,
+      dataIndex: 0,
+      marker: '<span class="trusted-marker"></span>',
+    })
 
+    // ECharts' own coloured dot is trusted HTML and survives unescaped.
     expect(html).toContain('<span class="trusted-marker"></span>')
     expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
     expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
     expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
-    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;")
+    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;") // target row
     expect(html).not.toContain("<script>")
+    // Hovering the ghost gradient bar renders no tooltip.
+    expect(
+      formatter?.({
+        seriesName: "<strong>Revenue</strong> (target)",
+        value: 17495,
+        dataIndex: 0,
+      })
+    ).toBe("")
   })
 
-  it("escapes the ordinary tooltip while preserving ECharts marker HTML", () => {
+  it("shows share of total only for multi-series charts", () => {
     render(
       <F0DataChart
         type="bar"
-        categories={["<script>category</script>"]}
-        series={[{ name: "<strong>Revenue</strong>", data: [107505] }]}
-        tooltipValueFormatter={(value) =>
-          `<em>${value.toLocaleString("en-US")}</em>`
-        }
+        categories={["A", "B"]}
+        series={[
+          { name: "S1", data: [30, 10] },
+          { name: "S2", data: [70, 90] },
+        ]}
       />
     )
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S1",
+      value: 30,
+      dataIndex: 0,
+    })
+    expect(html).toContain("30.0%")
+    expect(html).toContain("of total")
+    expect(html).toContain((100).toLocaleString())
+  })
 
-    const html = getTooltipFormatter()?.([
-      {
-        axisValueLabel: "<script>category</script>",
-        seriesName: "<strong>Revenue</strong>",
-        value: 107505,
-        marker: '<span class="trusted-marker"></span>',
-      },
-    ])
+  it("hides share of total for single-series charts", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [100] }]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 100,
+      dataIndex: 0,
+    })
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("total<")
+  })
 
-    expect(html).toContain('<span class="trusted-marker"></span>')
-    expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
-    expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
-    expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
-    expect(html).not.toContain("<script>")
+  it("never compares a bar with the previous category — that is a line-chart concept", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A", "B"]}
+        series={[{ name: "S", data: [100, 125] }]}
+      />
+    )
+    const formatter = getTooltipFormatter()
+    expect(
+      formatter?.({ name: "B", seriesName: "S", value: 125, dataIndex: 1 })
+    ).not.toContain("from previous")
   })
 
   it("bounds the accessible description for large datasets", () => {

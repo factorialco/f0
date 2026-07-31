@@ -3,8 +3,12 @@ import { describe, expect, it } from "vitest"
 import {
   computeCategoryAxisLayout,
   computeLabelInterval,
+  deltaRow,
   escapeTooltipText,
+  renderMarker,
+  renderValueTooltip,
 } from "../utils/options"
+import { resolveChartTheme } from "../utils/theme"
 
 describe("escapeTooltipText", () => {
   it("escapes HTML-significant characters in consumer-provided text", () => {
@@ -99,5 +103,95 @@ describe("computeCategoryAxisLayout", () => {
     const layout = computeCategoryAxisLayout(50, 100, true)
     expect(layout).toBeDefined()
     expect(layout!.labelWidth).toBeGreaterThanOrEqual(24)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Shared tooltip renderer — every chart type funnels through this.
+// ---------------------------------------------------------------------------
+
+describe("renderValueTooltip", () => {
+  const theme = resolveChartTheme()
+
+  it("renders marker, title, subtitle, value and rows", () => {
+    const html = renderValueTooltip(
+      {
+        marker: '<span class="dot"></span>',
+        title: "Variable pay",
+        subtitle: "Q2",
+        value: "22,000",
+        rows: [{ value: "14.1%", label: "of total" }],
+      },
+      theme
+    )
+    expect(html).toContain('<span class="dot"></span>') // trusted, unescaped
+    expect(html).toContain("Variable pay")
+    expect(html).toContain("Q2")
+    expect(html).toContain("22,000")
+    expect(html).toContain("14.1%")
+    expect(html).toContain("of total")
+    expect(html).toContain("min-width: 130px")
+  })
+
+  it("escapes everything except the ECharts marker", () => {
+    const html = renderValueTooltip(
+      {
+        marker: '<span class="dot"></span>',
+        title: "<script>x</script>",
+        subtitle: "<b>c</b>",
+        value: "<em>1</em>",
+        rows: [{ value: "<i>2</i>", label: "<u>l</u>" }],
+      },
+      theme
+    )
+    expect(html).toContain('<span class="dot"></span>')
+    expect(html).not.toContain("<script>")
+    expect(html).not.toContain("<b>")
+    expect(html).not.toContain("<em>")
+    expect(html).not.toContain("<i>")
+  })
+
+  it("omits sections that were not provided and drops falsy rows", () => {
+    const html = renderValueTooltip(
+      { title: "Only a title", rows: [undefined, false] },
+      theme
+    )
+    expect(html).toContain("Only a title")
+    expect(html).not.toContain("font-size: 20px") // no headline value
+    expect(html).not.toContain("<strong")
+  })
+})
+
+describe("deltaRow", () => {
+  const theme = resolveChartTheme()
+
+  it("signs and colors an increase", () => {
+    const row = deltaRow(125, 100, "from previous", theme)
+    expect(row?.value).toBe("+25.0%")
+    expect(row?.color).toBe(theme.colors.positive)
+  })
+
+  it("colors a decrease and keeps the minus sign", () => {
+    const row = deltaRow(75, 100, "from previous", theme)
+    expect(row?.value).toBe("-25.0%")
+    expect(row?.color).toBe(theme.colors.critical)
+  })
+
+  it("returns nothing without a usable baseline", () => {
+    expect(deltaRow(10, undefined, "l", theme)).toBeUndefined()
+    expect(deltaRow(10, 0, "l", theme)).toBeUndefined()
+    expect(deltaRow(Number.NaN, 10, "l", theme)).toBeUndefined()
+  })
+})
+
+describe("renderMarker", () => {
+  it("builds a dot in the requested color", () => {
+    expect(renderMarker("#0d9488")).toContain("background-color:#0d9488")
+  })
+
+  it("strips characters that would break out of the style attribute", () => {
+    expect(renderMarker('red"><script>alert(1)</script>')).not.toContain(
+      "<script>"
+    )
   })
 })

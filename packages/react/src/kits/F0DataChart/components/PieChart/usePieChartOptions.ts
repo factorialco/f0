@@ -12,6 +12,7 @@ import {
   buildItemTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
+  renderValueTooltip,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -165,11 +166,26 @@ export function usePieChartOptions(
             percent?: number
           }
           const val = Number(p.value ?? 0)
-          const formattedValue = valueFormatter
-            ? valueFormatter(val)
-            : String(val)
-          const pct = (p.percent ?? 0).toFixed(1)
-          return `<div>${String(p.marker ?? "")} <strong>${String(p.name ?? "")}</strong></div><div style="margin-top: 2px">${formattedValue} (${pct}%)</div>`
+          const total = dataPoints.reduce((sum, point) => sum + point.value, 0)
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: String(p.name ?? ""),
+              value: valueFormatter
+                ? valueFormatter(val)
+                : val.toLocaleString(),
+              rows: [
+                { value: `${(p.percent ?? 0).toFixed(1)}%`, label: "of total" },
+                {
+                  value: valueFormatter
+                    ? valueFormatter(total)
+                    : total.toLocaleString(),
+                  label: "total",
+                },
+              ],
+            },
+            theme
+          )
         },
       }),
       emphasis: DEFAULT_EMPHASIS,

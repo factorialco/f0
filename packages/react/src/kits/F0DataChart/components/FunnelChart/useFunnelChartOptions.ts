@@ -12,6 +12,7 @@ import { formatPercent } from "../../utils/formatters"
 import {
   buildGrid,
   buildItemTooltip,
+  renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
 } from "../../utils/options"
@@ -114,8 +115,6 @@ export function useFunnelChartOptions(
       },
     }
 
-    const { colors } = theme
-
     const buildTooltipFormatter = () => {
       // Use sorted order for step-over-step conversion
       const sorted =
@@ -139,26 +138,35 @@ export function useFunnelChartOptions(
         const val = Number(p.value ?? 0)
         const formattedValue = valueFormatter
           ? valueFormatter(val)
-          : String(val)
+          : val.toLocaleString()
         const name = String(p.name ?? "")
         const sortedIndex = sortedIndexMap.get(name)
 
-        let conversionHtml = ""
+        const conversionRows = []
         if (showConversion && firstValue > 0 && sortedIndex !== undefined) {
-          const overallPct = formatPercent(val, firstValue)
-          conversionHtml = `<div style="margin-top: 4px; color: ${colors.foregroundTertiary}; font-size: 11px">Overall: ${overallPct}</div>`
+          conversionRows.push({
+            value: formatPercent(val, firstValue),
+            label: "of total",
+          })
 
-          const prevIndex = sortedIndex - 1
-          if (prevIndex >= 0) {
-            const prevData = sorted[prevIndex]
-            if (prevData && prevData.value > 0) {
-              const stepPct = formatPercent(val, prevData.value)
-              conversionHtml += `<div style="color: ${colors.foregroundTertiary}; font-size: 11px">From ${prevData.name}: ${stepPct}</div>`
-            }
+          const prevData = sortedIndex > 0 ? sorted[sortedIndex - 1] : undefined
+          if (prevData && prevData.value > 0) {
+            conversionRows.push({
+              value: formatPercent(val, prevData.value),
+              label: `from ${prevData.name}`,
+            })
           }
         }
 
-        return `<div>${String(p.marker ?? "")} <strong>${name}</strong></div><div style="margin-top: 2px">${formattedValue}</div>${conversionHtml}`
+        return renderValueTooltip(
+          {
+            marker: p.marker,
+            title: name,
+            value: formattedValue,
+            rows: conversionRows,
+          },
+          theme
+        )
       }
     }
 

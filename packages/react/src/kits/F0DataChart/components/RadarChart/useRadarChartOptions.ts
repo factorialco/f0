@@ -7,6 +7,7 @@ import type { F0DataChartRadarProps } from "../../types"
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildItemTooltip,
+  renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
 } from "../../utils/options"
@@ -158,17 +159,24 @@ export function useRadarChartOptions(
             value?: number[]
           }
           const values = p.value ?? []
-          const header = `<div style="margin-bottom: 4px">${String(p.marker ?? "")} <strong>${String(p.name ?? "")}</strong></div>`
-          const items = indicators
-            .map((ind, i) => {
-              const val = values[i] ?? 0
-              const formattedVal = valueFormatter
-                ? valueFormatter(val)
-                : String(val)
-              return `<div>${ind.name}: <strong>${formattedVal}</strong></div>`
-            })
-            .join("")
-          return `${header}${items}`
+          // A radar point carries every indicator at once, so there is no
+          // single headline value — the indicators are the rows.
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: String(p.name ?? ""),
+              rows: indicators.map((indicator, i) => {
+                const val = values[i] ?? 0
+                return {
+                  value: valueFormatter
+                    ? valueFormatter(val)
+                    : val.toLocaleString(),
+                  label: indicator.name,
+                }
+              }),
+            },
+            theme
+          )
         },
       }),
       emphasis: DEFAULT_EMPHASIS,

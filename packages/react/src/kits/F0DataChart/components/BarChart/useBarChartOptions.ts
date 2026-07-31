@@ -10,7 +10,11 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions, escapeTooltipText } from "../../utils/options"
+import {
+  buildBaseChartOptions,
+  buildItemTooltip,
+  renderValueTooltip,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -582,48 +586,16 @@ export function useBarChartOptions(
       }
     }
 
-    const hasAnyTargets = targetMap.size > 0
-
-    // Tooltip values use their own formatter when provided (precise numbers),
-    // otherwise fall back to the shared value formatter.
+    // Aria descriptions use their own formatter when provided (precise
+    // numbers), otherwise fall back to the shared value formatter.
     const tooltipValue = tooltipValueFormatter ?? valueFormatter
 
-    const tooltipFormatter = hasAnyTargets
-      ? (params: unknown) => {
-          if (!Array.isArray(params)) return ""
-          const filtered = params.filter(
-            (p: { seriesName?: string }) =>
-              !String(p.seriesName ?? "").endsWith(" (target)")
-          )
-          if (filtered.length === 0) return ""
-
-          const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
-          const items = filtered
-            .map(
-              (p: {
-                marker?: string
-                seriesName?: string
-                value?: number
-                dataIndex?: number
-              }) => {
-                const val = Number(p.value)
-                const formattedValue = tooltipValue
-                  ? tooltipValue(val)
-                  : String(val)
-                const targets = targetMap.get(String(p.seriesName ?? ""))
-                const target = targets?.[p.dataIndex ?? 0]
-                const targetHtml =
-                  target !== undefined
-                    ? ` <span style="opacity: 0.6">/ ${escapeTooltipText(tooltipValue ? tooltipValue(target) : String(target))}</span>`
-                    : ""
-                return `<div>${String(p.marker ?? "")} ${escapeTooltipText(p.seriesName ?? "")} <strong>${escapeTooltipText(formattedValue)}</strong>${targetHtml}</div>`
-              }
-            )
-            .join("")
-
-          return `${header}${items}`
-        }
-      : undefined
+    // Tooltips show full numbers, not the compact axis format ("125,000", not
+    // "125k"). `tooltipValueFormatter` exists precisely to override this.
+    const formatTooltipValue = (value: number) =>
+      tooltipValueFormatter
+        ? tooltipValueFormatter(value)
+        : value.toLocaleString()
 
     const options = buildBaseChartOptions({
       categories,
@@ -639,8 +611,6 @@ export function useBarChartOptions(
       showValueAxis,
       valueFormatter,
       categoryFormatter,
-      tooltipFilterSeries: (name) => name.endsWith(" (target)"),
-      tooltipFormatter,
       tooltipValueFormatter,
       valueAxisSplitNumber,
       echartsOptions,
@@ -711,6 +681,67 @@ export function useBarChartOptions(
             duration: STATE_ANIMATION_DURATION,
             easing: "cubicOut",
           })
+    }
+
+    // Bar charts use an item-triggered tooltip about the hovered bar or
+    // segment (pairing with the stacked series highlight) instead of the
+    // axis tooltip listing every series: value large, then change vs. the
+    // previous category and — with multiple series — the category total
+    // and the hovered value's share of it.
+    {
+      options.tooltip = buildItemTooltip({
+        theme,
+        formatter: (params: unknown) => {
+          const p = params as {
+            seriesName?: string
+            name?: string
+            value?: number
+            dataIndex?: number
+            marker?: string
+          }
+          const seriesName = String(p.seriesName ?? "")
+          if (seriesName.endsWith(" (target)")) return ""
+
+          const value = Number(p.value)
+          const dataIndex = p.dataIndex ?? 0
+          const total = series.reduce(
+            (sum, s) => sum + (getValue(s.data[dataIndex]) || 0),
+            0
+          )
+          const target = targetMap.get(seriesName)?.[dataIndex]
+          // Share-of-total context only means something with several series;
+          // a single-series bar is always 100% of its own category.
+          const multiSeries = series.length > 1
+
+          // No "from previous" row here: bar categories are not necessarily a
+          // sequence (locations, departments), so comparing a bar with the one
+          // to its left is only meaningful on a trend — i.e. a line chart.
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: seriesName,
+              subtitle: String(p.name ?? ""),
+              value: formatTooltipValue(value),
+              rows: [
+                multiSeries &&
+                  total > 0 && {
+                    value: `${((value / total) * 100).toFixed(1)}%`,
+                    label: "of total",
+                  },
+                multiSeries && {
+                  value: formatTooltipValue(total),
+                  label: "total",
+                },
+                target !== undefined && {
+                  value: formatTooltipValue(target),
+                  label: "target",
+                },
+              ],
+            },
+            theme
+          )
+        },
+      })
     }
 
     // Non-stacked horizontal bars render labels BESIDE the bar end, so the

@@ -5,7 +5,11 @@ import { type RefObject, useMemo } from "react"
 import type { F0DataChartGaugeProps } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildItemTooltip } from "../../utils/options"
+import {
+  buildItemTooltip,
+  renderMarker,
+  renderValueTooltip,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 
@@ -131,16 +135,29 @@ export function useGaugeChartOptions(
         theme,
         formatter: (params: unknown) => {
           const p = params as {
-            marker?: string
             name?: string
             value?: number
           }
           const val = Number(p.value ?? 0)
-          const formattedValue = valueFormatter
-            ? valueFormatter(val)
-            : String(val)
-          const label = p.name ? `<strong>${String(p.name)}</strong><br/>` : ""
-          return `${label}${formattedValue}`
+          const span = max - min
+          return renderValueTooltip(
+            {
+              // ECharts' own marker for a gauge uses the palette, not the
+              // colour the arc is actually painted with.
+              marker: renderMarker(resolvedColor),
+              title: p.name ? String(p.name) : undefined,
+              value: valueFormatter
+                ? valueFormatter(val)
+                : val.toLocaleString(),
+              rows: [
+                span > 0 && {
+                  value: `${(((val - min) / span) * 100).toFixed(1)}%`,
+                  label: "of range",
+                },
+              ],
+            },
+            theme
+          )
         },
       }),
     }

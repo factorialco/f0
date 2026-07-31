@@ -9,7 +9,11 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions } from "../../utils/options"
+import {
+  buildBaseChartOptions,
+  deltaRow,
+  renderValueTooltip,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -186,6 +190,59 @@ export function useLineChartOptions(
 
     const legendData = series.map((s) => s.name)
 
+    // Tooltips show full numbers, not the compact axis format.
+    const formatTooltipValue = (value: number) => value.toLocaleString()
+
+    // Lines keep the axis trigger — a line is too thin to hover reliably —
+    // but render the shared tooltip card. With one series that is the same
+    // card every other chart type shows; with several, the category heads
+    // the card and each series becomes a row.
+    const tooltipFormatter = (params: unknown) => {
+      if (!Array.isArray(params) || params.length === 0) return ""
+      const points = params as {
+        seriesName?: string
+        axisValueLabel?: string
+        name?: string
+        value?: number
+        dataIndex?: number
+        marker?: string
+      }[]
+      const first = points[0]
+      const category = String(first?.axisValueLabel ?? first?.name ?? "")
+
+      if (points.length === 1 && first) {
+        const value = Number(first.value)
+        const dataIndex = first.dataIndex ?? 0
+        const hovered = series.find((s) => s.name === first.seriesName)
+        const previous =
+          dataIndex > 0 && hovered
+            ? getValue(hovered.data[dataIndex - 1])
+            : undefined
+        return renderValueTooltip(
+          {
+            marker: first.marker,
+            title: String(first.seriesName ?? ""),
+            subtitle: category,
+            value: formatTooltipValue(value),
+            rows: [deltaRow(value, previous, "from previous", theme)],
+          },
+          theme
+        )
+      }
+
+      return renderValueTooltip(
+        {
+          title: category,
+          rows: points.map((point) => ({
+            marker: point.marker,
+            value: formatTooltipValue(Number(point.value)),
+            label: String(point.seriesName ?? ""),
+          })),
+        },
+        theme
+      )
+    }
+
     return buildBaseChartOptions({
       categories,
       theme,
@@ -197,6 +254,7 @@ export function useLineChartOptions(
       showCategoryAxis,
       showValueAxis,
       valueFormatter,
+      tooltipFormatter,
       categoryFormatter,
       echartsOptions,
       containerWidth,

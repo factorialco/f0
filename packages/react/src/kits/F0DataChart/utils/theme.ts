@@ -32,6 +32,10 @@ export interface ChartThemeColors {
    * `containerBackground ?? background`.
    */
   containerBackground?: string
+  /** Positive delta text (e.g. tooltip "+x% from previous"). Resolves from --positive-70 */
+  positive: string
+  /** Negative delta text. Resolves from --critical-70 */
+  critical: string
 }
 
 /** Tooltip visual configuration */
@@ -231,6 +235,8 @@ export function resolveChartTheme(element?: Element | null): ChartTheme {
       : LIGHT_TOOLTIP.background,
     background,
     containerBackground: resolveContainerBackground(element, background),
+    positive: resolveCssColor("--positive-70", baseColors.grass[70], element),
+    critical: resolveCssColor("--critical-70", baseColors.red[70], element),
   }
 
   return {
