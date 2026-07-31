@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { withDataTestId } from "@/lib/data-testid"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
+import {
+  CalendarHeaderDropdowns,
+  getYearBounds,
+} from "./components/CalendarHeaderDropdowns"
 import {
   GranularityDefinition,
   GranularityDefinitionKey,
@@ -23,10 +27,6 @@ import {
   WeekStartDay,
   WeekStartsOn,
 } from "./types"
-import {
-  CalendarHeaderDropdowns,
-  getYearBounds,
-} from "./components/CalendarHeaderDropdowns"
 import { isActiveDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
@@ -45,6 +45,7 @@ interface OneCalendarInternalProps {
   weekStartsOn?: WeekStartsOn
   /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
   selectOnCellOnly?: boolean
+  localizedFormat?: boolean
 }
 
 export type OneCalendarProps = Omit<
@@ -90,9 +91,12 @@ const OneCalendarInternal = ({
   compact = false,
   weekStartsOn,
   selectOnCellOnly = false,
+  localizedFormat = false,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
+
+  const numericLocale = localizedFormat ? l10n.locale : undefined
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
@@ -127,7 +131,9 @@ const OneCalendarInternal = ({
       setSelectedInternal(date)
 
       // Set the input value
-      setInputValue(granularity.toRangeString(date, i18n))
+      setInputValue(
+        granularity.toRangeString(date, i18n, undefined, numericLocale)
+      )
 
       const newViewDate = granularity.getViewDateFromDate(
         date instanceof Date
@@ -241,7 +247,7 @@ const OneCalendarInternal = ({
     input: "from" | "to",
     inputValue: DateRangeString
   ) => {
-    const newDate = granularity.fromString(inputValue, i18n)
+    const newDate = granularity.fromString(inputValue, i18n, numericLocale)
     const error = !isSelectableDate(newDate?.[input])
 
     setInputError((prev) => ({
@@ -282,7 +288,9 @@ const OneCalendarInternal = ({
 
     const { from, to } = granularity.toRangeString(
       range ? range : { from: new Date(), to: undefined },
-      i18n
+      i18n,
+      undefined,
+      numericLocale
     )
     setInputValue({
       from: from || "",
@@ -293,7 +301,7 @@ const OneCalendarInternal = ({
 
   const handleInputNavigate = (input: "from" | "to", direction: -1 | 1) => {
     const currentDate = inputValue[input]
-      ? granularity.fromString(inputValue[input], i18n)
+      ? granularity.fromString(inputValue[input], i18n, numericLocale)
       : undefined
     const newDate = currentDate
       ? granularity.navigate(currentDate.from, direction)
@@ -302,7 +310,12 @@ const OneCalendarInternal = ({
     if (isSelectableDate(newDate)) {
       const newInputValue = {
         ...inputValue,
-        [input]: granularity.toRangeString(newDate, i18n).from,
+        [input]: granularity.toRangeString(
+          newDate,
+          i18n,
+          undefined,
+          numericLocale
+        ).from,
       }
       setSelectFromInput(input, newInputValue)
       setInputValue(newInputValue)

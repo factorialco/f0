@@ -38,6 +38,7 @@ export type FilterTypeContext<Options extends object = never> = {
   i18n: I18nContextType
   /** The key of this filter in the FiltersDefinition (passed to chipLabel for nested label lookups) */
   filterKey?: string
+  locale?: string
 }
 
 export type ChipLabel = {

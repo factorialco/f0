@@ -42,7 +42,12 @@ export const dateFilter: FilterTypeDefinition<
 
     const granularity = getGranularitySimpleDefinition(options.view)
 
-    return granularity.toString(value, context.i18n)
+    return granularity.toString(
+      value,
+      context.i18n,
+      "default",
+      options.localizedFormat ? context.locale : undefined
+    )
   },
   formHeight: 520,
 }

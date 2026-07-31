@@ -5,6 +5,7 @@ import { ReactElement, useEffect, useState } from "react"
 
 import { Chip } from "@/components/OneChip"
 import { I18nContextType, useI18n } from "@/lib/providers/i18n"
+import { useL10n } from "@/lib/providers/l10n"
 import { Skeleton } from "@/ui/skeleton"
 
 import type { FilterValue, FiltersDefinition } from "../types"
@@ -32,6 +33,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
   const filterType = getFilterType(filter.type)
 
   const i18n = useI18n()
+  const { locale } = useL10n()
 
   const [chipLabel, setChipLabel] = useState<ChipLabel>({
     label: "",
@@ -49,6 +51,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
           schema: Definition[keyof Definition]
           i18n: I18nContextType
           filterKey?: string
+          locale?: string
         }
       ) => Promise<string>
 
@@ -56,6 +59,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
         schema: filter,
         i18n,
         filterKey,
+        locale,
       })
       const label =
         typeof valueLabel === "object"
@@ -73,7 +77,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
 
     updateLabel()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, filterType, filter])
+  }, [value, filterType, filter, locale])
 
   return (
     <motion.div

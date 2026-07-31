@@ -4,13 +4,13 @@ import { useEffect, useState } from "react"
 import { Chip } from "@/components/OneChip"
 import { FiltersDefinition, FiltersState } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { ScrollArea } from "@/ui/scrollarea"
-
+import { useL10n } from "@/lib/providers/l10n"
 import {
   FilterDefinition,
   FilterTypeKey,
   filterTypes,
 } from "@/patterns/OneFilterPicker/filterTypes/filters"
+import { ScrollArea } from "@/ui/scrollarea"
 
 type ActiveFiltersChipsProps<Filters extends FiltersDefinition> = {
   filters: Filters
@@ -34,6 +34,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
 }: ActiveFiltersChipsProps<Filters>) => {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([])
   const i18n = useI18n()
+  const { locale } = useL10n()
 
   // Resolve filter labels using chipLabel from filter type definitions
   useEffect(() => {
@@ -77,6 +78,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
             const chipLabelResult = await filterType.chipLabel(value as any, {
               schema: filterDef as any,
               i18n,
+              locale,
             })
             /* eslint-enable @typescript-eslint/no-explicit-any */
             const displayText =
@@ -106,7 +108,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
     }
 
     resolveLabels()
-  }, [currentFilters, filters, i18n])
+  }, [currentFilters, filters, i18n, locale])
 
   if (activeFilters.length === 0) return null
 

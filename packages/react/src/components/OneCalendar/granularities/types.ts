@@ -36,7 +36,8 @@ export interface GranularityDefinition {
   toRangeString: (
     date: Date | DateRange | undefined | null,
     i18n: TranslationsType,
-    format?: DateStringFormat
+    format?: DateStringFormat,
+    locale?: string
   ) => DateRangeString
   // Convert the date to a date range (e.g for day granularity, this will be the start and end of the day)
   toRange: <T extends Date | DateRange | undefined | null>(
@@ -52,11 +53,12 @@ export interface GranularityDefinition {
   // Calculate the maximum width of the string representation of the date
   toStringMaxWidth: () => number
   // Default placeholder text for the input field, derived from the format pattern
-  placeholder: () => string
+  placeholder: (locale?: string) => string
   // Parse the date range string to a date range
   fromString: (
     dateStr: string | DateRangeString,
-    i18n: TranslationsType
+    i18n: TranslationsType,
+    locale?: string
   ) => DateRange | null
   // Calculate the next date form the UI View (e.g for day granularity, this will be the next month)
   navigateUIView: (viewDate: Date, direction: -1 | 1) => Date

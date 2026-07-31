@@ -8,7 +8,48 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
+  type Locale,
 } from "date-fns"
+import * as locales from "date-fns/locale"
+
+const dateFnsLocaleAliases: Record<string, keyof typeof locales> = {
+  en: "enUS",
+  zh: "zhCN",
+}
+
+export function getDateFnsLocale(
+  localeKey: string | undefined | null
+): Locale | undefined {
+  if (!localeKey) {
+    return undefined
+  }
+
+  const [language = "", region] = localeKey.split(/[-_]/)
+  const base = language.toLowerCase()
+
+  if (region) {
+    const regional =
+      locales[`${base}${region.toUpperCase()}` as keyof typeof locales]
+    if (regional) {
+      return regional
+    }
+  }
+
+  return locales[dateFnsLocaleAliases[base] ?? (base as keyof typeof locales)]
+}
+
+export function getNumericDateFormat(
+  localeKey: string | undefined | null,
+  fallback: string
+): string {
+  const pattern = getDateFnsLocale(localeKey)?.formatLong.date({
+    width: "short",
+  })
+
+  return pattern
+    ? pattern.replace(/y+/g, "yyyy").replace(/M+/g, "MM").replace(/d+/g, "dd")
+    : fallback
+}
 
 export function formatTime(date: Date) {
   return format(date, "p")

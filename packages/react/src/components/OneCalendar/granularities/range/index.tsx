@@ -7,7 +7,7 @@ import {
   isBeforeOrEqual,
 } from "../../utils"
 import { rangeSeparator } from "../consts"
-import { DAY_FORMAT, dayGranularity, toDayGranularityDateRange } from "../day"
+import { dayGranularity, getDayFormat, toDayGranularityDateRange } from "../day"
 import { GranularityDefinition } from "../types"
 /**
  * This is a special case of the day granularity.
@@ -22,12 +22,13 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
   }
 }
 
-const dayPlaceholder = formatToPlaceholder(DAY_FORMAT)
-
 export const rangeGranularity: GranularityDefinition = {
   ...dayGranularity,
   calendarMode: "range",
-  placeholder: () => `${dayPlaceholder} ${rangeSeparator} ${dayPlaceholder}`,
+  placeholder: (locale) => {
+    const dayPlaceholder = formatToPlaceholder(getDayFormat(locale))
+    return `${dayPlaceholder} ${rangeSeparator} ${dayPlaceholder}`
+  },
   add,
   getPrevNext: (value, options) => {
     const dateRange = toDayGranularityDateRange(value)
