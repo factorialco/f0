@@ -67,6 +67,8 @@ export interface ComponentEntry {
   hasStories: boolean
   hasUnitTests: boolean
   hasPlayFunction: boolean
+  /** Has a Chromatic visual-regression snapshot story (`withSnapshot(...)`). */
+  hasSnapshot: boolean
   hasMdxDocs: boolean
   docQuality: DocQuality
   docSignals: DocSignals
@@ -269,6 +271,13 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
     detail:
       "A Storybook play function (interaction test) covering the primary user flow.",
     isMet: (c) => c.hasPlayFunction,
+  },
+  {
+    key: "snapshot",
+    label: "Has a visual snapshot story",
+    detail:
+      "A Chromatic visual-regression story (via withSnapshot) that renders the component's variants, so unintended visual changes are caught.",
+    isMet: (c) => c.hasSnapshot,
   },
   {
     key: "mdxDocs",

@@ -104,6 +104,7 @@ There is no time minimum beyond the 60-day no-breaking-changes window. A widely-
 
 - **Core & Kit:** component moved to `src/components/` (or `patterns/`, `kits/`, `layouts/`, `hooks/`) following the [`f0-experimental-component-migration`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-experimental-component-migration/SKILL.md) skill. **Domain specific promotes in place** — it stays in `src/sds/<area>/`, no move.
 - Story `tags` updated to `["autodocs", "stable"]`.
+- Visual-regression snapshot story (via `withSnapshot`) rendering the component's variants, so unintended visual changes are caught in Chromatic.
 - MDX docs at **Good** tier minimum (Gold encouraged).
 - **Core & Kit:** ownership transferred to Foundations in `CODEOWNERS`. A **Domain specific** component stays owned by its team.
 - Promotion announced in `#f0-support` Slack and changelog.
@@ -116,7 +117,7 @@ There is no time minimum beyond the 60-day no-breaking-changes window. A widely-
 
 The story tag is a **claim**; the checklist is the **contract**. A component only shows the
 `Stable` badge when it is both tagged `stable` **and** clears every mechanically checkable
-requirement (stories, unit tests, play function, MDX docs at the Good tier, axe enforced). That
+requirement (stories, unit tests, play function, visual snapshot, MDX docs at the Good tier, axe enforced). That
 decision lives in `src/component-status/component-status.ts` and is recomputed from `src/` on
 every build, so it can't go stale. A component tagged stable but below the bar reads as
 `Experimental`, with the gap listed in its docs panel.
