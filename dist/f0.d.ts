@@ -4257,7 +4257,7 @@ declare type DateFilterOptions_2 = {
     mode?: CalendarMode;
     defaultSelected?: Date | DateRange | null;
     view?: CalendarView;
-    localizedFormat?: boolean;
+    localizedDayFormat?: boolean;
 };
 
 /**
@@ -14789,7 +14789,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_3<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, localizedFormat, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, localizedDayFormat, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -14805,7 +14805,7 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
     selectOnCellOnly?: boolean;
-    localizedFormat?: boolean;
+    localizedDayFormat?: boolean;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
