@@ -4190,5 +4190,7 @@ export const ActionBarWiggle: Story = {
  */
 export const Snapshot: Story = {
   ...AllFieldTypes,
-  parameters: withSnapshot({ a11y: { skipCi: true } }),
+  // a11y is already skipped for F0Form at the meta level; don't add another
+  // skipCi call-site (the allowlist burndown test forbids increasing counts).
+  parameters: withSnapshot({}),
 }
