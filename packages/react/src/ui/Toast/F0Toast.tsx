@@ -83,10 +83,14 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
 
     // Reset DURING render (not in an effect) so `remainingTime` is never
     // momentarily 0 while `duration > 0`, which would trip the auto-close effect
-    // below and dismiss the toast mid-resolution.
+    // below and dismiss the toast mid-resolution. Also clear `isPaused`: the mouse
+    // handlers are guarded on `duration > 0`, so a pause set while hovering (e.g.
+    // an error toast) never clears while the toast is `loading` (duration
+    // undefined) — it would carry over and freeze the resolved toast's countdown.
     if (contentSig !== prevSig) {
       setPrevSig(contentSig)
       setRemainingTime(duration || 0)
+      setIsPaused(false)
     }
 
     const { role, ariaLive, avatarType, progressBarColor } = useMemo(() => {
@@ -214,7 +218,10 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
           )}
         >
           {isLoading ? (
-            <div className="flex-shrink-0">
+            // aria-hidden: the Spinner has its own aria-live/aria-busy, which
+            // would nest a second live region inside the toast's role="status".
+            // The title already announces the state, so hide the spinner from AT.
+            <div className="flex-shrink-0" aria-hidden="true">
               <Spinner size="small" className="text-f1-foreground-inverse" />
             </div>
           ) : (

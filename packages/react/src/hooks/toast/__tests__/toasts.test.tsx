@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   act,
+  fireEvent,
   screen,
   waitFor,
   zeroRender as render,
@@ -314,6 +315,41 @@ describe("toasts API", () => {
       })
       await waitFor(() =>
         expect(screen.queryByText("Failed")).not.toBeInTheDocument()
+      )
+    })
+
+    it("does not freeze the countdown when a hovered toast resolves in place", async () => {
+      renderProvider()
+
+      act(() => {
+        toasts.open({ id: "op", variant: "error", title: "Failed to send" })
+      })
+      // Hover the error toast root → pauses its timer. (The critical avatar also
+      // has role="alert", so target the root via the title's closest alert.)
+      act(() => {
+        const root = screen
+          .getByText("Failed to send")
+          .closest('[role="alert"]')
+        fireEvent.mouseEnter(root as HTMLElement)
+      })
+
+      // Resolve in place: error → loading (no timer, so the pause can't clear via
+      // the mouse handlers) → success.
+      act(() => {
+        toasts.open({ id: "op", variant: "loading", title: "Retrying…" })
+      })
+      act(() => {
+        toasts.open({ id: "op", variant: "success", title: "Sent" })
+      })
+      expect(screen.getByText("Sent")).toBeInTheDocument()
+
+      // The resolved toast must still count down and dismiss — it would be frozen
+      // if the pause carried over from the error hover.
+      act(() => {
+        vi.advanceTimersByTime(5_200)
+      })
+      await waitFor(() =>
+        expect(screen.queryByText("Sent")).not.toBeInTheDocument()
       )
     })
 
