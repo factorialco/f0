@@ -177,6 +177,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     null
   )
   const [pendingQuote, setPendingQuote] = useState<PendingQuote | null>(null)
+  const [composerDraft, setComposerDraft] = useState<string | null>(null)
 
   // File drop bridge — the chat-wide DropOverlay rendered by ChatWindow
   // forwards files here. ChatTextarea registers its handler via
@@ -398,8 +399,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPendingContext,
         pendingQuote,
         setPendingQuote,
-        composerDraft: null,
-        setComposerDraft: () => {},
+        composerDraft,
+        setComposerDraft,
         panelContent,
         setPanelContent,
         clearPanelContent,

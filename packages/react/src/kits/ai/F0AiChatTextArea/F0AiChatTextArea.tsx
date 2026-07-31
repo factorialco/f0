@@ -107,7 +107,7 @@ export const F0AiChatTextArea = ({
   // hosts only need to wire the `onSuggestionClick` business action.
   // When the textarea is rendered outside an `F0AiChatProvider` the
   // tracking ref resolves to a no-op via the provider fallback.
-  const { tracking } = useAiChat()
+  const { tracking, composerDraft, setComposerDraft } = useAiChat()
   const handleSuggestionClick = useCallback(
     (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
       tracking?.onWelcomeSuggestionClick?.({
@@ -183,6 +183,29 @@ export const F0AiChatTextArea = ({
       textareaRef.current?.focus()
     }
   }, [])
+
+  // One-shot composer prefill: an external flow (e.g. the Analytics mode
+  // handoff) stages a draft in the provider; the textarea claims it by
+  // replacing the current input and consuming the draft. The caret/focus
+  // follow-up runs on the next render, once the controlled textarea holds
+  // the new value.
+  const pendingDraftCursorRef = useRef<number | null>(null)
+  useEffect(() => {
+    if (composerDraft == null) return
+    setInputValue(composerDraft)
+    setCursorPosition(composerDraft.length)
+    pendingDraftCursorRef.current = composerDraft.length
+    setComposerDraft(null)
+  }, [composerDraft, setComposerDraft])
+  useEffect(() => {
+    const cursor = pendingDraftCursorRef.current
+    if (cursor == null) return
+    pendingDraftCursorRef.current = null
+    const textarea = textareaRef.current
+    if (!textarea) return
+    textarea.focus()
+    textarea.setSelectionRange(cursor, cursor)
+  }, [inputValue])
 
   // Expose the file-drop handler to parents that own a wider drop zone
   // (e.g. the whole chat window). The handler is stable for the lifetime
