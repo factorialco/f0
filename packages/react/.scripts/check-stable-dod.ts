@@ -49,6 +49,7 @@ interface StatusEntry {
   hasStories: boolean
   hasUnitTests: boolean
   hasPlayFunction: boolean
+  hasSnapshot: boolean
   hasMdxDocs: boolean
   docQuality: string
   a11yTier: string
@@ -71,6 +72,7 @@ function unmetRequirements(c: StatusEntry): string[] {
   if (!c.hasStories) missing.push("stories")
   if (!c.hasUnitTests) missing.push("unit tests")
   if (!c.hasPlayFunction) missing.push("play function")
+  if (!c.hasSnapshot) missing.push("snapshot story")
   if (!c.hasMdxDocs) missing.push("MDX docs")
   if (DOC_TIER_ORDER.indexOf(c.docQuality) < DOC_TIER_ORDER.indexOf("good")) {
     missing.push(`docs "good" tier (is "${c.docQuality}")`)

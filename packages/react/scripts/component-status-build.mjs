@@ -14,6 +14,7 @@
  * - zone (components, patterns, sds, kits, experimental, layouts, deprecated…)
  * - API status tag (stable / experimental / deprecated / internal — from tags)
  * - hasUnitTests  (a __tests__ folder or *.test.ts(x) near the story)
+ * - hasSnapshot   (a Chromatic snapshot story — `withSnapshot(...)`)
  * - hasMdxDocs    (an *.mdx file alongside the story)
  * - docQuality    (heuristic tier from the MDX structure)
  *
@@ -47,6 +48,7 @@ export function meetsStableBar(c) {
     c.hasStories &&
     c.hasUnitTests &&
     c.hasPlayFunction &&
+    c.hasSnapshot &&
     c.hasMdxDocs &&
     DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good") &&
     c.a11yTier === "enforced"
@@ -332,6 +334,10 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       // A Storybook play function (interaction test) — `play: async (…)` or
       // `play: (…)` in a story object.
       hasPlayFunction: /\bplay\s*:\s*(async\b|\()/.test(content),
+      // A Chromatic visual-regression snapshot story — enabled via the
+      // `withSnapshot(...)` parameters helper (the global default disables
+      // Chromatic; withSnapshot re-enables it for that story).
+      hasSnapshot: /\bwithSnapshot\s*\(/.test(content),
       hasMdxDocs: Boolean(mdxPath),
       docQuality: scoreDocQuality(mdxContent, docSignals),
       docSignals,

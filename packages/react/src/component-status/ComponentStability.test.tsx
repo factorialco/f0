@@ -30,6 +30,7 @@ const DATASET: ComponentEntry[] = [
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: false,
     docQuality: "none",
     docSignals: {
@@ -52,6 +53,7 @@ const DATASET: ComponentEntry[] = [
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: true,
     docQuality: "gold",
     docSignals: {

@@ -6,6 +6,7 @@ import { z } from "zod"
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
@@ -4181,4 +4182,15 @@ export const ActionBarWiggle: Story = {
       </div>
     )
   },
+}
+
+/**
+ * Visual-regression snapshot. Reuses the `AllFieldTypes` render so the snapshot
+ * exercises every field type the form supports.
+ */
+export const Snapshot: Story = {
+  ...AllFieldTypes,
+  // a11y is already skipped for F0Form at the meta level; don't add another
+  // skipCi call-site (the allowlist burndown test forbids increasing counts).
+  parameters: withSnapshot({}),
 }

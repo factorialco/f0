@@ -21,6 +21,7 @@ function entry(overrides: Partial<ComponentEntry> = {}): ComponentEntry {
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: true,
     docQuality: "gold" as DocQuality,
     docSignals: {
@@ -325,11 +326,12 @@ describe("effectiveStatus parity (TS policy vs generator helper)", () => {
 })
 
 describe("STABLE_REQUIREMENTS", () => {
-  test("is the checklist of stories, tests, play, docs, doc quality, and a11y", () => {
+  test("is the checklist of stories, tests, play, snapshot, docs, doc quality, and a11y", () => {
     expect(STABLE_REQUIREMENTS.map((r) => r.key)).toEqual([
       "stories",
       "unitTests",
       "playFunction",
+      "snapshot",
       "mdxDocs",
       "docQuality",
       "a11y",
