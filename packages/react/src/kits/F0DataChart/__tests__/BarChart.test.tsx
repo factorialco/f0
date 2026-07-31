@@ -404,7 +404,7 @@ describe("BarChart — label placement", () => {
     expect(getMainSeries()[0]?.label?.fontSize).toBe(11)
   })
 
-  it("chooses contrast-safe label colours for per-bar fills", () => {
+  it("keeps inside labels white on every fill, including light ones", () => {
     render(
       <F0DataChart
         {...base}
@@ -421,11 +421,12 @@ describe("BarChart — label placement", () => {
       />
     )
 
-    const data = getMainSeries()[0]?.data
-    expect(data?.[0]?.label?.color).toBe("#ffffff")
-    expect(data?.[1]?.label?.color).toBe("#000000")
-    expect(data?.[0]?.emphasis?.label?.color).toBe("#ffffff")
-    expect(data?.[1]?.emphasis?.label?.color).toBe("#000000")
+    const mainSeries = getMainSeries()[0]
+    // A per-bar colour override no longer carries its own label colour: the
+    // series-level white applies to dark indigo and light yellow alike.
+    expect(mainSeries?.label?.color).toBe("#ffffff")
+    expect(mainSeries?.emphasis?.label?.color).toBe("#ffffff")
+    expect(mainSeries?.data?.[1]?.label).toBeUndefined()
   })
 })
 

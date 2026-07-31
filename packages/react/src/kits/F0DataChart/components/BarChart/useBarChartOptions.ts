@@ -29,34 +29,15 @@ const ARIA_MAX_SERIES = 10
 const ARIA_MAX_VALUES_PER_SERIES = 20
 
 /**
- * Pick the black/white foreground for text on a colored fill. Prefers white on
- * mid-tone fills (the strict WCAG crossover at 0.179 reads as "black too
- * eagerly" on saturated mid-tones like teal or purple); black only wins on
- * genuinely light fills (e.g. yellow), where white text would be illegible.
+ * Foreground for a value label sitting inside a colored fill.
+ *
+ * Always white: a stacked bar reads as one object, and per-segment black/white
+ * switching made a single bar look like two unrelated label styles. Every
+ * selectable series color is a shade-50 chromatic token, so white stays
+ * legible — though on the two lightest (flubber, yellow) it is a deliberate
+ * design call rather than a WCAG AA pass.
  */
-function readableLabelColor(background: string): "#000000" | "#ffffff" {
-  const hex = background.replace("#", "")
-  const normalized =
-    hex.length === 3
-      ? hex
-          .split("")
-          .map((value) => `${value}${value}`)
-          .join("")
-      : hex
-  const channels = [0, 2, 4].map((offset) => {
-    const value =
-      Number.parseInt(normalized.slice(offset, offset + 2), 16) / 255
-    return value <= 0.04045
-      ? value / 12.92
-      : Math.pow((value + 0.055) / 1.055, 2.4)
-  })
-  const luminance =
-    0.2126 * (channels[0] ?? 0) +
-    0.7152 * (channels[1] ?? 0) +
-    0.0722 * (channels[2] ?? 0)
-
-  return luminance > 0.4 ? "#000000" : "#ffffff"
-}
+const INSIDE_LABEL_COLOR = "#ffffff"
 
 function resolveGridRightSpace(
   right: number | string | undefined,
@@ -214,6 +195,7 @@ function buildSeriesEntries(
   showLabels: boolean,
   stacked: boolean,
   labelColor: string,
+  stackGapColor: string,
   labelFontSize: number,
   resolveBorderRadius: BorderRadiusResolver | undefined,
   labelLayout?: echarts.BarSeriesOption["labelLayout"],
@@ -240,10 +222,6 @@ function buildSeriesEntries(
     if (pointColor === undefined && pointBorderRadius === undefined) {
       return value
     }
-    // Inside a stacked segment with a per-bar colour override, the label must
-    // recompute its contrast colour against that override, not the series fill.
-    const contrastColor =
-      pointColor !== undefined ? readableLabelColor(pointColor) : undefined
     return {
       value,
       itemStyle: {
@@ -252,12 +230,9 @@ function buildSeriesEntries(
           borderRadius: pointBorderRadius,
         }),
       },
-      ...(stacked && contrastColor !== undefined
-        ? {
-            label: { color: contrastColor },
-            emphasis: { label: { color: contrastColor } },
-          }
-        : {}),
+      // Inside labels are white regardless of the fill, so a per-bar colour
+      // override needs no label colour of its own — the series-level one
+      // already applies.
     }
   })
 
@@ -278,6 +253,14 @@ function buildSeriesEntries(
     itemStyle: {
       color,
       borderRadius,
+      // ECharts has no native gap between stacked segments — a border in the
+      // container's background color is the standard way to separate them.
+      // 0.5 because adjacent segments both stroke the shared edge: the two
+      // strokes add up, and wider values read as a ~2px gap.
+      ...(stacked && {
+        borderColor: stackGapColor,
+        borderWidth: 0.5,
+      }),
     },
     label: {
       show: showLabels,
@@ -287,7 +270,7 @@ function buildSeriesEntries(
       // Inside a coloured segment, choose black or white per fill so small
       // canvas text retains WCAG AA contrast. Outside labels use the semantic
       // secondary foreground colour from the active theme.
-      color: stacked ? readableLabelColor(color) : labelColor,
+      color: stacked ? INSIDE_LABEL_COLOR : labelColor,
       fontWeight: "bold",
       fontSize: labelFontSize,
       overflow: "truncate",
@@ -304,13 +287,22 @@ function buildSeriesEntries(
         shadowOffsetX: 0,
         shadowColor: "transparent",
       },
+      // Hovering a stacked segment highlights that series across all bars by
+      // sending every other series into the blur state (see `blur` below).
+      ...(stacked && { focus: "series" as const }),
       // Keep the same contrast-safe colour on hover. With labels off, add
       // nothing here — otherwise hovering a stacked bar would reveal numbers
       // that are meant to stay off.
       ...(stacked && showLabels
-        ? { label: { show: true, color: readableLabelColor(color) } }
+        ? { label: { show: true, color: INSIDE_LABEL_COLOR } }
         : {}),
     },
+    ...(stacked && {
+      blur: {
+        itemStyle: { opacity: 0.4 },
+        label: { opacity: 0.4 },
+      },
+    }),
   }
 
   if (!hasTargetData) {
@@ -532,6 +524,7 @@ export function useBarChartOptions(
         showLabels,
         stacked,
         theme.colors.foregroundSecondary,
+        theme.colors.background,
         resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
@@ -652,6 +645,19 @@ export function useBarChartOptions(
         enabled: true,
         description: ariaDescriptions.join(" "),
       },
+    }
+
+    // Fade in/out of the hover blur state (see `blur` on the series). Two
+    // requirements: `stateAnimation` is only honored at the option root (the
+    // series-level one in the types is ignored), and the base options'
+    // `animation: false` — there to skip entrance animations — disables state
+    // transitions too. Re-enable the engine with zero-duration entrance and
+    // update animations so only the blur fade animates.
+    if (stacked) {
+      options.animation = true
+      options.animationDuration = 0
+      options.animationDurationUpdate = 0
+      options.stateAnimation = { duration: 500, easing: "cubicOut" }
     }
 
     // Non-stacked horizontal bars render labels BESIDE the bar end, so the
