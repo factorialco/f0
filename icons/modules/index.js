@@ -9,6 +9,7 @@ export { default as Documents } from "./Documents";
 export { default as Engagement } from "./Engagement";
 export { default as Finance } from "./Finance";
 export { default as Goals } from "./Goals";
+export { default as HeadcountPlanning } from "./HeadcountPlanning";
 export { default as Home } from "./Home";
 export { default as Hub } from "./Hub";
 export { default as Inbox } from "./Inbox";
