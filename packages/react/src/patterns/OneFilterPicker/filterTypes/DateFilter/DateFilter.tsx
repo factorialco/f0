@@ -16,7 +16,7 @@ export type DateFilterOptions = {
   mode?: CalendarMode
   defaultSelected?: Date | DateRange | null
   view?: CalendarView
-  localizedFormat?: boolean
+  localizedDayFormat?: boolean
 }
 
 export type DateFilterComponentProps = FilterTypeComponentProps<
@@ -54,7 +54,7 @@ export function DateFilter({
           view={options.view}
           mode={options.mode}
           compact={isCompactMode}
-          localizedFormat={options.localizedFormat}
+          localizedDayFormat={options.localizedDayFormat}
           showInput
         />
       </div>

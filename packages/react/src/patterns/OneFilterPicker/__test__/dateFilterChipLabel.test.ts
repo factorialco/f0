@@ -19,7 +19,7 @@ const contextFor = (
   }) as FilterTypeContext<DateFilterOptions>
 
 describe("date filter chip label", () => {
-  it("keeps the day-first format when localizedFormat is not opted into", () => {
+  it("keeps the day-first format when localizedDayFormat is not opted into", () => {
     expect(dateFilter.chipLabel(value, contextFor({ view: "day" }))).toBe(
       "12/07/2026"
     )
@@ -29,7 +29,7 @@ describe("date filter chip label", () => {
     expect(
       dateFilter.chipLabel(
         value,
-        contextFor({ view: "day", localizedFormat: true })
+        contextFor({ view: "day", localizedDayFormat: true })
       )
     ).toBe("07/12/2026")
   })

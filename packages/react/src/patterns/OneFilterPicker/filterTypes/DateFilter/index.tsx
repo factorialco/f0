@@ -46,7 +46,7 @@ export const dateFilter: FilterTypeDefinition<
       value,
       context.i18n,
       "default",
-      options.localizedFormat ? context.locale : undefined
+      options.localizedDayFormat ? context.locale : undefined
     )
   },
   formHeight: 520,

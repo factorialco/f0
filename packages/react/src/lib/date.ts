@@ -8,46 +8,61 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
-  type Locale,
 } from "date-fns"
-import * as locales from "date-fns/locale"
 
-const dateFnsLocaleAliases: Record<string, keyof typeof locales> = {
-  en: "enUS",
-  zh: "zhCN",
+const numericDateOptions: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
 }
 
-export function getDateFnsLocale(
-  localeKey: string | undefined | null
-): Locale | undefined {
-  if (!localeKey) {
-    return undefined
+const numericDateTokens: Partial<Record<Intl.DateTimeFormatPartTypes, string>> =
+  {
+    day: "dd",
+    month: "MM",
+    year: "yyyy",
   }
 
-  const [language = "", region] = localeKey.split(/[-_]/)
-  const base = language.toLowerCase()
+const bidiMarks = /[‎‏؜]/g
 
-  if (region) {
-    const regional =
-      locales[`${base}${region.toUpperCase()}` as keyof typeof locales]
-    if (regional) {
-      return regional
-    }
-  }
-
-  return locales[dateFnsLocaleAliases[base] ?? (base as keyof typeof locales)]
-}
+const languageOf = (locale: string) => locale.split("-")[0]?.toLowerCase()
 
 export function getNumericDateFormat(
   localeKey: string | undefined | null,
   fallback: string
 ): string {
-  const pattern = getDateFnsLocale(localeKey)?.formatLong.date({
-    width: "short",
-  })
+  const locale = localeKey?.replace(/_/g, "-")
+  if (!locale) {
+    return fallback
+  }
 
-  return pattern
-    ? pattern.replace(/y+/g, "yyyy").replace(/M+/g, "MM").replace(/d+/g, "dd")
+  let formatter: Intl.DateTimeFormat
+  try {
+    formatter = new Intl.DateTimeFormat(locale, numericDateOptions)
+  } catch {
+    return fallback
+  }
+
+  const resolved = formatter.resolvedOptions().locale
+  if (languageOf(resolved) !== languageOf(locale)) {
+    return fallback
+  }
+
+  let pattern = ""
+  for (const part of formatter.formatToParts(new Date(2026, 0, 1))) {
+    const token = numericDateTokens[part.type]
+    if (token) {
+      pattern += token
+      continue
+    }
+    if (part.type !== "literal") {
+      return fallback
+    }
+    pattern += part.value.replace(bidiMarks, "")
+  }
+
+  return /dd/.test(pattern) && /MM/.test(pattern) && /yyyy/.test(pattern)
+    ? pattern
     : fallback
 }
 

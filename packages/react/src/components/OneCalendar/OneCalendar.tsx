@@ -45,7 +45,7 @@ interface OneCalendarInternalProps {
   weekStartsOn?: WeekStartsOn
   /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
   selectOnCellOnly?: boolean
-  localizedFormat?: boolean
+  localizedDayFormat?: boolean
 }
 
 export type OneCalendarProps = Omit<
@@ -91,12 +91,12 @@ const OneCalendarInternal = ({
   compact = false,
   weekStartsOn,
   selectOnCellOnly = false,
-  localizedFormat = false,
+  localizedDayFormat = false,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
 
-  const numericLocale = localizedFormat ? l10n.locale : undefined
+  const numericLocale = localizedDayFormat ? l10n.locale : undefined
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
@@ -145,14 +145,14 @@ const OneCalendarInternal = ({
         setViewDate(newViewDate)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the granularity or effectiveDefaultMonth changes
-    [granularity, effectiveDefaultMonth]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the granularity, effectiveDefaultMonth or numericLocale changes
+    [granularity, effectiveDefaultMonth, numericLocale]
   )
 
   useEffect(() => {
     setSelected(defaultSelected)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be run when the defaultSelected changes
-  }, [defaultSelected])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be run when the defaultSelected or numericLocale changes
+  }, [defaultSelected, numericLocale])
 
   // Get header label
   const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
