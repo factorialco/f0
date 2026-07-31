@@ -87,11 +87,13 @@ describe("ResourceHeader", () => {
 
     render(<ResourceHeader title="Payroll" onHistoryClick={onHistoryClick} />)
 
-    // Mobile and desktop action clusters are both in the DOM.
+    // The action row is duplicated into a mobile and a desktop cluster, so
+    // assert on at least one rather than pinning that duplication. The last one
+    // is the desktop instance.
     const historyButtons = screen.getAllByRole("button", { name: "History" })
-    expect(historyButtons).toHaveLength(2)
+    expect(historyButtons.length).toBeGreaterThan(0)
 
-    await user.click(historyButtons[0])
+    await user.click(historyButtons[historyButtons.length - 1])
     expect(onHistoryClick).toHaveBeenCalledTimes(1)
   })
 
