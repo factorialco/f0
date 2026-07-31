@@ -34,7 +34,7 @@ const meta = {
     },
     tabs: {
       description:
-        "Sub-views of this resource. A section earns a tab when it is a different way of working, not merely long",
+        "The parts this page splits into. A section earns a tab when people work in it separately, not just because it is long",
     },
     aside: {
       description:
@@ -49,7 +49,7 @@ const meta = {
         "Opens the resource's activity. Renders the history button leftmost in the desktop action row",
     },
     secondaryTabs: {
-      description: "Sub-views of the active tab, rendered under `tabs`",
+      description: "The parts the open tab splits into, rendered under `tabs`",
     },
     stickyAside: {
       description:

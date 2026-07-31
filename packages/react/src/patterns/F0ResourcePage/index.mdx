@@ -16,7 +16,7 @@ Composes the body of a page about one resource (a person, a team, a workplace, a
 
 <Controls of={F0ResourcePageStories.Default} />
 
-Top to bottom: `alert` sits above everything because it must be read first; the resource header carries the avatar, name, status, description and the action row; `tabs` and then `secondaryTabs` appear only when the resource has sub-views; `children` renders beside `aside`. There is deliberately no type label in the header, because the breadcrumb, the avatar and the page's own shape already say what this is.
+Top to bottom: `alert` sits above everything because it must be read first; the resource header carries the avatar, name, status, description and the action row; `tabs` and then `secondaryTabs` appear only when the page is split into parts, like Overview and People on a team; `children` renders beside `aside`. There is deliberately no type label in the header, because the breadcrumb, the avatar and the page's own shape already say what this is.
 
 ## Guidelines
 
@@ -41,10 +41,13 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
         </td>
       </tr>
       <tr>
-        <td>The resource has sub-views</td>
         <td>
-          Pass <code>tabs</code>, and the header drops its bottom border so the
-          tab strip becomes the divider
+          The page splits into parts people work in separately, like Overview,
+          People and Settings on a team
+        </td>
+        <td>
+          Pass <code>tabs</code>. The header drops its bottom border so the tab
+          strip becomes the divider
         </td>
       </tr>
       <tr>
@@ -76,7 +79,10 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
         </td>
       </tr>
       <tr>
-        <td>The page needs bespoke chrome in a different order</td>
+        <td>
+          The page needs its parts in a different order, or a part this
+          component does not have
+        </td>
         <td>
           <code>Page</code> plus <code>ResourceHeader</code>, assembled by hand
         </td>
@@ -98,7 +104,7 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
   do={{
     description: "Lead with what the resource is",
     guidelines: [
-      "Put the thing the page is about in the main column: a place shows the place, a definition shows its spec, a cohort shows its people",
+      "Put the thing the page is about in the main column: a workplace shows the address and calendar, a role shows its levels and salary bands, a team shows its people",
       "Use the rail for what is worth glancing at, and link each item to the full content",
       "Keep the rail short: if everything is surfaced, nothing is",
     ],
@@ -122,7 +128,7 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 ### Behavior
 
 - **The order is fixed** and owned by the component, so it cannot drift page by page.
-- **`showBottomBorder` derives from the tabs.** With either tab strip present the header drops its border, since the strip already divides. Pass the prop explicitly to override.
+- **The header's bottom border follows the tabs.** With either tab strip present the header drops its border, because the strip already separates the header from the content. Set `showBottomBorder` yourself to override.
 - **The action row reads history, overflow, secondary, primary on desktop**, with the primary action rightmost. On mobile the actions stack by priority instead, primary first, and the history button sits above close.
 - **`aside` decides the column count.** With a rail the body is two columns and the rail collapses above the content on narrow viewports; without one the content takes the full width rather than leaving an empty column.
 - **`stickyAside`** keeps the main column scrolling under a pinned rail. Note that `TwoColumnLayout` applies the sticky treatment to the main column today, so the rail itself does not yet pin.
@@ -137,11 +143,11 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 
 <Canvas of={F0ResourcePageStories.WithoutRail} />
 
-**With tabs**, the tab strip replaces the header's bottom border. A section earns a tab when it is a different way of working, not merely long: it needs its own toolbar (search, filters, bulk actions), or people come to it for one distinct job. Long content that reads the same way should scroll.
+**With tabs**, the tab strip replaces the header's bottom border. A section earns a tab when people work in it separately: it needs its own search, filters or bulk actions, or they open the page specifically to go there. A section that is simply long should scroll instead.
 
 <Canvas of={F0ResourcePageStories.WithTabs} />
 
-**With sub-tabs**, a second strip appears under the first for sub-views of the active tab.
+**With sub-tabs**, a second strip appears under the first when the open tab splits further, like Active and Archived inside People.
 
 <Canvas of={F0ResourcePageStories.WithSecondaryTabs} />
 
@@ -159,7 +165,7 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 
 ## Accessibility
 
-- **The rail is a `complementary` landmark**, so screen reader users can reach or skip it. It is announced after the main column in the reading order on desktop.
+- **The rail is announced as a complementary region**, so screen reader users can jump to it or skip past it. On desktop it comes after the main column in the reading order.
 - **The resource name is not a heading.** `ResourceHeader` renders the title as a styled `span`, so a resource page currently has no `h1` and its heading outline starts at the `h2` of the first section. Raised with Foundations; it needs a change in `BaseHeader` because it affects every header in the product.
 - **The history button is icon-only on desktop.** It keeps its accessible name through `F0Button`'s `hideLabel` handling (an `aria-label`, a visually hidden label and a tooltip), and it is labelled outright in the mobile stack.
-- **Both tab strips are navigation landmarks.** Their `aria-label` values are currently inverted upstream in `Tabs`, so a page with two strips announces them the wrong way round. Raised separately.
+- **Each tab strip is announced as a navigation region.** `Tabs` currently swaps the two names, so a page with both strips announces the main one as secondary and vice versa. Raised separately.

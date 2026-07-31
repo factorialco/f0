@@ -9,9 +9,12 @@ export interface F0ResourcePageProps extends Omit<
   ResourceHeaderProps,
   "onClose"
 > {
-  /** Sub-views of this resource. Rendered directly under the header. */
+  /**
+   * The parts this page splits into, like Overview, People and Settings.
+   * Rendered directly under the header.
+   */
   tabs?: TabItem[]
-  /** Sub-views of the active tab. Rendered under `tabs`. */
+  /** The parts the open tab splits into. Rendered under `tabs`. */
   secondaryTabs?: TabItem[]
   /** Active tab, for id-based `tabs`. Href-based tabs resolve from the route. */
   activeTabId?: string
