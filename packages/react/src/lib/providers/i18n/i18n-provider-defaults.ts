@@ -66,6 +66,40 @@ export const defaultTranslations = {
     language: "Language",
     audio: "Audio",
   },
+  meetingCard: {
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    inProgress: "In progress",
+    inProgressTitle: "Call in progress",
+    summarizing: "Summarizing",
+    finished: "Finished",
+    cancelled: "Cancelled",
+    startingNow: "Starting now",
+    startsIn: {
+      one: "In {{count}} min",
+      other: "In {{count}} mins",
+    },
+    startedAgo: {
+      one: "{{count}} min ago",
+      other: "{{count}} mins ago",
+    },
+    invited: {
+      one: "{{count}} guest",
+      other: "{{count}} guests",
+    },
+    inside: {
+      one: "{{count}} inside",
+      other: "{{count}} inside",
+    },
+    duration: {
+      one: "{{count}} min",
+      other: "{{count}} mins",
+    },
+    attendees: "Attendees",
+    join: "Join",
+    summary: "Summary",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
