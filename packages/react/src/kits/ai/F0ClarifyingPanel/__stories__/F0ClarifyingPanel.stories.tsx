@@ -68,13 +68,15 @@ const FORMAT_OPTIONS = [
 // dependency on F0AiChat / useAiChat.
 // ---------------------------------------------------------------------------
 
-function useLocalClarifyingState(steps: StoryStep[]) {
+function useLocalClarifyingState(
+  steps: StoryStep[],
+  initialInteractions: Record<string, StepInteraction> = {}
+) {
   const [resolved, setResolved] = useState<string[]>([])
   const [stepIndex, setStepIndex] = useState(0)
   const [dismissed, setDismissed] = useState(false)
-  const [interactions, setInteractions] = useState<
-    Record<string, StepInteraction>
-  >({})
+  const [interactions, setInteractions] =
+    useState<Record<string, StepInteraction>>(initialInteractions)
 
   const currentStep = steps[stepIndex]
   const interaction = currentStep
@@ -233,11 +235,16 @@ function useLocalClarifyingState(steps: StoryStep[]) {
 const StoryShell = ({
   steps,
   isSubmitDisabled,
+  initialInteractions,
 }: {
   steps: StoryStep[]
   isSubmitDisabled?: boolean
+  initialInteractions?: Record<string, StepInteraction>
 }) => {
-  const { state, resolved, reset } = useLocalClarifyingState(steps)
+  const { state, resolved, reset } = useLocalClarifyingState(
+    steps,
+    initialInteractions
+  )
 
   return (
     <div className="w-[360px] space-y-3">
@@ -396,6 +403,47 @@ export const CustomAnswerMultiple: Story = {
       []
     )
     return <StoryShell steps={steps} />
+  },
+}
+
+/**
+ * Long free-text answer: the custom answer field is a textarea that grows with
+ * its content (up to a max height, then scrolls) so long or multi-line
+ * responses stay fully visible instead of being clipped to a single line.
+ * Seeded with a long value — edit it or add newlines (Shift+Enter) to see it
+ * grow and shrink.
+ */
+export const CustomAnswerLongText: Story = {
+  render: () => {
+    const question = "Anything else we should know about this report?"
+    const steps = useMemo<StoryStep[]>(
+      () => [
+        {
+          question,
+          options: SINGLE_OPTIONS,
+          selectionMode: "single",
+          allowCustomAnswer: true,
+        },
+      ],
+      []
+    )
+    const initialInteractions = useMemo<Record<string, StepInteraction>>(
+      () => ({
+        [question]: {
+          selectedIds: [],
+          isCustomActive: true,
+          customText:
+            "Please group the results by department and then by team, " +
+            "exclude anyone who joined in the last 30 days, and add a " +
+            "summary row at the top with the company-wide totals so I can " +
+            "share it directly with the leadership team without editing it.",
+        },
+      }),
+      []
+    )
+    return (
+      <StoryShell steps={steps} initialInteractions={initialInteractions} />
+    )
   },
 }
 

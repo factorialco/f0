@@ -1,0 +1,379 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0EmojiPicker.stories"
+
+<Meta of={Stories} />
+
+# F0EmojiPicker
+
+Selects one emoji as the compact visual identifier of an object. The trigger
+starts with the Reaction avatar icon and displays the selected emoji without
+changing size.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Accessible name and tooltip for the trigger, such as “Choose group
+          emoji”.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>string | null</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Selected emoji when a parent controls the value.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultValue</code>
+        </td>
+        <td>
+          <code>string | null</code>
+        </td>
+        <td>
+          <code>null</code>
+        </td>
+        <td>—</td>
+        <td>Initially selected emoji in uncontrolled usage.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onChange</code>
+        </td>
+        <td>
+          <code>(emoji: string | null) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Called with the selected emoji, or null when cleared.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>clearable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Shows a localized clear action while an emoji is selected and the
+          picker is open.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Prevents opening the picker or changing its value.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>locale</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>
+          <code>"en"</code>
+        </td>
+        <td>—</td>
+        <td>Locale for search and category labels inside the picker.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>size</code>
+        </td>
+        <td>
+          <code>"sm" | "md" | "lg"</code>
+        </td>
+        <td>
+          <code>"md"</code>
+        </td>
+        <td>—</td>
+        <td>Size of the trigger avatar.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>dataTestId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Test identifier exposed by the public component wrapper.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+The trigger uses `F0AvatarIcon` with the Reaction icon by default and switches
+to the selected emoji after selection. Both states keep the configured size,
+followed by a popover containing search, categories and the emoji grid.
+Clearable instances add a footer action whenever they have a value.
+
+### Sizes
+
+<Canvas of={Stories.Sizes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>24 × 24 px trigger.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code>
+        </td>
+        <td>32 × 32 px trigger; this is the default.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>40 × 40 px trigger.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">When to use F0EmojiPicker</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A chat group needs a compact visual identifier</td>
+        <td>Place it beside the group name in create or edit settings.</td>
+      </tr>
+      <tr>
+        <td>An optional emoji value has not been chosen yet</td>
+        <td>
+          Use the Reaction fallback so the chosen emoji replaces it in place.
+        </td>
+      </tr>
+      <tr>
+        <td>A form owns the selected emoji</td>
+        <td>
+          Provide <code>value</code> and <code>onChange</code> as a controlled
+          field.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Adding an emoji reaction to content</td>
+        <td>The reactions picker, which owns reaction-specific behavior.</td>
+      </tr>
+      <tr>
+        <td>Selecting several emojis</td>
+        <td>
+          A multi-select pattern; <code>F0EmojiPicker</code> represents one
+          value.
+        </td>
+      </tr>
+      <tr>
+        <td>Triggering an action with a decorative icon</td>
+        <td>
+          <code>F0Button</code> with an icon.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Use a specific label that names the setting the emoji belongs to.",
+    guidelines: [
+      "“Choose group emoji” for a group identifier",
+      "Keep the picker next to the group name it affects",
+    ],
+  }}
+  dont={{
+    description:
+      "Do not use a generic label or reuse this control for content reactions.",
+    guidelines: [
+      "Avoid labels such as “Open” or “Emoji” without context",
+      "Use the reactions picker when the action adds a reaction",
+    ],
+  }}
+/>
+
+### Behavior
+
+- WHEN neither `value` nor `defaultValue` is provided → THEN the trigger shows
+  `<F0AvatarIcon icon={Reaction} />` at the configured size with the supplied
+  accessible `label`; the default `md` size is 32 × 32 px.
+- WHEN an emoji is selected → THEN the trigger displays it, announces it as the
+  current value, calls `onChange` and closes the popover.
+- WHEN `value` is provided → THEN the parent remains the source of truth and
+  must update it after `onChange`.
+- WHEN `value={null}` → THEN the controlled trigger displays the Reaction
+  fallback.
+- WHEN `defaultValue` is provided without `value` → THEN the component owns
+  subsequent selection state.
+- WHEN `disabled={true}` → THEN the trigger cannot open and any open popover
+  closes.
+- WHEN `locale` is provided → THEN emoji search and category labels use that
+  locale.
+- WHEN `size` is provided → THEN both the Reaction fallback and the selected
+  emoji use the corresponding 24, 32 or 40 px trigger size.
+- WHEN `clearable={true}` and an emoji is selected → THEN a localized clear
+  action is shown; activating it calls `onChange(null)`, closes the popover and
+  restores the Reaction fallback in uncontrolled usage.
+
+### Usage examples
+
+**Choose an emoji from the Reaction fallback**
+
+<Canvas of={Stories.Default} />
+
+**Keep the value in a form or parent component**
+
+<Canvas of={Stories.Controlled} />
+
+**Choose a trigger size for its surrounding layout**
+
+<Canvas of={Stories.Sizes} />
+
+**Allow an optional emoji to be removed**
+
+<Canvas of={Stories.Clearable} />
+
+**Compare default, selected and disabled states**
+
+<Canvas of={Stories.Snapshot} />
+
+## Accessibility
+
+The required `label` is always the trigger's accessible name. After a selection,
+the chosen emoji is appended to that name so screen readers announce both the
+setting and its current value. The picker popover uses the same label as its
+dialog name. The optional clear action uses the localized “Clear” label.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Moves focus to the trigger and through the picker controls.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>
+          Opens the picker from the trigger and activates an emoji or the clear
+          action.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Arrow keys</kbd>
+        </td>
+        <td>Move through the emoji grid.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Closes the picker and restores focus to the trigger.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The default Reaction trigger is announced as a button using `label`.
+- A selected trigger is announced with both `label` and the selected emoji.
+- The optional clear action is announced using its localized label.
+- Expanded and collapsed state is exposed by the popover trigger.
+- The open picker is announced as a named dialog.

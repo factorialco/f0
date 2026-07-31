@@ -112,6 +112,30 @@ There is no time minimum beyond the 60-day no-breaking-changes window. A widely-
 
 ---
 
+## Mechanical enforcement
+
+The story tag is a **claim**; the checklist is the **contract**. A component only shows the
+`Stable` badge when it is both tagged `stable` **and** clears every mechanically checkable
+requirement (stories, unit tests, play function, MDX docs at the Good tier, axe enforced). That
+decision lives in `src/component-status/component-status.ts` and is recomputed from `src/` on
+every build, so it can't go stale. A component tagged stable but below the bar reads as
+`Experimental`, with the gap listed in its docs panel.
+
+Two DoD items are not statically checkable and stay manual promotion gates: adoption by ≥3
+product teams, and no breaking changes for 60 days.
+
+`pnpm check:stable-dod` enforces this in CI as a **ratchet**, the same idiom as
+`.storybook/a11y-skip-allowlist.json`:
+
+- `.scripts/stable-dod-debt.json` lists the stable-tagged components still below the bar. The
+  list may only shrink.
+- A stable-tagged component below the bar that is **not** on the list fails the check, so a
+  regression (or tagging something stable before it's ready) can't land silently.
+- A listed component that **now clears** the bar also fails the check, and the fix is to delete
+  its entry. That is what makes each win permanent.
+
+---
+
 ## Maturity levels
 
 Three levels — **experimental → stable → deprecated** — with the **story tag** as the source of truth. See [Components Maturity](/docs/about-f0-components-maturity--documentation) for what each one guarantees, who owns it, and where it lives.

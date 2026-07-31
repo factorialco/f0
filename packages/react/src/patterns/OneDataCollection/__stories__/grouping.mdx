@@ -195,4 +195,35 @@ group header shows its own item count.
 Note: pagination and infinite scroll apply per board, not per lane inside a
 group — grouped lanes render the records that have already been fetched.
 
+When the collection is selectable, each group header shows a checkbox that
+selects every item in that group (parity with the Card and List
+visualizations). Pass `selectableGroups={false}` in the Kanban visualization
+options to hide the group-level checkbox while keeping per-card selection —
+useful when "select a whole group" isn't a meaningful action for the consumer.
+
 <Canvas of={KanbanStories.KanbanWithGrouping} />
+
+### Kanban grouping with the group checkbox hidden
+
+`selectableGroups={false}` on a grouped, selectable Kanban keeps per-card
+selection (and bulk actions) while hiding the per-group "Select all" checkbox.
+
+<Canvas of={KanbanStories.KanbanWithGroupingHiddenGroupSelect} />
+
+### Kanban height and scrolling
+
+The Kanban visualization controls its vertical behaviour with the `heightMode`
+prop (defined on the underlying `Kanban` component):
+
+- **`"fill"` (default)** — lanes stretch to fill the available height and each
+  lane scrolls its own cards. This suits a standalone Kanban that owns the
+  viewport, and it stays the default.
+- **`"content"`** — lanes hug their cards (no per-lane scroll) and every lane
+  matches the tallest, so a single outer container owns the vertical scroll.
+
+Grouped Kanban uses `"content"`. A grouped collection stacks one board per
+group inside a single scrollable list — the same container the grouped List and
+Card visualizations already scroll in. With per-lane scroll there you would get
+nested scrolling and could never see a whole group at once, so the grouped
+Kanban lets the group list own the single scroll, keeping it consistent with
+List and Card.

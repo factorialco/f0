@@ -30,7 +30,7 @@ export const ChatMessageReactions = ({
 }): ReactNode => {
   const i18n = useI18n()
   const reducedMotion = useReducedMotion()
-  const { toggleReaction, capabilities } = useF0ChatStable()
+  const { toggleReaction, loadReactionUsers, capabilities } = useF0ChatStable()
   // Existing pills stay VISIBLE without the capability (the data is real) —
   // only adding/toggling is disabled.
   const canReact = capabilities?.canReact !== false
@@ -72,6 +72,17 @@ export const ChatMessageReactions = ({
               initialCount={reaction.count}
               hasReacted={reaction.reactedByMe}
               users={reaction.users}
+              loadUsers={
+                loadReactionUsers &&
+                (reaction.users?.length ?? 0) < reaction.count
+                  ? () =>
+                      loadReactionUsers(
+                        message.id,
+                        reaction.emoji,
+                        reaction.count
+                      )
+                  : undefined
+              }
               onInteraction={
                 canReact
                   ? (emoji) => void toggleReaction(message.id, emoji)

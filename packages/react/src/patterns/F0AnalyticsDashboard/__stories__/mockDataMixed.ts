@@ -37,9 +37,42 @@ export const dashboardFilters = {
       options: STATUSES.map((s) => ({ value: s, label: s })),
     },
   },
+  employeeSearch: {
+    type: "search",
+    label: "Employee search",
+  },
+  reviewDate: {
+    type: "date",
+    label: "Review date",
+    options: {
+      mode: "single",
+    },
+  },
   dateRange: {
     type: "date",
     label: "Date range",
+    options: {
+      mode: "range",
+    },
+  },
+  salaryExact: {
+    type: "number",
+    label: "Exact salary",
+    options: {
+      modes: ["single"],
+      min: 0,
+      max: 250_000,
+    },
+  },
+  salary: {
+    type: "number",
+    label: "Salary range",
+    options: {
+      modes: ["range"],
+      min: 0,
+      max: 250_000,
+      openCloseToggle: true,
+    },
   },
 } as const
 

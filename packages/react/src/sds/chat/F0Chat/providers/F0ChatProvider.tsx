@@ -12,6 +12,7 @@ import {
   type F0ChatCapabilities,
   type F0ChatEditInput,
   type F0ChatRuntime,
+  type F0ChatUser,
 } from "../types"
 
 const F0ChatContext = createContext<F0ChatRuntime | null>(null)
@@ -31,6 +32,11 @@ export type F0ChatStable = {
   capabilities?: F0ChatCapabilities
   editWindowMs?: number
   toggleReaction: (messageId: string, emoji: string) => void
+  loadReactionUsers?: (
+    messageId: string,
+    emoji: string,
+    count: number
+  ) => Promise<F0ChatUser[]>
   retryMessage: (id: string) => void
   deleteMessage: (id: string) => void
   deleteFailedMessage?: (id: string) => void
@@ -72,6 +78,13 @@ export const F0ChatProvider = ({
 }): ReactNode => {
   const runtimeRef = useRef(runtime)
   runtimeRef.current = runtime
+  const reactionUsersCacheRef = useRef(new Map<string, Promise<F0ChatUser[]>>())
+  const reactionUsersCacheChannelRef = useRef(runtime.channel.id)
+
+  if (reactionUsersCacheChannelRef.current !== runtime.channel.id) {
+    reactionUsersCacheRef.current.clear()
+    reactionUsersCacheChannelRef.current = runtime.channel.id
+  }
 
   // Identity-stable delegates: always call into the LATEST runtime, so hosts
   // that rebuild their callbacks per render don't churn the stable context.
@@ -79,6 +92,34 @@ export const F0ChatProvider = ({
     () => ({
       toggleReaction: (messageId: string, emoji: string) =>
         void runtimeRef.current.toggleReaction(messageId, emoji),
+      loadReactionUsers: (
+        messageId: string,
+        emoji: string,
+        count: number
+      ): Promise<F0ChatUser[]> => {
+        const currentRuntime = runtimeRef.current
+        if (!currentRuntime.loadReactionUsers) return Promise.resolve([])
+
+        const keyPrefix = `${currentRuntime.channel.id}\u0000${messageId}\u0000${emoji}\u0000`
+        const key = `${keyPrefix}${count}`
+        const cached = reactionUsersCacheRef.current.get(key)
+        if (cached) return cached
+
+        for (const cachedKey of reactionUsersCacheRef.current.keys()) {
+          if (cachedKey.startsWith(keyPrefix)) {
+            reactionUsersCacheRef.current.delete(cachedKey)
+          }
+        }
+
+        const request = currentRuntime.loadReactionUsers(messageId, emoji)
+        reactionUsersCacheRef.current.set(key, request)
+        void request.catch(() => {
+          if (reactionUsersCacheRef.current.get(key) === request) {
+            reactionUsersCacheRef.current.delete(key)
+          }
+        })
+        return request
+      },
       retryMessage: (id: string) => void runtimeRef.current.retryMessage(id),
       deleteMessage: (id: string) => void runtimeRef.current.deleteMessage(id),
       deleteFailedMessage: (id: string) =>
@@ -94,6 +135,7 @@ export const F0ChatProvider = ({
   // identity, in the memo.
   const hasEditMessage = !!runtime.editMessage
   const hasDeleteFailedMessage = !!runtime.deleteFailedMessage
+  const hasLoadReactionUsers = !!runtime.loadReactionUsers
 
   const stable = useMemo<F0ChatStable>(
     () => ({
@@ -101,6 +143,9 @@ export const F0ChatProvider = ({
       capabilities,
       editWindowMs: runtime.editWindowMs,
       toggleReaction: delegates.toggleReaction,
+      loadReactionUsers: hasLoadReactionUsers
+        ? delegates.loadReactionUsers
+        : undefined,
       retryMessage: delegates.retryMessage,
       deleteMessage: delegates.deleteMessage,
       deleteFailedMessage: hasDeleteFailedMessage
@@ -114,6 +159,7 @@ export const F0ChatProvider = ({
       runtime.editWindowMs,
       hasEditMessage,
       hasDeleteFailedMessage,
+      hasLoadReactionUsers,
       delegates,
     ]
   )

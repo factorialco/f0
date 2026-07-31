@@ -245,4 +245,74 @@ describe("F0ClarifyingPanel", () => {
       expect(state.confirm).not.toHaveBeenCalled()
     })
   })
+
+  describe("custom answer multiline input", () => {
+    it("renders the custom answer field as a multiline textarea", () => {
+      const state = buildState({}, { allowCustomAnswer: true })
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      // A <textarea> keeps the "textbox" role but is a distinct element from
+      // a single-line <input>. Assert the tag so long answers can wrap.
+      expect(screen.getByRole("textbox").tagName).toBe("TEXTAREA")
+    })
+
+    it("does not restrict the custom answer to a single line", () => {
+      const state = buildState({}, { allowCustomAnswer: true })
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      // resize is disabled (handled by auto-grow), but the element must not be
+      // the old single-line input that clipped long text.
+      const textarea = screen.getByRole("textbox") as HTMLTextAreaElement
+      expect(textarea).toBeInstanceOf(HTMLTextAreaElement)
+      expect(textarea).not.toHaveAttribute("type", "text")
+    })
+
+    it("preserves newlines in a multiline custom answer value", () => {
+      // A single-line <input> sanitizes newlines out of its value; a
+      // <textarea> keeps them. This is what lets long/multi-line answers
+      // render across several lines instead of being clipped to one.
+      const multiline = "first line\nsecond line\nthird line"
+      const state = buildState(
+        {},
+        {
+          allowCustomAnswer: true,
+          isCustomAnswerActive: true,
+          customAnswerText: multiline,
+        }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      const textarea = screen.getByRole("textbox") as HTMLTextAreaElement
+      expect(textarea.value).toBe(multiline)
+    })
+
+    it("inserts a newline (does not submit) on Shift+Enter", async () => {
+      const state = buildState(
+        {},
+        {
+          allowCustomAnswer: true,
+          isCustomAnswerActive: true,
+          customAnswerText: "line one",
+        }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      const textarea = screen.getByRole("textbox")
+      textarea.focus()
+      await userEvent.keyboard("{Shift>}{Enter}{/Shift}")
+      expect(state.confirm).not.toHaveBeenCalled()
+    })
+
+    it("submits on plain Enter when a custom answer can proceed", async () => {
+      const state = buildState(
+        {},
+        {
+          allowCustomAnswer: true,
+          isCustomAnswerActive: true,
+          customAnswerText: "my answer",
+        }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      const textarea = screen.getByRole("textbox")
+      textarea.focus()
+      await userEvent.keyboard("{Enter}")
+      expect(state.confirm).toHaveBeenCalledOnce()
+    })
+  })
 })
