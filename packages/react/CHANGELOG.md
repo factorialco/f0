@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.70.2](https://github.com/factorialco/f0/compare/f0-react-v4.70.1...f0-react-v4.70.2) (2026-07-31)
+
+
+### Bug Fixes
+
+* **F0AvatarIcon:** solid dark-mode background & align radius ([#4932](https://github.com/factorialco/f0/issues/4932)) ([36e08e9](https://github.com/factorialco/f0/commit/36e08e9d56778b2ce31386a1a11043348ae22779))
+
 ## [4.70.1](https://github.com/factorialco/f0/compare/f0-react-v4.70.0...f0-react-v4.70.1) (2026-07-30)
 
 
