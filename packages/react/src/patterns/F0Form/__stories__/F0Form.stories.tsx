@@ -6,6 +6,7 @@ import { z } from "zod"
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
@@ -2931,6 +2932,62 @@ export const WithActionBarAndDiscard: Story = {
 }
 
 /**
+ * Single-schema form with `submitConfig.showSubmitWhenDirty` enabled.
+ * The submit button stays hidden while the form is pristine, appears as soon as
+ * the user edits a field, and goes away again after a successful save, so its
+ * absence reads as "nothing pending". The internal action bar still shows the
+ * Saving → Saved feedback.
+ *
+ * Use it when the form is one of several independently-savable blocks on a page
+ * and a permanently visible Save button would be noise.
+ */
+export const ShowSubmitWhenDirty: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField.text({
+        label: "First Name",
+        placeholder: "Enter your first name",
+      }),
+      lastName: f0FormField.text({
+        label: "Last Name",
+        placeholder: "Enter your last name",
+      }),
+      nickname: f0FormField.text({
+        label: "Nickname",
+        optional: true,
+        placeholder: "How should we call you?",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "single-schema-dirty",
+      schema: formSchema,
+      submitConfig: { label: "Save", showSubmitWhenDirty: true },
+      defaultValues: {
+        firstName: "Jane",
+        lastName: "Doe",
+        nickname: "",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Personal information updated" }
+      },
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form formDefinition={formDefinition} />
+        <p className="mt-4 text-sm text-f1-foreground-secondary">
+          Modify any field to see the Save button appear. Save it: the action
+          bar confirms, then the button goes away again.
+        </p>
+      </div>
+    )
+  },
+}
+
+/**
  * Form with `type: "autosubmit"` — the form is auto-submitted after the user
  * stops editing for the configured `delay` (default 800ms).
  *
@@ -4125,4 +4182,15 @@ export const ActionBarWiggle: Story = {
       </div>
     )
   },
+}
+
+/**
+ * Visual-regression snapshot. Reuses the `AllFieldTypes` render so the snapshot
+ * exercises every field type the form supports.
+ */
+export const Snapshot: Story = {
+  ...AllFieldTypes,
+  // a11y is already skipped for F0Form at the meta level; don't add another
+  // skipCi call-site (the allowlist burndown test forbids increasing counts).
+  parameters: withSnapshot({}),
 }

@@ -246,6 +246,89 @@ describe("FileFieldRenderer", () => {
     })
   })
 
+  it("disables submit while a file is uploading and re-enables it after", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true }))
+
+    const schema = z.object({
+      file: f0FormField(z.string().min(1), {
+        label: "Document",
+        fieldType: "file",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-upload-blocks-submit"
+        schema={schema}
+        defaultValues={{ file: "" }}
+        onSubmit={onSubmit}
+        useUpload={createMockUploadHook({ delay: 50 })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const submitButton = screen.getByRole("button", { name: "Save" })
+    // No upload in flight yet — submit is enabled.
+    expect(submitButton).not.toBeDisabled()
+
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+    await userEvent.upload(input, createFile("test.pdf"))
+
+    // Upload in flight → submit blocked.
+    await waitFor(() => {
+      expect(submitButton).toBeDisabled()
+    })
+
+    // Upload settles → file value resolved and submit re-enabled.
+    await waitFor(() => {
+      expect(screen.getByText("test.pdf")).toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+
+    await userEvent.click(submitButton)
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ file: "signed_test.pdf" })
+      )
+    })
+  })
+
+  it("does not block submit when no upload hook is provided", async () => {
+    const schema = z.object({
+      file: f0FormField(z.string().optional(), {
+        label: "Document",
+        fieldType: "file",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-no-hook-submit"
+        schema={schema}
+        defaultValues={{ file: "" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+    await userEvent.upload(input, createFile("nohook.pdf"))
+
+    await waitFor(() => {
+      expect(screen.getByText("nohook.pdf")).toBeInTheDocument()
+    })
+
+    // Without an upload hook the value can never resolve, so submission must
+    // not be blocked indefinitely.
+    expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+  })
+
   it("shows accepted file types in the dropzone", () => {
     const schema = z.object({
       file: f0FormField(z.string().optional(), {
@@ -307,6 +390,61 @@ describe("FileFieldRenderer", () => {
         screen.getByText("File type not accepted. Accepted formats: JPEG, PNG")
       ).toBeInTheDocument()
     })
+  })
+
+  it("shows a file-type validation error in multiple mode", async () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()).optional(), {
+        label: "Attachments",
+        fieldType: "file",
+        multiple: true,
+        accept: ["application/pdf", "image"],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-multi-type-validation"
+        schema={schema}
+        defaultValues={{ files: [] }}
+        useUpload={createMockUploadHook()}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const dropzone = screen.getByRole("button", { name: /drag and drop/i })
+    const makeCsvTransfer = () => ({
+      files: [createFile("data.csv", 1024, "text/csv")],
+      types: ["Files"],
+    })
+
+    // First unsupported drop surfaces the error.
+    fireEvent.dragOver(dropzone, { dataTransfer: makeCsvTransfer() })
+    fireEvent.drop(dropzone, { dataTransfer: makeCsvTransfer() })
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "File type not accepted. Accepted formats: PDF, Images"
+        )
+      ).toBeInTheDocument()
+    })
+
+    // A second unsupported drop must keep surfacing the error. This is the
+    // regression: the message used to be set from inside the setEntries
+    // updater, so once a prior state update was pending the updater ran after
+    // the read and the error was silently dropped on the repeat attempt.
+    fireEvent.dragOver(dropzone, { dataTransfer: makeCsvTransfer() })
+    fireEvent.drop(dropzone, { dataTransfer: makeCsvTransfer() })
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "File type not accepted. Accepted formats: PDF, Images"
+        )
+      ).toBeInTheDocument()
+    })
+
+    // No CSV entry was ever added.
+    expect(screen.queryByText("data.csv")).not.toBeInTheDocument()
   })
 
   it("shows file size validation error", async () => {
@@ -1011,5 +1149,35 @@ describe("FileFieldRenderer — async initialFiles", () => {
 
     // Server file NOT injected since user already added a file
     expect(screen.queryByText("server_file.pdf")).not.toBeInTheDocument()
+  })
+
+  it("keeps a user-uploaded file when the initialFiles pool is empty (multiple)", async () => {
+    // Deterministic repro: an empty pool resolves before the user interacts, so
+    // the one-time sync runs when the first upload populates the form value. It
+    // must not drop that upload just because its value isn't in the (empty) pool.
+    const initialFiles = () =>
+      new Promise<InitialFile[]>((resolve) => setTimeout(() => resolve([]), 10))
+
+    render(
+      <AsyncInitialFilesForm
+        defaultValues={{ document: "", attachments: [] }}
+        initialFiles={initialFiles}
+      />
+    )
+
+    // Let the (empty) pool resolve so the sync's loading guard clears.
+    await vi.advanceTimersByTimeAsync(20)
+
+    // Upload into the multiple "attachments" field (second file input).
+    const inputs = document.querySelectorAll('input[type="file"]')
+    await userEvent.upload(
+      inputs[1] as HTMLInputElement,
+      createFile("added.pdf")
+    )
+
+    // Let the upload complete and the one-time initialFiles sync run.
+    await vi.advanceTimersByTimeAsync(20)
+
+    expect(screen.getByText("added.pdf")).toBeInTheDocument()
   })
 })

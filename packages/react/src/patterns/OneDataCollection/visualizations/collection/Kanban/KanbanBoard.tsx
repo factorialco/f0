@@ -16,6 +16,7 @@ type KanbanBoardProps<R extends RecordType> = {
   idProvider?: (item: R, index?: number) => string | number | symbol
   allowReorder: boolean
   loading: boolean
+  heightMode?: KanbanProps<R>["heightMode"]
 }
 
 /**
@@ -34,6 +35,7 @@ export const KanbanBoard = <R extends RecordType>({
   idProvider,
   allowReorder,
   loading,
+  heightMode,
 }: KanbanBoardProps<R>) => {
   const [instanceId] = useState(() => Symbol("kanban-visualization"))
 
@@ -73,8 +75,9 @@ export const KanbanBoard = <R extends RecordType>({
       renderCard,
       onCreate,
       dnd,
+      heightMode,
     }),
-    [lanes, loading, getKey, renderCard, onCreate, dnd]
+    [lanes, loading, getKey, renderCard, onCreate, dnd, heightMode]
   )
 
   return !onMove ? (

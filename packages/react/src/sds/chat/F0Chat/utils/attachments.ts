@@ -2,6 +2,34 @@ import { type F0DocumentKind } from "@/components/F0PdfViewer"
 
 import { type F0ChatFileAttachment } from "../types"
 
+const VIDEO_EXTENSIONS = new Set(["m4v", "mov", "mp4", "ogv", "webm"])
+
+/** Compact binary size used in composer validation messages. */
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) {
+    const kilobytes = bytes / 1024
+    return `${Number.isInteger(kilobytes) ? kilobytes : kilobytes.toFixed(1)} KB`
+  }
+  if (bytes < 1024 * 1024 * 1024) {
+    const megabytes = bytes / (1024 * 1024)
+    return `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)} MB`
+  }
+  const gigabytes = bytes / (1024 * 1024 * 1024)
+  return `${Number.isInteger(gigabytes) ? gigabytes : gigabytes.toFixed(1)} GB`
+}
+
+/** Whether a generic file attachment can render in the native F0 video player. */
+export const isVideoFileAttachment = (file: F0ChatFileAttachment): boolean => {
+  if (file.mimeType?.toLowerCase().startsWith("video/")) return true
+
+  return [file.name, file.url].some((candidate) => {
+    const cleanCandidate = candidate.split(/[?#]/, 1)[0] ?? ""
+    const extension = cleanCandidate.split(".").at(-1)?.toLowerCase()
+    return extension !== undefined && VIDEO_EXTENSIONS.has(extension)
+  })
+}
+
 /**
  * Document families with an in-chat preview (Slack-style snapshot card + the
  * fullscreen F0PdfViewer, which routes by this same kind). Anything else —

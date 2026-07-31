@@ -104,11 +104,36 @@ There is no time minimum beyond the 60-day no-breaking-changes window. A widely-
 
 - **Core & Kit:** component moved to `src/components/` (or `patterns/`, `kits/`, `layouts/`, `hooks/`) following the [`f0-experimental-component-migration`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-experimental-component-migration/SKILL.md) skill. **Domain specific promotes in place** — it stays in `src/sds/<area>/`, no move.
 - Story `tags` updated to `["autodocs", "stable"]`.
+- Visual-regression snapshot story (via `withSnapshot`) rendering the component's variants, so unintended visual changes are caught in Chromatic.
 - MDX docs at **Good** tier minimum (Gold encouraged).
 - **Core & Kit:** ownership transferred to Foundations in `CODEOWNERS`. A **Domain specific** component stays owned by its team.
 - Promotion announced in `#f0-support` Slack and changelog.
 
 **Response time:** an F0 designer + Foundations engineer respond to promotion requests based on team availability and as quickly as possible — we don't commit to a fixed SLA today, as it depends on team size and current focus. For urgent or blocking cases, ping `#f0-support` in Slack.
+
+---
+
+## Mechanical enforcement
+
+The story tag is a **claim**; the checklist is the **contract**. A component only shows the
+`Stable` badge when it is both tagged `stable` **and** clears every mechanically checkable
+requirement (stories, unit tests, play function, visual snapshot, MDX docs at the Good tier, axe enforced). That
+decision lives in `src/component-status/component-status.ts` and is recomputed from `src/` on
+every build, so it can't go stale. A component tagged stable but below the bar reads as
+`Experimental`, with the gap listed in its docs panel.
+
+Two DoD items are not statically checkable and stay manual promotion gates: adoption by ≥3
+product teams, and no breaking changes for 60 days.
+
+`pnpm check:stable-dod` enforces this in CI as a **ratchet**, the same idiom as
+`.storybook/a11y-skip-allowlist.json`:
+
+- `.scripts/stable-dod-debt.json` lists the stable-tagged components still below the bar. The
+  list may only shrink.
+- A stable-tagged component below the bar that is **not** on the list fails the check, so a
+  regression (or tagging something stable before it's ready) can't land silently.
+- A listed component that **now clears** the bar also fails the check, and the fix is to delete
+  its entry. That is what makes each win permanent.
 
 ---
 

@@ -15,22 +15,26 @@ import {
 } from "../types"
 import {
   documentPreviewKind,
+  isVideoFileAttachment,
   withinPreviewSizeLimit,
 } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
 import { bubbleCornerClass } from "./ChatBubble"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
+import { ChatVideoAttachment } from "./ChatVideoAttachment"
 import { ChatVoiceAttachment } from "./ChatVoiceAttachment"
 import { FadeInImage } from "./FadeInImage"
 
 /**
  * Attachments shown above a message bubble — images render inline (clickable to
- * open the in-chat lightbox); previewable documents (pdf/sheet/docx/text) get a
- * Slack-style snapshot card (clickable to open the fullscreen viewer); other
- * files use {@link F0FileItem} with a download action, mirroring the AI chat's
- * file rendering. A lone image, location, voice and document cards follow the
- * bubble's chained corners (run-aware); file chips can't.
+ * open the in-chat lightbox); videos render as wide, inline F0VideoPlayers;
+ * previewable documents (pdf/sheet/docx/text) get a Slack-style snapshot card
+ * (clickable to open the fullscreen viewer); other files use
+ * {@link F0FileItem} with a download action, mirroring the AI chat's file
+ * rendering. Multiple videos stack vertically so each keeps the largest useful
+ * playback area. A lone image, video, location, voice and document cards follow
+ * the bubble's chained corners (run-aware); file chips can't.
  */
 export const ChatMessageAttachments = ({
   message,
@@ -55,16 +59,21 @@ export const ChatMessageAttachments = ({
   const files = attachments.filter(
     (a): a is F0ChatFileAttachment => a.kind === "file"
   )
+  // A completed browser-compatible video becomes an inline player. While it is
+  // uploading it intentionally stays a file chip, keeping progress feedback.
+  const videoFiles = files.filter(
+    (file) => file.progress === undefined && isVideoFileAttachment(file)
+  )
+  const nonVideoFiles = files.filter((file) => !videoFiles.includes(file))
   // Previewable documents get the Slack-style snapshot card (a document still
-  // uploading, or too big to parse client-side, keeps the plain chip). `files`
-  // stays whole for the corner math below.
-  const documentFiles = files.flatMap((file) => {
+  // uploading, or too big to parse client-side, keeps the plain chip).
+  const documentFiles = nonVideoFiles.flatMap((file) => {
     if (file.progress !== undefined) return []
     const docKind = documentPreviewKind(file)
     if (!docKind || !withinPreviewSizeLimit(file, docKind)) return []
     return [{ file, docKind }]
   })
-  const plainFiles = files.filter(
+  const plainFiles = nonVideoFiles.filter(
     (file) => !documentFiles.some((entry) => entry.file === file)
   )
   const locations = attachments.filter(
@@ -82,26 +91,47 @@ export const ChatMessageAttachments = ({
   // caption bubble, no further message of the run).
   const captionBelow =
     message.body.trim().length > 0 || Boolean(message.replyTo)
-  const belowMedia =
+  const belowImages =
     files.length > 0 || voices.length > 0 || captionBelow || !isLastOfRun
   const imageCorners = bubbleCornerClass(
     isMine,
     isFirstOfRun,
-    locations.length === 0 && !belowMedia
+    locations.length === 0 && !belowImages
   )
-  const locationCorners = (index: number): string =>
+  const belowVideos =
+    locations.length > 0 ||
+    voices.length > 0 ||
+    nonVideoFiles.length > 0 ||
+    captionBelow ||
+    !isLastOfRun
+  const videoCorners = (index: number): string =>
     bubbleCornerClass(
       isMine,
       isFirstOfRun && images.length === 0 && index === 0,
-      index === locations.length - 1 && !belowMedia
+      index === videoFiles.length - 1 && !belowVideos
+    )
+  const belowLocations =
+    voices.length > 0 ||
+    nonVideoFiles.length > 0 ||
+    captionBelow ||
+    !isLastOfRun
+  const locationCorners = (index: number): string =>
+    bubbleCornerClass(
+      isMine,
+      isFirstOfRun &&
+        images.length === 0 &&
+        videoFiles.length === 0 &&
+        index === 0,
+      index === locations.length - 1 && !belowLocations
     )
   // Voice notes stack after the locations, before the files/caption.
-  const belowVoices = files.length > 0 || captionBelow || !isLastOfRun
+  const belowVoices = nonVideoFiles.length > 0 || captionBelow || !isLastOfRun
   const voiceCorners = (index: number): string =>
     bubbleCornerClass(
       isMine,
       isFirstOfRun &&
         images.length === 0 &&
+        videoFiles.length === 0 &&
         locations.length === 0 &&
         index === 0,
       index === voices.length - 1 && !belowVoices
@@ -113,6 +143,7 @@ export const ChatMessageAttachments = ({
       isMine,
       isFirstOfRun &&
         images.length === 0 &&
+        videoFiles.length === 0 &&
         locations.length === 0 &&
         voices.length === 0 &&
         index === 0,
@@ -170,6 +201,13 @@ export const ChatMessageAttachments = ({
           ))}
         </div>
       )}
+      {videoFiles.map((file, i) => (
+        <ChatVideoAttachment
+          key={`${file.url}-${i}`}
+          file={file}
+          cornerClass={videoCorners(i)}
+        />
+      ))}
       {locations.map((location, i) => (
         <ChatLocationAttachment
           key={`${location.latitude},${location.longitude}-${i}`}

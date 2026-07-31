@@ -1,8 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
+import { expect, userEvent, within } from "storybook/test"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Chat } from "./F0Chat"
+import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
@@ -277,7 +281,7 @@ const StormHud = ({
   }, [commitsRef])
 
   return (
-    <div className="absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 font-mono text-xs text-f1-foreground shadow-md">
+    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-xs text-f1-foreground shadow-md">
       <div>
         {fps} fps · {eventsPerSecond} ev/s
       </div>
@@ -367,6 +371,47 @@ const Conversation = ({
         <F0Chat headerActions={headerActions} />
       </F0ChatProvider>
     </Frame>
+  )
+}
+
+/** Voice-note regression at the width used by a minimized chat panel. */
+const CompactVoiceConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "compact-voice",
+        author: ana,
+        body: "",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "voice",
+            url: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+            durationSeconds: 62,
+            mimeType: "audio/mpeg",
+            name: "voice-note.mp3",
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <div
+      style={{ display: "flex", height: 520, width: 360 }}
+      data-testid="compact-chat-frame"
+    >
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </div>
   )
 }
 
@@ -543,10 +588,10 @@ const MembershipConversation = (): ReactNode => {
 
 /**
  * Previewable documents (PDF, Excel/CSV, Word, text/markdown) render as a
- * Slack-style card: a content snapshot (lazy — each parser only loads when a
- * card scrolls into view) under a header with the type badge, name and a quick
- * download. Clicking the snapshot opens the fullscreen viewer for that kind.
- * Non-previewable files (PowerPoint, binary .doc…) keep the plain chip.
+ * document card: a content snapshot (lazy — each parser only loads when a card
+ * scrolls into view) under a header with the type badge and name. Clicking the
+ * snapshot opens the fullscreen viewer, where download remains available.
+ * Non-previewable files (PowerPoint, binary .doc…) keep the downloadable chip.
  */
 const DocumentConversation = (): ReactNode => {
   const runtime = useMockChatRuntime({
@@ -650,10 +695,74 @@ const DocumentConversation = (): ReactNode => {
   )
 }
 
+/**
+ * Videos play directly in the conversation through F0VideoPlayer. Several
+ * videos in one message stack vertically instead of shrinking into a grid, so
+ * every player uses the available width up to the chat media limit. The
+ * built-in player controls provide inline playback and fullscreen.
+ */
+const VideoConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 4,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "video-1",
+        author: ana,
+        body: "Two cuts from today’s walkthrough",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "walkthrough.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "deep-dive.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "#",
+            name: "source-deck.pptx",
+            mimeType: "application/vnd.ms-powerpoint",
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 const meta = {
   title: "F0Chat",
   component: F0Chat,
-  tags: ["experimental"],
+  tags: ["!autodocs", "experimental"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof F0Chat>
 
@@ -662,6 +771,69 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => <Conversation initialCount={40} />,
+}
+
+export const Snapshot: Story = {
+  render: () => (
+    <div className="flex flex-col gap-8 bg-f1-background p-4">
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-default-chat"
+      >
+        <h2 className="text-lg font-medium">Emoji autocomplete</h2>
+        <Conversation initialCount={12} />
+      </section>
+      <section
+        className="flex w-fit flex-col gap-2"
+        data-testid="snapshot-compact-voice"
+      >
+        <h2 className="text-lg font-medium">Compact voice attachment</h2>
+        <CompactVoiceConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-documents"
+      >
+        <h2 className="text-lg font-medium">Document attachments</h2>
+        <DocumentConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-videos"
+      >
+        <h2 className="text-lg font-medium">Video attachments</h2>
+        <VideoConversation />
+      </section>
+    </div>
+  ),
+  parameters: withSnapshot({}),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const defaultChat = within(canvas.getByTestId("snapshot-default-chat"))
+    const composer = defaultChat.getByRole("combobox", {
+      name: /write something here/i,
+    })
+    await userEvent.clear(composer)
+    await userEvent.type(composer, ":smil")
+    await expect(
+      defaultChat.getByRole("listbox", { name: "Add emoji" })
+    ).toBeVisible()
+
+    const compactVoice = within(canvas.getByTestId("snapshot-compact-voice"))
+    await expect(
+      await compactVoice.findByTestId("chat-voice-attachment")
+    ).toBeVisible()
+
+    const documents = within(canvas.getByTestId("snapshot-documents"))
+    await expect(
+      await documents.findAllByTestId("chat-document-attachment")
+    ).not.toHaveLength(0)
+
+    const videos = within(canvas.getByTestId("snapshot-videos"))
+    await expect(
+      await videos.findAllByTestId("chat-video-attachment")
+    ).not.toHaveLength(0)
+  },
 }
 
 /** Composer micro-interaction QA. Try, in order: hover a message → Reply (the
@@ -673,6 +845,80 @@ export const Default: Story = {
 export const ComposerMotion: Story = {
   name: "Composer micro-interactions",
   render: () => <Conversation initialCount={8} />,
+}
+
+/** Minimized-chat regression (360px panel): the waveform compresses before
+ * reaching the fixed time/speed slot instead of overflowing across it. */
+export const CompactVoiceAttachment: Story = {
+  name: "Compact voice attachment",
+  render: () => <CompactVoiceConversation />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const frame = canvas.getByTestId("compact-chat-frame")
+    const card = await canvas.findByTestId("chat-voice-attachment")
+    const waveform = await canvas.findByTestId("chat-voice-waveform")
+    const time = await canvas.findByTestId("chat-voice-time")
+
+    const frameRect = frame.getBoundingClientRect()
+    const cardRect = card.getBoundingClientRect()
+    const waveformRect = waveform.getBoundingClientRect()
+    const timeRect = time.getBoundingClientRect()
+
+    await expect(cardRect.right).toBeLessThanOrEqual(frameRect.right)
+    await expect(waveformRect.width).toBeGreaterThan(0)
+    await expect(waveformRect.right).toBeLessThanOrEqual(timeRect.left)
+  },
+}
+
+/** Slack-style inline emoji lookup: type `:` followed by a shortcode or name,
+ * then use arrows + Enter/Tab to replace the query with the selected emoji. */
+export const EmojiAutocomplete: Story = {
+  name: "Composer emoji autocomplete",
+  render: () => <Conversation initialCount={8} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+
+    await step("Search and select with the keyboard", async () => {
+      await userEvent.type(composer, ":smil")
+      const listbox = canvas.getByRole("listbox", { name: "Add emoji" })
+      const selectedOption = within(listbox).getByRole("option", {
+        name: /:smile:.*Grinning Face with Smiling Eyes/,
+      })
+
+      await expect(listbox).toBeVisible()
+      await expect(composer).toHaveAttribute("aria-expanded", "true")
+      await expect(composer).toHaveAttribute("aria-controls", listbox.id)
+      await expect(composer).toHaveAttribute(
+        "aria-activedescendant",
+        selectedOption.id
+      )
+      await expect(selectedOption).toHaveAttribute("aria-selected", "true")
+
+      await userEvent.keyboard("{Enter}")
+      await expect(composer).toHaveValue("😄 ")
+      await expect(
+        canvas.queryByRole("listbox", { name: "Add emoji" })
+      ).not.toBeInTheDocument()
+      await expect(composer).toHaveAttribute("aria-expanded", "false")
+      await expect(composer).toHaveFocus()
+    })
+
+    await step("Convert a complete alias", async () => {
+      await userEvent.clear(composer)
+      await userEvent.type(composer, ":thumbsup:")
+      await expect(composer).toHaveValue("👍")
+    })
+
+    await step("Leave the visual example open", async () => {
+      await userEvent.type(composer, " :joy")
+      await expect(
+        canvas.getByRole("listbox", { name: "Add emoji" })
+      ).toBeVisible()
+    })
+  },
 }
 
 /** Group chat with functional `@`-mentions (`@here` for everyone + members). */
@@ -691,10 +937,18 @@ export const GroupMembershipEvents: Story = {
 
 /** Document attachments: Slack-style snapshot cards for PDF, Excel/CSV, Word
  * and text/markdown — click to open the fullscreen viewer for each kind.
- * Non-previewable files (ppt) keep the plain chip. */
+ * Non-previewable files (ppt) keep the downloadable chip. */
 export const WithDocumentAttachments: Story = {
   name: "Document attachments",
   render: () => <DocumentConversation />,
+}
+
+/** Inline video attachments: each F0VideoPlayer stays wide, multiple videos
+ * stack vertically, and the player itself provides playback, download and
+ * fullscreen. */
+export const WithVideoAttachments: Story = {
+  name: "Video attachments",
+  render: () => <VideoConversation />,
 }
 
 /** Resilient sending under a bad connection: instant bubble, delayed sending

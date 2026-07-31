@@ -14,6 +14,7 @@ import {
 import { useGroups } from "@/hooks/datasource/useGroups"
 import { useReducedMotion } from "@/lib/a11y"
 import { useIsDev } from "@/lib/providers/user-platafform"
+import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
 
@@ -55,6 +56,7 @@ export const KanbanCollection = <
   onLoadError,
   onLoadData,
   getLanesForGroup,
+  selectableGroups = true,
 }: KanbanCollectionProps<
   R,
   Filters,
@@ -465,7 +467,8 @@ export const KanbanCollection = <
               // board's lanes' status for this group into one tri-state, and fan
               // the toggle out to each lane (same primitives Card/List use, just
               // summed across the board's columns).
-              const groupSelectable = source.selectable !== undefined
+              const groupSelectable =
+                selectableGroups && source.selectable !== undefined
               let selectedCount = 0
               let unselectedCount = 0
               for (const lane of board.lanes) {
@@ -488,7 +491,14 @@ export const KanbanCollection = <
                   data-testid={`kanban-group-${board.key}`}
                 >
                   <GroupHeader
-                    className="cursor-pointer select-none rounded-md px-3.5 py-3 transition-colors hover:bg-f1-background-hover"
+                    className={cn(
+                      // Left inset matches the collection toolbar's content (the
+                      // search/filters row) so a group's label lines up with it and
+                      // with the board's cards below, instead of hanging further left.
+                      "rounded-md py-3 pl-6 pr-3.5",
+                      (collapsible || groupSelectable) &&
+                        "cursor-pointer select-none transition-colors hover:bg-f1-background-hover"
+                    )}
                     showOpenChange={collapsible}
                     label={board.label}
                     itemCount={board.itemCount}
@@ -516,14 +526,13 @@ export const KanbanCollection = <
                           ease: "easeInOut",
                         }}
                       >
-                        {/* Stacked boards render at content height; the group list
-                          above owns the single vertical scroll — same model as the
-                          grouped List/Card. Each lane still honours ui/Kanban's
-                          400px minimum (KanbanLane MIN_HEIGHT); a true content-hug
-                          for short groups would need an explicit content-height
-                          option on ui/Kanban (pending Foundations). */}
+                        {/* heightMode="content": each group's board hugs its cards
+                          (lanes grow, matched to the tallest, no per-lane scroll) so
+                          the group list above owns the single vertical scroll — same
+                          model as the grouped List/Card. */}
                         <KanbanBoard<R>
                           lanes={board.lanes}
+                          heightMode="content"
                           renderCard={renderCard}
                           getKey={getKey}
                           onCreate={onCreate}

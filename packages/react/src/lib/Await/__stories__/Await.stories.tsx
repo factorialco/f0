@@ -5,9 +5,17 @@ import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Skeleton } from "@/ui/skeleton"
 
 import { Await } from "../index"
+
+// Deterministic promise states for the snapshot.
+const pendingPromise = new Promise<string>(() => {})
+const rejectedPromise = Promise.reject<string>(new Error("Failed to load"))
+// Attach a no-op catch so this module-scope rejection isn't reported as an
+// unhandled rejection before `Await` wires up its own handler.
+rejectedPromise.catch(() => {})
 
 const ExampleComponent = (args: Story["args"]) => {
   const [count, setCount] = useState(0)
@@ -105,4 +113,50 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("my-test-await")).toBeInTheDocument()
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  // `render` drives everything; `args` only satisfies the component's required
+  // props for the (strict) meta type.
+  args: {
+    resolve: "Loaded value",
+    fallback: "Loading…",
+    children: (value: unknown) => String(value),
+  },
+  render: () => (
+    <div className="flex w-64 flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-f1-foreground-secondary">
+          Resolved
+        </span>
+        <Await resolve="Loaded value" fallback="Loading…">
+          {(value) => <span>{value}</span>}
+        </Await>
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-f1-foreground-secondary">
+          Pending (fallback)
+        </span>
+        <Await
+          resolve={pendingPromise}
+          fallback={<Skeleton className="h-4 w-40" />}
+        >
+          {(value) => <span>{value}</span>}
+        </Await>
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-f1-foreground-secondary">
+          Rejected (error)
+        </span>
+        <Await
+          resolve={rejectedPromise}
+          fallback="Loading…"
+          error={<span>Something went wrong</span>}
+        >
+          {(value) => <span>{value}</span>}
+        </Await>
+      </div>
+    </div>
+  ),
 }

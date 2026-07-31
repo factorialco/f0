@@ -1,5 +1,11 @@
 import { F0Button } from "@/components/F0Button"
-import { Maximize, Minimize, SolidPause, SolidPlay } from "@/icons/app"
+import {
+  Download,
+  Maximize,
+  Minimize,
+  SolidPause,
+  SolidPlay,
+} from "@/icons/app"
 import { type LanguageOption } from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -68,6 +74,10 @@ export interface ControlsProps {
   /** Toggle audio description on/off — used by the bar toggle (single-language case). */
   onToggleAudioDescription: () => void
   onSeek: (time: number) => void
+  download?: {
+    label: string
+    onClick: () => void
+  }
 }
 
 /** Bottom control bar. Pure presentation; every interaction is delegated up. */
@@ -107,6 +117,7 @@ export function Controls({
   onToggleCaptions,
   onToggleAudioDescription,
   onSeek,
+  download,
 }: ControlsProps) {
   const { t } = useI18n()
 
@@ -229,6 +240,17 @@ export function Controls({
           audioDescriptionOn={audioDescriptionOn}
           onAudioDescriptionLanguageChange={onAudioDescriptionLanguageChange}
           onAudioDescriptionOff={onAudioDescriptionOff}
+        />
+      )}
+
+      {download && (
+        <F0Button
+          variant="ghost"
+          size="sm"
+          hideLabel
+          icon={Download}
+          label={download.label}
+          onClick={download.onClick}
         />
       )}
 

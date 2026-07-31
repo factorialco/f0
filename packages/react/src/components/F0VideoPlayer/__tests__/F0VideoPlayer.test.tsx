@@ -8,8 +8,8 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import { F0VideoPlayer } from "../F0VideoPlayer"
 import { volumeIcon } from "../components/VolumeControl"
+import { F0VideoPlayer } from "../F0VideoPlayer"
 
 const VIDEO_SRC = "https://example.com/video.mp4"
 
@@ -70,6 +70,15 @@ describe("F0VideoPlayer", () => {
       expect(getVideo()).toHaveAttribute("poster", "poster.webp")
     })
 
+    it("accepts a contextual accessible name", () => {
+      render(
+        <F0VideoPlayer src={VIDEO_SRC} ariaLabel="Video player: demo.mp4" />
+      )
+      expect(
+        screen.getByRole("region", { name: "Video player: demo.mp4" })
+      ).toBeInTheDocument()
+    })
+
     it("shows a center play overlay while paused and hides it during playback", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} />)
       expect(
@@ -107,6 +116,31 @@ describe("F0VideoPlayer", () => {
 
       fireEvent.loadedData(getVideo())
       expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument()
+    })
+
+    it("renders an optional download inside the loaded player controls", async () => {
+      const onDownload = vi.fn()
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          download={{ label: "Download demo.mp4", onClick: onDownload }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Download demo.mp4" })
+      ).not.toBeInTheDocument()
+
+      fireEvent.loadedData(getVideo())
+      const downloadButton = screen.getByRole("button", {
+        name: "Download demo.mp4",
+      })
+      downloadButton.focus()
+      await user.keyboard(" ")
+
+      expect(onDownload).toHaveBeenCalledOnce()
+      expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
     })
   })
 

@@ -36,6 +36,7 @@ function _Reactions({ items, onInteraction, locale, action }: ReactionsProps) {
           initialCount={item.initialCount}
           hasReacted={item.hasReacted}
           users={item.users}
+          loadUsers={item.loadUsers}
           onInteraction={onInteraction}
         />
       ))}
