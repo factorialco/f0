@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.72.1](https://github.com/factorialco/f0/compare/f0-react-v4.72.0...f0-react-v4.72.1) (2026-07-31)
+
+
+### Bug Fixes
+
+* **icons:** remove non-scaling-stroke to fix thin strokes on Retina ([#4944](https://github.com/factorialco/f0/issues/4944)) ([96311fe](https://github.com/factorialco/f0/commit/96311fe86f9901d6feaa62a51b4f26c098e35f81))
+
 ## [4.72.0](https://github.com/factorialco/f0/compare/f0-react-v4.71.0...f0-react-v4.72.0) (2026-07-31)
 
 
