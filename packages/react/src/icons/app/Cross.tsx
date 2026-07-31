@@ -13,14 +13,12 @@ const SvgCross = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M16.9497 7.05026L12 12L7.05025 16.9498"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M12 12L7.05025 7.05026L16.9497 16.9498"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

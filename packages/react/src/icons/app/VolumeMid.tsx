@@ -16,14 +16,12 @@ const SvgVolumeMid = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M11 5L6 9H3V15H6L11 19V5Z"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M15 9.5C16 10.6667 16 13.3333 15 14.5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

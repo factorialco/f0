@@ -8,18 +8,8 @@ const SvgAlert = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M12 14V6.99997"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M12 17.1V17"
-      vectorEffect="non-scaling-stroke"
-    />
+    <path stroke="currentColor" strokeLinecap="round" d="M12 14V6.99997" />
+    <path stroke="currentColor" strokeLinecap="round" d="M12 17.1V17" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgAlert)

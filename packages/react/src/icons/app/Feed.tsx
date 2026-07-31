@@ -13,7 +13,6 @@ const SvgFeed = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M4 12H7L9.5 6.5L14.5 17.5L17 12H20"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )
