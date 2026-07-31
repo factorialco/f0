@@ -396,7 +396,7 @@ export function defaultChartConfig(
 ): DashboardChartConfig {
   switch (type) {
     case "bar":
-      return { type: "bar", orientation: "vertical" }
+      return { type: "bar", orientation: "vertical", showLabels: true }
     case "line":
       return { type: "line", lineType: "linear", showArea: true }
     case "funnel":

@@ -196,6 +196,9 @@ function buildChartProps(
   if ("showLegend" in item.chart) {
     shared.showLegend = item.chart.showLegend
   }
+  if ("showLabels" in item.chart) {
+    shared.showLabels = item.chart.showLabels
+  }
 
   // Build the final props by merging config + adapted data
   switch (targetType) {
@@ -308,7 +311,14 @@ function buildNativeChartProps(
         series = adapted.series
         categories = adapted.categories ?? []
       }
-      return { ...chart, categories, series } as F0DataChartProps
+      return {
+        // Dashboard bar charts show value labels by default; an explicit
+        // `showLabels` in the item config still wins.
+        ...(chart.type === "bar" ? { showLabels: true } : {}),
+        ...chart,
+        categories,
+        series,
+      } as F0DataChartProps
     }
   }
 }
