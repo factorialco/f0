@@ -39,6 +39,10 @@ const meta: Meta<typeof ResourceHeader> = {
       description:
         "Complementary set of lower-priority actions offering additional but less frequent functionalities",
     },
+    onHistoryClick: {
+      description:
+        "Renders a history button leftmost in the desktop action row. Use it for the resource's activity",
+    },
     otherActions: {
       description:
         "Expandable menu containing additional operations and advanced options",
@@ -670,6 +674,7 @@ export const Snapshot: Story = {
         <ResourceHeader
           {...(WithLongDescription.args as ResourceHeaderProps)}
         />
+        <ResourceHeader {...(WithHistory.args as ResourceHeaderProps)} />
         <ResourceHeader {...(WithDropdownAction.args as ResourceHeaderProps)} />
         <ResourceHeader
           {...(WithSecondaryDropdownAction.args as ResourceHeaderProps)}

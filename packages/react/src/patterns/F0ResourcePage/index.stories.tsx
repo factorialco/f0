@@ -21,6 +21,10 @@ const meta = {
   tags: ["experimental", "!autodocs"],
   parameters: {
     layout: "fullscreen",
+    // Rendered inline in the docs page on purpose: an iframe (`inline: false`)
+    // is narrower than the `md` breakpoint, so every Canvas would document the
+    // mobile stack instead of the two-column layout.
+    docs: { story: { inline: true } },
   },
   argTypes: {
     title: { description: "The resource's name" },
@@ -42,7 +46,18 @@ const meta = {
     },
     onHistoryClick: {
       description:
-        "Opens the resource's activity. Renders the history button leftmost in the action row",
+        "Opens the resource's activity. Renders the history button leftmost in the desktop action row",
+    },
+    secondaryTabs: {
+      description: "Sub-views of the active tab, rendered under `tabs`",
+    },
+    stickyAside: {
+      description:
+        "Keeps the rail in place while the main column scrolls. Applies to the main column today, see Behavior",
+    },
+    showBottomBorder: {
+      description:
+        "Derived from the tabs when omitted: present without tabs, dropped with them",
     },
   },
 } satisfies Meta<typeof F0ResourcePage>
@@ -113,6 +128,48 @@ export const WithTabs: Story = {
     activeTabId: "overview",
     aside: <RailContent />,
     children: <MainContent />,
+  },
+}
+
+export const WithSecondaryTabs: Story = {
+  args: {
+    ...baseArgs,
+    tabs: [
+      { id: "overview", label: "Overview" },
+      { id: "people", label: "People" },
+    ],
+    activeTabId: "people",
+    secondaryTabs: [
+      { id: "active", label: "Active" },
+      { id: "archived", label: "Archived" },
+    ],
+    activeSecondaryTabId: "active",
+    aside: <RailContent />,
+    children: <MainContent />,
+  },
+}
+
+/** `stickyAside` keeps the main column scrolling under a pinned rail. */
+export const StickyRail: Story = {
+  args: {
+    ...baseArgs,
+    stickyAside: true,
+    aside: <RailContent />,
+    children: (
+      <F0Box display="flex" flexDirection="column" gap="lg">
+        <SectionHeader title="Members" description="" />
+        <F0Box display="flex" flexDirection="column" gap="sm">
+          {Array.from({ length: 24 }, (_, index) => (
+            <F0Card
+              key={index}
+              compact
+              title={`Teammate ${index + 1}`}
+              description="Engineering"
+            />
+          ))}
+        </F0Box>
+      </F0Box>
+    ),
   },
 }
 
@@ -201,22 +258,57 @@ export const HistoryOpensActivity: Story = {
     // at Storybook's default viewport.
     const historyButtons = canvas.getAllByRole("button", { name: "History" })
     await userEvent.click(historyButtons[historyButtons.length - 1])
-    expect(args.onHistoryClick).toHaveBeenCalled()
+    await expect(args.onHistoryClick).toHaveBeenCalled()
   },
 }
 
+/**
+ * One consolidated visual capture. Stacks the configurations that differ
+ * structurally so each is covered by a single Chromatic snapshot rather than
+ * scattering `withSnapshot` across stories.
+ */
 export const Snapshot: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
-  args: {
-    ...baseArgs,
-    onHistoryClick: fn(),
-    tabs: [
-      { id: "overview", label: "Overview" },
-      { id: "people", label: "People" },
-    ],
-    activeTabId: "overview",
-    aside: <RailContent />,
-    children: <MainContent />,
-  },
+  args: { ...baseArgs, children: <MainContent /> },
+  render: (args) => (
+    <F0Box display="flex" flexDirection="column" gap="xl">
+      <F0ResourcePage
+        {...args}
+        onHistoryClick={fn()}
+        tabs={[
+          { id: "overview", label: "Overview" },
+          { id: "people", label: "People" },
+        ]}
+        activeTabId="overview"
+        aside={<RailContent />}
+      />
+      <F0ResourcePage {...args} />
+      <F0ResourcePage
+        {...args}
+        alert={
+          <F0Alert
+            variant="warning"
+            title="Sync paused"
+            description="Reconnect your calendar to resume sync."
+          />
+        }
+        aside={<RailContent />}
+      />
+      <F0ResourcePage
+        title="Untitled workplace"
+        avatar={{ type: "team", name: "Untitled workplace" }}
+        primaryAction={{ label: "Complete setup", icon: Add, onClick: fn() }}
+        aside={
+          <F0Card
+            compact
+            title="20% set up"
+            description="Missing: address, timezone, holidays"
+          />
+        }
+      >
+        <F0Text variant="body" content="No members yet." />
+      </F0ResourcePage>
+    </F0Box>
+  ),
 }

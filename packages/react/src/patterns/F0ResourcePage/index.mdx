@@ -1,4 +1,4 @@
-import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
@@ -8,17 +8,7 @@ import * as F0ResourcePageStories from "./index.stories"
 
 # Resource page
 
-Composes the body of a page about one resource (a person, a team, a workplace, a role, a legal entity) in a fixed order, so every resource page reads the same way. Mount it in the `children` of `Navigation/Page`, whose `header` slot keeps the `PageHeader` and its breadcrumbs.
-
----
-
-# Overview
-
-## Purpose
-
-- **Makes the order structural.** Notice, header, tabs, then content beside its rail. The component owns the order, so it cannot drift page by page.
-- **Answers the same questions everywhere.** What is this, what is true about it, where does it sit, who is in it, is it healthy, what changed, what can I do.
-- **Keeps the shell with the consumer.** It never renders breadcrumbs or the sidebar; those belong to the app.
+Composes the body of a page about one resource (a person, a team, a workplace, a role, a legal entity) in a fixed order, so every resource page reads the same way: notice, header, tabs, then the content beside its right-hand rail. Mount it in the `children` of `Navigation/Page`, whose `header` slot keeps the `PageHeader` and its breadcrumbs. For a list, a dashboard or a settings area, compose `Layout.Page` directly instead, without a resource header.
 
 ## Anatomy
 
@@ -26,54 +16,82 @@ Composes the body of a page about one resource (a person, a team, a workplace, a
 
 <Controls of={F0ResourcePageStories.Default} />
 
-Top to bottom:
+Top to bottom: `alert` sits above everything because it must be read first; the resource header carries the avatar, name, status, description and the action row; `tabs` and then `secondaryTabs` appear only when the resource has sub-views; `children` renders beside `aside`. There is deliberately no type label in the header, because the breadcrumb, the avatar and the page's own shape already say what this is.
 
-1. **`alert`**: a page-wide notice, above everything, because it must be read first.
-2. **The resource header**: avatar, name, status, description, and the action row. There is deliberately no type label, because the breadcrumb, the avatar and the page's own shape already say what this is.
-3. **`tabs`**, then **`secondaryTabs`**: only when the resource has sub-views.
-4. **`children` beside `aside`**: what the page is about, with the rail on the right.
+## Guidelines
 
-On desktop the action row reads **history, overflow, secondary, primary**, with the primary action rightmost. On mobile the actions stack by priority instead, primary first. Pass `onHistoryClick` and the history button appears; its icon and label are fixed so it is identical on every resource.
+### Design best practices
 
-### Mounted inside `Page`
+**When to use**
 
-<Canvas of={F0ResourcePageStories.InsidePage} />
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use Resource page when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A page about one identifiable thing</td>
+        <td>
+          You can name the single resource the page is about: this employee,
+          this team, this workplace
+        </td>
+      </tr>
+      <tr>
+        <td>The resource has sub-views</td>
+        <td>
+          Pass <code>tabs</code>, and the header drops its bottom border so the
+          tab strip becomes the divider
+        </td>
+      </tr>
+      <tr>
+        <td>Something is worth glancing at beside the content</td>
+        <td>
+          Pass <code>aside</code> for the rail: counts, completeness, shortcuts
+          into the full content
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
-## Variants
+**When not to use**
 
-### Without a rail
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A list, a dashboard or a settings area</td>
+        <td>
+          <code>Layout.Page</code> composed directly, with no resource header
+        </td>
+      </tr>
+      <tr>
+        <td>The page needs bespoke chrome in a different order</td>
+        <td>
+          <code>Page</code> plus <code>ResourceHeader</code>, assembled by hand
+        </td>
+      </tr>
+      <tr>
+        <td>One record shown inside another page</td>
+        <td>
+          <code>ResourceHeader</code> on its own
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
-A single-column page. Omit `aside` and the content takes the full width, rather than leaving an empty column.
-
-<Canvas of={F0ResourcePageStories.WithoutRail} />
-
-### With tabs
-
-A section earns a tab when it is **a different way of working**, not merely long: it needs its own toolbar (search, filters, bulk actions), or people come to it for one distinct job. Long content that reads the same way should scroll. When tabs are present the tab strip separates header from content, so the header drops its bottom border automatically.
-
-<Canvas of={F0ResourcePageStories.WithTabs} />
-
-### With a notice
-
-<Canvas of={F0ResourcePageStories.WithAlert} />
-
-### A sparse resource
-
-Most real resources are half filled in. The rail keeps showing what is missing instead of hiding it, because hidden gaps never get filled.
-
-<Canvas of={F0ResourcePageStories.Sparse} />
-
----
-
-# Guidelines
-
-## Content best practices
-
-- **Description** is the resource's own description when one exists; otherwise its single most identifying fact, like a member count. Never generated filler.
-- **Status** belongs only to resources that genuinely have a lifecycle. Do not invent states for things that cannot change state.
-- **Leave a slot out** when it has no honest content. An absent owner is better than a guessed one.
-
-## Design best practices
+**Do's and don'ts**
 
 <DoDonts
   stacked
@@ -95,7 +113,53 @@ Most real resources are half filled in. The rail keeps showing what is missing i
   }}
 />
 
-## When not to use it
+### Content best practices
 
-- **Module pages.** A list, a dashboard, or a settings area is not about one identifiable resource. Compose those directly in `Page` without a resource header.
-- **Pages needing bespoke chrome.** Drop down to `Page` + `ResourceHeader` and assemble by hand. This component stays strict on purpose.
+- **Description** is the resource's own description when one exists; otherwise its single most identifying fact, like a member count. Never generated filler.
+- **Status** belongs only to resources that genuinely have a lifecycle. Do not invent states for things that cannot change state.
+- **Leave a slot out** when it has no honest content. An absent owner is better than a guessed one.
+
+### Behavior
+
+- **The order is fixed** and owned by the component, so it cannot drift page by page.
+- **`showBottomBorder` derives from the tabs.** With either tab strip present the header drops its border, since the strip already divides. Pass the prop explicitly to override.
+- **The action row reads history, overflow, secondary, primary on desktop**, with the primary action rightmost. On mobile the actions stack by priority instead, primary first, and the history button sits above close.
+- **`aside` decides the column count.** With a rail the body is two columns and the rail collapses above the content on narrow viewports; without one the content takes the full width rather than leaving an empty column.
+- **`stickyAside`** keeps the main column scrolling under a pinned rail. Note that `TwoColumnLayout` applies the sticky treatment to the main column today, so the rail itself does not yet pin.
+
+### Usage examples
+
+**Mounted inside `Page`** is how the component is actually used: the app page header supplies the breadcrumbs, and this fills the body below it.
+
+<Canvas of={F0ResourcePageStories.InsidePage} />
+
+**Without a rail**, the content takes the full width.
+
+<Canvas of={F0ResourcePageStories.WithoutRail} />
+
+**With tabs**, the tab strip replaces the header's bottom border. A section earns a tab when it is a different way of working, not merely long: it needs its own toolbar (search, filters, bulk actions), or people come to it for one distinct job. Long content that reads the same way should scroll.
+
+<Canvas of={F0ResourcePageStories.WithTabs} />
+
+**With sub-tabs**, a second strip appears under the first for sub-views of the active tab.
+
+<Canvas of={F0ResourcePageStories.WithSecondaryTabs} />
+
+**With a notice**, `alert` renders above the header so it is read before anything else.
+
+<Canvas of={F0ResourcePageStories.WithAlert} />
+
+**With history**, `onHistoryClick` adds the history button to the action row. Its icon and label are fixed by the component, so the control is identical on every resource.
+
+<Canvas of={F0ResourcePageStories.HistoryOpensActivity} />
+
+**A sparse resource** is the common real case. The rail keeps showing what is missing instead of hiding it, because hidden gaps never get filled.
+
+<Canvas of={F0ResourcePageStories.Sparse} />
+
+## Accessibility
+
+- **The rail is a `complementary` landmark**, so screen reader users can reach or skip it. It is announced after the main column in the reading order on desktop.
+- **The resource name is not a heading.** `ResourceHeader` renders the title as a styled `span`, so a resource page currently has no `h1` and its heading outline starts at the `h2` of the first section. Raised with Foundations; it needs a change in `BaseHeader` because it affects every header in the product.
+- **The history button is icon-only on desktop.** It keeps its accessible name through `F0Button`'s `hideLabel` handling (an `aria-label`, a visually hidden label and a tooltip), and it is labelled outright in the mobile stack.
+- **Both tab strips are navigation landmarks.** Their `aria-label` values are currently inverted upstream in `Tabs`, so a page with two strips announces them the wrong way round. Raised separately.
