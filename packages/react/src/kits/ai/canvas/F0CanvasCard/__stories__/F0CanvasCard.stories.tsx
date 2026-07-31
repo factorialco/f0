@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 
-import { Download } from "@/icons/app"
+import { Download, Table } from "@/icons/app"
 
 import { F0CanvasCard } from "../F0CanvasCard"
 
@@ -86,6 +86,16 @@ export const FileAvatarNoDescription: Story = {
   args: {
     avatar: { type: "file", file: { name: "headcount_q1.pdf", type: "pdf" } },
     title: "Headcount report Q1",
+    isActive: false,
+    action: openAction,
+  },
+}
+
+export const IconAvatar: Story = {
+  args: {
+    avatar: { type: "icon", icon: Table },
+    title: "Headcount Overview",
+    description: "Employee distribution by department",
     isActive: false,
     action: openAction,
   },
