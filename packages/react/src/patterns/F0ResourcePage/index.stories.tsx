@@ -20,7 +20,11 @@ const meta = {
   // Manual MDX lives next to this file, so autodocs is opted out of.
   tags: ["experimental", "!autodocs"],
   parameters: {
-    layout: "fullscreen",
+    // Padded, not fullscreen: fullscreen makes the Storybook provider paint
+    // the gray app canvas behind the story, which reads as the component
+    // having a gray background. InsidePage opts back in, where that canvas is
+    // exactly what the story is about.
+    layout: "padded",
     // Rendered inline in the docs page on purpose: an iframe (`inline: false`)
     // is narrower than the `md` breakpoint, so every Canvas would document the
     // mobile stack instead of the two-column layout.
@@ -215,6 +219,8 @@ export const Sparse: Story = {
  * holds rather than splitting the height between header, tabs and content.
  */
 export const InsidePage: Story = {
+  // The gray app canvas around the rounded page is the point of this story.
+  parameters: { layout: "fullscreen" },
   args: {
     ...baseArgs,
     onHistoryClick: fn(),
