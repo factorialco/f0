@@ -61,13 +61,18 @@ export function snapshotMatrix<TArgs>(
   const rowValues = rows?.values ?? [undefined]
   const colValues = cols?.values ?? [undefined]
 
+  // Cast away the generic for the dynamic spread: JSX can't prove that an
+  // arbitrary `TArgs` satisfies `IntrinsicAttributes`, and the per-cell args are
+  // assembled dynamically from the declared dimensions anyway.
+  const RenderComponent = Component as ComponentType<Record<string, unknown>>
+
   const renderCell = (rowValue: unknown, colValue: unknown): ReactNode => {
-    const args = {
+    const args: Record<string, unknown> = {
       ...(baseArgs as Record<string, unknown>),
       ...(rows ? { [rows.arg]: rowValue } : {}),
       ...(cols ? { [cols.arg]: colValue } : {}),
-    } as TArgs
-    return <Component {...args} />
+    }
+    return <RenderComponent {...args} />
   }
 
   const gridTemplateColumns = `${rows ? "max-content " : ""}repeat(${colValues.length}, max-content)`
