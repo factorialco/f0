@@ -1,29 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { useReducedMotion } from "@/lib/a11y"
 
 import { SummariesDefinition } from "../../../../summary"
 import { ColId, HeaderGroupDefinition, TableColumnDefinition } from "../types"
+import { ColumnCollapseTransition } from "./useColumnCollapseAnimation"
 import { getColumnId } from "./useColums"
 
-/** Kept in step with the duration baked into `collapsingCellClass`. */
-const COLLAPSE_ANIMATION_MS = 220
-
 /**
- * Applied to the cells of a group that is opening or closing. They stay mounted
- * for the duration, which is what the width travels along — unmounting them
- * outright is what made the change snap.
- *
- * The contents fade out in well under half the time the width takes. Matching
- * the two leaves a sliver of clipped text riding the column shut; dropping the
- * text early closes the column on empty space instead.
- *
- * `!` is load-bearing: cells size themselves through inline `style`, and only
- * an important declaration outranks that.
+ * Marker carried by the animating cells of a group so the animation can find
+ * them. Group ids come from consumers and are not guaranteed to be usable in a
+ * selector, so this is keyed by the group's position among the collapsible ones
+ * rather than by the id itself.
  */
-export const collapsingCellClass =
-  "!w-0 !min-w-0 !max-w-0 !px-0 overflow-hidden opacity-0 [transition:opacity_80ms_ease-out,width_220ms_ease-out,min-width_220ms_ease-out,max-width_220ms_ease-out,padding_220ms_ease-out] motion-reduce:[transition:none]"
+export const collapsingCellClassFor = (groupIndex: number) =>
+  `f0-collapsing-group-${groupIndex}`
 
 export type HeaderGroupSpan = {
   type: "group"
@@ -219,10 +211,14 @@ export type UseHeaderGroupsReturn<
   /** Collapses an expanded group, or expands a collapsed one. */
   toggleHeaderGroup: (groupId: string) => void
   /**
-   * Ids of the columns currently opening or closing. Their cells should carry
-   * {@link collapsingCellClass}. Empty once nothing is in flight.
+   * Marker class each animating column's cells should carry, keyed by column
+   * id. Empty once nothing is in flight.
    */
-  collapsingColumnIds: ReadonlySet<ColId>
+  collapsingCellClasses: ReadonlyMap<ColId, string>
+  /** One entry per group in flight, to hand to the collapse animation. */
+  collapseTransitions: ColumnCollapseTransition[]
+  /** Called by the animation to release a group once it has played out. */
+  settleHeaderGroup: (groupId: string) => void
 }
 
 /**
@@ -261,18 +257,6 @@ export const useHeaderGroups = <
   )
   const shouldReduceMotion = useReducedMotion()
 
-  // Keyed by group, so re-toggling one group mid-flight cancels only its own
-  // pending step and leaves another group's alone.
-  const pendingSteps = useRef(new Map<string, () => void>())
-
-  useEffect(
-    () => () => {
-      pendingSteps.current.forEach((cancel) => cancel())
-      pendingSteps.current.clear()
-    },
-    []
-  )
-
   const settleGroup = useCallback((groupId: string) => {
     setAnimatingGroups((current) => {
       if (!current.has(groupId)) return current
@@ -295,29 +279,13 @@ export const useHeaderGroups = <
 
       setCollapsedGroups(next)
 
-      pendingSteps.current.get(groupId)?.()
-      pendingSteps.current.delete(groupId)
-
       if (shouldReduceMotion) {
         settleGroup(groupId)
       } else {
+        // The columns stay mounted at their natural size for this render; the
+        // animation measures them and drives both directions from there,
+        // reporting back through `settleGroup` when it is done.
         setAnimatingGroups((current) => new Set(current).add(groupId))
-
-        if (collapsed) {
-          // Hold the columns until their contents have animated out.
-          const timeout = setTimeout(
-            () => settleGroup(groupId),
-            COLLAPSE_ANIMATION_MS
-          )
-          pendingSteps.current.set(groupId, () => clearTimeout(timeout))
-        } else {
-          // Mounted faded and shifted; release next frame so the browser has a
-          // start value to transition away from.
-          const frame = requestAnimationFrame(() =>
-            requestAnimationFrame(() => settleGroup(groupId))
-          )
-          pendingSteps.current.set(groupId, () => cancelAnimationFrame(frame))
-        }
       }
 
       onCollapsedChange?.(groupId, collapsed)
@@ -346,19 +314,58 @@ export const useHeaderGroups = <
     return columns.filter((_, index) => !hidden.has(index))
   }, [columns, definitions, settledCollapsedGroups])
 
-  const collapsingColumnIds = useMemo(() => {
-    if (!definitions || animatingGroups.size === 0) return new Set<ColId>()
+  // Stable order, so a group's marker class does not change between renders.
+  const collapsibleGroupIds = useMemo(
+    () =>
+      Object.entries(definitions ?? {})
+        .filter(([, definition]) => definition.collapsedColumns !== undefined)
+        .map(([groupId]) => groupId)
+        .sort(),
+    [definitions]
+  )
 
-    const animating = getCollapsedColumnIndices(
-      visibleColumns,
-      definitions,
-      animatingGroups
-    )
+  // Which marker class each animating column's cells should carry, if any.
+  const collapsingCellClasses = useMemo(() => {
+    const classes = new Map<ColId, string>()
+    if (!definitions || animatingGroups.size === 0) return classes
 
-    return new Set(
-      [...animating].map((index) => getColumnId(visibleColumns[index]))
-    )
-  }, [visibleColumns, definitions, animatingGroups])
+    animatingGroups.forEach((groupId) => {
+      const groupIndex = collapsibleGroupIds.indexOf(groupId)
+      if (groupIndex === -1) return
+
+      const indices = getCollapsedColumnIndices(
+        visibleColumns,
+        definitions,
+        new Set([groupId])
+      )
+
+      indices.forEach((index) => {
+        classes.set(
+          getColumnId(visibleColumns[index]),
+          collapsingCellClassFor(groupIndex)
+        )
+      })
+    })
+
+    return classes
+  }, [visibleColumns, definitions, animatingGroups, collapsibleGroupIds])
+
+  // One entry per group in flight, for the animation to pick up.
+  const collapseTransitions = useMemo(
+    () =>
+      [...animatingGroups]
+        .map((groupId) => ({
+          groupId,
+          cellClass: collapsingCellClassFor(
+            collapsibleGroupIds.indexOf(groupId)
+          ),
+          direction: (collapsedGroups.has(groupId) ? "close" : "open") as
+            | "close"
+            | "open",
+        }))
+        .filter(({ groupId }) => collapsibleGroupIds.includes(groupId)),
+    [animatingGroups, collapsedGroups, collapsibleGroupIds]
+  )
 
   const entries = useMemo(() => {
     if (!definitions) return null
@@ -371,7 +378,9 @@ export const useHeaderGroups = <
 
   return {
     columns: visibleColumns,
-    collapsingColumnIds,
+    collapsingCellClasses,
+    collapseTransitions,
+    settleHeaderGroup: settleGroup,
     headerGroups: entries,
     toggleHeaderGroup,
   }

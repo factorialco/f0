@@ -1211,7 +1211,18 @@ describe("TableCollection", () => {
       expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
     })
 
-    it("holds the cells mounted and shrinking before dropping them", async () => {
+    it("still collapses where the Web Animations API is unavailable", async () => {
+      // The open/close movement is driven by element.animate, which jsdom does
+      // not implement — so this is that path. The columns must settle anyway
+      // rather than be left mounted mid-flight forever.
+      expect(
+        typeof (
+          document.createElement("td") as HTMLElement & {
+            animate?: unknown
+          }
+        ).animate
+      ).not.toBe("function")
+
       renderTable({
         headerGroups: {
           contact: { label: "Contact", collapsedColumns: ["email"] },
@@ -1225,56 +1236,18 @@ describe("TableCollection", () => {
       const toggle = screen.getByRole("button", { name: "Contact" })
       await userEvent.click(toggle)
 
-      // The control answers the click at once...
       expect(toggle).toHaveAttribute("aria-expanded", "false")
-
-      // ...while the cells stay mounted at zero width. That is what the
-      // transition travels along; unmounting outright would snap.
-      const cell = screen.getByText(testData[0].displayName).closest("td")
-      expect(cell).toBeInTheDocument()
-      expect(cell?.classList.contains("!w-0")).toBe(true)
-
-      // Only once the close has played out do they leave the DOM.
       await waitFor(() => {
         expect(
           screen.queryByText(testData[0].displayName)
         ).not.toBeInTheDocument()
       })
-    })
 
-    it("mounts reopening cells shrunk so they can grow back in", async () => {
-      renderTable({
-        headerGroups: {
-          contact: {
-            label: "Contact",
-            collapsedColumns: ["email"],
-            defaultCollapsed: true,
-          },
-        },
-      })
+      await userEvent.click(toggle)
 
+      expect(toggle).toHaveAttribute("aria-expanded", "true")
       await waitFor(() => {
-        expect(screen.getByText(testData[0].email)).toBeInTheDocument()
-      })
-
-      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
-
-      // Back in the DOM at once, starting from zero width so the browser has
-      // somewhere to transition from.
-      expect(
-        screen
-          .getByText(testData[0].displayName)
-          .closest("td")
-          ?.classList.contains("!w-0")
-      ).toBe(true)
-
-      await waitFor(() => {
-        expect(
-          screen
-            .getByText(testData[0].displayName)
-            .closest("td")
-            ?.classList.contains("!w-0")
-        ).toBe(false)
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
       })
     })
 

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -52,11 +52,8 @@ import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { getColumnId, useColumns } from "./hooks/useColums"
-import {
-  collapsingCellClass,
-  groupBorderClass,
-  useHeaderGroups,
-} from "./hooks/useHeaderGroups"
+import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
+import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
@@ -163,11 +160,24 @@ export const TableCollection = <
 
   // Header groups own the collapsed state and drop the columns hidden by a
   // collapsed group, so everything downstream renders off `columns` unchanged.
-  const { columns, headerGroups, toggleHeaderGroup, collapsingColumnIds } =
-    useHeaderGroups(orderedColumns, {
-      headerGroups: headerGroupsOption,
-      onCollapsedChange: onHeaderGroupCollapsedChange,
-    })
+  const {
+    columns,
+    headerGroups,
+    toggleHeaderGroup,
+    collapsingCellClasses,
+    collapseTransitions,
+    settleHeaderGroup,
+  } = useHeaderGroups(orderedColumns, {
+    headerGroups: headerGroupsOption,
+    onCollapsedChange: onHeaderGroupCollapsedChange,
+  })
+
+  const tableContainerRef = useRef<HTMLDivElement>(null)
+  useColumnCollapseAnimation(
+    tableContainerRef,
+    collapseTransitions,
+    settleHeaderGroup
+  )
 
   const {
     data,
@@ -436,6 +446,7 @@ export const TableCollection = <
     <div className="flex h-full min-h-0 flex-col gap-4">
       <TableWrapper>
         <div
+          ref={tableContainerRef}
           className={cn(
             "min-h-0",
             bordered &&
@@ -610,9 +621,9 @@ export const TableCollection = <
                           fromVisualization === "editableTable" &&
                             (index !== columns.length - 1 || showItemActions) &&
                             "border-0 border-r-[1px] border-solid border-f1-border-secondary",
-                          collapsingColumnIds.has(
+                          collapsingCellClasses.get(
                             getColumnId({ id: column.id, label })
-                          ) && collapsingCellClass
+                          )
                         ) || undefined
                       }
                       onSortClick={
@@ -785,7 +796,7 @@ export const TableCollection = <
                                 rowWrapper={RowWrapper}
                                 cellRenderer={cellRenderer}
                                 headerGroups={headerGroups}
-                                collapsingColumnIds={collapsingColumnIds}
+                                collapsingCellClasses={collapsingCellClasses}
                                 fromVisualization={fromVisualization}
                                 registerSelectable={selectionRegistry.register}
                                 unregisterSelectable={
@@ -851,7 +862,7 @@ export const TableCollection = <
                         cellRenderer={cellRenderer}
                         fromVisualization={fromVisualization}
                         headerGroups={headerGroups}
-                        collapsingColumnIds={collapsingColumnIds}
+                        collapsingCellClasses={collapsingCellClasses}
                         registerSelectable={selectionRegistry.register}
                         unregisterSelectable={selectionRegistry.unregister}
                       />
@@ -939,8 +950,7 @@ export const TableCollection = <
                               (cellIndex !== columns.length - 1 ||
                                 showItemActions) &&
                               "border-0 border-r-[1px] border-solid border-f1-border-secondary",
-                            collapsingColumnIds.has(getColumnId(column)) &&
-                              collapsingCellClass
+                            collapsingCellClasses.get(getColumnId(column))
                           )}
                         >
                           {cellIndex === 0 &&

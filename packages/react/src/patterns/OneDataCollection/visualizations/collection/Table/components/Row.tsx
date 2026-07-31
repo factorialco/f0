@@ -34,11 +34,7 @@ import type {
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { getColumnId } from "../hooks/useColums"
-import {
-  collapsingCellClass,
-  groupBorderClass,
-  HeaderGroupEntry,
-} from "../hooks/useHeaderGroups"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -86,8 +82,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
-  /** Ids of the columns opening or closing. */
-  collapsingColumnIds?: ReadonlySet<ColId>
+  /** Marker class for each animating column's cells, keyed by column id. */
+  collapsingCellClasses?: ReadonlyMap<ColId, string>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
@@ -163,7 +159,7 @@ const RowComponentInner = <
     rowWrapper,
     fromVisualization,
     headerGroups,
-    collapsingColumnIds,
+    collapsingCellClasses,
     registerSelectable,
     unregisterSelectable,
   }: RowProps<
@@ -362,8 +358,7 @@ const RowComponentInner = <
             className={cn(
               cellRenderedClass,
               isLastInGroup && groupBorderClass,
-              collapsingColumnIds?.has(getColumnId(column)) &&
-                collapsingCellClass
+              collapsingCellClasses?.get(getColumnId(column))
             )}
           >
             {CellRenderer ? (
