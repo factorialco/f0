@@ -12,12 +12,7 @@ import { isDataChartEmpty } from "./utils/isDataChartEmpty"
 
 export const F0DataChart = (props: F0DataChartProps) => {
   if (!props.emptyState?.disabled && isDataChartEmpty(props)) {
-    return (
-      <DataChartEmptyStateView
-        chartType={props.type}
-        emptyState={props.emptyState}
-      />
-    )
+    return <DataChartEmptyStateView emptyState={props.emptyState} />
   }
 
   switch (props.type) {
