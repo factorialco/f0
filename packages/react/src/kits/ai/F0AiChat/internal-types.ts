@@ -187,6 +187,14 @@ export type AiChatProviderReturnValue = {
   /** Set the pending quote (pass null to clear). */
   setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
   /**
+   * One-shot composer prefill staged by an external flow (e.g. the Analytics
+   * mode handoff). The chat textarea claims it: replaces the current input,
+   * focuses with the caret at the end, and resets the draft to null.
+   */
+  composerDraft: string | null
+  /** Stage a composer draft (pass null to clear). */
+  setComposerDraft: React.Dispatch<React.SetStateAction<string | null>>
+  /**
    * Content currently hosted in the side panel, or `null` to show the F0.ai
    * chat. Only one is mounted at a time — see {@link SidePanelContent}.
    */
