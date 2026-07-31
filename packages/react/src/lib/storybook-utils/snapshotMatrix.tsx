@@ -120,5 +120,5 @@ export function snapshotMatrix<TArgs>(
     // The generic `TArgs` may declare required props, which would make
     // StoryObj demand an `args` field. The matrix renders everything through
     // `render`, so no `args` are needed — cast past that requirement.
-  } as StoryObj<TArgs>
+  } as unknown as StoryObj<TArgs>
 }
