@@ -269,27 +269,22 @@ const TYPE_ROWS: {
   {
     label: "Person",
     sizes: avatarSizes,
-    avatar: {
-      type: "person",
-      firstName: "John",
-      lastName: "Doe",
-      "aria-label": "John Doe",
-    },
+    avatar: { type: "person", firstName: "John", lastName: "Doe" },
   },
   {
     label: "Team",
     sizes: avatarSizes,
-    avatar: { type: "team", name: "Engineering Team", "aria-label": "Team" },
+    avatar: { type: "team", name: "Engineering Team" },
   },
   {
     label: "Company",
     sizes: avatarSizes,
-    avatar: { type: "company", name: "Factorial HR", "aria-label": "Company" },
+    avatar: { type: "company", name: "Factorial HR" },
   },
   {
     label: "Flag",
     sizes: avatarSizes,
-    avatar: { type: "flag", flag: "es", "aria-label": "Spain" },
+    avatar: { type: "flag", flag: "es" },
   },
   {
     label: "File",
@@ -297,18 +292,17 @@ const TYPE_ROWS: {
     avatar: {
       type: "file",
       file: { name: "report.pdf", type: "application/pdf" },
-      "aria-label": "report.pdf",
     },
   },
   {
     label: "Emoji",
     sizes: avatarEmojiSizes,
-    avatar: { type: "emoji", emoji: "🎉", "aria-label": "Party" },
+    avatar: { type: "emoji", emoji: "🎉" },
   },
   {
     label: "Icon",
     sizes: avatarIconSizes,
-    avatar: { type: "icon", icon: Calendar, "aria-label": "Calendar" },
+    avatar: { type: "icon", icon: Calendar },
   },
 ]
 
