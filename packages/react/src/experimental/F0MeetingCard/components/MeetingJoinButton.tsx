@@ -25,7 +25,6 @@ export const MeetingJoinButton = ({
         label={label}
         icon={VideoRecorder}
         variant="default"
-        size="sm"
         href={join.href}
       />
     )
@@ -36,7 +35,6 @@ export const MeetingJoinButton = ({
       label={label}
       icon={VideoRecorder}
       variant="default"
-      size="sm"
       disabled={disabled}
       onClick={join.onJoin}
     />

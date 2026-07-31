@@ -158,7 +158,6 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
             label={action.label}
             icon={action.icon}
             variant="outline"
-            size="sm"
             onClick={action.onClick}
           />
         ))}
