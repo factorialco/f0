@@ -117,6 +117,13 @@ export const WithDataTestId: Story = {
 
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
+  // `render` drives everything; `args` only satisfies the component's required
+  // props for the (strict) meta type.
+  args: {
+    resolve: "Loaded value",
+    fallback: "Loading…",
+    children: (value: unknown) => String(value),
+  },
   render: () => (
     <div className="flex w-64 flex-col gap-4">
       <div className="flex flex-col gap-1">

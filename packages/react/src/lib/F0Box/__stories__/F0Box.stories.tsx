@@ -2797,7 +2797,7 @@ export const Snapshot = snapshotMatrix(F0Box, {
     justifyContent: "center",
     width: "24",
     height: "16",
-    borderWidth: "default",
+    border: "default",
     borderColor: "default",
     borderStyle: "solid",
     children: <span className="text-sm font-medium">Box</span>,
