@@ -8,75 +8,17 @@ const SvgChip = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <rect
-      width={12}
-      height={12}
-      x={6}
-      y={6}
-      stroke="currentColor"
-      rx={3}
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M9 6V4"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M9 20V18"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M18 9L20 9"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M4 9L6 9"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M15 6V4"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M15 20V18"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M18 15L20 15"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M4 15L6 15"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M12 9L9 12"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M15 12L12 15"
-      vectorEffect="non-scaling-stroke"
-    />
+    <rect width={12} height={12} x={6} y={6} stroke="currentColor" rx={3} />
+    <path stroke="currentColor" strokeLinecap="round" d="M9 6V4" />
+    <path stroke="currentColor" strokeLinecap="round" d="M9 20V18" />
+    <path stroke="currentColor" strokeLinecap="round" d="M18 9L20 9" />
+    <path stroke="currentColor" strokeLinecap="round" d="M4 9L6 9" />
+    <path stroke="currentColor" strokeLinecap="round" d="M15 6V4" />
+    <path stroke="currentColor" strokeLinecap="round" d="M15 20V18" />
+    <path stroke="currentColor" strokeLinecap="round" d="M18 15L20 15" />
+    <path stroke="currentColor" strokeLinecap="round" d="M4 15L6 15" />
+    <path stroke="currentColor" strokeLinecap="round" d="M12 9L9 12" />
+    <path stroke="currentColor" strokeLinecap="round" d="M15 12L12 15" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgChip)

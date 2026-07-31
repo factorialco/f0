@@ -16,7 +16,6 @@ const SvgTextSize = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M4 6H9M14 6H9M9 6V18M13 12H16M19 12H16M16 12V18"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

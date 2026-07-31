@@ -16,21 +16,18 @@ const SvgAlignTextCenter = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M5 8H19"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M5 12H19"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M9 16L15 16"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

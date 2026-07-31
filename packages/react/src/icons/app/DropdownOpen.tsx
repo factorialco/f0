@@ -19,13 +19,8 @@ const SvgDropdownOpen = (
       fill="#052657"
       fillOpacity={0.06}
       rx={4}
-      vectorEffect="non-scaling-stroke"
     />
-    <path
-      stroke="currentColor"
-      d="M15.5 13.75L12 10.25L8.5 13.75"
-      vectorEffect="non-scaling-stroke"
-    />
+    <path stroke="currentColor" d="M15.5 13.75L12 10.25L8.5 13.75" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgDropdownOpen)

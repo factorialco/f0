@@ -54,11 +54,8 @@ const PeopleAnimated = React.forwardRef<SVGSVGElement, PeopleProps>(
           animate={animate}
           transition={defaultTransition}
         >
-          <circle cx="9" cy="9" r="4" vectorEffect="non-scaling-stroke" />
-          <path
-            d="M4.00003 18C4.00003 18 5.50003 16 9.00003 16C12.5 16 14 18 14 18"
-            vectorEffect="non-scaling-stroke"
-          />
+          <circle cx="9" cy="9" r="4" />
+          <path d="M4.00003 18C4.00003 18 5.50003 16 9.00003 16C12.5 16 14 18 14 18" />
         </motion.g>
         <motion.g
           initial="normal"
@@ -66,14 +63,8 @@ const PeopleAnimated = React.forwardRef<SVGSVGElement, PeopleProps>(
           animate={animate}
           transition={defaultTransition}
         >
-          <path
-            d="M16 13C17.6569 13 19 11.6569 19 10C19 8.34315 17.6569 7 16 7"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d="M17 16C19 16 19.75 17 19.75 17"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d="M16 13C17.6569 13 19 11.6569 19 10C19 8.34315 17.6569 7 16 7" />
+          <path d="M17 16C19 16 19.75 17 19.75 17" />
         </motion.g>
       </svg>
     )

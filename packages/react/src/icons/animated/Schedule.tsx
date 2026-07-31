@@ -51,28 +51,15 @@ const ScheduleAnimated = React.forwardRef<SVGSVGElement, ScheduleProps>(
         strokeLinejoin="round"
         {...props}
       >
-        <path
-          d="M10.5 18H7C5.34315 18 4 16.6569 4 15V9C4 7.34315 5.34315 6 7 6H17C18.6569 6 20 7.34315 20 9V9"
-          vectorEffect="non-scaling-stroke"
-        />
+        <path d="M10.5 18H7C5.34315 18 4 16.6569 4 15V9C4 7.34315 5.34315 6 7 6H17C18.6569 6 20 7.34315 20 9V9" />
         <motion.g
           variants={clockVariants}
           animate={animate}
           initial="normal"
           transition={clockTransition}
         >
-          <rect
-            x="13"
-            y="11"
-            width="9"
-            height="9"
-            rx="4.5"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d="M17.5 14V15.054C17.5 15.3326 17.6393 15.5928 17.8711 15.7474L19 16.5"
-            vectorEffect="non-scaling-stroke"
-          />
+          <rect x="13" y="11" width="9" height="9" rx="4.5" />
+          <path d="M17.5 14V15.054C17.5 15.3326 17.6393 15.5928 17.8711 15.7474L19 16.5" />
         </motion.g>
         <motion.path
           d="M7 10L11 10"
@@ -80,7 +67,6 @@ const ScheduleAnimated = React.forwardRef<SVGSVGElement, ScheduleProps>(
           animate={animate}
           initial="normal"
           transition={lineTransition}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M7 14H9"
@@ -88,7 +74,6 @@ const ScheduleAnimated = React.forwardRef<SVGSVGElement, ScheduleProps>(
           animate={animate}
           initial="normal"
           transition={lineTransition}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

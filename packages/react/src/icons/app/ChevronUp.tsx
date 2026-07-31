@@ -16,14 +16,12 @@ const SvgChevronUp = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M18 14L12 8"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M6 14L12 8"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

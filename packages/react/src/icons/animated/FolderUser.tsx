@@ -56,7 +56,6 @@ const FolderUserAnimated = React.forwardRef<SVGSVGElement, FolderUserProps>(
           variants={folderVariants}
           transition={folderTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M8 17.5C8 16 9.79086 15 12 15C14.2091 15 16 16 16 17.5"
@@ -64,7 +63,6 @@ const FolderUserAnimated = React.forwardRef<SVGSVGElement, FolderUserProps>(
           variants={userVariants}
           transition={userTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.circle
           cx="12"
@@ -74,7 +72,6 @@ const FolderUserAnimated = React.forwardRef<SVGSVGElement, FolderUserProps>(
           variants={userVariants}
           transition={userTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )
