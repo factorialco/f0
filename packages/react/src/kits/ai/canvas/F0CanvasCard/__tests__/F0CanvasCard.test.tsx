@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
-import { Download } from "@/icons/app"
+import { BarGraph, Download } from "@/icons/app"
 
 import { F0CanvasCard } from "../F0CanvasCard"
 
@@ -99,6 +99,17 @@ describe("F0CanvasCard", () => {
     )
 
     expect(screen.getByText("PDF")).toBeInTheDocument()
+  })
+
+  it("renders icon avatar", () => {
+    const { container } = render(
+      <F0CanvasCard
+        {...defaultProps}
+        avatar={{ type: "icon", icon: BarGraph }}
+      />
+    )
+
+    expect(container.querySelector("svg")).toBeInTheDocument()
   })
 
   it("does not render description line when description is omitted", () => {

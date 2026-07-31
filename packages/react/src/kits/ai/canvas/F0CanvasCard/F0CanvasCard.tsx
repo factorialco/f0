@@ -4,6 +4,7 @@ import {
 } from "@/components/avatars/F0AvatarModule"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import type { IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils"
 type CanvasCardAvatar =
   | { type: "module"; module: ModuleId }
   | { type: "file"; file: FileDef }
+  | { type: "icon"; icon: IconType }
 
 type CanvasCardAction =
   | {
@@ -35,7 +37,7 @@ type CanvasCardAction =
  * @removeIn 5.0.0
  */
 export type F0CanvasCardProps = {
-  /** Avatar to display: a module icon or a file-type badge */
+  /** Avatar to display: a module icon, a file-type badge, or a plain icon */
   avatar?: CanvasCardAvatar
   /** Primary title */
   title: string
@@ -93,6 +95,9 @@ export function F0CanvasCard({
         )}
         {avatar?.type === "file" && (
           <F0AvatarFile file={avatar.file} size="lg" />
+        )}
+        {avatar?.type === "icon" && (
+          <F0AvatarIcon icon={avatar.icon} size="md" />
         )}
         <div className="flex min-w-0 flex-1 flex-col">
           <OneEllipsis className="text-lg font-semibold text-f1-foreground">
