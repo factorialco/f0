@@ -109,6 +109,10 @@ export const WithDescription: Story = {
  * the global `F0Provider` (Storybook preview) already mounts one.
  */
 export const Examples: Story = {
+  // Excluded from the test-runner: it fires real toasts into the global overlay
+  // (a shared, document-level layer), which can leak into other stories running
+  // in the same worker page. It's an interactive playground, not a visit target.
+  tags: ["!test"],
   parameters: {
     layout: "fullscreen",
     docs: { story: { inline: false, height: "520px" } },
@@ -209,6 +213,9 @@ export const Examples: Story = {
  * mount so it stays visible while you drag the canvas.
  */
 export const Responsive: Story = {
+  // Opens a persistent toast on mount — excluded from the test-runner so it can't
+  // leak into other stories sharing the same worker page (see Examples above).
+  tags: ["!test"],
   parameters: { layout: "fullscreen" },
   render: () => {
     useEffect(() => {
