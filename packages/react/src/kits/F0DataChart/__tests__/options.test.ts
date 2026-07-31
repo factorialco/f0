@@ -182,6 +182,18 @@ describe("deltaRow", () => {
     expect(deltaRow(10, 0, "l", theme)).toBeUndefined()
     expect(deltaRow(Number.NaN, 10, "l", theme)).toBeUndefined()
   })
+
+  it("falls back to the primary foreground when the theme omits delta colors", () => {
+    const bare = {
+      ...theme,
+      colors: { ...theme.colors, positive: undefined, critical: undefined },
+    }
+    const html = renderValueTooltip(
+      { value: "125", rows: [deltaRow(125, 100, "from previous", bare)] },
+      bare
+    )
+    expect(html).toContain(`color: ${theme.colors.foreground}`)
+  })
 })
 
 describe("renderMarker", () => {
