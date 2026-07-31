@@ -145,7 +145,11 @@
 
 /* Font sizes carried by the textStyle mark. A class rather than an inline style
    because the sanitizer read-only content passes through allows `class` but not
-   `style`. */
+   `style`.
+
+   Line heights follow the core typography tokens wherever one has the same
+   size: 12/14/16/18 are `sm`/`base`/`lg`/`xl`. The remaining steps sit in gaps
+   the token scale does not cover. */
 .rich-text-editor-container .f0-fs-12,
 .rich-text-display-container .f0-fs-12 {
   @apply text-[12px] leading-[16px];
@@ -163,7 +167,7 @@
 
 .rich-text-editor-container .f0-fs-18,
 .rich-text-display-container .f0-fs-18 {
-  @apply text-[18px] leading-[26px];
+  @apply text-[18px] leading-[28px];
 }
 
 .rich-text-editor-container .f0-fs-20,

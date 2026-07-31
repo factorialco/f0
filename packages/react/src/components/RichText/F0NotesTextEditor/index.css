@@ -71,7 +71,7 @@
 }
 
 .notes-text-editor .f0-fs-18 {
-  @apply text-[18px] leading-[26px] tracking-[-0.18px];
+  @apply text-[18px] leading-[28px] tracking-[-0.18px];
 }
 
 .notes-text-editor .f0-fs-20 {
