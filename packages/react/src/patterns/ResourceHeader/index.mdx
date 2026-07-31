@@ -119,6 +119,17 @@ Designed to display information about a team.
 - Must include the trash icon
 - Uses a critical button type with a "danger" color
 
+### History
+
+- Set `onHistoryClick` and the button appears leftmost in the desktop action
+  row, and above the close button in the mobile stack
+- The icon and label are fixed by the component, so the control is identical on
+  every resource and users learn it once
+- Use it for the resource's activity: what changed it or directly affected it
+- Icon-only on desktop, labelled on mobile, matching the close button
+
+<Canvas of={ResourceHeaderStories.WithHistory} />
+
 ## Layout
 
 - Elements are arranged to prioritize information hierarchy and visual clarity,

@@ -80,4 +80,24 @@ describe("ResourceHeader", () => {
       )
     )
   })
+
+  it("renders a history button when onHistoryClick is set and calls it", async () => {
+    const user = userEvent.setup()
+    const onHistoryClick = vi.fn()
+
+    render(<ResourceHeader title="Payroll" onHistoryClick={onHistoryClick} />)
+
+    // Mobile and desktop action clusters are both in the DOM.
+    const historyButtons = screen.getAllByRole("button", { name: "History" })
+    expect(historyButtons).toHaveLength(2)
+
+    await user.click(historyButtons[0])
+    expect(onHistoryClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("omits the history button when onHistoryClick is not set", () => {
+    render(<ResourceHeader title="Payroll" />)
+
+    expect(screen.queryByRole("button", { name: "History" })).toBeNull()
+  })
 })

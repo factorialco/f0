@@ -77,6 +77,7 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    history: "History",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",

@@ -19,6 +19,7 @@ type Props = {} & Pick<
   | "deactivated"
   | "metadataRowGap"
   | "showBottomBorder"
+  | "onHistoryClick"
   | "onClose"
 >
 
@@ -34,6 +35,7 @@ const _ResourceHeader = ({
   deactivated,
   metadataRowGap,
   showBottomBorder,
+  onHistoryClick,
   onClose,
 }: Props) => {
   return (
@@ -49,6 +51,7 @@ const _ResourceHeader = ({
       deactivated={deactivated}
       metadataRowGap={metadataRowGap}
       showBottomBorder={showBottomBorder}
+      onHistoryClick={onHistoryClick}
       onClose={onClose}
     />
   )

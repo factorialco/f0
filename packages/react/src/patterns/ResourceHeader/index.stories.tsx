@@ -243,6 +243,25 @@ export const WithOtherActions: Story = {
   },
 }
 
+/**
+ * `onHistoryClick` renders a history button leftmost in the action row. Its icon
+ * and label are fixed by the component, so it is identical on every resource.
+ */
+export const WithHistory: Story = {
+  tags: ["!dev"],
+  args: {
+    ...Default.args,
+    onHistoryClick: fn(),
+    otherActions: [
+      {
+        label: "Share",
+        icon: ExternalLink,
+        onClick: fn(),
+      },
+    ],
+  },
+}
+
 export const WithDropdownAction: Story = {
   tags: ["!dev"],
   args: {

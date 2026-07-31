@@ -19,6 +19,10 @@ export * from "../../ui/Omnibutton"
  * @deprecated Page has moved to @/patterns/Navigation/Page. Import from there instead.
  */
 export * from "../../patterns/Navigation/Page"
+// Not a moved component: F0ResourcePage is new and lives in patterns/ alongside
+// Page and ResourceHeader. Exported here because this barrel feeds the
+// experimental entrypoint.
+export * from "../../patterns/F0ResourcePage"
 /**
  * @deprecated Sidebar has moved to @/patterns/Navigation/Sidebar. Import from there instead.
  */

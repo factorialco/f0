@@ -1,0 +1,101 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as F0ResourcePageStories from "./index.stories"
+
+<Meta of={F0ResourcePageStories} />
+
+# Resource page
+
+Composes the body of a page about one resource (a person, a team, a workplace, a role, a legal entity) in a fixed order, so every resource page reads the same way. Mount it in the `children` of `Navigation/Page`, whose `header` slot keeps the `PageHeader` and its breadcrumbs.
+
+---
+
+# Overview
+
+## Purpose
+
+- **Makes the order structural.** Notice, header, tabs, then content beside its rail. The component owns the order, so it cannot drift page by page.
+- **Answers the same questions everywhere.** What is this, what is true about it, where does it sit, who is in it, is it healthy, what changed, what can I do.
+- **Keeps the shell with the consumer.** It never renders breadcrumbs or the sidebar; those belong to the app.
+
+## Anatomy
+
+<Canvas of={F0ResourcePageStories.Default} />
+
+<Controls of={F0ResourcePageStories.Default} />
+
+Top to bottom:
+
+1. **`alert`**: a page-wide notice, above everything, because it must be read first.
+2. **The resource header**: avatar, name, status, description, and the action row. There is deliberately no type label, because the breadcrumb, the avatar and the page's own shape already say what this is.
+3. **`tabs`**, then **`secondaryTabs`**: only when the resource has sub-views.
+4. **`children` beside `aside`**: what the page is about, with the rail on the right.
+
+On desktop the action row reads **history, overflow, secondary, primary**, with the primary action rightmost. On mobile the actions stack by priority instead, primary first. Pass `onHistoryClick` and the history button appears; its icon and label are fixed so it is identical on every resource.
+
+### Mounted inside `Page`
+
+<Canvas of={F0ResourcePageStories.InsidePage} />
+
+## Variants
+
+### Without a rail
+
+A single-column page. Omit `aside` and the content takes the full width, rather than leaving an empty column.
+
+<Canvas of={F0ResourcePageStories.WithoutRail} />
+
+### With tabs
+
+A section earns a tab when it is **a different way of working**, not merely long: it needs its own toolbar (search, filters, bulk actions), or people come to it for one distinct job. Long content that reads the same way should scroll. When tabs are present the tab strip separates header from content, so the header drops its bottom border automatically.
+
+<Canvas of={F0ResourcePageStories.WithTabs} />
+
+### With a notice
+
+<Canvas of={F0ResourcePageStories.WithAlert} />
+
+### A sparse resource
+
+Most real resources are half filled in. The rail keeps showing what is missing instead of hiding it, because hidden gaps never get filled.
+
+<Canvas of={F0ResourcePageStories.Sparse} />
+
+---
+
+# Guidelines
+
+## Content best practices
+
+- **Description** is the resource's own description when one exists; otherwise its single most identifying fact, like a member count. Never generated filler.
+- **Status** belongs only to resources that genuinely have a lifecycle. Do not invent states for things that cannot change state.
+- **Leave a slot out** when it has no honest content. An absent owner is better than a guessed one.
+
+## Design best practices
+
+<DoDonts
+  stacked
+  do={{
+    description: "Lead with what the resource is",
+    guidelines: [
+      "Put the thing the page is about in the main column: a place shows the place, a definition shows its spec, a cohort shows its people",
+      "Use the rail for what is worth glancing at, and link each item to the full content",
+      "Keep the rail short: if everything is surfaced, nothing is",
+    ],
+  }}
+  dont={{
+    description: "Make every resource a list of people",
+    guidelines: [
+      "Do not default the main column to a member table: on a workplace or a role the people are a consequence, not the subject",
+      "Do not put the resource's defining attributes behind a Settings tab",
+      "Do not add a tab because a section grew long: let it scroll",
+    ],
+  }}
+/>
+
+## When not to use it
+
+- **Module pages.** A list, a dashboard, or a settings area is not about one identifiable resource. Compose those directly in `Page` without a resource header.
+- **Pages needing bespoke chrome.** Drop down to `Page` + `ResourceHeader` and assemble by hand. This component stays strict on purpose.

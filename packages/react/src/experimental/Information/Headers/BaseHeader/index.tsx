@@ -2,7 +2,7 @@ import { Fragment } from "react"
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
-import { Cross } from "@/icons/app"
+import { ClockBack, Cross } from "@/icons/app"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
@@ -62,6 +62,8 @@ interface BaseHeaderProps {
   metadataRowGap?: MetadataProps["rowGap"]
   /** Renders a 1px bottom border at the very bottom of the header. */
   showBottomBorder?: boolean
+  /** When set, renders a history button in the header actions that calls this on click. */
+  onHistoryClick?: () => void
   /** When set, renders a close button in the header actions that calls this on click. */
   onClose?: () => void
 }
@@ -81,6 +83,7 @@ export function BaseHeader({
   metadata = [],
   metadataRowGap = "none",
   showBottomBorder = false,
+  onHistoryClick,
   onClose,
 }: BaseHeaderProps) {
   const i18n = useI18n()
@@ -247,6 +250,17 @@ export function BaseHeader({
               <MobileDropdown items={visibleOtherActions} />
             </div>
           )}
+          {onHistoryClick && (
+            <div className="w-full md:hidden [&>*]:w-full">
+              <F0Button
+                label={i18n.actions.history}
+                icon={ClockBack}
+                variant="outline"
+                size="lg"
+                onClick={onHistoryClick}
+              />
+            </div>
+          )}
           {onClose && (
             <div className="w-full md:hidden [&>*]:w-full">
               <F0Button
@@ -261,6 +275,17 @@ export function BaseHeader({
         </div>
 
         <div className="-m-1 hidden w-fit shrink-0 flex-wrap items-center gap-x-2 gap-y-2 p-1 md:flex md:overflow-x-auto">
+          {onHistoryClick && (
+            <div className="hidden md:block">
+              <F0Button
+                label={i18n.actions.history}
+                hideLabel
+                icon={ClockBack}
+                variant="outline"
+                onClick={onHistoryClick}
+              />
+            </div>
+          )}
           {visibleOtherActions.length > 0 && (
             <div>
               <Dropdown items={visibleOtherActions} />
