@@ -166,6 +166,40 @@ const e = {
     language: "Language",
     audio: "Audio"
   },
+  meetingCard: {
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    inProgress: "In progress",
+    inProgressTitle: "Call in progress",
+    summarizing: "Summarizing",
+    finished: "Finished",
+    cancelled: "Cancelled",
+    startingNow: "Starting now",
+    startsIn: {
+      one: "In {{count}} min",
+      other: "In {{count}} mins"
+    },
+    startedAgo: {
+      one: "{{count}} min ago",
+      other: "{{count}} mins ago"
+    },
+    invited: {
+      one: "{{count}} guest",
+      other: "{{count}} guests"
+    },
+    inside: {
+      one: "{{count}} inside",
+      other: "{{count}} inside"
+    },
+    duration: {
+      one: "{{count}} min",
+      other: "{{count}} mins"
+    },
+    attendees: "Attendees",
+    join: "Join",
+    summary: "Summary"
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -602,8 +636,10 @@ const e = {
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
-    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    removeNamedFile: "Remove {{name}}",
+    // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
     fileUploadError: "Upload failed",
     micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
     micError: "Couldn't access the microphone.",
@@ -648,6 +684,7 @@ const e = {
     reply: "Reply",
     react: "Add reaction",
     download: "Download",
+    downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
     // Editing your own message (within the edit window). `editing` heads the
     // composer chip; `edited` is the muted marker after an edited message body.
@@ -665,7 +702,10 @@ const e = {
     previousImage: "Previous image",
     nextImage: "Next image",
     openDocument: "Open document",
+    openNamedDocument: "Open {{name}}",
     documentPreview: "Document preview",
+    videoPlayerLabel: "Video player: {{name}}",
+    loadingVideo: "Loading video: {{name}}",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",

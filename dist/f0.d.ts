@@ -2147,6 +2147,9 @@ declare type CanvasCardAvatar = {
 } | {
     type: "file";
     file: FileDef;
+} | {
+    type: "icon";
+    icon: IconType;
 };
 
 /**
@@ -4576,6 +4579,40 @@ export declare const defaultTranslations: {
         readonly language: "Language";
         readonly audio: "Audio";
     };
+    readonly meetingCard: {
+        readonly today: "Today";
+        readonly yesterday: "Yesterday";
+        readonly tomorrow: "Tomorrow";
+        readonly inProgress: "In progress";
+        readonly inProgressTitle: "Call in progress";
+        readonly summarizing: "Summarizing";
+        readonly finished: "Finished";
+        readonly cancelled: "Cancelled";
+        readonly startingNow: "Starting now";
+        readonly startsIn: {
+            readonly one: "In {{count}} min";
+            readonly other: "In {{count}} mins";
+        };
+        readonly startedAgo: {
+            readonly one: "{{count}} min ago";
+            readonly other: "{{count}} mins ago";
+        };
+        readonly invited: {
+            readonly one: "{{count}} guest";
+            readonly other: "{{count}} guests";
+        };
+        readonly inside: {
+            readonly one: "{{count}} inside";
+            readonly other: "{{count}} inside";
+        };
+        readonly duration: {
+            readonly one: "{{count}} min";
+            readonly other: "{{count}} mins";
+        };
+        readonly attendees: "Attendees";
+        readonly join: "Join";
+        readonly summary: "Summary";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -5012,7 +5049,9 @@ export declare const defaultTranslations: {
         readonly cancelRecording: "Cancel recording";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -5048,6 +5087,7 @@ export declare const defaultTranslations: {
         readonly reply: "Reply";
         readonly react: "Add reaction";
         readonly download: "Download";
+        readonly downloadNamedFile: "Download {{name}}";
         readonly removeQuote: "Remove quote";
         readonly edit: "Edit";
         readonly editing: "Editing";
@@ -5061,7 +5101,10 @@ export declare const defaultTranslations: {
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
         readonly openDocument: "Open document";
+        readonly openNamedDocument: "Open {{name}}";
         readonly documentPreview: "Document preview";
+        readonly videoPlayerLabel: "Video player: {{name}}";
+        readonly loadingVideo: "Loading video: {{name}}";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -7019,7 +7062,7 @@ export declare interface F0AlertProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AnalyticsDashboard: {
-    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
+    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
     displayName: string;
 };
 
@@ -7052,8 +7095,21 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
     presets?: PresetsDefinition<Filters>;
     /**
      * Initial filter values applied when the dashboard first renders.
+     * Used only when `filtersValue` is not provided.
      */
     defaultFilters?: FiltersState<Filters>;
+    /**
+     * Applied dashboard-level filter values. Providing this prop makes filter
+     * state controlled: reflect every `onFiltersChange` value back into it or the
+     * applied filters will not move. Takes precedence over `defaultFilters`, and
+     * must not be switched on or off after the first render.
+     */
+    filtersValue?: FiltersState<Filters>;
+    /**
+     * Called when applied dashboard-level filters change through Apply, Clear,
+     * chip removal, or preset selection.
+     */
+    onFiltersChange?: (value: FiltersState<Filters>) => void;
     /**
      * Ordered list of dashboard items to render in the grid.
      * Each item declares its type, visual config, grid span, and data fetcher.
@@ -7884,7 +7940,7 @@ export declare namespace F0CanvasCard {
  * @removeIn 5.0.0
  */
 export declare type F0CanvasCardProps = {
-    /** Avatar to display: a module icon or a file-type badge */
+    /** Avatar to display: a module icon, a file-type badge, or a plain icon */
     avatar?: CanvasCardAvatar;
     /** Primary title */
     title: string;
@@ -8273,6 +8329,45 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     orientation?: "vertical" | "horizontal";
     /** Stack all series into a single bar per category. @default false */
     stacked?: boolean;
+    /**
+     * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
+     * labels if the widest value in that category doesn't fit the bar. The whole
+     * category drops together (all-or-nothing), so a tight chart never shows a
+     * ragged, half-labelled set instead of overlapping numbers. @default true
+     */
+    hideOverflowingLabels?: boolean;
+    /**
+     * Per-side clearance in pixels the widest value must have before
+     * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
+     * Overrides the default, which is placement-based: **12** for stacked (inside)
+     * labels, **0** for labels outside the bar.
+     */
+    labelFitPadding?: number;
+    /**
+     * With {@link F0DataChartBarProps.hideOverflowingLabels} on, use the widest
+     * label as the fit reference for vertical columns and labels outside
+     * horizontal bars. If it exceeds the shared allowance, hide every label
+     * instead of leaving a ragged, partially labelled chart. Labels inside
+     * horizontal stacked segments always fit per segment because their available
+     * widths differ. Height overflow is also evaluated per bar. @default true
+     */
+    hideAllLabelsOnOverflow?: boolean;
+    /**
+     * Suggested number of segments on the value axis — lower values draw fewer
+     * grid lines. Applies to whichever axis is the value axis (Y for vertical
+     * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2
+     */
+    valueAxisSplitNumber?: number;
+    /**
+     * Font size in pixels for the value labels. @default 11
+     */
+    labelFontSize?: number;
+    /**
+     * Formatter for the values shown in the hover tooltip. Defaults to
+     * {@link F0DataChartBaseProps.valueFormatter}; set it to show precise values
+     * (e.g. "107,505") while the axis and labels stay compact ("107.5K").
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -9601,6 +9696,13 @@ declare interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
      * @default false
      */
     hideSubmitButton?: boolean;
+    /**
+     * When true, the submit button is only visible once the form has unsaved changes.
+     * It goes back to hidden after a successful submit.
+     * Ignored when `hideSubmitButton` is true.
+     * @default false
+     */
+    showSubmitWhenDirty?: boolean;
     /**
      * When true, hides the internal action bar (loading/success feedback).
      * Useful when the parent component provides its own action bar.
@@ -12049,9 +12151,11 @@ export declare const F0VideoPlayer: WithDataTestIdReturnType_3<typeof F0VideoPla
  *   useRestrictForwardSeek  → blocks seeking past the furthest-watched point.
  *   <Controls>              → presentation only; interactions delegated back here.
  */
-declare function F0VideoPlayerInternal({ src, poster, silent, persistControls, content, defaultLanguage, autoPlay, autoFocus, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
+declare function F0VideoPlayerInternal({ src, poster, ariaLabel, silent, persistControls, content, defaultLanguage, autoPlay, autoFocus, download, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
 
 export declare interface F0VideoPlayerProps extends DataAttributes_2 {
+    /** Accessible name for this player region. Defaults to "Video player". */
+    ariaLabel?: string;
     /**
      * Video source URL. Localizable — pass a per-locale list of dubbed renditions
      * to offer selectable audio languages; an "Audio" selector then appears,
@@ -12101,6 +12205,15 @@ export declare interface F0VideoPlayerProps extends DataAttributes_2 {
     autoPlay?: boolean;
     /** Focus the player on mount so keyboard shortcuts work immediately. Default `false`. */
     autoFocus?: boolean;
+    /**
+     * Optional download action rendered inside the player controls. Native media
+     * downloads remain disabled, so embedded surfaces that allow saving the
+     * source can expose an explicit, keyboard-accessible action here.
+     */
+    download?: {
+        label: string;
+        onClick: () => void;
+    };
     /**
      * Prevent seeking past the furthest point already watched. Renders a marker at
      * that position and blocks the cursor beyond it. Default `false`.
@@ -12872,7 +12985,11 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     title: (record: R) => string;
     /** Secondary line of text for a node. */
     subtitle?: (record: R) => string;
-    /** Avatar shown on the leading side of the node pill. */
+    /**
+     * Avatar shown on the leading side of the node pill. Its variant also drives
+     * the node silhouette: `person` → circular dot/pill, any other variant
+     * (`team`, `icon`, …) → rounded-square card.
+     */
     avatar?: (record: R) => AvatarVariant;
     /**
      * Tags rendered in the node metadata row. A tag may set `column` to place it
@@ -13682,6 +13799,13 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
      * `source.lanes`). Enables the onboarding case where each policy version has
      * its own phases. NOTE: API shape pending Foundations review. */
     getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    /** Whether each group header shows a selection checkbox when the collection is
+     * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
+     * keep per-card selection while hiding the group-level checkbox — e.g. when
+     * "select a whole group" isn't a meaningful action for the consumer. Note: a
+     * collapsed group unmounts its cards, so with `false` the group's items can
+     * only be selected once the group is expanded. */
+    selectableGroups?: boolean;
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
@@ -18770,10 +18894,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -18781,8 +18903,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
