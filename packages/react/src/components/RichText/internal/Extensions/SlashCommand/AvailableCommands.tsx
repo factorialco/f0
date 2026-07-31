@@ -8,6 +8,9 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
   Image,
   List,
   Minus,
@@ -111,6 +114,45 @@ const getGroupedCommands = ({
               .run()
           },
           icon: Heading3,
+        },
+        {
+          title: translations.richTextEditor.heading4,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleHeading({ level: 4 })
+              .run()
+          },
+          icon: Heading4,
+        },
+        {
+          title: translations.richTextEditor.heading5,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleHeading({ level: 5 })
+              .run()
+          },
+          icon: Heading5,
+        },
+        {
+          title: translations.richTextEditor.heading6,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleHeading({ level: 6 })
+              .run()
+          },
+          icon: Heading6,
         },
       ],
     },

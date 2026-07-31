@@ -24,11 +24,13 @@ import {
   Pencil,
   Quote,
   Strikethrough,
+  TextSize,
   Underline,
 } from "@/icons/app"
 import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { FONT_SIZE_SCALE } from "../Extensions/FontSize"
 import { LinkPopup } from "./LinkPopup"
 import { ToolbarDivider } from "./ToolbarDivider"
 import { ToolbarDropdown } from "./ToolbarDropdown"
@@ -233,6 +235,9 @@ export const Toolbar = memo(function Toolbar({
       textAlign: (TEXT_ALIGN_OPTIONS.find(({ value }) =>
         editorInstance.isActive({ textAlign: value })
       )?.value ?? "left") as TextAlignValue,
+      fontSize: (editorInstance.getAttributes("textStyle").fontSize ?? null) as
+        | string
+        | null,
       codeBlock: editorInstance.isActive("codeBlock"),
       horizontalRule: editorInstance.isActive("horizontalRule"),
       blockquote: editorInstance.isActive("blockquote"),
@@ -261,6 +266,33 @@ export const Toolbar = memo(function Toolbar({
   const activeAlign =
     TEXT_ALIGN_OPTIONS.find(({ value }) => value === activeStates.textAlign) ??
     TEXT_ALIGN_OPTIONS[0]
+
+  // Sizes are numeric labels; the icon is the same on every row because
+  // ToolbarDropdownItem requires one and no per-size glyph exists.
+  const fontSizeGroup = (
+    <ToolbarDropdown
+      darkMode={darkMode}
+      disabled={disableButtons}
+      activator={{
+        label: translations.richTextEditor.textSize,
+        icon: TextSize,
+      }}
+      items={[
+        {
+          label: translations.richTextEditor.textSizeDefault,
+          icon: TextSize,
+          onClick: () => editor.chain().focus().unsetFontSize().run(),
+          isActive: activeStates.fontSize === null,
+        },
+        ...FONT_SIZE_SCALE.map((px) => ({
+          label: String(px),
+          icon: TextSize,
+          onClick: () => editor.chain().focus().setFontSize(`${px}px`).run(),
+          isActive: activeStates.fontSize === `${px}px`,
+        })),
+      ]}
+    />
+  )
 
   const moreOptionsGroup = (
     <div className="flex flex-row items-center gap-0.5">
@@ -357,6 +389,7 @@ export const Toolbar = memo(function Toolbar({
     showEmojiPicker && !disableButtons && emojiGroup,
     formattingGroup,
     textSizeGroup,
+    fontSizeGroup,
     moreOptionsGroup,
   ])
 
