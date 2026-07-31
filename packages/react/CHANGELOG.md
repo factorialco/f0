@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.72.0](https://github.com/factorialco/f0/compare/f0-react-v4.71.0...f0-react-v4.72.0) (2026-07-31)
+
+
+### Features
+
+* **F0CanvasCard:** add icon avatar variant ([#4940](https://github.com/factorialco/f0/issues/4940)) ([8194df4](https://github.com/factorialco/f0/commit/8194df463c33684918031097b99110165925b929))
+
 ## [4.71.0](https://github.com/factorialco/f0/compare/f0-react-v4.70.2...f0-react-v4.71.0) (2026-07-31)
 
 
