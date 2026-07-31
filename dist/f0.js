@@ -7,12 +7,12 @@ import { D as HF, E as WF, G as UF, H as _d, I as Ab, J as DN, K as AN, L as Zn,
 import { A as vde, C as pde, t as gde, s as mde, v as yde, y as _de, l as bde, i as xde, q as wde, z as Sde, B as Cde, p as Tde, r as Dde, j as Ade, e as Mde, g as Ede, k as Lde, T as Nde, w as Ide, h as kde, a as Pde, n as Rde, m as Ode, o as Bde, b as zde, f as Vde, x as Fde, c as Gde, d as Hde, u as Wde } from "./F0AiProcessingOverlay-C0NmG1vV.js";
 import { d as te, u as rf, h as KF, i as Ys, P as nf, g as Vl, j as QF, f as Pa } from "./tooltip-Cik7KBQT.js";
 import { createPortal as qv } from "react-dom";
-import { C as JF, ap as e5, aq as t5, ar as r5, as as Tw, at as n5, au as i5, av as a5, aw as o5, ax as s5, ay as l5, az as u5, j as c5, F as MN, aA as f5, aB as h5, aC as d5, aD as v5, aE as p5, aF as EN, aG as g5, aH as Zv, aI as Va, aJ as m5, aK as Mb, aL as Eb, K as y5, aM as _5, aN as hs, aO as LN, aP as b5, aQ as x5, aR as w5, aS as S5, aT as C5, aU as T5, a0 as D5, ag as A5, aV as M5, X as E5, E as L5, a as N5, e as jv, R as Lb, u as Nb, _ as NN, O as Ib, aW as IN, aX as Dw, aY as kb, s as I5, f as kN, a4 as PN, aZ as k5, a_ as P5, a$ as R5, b0 as O5, M as B5 } from "./index-BZPUbw4M.js";
-import { v as $de, w as Yde, N as Xde, x as qde, H as Zde, bm as jde, bl as Kde, bf as Qde, b2 as Jde, b1 as eve, b3 as tve, b4 as rve, b6 as nve, b7 as ive, ai as ave, ah as ove, al as sve, Z as lve, T as uve, an as cve, U as fve, y as hve, bn as dve, aj as vve, ak as pve, W as gve, z as mve, P as yve, G as _ve, I as bve, am as xve, Y as wve, ao as Sve, D as Cve, J as Tve, bp as Dve, q as Ave, r as Mve, be as Eve, bj as Lve, bj as Nve, bk as Ive, ba as kve, b9 as Pve, bo as Rve, ae as Ove, bc as Bve, bd as zve, Q as Vve, bq as Fve, br as Gve, g as Hve, bg as Wve, bh as Uve, bi as $ve, b5 as Yve, bb as Xve, h as qve, k as Zve, b8 as jve, bs as Kve } from "./index-BZPUbw4M.js";
+import { C as JF, ap as e5, aq as t5, ar as r5, as as Tw, at as n5, au as i5, av as a5, aw as o5, ax as s5, ay as l5, az as u5, j as c5, F as MN, aA as f5, aB as h5, aC as d5, aD as v5, aE as p5, aF as EN, aG as g5, aH as Zv, aI as Va, aJ as m5, aK as Mb, aL as Eb, K as y5, aM as _5, aN as hs, aO as LN, aP as b5, aQ as x5, aR as w5, aS as S5, aT as C5, aU as T5, a0 as D5, ag as A5, aV as M5, X as E5, E as L5, a as N5, e as jv, R as Lb, u as Nb, _ as NN, O as Ib, aW as IN, aX as Dw, aY as kb, s as I5, f as kN, a4 as PN, aZ as k5, a_ as P5, a$ as R5, b0 as O5, M as B5 } from "./index-Dq9rNx0D.js";
+import { v as $de, w as Yde, N as Xde, x as qde, H as Zde, bm as jde, bl as Kde, bf as Qde, b2 as Jde, b1 as eve, b3 as tve, b4 as rve, b6 as nve, b7 as ive, ai as ave, ah as ove, al as sve, Z as lve, T as uve, an as cve, U as fve, y as hve, bn as dve, aj as vve, ak as pve, W as gve, z as mve, P as yve, G as _ve, I as bve, am as xve, Y as wve, ao as Sve, D as Cve, J as Tve, bp as Dve, q as Ave, r as Mve, be as Eve, bj as Lve, bj as Nve, bk as Ive, ba as kve, b9 as Pve, bo as Rve, ae as Ove, bc as Bve, bd as zve, Q as Vve, bq as Fve, br as Gve, g as Hve, bg as Wve, bh as Uve, bi as $ve, b5 as Yve, bb as Xve, h as qve, k as Zve, b8 as jve, bs as Kve } from "./index-Dq9rNx0D.js";
 import { l as Wy, c as RN, d as bd, r as Uy } from "./F0VideoPlayer-BWRlLaGW.js";
 import { F as Jve } from "./F0VideoPlayer-BWRlLaGW.js";
-import { F as tpe, p as rpe } from "./index-Cql9uxeA.js";
-import { c as ipe } from "./pdfWorker-CMiWD9U2.js";
+import { F as tpe, p as rpe } from "./index-eDEEXSHh.js";
+import { c as ipe } from "./pdfWorker-CuZhyFDG.js";
 import { g as z5 } from "./_commonjsHelpers-ByX85dGu.js";
 import { utils as al, write as ON } from "./xlsx-CzlURDDb.js";
 import { defaultTranslations as ope } from "./i18n-provider-defaults.js";
@@ -52826,51 +52826,49 @@ function sb(r, e) {
   return r ? e ? [0, 0, ra, ra] : [ra, ra, 0, 0] : e ? [ra, 0, 0, ra] : [0, ra, ra, 0];
 }
 function Aae(r, e, t) {
-  if (!r.some(
-    (o) => o.data.some((s) => Il(s) < 0)
-  ))
-    return;
   if (!t)
-    return (o, s, l) => sb(e, l < 0);
-  const i = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Map();
-  return r.forEach((o, s) => {
-    o.data.forEach((l, u) => {
-      const c = Il(l);
-      c > 0 ? i.set(u, s) : c < 0 && a.set(u, s);
+    return r.some(
+      (o) => o.data.some((s) => Il(s) < 0)
+    ) ? (o, s, l) => sb(e, l < 0) : void 0;
+  const n = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map();
+  return r.forEach((a, o) => {
+    a.data.forEach((s, l) => {
+      const u = Il(s);
+      u > 0 ? n.set(l, o) : u < 0 && i.set(l, o);
     });
-  }), (o, s, l) => {
-    if (l === 0) return 0;
-    const u = l < 0;
-    return (u ? a : i).get(s) === o ? sb(e, u) : 0;
+  }), (a, o, s) => {
+    if (s === 0) return 0;
+    const l = s < 0;
+    return (l ? i : n).get(o) === a ? sb(e, l) : 0;
   };
 }
-function Mae(r, e, t, n, i, a, o, s, l, u, c) {
-  const f = Tae(r, e), h = Dae(r), d = i ? h ? `stacked-${e}` : "stacked" : h ? `stack-${e}` : void 0, v = r.data.map((b, S) => {
-    const x = Il(b), C = xL(b), T = l?.(e, S, x);
-    if (C === void 0 && T === void 0)
-      return x;
-    const D = C !== void 0 ? Dy(C) : void 0;
+function Mae(r, e, t, n, i, a, o, s, l, u) {
+  const c = Tae(r, e), f = Dae(r), h = i ? f ? `stacked-${e}` : "stacked" : f ? `stack-${e}` : void 0, d = r.data.map((y, _) => {
+    const b = Il(y), S = xL(y), x = s?.(e, _, b);
+    if (S === void 0 && x === void 0)
+      return b;
+    const C = S !== void 0 ? Dy(S) : void 0;
     return {
-      value: x,
+      value: b,
       itemStyle: {
-        ...C !== void 0 && { color: C },
-        ...T !== void 0 && {
-          borderRadius: T
+        ...S !== void 0 && { color: S },
+        ...x !== void 0 && {
+          borderRadius: x
         }
       },
-      ...i && D !== void 0 ? {
-        label: { color: D },
-        emphasis: { label: { color: D } }
+      ...i && C !== void 0 ? {
+        label: { color: C },
+        emphasis: { label: { color: C } }
       } : {}
     };
-  }), p = sb(t, !1), g = i && !a ? 0 : p, m = {
+  }), v = sb(t, !1), p = {
     name: r.name,
     type: "bar",
-    data: v,
-    stack: d,
+    data: d,
+    stack: h,
     itemStyle: {
-      color: f,
-      borderRadius: g
+      color: c,
+      borderRadius: v
     },
     label: {
       show: n,
@@ -52880,15 +52878,15 @@ function Mae(r, e, t, n, i, a, o, s, l, u, c) {
       // Inside a coloured segment, choose black or white per fill so small
       // canvas text retains WCAG AA contrast. Outside labels use the semantic
       // secondary foreground colour from the active theme.
-      color: i ? Dy(f) : o,
+      color: i ? Dy(c) : a,
       fontWeight: "bold",
-      fontSize: s,
+      fontSize: o,
       overflow: "truncate",
       ellipsis: "...",
       // Labels use the same value formatter as the axis/tooltip (e.g. "100K").
-      formatter: c ? (b) => c(Number(b.value)) : void 0
+      formatter: u ? (y) => u(Number(y.value)) : void 0
     },
-    labelLayout: u,
+    labelLayout: l,
     emphasis: {
       itemStyle: {
         shadowBlur: 0,
@@ -52898,34 +52896,34 @@ function Mae(r, e, t, n, i, a, o, s, l, u, c) {
       // Keep the same contrast-safe colour on hover. With labels off, add
       // nothing here — otherwise hovering a stacked bar would reveal numbers
       // that are meant to stay off.
-      ...i && n ? { label: { show: !0, color: Dy(f) } } : {}
+      ...i && n ? { label: { show: !0, color: Dy(c) } } : {}
     }
   };
-  if (!h)
-    return [m];
-  const y = r.data.map((b) => {
-    const S = Il(b), x = ob(b);
-    if (x === void 0 || x <= S)
+  if (!f)
+    return [p];
+  const g = r.data.map((y) => {
+    const _ = Il(y), b = ob(y);
+    if (b === void 0 || b <= _)
       return 0;
-    const C = xL(b);
-    return C !== void 0 ? {
-      value: x - S,
+    const S = xL(y);
+    return S !== void 0 ? {
+      value: b - _,
       itemStyle: {
         color: new zi(
           ...t ? [0, 0, 0, 1] : [1, 0, 0, 0],
           [
-            { offset: 0, color: `${C}33` },
-            { offset: 1, color: `${C}00` }
+            { offset: 0, color: `${S}33` },
+            { offset: 1, color: `${S}00` }
           ]
         ),
-        borderRadius: p
+        borderRadius: v
       }
-    } : x - S;
-  }), _ = {
+    } : b - _;
+  }), m = {
     name: `${r.name} (target)`,
     type: "bar",
-    data: y,
-    stack: d,
+    data: g,
+    stack: h,
     // Hide from legend and tooltip
     legendHoverLink: !1,
     tooltip: {
@@ -52936,13 +52934,13 @@ function Mae(r, e, t, n, i, a, o, s, l, u, c) {
         ...t ? [0, 0, 0, 1] : [1, 0, 0, 0],
         [
           // offset 0 = far end from the solid bar → more opaque (darker)
-          { offset: 0, color: `${f}33` },
+          { offset: 0, color: `${c}33` },
           // offset 1 = near the solid bar → transparent
-          { offset: 1, color: `${f}00` }
+          { offset: 1, color: `${c}00` }
         ]
       ),
       // Only round the far end (away from the solid bar)
-      borderRadius: p
+      borderRadius: v
     },
     label: {
       show: !1
@@ -52951,7 +52949,7 @@ function Mae(r, e, t, n, i, a, o, s, l, u, c) {
       disabled: !0
     }
   };
-  return [m, _];
+  return [p, m];
 }
 function Eae(r) {
   return {
@@ -53017,7 +53015,6 @@ function Lae(r, {
         S,
         s,
         i,
-        U === t.length - 1,
         y.colors.foregroundSecondary,
         x,
         E,
