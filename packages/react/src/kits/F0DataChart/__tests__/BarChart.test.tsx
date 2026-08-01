@@ -1124,6 +1124,23 @@ describe("BarChart — item tooltip", () => {
     expect(description).toContain("5 more values")
     expect(description).not.toContain("Category 21")
   })
+
+  it("lets a caller's own echartsOptions.tooltip win over the built-in one", () => {
+    const ownFormatter = () => "custom tooltip"
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [1] }]}
+        echartsOptions={{
+          tooltip: { trigger: "axis", formatter: ownFormatter },
+        }}
+      />
+    )
+
+    const tooltip = getTooltipFormatter()
+    expect(tooltip).toBe(ownFormatter)
+  })
 })
 
 describe("BarChart — horizontal category density", () => {

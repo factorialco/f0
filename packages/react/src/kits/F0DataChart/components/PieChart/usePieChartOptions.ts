@@ -2,6 +2,8 @@ import type * as echarts from "echarts"
 
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type { F0DataChartPieProps } from "../../types"
 
 import {
@@ -50,6 +52,7 @@ export function usePieChartOptions(
   size: PieChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth } = useContainerSize(containerRef)
 
   return useMemo(() => {
@@ -175,12 +178,15 @@ export function usePieChartOptions(
                 ? valueFormatter(val)
                 : val.toLocaleString(),
               rows: [
-                { value: `${(p.percent ?? 0).toFixed(1)}%`, label: "of total" },
+                {
+                  value: `${(p.percent ?? 0).toFixed(1)}%`,
+                  label: i18n.dataChart.tooltip.ofTotal,
+                },
                 {
                   value: valueFormatter
                     ? valueFormatter(total)
                     : total.toLocaleString(),
-                  label: "total",
+                  label: i18n.dataChart.tooltip.total,
                 },
               ],
             },
@@ -205,6 +211,7 @@ export function usePieChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     size,
   ])

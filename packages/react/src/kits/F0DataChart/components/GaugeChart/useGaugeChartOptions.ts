@@ -2,6 +2,8 @@ import type * as echarts from "echarts"
 
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type { F0DataChartGaugeProps } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
@@ -63,6 +65,7 @@ export function useGaugeChartOptions(
   size: GaugeChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
 
   return useMemo(() => {
     const resolvedColor = color
@@ -152,7 +155,7 @@ export function useGaugeChartOptions(
               rows: [
                 span > 0 && {
                   value: `${(((val - min) / span) * 100).toFixed(1)}%`,
-                  label: "of range",
+                  label: i18n.dataChart.tooltip.ofRange,
                 },
               ],
             },
@@ -177,6 +180,7 @@ export function useGaugeChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    i18n,
     size,
   ])
 }

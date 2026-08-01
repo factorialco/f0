@@ -2,6 +2,8 @@ import type * as echarts from "echarts"
 
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type { F0DataChartFunnelProps } from "../../types"
 
 import {
@@ -35,6 +37,7 @@ export function useFunnelChartOptions(
   }: F0DataChartFunnelProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth } = useContainerSize(containerRef)
 
   return useMemo(() => {
@@ -146,14 +149,16 @@ export function useFunnelChartOptions(
         if (showConversion && firstValue > 0 && sortedIndex !== undefined) {
           conversionRows.push({
             value: formatPercent(val, firstValue),
-            label: "of total",
+            label: i18n.dataChart.tooltip.ofTotal,
           })
 
           const prevData = sortedIndex > 0 ? sorted[sortedIndex - 1] : undefined
           if (prevData && prevData.value > 0) {
             conversionRows.push({
               value: formatPercent(val, prevData.value),
-              label: `from ${prevData.name}`,
+              label: i18n.t("dataChart.tooltip.fromStage", {
+                stage: prevData.name,
+              }),
             })
           }
         }
@@ -207,6 +212,7 @@ export function useFunnelChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
   ])
 }

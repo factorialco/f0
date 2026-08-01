@@ -179,9 +179,12 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    */
   labelFontSize?: number
   /**
-   * Formatter for the values shown in the hover tooltip. Defaults to
-   * {@link F0DataChartBaseProps.valueFormatter}; set it to show precise values
-   * (e.g. "107,505") while the axis and labels stay compact ("107.5K").
+   * Formatter for the values shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the axis
+   * and labels stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which
+   * {@link F0DataChartBaseProps.valueFormatter} does not do — that one formats
+   * the axis only.
    */
   tooltipValueFormatter?: (value: number) => string
 }
@@ -204,6 +207,15 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
   showArea?: boolean
   /** Show data point dots on the lines. @default false */
   showDots?: boolean
+  /**
+   * Formatter for the values shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the axis
+   * and labels stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which
+   * {@link F0DataChartBaseProps.valueFormatter} does not do — that one formats
+   * the axis only.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 // ---------------------------------------------------------------------------

@@ -55,6 +55,9 @@ function getLatestOption() {
     legend?: { show?: boolean }
     xAxis: { axisLabel: { show: boolean } }
     yAxis: { axisLabel: { show: boolean } }
+    tooltip?: {
+      formatter?: (params: unknown) => string
+    }
   }
 }
 
@@ -155,5 +158,40 @@ describe("LineChart — responsive breakpoints", () => {
     expect(option.legend?.show).toBe(true)
     expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(true)
+  })
+})
+
+describe("LineChart — tooltip value formatting", () => {
+  const hoverFirstPoint = () =>
+    getLatestOption().tooltip?.formatter?.([
+      { axisValue: "A", seriesName: "S", value: 107505, dataIndex: 0 },
+    ])
+
+  it("shows full numbers rather than the compact axis format", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+      />
+    )
+
+    expect(hoverFirstPoint()).toContain((107505).toLocaleString())
+    expect(hoverFirstPoint()).not.toContain("108K")
+  })
+
+  it("lets tooltipValueFormatter keep a unit the axis formatter would drop", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        tooltipValueFormatter={(v) => `${v.toLocaleString("en-US")} €`}
+      />
+    )
+
+    expect(hoverFirstPoint()).toContain("107,505 €")
   })
 })

@@ -1,6 +1,8 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
@@ -150,12 +152,14 @@ export function useLineChartOptions(
     showGrid = true,
     showLabels = false,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
     echartsOptions,
   }: F0DataChartLineProps,
   size: LineChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
 
@@ -190,8 +194,14 @@ export function useLineChartOptions(
 
     const legendData = series.map((s) => s.name)
 
-    // Tooltips show full numbers, not the compact axis format.
-    const formatTooltipValue = (value: number) => value.toLocaleString()
+    // `valueFormatter` formats the value AXIS, which is usually compact
+    // ("125k"); tooltips show the full number instead ("125,000").
+    // `tooltipValueFormatter` overrides that — it is also the way to keep a
+    // unit (currency, "%") in the tooltip.
+    const formatTooltipValue = (value: number) =>
+      tooltipValueFormatter
+        ? tooltipValueFormatter(value)
+        : value.toLocaleString()
 
     // Lines keep the axis trigger — a line is too thin to hover reliably —
     // but render the shared tooltip card. With one series that is the same
@@ -224,7 +234,14 @@ export function useLineChartOptions(
             title: String(first.seriesName ?? ""),
             subtitle: category,
             value: formatTooltipValue(value),
-            rows: [deltaRow(value, previous, "from previous", theme)],
+            rows: [
+              deltaRow(
+                value,
+                previous,
+                i18n.dataChart.tooltip.fromPrevious,
+                theme
+              ),
+            ],
           },
           theme
         )
@@ -271,9 +288,11 @@ export function useLineChartOptions(
     showGrid,
     showLabels,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     containerHeight,
     size,

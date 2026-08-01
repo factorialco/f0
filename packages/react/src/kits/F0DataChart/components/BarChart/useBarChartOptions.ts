@@ -2,6 +2,7 @@ import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   F0DataChartBarDataPoint,
@@ -462,6 +463,7 @@ export function useBarChartOptions(
   size: BarChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
   const prefersReducedMotion = useReducedMotion()
@@ -590,8 +592,10 @@ export function useBarChartOptions(
     // numbers), otherwise fall back to the shared value formatter.
     const tooltipValue = tooltipValueFormatter ?? valueFormatter
 
-    // Tooltips show full numbers, not the compact axis format ("125,000", not
-    // "125k"). `tooltipValueFormatter` exists precisely to override this.
+    // `valueFormatter` formats the value AXIS, which is usually compact
+    // ("125k"); tooltips show the full number instead ("125,000").
+    // `tooltipValueFormatter` overrides that — it is also the way to keep a
+    // unit (currency, "%") in the tooltip.
     const formatTooltipValue = (value: number) =>
       tooltipValueFormatter
         ? tooltipValueFormatter(value)
@@ -684,11 +688,14 @@ export function useBarChartOptions(
     }
 
     // Bar charts use an item-triggered tooltip about the hovered bar or
-    // segment (pairing with the stacked series highlight) instead of the
-    // axis tooltip listing every series: value large, then change vs. the
-    // previous category and — with multiple series — the category total
-    // and the hovered value's share of it.
-    {
+    // segment (pairing with the stacked series highlight) instead of the axis
+    // tooltip listing every series: value large, then — with multiple series —
+    // the hovered value's share of the category total, that total, and the
+    // target when there is one.
+    //
+    // `buildBaseChartOptions` has already merged `echartsOptions`, so a caller
+    // that passed its own tooltip keeps it: only build ours when it didn't.
+    if (echartsOptions?.tooltip === undefined) {
       options.tooltip = buildItemTooltip({
         theme,
         formatter: (params: unknown) => {
@@ -726,15 +733,15 @@ export function useBarChartOptions(
                 multiSeries &&
                   total > 0 && {
                     value: `${((value / total) * 100).toFixed(1)}%`,
-                    label: "of total",
+                    label: i18n.dataChart.tooltip.ofTotal,
                   },
                 multiSeries && {
                   value: formatTooltipValue(total),
-                  label: "total",
+                  label: i18n.dataChart.tooltip.total,
                 },
                 target !== undefined && {
                   value: formatTooltipValue(target),
-                  label: "target",
+                  label: i18n.dataChart.tooltip.target,
                 },
               ],
             },
@@ -775,6 +782,7 @@ export function useBarChartOptions(
     valueAxisSplitNumber,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     containerHeight,
     size,
