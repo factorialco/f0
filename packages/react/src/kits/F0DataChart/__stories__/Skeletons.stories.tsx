@@ -8,6 +8,7 @@ import {
   LineChartSkeleton,
   PieChartSkeleton,
   RadarChartSkeleton,
+  ScatterChartSkeleton,
 } from "../skeletons"
 import { ChartDecorator } from "./decorators"
 
@@ -85,4 +86,12 @@ export const Gauge: StoryObj = {
 
 export const Heatmap: StoryObj = {
   render: () => <HeatmapChartSkeleton />,
+}
+
+export const Scatter: StoryObj = {
+  render: () => <ScatterChartSkeleton />,
+}
+
+export const ScatterNoLegend: StoryObj = {
+  render: () => <ScatterChartSkeleton showLegend={false} />,
 }

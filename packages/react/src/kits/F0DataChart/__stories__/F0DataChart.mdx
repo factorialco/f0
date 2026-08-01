@@ -6,6 +6,7 @@ import * as PieStories from "./Pie.stories"
 import * as RadarStories from "./Radar.stories"
 import * as GaugeStories from "./Gauge.stories"
 import * as HeatmapStories from "./Heatmap.stories"
+import * as ScatterStories from "./Scatter.stories"
 import * as SkeletonsStories from "./Skeletons.stories"
 import * as EmptyStatesStories from "./EmptyStates.stories"
 
@@ -30,6 +31,7 @@ import { F0DataChart } from "@factorialco/f0-react"
 | `radar`   | Multi-dimensional comparisons        | `series`, `indicators`, `showArea`                         |
 | `gauge`   | Single KPI / progress indicator      | `value`, `min`, `max`, `name`                              |
 | `heatmap` | Density across two dimensions        | `data`, `xCategories`, `yCategories`, `showLabels`         |
+| `scatter` | Relationship between two measures    | `series`, `pointSize`, `scaleAxes`, `xValueFormatter`      |
 
 All variants share an optional `emptyState` prop — see [Empty states](#empty-states).
 
@@ -294,6 +296,53 @@ At high density rounded squares collapse into perfect dots — the same `borderR
 The same chart rendered in every breakpoint (small / medium / large) and density (low / normal / large) — mirrors the Figma matrix at file `1smmEIugmR0CNeu7NvK33y` node `10218-20575`.
 
 <Canvas of={HeatmapStories.ResponsiveSnapshotMatrix} />
+
+---
+
+## Scatter Chart
+
+Show the relationship between two measures — one on each axis, one point per entity. Unlike every other cartesian variant there is no category axis: both axes are continuous, so `categories` does not apply. Each point may carry a `label` identifying it, which becomes the tooltip header.
+
+Reach for scatter when the question is "does X relate to Y?". For a trend over time use `line`; for a comparison across categories use `bar`.
+
+<Canvas of={ScatterStories.Default} />
+<Controls of={ScatterStories.Default} />
+
+### Color split
+
+Pass more than one series to split the points by a group dimension. The legend appears only when there is a split to explain — a single-series scatter would otherwise show one chip restating the title.
+
+<Canvas of={ScatterStories.ColorSplit} />
+
+### Axis scaling
+
+Both axes fit their data range by default. Set `scaleAxes: false` to anchor them at the origin — meaningful when distance from zero matters, wasteful when the values sit far from it.
+
+<Canvas of={ScatterStories.AnchoredAtOrigin} />
+
+### Point size
+
+<Canvas of={ScatterStories.CustomPointSize} />
+
+### Density
+
+Points render at 85% opacity so overlapping regions read as density rather than a solid block.
+
+<Canvas of={ScatterStories.Dense} />
+
+### Tuple points
+
+Points can be bare `[x, y]` tuples when they need no identity, instead of `{ x, y, label }` objects.
+
+<Canvas of={ScatterStories.TuplePoints} />
+
+### Responsive Snapshot
+
+Both axes carry numeric ticks that are equally load-bearing, so unlike bar and line — which drop their category axis first — scatter shows or hides both axes together.
+
+<Canvas of={ScatterStories.ResponsiveSnapshotMatrix} />
+
+> **Note:** scatter cannot be converted to or from other chart types in the dashboard chart-type switcher. A measure-against-measure payload has no meaningful bar or line equivalent.
 
 ---
 

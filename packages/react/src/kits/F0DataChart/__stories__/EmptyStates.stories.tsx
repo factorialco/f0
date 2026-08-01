@@ -64,6 +64,12 @@ export const EmptyHeatmap: Story = {
   },
 }
 
+export const EmptyScatter: Story = {
+  // No series at all, or every series without points. A point at [0, 0] is
+  // NOT empty — the origin is a legitimate coordinate.
+  args: { type: "scatter", series: [] },
+}
+
 // ---------------------------------------------------------------------------
 // Behavior showcases
 // ---------------------------------------------------------------------------
@@ -140,6 +146,7 @@ const SNAPSHOT_VARIANTS: { label: string; props: F0DataChartProps }[] = [
       data: [],
     },
   },
+  { label: "Scatter", props: { type: "scatter", series: [] } },
 ]
 
 /** Chromatic-only matrix that covers every empty variant in one snapshot. */

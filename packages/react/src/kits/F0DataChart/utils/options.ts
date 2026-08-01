@@ -237,6 +237,13 @@ interface ValueAxisOptions {
   scale?: boolean
   /** Padding at each end of the axis, so a point on the min/max isn't clipped. */
   boundaryGap?: [string | number, string | number]
+  /**
+   * Anchor the first and last labels to the axis ends so they cannot overflow
+   * the chart container — the value-axis counterpart of `edgeAligned` on
+   * {@link buildCategoryAxis}. Needed when the axis bound coincides with the
+   * plot edge, which is the normal case for a scaled axis.
+   */
+  alignEdgeLabels?: boolean
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -249,6 +256,7 @@ export function buildValueAxis({
   splitNumber,
   scale,
   boundaryGap,
+  alignEdgeLabels,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
@@ -267,6 +275,9 @@ export function buildValueAxis({
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
       hideOverlap: true,
+      ...(alignEdgeLabels
+        ? { alignMinLabel: "left" as const, alignMaxLabel: "right" as const }
+        : {}),
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(Number(_value)),

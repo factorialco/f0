@@ -43,6 +43,17 @@ function resolveResponsiveDisplay(size: ScatterChartSize) {
 }
 
 /**
+ * Padding added beyond the data extremes on both value axes.
+ *
+ * With `scale` on, the most extreme point sits exactly on the axis bound —
+ * which clips the point itself (`series.clip` defaults true) and pushes the
+ * final tick label past the edge of the canvas. Bar and line never hit this
+ * because their value axis is anchored at zero and rounded to nice bounds,
+ * leaving slack at the top.
+ */
+const AXIS_BOUNDARY_GAP: [string, string] = ["3%", "3%"]
+
+/**
  * Convert an F0 scatter point into an ECharts data item.
  *
  * A `label` is emitted as ECharts' `name`, which surfaces as `params.name` in
@@ -165,6 +176,10 @@ export function useScatterChartOptions(
       formatter: xValueFormatter,
       show: showAxes,
       scale: scaleAxes,
+      // The X bound sits at the plot edge, so its end labels would otherwise
+      // render half outside the canvas.
+      alignEdgeLabels: true,
+      ...(scaleAxes ? { boundaryGap: AXIS_BOUNDARY_GAP } : {}),
     })
 
     const yAxis = buildValueAxis({
@@ -174,6 +189,7 @@ export function useScatterChartOptions(
       show: showAxes,
       scale: scaleAxes,
       maxLabelWidth: yAxisMaxLabelWidth,
+      ...(scaleAxes ? { boundaryGap: AXIS_BOUNDARY_GAP } : {}),
     })
 
     const baseOptions: echarts.EChartsOption = {
