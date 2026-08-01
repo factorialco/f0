@@ -214,6 +214,21 @@ export interface ChatDashboardHeatmapChartConfig {
   valueFormat?: FormatPreset
 }
 
+export interface ChatDashboardScatterChartConfig {
+  type: "scatter"
+  pointSize?: number
+  scaleAxes?: boolean
+  showGrid?: boolean
+  /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
+  xAxisName?: string
+  /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */
+  yAxisName?: string
+  /** Formats the Y measure */
+  valueFormat?: FormatPreset
+  /** Formats the X measure, which is a second measure rather than a category */
+  xValueFormat?: FormatPreset
+}
+
 export type ChatDashboardChartConfig =
   | ChatDashboardBarChartConfig
   | ChatDashboardLineChartConfig
@@ -222,6 +237,7 @@ export type ChatDashboardChartConfig =
   | ChatDashboardPieChartConfig
   | ChatDashboardGaugeChartConfig
   | ChatDashboardHeatmapChartConfig
+  | ChatDashboardScatterChartConfig
 
 export type ChatDashboardMetricFormat =
   | { type: "number" }
@@ -294,6 +310,21 @@ export interface HeatmapComputation {
   yAxis: string
   valueColumn: string
   aggregation: AggregationType
+}
+
+/**
+ * Both axes are measures, so there is no aggregation: a scatter plots one
+ * point per row rather than grouping rows into categories. `label` names the
+ * column identifying each point, and `series` the optional column that splits
+ * the points into colour groups.
+ */
+export interface ScatterComputation {
+  datasetId: string
+  xAxis: string
+  yAxis: string
+  label?: string
+  series?: string
+  limit?: number
 }
 
 export interface CollectionComputation {
@@ -397,6 +428,7 @@ export interface ChatDashboardChartItem extends ChatDashboardItemBase {
     | PieComputation
     | GaugeComputation
     | HeatmapComputation
+    | ScatterComputation
 }
 
 export interface ChatDashboardMetricItem extends ChatDashboardItemBase {
