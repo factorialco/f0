@@ -43,6 +43,7 @@ import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import {
   defaultChartConfig,
   detectDataShape,
+  isRenderableChart,
   fromCanonical,
   compatibleTargetTypes,
   toCanonical,
@@ -111,29 +112,6 @@ function buildChartTypeOptions(
 // ---------------------------------------------------------------------------
 // Skeleton picker
 // ---------------------------------------------------------------------------
-
-/**
- * Chart types this build knows how to render. Anything else reaches the type
- * switches below, none of which have a default.
- *
- * Declared as a `satisfies Record<…>` rather than a `Set<Union>`, because the
- * latter only checks that each listed member belongs to the union — it would
- * let a ninth chart type go unlisted and silently render as unsupported,
- * which is the very skew this guard exists to absorb. This way, adding a type
- * without listing it fails the build. Mirrors `EmptyState`'s `skeletonByType`.
- */
-const RENDERABLE_CHART_TYPES = new Set(
-  Object.keys({
-    bar: true,
-    line: true,
-    funnel: true,
-    pie: true,
-    radar: true,
-    gauge: true,
-    heatmap: true,
-    scatter: true,
-  } satisfies Record<DashboardChartConfig["type"], true>)
-)
 
 /** Stands in for an unrenderable config so hooks stay on their happy path. */
 const FALLBACK_CHART_CONFIG: DashboardChartConfig = { type: "bar" }
@@ -509,8 +487,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // `undefined`. Every path below switches on `chart.type` without a default,
   // so rendering it would throw and take the whole dashboard with it. Detect
   // it once and degrade to this item's own error state.
-  const unrenderableChart =
-    item.chart == null || !RENDERABLE_CHART_TYPES.has(item.chart.type)
+  const unrenderableChart = !isRenderableChart(item.chart)
   const safeChart = unrenderableChart ? FALLBACK_CHART_CONFIG : item.chart
 
   const downloadActions = useChartDownloadActions({
@@ -578,7 +555,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // chart. Gauge has the same shape and the same latent trap, but it also has
   // that route today; taking it away is a change existing users would see, so
   // it belongs in its own PR rather than riding along with a new chart type.
-  const hidesChartTypePicker = safeChart.type === "scatter"
+  // Keyed on the data shape, not the config, because that is what the option
+  // list above is keyed on — an item configured as something else whose data
+  // arrives as `scatterSeries` gets the same one-entry list and needs the same
+  // treatment.
+  const hidesChartTypePicker = dataShape === "scatter"
 
   const chartTypeOptions =
     onTransformChart && !hidesChartTypePicker

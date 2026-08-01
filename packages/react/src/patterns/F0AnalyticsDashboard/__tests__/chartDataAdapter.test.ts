@@ -106,6 +106,30 @@ describe("canonical round trip — scatter", () => {
     expect(canonical.categories).toEqual(["12"])
   })
 
+  it("aligns series on a shared category set rather than by position", () => {
+    // Scatter series carry independent point sets of unequal length — that is
+    // the premise of the type. Mapping positionally would put Sales' first
+    // value under Engineering's first label.
+    const canonical = toCanonical({
+      scatterSeries: [
+        {
+          name: "Engineering",
+          data: [
+            { x: 1, y: 10, label: "Ana" },
+            { x: 2, y: 20, label: "Marc" },
+          ],
+        },
+        { name: "Sales", data: [{ x: 3, y: 30, label: "Genís" }] },
+      ],
+    })
+
+    expect(canonical.categories).toEqual(["Ana", "Marc", "Genís"])
+    expect(canonical.series).toEqual([
+      { name: "Engineering", data: [10, 20, 0] },
+      { name: "Sales", data: [0, 0, 30] },
+    ])
+  })
+
   it("rebuilds a renderable scatter payload", () => {
     const canonical = toCanonical(scatterData)
     const rebuilt = fromCanonical(canonical, "scatter")
