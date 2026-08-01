@@ -26,8 +26,12 @@ export interface ChartThemeColors {
    * non-transparent background, falling back to {@link background}. Use this
    * when a chart needs to blend into its own surface (a tinted card, a modal)
    * rather than into the page.
+   *
+   * Always set by {@link resolveChartTheme}; optional only so that themes built
+   * by hand (test fixtures, consumer overrides) keep compiling — read it as
+   * `containerBackground ?? background`.
    */
-  containerBackground: string
+  containerBackground?: string
 }
 
 /** Tooltip visual configuration */

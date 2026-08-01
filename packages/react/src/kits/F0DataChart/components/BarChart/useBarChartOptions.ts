@@ -555,7 +555,7 @@ export function useBarChartOptions(
         showLabels,
         stacked,
         theme.colors.foregroundSecondary,
-        theme.colors.containerBackground,
+        theme.colors.containerBackground ?? theme.colors.background,
         resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
