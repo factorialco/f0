@@ -451,6 +451,7 @@ export const defaultTranslations = {
     dashboardItem: {
       chartType: "Chart type",
       errorTitle: "Error loading data",
+      unsupportedChart: "This widget uses a chart type this version can't show",
       retry: "Retry",
       dataExplanation: "Where does this data come from?",
     },

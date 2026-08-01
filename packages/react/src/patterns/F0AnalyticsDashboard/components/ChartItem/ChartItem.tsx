@@ -115,10 +115,25 @@ function buildChartTypeOptions(
 /**
  * Chart types this build knows how to render. Anything else reaches the type
  * switches below, none of which have a default.
+ *
+ * Declared as a `satisfies Record<…>` rather than a `Set<Union>`, because the
+ * latter only checks that each listed member belongs to the union — it would
+ * let a ninth chart type go unlisted and silently render as unsupported,
+ * which is the very skew this guard exists to absorb. This way, adding a type
+ * without listing it fails the build. Mirrors `EmptyState`'s `skeletonByType`.
  */
-const RENDERABLE_CHART_TYPES: ReadonlySet<string> = new Set<
-  DashboardChartConfig["type"]
->(["bar", "line", "funnel", "pie", "radar", "gauge", "heatmap", "scatter"])
+const RENDERABLE_CHART_TYPES = new Set(
+  Object.keys({
+    bar: true,
+    line: true,
+    funnel: true,
+    pie: true,
+    radar: true,
+    gauge: true,
+    heatmap: true,
+    scatter: true,
+  } satisfies Record<DashboardChartConfig["type"], true>)
+)
 
 /** Stands in for an unrenderable config so hooks stay on their happy path. */
 const FALLBACK_CHART_CONFIG: DashboardChartConfig = { type: "bar" }
@@ -606,10 +621,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
       error={
         error ??
         (unrenderableChart
-          ? new Error(translations.ai.dashboardItem.errorTitle)
+          ? new Error(translations.ai.dashboardItem.unsupportedChart)
           : undefined)
       }
-      onRetry={retry}
+      // Refetching cannot conjure a chart config this build understands, so
+      // an unrenderable item gets no Retry button.
+      onRetry={unrenderableChart ? undefined : retry}
       skeleton={chartSkeleton(safeChart)}
       actions={allActions}
       editMode={editMode}

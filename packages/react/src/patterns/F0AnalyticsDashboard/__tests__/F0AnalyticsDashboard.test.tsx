@@ -239,11 +239,68 @@ describe("F0AnalyticsDashboard — unrenderable chart config", () => {
       />
     )
 
-    // The bad widget reports an error…
+    // The bad widget names the actual condition…
     await waitFor(() =>
-      expect(getVisibleByText("Error loading data")).toBeInTheDocument()
+      expect(
+        getVisibleByText(
+          "This widget uses a chart type this version can't show"
+        )
+      ).toBeInTheDocument()
     )
     // …and its neighbour still renders.
     expect(getVisibleByText("Headcount")).toBeInTheDocument()
+  })
+
+  it("does not offer Retry for a condition refetching cannot fix", async () => {
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[
+          {
+            id: "broken",
+            title: "Broken widget",
+            type: "chart",
+            chart: undefined as never,
+            fetchData: vi.fn().mockResolvedValue({}),
+          },
+        ]}
+      />
+    )
+
+    await waitFor(() =>
+      expect(
+        getVisibleByText(
+          "This widget uses a chart type this version can't show"
+        )
+      ).toBeInTheDocument()
+    )
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull()
+  })
+
+  it("states the condition once, not as both title and description", async () => {
+    // `getVisibleByText` picks the first match, so it would happily pass on a
+    // duplicated render — assert the count directly instead.
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[
+          {
+            id: "broken",
+            title: "Broken widget",
+            type: "chart",
+            chart: undefined as never,
+            fetchData: vi.fn().mockResolvedValue({}),
+          },
+        ]}
+      />
+    )
+
+    await waitFor(() =>
+      expect(
+        screen.getAllByText(
+          "This widget uses a chart type this version can't show"
+        )
+      ).toHaveLength(1)
+    )
   })
 })
