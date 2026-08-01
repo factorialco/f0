@@ -2472,7 +2472,7 @@ export declare const defaultTranslations: {
         readonly forwardTo: "Forward to…";
         readonly forwarded: "Forwarded";
         readonly forwardSearchPlaceholder: "Search conversations";
-        readonly forwardCommentPlaceholder: "Add a comment (optional)";
+        readonly forwardNoResults: "No conversations found";
         readonly forwardConfirm: "Forward";
         readonly download: "Download";
         readonly downloadNamedFile: "Download {{name}}";
