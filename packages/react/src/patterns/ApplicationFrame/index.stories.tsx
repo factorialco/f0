@@ -94,6 +94,7 @@ import {
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { useChatForward } from "@/sds/chat/F0Chat/mocks/useChatForward"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { Action } from "@/ui/Action"
@@ -1088,6 +1089,11 @@ const MockChatPanel = ({
     seed?.myRole,
     { members: seed?.participants }
   )
+  // "Forward" opens a picker dialog OWNED BY THE HOST (same pattern as Edit
+  // group above) so the user can send a copy of a message into any other
+  // conversation they belong to — F0Chat itself has no notion of other
+  // channels to pick from.
+  const { forwardMessage, forwardDialog } = useChatForward(convId)
   const {
     visualizationMode,
     setVisualizationMode,
@@ -1097,7 +1103,7 @@ const MockChatPanel = ({
   const isFullscreen = visualizationMode === "fullscreen"
 
   return (
-    <F0ChatProvider runtime={previewRuntime}>
+    <F0ChatProvider runtime={{ ...previewRuntime, forwardMessage }}>
       <F0Chat
         isFullscreen={isFullscreen}
         onToggleFullscreen={() =>
@@ -1109,8 +1115,10 @@ const MockChatPanel = ({
         }}
         headerActions={headerActions}
       />
-      {/* The Edit action's dialog is the HOST's — rendered outside F0Chat. */}
+      {/* Edit group's and Forward's dialogs are the HOST's — rendered outside
+          F0Chat, same as any other host-owned action UI. */}
       {editDialog}
+      {forwardDialog}
     </F0ChatProvider>
   )
 }

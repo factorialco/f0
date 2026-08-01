@@ -187,6 +187,18 @@ export type F0ChatMessageReply = {
   attachments?: F0ChatAttachment[]
 }
 
+/**
+ * Snapshot of the original message a forwarded copy carries, shown as the
+ * non-interactive "Forwarded" tag (no jump-to-source — the destination
+ * conversation's members may not belong to the origin channel, unlike a
+ * same-channel reply quote).
+ */
+export type F0ChatForwardedFrom = F0ChatMessageReply & {
+  /** Origin channel's title, for a "Forwarded from #channel" label. Omit when
+   * the host doesn't want to reveal where the message came from. */
+  channelTitle?: string
+}
+
 export type F0ChatMessage = {
   /**
    * Discriminant against {@link F0ChatSystemMessage}. Optional — an absent
@@ -222,6 +234,13 @@ export type F0ChatMessage = {
    */
   linkPreviews?: F0ChatLinkPreview[]
   replyTo?: F0ChatMessageReply
+  /**
+   * Present when this message is a forwarded copy of another message —
+   * possibly from a different conversation. Mutually exclusive with
+   * `replyTo` (a forwarded message doesn't also carry its own reply quote).
+   * Renders the non-interactive "Forwarded" tag instead of a reply quote.
+   */
+  forwardedFrom?: F0ChatForwardedFrom
   /**
    * People mentioned in this message (groups only). Drives the `@name` chip
    * highlighting in the bubble; a chip whose id is the current user gets the
@@ -320,6 +339,17 @@ export type F0ChatSendInput = {
   body: string
   attachments?: F0ChatAttachment[]
   replyToId?: string
+  /**
+   * Set when this send is constructing a forwarded copy in the DESTINATION
+   * channel — carries the full origin snapshot (not just an id) because the
+   * origin message may not be loaded in this channel's runtime at all. The
+   * host's `sendMessage` stores it verbatim on the new message (factorial →
+   * a custom field on the Stream message, e.g. `custom_data: {
+   * forwarded_from_message_id, forwarded_from_channel_cid,
+   * forwarded_from_user_id }` — Stream has no native cross-channel quote:
+   * `quoted_message_id` only resolves within the same channel).
+   */
+  forwardedFrom?: F0ChatForwardedFrom
   /** People mentioned in the body (groups only). The host maps these to the
    * transport's mention field (factorial → Stream `mentioned_users`). */
   mentions?: F0ChatMention[]
@@ -512,6 +542,17 @@ export type F0ChatRuntime = {
    * anytime). factorial sets a fixed window (e.g. 15 min).
    */
   editWindowMs?: number
+  /**
+   * Forward a message to another conversation. Omit to disable forwarding —
+   * the "Forward" action then never shows. Unlike the other actions here,
+   * this isn't a transport call itself: it's the host's cue to open ITS OWN
+   * conversation-picker dialog (same pattern as a header action opening its
+   * own "Edit group" dialog outside F0Chat — F0Chat has no notion of other
+   * channels to pick from). Once the user picks target(s), the host sends a
+   * copy into each with `sendMessage({ body, forwardedFrom })` on that
+   * channel's own runtime/adapter instance.
+   */
+  forwardMessage?: (message: F0ChatMessage) => void | Promise<void>
   /** Called as the user types so the runtime can emit typing.start/stop. */
   onInputActivity: () => void
   /**

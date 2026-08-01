@@ -11,6 +11,7 @@ import {
   AlertCircleLine,
   Pencil,
   Reply,
+  Share,
   Plus,
 } from "@/icons/app"
 import { Picker } from "@/sds/social/Reactions/Picker"
@@ -84,6 +85,7 @@ export const ChatMessageActions = ({
     editMessage,
     editWindowMs,
     retryMessage,
+    forwardMessage,
     capabilities,
   } = useF0ChatStable()
   const { setReplyTo } = useChatReply()
@@ -246,6 +248,13 @@ export const ChatMessageActions = ({
                   setReplyTo(message)
                 })}
               />
+              {forwardMessage && !message.deleted && (
+                <MenuItem
+                  icon={Share}
+                  label={i18n.chat.forward}
+                  onClick={runAndClose(() => forwardMessage(message))}
+                />
+              )}
               <MenuItem
                 icon={Files}
                 label={i18n.actions.copy}

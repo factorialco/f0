@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
 import { senderNameColorClass } from "../utils/sender-color"
+import { ChatForwardedTag } from "./ChatForwardedTag"
 import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
@@ -147,20 +148,30 @@ const ChatBubbleImpl = ({
           message.status === "failed" && "opacity-60"
         )}
       >
-        {message.replyTo && (
-          <ReplyQuote
-            reply={message.replyTo}
+        {message.forwardedFrom ? (
+          <ChatForwardedTag
+            forwarded={message.forwardedFrom}
             isMine={isMine}
             isFirstOfRun={isFirstOfRun}
           />
+        ) : (
+          message.replyTo && (
+            <ReplyQuote
+              reply={message.replyTo}
+              isMine={isMine}
+              isFirstOfRun={isFirstOfRun}
+            />
+          )
         )}
         {message.linkPreviews && message.linkPreviews.length > 0 && (
           <ChatLinkPreview
             previews={message.linkPreviews}
             isMine={isMine}
-            // Below a reply quote the card no longer touches the bubble's top —
-            // keep it fully rounded there.
-            isFirstOfRun={message.replyTo ? true : isFirstOfRun}
+            // Below a reply quote/forwarded tag the card no longer touches the
+            // bubble's top — keep it fully rounded there.
+            isFirstOfRun={
+              message.replyTo || message.forwardedFrom ? true : isFirstOfRun
+            }
           />
         )}
         <div className="px-3.5 py-2.5">

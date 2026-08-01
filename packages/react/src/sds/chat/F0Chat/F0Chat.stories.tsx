@@ -67,6 +67,52 @@ const groupChannel = {
 }
 
 /**
+ * A DM carrying a forwarded message: the non-interactive "Forwarded" tag (no
+ * jump-to-source, unlike a reply quote) plus the original author, above the
+ * body — the destination's members may not belong to the origin conversation.
+ */
+const ForwardedConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 4,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "forwarded-1",
+        author: me,
+        body: "El deck de Q3 ya está listo, revisad la sección de pricing antes del viernes 🙏",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        status: "read",
+        forwardedFrom: {
+          id: "orig-1",
+          author: anaG,
+          body: "El deck de Q3 ya está listo, revisad la sección de pricing antes del viernes 🙏",
+          channelTitle: "Product Team",
+        },
+      },
+      {
+        id: "forwarded-comment",
+        author: me,
+        body: "Os lo paso por si no lo habíais visto",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        status: "read",
+      },
+    ],
+  })
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+/**
  * Group conversation with `@`-mentions: type `@` to open the popover (with
  * `@here` pinned on top), pick a member or everyone, and send — the sent chip
  * is highlighted. The two seeded incoming messages demo a mention of you and an
@@ -925,6 +971,13 @@ export const EmojiAutocomplete: Story = {
 export const Group: Story = {
   name: "Group with mentions",
   render: () => <GroupConversation />,
+}
+
+/** A forwarded message: the non-interactive "Forwarded · Ana García" tag
+ * (Slack/WhatsApp-style) followed by the sender's own comment as a separate
+ * message — reenviar a otra conversación from the "Forward" message action. */
+export const Forwarded: Story = {
+  render: () => <ForwardedConversation />,
 }
 
 /** Membership events as centered system rows (added / left / removed) with

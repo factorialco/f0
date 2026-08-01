@@ -344,3 +344,27 @@ describe("header actions", () => {
     expect(headerActions).toHaveBeenCalledWith(runtime.channel)
   })
 })
+
+describe("forwarding", () => {
+  it("hides Forward by default (no forwardMessage on the runtime)", () => {
+    renderChat(makeRuntime())
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]
+    )
+    expect(
+      screen.queryByRole("button", { name: "Forward" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows Forward when forwardMessage is provided and fires it with the message", () => {
+    const forwardMessage = vi.fn()
+    renderChat(makeRuntime({ forwardMessage }))
+
+    // First trigger belongs to the OTHER person's message ("theirs").
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Forward" }))
+    expect(forwardMessage).toHaveBeenCalledWith(theirs)
+  })
+})

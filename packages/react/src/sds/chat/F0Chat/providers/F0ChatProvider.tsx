@@ -11,6 +11,7 @@ import {
 import {
   type F0ChatCapabilities,
   type F0ChatEditInput,
+  type F0ChatMessage,
   type F0ChatRuntime,
   type F0ChatUser,
 } from "../types"
@@ -41,6 +42,7 @@ export type F0ChatStable = {
   deleteMessage: (id: string) => void
   deleteFailedMessage?: (id: string) => void
   editMessage?: (id: string, input: F0ChatEditInput) => void
+  forwardMessage?: (message: F0ChatMessage) => void
 }
 
 const F0ChatStableContext = createContext<F0ChatStable | null>(null)
@@ -126,6 +128,8 @@ export const F0ChatProvider = ({
         void runtimeRef.current.deleteFailedMessage?.(id),
       editMessage: (id: string, input: F0ChatEditInput) =>
         void runtimeRef.current.editMessage?.(id, input),
+      forwardMessage: (message: F0ChatMessage) =>
+        void runtimeRef.current.forwardMessage?.(message),
     }),
     []
   )
@@ -136,6 +140,7 @@ export const F0ChatProvider = ({
   const hasEditMessage = !!runtime.editMessage
   const hasDeleteFailedMessage = !!runtime.deleteFailedMessage
   const hasLoadReactionUsers = !!runtime.loadReactionUsers
+  const hasForwardMessage = !!runtime.forwardMessage
 
   const stable = useMemo<F0ChatStable>(
     () => ({
@@ -152,6 +157,7 @@ export const F0ChatProvider = ({
         ? delegates.deleteFailedMessage
         : undefined,
       editMessage: hasEditMessage ? delegates.editMessage : undefined,
+      forwardMessage: hasForwardMessage ? delegates.forwardMessage : undefined,
     }),
     [
       runtime.currentUserId,
@@ -160,6 +166,7 @@ export const F0ChatProvider = ({
       hasEditMessage,
       hasDeleteFailedMessage,
       hasLoadReactionUsers,
+      hasForwardMessage,
       delegates,
     ]
   )
