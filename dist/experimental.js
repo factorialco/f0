@@ -13942,14 +13942,14 @@ const Ab = (e) => {
           u,
           e.editedAt && // WhatsApp-style "edited" marker; sits at the end of the body (the
           // bubble shows no timestamp, so there's no time to pair it with).
-          /* @__PURE__ */ n("span", { className: "ml-1 align-baseline text-sm text-f1-foreground-tertiary", children: s.chat.edited })
+          /* @__PURE__ */ n("span", { className: "ml-1 align-baseline text-sm text-f1-foreground-tertiary italic", children: s.chat.edited })
         ] })
       ]
     }
   ) });
 }, _b = gs(Bb), $b = () => {
   const e = se();
-  return /* @__PURE__ */ h("span", { className: "flex w-fit items-center gap-1 px-3.5 pt-1 text-sm text-f1-foreground-tertiary", children: [
+  return /* @__PURE__ */ h("span", { className: "flex w-fit items-center gap-1 px-3.5 pt-1 text-sm text-f1-foreground-tertiary italic", children: [
     /* @__PURE__ */ n(ye, { icon: cs, size: "sm" }),
     e.chat.forwarded
   ] });
@@ -14628,7 +14628,7 @@ const Ab = (e) => {
                               isLastOfRun: s
                             }
                           ),
-                          !v && e.editedAt && !e.deleted && /* @__PURE__ */ n("span", { className: "px-1 text-sm text-f1-foreground-tertiary", children: l.chat.edited })
+                          !v && e.editedAt && !e.deleted && /* @__PURE__ */ n("span", { className: "px-1 text-sm text-f1-foreground-tertiary italic", children: l.chat.edited })
                         ]
                       }
                     ),
