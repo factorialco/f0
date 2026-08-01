@@ -425,6 +425,13 @@ export interface ValueTooltipRow {
   color?: string
   /** ECharts' colored dot, for rows that stand for a series. Trusted HTML. */
   marker?: string
+  /**
+   * Render the value at headline size instead of the compact row size. For
+   * charts whose data point has no single headline value but whose numbers
+   * still deserve the emphasis every other chart's `value` gets — a scatter
+   * point is two coordinates, neither subordinate to the other.
+   */
+  size?: "large"
 }
 
 export interface ValueTooltipContent {
@@ -454,7 +461,21 @@ export function renderValueTooltip(
   theme: ChartTheme
 ): string {
   const secondary = `color: ${theme.colors.foregroundSecondary}; font-size: 12px`
+  const headline = "font-size: 20px; font-weight: 600; line-height: 1.2"
   const visibleRows = rows.filter((row): row is ValueTooltipRow => Boolean(row))
+
+  const renderRow = (row: ValueTooltipRow): string => {
+    const color = row.color ?? theme.colors.foreground
+    const marker = String(row.marker ?? "")
+
+    if (row.size === "large") {
+      // Label sits under its value rather than beside it: with two stacked
+      // large rows, trailing labels would leave the numbers ragged.
+      return `<div style="margin-top: 6px">${marker}<div style="${headline}; color: ${color}">${escapeTooltipText(row.value)}</div><div style="${secondary}">${escapeTooltipText(row.label)}</div></div>`
+    }
+
+    return `<div style="${secondary}">${marker}<strong style="color: ${color}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
+  }
 
   const html = [
     title !== undefined
@@ -464,15 +485,10 @@ export function renderValueTooltip(
       ? `<div style="${secondary}">${escapeTooltipText(subtitle)}</div>`
       : "",
     value !== undefined
-      ? `<div style="font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 6px">${escapeTooltipText(value)}</div>`
+      ? `<div style="${headline}; margin-top: 6px">${escapeTooltipText(value)}</div>`
       : "",
     visibleRows.length > 0
-      ? `<div style="margin-top: 6px">${visibleRows
-          .map(
-            (row) =>
-              `<div style="${secondary}">${String(row.marker ?? "")}<strong style="color: ${row.color ?? theme.colors.foreground}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
-          )
-          .join("")}</div>`
+      ? `<div style="margin-top: 6px">${visibleRows.map(renderRow).join("")}</div>`
       : "",
   ].join("")
 

@@ -55,6 +55,14 @@ function resolveResponsiveDisplay(size: ScatterChartSize) {
 const AXIS_BOUNDARY_GAP: [string, string] = ["3%", "3%"]
 
 /**
+ * Suggested segments per axis. Two keeps the grid quiet behind a dense point
+ * cloud — the same default bar charts use for their value axis. ECharts treats
+ * this as a hint and still rounds to nice intervals, so the rendered count can
+ * differ by one.
+ */
+const AXIS_SPLIT_NUMBER = 2
+
+/**
  * Convert an F0 scatter point into an ECharts data item.
  *
  * A `label` is emitted as ECharts' `name`, which surfaces as `params.name` in
@@ -93,7 +101,7 @@ function buildSeriesEntry(
     symbolSize: pointSize,
     // Scatter points overlap in a way bars and line dots never do. A sub-1
     // fill keeps dense regions readable as density instead of a solid blob.
-    itemStyle: { color, opacity: 0.85 },
+    itemStyle: { color, opacity: 0.7 },
     emphasis: {
       focus: "series",
       itemStyle: {
@@ -106,26 +114,30 @@ function buildSeriesEntry(
   }
 }
 
-type ScatterTooltipNames = {
+type ScatterTooltipOptions = {
   xAxisName?: string
   yAxisName?: string
-  xValueFormatter?: (value: number) => string
-  valueFormatter?: (value: number) => string
+  xTooltipValueFormatter?: (value: number) => string
+  tooltipValueFormatter?: (value: number) => string
 }
 
 /**
  * A scatter point carries two coordinates and no third measure, so — like a
- * radar point — there is no single headline value and both coordinates read
- * as rows. The point's own label is the title, with the series name beneath
- * it whenever the two differ.
+ * radar point — there is no single headline value. Both coordinates are rows,
+ * but rendered at headline size, since neither is subordinate to the other.
+ * The point's own label is the title, with the series name beneath it whenever
+ * the two differ.
+ *
+ * Values are shown in full ("82,000", not the axis's compact "82k"), matching
+ * every other chart's tooltip.
  */
 function buildTooltipFormatter(
   {
     xAxisName,
     yAxisName,
-    xValueFormatter,
-    valueFormatter,
-  }: ScatterTooltipNames,
+    xTooltipValueFormatter,
+    tooltipValueFormatter,
+  }: ScatterTooltipOptions,
   theme: ChartTheme
 ) {
   return (params: unknown): string => {
@@ -146,12 +158,18 @@ function buildTooltipFormatter(
         ...(seriesName && seriesName !== title ? { subtitle: seriesName } : {}),
         rows: [
           {
-            value: xValueFormatter ? xValueFormatter(x) : x.toLocaleString(),
+            value: xTooltipValueFormatter
+              ? xTooltipValueFormatter(x)
+              : x.toLocaleString(),
             label: xAxisName ?? "",
+            size: "large",
           },
           {
-            value: valueFormatter ? valueFormatter(y) : y.toLocaleString(),
+            value: tooltipValueFormatter
+              ? tooltipValueFormatter(y)
+              : y.toLocaleString(),
             label: yAxisName ?? "",
+            size: "large",
           },
         ],
       },
@@ -172,12 +190,14 @@ export function useScatterChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
   {
     series,
-    pointSize = 8,
+    pointSize = 12,
     scaleAxes = true,
     showLegend = true,
     showGrid = true,
     valueFormatter,
     xValueFormatter,
+    tooltipValueFormatter,
+    xTooltipValueFormatter,
     xAxisName,
     yAxisName,
     echartsOptions,
@@ -206,6 +226,7 @@ export function useScatterChartOptions(
       formatter: xValueFormatter,
       show: showAxes,
       scale: scaleAxes,
+      splitNumber: AXIS_SPLIT_NUMBER,
       // The X bound sits at the plot edge, so its end labels would otherwise
       // render half outside the canvas.
       alignEdgeLabels: true,
@@ -218,6 +239,7 @@ export function useScatterChartOptions(
       formatter: valueFormatter,
       show: showAxes,
       scale: scaleAxes,
+      splitNumber: AXIS_SPLIT_NUMBER,
       maxLabelWidth: yAxisMaxLabelWidth,
       ...(scaleAxes ? { boundaryGap: AXIS_BOUNDARY_GAP } : {}),
     })
@@ -242,7 +264,12 @@ export function useScatterChartOptions(
       tooltip: buildItemTooltip({
         theme,
         formatter: buildTooltipFormatter(
-          { xAxisName, yAxisName, xValueFormatter, valueFormatter },
+          {
+            xAxisName,
+            yAxisName,
+            xTooltipValueFormatter,
+            tooltipValueFormatter,
+          },
           theme
         ),
       }),
@@ -262,6 +289,8 @@ export function useScatterChartOptions(
     showGrid,
     valueFormatter,
     xValueFormatter,
+    tooltipValueFormatter,
+    xTooltipValueFormatter,
     xAxisName,
     yAxisName,
     echartsOptions,

@@ -552,7 +552,7 @@ export interface F0DataChartScatterProps extends F0DataChartCommonProps {
   type: "scatter"
   /** One or more point groups. Multiple series render as a color split. */
   series: F0DataChartScatterSeries[]
-  /** Point diameter in pixels. @default 8 */
+  /** Point diameter in pixels. @default 12 */
   pointSize?: number
   /**
    * Fit each axis to its data range instead of anchoring it at zero. Turn off
@@ -563,10 +563,18 @@ export interface F0DataChartScatterProps extends F0DataChartCommonProps {
   showLegend?: boolean
   /** Show the background grid lines on both axes. @default true */
   showGrid?: boolean
-  /** Format the Y axis tick labels and the y value in the tooltip */
+  /** Format the Y axis tick labels */
   valueFormatter?: (value: number) => string
-  /** Format the X axis tick labels and the x value in the tooltip */
+  /** Format the X axis tick labels */
   xValueFormatter?: (value: number) => string
+  /**
+   * Format the y value in the tooltip. Tooltips show full numbers rather than
+   * the compact axis format ("82,000", not "82k"); set this to reapply a unit
+   * or currency at full precision.
+   */
+  tooltipValueFormatter?: (value: number) => string
+  /** Format the x value in the tooltip. See {@link tooltipValueFormatter}. */
+  xTooltipValueFormatter?: (value: number) => string
   /**
    * What the X measure is, e.g. "salary". Labels the x row in the tooltip —
    * a scatter has no headline value, so both coordinates read as rows and

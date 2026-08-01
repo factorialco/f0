@@ -77,6 +77,7 @@ const SALES: F0DataChartScatterSeries = {
 }
 
 const eurFormatter = (value: number) => `€${Math.round(value / 1000)}k`
+const eurPreciseFormatter = (value: number) => `€${value.toLocaleString()}`
 const yearsFormatter = (value: number) => `${value} yrs`
 
 /**
@@ -91,6 +92,8 @@ export const Default: Story = {
     valueFormatter: yearsFormatter,
     xAxisName: "salary",
     yAxisName: "tenure",
+    xTooltipValueFormatter: eurPreciseFormatter,
+    tooltipValueFormatter: yearsFormatter,
   },
 }
 
@@ -106,6 +109,8 @@ export const ColorSplit: Story = {
     valueFormatter: yearsFormatter,
     xAxisName: "salary",
     yAxisName: "tenure",
+    xTooltipValueFormatter: eurPreciseFormatter,
+    tooltipValueFormatter: yearsFormatter,
   },
 }
 
@@ -123,6 +128,8 @@ export const AnchoredAtOrigin: Story = {
     valueFormatter: yearsFormatter,
     xAxisName: "salary",
     yAxisName: "tenure",
+    xTooltipValueFormatter: eurPreciseFormatter,
+    tooltipValueFormatter: yearsFormatter,
   },
 }
 
@@ -136,6 +143,8 @@ export const CustomPointSize: Story = {
     valueFormatter: yearsFormatter,
     xAxisName: "salary",
     yAxisName: "tenure",
+    xTooltipValueFormatter: eurPreciseFormatter,
+    tooltipValueFormatter: yearsFormatter,
   },
 }
 
@@ -155,6 +164,8 @@ export const Dense: Story = {
     valueFormatter: yearsFormatter,
     xAxisName: "salary",
     yAxisName: "tenure",
+    xTooltipValueFormatter: eurPreciseFormatter,
+    tooltipValueFormatter: yearsFormatter,
   },
 }
 
@@ -210,6 +221,8 @@ const responsiveScatterProps = (
     valueFormatter: yearsFormatter,
     xAxisName: "salary",
     yAxisName: "tenure",
+    xTooltipValueFormatter: eurPreciseFormatter,
+    tooltipValueFormatter: yearsFormatter,
   }
 }
 

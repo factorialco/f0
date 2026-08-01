@@ -228,6 +228,42 @@ describe("ScatterChart — tooltip", () => {
         {...scatterProps}
         xAxisName="salary"
         yAxisName="tenure"
+        xTooltipValueFormatter={(v) => `€${v.toLocaleString()}`}
+        tooltipValueFormatter={(v) => `${v} yrs`}
+      />
+    )
+
+    const html = getLatestOption().tooltip.formatter({
+      marker: "",
+      name: "Ana Ruiz",
+      seriesName: "Engineering",
+      value: [62000, 4.5],
+    })
+
+    expect(html).toContain(`€${(62000).toLocaleString()}`)
+    expect(html).toContain("salary")
+    expect(html).toContain("4.5 yrs")
+    expect(html).toContain("tenure")
+  })
+
+  it("renders both coordinates at headline size", () => {
+    render(<F0DataChart {...scatterProps} xAxisName="salary" />)
+
+    const html = getLatestOption().tooltip.formatter({
+      marker: "",
+      name: "Ana Ruiz",
+      seriesName: "Engineering",
+      value: [62000, 4.5],
+    })
+
+    // Both rows opt into the large size, so the headline style appears twice.
+    expect(html.match(/font-size: 20px/g)).toHaveLength(2)
+  })
+
+  it("shows full numbers rather than the compact axis format", () => {
+    render(
+      <F0DataChart
+        {...scatterProps}
         xValueFormatter={(v) => `€${v / 1000}k`}
         valueFormatter={(v) => `${v} yrs`}
       />
@@ -240,10 +276,8 @@ describe("ScatterChart — tooltip", () => {
       value: [62000, 4.5],
     })
 
-    expect(html).toContain("€62k")
-    expect(html).toContain("salary")
-    expect(html).toContain("4.5 yrs")
-    expect(html).toContain("tenure")
+    expect(html).toContain((62000).toLocaleString())
+    expect(html).not.toContain("€62k")
   })
 
   it("falls back to the series name as the title when a point has no label", () => {
