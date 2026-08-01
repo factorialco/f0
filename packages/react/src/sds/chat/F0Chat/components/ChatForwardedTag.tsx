@@ -59,7 +59,7 @@ export const ChatForwardedTag = ({
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
           <span className="flex items-center gap-1 text-sm italic text-f1-foreground-secondary">
-            <F0Icon icon={Share} size="sm" color="disabled" />
+            <F0Icon icon={Share} size="sm" color="secondary" />
             {i18n.chat.forwarded}
             <span aria-hidden className="not-italic">
               ·
