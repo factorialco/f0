@@ -568,12 +568,17 @@ export interface F0DataChartScatterProps extends F0DataChartCommonProps {
   /** Format the X axis tick labels */
   xValueFormatter?: (value: number) => string
   /**
-   * Format the y value in the tooltip. Tooltips show full numbers rather than
-   * the compact axis format ("82,000", not "82k"); set this to reapply a unit
-   * or currency at full precision.
+   * Formatter for the y value shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the axis
+   * and labels stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
+   * one formats the axis only.
    */
   tooltipValueFormatter?: (value: number) => string
-  /** Format the x value in the tooltip. See {@link tooltipValueFormatter}. */
+  /**
+   * Formatter for the x value shown in the hover tooltip. Same contract as
+   * {@link tooltipValueFormatter}, against {@link xValueFormatter}.
+   */
   xTooltipValueFormatter?: (value: number) => string
   /**
    * What the X measure is, e.g. "salary". Labels the x row in the tooltip —
