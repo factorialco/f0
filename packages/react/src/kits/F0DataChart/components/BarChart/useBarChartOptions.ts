@@ -39,6 +39,19 @@ const ARIA_MAX_VALUES_PER_SERIES = 20
  */
 const INSIDE_LABEL_COLOR = "#ffffff"
 
+/**
+ * Stroke width (px) of the hairline separating stacked segments. Adjacent
+ * segments both stroke the shared edge and the strokes are centered on it, so
+ * they overlap rather than add: the visible separation is ~0.5 CSS px.
+ */
+const STACK_GAP_BORDER_WIDTH = 0.5
+
+/** Opacity of the series that are *not* hovered, while one series has focus. */
+const BLUR_OPACITY = 0.4
+
+/** Cross-fade duration (ms) in and out of the hover blur state. */
+const STATE_ANIMATION_DURATION = 500
+
 function resolveGridRightSpace(
   right: number | string | undefined,
   containerWidth: number
@@ -255,11 +268,9 @@ function buildSeriesEntries(
       borderRadius,
       // ECharts has no native gap between stacked segments — a border in the
       // container's background color is the standard way to separate them.
-      // 0.5 because adjacent segments both stroke the shared edge: the two
-      // strokes add up, and wider values read as a ~2px gap.
       ...(stacked && {
         borderColor: stackGapColor,
-        borderWidth: 0.5,
+        borderWidth: STACK_GAP_BORDER_WIDTH,
       }),
     },
     label: {
@@ -267,9 +278,9 @@ function buildSeriesEntries(
       // Stacked bars are segmented, so center the value inside its own segment;
       // single/grouped bars keep the value just outside the bar (above / beside).
       position: stacked ? "inside" : isVertical ? "top" : "right",
-      // Inside a coloured segment, choose black or white per fill so small
-      // canvas text retains WCAG AA contrast. Outside labels use the semantic
-      // secondary foreground colour from the active theme.
+      // Inside a coloured segment the label is always white (see
+      // INSIDE_LABEL_COLOR). Outside labels use the semantic secondary
+      // foreground colour from the active theme.
       color: stacked ? INSIDE_LABEL_COLOR : labelColor,
       fontWeight: "bold",
       fontSize: labelFontSize,
@@ -290,17 +301,17 @@ function buildSeriesEntries(
       // Hovering a stacked segment highlights that series across all bars by
       // sending every other series into the blur state (see `blur` below).
       ...(stacked && { focus: "series" as const }),
-      // Keep the same contrast-safe colour on hover. With labels off, add
-      // nothing here — otherwise hovering a stacked bar would reveal numbers
-      // that are meant to stay off.
+      // Keep the same colour on hover. With labels off, add nothing here —
+      // otherwise hovering a stacked bar would reveal numbers that are meant
+      // to stay off.
       ...(stacked && showLabels
         ? { label: { show: true, color: INSIDE_LABEL_COLOR } }
         : {}),
     },
     ...(stacked && {
       blur: {
-        itemStyle: { opacity: 0.4 },
-        label: { opacity: 0.4 },
+        itemStyle: { opacity: BLUR_OPACITY },
+        label: { opacity: BLUR_OPACITY },
       },
     }),
   }
@@ -370,6 +381,14 @@ function buildSeriesEntries(
     emphasis: {
       disabled: true,
     },
+    // The target ghost is a separate series, so `focus: "series"` blurs it even
+    // when its own bar is the one hovered. Match the main series' blur opacity
+    // so it fades with its stack instead of dropping to the ECharts default.
+    ...(stacked && {
+      blur: {
+        itemStyle: { opacity: BLUR_OPACITY },
+      },
+    }),
   }
 
   return [mainSeries, targetSeries]
@@ -653,11 +672,19 @@ export function useBarChartOptions(
     // `animation: false` — there to skip entrance animations — disables state
     // transitions too. Re-enable the engine with zero-duration entrance and
     // update animations so only the blur fade animates.
+    //
+    // This runs after `buildBaseChartOptions` merged the consumer's
+    // `echartsOptions`, so each key defers to an explicitly-provided value —
+    // same convention as the `userGridRight` guard below.
     if (stacked) {
-      options.animation = true
-      options.animationDuration = 0
-      options.animationDurationUpdate = 0
-      options.stateAnimation = { duration: 500, easing: "cubicOut" }
+      options.animation = echartsOptions?.animation ?? true
+      options.animationDuration = echartsOptions?.animationDuration ?? 0
+      options.animationDurationUpdate =
+        echartsOptions?.animationDurationUpdate ?? 0
+      options.stateAnimation = echartsOptions?.stateAnimation ?? {
+        duration: STATE_ANIMATION_DURATION,
+        easing: "cubicOut",
+      }
     }
 
     // Non-stacked horizontal bars render labels BESIDE the bar end, so the

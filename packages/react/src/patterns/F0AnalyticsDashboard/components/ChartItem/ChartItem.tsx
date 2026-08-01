@@ -161,8 +161,10 @@ function chartSkeleton(config: DashboardChartConfig) {
 /**
  * Build F0DataChart props. When `overrideType` differs from the item's
  * original chart type, the data is converted via the canonical adapter.
+ *
+ * @internal Exported for unit tests — not part of the package's public API.
  */
-function buildChartProps(
+export function buildChartProps(
   item: DashboardChartItem,
   data: DashboardChartData,
   overrideType?: DashboardChartConfig["type"],
@@ -196,7 +198,15 @@ function buildChartProps(
   if ("showLegend" in item.chart) {
     shared.showLegend = item.chart.showLegend
   }
-  if ("showLabels" in item.chart) {
+  // Only bar targets inherit the source config's `showLabels`. Other types keep
+  // their own default, so transforming a pie (labels on by default) into a line
+  // doesn't drag labels along. `undefined` is not an explicit value — letting it
+  // through would clobber the target's default with "unset".
+  if (
+    targetType === "bar" &&
+    "showLabels" in item.chart &&
+    item.chart.showLabels !== undefined
+  ) {
     shared.showLabels = item.chart.showLabels
   }
 
@@ -312,10 +322,13 @@ function buildNativeChartProps(
         categories = adapted.categories ?? []
       }
       return {
-        // Dashboard bar charts show value labels by default; an explicit
-        // `showLabels` in the item config still wins.
-        ...(chart.type === "bar" ? { showLabels: true } : {}),
         ...chart,
+        // Dashboard bar charts show value labels by default. Resolved after the
+        // spread rather than before it: `...chart` carries `showLabels` even
+        // when it is explicitly `undefined`, which would overwrite the default.
+        ...(chart.type === "bar"
+          ? { showLabels: chart.showLabels ?? true }
+          : {}),
         categories,
         series,
       } as F0DataChartProps

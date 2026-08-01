@@ -11,6 +11,7 @@ import "@testing-library/jest-dom/vitest"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
+import { resolveChartTheme } from "../utils/theme"
 
 // ---------------------------------------------------------------------------
 // Same ECharts mock + container size mock as LineChart.test.tsx so the two
@@ -96,11 +97,31 @@ function getMainSeries() {
           fontSize?: number
           formatter?: (params: { value: number }) => string
         }
-        emphasis?: { label?: { color?: string; show?: boolean } }
+        itemStyle?: { borderColor?: string; borderWidth?: number }
+        emphasis?: {
+          label?: { color?: string; show?: boolean }
+          focus?: string
+        }
+        blur?: {
+          itemStyle?: { opacity?: number }
+          label?: { opacity?: number }
+        }
         labelLayout?: (p: LabelLayoutParams) => { fontSize?: number }
       }[]
     }
   ).series
+}
+
+/** Root-level animation keys that drive the hover blur cross-fade */
+function getAnimationOptions() {
+  const call = setOptionMock.mock.calls.at(-1)
+  if (!call) throw new Error("setOption was never called")
+  return call[0] as {
+    animation?: boolean
+    animationDuration?: number
+    animationDurationUpdate?: number
+    stateAnimation?: { duration?: number; easing?: string }
+  }
 }
 
 /** Corner radii of every bar in a series, `undefined` for plain-number data */
@@ -427,6 +448,118 @@ describe("BarChart — label placement", () => {
     expect(mainSeries?.label?.color).toBe("#ffffff")
     expect(mainSeries?.emphasis?.label?.color).toBe("#ffffff")
     expect(mainSeries?.data?.[1]?.label).toBeUndefined()
+  })
+})
+
+describe("BarChart — stacked segment polish", () => {
+  const base = {
+    type: "bar" as const,
+    categories: ["A", "B"],
+    series: [
+      { name: "X", data: [1, 2] },
+      { name: "Y", data: [3, 4] },
+    ],
+  }
+
+  /** The chart resolves its own light-mode theme in jsdom (no `.dark` ancestor). */
+  const themeBackground = resolveChartTheme(null).colors.background
+
+  it("separates stacked segments with a hairline in the theme background", () => {
+    render(<F0DataChart {...base} stacked />)
+
+    const itemStyle = getMainSeries()[0]?.itemStyle
+    expect(itemStyle?.borderColor).toBe(themeBackground)
+    // Both neighbours stroke the shared edge and the strokes overlap, so 0.5
+    // renders as a ~0.5px separation rather than 1px.
+    expect(itemStyle?.borderWidth).toBe(0.5)
+  })
+
+  it("leaves non-stacked bars without a separator border", () => {
+    render(<F0DataChart {...base} />)
+
+    const itemStyle = getMainSeries()[0]?.itemStyle
+    expect(itemStyle?.borderColor).toBeUndefined()
+    expect(itemStyle?.borderWidth).toBeUndefined()
+  })
+
+  it("isolates the hovered series and fades the rest to 40%", () => {
+    render(<F0DataChart {...base} stacked />)
+
+    const series = getMainSeries()
+    for (const entry of series) {
+      expect(entry?.emphasis?.focus).toBe("series")
+      expect(entry?.blur?.itemStyle?.opacity).toBe(0.4)
+      expect(entry?.blur?.label?.opacity).toBe(0.4)
+    }
+  })
+
+  it("does not blur or focus when the bars are not stacked", () => {
+    render(<F0DataChart {...base} />)
+
+    const mainSeries = getMainSeries()[0]
+    expect(mainSeries?.emphasis?.focus).toBeUndefined()
+    expect(mainSeries?.blur).toBeUndefined()
+  })
+
+  it("fades the target ghost with its stack instead of the echarts default", () => {
+    render(
+      <F0DataChart
+        {...base}
+        stacked
+        series={[{ name: "X", data: [{ value: 1, target: 5 }] }]}
+        categories={["A"]}
+      />
+    )
+
+    // [main, target] — the ghost is a separate series, so `focus: "series"`
+    // blurs it too; it must dim to the same 40%.
+    const target = getMainSeries()[1]
+    expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
+  })
+
+  it("runs the blur cross-fade without animating entrance or updates", () => {
+    render(<F0DataChart {...base} stacked />)
+
+    const options = getAnimationOptions()
+    // The engine must be on for state transitions, but entrance and update
+    // animations stay at zero so only the blur fade is visible.
+    expect(options.animation).toBe(true)
+    expect(options.animationDuration).toBe(0)
+    expect(options.animationDurationUpdate).toBe(0)
+    expect(options.stateAnimation).toEqual({
+      duration: 500,
+      easing: "cubicOut",
+    })
+  })
+
+  it("defers to consumer-provided animation options", () => {
+    render(
+      <F0DataChart
+        {...base}
+        stacked
+        echartsOptions={{
+          animationDuration: 900,
+          stateAnimation: { duration: 120, easing: "linear" },
+        }}
+      />
+    )
+
+    const options = getAnimationOptions()
+    expect(options.animationDuration).toBe(900)
+    expect(options.stateAnimation).toEqual({
+      duration: 120,
+      easing: "linear",
+    })
+    // Untouched keys still get their stacked defaults.
+    expect(options.animation).toBe(true)
+    expect(options.animationDurationUpdate).toBe(0)
+  })
+
+  it("leaves non-stacked charts' animation options alone", () => {
+    render(<F0DataChart {...base} />)
+
+    const options = getAnimationOptions()
+    expect(options.stateAnimation).toBeUndefined()
   })
 })
 

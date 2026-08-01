@@ -23,7 +23,10 @@ interface ChartConfigBase {
   showLegend?: boolean
   /** Show background grid lines. @default true */
   showGrid?: boolean
-  /** Show value labels on each data point. @default false */
+  /**
+   * Show value labels on each data point.
+   * @default true for bar charts, false otherwise
+   */
   showLabels?: boolean
   /** Format the value axis tick labels */
   valueFormatter?: (value: number) => string
