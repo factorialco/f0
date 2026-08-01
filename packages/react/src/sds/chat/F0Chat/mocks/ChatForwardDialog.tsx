@@ -5,22 +5,21 @@ import { useMemo, useState, type ReactNode } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0SearchInput } from "@/components/F0SearchInput"
-import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
 import { type F0ChatMessage } from "../types"
 import { SEED_BY_ID, SEEDS } from "./mockSeeds"
 import { useMockChatApp } from "./useMockChatApp"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 
 /**
  * Host-owned "Forward to…" picker (same pattern as the "Edit group" dialog in
  * {@link useDemoHeaderActions}: F0Chat only fires a callback with the message,
  * the host decides what UI that opens). Lets the user multi-select target
- * conversations and add an optional comment, then pushes a forwarded copy —
- * and, if given, the comment as a separate message — into each target via the
- * shared mock store (`useMockChatApp().send`, the same call the composer
- * uses, just aimed at a conversation OTHER than the one currently open).
+ * conversations, then pushes a verbatim forwarded copy into each target via the
+ * shared mock store (`useMockChatApp().send`, the same call the composer uses,
+ * just aimed at a conversation OTHER than the one currently open).
  */
 export const ChatForwardDialog = ({
   message,
@@ -38,7 +37,6 @@ export const ChatForwardDialog = ({
   const app = useMockChatApp()
   const [query, setQuery] = useState("")
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [comment, setComment] = useState("")
 
   const targets = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -50,7 +48,6 @@ export const ChatForwardDialog = ({
   const reset = () => {
     setQuery("")
     setSelected(new Set())
-    setComment("")
     onClose()
   }
 
@@ -72,10 +69,17 @@ export const ChatForwardDialog = ({
       attachments: message.attachments,
       channelTitle: origin?.title,
     }
-    const trimmedComment = comment.trim()
     for (const targetId of selected) {
-      app.send(targetId, { body: message.body, forwardedFrom })
-      if (trimmedComment) app.send(targetId, { body: trimmedComment })
+      // The forwarded copy IS the original message verbatim (body, attachments,
+      // mentions) — it renders like any normal bubble, just with the thin
+      // "Forwarded" marker on top. `forwardedFrom` only flags the provenance.
+      app.send(targetId, {
+        body: message.body,
+        attachments: message.attachments,
+        mentions: message.mentions,
+        mentionedEveryone: message.mentionedEveryone,
+        forwardedFrom,
+      })
     }
     reset()
   }
@@ -103,31 +107,28 @@ export const ChatForwardDialog = ({
           onChange={setQuery}
         />
         <div className="flex max-h-56 flex-col gap-0.5 overflow-y-auto">
-          {targets.map((seed) => (
-            <label
-              key={seed.id}
-              className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-f1-background-secondary"
-            >
-              <F0Avatar avatar={seed.avatar} size="sm" />
-              <span className="line-clamp-1 flex-1 text-sm text-f1-foreground">
-                {seed.title}
-              </span>
-              <F0Checkbox
-                checked={selected.has(seed.id)}
-                onCheckedChange={() => toggle(seed.id)}
-                hideLabel
-                title={seed.title}
-              />
-            </label>
-          ))}
+          {targets.length === 0 ? (
+            <p className="px-2 py-6 text-center text-base text-f1-foreground-secondary">
+              {i18n.chat.forwardNoResults}
+            </p>
+          ) : (
+            targets.map((seed) => (
+              <label
+                key={seed.id}
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-f1-background-secondary"
+              >
+                <F0Avatar avatar={seed.avatar} size="sm" />
+                <OneEllipsis className="flex-1">{seed.title}</OneEllipsis>
+                <F0Checkbox
+                  checked={selected.has(seed.id)}
+                  onCheckedChange={() => toggle(seed.id)}
+                  hideLabel
+                  title={seed.title}
+                />
+              </label>
+            ))
+          )}
         </div>
-        <F0TextInput
-          label={i18n.chat.forwardCommentPlaceholder}
-          hideLabel
-          placeholder={i18n.chat.forwardCommentPlaceholder}
-          value={comment}
-          onChange={setComment}
-        />
       </div>
     </F0Dialog>
   )

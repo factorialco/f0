@@ -596,7 +596,7 @@ export const defaultTranslations = {
     forwardTo: "Forward to…",
     forwarded: "Forwarded",
     forwardSearchPlaceholder: "Search conversations",
-    forwardCommentPlaceholder: "Add a comment (optional)",
+    forwardNoResults: "No conversations found",
     forwardConfirm: "Forward",
     download: "Download",
     downloadNamedFile: "Download {{name}}",

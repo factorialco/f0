@@ -94,12 +94,28 @@ const ForwardedConversation = (): ReactNode => {
         },
       },
       {
-        id: "forwarded-comment",
+        // Attachment-only (no caption): renders no bubble, so the "Forwarded"
+        // marker must sit above the whole message to still show.
+        id: "forwarded-file",
         author: me,
-        body: "Os lo paso por si no lo habíais visto",
+        body: "",
         createdAt: new Date().toISOString(),
         isMine: true,
         status: "read",
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-pdf-viewer-sample.pdf",
+            name: "quarterly-report.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+        forwardedFrom: {
+          id: "orig-2",
+          author: anaG,
+          body: "",
+          channelTitle: "Product Team",
+        },
       },
     ],
   })
@@ -973,9 +989,10 @@ export const Group: Story = {
   render: () => <GroupConversation />,
 }
 
-/** A forwarded message: the non-interactive "Forwarded · Ana García" tag
- * (Slack/WhatsApp-style) followed by the sender's own comment as a separate
- * message — reenviar a otra conversación from the "Forward" message action. */
+/** A forwarded message: rendered verbatim (body, attachments, mentions) like
+ * any normal bubble, topped by a thin non-interactive "Forwarded" marker
+ * (Slack/WhatsApp-style, mirroring the "edited" marker) — reenviar a otra
+ * conversación from the "Forward" message action. */
 export const Forwarded: Story = {
   render: () => <ForwardedConversation />,
 }

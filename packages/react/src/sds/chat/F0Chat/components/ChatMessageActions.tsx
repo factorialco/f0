@@ -11,8 +11,8 @@ import {
   AlertCircleLine,
   Pencil,
   Reply,
-  Share,
   Plus,
+  ArrowRight,
 } from "@/icons/app"
 import { Picker } from "@/sds/social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
@@ -250,7 +250,7 @@ export const ChatMessageActions = ({
               />
               {forwardMessage && !message.deleted && (
                 <MenuItem
-                  icon={Share}
+                  icon={ArrowRight}
                   label={i18n.chat.forward}
                   onClick={runAndClose(() => forwardMessage(message))}
                 />
