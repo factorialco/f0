@@ -518,42 +518,52 @@ export function ChartItem<Filters extends FiltersDefinition>({
       : 1
     : 1
 
-  const chartTypeOptions = onTransformChart
-    ? CHART_TYPE_OPTIONS.filter((opt) => {
-        const typeToCheck = opt.type === "bar" ? "bar" : opt.type
-        if (!allowedTargets.has(typeToCheck)) return false
-        // Hide pie for multi-series data — it only shows one series
-        if (opt.type === "pie" && seriesCount > 1) return false
-        return true
-      }).map((opt) => {
-        const isTable = opt.type === "table"
-        const isActive = isTable
-          ? viewMode === "table"
-          : viewMode === "chart" &&
-            item.chart.type === opt.type &&
-            (opt.type !== "bar" || currentOrientation === opt.orientation)
+  const availableChartTypes = CHART_TYPE_OPTIONS.filter((opt) => {
+    const typeToCheck = opt.type === "bar" ? "bar" : opt.type
+    if (!allowedTargets.has(typeToCheck)) return false
+    // Hide pie for multi-series data — it only shows one series
+    if (opt.type === "pie" && seriesCount > 1) return false
+    return true
+  })
 
-        return {
-          label: opt.label,
-          value: opt.value,
-          icon: opt.icon,
-          isActive,
-          onSelect: () => {
-            if (isTable) {
-              setViewMode("table")
-            } else {
-              setViewMode("chart")
-              if (
-                item.chart.type !== opt.type ||
-                (opt.type === "bar" && currentOrientation !== opt.orientation)
-              ) {
-                onTransformChart(item.id, opt.type, opt.orientation)
+  // A chart with no alternative visualization (scatter, gauge) would otherwise
+  // render a picker whose only entry is "Table" — and since the group is
+  // `required`, selecting it leaves no way back to the chart.
+  const hasAlternativeChartType = availableChartTypes.some(
+    (opt) => opt.type !== "table"
+  )
+
+  const chartTypeOptions =
+    onTransformChart && hasAlternativeChartType
+      ? availableChartTypes.map((opt) => {
+          const isTable = opt.type === "table"
+          const isActive = isTable
+            ? viewMode === "table"
+            : viewMode === "chart" &&
+              item.chart.type === opt.type &&
+              (opt.type !== "bar" || currentOrientation === opt.orientation)
+
+          return {
+            label: opt.label,
+            value: opt.value,
+            icon: opt.icon,
+            isActive,
+            onSelect: () => {
+              if (isTable) {
+                setViewMode("table")
+              } else {
+                setViewMode("chart")
+                if (
+                  item.chart.type !== opt.type ||
+                  (opt.type === "bar" && currentOrientation !== opt.orientation)
+                ) {
+                  onTransformChart(item.id, opt.type, opt.orientation)
+                }
               }
-            }
-          },
-        }
-      })
-    : undefined
+            },
+          }
+        })
+      : undefined
 
   return (
     <DashboardItem

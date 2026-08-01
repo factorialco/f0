@@ -61,19 +61,36 @@ function buildPoints(count: number, seed: number, salaryBase: number) {
   })
 }
 
+/**
+ * Deliberate anomalies that sit well off the trend — a senior hire paid far
+ * above their tenure, and a long-serving employee who never caught up. Spotting
+ * these is the whole point of a scatter, and they stretch the axes enough to
+ * exercise the scaled bounds and the anchored end labels.
+ */
+const ENGINEERING_OUTLIERS = [
+  { x: 128000, y: 0.6, label: "Roser Nogué" },
+  { x: 37000, y: 13.8, label: "Bernat Illa" },
+]
+
 const ENGINEERING: F0DataChartScatterSeries = {
   name: "Engineering",
-  data: buildPoints(28, 11, 52000),
+  data: [...buildPoints(28, 11, 52000), ...ENGINEERING_OUTLIERS],
 }
 
 const DESIGN: F0DataChartScatterSeries = {
   name: "Design",
-  data: buildPoints(18, 23, 46000),
+  data: [
+    ...buildPoints(18, 23, 46000),
+    { x: 96000, y: 1.4, label: "Ivet Prat" },
+  ],
 }
 
 const SALES: F0DataChartScatterSeries = {
   name: "Sales",
-  data: buildPoints(22, 47, 41000),
+  data: [
+    ...buildPoints(22, 47, 41000),
+    { x: 34000, y: 11.9, label: "Genís Mas" },
+  ],
 }
 
 const eurFormatter = (value: number) => `€${Math.round(value / 1000)}k`

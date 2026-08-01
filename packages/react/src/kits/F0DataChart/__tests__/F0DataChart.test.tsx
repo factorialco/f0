@@ -109,6 +109,21 @@ describe("F0DataChart", () => {
     expect(container.querySelector("div")).toBeInTheDocument()
   })
 
+  it("renders a scatter chart without crashing", () => {
+    const { container } = render(
+      <F0DataChart
+        type="scatter"
+        series={[
+          {
+            name: "Engineering",
+            data: [[62000, 4.5], { x: 78000, y: 7.2, label: "Marc Vidal" }],
+          },
+        ]}
+      />
+    )
+    expect(container.querySelector("div")).toBeInTheDocument()
+  })
+
   it("renders funnel labels with point names", () => {
     const { container } = render(
       <F0DataChart

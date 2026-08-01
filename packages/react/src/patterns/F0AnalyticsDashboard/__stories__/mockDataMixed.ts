@@ -515,6 +515,23 @@ const SCATTER_FIRST_NAMES = [
 const SCATTER_LAST_NAMES = ["Ruiz", "Vidal", "Serra", "Bosch", "Roca", "Ferrer"]
 
 /**
+ * Deliberate anomalies per department — a senior hire paid well above their
+ * tenure, and someone long-serving whose salary never caught up. Spotting these
+ * is the whole point of a scatter, so the demo data should contain some.
+ */
+const SCATTER_OUTLIERS: Record<
+  string,
+  { x: number; y: number; label: string }[]
+> = {
+  Engineering: [
+    { x: 128000, y: 0.6, label: "Roser Nogué" },
+    { x: 37000, y: 13.8, label: "Bernat Illa" },
+  ],
+  Design: [{ x: 96000, y: 1.4, label: "Ivet Prat" }],
+  Sales: [{ x: 34000, y: 11.9, label: "Genís Mas" }],
+}
+
+/**
  * Salary against tenure, one point per employee, split by department. Salary
  * rises with tenure plus noise, so the cloud shows the correlation a scatter
  * is meant to reveal.
@@ -526,24 +543,27 @@ function fetchSalaryTenureScatter(
   return delay(600).then(() => ({
     scatterSeries: SCATTER_DEPARTMENTS.map((department, deptIdx) => ({
       name: department.name,
-      data: Array.from({ length: department.count }, (_, i) => {
-        const seed = deptIdx * 100 + i
-        const tenure = Math.round(seeded(w, 400 + seed) * 120) / 10
-        const salary =
-          Math.round(
-            (department.salaryBase +
-              tenure * 3200 +
-              (seeded(w, 700 + seed) - 0.5) * 14000) /
-              500
-          ) * 500
-        return {
-          x: salary,
-          y: tenure,
-          label: `${SCATTER_FIRST_NAMES[i % SCATTER_FIRST_NAMES.length]} ${
-            SCATTER_LAST_NAMES[i % SCATTER_LAST_NAMES.length]
-          }`,
-        }
-      }),
+      data: [
+        ...Array.from({ length: department.count }, (_, i) => {
+          const seed = deptIdx * 100 + i
+          const tenure = Math.round(seeded(w, 400 + seed) * 120) / 10
+          const salary =
+            Math.round(
+              (department.salaryBase +
+                tenure * 3200 +
+                (seeded(w, 700 + seed) - 0.5) * 14000) /
+                500
+            ) * 500
+          return {
+            x: salary,
+            y: tenure,
+            label: `${SCATTER_FIRST_NAMES[i % SCATTER_FIRST_NAMES.length]} ${
+              SCATTER_LAST_NAMES[i % SCATTER_LAST_NAMES.length]
+            }`,
+          }
+        }),
+        ...(SCATTER_OUTLIERS[department.name] ?? []),
+      ],
     })),
   }))
 }
