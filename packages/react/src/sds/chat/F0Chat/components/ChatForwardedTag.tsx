@@ -19,7 +19,7 @@ export const ChatForwardedTag = (): ReactNode => {
   const i18n = useI18n()
 
   return (
-    <span className="flex w-fit items-center gap-1 px-3.5 pt-1 text-sm text-f1-foreground-tertiary">
+    <span className="flex w-fit items-center gap-1 px-3.5 pt-1 text-sm text-f1-foreground-tertiary italic">
       <F0Icon icon={Reply} size="sm" />
       {i18n.chat.forwarded}
     </span>

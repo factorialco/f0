@@ -154,7 +154,7 @@ export const ChatMessageItem = ({
                   attachment-only message has no bubble, so surface it here
                   instead — otherwise an edited media message shows no mark. */}
               {!hasBubble && message.editedAt && !message.deleted && (
-                <span className="px-1 text-sm text-f1-foreground-tertiary">
+                <span className="px-1 text-sm text-f1-foreground-tertiary italic">
                   {i18n.chat.edited}
                 </span>
               )}
