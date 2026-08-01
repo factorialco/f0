@@ -19,8 +19,15 @@ export interface ChartThemeColors {
   border: string
   /** Tooltip background color (CSS rgba string) */
   tooltipBackground: string
-  /** Chart container background — used when chart needs to know its own bg */
+  /** Page-level background token for the active mode */
   background: string
+  /**
+   * The color actually painted behind the chart — the nearest ancestor with a
+   * non-transparent background, falling back to {@link background}. Use this
+   * when a chart needs to blend into its own surface (a tinted card, a modal)
+   * rather than into the page.
+   */
+  containerBackground: string
 }
 
 /** Tooltip visual configuration */
@@ -124,6 +131,45 @@ function isDarkMode(element?: Element | null): boolean {
   return target.closest(".dark") !== null
 }
 
+/** `transparent`, `rgba(…, 0)`, or unset — this element paints no background. */
+function paintsNoBackground(color: string): boolean {
+  const value = color.trim()
+  if (value === "" || value === "transparent") return true
+  const alpha = /^rgba\(.*,\s*([\d.]+)\s*\)$/.exec(value)?.[1]
+  return alpha !== undefined && Number.parseFloat(alpha) === 0
+}
+
+/**
+ * The first non-transparent background color at or above `element`.
+ *
+ * Charts that paint their own background — the hairline between stacked bar
+ * segments, for one — need the surface they actually sit on, not the page
+ * token: a chart inside a tinted card, a modal, or a fullscreen overlay has a
+ * different backdrop from `<body>`.
+ *
+ * Falls back to `fallback` when nothing in the chain paints a background, or
+ * when there is no DOM (SSR). A translucent ancestor is taken at face value
+ * rather than blended with what sits beneath it — close enough for a hairline.
+ */
+function resolveContainerBackground(
+  element: Element | null | undefined,
+  fallback: string
+): string {
+  if (typeof window === "undefined" || !element) return fallback
+
+  let current: Element | null = element
+  while (current) {
+    const color = getComputedStyle(current)
+      .getPropertyValue("background-color")
+      .trim()
+    if (!paintsNoBackground(color)) {
+      return color
+    }
+    current = current.parentElement
+  }
+  return fallback
+}
+
 // ---------------------------------------------------------------------------
 // Theme resolver
 // ---------------------------------------------------------------------------
@@ -146,6 +192,9 @@ function isDarkMode(element?: Element | null): boolean {
  */
 export function resolveChartTheme(element?: Element | null): ChartTheme {
   const dark = isDarkMode(element)
+  const background = dark
+    ? chartColor(baseColors.grey[100])
+    : chartColor(baseColors.white[100])
 
   const colors: ChartThemeColors = {
     foreground: resolveCssColor(
@@ -176,9 +225,8 @@ export function resolveChartTheme(element?: Element | null): ChartTheme {
     tooltipBackground: dark
       ? DARK_TOOLTIP.background
       : LIGHT_TOOLTIP.background,
-    background: dark
-      ? chartColor(baseColors.grey[100])
-      : chartColor(baseColors.white[100]),
+    background,
+    containerBackground: resolveContainerBackground(element, background),
   }
 
   return {

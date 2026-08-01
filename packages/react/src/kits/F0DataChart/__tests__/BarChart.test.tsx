@@ -461,7 +461,10 @@ describe("BarChart — stacked segment polish", () => {
     ],
   }
 
-  /** The chart resolves its own light-mode theme in jsdom (no `.dark` ancestor). */
+  /**
+   * Nothing in the jsdom tree paints a background, so the container lookup
+   * falls back to the light-mode page token.
+   */
   const themeBackground = resolveChartTheme(null).colors.background
 
   it("separates stacked segments with a hairline in the theme background", () => {
@@ -469,9 +472,21 @@ describe("BarChart — stacked segment polish", () => {
 
     const itemStyle = getMainSeries()[0]?.itemStyle
     expect(itemStyle?.borderColor).toBe(themeBackground)
-    // Both neighbours stroke the shared edge and the strokes overlap, so 0.5
-    // renders as a ~0.5px separation rather than 1px.
+    // Both neighbours stroke the shared edge and canvas strokes are centered on
+    // it, so the two cover the same band rather than adding up: 0.5 reads as a
+    // hairline, not a 1px gap.
     expect(itemStyle?.borderWidth).toBe(0.5)
+  })
+
+  it("paints the separator in the nearest surface colour, not the page colour", () => {
+    render(
+      <div style={{ backgroundColor: "rgb(1, 2, 3)" }}>
+        <F0DataChart {...base} stacked />
+      </div>
+    )
+
+    // A chart on a tinted card / modal must blend into that surface.
+    expect(getMainSeries()[0]?.itemStyle?.borderColor).toBe("rgb(1, 2, 3)")
   })
 
   it("leaves non-stacked bars without a separator border", () => {

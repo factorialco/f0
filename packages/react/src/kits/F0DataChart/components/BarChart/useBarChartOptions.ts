@@ -40,9 +40,12 @@ const ARIA_MAX_VALUES_PER_SERIES = 20
 const INSIDE_LABEL_COLOR = "#ffffff"
 
 /**
- * Stroke width (px) of the hairline separating stacked segments. Adjacent
- * segments both stroke the shared edge and the strokes are centered on it, so
- * they overlap rather than add: the visible separation is ~0.5 CSS px.
+ * Stroke width (px) of the hairline separating stacked segments.
+ *
+ * Adjacent segments both stroke the shared edge and canvas strokes are centered
+ * on the path, so the two cover the same band rather than adding to it: the
+ * visible separation equals this width, not twice it. 0.5 is deliberate — it
+ * renders as a hairline at 1x and a crisp single device pixel at 2x.
  */
 const STACK_GAP_BORDER_WIDTH = 0.5
 
@@ -543,7 +546,7 @@ export function useBarChartOptions(
         showLabels,
         stacked,
         theme.colors.foregroundSecondary,
-        theme.colors.background,
+        theme.colors.containerBackground,
         resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
