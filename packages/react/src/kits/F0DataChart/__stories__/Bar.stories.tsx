@@ -454,9 +454,10 @@ export const ResponsiveSnapshotMatrix: Story = {
 
 /**
  * Same matrix as `ResponsiveSnapshotMatrix` but rendered with
- * `orientation: "horizontal"`. The category axis lives on Y instead of X, so
- * at the medium breakpoint it's the Y axis (categories) that gets hidden and
- * the X axis (values) that stays visible — the inverse of the vertical case.
+ * `orientation: "horizontal"`. The category axis lives on Y instead of X, and
+ * unlike the vertical case it survives the medium breakpoint: each label names
+ * the row beside it, so hiding them would leave a stack of anonymous bars.
+ * Both axes are visible from `md` up; `sm` still drops all chrome.
  */
 const responsivePropsHorizontal = (
   column: "low" | "normal" | "large"

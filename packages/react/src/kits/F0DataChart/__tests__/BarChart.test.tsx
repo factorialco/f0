@@ -176,15 +176,37 @@ describe("BarChart — responsive breakpoints", () => {
     expect(option.yAxis.axisLabel.show).toBe(true)
   })
 
-  it("respects orientation: in horizontal bars the category axis lives on Y", () => {
-    containerSize.width = 320 // medium breakpoint → category axis hidden
+  it("keeps the category axis on horizontal bars at the medium breakpoint", () => {
+    containerSize.width = 320
     render(<F0DataChart {...verticalProps} orientation="horizontal" />)
 
     const option = getLatestOption()
     expect(option.legend?.show).toBe(true)
-    // Horizontal bars: X = value axis (shown at md), Y = category axis (hidden at md)
+    // Horizontal bars: X = value axis, Y = category axis. Each category label
+    // names the row beside it, so dropping them at md would leave a stack of
+    // anonymous bars — unlike vertical bars, where they crowd each other.
     expect(option.xAxis.axisLabel.show).toBe(true)
+    expect(option.yAxis.axisLabel.show).toBe(true)
+  })
+
+  it("still hides the category axis on horizontal bars at the small breakpoint", () => {
+    containerSize.width = 180
+    render(<F0DataChart {...verticalProps} orientation="horizontal" />)
+
+    const option = getLatestOption()
+    expect(option.legend).toBeUndefined()
+    expect(option.xAxis.axisLabel.show).toBe(false)
     expect(option.yAxis.axisLabel.show).toBe(false)
+  })
+
+  it("keeps hiding the category axis on vertical bars at the medium breakpoint", () => {
+    containerSize.width = 320
+    render(<F0DataChart {...verticalProps} />)
+
+    const option = getLatestOption()
+    // X = category. The md exception is horizontal-only.
+    expect(option.xAxis.axisLabel.show).toBe(false)
+    expect(option.yAxis.axisLabel.show).toBe(true)
   })
 
   it("inverts the category axis on horizontal bars so rows read top-to-bottom in data order", () => {

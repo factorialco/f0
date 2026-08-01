@@ -402,17 +402,26 @@ export type BarChartSize = ChartResponsiveSize
 
 /**
  * Maps a discrete `size` to which chrome (legend, axes) is rendered. The
- * matrix is identical to `LineChart.resolveResponsiveDisplay` so the two
- * chart families behave the same at every breakpoint:
+ * matrix mirrors `LineChart.resolveResponsiveDisplay` so the two chart
+ * families behave the same at every breakpoint, with one bar-only exception
+ * at `md`:
  *
  * - `sm` → just the bars, no axes, no legend
- * - `md` → bars + legend + value axis, no category axis
+ * - `md` → bars + legend + value axis; the category axis shows for horizontal
+ *   bars only
  * - `lg` → bars + legend + both axes (with smart truncation on the category axis)
+ *
+ * Horizontal bars carry their categories on the left, one label per row beside
+ * the bar it names. Dropping them leaves a stack of anonymous bars that the
+ * value axis alone can't explain, and they cost at most 20% of the width
+ * (`yAxisMaxLabelWidth`) rather than competing with each other. Vertical bars
+ * keep the plain `md` rule: their categories run along the bottom, where they
+ * crowd each other well before the plot runs out of room.
  */
-function resolveResponsiveDisplay(size: BarChartSize) {
+function resolveResponsiveDisplay(size: BarChartSize, isVertical: boolean) {
   return {
     showLegend: size !== "sm",
-    showCategoryAxis: size === "lg",
+    showCategoryAxis: size === "lg" || (size === "md" && !isVertical),
     showValueAxis: size !== "sm",
   }
 }
@@ -457,7 +466,7 @@ export function useBarChartOptions(
       containerWidth
     )
 
-    const responsive = resolveResponsiveDisplay(size)
+    const responsive = resolveResponsiveDisplay(size, isVertical)
     // The user-provided `showLegend` prop can still force the legend off,
     // but it can never override the `sm` rule.
     const effectiveShowLegend = responsive.showLegend && showLegend
