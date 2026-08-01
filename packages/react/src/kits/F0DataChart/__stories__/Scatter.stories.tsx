@@ -150,7 +150,7 @@ export const AnchoredAtOrigin: Story = {
   },
 }
 
-/** Larger points suit sparse data; the default of 8px suits a typical cloud. */
+/** Larger points suit sparse data; the default of 12px suits a typical cloud. */
 export const CustomPointSize: Story = {
   args: {
     type: "scatter",
@@ -166,7 +166,7 @@ export const CustomPointSize: Story = {
 }
 
 /**
- * ~450 points across three groups. Points render at 85% opacity so dense
+ * ~450 points across three groups. Points render at 70% opacity so dense
  * regions read as density rather than a solid block.
  */
 export const Dense: Story = {

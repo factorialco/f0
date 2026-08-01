@@ -52,6 +52,13 @@ function resolveResponsiveDisplay(size: ScatterChartSize) {
 const AXIS_SPLIT_NUMBER = 2
 
 /**
+ * Bounds for `pointSize`. It can arrive unvalidated from an agent-authored
+ * config, where 0 blanks the plot and a huge value fills it with one blob.
+ */
+const MIN_POINT_SIZE = 2
+const MAX_POINT_SIZE = 48
+
+/**
  * Convert an F0 scatter point into an ECharts data item.
  *
  * A `label` is emitted as ECharts' `name`, which surfaces as `params.name` in
@@ -136,7 +143,11 @@ function buildTooltipFormatter(
       seriesName?: string
       value?: [number, number]
     }
-    const [x, y] = point.value ?? [0, 0]
+    // Guard each coordinate, not just the tuple: `scatterSeries` arrives as
+    // JSON from a fetch, so a short tuple or a null element is possible and
+    // `.toLocaleString()` on it would throw from inside an ECharts formatter.
+    const x = point.value?.[0] ?? 0
+    const y = point.value?.[1] ?? 0
     const seriesName = point.seriesName ?? ""
     const title = point.name || seriesName
 
@@ -240,7 +251,11 @@ export function useScatterChartOptions(
       xAxis: xAxis as echarts.EChartsOption["xAxis"],
       yAxis: yAxis as echarts.EChartsOption["yAxis"],
       series: series.map((entry, index) =>
-        buildSeriesEntry(entry, index, pointSize)
+        buildSeriesEntry(
+          entry,
+          index,
+          Math.min(MAX_POINT_SIZE, Math.max(MIN_POINT_SIZE, pointSize))
+        )
       ),
       legend: buildLegend({
         show: legendVisible,

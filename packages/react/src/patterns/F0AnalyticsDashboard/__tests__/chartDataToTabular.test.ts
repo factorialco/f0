@@ -28,14 +28,9 @@ describe("chartDataToTabular — scatter", () => {
     const { rows } = chartDataToTabular(scatterConfig, scatterData)
 
     expect(rows).toEqual([
-      { Series: "Engineering", Label: "Ana Ruiz", salary: 62000, tenure: 4.5 },
-      {
-        Series: "Engineering",
-        Label: "Marc Vidal",
-        salary: 78000,
-        tenure: 7.2,
-      },
-      { Series: "Sales", Label: "", salary: 41000, tenure: 1.2 },
+      { series: "Engineering", label: "Ana Ruiz", x: 62000, y: 4.5 },
+      { series: "Engineering", label: "Marc Vidal", x: 78000, y: 7.2 },
+      { series: "Sales", label: "", x: 41000, y: 1.2 },
     ])
   })
 
@@ -43,6 +38,12 @@ describe("chartDataToTabular — scatter", () => {
     const { columns } = chartDataToTabular(scatterConfig, scatterData)
 
     expect(columns).toEqual(["Series", "Label", "salary", "tenure"])
+  })
+
+  it("keys rows independently of the header labels", () => {
+    const { keys } = chartDataToTabular(scatterConfig, scatterData)
+
+    expect(keys).toEqual(["series", "label", "x", "y"])
   })
 
   it("falls back to X and Y when the axes are unnamed", () => {
@@ -59,5 +60,29 @@ describe("chartDataToTabular — scatter", () => {
     // Columns stay stable so an empty export still has a usable header.
     expect(rows).toEqual([])
     expect(columns).toEqual(["Series", "Label", "salary", "tenure"])
+  })
+
+  // Axis names are user-controlled — LLM-generated on the chat path — so
+  // duplicates are ordinary. Before rows were keyed separately, the later
+  // computed key silently overwrote the earlier one and a column's data
+  // disappeared from the table and every export.
+  it("keeps both measures when the axes share a name", () => {
+    const { columns, keys, rows } = chartDataToTabular(
+      { type: "scatter", xAxisName: "Amount", yAxisName: "Amount" },
+      { scatterSeries: [{ name: "Eng", data: [{ x: 111, y: 999 }] }] }
+    )
+
+    expect(columns).toEqual(["Series", "Label", "Amount", "Amount"])
+    expect(keys).toEqual(["series", "label", "x", "y"])
+    expect(rows[0]).toMatchObject({ x: 111, y: 999 })
+  })
+
+  it("keeps the series name when an axis is called Series", () => {
+    const { rows } = chartDataToTabular(
+      { type: "scatter", xAxisName: "Series", yAxisName: "tenure" },
+      { scatterSeries: [{ name: "Eng", data: [{ x: 111, y: 9 }] }] }
+    )
+
+    expect(rows[0]).toMatchObject({ series: "Eng", x: 111, y: 9 })
   })
 })

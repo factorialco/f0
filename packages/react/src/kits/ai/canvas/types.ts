@@ -219,6 +219,8 @@ export interface ChatDashboardScatterChartConfig {
   pointSize?: number
   scaleAxes?: boolean
   showGrid?: boolean
+  /** Only rendered with 2+ series, but still needed so a skeleton can reserve for it. */
+  showLegend?: boolean
   /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
   xAxisName?: string
   /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */

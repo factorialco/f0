@@ -153,7 +153,11 @@ function chartSkeleton(config: DashboardChartConfig) {
     case "heatmap":
       return <HeatmapChartSkeleton />
     case "scatter":
-      return <ScatterChartSkeleton showLegend={config.showLegend} />
+      // Scatter is the only type whose legend depends on the data — it needs
+      // 2+ series — and the skeleton can't see the data. Default to reserving
+      // no legend row: single-series is the common case, and over-reserving
+      // makes the plot jump when the real chart replaces the skeleton.
+      return <ScatterChartSkeleton showLegend={config.showLegend ?? false} />
   }
 }
 
@@ -278,8 +282,11 @@ export function buildChartProps(
         data: adapted.data ?? [],
       } as F0DataChartProps
     case "scatter":
-      // Unreachable while scatter stays out of the type switcher — a native
-      // scatter takes the fast path above and nothing converts into one.
+      // Reached only when the data doesn't look like a scatter: `detectDataShape`
+      // falls through to "bar" for an empty or errored result, which sends a
+      // scatter-configured item down the conversion path. Renders the empty
+      // state, so losing the axis names and pointSize that `shared` drops
+      // doesn't matter here.
       return {
         ...config,
         ...shared,
@@ -405,9 +412,12 @@ function ChartTableView({
         {
           type: "table" as const,
           options: {
-            columns: tabular.columns.map((col) => ({
+            columns: tabular.columns.map((col, index) => ({
               label: col,
-              render: (row: RecordType) => String(row[col] ?? ""),
+              // Look up by the stable key when the converter supplies one —
+              // header labels can repeat, row keys cannot.
+              render: (row: RecordType) =>
+                String(row[tabular.keys?.[index] ?? col] ?? ""),
             })),
           },
         },

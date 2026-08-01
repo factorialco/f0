@@ -20,6 +20,8 @@ type SheetData = {
   name: string
   columns: string[]
   rows: Record<string, unknown>[]
+  /** Row-lookup keys parallel to `columns`, when headers may collide. */
+  keys?: string[]
 }
 
 interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
@@ -109,6 +111,7 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
             name: item.title,
             columns: tabular.columns,
             rows: tabular.rows,
+            keys: tabular.keys,
           }
         } catch (err) {
           console.warn(

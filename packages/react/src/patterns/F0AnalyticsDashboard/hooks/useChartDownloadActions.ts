@@ -66,13 +66,13 @@ export function useChartDownloadActions({
   const handleExcel = useCallback(() => {
     if (!data) return
     const tabular = chartDataToTabular(effectiveConfig, data)
-    downloadAsExcel(tabular.columns, tabular.rows, title)
+    downloadAsExcel(tabular.columns, tabular.rows, title, tabular.keys)
   }, [effectiveConfig, data, title])
 
   const handleCsv = useCallback(() => {
     if (!data) return
     const tabular = chartDataToTabular(effectiveConfig, data)
-    downloadAsCsv(tabular.columns, tabular.rows, title)
+    downloadAsCsv(tabular.columns, tabular.rows, title, tabular.keys)
   }, [effectiveConfig, data, title])
 
   return useMemo(() => {

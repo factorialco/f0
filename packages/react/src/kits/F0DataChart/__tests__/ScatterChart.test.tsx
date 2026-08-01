@@ -165,6 +165,15 @@ describe("ScatterChart — series", () => {
 
     expect(getLatestOption().series[0]?.symbolSize).toBe(14)
   })
+
+  it("clamps a pointSize that would blank or flood the plot", () => {
+    // Can arrive unvalidated from an agent-authored config.
+    render(<F0DataChart {...scatterProps} pointSize={0} />)
+    expect(getLatestOption().series[0]?.symbolSize).toBe(2)
+
+    render(<F0DataChart {...scatterProps} pointSize={9000} />)
+    expect(getLatestOption().series[0]?.symbolSize).toBe(48)
+  })
 })
 
 describe("ScatterChart — legend", () => {
@@ -304,6 +313,21 @@ describe("ScatterChart — tooltip", () => {
     })
 
     expect(html).toContain((62000).toLocaleString())
+  })
+
+  it("survives a malformed coordinate pair", () => {
+    render(<F0DataChart {...scatterProps} />)
+
+    // `scatterSeries` arrives as JSON from a fetch, so the TS types are not a
+    // runtime guarantee — a short tuple must not throw from inside ECharts.
+    const html = getLatestOption().tooltip.formatter({
+      marker: "",
+      name: "Ana Ruiz",
+      seriesName: "Engineering",
+      value: [5] as unknown as [number, number],
+    })
+
+    expect(html).toContain("Ana Ruiz")
   })
 
   it("escapes labels coming from user data", () => {
