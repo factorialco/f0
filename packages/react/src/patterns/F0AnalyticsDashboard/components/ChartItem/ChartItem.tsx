@@ -112,6 +112,17 @@ function buildChartTypeOptions(
 // Skeleton picker
 // ---------------------------------------------------------------------------
 
+/**
+ * Chart types this build knows how to render. Anything else reaches the type
+ * switches below, none of which have a default.
+ */
+const RENDERABLE_CHART_TYPES: ReadonlySet<string> = new Set<
+  DashboardChartConfig["type"]
+>(["bar", "line", "funnel", "pie", "radar", "gauge", "heatmap", "scatter"])
+
+/** Stands in for an unrenderable config so hooks stay on their happy path. */
+const FALLBACK_CHART_CONFIG: DashboardChartConfig = { type: "bar" }
+
 function chartSkeleton(config: DashboardChartConfig) {
   switch (config.type) {
     case "bar":
@@ -478,9 +489,18 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [translations]
   )
 
+  // An item can arrive with a chart config this build cannot render — most
+  // plausibly when a host app maps a wire type it has no case for and yields
+  // `undefined`. Every path below switches on `chart.type` without a default,
+  // so rendering it would throw and take the whole dashboard with it. Detect
+  // it once and degrade to this item's own error state.
+  const unrenderableChart =
+    item.chart == null || !RENDERABLE_CHART_TYPES.has(item.chart.type)
+  const safeChart = unrenderableChart ? FALLBACK_CHART_CONFIG : item.chart
+
   const downloadActions = useChartDownloadActions({
     chartContainerRef,
-    chartConfig: item.chart,
+    chartConfig: safeChart,
     data,
     title: item.title,
   })
@@ -499,23 +519,25 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // hides it mid-hover — on every parent render.
   const chartProps = useMemo(
     () =>
-      data ? buildChartProps(item as DashboardChartItem, data) : undefined,
-    [item, data]
+      data && !unrenderableChart
+        ? buildChartProps(item as DashboardChartItem, data)
+        : undefined,
+    [item, data, unrenderableChart]
   )
 
   // Determine which chart type options are available for this chart
   const currentOrientation =
-    item.chart.type === "bar"
-      ? "orientation" in item.chart
-        ? (item.chart.orientation ?? "vertical")
+    safeChart.type === "bar"
+      ? "orientation" in safeChart
+        ? (safeChart.orientation ?? "vertical")
         : "vertical"
       : undefined
 
   // Compute which target types are valid based on the actual data shape
   // (not item.chart.type, which may have changed after a transform)
   const dataShape = data
-    ? detectDataShape(data, item.chart.type)
-    : item.chart.type
+    ? detectDataShape(data, safeChart.type)
+    : safeChart.type
   const allowedTargets = useMemo(
     () => compatibleTargetTypes(dataShape),
     [dataShape]
@@ -536,21 +558,21 @@ export function ChartItem<Filters extends FiltersDefinition>({
     return true
   })
 
-  // A chart with no alternative visualization (scatter, gauge) would otherwise
-  // render a picker whose only entry is "Table" — and since the group is
-  // `required`, selecting it leaves no way back to the chart.
-  const hasAlternativeChartType = availableChartTypes.some(
-    (opt) => opt.type !== "table"
-  )
+  // Scatter converts to nothing, so its picker would hold only "Table" — and
+  // the group is `required`, so selecting it would leave no route back to the
+  // chart. Gauge has the same shape and the same latent trap, but it also has
+  // that route today; taking it away is a change existing users would see, so
+  // it belongs in its own PR rather than riding along with a new chart type.
+  const hidesChartTypePicker = safeChart.type === "scatter"
 
   const chartTypeOptions =
-    onTransformChart && hasAlternativeChartType
+    onTransformChart && !hidesChartTypePicker
       ? availableChartTypes.map((opt) => {
           const isTable = opt.type === "table"
           const isActive = isTable
             ? viewMode === "table"
             : viewMode === "chart" &&
-              item.chart.type === opt.type &&
+              safeChart.type === opt.type &&
               (opt.type !== "bar" || currentOrientation === opt.orientation)
 
           return {
@@ -564,7 +586,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
               } else {
                 setViewMode("chart")
                 if (
-                  item.chart.type !== opt.type ||
+                  safeChart.type !== opt.type ||
                   (opt.type === "bar" && currentOrientation !== opt.orientation)
                 ) {
                   onTransformChart(item.id, opt.type, opt.orientation)
@@ -581,9 +603,14 @@ export function ChartItem<Filters extends FiltersDefinition>({
       description={item.description}
       explanation={item.explanation}
       isLoading={isLoading}
-      error={error}
+      error={
+        error ??
+        (unrenderableChart
+          ? new Error(translations.ai.dashboardItem.errorTitle)
+          : undefined)
+      }
       onRetry={retry}
-      skeleton={chartSkeleton(item.chart)}
+      skeleton={chartSkeleton(safeChart)}
       actions={allActions}
       editMode={editMode}
       handleDelete={handleDelete}
@@ -594,7 +621,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     >
       {data && chartProps ? (
         viewMode === "table" ? (
-          <ChartTableView config={item.chart} data={data} />
+          <ChartTableView config={safeChart} data={data} />
         ) : (
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
             <F0DataChart {...chartProps} />

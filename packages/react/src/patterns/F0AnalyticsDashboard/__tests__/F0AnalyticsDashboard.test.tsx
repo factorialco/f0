@@ -211,3 +211,39 @@ describe("F0AnalyticsDashboard report filters", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("F0AnalyticsDashboard — unrenderable chart config", () => {
+  // A host app that maps a wire chart type it has no case for yields
+  // `undefined`. Every type switch here lacks a default, so without a guard
+  // that would throw and take the whole dashboard down with it.
+  it("contains an unknown chart type as one item's error state", async () => {
+    const fetchData = vi.fn().mockResolvedValue({
+      categories: ["A"],
+      series: [{ name: "s", data: [1] }],
+    })
+
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[
+          {
+            id: "broken",
+            title: "Broken widget",
+            type: "chart",
+            // What a host app hands over when its mapper has no case.
+            chart: undefined as never,
+            fetchData,
+          },
+          metricItem(vi.fn().mockResolvedValue({ value: 42 })),
+        ]}
+      />
+    )
+
+    // The bad widget reports an error…
+    await waitFor(() =>
+      expect(getVisibleByText("Error loading data")).toBeInTheDocument()
+    )
+    // …and its neighbour still renders.
+    expect(getVisibleByText("Headcount")).toBeInTheDocument()
+  })
+})
