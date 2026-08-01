@@ -89,6 +89,8 @@ export const Default: Story = {
     series: [ENGINEERING],
     xValueFormatter: eurFormatter,
     valueFormatter: yearsFormatter,
+    xAxisName: "salary",
+    yAxisName: "tenure",
   },
 }
 
@@ -102,6 +104,8 @@ export const ColorSplit: Story = {
     series: [ENGINEERING, DESIGN, SALES],
     xValueFormatter: eurFormatter,
     valueFormatter: yearsFormatter,
+    xAxisName: "salary",
+    yAxisName: "tenure",
   },
 }
 
@@ -117,6 +121,8 @@ export const AnchoredAtOrigin: Story = {
     scaleAxes: false,
     xValueFormatter: eurFormatter,
     valueFormatter: yearsFormatter,
+    xAxisName: "salary",
+    yAxisName: "tenure",
   },
 }
 
@@ -128,6 +134,8 @@ export const CustomPointSize: Story = {
     pointSize: 16,
     xValueFormatter: eurFormatter,
     valueFormatter: yearsFormatter,
+    xAxisName: "salary",
+    yAxisName: "tenure",
   },
 }
 
@@ -145,6 +153,8 @@ export const Dense: Story = {
     ],
     xValueFormatter: eurFormatter,
     valueFormatter: yearsFormatter,
+    xAxisName: "salary",
+    yAxisName: "tenure",
   },
 }
 
@@ -198,6 +208,8 @@ const responsiveScatterProps = (
     series,
     xValueFormatter: eurFormatter,
     valueFormatter: yearsFormatter,
+    xAxisName: "salary",
+    yAxisName: "tenure",
   }
 }
 

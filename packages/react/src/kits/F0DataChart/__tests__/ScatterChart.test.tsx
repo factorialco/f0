@@ -207,7 +207,7 @@ describe("ScatterChart — legend", () => {
 })
 
 describe("ScatterChart — tooltip", () => {
-  it("renders the point label above its coordinates", () => {
+  it("titles the card with the point and subtitles it with the series", () => {
     render(<F0DataChart {...scatterProps} />)
 
     const html = getLatestOption().tooltip.formatter({
@@ -219,10 +219,34 @@ describe("ScatterChart — tooltip", () => {
 
     expect(getLatestOption().tooltip.trigger).toBe("item")
     expect(html).toContain("Ana Ruiz")
-    expect(html).toContain("(62000, 4.5)")
+    expect(html).toContain("Engineering")
   })
 
-  it("falls back to the series name when a point has no label", () => {
+  it("lists both coordinates as rows, labelled by the axis names", () => {
+    render(
+      <F0DataChart
+        {...scatterProps}
+        xAxisName="salary"
+        yAxisName="tenure"
+        xValueFormatter={(v) => `€${v / 1000}k`}
+        valueFormatter={(v) => `${v} yrs`}
+      />
+    )
+
+    const html = getLatestOption().tooltip.formatter({
+      marker: "",
+      name: "Ana Ruiz",
+      seriesName: "Engineering",
+      value: [62000, 4.5],
+    })
+
+    expect(html).toContain("€62k")
+    expect(html).toContain("salary")
+    expect(html).toContain("4.5 yrs")
+    expect(html).toContain("tenure")
+  })
+
+  it("falls back to the series name as the title when a point has no label", () => {
     render(<F0DataChart {...scatterProps} />)
 
     const html = getLatestOption().tooltip.formatter({
@@ -235,22 +259,17 @@ describe("ScatterChart — tooltip", () => {
     expect(html).toContain("Engineering")
   })
 
-  it("applies the formatters to both coordinates", () => {
-    render(
-      <F0DataChart
-        {...scatterProps}
-        xValueFormatter={(v) => `€${v / 1000}k`}
-        valueFormatter={(v) => `${v} yrs`}
-      />
-    )
+  it("formats unformatted coordinates with locale separators", () => {
+    render(<F0DataChart {...scatterProps} />)
 
     const html = getLatestOption().tooltip.formatter({
       marker: "",
       name: "Ana Ruiz",
+      seriesName: "Engineering",
       value: [62000, 4.5],
     })
 
-    expect(html).toContain("(€62k, 4.5 yrs)")
+    expect(html).toContain((62000).toLocaleString())
   })
 
   it("escapes labels coming from user data", () => {

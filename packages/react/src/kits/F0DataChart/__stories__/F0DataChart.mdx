@@ -31,7 +31,7 @@ import { F0DataChart } from "@factorialco/f0-react"
 | `radar`   | Multi-dimensional comparisons        | `series`, `indicators`, `showArea`                         |
 | `gauge`   | Single KPI / progress indicator      | `value`, `min`, `max`, `name`                              |
 | `heatmap` | Density across two dimensions        | `data`, `xCategories`, `yCategories`, `showLabels`         |
-| `scatter` | Relationship between two measures    | `series`, `pointSize`, `scaleAxes`, `xValueFormatter`      |
+| `scatter` | Relationship between two measures    | `series`, `pointSize`, `scaleAxes`, `xAxisName`            |
 
 All variants share an optional `emptyState` prop — see [Empty states](#empty-states).
 
@@ -304,6 +304,8 @@ The same chart rendered in every breakpoint (small / medium / large) and density
 Show the relationship between two measures — one on each axis, one point per entity. Unlike every other cartesian variant there is no category axis: both axes are continuous, so `categories` does not apply. Each point may carry a `label` identifying it, which becomes the tooltip header.
 
 Reach for scatter when the question is "does X relate to Y?". For a trend over time use `line`; for a comparison across categories use `bar`.
+
+Because a point has two coordinates and no third measure, its tooltip has no headline value — both coordinates read as rows, the same shape radar uses for its indicators. Set `xAxisName` and `yAxisName` to label those rows ("salary", "tenure"); without them the rows show bare values.
 
 <Canvas of={ScatterStories.Default} />
 <Controls of={ScatterStories.Default} />

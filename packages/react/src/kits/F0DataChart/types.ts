@@ -567,6 +567,14 @@ export interface F0DataChartScatterProps extends F0DataChartCommonProps {
   valueFormatter?: (value: number) => string
   /** Format the X axis tick labels and the x value in the tooltip */
   xValueFormatter?: (value: number) => string
+  /**
+   * What the X measure is, e.g. "salary". Labels the x row in the tooltip —
+   * a scatter has no headline value, so both coordinates read as rows and
+   * need naming, the same way radar names its indicators.
+   */
+  xAxisName?: string
+  /** What the Y measure is, e.g. "tenure". Labels the y row in the tooltip. */
+  yAxisName?: string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }

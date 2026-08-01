@@ -15,9 +15,10 @@ import {
   buildItemTooltip,
   buildLegend,
   buildValueAxis,
-  escapeTooltipText,
+  renderValueTooltip,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
+import type { ChartTheme } from "../../utils/theme"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 
@@ -105,13 +106,27 @@ function buildSeriesEntry(
   }
 }
 
+type ScatterTooltipNames = {
+  xAxisName?: string
+  yAxisName?: string
+  xValueFormatter?: (value: number) => string
+  valueFormatter?: (value: number) => string
+}
+
 /**
- * Tooltip body: the point's identity on the first line, its coordinates on
- * the second. Falls back to the series name when a point carries no label.
+ * A scatter point carries two coordinates and no third measure, so — like a
+ * radar point — there is no single headline value and both coordinates read
+ * as rows. The point's own label is the title, with the series name beneath
+ * it whenever the two differ.
  */
 function buildTooltipFormatter(
-  xValueFormatter?: (value: number) => string,
-  valueFormatter?: (value: number) => string
+  {
+    xAxisName,
+    yAxisName,
+    xValueFormatter,
+    valueFormatter,
+  }: ScatterTooltipNames,
+  theme: ChartTheme
 ) {
   return (params: unknown): string => {
     const point = params as {
@@ -121,14 +136,27 @@ function buildTooltipFormatter(
       value?: [number, number]
     }
     const [x, y] = point.value ?? [0, 0]
-    const formattedX = xValueFormatter ? xValueFormatter(x) : String(x)
-    const formattedY = valueFormatter ? valueFormatter(y) : String(y)
-    const header = point.name || point.seriesName || ""
+    const seriesName = point.seriesName ?? ""
+    const title = point.name || seriesName
 
-    return [
-      `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(header)}</div>`,
-      `<div>${String(point.marker ?? "")} <strong>(${escapeTooltipText(formattedX)}, ${escapeTooltipText(formattedY)})</strong></div>`,
-    ].join("")
+    return renderValueTooltip(
+      {
+        marker: point.marker,
+        title,
+        ...(seriesName && seriesName !== title ? { subtitle: seriesName } : {}),
+        rows: [
+          {
+            value: xValueFormatter ? xValueFormatter(x) : x.toLocaleString(),
+            label: xAxisName ?? "",
+          },
+          {
+            value: valueFormatter ? valueFormatter(y) : y.toLocaleString(),
+            label: yAxisName ?? "",
+          },
+        ],
+      },
+      theme
+    )
   }
 }
 
@@ -150,6 +178,8 @@ export function useScatterChartOptions(
     showGrid = true,
     valueFormatter,
     xValueFormatter,
+    xAxisName,
+    yAxisName,
     echartsOptions,
   }: F0DataChartScatterProps,
   size: ScatterChartSize
@@ -211,7 +241,10 @@ export function useScatterChartOptions(
       grid: buildGrid({ showLegend: legendVisible }),
       tooltip: buildItemTooltip({
         theme,
-        formatter: buildTooltipFormatter(xValueFormatter, valueFormatter),
+        formatter: buildTooltipFormatter(
+          { xAxisName, yAxisName, xValueFormatter, valueFormatter },
+          theme
+        ),
       }),
       emphasis: DEFAULT_EMPHASIS,
     }
@@ -229,6 +262,8 @@ export function useScatterChartOptions(
     showGrid,
     valueFormatter,
     xValueFormatter,
+    xAxisName,
+    yAxisName,
     echartsOptions,
     theme,
     width,
