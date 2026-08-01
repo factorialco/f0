@@ -228,6 +228,15 @@ interface ValueAxisOptions {
   show?: boolean
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   splitNumber?: number
+  /**
+   * Fit the axis to the data range instead of anchoring it at zero. ECharts
+   * defaults this off, which is right for bar/line (a bar not starting at zero
+   * misstates its magnitude) but collapses a two-measure plot whose values sit
+   * far from the origin.
+   */
+  scale?: boolean
+  /** Padding at each end of the axis, so a point on the min/max isn't clipped. */
+  boundaryGap?: [string | number, string | number]
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -238,10 +247,14 @@ export function buildValueAxis({
   maxLabelWidth,
   show = true,
   splitNumber,
+  scale,
+  boundaryGap,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
     ...(splitNumber !== undefined ? { splitNumber } : {}),
+    ...(scale !== undefined ? { scale } : {}),
+    ...(boundaryGap !== undefined ? { boundaryGap } : {}),
     axisLine: {
       show: false,
     },
