@@ -6,7 +6,11 @@ import type {
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
 
-import type { DashboardChartConfig, DashboardChartData } from "../types"
+import type {
+  DashboardChartConfig,
+  DashboardChartData,
+  ScatterChartConfig,
+} from "../types"
 
 interface TabularResult {
   columns: string[]
@@ -47,6 +51,8 @@ export function chartDataToTabular(
       return gaugeToTabular(data)
     case "heatmap":
       return heatmapToTabular(data)
+    case "scatter":
+      return scatterToTabular(config, data)
   }
 }
 
@@ -151,4 +157,28 @@ function heatmapToTabular(data: DashboardChartData): TabularResult {
   }))
 
   return { columns: ["X", "Y", "Value"], rows }
+}
+
+/**
+ * One row per point, long format — the same choice heatmap makes for its
+ * cells. The Series and Label columns stay in the header even when unused, so
+ * a single-series scatter and a colour-split one export the same shape.
+ */
+function scatterToTabular(
+  config: ScatterChartConfig,
+  data: DashboardChartData
+): TabularResult {
+  const xColumn = config.xAxisName ?? "X"
+  const yColumn = config.yAxisName ?? "Y"
+
+  const rows = (data.scatterSeries ?? []).flatMap((series) =>
+    series.data.map((point) => ({
+      Series: series.name,
+      Label: Array.isArray(point) ? "" : (point.label ?? ""),
+      [xColumn]: Array.isArray(point) ? point[0] : point.x,
+      [yColumn]: Array.isArray(point) ? point[1] : point.y,
+    }))
+  )
+
+  return { columns: ["Series", "Label", xColumn, yColumn], rows }
 }

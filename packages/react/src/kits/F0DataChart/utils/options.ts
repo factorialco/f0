@@ -235,8 +235,6 @@ interface ValueAxisOptions {
    * far from the origin.
    */
   scale?: boolean
-  /** Padding at each end of the axis, so a point on the min/max isn't clipped. */
-  boundaryGap?: [string | number, string | number]
   /**
    * Anchor the first and last labels to the axis ends so they cannot overflow
    * the chart container — the value-axis counterpart of `edgeAligned` on
@@ -255,14 +253,12 @@ export function buildValueAxis({
   show = true,
   splitNumber,
   scale,
-  boundaryGap,
   alignEdgeLabels,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
     ...(splitNumber !== undefined ? { splitNumber } : {}),
     ...(scale !== undefined ? { scale } : {}),
-    ...(boundaryGap !== undefined ? { boundaryGap } : {}),
     axisLine: {
       show: false,
     },

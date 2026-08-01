@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  buildValueAxis,
   computeCategoryAxisLayout,
   computeLabelInterval,
   deltaRow,
@@ -104,6 +105,39 @@ describe("computeCategoryAxisLayout", () => {
     const layout = computeCategoryAxisLayout(50, 100, true)
     expect(layout).toBeDefined()
     expect(layout!.labelWidth).toBeGreaterThanOrEqual(24)
+  })
+})
+
+describe("buildValueAxis", () => {
+  const theme = resolveChartTheme(null)
+
+  it("omits scale and edge alignment unless asked", () => {
+    // The no-regression guard for bar and line: their axes must serialise
+    // exactly as they did before scatter needed these knobs.
+    const axis = buildValueAxis({ theme, showGrid: true })
+
+    expect(axis).not.toHaveProperty("scale")
+    expect(axis.axisLabel).not.toHaveProperty("alignMinLabel")
+    expect(axis.axisLabel).not.toHaveProperty("alignMaxLabel")
+  })
+
+  it("fits the axis to its data range when scaled", () => {
+    expect(
+      buildValueAxis({ theme, showGrid: true, scale: true })
+    ).toMatchObject({ scale: true })
+  })
+
+  it("anchors the end labels so they cannot overflow the container", () => {
+    const axis = buildValueAxis({
+      theme,
+      showGrid: true,
+      alignEdgeLabels: true,
+    })
+
+    expect(axis.axisLabel).toMatchObject({
+      alignMinLabel: "left",
+      alignMaxLabel: "right",
+    })
   })
 })
 

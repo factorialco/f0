@@ -26,6 +26,7 @@ import {
   LineChartSkeleton,
   PieChartSkeleton,
   RadarChartSkeleton,
+  ScatterChartSkeleton,
 } from "@/kits/F0DataChart"
 import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
@@ -151,6 +152,8 @@ function chartSkeleton(config: DashboardChartConfig) {
       return <GaugeChartSkeleton />
     case "heatmap":
       return <HeatmapChartSkeleton />
+    case "scatter":
+      return <ScatterChartSkeleton showLegend={config.showLegend} />
   }
 }
 
@@ -274,6 +277,14 @@ export function buildChartProps(
         yCategories: adapted.yCategories ?? [],
         data: adapted.data ?? [],
       } as F0DataChartProps
+    case "scatter":
+      // Unreachable while scatter stays out of the type switcher — a native
+      // scatter takes the fast path above and nothing converts into one.
+      return {
+        ...config,
+        ...shared,
+        series: adapted.scatterSeries ?? [],
+      } as F0DataChartProps
   }
 }
 
@@ -316,6 +327,11 @@ function buildNativeChartProps(
         xCategories: data.xCategories ?? [],
         yCategories: data.yCategories ?? [],
         data: data.data ?? [],
+      } as F0DataChartProps
+    case "scatter":
+      return {
+        ...chart,
+        series: data.scatterSeries ?? [],
       } as F0DataChartProps
     case "bar":
     case "line": {

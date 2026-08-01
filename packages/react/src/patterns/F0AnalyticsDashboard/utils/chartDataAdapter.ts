@@ -120,6 +120,29 @@ function gaugeToCanonical(data: DashboardChartData): CanonicalChartData {
   }
 }
 
+/**
+ * Scatter points have no shared category axis — each carries its own x. The
+ * canonical form uses each point's label (or its x value) as the category, so
+ * a converted chart still reads sensibly. Unreachable while scatter stays out
+ * of the type switcher; kept correct so lifting that restriction is safe.
+ */
+function scatterToCanonical(data: DashboardChartData): CanonicalChartData {
+  const scatterSeries = data.scatterSeries ?? []
+  const categories = (scatterSeries[0]?.data ?? []).map((point) =>
+    Array.isArray(point) ? String(point[0]) : (point.label ?? String(point.x))
+  )
+
+  return {
+    categories,
+    series: scatterSeries.map((entry) => ({
+      name: entry.name,
+      data: entry.data.map((point) =>
+        Array.isArray(point) ? point[1] : point.y
+      ),
+    })),
+  }
+}
+
 function heatmapToCanonical(data: DashboardChartData): CanonicalChartData {
   const xCats = data.xCategories ?? []
   const yCats = data.yCategories ?? []
@@ -153,6 +176,13 @@ export function detectDataShape(
   data: DashboardChartData,
   hint?: DashboardChartConfig["type"]
 ): DashboardChartConfig["type"] {
+  // Scatter: its own field, so it can never be confused with the heatmap
+  // tuples or a bar/line series array. Checked on presence rather than
+  // length, so an empty scatter still renders its own empty state instead
+  // of being misread as a bar chart.
+  if (data.scatterSeries !== undefined) {
+    return "scatter"
+  }
   // Heatmap: has xCategories/yCategories + data tuples
   if (
     data.xCategories?.length ||
@@ -210,6 +240,8 @@ export function toCanonical(
       return gaugeToCanonical(data)
     case "heatmap":
       return heatmapToCanonical(data)
+    case "scatter":
+      return scatterToCanonical(data)
   }
 }
 
@@ -275,6 +307,24 @@ function canonicalToRadar(canonical: CanonicalChartData): DashboardChartData {
   }
 }
 
+/**
+ * Canonical data has one shared category axis, so the x coordinate has to come
+ * from the category index — the original x measure is not recoverable. Lossy
+ * but never blank; unreachable while scatter stays out of the type switcher.
+ */
+function canonicalToScatter(canonical: CanonicalChartData): DashboardChartData {
+  return {
+    scatterSeries: canonical.series.map((s) => ({
+      name: s.name,
+      data: canonical.categories.map((category, index) => ({
+        x: index,
+        y: s.data[index] ?? 0,
+        label: category,
+      })),
+    })),
+  }
+}
+
 function canonicalToGauge(canonical: CanonicalChartData): DashboardChartData {
   const firstValue = canonical.series[0]?.data[0] ?? 0
   return {
@@ -308,6 +358,8 @@ export function fromCanonical(
     case "heatmap":
       // Heatmap needs 2D data — not meaningful from 1D canonical
       return { xCategories: [], yCategories: [], data: [] }
+    case "scatter":
+      return canonicalToScatter(canonical)
   }
 }
 
@@ -376,6 +428,11 @@ export function compatibleTargetTypes(
       targets.add("bar")
       targets.add("line")
       break
+
+    case "scatter":
+      // Measure against measure has no equivalent in any category-axis chart:
+      // converting either invents an x or discards one. Only table and itself.
+      break
   }
 
   return targets
@@ -409,5 +466,7 @@ export function defaultChartConfig(
       return { type: "gauge", showValue: true }
     case "heatmap":
       return { type: "heatmap" }
+    case "scatter":
+      return { type: "scatter", scaleAxes: true }
   }
 }
