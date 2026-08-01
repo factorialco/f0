@@ -23,6 +23,9 @@ export type {
   F0DataChartRadarIndicator,
   F0DataChartRadarProps,
   F0DataChartRadarSeries,
+  F0DataChartScatterDataPoint,
+  F0DataChartScatterProps,
+  F0DataChartScatterSeries,
 } from "./types"
 
 export { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"
@@ -36,6 +39,7 @@ export {
   LineChartSkeleton,
   PieChartSkeleton,
   RadarChartSkeleton,
+  ScatterChartSkeleton,
 } from "./skeletons"
 
 /**

@@ -8,6 +8,7 @@ import { HeatmapChart } from "./components/HeatmapChart/HeatmapChart"
 import { LineChart } from "./components/LineChart/LineChart"
 import { PieChart } from "./components/PieChart/PieChart"
 import { RadarChart } from "./components/RadarChart/RadarChart"
+import { ScatterChart } from "./components/ScatterChart/ScatterChart"
 import { isDataChartEmpty } from "./utils/isDataChartEmpty"
 
 export const F0DataChart = (props: F0DataChartProps) => {
@@ -30,5 +31,7 @@ export const F0DataChart = (props: F0DataChartProps) => {
       return <GaugeChart {...props} />
     case "heatmap":
       return <HeatmapChart {...props} />
+    case "scatter":
+      return <ScatterChart {...props} />
   }
 }

@@ -499,6 +499,79 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
 }
 
 // ---------------------------------------------------------------------------
+// Scatter data types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single point in a scatter series.
+ *
+ * The bare `[x, y]` tuple is the terse form. The object form additionally
+ * carries `label` — the point's identity (e.g. an employee or team name),
+ * shown as the tooltip header.
+ */
+export type F0DataChartScatterDataPoint =
+  | [number, number]
+  | {
+      /** Horizontal position, plotted on the value X axis */
+      x: number
+      /** Vertical position, plotted on the value Y axis */
+      y: number
+      /** Identity of this point, used as the tooltip header (e.g. "Ana Ruiz") */
+      label?: string
+      /** Override color for this individual point. Must be an F0 design token name. */
+      color?: ChartColorToken
+    }
+
+/**
+ * A group of points sharing a color and a legend entry. Use one series per
+ * group value to split a scatter by a dimension (e.g. one per department).
+ */
+export interface F0DataChartScatterSeries {
+  /** Display name used in legend and tooltip */
+  name: string
+  /** Points in this group */
+  data: F0DataChartScatterDataPoint[]
+  /** Override color for this series. Must be an F0 design token name. Falls back to the theme palette. */
+  color?: ChartColorToken
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: scatter variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Scatter chart variant props.
+ *
+ * Plots x/y pairs on two value axes to show the relationship between two
+ * measures. Unlike bar/line there is no category axis — both axes are
+ * continuous — so this interface is separate from `F0DataChartBaseProps`.
+ * Pass multiple `series` to color-split the points by a group dimension.
+ */
+export interface F0DataChartScatterProps extends F0DataChartCommonProps {
+  /** Chart type */
+  type: "scatter"
+  /** One or more point groups. Multiple series render as a color split. */
+  series: F0DataChartScatterSeries[]
+  /** Point diameter in pixels. @default 8 */
+  pointSize?: number
+  /**
+   * Fit each axis to its data range instead of anchoring it at zero. Turn off
+   * to force both axes through the origin. @default true
+   */
+  scaleAxes?: boolean
+  /** Show the legend below the chart. Only rendered with 2+ series. @default true */
+  showLegend?: boolean
+  /** Show the background grid lines on both axes. @default true */
+  showGrid?: boolean
+  /** Format the Y axis tick labels and the y value in the tooltip */
+  valueFormatter?: (value: number) => string
+  /** Format the X axis tick labels and the x value in the tooltip */
+  xValueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
 // Union
 // ---------------------------------------------------------------------------
 
@@ -506,7 +579,7 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
  * Props for the F0DataChart component.
  *
  * A unified chart component that supports bar, line, funnel, pie, radar,
- * gauge, and heatmap chart types via a discriminated `type` prop.
+ * gauge, heatmap, and scatter chart types via a discriminated `type` prop.
  */
 export type F0DataChartProps =
   | F0DataChartBarProps
@@ -516,3 +589,4 @@ export type F0DataChartProps =
   | F0DataChartRadarProps
   | F0DataChartGaugeProps
   | F0DataChartHeatmapProps
+  | F0DataChartScatterProps
