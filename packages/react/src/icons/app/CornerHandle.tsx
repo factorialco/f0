@@ -16,7 +16,6 @@ const SvgCornerHandle = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M16 6L6 16M17 11.5L11.5 17"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )
