@@ -34,7 +34,8 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
 }: ActiveFiltersChipsProps<Filters>) => {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([])
   const i18n = useI18n()
-  const { locale } = useL10n()
+  const { locale, date } = useL10n()
+  const localizedDayFormat = date?.localizedDayFormat
 
   // Resolve filter labels using chipLabel from filter type definitions
   useEffect(() => {
@@ -79,6 +80,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
               schema: filterDef as any,
               i18n,
               locale,
+              localizedDayFormat,
             })
             /* eslint-enable @typescript-eslint/no-explicit-any */
             const displayText =
@@ -108,7 +110,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
     }
 
     resolveLabels()
-  }, [currentFilters, filters, i18n, locale])
+  }, [currentFilters, filters, i18n, locale, localizedDayFormat])
 
   if (activeFilters.length === 0) return null
 

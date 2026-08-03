@@ -45,6 +45,11 @@ interface OneCalendarInternalProps {
   weekStartsOn?: WeekStartsOn
   /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
   selectOnCellOnly?: boolean
+  /**
+   * Derive the numeric day format from the locale instead of the fixed
+   * day-first fallback. Only affects the day and range granularities.
+   * Defaults to `l10n.date.localizedDayFormat`, then false.
+   */
   localizedDayFormat?: boolean
 }
 
@@ -91,12 +96,15 @@ const OneCalendarInternal = ({
   compact = false,
   weekStartsOn,
   selectOnCellOnly = false,
-  localizedDayFormat = false,
+  localizedDayFormat,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
 
-  const numericLocale = localizedDayFormat ? l10n.locale : undefined
+  const numericLocale =
+    (localizedDayFormat ?? l10n.date?.localizedDayFormat)
+      ? l10n.locale
+      : undefined
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday

@@ -33,7 +33,8 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
   const filterType = getFilterType(filter.type)
 
   const i18n = useI18n()
-  const { locale } = useL10n()
+  const { locale, date } = useL10n()
+  const localizedDayFormat = date?.localizedDayFormat
 
   const [chipLabel, setChipLabel] = useState<ChipLabel>({
     label: "",
@@ -52,6 +53,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
           i18n: I18nContextType
           filterKey?: string
           locale?: string
+          localizedDayFormat?: boolean
         }
       ) => Promise<string>
 
@@ -60,6 +62,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
         i18n,
         filterKey,
         locale,
+        localizedDayFormat,
       })
       const label =
         typeof valueLabel === "object"
@@ -77,7 +80,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
 
     updateLabel()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, filterType, filter, locale])
+  }, [value, filterType, filter, locale, localizedDayFormat])
 
   return (
     <motion.div

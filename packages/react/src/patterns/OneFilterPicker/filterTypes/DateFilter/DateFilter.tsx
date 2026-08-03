@@ -16,6 +16,11 @@ export type DateFilterOptions = {
   mode?: CalendarMode
   defaultSelected?: Date | DateRange | null
   view?: CalendarView
+  /**
+   * Derive the numeric day format from the locale instead of the fixed
+   * day-first fallback. Only affects the `day` and `range` views.
+   * Defaults to `l10n.date.localizedDayFormat`, then false.
+   */
   localizedDayFormat?: boolean
 }
 

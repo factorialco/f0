@@ -146,7 +146,10 @@ export const dayGranularity: GranularityDefinition = {
       const year = Number(partFor("y"))
       const parsed = new Date(year, month - 1, day)
 
-      return parsed.getDate() === day && parsed.getMonth() === month - 1
+      // The year check also rejects two-digit years, which Date() would map to 1900–1999
+      return parsed.getFullYear() === year &&
+        parsed.getMonth() === month - 1 &&
+        parsed.getDate() === day
         ? parsed
         : new Date(NaN)
     }

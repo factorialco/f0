@@ -177,6 +177,13 @@ describe("dayGranularity", () => {
         to: invalidDate,
       })
     })
+
+    it("rejects two-digit years instead of mapping them to the 1900s", () => {
+      expect(dayGranularity.fromString("15-01-24", i18n)).toEqual({
+        from: invalidDate,
+        to: invalidDate,
+      })
+    })
   })
 
   describe("navigate", () => {
