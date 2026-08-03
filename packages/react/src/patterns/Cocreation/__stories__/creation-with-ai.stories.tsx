@@ -2767,6 +2767,12 @@ function FlowContent({
   // Gate the chat's own close (its ✕) BEFORE it animates: if a survey is being
   // selected, confirm leaving first and abort the close (return false) so no
   // docking animation runs. "Leave" tears the flow down via `leaveGuidedFlow`.
+  //
+  // KNOWN LIMITATION — this covers the ✕ only. The header's One switch closes
+  // through `useAiChatToggle`, which calls `setOpen(false)` directly and has no
+  // before-close hook, so toggling it off skips this confirmation. Gating that
+  // too would mean adding a before-close concept to the production F0AiChat
+  // provider (every consumer, not just this mock), which is out of scope here.
   useEffect(() => {
     setBeforeClose(async () => {
       if (!confirmOnCloseRef.current) return true
