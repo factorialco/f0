@@ -7,6 +7,7 @@ import {
   escapeTooltipText,
   renderMarker,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../utils/options"
 import { resolveChartTheme } from "../utils/theme"
 
@@ -204,6 +205,33 @@ describe("renderMarker", () => {
   it("strips characters that would break out of the style attribute", () => {
     expect(renderMarker('red"><script>alert(1)</script>')).not.toContain(
       "<script>"
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The one place every chart type resolves its tooltip number.
+// ---------------------------------------------------------------------------
+
+describe("tooltipValueFormat", () => {
+  it("reads the value the way the axis and labels do", () => {
+    // Without this a chart whose axis says "€46,390.86" hovered as
+    // "46390.863" — currency gone, raw float precision exposed.
+    const axis = (v: number) =>
+      `€${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    expect(tooltipValueFormat(undefined, axis)(46390.8632)).toBe("€46,390.86")
+  })
+
+  it("lets tooltipValueFormatter win, for a compact axis with an exact tooltip", () => {
+    const compactAxis = (v: number) => `${Math.round(v / 1000)}k`
+    const exact = (v: number) => v.toLocaleString("en-US")
+    expect(tooltipValueFormat(exact, compactAxis)(107505)).toBe("107,505")
+  })
+
+  it("falls back to a plain localized number when neither is given", () => {
+    expect(tooltipValueFormat()(107505)).toBe((107505).toLocaleString())
+    expect(tooltipValueFormat(undefined, undefined)(0)).toBe(
+      (0).toLocaleString()
     )
   })
 })

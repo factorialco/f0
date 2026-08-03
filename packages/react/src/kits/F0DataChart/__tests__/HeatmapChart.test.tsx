@@ -169,7 +169,7 @@ describe("HeatmapChart — tooltip", () => {
     expect(html).toContain((4).toLocaleString())
   })
 
-  it("escapes category names and ignores the in-cell label format", () => {
+  it("escapes category names and reads the value the way the cells do", () => {
     containerSize.width = 720
     render(
       <F0DataChart
@@ -181,8 +181,7 @@ describe("HeatmapChart — tooltip", () => {
     )
 
     const html = hover({ value: [0, 0, 5] })
-    expect(html).toContain((5).toLocaleString())
-    expect(html).not.toContain("5h") // that stays inside the cell
+    expect(html).toContain("5h")
     expect(html).toContain("&lt;script&gt;")
     expect(html).not.toContain("<script>")
   })

@@ -122,7 +122,7 @@ describe("GaugeChart — tooltip", () => {
     )
   })
 
-  it("escapes the name and shows the full number, not the ring's format", () => {
+  it("escapes the name and reads the value the way the ring does", () => {
     render(
       <F0DataChart
         {...gaugeProps}
@@ -134,8 +134,7 @@ describe("GaugeChart — tooltip", () => {
     )
 
     const html = hover({ name: "<script>x</script>", value: 7200 })
-    expect(html).toContain((7200).toLocaleString())
-    expect(html).not.toContain("72%") // that stays in the centre of the ring
+    expect(html).toContain("72%")
     expect(html).toContain("&lt;script&gt;")
     expect(html).not.toContain("<script>")
   })

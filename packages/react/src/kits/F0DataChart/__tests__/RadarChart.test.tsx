@@ -121,14 +121,12 @@ describe("RadarChart — tooltip", () => {
     expect(html).not.toContain("font-size: 20px")
   })
 
-  it("shows full numbers, not the compact vertex-label format", () => {
-    render(
-      <F0DataChart {...radarProps} valueFormatter={(v) => `${v / 100}x`} />
-    )
+  it("reads every indicator the way the vertex labels do", () => {
+    render(<F0DataChart {...radarProps} valueFormatter={(v) => `${v} pts`} />)
 
-    const html = hover({ name: "Team A", value: [8500, 70, 90] })
-    expect(html).toContain((8500).toLocaleString())
-    expect(html).not.toContain("85x") // that stays on the vertex label
+    const html = hover({ name: "Team A", value: [85, 70, 90] })
+    expect(html).toContain("85 pts")
+    expect(html).toContain("70 pts")
   })
 
   it("lets tooltipValueFormatter set every indicator row", () => {

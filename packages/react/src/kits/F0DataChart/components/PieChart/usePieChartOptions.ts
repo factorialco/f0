@@ -63,7 +63,10 @@ export function usePieChartOptions(
       ? resolveChartColorToken(series.color)
       : undefined
 
-    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const responsive = resolveResponsiveDisplay(size)
     // The user prop can still force chrome OFF, but never ON at sm/md.

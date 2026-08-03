@@ -151,7 +151,10 @@ export function useGaugeChartOptions(
               // colour the arc is actually painted with.
               marker: renderMarker(resolvedColor),
               title: p.name ? String(p.name) : undefined,
-              value: tooltipValueFormat(tooltipValueFormatter)(val),
+              value: tooltipValueFormat(
+                tooltipValueFormatter,
+                valueFormatter
+              )(val),
               rows: [
                 span > 0 && {
                   value: `${(((val - min) / span) * 100).toFixed(1)}%`,

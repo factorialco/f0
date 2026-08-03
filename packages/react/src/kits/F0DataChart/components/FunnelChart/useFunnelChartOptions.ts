@@ -120,7 +120,10 @@ export function useFunnelChartOptions(
       },
     }
 
-    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const buildTooltipFormatter = () => {
       // Use sorted order for step-over-step conversion

@@ -118,7 +118,7 @@ Bar labels use `valueFormatter`, with configurable size and collision handling:
 
 ### Precise tooltip values
 
-Tooltips already show the full number while the axis and labels stay compact. Use `tooltipValueFormatter` to control that number yourself — a fixed locale, a unit, or a currency the compact axis format leaves out. The Customization section below covers how the two formatters divide the work.
+Tooltips use `valueFormatter` like the rest of the chart. Add `tooltipValueFormatter` when the axis and labels must stay compact but the tooltip should carry the exact figure. The Customization section below covers how the two divide the work.
 
 <Canvas of={BarStories.PreciseTooltip} />
 
@@ -319,22 +319,21 @@ import {
 
 ### Value & Category Formatters
 
-Two formatters, split by where the number is drawn:
+Every chart type takes `valueFormatter` for its numbers — axis ticks, labels, and the hover tooltip. One formatter is all most charts need: the tooltip reads the value the way the rest of the chart does, so a unit or a currency can't go missing on hover. Bar and line charts also support `categoryFormatter` for axis labels.
 
-- **`valueFormatter`** — axes and labels, the places where space is tight, so it is usually a compact format. Bar and line charts also support `categoryFormatter` for axis labels.
-- **`tooltipValueFormatter`** — the hover tooltip only.
-
-Every chart type supports both, and the rule is the same on all seven: **a tooltip shows the full localized number** (`4,000,000`, not `4M €`), because the tooltip is where the exact figure belongs. `valueFormatter` never reaches the tooltip, so a unit that lived in it needs `tooltipValueFormatter` to come back:
+`tooltipValueFormatter` overrides it for the tooltip alone. Reach for it when the axis has to stay compact but the tooltip should be exact:
 
 ```tsx
 <F0DataChart
   type="line"
-  valueFormatter={(v) => `${v / 1_000_000}M €`} // axis: "4M €"
-  tooltipValueFormatter={(v) => `${v.toLocaleString()} €`} // tooltip: "4,000,000 €"
+  valueFormatter={(v) => `€${(v / 1_000_000).toFixed(1)}M`} // axis: "€4.0M"
+  tooltipValueFormatter={(v) => `€${v.toLocaleString()}`} // tooltip: "€4,000,000"
   categoryFormatter={(v) => v.slice(0, 3)}
   // ...
 />
 ```
+
+With neither, values render as a plain localized number.
 
 <Canvas of={LineStories.CustomFormatters} />
 

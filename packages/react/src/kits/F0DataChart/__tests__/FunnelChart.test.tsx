@@ -159,14 +159,12 @@ describe("FunnelChart — tooltip", () => {
     expect(html).not.toContain("<script>")
   })
 
-  it("shows the full number, not the compact stage-label format", () => {
+  it("reads the value the way the stage labels do", () => {
     render(
-      <F0DataChart {...funnelProps} valueFormatter={(v) => `${v / 1000}k`} />
+      <F0DataChart {...funnelProps} valueFormatter={(v) => `${v} people`} />
     )
 
-    const html = hover({ name: "Screened", value: 480 })
-    expect(html).toContain((480).toLocaleString())
-    expect(html).not.toContain("0.48k") // that stays on the stage label
+    expect(hover({ name: "Screened", value: 480 })).toContain("480 people")
   })
 
   it("lets tooltipValueFormatter set the tooltip number", () => {

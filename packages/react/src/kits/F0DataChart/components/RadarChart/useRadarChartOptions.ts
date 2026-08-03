@@ -58,7 +58,10 @@ export function useRadarChartOptions(
     const responsive = resolveResponsiveDisplay(size)
     const effectiveShowLegend = responsive.showLegend && showLegend
     const { showIndicatorNames, nameWidth } = responsive
-    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     // Auto-calculate max for each indicator if not provided
     const radarIndicators = indicators.map((ind, i) => {

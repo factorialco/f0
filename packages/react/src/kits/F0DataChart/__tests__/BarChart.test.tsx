@@ -985,23 +985,27 @@ describe("BarChart — item tooltip", () => {
     expect(getLatestOption().aria?.label?.description).toContain("107,505")
   })
 
-  it("shows full numbers (not the compact axis format) when no tooltipValueFormatter is given", () => {
+  // The tooltip reads the number the way the axis does, so a unit written by
+  // `valueFormatter` (a currency, a "%") is not silently dropped on hover.
+  it("falls back to the axis formatter when no tooltipValueFormatter is given", () => {
     render(
       <F0DataChart
         type="bar"
         categories={["A"]}
-        series={[{ name: "S", data: [107505] }]}
-        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        series={[{ name: "S", data: [107505.8632] }]}
+        valueFormatter={(v) =>
+          `€${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
       />
     )
     const html = getTooltipFormatter()?.({
       name: "A",
       seriesName: "S",
-      value: 107505,
+      value: 107505.8632,
       dataIndex: 0,
     })
-    expect(html).toContain((107505).toLocaleString())
-    expect(html).not.toContain("108K")
+    expect(html).toContain("€107,505.86")
+    expect(html).not.toContain("107505.8632") // no raw float precision
   })
 
   it("formats and escapes values in target tooltips, and hides ghost series", () => {

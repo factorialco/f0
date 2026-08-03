@@ -195,7 +195,10 @@ export function useLineChartOptions(
 
     const legendData = series.map((s) => s.name)
 
-    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     // Lines keep the axis trigger — a line is too thin to hover reliably —
     // but render the shared tooltip card. With one series that is the same

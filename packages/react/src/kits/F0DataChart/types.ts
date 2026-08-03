@@ -179,12 +179,11 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    */
   labelFontSize?: number
   /**
-   * Formatter for the values shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the axis
-   * and labels stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which
-   * {@link F0DataChartBaseProps.valueFormatter} does not do — that one formats
-   * the axis only.
+   * Formatter for the values shown in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the
+   * axis reads the same on hover, then to a plain localized number. Set it when
+   * the axis has to stay compact ("107.5K") but the tooltip should be exact
+   * ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
 }
@@ -208,12 +207,11 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
   /** Show data point dots on the lines. @default false */
   showDots?: boolean
   /**
-   * Formatter for the values shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the axis
-   * and labels stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which
-   * {@link F0DataChartBaseProps.valueFormatter} does not do — that one formats
-   * the axis only.
+   * Formatter for the values shown in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the
+   * axis reads the same on hover, then to a plain localized number. Set it when
+   * the axis has to stay compact ("107.5K") but the tooltip should be exact
+   * ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
 }
@@ -282,11 +280,10 @@ export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
   /**
-   * Formatter for the value shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the labels
-   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
-   * one formats the labels only.
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
   /**
@@ -352,11 +349,10 @@ export interface F0DataChartPieProps extends F0DataChartCommonProps {
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
   /**
-   * Formatter for the value shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the labels
-   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
-   * one formats the labels only.
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
@@ -414,11 +410,10 @@ export interface F0DataChartRadarProps extends F0DataChartCommonProps {
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
   /**
-   * Formatter for the value shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the labels
-   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
-   * one formats the labels only.
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
@@ -452,11 +447,10 @@ export interface F0DataChartGaugeProps extends F0DataChartCommonProps {
   /** Format the value displayed */
   valueFormatter?: (value: number) => string
   /**
-   * Formatter for the value shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the labels
-   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
-   * one formats the labels only.
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
@@ -494,11 +488,10 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
   /**
-   * Formatter for the value shown in the hover tooltip. Defaults to a plain
-   * localized number, so the tooltip stays precise ("107,505") while the labels
-   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
-   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
-   * one formats the labels only.
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
    */
   tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */

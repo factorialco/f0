@@ -458,19 +458,22 @@ export function renderValueTooltip(
 /**
  * The formatter every chart type uses for the values in its tooltip.
  *
- * Tooltips show the full localized number ("125,000") rather than the compact
- * form axes and labels use ("125k"): the tooltip is where the exact figure
- * belongs, and it is the same number on every chart type. `valueFormatter`
- * deliberately does not reach here — pass `tooltipValueFormatter` to control
- * this number, which is also how a unit or a currency gets into a tooltip.
+ * A tooltip reads the number the same way the rest of the chart does, so it
+ * takes `valueFormatter` — the one that writes the axis and the labels. That is
+ * what carries a unit across: a chart whose axis says "€46,390.86" would
+ * otherwise hover as "46390.863", dropping the currency and exposing raw
+ * float precision.
+ *
+ * `tooltipValueFormatter` overrides it, for the case where the axis has to stay
+ * compact ("125k") but the tooltip should be exact ("125,000"). With neither,
+ * the value falls back to a plain localized number.
  */
 export function tooltipValueFormat(
-  tooltipValueFormatter?: (value: number) => string
+  tooltipValueFormatter?: (value: number) => string,
+  valueFormatter?: (value: number) => string
 ): (value: number) => string {
-  return (value) =>
-    tooltipValueFormatter
-      ? tooltipValueFormatter(value)
-      : value.toLocaleString()
+  const format = tooltipValueFormatter ?? valueFormatter
+  return (value) => (format ? format(value) : value.toLocaleString())
 }
 
 /**

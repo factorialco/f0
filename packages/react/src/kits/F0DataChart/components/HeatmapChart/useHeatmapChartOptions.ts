@@ -209,7 +209,10 @@ export function useHeatmapChartOptions(
               marker: p.marker,
               title: yCategories[yIdx] ?? "",
               subtitle: xCategories[xIdx] ?? "",
-              value: tooltipValueFormat(tooltipValueFormatter)(val),
+              value: tooltipValueFormat(
+                tooltipValueFormatter,
+                valueFormatter
+              )(val),
             },
             theme
           )

@@ -167,18 +167,29 @@ describe("LineChart — tooltip value formatting", () => {
       { axisValue: "A", seriesName: "S", value: 107505, dataIndex: 0 },
     ])
 
-  it("shows full numbers rather than the compact axis format", () => {
+  it("falls back to the axis formatter when no tooltipValueFormatter is given", () => {
     render(
       <F0DataChart
         type="line"
         categories={["A"]}
         series={[{ name: "S", data: [107505] }]}
-        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K €`}
+      />
+    )
+
+    expect(hoverFirstPoint()).toContain("108K €")
+  })
+
+  it("uses a plain localized number when neither formatter is given", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
       />
     )
 
     expect(hoverFirstPoint()).toContain((107505).toLocaleString())
-    expect(hoverFirstPoint()).not.toContain("108K")
   })
 
   it("lets tooltipValueFormatter keep a unit the axis formatter would drop", () => {

@@ -131,12 +131,12 @@ describe("PieChart — tooltip", () => {
     expect(html).toContain((85).toLocaleString()) // 45 + 18 + 22
   })
 
-  it("shows the full number, not the compact slice-label format", () => {
-    render(<F0DataChart {...pieProps} valueFormatter={(v) => `${v / 1000}k`} />)
+  it("reads the slice value and the total the way the labels do", () => {
+    render(<F0DataChart {...pieProps} valueFormatter={(v) => `${v} FTE`} />)
 
     const html = hover({ name: "Design", value: 18, percent: 21.2 })
-    expect(html).toContain((18).toLocaleString())
-    expect(html).not.toContain("0.018k") // that stays on the slice label
+    expect(html).toContain("18 FTE")
+    expect(html).toContain("85 FTE") // the total row too
   })
 
   it("lets tooltipValueFormatter set both the slice value and the total", () => {

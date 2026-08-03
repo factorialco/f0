@@ -593,7 +593,10 @@ export function useBarChartOptions(
     // numbers), otherwise fall back to the shared value formatter.
     const tooltipValue = tooltipValueFormatter ?? valueFormatter
 
-    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const options = buildBaseChartOptions({
       categories,
