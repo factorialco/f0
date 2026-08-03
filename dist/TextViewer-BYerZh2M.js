@@ -1,7 +1,7 @@
 import { jsxs as b, jsx as e } from "react/jsx-runtime";
 import { useState as _, useEffect as h } from "react";
-import { u as x, S as p, p as w } from "./F0CanvasPanel-B3P_-4tL.js";
-import { u as y, D as g } from "./DocumentToolbar-DbZcYGAx.js";
+import { u as x, S as p, p as w } from "./F0CanvasPanel-CAY9Mu_e.js";
+import { u as y, D as g } from "./DocumentToolbar-3BuzSrXe.js";
 const k = 2 * 1024 * 1024, v = [
   "[&_h1]:mb-3 [&_h1]:mt-6 [&_h1]:text-2xl [&_h1]:font-semibold",
   "[&_h2]:mb-2 [&_h2]:mt-5 [&_h2]:text-xl [&_h2]:font-semibold",

@@ -5977,6 +5977,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      *
      * Return `undefined` to hide the hint.
      *
+     * For `display-only` / `disabled` cells, the hint icon renders on the
+     * right by default. Pass `hintPosition: "left"` to override this for a
+     * specific column (e.g. when the hint always sits next to the value it
+     * annotates, regardless of the cell's editable state).
+     *
      * @example
      * cellHint: (item) => {
      *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
@@ -5988,6 +5993,7 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
         icon: IconType;
         message: string;
         iconColor?: F0IconProps["color"];
+        hintPosition?: "left" | "right";
     } | undefined;
 };
 
@@ -18872,15 +18878,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -18893,8 +18890,27 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
