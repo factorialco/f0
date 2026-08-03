@@ -32,7 +32,7 @@ export function PrototypeRoute() {
 
   const Component = entry.component
   return (
-    <FactorialShell activeModule={entry.meta.module}>
+    <FactorialShell activeModule={entry.meta.module} sidebar={entry.meta.sidebar}>
       <Component />
     </FactorialShell>
   )

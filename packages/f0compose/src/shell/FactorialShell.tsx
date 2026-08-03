@@ -28,16 +28,25 @@ import { aiChatConfig } from "./aiChatConfig"
  */
 export function FactorialShell({
   activeModule,
+  sidebar: SidebarOverride,
   children,
 }: {
   activeModule: ModuleId | null
+  /** Opt out of FactorialSidebar for prototypes exploring a different nav concept. */
+  sidebar?: React.ComponentType
   children: React.ReactNode
 }) {
   return (
     <F0AiFormRegistryProvider>
       <ApplicationFrame
         ai={aiChatConfig}
-        sidebar={<FactorialSidebar activeModule={activeModule} />}
+        sidebar={
+          SidebarOverride ? (
+            <SidebarOverride />
+          ) : (
+            <FactorialSidebar activeModule={activeModule} />
+          )
+        }
       >
         {children}
       </ApplicationFrame>

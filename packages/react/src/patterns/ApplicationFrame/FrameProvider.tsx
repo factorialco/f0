@@ -1,7 +1,6 @@
 import { breakpoints } from "@factorialco/f0-core"
 import React, {
   createContext,
-  PointerEvent,
   useCallback,
   useContext,
   useEffect,
@@ -80,20 +79,8 @@ export function FrameProvider({ children }: FrameProviderProps) {
     [isSmallScreen, visible, locked, setLocked, setVisible]
   )
 
-  const handlePointerMove = useCallback(
-    (e: PointerEvent<HTMLDivElement>) => {
-      if (isSmallScreen) return
-
-      if (e.clientX < 32) {
-        setVisible(true)
-      }
-
-      if (e.clientX > 280) {
-        setVisible(false)
-      }
-    },
-    [isSmallScreen, setVisible]
-  )
+  // Edge-hover reveal removed: the sidebar only opens via explicit toggle
+  // (docked, pushing content) — it never floats in on pointer proximity.
 
   const sidebarState: SidebarState = useMemo(() => {
     if (isSmallScreen) {
@@ -132,9 +119,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
         setForceFloat,
       }}
     >
-      <div onPointerMove={handlePointerMove} className="h-screen w-screen">
-        {children}
-      </div>
+      <div className="h-screen w-screen">{children}</div>
     </FrameContext.Provider>
   )
 }

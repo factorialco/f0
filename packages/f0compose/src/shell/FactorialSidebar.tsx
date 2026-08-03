@@ -12,6 +12,7 @@ import { type ModuleId, iconForModule, modules } from "./modules"
 
 /** Map module IDs to prototype slugs for sidebar navigation. */
 const moduleToPrototype: Partial<Record<ModuleId, string>> = {
+  home: "home",
   recruitment: "recruitment",
   performance: "goals-strategy-map",
 }

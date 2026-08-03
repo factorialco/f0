@@ -56,6 +56,9 @@ const personFromEmployee = (id: string) => {
 
 export const aiChatConfig = {
   enabled: true,
+  // Hide CopilotKit's dev banner ("Failed to fetch" toast when the local
+  // Mastra agent is offline) — prototypes should degrade silently.
+  showDevConsole: false,
   agent: import.meta.env.VITE_AGENT_NAME ?? DEFAULT_AGENT_NAME,
   runtimeUrl: import.meta.env.VITE_AGENT_URL ?? DEFAULT_AGENT_URL,
   credentials: "include" as const,

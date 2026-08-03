@@ -3,14 +3,20 @@
  *
  * f0-react ships its own pre-compiled Tailwind in `dist/styles.css`, including
  * the f0 reset, all f1-* utilities, the safelist patterns and the design
- * system tokens. We import that bundle as-is and DO NOT run our own Tailwind
- * — running a second Tailwind compilation here would re-introduce its
- * `preflight` reset on top of f0's reset and overwrite f0's typography
- * defaults, which is what was making buttons / typography look "off".
+ * system tokens. We import that bundle as-is.
+ *
+ * On top of it we run a utilities-ONLY Tailwind pass over f0compose's own
+ * source (see tailwind.config.ts): the pre-compiled bundle only contains the
+ * classes f0-react itself uses, so anything else a prototype needs
+ * (p-[14px], w-[712px], rounded-[10px]…) would silently emit nothing.
+ * Preflight stays disabled — no `@tailwind base` here — so f0's reset remains
+ * the only reset and typography defaults are untouched.
  */
 
 @import "@factorialco/f0-react/assets/fonts/style.css";
 @import "@factorialco/f0-react/dist/styles.css";
+
+@tailwind utilities;
 
 :root {
   /* color-scheme is set dynamically by FloatingControls via

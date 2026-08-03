@@ -30,6 +30,13 @@ export type PrototypeMeta = {
   createdAt: string
   /** Optional author display name. */
   author?: string
+  /**
+   * Opt out of the shared FactorialSidebar (48-module list) and supply a
+   * different sidebar component instead. Used by prototypes exploring a
+   * different navigation concept — the classic sidebar stays the default
+   * for everyone else.
+   */
+  sidebar?: React.ComponentType
 }
 
 /**

@@ -94,7 +94,7 @@ export default function Training() {
         <>
           <PageHeader
             module={{
-              id: "trainings",
+              id: "my_trainings",
               name: "Training",
               href: "/p/training",
             }}
@@ -140,19 +140,19 @@ export default function Training() {
 function BudgetsTab() {
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
-      <F0Heading content="Training Budgets — 2026" level={3} />
-      <F0Box display="flex" flexDirection="column" gap="m">
+      <F0Heading content="Training Budgets — 2026" variant="heading" as="h3" />
+      <F0Box display="flex" flexDirection="column" gap="md">
         {trainingBudgets.map((b) => {
           const pct = Math.round((b.spent / b.totalBudget) * 100)
           return (
             <F0Box
               key={b.id}
               display="flex"
-              justifyContent="space-between"
+              justifyContent="between"
               alignItems="center"
-              padding="m"
-              borderRadius="m"
-              backgroundColor="f1-background-secondary"
+              padding="md"
+              borderRadius="md"
+              background="secondary"
             >
               <F0Box display="flex" flexDirection="column" gap="xs">
                 <F0Text content={b.teamName} variant="body" />
@@ -161,8 +161,8 @@ function BudgetsTab() {
                   variant="description"
                 />
               </F0Box>
-              <F0Box display="flex" gap="l" alignItems="center">
-                <F0Box display="flex" flexDirection="column" alignItems="flex-end" gap="xs">
+              <F0Box display="flex" gap="lg" alignItems="center">
+                <F0Box display="flex" flexDirection="column" alignItems="end" gap="xs">
                   <F0Text
                     content={`${b.spent.toLocaleString()} / ${b.totalBudget.toLocaleString()} ${b.currency}`}
                     variant="body"

@@ -168,9 +168,18 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.3.4(vite@7.3.0(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.7.0))
+      autoprefixer:
+        specifier: ^10.4.21
+        version: 10.4.21(postcss@8.5.6)
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
+      postcss:
+        specifier: ^8.5.3
+        version: 8.5.6
+      tailwindcss:
+        specifier: ^3.4.3
+        version: 3.4.17
       tsx:
         specifier: ^4.8.1
         version: 4.21.0
@@ -2199,17 +2208,17 @@ packages:
   '@copilotkitnext/agent@1.54.0':
     resolution: {integrity: sha512-IDcisz4ce1zZq5OE+0bGQpOnI2RuuhubEQVSqffgWSUxvOlkln9yAP0ktFyAM6cX9oJkglrW10RNANlxNqFYsg==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/agent instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
+    deprecated: Moved into @copilotkit/runtime. Import from '@copilotkit/runtime/v2'.
 
   '@copilotkitnext/core@1.54.0':
     resolution: {integrity: sha512-0aJSsfUnQjIZH/7lVobltUwp7hNpc1D8JtGz/cQVmRG+p3W0xFiAqli1qUfv4Ax9t5h6JxJESRbd6JdPmr5anA==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/core instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
+    deprecated: Use @copilotkit/core instead.
 
   '@copilotkitnext/react@1.54.0':
     resolution: {integrity: sha512-Yz+RBXmLTrl2l5PPuFKoU4SHsSOFKRXtP4rN1zDEmyBSxft3cOvy53CLl6HI0qEZQ4Xn8sSf3kVxCYEcfugqyg==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/react instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
+    deprecated: Moved into @copilotkit/react-core. Import from '@copilotkit/react-core/v2'.
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
@@ -2217,7 +2226,7 @@ packages:
   '@copilotkitnext/runtime@1.54.0':
     resolution: {integrity: sha512-dW+veSk9ObTDRzE9wJKhdlBrblBB2jsTnVhXdgYcHw4eCO4zP2GqGgzkRaZQ0LBKNq7t9TI0xXuvynRrOreAYg==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/runtime instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
+    deprecated: Moved into @copilotkit/runtime. Import from '@copilotkit/runtime/v2'.
     peerDependencies:
       '@ag-ui/client': 0.0.47
       '@ag-ui/core': 0.0.47
@@ -2232,7 +2241,7 @@ packages:
   '@copilotkitnext/web-inspector@1.54.0':
     resolution: {integrity: sha512-l2rWMXuFNdn5DcxZx9bsKRii1UPHdH+/uNm9/Jf0EbSztyCLJlWK0sYZI6Rbdx+XU1ELxeDbxVbwhPTp0Kd8mQ==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/web-inspector instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
+    deprecated: Use @copilotkit/web-inspector instead.
 
   '@csstools/color-helpers@5.0.1':
     resolution: {integrity: sha512-MKtmkA0BX87PKaO1NFRTFH+UnkgnmySQOvNxJubsadusqPEC2aJ9MOQiMceZJJ6oitUl/i0L6u0M1IrmAOmgBA==}
@@ -6278,6 +6287,7 @@ packages:
   '@xmldom/xmldom@0.8.10':
     resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -6722,7 +6732,7 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
+    deprecated: Security vulnerability fixed in 5.2.1, please upgrade
 
   better-opn@3.0.2:
     resolution: {integrity: sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==}
@@ -8645,7 +8655,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
-    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
