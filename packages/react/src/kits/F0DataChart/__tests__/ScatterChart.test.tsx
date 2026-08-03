@@ -269,7 +269,9 @@ describe("ScatterChart — tooltip", () => {
     expect(html.match(/font-size: 20px/g)).toHaveLength(2)
   })
 
-  it("shows full numbers rather than the compact axis format", () => {
+  // Each coordinate reads the way its OWN axis reads — a currency on X and a
+  // unit on Y both survive the hover.
+  it("reads each coordinate the way its own axis does", () => {
     render(
       <F0DataChart
         {...scatterProps}
@@ -285,8 +287,29 @@ describe("ScatterChart — tooltip", () => {
       value: [62000, 4.5],
     })
 
-    expect(html).toContain((62000).toLocaleString())
-    expect(html).not.toContain("€62k")
+    expect(html).toContain("€62k")
+    expect(html).toContain("4.5 yrs")
+  })
+
+  it("lets the tooltip formatters override each axis independently", () => {
+    render(
+      <F0DataChart
+        {...scatterProps}
+        xValueFormatter={(v) => `€${v / 1000}k`}
+        valueFormatter={(v) => `${v} yrs`}
+        xTooltipValueFormatter={(v) => `€${v.toLocaleString("en-US")}`}
+      />
+    )
+
+    const html = getLatestOption().tooltip.formatter({
+      marker: "",
+      name: "Ana Ruiz",
+      seriesName: "Engineering",
+      value: [62000, 4.5],
+    })
+
+    expect(html).toContain("€62,000") // overridden
+    expect(html).toContain("4.5 yrs") // still the Y axis formatter
   })
 
   it("falls back to the series name as the title when a point has no label", () => {

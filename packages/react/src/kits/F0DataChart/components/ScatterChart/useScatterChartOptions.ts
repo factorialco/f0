@@ -114,6 +114,8 @@ function buildSeriesEntry(
 type ScatterTooltipOptions = {
   xAxisName?: string
   yAxisName?: string
+  xValueFormatter?: (value: number) => string
+  valueFormatter?: (value: number) => string
   xTooltipValueFormatter?: (value: number) => string
   tooltipValueFormatter?: (value: number) => string
 }
@@ -125,21 +127,23 @@ type ScatterTooltipOptions = {
  * The point's own label is the title, with the series name beneath it whenever
  * the two differ.
  *
- * Both coordinates go through `tooltipValueFormat`, so they read the same as
- * every other chart's tooltip: the full number ("82,000", not the axis's
- * compact "82k") unless the caller formats it.
+ * Each coordinate goes through `tooltipValueFormat` against its OWN axis
+ * formatter, so a currency on X and a percentage on Y each read on hover the
+ * way their axis reads. The `*TooltipValueFormatter` pair overrides them.
  */
 function buildTooltipFormatter(
   {
     xAxisName,
     yAxisName,
+    xValueFormatter,
+    valueFormatter,
     xTooltipValueFormatter,
     tooltipValueFormatter,
   }: ScatterTooltipOptions,
   theme: ChartTheme
 ) {
-  const formatX = tooltipValueFormat(xTooltipValueFormatter)
-  const formatY = tooltipValueFormat(tooltipValueFormatter)
+  const formatX = tooltipValueFormat(xTooltipValueFormatter, xValueFormatter)
+  const formatY = tooltipValueFormat(tooltipValueFormatter, valueFormatter)
 
   return (params: unknown): string => {
     const point = params as {
@@ -270,6 +274,8 @@ export function useScatterChartOptions(
           {
             xAxisName,
             yAxisName,
+            xValueFormatter,
+            valueFormatter,
             xTooltipValueFormatter,
             tooltipValueFormatter,
           },
