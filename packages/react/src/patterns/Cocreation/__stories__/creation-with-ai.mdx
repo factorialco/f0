@@ -17,8 +17,8 @@ want in a chat (Chat), then refines the resulting draft on a canvas while the co
 continues (Split). Each phase below maps to what the survey example shows.
 
 The mock runs full screen, so each flow opens in its own canvas. It ships as five stories under
-**Walkthrough** — the two ways a flow can open the conversation, and the out-of-credits state of
-each. Open any of them:
+**Walkthrough** — the three ways a flow can open the conversation, and the out-of-credits state of
+two of them. Open any of them:
 
 <Unstyled>
   <FeatureGrid features={WALKTHROUGH_FLOW_FEATURES} />
@@ -110,7 +110,7 @@ each flow — the survey example fills all four:
 
 Above the composer sits a separate, optional row of quick-start buttons — the welcome
 suggestions (`welcomeScreenSuggestions`). They are **example prompts, not flows**: each button is
-a group (here, the "Create a Survey for..." pill) that opens a short list of starter prompts, and
+a group (here, the "Create a survey for..." pill) that opens a short list of starter prompts, and
 picking one sends its text straight to the AI as if the user had typed it. That is the line
 between the two entry points — **a suggestion sends a prompt, a card triggers a flow** (open a
 canvas, seed a template). Use suggestions to show the user _what to say_ and to lower the
@@ -275,4 +275,4 @@ This flow assembles the blocks documented in
 `F0CardHorizontal` (the in-chat resource card plus the draft-confirmation and proposal cards), and
 `F0AiProcessingOverlay`. Only the surfaces specific to this example — the survey's answering
 form and builder — come from the
-[Surveys](?path=/docs/sds-surveys-surveyformbuilder--documentation) SDS.
+[Surveys](?path=/docs/kits-surveys-surveyformbuilder--documentation) Kit.

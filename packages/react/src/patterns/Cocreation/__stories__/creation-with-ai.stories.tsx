@@ -2243,8 +2243,9 @@ function SurveyWelcomeCardsRegistrar() {
   // Welcome-card behavior, keyed by card `id`. Each card's `onClick` (above)
   // routes here through `handleCardSelectRef`; each branch opens the AI Canvas
   // and seeds the matching guided flow. The preset card's id/content come from
-  // `config.presetCard` (Employee NPS for Engagement, Compliance training for
-  // Training), so this switch reads the same for every flow.
+  // `config.presetCard` (Employee NPS for Engagement), so this switch reads the
+  // same for every flow that has a welcome screen. Only `cards` flows get here;
+  // `guidedType`/`guidedEntry` have no welcome cards.
   const handleCardSelect = (id: string) => {
     if (!cardsConfig) return
     switch (id) {

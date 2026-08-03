@@ -64,7 +64,7 @@ export type PresetCard = {
   introMessage: string
 }
 
-/** A visual-only placeholder welcome card — no behavior wired yet. */
+/** A welcome card that opens the flow's sample survey in a read-only preview. */
 export type PlaceholderCard = {
   id: string
   icon: IconType
