@@ -92,8 +92,14 @@ export const F0Coachmark = ({
         //   - f1-background-inverse is 0.92/0.9 alpha. This panel floats over
         //     arbitrary page content and has no backdrop blur, so it needs an
         //     opaque surface to stay legible.
+        // w-72 (18rem) is the relative spacing scale step the DS maps `width`
+        // to, and matches PopoverContent's own default.
+        // No border: the surface already contrasts strongly with the page in
+        // both themes, and an outline on the panel has to be matched by one on
+        // the arrow, which leaves a seam where the two meet. `border-none`
+        // rather than relying on PopoverContent's `border` computing to 0px.
         className={cn(
-          "w-[17.5rem] rounded-lg border-f1-background/20 bg-f1-foreground p-4",
+          "w-72 rounded-lg border-none bg-f1-foreground p-4",
           "text-f1-background shadow-md"
         )}
       >
@@ -109,10 +115,7 @@ export const F0Coachmark = ({
               hideLabel
               onClick={onDismiss}
               label={i18n.actions.close}
-              // Action variants resolve against the page theme, not this
-              // inverted surface, so the two buttons take their colours from
-              // the same flipping pair as the panel.
-              className="-mr-2 -mt-1 flex-shrink-0 text-f1-background hover:bg-f1-background/20"
+              className="-mr-2 -mt-1 flex-shrink-0 text-f1-background hover:bg-f1-background/10 [&_svg:not([data-has-color])]:text-f1-background"
             />
           </div>
           {description && (
@@ -120,31 +123,36 @@ export const F0Coachmark = ({
               {description}
             </p>
           )}
+          {/* HARDCODED, deliberately. Action variants resolve their colours
+              against the page theme, so on a surface that flips polarity like
+              this one they land the wrong way round: `outline` would paint a
+              60% white fill (its base is `bg-f1-background-inverse-secondary`)
+              and dark label text on the dark panel.
+              These four classes restate the button in terms of the same
+              background/foreground pair the panel uses, so they flip with it —
+              no mode-specific classes. They should all be deleted once the
+              button variants express colour relative to their surface
+              (currentColor) rather than to the active theme; that is tracked as
+              its own initiative. See also the dismiss button below. */}
           <ButtonInternal
-            variant="ghost"
+            variant="outline"
             label={action.label}
             onClick={action.onClick}
             block
-            className="bg-f1-background/10 text-f1-background hover:bg-f1-background/20"
+            className="bg-transparent text-f1-background after:ring-f1-background/30 hover:bg-f1-background/10 hover:after:ring-f1-background/50"
           />
         </div>
         {arrow && (
           <PopoverArrow asChild width={ARROW_WIDTH} height={ARROW_HEIGHT}>
-            {/* Pulled 1px into the panel so its fill hides the panel border
-                running behind the arrow's base. */}
+            {/* Pulled 1px into the panel so antialiasing along the shared edge
+                cannot leave a hairline between the arrow and the surface. */}
             <svg
               viewBox={`0 0 ${ARROW_WIDTH} ${ARROW_HEIGHT}`}
-              className="-translate-y-px overflow-visible"
+              className="-translate-y-px"
             >
-              {/* stroke-current picks up the panel's text colour, which is the
-                  same token the border is derived from; there is no
-                  stroke-f1-background utility to match it directly. */}
               <path
-                d={`M0 0L${ARROW_WIDTH / 2} ${ARROW_HEIGHT}L${ARROW_WIDTH} 0`}
-                className="fill-f1-foreground stroke-current"
-                strokeWidth={1}
-                strokeOpacity={0.2}
-                vectorEffect="non-scaling-stroke"
+                d={`M0 0L${ARROW_WIDTH / 2} ${ARROW_HEIGHT}L${ARROW_WIDTH} 0Z`}
+                className="fill-f1-foreground"
               />
             </svg>
           </PopoverArrow>
