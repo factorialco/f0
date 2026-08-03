@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import React from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import {
   avatarVariants,
@@ -12,7 +13,6 @@ import {
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarList } from "../F0AvatarList"
 import { avatarListSizes } from "../types"
 
@@ -153,7 +153,7 @@ function getDummyAvatars<
             : never
 }
 
-const meta: Meta<typeof F0AvatarList> = {
+const meta = {
   component: F0AvatarList,
   title: "Avatars/AvatarList",
   tags: ["stable", "!autodocs"],
@@ -164,6 +164,13 @@ const meta: Meta<typeof F0AvatarList> = {
     noTooltip: false,
   },
   parameters: {
+    // Gate the file, then downgrade the one story that cannot pass. Without this
+    // key nothing here is gated at all: `.storybook/preview.tsx:151` sets a
+    // global `a11y: { test: "todo" }` and `test-runner.ts:262` reads the merged
+    // parameters, so its `?? "error"` fallback never fires. Every story below is
+    // axe-clean except `OverflowPopover`, which carries its own `todo` and the
+    // reason for it.
+    a11y: { test: "error" },
     docs: {
       description: {
         component: [
@@ -176,7 +183,11 @@ const meta: Meta<typeof F0AvatarList> = {
     layout: "centered",
   },
   argTypes: {
-    ...getBaseAvatarArgTypes(["aria-label", "aria-labelledby"]),
+    // No `getBaseAvatarArgTypes` spread: `aria-label`/`aria-labelledby` are not
+    // part of `F0AvatarListProps` and `F0AvatarList.tsx` never destructures
+    // them, so advertising them as controls was a knob that did nothing — and it
+    // contradicted the Accessibility section, which says the label belongs on an
+    // entry, not on the list.
     size: {
       control: "select",
       options: avatarListSizes,
@@ -187,6 +198,12 @@ const meta: Meta<typeof F0AvatarList> = {
       options: avatarVariants,
       description: "The type of the avatars in the list",
     },
+    tooltipScroll: {
+      control: "select",
+      options: ["vertical", "none"],
+      description:
+        "Scroll behaviour of the `+N` popover. `none` avoids the scroll region that trips axe's scrollable-region-focusable, at the cost of an unbounded popover height.",
+    },
   },
 } satisfies Meta<typeof F0AvatarList>
 
@@ -196,6 +213,35 @@ type Story = StoryObj<typeof F0AvatarList>
 
 export const Default: Story = {
   args: { max: 3 },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("renders one item per entry, none collapsed", async () => {
+      // What AvatarList decides is how many entries stay visible (`max`/`min`,
+      // F0AvatarList.tsx:69-76) — not what any single avatar looks like. So
+      // count the rendered list items rather than asserting an initials string:
+      // initials come from BaseAvatar's own algorithm and from whichever
+      // fixture entry happens to lack a `src`, neither of which is this
+      // component's contract. Deriving the expected count from `args` keeps
+      // the assertion true if `meta.args` grows.
+      //
+      // `waitFor`, not a bare `getAllByTestId`: OverflowList renders skeleton
+      // placeholders until it has measured the items and flipped
+      // `isInitialized` (ui/OverflowList/index.tsx:180), so the first paint has
+      // zero `overflow-visible-item` nodes. Asserting synchronously here fails
+      // in a real browser even though jsdom happens to be fast enough.
+      // 5s, not the 1s default: measuring is slow on a cold browser (observed
+      // 0 items at 2.5s, 3 at 5s), and this play timed out in CI once already.
+      await waitFor(
+        () =>
+          expect(canvas.getAllByTestId("overflow-visible-item")).toHaveLength(
+            args.avatars.length
+          ),
+        { timeout: 5000 }
+      )
+      // `max` equals the number of avatars, so nothing collapses into `+N`.
+      await expect(canvas.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
+    })
+  },
 }
 
 /**
@@ -268,6 +314,70 @@ export const OverflowPopover: Story = {
     type: "person",
     avatars: getDummyAvatars(15, "person"),
     max: 3,
+  },
+  parameters: {
+    // Known a11y debt, scoped to the one story that hits it so the rest of the
+    // file stays gated. The play below opens the `+N` popover, whose ScrollArea
+    // viewport (ui/scrollarea via MaxCounter.tsx, `tooltipScroll="vertical"` by
+    // default) trips axe's `scrollable-region-focusable`: 392px of content in a
+    // 172px box with no keyboard access (WCAG 2.1.1). Verified, not assumed —
+    // with `test: "error"` this story fails
+    // `TARGET_URL=… test-storybook -- --testPathPatterns F0AvatarList` on that
+    // rule, and passes with the downgrade.
+    //
+    // Note where the defect actually lives, because it is not where it looks:
+    // `ui/scrollarea.tsx:80` does put `tabIndex={0}` on the viewport, and Radix
+    // `HoverCardContent` then rewrites every tabbable node inside it to
+    // `tabindex="-1"`. So a fix inside ScrollArea would be undone by HoverCard —
+    // it belongs in MaxCounter's choice of container, and it is a behaviour
+    // change, hence its own PR. Until then AvatarList stays on the stable-DoD
+    // debt list.
+    a11y: { test: "todo" },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const max = args.max as number
+    const collapsedCount = args.avatars.length - max
+
+    await step("caps the visible row at `max`", async () => {
+      // `max` also sets `min` (F0AvatarList.tsx:76), so exactly `max` avatars
+      // stay visible however wide the container is. Same measurement race as
+      // `Default`: wait for `isInitialized` to replace the skeletons.
+      // Same cold-browser measurement race as `Default`; same 5s allowance.
+      await waitFor(
+        () =>
+          expect(canvas.getAllByTestId("overflow-visible-item")).toHaveLength(
+            max
+          ),
+        { timeout: 5000 }
+      )
+    })
+
+    await step("the counter discloses every collapsed entry", async () => {
+      // Match the counter by pattern, never by the literal "+12".
+      await userEvent.hover(canvas.getByText(/^\+\d+$/))
+
+      // The popover is portalled out of the canvas (ui/hover-card.tsx passes no
+      // `container`) and carries no role, so scope to <body> and pick the open
+      // radix content. Then count rows by the one avatar each row renders
+      // (MaxCounter.tsx) — the number of rows is AvatarList's contract, whereas
+      // a per-name multiplicity would just encode how many distinct people
+      // `getDummyAvatars` cycles.
+      const body = canvasElement.closest("body")!
+      const popover = await waitFor(
+        () => {
+          const el = body.querySelector<HTMLElement>(
+            '[data-radix-popper-content-wrapper] [data-state="open"]'
+          )
+          if (!el) throw new Error("the `+N` popover did not open")
+          return el
+        },
+        { timeout: 3000 }
+      )
+      expect(popover.querySelectorAll('[role="img"]')).toHaveLength(
+        collapsedCount
+      )
+    })
   },
 }
 
