@@ -1764,6 +1764,14 @@ export const CommunicationsVideoAttachments: Story = {
       )
       await expect(players).toHaveLength(2)
 
+      // The transcript keeps its subtree in the a11y tree while it's still
+      // `opacity-0` (it fades in once Virtuoso has positioned the entry row),
+      // so `findBy*` resolves before anything inside is actually visible. Gate
+      // on the region itself becoming visible — a starved frame budget on CI
+      // otherwise lets the video's `loadeddata` mount the controls first and
+      // every `toBeVisible()` below asserts against a hidden transcript.
+      await waitFor(() => expect(players[0]).toBeVisible())
+
       const widths = players.map(
         (player) => player.getBoundingClientRect().width
       )
@@ -1788,20 +1796,18 @@ export const CommunicationsVideoAttachments: Story = {
         ).toBeLessThanOrEqual(1)
 
         const controls = within(player)
-        await expect(
-          await controls.findByRole(
-            "button",
-            { name: "Play" },
-            { timeout: 5_000 }
-          )
-        ).toBeVisible()
-        await expect(
-          await controls.findByRole(
-            "button",
-            { name: "Enter fullscreen" },
-            { timeout: 5_000 }
-          )
-        ).toBeVisible()
+        const playButton = await controls.findByRole(
+          "button",
+          { name: "Play" },
+          { timeout: 5_000 }
+        )
+        await waitFor(() => expect(playButton).toBeVisible())
+        const fullscreenButton = await controls.findByRole(
+          "button",
+          { name: "Enter fullscreen" },
+          { timeout: 5_000 }
+        )
+        await waitFor(() => expect(fullscreenButton).toBeVisible())
         const video = player.querySelector("video")
         await expect(video).not.toBeNull()
         await expect(video!).toHaveAttribute("src", "/Big_Buck_Bunny_alt.webm")
@@ -1811,7 +1817,9 @@ export const CommunicationsVideoAttachments: Story = {
         cards[0].getBoundingClientRect().bottom
       )
 
-      await expect(canvas.getByText("kickoff-deck.pptx")).toBeVisible()
+      await waitFor(() =>
+        expect(canvas.getByText("kickoff-deck.pptx")).toBeVisible()
+      )
     })
   },
 }
