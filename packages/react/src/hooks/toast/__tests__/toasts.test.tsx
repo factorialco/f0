@@ -20,8 +20,8 @@ const renderProvider = () =>
 
 describe("toasts API", () => {
   beforeEach(() => {
-    // Reset the module-level store between tests. No provider is mounted at this
-    // point (the previous render was unmounted by the global afterEach cleanup).
+    // Reset sonner's global toast state between tests. No provider is mounted at
+    // this point (the previous render was unmounted by the global afterEach cleanup).
     toasts.closeAll()
   })
 
@@ -240,7 +240,8 @@ describe("toasts API", () => {
       act(() => {
         toasts.open({ title: "Temporary" })
       })
-      expect(screen.getByText("Temporary")).toBeInTheDocument()
+      // Sonner flushes new toasts in a setTimeout, so the first paint is async.
+      expect(await screen.findByText("Temporary")).toBeInTheDocument()
 
       // Default lifetime is 10s; advance past it.
       act(() => {
@@ -252,13 +253,13 @@ describe("toasts API", () => {
       )
     })
 
-    it("keeps a persistent toast open indefinitely", () => {
+    it("keeps a persistent toast open indefinitely", async () => {
       renderProvider()
 
       act(() => {
         toasts.open({ title: "Sticky", persistent: true })
       })
-      expect(screen.getByText("Sticky")).toBeInTheDocument()
+      expect(await screen.findByText("Sticky")).toBeInTheDocument()
 
       act(() => {
         vi.advanceTimersByTime(60_000)

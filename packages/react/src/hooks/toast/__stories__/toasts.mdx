@@ -9,13 +9,15 @@ import * as ToastsStories from "./toasts.stories"
 
 ### Definition
 
-`toasts` is an imperative API for triggering toast notifications. You can call its methods from anywhere (event handlers, async callbacks, even outside React), as long as your app is wrapped in `<F0Provider>` (which mounts the `ToastProvider`). Open toasts live in a module-level store that the provider renders into a portal.
+`toasts` is an imperative API for triggering toast notifications. You can call its methods from anywhere (event handlers, async callbacks, even outside React), as long as your app is wrapped in `<F0Provider>` (which mounts the `ToastProvider`). Under the hood the toasts are rendered by [sonner](https://sonner.emilkowal.ski), which the provider mounts into a portal — the sonner engine is an implementation detail and never part of the public API.
+
+Because sonner holds the toast state, toasts fired **before** the provider mounts are not rendered retroactively (a dev-time warning is logged when this happens).
 
 ### Purpose
 
 - **No wiring:** Call `toasts.open(...)` directly — no `useState`, no conditional rendering
 - **Automatic lifecycle:** Toasts auto-dismiss after a configurable duration and clean up after themselves
-- **Consistent UX:** Standardized toast patterns with stacking, hover-to-expand, and smooth animations
+- **Consistent UX:** Toasts stack collapsed (newest in front, older ones peeking behind), expand into a list on hover — pausing every countdown — and can be swiped away. All animations come from sonner
 - **Flexible API:** Support for variants, descriptions, action buttons/links, custom durations, and persistent toasts
 - **Programmatic control:** Dismiss individual toasts (`toasts.close`) or all at once (`toasts.closeAll`) from anywhere in your code
 

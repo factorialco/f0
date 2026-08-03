@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid"
+import { toast as sonnerToast } from "sonner"
 
 import { toastStore } from "./store"
+import { ToastItem } from "./ToastItem"
 import { ToastId, ToastOptions } from "./types"
 
 // Default lifetime for a non-persistent toast (ms).
@@ -20,22 +22,36 @@ const open = (options: ToastOptions): ToastId => {
 
   warnIfNoProvider("toasts.open()")
 
-  toastStore.addItem({
-    duration: options.persistent ? undefined : DEFAULT_DURATION,
-    ...options,
-    id,
-    onClose: () => toastStore.removeItem(id),
-  })
+  // F0Toast owns the countdown (it drives the progress bar), so sonner never
+  // auto-dismisses: F0Toast calls onClose when its timer runs out.
+  const duration = options.persistent
+    ? undefined
+    : (options.duration ?? DEFAULT_DURATION)
+
+  sonnerToast.custom(
+    (sonnerId) => (
+      <ToastItem
+        id={id}
+        title={options.title}
+        description={options.description}
+        variant={options.variant}
+        actions={options.actions}
+        duration={duration}
+        onClose={() => sonnerToast.dismiss(sonnerId)}
+      />
+    ),
+    { id, duration: Infinity }
+  )
 
   return id
 }
 
 const close = (id: ToastId): void => {
-  toastStore.removeItem(id)
+  sonnerToast.dismiss(id)
 }
 
 const closeAll = (): void => {
-  toastStore.clear()
+  sonnerToast.dismiss()
 }
 
 /**
