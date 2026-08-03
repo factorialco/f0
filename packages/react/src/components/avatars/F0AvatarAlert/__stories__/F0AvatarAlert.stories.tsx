@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
@@ -14,6 +16,7 @@ const meta = {
   title: "Avatars/AvatarAlert",
   tags: ["stable", "!autodocs"],
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: [
@@ -46,6 +49,25 @@ const SIZES = alertAvatarSizes
 const TYPES = alertAvatarTypes
 export const Default: Story = {
   args: { type: "info", size: "lg" },
+  play: async ({ canvasElement }) => {
+    const alert = within(canvasElement).getByRole("alert")
+    // `size: "lg"` is a 40px square — the real contract of the size variant.
+    await expect(alert).toHaveClass("h-10", "w-10")
+    await expect(alert.querySelector("svg")).toBeInTheDocument()
+  },
+}
+
+/**
+ * Each type maps to a fixed icon and semantic color.
+ */
+export const Types: Story = {
+  render: () => (
+    <div className="flex w-fit flex-row gap-2">
+      {TYPES.map((type) => (
+        <F0AvatarAlert key={type} type={type} size="lg" />
+      ))}
+    </div>
+  ),
 }
 
 export const Snapshot: Story = {

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 
@@ -30,6 +32,7 @@ const meta = {
     },
   },
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: ["A company avatar component."]
@@ -49,7 +52,18 @@ export default meta
 
 type Story = StoryObj<typeof F0AvatarCompany>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Named because meta.args passes aria-label; without it the avatar is
+    // aria-hidden and exposes no role at all.
+    await expect(
+      canvas.getByRole("img", { name: "Factorial avatar" })
+    ).toBeInTheDocument()
+    // No `src`, so the initials fallback renders instead of an image.
+    await expect(canvas.getByText("FA")).toBeInTheDocument()
+  },
+}
 
 export const WithImage: Story = {
   args: {

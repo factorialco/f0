@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { Check } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
@@ -13,6 +15,9 @@ const meta = {
   component: F0AvatarTeam,
   title: "Avatars/AvatarTeam",
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   argTypes: {
     ...getBaseAvatarArgTypes([
       "size",
@@ -31,7 +36,13 @@ export default meta
 
 type Story = StoryObj<typeof F0AvatarTeam>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    // No `src`, so the initials fallback renders. Query by text, not by role:
+    // no story passes aria-label, so the avatar is aria-hidden.
+    await expect(within(canvasElement).getByText("DE")).toBeInTheDocument()
+  },
+}
 
 export const WithImage: Story = {
   args: {
@@ -52,7 +63,7 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex w-fit flex-col gap-2">
-      <h3 className="text-lg font-semibold">All Company Avatars</h3>
+      <h3 className="text-lg font-semibold">All Team Avatars</h3>
 
       <section>
         <h4 className="text-lg font-semibold">Without Image</h4>
