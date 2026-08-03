@@ -17,6 +17,7 @@ import type {
 } from "../../types"
 
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
+import { DashboardEmptyState } from "../DashboardEmptyState/DashboardEmptyState"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 
@@ -194,7 +195,16 @@ export function MetricItem<Filters extends FiltersDefinition>({
     DashboardMetricData
   >(item.fetchData, filters, enabled)
 
-  const trend = data ? computeTrend(data.value, data.previousValue) : undefined
+  // A metric with nothing to show reads as an empty state, not a blank tile.
+  // `DashboardItem` only renders children once loading has finished and no
+  // error is set, so reaching here without a usable number means the query
+  // came back without one. Non-finite values are treated the same way — they
+  // would otherwise format as "NaN".
+  const value =
+    data !== undefined && Number.isFinite(data.value) ? data.value : undefined
+
+  const trend =
+    value !== undefined ? computeTrend(value, data?.previousValue) : undefined
 
   return (
     <DashboardItem
@@ -210,15 +220,17 @@ export function MetricItem<Filters extends FiltersDefinition>({
       handleDelete={handleDelete}
       itemId={item.id}
     >
-      {data && (
+      {value !== undefined ? (
         <MetricValue
           value={
             item.valueFormatter
-              ? item.valueFormatter(data.value)
-              : formatValue(data.value, item.format, item.decimals)
+              ? item.valueFormatter(value)
+              : formatValue(value, item.format, item.decimals)
           }
           trend={trend}
         />
+      ) : (
+        <DashboardEmptyState emptyState={item.emptyState} />
       )}
     </DashboardItem>
   )
