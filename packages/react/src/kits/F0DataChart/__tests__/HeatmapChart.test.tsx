@@ -52,7 +52,15 @@ function getLatestOption() {
       label?: { show?: boolean }
       itemStyle?: SeriesItemStyle
     }>
+    tooltip?: { formatter?: (params: unknown) => string }
   }
+}
+
+/** Run the tooltip formatter the way ECharts would on hover. */
+function hover(params: unknown) {
+  const formatter = getLatestOption().tooltip?.formatter
+  if (!formatter) throw new Error("the chart built no tooltip formatter")
+  return formatter(params)
 }
 
 const heatmapProps = {
@@ -141,5 +149,75 @@ describe("HeatmapChart — cell appearance", () => {
     const option = getLatestOption()
     expect(option.xAxis.axisLine.show).toBe(false)
     expect(option.yAxis.axisLine.show).toBe(false)
+  })
+})
+
+// The formatter runs inside ECharts on hover, so it only gets exercised by
+// calling it with the params ECharts passes.
+describe("HeatmapChart — tooltip", () => {
+  it("names both dimensions of the hovered cell and shows its value", () => {
+    containerSize.width = 720
+    render(<F0DataChart {...heatmapProps} />)
+
+    const html = hover({
+      value: [1, 1, 4],
+      marker: '<span class="trusted-marker"></span>',
+    })
+    expect(html).toContain('<span class="trusted-marker"></span>')
+    expect(html).toContain("Afternoon") // y category
+    expect(html).toContain("Tue") // x category
+    expect(html).toContain((4).toLocaleString())
+  })
+
+  it("escapes category names and ignores the in-cell label format", () => {
+    containerSize.width = 720
+    render(
+      <F0DataChart
+        {...heatmapProps}
+        xCategories={["<script>x</script>", "Tue", "Wed"]}
+        showLabels
+        valueFormatter={(v) => `${v}h`}
+      />
+    )
+
+    const html = hover({ value: [0, 0, 5] })
+    expect(html).toContain((5).toLocaleString())
+    expect(html).not.toContain("5h") // that stays inside the cell
+    expect(html).toContain("&lt;script&gt;")
+    expect(html).not.toContain("<script>")
+  })
+
+  it("lets tooltipValueFormatter set the tooltip number", () => {
+    containerSize.width = 720
+    render(
+      <F0DataChart
+        {...heatmapProps}
+        showLabels
+        tooltipValueFormatter={(v) => `${v} hours`}
+      />
+    )
+
+    expect(hover({ value: [1, 1, 4] })).toContain("4 hours")
+  })
+
+  it("survives a cell params object with no value tuple", () => {
+    containerSize.width = 720
+    render(<F0DataChart {...heatmapProps} />)
+
+    const html = hover({})
+    // Falls back to the first cell of the grid at zero rather than throwing.
+    expect(html).toContain("Morning")
+    expect(html).toContain("Mon")
+    expect(html).toContain((0).toLocaleString())
+    expect(html).not.toContain("undefined")
+  })
+
+  it("leaves the title empty when the index is outside the categories", () => {
+    containerSize.width = 720
+    render(<F0DataChart {...heatmapProps} />)
+
+    const html = hover({ value: [9, 9, 2] })
+    expect(html).toContain((2).toLocaleString())
+    expect(html).not.toContain("undefined")
   })
 })

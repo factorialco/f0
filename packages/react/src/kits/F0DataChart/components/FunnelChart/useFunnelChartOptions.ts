@@ -17,6 +17,7 @@ import {
   renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
+  tooltipValueFormat,
 } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -33,6 +34,7 @@ export function useFunnelChartOptions(
     showConversion = false,
     colorScale = true,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartFunnelProps
 ): echarts.EChartsOption {
@@ -118,6 +120,8 @@ export function useFunnelChartOptions(
       },
     }
 
+    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
+
     const buildTooltipFormatter = () => {
       // Use sorted order for step-over-step conversion
       const sorted =
@@ -139,9 +143,7 @@ export function useFunnelChartOptions(
           value?: number
         }
         const val = Number(p.value ?? 0)
-        const formattedValue = valueFormatter
-          ? valueFormatter(val)
-          : val.toLocaleString()
+        const formattedValue = formatTooltipValue(val)
         const name = String(p.name ?? "")
         const sortedIndex = sortedIndexMap.get(name)
 
@@ -210,6 +212,7 @@ export function useFunnelChartOptions(
     showConversion,
     colorScale,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     i18n,

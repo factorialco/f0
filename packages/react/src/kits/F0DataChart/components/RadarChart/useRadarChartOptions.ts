@@ -10,6 +10,7 @@ import {
   renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -45,6 +46,7 @@ export function useRadarChartOptions(
     showLegend = true,
     showLabels = false,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartRadarProps,
   size: RadarChartSize
@@ -56,6 +58,7 @@ export function useRadarChartOptions(
     const responsive = resolveResponsiveDisplay(size)
     const effectiveShowLegend = responsive.showLegend && showLegend
     const { showIndicatorNames, nameWidth } = responsive
+    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
 
     // Auto-calculate max for each indicator if not provided
     const radarIndicators = indicators.map((ind, i) => {
@@ -165,15 +168,10 @@ export function useRadarChartOptions(
             {
               marker: p.marker,
               title: String(p.name ?? ""),
-              rows: indicators.map((indicator, i) => {
-                const val = values[i] ?? 0
-                return {
-                  value: valueFormatter
-                    ? valueFormatter(val)
-                    : val.toLocaleString(),
-                  label: indicator.name,
-                }
-              }),
+              rows: indicators.map((indicator, i) => ({
+                value: formatTooltipValue(values[i] ?? 0),
+                label: indicator.name,
+              })),
             },
             theme
           )
@@ -194,6 +192,7 @@ export function useRadarChartOptions(
     showLegend,
     showLabels,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     containerSize,

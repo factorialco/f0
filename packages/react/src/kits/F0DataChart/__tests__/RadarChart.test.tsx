@@ -42,7 +42,15 @@ function getLatestOption() {
     radar: {
       axisName?: { show?: boolean; width?: number }
     }
+    tooltip?: { formatter?: (params: unknown) => string }
   }
+}
+
+/** Run the tooltip formatter the way ECharts would on hover. */
+function hover(params: unknown) {
+  const formatter = getLatestOption().tooltip?.formatter
+  if (!formatter) throw new Error("the chart built no tooltip formatter")
+  return formatter(params)
 }
 
 const radarProps = {
@@ -87,5 +95,70 @@ describe("RadarChart — responsive breakpoints", () => {
     const option = getLatestOption()
     expect(option.legend?.show).toBe(true)
     expect(option.radar.axisName?.width).toBe(96)
+  })
+})
+
+// The formatter runs inside ECharts on hover, so it only gets exercised by
+// calling it with the params ECharts passes.
+describe("RadarChart — tooltip", () => {
+  it("lists every indicator as a row under the series name", () => {
+    render(<F0DataChart {...radarProps} />)
+
+    const html = hover({
+      name: "Team A",
+      value: [85, 70, 90],
+      marker: '<span class="trusted-marker"></span>',
+    })
+    expect(html).toContain('<span class="trusted-marker"></span>')
+    expect(html).toContain("Team A")
+    expect(html).toContain("Performance")
+    expect(html).toContain("Engagement")
+    expect(html).toContain("Retention")
+    expect(html).toContain((85).toLocaleString())
+    expect(html).toContain((70).toLocaleString())
+    expect(html).toContain((90).toLocaleString())
+    // A radar point carries every indicator at once — no single headline value.
+    expect(html).not.toContain("font-size: 20px")
+  })
+
+  it("shows full numbers, not the compact vertex-label format", () => {
+    render(
+      <F0DataChart {...radarProps} valueFormatter={(v) => `${v / 100}x`} />
+    )
+
+    const html = hover({ name: "Team A", value: [8500, 70, 90] })
+    expect(html).toContain((8500).toLocaleString())
+    expect(html).not.toContain("85x") // that stays on the vertex label
+  })
+
+  it("lets tooltipValueFormatter set every indicator row", () => {
+    render(
+      <F0DataChart
+        {...radarProps}
+        tooltipValueFormatter={(v) => `${v} / 100`}
+      />
+    )
+
+    const html = hover({ name: "Team A", value: [85, 70, 90] })
+    expect(html).toContain("85 / 100")
+    expect(html).toContain("70 / 100")
+    expect(html).toContain("90 / 100")
+  })
+
+  it("escapes the series name and fills indicators the point omits", () => {
+    render(
+      <F0DataChart
+        {...radarProps}
+        series={[{ name: "<b>A</b>", data: [85] }]}
+      />
+    )
+
+    const html = hover({ name: "<b>A</b>", value: [85] })
+    expect(html).toContain("&lt;b&gt;A&lt;/b&gt;")
+    expect(html).not.toContain("<b>")
+    // Two indicators had no value: they read 0 rather than disappearing.
+    expect(html).toContain("Retention")
+    expect(html).not.toContain("undefined")
+    expect(html).not.toContain("NaN")
   })
 })

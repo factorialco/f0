@@ -15,6 +15,7 @@ import {
   buildLegend,
   DEFAULT_EMPHASIS,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -47,6 +48,7 @@ export function usePieChartOptions(
     showLabels = true,
     showPercentage = false,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartPieProps,
   size: PieChartSize
@@ -60,6 +62,8 @@ export function usePieChartOptions(
     const resolvedSeriesColor = series.color
       ? resolveChartColorToken(series.color)
       : undefined
+
+    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
 
     const responsive = resolveResponsiveDisplay(size)
     // The user prop can still force chrome OFF, but never ON at sm/md.
@@ -174,18 +178,14 @@ export function usePieChartOptions(
             {
               marker: p.marker,
               title: String(p.name ?? ""),
-              value: valueFormatter
-                ? valueFormatter(val)
-                : val.toLocaleString(),
+              value: formatTooltipValue(val),
               rows: [
                 {
                   value: `${(p.percent ?? 0).toFixed(1)}%`,
                   label: i18n.dataChart.tooltip.ofTotal,
                 },
                 {
-                  value: valueFormatter
-                    ? valueFormatter(total)
-                    : total.toLocaleString(),
+                  value: formatTooltipValue(total),
                   label: i18n.dataChart.tooltip.total,
                 },
               ],
@@ -209,6 +209,7 @@ export function usePieChartOptions(
     showLabels,
     showPercentage,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     i18n,

@@ -15,6 +15,7 @@ import {
   buildBaseChartOptions,
   deltaRow,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -194,14 +195,7 @@ export function useLineChartOptions(
 
     const legendData = series.map((s) => s.name)
 
-    // `valueFormatter` formats the value AXIS, which is usually compact
-    // ("125k"); tooltips show the full number instead ("125,000").
-    // `tooltipValueFormatter` overrides that — it is also the way to keep a
-    // unit (currency, "%") in the tooltip.
-    const formatTooltipValue = (value: number) =>
-      tooltipValueFormatter
-        ? tooltipValueFormatter(value)
-        : value.toLocaleString()
+    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
 
     // Lines keep the axis trigger — a line is too thin to hover reliably —
     // but render the shared tooltip card. With one series that is the same

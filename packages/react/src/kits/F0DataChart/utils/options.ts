@@ -456,6 +456,24 @@ export function renderValueTooltip(
 }
 
 /**
+ * The formatter every chart type uses for the values in its tooltip.
+ *
+ * Tooltips show the full localized number ("125,000") rather than the compact
+ * form axes and labels use ("125k"): the tooltip is where the exact figure
+ * belongs, and it is the same number on every chart type. `valueFormatter`
+ * deliberately does not reach here — pass `tooltipValueFormatter` to control
+ * this number, which is also how a unit or a currency gets into a tooltip.
+ */
+export function tooltipValueFormat(
+  tooltipValueFormatter?: (value: number) => string
+): (value: number) => string {
+  return (value) =>
+    tooltipValueFormatter
+      ? tooltipValueFormatter(value)
+      : value.toLocaleString()
+}
+
+/**
  * Build a tooltip dot in an explicit color, matching the one ECharts injects
  * as `params.marker`. Needed where ECharts' own marker uses the palette rather
  * than the color actually painted (e.g. the gauge arc).

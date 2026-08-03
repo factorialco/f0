@@ -118,7 +118,7 @@ Bar labels use `valueFormatter`, with configurable size and collision handling:
 
 ### Precise tooltip values
 
-Use `tooltipValueFormatter` when the axis and labels should stay compact while the hover tooltip retains the precise value.
+Tooltips already show the full number while the axis and labels stay compact. Use `tooltipValueFormatter` to control that number yourself — a fixed locale, a unit, or a currency the compact axis format leaves out. The Customization section below covers how the two formatters divide the work.
 
 <Canvas of={BarStories.PreciseTooltip} />
 
@@ -319,16 +319,24 @@ import {
 
 ### Value & Category Formatters
 
-All chart types support `valueFormatter` to customize how numbers are displayed in axes, labels, and tooltips. Bar and line charts also support `categoryFormatter` for axis labels.
+Two formatters, split by where the number is drawn:
+
+- **`valueFormatter`** — axes and labels, the places where space is tight, so it is usually a compact format. Bar and line charts also support `categoryFormatter` for axis labels.
+- **`tooltipValueFormatter`** — the hover tooltip only.
+
+Every chart type supports both, and the rule is the same on all seven: **a tooltip shows the full localized number** (`4,000,000`, not `4M €`), because the tooltip is where the exact figure belongs. `valueFormatter` never reaches the tooltip, so a unit that lived in it needs `tooltipValueFormatter` to come back:
 
 ```tsx
 <F0DataChart
-  type="bar"
-  valueFormatter={(v) => `${v / 1_000_000}M €`}
+  type="line"
+  valueFormatter={(v) => `${v / 1_000_000}M €`} // axis: "4M €"
+  tooltipValueFormatter={(v) => `${v.toLocaleString()} €`} // tooltip: "4,000,000 €"
   categoryFormatter={(v) => v.slice(0, 3)}
   // ...
 />
 ```
+
+<Canvas of={LineStories.CustomFormatters} />
 
 ### ECharts Escape Hatch
 

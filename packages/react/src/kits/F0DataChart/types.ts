@@ -282,6 +282,14 @@ export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
   /**
+   * Formatter for the value shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the labels
+   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
+   * one formats the labels only.
+   */
+  tooltipValueFormatter?: (value: number) => string
+  /**
    * Map stage colors to their values using a gradient scale (light→dark).
    * When enabled, higher values get a more intense color. @default true
    */
@@ -343,6 +351,14 @@ export interface F0DataChartPieProps extends F0DataChartCommonProps {
   showPercentage?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the labels
+   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
+   * one formats the labels only.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -397,6 +413,14 @@ export interface F0DataChartRadarProps extends F0DataChartCommonProps {
   showLabels?: boolean
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the labels
+   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
+   * one formats the labels only.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -427,6 +451,14 @@ export interface F0DataChartGaugeProps extends F0DataChartCommonProps {
   showValue?: boolean
   /** Format the value displayed */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the labels
+   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
+   * one formats the labels only.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -461,6 +493,14 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
   showVisualMap?: boolean
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to a plain
+   * localized number, so the tooltip stays precise ("107,505") while the labels
+   * stay compact ("107.5K"). Set it to keep a unit in the tooltip
+   * (e.g. `(v) => \`${v}%\``), which {@link valueFormatter} does not do — that
+   * one formats the labels only.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }

@@ -11,6 +11,7 @@ import {
   buildItemTooltip,
   renderMarker,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -60,6 +61,7 @@ export function useGaugeChartOptions(
     color,
     showValue = true,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartGaugeProps,
   size: GaugeChartSize
@@ -149,9 +151,7 @@ export function useGaugeChartOptions(
               // colour the arc is actually painted with.
               marker: renderMarker(resolvedColor),
               title: p.name ? String(p.name) : undefined,
-              value: valueFormatter
-                ? valueFormatter(val)
-                : val.toLocaleString(),
+              value: tooltipValueFormat(tooltipValueFormatter)(val),
               rows: [
                 span > 0 && {
                   value: `${(((val - min) / span) * 100).toFixed(1)}%`,
@@ -178,6 +178,7 @@ export function useGaugeChartOptions(
     color,
     showValue,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     i18n,

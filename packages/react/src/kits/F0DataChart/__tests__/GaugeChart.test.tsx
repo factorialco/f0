@@ -41,10 +41,18 @@ function getLatestOption() {
     series: Array<{
       title?: { show?: boolean; fontSize?: number }
       detail?: { show?: boolean; fontSize?: number }
-      progress?: { width?: number }
+      progress?: { width?: number; itemStyle?: { color?: string } }
       axisLine?: { lineStyle?: { width?: number } }
     }>
+    tooltip?: { formatter?: (params: unknown) => string }
   }
+}
+
+/** Run the tooltip formatter the way ECharts would on hover. */
+function hover(params: unknown) {
+  const formatter = getLatestOption().tooltip?.formatter
+  if (!formatter) throw new Error("the chart built no tooltip formatter")
+  return formatter(params)
 }
 
 const gaugeProps = {
@@ -88,5 +96,71 @@ describe("GaugeChart — responsive breakpoints", () => {
     expect(option.series[0].title?.show).toBe(true)
     expect(option.series[0].detail?.fontSize).toBe(32)
     expect(option.series[0].progress?.width).toBe(18)
+  })
+})
+
+// The formatter runs inside ECharts on hover, so it only gets exercised by
+// calling it with the params ECharts passes.
+describe("GaugeChart — tooltip", () => {
+  it("shows the name, the value and its share of the range", () => {
+    render(<F0DataChart {...gaugeProps} min={0} max={200} />)
+
+    const html = hover({ name: "Engagement", value: 72 })
+    expect(html).toContain("Engagement")
+    expect(html).toContain((72).toLocaleString())
+    expect(html).toContain("36.0%")
+    expect(html).toContain("of range")
+  })
+
+  it("marks the dot with the arc's own colour, not the palette entry", () => {
+    render(<F0DataChart {...gaugeProps} color="viridian" />)
+
+    const painted = getLatestOption().series[0].progress?.itemStyle?.color
+    expect(painted).toBeTruthy()
+    expect(hover({ name: "Engagement", value: 72 })).toContain(
+      `background-color:${painted}`
+    )
+  })
+
+  it("escapes the name and shows the full number, not the ring's format", () => {
+    render(
+      <F0DataChart
+        {...gaugeProps}
+        name="<script>x</script>"
+        value={7200}
+        max={10000}
+        valueFormatter={(v) => `${v / 100}%`}
+      />
+    )
+
+    const html = hover({ name: "<script>x</script>", value: 7200 })
+    expect(html).toContain((7200).toLocaleString())
+    expect(html).not.toContain("72%") // that stays in the centre of the ring
+    expect(html).toContain("&lt;script&gt;")
+    expect(html).not.toContain("<script>")
+  })
+
+  it("lets tooltipValueFormatter set the tooltip number", () => {
+    render(
+      <F0DataChart
+        {...gaugeProps}
+        valueFormatter={(v) => `${v}%`}
+        tooltipValueFormatter={(v) => `${v} of 100 points`}
+      />
+    )
+
+    expect(hover({ name: "Engagement", value: 72 })).toContain(
+      "72 of 100 points"
+    )
+  })
+
+  it("survives a missing value and a zero-width range", () => {
+    render(<F0DataChart {...gaugeProps} min={50} max={50} />)
+
+    const html = hover({ name: "Engagement" })
+    expect(html).toContain((0).toLocaleString())
+    expect(html).not.toContain("of range") // no range to be a share of
+    expect(html).not.toContain("NaN")
+    expect(html).not.toContain("Infinity")
   })
 })

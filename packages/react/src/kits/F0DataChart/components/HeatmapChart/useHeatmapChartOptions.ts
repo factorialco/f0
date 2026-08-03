@@ -9,6 +9,7 @@ import {
   buildCategoryAxis,
   buildItemTooltip,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -59,6 +60,7 @@ export function useHeatmapChartOptions(
     showLabels = false,
     showVisualMap = false,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartHeatmapProps,
   size: HeatmapChartSize
@@ -207,9 +209,7 @@ export function useHeatmapChartOptions(
               marker: p.marker,
               title: yCategories[yIdx] ?? "",
               subtitle: xCategories[xIdx] ?? "",
-              value: valueFormatter
-                ? valueFormatter(val)
-                : val.toLocaleString(),
+              value: tooltipValueFormat(tooltipValueFormatter)(val),
             },
             theme
           )
@@ -231,6 +231,7 @@ export function useHeatmapChartOptions(
     showLabels,
     showVisualMap,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     width,
