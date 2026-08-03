@@ -13,10 +13,21 @@ const rows = (count: number, offset = 0) =>
     title: `Person ${offset + index}`,
   }))
 
-// jsdom does not implement `scrollIntoView`, which the component calls when the
-// active row moves.
+/**
+ * Records the row each `scrollIntoView` call targeted — that is what decides
+ * where the dropdown ends up scrolled.
+ *
+ * The global setup already stubs this on `HTMLElement.prototype`, so it MUST be
+ * overridden there: a stub on `Element.prototype` sits further up the chain, is
+ * shadowed, and silently records nothing.
+ */
+const scrolledTo: string[] = []
+
 beforeEach(() => {
-  Element.prototype.scrollIntoView = vi.fn()
+  scrolledTo.length = 0
+  window.HTMLElement.prototype.scrollIntoView = vi.fn(function (this: Element) {
+    scrolledTo.push(this.textContent ?? "")
+  })
 })
 
 const searchProps = (results: ReturnType<typeof rows>, value: string) => ({
@@ -62,12 +73,16 @@ describe("Search preview pagination", () => {
     fireEvent.mouseOver(rowButtons()[PAGE_SIZE - 1])
     expect(highlightedRow()).toBe(PAGE_SIZE - 1)
 
+    scrolledTo.length = 0
     view.rerender(
       <Search {...searchProps([...firstPage, ...rows(10, PAGE_SIZE)], "mar")} />
     )
 
-    // The appended page must not move the highlight off the row being read.
+    // The appended page must not move the highlight off the row being read...
     expect(highlightedRow()).toBe(PAGE_SIZE - 1)
+    // ...because that scrolls the first row into view, yanking the reader back to
+    // the top of the dropdown just as they reach the bottom.
+    expect(scrolledTo).toEqual([])
   })
 
   it("highlights the first row when a new query replaces the results", async () => {
