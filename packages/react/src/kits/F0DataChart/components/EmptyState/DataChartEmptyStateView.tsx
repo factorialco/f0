@@ -5,7 +5,11 @@ import type { F0DataChartEmptyStateProps, F0DataChartProps } from "../../types"
 import { DataChartEmptyState } from "./EmptyState"
 
 interface DataChartEmptyStateViewProps {
-  /** @deprecated No longer used — the empty state renders text only. */
+  /**
+   * @deprecated No longer used — the empty state renders text only. Remove the prop.
+   * @removeIn 5.0.0
+   * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-datachart-emptystate-charttype-removal.md
+   */
   chartType?: F0DataChartProps["type"]
   emptyState?: F0DataChartEmptyStateProps
 }
