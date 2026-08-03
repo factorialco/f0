@@ -169,6 +169,16 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    */
   hideAllLabelsOnOverflow?: boolean
   /**
+   * Render every category at once instead of windowing them.
+   *
+   * A horizontal chart with more categories than fit at a readable bar
+   * thickness normally shows a scrollable window of rows. Set this when the
+   * reader has asked to see the whole distribution — an expanded or fullscreen
+   * view — and accepts thinner bars in exchange. Ignored by vertical charts,
+   * which lay categories out along the width. @default false
+   */
+  showAllCategories?: boolean
+  /**
    * Suggested number of segments on the value axis — lower values draw fewer
    * grid lines. Applies to whichever axis is the value axis (Y for vertical
    * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2

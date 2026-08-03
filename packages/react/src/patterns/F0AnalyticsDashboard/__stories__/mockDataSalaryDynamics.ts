@@ -193,6 +193,7 @@ export const salaryDynamicsItems: DashboardItem[] = [
     chart: {
       type: "bar",
       orientation: "horizontal",
+      showLabels: true,
       valueFormatter: compactEuros,
     },
     fetchData: async () => byWorkplaceAndGender(),
@@ -209,6 +210,7 @@ export const salaryDynamicsItems: DashboardItem[] = [
     chart: {
       type: "bar",
       orientation: "horizontal",
+      showLabels: true,
       valueFormatter: compactEuros,
     },
     fetchData: async () => byWorkplace(),

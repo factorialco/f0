@@ -66,6 +66,13 @@ interface DashboardItemProps {
   explanation?: string
   /** Whether this item is currently expanded to fill the grid */
   isFullscreen?: boolean
+  /**
+   * Take the height from the content instead of the available space. Set by an
+   * expanded item whose content has an intrinsic height it must not compress
+   * below — a horizontal bar chart drawing every category at a fixed row
+   * height. The widget then grows past the viewport and the page scrolls.
+   */
+  fitContent?: boolean
   /** Called when the user toggles fullscreen from the dropdown */
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -93,6 +100,7 @@ export function DashboardItem({
   chartTypeOptions,
   explanation,
   isFullscreen = false,
+  fitContent = false,
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -159,7 +167,12 @@ export function DashboardItem({
 
   return (
     <div
-      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
+      className={cn(
+        "group/dashitem flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
+        // `min-h-full` still fills the space when the content is shorter, but
+        // lets a taller intrinsic height win instead of being clipped to it.
+        fitContent ? "min-h-full" : "h-full"
+      )}
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
@@ -331,7 +344,9 @@ export function DashboardItem({
           )}
         </div>
       </div>
-      <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>
+      <div className={cn("flex-1", !fitContent && "min-h-0")}>
+        {isLoading ? skeleton : children}
+      </div>
     </div>
   )
 }

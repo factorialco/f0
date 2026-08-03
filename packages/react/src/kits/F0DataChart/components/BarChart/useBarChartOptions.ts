@@ -128,6 +128,141 @@ function hasTargets(series: F0DataChartBarSeries): boolean {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Horizontal category window
+// ---------------------------------------------------------------------------
+
+/** Thinnest a horizontal bar may get before the chart windows its categories. */
+const MIN_BAR_THICKNESS = 12
+
+/**
+ * Thickness every bar gets once `showAllCategories` is on. Expanding trades the
+ * pinned axis for the whole distribution, and at that point the rows are the
+ * content — so they get more room than in the windowed view, and the chart grows
+ * past its container to afford it.
+ */
+const EXPANDED_MIN_BAR_THICKNESS = 20
+
+/** Clearance between neighbouring bars, both within and between categories. */
+const MIN_BAR_GAP = 8
+
+/**
+ * Vertical space the chart spends on chrome rather than rows: the value axis on
+ * top, the grid's own padding, and the legend row. Deliberately one rough
+ * constant — it only shifts how many rows the window holds by one.
+ */
+const HORIZONTAL_CHART_CHROME = 64
+
+/**
+ * Band height (px) holding `barsPerBand` bars at `thickness` with
+ * {@link MIN_BAR_GAP} between them and one more gap separating this band from
+ * the next. Stacked series share a single bar per category, so they count as
+ * one. This is the geometry {@link horizontalBarGaps} expresses as the ratios
+ * ECharts actually takes.
+ */
+function minBandHeight(
+  barsPerBand: number,
+  thickness: number = MIN_BAR_THICKNESS
+): number {
+  const bars = Math.max(1, barsPerBand)
+  return bars * thickness + (bars - 1) * MIN_BAR_GAP + MIN_BAR_GAP
+}
+
+/**
+ * `barGap` / `barCategoryGap` for a horizontal chart, as the percentages
+ * ECharts expects — neither accepts pixels. `barGap` is a share of one bar's
+ * thickness; `barCategoryGap` is the share of the band left empty between
+ * adjacent categories.
+ *
+ * Expressing the gaps as ratios rather than pixels keeps them correct at any
+ * bar thickness: a chart with room to spare draws bars thicker than the
+ * thickness floor, and its gaps grow with them instead of staying pinned at
+ * {@link MIN_BAR_GAP}.
+ */
+function horizontalBarGaps(
+  barsPerBand: number,
+  thickness: number = MIN_BAR_THICKNESS
+): {
+  barGap: string
+  barCategoryGap: string
+} {
+  const gapShareOfBar = (MIN_BAR_GAP / thickness) * 100
+  const gapShareOfBand =
+    (MIN_BAR_GAP / minBandHeight(barsPerBand, thickness)) * 100
+
+  return {
+    barGap: `${gapShareOfBar.toFixed(1)}%`,
+    barCategoryGap: `${gapShareOfBand.toFixed(1)}%`,
+  }
+}
+
+/**
+ * Height (px) a horizontal chart needs to draw every category at
+ * {@link EXPANDED_MIN_BAR_THICKNESS}, or `undefined` when the chart isn't in
+ * `showAllCategories` mode (where the window handles density instead).
+ *
+ * Applied by `BarChart` as a `min-height` on the ECharts host inside a
+ * scrolling wrapper: below its container the chart still fills it and the bars
+ * come out thicker; above it the container scrolls.
+ */
+export function expandedHorizontalChartHeight(
+  props: Pick<
+    F0DataChartBarProps,
+    "orientation" | "stacked" | "categories" | "showAllCategories"
+  > & { series?: F0DataChartBarSeries[] }
+): number | undefined {
+  if (!props.showAllCategories || props.orientation !== "horizontal") {
+    return undefined
+  }
+
+  const categoryCount = props.categories?.length ?? 0
+  if (categoryCount === 0) return undefined
+
+  const barsPerBand = props.stacked ? 1 : (props.series?.length ?? 1)
+  const band = minBandHeight(barsPerBand, EXPANDED_MIN_BAR_THICKNESS)
+
+  return Math.ceil(categoryCount * band) + HORIZONTAL_CHART_CHROME
+}
+
+/**
+ * How many categories a horizontal chart can show at
+ * {@link MIN_BAR_THICKNESS}, or `undefined` when every category already fits.
+ *
+ * The alternative — growing the canvas past its container and letting the DOM
+ * scroll — drags the value axis and legend along with the rows, because ECharts
+ * paints them into the same canvas. Windowing the category axis instead keeps
+ * the axis pinned to the top of the chart and the legend to the bottom, and
+ * only the rows move.
+ */
+function horizontalCategoryWindow({
+  isVertical,
+  showAllCategories,
+  stacked,
+  categoryCount,
+  seriesCount,
+  containerHeight,
+}: {
+  isVertical: boolean
+  showAllCategories: boolean
+  stacked: boolean
+  categoryCount: number
+  seriesCount: number
+  containerHeight: number | undefined
+}): number | undefined {
+  if (showAllCategories) return undefined
+  if (isVertical || !containerHeight || categoryCount === 0) return undefined
+
+  const plotHeight = containerHeight - HORIZONTAL_CHART_CHROME
+  if (plotHeight <= 0) return undefined
+
+  const band = minBandHeight(stacked ? 1 : seriesCount)
+  if (plotHeight / categoryCount >= band) return undefined
+
+  // At least two rows, so the window can never collapse to a single bar that
+  // gives no sense of the surrounding data.
+  return Math.max(2, Math.floor(plotHeight / band))
+}
+
 const BAR_CORNER_RADIUS = 4
 
 /**
@@ -454,6 +589,7 @@ export function useBarChartOptions(
     hideOverflowingLabels = true,
     labelFitPadding,
     hideAllLabelsOnOverflow = true,
+    showAllCategories = false,
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
@@ -577,6 +713,21 @@ export function useBarChartOptions(
       )
     )
 
+    // Horizontal rows carry an explicit gap geometry rather than ECharts'
+    // defaults (20% of the band, 30% of a bar), which at the thickness a dense
+    // chart lands on leaves bars visually touching. Vertical charts keep the
+    // defaults. ECharts reads these from the first series of a stack group, but
+    // setting them on every entry keeps that independent of series order.
+    if (!isVertical) {
+      const gaps = horizontalBarGaps(
+        stacked ? 1 : series.length,
+        showAllCategories ? EXPANDED_MIN_BAR_THICKNESS : MIN_BAR_THICKNESS
+      )
+      for (const entry of echartsSeries) {
+        Object.assign(entry, gaps)
+      }
+    }
+
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
 
@@ -598,6 +749,19 @@ export function useBarChartOptions(
       valueFormatter
     )
 
+    // Too many categories to render at the minimum bar thickness: show a
+    // window of them and let the reader scroll through the rest. Resolved
+    // before the axes are built, because the axis decides label skipping from
+    // the rows it actually draws.
+    const categoryWindow = horizontalCategoryWindow({
+      isVertical,
+      showAllCategories,
+      stacked,
+      categoryCount: categories.length,
+      seriesCount: series.length,
+      containerHeight,
+    })
+
     const options = buildBaseChartOptions({
       categories,
       theme,
@@ -610,6 +774,9 @@ export function useBarChartOptions(
       // bars it's the Y axis. `buildAxes` already handles that mapping.
       showCategoryAxis,
       showValueAxis,
+      ...(categoryWindow !== undefined
+        ? { categoryVisibleCount: categoryWindow }
+        : {}),
       valueFormatter,
       categoryFormatter,
       tooltipValueFormatter,
@@ -771,6 +938,25 @@ export function useBarChartOptions(
       }
     }
 
+    // Scroll (wheel or drag) pans the window resolved above. `zoomLock` fixes
+    // its size, so panning never re-thins the bars, and `filterMode: "none"`
+    // keeps every row in the dataset so `dataIndex` still lines up with
+    // `categories` — the label layout and corner-radius resolvers index by it.
+    if (categoryWindow !== undefined) {
+      options.dataZoom = [
+        {
+          type: "inside",
+          yAxisIndex: 0,
+          startValue: 0,
+          endValue: categoryWindow - 1,
+          filterMode: "none",
+          zoomLock: true,
+          moveOnMouseWheel: true,
+          zoomOnMouseWheel: false,
+        },
+      ]
+    }
+
     return options
   }, [
     categories,
@@ -783,6 +969,7 @@ export function useBarChartOptions(
     hideOverflowingLabels,
     labelFitPadding,
     hideAllLabelsOnOverflow,
+    showAllCategories,
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,

@@ -408,6 +408,23 @@ function ChartTableView({
   )
 }
 
+/**
+ * Whether an expanded `item` should be sized by its content rather than by the
+ * viewport. Only horizontal bar charts qualify: expanding drops their scrollable
+ * row window (see `showAllCategories`) and draws every category at a fixed row
+ * height, which is an intrinsic height the widget has to accommodate. Shared
+ * with `DashboardGrid` so the fullscreen container and the card agree.
+ */
+export function chartItemFitsContent<Filters extends FiltersDefinition>(
+  item: DashboardChartItem<Filters>
+): boolean {
+  return (
+    item.chart.type === "bar" &&
+    "orientation" in item.chart &&
+    item.chart.orientation === "horizontal"
+  )
+}
+
 // ---------------------------------------------------------------------------
 // ChartItem component
 // ---------------------------------------------------------------------------
@@ -539,6 +556,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
       })
     : undefined
 
+  const fitContent = !!isFullscreen && chartItemFitsContent(item)
+
   return (
     <DashboardItem
       title={item.title}
@@ -554,6 +573,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       itemId={item.id}
       chartTypeOptions={chartTypeOptions}
       isFullscreen={isFullscreen}
+      fitContent={fitContent}
       onFullscreenChange={onFullscreenChange}
     >
       {data && chartProps ? (
@@ -561,7 +581,13 @@ export function ChartItem<Filters extends FiltersDefinition>({
           <ChartTableView config={item.chart} data={data} />
         ) : (
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
-            <F0DataChart {...chartProps} />
+            <F0DataChart
+              {...chartProps}
+              // Expanding is the reader asking for the whole picture, so a
+              // horizontal bar chart drops its scrollable row window and draws
+              // every category at a fixed row height, growing the widget.
+              {...(fitContent ? { showAllCategories: true } : {})}
+            />
           </div>
         )
       ) : !isLoading ? (

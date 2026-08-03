@@ -531,27 +531,21 @@ export const Snapshot: Story = {
 // ---------------------------------------------------------------------------
 
 /**
- * "Average salary dynamics (12 months)" exactly as the One agent authored it in
- * Analytics mode — item ids, titles, descriptions, chart types, orientation and
- * heights come from the `authorSemanticDashboardPreview` call in the trace; the
- * numbers are synthetic but keep the real cardinality (29 workplaces × 3 gender
- * series).
- *
- * The middle chart is the one worth looking at: a horizontal bar with 87 bars
- * inside 655px, which is where the category axis starts dropping labels.
+ * The report in edit mode, with its layout owned by the story the way the
+ * canvas owns it in production: `onLayoutChange` writes every drag and resize
+ * back onto the items, so a widget keeps its new height and slot instead of
+ * snapping back on the next render.
  */
-export const OneSalaryDynamicsReport: Story = {
-  tags: ["no-sidebar"],
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "A verbatim reproduction of a One Analytics report, for iterating on how a dense horizontal bar chart renders inside the canvas.",
-      },
-    },
-  },
-  render: () => (
-    <div className="flex flex-col gap-4">
+const ResizableSalaryDynamicsReport = () => {
+  const [items, setItems] = useState<DashboardItem[]>(salaryDynamicsItems)
+
+  return (
+    // Bounded height, scrolled here rather than by the page — the same shape as
+    // the canvas panel that hosts this report in production. Fullscreen depends
+    // on it: the dashboard root switches to `h-full` and can only fill a parent
+    // whose height is known, so an auto-height wrapper collapses the expanded
+    // item to its header.
+    <div className="flex h-screen flex-col gap-4 py-1">
       <header>
         <h2 className="m-0 text-2xl font-semibold text-f1-foreground">
           {salaryDynamicsTitle}
@@ -560,19 +554,66 @@ export const OneSalaryDynamicsReport: Story = {
           {salaryDynamicsDescription}
         </p>
       </header>
-      <F0AnalyticsDashboard
-        filters={salaryDynamicsFilters}
-        navigationFilters={{
-          date: {
-            type: "date-navigator",
-            defaultValue: new Date("2026-08-03T12:00:00.000Z"),
-            granularity: ["year"],
-          },
-        }}
-        items={salaryDynamicsItems}
-      />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <F0AnalyticsDashboard
+          filters={salaryDynamicsFilters}
+          navigationFilters={{
+            date: {
+              type: "date-navigator",
+              defaultValue: new Date("2026-08-03T12:00:00.000Z"),
+              granularity: ["year"],
+            },
+          }}
+          items={items}
+          editMode
+          onLayoutChange={(layout) => {
+            const byId = new Map(layout.map((entry) => [entry.id, entry]))
+            setItems((prev) =>
+              prev.map((item) => {
+                const next = byId.get(item.id)
+                return next
+                  ? {
+                      ...item,
+                      x: next.x,
+                      y: next.y,
+                      colSpan: next.colSpan,
+                      itemHeight: next.itemHeight,
+                    }
+                  : item
+              })
+            )
+          }}
+        />
+      </div>
     </div>
-  ),
+  )
+}
+
+/**
+ * "Average salary dynamics (12 months)" exactly as the One agent authored it in
+ * Analytics mode — item ids, titles, descriptions, chart types, orientation and
+ * heights come from the `authorSemanticDashboardPreview` call in the trace; the
+ * numbers are synthetic but keep the real cardinality (29 workplaces × 3 gender
+ * series).
+ *
+ * The middle chart is the one worth looking at: 87 bars across 29 categories,
+ * far more than a 655px widget can render at a readable thickness.
+ *
+ * `editMode` is on, so each widget can be resized and moved: drag the handle
+ * under a row to change its height, and drag a widget's header onto another row
+ * to make them share it — width comes from how many widgets a row holds.
+ */
+export const OneSalaryDynamicsReport: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A verbatim reproduction of a One Analytics report, in edit mode, for iterating on how a dense horizontal bar chart renders and reflows as the canvas is resized.",
+      },
+    },
+  },
+  render: () => <ResizableSalaryDynamicsReport />,
 }
 
 // ---------------------------------------------------------------------------

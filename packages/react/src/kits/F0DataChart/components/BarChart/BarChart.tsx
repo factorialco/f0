@@ -8,7 +8,10 @@ import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
-import { useBarChartOptions } from "./useBarChartOptions"
+import {
+  expandedHorizontalChartHeight,
+  useBarChartOptions,
+} from "./useBarChartOptions"
 
 export const BarChart = (props: F0DataChartBarProps) => {
   const ref = useRef<HTMLDivElement>(null)
@@ -20,11 +23,23 @@ export const BarChart = (props: F0DataChartBarProps) => {
   useAxisLabelTooltip(chartRef, ref, theme)
   useLegendInteraction(chartRef)
 
+  // Expanded horizontal charts draw every category at a fixed row height rather
+  // than compressing them into the container, so the canvas can end up taller
+  // than the space it was given. It grows in place — the surrounding widget
+  // takes its height from this and the page scrolls — so nothing here clips or
+  // scrolls on its own. `min-height` rather than `height`: a chart with fewer
+  // categories than fit keeps filling its container via `h-full`, so its bars
+  // come out thicker instead of leaving the widget half empty.
+  const expandedHeight = expandedHorizontalChartHeight(props)
+
   // See LineChart.tsx for the rationale on the scoped axis-label cursor reset.
   return (
     <div
       ref={ref}
       className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default"
+      {...(expandedHeight !== undefined
+        ? { style: { minHeight: expandedHeight } }
+        : {})}
     />
   )
 }
