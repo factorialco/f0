@@ -119809,7 +119809,7 @@ const bv = (e, t) => ({
       if (!isNaN(h.getTime()))
         return h;
       const m = c.split(/[/.-]/), v = f.match(/[dMy]+/g) ?? [], g = (E) => m[v.findIndex((L) => L.startsWith(E))], y = Number(g("d")), b = Number(g("M")), M = Number(g("y")), w = new Date(M, b - 1, y);
-      return w.getDate() === y && w.getMonth() === b - 1 ? w : /* @__PURE__ */ new Date(NaN);
+      return w.getFullYear() === M && w.getMonth() === b - 1 && w.getDate() === y ? w : /* @__PURE__ */ new Date(NaN);
     };
     return F7({
       from: s(o),
@@ -128958,7 +128958,7 @@ const PY1 = (e, t) => !e || "from" in e && !e.from && t.schema.options.mode === 
       e,
       t.i18n,
       "default",
-      n.localizedDayFormat ? t.locale : void 0
+      n.localizedDayFormat ?? t.localizedDayFormat ? t.locale : void 0
     );
   },
   formHeight: 520
@@ -130182,7 +130182,7 @@ function UY1({
   onSelect: r,
   onRemove: o
 }) {
-  const [i, s] = g2(!0), l = Nn(e.type), c = O1(), { locale: u } = y9(), [d, f] = g2({
+  const [i, s] = g2(!0), l = Nn(e.type), c = O1(), { locale: u, date: d } = y9(), f = d?.localizedDayFormat, [h, m] = g2({
     label: ""
   });
   return V2(() => {
@@ -130190,19 +130190,20 @@ function UY1({
       if (n === void 0)
         return;
       s(!0);
-      const m = l.chipLabel, v = await m(n, {
+      const g = l.chipLabel, y = await g(n, {
         schema: e,
         i18n: c,
         filterKey: t,
-        locale: u
-      }), g = typeof v == "object" ? v : { label: v, icon: void 0, avatar: void 0 };
-      f({
-        label: `${e.label}: ${g.label}`,
-        icon: g.icon,
-        avatar: g.avatar
+        locale: u,
+        localizedDayFormat: f
+      }), b = typeof y == "object" ? y : { label: y, icon: void 0, avatar: void 0 };
+      m({
+        label: `${e.label}: ${b.label}`,
+        icon: b.icon,
+        avatar: b.avatar
       }), s(!1);
     })();
-  }, [n, l, e, u]), /* @__PURE__ */ a(
+  }, [n, l, e, u, f]), /* @__PURE__ */ a(
     k1.div,
     {
       layout: !0,
@@ -130214,7 +130215,7 @@ function UY1({
         AJ,
         {
           variant: "selected",
-          ...d,
+          ...h,
           onClose: o,
           onClick: r
         }
@@ -131314,53 +131315,54 @@ const nK1 = _32, Tv = "__no-grouping__", rK1 = ({
   currentFilters: t,
   onFiltersChange: n
 }) => {
-  const [r, o] = g2([]), i = O1(), { locale: s } = y9();
+  const [r, o] = g2([]), i = O1(), { locale: s, date: l } = y9(), c = l?.localizedDayFormat;
   if (V2(() => {
     (async () => {
-      const u = Object.entries(t).filter(([, f]) => f == null ? !1 : Array.isArray(f) ? f.length > 0 : f !== ""), d = await Promise.all(
-        u.map(async ([f, h]) => {
-          const m = e[f], v = m?.label ?? f;
-          if (!m || !m.type)
+      const f = Object.entries(t).filter(([, m]) => m == null ? !1 : Array.isArray(m) ? m.length > 0 : m !== ""), h = await Promise.all(
+        f.map(async ([m, v]) => {
+          const g = e[m], y = g?.label ?? m;
+          if (!g || !g.type)
             return {
-              key: f,
-              label: v,
-              displayText: String(h)
+              key: m,
+              label: y,
+              displayText: String(v)
             };
-          const g = L32[m.type];
-          if (!g?.chipLabel)
+          const b = L32[g.type];
+          if (!b?.chipLabel)
             return {
-              key: f,
-              label: v,
-              displayText: Array.isArray(h) ? h.join(", ") : String(h)
+              key: m,
+              label: y,
+              displayText: Array.isArray(v) ? v.join(", ") : String(v)
             };
           try {
-            const y = await g.chipLabel(h, {
-              schema: m,
+            const M = await b.chipLabel(v, {
+              schema: g,
               i18n: i,
-              locale: s
-            }), b = typeof y == "string" ? y : y.label;
+              locale: s,
+              localizedDayFormat: c
+            }), w = typeof M == "string" ? M : M.label;
             return {
-              key: f,
-              label: v,
-              displayText: b
+              key: m,
+              label: y,
+              displayText: w
             };
           } catch {
             return {
-              key: f,
-              label: v,
-              displayText: Array.isArray(h) ? h.join(", ") : String(h)
+              key: m,
+              label: y,
+              displayText: Array.isArray(v) ? v.join(", ") : String(v)
             };
           }
         })
       );
-      o(d);
+      o(h);
     })();
-  }, [t, e, i, s]), r.length === 0) return null;
-  const l = (c) => {
-    const u = { ...t };
-    delete u[c], n(u);
+  }, [t, e, i, s, c]), r.length === 0) return null;
+  const u = (d) => {
+    const f = { ...t };
+    delete f[d], n(f);
   };
-  return /* @__PURE__ */ a(Yn, { children: /* @__PURE__ */ a("div", { className: "flex gap-1 border-0 p-2", children: /* @__PURE__ */ a(S3, { mode: "popLayout", children: r.map((c) => /* @__PURE__ */ a(
+  return /* @__PURE__ */ a(Yn, { children: /* @__PURE__ */ a("div", { className: "flex gap-1 border-0 p-2", children: /* @__PURE__ */ a(S3, { mode: "popLayout", children: r.map((d) => /* @__PURE__ */ a(
     k1.div,
     {
       layout: !0,
@@ -131373,12 +131375,12 @@ const nK1 = _32, Tv = "__no-grouping__", rK1 = ({
         AJ,
         {
           variant: "selected",
-          label: `${c.label}: ${c.displayText}`,
-          onClose: () => l(c.key)
+          label: `${d.label}: ${d.displayText}`,
+          onClose: () => u(d.key)
         }
       )
     },
-    c.key
+    d.key
   )) }) }) });
 };
 H32.displayName = "ActiveFiltersChips";
@@ -132251,9 +132253,9 @@ const CK1 = ["compact"], hK1 = (e) => {
   compact: u = !1,
   weekStartsOn: d,
   selectOnCellOnly: f = !1,
-  localizedDayFormat: h = !1
+  localizedDayFormat: h
 }) => {
-  const m = O1(), v = y9(), g = h ? v.locale : void 0, y = d ?? v.date?.weekStartsOn ?? at.Monday, b = T2(() => {
+  const m = O1(), v = y9(), g = h ?? v.date?.localizedDayFormat ? v.locale : void 0, y = d ?? v.date?.weekStartsOn ?? at.Monday, b = T2(() => {
     if (r) return r;
     const G = /* @__PURE__ */ new Date();
     return l && G < l ? l : c && G > c ? c : G;

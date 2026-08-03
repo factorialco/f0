@@ -4257,6 +4257,11 @@ declare type DateFilterOptions_2 = {
     mode?: CalendarMode;
     defaultSelected?: Date | DateRange | null;
     view?: CalendarView;
+    /**
+     * Derive the numeric day format from the locale instead of the fixed
+     * day-first fallback. Only affects the `day` and `range` views.
+     * Defaults to `l10n.date.localizedDayFormat`, then false.
+     */
     localizedDayFormat?: boolean;
 };
 
@@ -12501,6 +12506,8 @@ declare type FilterTypeContext<Options extends object = never> = {
     /** The key of this filter in the FiltersDefinition (passed to chipLabel for nested label lookups) */
     filterKey?: string;
     locale?: string;
+    /** Provider-level default from `l10n.date.localizedDayFormat`; per-filter options override it */
+    localizedDayFormat?: boolean;
 };
 
 declare type FilterTypeDefinition<Value = unknown, Options extends object = never, EmptyValue = Value, OptionalOptions extends boolean = false> = {
@@ -13782,7 +13789,13 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
 declare type L10nContextValue = {
     locale: string;
     date?: {
-        weekStartsOn: WeekStartsOn;
+        weekStartsOn?: WeekStartsOn;
+        /**
+         * App-wide default for deriving numeric day formats from the locale
+         * instead of the fixed day-first fallback. Per-component and per-filter
+         * `localizedDayFormat` flags override it.
+         */
+        localizedDayFormat?: boolean;
     };
 };
 
@@ -14805,6 +14818,11 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
     selectOnCellOnly?: boolean;
+    /**
+     * Derive the numeric day format from the locale instead of the fixed
+     * day-first fallback. Only affects the day and range granularities.
+     * Defaults to `l10n.date.localizedDayFormat`, then false.
+     */
     localizedDayFormat?: boolean;
 }
 
@@ -18838,11 +18856,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -18850,8 +18865,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
