@@ -15,6 +15,7 @@ import {
   buildBaseChartOptions,
   buildItemTooltip,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -592,14 +593,7 @@ export function useBarChartOptions(
     // numbers), otherwise fall back to the shared value formatter.
     const tooltipValue = tooltipValueFormatter ?? valueFormatter
 
-    // `valueFormatter` formats the value AXIS, which is usually compact
-    // ("125k"); tooltips show the full number instead ("125,000").
-    // `tooltipValueFormatter` overrides that — it is also the way to keep a
-    // unit (currency, "%") in the tooltip.
-    const formatTooltipValue = (value: number) =>
-      tooltipValueFormatter
-        ? tooltipValueFormatter(value)
-        : value.toLocaleString()
+    const formatTooltipValue = tooltipValueFormat(tooltipValueFormatter)
 
     const options = buildBaseChartOptions({
       categories,
@@ -689,9 +683,9 @@ export function useBarChartOptions(
 
     // Bar charts use an item-triggered tooltip about the hovered bar or
     // segment (pairing with the stacked series highlight) instead of the axis
-    // tooltip listing every series: value large, then — with multiple series —
-    // the hovered value's share of the category total, that total, and the
-    // target when there is one.
+    // tooltip listing every series: value large, then — with several
+    // same-signed series — the hovered value's share of the category total,
+    // that total, and the target when there is one.
     //
     // `buildBaseChartOptions` has already merged `echartsOptions`, so a caller
     // that passed its own tooltip keeps it: only build ours when it didn't.
@@ -711,14 +705,23 @@ export function useBarChartOptions(
 
           const value = Number(p.value)
           const dataIndex = p.dataIndex ?? 0
-          const total = series.reduce(
-            (sum, s) => sum + (getValue(s.data[dataIndex]) || 0),
-            0
-          )
           const target = targetMap.get(seriesName)?.[dataIndex]
-          // Share-of-total context only means something with several series;
-          // a single-series bar is always 100% of its own category.
-          const multiSeries = series.length > 1
+          // Share-of-total context only means something with several series
+          // pushing the same way: a single-series bar is always 100% of its own
+          // category, and a category mixing gains with losses has no "total"
+          // the parts add up to — 24 hires against a net of 19 would read as
+          // 126.3%, and near-cancellation makes that ratio arbitrarily large.
+          // Signed categories therefore show the value alone.
+          const categoryValues = series.map((s) => {
+            // A series can be shorter than `categories`.
+            const point = s.data[dataIndex]
+            return point === undefined ? 0 : getValue(point) || 0
+          })
+          const hasMixedSigns =
+            categoryValues.some((v) => v > 0) &&
+            categoryValues.some((v) => v < 0)
+          const total = categoryValues.reduce((sum, v) => sum + v, 0)
+          const showTotal = series.length > 1 && !hasMixedSigns
 
           // No "from previous" row here: bar categories are not necessarily a
           // sequence (locations, departments), so comparing a bar with the one
@@ -730,12 +733,14 @@ export function useBarChartOptions(
               subtitle: String(p.name ?? ""),
               value: formatTooltipValue(value),
               rows: [
-                multiSeries &&
-                  total > 0 && {
+                showTotal &&
+                  total !== 0 && {
+                    // Same sign on both sides, so the ratio is positive even
+                    // when the whole category is negative.
                     value: `${((value / total) * 100).toFixed(1)}%`,
                     label: i18n.dataChart.tooltip.ofTotal,
                   },
-                multiSeries && {
+                showTotal && {
                   value: formatTooltipValue(total),
                   label: i18n.dataChart.tooltip.total,
                 },

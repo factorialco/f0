@@ -1087,6 +1087,131 @@ describe("BarChart — item tooltip", () => {
     expect(html).not.toContain("total<")
   })
 
+  // A stacked chart mixing gains with losses has no total its parts add up
+  // to: the net sum is smaller than the segments it is made of, so a share of
+  // it can exceed 100% (or blow up entirely near cancellation).
+  it("omits share and total when the category mixes positive and negative values", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1", "Q2"]}
+        series={[
+          { name: "Hires", data: [24, 18] },
+          { name: "Internal moves", data: [6, 4] },
+          { name: "Voluntary exits", data: [-8, -12] },
+          { name: "Involuntary exits", data: [-3, -2] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 24,
+      dataIndex: 0,
+    })
+    // 24 / (24 + 6 - 8 - 3) would have read 126.3%, and the misleading net
+    // total goes with it — both rows carry the word "total".
+    expect(html).toContain((24).toLocaleString())
+    expect(html).not.toContain("total")
+    expect(html).not.toContain("126.3%")
+    expect(html).not.toContain((19).toLocaleString())
+  })
+
+  it("omits share and total when positive and negative series cancel out", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Hires", data: [1000] },
+          { name: "Exits", data: [-999.9] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 1000,
+      dataIndex: 0,
+    })
+    // A net of 0.1 would have turned 1000 into 1,000,000% of total.
+    expect(html).not.toContain("total")
+    expect(html).not.toContain("%</strong>")
+  })
+
+  it("keeps share and total when every series is negative", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Voluntary exits", data: [-8] },
+          { name: "Involuntary exits", data: [-2] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Voluntary exits",
+      value: -8,
+      dataIndex: 0,
+    })
+    // Both sides share a sign, so the ratio still reads as a positive share.
+    expect(html).toContain("80.0%")
+    expect(html).toContain("of total")
+    expect(html).toContain((-10).toLocaleString())
+  })
+
+  it("treats a series that runs short of the categories as zero there", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["A", "B"]}
+        series={[
+          { name: "S1", data: [30, 40] },
+          { name: "S2", data: [70] }, // no value for "B"
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "B",
+      seriesName: "S1",
+      value: 40,
+      dataIndex: 1,
+    })
+    expect(html).toContain("100.0%")
+    expect(html).not.toContain("NaN")
+  })
+
+  it("omits the share but keeps the total when every value is zero", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Hires", data: [0] },
+          { name: "Exits", data: [0] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 0,
+      dataIndex: 0,
+    })
+    // No division by zero, and "0 total" is still true.
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("Infinity")
+    expect(html).not.toContain("NaN")
+    expect(html).toContain("total")
+  })
+
   it("never compares a bar with the previous category — that is a line-chart concept", () => {
     render(
       <F0DataChart
