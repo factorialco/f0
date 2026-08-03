@@ -1,5 +1,8 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as CompanyStories from "./F0AvatarCompany.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import { F0AvatarCompany } from "../F0AvatarCompany"
 
 <Meta of={CompanyStories} />
 
@@ -25,6 +28,14 @@ shared by every avatar type except person.
 
 <Controls of={CompanyStories.Default} />
 
+### Variants
+
+#### Badge
+
+A badge marks the product module the company belongs to.
+
+<Canvas of={CompanyStories.WithModuleBadge} />
+
 ---
 
 ## Guidelines
@@ -41,6 +52,19 @@ shared by every avatar type except person.
 - The entity type is dynamic (could be a person or team): use `F0Avatar`
 - The entity is not a company: use the matching `F0Avatar*` component
 
+<DoDonts
+  do={{
+    description:
+      "Pass the company's real name, so the initials fallback stays meaningful when the logo is missing",
+    children: <F0AvatarCompany size="lg" name="Factorial" />,
+  }}
+  dont={{
+    description:
+      "Don't pass a placeholder or an id — the fallback is what most rows without a logo will show",
+    children: <F0AvatarCompany size="lg" name="—" />,
+  }}
+/>
+
 ---
 
 ## Behavior
@@ -50,3 +74,22 @@ shared by every avatar type except person.
 With no `src` — or if the image fails to load — the avatar shows the company's
 initials. Unlike person and team avatars, the fallback uses a single fixed
 background color rather than one derived from the name.
+
+#### With a logo
+
+<Canvas of={CompanyStories.WithImage} />
+
+---
+
+## Accessibility
+
+The avatar is decorative by default: unless you pass `aria-label` or
+`aria-labelledby`, it renders `aria-hidden` and screen readers skip it entirely.
+
+- In a row or header where the company name is already text, leave the label off
+  and let that text carry the meaning. A labelled avatar next to the same words
+  is announced twice.
+- When the avatar stands alone — a logo-only cell, a compact picker — pass
+  `aria-label` with the company name so it is reachable at all.
+- `aria-labelledby` takes the **id** of the element holding the name, not the
+  name itself.

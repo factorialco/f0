@@ -1,5 +1,8 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as ModuleStories from "./F0AvatarModule.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import { F0AvatarModule } from "../index"
 
 <Meta of={ModuleStories} />
 
@@ -107,6 +110,10 @@ for a standalone module avatar use `xs` (20px) or larger.
 
 <Canvas of={ModuleStories.AsBadge} />
 
+The badge sub-size follows its host avatar, so you never set it by hand:
+
+<Canvas of={ModuleStories.AsBadgeSizes} />
+
 ---
 
 ## Guidelines
@@ -127,6 +134,19 @@ for a standalone module avatar use `xs` (20px) or larger.
 - Representing a person, team or other entity: use the matching `F0Avatar*`
   component.
 
+<DoDonts
+  do={{
+    description:
+      "Use xs (20px) or larger for a standalone module avatar, so the icon stays legible",
+    children: <F0AvatarModule module="home" size="xs" />,
+  }}
+  dont={{
+    description:
+      "Don't use the badge sub-sizes (2xs, 3xs, 4xs) on their own — they only read as a corner badge on another avatar",
+    children: <F0AvatarModule module="home" size="3xs" />,
+  }}
+/>
+
 #### Adding a new module icon
 
 Module icons are a curated set. Add one only when a real product module needs
@@ -144,3 +164,20 @@ it, and keep the set consistent:
   sources (e.g. Gamma) — they won't match in style.
 - **Source vs. usage.** The raw module SVGs live in the module icon set; in the
   UI always render them through `F0AvatarModule`, never the raw SVG.
+
+---
+
+## Accessibility
+
+The module avatar is **always decorative**. It renders `aria-hidden="true"`
+unconditionally, so assistive technology never reaches it.
+
+- The module name has to exist as visible text, or on the labelled element the
+  avatar sits inside. The squircle alone conveys nothing to a screen reader.
+- As a corner badge this needs care: the host entity avatar is itself
+  `aria-hidden` unless the consumer passes `aria-label`, so by default neither
+  the badge nor the avatar it sits on has a name. The surrounding row has to
+  carry both.
+- The `aria-label` and `aria-labelledby` props are currently **inert**: they land
+  on the same element as the hardcoded `aria-hidden`, which wins. Don't rely on
+  them to name anything.

@@ -1,5 +1,8 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as TeamStories from "./F0AvatarTeam.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import { F0AvatarTeam } from "../F0AvatarTeam"
 
 <Meta of={TeamStories} />
 
@@ -25,6 +28,14 @@ shared by every avatar type except person.
 
 <Controls of={TeamStories.Default} />
 
+### Variants
+
+#### Badge
+
+A badge marks a status on the avatar's corner.
+
+<Canvas of={TeamStories.WithBadge} />
+
 ---
 
 ## Guidelines
@@ -41,6 +52,19 @@ shared by every avatar type except person.
 - The entity type is dynamic (could be a person or company): use `F0Avatar`
 - The entity is not a team: use the matching `F0Avatar*` component
 
+<DoDonts
+  do={{
+    description:
+      "Pass the team's real name — the initials and the fallback color are both derived from it, so the same team always looks the same",
+    children: <F0AvatarTeam size="lg" name="Design" />,
+  }}
+  dont={{
+    description:
+      "Don't pass an id or a slug. It produces initials that identify nothing, and renaming the record silently changes the color",
+    children: <F0AvatarTeam size="lg" name="t-1042-design-ops" />,
+  }}
+/>
+
 ---
 
 ## Behavior
@@ -50,3 +74,22 @@ shared by every avatar type except person.
 With no `src` — or if the image fails to load — the avatar shows the team's
 initials over a color derived deterministically from its name, so the same team
 always keeps the same color.
+
+#### With an image
+
+<Canvas of={TeamStories.WithImage} />
+
+---
+
+## Accessibility
+
+The avatar is decorative by default: unless you pass `aria-label` or
+`aria-labelledby`, it renders `aria-hidden` and screen readers skip it entirely.
+
+- In a row or header where the team name is already text, leave the label off and
+  let that text carry the meaning. A labelled avatar next to the same words is
+  announced twice.
+- When the avatar stands alone — an owner cell, a compact stack — pass
+  `aria-label` with the team name so it is reachable at all.
+- `aria-labelledby` takes the **id** of the element holding the name, not the
+  name itself.

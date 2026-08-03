@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
@@ -11,6 +13,7 @@ const meta = {
   title: "Avatars/AvatarFile",
   tags: ["stable", "!autodocs"],
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: ["An avatar component that displays a file type icon."]
@@ -40,6 +43,11 @@ export const Default: Story = {
   args: {
     file: { name: "document.pdf", type: "application/pdf" },
     size: "lg",
+  },
+  play: async ({ canvasElement }) => {
+    // The one decision this component makes: file in, type label out.
+    // "application/pdf" resolves to the PDF label via getFileTypeInfo.
+    await expect(within(canvasElement).getByText("PDF")).toBeInTheDocument()
   },
 }
 
