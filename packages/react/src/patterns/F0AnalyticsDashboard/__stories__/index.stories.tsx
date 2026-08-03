@@ -16,6 +16,12 @@ import {
   type DashboardFiltersType,
   mixedItems,
 } from "./mockDataMixed"
+import {
+  salaryDynamicsDescription,
+  salaryDynamicsFilters,
+  salaryDynamicsItems,
+  salaryDynamicsTitle,
+} from "./mockDataSalaryDynamics"
 
 const meta = {
   component: F0AnalyticsDashboard,
@@ -515,6 +521,55 @@ export const Snapshot: Story = {
       <F0AnalyticsDashboard
         filters={dashboardFilters}
         items={metricHeightItems}
+      />
+    </div>
+  ),
+}
+
+// ---------------------------------------------------------------------------
+// A real One-authored report
+// ---------------------------------------------------------------------------
+
+/**
+ * "Average salary dynamics (12 months)" exactly as the One agent authored it in
+ * Analytics mode — item ids, titles, descriptions, chart types, orientation and
+ * heights come from the `authorSemanticDashboardPreview` call in the trace; the
+ * numbers are synthetic but keep the real cardinality (29 workplaces × 3 gender
+ * series).
+ *
+ * The middle chart is the one worth looking at: a horizontal bar with 87 bars
+ * inside 655px, which is where the category axis starts dropping labels.
+ */
+export const OneSalaryDynamicsReport: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A verbatim reproduction of a One Analytics report, for iterating on how a dense horizontal bar chart renders inside the canvas.",
+      },
+    },
+  },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <header>
+        <h2 className="m-0 text-2xl font-semibold text-f1-foreground">
+          {salaryDynamicsTitle}
+        </h2>
+        <p className="m-0 mt-1 text-base text-f1-foreground-secondary">
+          {salaryDynamicsDescription}
+        </p>
+      </header>
+      <F0AnalyticsDashboard
+        filters={salaryDynamicsFilters}
+        navigationFilters={{
+          date: {
+            type: "date-navigator",
+            defaultValue: new Date("2026-08-03T12:00:00.000Z"),
+            granularity: ["year"],
+          },
+        }}
+        items={salaryDynamicsItems}
       />
     </div>
   ),
