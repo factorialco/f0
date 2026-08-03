@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.73.1](https://github.com/factorialco/f0/compare/f0-react-v4.73.0...f0-react-v4.73.1) (2026-08-03)
+
+
+### Bug Fixes
+
+* **EditableTable:** allow overriding read-only cellHint icon position ([#4924](https://github.com/factorialco/f0/issues/4924)) ([3c8986d](https://github.com/factorialco/f0/commit/3c8986dba984a995aa5ffed5f3a584dc29ae4268))
+
 ## [4.73.0](https://github.com/factorialco/f0/compare/f0-react-v4.72.3...f0-react-v4.73.0) (2026-08-03)
 
 
