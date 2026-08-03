@@ -131,6 +131,24 @@ export const TwoRateLines: Story = {
   } satisfies F0DataChartProps,
 }
 
+/**
+ * Net change goes negative — the shape the employee-movements data produces.
+ * Both axes divide into the same number of intervals, so every right-hand label
+ * still lands on a grid line. The rate axis stays anchored at 0%: sharing the
+ * bar axis' negative split would print impossible negative percentages, so the
+ * two zero lines are allowed to sit at different heights instead.
+ */
+export const NegativeValues: Story = {
+  args: {
+    type: "combo",
+    categories: [...MONTHS],
+    barSeries: [{ name: "Net change", data: [12, -8, 5, -14, 9, 3] }],
+    lineSeries: TURNOVER,
+    valueFormatter: people,
+    secondaryValueFormatter: percent,
+  } satisfies F0DataChartProps,
+}
+
 /** Smoothed line, with dots marking each data point. */
 export const SmoothLineWithDots: Story = {
   args: {

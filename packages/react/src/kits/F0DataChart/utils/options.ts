@@ -1,5 +1,6 @@
 import type * as echarts from "echarts"
 
+import type { ValueAxisBounds } from "./alignedAxes"
 import type { ChartTheme } from "./theme"
 
 // ---------------------------------------------------------------------------
@@ -228,6 +229,12 @@ interface ValueAxisOptions {
   show?: boolean
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   splitNumber?: number
+  /**
+   * Pins the scale exactly, overriding `splitNumber` (which ECharts treats as a
+   * hint and overrides for nicer rounding). Needed whenever two axes must land
+   * on the same tick positions — see {@link computeAlignedValueAxes}.
+   */
+  bounds?: ValueAxisBounds
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -238,10 +245,17 @@ export function buildValueAxis({
   maxLabelWidth,
   show = true,
   splitNumber,
+  bounds,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
-    ...(splitNumber !== undefined ? { splitNumber } : {}),
+    // An explicit min/max/interval fully determines the scale, so splitNumber
+    // would be redundant — and ECharts warns when both are supplied.
+    ...(bounds
+      ? { min: bounds.min, max: bounds.max, interval: bounds.interval }
+      : splitNumber !== undefined
+        ? { splitNumber }
+        : {}),
     axisLine: {
       show: false,
     },
@@ -539,6 +553,7 @@ export function buildAxes({
   categoryMaxLabelWidth,
   valueAxisSplitNumber,
   secondaryValueAxis,
+  valueAxisBounds,
 }: {
   isVertical: boolean
   categories: string[]
@@ -568,8 +583,16 @@ export function buildAxes({
    *
    * Vertical charts only: on a horizontal chart the value axis is the X axis,
    * so a second one would sit above the plot and read as a header.
+   *
+   * Pass `bounds` on both this and `valueAxisBounds` to pin the two scales to
+   * the same tick positions — see {@link computeAlignedValueAxes}.
    */
-  secondaryValueAxis?: { formatter?: (value: number) => string }
+  secondaryValueAxis?: {
+    formatter?: (value: number) => string
+    bounds?: ValueAxisBounds
+  }
+  /** Pins the primary value axis' scale, overriding `valueAxisSplitNumber`. */
+  valueAxisBounds?: ValueAxisBounds
 }) {
   const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
   const hasSecondaryValueAxis = isVertical && secondaryValueAxis !== undefined
@@ -618,6 +641,7 @@ export function buildAxes({
     formatter: valueFormatter,
     show: showValueAxis,
     splitNumber: valueAxisSplitNumber,
+    bounds: valueAxisBounds,
     ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
@@ -630,6 +654,7 @@ export function buildAxes({
         formatter: secondaryValueAxis?.formatter ?? valueFormatter,
         show: showValueAxis,
         splitNumber: valueAxisSplitNumber,
+        bounds: secondaryValueAxis?.bounds,
         maxLabelWidth: yAxisMaxLabelWidth,
       })
     : undefined
@@ -700,7 +725,12 @@ interface BaseChartOptionsParams {
    * charts plotting two measures on different scales. Series opt into it with
    * `yAxisIndex: 1`. See {@link buildAxes}.
    */
-  secondaryValueAxis?: { formatter?: (value: number) => string }
+  secondaryValueAxis?: {
+    formatter?: (value: number) => string
+    bounds?: ValueAxisBounds
+  }
+  /** Pins the primary value axis' scale, overriding `valueAxisSplitNumber`. */
+  valueAxisBounds?: ValueAxisBounds
 }
 
 /**
@@ -732,6 +762,7 @@ export function buildBaseChartOptions({
   categoryMaxLabelWidth,
   valueAxisSplitNumber,
   secondaryValueAxis,
+  valueAxisBounds,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -748,6 +779,7 @@ export function buildBaseChartOptions({
     categoryMaxLabelWidth,
     valueAxisSplitNumber,
     secondaryValueAxis,
+    valueAxisBounds,
   })
 
   const baseOptions: echarts.EChartsOption = {

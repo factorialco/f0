@@ -39,6 +39,9 @@ type ValueAxis = {
   axisLabel: { show: boolean; formatter?: (value: string | number) => string }
   splitLine?: { show?: boolean }
   splitNumber?: number
+  min?: number
+  max?: number
+  interval?: number
 }
 
 function getLatestOption() {
@@ -100,12 +103,32 @@ describe("ComboChart — axis binding", () => {
     expect(secondary.splitLine?.show).toBe(false)
   })
 
-  it("keeps both axes on the same split count so their ticks align", () => {
+  it("pins both axes to the same tick count so every label lands on a grid line", () => {
+    // splitNumber alone is a hint ECharts overrides for nicer rounding, which
+    // left the two scales on different interval counts (measured in a real
+    // browser). Explicit min/max/interval is what actually holds them together.
     render(<F0DataChart {...comboProps} valueAxisSplitNumber={4} />)
 
     const [primary, secondary] = getLatestOption().yAxis
-    expect(primary.splitNumber).toBe(4)
-    expect(secondary.splitNumber).toBe(4)
+    for (const axis of [primary, secondary]) {
+      expect(axis.min).toBeDefined()
+      expect(axis.max).toBeDefined()
+      expect(axis.interval).toBeDefined()
+      expect(axis.splitNumber).toBeUndefined()
+    }
+    const ticks = (axis: ValueAxis) =>
+      Math.round((axis.max! - axis.min!) / axis.interval!)
+    expect(ticks(primary)).toBe(4)
+    expect(ticks(secondary)).toBe(4)
+  })
+
+  it("scales each axis to its own measure", () => {
+    render(<F0DataChart {...comboProps} />)
+
+    const [primary, secondary] = getLatestOption().yAxis
+    // Headcount 120–131 vs a 3.8–5.2% rate: the two axes must not share a range.
+    expect(primary.max).toBeGreaterThan(100)
+    expect(secondary.max).toBeLessThan(100)
   })
 })
 

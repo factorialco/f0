@@ -189,6 +189,14 @@ When both measures share a unit, omit `secondaryValueFormatter` and the secondar
 
 <Canvas of={ComboStories.WorkedAgainstExpectedHours} />
 
+### Tick alignment
+
+Both value axes are pinned to explicit `min`/`max`/`interval` so they divide into the same number of intervals — every right-hand label lands on a grid line the left axis drew. `splitNumber` alone cannot do this: ECharts treats it as a hint and overrides it for nicer rounding, which leaves the two scales on different interval counts.
+
+Zero alignment is applied only when _both_ axes carry negative values. Forcing a shared split onto an axis whose quantity cannot go negative would print impossible ticks (a turnover rate of −5%) and spend half its height on empty range, so when only one axis has negatives the two zero lines legitimately differ.
+
+<Canvas of={ComboStories.NegativeValues} />
+
 ### Stacked bars with a rate line
 
 <Canvas of={ComboStories.StackedBarsWithRateLine} />

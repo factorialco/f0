@@ -4,6 +4,7 @@ import { type RefObject, useMemo } from "react"
 
 import type { F0DataChartComboProps } from "../../types"
 
+import { computeAlignedValueAxes } from "../../utils/alignedAxes"
 import { buildBaseChartOptions, escapeTooltipText } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -230,6 +231,19 @@ export function useComboChartOptions(
       lineEntries.map((_, index) => barEntries.length + index)
     )
 
+    // Pin both scales to the same tick positions. Left to ECharts, the two axes
+    // auto-scale independently and land on different interval counts, so the
+    // secondary labels float between the grid lines drawn from the primary.
+    const pointValue = (point: unknown): number =>
+      typeof point === "number"
+        ? point
+        : ((point as { value?: number })?.value ?? 0)
+    const alignedAxes = computeAlignedValueAxes(
+      barSeries.flatMap((series) => series.data.map(pointValue)),
+      lineSeries.flatMap((series) => series.data.map(pointValue)),
+      valueAxisSplitNumber
+    )
+
     const options = buildBaseChartOptions({
       categories,
       theme,
@@ -250,7 +264,11 @@ export function useComboChartOptions(
       valueFormatter,
       categoryFormatter,
       valueAxisSplitNumber,
-      secondaryValueAxis: { formatter: lineFormatter },
+      valueAxisBounds: alignedAxes?.primary,
+      secondaryValueAxis: {
+        formatter: lineFormatter,
+        bounds: alignedAxes?.secondary,
+      },
       tooltipFilterSeries: (name) => name.endsWith(TARGET_SERIES_SUFFIX),
       tooltipFormatter: buildComboTooltipFormatter(
         secondaryAxisIndices,
