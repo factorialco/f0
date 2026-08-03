@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
@@ -13,6 +13,7 @@ import {
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { getCompareToValue } from "./compareTo"
@@ -84,6 +85,23 @@ export function DatePickerPopup({
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
+
+  // Auto-detect if we're inside a dialog and use its portal container.
+  // The calendar header's year and month dropdowns are selects, and selects already
+  // portal into the dialog's container, which is a stacking context. Leaving the
+  // calendar in `document.body` puts it after that container in document order, so at
+  // the shared z-index it paints over the whole dialog subtree — including the very
+  // dropdowns it owns, which become unclickable. Sharing the container puts both
+  // layers in one stacking context, where the dropdown opened last wins.
+  // Side panels (left/right) keep rendering in body to prevent clipping.
+  const dialogContext = useContext(F0DialogContext)
+  const shouldUseDialogContainer =
+    dialogContext.portalContainer &&
+    (dialogContext.position === "center" ||
+      dialogContext.position === "fullscreen")
+  const portalContainer = shouldUseDialogContainer
+    ? dialogContext.portalContainer
+    : undefined
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -245,7 +263,11 @@ export function DatePickerPopup({
   return (
     <Popover open={props.open} onOpenChange={props.onOpenChange}>
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
-      <PopoverContent className="w-full overflow-auto" align="start">
+      <PopoverContent
+        className="w-full overflow-auto"
+        align="start"
+        container={portalContainer}
+      >
         {showPresets ? (
           <PresetList
             presets={presets}
