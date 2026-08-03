@@ -307,6 +307,34 @@ export const WithoutEnhance: Story = {
   },
 }
 
+/**
+ * Every step of the font-size scale the `textStyle` mark can carry. 16px is the
+ * body size, so text at 16 normally carries no mark at all; it is shown here for
+ * comparison. Sizes arrive this way from imported documents, which is why they
+ * have to survive being opened and saved.
+ */
+export const FontSizes: Story = {
+  args: {
+    ...Default.args,
+    initialEditorState: {
+      title: "Font sizes",
+      content: {
+        type: "doc",
+        content: [12, 14, 16, 18, 20, 24, 29].map((px) => ({
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: `${px}px — the quick brown fox jumps over the lazy dog`,
+              marks: [{ type: "textStyle", attrs: { fontSize: `${px}px` } }],
+            },
+          ],
+        })),
+      },
+    },
+  },
+}
+
 export const WithWarningAlert: Story = {
   args: {
     ...Default.args,
