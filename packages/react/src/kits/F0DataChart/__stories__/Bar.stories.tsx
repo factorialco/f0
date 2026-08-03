@@ -521,10 +521,17 @@ export const CategoryAxisBoundaries: Story = {
                 <span className="text-xs text-f1-foreground-secondary">
                   {label}
                 </span>
-                <div
-                  className={`${widthClass} h-[240px] rounded-md border border-solid border-f1-border-secondary bg-f1-background p-3`}
-                >
-                  <F0DataChart {...boundaryProps(orientation)} />
+                {/*
+                 * The sized box carries no border or padding of its own. The
+                 * chart measures its container, and `box-sizing: border-box`
+                 * means any inset would shift the effective width off the
+                 * boundary being demonstrated — a padded 220px box measures as
+                 * `sm`. The frame lives on the wrapper instead.
+                 */}
+                <div className="w-fit rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+                  <div className={`${widthClass} h-[240px]`}>
+                    <F0DataChart {...boundaryProps(orientation)} />
+                  </div>
                 </div>
               </div>
             ))}
