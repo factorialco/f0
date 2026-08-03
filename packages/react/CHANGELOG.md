@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.73.0](https://github.com/factorialco/f0/compare/f0-react-v4.72.3...f0-react-v4.73.0) (2026-08-03)
+
+
+### Features
+
+* **Card:** default the header link to a ghost appearance ([#4770](https://github.com/factorialco/f0/issues/4770)) ([49207c5](https://github.com/factorialco/f0/commit/49207c52a4a36a25aa90e3a0c506419558c8531c))
+
 ## [4.72.3](https://github.com/factorialco/f0/compare/f0-react-v4.72.2...f0-react-v4.72.3) (2026-08-03)
 
 
