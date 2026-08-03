@@ -170,14 +170,15 @@ describe("BarChart — responsive breakpoints", () => {
     expect(option.yAxis.axisLabel.show).toBe(false)
   })
 
-  it("shows legend and the value axis but hides the category axis at the medium breakpoint", () => {
+  it("shows legend and both axes at the medium breakpoint", () => {
     containerSize.width = 320
     render(<F0DataChart {...verticalProps} />)
 
     const option = getLatestOption()
     expect(option.legend?.show).toBe(true)
-    // X = category (hidden at md), Y = value (shown at md)
-    expect(option.xAxis.axisLabel.show).toBe(false)
+    // Bars keep their categories wherever they keep any chrome — X = category,
+    // Y = value. Crowding is handled by the smart axis layout, not by hiding.
+    expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(true)
   })
 
@@ -197,9 +198,9 @@ describe("BarChart — responsive breakpoints", () => {
 
     const option = getLatestOption()
     expect(option.legend?.show).toBe(true)
-    // Horizontal bars: X = value axis, Y = category axis. Each category label
-    // names the row beside it, so dropping them at md would leave a stack of
-    // anonymous bars — unlike vertical bars, where they crowd each other.
+    // Horizontal bars: X = value axis, Y = category axis. Both orientations
+    // keep their categories at md; dropping them would leave a stack of
+    // anonymous bars the value axis can't explain.
     expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(true)
   })
@@ -214,14 +215,14 @@ describe("BarChart — responsive breakpoints", () => {
     expect(option.yAxis.axisLabel.show).toBe(false)
   })
 
-  it("keeps hiding the category axis on vertical bars at the medium breakpoint", () => {
-    containerSize.width = 320
+  it("still hides the category axis on vertical bars at the small breakpoint", () => {
+    containerSize.width = 180
     render(<F0DataChart {...verticalProps} />)
 
     const option = getLatestOption()
-    // X = category. The md exception is horizontal-only.
+    // `sm` is the only size that drops the categories, in either orientation.
     expect(option.xAxis.axisLabel.show).toBe(false)
-    expect(option.yAxis.axisLabel.show).toBe(true)
+    expect(option.yAxis.axisLabel.show).toBe(false)
   })
 
   it("inverts the category axis on horizontal bars so rows read top-to-bottom in data order", () => {
@@ -242,13 +243,13 @@ describe("BarChart — responsive breakpoints", () => {
 })
 
 // ---------------------------------------------------------------------------
-// Horizontal bars deviate from the shared matrix: they keep the category axis
+// Bars deviate from the shared matrix: both orientations keep the category axis
 // at `md`, where every other chart family hides it (see
-// `resolveResponsiveDisplay`). That deviation costs plot width — the category
-// labels take `min(80, width * 0.2)` — so these pin the exact width the
-// behavior changes at, one pixel either side of both band edges. A breakpoint
-// tweak that moves the flip has to fail here rather than quietly reflow every
-// horizontal chart in a chat card.
+// `resolveResponsiveDisplay`). That deviation costs plot area — horizontal
+// labels take `min(80, width * 0.2)` of the width, vertical ones a row of
+// height — so these pin the exact width the behavior changes at, one pixel
+// either side of both band edges. A breakpoint tweak that moves the flip has to
+// fail here rather than quietly reflow every bar chart in a chat card.
 // ---------------------------------------------------------------------------
 
 describe("BarChart — category axis at the breakpoint boundaries", () => {
@@ -271,29 +272,21 @@ describe("BarChart — category axis at the breakpoint boundaries", () => {
       : option.yAxis.axisLabel.show
   }
 
-  it("hides the horizontal category axis at the last sm width (219px)", () => {
-    expect(categoryAxisShownAt(SM_MAX_WIDTH - 1, "horizontal")).toBe(false)
-  })
+  for (const orientation of ["horizontal", "vertical"] as const) {
+    it(`hides the ${orientation} category axis at the last sm width (219px)`, () => {
+      expect(categoryAxisShownAt(SM_MAX_WIDTH - 1, orientation)).toBe(false)
+    })
 
-  it("shows the horizontal category axis from the first md width (220px)", () => {
-    expect(categoryAxisShownAt(SM_MAX_WIDTH, "horizontal")).toBe(true)
-  })
+    it(`shows the ${orientation} category axis from the first md width (220px)`, () => {
+      expect(categoryAxisShownAt(SM_MAX_WIDTH, orientation)).toBe(true)
+    })
 
-  it("keeps the horizontal category axis across the md → lg edge (519/520px)", () => {
-    // Already visible at md, so crossing into lg must not toggle anything.
-    expect(categoryAxisShownAt(MD_MAX_WIDTH - 1, "horizontal")).toBe(true)
-    expect(categoryAxisShownAt(MD_MAX_WIDTH, "horizontal")).toBe(true)
-  })
-
-  it("keeps the vertical category axis hidden across the whole md band", () => {
-    // The deviation is horizontal-only: vertical still flips at lg alone.
-    expect(categoryAxisShownAt(SM_MAX_WIDTH, "vertical")).toBe(false)
-    expect(categoryAxisShownAt(MD_MAX_WIDTH - 1, "vertical")).toBe(false)
-  })
-
-  it("shows the vertical category axis from the first lg width (520px)", () => {
-    expect(categoryAxisShownAt(MD_MAX_WIDTH, "vertical")).toBe(true)
-  })
+    it(`keeps the ${orientation} category axis across the md → lg edge (519/520px)`, () => {
+      // Already visible at md, so crossing into lg must not toggle anything.
+      expect(categoryAxisShownAt(MD_MAX_WIDTH - 1, orientation)).toBe(true)
+      expect(categoryAxisShownAt(MD_MAX_WIDTH, orientation)).toBe(true)
+    })
+  }
 })
 
 describe("BarChart — corner rounding", () => {

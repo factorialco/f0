@@ -454,10 +454,10 @@ export const ResponsiveSnapshotMatrix: Story = {
 
 /**
  * Same matrix as `ResponsiveSnapshotMatrix` but rendered with
- * `orientation: "horizontal"`. The category axis lives on Y instead of X, and
- * unlike the vertical case it survives the medium breakpoint: each label names
- * the row beside it, so hiding them would leave a stack of anonymous bars.
- * Both axes are visible from `md` up; `sm` still drops all chrome.
+ * `orientation: "horizontal"`. The category axis lives on Y instead of X; as in
+ * the vertical case it survives the medium breakpoint, since the categories are
+ * the subjects being compared. Both axes are visible from `md` up; `sm` still
+ * drops all chrome.
  */
 const responsivePropsHorizontal = (
   column: "low" | "normal" | "large"
@@ -474,13 +474,13 @@ export const ResponsiveSnapshotMatrixHorizontal: Story = {
 // ---------------------------------------------------------------------------
 // Category-axis boundary widths
 //
-// Horizontal bars keep their category axis at `md`, where every other chart
-// family hides it (see `resolveResponsiveDisplay`). The deviation is deliberate
-// — a row label names the bar beside it — but it costs plot width: the labels
-// take `min(80, width * 0.2)`, so bars in a 220–519px container are up to 20%
-// shorter than they were. This story renders one pixel either side of both band
-// edges so Chromatic diffs that trade-off instead of leaving it to prose. The
-// vertical column is the control: it still gains its axis only at `lg`.
+// Bar charts keep their category axis at `md` in both orientations, where every
+// other chart family hides it (see `resolveResponsiveDisplay`). The deviation is
+// deliberate — the categories are the subjects being compared — but it costs
+// plot area: horizontal labels take `min(80, width * 0.2)` of the width,
+// vertical ones a row of height. This story renders one pixel either side of
+// both band edges so Chromatic diffs that trade-off instead of leaving it to
+// prose, and shows what the smart axis layout does with the space it gets.
 // ---------------------------------------------------------------------------
 
 const CATEGORY_AXIS_BOUNDARY_WIDTHS = [
@@ -501,9 +501,10 @@ const boundaryProps = (
 })
 
 /**
- * The exact widths at which the category axis appears, per orientation.
- * Horizontal gains it at 220px (`sm` → `md`); vertical not until 520px
- * (`md` → `lg`). Paired with the boundary assertions in `BarChart.test.tsx`.
+ * The exact widths at which the category axis appears. Both orientations gain
+ * it at 220px (`sm` → `md`) and keep it across 519/520px, so the only visible
+ * step is between the first two columns. Paired with the boundary assertions in
+ * `BarChart.test.tsx`.
  */
 export const CategoryAxisBoundaries: Story = {
   parameters: withSnapshot({}),
