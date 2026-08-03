@@ -33,7 +33,6 @@ export const F0AvatarList = ({
   noTooltip = false,
   remainingCount: initialRemainingCount,
   max,
-  tooltipScroll,
 }: F0AvatarListProps) => {
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
@@ -135,7 +134,6 @@ export const F0AvatarList = ({
             size={size}
             type={type === "person" ? "rounded" : "base"}
             avatarType={type}
-            tooltipScroll={tooltipScroll}
             list={
               initialRemainingCount
                 ? undefined

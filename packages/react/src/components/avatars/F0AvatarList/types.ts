@@ -85,11 +85,17 @@ export type F0AvatarListProps = {
   layout?: "fill" | "compact"
 
   /**
-   * Controls the scroll behavior of the `+N` overflow popover that lists
-   * collapsed avatars (including their `tooltipDescription` entries).
-   * - `"vertical"` (default): caps the popover height and scrolls vertically.
-   * - `"none"`: lets the popover grow to fit all entries.
-   * @default "vertical"
+   * @deprecated No longer has any effect; the `+N` popover never scrolls and
+   * always grows to fit its entries. The previous `"vertical"` behaviour capped
+   * the height and scrolled, which no keyboard user could operate: Radix
+   * `HoverCardContent` sets `tabindex="-1"` on every tabbable node it contains
+   * on each render, stripping the `tabIndex={0}` that makes `ScrollArea`
+   * accessible everywhere else (axe `scrollable-region-focusable`, WCAG 2.1.1).
+   * @removeIn 5.0
+   * @migration Remove the prop. There is no replacement — the behaviour it
+   * selected was inaccessible. If a cluster is large enough that the popover
+   * becomes unwieldy, surface the full list somewhere the page can scroll
+   * normally instead of hiding it behind a hover card.
    */
   tooltipScroll?: "vertical" | "none"
 } & F0AvatarListPropsAvatars

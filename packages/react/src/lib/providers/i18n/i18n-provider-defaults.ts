@@ -677,6 +677,16 @@ export const defaultTranslations = {
     noData: "No data",
     canceled: "Canceled",
   },
+  avatarList: {
+    // Accessible name for the `+N` overflow counter, which is a disclosure
+    // button. It has to include the visible "+N" text so the accessible name
+    // contains the visible label (WCAG 2.5.3), and it has to exist at all at
+    // `xs`, where the counter renders an ellipsis icon and no text.
+    showMore: {
+      one: "+{{count}} more",
+      other: "+{{count}} more",
+    },
+  },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",

@@ -95,6 +95,95 @@ describe("F0AvatarList", () => {
     expect(screen.getByText("lionel.messi@example.com")).toBeInTheDocument()
   })
 
+  describe("the `+N` counter as a keyboard-reachable disclosure", () => {
+    const overflowing = (
+      <F0AvatarList
+        type="person"
+        avatars={[
+          { firstName: "Ada", lastName: "Lovelace" },
+          { firstName: "Alan", lastName: "Turing" },
+          { firstName: "Grace", lastName: "Hopper" },
+          { firstName: "Marie", lastName: "Curie" },
+        ]}
+        max={3}
+        noTooltip
+      />
+    )
+
+    it("exposes the counter as a button naming the count", () => {
+      render(overflowing)
+
+      // The name has to contain the visible "+1" so voice control can target
+      // what it reads (WCAG 2.5.3), and it has to exist at all at `xs`, where
+      // the counter renders an icon and no text.
+      const trigger = screen.getByRole("button", { name: "+1 more" })
+      expect(trigger).toHaveTextContent("+1")
+      expect(trigger).toHaveAttribute("aria-expanded", "false")
+    })
+
+    it("is reachable by Tab and discloses the names on focus alone", async () => {
+      const user = userEvent.setup()
+      render(overflowing)
+
+      // The regression this pins: the trigger used to be a role-less <div>, so
+      // Tab never reached it and Radix's focus-to-open path could never fire.
+      // No hover anywhere in this test — keyboard only.
+      await user.tab()
+      const trigger = screen.getByRole("button", { name: "+1 more" })
+      expect(trigger).toHaveFocus()
+
+      expect(await screen.findByText("Marie Curie")).toBeInTheDocument()
+      expect(trigger).toHaveAttribute("aria-expanded", "true")
+    })
+
+    it("toggles on click, which is the only path that works on touch", async () => {
+      const user = userEvent.setup()
+      render(overflowing)
+
+      const trigger = screen.getByRole("button", { name: "+1 more" })
+      await user.click(trigger)
+
+      expect(await screen.findByText("Marie Curie")).toBeInTheDocument()
+      expect(trigger).toHaveAttribute("aria-expanded", "true")
+    })
+
+    it("renders no scroll region in the popover", async () => {
+      const user = userEvent.setup()
+      render(overflowing)
+
+      await user.click(screen.getByRole("button", { name: "+1 more" }))
+      expect(await screen.findByText("Marie Curie")).toBeInTheDocument()
+
+      // The whole point of the fix. `ScrollArea` stamps `data-scroll-container`
+      // on its viewport (ui/scrollarea.tsx), and inside a hover card that
+      // viewport can never be focused, so its presence is the defect itself.
+      expect(
+        document.querySelector("[data-scroll-container]")
+      ).not.toBeInTheDocument()
+    })
+
+    it("keeps the counter role-less when there is nothing to disclose", () => {
+      render(
+        <F0AvatarList
+          type="person"
+          avatars={[
+            { firstName: "Ada", lastName: "Lovelace" },
+            { firstName: "Alan", lastName: "Turing" },
+          ]}
+          max={2}
+          remainingCount={7}
+          noTooltip
+        />
+      )
+
+      // `remainingCount` switches the popover's list off, so there is nothing
+      // to open. A button here would advertise an interaction that does not
+      // exist.
+      expect(screen.getByText("+7")).toBeInTheDocument()
+      expect(screen.queryByRole("button")).not.toBeInTheDocument()
+    })
+  })
+
   it("shows the tooltip description on hover by default", async () => {
     const user = userEvent.setup()
     render(

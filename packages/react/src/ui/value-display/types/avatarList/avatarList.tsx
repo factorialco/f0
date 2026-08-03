@@ -25,10 +25,10 @@ type AvatarListValue = {
    */
   max?: number
   /**
-   * Controls the scroll behavior of the `+N` overflow popover.
-   * - `"vertical"` (default): caps the popover height and scrolls vertically.
-   * - `"none"`: lets the popover grow to fit all entries.
-   * @default "vertical"
+   * @deprecated No longer has any effect; the `+N` popover never scrolls and
+   * always grows to fit its entries. See `F0AvatarListProps["tooltipScroll"]`.
+   * @removeIn 5.0
+   * @migration Remove the prop.
    */
   tooltipScroll?: "vertical" | "none"
 } & (
@@ -66,7 +66,6 @@ export const AvatarListCell = (
           avatars: args.avatarList,
           size: "xs" as const,
           max: args.max,
-          tooltipScroll: args.tooltipScroll,
         } as F0AvatarListProps)}
       />
     </div>

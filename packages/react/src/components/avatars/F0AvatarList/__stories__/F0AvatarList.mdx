@@ -53,7 +53,11 @@ counter renders `remainingCount` plus whatever `max` collapsed
 
 <Canvas of={ListStories.WithRemainingCount} />
 
-Hovering the `+N` counter opens a popover listing the hidden avatars by name.
+The `+N` counter is a disclosure button. Hovering it, focusing it with the
+keyboard, or clicking it opens a popover listing the hidden avatars by name. The
+popover grows with its list rather than scrolling, so a very large cluster
+produces a very tall card — cap `max` with that in mind, and keep the full list
+available somewhere the page itself can scroll.
 
 <Canvas of={ListStories.OverflowPopover} />
 
@@ -132,21 +136,16 @@ means the same pixels as it does on a standalone avatar.
 
 ## Accessibility
 
-Five known limitations. Axe blocks on every story except `OverflowPopover`, which
-is downgraded to `todo` because one of the limitations below is an actual axe
-failure that cannot be fixed without changing the popover's behaviour. The other
-four are invisible to axe entirely, so passing an automated check would never
-have meant "accessible".
+The `+N` counter is a `<button>` with `aria-expanded`, so the collapsed names are
+reachable by keyboard: Tab to it and the popover opens on focus, Escape
+dismisses. Click and touch work too. The popover deliberately does not scroll —
+inside a hover card a scroll region can never be operated, because Radix sets
+`tabindex="-1"` on every tabbable node it contains on each render, stripping the
+`tabIndex={0}` that makes `ScrollArea` accessible everywhere else.
 
-- **The `+N` popover's scroll region has no keyboard access** (WCAG 2.1.1, axe
-  `scrollable-region-focusable`). With the default `tooltipScroll="vertical"` the
-  popover caps its height and scrolls, but the scrolling element is neither
-  focusable nor does it contain focusable content, so the overflowing names are
-  unreachable without a mouse. This is the one limitation here that axe does
-  catch: `pnpm test-storybook -- --testPathPatterns F0AvatarList` fails the
-  `OverflowPopover` story if the file is flipped to `a11y: { test: "error" }`.
-  `tooltipScroll="none"` avoids the scroll region, at the cost of an unbounded
-  popover height.
+Two known limitations remain, and axe can see neither of them, so a green
+automated check does not mean this component is accessible.
+
 - **The cluster is silent to a screen reader** (WCAG 1.1.1, 4.1.2). Every avatar
   renders `aria-hidden`, because `BaseAvatar` un-hides only when it receives an
   `aria-label` and AvatarList never forwards one — even though it already
@@ -159,10 +158,10 @@ have meant "accessible".
   it: `aria-label` and `aria-labelledby` are the only extra keys an entry
   forwards to the avatar (see `F0Avatar.tsx`, which enumerates props per type
   rather than spreading them), so any other key on an entry is silently dropped.
-- **The `+N` popover is hover-only.** Its trigger is a plain `div` with no
-  `tabIndex` and no role, so the collapsed names cannot be reached by keyboard
-  (WCAG 2.1.1). Never make the popover the only path to the full list.
-- **At `xs` the counter shows an ellipsis icon instead of `+N`**, so at that size
-  the count has no text alternative at all (WCAG 1.1.1).
-- **Per-avatar tooltips are hover-only too**, for the same reason: the avatar is
-  not focusable, so `tooltipDescription` is mouse-only detail.
+- **Per-avatar tooltips are hover-only.** Unlike the counter, an avatar is not
+  focusable, so a `tooltipDescription` is mouse-only detail (WCAG 2.1.1). Never
+  put anything there that is not also available in the surrounding UI.
+
+At `xs` the counter renders an ellipsis icon rather than `+N`, so it carries no
+visible count — its `aria-label` still names one ("+12 more"), which is why the
+label includes the number rather than saying only "more".

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import React from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, waitFor, within } from "storybook/test"
 
 import {
   avatarVariants,
@@ -164,12 +164,15 @@ const meta = {
     noTooltip: false,
   },
   parameters: {
-    // Gate the file, then downgrade the one story that cannot pass. Without this
-    // key nothing here is gated at all: `.storybook/preview.tsx:151` sets a
-    // global `a11y: { test: "todo" }` and `test-runner.ts:262` reads the merged
-    // parameters, so its `?? "error"` fallback never fires. Every story below is
-    // axe-clean except `OverflowPopover`, which carries its own `todo` and the
-    // reason for it.
+    // Load-bearing: without this key nothing here is gated at all.
+    // `.storybook/preview.tsx:151` sets the global a11y test mode to non-
+    // blocking and `test-runner.ts:262` reads the merged parameters, so its
+    // `?? "error"` fallback never fires. Every story in this file is axe-clean,
+    // including `OverflowPopover`, whose play opens the `+N` popover.
+    //
+    // Do not spell the non-blocking mode out literally anywhere in this file:
+    // `a11yTierOf` (scripts/component-status-build.mjs) greps the file's text,
+    // so the words in a comment would downgrade the component's DoD tier.
     a11y: { test: "error" },
     docs: {
       description: {
@@ -197,12 +200,6 @@ const meta = {
       control: "select",
       options: avatarVariants,
       description: "The type of the avatars in the list",
-    },
-    tooltipScroll: {
-      control: "select",
-      options: ["vertical", "none"],
-      description:
-        "Scroll behaviour of the `+N` popover. `none` avoids the scroll region that trips axe's scrollable-region-focusable, at the cost of an unbounded popover height.",
     },
   },
 } satisfies Meta<typeof F0AvatarList>
@@ -306,33 +303,16 @@ export const WithTooltipDescription: Story = {
 }
 
 /**
- * Hovering the `+N` counter opens a popover listing the hidden avatars by name.
- * The popover caps its height and scrolls by default (`tooltipScroll="vertical"`).
+ * The `+N` counter is a disclosure button: hover it, focus it with the keyboard,
+ * or click it, and a popover lists the hidden avatars by name. It never scrolls
+ * — the card grows with its list, because a scroll region inside a hover card
+ * can never be operated by keyboard.
  */
 export const OverflowPopover: Story = {
   args: {
     type: "person",
     avatars: getDummyAvatars(15, "person"),
     max: 3,
-  },
-  parameters: {
-    // Known a11y debt, scoped to the one story that hits it so the rest of the
-    // file stays gated. The play below opens the `+N` popover, whose ScrollArea
-    // viewport (ui/scrollarea via MaxCounter.tsx, `tooltipScroll="vertical"` by
-    // default) trips axe's `scrollable-region-focusable`: 392px of content in a
-    // 172px box with no keyboard access (WCAG 2.1.1). Verified, not assumed —
-    // with `test: "error"` this story fails
-    // `TARGET_URL=… test-storybook -- --testPathPatterns F0AvatarList` on that
-    // rule, and passes with the downgrade.
-    //
-    // Note where the defect actually lives, because it is not where it looks:
-    // `ui/scrollarea.tsx:80` does put `tabIndex={0}` on the viewport, and Radix
-    // `HoverCardContent` then rewrites every tabbable node inside it to
-    // `tabindex="-1"`. So a fix inside ScrollArea would be undone by HoverCard —
-    // it belongs in MaxCounter's choice of container, and it is a behaviour
-    // change, hence its own PR. Until then AvatarList stays on the stable-DoD
-    // debt list.
-    a11y: { test: "todo" },
   },
   play: async ({ args, canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -353,10 +333,22 @@ export const OverflowPopover: Story = {
       )
     })
 
-    await step("the counter discloses every collapsed entry", async () => {
-      // Match the counter by pattern, never by the literal "+12".
-      await userEvent.hover(canvas.getByText(/^\+\d+$/))
+    await step("the counter is reachable by keyboard", async () => {
+      // The regression this pins: the counter used to be a role-less <div>, so
+      // it was not in the tab order and Radix's focus-to-open path could never
+      // fire — the collapsed names were mouse-only (WCAG 2.1.1). Name it by
+      // pattern, never by the literal "+12".
+      const trigger = canvas.getByRole("button", { name: /^\+\d+ more$/ })
+      await expect(trigger).toHaveAttribute("aria-expanded", "false")
 
+      trigger.focus()
+      await expect(trigger).toHaveFocus()
+      await waitFor(() =>
+        expect(trigger).toHaveAttribute("aria-expanded", "true")
+      )
+    })
+
+    await step("the counter discloses every collapsed entry", async () => {
       // The popover is portalled out of the canvas (ui/hover-card.tsx passes no
       // `container`) and carries no role, so scope to <body> and pick the open
       // radix content. Then count rows by the one avatar each row renders

@@ -1,11 +1,12 @@
 import { cva } from "cva"
+import { useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import { internalAvatarTypes } from "@/ui/Avatar"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 
 import { AvatarVariant, AvatarVariants, F0Avatar } from "../../F0Avatar"
 import { type AvatarListSize, type F0AvatarListExtras } from "../types"
@@ -48,15 +49,6 @@ type Props = {
   type?: (typeof internalAvatarTypes)[number]
   list?: (Omit<AvatarVariant, "type"> & F0AvatarListExtras)[]
   avatarType?: AvatarVariants
-  /**
-   * Controls the popover content scroll behavior.
-   * - `"vertical"` (default): caps the popover height at ~172px and scrolls
-   *   vertically when the list overflows. Matches the historical behavior.
-   * - `"none"`: removes the height cap and lets the popover grow with its
-   *   content.
-   * @default "vertical"
-   */
-  tooltipScroll?: "vertical" | "none"
 }
 
 export const MaxCounter = ({
@@ -65,36 +57,49 @@ export const MaxCounter = ({
   type,
   list,
   avatarType = "person",
-  tooltipScroll = "vertical",
 }: Props) => {
-  const counter = (
-    <div
-      className={cn(
-        "cursor-default font-medium transition hover:bg-f1-background-secondary-hover",
-        sizeVariants({ size, type })
-      )}
-    >
-      {size === "xs" ? (
+  const i18n = useI18n()
+  const [open, setOpen] = useState(false)
+
+  const label = (
+    count === 1 ? i18n.avatarList.showMore.one : i18n.avatarList.showMore.other
+  ).replace("{{count}}", count.toString())
+
+  // At `xs` the counter is an ellipsis icon with no text, so the count needs a
+  // text alternative (WCAG 1.1.1). An `sr-only` span rather than `aria-label`:
+  // the plain counter below is a role-less <div>, where ARIA prohibits
+  // `aria-label` and assistive technology need not honour it. Real text works
+  // in both branches.
+  const counterContent =
+    size === "xs" ? (
+      <>
         <F0Icon icon={EllipsisHorizontal} size="xs" />
-      ) : (
-        `+${count}`
-      )}
-    </div>
-  )
+        <span className="sr-only">{label}</span>
+      </>
+    ) : (
+      `+${count}`
+    )
 
-  if (!list?.length) return counter
-
-  const isVertical = tooltipScroll === "vertical"
+  // Without a list there is nothing to disclose, so the counter stays a plain
+  // element: a button would advertise an interaction that does not exist.
+  if (!list?.length)
+    return (
+      <div
+        className={cn(
+          "cursor-default font-medium transition",
+          sizeVariants({ size, type })
+        )}
+      >
+        {counterContent}
+      </div>
+    )
 
   const items = list.map((avatar, index) => {
     const description = avatar.tooltipDescription
     return (
       <div
         key={index}
-        className={cn(
-          "flex items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
-          isVertical && "w-[180px] min-w-0"
-        )}
+        className="flex items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
       >
         <div className="h-6 w-6 shrink-0">
           <F0Avatar
@@ -102,22 +107,12 @@ export const MaxCounter = ({
             size="sm"
           />
         </div>
-        <div className={cn("flex flex-col", isVertical && "min-w-0 flex-1")}>
-          <div
-            className={cn(
-              "font-semibold",
-              isVertical ? "truncate" : "whitespace-nowrap"
-            )}
-          >
+        <div className="flex flex-col">
+          <div className="whitespace-nowrap font-semibold">
             {getAvatarDisplayName(avatarType, avatar)}
           </div>
           {description && (
-            <div
-              className={cn(
-                "text-sm text-current opacity-70",
-                isVertical ? "truncate" : "whitespace-nowrap"
-              )}
-            >
+            <div className="whitespace-nowrap text-sm text-current opacity-70">
               {description}
             </div>
           )}
@@ -127,20 +122,43 @@ export const MaxCounter = ({
   })
 
   return (
-    <HoverCard>
-      <HoverCardTrigger asChild>{counter}</HoverCardTrigger>
-      <HoverCardContent side="top" className={cn(!isVertical && "w-auto")}>
-        {isVertical ? (
-          <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col">
-            {items}
-            <ScrollBar
-              orientation="vertical"
-              className="[&_div]:bg-f1-background"
-            />
-          </ScrollArea>
-        ) : (
-          <div className="flex flex-col py-1">{items}</div>
-        )}
+    <HoverCard open={open} onOpenChange={setOpen}>
+      <HoverCardTrigger asChild>
+        {/*
+         * A real <button>, not the <div> this used to be. Radix opens the card
+         * on `focus` as well as on hover, but only if the trigger can actually
+         * receive focus — a role-less <div> never does, so the names in here
+         * were mouse-only (WCAG 2.1.1). `onClick` toggles too, which is what
+         * makes it reachable on touch: Radix preventDefaults `touchstart`, so
+         * hover never fires there either.
+         *
+         * The accessible name keeps the visible "+N" inside it ("+12 more") so
+         * a voice-control user can still say what they see (WCAG 2.5.3), and it
+         * is the only name available at `xs`, where the counter is an icon.
+         */}
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={label}
+          onClick={() => setOpen((previous) => !previous)}
+          className={cn(
+            "cursor-pointer font-medium transition hover:bg-f1-background-secondary-hover",
+            sizeVariants({ size, type }),
+            focusRing()
+          )}
+        >
+          {counterContent}
+        </button>
+      </HoverCardTrigger>
+      {/*
+       * No ScrollArea, and no height cap. Anything scrollable in here is
+       * unreachable by keyboard whatever `tabIndex` it carries, because
+       * HoverCardContent strips tab stops on every render. Since the content is
+       * purely readable, the honest fix is to have nothing to operate: the card
+       * grows with its list.
+       */}
+      <HoverCardContent side="top" className="w-auto">
+        <div className="flex flex-col py-1">{items}</div>
       </HoverCardContent>
     </HoverCard>
   )
