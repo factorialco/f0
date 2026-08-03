@@ -13,6 +13,7 @@ import type {
   GraphEdge,
   GraphNode,
   LayoutEngine,
+  ViewportInset,
   ZoomLevel,
   ZoomPreset,
   ZoomThresholds,
@@ -130,6 +131,40 @@ export interface F0GraphProps<T = unknown> {
    * still animate with the smooth pan.
    */
   initialFocusNodeId?: string
+  /**
+   * Whether clicking a node flies to it — centering and zooming in close on the
+   * clicked node. **Defaults to `true`**: every consumer gets the fly-to without
+   * wiring anything. Pass `false` to keep a static camera on click (selection
+   * still happens, the viewport just doesn't move). Keyboard navigation is never
+   * affected — it scrolls focus its own way and this only reacts to clicks.
+   *
+   * Re-fires on **every** click, including a click on the already-selected node,
+   * so a click after panning away always re-centers.
+   */
+  centerOnNodeClick?: boolean
+  /**
+   * Zoom level a node click lands on. Defaults to `NODE_CLICK_ZOOM` (`1.5`),
+   * clamped to `maxZoom`. A click is a deliberate "take me here", so it zooms in
+   * closer than the initial-focus frame regardless of the current zoom (clicking
+   * from far out still lands close; clicking from deep in doesn't stay deeper).
+   * Lower it for a dense graph where `1.5` feels too tight. Ignored when
+   * `centerOnNodeClick` is `false`.
+   */
+  nodeClickZoom?: number
+  /**
+   * Region of the canvas (in screen px) covered by external chrome — typically a
+   * side panel / drawer the consumer opens over the graph. Every fly-to path
+   * (click, `focusedNode`, `focusNode(id)`, "Find me", initial focus, fit-view)
+   * shifts its target so the node lands centered in the *free* area beside the
+   * panel instead of behind it. The side is encoded by which key is set (a
+   * right-hand drawer sets `right`; a left-hand one or RTL sets `left`).
+   *
+   * The consumer supplies the value — F0Graph has no notion of the panel. For a
+   * fixed-width drawer, pass its width while it's open (e.g. `{ right: 480 }`)
+   * and `undefined` / `{}` while it's closed. All-zero behaves exactly as if
+   * there were no inset.
+   */
+  viewportInset?: ViewportInset
 
   // ---- Layout ----
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows). */

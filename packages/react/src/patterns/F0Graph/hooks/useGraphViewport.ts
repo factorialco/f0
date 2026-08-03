@@ -1,9 +1,10 @@
-import { type Viewport, useReactFlow } from "@xyflow/react"
+import { type Viewport, useReactFlow, useStoreApi } from "@xyflow/react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { FIT_VIEW_PADDING_LOOSE, FIT_VIEW_PADDING_TIGHT } from "../constants"
 import type {
   PositionedNode,
+  ViewportInset,
   ZoomLevel,
   ZoomPreset,
   ZoomThresholds,
@@ -31,6 +32,12 @@ interface UseGraphViewportOptions {
     height: number
   } | null
   getNodePosition?: (id: string) => PositionedNode | undefined
+  /**
+   * Region of the canvas (screen px) occluded by external chrome (a side panel).
+   * All fly-to paths shift their target so the node lands in the free area. Read
+   * through a ref so it never changes the handlers' identity.
+   */
+  viewportInset?: ViewportInset
 }
 
 export interface UseGraphViewportResult {
@@ -54,10 +61,39 @@ export interface UseGraphViewportResult {
   handleFocusUser: () => void
   /**
    * Fly to a node using its full-layout position, so it works even when the
-   * node is windowed out of React Flow's store. Returns false if the position
-   * is unknown (caller should fall back to an id-based fit).
+   * node is windowed out of React Flow's store. Centers the node in the free
+   * region when a `viewportInset` is set. `zoom` defaults to the graph's
+   * `defaultZoom`. Returns false if the position is unknown (caller should fall
+   * back to an id-based fit).
    */
-  centerOnNode: (nodeId: string, duration: number) => boolean
+  centerOnNode: (nodeId: string, duration: number, zoom?: number) => boolean
+  /**
+   * Build a React Flow `fitView` padding that layers the current `viewportInset`
+   * on top of a symmetric base fraction, so id-based fits also clear the panel.
+   * Returns the plain `base` (identical to before) when there is no inset.
+   */
+  getFitPadding: (base: number) => number | ViewportInsetPadding
+  /** True when a non-zero `viewportInset` is currently set. */
+  hasViewportInset: boolean
+}
+
+/** Per-side fitView padding (fractions), returned by {@link getFitPadding}. */
+interface ViewportInsetPadding {
+  top: number
+  right: number
+  bottom: number
+  left: number
+}
+
+/** True when any side of the inset actually occludes part of the canvas. */
+function insetOccludes(inset?: ViewportInset): boolean {
+  return (
+    !!inset &&
+    ((inset.top ?? 0) > 0 ||
+      (inset.right ?? 0) > 0 ||
+      (inset.bottom ?? 0) > 0 ||
+      (inset.left ?? 0) > 0)
+  )
 }
 
 /**
@@ -75,8 +111,17 @@ export function useGraphViewport({
   nodeWindowingActive = false,
   getContentBounds,
   getNodePosition,
+  viewportInset,
 }: UseGraphViewportOptions): UseGraphViewportResult {
   const reactFlow = useReactFlow()
+  const storeApi = useStoreApi()
+
+  // Read the inset through a ref so the fly-to handlers keep a stable identity
+  // even when the consumer passes a fresh object every render (the careful
+  // `centerOnNode` identity guarantees the fly effects rely on must not churn).
+  const insetRef = useRef(viewportInset)
+  insetRef.current = viewportInset
+  const hasViewportInset = insetOccludes(viewportInset)
 
   // Viewport zoom (tracked via onViewportChange to avoid useViewport churn).
   const [currentZoom, setCurrentZoom] = useState(defaultZoom)
@@ -129,6 +174,28 @@ export function useGraphViewport({
     reactFlow.zoomOut({ duration: 300 })
   }, [reactFlow])
 
+  // Layer the current inset (screen px) onto a symmetric base fraction, so
+  // id-based fits frame their content in the free area rather than behind the
+  // panel. Each side's px is converted to a fraction of the container dimension
+  // it applies to (width for left/right, height for top/bottom) and added to the
+  // base. With no inset, returns the plain `base` — byte-for-byte the old call.
+  const getFitPadding = useCallback(
+    (base: number): number | ViewportInsetPadding => {
+      const inset = insetRef.current
+      if (!insetOccludes(inset)) return base
+      const { width, height } = storeApi.getState()
+      const fx = width > 0 ? width : 1
+      const fy = height > 0 ? height : 1
+      return {
+        top: base + (inset!.top ?? 0) / fy,
+        right: base + (inset!.right ?? 0) / fx,
+        bottom: base + (inset!.bottom ?? 0) / fy,
+        left: base + (inset!.left ?? 0) / fx,
+      }
+    },
+    [storeApi]
+  )
+
   const handleFitView = useCallback(() => {
     // Windowing: the store only holds on-screen nodes, so id-less fitView would
     // fit the window, not the graph. Fit the full layout bounds instead.
@@ -136,29 +203,42 @@ export function useGraphViewport({
     if (bounds) {
       reactFlow.fitBounds(bounds, {
         duration: 400,
-        padding: FIT_VIEW_PADDING_TIGHT,
+        padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
       })
       return
     }
-    reactFlow.fitView({ duration: 400, padding: FIT_VIEW_PADDING_TIGHT })
-  }, [reactFlow, nodeWindowingActive, getContentBounds])
+    reactFlow.fitView({
+      duration: 400,
+      padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
+    })
+  }, [reactFlow, nodeWindowingActive, getContentBounds, getFitPadding])
 
   // Fly to a node by its full-layout position (works even when windowing has
   // dropped it from React Flow's store). Returns false when the position is
   // unknown so callers can fall back to an id-based fitView.
   //
-  // Resets the zoom to `defaultZoom` (the graph's initial zoom) rather than
+  // `zoom` defaults to `defaultZoom` (the graph's initial zoom) rather than
   // keeping whatever the user had panned/zoomed to: navigating to a person
   // ("Find me" / search reveal) should land on the initial org-chart zoom state,
-  // not stay stuck at an arbitrary deep zoom.
+  // not stay stuck at an arbitrary deep zoom. The click path passes a closer zoom.
+  //
+  // When a `viewportInset` is set, the target is shifted so the node lands in the
+  // middle of the region NOT covered by the panel: a right-hand panel moves the
+  // target right by half its width (in flow units), so the node ends up centered
+  // in the visible area beside it. The side is encoded by the inset keys, so RTL
+  // is just a `left` inset — no extra direction handling here.
   const centerOnNode = useCallback(
-    (nodeId: string, duration: number): boolean => {
+    (nodeId: string, duration: number, zoom: number = defaultZoom): boolean => {
       const pos = getNodePosition?.(nodeId)
       if (!pos) return false
-      reactFlow.setCenter(pos.x + pos.width / 2, pos.y + pos.height / 2, {
-        duration,
-        zoom: defaultZoom,
-      })
+      const inset = insetRef.current
+      const shiftX = ((inset?.right ?? 0) - (inset?.left ?? 0)) / 2 / zoom
+      const shiftY = ((inset?.bottom ?? 0) - (inset?.top ?? 0)) / 2 / zoom
+      reactFlow.setCenter(
+        pos.x + pos.width / 2 + shiftX,
+        pos.y + pos.height / 2 + shiftY,
+        { duration, zoom }
+      )
       return true
     },
     [reactFlow, getNodePosition, defaultZoom]
@@ -172,9 +252,15 @@ export function useGraphViewport({
     reactFlow.fitView({
       nodes: [{ id: currentUserNodeId }],
       duration: 400,
-      padding: FIT_VIEW_PADDING_LOOSE,
+      padding: getFitPadding(FIT_VIEW_PADDING_LOOSE),
     })
-  }, [currentUserNodeId, reactFlow, nodeWindowingActive, centerOnNode])
+  }, [
+    currentUserNodeId,
+    reactFlow,
+    nodeWindowingActive,
+    centerOnNode,
+    getFitPadding,
+  ])
 
   return {
     zoomLevel,
@@ -185,5 +271,7 @@ export function useGraphViewport({
     handleFitView,
     handleFocusUser,
     centerOnNode,
+    getFitPadding,
+    hasViewportInset,
   }
 }

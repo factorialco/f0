@@ -6,6 +6,7 @@ import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typin
 import type {
   F0GraphNodeTag,
   F0GraphNodeTagColumn,
+  ViewportInset,
   ZoomPreset,
 } from "@/patterns/F0Graph"
 import type {
@@ -155,6 +156,25 @@ export type GraphVisualizationOptions<
   minZoom?: number
   /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
   maxZoom?: number
+  /**
+   * Whether clicking a node flies to it (centers + zooms in close), passed
+   * through to F0Graph. Defaults to `true` — pass `false` for a static camera on
+   * click (selection still happens). Re-centers on every click, even a repeat.
+   */
+  centerOnNodeClick?: boolean
+  /**
+   * Zoom a node click lands on (pass-through). Defaults to F0Graph's
+   * `NODE_CLICK_ZOOM` (`1.5`), clamped to `maxZoom`. Lower it for a dense tree.
+   */
+  nodeClickZoom?: number
+  /**
+   * Region of the canvas (screen px) covered by a side panel / drawer the
+   * consumer opens over the graph (pass-through to F0Graph). Every fly-to path
+   * shifts its target so the clicked / revealed node lands centered in the free
+   * area beside the panel instead of behind it. For a fixed-width drawer, pass
+   * its width while open (e.g. `{ right: 480 }`) and omit it while closed.
+   */
+  viewportInset?: ViewportInset
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
   /**

@@ -43,6 +43,10 @@ const meta = {
     maxZoom: {
       control: { type: "number", min: 1, max: 4, step: 0.1 },
     },
+    centerOnNodeClick: { control: "boolean" },
+    nodeClickZoom: {
+      control: { type: "number", min: 0.1, max: 2, step: 0.1 },
+    },
 
     // ---- Hidden from controls ----
     nodes: { table: { disable: true } },
@@ -60,6 +64,7 @@ const meta = {
     onNodeSelect: { table: { disable: true } },
     focusedNode: { table: { disable: true } },
     highlightedNodes: { table: { disable: true } },
+    viewportInset: { table: { disable: true } },
     layoutEngine: { table: { disable: true } },
     controlLabels: { table: { disable: true } },
     onZoomLevelChange: { table: { disable: true } },
@@ -740,6 +745,77 @@ export const InitialFocus: Story = {
     defaultExpandDepth: 2,
     initialFocusNodeId: "dept-4-member-100",
   },
+}
+
+// ─── Click-to-focus + side-panel inset ─────────────────────────────
+
+/**
+ * Clicking a node flies to it (F0Graph's default `centerOnNodeClick`), zooming
+ * in close and centering it. This demo opens a fixed-width (480px) side panel on
+ * selection and passes `viewportInset={{ right: 480 }}` while it's open, so the
+ * clicked node lands centered in the free area beside the panel instead of behind
+ * it. Click nodes with the panel open vs. closed to see the offset; click the
+ * empty canvas to dismiss the panel.
+ */
+function ClickToFocusWithSidePanelDemo() {
+  const nodes = makeLargeTree(600)
+  const [selected, setSelected] = useState<GraphNode<Employee> | null>(null)
+  const PANEL_WIDTH = 480
+  const byId = useCallback(
+    (id: string) => nodes.find((n) => n.id === id) ?? null,
+    [nodes]
+  )
+
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <F0Graph<Employee>
+        nodes={nodes}
+        renderNode={renderEmployee}
+        showControls
+        defaultExpandDepth={2}
+        selectionMode="single"
+        // The side panel is a fixed-width drawer; feed its width as the inset
+        // while it's open so every fly-to clears it. `0` while closed behaves
+        // exactly as if there were no inset.
+        viewportInset={{ right: selected ? PANEL_WIDTH : 0 }}
+        onSelectedNodesChange={(next) => {
+          const id = [...next][0]
+          setSelected(id ? byId(id) : null)
+        }}
+        onPaneClick={() => setSelected(null)}
+      />
+      {selected && (
+        <div
+          className="absolute right-0 top-0 z-20 flex h-full flex-col gap-2 border-l border-f1-border bg-f1-background p-6 shadow-lg"
+          style={{ width: PANEL_WIDTH }}
+        >
+          <div className="text-lg font-semibold text-f1-foreground">
+            {selected.data.name}
+          </div>
+          <div className="text-f1-foreground-secondary">
+            {selected.data.title}
+          </div>
+          <F0Button
+            variant="neutral"
+            label="Close"
+            onClick={() => setSelected(null)}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+export const ClickToFocusWithSidePanel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click a node to fly to it (default `centerOnNodeClick`). A fixed-width side panel opens on selection and `viewportInset={{ right: 480 }}` keeps the centered node in the visible area beside it. Click the canvas to dismiss.",
+      },
+    },
+  },
+  render: () => <ClickToFocusWithSidePanelDemo />,
 }
 
 // ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
