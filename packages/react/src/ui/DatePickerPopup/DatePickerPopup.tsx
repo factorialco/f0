@@ -86,14 +86,10 @@ export function DatePickerPopup({
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
 
-  // Auto-detect if we're inside a dialog and use its portal container.
-  // The calendar header's year and month dropdowns are selects, and selects already
-  // portal into the dialog's container, which is a stacking context. Leaving the
-  // calendar in `document.body` puts it after that container in document order, so at
-  // the shared z-index it paints over the whole dialog subtree — including the very
-  // dropdowns it owns, which become unclickable. Sharing the container puts both
-  // layers in one stacking context, where the dropdown opened last wins.
-  // Side panels (left/right) keep rendering in body to prevent clipping.
+  // The calendar's year/month dropdowns are selects that portal into the dialog's
+  // container — a stacking context. A calendar left in `document.body` would paint over
+  // that subtree and cover the dropdowns it owns, so share the container instead.
+  // Side panels (left/right) stay in body to prevent clipping.
   const dialogContext = useContext(F0DialogContext)
   const shouldUseDialogContainer =
     dialogContext.portalContainer &&
