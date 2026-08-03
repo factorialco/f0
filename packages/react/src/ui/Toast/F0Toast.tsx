@@ -79,18 +79,17 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     // `remainingTime` and dismiss a few frames after it paints.
     const contentSig = `${duration ?? ""}|${variant}|${title ?? ""}|${description ?? ""}`
     const [prevSig, setPrevSig] = useState(contentSig)
-    const [isPaused, setIsPaused] = useState(false)
+    // Pause is derived from ACTUAL hover, tracked unconditionally (not gated on
+    // `duration`), so hovering during `loading` still holds the resolved toast,
+    // and an in-place update never discards a legitimate hover pause.
+    const [isHovered, setIsHovered] = useState(false)
 
     // Reset DURING render (not in an effect) so `remainingTime` is never
     // momentarily 0 while `duration > 0`, which would trip the auto-close effect
-    // below and dismiss the toast mid-resolution. Also clear `isPaused`: the mouse
-    // handlers are guarded on `duration > 0`, so a pause set while hovering (e.g.
-    // an error toast) never clears while the toast is `loading` (duration
-    // undefined) — it would carry over and freeze the resolved toast's countdown.
+    // below and dismiss the toast mid-resolution.
     if (contentSig !== prevSig) {
       setPrevSig(contentSig)
       setRemainingTime(duration || 0)
-      setIsPaused(false)
     }
 
     const { role, ariaLive, avatarType, progressBarColor } = useMemo(() => {
@@ -141,7 +140,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     // triggered by the effect below, so we never call onClose (which updates the
     // parent toast store) from inside a state updater during render.
     useEffect(() => {
-      if (!duration || duration <= 0 || isPaused || forcePauseTimer) {
+      if (!duration || duration <= 0 || isHovered || forcePauseTimer) {
         return
       }
 
@@ -150,7 +149,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
       }, 16)
 
       return () => clearInterval(interval)
-    }, [duration, isPaused, forcePauseTimer])
+    }, [duration, isHovered, forcePauseTimer])
 
     // Close once the timer has run out.
     useEffect(() => {
@@ -159,17 +158,8 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
       }
     }, [remainingTime, duration, handleClose])
 
-    const handleMouseEnter = () => {
-      if (duration && duration > 0) {
-        setIsPaused(true)
-      }
-    }
-
-    const handleMouseLeave = () => {
-      if (duration && duration > 0) {
-        setIsPaused(false)
-      }
-    }
+    const handleMouseEnter = () => setIsHovered(true)
+    const handleMouseLeave = () => setIsHovered(false)
 
     const actionsArray = toArray(actions)
     const buttonActions: ToastActionButton[] = actionsArray.filter(
@@ -302,7 +292,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
               className={cn("h-full w-full", progressBarColor)}
               style={{
                 transform: `translateX(-${100 - progress}%)`,
-                transition: isPaused ? "none" : "transform 16ms linear",
+                transition: isHovered ? "none" : "transform 16ms linear",
               }}
             />
           </div>

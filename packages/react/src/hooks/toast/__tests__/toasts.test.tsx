@@ -318,14 +318,14 @@ describe("toasts API", () => {
       )
     })
 
-    it("does not freeze the countdown when a hovered toast resolves in place", async () => {
+    it("holds a hovered toast paused across an in-place resolve, resuming on leave", async () => {
       renderProvider()
 
       act(() => {
         toasts.open({ id: "op", variant: "error", title: "Failed to send" })
       })
-      // Hover the error toast root → pauses its timer. (The critical avatar also
-      // has role="alert", so target the root via the title's closest alert.)
+      // Hover the toast root → pauses its timer. (The critical avatar also has
+      // role="alert", so target the root via the title's closest alert.)
       act(() => {
         const root = screen
           .getByText("Failed to send")
@@ -333,8 +333,7 @@ describe("toasts API", () => {
         fireEvent.mouseEnter(root as HTMLElement)
       })
 
-      // Resolve in place: error → loading (no timer, so the pause can't clear via
-      // the mouse handlers) → success.
+      // Resolve in place while still hovered: error → loading → success.
       act(() => {
         toasts.open({ id: "op", variant: "loading", title: "Retrying…" })
       })
@@ -343,8 +342,18 @@ describe("toasts API", () => {
       })
       expect(screen.getByText("Sent")).toBeInTheDocument()
 
-      // The resolved toast must still count down and dismiss — it would be frozen
-      // if the pause carried over from the error hover.
+      // Still hovered → paused → does NOT dismiss even past its duration (pause is
+      // tracked from live hover, so it survives the in-place update).
+      act(() => {
+        vi.advanceTimersByTime(6_000)
+      })
+      expect(screen.getByText("Sent")).toBeInTheDocument()
+
+      // Mouse leaves → the countdown resumes and the toast dismisses.
+      act(() => {
+        const root = screen.getByText("Sent").closest("[role]")
+        fireEvent.mouseLeave(root as HTMLElement)
+      })
       act(() => {
         vi.advanceTimersByTime(5_200)
       })
