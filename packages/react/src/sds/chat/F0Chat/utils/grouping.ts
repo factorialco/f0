@@ -31,7 +31,10 @@ const needsSeparator = (
  * windowed renderer can map an index to exactly one row.
  */
 export type ChatRow =
-  | { type: "separator"; key: string; at: string }
+  // `forId`: the item whose arrival created the separator — lets the renderer
+  // check the fresh-appended batch so a live day change animates in with its
+  // message (also encoded in the key, made explicit here).
+  | { type: "separator"; key: string; at: string; forId: string }
   | { type: "divider"; key: string }
   // A centered system row (membership events). Breaks author runs on both
   // sides and never carries run flags, footer or interactions.
@@ -129,6 +132,7 @@ export function flattenChatRows(
         type: "separator",
         key: `sep-${item.id}`,
         at: item.createdAt,
+        forId: item.id,
       })
     }
 

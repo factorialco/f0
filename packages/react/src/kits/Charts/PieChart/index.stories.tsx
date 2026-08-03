@@ -5,13 +5,8 @@ import { PieChart } from "./index"
 const meta: Meta<typeof PieChart> = {
   component: PieChart,
   title: "Charts/PieChart",
-  parameters: {
-    a11y: {
-      config: {
-        rules: [{ id: "svg-img-alt", enabled: false }],
-      },
-    },
-  },
+  tags: ["no-sidebar"],
+  parameters: {},
   decorators: [
     (Story) => (
       <div className="h-96 w-full">

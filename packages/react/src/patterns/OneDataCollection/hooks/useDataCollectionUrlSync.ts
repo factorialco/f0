@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
 import { useDeepCompareEffect } from "@reactuses/core"
+import { useCallback, useEffect, useState } from "react"
+import { useDebounceCallback } from "usehooks-ts"
 
 import {
   FiltersDefinition,
@@ -8,9 +9,19 @@ import {
   SortingsState,
 } from "@/hooks/datasource"
 import {
+  type DataCollectionUrlState,
   parseDataCollectionUrlParams,
   syncDataCollectionUrlParams,
 } from "@/lib/providers/datacollection/dataCollectionUrlParams"
+
+/**
+ * Debounce (ms) for the collection → URL write. The search box updates
+ * `currentSearch` on every keystroke, and each write is a `history.replaceState`
+ * — which the browser Sentry SDK treats as a navigation and rotates the session
+ * on, so an un-debounced write spams two session envelopes per letter. Coalesce
+ * a burst of changes into a single write once the user pauses.
+ */
+const URL_SYNC_DEBOUNCE_MS = 300
 
 type UseDataCollectionUrlSyncOptions = {
   /**
@@ -110,10 +121,26 @@ export const useDataCollectionUrlSync = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- apply once when ready
   }, [active, storageReady])
 
-  // collection → URL.
+  // collection → URL. Debounced (see URL_SYNC_DEBOUNCE_MS): a burst of changes —
+  // above all typing in the search box — collapses into a single
+  // `history.replaceState` instead of one per keystroke, so the browser Sentry
+  // session isn't rotated (two session envelopes) on every letter.
+  // Stable identity (empty deps): `useDebounceCallback` re-creates its debounced
+  // instance whenever `func` changes, so an inline arrow here would yield a new
+  // `debouncedSync` every render — re-running the effect below and cancelling
+  // the pending write on each render, which under frequent re-renders would
+  // never let it fire. `syncDataCollectionUrlParams` reads `window.location`
+  // itself and takes the full state as its argument, so it needs no deps.
+  const syncToUrl = useCallback(
+    (state: DataCollectionUrlState<FiltersState<FiltersDefinition>>) =>
+      syncDataCollectionUrlParams(state),
+    []
+  )
+  const debouncedSync = useDebounceCallback(syncToUrl, URL_SYNC_DEBOUNCE_MS)
+
   useDeepCompareEffect(() => {
     if (!active || !urlApplied) return
-    syncDataCollectionUrlParams({
+    debouncedSync({
       filters,
       search,
       sortings,
@@ -124,6 +151,11 @@ export const useDataCollectionUrlSync = ({
           : undefined,
       preset: selectedPresetId,
     })
+    // Cancel a still-pending write when deps change or on unmount, so a stale
+    // snapshot can't land after a newer one — and, on unmount, can't stamp this
+    // collection's `dc_` params onto the page we navigated to. Each change
+    // re-schedules with the latest state, so coalescing is preserved.
+    return () => debouncedSync.cancel()
   }, [
     active,
     urlApplied,
@@ -134,5 +166,6 @@ export const useDataCollectionUrlSync = ({
     visualizationKeys,
     syncVisualization,
     selectedPresetId,
+    debouncedSync,
   ])
 }

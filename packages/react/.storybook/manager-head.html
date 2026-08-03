@@ -156,6 +156,40 @@
 </style>
 
 <script>
+  // Recover from stale lazy-loaded chunks after a redeploy. The manager
+  // lazy-loads its own chunks (index, docs) the same way the preview loads
+  // story chunks, so it hits the same "Failed to fetch dynamically imported
+  // module" 404 when a merge to main redeploys the site under an open tab.
+  // See preview-head.html for the full explanation.
+  ;(function () {
+    var KEY = "sb:chunk-reload-at"
+    function recover() {
+      var now = Date.now()
+      var last = Number(sessionStorage.getItem(KEY) || 0)
+      if (now - last < 10000) return
+      sessionStorage.setItem(KEY, String(now))
+      window.location.reload()
+    }
+    window.addEventListener("vite:preloadError", function (event) {
+      event.preventDefault()
+      recover()
+    })
+    window.addEventListener("unhandledrejection", function (event) {
+      var reason = event && event.reason
+      var msg = reason && (reason.message || String(reason))
+      if (
+        typeof msg === "string" &&
+        /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(
+          msg
+        )
+      ) {
+        recover()
+      }
+    })
+  })()
+</script>
+
+<script>
   ;(function () {
     // hide internal tags in production builds menu
     setTimeout(function () {

@@ -54,6 +54,38 @@
   @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
 }
 
+/* Font sizes carried by the textStyle mark. A class rather than an inline style
+   because the sanitizer read-only content passes through allows `class` but not
+   `style`. 16px is the body size and needs no mark; it is here for when a size
+   is set explicitly. */
+.notes-text-editor .f0-fs-12 {
+  @apply text-[12px] leading-[16px] tracking-[-0.12px];
+}
+
+.notes-text-editor .f0-fs-14 {
+  @apply text-[14px] leading-[20px] tracking-[-0.14px];
+}
+
+.notes-text-editor .f0-fs-16 {
+  @apply text-[16px] leading-[24px] tracking-[-0.16px];
+}
+
+.notes-text-editor .f0-fs-18 {
+  @apply text-[18px] leading-[28px] tracking-[-0.18px];
+}
+
+.notes-text-editor .f0-fs-20 {
+  @apply text-[20px] leading-[28px] tracking-[-0.2px];
+}
+
+.notes-text-editor .f0-fs-24 {
+  @apply text-[24px] leading-[32px] tracking-[-0.24px];
+}
+
+.notes-text-editor .f0-fs-29 {
+  @apply text-[29px] leading-[39px] tracking-[-0.29px];
+}
+
 .notes-text-editor strong {
   @apply font-semibold;
 }

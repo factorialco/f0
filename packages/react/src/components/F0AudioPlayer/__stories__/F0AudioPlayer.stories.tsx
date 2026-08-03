@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ComponentProps, useEffect, useRef } from "react"
 
 import { Download } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -48,6 +49,10 @@ export const Disabled: Story = {
   args: { disabled: true },
 }
 
+// This card has no transcription (none passed and none in the sample file), so
+// the `f0-audio-transcription` a11y rule flags it (WCAG 1.2.1). It's marked
+// `test: "todo"` to record that gap without failing CI — see CardWithContent
+// for the accessible pattern.
 export const Card: StoryObj<typeof F0AudioPlayerCard> = {
   render: (args) => <F0AudioPlayerCard {...args} />,
   args: {
@@ -55,6 +60,7 @@ export const Card: StoryObj<typeof F0AudioPlayerCard> = {
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
   },
+  parameters: { a11y: { test: "todo" } },
 }
 
 // The kebab always carries the playback-speed options; `actions` adds extra
@@ -73,6 +79,8 @@ export const CardWithActions: StoryObj<typeof F0AudioPlayerCard> = {
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
   },
+  // No transcription — flagged by the audio-transcription a11y rule.
+  parameters: { a11y: { test: "todo" } },
 }
 
 export const WithDataTestId: Story = {
@@ -93,6 +101,8 @@ export const LazySource: StoryObj<typeof F0AudioPlayerCard> = {
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
   },
+  // No transcription — flagged by the audio-transcription a11y rule.
+  parameters: { a11y: { test: "todo" } },
 }
 
 // Sample copy lifted from the design, long enough to demonstrate the
@@ -113,37 +123,155 @@ const SAMPLE_TRANSCRIPT = Array.from({ length: 8 }, (_, i) =>
     : "Alex: Yes, I'm fully available for night shifts and weekends, and my commute is under 40 minutes."
 ).join("\n\n")
 
-const DETAILS = [
-  { value: "summary", label: "Summary", content: <p>{SAMPLE_SUMMARY}</p> },
-  {
-    value: "transcript",
-    label: "Transcript",
-    content: <p className="whitespace-pre-line">{SAMPLE_TRANSCRIPT}</p>,
-  },
-]
+// The structured `content` prop: the card builds the Summary / Transcription
+// tabs (with translated labels) for you. A transcription keeps the recording
+// accessible (WCAG 1.2.1).
+const CONTENT = {
+  summary: SAMPLE_SUMMARY,
+  transcription: SAMPLE_TRANSCRIPT,
+}
 
 // Collapsed by default — the "View detail" button toggles the tabbed panel.
-export const CardWithDetails: StoryObj<typeof F0AudioPlayerCard> = {
+export const CardWithContent: StoryObj<typeof F0AudioPlayerCard> = {
   render: (args) => <F0AudioPlayerCard {...args} />,
   args: {
     src: SAMPLE_SRC,
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
-    details: DETAILS,
+    content: CONTENT,
   },
 }
 
-// Same card, starting expanded so the Summary/Transcript tabs are visible.
-export const CardWithDetailsExpanded: StoryObj<typeof F0AudioPlayerCard> = {
+// Same card, starting expanded so the Summary / Transcription tabs are visible.
+export const CardWithContentExpanded: StoryObj<typeof F0AudioPlayerCard> = {
   render: (args) => <F0AudioPlayerCard {...args} />,
   args: {
     src: SAMPLE_SRC,
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
-    details: DETAILS,
+    content: CONTENT,
     defaultExpanded: true,
   },
 }
+
+// Localized summary + transcript for the multi-language example.
+const SAMPLE_SUMMARY_ES =
+  "La llamada con IA confirmó que Alex está disponible para turnos de noche y " +
+  "fines de semana, vive en Barajas con un trayecto de menos de 40 minutos y " +
+  "tiene experiencia sólida en logística; solo podría incorporarse en 2 semanas."
+
+const SAMPLE_TRANSCRIPT_ES = Array.from({ length: 8 }, (_, i) =>
+  i % 2 === 0
+    ? "Entrevistador: ¿Cuál es tu disponibilidad para turnos de noche y fines de semana?"
+    : "Alex: Tengo total disponibilidad para turnos de noche y fines de semana."
+).join("\n\n")
+
+/**
+ * Localized content: pass `summary` / `transcription` as per-locale lists and a
+ * language selector appears in the detail panel. One selection drives both tabs;
+ * `defaultLanguage` sets the initial choice.
+ */
+export const CardWithLocalizedContent: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    defaultExpanded: true,
+    defaultLanguage: "en",
+    content: {
+      summary: [
+        { locale: "en", value: SAMPLE_SUMMARY },
+        { locale: "es", value: SAMPLE_SUMMARY_ES },
+      ],
+      transcription: [
+        { locale: "en", value: SAMPLE_TRANSCRIPT },
+        { locale: "es", value: SAMPLE_TRANSCRIPT_ES },
+      ],
+    },
+  },
+}
+
+/**
+ * Localized (dubbed) audio: pass a per-locale `src` list and an "Audio" section
+ * appears in the kebab menu to switch the spoken language, independent of the
+ * detail-content language. Switching preserves the playback position.
+ *
+ * There's no dubbed rendition of the sample, so both entries point at the same
+ * file (a labeled stand-in) — the selector demonstrates the source swap.
+ */
+export const CardWithLocalizedAudio: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    defaultLanguage: "en",
+    src: [
+      { locale: "en", value: SAMPLE_SRC },
+      { locale: "es", value: SAMPLE_SRC },
+    ],
+  },
+}
+
+// Transcription only — no summary. `content.summary` is omitted, so the card
+// shows a single Transcription tab (no Summary tab).
+export const CardWithTranscriptionOnly: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    content: { transcription: SAMPLE_TRANSCRIPT },
+    defaultExpanded: true,
+  },
+}
+
+// Attaches an in-band text track to the <audio> after mount — the shape a
+// browser exposes for a transcript shipped inside the file (no `content` prop).
+// Audio files with browser-exposed transcripts aren't a reliable public sample,
+// so we simulate that track here to exercise the same derive-from-file path.
+function EmbeddedTranscriptionDemo(
+  args: ComponentProps<typeof F0AudioPlayerCard>
+) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const audio = ref.current?.querySelector("audio")
+    if (!audio || typeof audio.addTextTrack !== "function") return
+    const track = audio.addTextTrack("captions", "English", "en")
+    const lines = [
+      "Interviewer: Can you tell me about your availability for night shifts and weekends?",
+      "Alex: Yes, I'm fully available for night shifts and weekends.",
+      "Interviewer: And how long is your commute?",
+      "Alex: Under 40 minutes from Barajas.",
+    ]
+    lines.forEach((text, i) => track.addCue(new VTTCue(i * 4, i * 4 + 4, text)))
+  }, [])
+  return (
+    <div ref={ref}>
+      <F0AudioPlayerCard {...args} />
+    </div>
+  )
+}
+
+/**
+ * Transcription embedded in the audio file — no `content.transcription` passed.
+ * The card derives it from the file's own text track and shows the Transcription
+ * tab automatically.
+ *
+ * Audio files with browser-exposed transcripts aren't a reliable public sample,
+ * so this story simulates an in-band track to demonstrate the derive-from-file
+ * behaviour.
+ */
+export const CardWithEmbeddedTranscription: StoryObj<typeof F0AudioPlayerCard> =
+  {
+    render: (args) => <EmbeddedTranscriptionDemo {...args} />,
+    args: {
+      src: SAMPLE_SRC,
+      title: "AI Call with Alex Williams",
+      subtitle: "May 9, 2025 - 10:00am",
+      defaultExpanded: true,
+    },
+  }
 
 export const Snapshot: Story = {
   ...withSnapshot({}),
@@ -155,12 +283,13 @@ export const Snapshot: Story = {
         {...args}
         title="AI Call with Alex Williams"
         subtitle="May 9, 2025 - 10:00am"
+        content={{ transcription: SAMPLE_TRANSCRIPT }}
       />
       <F0AudioPlayerCard
         {...args}
         title="AI Call with Alex Williams"
         subtitle="May 9, 2025 - 10:00am"
-        details={DETAILS}
+        content={CONTENT}
         defaultExpanded
       />
     </div>

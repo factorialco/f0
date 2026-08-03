@@ -15,10 +15,14 @@ export function NonEditableCell<R extends RecordType>({
       showRightBorder={!isLastColumn}
       borderOnHover={false}
       hint={hint}
-      hintPosition="right"
+      hintPosition={hint?.hintPosition ?? "right"}
       cursor="default"
     >
-      <ReadOnlyCellContent editableColumn={editableColumn} item={item} />
+      <ReadOnlyCellContent
+        editableColumn={editableColumn}
+        item={item}
+        showFieldAffordances={false}
+      />
     </BaseCell>
   )
 }

@@ -3,6 +3,7 @@ import { type DragEvent, type ReactNode, useRef, useState } from "react"
 import { ChatComposer } from "./components/ChatComposer"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
+import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
 import {
@@ -115,6 +116,7 @@ const ChatShell = ({
       {capabilities?.canSend !== false && <ChatComposer />}
       <ChatDropOverlay visible={dragging} />
       <ChatImagePreview />
+      <ChatDocumentPreview />
     </div>
   )
 }

@@ -28,7 +28,7 @@ import {
 } from "../shared"
 
 const meta = {
-  title: "Data collection/CRUD patterns/By view",
+  title: "Data Collection/CRUD patterns/By view",
   tags: ["!autodocs"],
   parameters: {
     layout: "fullscreen",

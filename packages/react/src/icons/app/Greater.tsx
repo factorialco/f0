@@ -16,7 +16,6 @@ const SvgGreater = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M6 19L19 12L6 5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

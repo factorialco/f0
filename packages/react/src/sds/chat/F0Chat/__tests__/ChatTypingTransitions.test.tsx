@@ -19,33 +19,14 @@ import {
   type F0ChatUser,
 } from "../types"
 
-// Pass-through virtualizer (jsdom has no layout) — same as F0Chat.test.tsx.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn()
@@ -119,22 +100,24 @@ const replyFrom = (author: F0ChatUser, body: string): F0ChatMessage => ({
 describe("typing indicator transitions", () => {
   it("holds the bubble through the exit window, then removes it", () => {
     const { rerender } = render(chatFor([MARIA]))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
 
     // The writer pauses: the row is NOT dropped immediately (it fades out).
     rerender(chatFor([]))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
 
     // After the exit window the row is gone.
     act(() => {
       vi.advanceTimersByTime(400)
     })
-    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("status", { name: /writing/i })
+    ).not.toBeInTheDocument()
   })
 
   it("keeps the same bubble when typing resumes within the window", () => {
     const { rerender } = render(chatFor([MARIA]))
-    const bubble = screen.getByRole("status")
+    const bubble = screen.getByRole("status", { name: /writing/i })
 
     rerender(chatFor([]))
     act(() => {
@@ -146,17 +129,19 @@ describe("typing indicator transitions", () => {
     act(() => {
       vi.advanceTimersByTime(400)
     })
-    expect(screen.getByRole("status")).toBe(bubble)
+    expect(screen.getByRole("status", { name: /writing/i })).toBe(bubble)
   })
 
   it("replaces the dots with the typer's message in the same commit", () => {
     const { rerender } = render(chatFor([MARIA]))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
 
     // Same tick: typing clears AND the typer's message lands together — the
     // bubble must replace the dots immediately, no hysteresis ghost.
     rerender(chatFor([], [HELLO, replyFrom(MARIA, "On my way!")]))
-    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("status", { name: /writing/i })
+    ).not.toBeInTheDocument()
     expect(screen.getByText("On my way!")).toBeInTheDocument()
   })
 
@@ -166,43 +151,49 @@ describe("typing indicator transitions", () => {
     // typing_stop arrives first (staggered, real backends): the leaving fade
     // starts and the dots are still held...
     rerender(chatFor([]))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
     act(() => {
       vi.advanceTimersByTime(100)
     })
     // ...then the message lands within the window: swap immediately.
     rerender(chatFor([], [HELLO, replyFrom(MARIA, "On my way!")]))
-    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("status", { name: /writing/i })
+    ).not.toBeInTheDocument()
     expect(screen.getByText("On my way!")).toBeInTheDocument()
   })
 
   it("hides the dots when the message lands BEFORE the typing_stop (Stream order)", () => {
     const { rerender } = render(chatFor([MARIA]))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
 
     // Stream delivers message.new first — MARIA is still in typingUsers when
     // her bubble lands. Her dots must be suppressed immediately, not ghost
     // under the new message until the stop packet arrives.
     rerender(chatFor([MARIA], [HELLO, replyFrom(MARIA, "On my way!")]))
-    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("status", { name: /writing/i })
+    ).not.toBeInTheDocument()
     expect(screen.getByText("On my way!")).toBeInTheDocument()
 
     // The typing_stop finally lands: still no dots, no flash.
     rerender(chatFor([], [HELLO, replyFrom(MARIA, "On my way!")]))
-    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("status", { name: /writing/i })
+    ).not.toBeInTheDocument()
 
     // A NEW typing_start after the stop shows the dots again.
     rerender(chatFor([MARIA], [HELLO, replyFrom(MARIA, "On my way!")]))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
   })
 
   it("keeps the dots when someone ELSE's message lands while typing (group)", () => {
     const { rerender } = render(chatFor([MARIA], [HELLO], "group"))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
 
     // Otto's message arrives while María is still typing — her dots stay.
     rerender(chatFor([MARIA], [HELLO, replyFrom(OTTO, "Hey all")], "group"))
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
     expect(screen.getByText("Hey all")).toBeInTheDocument()
   })
 })

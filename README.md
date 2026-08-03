@@ -49,3 +49,15 @@ pnpm --filter @factorialco/f0-react-native test
 ## License
 
 MIT
+
+## Contributing
+
+F0 is built and maintained by the Foundations team **with** contributions from every Factorial team. To propose a new component, report a bug, or improve something existing, see the [Contributing guide](packages/react/docs/contributions.mdx) and follow the [F0 component lifecycle](packages/react/docs/definition-of-done.mdx).
+
+Skills for AI-assisted development:
+
+- [`f0-component-contribution`](vendor/skills/f0-component-contribution/SKILL.md) — propose, design, and build a new component.
+- [`f0-component-promotion`](vendor/skills/f0-component-promotion/SKILL.md) — promote `experimental/` → stable (Foundations only).
+- [`f0-experimental-component-migration`](packages/react/.skills/f0-experimental-component-migration/SKILL.md) — migrate experimental components to stable.
+
+For the full list of skills, see [AI Configuration](packages/react/docs/ai-configuration.mdx).

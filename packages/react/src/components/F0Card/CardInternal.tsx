@@ -243,6 +243,11 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
   ) {
     const linkRef = useRef<HTMLAnchorElement>(null)
 
+    // The card is clickable as a whole only when it actually navigates — via the
+    // overlay link or an onClick. Without either, the body must not look or behave
+    // clickable (no pointer cursor, no role="button" on the header).
+    const isInteractive = !disableOverlayLink && (!!link || !!onClick)
+
     const emulateLinkClick = (
       e: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
     ) => {
@@ -347,10 +352,40 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           </div>
         )}
 
-        <div className="flex grow flex-col gap-2">
+        <div
+          className={cn(
+            "flex grow flex-col gap-2",
+            // Show the pointer cursor across the whole clickable body (not just the
+            // title/description), so metadata rows and empty space read as clickable.
+            isInteractive && "cursor-pointer"
+          )}
+          {...(isInteractive
+            ? {
+                // Clicking anywhere in the body (title, description, metadata,
+                // empty space) navigates the card. Interactive regions
+                // (CardOptions, the footer, interactive children) stop
+                // propagation so they keep their own behaviour instead.
+                onClick: (e) => {
+                  // Some metadata renderers (e.g. avatarList/tagList overflow)
+                  // include their own interactive controls — links, form fields
+                  // or popover/menu triggers (aria-haspopup). Let those handle
+                  // their own click instead of navigating the card.
+                  if (
+                    e.target instanceof Element &&
+                    e.target.closest(
+                      'a[href], input, select, textarea, [aria-haspopup]:not([aria-haspopup="false"])'
+                    )
+                  ) {
+                    return
+                  }
+                  emulateLinkClick(e)
+                },
+              }
+            : {})}
+        >
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
-              {...(!disableOverlayLink
+              {...(isInteractive
                 ? {
                     onClick: (e) => {
                       emulateLinkClick(e)
@@ -408,24 +443,31 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               />
             )}
           </div>
-          {(metadata || children) && (
+          {metadata && (
+            // Metadata is display-only, so it navigates with the rest of the card:
+            // clicks bubble up to the body handler above. It sits above the overlay
+            // link (z-10) so its icon tooltips stay hoverable.
+            <div
+              className={cn(
+                "relative z-10 flex flex-col gap-0.5",
+                compact && "gap-x-3 gap-y-0",
+                forceVerticalMetadata && "flex-col gap-y-0.5"
+              )}
+            >
+              {metadata.map((item, index) => (
+                <CardMetadata key={index} metadata={item} />
+              ))}
+            </div>
+          )}
+          {children && (
+            // Children can be interactive, so this region swallows clicks
+            // (stopPropagation) and only re-enables pointer events on the
+            // interactive elements inside it — keeping them from navigating the
+            // card while still letting them work.
             <CardContent
               className="pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_[role='button']]:pointer-events-auto [&_[tabindex]]:pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              {metadata && (
-                <div
-                  className={cn(
-                    "flex flex-col gap-0.5",
-                    compact && "gap-x-3 gap-y-0",
-                    forceVerticalMetadata && "flex-col gap-y-0.5"
-                  )}
-                >
-                  {metadata.map((item, index) => (
-                    <CardMetadata key={index} metadata={item} />
-                  ))}
-                </div>
-              )}
               {children}
             </CardContent>
           )}

@@ -4,7 +4,7 @@ import { useAudioPlayer } from "@/components/F0AudioPlayer"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import { type F0ChatVoiceAttachment } from "../types"
 
@@ -141,14 +141,45 @@ export const ChatVoiceAttachment = ({
     [player, duration]
   )
 
+  const handleSeekKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (duration <= 0) return
+      const step = Math.max(1, duration / BAR_COUNT)
+      let nextTime: number
+
+      switch (event.key) {
+        case "ArrowLeft":
+        case "ArrowDown":
+          nextTime = player.currentTime - step
+          break
+        case "ArrowRight":
+        case "ArrowUp":
+          nextTime = player.currentTime + step
+          break
+        case "Home":
+          nextTime = 0
+          break
+        case "End":
+          nextTime = duration
+          break
+        default:
+          return
+      }
+
+      event.preventDefault()
+      player.seek(Math.min(duration, Math.max(0, nextTime)))
+    },
+    [duration, player]
+  )
+
   return (
     <div
       className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
     >
       <div
         className={cn(
-          // 320px by default, shrinking with the column when it doesn't fit
-          // (floor ≈ 254px: button + minimum bars + time slot + paddings).
+          // 320px by default, shrinking with the column when it doesn't fit.
+          // The waveform below owns any remaining overflow at very small sizes.
           "group/voice flex w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
           isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
           cornerClass,
@@ -175,10 +206,15 @@ export const ChatVoiceAttachment = ({
         <div
           ref={barsRef}
           onClick={handleSeek}
+          onKeyDown={handleSeekKeyDown}
           // justify-between spreads the fixed set of bars across whatever width
           // the card gets, so the waveform stays proportioned at any size.
-          className="flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5"
+          className={cn(
+            "flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5 overflow-hidden rounded-sm",
+            focusRing("focus-visible:ring-inset")
+          )}
           role="slider"
+          tabIndex={0}
           aria-label={i18n.audioPlayer.seek}
           aria-valuemin={0}
           aria-valuemax={Math.round(duration)}
@@ -189,7 +225,7 @@ export const ChatVoiceAttachment = ({
             <span
               key={i}
               className={cn(
-                "w-0.5 min-w-0.5 shrink rounded-full transition-colors",
+                "w-0.5 min-w-px shrink rounded-full transition-colors",
                 // Played part reads darker, WhatsApp-style.
                 i / levels.length <= progress && progress > 0
                   ? "bg-f1-foreground"
@@ -204,26 +240,31 @@ export const ChatVoiceAttachment = ({
           card (or tabbing into it) swaps the time for the speed control. Both
           have the same FIXED width so neither the ticking time ("0:04" → "0:12")
           nor the cycling rate ("1x" → "1.5x") resizes the waveform. */}
-        <span
-          className="inline-block w-12 shrink-0 text-end text-base font-medium pr-2 tabular-nums text-f1-foreground-secondary group-hover/voice:hidden"
-          data-testid="chat-voice-time"
+        <div
+          className="relative w-12 shrink-0"
+          data-testid="chat-voice-trailing"
         >
-          {formatTime(
-            player.isPlaying || player.currentTime > 0
-              ? player.currentTime
-              : duration
-          )}
-        </span>
+          <span
+            className="inline-block w-full pr-2 text-end text-base font-medium tabular-nums text-f1-foreground-secondary group-focus-within/voice:invisible group-hover/voice:invisible"
+            data-testid="chat-voice-time"
+          >
+            {formatTime(
+              player.isPlaying || player.currentTime > 0
+                ? player.currentTime
+                : duration
+            )}
+          </span>
 
-        <div className="hidden w-12 shrink-0 justify-end group-hover/voice:flex">
-          <ButtonInternal
-            variant="ghost"
-            size="sm"
-            label={`${PLAYBACK_RATES[rateIndex]}x`}
-            aria-label={i18n.audioPlayer.playbackSpeed}
-            onClick={handleCycleRate}
-            data-testid="chat-voice-rate"
-          />
+          <div className="pointer-events-none absolute inset-0 flex justify-end opacity-0 transition-opacity group-focus-within/voice:pointer-events-auto group-focus-within/voice:opacity-100 group-hover/voice:pointer-events-auto group-hover/voice:opacity-100 motion-reduce:transition-none">
+            <ButtonInternal
+              variant="ghost"
+              size="sm"
+              label={`${PLAYBACK_RATES[rateIndex]}x`}
+              aria-label={`${i18n.audioPlayer.playbackSpeed}: ${PLAYBACK_RATES[rateIndex]}x`}
+              onClick={handleCycleRate}
+              data-testid="chat-voice-rate"
+            />
+          </div>
         </div>
       </div>
     </div>

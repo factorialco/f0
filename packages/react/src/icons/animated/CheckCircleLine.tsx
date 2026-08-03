@@ -61,7 +61,6 @@ const CheckCircleLineAnimated = React.forwardRef<
         variants={circleVariants}
         transition={circleTransition}
         animate={animate}
-        vectorEffect="non-scaling-stroke"
       />
       <motion.path
         d="M9.00003 12L11.4 14.4L15 9.6"
@@ -69,7 +68,6 @@ const CheckCircleLineAnimated = React.forwardRef<
         variants={checkVariants}
         transition={checkTransition}
         animate={animate}
-        vectorEffect="non-scaling-stroke"
       />
     </svg>
   )

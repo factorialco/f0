@@ -1,46 +1,44 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
+import { getEmojiLabel } from "@/lib/emojis"
 import {
+  act,
   fireEvent,
   zeroRender as render,
+  zeroRenderHook as renderHook,
   screen,
   userEvent,
+  waitFor,
+  within,
 } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
+import { resolveMockReactionUsers } from "../mocks/MockChatApp"
+import {
+  groupReadersFor,
+  initialConvState,
+  ME,
+  SEED_BY_ID,
+  SEEDS,
+} from "../mocks/mockSeeds"
+import { useMockChatStore } from "../mocks/useMockChatApp"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
-import { type F0ChatMessage, type F0ChatRuntime } from "../types"
+import {
+  isUserMessage,
+  type F0ChatAttachment,
+  type F0ChatMessage,
+  type F0ChatRuntime,
+} from "../types"
+import { formatClock } from "../utils/natural-time"
 
-// The transcript is virtualized with @tanstack/react-virtual, which windows the
-// DOM based on the scroll viewport's measured size. jsdom has no layout (every
-// rect is 0), so the real virtualizer renders nothing. Mock it to a pass-through
-// that renders all rows — the windowing itself is exercised in Storybook.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 beforeAll(() => {
   // jsdom doesn't implement scrollIntoView (used by the scroll hook).
@@ -142,7 +140,82 @@ describe("F0Chat", () => {
 
   it("shows the read status under the last message (mine)", () => {
     renderChat(makeRuntime())
-    expect(screen.getByText(/^Read/)).toBeInTheDocument()
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent(`Read · ${formatClock(new Date(now))}`)
+    expect(status).toHaveAttribute("aria-live", "polite")
+    expect(status).toHaveAttribute("aria-atomic", "true")
+  })
+
+  it("shows sent with the time until a direct message is read", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "sent-message",
+            author: { id: "me", name: "Me" },
+            body: "Waiting for the receipt",
+            createdAt: now,
+            isMine: true,
+            status: "sent",
+          },
+        ],
+      })
+    )
+
+    expect(
+      screen.getByText(`Sent · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+  })
+
+  it("updates the stable live region from sent to read", () => {
+    const message: F0ChatMessage = {
+      id: "live-status-message",
+      author: { id: "me", name: "Me" },
+      body: "Waiting for the receipt",
+      createdAt: now,
+      isMine: true,
+      status: "sent",
+    }
+    const { rerender } = renderChat(
+      makeRuntime({
+        messages: [message],
+      })
+    )
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent(`Sent · ${formatClock(new Date(now))}`)
+
+    rerender(
+      <F0ChatProvider
+        runtime={makeRuntime({
+          messages: [{ ...message, status: "read" }],
+        })}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(screen.getByRole("status")).toBe(status)
+    expect(status).toHaveTextContent(`Read · ${formatClock(new Date(now))}`)
+  })
+
+  it("keeps the legacy bare time when the message status is omitted", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "legacy-message",
+            author: { id: "me", name: "Me" },
+            body: "No delivery status",
+            createdAt: now,
+            isMine: true,
+          },
+        ],
+      })
+    )
+
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent(formatClock(new Date(now)))
+    expect(status).not.toHaveTextContent(/Sent|Read/)
   })
 
   it("deletes a message from its actions menu", async () => {
@@ -162,7 +235,11 @@ describe("F0Chat", () => {
     await userEvent.click(screen.getByRole("button", { name: /info/i }))
     // Menu is replaced in place by the info panel (Delivered row + Back button).
     expect(screen.getByText(/delivered/i)).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /back/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /^back$/i })).toHaveFocus()
+    expect(screen.getByRole("region", { name: /info/i })).toHaveAttribute(
+      "tabindex",
+      "0"
+    )
     expect(
       screen.queryByRole("button", { name: /^Reply$/i })
     ).not.toBeInTheDocument()
@@ -176,6 +253,14 @@ describe("F0Chat", () => {
     expect(
       screen.getByRole("button", { name: /remove quote/i })
     ).toBeInTheDocument()
+    // Removing the quote collapses the chip away (exit resolves instantly
+    // under skipAnimations) — the composer returns to its resting state.
+    await userEvent.click(screen.getByRole("button", { name: /remove quote/i }))
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /remove quote/i })
+      ).not.toBeInTheDocument()
+    )
   })
 
   it("edits my message from its actions menu, prefilling the composer", async () => {
@@ -332,6 +417,158 @@ describe("F0Chat", () => {
     )
   })
 
+  it("selects an emoji with Enter before sending the completed message", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smil")
+    const listbox = screen.getByRole("listbox", { name: /add emoji/i })
+    const selectedOption = within(listbox).getByRole("option", {
+      selected: true,
+    })
+    expect(input).toHaveAttribute("aria-expanded", "true")
+    expect(input).toHaveAttribute("aria-controls", listbox.id)
+    expect(input).toHaveAttribute("aria-activedescendant", selectedOption.id)
+
+    await userEvent.keyboard("{Enter}")
+    expect(input).toHaveValue("😄 ")
+    expect(input).toHaveAttribute("aria-expanded", "false")
+    expect(input).not.toHaveAttribute("aria-activedescendant")
+    expect(sendMessage).not.toHaveBeenCalled()
+
+    await userEvent.keyboard("{Enter}")
+    expect(sendMessage).toHaveBeenCalledOnce()
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ body: "😄" })
+    )
+  })
+
+  it("does not select or send when Enter confirms an IME composition", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smil")
+    fireEvent.compositionStart(input)
+    fireEvent.keyDown(input, {
+      key: "Enter",
+      code: "Enter",
+      isComposing: true,
+    })
+
+    expect(input).toHaveValue(":smil")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("selects the hovered emoji with the pointer and keeps composer focus", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":sm")
+    const listbox = screen.getByRole("listbox", { name: /add emoji/i })
+    const smiley = within(listbox).getByRole("option", {
+      name: /:smiley:/,
+    })
+
+    await userEvent.hover(smiley)
+    expect(smiley).toHaveAttribute("aria-selected", "true")
+    await userEvent.click(smiley)
+
+    expect(input).toHaveValue("😃 ")
+    expect(input).toHaveFocus()
+    expect(input).toHaveProperty("selectionStart", 3)
+    expect(
+      screen.queryByRole("listbox", { name: /add emoji/i })
+    ).not.toBeInTheDocument()
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("closes emoji autocomplete when the composer loses focus", async () => {
+    renderChat(makeRuntime())
+    const input = screen.getByPlaceholderText(/write something here/i)
+    await userEvent.type(input, ":sm")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /attach file/i }))
+    expect(
+      screen.queryByRole("listbox", { name: /add emoji/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("converts a closed emoji alias in place without sending", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "Great :thumbsup:")
+
+    expect(input).toHaveValue("Great 👍")
+    expect(input).toHaveProperty("selectionStart", 8)
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("keeps mention selection working when emoji autocomplete is enabled", async () => {
+    const sendMessage = vi.fn()
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "group-1",
+          type: "group",
+          title: "Product",
+          avatar: { type: "team", name: "Product" },
+        },
+        searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+        sendMessage,
+      })
+    )
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "@Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+    await userEvent.keyboard("{Enter}")
+
+    expect(input).toHaveValue("@Ana García ")
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it("gives an active emoji query precedence over a pending mention", async () => {
+    const sendMessage = vi.fn()
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "group-1",
+          type: "group",
+          title: "Product",
+          avatar: { type: "team", name: "Product" },
+        },
+        searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+        sendMessage,
+      })
+    )
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "@Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+    await userEvent.type(input, " :smil")
+
+    screen.getByRole("listbox", { name: /add emoji/i })
+    expect(screen.getAllByRole("listbox")).toHaveLength(1)
+    await userEvent.keyboard("{Enter}")
+
+    expect(input).toHaveValue("@Ana 😄 ")
+    expect(sendMessage).not.toHaveBeenCalled()
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 250))
+    })
+    expect(screen.queryAllByRole("listbox")).toHaveLength(0)
+  })
+
   it("shows an emoji picker button in the composer", () => {
     renderChat(makeRuntime())
     expect(
@@ -369,10 +606,12 @@ describe("F0Chat", () => {
             attachments: [
               { kind: "image", url: "blob:img", name: "photo.png" },
               {
+                // Not previewable — documents (pdf/sheet/docx/text) get the
+                // snapshot card instead (ChatPdfAttachment.test).
                 kind: "file",
                 url: "blob:doc",
-                name: "report.pdf",
-                mimeType: "application/pdf",
+                name: "deck.pptx",
+                mimeType: "application/vnd.ms-powerpoint",
               },
             ],
           },
@@ -380,17 +619,23 @@ describe("F0Chat", () => {
       })
     )
     expect(screen.getByRole("img", { name: /photo\.png/i })).toBeInTheDocument()
-    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+    expect(screen.getByText("deck.pptx")).toBeInTheDocument()
   })
 
-  it("previews uploaded images as square thumbnails and other files as chips", async () => {
-    // The pdf uploads first — images must still render grouped at the front.
+  it("previews images, videos, and documents immediately in the composer", async () => {
+    // The documents upload first — images must still render grouped at the front.
     const uploadFiles = vi.fn().mockResolvedValue([
       {
         kind: "file",
         url: "blob:doc",
         name: "report.pdf",
         mimeType: "application/pdf",
+      },
+      {
+        kind: "file",
+        url: "blob:video",
+        name: "walkthrough.webm",
+        mimeType: "video/webm",
       },
       { kind: "image", url: "blob:img", name: "photo.png" },
     ])
@@ -401,26 +646,388 @@ describe("F0Chat", () => {
       target: {
         files: [
           new File(["doc"], "report.pdf", { type: "application/pdf" }),
+          new File(["video"], "walkthrough.webm", { type: "video/webm" }),
           new File(["img"], "photo.png", { type: "image/png" }),
         ],
       },
     })
-    // The image resolves to an inline square preview, the pdf to a file chip.
-    const preview = await screen.findByRole("img", { name: /photo\.png/i })
-    expect(preview).toHaveAttribute("src", "blob:img")
-    const chip = screen.getByText("report.pdf")
-    // The image preview comes before the file chip despite uploading second.
+    // Local object URLs make every supported preview visible before the upload
+    // promise swaps them for the host-provided URLs.
+    const localPreview = await screen.findByRole("img", {
+      name: /photo\.png/i,
+    })
+    expect(localPreview.getAttribute("src")).toMatch(/^blob:/)
+    const documentPreview = screen.getByTestId("chat-composer-document-preview")
+    expect(documentPreview).toHaveTextContent("report.pdf")
     expect(
-      preview.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING
+      documentPreview.querySelector('[data-testid="chat-document-attachment"]')
+    ).toHaveStyle({ width: "64px" })
+    const videoPreview = screen.getByTestId("chat-composer-video-preview")
+    expect(videoPreview).toHaveClass("h-16", "w-28")
+    expect(screen.getByTestId("chat-composer-image-preview")).toHaveClass(
+      "h-16",
+      "w-16"
+    )
+    await waitFor(() =>
+      expect(screen.getByRole("img", { name: /photo\.png/i })).toHaveAttribute(
+        "src",
+        "blob:img"
+      )
+    )
+
+    // The image preview comes before the document despite uploading last.
+    const preview = screen.getByRole("img", { name: /photo\.png/i })
+    const document = screen.getByText("report.pdf")
+    expect(
+      preview.compareDocumentPosition(document) &
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
     // Each pending attachment carries its own remove action.
-    const removeButtons = screen.getAllByRole("button", { name: /^remove$/i })
-    expect(removeButtons).toHaveLength(2)
-    await userEvent.click(removeButtons[0])
+    const removePhoto = screen.getByRole("button", {
+      name: "Remove photo.png",
+    })
+    expect(
+      screen.getByRole("button", { name: "Remove walkthrough.webm" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Remove report.pdf" })
+    ).toBeInTheDocument()
+    const attachmentStrip = screen.getByRole("region", {
+      name: "3 attachments",
+    })
+    expect(attachmentStrip).toHaveAttribute("tabindex", "0")
+    expect(attachmentStrip).toHaveClass("flex-nowrap", "overflow-x-auto")
+    await userEvent.click(removePhoto)
     expect(
       screen.queryByRole("img", { name: /photo\.png/i })
     ).not.toBeInTheDocument()
-    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+    await waitFor(() => expect(attachmentStrip).toHaveFocus())
+    expect(document).toBeInTheDocument()
+  })
+
+  it("removes a local preview without restoring it when upload finishes", async () => {
+    let resolveUpload: (attachments: F0ChatAttachment[]) => void = () => {}
+    const uploadFiles = vi.fn(
+      () =>
+        new Promise<F0ChatAttachment[]>((resolve) => {
+          resolveUpload = resolve
+        })
+    )
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL")
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["video"], "walkthrough.webm", { type: "video/webm" }),
+        ],
+      },
+    })
+
+    const preview = await screen.findByTestId("chat-composer-video-preview")
+    const localUrl = preview.querySelector("video")?.getAttribute("src")
+    expect(localUrl).toMatch(/^blob:/)
+    expect(
+      screen.getByTestId("chat-composer-attachment-uploading")
+    ).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: /^remove /i }))
+    expect(preview).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText("Write something here..")
+      ).toHaveFocus()
+    )
+    expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
+
+    act(() => {
+      resolveUpload([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/walkthrough.webm",
+          name: "walkthrough.webm",
+          mimeType: "video/webm",
+        },
+      ])
+    })
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("chat-composer-video-preview")
+      ).not.toBeInTheDocument()
+    )
+    revokeObjectUrl.mockRestore()
+  })
+
+  it("releases the local preview URL after a successful upload", async () => {
+    let resolveUpload: (attachments: F0ChatAttachment[]) => void = () => {}
+    const uploadFiles = vi.fn(
+      () =>
+        new Promise<F0ChatAttachment[]>((resolve) => {
+          resolveUpload = resolve
+        })
+    )
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL")
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["video"], "walkthrough.webm", { type: "video/webm" }),
+        ],
+      },
+    })
+
+    const localVideo = (
+      await screen.findByTestId("chat-composer-video-preview")
+    ).querySelector("video")!
+    const localUrl = localVideo.getAttribute("src")
+    expect(localUrl).toMatch(/^blob:/)
+    const removeButton = screen.getByRole("button", {
+      name: "Remove walkthrough.webm",
+    })
+    removeButton.focus()
+
+    act(() => {
+      resolveUpload([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/walkthrough.webm",
+          name: "walkthrough.webm",
+          mimeType: "video/webm",
+        },
+      ])
+    })
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("chat-composer-video-preview").querySelector("video")
+      ).toHaveAttribute("src", "https://cdn.example.com/walkthrough.webm")
+    )
+    expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
+    expect(removeButton).toHaveFocus()
+    revokeObjectUrl.mockRestore()
+  })
+
+  it("preserves attachment order when concurrent uploads resolve out of order", async () => {
+    const resolvers = new Map<
+      string,
+      (attachments: F0ChatAttachment[]) => void
+    >()
+    const uploadFiles = vi.fn(
+      (files: File[]) =>
+        new Promise<F0ChatAttachment[]>((resolve) => {
+          resolvers.set(files[0]!.name, resolve)
+        })
+    )
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+    const first = new File(["first"], "first-batch.zip", {
+      type: "application/zip",
+    })
+    const second = new File(["second"], "second-batch.zip", {
+      type: "application/zip",
+    })
+
+    fireEvent.change(fileInput, { target: { files: [first] } })
+    fireEvent.change(fileInput, { target: { files: [second] } })
+    await screen.findByText("second-batch.zip")
+
+    act(() => {
+      resolvers.get("second-batch.zip")?.([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/second-batch.zip",
+          name: "second-batch.zip",
+          mimeType: "application/zip",
+        },
+      ])
+    })
+    await waitFor(() =>
+      expect(
+        screen.getAllByTestId("chat-composer-attachment-uploading")
+      ).toHaveLength(1)
+    )
+
+    act(() => {
+      resolvers.get("first-batch.zip")?.([
+        {
+          kind: "file",
+          url: "https://cdn.example.com/first-batch.zip",
+          name: "first-batch.zip",
+          mimeType: "application/zip",
+        },
+      ])
+    })
+    await waitFor(() =>
+      expect(
+        screen.queryAllByTestId("chat-composer-attachment-uploading")
+      ).toHaveLength(0)
+    )
+
+    const firstName = screen.getByText("first-batch.zip")
+    const secondName = screen.getByText("second-batch.zip")
+    expect(
+      firstName.compareDocumentPosition(secondName) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("releases local preview URLs when an upload fails", async () => {
+    let rejectUpload: (error: Error) => void = () => {}
+    const uploadFiles = vi.fn(
+      () =>
+        new Promise<F0ChatAttachment[]>((_resolve, reject) => {
+          rejectUpload = reject
+        })
+    )
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL")
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [new File(["image"], "cover.webp", { type: "image/webp" })],
+      },
+    })
+
+    const localImage = await screen.findByRole("img", {
+      name: "cover.webp",
+    })
+    const localUrl = localImage.getAttribute("src")
+    expect(localUrl).toMatch(/^blob:/)
+
+    act(() => rejectUpload(new Error("network failure")))
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("chat-composer-image-preview")
+      ).not.toBeInTheDocument()
+    )
+    expect(screen.getByText("Upload failed")).toBeInTheDocument()
+    expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
+    revokeObjectUrl.mockRestore()
+  })
+
+  it("keeps an oversized preview document as an F0FileItem", async () => {
+    const uploadFiles = vi.fn(() => new Promise<F0ChatAttachment[]>(() => {}))
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+    const oversizedSheet = new File(["sheet"], "large-report.xlsx", {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+    Object.defineProperty(oversizedSheet, "size", {
+      value: 11 * 1024 * 1024,
+    })
+
+    fireEvent.change(fileInput, {
+      target: { files: [oversizedSheet] },
+    })
+
+    expect(
+      await screen.findByTestId("chat-composer-file-preview")
+    ).toHaveTextContent("large-report.xlsx")
+    expect(
+      screen.queryByTestId("chat-composer-document-preview")
+    ).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /^remove /i }))
+  })
+
+  it("rejects a whole batch when one file exceeds the configured size limit", async () => {
+    vi.useFakeTimers()
+    try {
+      const maxFileSizeBytes = 100 * 1024 * 1024
+      const uploadFiles = vi.fn().mockResolvedValue([])
+      const { container } = renderChat(
+        makeRuntime({ uploadFiles, maxFileSizeBytes })
+      )
+      const fileInput =
+        container.querySelector<HTMLInputElement>("input[type=file]")!
+      const withinLimit = new File(["small"], "notes.txt", {
+        type: "text/plain",
+      })
+      const tooLarge = new File(["small"], "archive.zip", {
+        type: "application/zip",
+      })
+      Object.defineProperty(tooLarge, "size", {
+        value: maxFileSizeBytes + 1,
+      })
+
+      fireEvent.change(fileInput, {
+        target: { files: [withinLimit, tooLarge] },
+      })
+
+      expect(uploadFiles).not.toHaveBeenCalled()
+      expect(
+        screen.getByText("Each file must be 100 MB or smaller")
+      ).toBeInTheDocument()
+
+      act(() => vi.advanceTimersByTime(4_000))
+      expect(
+        screen.getByText("Each file must be 100 MB or smaller")
+      ).toBeInTheDocument()
+
+      vi.useRealTimers()
+      const atLimit = new File(["small"], "at-limit.zip", {
+        type: "application/zip",
+      })
+      Object.defineProperty(atLimit, "size", { value: maxFileSizeBytes })
+      fireEvent.change(fileInput, { target: { files: [atLimit] } })
+
+      expect(uploadFiles).toHaveBeenCalledWith([atLimit])
+      await waitFor(() =>
+        expect(
+          screen.queryByText("Each file must be 100 MB or smaller")
+        ).not.toBeInTheDocument()
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("attaches pasted files without intercepting text-only paste", async () => {
+    const maxFileSizeBytes = 100 * 1024 * 1024
+    const uploadFiles = vi.fn().mockResolvedValue([])
+    renderChat(makeRuntime({ uploadFiles, maxFileSizeBytes }))
+    const textarea = screen.getByPlaceholderText("Write something here..")
+    const pastedFile = new File(["pasted"], "pasted-notes.txt", {
+      type: "text/plain",
+    })
+    const oversizedFile = new File(["large"], "oversized-paste.zip", {
+      type: "application/zip",
+    })
+    Object.defineProperty(oversizedFile, "size", {
+      value: maxFileSizeBytes + 1,
+    })
+
+    expect(
+      fireEvent.paste(textarea, {
+        clipboardData: { files: [pastedFile, oversizedFile] },
+      })
+    ).toBe(false)
+    expect(uploadFiles).not.toHaveBeenCalled()
+    expect(
+      screen.getByText("Each file must be 100 MB or smaller")
+    ).toBeInTheDocument()
+
+    expect(
+      fireEvent.paste(textarea, {
+        clipboardData: { files: [pastedFile] },
+      })
+    ).toBe(false)
+    await waitFor(() => expect(uploadFiles).toHaveBeenCalledWith([pastedFile]))
+
+    expect(
+      fireEvent.paste(textarea, {
+        clipboardData: { files: [] },
+      })
+    ).toBe(true)
   })
 
   it("renders the empty state when there are no messages", () => {
@@ -428,7 +1035,286 @@ describe("F0Chat", () => {
     expect(screen.getByText(/no messages yet/i)).toBeInTheDocument()
   })
 
-  it("shows the interpolated 'Read by N' count for my read message in a group", () => {
+  it("seeds reader identities on every group message in the application mock", () => {
+    for (const seed of SEEDS.filter((item) => item.type === "group")) {
+      const messages = initialConvState(seed).messages.filter(isUserMessage)
+
+      for (const message of messages) {
+        expect(message.readBy?.length).toBeGreaterThan(0)
+        expect(
+          message.readBy?.some((reader) => reader.id === message.author.id)
+        ).toBe(false)
+      }
+    }
+  })
+
+  it("seeds more than 40 readers for the application frame overflow demo", () => {
+    const seed = SEED_BY_ID.get("grp-reporting")
+    if (!seed) throw new Error("Expected grp-reporting mock seed")
+
+    const messages = initialConvState(seed).messages.filter(isUserMessage)
+
+    expect(messages.length).toBeGreaterThan(0)
+    for (const message of messages) {
+      expect(message.readBy?.length).toBeGreaterThan(40)
+    }
+
+    const firstParticipant = seed.participants[0]
+    if (!firstParticipant) throw new Error("Expected group participants")
+    const readers = groupReadersFor(
+      {
+        ...seed,
+        participants: [...seed.participants, firstParticipant],
+      },
+      ME.id
+    )
+    expect(new Set(readers?.map(({ id }) => id)).size).toBe(readers?.length)
+
+    const dmSeed = SEED_BY_ID.get("dm-eleanor")
+    if (!dmSeed) throw new Error("Expected dm-eleanor mock seed")
+    expect(groupReadersFor(dmSeed, ME.id)).toBeUndefined()
+  })
+
+  it("adds group readers only when a live message reaches the read state", async () => {
+    vi.useFakeTimers()
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.9)
+
+    try {
+      const { result } = renderHook(() => useMockChatStore())
+      act(() => {
+        result.current.send("grp-reporting", { body: "Receipt state test" })
+      })
+
+      const getSentMessage = (): F0ChatMessage => {
+        const message = result.current.states["grp-reporting"]?.messages
+          .filter(isUserMessage)
+          .find(({ body }) => body === "Receipt state test")
+        if (!message) throw new Error("Expected the live mock message")
+        return message
+      }
+
+      expect(getSentMessage().status).toBe("sending")
+      expect(getSentMessage().readBy).toBeUndefined()
+
+      await act(() => vi.advanceTimersByTimeAsync(400))
+      expect(getSentMessage().status).toBe("sent")
+      expect(getSentMessage().readBy).toBeUndefined()
+
+      await act(() => vi.advanceTimersByTimeAsync(900))
+      expect(getSentMessage().status).toBe("delivered")
+      expect(getSentMessage().readBy).toBeUndefined()
+
+      await act(() => vi.advanceTimersByTimeAsync(900))
+      expect(getSentMessage().status).toBe("read")
+      expect(getSentMessage().readBy).toHaveLength(45)
+    } finally {
+      randomSpy.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
+  it("resolves complete and fallback reaction users in the application mock", () => {
+    const seed = SEED_BY_ID.get("grp-reporting")
+    if (!seed) throw new Error("Expected grp-reporting mock seed")
+
+    const messages = initialConvState(seed).messages
+    const message = messages
+      .filter(isUserMessage)
+      .find((item) => item.reactions?.some(({ emoji }) => emoji === "🎉"))
+    if (!message) throw new Error("Expected a seeded reaction message")
+
+    expect(
+      resolveMockReactionUsers(seed, messages, message.id, "🎉").map(
+        ({ name }) => name
+      )
+    ).toEqual(["Grace Liang", "Marcus Bennett", "Sam Okafor"])
+    expect(resolveMockReactionUsers(seed, messages, message.id, "👍")).toEqual(
+      []
+    )
+    expect(resolveMockReactionUsers(seed, messages, "missing", "🎉")).toEqual(
+      []
+    )
+
+    const fallbackMessages = messages.map((item) =>
+      isUserMessage(item) && item.id === message.id
+        ? {
+            ...item,
+            reactions: [{ emoji: "🎉", count: 2, reactedByMe: false }],
+          }
+        : item
+    )
+    expect(
+      resolveMockReactionUsers(seed, fallbackMessages, message.id, "🎉").map(
+        ({ name }) => name
+      )
+    ).toEqual(["Grace Liang", "Marcus Bennett"])
+  })
+
+  it("keeps a group message sent until every channel member has read it", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 4,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            readBy: [
+              {
+                id: "grace",
+                name: "Grace Liang",
+                subtitle: "Data Analyst",
+                profileHref: "/people/grace",
+              },
+              {
+                id: "marcus",
+                name: "Marcus Bennett",
+                subtitle: "Engineering Manager",
+              },
+            ],
+            readByCount: 99,
+          },
+        ],
+      })
+    )
+    expect(
+      screen.getByText(`Sent · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/read by 2/i)).not.toBeInTheDocument()
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /message actions/i })
+    )
+    await userEvent.click(screen.getByRole("button", { name: /^Info$/i }))
+
+    const readers = screen.getByRole("list", { name: /read by 2/i })
+    const infoPanel = screen.getByRole("region", { name: /info/i })
+    expect(infoPanel).toHaveAttribute("tabindex", "0")
+    const graceRow = within(readers).getByText("Grace Liang").parentElement!
+    expect(graceRow).toBeVisible()
+    expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
+    expect(within(readers).queryByRole("link")).not.toBeInTheDocument()
+    expect(
+      readers.querySelector(
+        '[tabindex], button, a, input, select, textarea, [role="button"], [role="link"], [contenteditable="true"]'
+      )
+    ).not.toBeInTheDocument()
+
+    await userEvent.hover(graceRow)
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    expect(screen.queryByText("Data Analyst")).not.toBeInTheDocument()
+    expect(screen.queryByText("Engineering Manager")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: /view profile/i })
+    ).not.toBeInTheDocument()
+
+    const backButton = screen.getByRole("button", { name: /^back$/i })
+    expect(backButton).toHaveFocus()
+    await userEvent.tab()
+    expect(infoPanel).toHaveFocus()
+    await userEvent.tab()
+    expect(readers.contains(document.activeElement)).toBe(false)
+  })
+
+  it("shows read with the time once every channel member has read it", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 3,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            readBy: [
+              { id: "grace", name: "Grace Liang" },
+              { id: "marcus", name: "Marcus Bennett" },
+            ],
+          },
+        ],
+      })
+    )
+
+    expect(
+      screen.getByText(`Read · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/read by 2/i)).not.toBeInTheDocument()
+  })
+
+  it("keeps a known group sent when receipt data is unavailable", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 3,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Sent · ${formatClock(new Date(now))}`
+    )
+  })
+
+  it("shows a single-member group as read without receipt rows", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Personal notes",
+          avatar: { type: "team", name: "Personal notes" },
+          memberCount: 1,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "No other readers are expected",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Read · ${formatClock(new Date(now))}`
+    )
+  })
+
+  it("trusts the group message status when member count is unavailable", () => {
     renderChat(
       makeRuntime({
         channel: {
@@ -445,13 +1331,95 @@ describe("F0Chat", () => {
             createdAt: now,
             isMine: true,
             status: "read",
+            readByCount: 2,
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Read · ${formatClock(new Date(now))}`
+    )
+  })
+
+  it("keeps the legacy group read count inside the info panel", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+          memberCount: 4,
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
             readByCount: 3,
           },
         ],
       })
     )
-    // i18n.t("chat.readBy.other", { count: 3 }) → "Read by 3".
+    expect(
+      screen.getByText(`Read · ${formatClock(new Date(now))}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/read by 3/i)).not.toBeInTheDocument()
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /message actions/i })
+    )
+    await userEvent.click(screen.getByRole("button", { name: /^Info$/i }))
     expect(screen.getByText(/read by 3/i)).toBeInTheDocument()
+  })
+
+  it("loads reaction users once across repeated hovers", async () => {
+    const loadReactionUsers = vi.fn().mockResolvedValue([
+      { id: "grace", name: "Grace Liang" },
+      { id: "marcus", name: "Marcus Bennett" },
+    ])
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "m-reaction",
+            author: { id: "other", name: "María José" },
+            body: "Great launch",
+            createdAt: now,
+            isMine: false,
+            reactions: [
+              {
+                emoji: "👍",
+                count: 2,
+                reactedByMe: false,
+              },
+            ],
+          },
+        ],
+        loadReactionUsers,
+      })
+    )
+
+    const reaction = screen.getByRole("button", {
+      name: `${getEmojiLabel("👍")}: 2`,
+    })
+    expect(reaction).toHaveAttribute("aria-pressed", "false")
+    await userEvent.hover(reaction)
+    await waitFor(() =>
+      expect(loadReactionUsers).toHaveBeenCalledWith("m-reaction", "👍")
+    )
+    await userEvent.unhover(reaction)
+    await userEvent.hover(reaction)
+    expect(
+      await screen.findAllByText("Grace Liang, Marcus Bennett")
+    ).not.toHaveLength(0)
+    await userEvent.unhover(reaction)
+    await userEvent.hover(reaction)
+    expect(loadReactionUsers).toHaveBeenCalledTimes(1)
   })
 
   it("names the typing users in a group (interpolated label)", () => {

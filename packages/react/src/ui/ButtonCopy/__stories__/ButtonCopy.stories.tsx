@@ -9,7 +9,7 @@ import { ButtonCopy } from "../ButtonCopy"
 import { buttonCopySizes } from "../types"
 
 const meta = {
-  title: "Components/ButtonCopy",
+  title: "ButtonCopy",
   component: ButtonCopy,
   parameters: {
     layout: "centered",

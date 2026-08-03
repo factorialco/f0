@@ -6,10 +6,11 @@ import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 
 import { type F0ChatUser } from "../types"
+import { rowEntryTransition } from "../utils/chat-motion"
 import { type ChatRow } from "../utils/grouping"
 import { ChatMessageItem } from "./ChatMessageItem"
 import { ChatSystemMessage } from "./ChatSystemMessage"
-import { ChatTypingBubble } from "./ChatTypingBubble"
+import { ChatTypingBubble, type TypingEntryState } from "./ChatTypingBubble"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { DateTimeSeparator } from "./DateTimeSeparator"
 import { MessageStatus } from "./MessageStatus"
@@ -50,6 +51,7 @@ const ChatMessageRowRendererComponent = ({
   animatedIds,
   freshIds,
   typingLeaving = false,
+  typingEntry,
 }: {
   row: ChatRow
   isGroup: boolean
@@ -64,6 +66,8 @@ const ChatMessageRowRendererComponent = ({
   freshIds: Map<string, number>
   /** Typing row only: fade the bubble out before the row is removed. */
   typingLeaving?: boolean
+  /** Typing row only: streak-start gate for the bubble's entry pop. */
+  typingEntry?: TypingEntryState
 }): ReactNode => {
   // No per-row bottom padding: the transcript's bottom breathing room lives on
   // the viewport (constant), so being/stopping-being the last row never
@@ -72,25 +76,54 @@ const ChatMessageRowRendererComponent = ({
 
   // Decided once at mount: animate only genuinely fresh arrivals (in this
   // commit's appended tail and never shown before) — prepends, scroll-backs
-  // and window swaps never enter `freshIds`.
+  // and window swaps never enter `freshIds`. A live day change animates its
+  // separator alongside its message (same batch slot, `forId`); system rows
+  // are real appended items so they gate like messages. The unread divider
+  // never animates (it only (re)appears on conversation entry).
   const [entry] = useState(() => {
-    if (!enterAnimation || row.type !== "message") return null
-    const order = freshIds.get(row.message.id)
-    if (order === undefined || animatedIds.has(row.message.id)) return null
-    return { order }
+    if (!enterAnimation) return null
+    if (row.type === "message" || row.type === "system") {
+      const order = freshIds.get(row.message.id)
+      if (order === undefined || animatedIds.has(row.message.id)) return null
+      return { order }
+    }
+    if (row.type === "separator") {
+      const order = freshIds.get(row.forId)
+      if (order === undefined || animatedIds.has(row.key)) return null
+      return { order }
+    }
+    return null
   })
   const animate = entry !== null
   // Mark as "seen" after commit (not during render) so render stays pure and a
   // Strict-Mode double render can't wrongly flag a fresh arrival as already shown.
   useEffect(() => {
-    if (row.type === "message") animatedIds.add(row.message.id)
+    if (row.type === "message" || row.type === "system") {
+      animatedIds.add(row.message.id)
+    } else if (row.type === "separator") {
+      animatedIds.add(row.key)
+    }
   }, [row, animatedIds])
 
-  if (row.type === "separator") {
-    return (
-      <div className={spacing}>
+  if (row.type === "separator" || row.type === "system") {
+    // Centered, author-less rows — same fast opacity-only entry as messages.
+    const inner =
+      row.type === "separator" ? (
         <DateTimeSeparator at={row.at} padded />
-      </div>
+      ) : (
+        <ChatSystemMessage message={row.message} />
+      )
+    return animate ? (
+      <motion.div
+        className={spacing}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={rowEntryTransition(entry?.order ?? 0)}
+      >
+        {inner}
+      </motion.div>
+    ) : (
+      <div className={spacing}>{inner}</div>
     )
   }
 
@@ -98,15 +131,6 @@ const ChatMessageRowRendererComponent = ({
     return (
       <div className={spacing}>
         <UnreadDivider />
-      </div>
-    )
-  }
-
-  if (row.type === "system") {
-    // Centered membership row — no enter animation (same as separators).
-    return (
-      <div className={spacing}>
-        <ChatSystemMessage message={row.message} />
       </div>
     )
   }
@@ -120,6 +144,7 @@ const ChatMessageRowRendererComponent = ({
         isGroup={isGroup}
         leaving={typingLeaving}
         spacingClass={spacing}
+        entryState={typingEntry}
       />
     )
   }
@@ -179,41 +204,18 @@ const ChatMessageRowRendererComponent = ({
   )
 
   return animate ? (
-    // WhatsApp-style arrival: the transcript's slide layer provides the shared
-    // translation; the bubble adds its own presence on top — a sent one pops
-    // from its corner with a micro-overshoot (mobile's entry vocabulary), an
-    // incoming one rises more gently. Springs are soft enough to read but
-    // settle before the slide does, so the two never fight. Batched arrivals
-    // stagger by their order (45ms) so a coalesced burst enters with rhythm.
-    // The row mounts at full height, keeping measurements stable for the
-    // virtualizer. Only fresh unseen rows animate — scrolled-back history is
-    // never disturbed.
+    // WhatsApp-style arrival: the transcript's slide layer (critically damped)
+    // is the ONLY movement; the bubble itself just fades in fast — any own
+    // translation doubles the slide's motion, and a slow fade reads as an
+    // empty gap that fills in late. Batched arrivals stagger by their order
+    // (capped — rows mount at full height, so an uncapped stagger leaves
+    // blank rows during big reconnect bursts). Only fresh unseen rows animate
+    // — scrolled-back history is never disturbed.
     <motion.div
       className={cn("flex flex-col gap-1", spacing)}
-      style={{ transformOrigin: isMine ? "bottom right" : "bottom left" }}
-      initial={
-        isMine
-          ? { opacity: 0, y: 11, scale: 0.96 }
-          : { opacity: 0, y: 6, scale: 0.98 }
-      }
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={
-        isMine
-          ? {
-              type: "spring",
-              stiffness: 320,
-              damping: 22,
-              mass: 0.8,
-              delay: (entry?.order ?? 0) * 0.045,
-            }
-          : {
-              type: "spring",
-              stiffness: 280,
-              damping: 26,
-              mass: 0.85,
-              delay: (entry?.order ?? 0) * 0.045,
-            }
-      }
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={rowEntryTransition(entry?.order ?? 0)}
     >
       {content}
     </motion.div>

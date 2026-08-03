@@ -57,6 +57,54 @@ const renderList = (initialActiveChatId?: string) =>
   )
 
 describe("SidebarChatList", () => {
+  it("uses a hash glyph for a group without an emoji or custom image", () => {
+    renderList()
+
+    expect(
+      screen.getByTestId("sidebar-group-avatar-fallback")
+    ).toHaveTextContent("＃")
+    expect(screen.queryByRole("img", { name: "General" })).toBeNull()
+  })
+
+  it("keeps explicit group emoji and custom images", () => {
+    const { container } = render(
+      <SidebarChatProvider
+        initialGroups={[
+          {
+            id: "groups",
+            title: "Groups",
+            chats: [
+              {
+                id: "emoji",
+                label: "Product",
+                avatar: { type: "emoji", emoji: "🧭" },
+              },
+              {
+                id: "image",
+                label: "Design",
+                avatar: {
+                  type: "team",
+                  name: "Design",
+                  src: "/design.png",
+                },
+              },
+            ],
+          },
+        ]}
+      >
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+
+    expect(
+      screen.queryByTestId("sidebar-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "🧭" })).toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-hidden="true"]')
+    ).toBeInTheDocument()
+  })
+
   it("shows a blank state when there are no chats", () => {
     render(
       <SidebarChatProvider initialGroups={[]}>

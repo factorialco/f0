@@ -11,14 +11,7 @@ const SvgDottedCircle = (
     ref={ref}
     {...props}
   >
-    <circle
-      cx={12}
-      cy={12}
-      r={8}
-      stroke="currentColor"
-      strokeDasharray="2 2"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={12} r={8} stroke="currentColor" strokeDasharray="2 2" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgDottedCircle)

@@ -49,6 +49,7 @@ import { CollectionProps } from "../../../types"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
+import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
@@ -222,6 +223,23 @@ export const TableCollection = <
     }
     return `index:${String(index)}`
   }
+
+  // Flash newly-added rows: track which flat row keys appeared since the last
+  // render so a freshly-inserted row can play the green "flash on add" effect.
+  const flatRowKeys =
+    data?.type === "flat"
+      ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
+      : []
+  // Identity of the current pagination position. When it changes the row set is
+  // swapped by navigation (paging / loading more), not by an insert, so the
+  // flash must be suppressed for that render.
+  const paginationResetKey =
+    paginationInfo?.type === "pages"
+      ? paginationInfo.currentPage
+      : paginationInfo?.type === "infinite-scroll"
+        ? paginationInfo.cursor
+        : undefined
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
@@ -399,6 +417,7 @@ export const TableCollection = <
       <TableWrapper>
         <div
           className={cn(
+            "min-h-0",
             bordered &&
               "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}
@@ -729,11 +748,28 @@ export const TableCollection = <
                   )
                 })}
               {data?.type === "flat" &&
+                // Deliberately not wrapped in `AnimatePresence`: a row that
+                // leaves the dataset (deleted, filtered out, re-sorted away)
+                // must unmount on the same render. An exit transition keeps it
+                // mounted — still in the DOM, still in the selection registry —
+                // for as long as it runs, so a removed row goes on answering
+                // queries and shifting row/checkbox positions. Enter and flash
+                // don't need presence tracking; `initial`/`animate` cover them.
                 data.records.map((item, index) => {
                   const rowKey = `row-${getRowKey(item, index)}`
-                  const row = (
-                    <Row
+                  const isNew = addedRowKeys.has(rowKey)
+                  const motionRow = (
+                    <MotionRow
+                      variants={getAnimationVariants()}
+                      // Only a genuinely-inserted row plays the enter
+                      // animation; rows arriving via pagination or the initial
+                      // load appear in place, without movement.
+                      initial={isNew ? "hidden" : false}
+                      animate="visible"
+                      custom={index}
                       key={rowKey}
+                      layout
+                      isNew={isNew}
                       groupIndex={0}
                       source={effectiveSource}
                       item={item}
@@ -759,12 +795,12 @@ export const TableCollection = <
                   if (RowWrapper) {
                     return (
                       <RowWrapper key={rowKey} item={item} index={index}>
-                        {row}
+                        {motionRow}
                       </RowWrapper>
                     )
                   }
 
-                  return row
+                  return motionRow
                 })}
               {paginationInfo?.type === "infinite-scroll" &&
                 isLoadingMore &&

@@ -438,6 +438,16 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // No fabricated error when data is absent — `F0DataChart` (or the explicit
   // fallback below for `!data`) renders a proper empty state instead.
 
+  // Memoized so the chart receives identity-stable props across unrelated
+  // re-renders. Fresh props objects would rebuild the ECharts options and
+  // trigger a full `setOption(notMerge)` — which recreates the tooltip and
+  // hides it mid-hover — on every parent render.
+  const chartProps = useMemo(
+    () =>
+      data ? buildChartProps(item as DashboardChartItem, data) : undefined,
+    [item, data]
+  )
+
   // Determine which chart type options are available for this chart
   const currentOrientation =
     item.chart.type === "bar"
@@ -517,14 +527,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
       isFullscreen={isFullscreen}
       onFullscreenChange={onFullscreenChange}
     >
-      {data ? (
+      {data && chartProps ? (
         viewMode === "table" ? (
           <ChartTableView config={item.chart} data={data} />
         ) : (
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
-            <F0DataChart
-              {...buildChartProps(item as DashboardChartItem, data)}
-            />
+            <F0DataChart {...chartProps} />
           </div>
         )
       ) : !isLoading ? (

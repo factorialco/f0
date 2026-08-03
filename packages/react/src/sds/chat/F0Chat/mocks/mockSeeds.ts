@@ -7,9 +7,11 @@ import {
   type F0ChatItem,
   type F0ChatLinkPreview,
   type F0ChatMention,
+  type F0ChatReaction,
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./constants"
 
 // ---------------------------------------------------------------------------
 // People
@@ -100,6 +102,19 @@ const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
 // No photo — initials + colour avatar.
 const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
 
+/** Extra members for the large read-receipt demo. Together with the named
+ * participants, they make every Quarterly Reporting message expose 45 readers
+ * so the message-info list has a realistic overflow state. */
+const RECEIPT_DEMO_READERS = Array.from({ length: 42 }, (_, index) => {
+  const number = String(index + 1).padStart(2, "0")
+  return person(
+    `u_receipt_demo_${number}`,
+    "Demo",
+    `Reader ${number}`,
+    "Quarterly Reporting member"
+  )
+})
+
 // ---------------------------------------------------------------------------
 // Seeds — every conversation is deliberately different (empty, short, long,
 // DMs and multi-person groups with topical messages).
@@ -119,6 +134,10 @@ type MessageLine = {
   linkPreviews?: F0ChatLinkPreview[]
   /** Attachments (images, files, shared locations) for the media demos. */
   attachments?: F0ChatAttachment[]
+  /** Group members who read this message. */
+  readBy?: F0ChatUser[]
+  /** Reactions shown under the message. */
+  reactions?: F0ChatReaction[]
 }
 
 /** A membership event in the transcript — becomes a centered system row. */
@@ -163,9 +182,8 @@ export type Seed = {
   myRole?: "admin" | "member" | "guest"
 }
 
-/** Group avatar: the emoji when one is given, otherwise the company avatar
- * built from the group's name (its initials). A company avatar is never passed
- * by hand — it's always this name-derived fallback. */
+/** Group avatar data: an explicit emoji when one is given; otherwise a
+ * name-derived company avatar that chat surfaces replace with the ＃ fallback. */
 const groupAvatar = (name: string, emoji?: string): AvatarVariant =>
   emoji ? { type: "emoji", emoji } : { type: "company", name }
 
@@ -573,6 +591,127 @@ export const SEEDS: Seed[] = [
       },
     ],
   },
+  // GROUP — document attachments of every previewable kind (pdf, xlsx, csv,
+  // docx, md, txt), two inline videos in one message, and a non-previewable deck
+  // that stays a plain chip. The sample files live in `public/`.
+  {
+    id: "grp-reporting",
+    type: "group",
+    title: "Quarterly Reporting",
+    avatar: groupAvatar("Quarterly Reporting"),
+    participants: [GRACE, MARCUS, SAM, ...RECEIPT_DEMO_READERS],
+    lines: [
+      {
+        from: GRACE,
+        body: "Quarterly report is final, please give it a last read 📄",
+        min: 3 * HOUR,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-pdf-viewer-sample.pdf",
+            name: "quarterly-report.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+      },
+      {
+        from: ME,
+        body: "Looks great. Attaching the raw data behind the charts",
+        min: 2 * HOUR,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.xlsx",
+            name: "raw-data.xlsx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.csv",
+            name: "offices.csv",
+            mimeType: "text/csv",
+          },
+        ],
+      },
+      {
+        from: MARCUS,
+        body: "Offer draft + release notes for the announcement",
+        min: 80 * MIN,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.docx",
+            name: "offer-letter.docx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.md",
+            name: "RELEASE-NOTES.md",
+            mimeType: "text/markdown",
+          },
+        ],
+      },
+      {
+        from: SAM,
+        body: "Worker log from the failed import, for whoever debugs it",
+        min: 45 * MIN,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.txt",
+            name: "worker.log",
+            mimeType: "text/plain",
+          },
+        ],
+      },
+      {
+        from: ME,
+        body: "And the kickoff deck — plus two walkthrough videos",
+        min: 10 * MIN,
+        reactions: [
+          {
+            emoji: "🎉",
+            count: 3,
+            reactedByMe: false,
+            users: [GRACE, MARCUS, SAM],
+          },
+        ],
+        attachments: [
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "quarterly-walkthrough.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "chart-deep-dive.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "#",
+            name: "kickoff-deck.pptx",
+            mimeType: "application/vnd.ms-powerpoint",
+          },
+        ],
+      },
+    ],
+  },
   // GROUP — extensive, weeks/days of history.
   {
     id: "grp-design",
@@ -754,7 +893,7 @@ export const SEEDS: Seed[] = [
     id: "grp-release",
     type: "group",
     title: "Release War Room",
-    avatar: groupAvatar("Release War Room", "🔥"),
+    avatar: groupAvatar("Release War Room"),
     participants: [MARCUS, GRACE],
     multiTyping: true,
     lines: [
@@ -868,6 +1007,23 @@ export type ConvState = {
 let seq = 0
 export const nextId = (): string => `m-${seq++}`
 
+/** Reader identities for a group message in the ApplicationFrame mock. */
+export const groupReadersFor = (
+  seed: Seed | undefined,
+  authorId: string
+): F0ChatUser[] | undefined => {
+  if (seed?.type !== "group") return undefined
+
+  const uniqueParticipants = new Map(
+    [...seed.participants, ME].map((participant) => [
+      participant.id,
+      participant,
+    ])
+  )
+  uniqueParticipants.delete(authorId)
+  return [...uniqueParticipants.values()]
+}
+
 const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
@@ -893,6 +1049,8 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       mentionedEveryone: line.mentionedEveryone,
       linkPreviews: line.linkPreviews,
       attachments: line.attachments,
+      readBy: line.readBy ?? groupReadersFor(seed, line.from.id),
+      reactions: line.reactions,
     }
   })
   // Second pass: resolve reply references now that every message has an id.

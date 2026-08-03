@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
+import { microEnterTransition } from "../utils/chat-motion"
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
@@ -53,6 +54,9 @@ export const ChatMessageItem = ({
   // reacted message scrolled back into the virtual window): render them in
   // place. Only reactions changing on an already-visible message animate.
   const hadReactionsAtMountRef = useRef(hasReactions)
+  // Same gate for the failure alert: only a LIVE sending→failed flip pops it —
+  // an already-failed message scrolled back into view renders it in place.
+  const wasFailedAtMountRef = useRef(message.status === "failed")
   useEffect(() => {
     // After the first commit, any (re)appearance of the row is a live change.
     hadReactionsAtMountRef.current = false
@@ -171,12 +175,34 @@ export const ChatMessageItem = ({
                   actionsOpen && "opacity-100"
                 )}
               >
-                <ChatMessageActions
-                  message={message}
-                  isMine={isMine}
-                  open={actionsOpen}
-                  onOpenChange={setActionsOpen}
-                />
+                {message.status === "failed" ? (
+                  // The alert fades in on a live failure (the branch switch
+                  // remounts it, so `initial` applies) — never on a
+                  // scroll-back of an old failure.
+                  <motion.div
+                    initial={
+                      wasFailedAtMountRef.current || reducedMotion
+                        ? false
+                        : { opacity: 0, scale: 0.9 }
+                    }
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={microEnterTransition}
+                  >
+                    <ChatMessageActions
+                      message={message}
+                      isMine={isMine}
+                      open={actionsOpen}
+                      onOpenChange={setActionsOpen}
+                    />
+                  </motion.div>
+                ) : (
+                  <ChatMessageActions
+                    message={message}
+                    isMine={isMine}
+                    open={actionsOpen}
+                    onOpenChange={setActionsOpen}
+                  />
+                )}
               </div>
             )}
           </div>

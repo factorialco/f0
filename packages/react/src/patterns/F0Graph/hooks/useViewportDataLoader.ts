@@ -28,6 +28,14 @@ interface UseViewportDataLoaderOptions {
  * that newly entered the viewport. Each id is requested at most once for the
  * lifetime of the graph, and ids seen mid-pan accumulate into a single batch —
  * so a fast pan across the graph produces one settled fetch, not one per frame.
+ *
+ * Fly-over nodes are NOT hydrated: at flush time the batch is filtered to the
+ * ids that are STILL on screen, so nodes the camera merely swept across during
+ * an automatic navigation (or a fast user pan) — entering and leaving within
+ * the debounce window — are dropped. Because the debounce is trailing, the
+ * single flush lands after the camera settles, when the on-screen set is the
+ * final resting viewport. Dropped ids are NOT marked as requested, so they stay
+ * eligible to hydrate if the user later navigates to them.
  */
 export function useViewportDataLoader({
   nodeIds,
@@ -39,12 +47,17 @@ export function useViewportDataLoader({
   const requestedRef = useRef<Set<string>>(new Set())
   // Ids seen but not yet flushed (accumulates across pan frames).
   const pendingRef = useRef<Set<string>>(new Set())
+  // Latest on-screen set, used at flush time to drop fly-over ids that have
+  // already left the viewport (see the hook doc).
+  const latestNodeIdsRef = useRef<Set<string>>(new Set())
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Latest callback, so the timer always calls the current prop.
   const callbackRef = useRef(loadVisibleNodeData)
   callbackRef.current = loadVisibleNodeData
 
   useEffect(() => {
+    latestNodeIdsRef.current = new Set(nodeIds)
+
     if (!loadVisibleNodeData || !enabled) return
 
     let hasNew = false
@@ -66,10 +79,20 @@ export function useViewportDataLoader({
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       timerRef.current = null
-      const batch = Array.from(pendingRef.current)
+      // Drop fly-over ids that left the viewport before this flush; only the
+      // ids still on screen are hydrated and marked requested. Dropped ids are
+      // left in neither set, so they re-enter `pending` (and hydrate) if they
+      // come back on screen later.
+      const onScreen = latestNodeIdsRef.current
+      const batch: string[] = []
+      for (const id of pendingRef.current) {
+        if (onScreen.has(id)) {
+          batch.push(id)
+          requestedRef.current.add(id)
+        }
+      }
       pendingRef.current.clear()
-      for (const id of batch) requestedRef.current.add(id)
-      callbackRef.current?.(batch)
+      if (batch.length > 0) callbackRef.current?.(batch)
     }, debounceMs)
   }, [nodeIds, loadVisibleNodeData, debounceMs, enabled])
 

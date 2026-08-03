@@ -56,7 +56,6 @@ const FoldersAnimated = React.forwardRef<SVGSVGElement, FoldersProps>(
           variants={folderVariants}
           animate={animate}
           transition={defaultTransition}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M7 19H11.4C14.7603 19 16.4405 19 17.7239 18.346C18.8529 17.7708 19.7708 16.8529 20.346 15.7239C21 14.4405 21 12.7603 21 9.4V9"
@@ -64,7 +63,6 @@ const FoldersAnimated = React.forwardRef<SVGSVGElement, FoldersProps>(
           variants={foldVariants}
           animate={animate}
           transition={defaultTransition}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

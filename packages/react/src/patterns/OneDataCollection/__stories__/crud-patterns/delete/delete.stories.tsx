@@ -25,7 +25,7 @@ import {
 } from "../shared"
 
 const meta = {
-  title: "Data collection/CRUD patterns/Delete",
+  title: "Data Collection/CRUD patterns/Delete",
   parameters: {
     layout: "fullscreen",
   },

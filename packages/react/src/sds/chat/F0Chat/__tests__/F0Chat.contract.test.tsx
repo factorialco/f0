@@ -16,33 +16,14 @@ import {
   type F0ChatRuntime,
 } from "../types"
 
-// Pass-through virtualizer (jsdom has no layout) — same as F0Chat.test.tsx.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn()
@@ -169,14 +150,36 @@ describe("connection states", () => {
 })
 
 describe("delivery states", () => {
-  it("shows Delivered under the last own message when the backend reports it", () => {
-    renderChat(makeRuntime({ messages: [theirs, mine("delivered")] }))
-    expect(screen.getByText(/^Delivered/)).toBeInTheDocument()
+  // Sending and legacy messages keep the bare time. Once acknowledged, sent
+  // and delivered share "Sent · time"; read advances to "Read · time".
+  const bareTimeOf = (message: F0ChatMessage) =>
+    new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(message.createdAt))
+
+  it("shows the bare time while sending, from the very first frame", () => {
+    const message = mine("sending")
+    renderChat(makeRuntime({ messages: [theirs, message] }))
+    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
+    expect(screen.queryByText("Sending…")).not.toBeInTheDocument()
   })
 
-  it("shows Sending… in the footer from the very first frame (no empty beat)", () => {
-    renderChat(makeRuntime({ messages: [theirs, mine("sending")] }))
-    expect(screen.getByText("Sending…")).toBeInTheDocument()
+  it("shows sent with the time once the message is acknowledged", () => {
+    const message = mine("sent")
+    renderChat(makeRuntime({ messages: [theirs, message] }))
+    expect(
+      screen.getByText(`Sent · ${bareTimeOf(message)}`)
+    ).toBeInTheDocument()
+  })
+
+  it("keeps delivered under the sent footer label", () => {
+    const message = mine("delivered")
+    renderChat(makeRuntime({ messages: [theirs, message] }))
+    expect(
+      screen.getByText(`Sent · ${bareTimeOf(message)}`)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/^Delivered/)).not.toBeInTheDocument()
   })
 
   it("appends the failureReason to the failed indicator's label", () => {

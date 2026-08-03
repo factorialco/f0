@@ -1,0 +1,7 @@
+metadata:
+  domain: Growth
+  owner: "@factorialco/growth-product"
+  reviewers:
+    - team: "@factorialco/platform-ai-building-blocks"
+      include:
+        - ai

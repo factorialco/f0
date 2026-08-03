@@ -30,7 +30,11 @@ export type GraphVisualizationOptions<
   title: (record: R) => string
   /** Secondary line of text for a node. */
   subtitle?: (record: R) => string
-  /** Avatar shown on the leading side of the node pill. */
+  /**
+   * Avatar shown on the leading side of the node pill. Its variant also drives
+   * the node silhouette: `person` → circular dot/pill, any other variant
+   * (`team`, `icon`, …) → rounded-square card.
+   */
   avatar?: (record: R) => AvatarVariant
   /**
    * Tags rendered in the node metadata row. A tag may set `column` to place it
@@ -153,6 +157,14 @@ export type GraphVisualizationOptions<
   maxZoom?: number
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
+  /**
+   * Optional action(s) rendered at the bottom-right of the graph canvas
+   * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+   * so it tracks the graph's visible area and reflows when a side panel shrinks
+   * it — clear of the controls (bottom-left). Use for a persistent affordance
+   * like a "Give feedback" button.
+   */
+  canvasFooterActions?: ReactNode
   /**
    * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
    * the viewport are handed to React Flow — for very large trees (thousands of

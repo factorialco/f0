@@ -8,24 +8,14 @@ import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatHeaderAction, type F0ChatRuntime } from "../types"
 
-// Same virtualizer pass-through as F0Chat.test: jsdom has no layout, so render
-// all rows instead of windowing.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => ({
-    getVirtualItems: () =>
-      Array.from({ length: count }, (_, index) => ({
-        index,
-        key: index,
-        start: index * 40,
-        size: 40,
-        end: index * 40 + 40,
-      })),
-    getTotalSize: () => count * 40,
-    measureElement: () => {},
-    scrollToIndex: () => {},
-    measure: () => {},
-  }),
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 const makeRuntime = (
   overrides: Partial<F0ChatRuntime> = {}
@@ -71,6 +61,57 @@ beforeAll(() => {
 })
 
 describe("ChatHeader host actions", () => {
+  it("uses a hash glyph when a group has no emoji or custom image", () => {
+    renderChat(makeRuntime())
+
+    expect(screen.getByTestId("chat-group-avatar-fallback")).toHaveTextContent(
+      "＃"
+    )
+    expect(screen.queryByRole("img", { name: "Product Team" })).toBeNull()
+  })
+
+  it("keeps an explicit group emoji instead of the hash fallback", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "emoji", emoji: "🚀" },
+        },
+      })
+    )
+
+    expect(
+      screen.queryByTestId("chat-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "🚀" })).toBeInTheDocument()
+  })
+
+  it("keeps a custom group image instead of the hash fallback", () => {
+    const { container } = renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: {
+            type: "team",
+            name: "Product Team",
+            src: "/product-team.png",
+          },
+        },
+      })
+    )
+
+    expect(
+      screen.queryByTestId("chat-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-hidden="true"]')
+    ).toBeInTheDocument()
+  })
+
   it("renders an inline action as its own icon button and fires the callback", () => {
     const onClick = vi.fn()
     const runtime = makeRuntime()

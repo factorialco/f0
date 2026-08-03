@@ -11,14 +11,12 @@ const SvgMoveUp = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     <path
       stroke="currentColor"
       d="M12.5004 17H7C5.89543 17 5 16.1046 5 15V9C5 7.89543 5.89543 7 7 7H9.5004"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M8.0004 5L10.0004 7L8.0004 9"
-      vectorEffect="non-scaling-stroke"
     />
     <rect
       width={6.7}
@@ -28,7 +26,6 @@ const SvgMoveUp = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       fill="currentColor"
       stroke="currentColor"
       rx={1.35}
-      vectorEffect="non-scaling-stroke"
     />
     <rect
       width={6.7}
@@ -37,7 +34,6 @@ const SvgMoveUp = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       y={13.65}
       stroke="currentColor"
       rx={1.35}
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

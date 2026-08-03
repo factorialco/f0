@@ -5,7 +5,7 @@ import { ProgressBar } from "./index"
 const meta: Meta<typeof ProgressBar> = {
   title: "Charts/ProgressChart",
   component: ProgressBar,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   args: {
     value: 60,
     label: "Label",

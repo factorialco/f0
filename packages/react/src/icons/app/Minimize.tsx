@@ -16,14 +16,12 @@ const SvgMinimize = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M19 5L13.5 10.5M13.5 10.5L17.5 10.5M13.5 10.5L13.5 6.5"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M5 19L10.5 13.5M10.5 13.5L6.5 13.5M10.5 13.5L10.5 17.5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

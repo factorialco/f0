@@ -14,9 +14,10 @@ type value = {
   dataPoints: Array<{
     name: string          // category label shown in tooltip
     value: number         // absolute count
-    color?: string        // optional color name or hex; falls back to categorical palette
+    color?: CategoryBarColor // optional: a 15-palette base-color token (e.g. "viridian", "yellow", "barbie") OR a legacy token ("categorical-1"…"categorical-8", "feedback-*"); falls back to the categorical palette by index
   }>
   hideTooltip?: boolean   // when true, suppresses hover tooltips
+  loading?: boolean       // when true, renders a skeleton (same size as the bar) until data arrives
 }
 ```
 
@@ -44,6 +45,10 @@ The cell inside a OneDataCollection-like table with clickable rows: tooltips ope
 
 <Canvas of={CategoryBarChartStories.WithCustomColors} />
 
+#### LegacyColors
+
+<Canvas of={CategoryBarChartStories.LegacyColors} />
+
 #### HiddenTooltip
 
 Set `hideTooltip: true` on the value to suppress the per-segment tooltip. Segments still render and stay focusable.
@@ -53,3 +58,9 @@ Set `hideTooltip: true` on the value to suppress the per-segment tooltip. Segmen
 #### Empty
 
 <Canvas of={CategoryBarChartStories.Empty} />
+
+#### Loading
+
+Set `loading: true` while the row's data is still loading. The cell renders a skeleton with the same height and width as the loaded bar, so the row doesn't jump and no empty dash flashes before the values arrive.
+
+<Canvas of={CategoryBarChartStories.Loading} />

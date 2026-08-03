@@ -6,6 +6,7 @@ import { z } from "zod"
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
@@ -2000,13 +2001,18 @@ export const EntitiesListFieldNavigable: Story = {
 }
 
 /**
- * Separate create/update form definitions. Instead of a single `schema`, the
- * field takes a `createFormDefinition` (reduced: name + email) and an
- * `updateFormDefinition` (fuller: adds role + start date), each with its **own**
- * `onSubmit` — so adding vs editing can persist independently (watch the
- * console: `CREATE` vs `UPDATE`). The item is still committed to the field
- * value. `updateFormDefinition`'s schema is canonical, so its extra fields are
- * `optional` to keep freshly-added rows valid.
+ * The full persistence trio: **add** → `createFormDefinition`, **edit** →
+ * `updateFormDefinition`, **remove** → `config.onRemove`. Each runs its own
+ * request independently (watch the console: `CREATE` / `UPDATE` / `DELETE`), and
+ * the field value is kept in sync. `createFormDefinition` is reduced (name +
+ * email) and `updateFormDefinition` is canonical (adds role + start date), so
+ * its extra fields are `optional` to keep freshly-added rows valid.
+ *
+ * Removing opens a confirmation first (custom copy via `config.confirmRemove`,
+ * which names the member), and the row is only dropped once `onRemove` resolves
+ * successfully — return `{ success: false }` or throw to keep it and surface an
+ * error. `config.removableIds` pins the first member (editable, but no remove
+ * action) to show that edit and remove gate independently.
  */
 export const EntitiesListFieldFormDefinitions: Story = {
   parameters: { docs: { story: { inline: false, height: "560px" } } },
@@ -2058,6 +2064,23 @@ export const EntitiesListFieldFormDefinitions: Story = {
           labels: {
             addButton: "Add member",
             update: { title: "Edit member" },
+          },
+          // `removableIds` is independent of editing: the owner (m-1) stays
+          // editable but has no remove action, while everyone else is
+          // removable. Newly-added rows (no id) stay removable.
+          removableIds: ["m-2"],
+          // Delete counterpart to create/update: confirm first (naming the
+          // member), then persist. The row is dropped only on success.
+          confirmRemove: (item) => ({
+            type: "critical",
+            title: `Remove ${String(item.name)}?`,
+            msg: "They will lose access immediately. This cannot be undone.",
+            confirm: { label: "Remove" },
+          }),
+          onRemove: async (item) => {
+            await sleep(300)
+            console.info(`DELETE member: ${JSON.stringify(item)}`)
+            return { success: true }
           },
         },
       }),
@@ -2902,6 +2925,62 @@ export const WithActionBarAndDiscard: Story = {
         <F0Form formDefinition={formDefinition} />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar with Save and Discard buttons
+        </p>
+      </div>
+    )
+  },
+}
+
+/**
+ * Single-schema form with `submitConfig.showSubmitWhenDirty` enabled.
+ * The submit button stays hidden while the form is pristine, appears as soon as
+ * the user edits a field, and goes away again after a successful save, so its
+ * absence reads as "nothing pending". The internal action bar still shows the
+ * Saving → Saved feedback.
+ *
+ * Use it when the form is one of several independently-savable blocks on a page
+ * and a permanently visible Save button would be noise.
+ */
+export const ShowSubmitWhenDirty: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField.text({
+        label: "First Name",
+        placeholder: "Enter your first name",
+      }),
+      lastName: f0FormField.text({
+        label: "Last Name",
+        placeholder: "Enter your last name",
+      }),
+      nickname: f0FormField.text({
+        label: "Nickname",
+        optional: true,
+        placeholder: "How should we call you?",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "single-schema-dirty",
+      schema: formSchema,
+      submitConfig: { label: "Save", showSubmitWhenDirty: true },
+      defaultValues: {
+        firstName: "Jane",
+        lastName: "Doe",
+        nickname: "",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Personal information updated" }
+      },
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form formDefinition={formDefinition} />
+        <p className="mt-4 text-sm text-f1-foreground-secondary">
+          Modify any field to see the Save button appear. Save it: the action
+          bar confirms, then the button goes away again.
         </p>
       </div>
     )
@@ -4103,4 +4182,15 @@ export const ActionBarWiggle: Story = {
       </div>
     )
   },
+}
+
+/**
+ * Visual-regression snapshot. Reuses the `AllFieldTypes` render so the snapshot
+ * exercises every field type the form supports.
+ */
+export const Snapshot: Story = {
+  ...AllFieldTypes,
+  // a11y is already skipped for F0Form at the meta level; don't add another
+  // skipCi call-site (the allowlist burndown test forbids increasing counts).
+  parameters: withSnapshot({}),
 }

@@ -230,6 +230,41 @@ role: f0FormField.select({
 
 When using enum-inferred select fields, use `undefined` (not `""`) as the default value for empty initial state.
 
+### Select options from a data source
+
+Instead of a static `options` array, `select` and `multiSelect` accept a `source` — the same `DataSourceDefinition` abstraction that powers `OneDataCollection` and tables — together with a `mapOptions` function that turns each record into an option. Use this when options come from an API, or when the list is large enough to benefit from server-side search and pagination. `source` and `options` are mutually exclusive.
+
+```tsx
+import { createDataSourceDefinition } from "@factorialco/f0-react"
+
+// A source fetches records; `search` is passed through so filtering can happen server-side.
+const countriesSource = createDataSourceDefinition<Country>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      const records = await api.countries.list({ query: search })
+      return { records }
+    },
+  },
+})
+
+const schema = z.object({
+  country: f0FormField.select({
+    label: "Country",
+    showSearchBox: true,
+    source: countriesSource,
+    mapOptions: (c) => ({
+      value: c.id,
+      label: c.name,
+      description: c.continent,
+    }),
+  }),
+})
+```
+
+Because filtering is delegated to the source's `fetchData({ search })`, the client-side `searchFn` prop is not available in this mode. For paginated results, give the adapter `paginationType: "infinite-scroll"` and the dropdown loads more as the user scrolls. The same `source` + `mapOptions` pair works with `multiSelect` for multiple selection.
+
+<Canvas of={Stories.SelectWithDataSource} />
+
 ### `optional` flag
 
 All shortcuts that support `optional` accept it as a top-level config key instead of wrapping the schema manually:
@@ -439,6 +474,8 @@ With more than 2 fields it switches to **dialog** mode by default: the cells are
 
 `editableIds` locks editing to items whose `id` is listed — locked rows render as read-only (disabled) cells. Items without an `id` (rows the user just added) always stay editable.
 
+`removableIds` is the independent counterpart for removal: it locks the remove action to items whose `id` is listed, so a row can be editable but not removable (or vice versa). Omitted → every row is removable, matching `editableIds`. Use it to pin a row (e.g. a resource owner) that must not be deleted while still allowing edits.
+
 ### List-view visualization
 
 When there's no inline editing, set `config.visualization: "list-view"` to render the items as a OneDataCollection **list** instead of a read-only table. Each row shows a title (the first field) and description lines (the rest); **Add** and the per-row **Edit** action open the form dialog, and rows have a **Remove** action. Override the row labelling with `config.listItem` (`title` / `description` / `avatar` functions). Drag-reorder isn't available in list mode.
@@ -501,9 +538,38 @@ members: f0FormField.entitiesList({
 
 <Canvas of={Stories.EntitiesListFieldFormDefinitions} />
 
+### Persisting removals
+
+The three row operations persist through a matching trio:
+
+| Operation | How it persists                             |
+| --------- | ------------------------------------------- |
+| Add       | `createFormDefinition` (its own `onSubmit`) |
+| Edit      | `updateFormDefinition` (its own `onSubmit`) |
+| Remove    | `config.onRemove`                           |
+
+`config.onRemove` is the delete counterpart. Removing a row (from the overflow `⋮` menu, per the CRUD "Delete & destructive" doc) now **always confirms first**, then — if `onRemove` is set — runs it with the row item. The row is dropped from the field value only when `onRemove` resolves successfully; returning `{ success: false }` or throwing keeps the row and surfaces an error, and the remove action is disabled while the request is in flight. Without `onRemove`, removal is value-only (the row is spliced out) but the confirmation is still shown.
+
+Use `config.confirmRemove` to **name the resource** in the confirmation (what, how much, whether reversible). When omitted, a generic default confirmation is used.
+
+```tsx
+config: {
+  onRemove: async (item) => {
+    await api.delete(item.id)
+    return { success: true }
+  },
+  confirmRemove: (item) => ({
+    type: "critical",
+    title: `Remove ${item.name}?`,
+    msg: "They will lose access immediately. This cannot be undone.",
+    confirm: { label: "Remove" },
+  }),
+}
+```
+
 ### Custom row actions
 
-`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row:
+`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row. The `remove` helper routes through the same confirm + `onRemove` path as the built-in remove, so custom "Delete" actions also confirm and persist:
 
 ```tsx
 config: {
@@ -523,6 +589,8 @@ config: {
 - `canAddItems` (default `true`) — show the add button. Adding is blocked while an existing row is still invalid.
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
 - `labels` — `addButton`, `create`/`update` (each `{ title, description }`) and `edit`/`remove` action labels. The create description doubles as the add button's tooltip; the update title as the icon-only edit action's tooltip.
+- `onRemove` / `confirmRemove` — persist and confirm removals (see [Persisting removals](#persisting-removals)).
+- `editableIds` / `removableIds` — independently lock editing / removal to the listed `id`s (see above).
 - `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
 
 ### Auto-save
@@ -643,6 +711,52 @@ The optional `styling` config controls the form layout:
   styling={{ noPadding: true }}
 />
 ```
+
+## Submit configuration
+
+The optional `submitConfig` controls how the form is submitted and what submit affordance is rendered. In single-schema mode `label`, `icon`, `savingMessage` and `successMessageDuration` are shared by every type, and `type` picks the affordance, defaulting to `"default"`. Per-section schema mode takes a smaller config, described at the end of this section.
+
+### `type: "default"` — inline submit button
+
+A button rendered at the end of the form.
+
+- `showSubmitWhenDirty` — keep the button hidden until the form has unsaved changes. It appears on the first edit and goes away again after a successful save, so its absence reads as "nothing pending". The internal action bar still shows the Saving → Saved feedback unless you also set `hideActionBar`. Use it for pages made of several independently-savable blocks, where a permanently visible Save button is noise. Defaults to `false`.
+- `hideSubmitButton` — never render the button. For submitting from outside the form via `useF0Form`. Takes precedence over `showSubmitWhenDirty`.
+- `hideActionBar` — hide the internal loading/success feedback bar when the parent provides its own.
+
+```tsx
+<F0Form
+  name="personal-information"
+  schema={schema}
+  defaultValues={defaultValues}
+  onSubmit={onSubmit}
+  submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+/>
+```
+
+<Canvas of={Stories.ShowSubmitWhenDirty} />
+
+### `type: "action-bar"` — floating bar
+
+A bar that appears at the bottom of the viewport once the form is dirty, so it is dirty-gated by construction. Extra options: `discardable` to add a Discard button that resets the form, `discardConfig` for its label and icon, and `actionBarLabel` for the bar's own text.
+
+<Canvas of={Stories.WithActionBar} />
+
+<Canvas of={Stories.WithActionBarAndDiscard} />
+
+### `type: "autosubmit"` — debounced auto-save
+
+No button at all: the form submits itself `delay` ms (default `800`) after the last change, and the internal action bar shows the Saving → Saved feedback. `hideActionBar` suppresses that feedback.
+
+<Canvas of={Stories.Autosubmit} />
+
+<Canvas of={Stories.AutosubmitCustomDelay} />
+
+### Per-section schema mode
+
+With a per-section schema each section submits on its own, so `submitConfig` accepts `label`, `icon`, `showSubmitWhenDirty` and `hideSubmitButton` per section. Set it at the form level to apply to every section, and override it on `sections[id].submitConfig` for one.
+
+<Canvas of={Stories.PerSectionShowSubmitWhenDirty} />
 
 ## Conditional rendering
 
