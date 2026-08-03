@@ -11,7 +11,9 @@ import { F0Coachmark } from "../index"
 const meta = {
   title: "F0Coachmark",
   component: F0Coachmark,
-  tags: ["experimental"],
+  // !autodocs is required to opt out — autodocs is enabled globally in
+  // .storybook/preview.tsx, so dropping the tag alone has no effect.
+  tags: ["!autodocs", "experimental"],
   argTypes: {
     side: {
       control: "select",
@@ -30,8 +32,10 @@ const meta = {
     onDismiss: fn(),
   },
   decorators: [
+    // The panel is portalled out of this box, so the decorator has to be tall
+    // enough to contain it visually or it spills onto the next docs block.
     (Story) => (
-      <div className="flex min-h-64 items-center justify-center p-6">
+      <div className="flex min-h-80 items-center justify-center p-6">
         {Story()}
       </div>
     ),
@@ -54,6 +58,7 @@ export const Basic: Story = {
  * persists the dismissal — the component never reopens itself.
  */
 export const Controlled: Story = {
+  tags: ["no-sidebar"],
   args: {
     open: true,
     children: <F0Button variant="outline" label="Filters" />,
@@ -82,6 +87,7 @@ export const Controlled: Story = {
  * `arrow={false}` removes the pointer while keeping the anchored positioning.
  */
 export const WithoutArrow: Story = {
+  tags: ["no-sidebar"],
   args: {
     open: true,
     arrow: false,
@@ -93,6 +99,7 @@ export const WithoutArrow: Story = {
  * Title and CTA only — `description` is optional.
  */
 export const WithoutDescription: Story = {
+  tags: ["no-sidebar"],
   args: {
     open: true,
     description: undefined,
@@ -105,6 +112,7 @@ export const WithoutDescription: Story = {
  * would overflow the viewport, so it stays visible near a screen edge.
  */
 export const CollisionAware: Story = {
+  tags: ["no-sidebar"],
   args: {
     open: true,
     side: "top",
@@ -120,6 +128,7 @@ export const CollisionAware: Story = {
 const sides = ["top", "right", "bottom", "left"] as const
 
 export const Snapshot: Story = {
+  tags: ["no-sidebar"],
   args: {
     open: true,
     children: <F0Button variant="outline" label="Filters" />,
@@ -151,6 +160,7 @@ export const Snapshot: Story = {
  * immediately discard it. Escape and the close button both dismiss.
  */
 export const KeyboardAndDismissal: Story = {
+  tags: ["no-sidebar"],
   args: {
     open: true,
     children: <F0Button variant="outline" label="Filters" />,
@@ -178,5 +188,33 @@ export const KeyboardAndDismissal: Story = {
       )
       await expect(args.onDismiss).toHaveBeenCalled()
     })
+  },
+}
+
+// F0Coachmark calls useI18n, so it cannot be rendered as inline JSX in MDX.
+// These render inside the full decorator chain and are embedded in the docs
+// through <Canvas> as DoDonts children.
+
+export const DoDontsGoodCopy: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    open: true,
+    title: "Filters got smarter",
+    description:
+      "Stack filters on jobs and candidates, then save the combination as a view your whole team can reuse.",
+    action: { label: "Learn more", onClick: fn() },
+    children: <F0Button variant="outline" label="Filters" />,
+  },
+}
+
+export const DoDontsBadCopy: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    open: true,
+    title: "Update",
+    description:
+      "We have made some changes to this area of the product that you might find useful, so please take a moment to review them whenever you get the chance.",
+    action: { label: "OK", onClick: fn() },
+    children: <F0Button variant="outline" label="Filters" />,
   },
 }

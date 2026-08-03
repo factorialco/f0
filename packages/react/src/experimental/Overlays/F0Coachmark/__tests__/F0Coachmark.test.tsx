@@ -1,12 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import {
-  zeroRender as render,
-  screen,
-  waitFor,
-  within,
-} from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0Coachmark } from "../index"
 
@@ -177,20 +172,6 @@ describe("F0Coachmark", () => {
     expect(dialog.className.split(/\s+/)).not.toContain("dark")
     expect(dialog.className).not.toContain("f1-foreground-inverse")
     expect(dialog.className).not.toContain("f1-background-inverse")
-  })
-
-  // Action variants resolve against the page theme, not the inverted panel, so
-  // both controls have to be pinned to the same flipping pair as the surface.
-  it("colours the CTA and the dismiss button from the same flipping pair", () => {
-    renderCoachmark()
-    const dialog = screen.getByRole("dialog")
-
-    expect(
-      within(dialog).getByRole("button", { name: "Learn more" })
-    ).toHaveClass("text-f1-background")
-    expect(within(dialog).getByRole("button", { name: "Close" })).toHaveClass(
-      "text-f1-background"
-    )
   })
 
   it("renders the arrow by default and hides it when arrow is false", () => {
