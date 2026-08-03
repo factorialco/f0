@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.72.3](https://github.com/factorialco/f0/compare/f0-react-v4.72.2...f0-react-v4.72.3) (2026-08-03)
+
+
+### Bug Fixes
+
+* **SectionHeader:** draw the separator with a 3px/4px dash ([#4941](https://github.com/factorialco/f0/issues/4941)) ([448d338](https://github.com/factorialco/f0/commit/448d33885838663f82e5a9b3c92e375ca66a3d27))
+
 ## [4.72.2](https://github.com/factorialco/f0/compare/f0-react-v4.72.1...f0-react-v4.72.2) (2026-08-03)
 
 
