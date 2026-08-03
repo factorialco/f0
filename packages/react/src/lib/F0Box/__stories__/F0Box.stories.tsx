@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 
+import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
+
 import { F0Box } from "../index"
 import { F0Text } from "@/components/F0Text"
 import { F0Heading } from "@/components/F0Heading"
@@ -2785,3 +2787,35 @@ export const Shadow: Story = {
     </F0Box>
   ),
 }
+
+// ─── Snapshot ────────────────────────────────────────────────────
+
+export const Snapshot = snapshotMatrix(F0Box, {
+  baseArgs: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "24",
+    height: "16",
+    border: "default",
+    borderColor: "default",
+    borderStyle: "solid",
+    children: <span className="text-sm font-medium">Box</span>,
+  },
+  rows: {
+    arg: "borderRadius",
+    values: ["none", "xs", "sm", "md", "lg", "xl", "2xl"],
+  },
+  cols: {
+    arg: "background",
+    values: [
+      "secondary",
+      "tertiary",
+      "accent",
+      "info",
+      "warning",
+      "positive",
+      "critical",
+    ],
+  },
+})

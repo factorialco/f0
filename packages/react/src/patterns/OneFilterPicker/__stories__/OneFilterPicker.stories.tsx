@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useEffect, useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { Input } from "@/ui/input"
 import { Label } from "@/ui/label"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type {
   FiltersDefinition,
@@ -33,20 +34,23 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "FilterPicker",
+  title: "Filters/FilterPicker",
+  tags: ["!autodocs", "stable"],
   component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
     return <OneFilterPickerComponent {...props} />
   },
   decorators: [
-    (Story, { args }) => {
+    (Story, { args, parameters }) => {
       const [filters, setFilters] = useState<
         FiltersState<typeof filterDefinition>
       >(args?.value as FiltersState<typeof filterDefinition>)
+      const onChange =
+        parameters.echoChanges === false ? args.onChange : setFilters
 
       return (
         <>
           <div className="mb-10 w-[800px]">
-            <Story args={{ ...args, value: filters, onChange: setFilters }} />
+            <Story args={{ ...args, value: filters, onChange }} />
           </div>
           <p>
             Filters:
@@ -192,6 +196,46 @@ export const Default: Story = {
     value: {},
     onChange: fn(),
   },
+}
+
+export const OptimisticWithoutEcho: Story = {
+  args: {
+    filters: filterDefinition,
+    value: {},
+    onChange: fn(),
+  },
+  parameters: {
+    echoChanges: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const page = within(canvasElement.closest("body")!)
+
+    await userEvent.click(canvas.getByRole("button", { name: "Filters" }))
+    await userEvent.click(page.getByRole("button", { name: "Department" }))
+    await userEvent.click(
+      await page.findByRole("checkbox", { name: "Engineering" })
+    )
+    await userEvent.click(page.getByRole("button", { name: "Apply filters" }))
+
+    await expect(
+      await canvas.findByRole("button", { name: "Department: Engineering" })
+    ).toBeInTheDocument()
+  },
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    filters: filterDefinition,
+    value: {
+      department: ["engineering"],
+      name: "John",
+    },
+    presets: samplePresets,
+    onChange: fn(),
+  },
+  parameters: withSnapshot({}),
 }
 
 /**

@@ -50,6 +50,21 @@ export type VisualizationFilterOverrides<
 }
 
 /**
+ * Optional per-visualization label override for built-in visualization types.
+ * When omitted, the localized built-in label from
+ * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
+ *
+ * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
+ * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
+ * comes from the built-in registry for the visualization type.
+ */
+export type VisualizationLabelOverrides = {
+  /** Custom label shown in the view switcher chip and Settings selector.
+   *  Defaults to the localized built-in label for this visualization type. */
+  label?: string
+}
+
+/**
  * Represents a visualization configuration for displaying collection data.
  * Supports different visualization types (card, table, or custom) with their respective options.
  *
@@ -71,19 +86,22 @@ export type Visualization<
       type: "card"
       /** Configuration options for card visualization */
       options: CardVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters, Sortings>)
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
   | ({
       /** Kanban-based visualization type */
       type: "kanban"
       /** Configuration options for kanban visualization */
       options: KanbanVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters, Sortings>)
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
   | ({
       /** Table-based visualization type */
       type: "table"
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
-    } & VisualizationFilterOverrides<Filters, Sortings>)
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
   | ({
       /** Editable table-based visualization type */
       type: "editableTable"
@@ -94,19 +112,22 @@ export type Visualization<
         Sortings,
         Summaries
       >
-    } & VisualizationFilterOverrides<Filters, Sortings>)
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
   | ({
       /** List-based visualization type */
       type: "list"
       /** Configuration options for list visualization */
       options: ListVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters, Sortings>)
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
   | ({
       /** Graph/org-chart-based visualization type */
       type: "graph"
       /** Configuration options for graph visualization */
       options: GraphVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters, Sortings>)
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
   | ({
       /** Human-readable label for the visualization */
       label: string

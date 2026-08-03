@@ -11,7 +11,9 @@
   "scripts": {
     "prepare": "lefthook install",
     "postinstall": "tsx scripts/install-skills.ts",
-    "skills:sync": "tsx scripts/install-skills.ts"
+    "skills:sync": "tsx scripts/install-skills.ts",
+    "ownership": "pnpm --filter @factorialco/f0-ownership run generate",
+    "ownership:check": "pnpm --filter @factorialco/f0-ownership run check"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
@@ -38,9 +40,9 @@
       "@types/react-dom": "^18.3.1",
       "react": "18.3.1",
       "react-dom": "18.3.1",
-      "@factorialco/f0-react-native>react": "19.1.0",
-      "@factorialco/f0-react-native>react-dom": "19.1.0",
-      "@factorialco/f0-react-native>react-test-renderer": "19.1.0"
+      "@factorialco/f0-react-native>react": "19.2.3",
+      "@factorialco/f0-react-native>react-dom": "19.2.3",
+      "@factorialco/f0-react-native>react-test-renderer": "19.2.3"
     }
   }
 }

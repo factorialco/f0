@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { subDays } from "date-fns"
+import { addMonths, subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
@@ -245,6 +245,23 @@ export const WithMinMaxDates: Story = {
     granularities: ["day", "week", "month"],
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     maxDate: today, // Can't select dates after today
+  },
+}
+
+export const OpensOnMinDate: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With no value selected, the calendar opens on the month of the nearest bound instead of today. Here `minDate` is two months ahead, so the picker opens on that month — handy for an end-date picker whose `minDate` is the already-selected start date.",
+      },
+    },
+  },
+  args: {
+    label: "Date",
+    placeholder: "Select a date",
+    minDate: addMonths(today, 2),
+    open: true,
   },
 }
 

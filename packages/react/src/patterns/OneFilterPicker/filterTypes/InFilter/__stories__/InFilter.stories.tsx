@@ -14,7 +14,7 @@ import type { InFilterOptionItem, InFilterOptions } from "../types"
 import { InFilter } from "../InFilter"
 
 const meta = {
-  title: "FilterPicker/Filters/InFilter",
+  title: "Filters/FilterPicker/Filters/InFilter",
   component: InFilter,
   parameters: {
     layout: "centered",
@@ -397,4 +397,165 @@ export const WithDataSource: Story = {
     value: [],
     onChange: () => {},
   },
+}
+
+// Grouped (nested) options example.
+//
+// A parent option can expose `children`, whose selections are stored under a
+// separate `filterKey` (here `"space"`). Expanding a group reveals its children;
+// toggling a child is reported through `onFilterChange(filterKey, values)` rather
+// than the parent's `onChange`. This is how "in" filters render grouped options
+// like the office → floor hierarchy below.
+const GroupedOptionsExample = () => {
+  // Parent selection (offices) lives in `value`; nested child selections
+  // (spaces) live under their own filter key, mirroring how OneFilterPicker
+  // stores sibling-filter values.
+  const [officeValues, setOfficeValues] = useState<string[]>([])
+  const [allFiltersValue, setAllFiltersValue] = useState<
+    Record<string, unknown>
+  >({ space: [] })
+
+  const groupedOptions: InFilterOptionItem<string>[] = [
+    {
+      value: "101",
+      label: "Barcelona HQ",
+      children: {
+        filterKey: "space",
+        options: [
+          { value: "1", label: "Floor 1" },
+          { value: "2", label: "Floor 2" },
+          { value: "3", label: "Rooftop Terrace" },
+        ],
+      },
+    },
+    {
+      value: "102",
+      label: "Madrid Office",
+      children: {
+        filterKey: "space",
+        options: [
+          { value: "4", label: "Floor 1 (Madrid)" },
+          { value: "5", label: "Floor 2 (Madrid)" },
+        ],
+      },
+    },
+    { value: "103", label: "London (no floors)" },
+  ]
+
+  return (
+    <InFilter<string>
+      schema={{ label: "Office", options: { options: groupedOptions } }}
+      value={officeValues}
+      onChange={setOfficeValues}
+      allFiltersValue={allFiltersValue}
+      onFilterChange={(key, value) =>
+        setAllFiltersValue((prev) => ({ ...prev, [key]: value }))
+      }
+    />
+  )
+}
+
+export const GroupedOptions: Story = {
+  render: () => <GroupedOptionsExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Options grouped under expandable parents. Child selections are stored under a separate `filterKey` and reported via `onFilterChange`, so a group's children can drive a sibling filter independently of the parent selection.",
+      },
+    },
+  },
+}
+
+// Hierarchical nested options with multiple depth levels.
+//
+// Reproduces the exact scenario the root-level separator fix targets: a deeply
+// nested tree (4 depth levels) where an expanded node sits next to a sibling.
+// Only root-level entries render a bottom-border separator, so the expanded
+// subtree reads as a single continuous block.
+const NestedOptionsExample = () => {
+  const [selectedValues, setSelectedValues] = useState<string[]>([])
+  const [allFilters, setAllFilters] = useState<Record<string, unknown>>({})
+
+  const handleChange = (value: string[]) => {
+    setSelectedValues(value)
+    setAllFilters((prev) => ({ ...prev, team: value }))
+  }
+
+  const handleFilterChange = (key: string, value: unknown) => {
+    setAllFilters((prev) => ({ ...prev, [key]: value }))
+  }
+
+  return (
+    <InFilter<string>
+      schema={{
+        label: "Teams",
+        options: {
+          options: [
+            {
+              value: "people",
+              label: "People",
+              children: {
+                filterKey: "teamDepth1",
+                options: [
+                  {
+                    value: "people_2",
+                    label: "people_2",
+                    children: {
+                      filterKey: "teamDepth2",
+                      options: [
+                        {
+                          value: "people_3",
+                          label: "people_3",
+                          children: {
+                            filterKey: "teamDepth3",
+                            options: [
+                              { value: "people_4", label: "people_4" },
+                              { value: "people_4b", label: "people_4b" },
+                            ],
+                          },
+                        },
+                        { value: "people_3b", label: "people_3b" },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              value: "engineering",
+              label: "Engineering",
+              children: {
+                filterKey: "teamDepth1",
+                options: [
+                  {
+                    value: "frontend",
+                    label: "Frontend",
+                    children: {
+                      filterKey: "teamDepth2",
+                      options: [
+                        { value: "design-system", label: "Design System" },
+                        { value: "web-platform", label: "Web Platform" },
+                      ],
+                    },
+                  },
+                  { value: "backend", label: "Backend" },
+                  { value: "mobile", label: "Mobile" },
+                ],
+              },
+            },
+            { value: "marketing", label: "Marketing" },
+          ],
+        },
+      }}
+      value={selectedValues}
+      onChange={handleChange}
+      onFilterChange={handleFilterChange}
+      allFiltersValue={allFilters}
+    />
+  )
+}
+
+export const NestedOptions: Story = {
+  render: () => <NestedOptionsExample />,
 }

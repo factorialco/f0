@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.59.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.58.1...f0-react-native-v0.59.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
+## [0.58.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.58.0...f0-react-native-v0.58.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **F0Button:** clip press overlay to the button's rounded corners ([#4702](https://github.com/factorialco/f0/issues/4702)) ([2b80c30](https://github.com/factorialco/f0/commit/2b80c30c22fcc77b708b7e50416a7a56b68ad66a))
+
+## [0.58.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.57.0...f0-react-native-v0.58.0) (2026-07-10)
+
+
+### Features
+
+* **react-native:** support Expo SDK 56 (React Native 0.85) ([#4584](https://github.com/factorialco/f0/issues/4584)) ([c8312c9](https://github.com/factorialco/f0/commit/c8312c955f59dcb162c9dfbcabe6a5e60ee782a4))
+
 ## [0.57.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.56.0...f0-react-native-v0.57.0) (2026-07-06)
 
 

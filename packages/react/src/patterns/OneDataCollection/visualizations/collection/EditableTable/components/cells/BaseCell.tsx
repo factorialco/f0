@@ -19,6 +19,7 @@ const cursorClass = {
 } as const
 
 export function BaseCell({
+  disabled = false,
   readonly = false,
   showRightBorder = true,
   cursor = "text",
@@ -29,6 +30,7 @@ export function BaseCell({
   hintPosition = "left",
   children,
 }: {
+  disabled?: boolean
   readonly?: boolean
   showRightBorder?: boolean
   cursor?: "text" | "pointer" | "default" | "not-allowed"
@@ -80,7 +82,8 @@ export function BaseCell({
             : borderOnHover
               ? "shadow-none [&:not(:focus-within)]:hover:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))] focus-within:relative focus-within:z-[1] focus-within:border-r-0 focus-within:bg-f1-background focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
               : "shadow-none",
-        readonly && "bg-f1-background-secondary"
+        readonly && "bg-f1-background-secondary",
+        disabled && "bg-f1-background-disabled"
       )}
     >
       <ErrorTooltip message={error}>

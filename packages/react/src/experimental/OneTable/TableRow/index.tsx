@@ -11,10 +11,16 @@ interface TableRowProps {
   selected?: boolean
   className?: string
   sticky?: boolean
+  /**
+   * Extra inline styles merged onto the row. Used, for example, to apply a
+   * drag transform when the row is sortable. Merged after the sticky-top
+   * offset so callers can override it when needed.
+   */
+  style?: React.CSSProperties
 }
 
 const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
-  ({ children, selected, className, sticky }, ref) => {
+  ({ children, selected, className, sticky, style }, ref) => {
     return (
       <TableRowRoot
         ref={ref}
@@ -27,7 +33,10 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
           "[&:has(a:focus)]:before:rounded-sm [&:has(a:focus)]:before:ring-1 [&:has(a:focus)]:before:ring-inset [&:has(a:focus)]:before:ring-f1-special-ring",
           sticky && "hover:bg-f1-background-hover! sticky z-20 bg-f1-background"
         )}
-        style={sticky ? { top: TABLE_ROW_STICKY_TOP_OFFSET } : undefined}
+        style={{
+          ...(sticky ? { top: TABLE_ROW_STICKY_TOP_OFFSET } : undefined),
+          ...style,
+        }}
       >
         {children}
       </TableRowRoot>

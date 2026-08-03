@@ -29,10 +29,25 @@
  * rollup noise (the `F0TextInputProps_2` suffixes / dangling `./types` imports)
  * instead of diffing raw `.d.ts` text.
  *
- * Unions are compared variant-by-variant (pairwise) and intersections of
+ * Unions are compared as *sets* of structural variants, and intersections of
  * object shapes are flattened into one merged member set — so an optional
  * prop added to a base type that feeds a union of prop variants (the
  * `F0SelectProps` shape) classifies as additive, not as "the union changed".
+ *
+ * A union that only *gains* variants is a widening and is treated as safe:
+ * accepting more values (e.g. a `CountryCode` union that grows when countries
+ * are added, or a new `"phone"` field type) does not break a consumer passing
+ * one of the existing values, the same way a new optional prop is safe. Only a
+ * *removed* variant (narrowing) is breaking. When every variant is reshaped by
+ * a change to a shared base, the reshaped variants are aligned and compared
+ * structurally so a real breaking prop change is still caught.
+ *
+ * Array and tuple types are unwrapped to their element type and compared
+ * structurally, wrapped in an `array` marker so a `T` ↔ `T[]` change still
+ * reads as a shape change. Without this, an array-typed prop collapses to an
+ * opaque `T[]` string and any breaking change to a type reachable *only*
+ * through it — e.g. the visualization options behind OneDataCollection's
+ * `visualizations` array — would be hidden.
  *
  * The shared translations dictionary (`TranslationsType` / `TranslationShape`
  * / `TranslationKey`, plus the inlined `defaultTranslations` object) is
@@ -47,7 +62,12 @@
  * unions/intersections) are compared by their normalized string, so a
  * *widening* of a leaf type (e.g. a prop `string` → `string | number`, which
  * is safe for an input) is reported as breaking. Object/parameter shape
- * changes — the common case — are classified precisely.
+ * changes — the common case — are classified precisely. Variance is not
+ * tracked, so a widened union is assumed to sit in an input position (a prop
+ * value the consumer passes in), where widening is safe; a union that only
+ * grows in a covariant output position (a value the consumer reads back and
+ * exhaustively switches over) is under-reported rather than flagged. This
+ * matches how the check already treats a new optional prop as safe.
  *
  * Usage:
  *   tsx .scripts/check-api-surface.ts --base <dir> --head <dir> [--json]
@@ -67,13 +87,18 @@ import consola from "consola"
 import ts from "typescript"
 
 /** Public entry points shipped in `dist/`. */
-export const ENTRIES = ["f0", "experimental", "ai"] as const
+export const ENTRIES = ["f0", "experimental", "ai", "component-status"] as const
 export type Entry = (typeof ENTRIES)[number]
 
 /** How deep to expand object/signature types before treating them as opaque
- * leaves. Bounds the work while still reaching component props
- * (export → call signature → props object → member). */
-const MAX_DEPTH = 4
+ * leaves. Bounds the work while still reaching props nested a few containers
+ * deep — the deepest chain we guard is OneDataCollection's
+ * export → call signature → props object → `visualizations` array → element →
+ * visualization variant → `options` → member. Arrays are unwrapped (see
+ * {@link buildApiItem}) and each container costs one level, so this must clear
+ * that chain. Raising it expands more of every export's type tree, so keep it
+ * to the shallowest value that reaches the props we care about. */
+const MAX_DEPTH = 7
 
 /**
  * A normalized, structural representation of a type used for comparison.
@@ -81,6 +106,7 @@ const MAX_DEPTH = 4
  *    of object shapes are flattened into this (the checker merges members).
  *  - `callable`: a function/component, compared signature by signature.
  *  - `union`: a union, compared variant by variant (pairwise by position).
+ *  - `array`: an array/tuple, compared by its unwrapped element type.
  *  - `translations`: the shared translations dictionary, compared by its
  *    dot-separated key paths and summarized once per analysis.
  *  - `opaque`: anything else (primitive, external type, non-object
@@ -103,6 +129,7 @@ export type ApiItem =
       }>
     }
   | { k: "union"; members: ApiItem[] }
+  | { k: "array"; element: ApiItem }
   | { k: "translations"; keys: string[] }
   | { k: "opaque"; text: string }
 
@@ -337,15 +364,83 @@ function typeParameterText(sym: ts.Symbol): string {
 const TYPE_TO_STRING_FLAGS =
   ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.WriteArrayAsGenericType
 
+const normalizedTypeTextCache = new Map<string, string>()
+const typeNodePrinter = ts.createPrinter({ removeComments: true })
+
+/**
+ * TypeScript may render equivalent unions in a different order when unrelated
+ * declarations move in an api-extractor rollup. Opaque types preserve that
+ * rendered text, so canonicalize every union node before comparing it. Parsing
+ * the whole type lets this reach unions nested inside external generic types
+ * without changing intersection order or other potentially meaningful syntax.
+ */
+function canonicalizeUnionOrder(typeText: string): string {
+  if (!typeText.includes("|")) return typeText
+
+  const cached = normalizedTypeTextCache.get(typeText)
+  if (cached !== undefined) return cached
+
+  const sourceFile = ts.createSourceFile(
+    "__api_surface_type__.ts",
+    `type __ApiSurfaceType = ${typeText}`,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TS
+  )
+  const statement = sourceFile.statements[0]
+  if (
+    sourceFile.parseDiagnostics.length > 0 ||
+    !ts.isTypeAliasDeclaration(statement)
+  ) {
+    normalizedTypeTextCache.set(typeText, typeText)
+    return typeText
+  }
+
+  const result = ts.transform<ts.TypeNode>(statement.type, [
+    (context) => {
+      const visit: ts.Visitor = (node) => {
+        const visited = ts.visitEachChild(node, visit, context)
+        if (!ts.isUnionTypeNode(visited)) return visited
+
+        const sortedTypes = [...visited.types]
+          .map((type) => ({
+            text: typeNodePrinter.printNode(
+              ts.EmitHint.Unspecified,
+              type,
+              sourceFile
+            ),
+            type,
+          }))
+          .sort((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0))
+          .map(({ type }) => type)
+
+        return context.factory.updateUnionTypeNode(visited, sortedTypes)
+      }
+
+      return (root) => ts.visitNode(root, visit) as ts.TypeNode
+    },
+  ])
+  const normalized = typeNodePrinter.printNode(
+    ts.EmitHint.Unspecified,
+    result.transformed[0],
+    sourceFile
+  )
+  result.dispose()
+  normalizedTypeTextCache.set(typeText, normalized)
+  return normalized
+}
+
 /**
  * Normalize a type string so it is comparable across the two analyzed dirs:
  *  - strip `import("<abs path>").` qualifiers — the path is base-dir vs
  *    head-dir specific and would make every cross-referenced type look changed;
  *  - strip per-program unique-id suffixes on computed/internal names
  *    (e.g. `__@iterator@968`), which differ run-to-run.
+ *  - canonicalize union-member order, including unions nested in opaque types.
  */
 export function normalize(s: string): string {
-  return s.replace(/import\("[^"]*"\)\./g, "").replace(/@\d+/g, "")
+  const stableText = s.replace(/import\("[^"]*"\)\./g, "").replace(/@\d+/g, "")
+  return canonicalizeUnionOrder(stableText)
 }
 
 /** A type declared only outside the analyzed dir (React/DOM/lib) — referenced
@@ -632,6 +727,34 @@ function buildApiItem(
   const props = type.getProperties()
   const indexInfos = checker.getIndexInfosOfType(type)
   const isObjectLike = props.length > 0 || indexInfos.length > 0
+
+  // Array/tuple types are lib (external) objects that would otherwise collapse
+  // to an opaque `T[]` string, hiding breaking changes to their element's
+  // shape — e.g. a prop removed from a type nested inside OneDataCollection's
+  // `visualizations` array. Unwrap the numeric-index element type and compare
+  // it structurally; the `array` wrapper is kept so a `T` ↔ `T[]` change still
+  // reads as a shape change. Only lib arrays are unwrapped here — a local
+  // object type carrying a numeric index signature still goes through the
+  // object branch below, so its `index` string is compared as before.
+  if (isObjectType && isExternal(type, dirAbsolute)) {
+    const elementType = indexInfos.find(
+      (info) => !!(info.keyType.flags & ts.TypeFlags.Number)
+    )?.type
+    if (elementType) {
+      const next = new Set(visited).add(type)
+      return {
+        k: "array",
+        element: buildApiItem(
+          elementType,
+          checker,
+          dirAbsolute,
+          depth - 1,
+          next
+        ),
+      }
+    }
+  }
+
   if (isObjectType && isObjectLike && !isExternal(type, dirAbsolute)) {
     const next = new Set(visited).add(type)
     const members: Record<
@@ -803,6 +926,46 @@ function translationsToObjectItem(keys: string[]): ApiItem {
 }
 
 /**
+ * A canonical, order-independent string signature of an {@link ApiItem}, used
+ * to match union variants across the two sides as a set. Two variants with the
+ * same signature are structurally identical; object members are sorted by name
+ * and union members by their own signatures so member/variant ordering does not
+ * affect the result.
+ */
+export function itemSignature(item: ApiItem): string {
+  switch (item.k) {
+    case "opaque":
+      return `O:${item.text}`
+    case "translations":
+      // keys are already sorted at construction time
+      return `T:${item.keys.join(",")}`
+    case "union":
+      return `U:[${item.members.map(itemSignature).sort().join("|")}]`
+    case "array":
+      return `A:${itemSignature(item.element)}`
+    case "callable":
+      return `C:[${item.sigs
+        .map(
+          (s) =>
+            `(${s.params
+              .map((p) => `${p.optional ? "?" : ""}${itemSignature(p.type)}`)
+              .join(",")})=>${itemSignature(s.ret)}`
+        )
+        .join(";")}]`
+    case "object": {
+      const members = Object.keys(item.members)
+        .sort()
+        .map((name) => {
+          const m = item.members[name]
+          return `${name}${m.optional ? "?" : ""}${m.readonly ? "R" : ""}:${itemSignature(m.type)}`
+        })
+        .join(";")
+      return `{${members}}${item.index ? `[${item.index}]` : ""}`
+    }
+  }
+}
+
+/**
  * Structural breaking-change comparison. Variance is modelled the way a
  * consumer experiences component props: adding an optional member or relaxing
  * a required member to optional is safe; removing a member, retyping it, adding
@@ -849,20 +1012,79 @@ function classifyItem(
       : []
   }
 
+  if (before.k === "array" && after.k === "array") {
+    // Same array-ness on both sides: the delta is entirely in the element
+    // shape. (A `T` ↔ `T[]` change is caught by the kind mismatch above.)
+    return classifyItem(before.element, after.element, at(path, "[]"), tx)
+  }
+
   if (before.k === "union" && after.k === "union") {
-    if (before.members.length !== after.members.length) {
+    // Match variants across the two sides as a multiset of structural
+    // signatures. Variants present on both sides are unchanged; what is left
+    // over is the actual delta.
+    const remainingHead = new Map<string, number>()
+    for (const m of after.members) {
+      const s = itemSignature(m)
+      remainingHead.set(s, (remainingHead.get(s) ?? 0) + 1)
+    }
+    const unmatchedBase: ApiItem[] = []
+    for (const m of before.members) {
+      const s = itemSignature(m)
+      const n = remainingHead.get(s) ?? 0
+      if (n > 0) remainingHead.set(s, n - 1)
+      else unmatchedBase.push(m)
+    }
+    const remainingBase = new Map<string, number>()
+    for (const m of before.members) {
+      const s = itemSignature(m)
+      remainingBase.set(s, (remainingBase.get(s) ?? 0) + 1)
+    }
+    const unmatchedHead: ApiItem[] = []
+    for (const m of after.members) {
+      const s = itemSignature(m)
+      const n = remainingBase.get(s) ?? 0
+      if (n > 0) remainingBase.set(s, n - 1)
+      else unmatchedHead.push(m)
+    }
+
+    // Every base variant still has a twin on the head side: the union only
+    // gained variants (widening) or is unchanged. Safe, like a new optional
+    // prop — accepting more values doesn't break a consumer passing an
+    // existing one.
+    if (unmatchedBase.length === 0) return []
+
+    // Base variants disappeared and nothing reshaped took their place: a pure
+    // narrowing. Removing accepted values is breaking.
+    if (unmatchedHead.length === 0) {
       return [
-        `${path || "type"} union variants changed (${before.members.length} → ${after.members.length})`,
+        `${path || "type"} union variants removed (${before.members.length} → ${after.members.length})`,
       ]
     }
-    // Variants are compared at the same path so identical reasons coming
-    // from a change in a shared base dedupe into a single line.
+
+    // Both sides carry unmatched variants — the shape a shared base being
+    // changed produces (every variant is reshaped, so none matches exactly).
+    // Align the reshaped variants pairwise and compare them structurally, so a
+    // real breaking prop change is still caught while an additive one is not.
+    // Identical reasons from each variant dedupe into a single line.
     const reasons = new Set<string>()
-    before.members.forEach((b, i) => {
-      for (const reason of classifyItem(b, after.members[i], path, tx)) {
+    const paired = Math.min(unmatchedBase.length, unmatchedHead.length)
+    for (let i = 0; i < paired; i++) {
+      for (const reason of classifyItem(
+        unmatchedBase[i],
+        unmatchedHead[i],
+        path,
+        tx
+      )) {
         reasons.add(reason)
       }
-    })
+    }
+    // Leftover base variants with no head counterpart were removed (breaking);
+    // leftover head variants are additive and safe.
+    if (unmatchedBase.length > unmatchedHead.length) {
+      reasons.add(
+        `${path || "type"} union variants removed (${before.members.length} → ${after.members.length})`
+      )
+    }
     return [...reasons]
   }
 

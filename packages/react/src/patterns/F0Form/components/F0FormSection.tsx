@@ -289,7 +289,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
           <div
             className={cn(
               "flex items-start justify-between py-5",
-              "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0"
+              "[&>div]:px-0 [&>div]:mx-0 [&>div]:border-0"
             )}
           >
             <SectionHeader title={title} description={description ?? ""} />

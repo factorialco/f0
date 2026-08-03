@@ -3,7 +3,16 @@ import { describe, expect, it } from "vitest"
 import {
   computeCategoryAxisLayout,
   computeLabelInterval,
+  escapeTooltipText,
 } from "../utils/options"
+
+describe("escapeTooltipText", () => {
+  it("escapes HTML-significant characters in consumer-provided text", () => {
+    expect(escapeTooltipText(`<img src=x onerror="alert('xss')">&`)).toBe(
+      "&lt;img src=x onerror=&quot;alert(&#039;xss&#039;)&quot;&gt;&amp;"
+    )
+  })
+})
 
 describe("computeLabelInterval", () => {
   it("returns undefined when labels fit comfortably", () => {
@@ -40,6 +49,13 @@ describe("computeLabelInterval", () => {
     const interval = computeLabelInterval(11, 600)
     expect(interval).toBeDefined()
     expect(interval).toBeGreaterThan(0)
+  })
+
+  it("uses the custom minSpace when provided (vertical/Y axis labels)", () => {
+    // 12 categories in 360px = 30px each. With the 60px width default this
+    // would skip (30 < 60), but a ~25px line-height min fits every label.
+    expect(computeLabelInterval(12, 360)).toBeGreaterThan(0) // default 60 → skips
+    expect(computeLabelInterval(12, 360, 25)).toBeUndefined() // line-height → all fit
   })
 })
 

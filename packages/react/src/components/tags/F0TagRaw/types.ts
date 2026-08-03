@@ -17,6 +17,11 @@ export type F0TagRawProps = {
    * Extra classes merged onto the tag (e.g. to give it a background).
    */
   className?: string
+  /**
+   * The size of the tag
+   * @default "md"
+   */
+  size?: "md" | "sm"
 } & (
   | {
       icon: IconType

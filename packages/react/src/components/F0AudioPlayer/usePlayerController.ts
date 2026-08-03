@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from "react"
+import { RefObject, useCallback, useEffect, useRef, useState } from "react"
 
 import type { F0AudioPlayerProps } from "./types"
 import { AudioPlayerControls, useAudioPlayer } from "./useAudioPlayer"
@@ -8,13 +8,26 @@ export interface PlayerController extends Omit<
   "play" | "pause"
 > {
   audioRef: RefObject<HTMLAudioElement>
+  currentSrc: string | undefined
   playbackRates: number[]
 }
 
+/**
+ * The controller drives a single `<audio>` element, so it takes an already
+ * language-resolved source (a URL or a lazy resolver) — not the localizable
+ * `Localized<...>` shape. Callers resolve the active language first (see
+ * {@link useAudioLanguage}).
+ */
+type ControllerProps = Omit<F0AudioPlayerProps, "src"> & {
+  src: string | (() => Promise<string>)
+}
+
 export const usePlayerController = (
-  props: F0AudioPlayerProps
+  props: ControllerProps
 ): PlayerController => {
   const {
+    src,
+    duration,
     playing,
     onPlayingChange,
     playbackRates = [1, 1.5, 2],
@@ -26,31 +39,91 @@ export const usePlayerController = (
     onError,
   } = props
 
+  const getSrc = typeof src === "function" ? src : undefined
+  const eagerSrc = typeof src === "function" ? undefined : src
+
   const audioRef = useRef<HTMLAudioElement>(null)
+  const [resolvedSrc, setResolvedSrc] = useState(eagerSrc)
+  const resolvingRef = useRef(false)
+  const playAfterResolveRef = useRef(false)
+  const refreshedRef = useRef(false)
 
-  const player = useAudioPlayer(audioRef, {
-    onPlay,
-    onPause,
-    onSeek,
-    onTimeUpdate,
-    onEnded,
-    onError,
-  })
+  const ensureSrc = useCallback(async () => {
+    if (!getSrc || resolvingRef.current) return
+    resolvingRef.current = true
+    try {
+      setResolvedSrc(await getSrc())
+    } catch {
+      playAfterResolveRef.current = false
+      onError?.(null)
+    } finally {
+      resolvingRef.current = false
+    }
+  }, [getSrc, onError])
 
-  // Drive the element from the controlled `playing` prop.
+  const handlePlay = useCallback(() => {
+    refreshedRef.current = false
+    onPlay?.()
+  }, [onPlay])
+
+  const handleError = useCallback(
+    (error: MediaError | null) => {
+      onError?.(error)
+      if (!getSrc || refreshedRef.current) return
+      refreshedRef.current = true
+      playAfterResolveRef.current = true
+      setResolvedSrc(undefined)
+      void ensureSrc()
+    },
+    [onError, getSrc, ensureSrc]
+  )
+
+  const player = useAudioPlayer(
+    audioRef,
+    {
+      onPlay: handlePlay,
+      onPause,
+      onSeek,
+      onTimeUpdate,
+      onEnded,
+      onError: handleError,
+    },
+    duration ?? 0
+  )
+
+  useEffect(() => {
+    if (eagerSrc !== undefined) setResolvedSrc(eagerSrc)
+  }, [eagerSrc])
+
+  useEffect(() => {
+    if (!resolvedSrc || !playAfterResolveRef.current) return
+    playAfterResolveRef.current = false
+    player.play()
+  }, [resolvedSrc, player])
+
+  const toggle = useCallback(() => {
+    if (!player.isPlaying && !resolvedSrc && getSrc) {
+      playAfterResolveRef.current = true
+      void ensureSrc()
+      return
+    }
+    player.toggle()
+  }, [player, resolvedSrc, getSrc, ensureSrc])
+
   useEffect(() => {
     if (playing === undefined) return
     if (playing && !player.isPlaying) {
-      player.play()
+      if (!resolvedSrc && getSrc) {
+        playAfterResolveRef.current = true
+        void ensureSrc()
+      } else {
+        player.play()
+      }
     } else if (!playing && player.isPlaying) {
       player.pause()
     }
-  }, [playing, player])
+  }, [playing, player, resolvedSrc, getSrc, ensureSrc])
 
-  // `player.isPlaying` (from the audio element events) is the single source of
-  // truth. Notify the consumer only when it actually changes — including
-  // changes the consumer didn't initiate (e.g. autoplay blocked, playback
-  // ended) so a controlled parent never gets stuck out of sync.
   const reportedPlaying = useRef(player.isPlaying)
   useEffect(() => {
     if (reportedPlaying.current === player.isPlaying) return
@@ -60,6 +133,7 @@ export const usePlayerController = (
 
   return {
     audioRef,
+    currentSrc: resolvedSrc,
     isPlaying: player.isPlaying,
     currentTime: player.currentTime,
     duration: player.duration,
@@ -67,7 +141,7 @@ export const usePlayerController = (
     playbackRate: player.playbackRate,
     isLoading: player.isLoading,
     error: player.error,
-    toggle: player.toggle,
+    toggle,
     seek: player.seek,
     setPlaybackRate: player.setPlaybackRate,
     playbackRates,

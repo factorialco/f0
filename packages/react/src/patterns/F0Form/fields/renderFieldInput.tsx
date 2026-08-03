@@ -13,6 +13,7 @@ import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
 import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
 import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
+import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
@@ -225,6 +226,14 @@ export function renderFieldInput({
         <CardSelectFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+        />
+      )
+    case "entitiesList":
+      return (
+        <EntitiesListFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          error={fieldState.error}
         />
       )
     case "custom":

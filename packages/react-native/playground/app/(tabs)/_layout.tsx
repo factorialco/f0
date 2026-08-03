@@ -1,41 +1,27 @@
-import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
-import { useUniwind } from 'uniwind';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
+/**
+ * Playground tab bar.
+ *
+ * Uses expo-router Native Tabs so the bar is the platform's real system tab bar:
+ * a UITabBar on iOS (Liquid Glass material by default on iOS 26+) and a Material 3
+ * bottom navigation on Android — both via react-native-screens, not a JS view.
+ *
+ * We intentionally do NOT set `backgroundColor`/`blurEffect`: on iOS 26 that would
+ * replace the system Liquid Glass material. Light/dark adaptation is handled by the
+ * OS. Icons use SF Symbols (`sf`) on iOS and Material symbols (`md`) on Android.
+ */
 export default function TabLayout() {
-  const { theme } = useUniwind();
-  const isDark = theme === 'dark';
-
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: isDark ? '#ffffff' : '#000000',
-        tabBarInactiveTintColor: isDark ? '#666666' : '#999999',
-        tabBarStyle: {
-          backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
-          borderTopColor: isDark ? '#333333' : '#e5e5e5',
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="tokens"
-        options={{
-          title: 'Design Tokens',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>🎨</Text>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="components"
-        options={{
-          title: 'Components',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>🧩</Text>
-          ),
-        }}
-      />
-    </Tabs>
+    <NativeTabs>
+      <NativeTabs.Trigger name="components">
+        <NativeTabs.Trigger.Icon sf="square.grid.2x2.fill" md="widgets" />
+        <NativeTabs.Trigger.Label>Components</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="tokens">
+        <NativeTabs.Trigger.Icon sf="paintpalette.fill" md="palette" />
+        <NativeTabs.Trigger.Label>Design Tokens</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

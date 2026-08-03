@@ -7,6 +7,7 @@ import type {
   DurationUnit,
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
@@ -22,6 +23,11 @@ import type { F0NumberConfig } from "./fields/number/types"
 import type { F0PeriodConfig } from "./fields/period/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0SelectConfig } from "./fields/select/types"
+import type {
+  EntitiesListItem,
+  F0EntitiesListConfig,
+  F0EntitiesListOptions,
+} from "./fields/entitiesList/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
 import type { F0TextConfig } from "./fields/text/types"
 import type { F0TextareaConfig } from "./fields/textarea/types"
@@ -92,6 +98,7 @@ export type F0FieldType =
   | "richtext"
   | "file"
   | "cardSelect"
+  | "entitiesList"
   | "custom"
 
 /**
@@ -160,6 +167,14 @@ export interface F0BaseConfig {
    * @default false
    */
   resetOnDisable?: boolean
+  /**
+   * When true, a change to this field auto-saves the form (a debounced submit),
+   * without waiting for the submit button. Other fields still save on submit.
+   * Independent from the form-level `submitConfig: { type: "autosubmit" }`,
+   * which auto-saves on any field change.
+   * @default false
+   */
+  autoSave?: boolean
   /** Row ID for horizontal grouping with other fields */
   row?: string
   /**
@@ -211,6 +226,7 @@ export type {
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
+  F0EntitiesListConfig,
 }
 
 /**
@@ -480,6 +496,15 @@ export type F0ArrayFileConfig = F0BaseConfig &
 export type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig
 
 /**
+ * Config for entities list fields (array of `{ title, url }` objects with
+ * drag-to-reorder and per-row removal).
+ */
+export type F0EntitiesListFieldConfig = F0BaseConfig &
+  F0EntitiesListConfig & {
+    fieldType: "entitiesList"
+  }
+
+/**
  * Config for object fields (richtext, daterange, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
@@ -510,6 +535,7 @@ export type F0FieldConfig<
   | F0ObjectConfig
   | F0PeriodFieldConfig
   | F0StringCardSelectConfig
+  | F0EntitiesListFieldConfig
 
 /**
  * Extended Zod type with F0 metadata
@@ -1406,5 +1432,167 @@ export namespace f0FormField {
     const base = z.array(z.string()).min(1)
     const schema = optional ? base.optional() : base
     return f0FormField(schema as never, { ...rest, multiple: true } as never)
+  }
+
+  // ---- entitiesList --------------------------------------------------------
+
+  /**
+   * @internal Fields shared by every entities-list config variant. `T` is the
+   * inferred row value type, so `config` callbacks (`itemHref`, `listItem`,
+   * `rowActions`, `columns.*.listTag`) receive a typed `item`.
+   */
+  type EntitiesListBaseConfig<T = EntitiesListItem> = Omit<
+    F0EntitiesListFieldConfig,
+    | "fieldType"
+    | "schema"
+    | "createFormDefinition"
+    | "updateFormDefinition"
+    | "config"
+  > & {
+    /** Behavior options, with callbacks typed against the row value `T`. */
+    config?: F0EntitiesListOptions<T>
+  }
+  /** @internal Single-schema config: one `schema` for both add and edit. */
+  type EntitiesListSingleConfig<TItem extends z.ZodObject<z.ZodRawShape>> =
+    EntitiesListBaseConfig<WithRowId<z.infer<TItem>>> & {
+      /** Zod object schema describing one row (add, edit and display). */
+      schema: TItem
+      createFormDefinition?: never
+      updateFormDefinition?: never
+      optional?: boolean
+    }
+  /**
+   * @internal Split-form config: separate `createFormDefinition` and
+   * `updateFormDefinition` (each a `useF0FormDefinition` with its own
+   * `onSubmit`), so add and update can persist independently. The
+   * `updateFormDefinition`'s schema is the canonical row shape (columns,
+   * display, value type), so fields only there should be optional to keep
+   * freshly-created rows valid.
+   */
+  type EntitiesListFormDefsConfig<
+    TCreate extends z.ZodObject<z.ZodRawShape>,
+    TUpdate extends z.ZodObject<z.ZodRawShape>,
+  > = EntitiesListBaseConfig<WithRowId<z.infer<TUpdate>>> & {
+    schema?: never
+    createFormDefinition: F0FormDefinitionSingleSchema<TCreate>
+    updateFormDefinition: F0FormDefinitionSingleSchema<TUpdate>
+    optional?: boolean
+  }
+
+  /**
+   * A row value: the item type plus an optional `id`. `id` is the row identity
+   * used for React keys and `config.editableIds`; it isn't an editable column,
+   * so it's intentionally absent from the item `schema` and added at the value
+   * type level here (the runtime schema stays `z.array(schema)`).
+   * @internal
+   */
+  type WithRowId<V> = V & { id?: string | number }
+  /** @internal Array schema whose inferred value carries the optional row `id`. */
+  type EntitiesListArray<TItem extends z.ZodObject<z.ZodRawShape>> = Omit<
+    z.ZodArray<TItem>,
+    "_output" | "_input"
+  > & {
+    _output: WithRowId<z.infer<TItem>>[]
+    _input: WithRowId<z.input<TItem>>[]
+  }
+  /** @internal Optional variant of {@link EntitiesListArray}. */
+  type OptionalEntitiesListArray<TItem extends z.ZodObject<z.ZodRawShape>> =
+    Omit<z.ZodOptional<z.ZodArray<TItem>>, "_output" | "_input"> & {
+      _output: WithRowId<z.infer<TItem>>[] | undefined
+      _input: WithRowId<z.input<TItem>>[] | undefined
+    }
+
+  /**
+   * Entities list field: an editable table for an array of objects.
+   *
+   * The row shape is defined by `schema` and columns are derived from it
+   * (`z.string()` → text, `z.number()` → number, `z.enum()` → select).
+   *
+   * @example
+   * // Single schema — same fields for add and edit:
+   * links: f0FormField.entitiesList({
+   *   label: "Links",
+   *   schema: z.object({
+   *     title: z.string().min(1),
+   *     url: z.string().url(),
+   *   }),
+   *   config: { labels: { addButton: "Add link" }, maxItems: 8 },
+   * })
+   *
+   * @example
+   * // Split form definitions — add and update persist independently:
+   * const createFormDefinition = useF0FormDefinition({
+   *   schema: z.object({ name: z.string(), email: z.string().email() }),
+   *   onSubmit: async ({ data }) => { await api.create(data); return { success: true } },
+   * })
+   * const updateFormDefinition = useF0FormDefinition({
+   *   schema: z.object({ name: z.string(), email: z.string().email(), role: … }),
+   *   onSubmit: async ({ data }) => { await api.update(data); return { success: true } },
+   * })
+   * members: f0FormField.entitiesList({ createFormDefinition, updateFormDefinition })
+   */
+  // Single-schema overloads.
+  export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
+    config: EntitiesListSingleConfig<TItem> & { optional: true }
+  ): OptionalEntitiesListArray<TItem> &
+    F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>
+  export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
+    config: EntitiesListSingleConfig<TItem> & { optional?: false | undefined }
+  ): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>
+  // Split-form overloads: the value type follows the update form's schema.
+  export function entitiesList<
+    TCreate extends z.ZodObject<z.ZodRawShape>,
+    TUpdate extends z.ZodObject<z.ZodRawShape>,
+  >(
+    config: EntitiesListFormDefsConfig<TCreate, TUpdate> & { optional: true }
+  ): OptionalEntitiesListArray<TUpdate> &
+    F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>
+  export function entitiesList<
+    TCreate extends z.ZodObject<z.ZodRawShape>,
+    TUpdate extends z.ZodObject<z.ZodRawShape>,
+  >(
+    config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
+      optional?: false | undefined
+    }
+  ): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>
+  export function entitiesList(
+    config: EntitiesListBaseConfig & {
+      optional?: boolean
+      schema?: z.ZodObject<z.ZodRawShape>
+      createFormDefinition?: F0FormDefinitionSingleSchema<
+        z.ZodObject<z.ZodRawShape>
+      >
+      updateFormDefinition?: F0FormDefinitionSingleSchema<
+        z.ZodObject<z.ZodRawShape>
+      >
+    }
+  ) {
+    const {
+      optional,
+      schema,
+      createFormDefinition,
+      updateFormDefinition,
+      ...rest
+    } = config
+    // Canonical row schema: the single `schema`, or the update form's schema
+    // (the fuller edit shape) in split-form mode.
+    const canonical = (schema ??
+      updateFormDefinition?.schema) as z.ZodObject<z.ZodRawShape>
+    const options = rest.config
+    let base = z.array(canonical)
+    const effectiveMin = options?.minItems ?? (optional ? undefined : 1)
+    if (effectiveMin !== undefined) base = base.min(effectiveMin)
+    if (options?.maxItems !== undefined) base = base.max(options.maxItems)
+    const finalSchema = optional ? base.optional() : base
+    return f0FormField(
+      finalSchema as never,
+      {
+        ...rest,
+        schema: canonical,
+        createFormDefinition,
+        updateFormDefinition,
+        fieldType: "entitiesList",
+      } as never
+    )
   }
 }

@@ -43,7 +43,9 @@ export const useVisualizationMeta = () => {
 
     return {
       icon: collectionVisualizations[visualization.type].icon,
-      label: i18n.collections.visualizations[visualization.type],
+      label:
+        visualization.label ??
+        i18n.collections.visualizations[visualization.type],
     }
   }
 }

@@ -129,7 +129,13 @@ export const DialogContent = forwardRef<
               className
             )}
             onClick={(e) => {
-              e.preventDefault()
+              // Only stop propagation so clicks inside the dialog box are not
+              // treated as outside-clicks by the overlay handler above. Do NOT
+              // preventDefault: this handler runs for every click that bubbles
+              // up from the dialog's contents, and preventing the default would
+              // cancel default actions of inner controls — most visibly the
+              // native file picker, which opens via a programmatic
+              // `fileInputRef.click()` that bubbles through here.
               e.stopPropagation()
             }}
           >

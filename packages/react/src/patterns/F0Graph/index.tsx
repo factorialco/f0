@@ -5,6 +5,8 @@ export { F0GraphSkeleton } from "./F0GraphSkeleton"
 export type { F0GraphSkeletonProps } from "./F0GraphSkeleton"
 /** Props for configuring F0Graph — data, rendering, zoom, selection, layout, and customization. */
 export type { F0GraphProps } from "./F0Graph"
+/** Imperative handle (via ref) — exposes `focusNode(id)` to fly to a node on demand, even when re-selecting the same node. */
+export type { F0GraphHandle } from "./F0Graph"
 /** Render context passed to the renderNode callback. */
 export type { F0GraphNodeRenderContext } from "./F0Graph"
 

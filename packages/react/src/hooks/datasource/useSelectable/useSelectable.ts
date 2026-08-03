@@ -42,6 +42,7 @@ export function useSelectable<
   resetOnPageChange = true,
   preserveSelectionOnDatasetChange = false,
   getRenderedSelectableEntries,
+  renderedSelectableCount = 0,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -95,8 +96,17 @@ export function useSelectable<
     if (isPageOnlySelection) {
       return data.records?.length || 0
     }
-    return paginationInfo ? paginationInfo.total : data.records?.length
-  }, [paginationInfo, data.records?.length, isPageOnlySelection])
+    const base = paginationInfo
+      ? paginationInfo.total
+      : (data.records?.length ?? 0)
+    // nested/tree tables: paginationInfo.total counts top-level rows, not the selectable children
+    return Math.max(base, renderedSelectableCount)
+  }, [
+    paginationInfo,
+    data.records?.length,
+    isPageOnlySelection,
+    renderedSelectableCount,
+  ])
 
   const currentPageIdentifier = useMemo(() => {
     if (!paginationInfo) return null
@@ -211,7 +221,9 @@ export function useSelectable<
       )
     }
     if (allSelectedCheck && selectAllTotal !== null) {
-      return selectAllTotal - uncheckedCount
+      // clamp at 0: selectAllTotal can lag behind children rendered after "select all"
+      const effectiveTotal = Math.max(selectAllTotal, renderedSelectableCount)
+      return Math.max(0, effectiveTotal - uncheckedCount)
     }
     return checkedCount
   }, [
@@ -221,6 +233,7 @@ export function useSelectable<
     checkedCount,
     isGrouped,
     allSelectedCheck,
+    renderedSelectableCount,
   ])
 
   const { itemsStatus, selectedIds } = useMemo(() => {

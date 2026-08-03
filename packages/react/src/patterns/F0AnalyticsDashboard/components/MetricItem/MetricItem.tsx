@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef, useState } from "react"
+
 import type {
   FiltersDefinition,
   FiltersState,
@@ -5,7 +7,8 @@ import type {
 
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
+import { cn, focusRing } from "@/lib/utils"
 
 import type {
   DashboardMetricData,
@@ -64,16 +67,112 @@ function formatValue(
   }
 }
 
+type MetricTrend = { percent: number; direction: "up" | "down" | "flat" }
+
 function computeTrend(
   value: number,
   previousValue?: number
-): { percent: number; direction: "up" | "down" | "flat" } | undefined {
+): MetricTrend | undefined {
   if (previousValue === undefined || previousValue === 0) return undefined
 
   const percent = ((value - previousValue) / Math.abs(previousValue)) * 100
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"
 
   return { percent: Math.abs(percent), direction }
+}
+
+/**
+ * The formatted value + optional trend, aligned within the widget body.
+ *
+ * Bottom-left by default; once the body grows taller than 220px it centers on
+ * both axes so the number sits in the middle of a large tile instead of
+ * hugging the bottom edge. Height is tracked with a `ResizeObserver`, so it
+ * reacts to grid resizes and fullscreen toggles.
+ */
+export function MetricValue({
+  value,
+  trend,
+}: {
+  value: string
+  trend?: MetricTrend
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { height, width } = useContainerSize(ref)
+  const [isScrollable, setIsScrollable] = useState(false)
+  const centered = height > 220
+
+  useLayoutEffect(() => {
+    const element = ref.current
+    setIsScrollable(
+      element !== null &&
+        (element.scrollWidth > element.clientWidth ||
+          element.scrollHeight > element.clientHeight)
+    )
+  }, [height, trend?.direction, trend?.percent, value, width])
+
+  return (
+    <div
+      ref={ref}
+      tabIndex={isScrollable ? 0 : undefined}
+      className={cn(
+        "flex h-full min-h-0 overflow-auto px-4",
+        centered ? "items-center py-4" : "items-end pb-4",
+        isScrollable &&
+          focusRing(
+            "rounded-sm focus-visible:ring-inset focus-visible:ring-offset-0"
+          )
+      )}
+    >
+      <div
+        className={cn(
+          "flex items-baseline gap-3",
+          // Nudge up to offset the widget header, so the value reads as
+          // optically centered against the whole card rather than the body.
+          // Auto margins center content that fits, but collapse to zero when
+          // it overflows so the beginning remains reachable by scrolling.
+          centered && "mx-auto -translate-y-4"
+        )}
+      >
+        <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
+          {value}
+        </span>
+        {trend && trend.direction !== "flat" && (
+          <div className="flex shrink-0 items-center">
+            {trend.direction === "up" ? (
+              <F0Icon
+                icon={ArrowUp}
+                color="positive"
+                size="sm"
+                aria-hidden="true"
+              />
+            ) : (
+              <F0Icon
+                icon={ArrowDown}
+                color="critical"
+                size="sm"
+                aria-hidden="true"
+              />
+            )}
+            <span className="sr-only">
+              {trend.direction === "up" ? "+" : "−"}
+              {trend.percent.toFixed(1)}%
+            </span>
+            <span
+              aria-hidden="true"
+              className={cn(
+                "whitespace-nowrap text-base font-medium",
+                trend.direction === "up"
+                  ? "text-f1-foreground-positive"
+                  : "text-f1-foreground-critical"
+              )}
+            >
+              {trend.percent.toFixed(1)}%
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -112,32 +211,14 @@ export function MetricItem<Filters extends FiltersDefinition>({
       itemId={item.id}
     >
       {data && (
-        <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">
-          <div className="flex items-baseline gap-3">
-            <span className="whitespace-nowrap text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
-              {formatValue(data.value, item.format, item.decimals)}
-            </span>
-            {trend && trend.direction !== "flat" && (
-              <div className="flex shrink-0 items-center">
-                {trend.direction === "up" ? (
-                  <F0Icon icon={ArrowUp} color="positive" size="sm" />
-                ) : (
-                  <F0Icon icon={ArrowDown} color="critical" size="sm" />
-                )}
-                <span
-                  className={cn(
-                    "whitespace-nowrap text-base font-medium",
-                    trend.direction === "up"
-                      ? "text-f1-foreground-positive"
-                      : "text-f1-foreground-critical"
-                  )}
-                >
-                  {trend.percent.toFixed(1)}%
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
+        <MetricValue
+          value={
+            item.valueFormatter
+              ? item.valueFormatter(data.value)
+              : formatValue(data.value, item.format, item.decimals)
+          }
+          trend={trend}
+        />
       )}
     </DashboardItem>
   )

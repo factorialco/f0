@@ -11,7 +11,7 @@ import * as ActionsStories from "./collection-actions.stories"
 import * as ItemActionsStories from "./item-actions.stories"
 import * as IndexStories from "../index.stories"
 
-<Meta title="Data collection/Actions" />
+<Meta title="Data Collection/Actions" />
 
 # Data collection / Actions
 
@@ -59,6 +59,11 @@ const dataSource = useDataCollectionSource({
     loading: true,
     // The disabled state of the action
     disabled: false,
+    // Optional tooltip shown around the button. Receives the disabled and
+    // loading states and returns the tooltip text, or undefined to hide it.
+    // Useful to explain why the action is disabled.
+    tooltip: ({ disabled }) =>
+      disabled ? "Explain why the action is disabled" : undefined,
   }),
 })
 ```
@@ -88,9 +93,9 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
-> ⚠️ The disabled or loading state of the action is not supported in the
-> F0ButtonDropdown component yet so this only works when the actions is a single
-> action.
+> ⚠️ The disabled or loading state and the tooltip of the action are not
+> supported in the F0ButtonDropdown component yet so they only work when the
+> actions is a single action.
 
 - **Secondary actions**: Are an array of actions and by defualt are displayed a
   dropdown. But you can define the number of actions to display as a secondary

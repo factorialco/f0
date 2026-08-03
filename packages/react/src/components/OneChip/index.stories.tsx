@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import * as Icons from "../../icons/app"
+import { withSnapshot } from "../../lib/storybook-utils/parameters"
 import { Chip } from "./index"
 
 const meta = {
@@ -11,7 +13,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   argTypes: {
     label: {
       description: "The label of the chip",
@@ -75,6 +77,31 @@ export const WithClose: Story = {
         ))}
       </div>
     )
+  },
+}
+
+export const ClickableAndRemovable: Story = {
+  args: {
+    label: "Department: Engineering",
+    onClick: fn(),
+    onClose: fn(),
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    const closeAction = canvas.getByRole("button", {
+      name: "Close",
+      description: "Department: Engineering",
+    })
+    const chipAction = canvas.getByRole("button", {
+      name: "Department: Engineering",
+    })
+
+    await userEvent.click(closeAction)
+    await expect(args.onClose).toHaveBeenCalledOnce()
+    await expect(args.onClick).not.toHaveBeenCalled()
+
+    await userEvent.click(chipAction)
+    await expect(args.onClick).toHaveBeenCalledOnce()
   },
 }
 
@@ -169,4 +196,41 @@ export const SelectedWithClose: Story = {
       </div>
     )
   },
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    label: "Label",
+    variant: "default",
+  },
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <Chip label="Default" />
+      <Chip label="Clickable" onClick={() => {}} />
+      <Chip label="Removable" onClose={() => {}} />
+      <Chip
+        label="Clickable and removable"
+        onClick={() => {}}
+        onClose={() => {}}
+      />
+      <Chip
+        label="Selected and removable"
+        variant="selected"
+        onClose={() => {}}
+      />
+      <Chip label="With icon" icon={Icons.Placeholder} />
+      <Chip label="Deactivated" deactivated />
+      <Chip
+        label="With avatar"
+        avatar={{
+          type: "person",
+          firstName: "Dani",
+          lastName: "Moreno",
+          src: "/avatars/person01.jpg",
+        }}
+      />
+    </div>
+  ),
 }

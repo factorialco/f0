@@ -184,6 +184,77 @@ describe("F0Card Component", () => {
     expect(handlePrimaryAction).toHaveBeenCalledTimes(1)
   })
 
+  it("triggers the card click when a metadata item is clicked", async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
+
+    render(
+      <F0Card
+        title="Clickable Card"
+        onClick={handleClick}
+        metadata={[
+          {
+            icon: Briefcase,
+            property: { type: "text", label: "Job title", value: "Designer" },
+          },
+        ]}
+      />
+    )
+
+    // Metadata is display-only, so clicking it navigates the card like the rest
+    // of the body (it used to be swallowed by the content region).
+    await user.click(screen.getByText("Designer"))
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not trigger the card click when interactive children are clicked", async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
+    const handleChild = vi.fn()
+
+    render(
+      <F0Card title="Clickable Card" onClick={handleClick}>
+        <button type="button" onClick={handleChild}>
+          Child button
+        </button>
+      </F0Card>
+    )
+
+    // Interactive children keep their own behaviour and must not navigate the card.
+    await user.click(screen.getByRole("button", { name: "Child button" }))
+    expect(handleChild).toHaveBeenCalledTimes(1)
+    expect(handleClick).not.toHaveBeenCalled()
+  })
+
+  it("does not trigger the card click from the footer area", async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
+    const handlePrimaryAction = vi.fn()
+
+    const { container } = render(
+      <F0Card
+        title="Clickable Card"
+        onClick={handleClick}
+        primaryAction={{
+          label: "Primary Action",
+          onClick: handlePrimaryAction,
+        }}
+      />
+    )
+
+    // The footer band holds actions, so clicking it — including the empty space
+    // around the buttons — must never trigger the card's own click/navigation.
+    const footer = container.querySelector(".border-t") as HTMLElement
+    expect(footer).toBeInTheDocument()
+    await user.click(footer)
+    expect(handleClick).not.toHaveBeenCalled()
+
+    // The footer's own action still works, without triggering the card click.
+    await user.click(screen.getByTestId("primary-button"))
+    expect(handlePrimaryAction).toHaveBeenCalledTimes(1)
+    expect(handleClick).not.toHaveBeenCalled()
+  })
+
   it("renders a secondary action link", async () => {
     const secondaryLink: CardSecondaryLink = {
       label: "View more",

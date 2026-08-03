@@ -11,19 +11,12 @@ const SvgCheckCircleLine = (
     ref={ref}
     {...props}
   >
-    <circle
-      cx={12}
-      cy={12}
-      r={8}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={12} r={8} stroke="currentColor" />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M9.00002 12L11.4 14.4L15 9.6"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

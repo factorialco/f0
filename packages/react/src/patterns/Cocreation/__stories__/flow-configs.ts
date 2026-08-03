@@ -17,9 +17,9 @@
 import type { IconType } from "@/components/F0Icon"
 import type { ModuleId } from "@/components/avatars/F0AvatarModule/modules"
 import { Files } from "@/icons/app"
-import type { ClarifyingOption } from "@/sds/ai/F0ClarifyingPanel"
-import type { SurveyAnswers } from "@/sds/surveys/SurveyAnsweringForm"
-import type { SurveyFormBuilderElement } from "@/sds/surveys/SurveyFormBuilder/types"
+import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
+import type { SurveyAnswers } from "@/kits/surveys/SurveyAnsweringForm"
+import type { SurveyFormBuilderElement } from "@/kits/surveys/SurveyFormBuilder/types"
 
 import {
   ENGAGEMENT_RESOURCES,

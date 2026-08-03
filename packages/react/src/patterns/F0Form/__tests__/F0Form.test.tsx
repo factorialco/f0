@@ -2322,6 +2322,274 @@ describe("F0Form per-section showSubmitWhenDirty", () => {
   })
 })
 
+describe("F0Form single-schema showSubmitWhenDirty", () => {
+  const schema = z.object({
+    name: f0FormField(z.string().min(1), { label: "Name" }),
+  })
+
+  it("hides the submit button when the form is pristine", () => {
+    render(
+      <F0Form
+        name="single-dirty-hidden"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+  })
+
+  it("shows the submit button after editing a field", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Form
+        name="single-dirty-shown"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "John")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+  })
+
+  it("always shows the submit button when the flag is absent", () => {
+    render(
+      <F0Form
+        name="single-dirty-absent"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    expect(screen.getByText("Save")).toBeInTheDocument()
+  })
+
+  it("hides the submit button again after a successful submit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    render(
+      <F0Form
+        name="single-dirty-reset"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "John")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ name: "John" })
+    })
+
+    // The button going away is what tells the user nothing is pending
+    await waitFor(() => {
+      expect(screen.queryByText("Save")).not.toBeInTheDocument()
+    })
+
+    // The button unmounted while it held focus — focus must not fall to <body>,
+    // or tab order restarts at the top of the document
+    await waitFor(() => {
+      expect(document.activeElement).not.toBe(document.body)
+    })
+  })
+
+  it("keeps the submit button visible after a failed submit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({
+      success: false,
+      rootMessage: "Server exploded",
+    })
+
+    render(
+      <F0Form
+        name="single-dirty-failed-submit"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "John")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    // The form is still dirty, so the retry affordance has to stay
+    expect(screen.getByText("Save")).toBeInTheDocument()
+  })
+
+  it("hides the submit button again when the edit is reverted", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Form
+        name="single-dirty-revert"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    const input = screen.getByLabelText("Name")
+    await user.type(input, "!")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+
+    // Undo the edit — RHF flips isDirty back to false
+    await user.type(input, "{backspace}")
+
+    await waitFor(() => {
+      expect(screen.queryByText("Save")).not.toBeInTheDocument()
+    })
+  })
+
+  it("honours the flag when type is passed explicitly", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Form
+        name="single-dirty-explicit-type"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{
+          type: "default",
+          label: "Save",
+          showSubmitWhenDirty: true,
+        }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    const input = screen.getByLabelText("Name")
+    await user.type(input, "!")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+  })
+
+  it("stays hidden while async defaultValues are loading and after they land", async () => {
+    const { rerender } = render(
+      <F0Form
+        name="single-dirty-async-defaults"
+        schema={schema}
+        isLoading
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    rerender(
+      <F0Form
+        name="single-dirty-async-defaults"
+        schema={schema}
+        isLoading={false}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    // The reset that lands the resolved values must not read as a user edit
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toHaveValue("Jane")
+    })
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+  })
+
+  it("keeps the submit button hidden when hideSubmitButton is also set", async () => {
+    const user = userEvent.setup()
+
+    const { unmount } = render(
+      <F0Form
+        name="single-dirty-hide-wins"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{
+          label: "Save",
+          showSubmitWhenDirty: true,
+          hideSubmitButton: true,
+        }}
+      />
+    )
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "John")
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    // Positive control: the same edit on the same config minus hideSubmitButton
+    // does show the button, so the assertion above is about precedence and not
+    // about the edit failing to make the form dirty
+    unmount()
+
+    render(
+      <F0Form
+        name="single-dirty-hide-wins-control"
+        schema={schema}
+        defaultValues={{ name: "Jane" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    const controlInput = screen.getByLabelText("Name")
+    await user.clear(controlInput)
+    await user.type(controlInput, "John")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+  })
+})
+
 describe("F0Form with formDefinition (single schema)", () => {
   const singleSchema = z.object({
     firstName: f0FormField(z.string().min(1), {

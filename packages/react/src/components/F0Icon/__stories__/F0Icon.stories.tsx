@@ -10,6 +10,7 @@ import * as Icons from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
 import * as SpecialIcons from "@/icons/special"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
 
 import { F0Icon } from "../index"
 
@@ -139,3 +140,20 @@ export const AI: Story = {
     },
   },
 }
+
+export const Snapshot = snapshotMatrix(F0Icon, {
+  baseArgs: { icon: Icons.ChartLine },
+  rows: { arg: "size", values: ["xs", "sm", "md", "lg"] },
+  cols: {
+    arg: "color",
+    values: [
+      "default",
+      "bold",
+      "accent",
+      "info",
+      "warning",
+      "positive",
+      "critical",
+    ],
+  },
+})

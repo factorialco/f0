@@ -19,6 +19,8 @@ type Employee = RecordType & {
   id: string
   name: string
   childrenCount: number
+  /** Set on live-update records to drive `getParentId` in re-parenting tests. */
+  parentId?: string
 }
 
 type TestFilters = FiltersDefinition
@@ -370,5 +372,322 @@ describe("useDataCollectionTreeData — two-phase hydration", () => {
     })
     await waitFor(() => expect(cbs.onLoadError).toHaveBeenCalled())
     expect(result.current.error).not.toBeNull()
+  })
+
+  type OptionOverrides = Partial<
+    GraphVisualizationOptions<Employee, TestFilters, SortingsDefinition>
+  >
+
+  it("liveUpdate upsert refreshes a node's data in place, without refetch or collapse", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+
+    const { result, rerender } = renderHook(
+      (props: OptionOverrides) =>
+        useDataCollectionTreeData(
+          source,
+          buildOptions({ defaultExpandDepth: 1, ...props }),
+          callbacks()
+        ),
+      { initialProps: {} as OptionOverrides }
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    expect(result.current.expandedNodes.has("ceo")).toBe(true)
+    const fetchesBefore = fetchData.mock.calls.length
+
+    await act(async () => {
+      rerender({
+        liveUpdate: {
+          version: 1,
+          upsert: [{ ...employees.vp1, name: "Renamed" }],
+        },
+      })
+    })
+
+    // Data swapped in place; expansion preserved; no refetch, no fan-out.
+    expect(
+      result.current.nodes.find((node) => node.id === "vp1")?.data.name
+    ).toBe("Renamed")
+    expect(result.current.expandedNodes.has("ceo")).toBe(true)
+    expect(fetchData.mock.calls.length).toBe(fetchesBefore)
+    expect(result.current.nodes.map((node) => node.id)).not.toContain("mgr1")
+  })
+
+  it("liveUpdate upsert inserts a new attachable child under a loaded parent", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const vp3: Employee = { id: "vp3", name: "Ada", childrenCount: 0 }
+    const getParentId = (employee: Employee) =>
+      employee.id === "vp3" ? "ceo" : null
+
+    const { result, rerender } = renderHook(
+      (props: OptionOverrides) =>
+        useDataCollectionTreeData(
+          source,
+          buildOptions({ defaultExpandDepth: 1, getParentId, ...props }),
+          callbacks()
+        ),
+      { initialProps: {} as OptionOverrides }
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    const fetchesBefore = fetchData.mock.calls.length
+
+    await act(async () => {
+      rerender({ liveUpdate: { version: 1, upsert: [vp3] } })
+    })
+
+    // Inserted under its (loaded) parent — not fetched.
+    expect(
+      result.current.nodes.find((node) => node.id === "vp3")?.parentId
+    ).toBe("ceo")
+    expect(fetchData.mock.calls.length).toBe(fetchesBefore)
+  })
+
+  it("liveUpdate remove drops a node with its descendants and prunes expansion", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+
+    const { result, rerender } = renderHook(
+      (props: OptionOverrides) =>
+        useDataCollectionTreeData(
+          source,
+          buildOptions({ defaultExpandDepth: 1, ...props }),
+          callbacks()
+        ),
+      { initialProps: {} as OptionOverrides }
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    // Expand vp1 so its child mgr1 is loaded (a descendant to cascade).
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo", "vp1"]))
+    })
+    await waitFor(() =>
+      expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    )
+    expect(result.current.expandedNodes.has("vp1")).toBe(true)
+
+    await act(async () => {
+      rerender({ liveUpdate: { version: 1, remove: ["vp1"] } })
+    })
+
+    const ids = result.current.nodes.map((node) => node.id)
+    expect(ids).not.toContain("vp1")
+    expect(ids).not.toContain("mgr1") // descendant cascaded
+    expect(ids).toContain("ceo")
+    expect(result.current.expandedNodes.has("vp1")).toBe(false)
+    expect(result.current.expandedNodes.has("ceo")).toBe(true)
+  })
+
+  it("liveUpdate re-parenting reconciles the old parent (no eternal spinner) and the new leaf parent (gains its expander, no refetch)", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    // Only live-update records carry `parentId`; initial loads never call this.
+    const getParentId = (employee: Employee) => employee.parentId ?? null
+
+    const { result, rerender } = renderHook(
+      (props: OptionOverrides) =>
+        useDataCollectionTreeData(
+          source,
+          buildOptions({ defaultExpandDepth: 1, getParentId, ...props }),
+          callbacks()
+        ),
+      { initialProps: {} as OptionOverrides }
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    // Expand vp1 so mgr1 (its only child) is loaded.
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo", "vp1"]))
+    })
+    await waitFor(() =>
+      expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    )
+
+    // Move mgr1 from vp1 (loaded, only child) to vp2 (a leaf, childrenCount 0).
+    await act(async () => {
+      rerender({
+        liveUpdate: {
+          version: 1,
+          upsert: [{ ...employees.mgr1, parentId: "vp2" }],
+        },
+      })
+    })
+
+    const byId = new Map(result.current.nodes.map((node) => [node.id, node]))
+    expect(byId.get("mgr1")?.parentId).toBe("vp2")
+    // Old parent: still expanded but must stop advertising children, or the
+    // graph renders a loading expander forever (children never arrive).
+    expect(byId.get("vp1")?.childrenCount).toBe(0)
+    expect(byId.get("vp1")?.childrenLoaded).toBe(true)
+    // New parent: was a leaf, now advertises its child and is fully loaded.
+    expect(byId.get("vp2")?.childrenCount).toBe(1)
+    expect(byId.get("vp2")?.childrenLoaded).toBe(true)
+
+    // Expanding the new parent must NOT fetch — the server may not reflect the
+    // live change yet; the in-memory child is the ground truth.
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo", "vp1", "vp2"]))
+    })
+    expect(countParentFetches(fetchData, "vp2")).toBe(0)
+  })
+
+  it("liveUpdate remove of the last child drops the loaded parent's childrenCount to 0", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+
+    const { result, rerender } = renderHook(
+      (props: OptionOverrides) =>
+        useDataCollectionTreeData(
+          source,
+          buildOptions({ defaultExpandDepth: 1, ...props }),
+          callbacks()
+        ),
+      { initialProps: {} as OptionOverrides }
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo", "vp1"]))
+    })
+    await waitFor(() =>
+      expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    )
+
+    await act(async () => {
+      rerender({ liveUpdate: { version: 1, remove: ["mgr1"] } })
+    })
+
+    const vp1 = result.current.nodes.find((node) => node.id === "vp1")
+    expect(vp1?.childrenCount).toBe(0)
+    expect(vp1?.childrenLoaded).toBe(true)
+  })
+
+  it("liveUpdate re-parenting under a not-loaded parent removes the subtree and reconciles the old parent", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const getParentId = (employee: Employee) => employee.parentId ?? null
+
+    const { result, rerender } = renderHook(
+      (props: OptionOverrides) =>
+        useDataCollectionTreeData(
+          source,
+          buildOptions({ defaultExpandDepth: 1, getParentId, ...props }),
+          callbacks()
+        ),
+      { initialProps: {} as OptionOverrides }
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo", "vp1"]))
+    })
+    await waitFor(() =>
+      expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    )
+
+    // vp1 moves under a parent that is not in the loaded tree: it leaves the
+    // graph (with its descendant mgr1) instead of floating as a fake root.
+    await act(async () => {
+      rerender({
+        liveUpdate: {
+          version: 1,
+          upsert: [{ ...employees.vp1, parentId: "outsider" }],
+        },
+      })
+    })
+
+    const ids = result.current.nodes.map((node) => node.id)
+    expect(ids).not.toContain("vp1")
+    expect(ids).not.toContain("mgr1")
+    expect(result.current.expandedNodes.has("vp1")).toBe(false)
+    const ceo = result.current.nodes.find((node) => node.id === "ceo")
+    expect(ceo?.childrenCount).toBe(1)
+  })
+
+  it("liveUpdate adopts its initial version without applying it on mount", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({
+          defaultExpandDepth: 1,
+          liveUpdate: {
+            version: 7,
+            upsert: [{ ...employees.vp1, name: "Should not apply" }],
+          },
+        }),
+        callbacks()
+      )
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    // A batch already present on mount is treated as applied — data untouched.
+    expect(
+      result.current.nodes.find((node) => node.id === "vp1")?.data.name
+    ).toBe("Marcus")
+  })
+})
+
+describe("useDataCollectionTreeData — focus on entry", () => {
+  it("pre-resolves and expands the focusOnEntry path on initial load, without focusing", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodePath = vi.fn(async () => [
+      employees.ceo,
+      employees.vp1,
+      employees.mgr1,
+    ])
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({
+          defaultExpandDepth: 0,
+          loadNodePath,
+          focusOnEntry: "mgr1",
+        }),
+        callbacks()
+      )
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    // Path resolved + ancestors expanded before the first paint...
+    expect(loadNodePath).toHaveBeenCalledWith("mgr1")
+    expect(result.current.expandedNodes.has("ceo")).toBe(true)
+    expect(result.current.expandedNodes.has("vp1")).toBe(true)
+    expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    // ...but NO focus/highlight — the initial viewport frames it (initialFocusNodeId).
+    expect(result.current.focusedNode).toBeUndefined()
+    expect(result.current.highlightedNodes.size).toBe(0)
+  })
+
+  it("falls back to the default view when focusOnEntry path resolution fails", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodePath = vi.fn(async () => {
+      throw new Error("no path")
+    })
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({
+          defaultExpandDepth: 1,
+          loadNodePath,
+          focusOnEntry: "mgr1",
+        }),
+        callbacks()
+      )
+    )
+
+    // Initial load still completes (no throw) → fit-to-all fallback.
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    expect(result.current.nodes.map((node) => node.id)).toContain("ceo")
   })
 })

@@ -1,0 +1,271 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Chat.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# F0Chat
+
+F0Chat renders a transport-agnostic direct or group conversation. The host provides messages, membership, receipts, reactions, and mutations through `F0ChatRuntime`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Receipt, reaction, and upload contracts
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Field</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>channel.memberCount</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Total group members, including the current user. F0 expects{" "}
+          <code>readBy</code> and <code>readByCount</code> to contain unique
+          other members, and compares them with <code>memberCount - 1</code>{" "}
+          before showing the all-read footer state. Without a member count, F0
+          trusts the host-provided message status.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>message.readBy</code>
+        </td>
+        <td>
+          <code>F0ChatUser[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Other group members who read the message. F0 derives the displayed
+          count from this list.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>message.readByCount</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Count fallback for hosts that cannot provide reader identities.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>runtime.loadReactionUsers</code>
+        </td>
+        <td>
+          <code>
+            (messageId: string, emoji: string) =&gt; Promise&lt;F0ChatUser[]&gt;
+          </code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Resolves complete reaction membership on first hover or keyboard
+          focus.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>runtime.maxFileSizeBytes</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>Unlimited</td>
+        <td>—</td>
+        <td>
+          Maximum size of each selected, dropped, or pasted file, in bytes. The
+          ApplicationFrame mock uses <code>100 * 1024 * 1024</code> (100 MB).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>file.thumbnailUrl</code>, <code>file.videoContent</code>,{" "}
+          <code>file.videoDefaultLanguage</code>, <code>file.videoSilent</code>
+        </td>
+        <td>
+          <code>string</code>, <code>VideoPlayerContent</code>,{" "}
+          <code>string</code>, <code>boolean</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Optional poster, accessible caption/description sources, initial
+          language, and genuine no-audio declaration forwarded to F0VideoPlayer
+          when a file has a video MIME type or supported video extension.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0Chat when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Product communications</td>
+        <td>A host integration supplies conversation state and mutations.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Static activity history</td>
+        <td>A timeline or activity-feed pattern.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Derive readBy from transport read pointers and exclude the message author.",
+  }}
+  dont={{
+    description:
+      "Treat delivery acknowledgement as proof that a member read the message.",
+  }}
+/>
+
+### Behavior
+
+- WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
+- WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
+- WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
+- WHEN a sent group message is still missing readers → THEN its footer shows `Sent · time` without exposing a count.
+- WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.
+- WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent · time`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
+- WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
+- WHEN reader identities appear in message Info → THEN each row displays only the reader avatar and name, without links or hover cards.
+- WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
+- WHEN reaction users are incomplete and `loadReactionUsers` exists → THEN F0 loads and caches identities by channel, message, emoji, and reaction count.
+- WHEN the reaction count or channel changes → THEN F0 invalidates the related identity cache.
+- WHEN any selected, dropped, or pasted file exceeds `maxFileSizeBytes` → THEN F0 rejects the whole batch before upload and displays the configured limit.
+- WHEN `maxFileSizeBytes` is omitted → THEN F0 does not impose a file-size limit.
+- WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
+- WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
+- WHEN `:` starts a token in the composer → THEN F0 opens a caret-anchored emoji list and filters it by shortcode, alias, keyword, or name as the query grows.
+- WHEN the emoji autocomplete is open → THEN Arrow Up and Arrow Down move through its options, Enter or Tab inserts the active emoji, and Escape dismisses the current trigger without sending.
+- WHEN an emoji autocomplete option is selected → THEN F0 replaces only the active `:query`, preserves surrounding message text, inserts one separating space, and restores the textarea focus and caret.
+- WHEN an exact shortcode or alias is completed with a closing colon, such as `:smile:` or `:thumbsup:` → THEN F0 converts it in place without requiring the suggestion list.
+- WHEN `:` belongs to another token such as a URL or time → THEN F0 leaves the composer unchanged and does not open emoji suggestions.
+- WHEN an image, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders an image-sized square preview immediately while the upload continues.
+- WHEN a video enters the composer → THEN F0 keeps the same compact height but renders a wider 16:9 preview so its media type is visually distinct.
+- WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
+- WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the same compact square footprint with a file-type icon.
+- WHEN a pending composer attachment is removed or its upload fails → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
+- WHEN several previews exceed the composer width → THEN F0 keeps them in one focusable horizontal strip instead of growing the composer through the transcript.
+- WHEN a completed file has a video MIME type or browser video extension → THEN F0 renders it as an inline F0VideoPlayer with playback and fullscreen controls.
+- WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
+- WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
+- WHEN a bubble attachment has an inline or document preview → THEN F0 omits the redundant download action from the bubble; download remains available inside the document viewer or video-player controls, while files without a preview and failed previews keep their downloadable file chip.
+- WHEN a voice attachment is narrower than its waveform → THEN the bars compress and any residual excess is clipped inside the seek area, preserving the fixed time/speed slot.
+- WHEN the reader wheels toward older messages → THEN F0 pauses bottom following immediately and keeps it paused through asynchronous attachment growth until the reader returns to the true bottom edge, explicitly jumps to the bottom, or sends a new message.
+
+### Usage examples
+
+**Group communications**
+
+Use a group runtime to provide member mentions, read receipts, and reaction membership.
+
+<Canvas of={Stories.Group} />
+
+**Emoji autocomplete**
+
+Type `:` followed by an emoji shortcode or name. Select a result with the
+keyboard or pointer without leaving the composer.
+
+<Canvas of={Stories.EmojiAutocomplete} />
+
+**Document attachments**
+
+Previewable documents open from a snapshot card into their fullscreen viewer.
+Non-previewable files remain downloadable file chips.
+
+<Canvas of={Stories.WithDocumentAttachments} />
+
+**Video attachments**
+
+Videos play directly inside the conversation. The host can provide a poster,
+captions, audio descriptions, and localized sources through the file attachment.
+Download lives in the player controls instead of floating over the bubble.
+
+<Canvas of={Stories.WithVideoAttachments} />
+
+**Compact voice attachments**
+
+In a minimized chat, the waveform yields its width before the duration or
+playback-speed slot can overflow.
+
+<Canvas of={Stories.CompactVoiceAttachment} />
+
+## Accessibility
+
+### Keyboard interaction
+
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is also focusable, supports horizontal keyboard scrolling, and receives focus after removing an attachment. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
+
+### Screen reader behavior
+
+Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces asynchronous transitions from “Sent” to “Read” together with the message time.
+
+Attachment actions include the filename in their accessible names. Each video
+player is contained in a figure named after its file and exposes a contextual
+player-region name; its optional download remains keyboard-accessible inside
+the player controls. Prerecorded videos should provide both
+`videoContent.captions` and audio descriptions where the visuals convey
+meaning; use `videoSilent` only when the source genuinely has no audio.
+
+Voice notes expose their waveform as a seek slider. Use the arrow keys to move
+through the recording and Home or End to jump to either edge. The playback
+speed button remains in the tab order and replaces the duration while it has
+keyboard focus; its accessible name includes the current speed.

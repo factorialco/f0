@@ -1,11 +1,4 @@
 import type {
-  FiltersDefinition,
-  FiltersState,
-  PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
-import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-
-import type {
   ChartColorToken,
   F0DataChartBarSeries,
   F0DataChartFunnelSeries,
@@ -14,6 +7,12 @@ import type {
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
+import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type {
+  FiltersDefinition,
+  FiltersState,
+  PresetsDefinition,
+} from "@/patterns/OneFilterPicker/types"
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -269,6 +268,13 @@ export interface DashboardMetricItem<
   format?: MetricFormat
   /** Number of decimal places. @default 0 */
   decimals?: number
+  /**
+   * Custom value formatter — takes precedence over `format`/`decimals`.
+   * The built-in presets format with the browser locale; this lets the
+   * consumer control locale and currency, mirroring the chart configs'
+   * `valueFormatter`.
+   */
+  valueFormatter?: (value: number) => string
   /** Async data fetcher — receives dashboard filters */
   fetchData: (filters: FiltersState<Filters>) => Promise<DashboardMetricData>
 }
@@ -379,8 +385,21 @@ export interface F0AnalyticsDashboardProps<
   presets?: PresetsDefinition<Filters>
   /**
    * Initial filter values applied when the dashboard first renders.
+   * Used only when `filtersValue` is not provided.
    */
   defaultFilters?: FiltersState<Filters>
+  /**
+   * Applied dashboard-level filter values. Providing this prop makes filter
+   * state controlled: reflect every `onFiltersChange` value back into it or the
+   * applied filters will not move. Takes precedence over `defaultFilters`, and
+   * must not be switched on or off after the first render.
+   */
+  filtersValue?: FiltersState<Filters>
+  /**
+   * Called when applied dashboard-level filters change through Apply, Clear,
+   * chip removal, or preset selection.
+   */
+  onFiltersChange?: (value: FiltersState<Filters>) => void
   /**
    * Ordered list of dashboard items to render in the grid.
    * Each item declares its type, visual config, grid span, and data fetcher.

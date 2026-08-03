@@ -1,7 +1,9 @@
-import { Tag, type TagVariant } from "@/components/tags/F0Tag/F0Tag"
+import { Tag } from "@/components/tags/F0Tag/F0Tag"
+
+import type { F0GraphNodeTag } from "./types"
 
 interface F0GraphNodeTagsProps {
-  tags: TagVariant[]
+  tags: F0GraphNodeTag[]
 }
 
 /**

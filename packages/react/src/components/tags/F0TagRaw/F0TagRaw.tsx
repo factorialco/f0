@@ -10,7 +10,7 @@ import { BaseTag } from "../internal/BaseTag"
 
 export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
   (
-    { text, additionalAccessibleText, icon, onlyIcon, info, className },
+    { text, additionalAccessibleText, icon, onlyIcon, info, className, size },
     ref
   ) => {
     useTextFormatEnforcer(
@@ -26,6 +26,7 @@ export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
           "border-[1px] border-solid border-f1-border-secondary",
           className
         )}
+        size={size}
         left={
           icon ? (
             <F0Icon

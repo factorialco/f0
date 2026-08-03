@@ -61,6 +61,7 @@ function configToF0Field(
     status: config.status,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
+    autoSave: "autoSave" in config ? config.autoSave : undefined,
     alert: config.alert,
     customFieldName:
       "customFieldName" in config ? config.customFieldName : undefined,
@@ -289,6 +290,37 @@ function configToF0Field(
         useUpload: "useUpload" in config ? config.useUpload : undefined,
         renderIf: config.renderIf,
       } as F0Field
+    case "entitiesList": {
+      const listOptions = "config" in config ? config.config : undefined
+      return {
+        ...baseProps,
+        type: "entitiesList",
+        itemSchema: "schema" in config ? config.schema : undefined,
+        createFormDefinition:
+          "createFormDefinition" in config
+            ? config.createFormDefinition
+            : undefined,
+        updateFormDefinition:
+          "updateFormDefinition" in config
+            ? config.updateFormDefinition
+            : undefined,
+        sortable: listOptions?.sortable,
+        canAddItems: listOptions?.canAddItems,
+        supportInlineEditing: listOptions?.supportInlineEditing,
+        visualization: listOptions?.visualization,
+        listItem: listOptions?.listItem,
+        itemHref: listOptions?.itemHref,
+        labels: listOptions?.labels,
+        editableIds: listOptions?.editableIds,
+        removableIds: listOptions?.removableIds,
+        maxItems: listOptions?.maxItems,
+        columns: listOptions?.columns,
+        rowActions: listOptions?.rowActions,
+        onRemove: listOptions?.onRemove,
+        confirmRemove: listOptions?.confirmRemove,
+        renderIf: config.renderIf,
+      } as F0Field
+    }
     case "cardSelect":
       return {
         ...baseProps,

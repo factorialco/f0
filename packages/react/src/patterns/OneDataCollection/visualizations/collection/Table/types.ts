@@ -88,6 +88,13 @@ export type TableColumnDefinition<
     noHiding?: boolean
 
     /**
+     * Avoid removing the column by the user. Only relevant when the
+     * visualization sets `onRemoveColumn`; the per-row trash affordance in the
+     * settings popover is hidden for this column. Mirrors `noHiding`.
+     */
+    noRemoving?: boolean
+
+    /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
      * The label for each group is provided via `headerGroupLabels` in
@@ -128,6 +135,22 @@ export type TableVisualizationOptions<
    * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
    */
   allowColumnHiding?: boolean
+
+  /**
+   * Called when the user clicks the "Add column" entry at the top of the
+   * column-settings popover. When omitted, the entry is not shown. Open your
+   * own column picker and update `columns` in response.
+   */
+  onAddColumn?: () => void
+
+  /**
+   * Called when the user removes a column via the trash affordance revealed on
+   * hovering its row in the column-settings popover. When omitted, no remove
+   * affordance is shown. Removing is distinct from hiding: drop the column from
+   * `columns` in response. Frozen/leading columns and columns flagged
+   * `noRemoving` are never removable.
+   */
+  onRemoveColumn?: (columnId: ColId) => void
 
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType

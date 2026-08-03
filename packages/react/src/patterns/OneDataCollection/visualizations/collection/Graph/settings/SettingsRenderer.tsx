@@ -1,7 +1,7 @@
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import type { F0GraphNodeTagType } from "@/patterns/F0Graph"
+import type { F0GraphNodeTagColumn } from "@/patterns/F0Graph"
 
 import { useDataCollectionSettings } from "../../../../Settings/SettingsProvider"
 import { SortAndHideSettings } from "../../../../Settings/SortAndHideSettings"
@@ -16,10 +16,10 @@ export type GraphVisualizationSettings = {
 }
 
 type GraphSettingsProps = {
-  tagTypes: ReadonlyArray<F0GraphNodeTagType>
-  labels?: Partial<Record<F0GraphNodeTagType, string>>
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  tagTypes: ReadonlyArray<F0GraphNodeTagColumn>
+  labels?: Partial<Record<F0GraphNodeTagColumn, string>>
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
 }
 
 /**
@@ -46,14 +46,14 @@ const GraphSettings = ({
   // Apply the saved order first, then append any types not yet ordered.
   const orderedTypes = [
     ...savedOrder.filter((type) =>
-      tagTypes.includes(type as F0GraphNodeTagType)
+      tagTypes.includes(type as F0GraphNodeTagColumn)
     ),
     ...tagTypes.filter((type) => !savedOrder.includes(type)),
   ]
 
   const items: SortAndHideListItem[] = orderedTypes.map((type) => ({
     id: type,
-    label: labels?.[type as F0GraphNodeTagType] ?? type,
+    label: labels?.[type as F0GraphNodeTagColumn] ?? type,
     // Pinned tags can't be reordered or hidden — shown with a lock icon, just
     // like frozen columns in the table settings.
     sortable: !pinned.has(type),

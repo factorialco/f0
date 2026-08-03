@@ -47,23 +47,23 @@ Content rendered as children of `F0BlurView` appears **on top of** the blur:
 
 ## Props
 
-| Prop                     | Type                     | Default     | Description                                                         |
-| ------------------------ | ------------------------ | ----------- | ------------------------------------------------------------------- |
-| `intensity`              | `number` (1–100)         | `40`        | Blur strength                                                       |
-| `tint`                   | `BlurTint`               | `"default"` | Color tint applied over the blur                                    |
-| `blurReductionFactor`    | `number`                 | `4`         | Android-only: divides `intensity` to match iOS perceived blur       |
-| `experimentalBlurMethod` | `ExperimentalBlurMethod` | `"none"`    | Android blur backend (see below)                                    |
-| `className`              | `string`                 | —           | Tailwind utility classes for layout/sizing (not for positioning)    |
-| `style`                  | `ViewStyle`              | —           | Inline style — use this for positioning (`StyleSheet.absoluteFill`) |
-| `testID`                 | `string`                 | —           | Test identifier                                                     |
-| `children`               | `ReactNode`              | —           | Content rendered on top of the blur layer                           |
+| Prop                  | Type             | Default     | Description                                                         |
+| --------------------- | ---------------- | ----------- | ------------------------------------------------------------------- |
+| `intensity`           | `number` (1–100) | `40`        | Blur strength                                                       |
+| `tint`                | `BlurTint`       | `"default"` | Color tint applied over the blur                                    |
+| `blurReductionFactor` | `number`         | `4`         | Android-only: divides `intensity` to match iOS perceived blur       |
+| `blurMethod`          | `BlurMethod`     | `"none"`    | Android blur backend (see below)                                    |
+| `className`           | `string`         | —           | Tailwind utility classes for layout/sizing (not for positioning)    |
+| `style`               | `ViewStyle`      | —           | Inline style — use this for positioning (`StyleSheet.absoluteFill`) |
+| `testID`              | `string`         | —           | Test identifier                                                     |
+| `children`            | `ReactNode`      | —           | Content rendered on top of the blur layer                           |
 
 ### `BlurTint` values
 
 Common values: `"default"`, `"light"`, `"dark"`, `"regular"`, `"prominent"`.
 Full list of system material variants available on iOS via `expo-blur`.
 
-### `experimentalBlurMethod` (Android only)
+### `blurMethod` (Android only)
 
 Controls the blur backend on Android. Defaults to `"none"` — a clean semi-transparent overlay — because `"dimezisBlurView"` can cause graphical artifacts (e.g. elevation shadows of children appearing as glows).
 
@@ -77,10 +77,10 @@ Opt in to `"dimezisBlurView"` only when the blur effect is critical and children
 <!-- prettier-ignore -->
 ```tsx
 // Opt-in to actual blur on Android (ensure no elevated children inside)
-<F0BlurView experimentalBlurMethod="dimezisBlurView" />
+<F0BlurView blurMethod="dimezisBlurView" />
 ```
 
-> See the [expo-blur Android docs](https://docs.expo.dev/versions/v54.0.0/sdk/blur-view/#experimentalblurmethod) for full details.
+> See the [expo-blur Android docs](https://docs.expo.dev/versions/v56.0.0/sdk/blur-view/#blurmethod) for full details.
 
 ## Accessibility
 
@@ -88,8 +88,8 @@ Opt in to `"dimezisBlurView"` only when the blur effect is critical and children
 
 ## Platform notes
 
-- **iOS** — full native blur via `UIVisualEffectView`. `experimentalBlurMethod` is ignored.
-- **Android** — defaults to `"none"` (semi-transparent overlay) to avoid graphical artifacts. Opt in to `experimentalBlurMethod="dimezisBlurView"` for actual blur, but ensure no elevated children are inside the BlurView.
+- **iOS** — full native blur via `UIVisualEffectView`. `blurMethod` is ignored.
+- **Android** — defaults to `"none"` (semi-transparent overlay) to avoid graphical artifacts. Opt in to `blurMethod="dimezisBlurView"` for actual blur, but ensure no elevated children are inside the BlurView.
 - **Web** — uses CSS `backdrop-filter: blur()`.
 
 ## File structure

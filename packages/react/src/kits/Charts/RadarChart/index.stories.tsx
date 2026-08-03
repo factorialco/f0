@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { RadarChart } from "./index"
 
 const meta: Meta = {
   title: "Charts/RadarChart",
   component: RadarChart,
-  tags: ["autodocs", "stable"],
+  tags: ["autodocs", "stable", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="h-80">
@@ -63,5 +65,13 @@ export const SingleSeries: Story = {
   args: {
     dataConfig: singleDataConfig,
     data: singleData,
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    dataConfig: skillsDataConfig,
+    data: skillsData,
   },
 }

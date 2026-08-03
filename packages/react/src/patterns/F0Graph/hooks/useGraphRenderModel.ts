@@ -12,18 +12,8 @@ import {
   useRef,
 } from "react"
 
-import {
-  BACKGROUND_DOT_GAP,
-  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-} from "../constants"
+import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
 import type { F0GraphNodeRenderContext } from "../F0Graph"
-import type { F0GraphNodeTagType } from "../components/F0GraphNode"
-import {
-  EXPANDER_Y_OFFSET_BY_ZOOM,
-  type CollapserNodeData,
-  type ExpanderNodeData,
-  type GraphNodeData,
-} from "../internal/ReactFlowAdapters"
 import type {
   GraphEdge,
   GraphNode,
@@ -33,6 +23,17 @@ import type {
   TreeNode,
   ZoomLevel,
 } from "../types"
+
+import {
+  BACKGROUND_DOT_GAP,
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+} from "../constants"
+import {
+  EXPANDER_Y_OFFSET_BY_ZOOM,
+  type CollapserNodeData,
+  type ExpanderNodeData,
+  type GraphNodeData,
+} from "../internal/ReactFlowAdapters"
 import {
   collectVisibleNodes,
   computeLayoutBounds,
@@ -54,13 +55,19 @@ interface UseGraphRenderModelOptions<T> {
   nodeMap: Map<string, TreeNode<T>>
   expandedNodes: Set<string>
   anchorNodeRef: MutableRefObject<string | null>
+  /**
+   * Called (before paint) when a toggle-driven reflow repositions the anchor
+   * node by `(dx, dy)` in flow-space. The owner translates the viewport by the
+   * same amount so the anchor stays visually fixed — node positions stay raw.
+   */
+  onAnchorReflow?: (dx: number, dy: number) => void
   resolvedEdgesProp?: GraphEdge[]
   stableRenderNode: (
     node: GraphNode<unknown>,
     ctx: F0GraphNodeRenderContext
   ) => ReactNode
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  visibleTagTypesSet: Set<F0GraphNodeTagType>
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  visibleTagTypesSet: Set<F0GraphNodeTagColumn>
   reserveTagRow?: boolean
   nodeWidthProp?: number
   nodeHeightProp?: number
@@ -111,6 +118,7 @@ export function useGraphRenderModel<T>({
   nodeMap,
   expandedNodes,
   anchorNodeRef,
+  onAnchorReflow,
   resolvedEdgesProp,
   stableRenderNode,
   nodeTagTypes,
@@ -335,26 +343,28 @@ export function useGraphRenderModel<T>({
     return { dx: 0, dy: 0 }
   }, [layout.nodes, anchorNodeRef])
 
-  // Persist positions and clear the anchor once the toggle has settled (safe for
-  // strict mode). In lazy mode an expand resolves in two phases: the node is
-  // marked expanded first, then its children arrive asynchronously. Clearing the
-  // anchor on the first commit would leave the big reflow (when many children
-  // appear) uncompensated and the view would jump. So keep the anchor until the
-  // toggled node's children are actually loaded.
+  // Keep the toggled node visually fixed across a reflow by translating the
+  // VIEWPORT (not the node positions). When the layout engine repositions the
+  // anchor — e.g. dagre re-centers a parent over its children, so collapsing
+  // shifts the parent's x — the anchor's (dx, dy) delta is handed to
+  // `onAnchorReflow`, which pans the camera by the same amount before paint.
+  // Node positions stay raw, so `getNodePosition`/`contentBounds` (reveal, fit)
+  // stay consistent, and there is no offset to "release" (the old node-offset
+  // held the node for one commit then snapped back on the next — e.g. a node
+  // windowing settle — leaving the root jumping to its natural position).
+  //
+  // In lazy mode an expand resolves in two phases (node marked expanded, then
+  // children arrive asynchronously); the anchor is kept across both so the big
+  // reflow when children appear is compensated too.
   useLayoutEffect(() => {
     const { dx, dy } = anchorOffset
     prevPositionsRef.current = new Map(
-      layout.nodes.map((pn) => [pn.id, { x: pn.x + dx, y: pn.y + dy }])
+      layout.nodes.map((pn) => [pn.id, { x: pn.x, y: pn.y }])
     )
     const anchorId = anchorNodeRef.current
     if (anchorId) {
+      if (dx !== 0 || dy !== 0) onAnchorReflow?.(dx, dy)
       const anchorNode = nodeMap.get(anchorId)
-      // Keep the anchor while an expanded node is still waiting for its children
-      // to materialize — they may arrive in a later commit (F0Graph's own lazy
-      // mode, or a consumer like the DataCollection adapter that loads children
-      // asynchronously into the `nodes` prop). Without this the big reflow when
-      // the children appear would be uncompensated and the viewport would jump.
-      // Mode-agnostic: keyed on the tree shape, not on how the data is sourced.
       const stillExpanding =
         anchorNode !== undefined &&
         expandedNodes.has(anchorId) &&
@@ -364,7 +374,14 @@ export function useGraphRenderModel<T>({
         anchorNodeRef.current = null
       }
     }
-  }, [layout.nodes, anchorOffset, nodeMap, expandedNodes, anchorNodeRef])
+  }, [
+    layout.nodes,
+    anchorOffset,
+    nodeMap,
+    expandedNodes,
+    anchorNodeRef,
+    onAnchorReflow,
+  ])
 
   // ── Node-array windowing ──
   // Ids of the LAYOUT nodes (graph pills + expanders) whose box intersects the
@@ -381,13 +398,12 @@ export function useGraphRenderModel<T>({
   const windowedIds = useMemo((): Set<string> | null => {
     if (!enableNodeWindowing || !viewportRect) return null
     const fallbackWidth = nodeWidthProp ?? 256
-    const { dx, dy } = anchorOffset
     const ids = new Set<string>()
     for (const pn of layout.nodes) {
       if (
         nodeIntersectsRect(
-          pn.x + dx,
-          pn.y + dy,
+          pn.x,
+          pn.y,
           pn.width || fallbackWidth,
           pn.height || effectiveNodeHeight,
           viewportRect
@@ -396,21 +412,38 @@ export function useGraphRenderModel<T>({
         ids.add(pn.id)
       }
     }
+    // Keep every windowed node connected to its ancestry: walk each windowed
+    // node's parent chain up to the root and materialize those ancestors too,
+    // even when they sit outside the viewport window. An edge only renders when
+    // BOTH endpoints are windowed (see `rfEdges`), and a node only renders when
+    // it is windowed (see `rfNodes`) — so without this a node whose parent
+    // scrolled off-window loses its incoming edge and looks like a detached root
+    // (the reporting line up to the CEO disappears). Bounded by tree DEPTH, not
+    // breadth: windowed siblings share ancestors, so this adds a thin spine, not
+    // a subtree. The walk stops as soon as it reaches an id already in the set,
+    // so each ancestor is visited at most once (and it is cycle-safe).
+    const base = Array.from(ids)
+    for (const startId of base) {
+      let parentId = nodeMap.get(startId)?.parentId ?? null
+      while (parentId !== null && !ids.has(parentId)) {
+        ids.add(parentId)
+        parentId = nodeMap.get(parentId)?.parentId ?? null
+      }
+    }
     return ids
   }, [
     enableNodeWindowing,
     viewportRect,
     layout.nodes,
-    anchorOffset,
     nodeWidthProp,
     effectiveNodeHeight,
+    nodeMap,
   ])
 
   // ── React Flow nodes ── Only the windowed nodes are materialized (all of them
   // when windowing is off). Building here — rather than building everything and
   // filtering — is what makes the work O(on-screen) instead of O(visible tree).
   const rfNodes = useMemo((): RFNode[] => {
-    const { dx: anchorDx, dy: anchorDy } = anchorOffset
     const BASE_W = nodeWidthProp ?? 256
     const BASE_H = effectiveNodeHeight
     const yStretch = 1
@@ -467,8 +500,8 @@ export function useGraphRenderModel<T>({
         id: treeNode.id,
         type: "graphNode",
         position: {
-          x: (pos?.x ?? 0) + anchorDx,
-          y: (pos?.y ?? 0) * yStretch + anchorDy,
+          x: pos?.x ?? 0,
+          y: (pos?.y ?? 0) * yStretch,
         },
         width: BASE_W,
         sourcePosition: sourcePos,
@@ -510,7 +543,7 @@ export function useGraphRenderModel<T>({
       nodes.push({
         id: exp.id,
         type: "expanderNode",
-        position: { x: expX + anchorDx, y: expY + anchorDy },
+        position: { x: expX, y: expY },
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
@@ -548,7 +581,7 @@ export function useGraphRenderModel<T>({
         id: `collapser-${parent.id}`,
         type: "collapserNode",
         zIndex: 10,
-        position: { x: colX + anchorDx, y: colY + anchorDy },
+        position: { x: colX, y: colY },
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
@@ -567,7 +600,6 @@ export function useGraphRenderModel<T>({
     expanderNodes,
     expandedNodes,
     stableRenderNode,
-    anchorOffset,
     EXPANDER_Y_OFFSET,
     COLLAPSER_OFFSET_ADJUSTMENT,
     nodeWidthProp,

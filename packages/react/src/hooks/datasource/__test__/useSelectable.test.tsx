@@ -1360,5 +1360,74 @@ describe("useSelectable", () => {
         expect(result.current.selectedItems.has(1)).toBe(true)
       })
     })
+
+    // total reflects the 2 parent rows, not the 6 selectable children (as in HC planning)
+    const undercountingPagination: PaginationInfo = {
+      type: "pages",
+      total: parentRecords.length,
+      currentPage: 1,
+      perPage: parentRecords.length,
+      pagesCount: 1,
+    }
+
+    it("counts rendered selectable rows, not paginationInfo.total (fixes 'Select all 2 items')", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo: undercountingPagination,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+          renderedSelectableCount: childRecords.length,
+        })
+      )
+
+      expect(result.current.selectionStatus.totalKnownItemsCount).toBe(6)
+
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.allSelectedStatus.selectedCount).toBe(6)
+      })
+    })
+
+    it("never reports a negative selected count when children are unchecked (fixes '-2 selected')", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo: undercountingPagination,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+          renderedSelectableCount: childRecords.length,
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+      await waitFor(() =>
+        expect(result.current.allSelectedStatus.selectedCount).toBe(6)
+      )
+
+      // uncheck 4 of 6 — more than total (2); pre-fix this gave 2 - 4 = -2
+      act(() => {
+        for (const item of childRecords.slice(0, 4)) {
+          result.current.handleSelectItemChange(item, false)
+        }
+      })
+
+      await waitFor(() => {
+        const count = result.current.allSelectedStatus.selectedCount
+        expect(count).toBeGreaterThanOrEqual(0)
+        expect(count).toBe(2)
+      })
+    })
   })
 })

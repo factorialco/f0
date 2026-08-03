@@ -151,6 +151,11 @@ const F0Button = React.memo(
 
     const shouldShowPressed = isPressed && !isDisabled
 
+    // PressableFeedback is the overflow-hidden node, so it needs the button's
+    // radius — otherwise its press/scale overlay clips to square corners.
+    const pressableRoundingClassName =
+      size === "sm" ? "rounded-sm" : size === "lg" ? "rounded-md" : "rounded"
+
     const isDarkGhost = isDark && variant === "ghost"
 
     const className = shouldShowPressed
@@ -179,6 +184,7 @@ const F0Button = React.memo(
           {...forwardedProps}
           disabled={isDisabled}
           variant={feedback}
+          className={pressableRoundingClassName}
           onPress={handlePress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}

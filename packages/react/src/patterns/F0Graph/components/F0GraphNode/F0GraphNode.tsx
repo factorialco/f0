@@ -18,6 +18,7 @@ import type { F0GraphNodeProps } from "./types"
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
+import { tagColumn } from "./types"
 import { graphNodeContainerVariants } from "./variants"
 
 // Composite-only transitions. Layout-affecting properties (padding,
@@ -121,9 +122,14 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
     const isCompact = variant === "compact"
     const isDot = variant === "dot"
     const isDetail = variant === "detail"
+    // Node silhouette follows the avatar's own shape (see F0Avatar): a `person`
+    // avatar is a circle, so the node stays a circular dot / pill; every other
+    // avatar (`team`, `company`, `icon`, …) is a rounded square, so the node
+    // becomes a rounded-square card. No avatar → keep the circular default.
+    const isSquareAvatar = avatar != null && avatar.type !== "person"
     const filteredTags = tags
       ? visibleTagTypes
-        ? tags.filter((t) => visibleTagTypes.has(t.type))
+        ? tags.filter((t) => visibleTagTypes.has(tagColumn(t)))
         : tags
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0
@@ -171,7 +177,10 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         <div
           className={cn(
             "group/pill relative inline-flex max-w-full flex-col items-stretch",
-            "outline-none rounded-full",
+            "outline-none",
+            // Square avatar → square (rounded, 20px) node pill so the whole node
+            // reads as a card; a circular (person) avatar keeps the pill silhouette.
+            isSquareAvatar ? "rounded-2xl" : "rounded-full",
             // Selection / highlight rings stay on the wrapper so they wrap
             // the layout box (which matches the visible compact/detail pill).
             // For dot variant the ring is moved to the avatar (see below).
@@ -181,8 +190,15 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             // Dimmed visually applies to the whole wrapper only in dot
             // (matches previous behaviour).
             state === "dimmed" && isDot && "opacity-40",
-            "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0",
-            "px-2.5 py-2",
+            // Keyboard focus ring on the wrapper for compact/detail (matches the
+            // selection ring above). For dot the wrapper is the invisible ~44px
+            // layout box, so the ring is moved to the scaled avatar below —
+            // otherwise it would frame the hidden box, not the visible dot.
+            !isDot &&
+              "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0",
+            // 10px padding on every side for the square (card) node; the
+            // circular pill keeps its original tighter vertical padding.
+            isSquareAvatar ? "p-2.5" : "px-2.5 py-2",
             "min-h-11"
           )}
           style={{
@@ -199,7 +215,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-0 rounded-full border border-solid bg-f1-background",
+              "pointer-events-none absolute inset-0 border border-solid bg-f1-background",
+              isSquareAvatar ? "rounded-2xl" : "rounded-full",
               // Backdrop-blur is only enabled in compact/detail. In dot the
               // chrome is invisible (opacity 0), but Chrome/Safari still
               // rasterize the backdrop filter every frame for every node \u2014
@@ -237,10 +254,20 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 along with the avatar. */}
             <div
               className={cn(
-                "flex  shrink-0 items-center justify-center overflow-hidden rounded-full",
+                "flex shrink-0 items-center justify-center",
+                // No clipping here: F0Avatar owns its own silhouette (person is a
+                // circle, team/company/icon/… are rounded squares at their own
+                // radius). The radius below is only the shape of the dot-mode
+                // selection/focus ring, so it hugs the scaled avatar.
+                isSquareAvatar ? "rounded-md" : "rounded-full",
                 isDot &&
                   (state === "selected" || state === "highlighted") &&
-                  "ring-2 ring-f1-background-selected ring-offset-0"
+                  "ring-2 ring-f1-background-selected ring-offset-0",
+                // In dot the visible node is this scaled avatar, so the keyboard
+                // focus ring lives here (not on the invisible wrapper) so it
+                // wraps the dot and scales with it.
+                isDot &&
+                  "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0"
               )}
               style={{
                 transform: `translateZ(0) scale(${isDot ? 96 / 40 : 1})`,
@@ -252,7 +279,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               }}
             >
               {loading ? (
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton
+                  className={cn(
+                    "h-10 w-10",
+                    isSquareAvatar ? "rounded-md" : "rounded-full"
+                  )}
+                />
               ) : (
                 avatar && <F0Avatar size="lg" avatar={avatar} />
               )}
@@ -371,6 +403,14 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
             }
             className="max-w-[256px]"
+            // Tags are informational: clicking a tag must not select/center the
+            // node. Two paths select a node: the node-level `onClick` (centering
+            // + itemOnClick) — swallowed here via stopPropagation — and the
+            // canvas `onPointerUp` handler, which fires on pointerup regardless
+            // of this click handler. `data-no-node-select` tells that handler to
+            // skip selection when the pointer went down on a tag.
+            data-no-node-select
+            onClick={(e) => e.stopPropagation()}
           >
             <F0GraphNodeTags tags={filteredTags!} />
           </motion.div>

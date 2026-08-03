@@ -2,10 +2,11 @@ import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { FeatureGrid } from "~/docs/components/FeatureGrid"
 import { Kanban, List, Pencil, Table } from "@/icons/app"
+import * as GraphStories from "./visualizations/graph.stories"
 
-<Meta title="Data collection/Visualizations" />
+<Meta title="Data Collection/Visualizations" />
 
-# Data collection/Visualizations
+# Data Collection/Visualizations
 
 ## Introduction
 
@@ -56,3 +57,39 @@ etc.) and the visualization, of the data at item level (visualization) and
     ]}
   />
 </Unstyled>
+
+## Switching between visualizations
+
+When you pass more than one visualization, Data Collection renders a view
+switcher (a segmented control) in the header. Each chip shows the
+visualization's icon and label.
+
+## Renaming the switcher chips
+
+By default each built-in visualization uses its localized name — "Table",
+"Graph", "List", etc. To rename a chip for a specific collection, pass an
+optional `label` on the visualization. Different collections can label the same
+type differently — e.g. the `graph` view as "Org chart" for employees, or the
+`table` view as "Teams" for teams.
+
+```tsx
+<OneDataCollection
+  source={dataSource}
+  visualizations={[
+    // Renames the chip to "Org chart"; the built-in graph icon is kept.
+    { type: "graph", label: "Org chart", options: {} },
+    // Omit `label` to keep the default localized name ("Table").
+    { type: "table", options: {} },
+  ]}
+/>
+```
+
+- `label` is optional; when omitted the localized built-in label is used, so
+  existing collections keep showing "Table" and "Graph".
+- Only the text is customizable — the icon still comes from the visualization
+  type. For a fully custom icon and label, use a `type: "custom"` visualization.
+
+In the example below the two chips read "Org chart" and "Directory" instead of
+the defaults "Graph" and "Table":
+
+<Canvas of={GraphStories.CustomViewLabels} />

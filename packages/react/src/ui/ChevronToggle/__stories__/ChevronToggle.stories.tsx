@@ -5,7 +5,7 @@ import { useState } from "react"
 import { ChevronToggle } from "../ChevronToggle"
 
 const meta = {
-  title: "Components/ChevronToggle",
+  title: "ChevronToggle",
   component: ChevronToggle,
   parameters: {
     layout: "centered",

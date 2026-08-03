@@ -40,8 +40,8 @@ Each module maps to its own icon.
 #### Sizes
 
 Module uses the shared avatar size scale for standalone use (`xs`–`lg`, same
-pixels as every other avatar). It also defines two smaller sub-sizes (`2xs`,
-`3xs`) reserved for the corner badge described below.
+pixels as every other avatar). It also defines three smaller sub-sizes (`2xs`,
+`3xs`, `4xs`) reserved for the corner badge described below.
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -80,11 +80,17 @@ pixels as every other avatar). It also defines two smaller sub-sizes (`2xs`,
         <td>
           <code>2xs</code> · badge
         </td>
-        <td>12px</td>
+        <td>16px</td>
       </tr>
       <tr>
         <td>
           <code>3xs</code> · badge
+        </td>
+        <td>12px</td>
+      </tr>
+      <tr>
+        <td>
+          <code>4xs</code> · badge
         </td>
         <td>10px</td>
       </tr>
@@ -92,10 +98,12 @@ pixels as every other avatar). It also defines two smaller sub-sizes (`2xs`,
   </table>
 </Unstyled>
 
-The `2xs` and `3xs` sub-sizes exist **only** so the module can render as a small
-badge in the corner of an entity avatar — marking which product module the item
-belongs to. They are too small to read on their own, so for a standalone module
-avatar use `xs` (20px) or larger.
+The `2xs`, `3xs` and `4xs` sub-sizes exist **only** so the module can render as
+a small badge in the corner of an entity avatar — marking which product module
+the item belongs to. As a badge the module is sized to roughly **half** its host
+avatar (`lg` 40px → `xs` 20px, `md` 32px → `2xs` 16px, `sm` 24px → `3xs` 12px,
+`xs` 20px → `4xs` 10px). These sub-sizes are too small to read on their own, so
+for a standalone module avatar use `xs` (20px) or larger.
 
 <Canvas of={ModuleStories.AsBadge} />
 
@@ -112,9 +120,10 @@ avatar use `xs` (20px) or larger.
 
 #### When NOT to use
 
-- **`2xs` / `3xs` for a standalone module avatar**: these sub-sizes exist only
-  so the module reads as a tiny corner badge on another avatar. On their own
-  they are too small to be legible — use `xs` (20px) or larger for standalone.
+- **`2xs` / `3xs` / `4xs` for a standalone module avatar**: these sub-sizes
+  exist only so the module reads as a tiny corner badge on another avatar. On
+  their own they are too small to be legible — use `xs` (20px) or larger for
+  standalone.
 - Representing a person, team or other entity: use the matching `F0Avatar*`
   component.
 

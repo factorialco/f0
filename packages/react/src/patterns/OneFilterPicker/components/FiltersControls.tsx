@@ -1,6 +1,16 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
+import isEqual from "lodash/isEqual"
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
+import {
+  type ComponentPropsWithoutRef,
+  forwardRef,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -22,7 +32,15 @@ import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
 interface FiltersControlsProps<Filters extends FiltersDefinition> {
+  /** The filters shown in the selector list (excludes `hideSelector` filters). */
   filters: Filters
+  /**
+   * The complete filter definition, including `hideSelector` filters (e.g. the
+   * sibling keys that hold nested/grouped child selections). Used when computing
+   * the value to apply so nested selections aren't dropped. Falls back to
+   * `filters` when omitted.
+   */
+  allFilters?: Filters
   value: FiltersState<Filters>
   onChange: (value: FiltersState<Filters>) => void
   isOpen?: boolean
@@ -34,8 +52,29 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
 
 const DEFAULT_FORM_HEIGHT = 388
 
+function AccessibleDescription({ id, text }: { id: string; text: string }) {
+  // `title` participates in the referenced description without adding a text
+  // node that would change existing consumer queries.
+  return <span id={id} title={text} className="sr-only" />
+}
+
+type DescribedFilterButtonProps = ComponentPropsWithoutRef<
+  typeof ButtonInternal
+> &
+  Pick<React.AriaAttributes, "aria-describedby">
+
+// Keep this standard ARIA attribute local to filter triggers instead of
+// widening the exported F0Button contract.
+const DescribedFilterButton = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  DescribedFilterButtonProps
+>((props, ref) => <ButtonInternal {...props} ref={ref} />)
+
+DescribedFilterButton.displayName = "DescribedFilterButton"
+
 export function FiltersControls<Filters extends FiltersDefinition>({
   filters,
+  allFilters,
   value,
   onChange,
   isOpen: controlledIsOpen,
@@ -44,6 +83,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   mode = "default",
   displayCounter = false,
 }: FiltersControlsProps<Filters>) {
+  // The value to emit must consider every filter — including `hideSelector`
+  // siblings that store nested/grouped selections — otherwise those selections
+  // are dropped when applying. The selector list stays on the visible `filters`
+  // set, while the counter and accessible summary include every applied value.
+  const filtersForValue = allFilters ?? filters
   const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
@@ -65,6 +109,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     defaultProp: false,
     onChange: controlledOnOpenChange,
   })
+  const [localFiltersValue, setLocalFiltersValue] = useState(value)
 
   const isOpenRef = useRef(isOpen)
   useEffect(() => {
@@ -81,6 +126,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
     if (currentIsOpen) {
       isClosingRef.current = true
+      setLocalFiltersValue(value)
       setIsOpen(false)
 
       setTimeout(() => {
@@ -95,8 +141,15 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
   const onOpenChange = handleOpenChange
 
-  const [localFiltersValue, setLocalFiltersValue] = useState(value)
+  // Re-seed the draft only when the committed value's CONTENT changes.
+  // Comparing by identity would wipe an in-progress draft whenever the host
+  // re-renders with a fresh but content-identical `value` object (controlled
+  // hosts commonly rebuild it every render), making the picker impossible to
+  // edit in those apps while working fine in stories with stable state.
+  const previousValueRef = useRef(value)
   useEffect(() => {
+    if (isEqual(previousValueRef.current, value)) return
+    previousValueRef.current = value
     setLocalFiltersValue(value)
   }, [value])
 
@@ -110,19 +163,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const handleApplyFilters = () => {
     // Emit only active filters so a cleared set is applied as `{}` (unfiltered),
     // not `{ key: emptyValue }` which could make the data source return nothing.
-    onChange(getActiveFiltersValue(filters, localFiltersValue, i18n))
+    onChange(getActiveFiltersValue(filtersForValue, localFiltersValue, i18n))
     onOpenChange(false)
   }
 
   const handleClearFilters = () => {
-    setLocalFiltersValue(getClearedFiltersValue(filters))
+    setLocalFiltersValue(getClearedFiltersValue(filtersForValue))
   }
 
   const handleGoBack = () => {
     if (selectedFilterKey) {
       setSelectedFilterKey(null)
     } else {
-      onChange(getActiveFiltersValue(filters, localFiltersValue, i18n))
+      onChange(getActiveFiltersValue(filtersForValue, localFiltersValue, i18n))
       onOpenChange(false)
     }
   }
@@ -174,30 +227,28 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return maxHeight
   }, [filters])
   const id = useId()
+  const activeFiltersDescriptionId = `${id}-active-filters-description`
 
   const activeFilters = useMemo(
-    () => getActiveFilterKeys(filters, localFiltersValue, i18n),
-    [filters, localFiltersValue, i18n]
+    () => getActiveFilterKeys(filtersForValue, value, i18n),
+    [filtersForValue, value, i18n]
   )
 
-  const appliedFiltersCount = useMemo(() => {
-    const count = getActiveFilterKeys(filters, value, i18n).length
-    if (count === 0) return undefined
-    return count
-  }, [filters, value, i18n])
+  const appliedFiltersCount =
+    activeFilters.length === 0 ? undefined : activeFilters.length
 
   const activeFiltersTooltip = useMemo(() => {
     return activeFilters.length > 0
       ? i18n.t("filters.activeFilters", {
           filters: activeFilters
             .map((key) => {
-              return filters[key].label
+              return filtersForValue[key].label
             })
             .join(", "),
         })
       : undefined
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the active filters change
-  }, [activeFilters, filters])
+  }, [activeFilters, filtersForValue])
 
   // Inline mode: dual-pane layout (filter list + content) as an overlay
   if (mode === "inline") {
@@ -206,9 +257,20 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
-          <ButtonInternal
+          <DescribedFilterButton
             variant="outline"
             label={i18n.filters.label}
+            aria-describedby={
+              activeFiltersTooltip ? activeFiltersDescriptionId : undefined
+            }
+            append={
+              activeFiltersTooltip ? (
+                <AccessibleDescription
+                  id={activeFiltersDescriptionId}
+                  text={activeFiltersTooltip}
+                />
+              ) : undefined
+            }
             icon={Filter}
             pressed={isOpen}
             onClick={() => onOpenChange(!isOpen)}
@@ -319,9 +381,20 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
-          <ButtonInternal
+          <DescribedFilterButton
             variant="outline"
             label={i18n.filters.label}
+            aria-describedby={
+              activeFiltersTooltip ? activeFiltersDescriptionId : undefined
+            }
+            append={
+              activeFiltersTooltip ? (
+                <AccessibleDescription
+                  id={activeFiltersDescriptionId}
+                  text={activeFiltersTooltip}
+                />
+              ) : undefined
+            }
             icon={Filter}
             pressed={isOpen}
             onClick={() => onOpenChange(!isOpen)}
@@ -399,9 +472,20 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     <div className="flex items-center gap-2">
       <Popover open={isOpen} onOpenChange={onOpenChange} modal>
         <PopoverTrigger asChild>
-          <ButtonInternal
+          <DescribedFilterButton
             variant="outline"
             label={i18n.filters.label}
+            aria-describedby={
+              activeFiltersTooltip ? activeFiltersDescriptionId : undefined
+            }
+            append={
+              activeFiltersTooltip ? (
+                <AccessibleDescription
+                  id={activeFiltersDescriptionId}
+                  text={activeFiltersTooltip}
+                />
+              ) : undefined
+            }
             icon={Filter}
             pressed={isOpen}
             hideLabel={hideLabel}
@@ -413,7 +497,8 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           className="w-fit min-w-[600px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
           align="start"
           side="bottom"
-          aria-id={id}
+          id={id}
+          aria-label={i18n.filters.label}
           container={portalContainer}
         >
           <FilterPickerInternal

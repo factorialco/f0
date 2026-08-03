@@ -15,7 +15,7 @@ import { ChevronLeft, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { ActionButtonVariant } from "@/ui/Action"
 import { Skeleton } from "@/ui/skeleton"
 

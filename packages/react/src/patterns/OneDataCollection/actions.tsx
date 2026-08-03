@@ -7,6 +7,10 @@ export type PrimaryActionItemDefinition = Pick<
   loading?: boolean
   onClick?: () => void | Promise<void>
   disabled?: boolean
+  tooltip?: (params: {
+    disabled: boolean
+    loading: boolean
+  }) => string | undefined
 }
 
 /**

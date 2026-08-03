@@ -15,10 +15,12 @@ describe("resolveGraphReveal", () => {
       revealId: null,
       consumeInitial: false,
       lastRevealed: undefined,
+      lastNonce: undefined,
     })
   })
 
-  it("does NOT auto-focus on entry by default (adopts the search value as handled)", () => {
+  it("never reveals on entry (adopts the search value as handled)", () => {
+    // Entry focus is handled by initialFocusNodeId, not by a reveal/pan here.
     const d = resolveGraphReveal({
       isInitialLoading: false,
       initialConsumed: false,
@@ -30,26 +32,10 @@ describe("resolveGraphReveal", () => {
     expect(d.lastRevealed).toBe("search-1") // tracks the search value, not revealed
   })
 
-  it("auto-focuses `focusOnEntry` once on entry, keeping search tracking intact", () => {
-    const d = resolveGraphReveal({
-      isInitialLoading: false,
-      initialConsumed: false,
-      focusOnEntry: "me",
-      revealNodeId: undefined,
-      lastRevealed: undefined,
-    })
-    expect(d.revealId).toBe("me")
-    expect(d.consumeInitial).toBe(true)
-    // lastRevealed stays on the (empty) search value so a later search pick fires.
-    expect(d.lastRevealed).toBeUndefined()
-  })
-
-  it("still reveals a later search selection after an entry auto-focus", () => {
-    // Entry consumed already; a fresh search selection differs from lastRevealed.
+  it("reveals a later search selection after entry", () => {
     const d = resolveGraphReveal({
       isInitialLoading: false,
       initialConsumed: true,
-      focusOnEntry: "me",
       revealNodeId: "search-2",
       lastRevealed: undefined,
     })
@@ -57,26 +43,48 @@ describe("resolveGraphReveal", () => {
     expect(d.lastRevealed).toBe("search-2")
   })
 
-  it("does not re-reveal the same search selection", () => {
+  it("does not re-reveal the same search selection on a plain re-render", () => {
+    // Same id, same nonce → nothing changed, so no reveal.
     const d = resolveGraphReveal({
       isInitialLoading: false,
       initialConsumed: true,
       revealNodeId: "search-2",
       lastRevealed: "search-2",
+      revealNonce: 3,
+      lastNonce: 3,
     })
     expect(d.revealId).toBeNull()
     expect(d.lastRevealed).toBe("search-2")
+    expect(d.lastNonce).toBe(3)
   })
 
-  it("ignores focusOnEntry after the initial render (entry-only)", () => {
-    // focusOnEntry changing later must not re-trigger a reveal.
+  it("re-reveals the same node when the search nonce bumps (repeat pick)", () => {
+    // Re-picking the same node in the shared search bumps the nonce even though
+    // the id is unchanged — so it re-centers, like "Find me".
     const d = resolveGraphReveal({
       isInitialLoading: false,
       initialConsumed: true,
-      focusOnEntry: "me",
-      revealNodeId: undefined,
-      lastRevealed: "search-1",
+      revealNodeId: "search-2",
+      lastRevealed: "search-2",
+      revealNonce: 4,
+      lastNonce: 3,
+    })
+    expect(d.revealId).toBe("search-2")
+    expect(d.lastRevealed).toBe("search-2")
+    expect(d.lastNonce).toBe(4)
+  })
+
+  it("adopts the entry nonce as handled without revealing", () => {
+    const d = resolveGraphReveal({
+      isInitialLoading: false,
+      initialConsumed: false,
+      revealNodeId: "search-1",
+      lastRevealed: undefined,
+      revealNonce: 2,
+      lastNonce: undefined,
     })
     expect(d.revealId).toBeNull()
+    expect(d.consumeInitial).toBe(true)
+    expect(d.lastNonce).toBe(2)
   })
 })

@@ -13,6 +13,7 @@ const meta = {
   component: F0Link,
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
   tags: ["autodocs", "stable"],
   argTypes: {

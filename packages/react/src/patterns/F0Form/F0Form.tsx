@@ -558,6 +558,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const hideSubmitButton =
     (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
     !!submitConfig?.hideSubmitButton
+  const showSubmitWhenDirty =
+    (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
+    !!submitConfig?.showSubmitWhenDirty
   const hideActionBar =
     submitConfig?.type !== "action-bar" && !!submitConfig?.hideActionBar
   const showSubmitButton = !isActionBar && !isAutosubmit && !hideSubmitButton
@@ -598,6 +601,32 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       .filter((item): item is SectionDefinition => item.type === "section")
       .map((section) => section.id)
   }, [definition])
+
+  // Field ids that opt into auto-save (a change to them saves the form),
+  // gathered across root fields, rows and sections.
+  const autoSaveFieldIds = useMemo(() => {
+    const ids = new Set<string>()
+    const add = (field: { id: string; autoSave?: boolean }) => {
+      if (field.autoSave) ids.add(field.id)
+    }
+    for (const item of definition) {
+      if (item.type === "field") add(item.field)
+      else if (item.type === "row") item.fields.forEach(add)
+      else if (item.type === "section") {
+        for (const sub of item.section.fields) {
+          if (sub.type === "field") add(sub.field)
+          else if (sub.type === "row") sub.fields.forEach(add)
+        }
+      }
+    }
+    return ids
+  }, [definition])
+  const hasFieldAutoSave = autoSaveFieldIds.size > 0
+  // Read the (possibly re-created) set from a ref inside the watch callback so
+  // the auto-save effect stays subscribed instead of re-running — and clearing
+  // its pending debounce timer — on every render.
+  const autoSaveFieldIdsRef = useRef(autoSaveFieldIds)
+  autoSaveFieldIdsRef.current = autoSaveFieldIds
 
   // Track active section (the last clicked section)
   const [activeSection, setActiveSection] = useState<string | undefined>(
@@ -668,12 +697,44 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
+  // Track file fields with in-flight uploads. Submission is blocked until the
+  // set empties so a form is never submitted with a file that hasn't finished
+  // uploading (its form value isn't set until the upload completes).
+  const [uploadingFieldIds, setUploadingFieldIds] = useState<Set<string>>(
+    () => new Set()
+  )
+  const registerUploadState = useCallback(
+    (id: string, isUploading: boolean) => {
+      setUploadingFieldIds((prev) => {
+        if (isUploading === prev.has(id)) return prev
+        const next = new Set(prev)
+        if (isUploading) next.add(id)
+        else next.delete(id)
+        return next
+      })
+    },
+    []
+  )
+  const hasPendingUploads = uploadingFieldIds.size > 0
+  // Mirror into a ref so the submit handler can guard against non-button
+  // submits (Enter key, autosubmit) without being re-created every render.
+  const hasPendingUploadsRef = useRef(hasPendingUploads)
+  hasPendingUploadsRef.current = hasPendingUploads
+
   const [actionBarStatus, setActionBarStatus] =
     useState<ActionBarStatus>("idle")
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autosubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const actionBarRef = useRef<F0ActionBarRef | null>(null)
+
+  // Tracks whether the component is still mounted. Guards state updates that
+  // are reached through an async path (`await onSubmit(...)`) or a timer
+  // callback: if the form unmounts while a submit is in flight, the unmount
+  // cleanup below has already run — a timer scheduled *after* the await would
+  // never be captured/cleared, and its callback (or the post-await setState)
+  // would run against a torn-down tree. See the unmount effect that flips this.
+  const isMountedRef = useRef(true)
 
   /**
    * Snapshot of the focused input element + caret position taken before a
@@ -712,6 +773,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Handle form submission with status flow: idle -> loading -> success -> idle
   const handleSubmit = async (data: TValues) => {
+    // Block submission while any file field still has an upload in flight.
+    // Covers non-button submit paths (Enter key, autosubmit); the visible
+    // submit controls are also disabled via `hasPendingUploads`.
+    if (hasPendingUploadsRef.current) return
+
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
       successTimerRef.current = null
@@ -729,6 +795,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     const result = await onSubmit(cleanedData)
 
+    // The form may have unmounted while `onSubmit` was in flight. The unmount
+    // cleanup has already run, so any state update here — or a timer scheduled
+    // below — would leak past teardown. Bail out.
+    if (!isMountedRef.current) return
+
     if (result.success) {
       form.reset(form.getValues())
       resetErrorNavigation()
@@ -736,6 +807,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       setActionBarStatus("success")
 
       successTimerRef.current = setTimeout(() => {
+        if (!isMountedRef.current) return
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
@@ -757,11 +829,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
       }
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
+        autosubmitTimerRef.current = null
       }
     }
   }, [])
@@ -810,7 +885,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     const snapshot = focusSnapshotRef.current
     focusSnapshotRef.current = null
     if (!snapshot) return
-    if (!snapshot.element.isConnected) return
+    if (!snapshot.element.isConnected) {
+      // `showSubmitWhenDirty` removes the submit button on a successful save.
+      // If it was the focused element, park focus on the form so tab order
+      // resumes here instead of restarting at the top of the document.
+      if (showSubmitWhenDirty && formElementRef.current) {
+        formElementRef.current.setAttribute("tabindex", "-1")
+        formElementRef.current.focus()
+      }
+      return
+    }
     if (document.activeElement === snapshot.element) return
 
     snapshot.element.focus()
@@ -830,27 +914,44 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         // Ignore — the focus call above is the important part.
       }
     }
-  }, [isSubmitting])
+  }, [isSubmitting, showSubmitWhenDirty])
 
-  // Autosubmit: debounced auto-submit when fields change.
-  // `form.handleSubmit` runs validation; invalid forms surface errors and skip onSubmit.
+  // Auto-save: debounced auto-submit when fields change. Triggered by every
+  // field in form-level autosubmit mode, or only by fields with `autoSave` when
+  // some are set. `form.handleSubmit` runs validation; invalid forms surface
+  // errors and skip onSubmit.
   const autosubmitDelay =
     submitConfig?.type === "autosubmit"
       ? (submitConfig.delay ?? DEFAULT_AUTOSUBMIT_DELAY_MS)
       : DEFAULT_AUTOSUBMIT_DELAY_MS
 
   useEffect(() => {
-    if (!isAutosubmit) return
+    if (!isAutosubmit && !hasFieldAutoSave) return
 
-    const subscription = form.watch(() => {
-      if (!form.formState.isDirty) return
+    const subscription = form.watch((_values, { name }) => {
       if (form.formState.isSubmitting) return
+
+      if (!isAutosubmit) {
+        // Per-field auto-save: only react to a change on a designated
+        // `autoSave` field. `name` is the changed path, e.g. "links.0.url" →
+        // root field id "links"; a matching name is itself the "field changed"
+        // signal (the watch fires with an undefined name on mount, skipped).
+        const rootFieldId = name?.split(".")[0]
+        if (!rootFieldId || !autoSaveFieldIdsRef.current.has(rootFieldId))
+          return
+      }
 
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
+        if (!isMountedRef.current) return
+        // Re-check dirtiness at fire time (RHF's `isDirty` has settled by now,
+        // unlike inside the synchronous watch callback): skip a save when the
+        // form is back to its last-saved state — e.g. a row was added then
+        // removed, netting no change from the snapshot.
+        if (!form.formState.isDirty) return
         snapshotFocus()
         form.handleSubmit((data) =>
           handleSubmitForAutosubmitRef.current(data)
@@ -865,7 +966,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         autosubmitTimerRef.current = null
       }
     }
-  }, [isAutosubmit, autosubmitDelay, form, snapshotFocus])
+  }, [isAutosubmit, hasFieldAutoSave, autosubmitDelay, form, snapshotFocus])
 
   // Handle discard action
   const handleDiscard = () => {
@@ -1029,6 +1130,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     }),
     [
@@ -1038,6 +1140,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       props.renderCustomField,
       isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     ]
   )
@@ -1054,7 +1157,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       (active.tagName === "BUTTON" ||
         (active.tagName === "INPUT" &&
           (active as HTMLInputElement).type === "submit"))
-    if (!isButtonActivation) snapshotFocus()
+    // With `showSubmitWhenDirty` the submit button unmounts itself on a
+    // successful save, so a button activation is snapshotted too — otherwise
+    // focus would be dropped on the floor when it disappears.
+    if (!isButtonActivation || showSubmitWhenDirty) snapshotFocus()
     submitHandler(event)
   }
 
@@ -1136,17 +1242,19 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       )}
 
       {/* Default submit button */}
-      {!isActionBar && showSubmitButton && (
-        <div className="mt-4 flex justify-end">
-          <F0Button
-            type="submit"
-            label={submitLabel}
-            icon={submitIcon}
-            loading={isSubmitting}
-            disabled={hasErrors || isFormLoading}
-          />
-        </div>
-      )}
+      {!isActionBar &&
+        showSubmitButton &&
+        (!showSubmitWhenDirty || isDirty) && (
+          <div className="mt-4 flex justify-end">
+            <F0Button
+              type="submit"
+              label={submitLabel}
+              icon={submitIcon}
+              loading={isSubmitting}
+              disabled={hasErrors || isFormLoading || hasPendingUploads}
+            />
+          </div>
+        )}
     </form>
   )
 
@@ -1185,6 +1293,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             isDirty={isDirty}
             actionBarStatus={actionBarStatus}
             hasErrors={hasErrors}
+            hasPendingUploads={hasPendingUploads}
             errorCount={errorCount}
             resolvedActionBarLabel={resolvedActionBarLabel}
             submitLabel={submitLabel}

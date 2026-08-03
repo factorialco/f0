@@ -12,9 +12,9 @@ import { ScrollArea as ScrollAreaComponent } from "./Utilities/ScrollArea"
 export * from "./AiPromotionChat/exports"
 export * from "./Actions/exports"
 /**
- * @deprecated Banners has moved to @/sds/ai/Banners. Import from there instead.
+ * @deprecated Banners has moved to @/kits/ai/Banners. Import from there instead.
  */
-export * from "../sds/ai/Banners/exports"
+export * from "../kits/ai/Banners/exports"
 /**
  * @deprecated Charts has moved to @/kits/Charts. Import from there instead.
  */
@@ -24,6 +24,8 @@ export * from "../kits/Charts/exports"
  */
 export * from "../components/F0ActionBar"
 export * from "./F0CardHorizontal"
+export * from "./F0MeetingCard"
+export * from "./F0ProgressSeries"
 export * from "./F0SegmentedBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"
@@ -32,6 +34,7 @@ export * from "./Lists/DetailsItem"
 export * from "./Lists/DetailsItemsList"
 export * from "./Lists/OnePersonListItem"
 export * from "./Navigation/exports"
+export * from "./F0FormEditableTable"
 /**
  * @deprecated OneApprovalHistory has moved to @/sds/inbox/OneApprovalHistory. Import from there instead.
  */

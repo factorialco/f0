@@ -147,13 +147,15 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
 
   const isAutosubmit = submitConfig?.type === "autosubmit"
 
-  // In autosubmit mode the form silently saves while the user keeps typing.
-  // Surfacing `isSubmitting` to field renderers would disable the active
-  // input and the browser would blur it mid-keystroke — breaking the entire
-  // point of autosubmit. Mask it out here so both the `<Controller disabled>`
-  // path (in ui/form FormField) and the inner input's `isDisabled` derivation
-  // (in renderFieldInput) treat the form as idle.
-  const isSubmitting = isAutosubmit ? false : isFormSubmitting
+  // Auto-saving fields save silently while the user keeps editing them — the
+  // whole form in autosubmit mode, or an individual field with `autoSave`.
+  // Surfacing `isSubmitting` would disable the active input and blur it
+  // mid-keystroke (and for the entities table it would swap the editable cell
+  // for a disabled one, remounting — losing — the input). Mask it out for those
+  // so both the `<Controller disabled>` path (in ui/form FormField) and the
+  // inner input's `isDisabled` derivation (in renderFieldInput) treat the form
+  // as idle.
+  const isSubmitting = isAutosubmit || field.autoSave ? false : isFormSubmitting
 
   // Evaluate if field is currently disabled
   const isDisabled = evaluateDisabled(field.disabled, values)
@@ -177,12 +179,17 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   // Check if field should be visible based on renderIf condition
   const isVisible = !field.renderIf || evaluateRenderIf(field.renderIf, values)
 
-  // For checkbox and custom fields, label is handled internally
+  // For checkbox, custom and entitiesList fields, the label is handled
+  // internally (entitiesList renders it in a header row beside its add button).
   const showLabel =
     field.type !== "checkbox" &&
     field.type !== "custom" &&
+    field.type !== "entitiesList" &&
     !(field.type === "cardSelect" && field.hideLabel)
-  const showFormMessage = field.type !== "custom"
+  // Entities list fields surface item-level and array-level errors inline,
+  // so suppress the generic outer FormMessage (same as custom fields).
+  const showFormMessage =
+    field.type !== "custom" && field.type !== "entitiesList"
 
   // Determine if field is required based on validation schema and field type
   const isRequired =
@@ -198,7 +205,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       <FormFieldPrimitive
         control={form.control}
         name={field.id}
-        {...(isAutosubmit ? { disabled: false } : {})}
+        {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
         render={() => <span className="hidden" aria-hidden="true" />}
       />
     )
@@ -208,7 +215,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     <FormFieldPrimitive
       control={form.control}
       name={field.id}
-      {...(isAutosubmit ? { disabled: false } : {})}
+      {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
       render={({ field: formField, fieldState }) => (
         <FormItem id={anchorId} className="scroll-mt-4">
           {showLabel && (

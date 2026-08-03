@@ -145,6 +145,45 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   orientation?: "vertical" | "horizontal"
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
+  /**
+   * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
+   * labels if the widest value in that category doesn't fit the bar. The whole
+   * category drops together (all-or-nothing), so a tight chart never shows a
+   * ragged, half-labelled set instead of overlapping numbers. @default true
+   */
+  hideOverflowingLabels?: boolean
+  /**
+   * Per-side clearance in pixels the widest value must have before
+   * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
+   * Overrides the default, which is placement-based: **12** for stacked (inside)
+   * labels, **0** for labels outside the bar.
+   */
+  labelFitPadding?: number
+  /**
+   * With {@link F0DataChartBarProps.hideOverflowingLabels} on, use the widest
+   * label as the fit reference for vertical columns and labels outside
+   * horizontal bars. If it exceeds the shared allowance, hide every label
+   * instead of leaving a ragged, partially labelled chart. Labels inside
+   * horizontal stacked segments always fit per segment because their available
+   * widths differ. Height overflow is also evaluated per bar. @default true
+   */
+  hideAllLabelsOnOverflow?: boolean
+  /**
+   * Suggested number of segments on the value axis — lower values draw fewer
+   * grid lines. Applies to whichever axis is the value axis (Y for vertical
+   * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2
+   */
+  valueAxisSplitNumber?: number
+  /**
+   * Font size in pixels for the value labels. @default 11
+   */
+  labelFontSize?: number
+  /**
+   * Formatter for the values shown in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}; set it to show precise values
+   * (e.g. "107,505") while the axis and labels stay compact ("107.5K").
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 // ---------------------------------------------------------------------------

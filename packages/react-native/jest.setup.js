@@ -23,6 +23,29 @@ jest.mock("react-native/Libraries/NativeComponent/ViewConfigIgnore", () => {
   };
 });
 
+// Mock react-native-worklets to avoid native worklets initialization in Jest.
+// Reanimated 4's mock pulls in react-native-worklets, whose native module
+// throws "Native part of Worklets doesn't seem to be initialized" outside a
+// native runtime.
+jest.mock("react-native-worklets", () => ({
+  createWorkletRuntime: jest.fn(),
+  createSerializable: jest.fn((v) => v),
+  isWorkletFunction: jest.fn(() => true),
+  runOnRuntime: jest.fn(),
+  runOnJS: jest.fn((fn) => fn),
+  runOnUI: jest.fn((fn) => fn),
+  scheduleOnRN: jest.fn(),
+  scheduleOnUI: jest.fn(),
+  makeShareable: jest.fn((v) => v),
+  createSharedValue: jest.fn((v) => ({ value: v })),
+  RuntimeKind: {
+    ReactNative: "ReactNative",
+    UI: "UI",
+    Custom: "Custom",
+  },
+  serializableMappingCache: new WeakMap(),
+}));
+
 // Mock react-native-reanimated
 jest.mock("react-native-reanimated", () =>
   require("react-native-reanimated/mock"),

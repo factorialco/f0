@@ -20,6 +20,11 @@ type BaseTagProps = {
   // Hides the info icon
   shape?: "rounded" | "square"
   /**
+   * The size of the tag
+   * @default "md"
+   */
+  size?: "md" | "sm"
+  /**
    * Whether to hide the label
    */
   hideLabel?: boolean
@@ -48,6 +53,7 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
       hint,
       info,
       shape = "rounded",
+      size = "md",
       hideLabel,
       deactivated,
     },
@@ -56,11 +62,16 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
     additionalAccessibleText =
       additionalAccessibleText || (hideLabel ? text : undefined)
     return (
-      <div className="flex w-fit max-w-full flex-row items-center justify-start gap-1">
+      <div
+        data-no-strike
+        className="flex w-fit max-w-full flex-row items-center justify-start gap-1"
+      >
         <div
           ref={ref}
           className={cn(
-            "inline-flex w-fit max-w-full flex-row items-center justify-start gap-1 py-0.5 pr-2 text-base font-medium text-f1-foreground",
+            "inline-flex w-fit max-w-full flex-row items-center justify-start gap-1 py-0.5 pr-2 font-medium text-f1-foreground",
+            size === "md" && "text-base",
+            size === "sm" && "text-sm",
             !text && "aspect-square w-6 items-center justify-center p-1",
             !left ? "pl-2" : "pl-1",
             shape === "rounded" && "rounded-full",

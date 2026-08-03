@@ -393,7 +393,8 @@ that should be visually distinguished from regular records.
 ### Striked Rows
 
 `referenceRowType` also accepts `"striked"` to render the row with line-through
-text + muted foreground.
+text + muted foreground. Tag cells (status, tag, dot, etc.) opt out of the
+strike so their labels stay legible — see the Status column below.
 
 ```tsx
 {

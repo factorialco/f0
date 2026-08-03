@@ -76,6 +76,7 @@ export const CollectionActions = ({
             label: action.label,
             icon: action.icon,
             description: action.description,
+            disabled: action.disabled,
             value: index.toString(),
           }))}
           onClick={(value) => {
@@ -83,15 +84,31 @@ export const CollectionActions = ({
           }}
         />
       ) : primaryActionsButtons.length === 1 ? (
-        <F0Button
-          size="md"
-          onClick={primaryActionsButtons[0].onClick}
-          icon={primaryActionsButtons[0].icon}
-          variant="default"
-          label={primaryActionsButtons[0].label}
-          loading={primaryActionsButtons[0].loading}
-          disabled={primaryActionsButtons[0].disabled}
-        />
+        (() => {
+          const action = primaryActionsButtons[0]
+          const tooltipText = action.tooltip?.({
+            disabled: !!action.disabled,
+            loading: !!action.loading,
+          })
+
+          const button = (
+            <F0Button
+              size="md"
+              onClick={action.onClick}
+              icon={action.icon}
+              variant="default"
+              label={action.label}
+              loading={action.loading}
+              disabled={action.disabled}
+            />
+          )
+
+          return tooltipText ? (
+            <Tooltip description={tooltipText}>{button}</Tooltip>
+          ) : (
+            button
+          )
+        })()
       ) : (
         primaryActionsButtons.length > 1 && (
           <F0ButtonDropdown

@@ -44,14 +44,14 @@ import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { ResourceHeader } from "@/patterns/ResourceHeader"
-import { useAiChat } from "@/sds/ai/F0AiChat"
-import type { ClarifyingOption } from "@/sds/ai/F0ClarifyingPanel"
+import { useAiChat } from "@/kits/ai/F0AiChat"
+import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
 import {
   type CanvasContent,
   type CanvasContentBase,
   type CanvasEntityDefinition,
-} from "@/sds/ai/canvas"
-import { F0AiProcessingOverlay } from "@/sds/ai/F0AiProcessingOverlay"
+} from "@/kits/ai/canvas"
+import { F0AiProcessingOverlay } from "@/kits/ai/F0AiProcessingOverlay"
 import {
   type ClarifyingStep,
   MockAiChatRuntimeProvider,
@@ -59,15 +59,15 @@ import {
   MockConnectedChatInput,
   MockConnectedMessagesContainer,
   useMockAiChatRuntime,
-} from "@/sds/ai/F0AiChat/__stories__/_mock"
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
 
 import { f0FormField, F0Form } from "@/patterns/F0Form"
 import type { F0SectionConfig } from "@/patterns/F0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
-import { SurveyAnsweringForm } from "@/sds/surveys/SurveyAnsweringForm"
-import { SurveyFormBuilder } from "@/sds/surveys/SurveyFormBuilder/Form"
-import type { SurveyFormBuilderElement } from "@/sds/surveys/SurveyFormBuilder/types"
-import { mockDatasets } from "@/sds/surveys/__stories__/mocks"
+import { SurveyAnsweringForm } from "@/kits/surveys/SurveyAnsweringForm"
+import { SurveyFormBuilder } from "@/kits/surveys/SurveyFormBuilder/Form"
+import type { SurveyFormBuilderElement } from "@/kits/surveys/SurveyFormBuilder/types"
+import { mockDatasets } from "@/kits/surveys/__stories__/mocks"
 
 import {
   EMPTY_SURVEY_TEMPLATE,
@@ -98,7 +98,7 @@ import type {
   FlowConfig,
   GuidedEntryFlowConfig,
 } from "./flow-configs"
-import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
+import type { F0AiChatWelcomeCard } from "@/kits/ai/F0AiChat"
 
 /**
  * AI Cocreation patterns — "Walkthrough".

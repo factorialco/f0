@@ -48,11 +48,6 @@ const meta = {
     ),
   },
   parameters: {
-    a11y: {
-      config: {
-        rules: [{ id: "svg-img-alt", enabled: false }],
-      },
-    },
     docs: {
       description: {
         component: [

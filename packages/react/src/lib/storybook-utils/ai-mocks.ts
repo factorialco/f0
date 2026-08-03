@@ -1,4 +1,4 @@
-import { type TranscribeFn } from "@/sds/ai/F0AiChat/types"
+import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
 
 const pickRandom = <T>(items: readonly T[]): T =>
   items[Math.floor(Math.random() * items.length)]

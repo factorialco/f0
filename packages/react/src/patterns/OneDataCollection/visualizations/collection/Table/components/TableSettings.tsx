@@ -16,6 +16,13 @@ type TableSettingsProps = {
   allowHiding: boolean
   /** Settings key for column order/hidden state. Use "editableTable" for EditableTable visualization. */
   visualizationKey?: TableVisualizationSettingsKey
+  /** Shows an "Add column" entry at the top of the popover when provided. */
+  onAddColumn?: () => void
+  /**
+   * Enables a hover trash affordance per non-frozen column (unless the column
+   * sets `noRemoving`). Called with the column id to drop it from the table.
+   */
+  onRemoveColumn?: (columnId: string) => void
 }
 
 export const TableSettings = ({
@@ -24,6 +31,8 @@ export const TableSettings = ({
   allowSorting,
   allowHiding,
   visualizationKey = "table",
+  onAddColumn,
+  onRemoveColumn,
 }: TableSettingsProps) => {
   const { settings } = useDataCollectionSettings()
 
@@ -37,8 +46,15 @@ export const TableSettings = ({
     allowHiding
   )
 
-  const items = useMemo(
-    () =>
+  const items = useMemo(() => {
+    // The leading `frozenColumns || 1` columns are non-editable (always-visible,
+    // not reorderable). They can never be removed — mirror that for the trash.
+    const lockedCount = frozenColumns || 1
+    const lockedIds = new Set(
+      columnsWithStatus.slice(0, lockedCount).map((column) => column.column.id)
+    )
+
+    return (
       columnsWithStatus
         // If allowHiding is false, we show only the columns that are visible
         .filter((column) => allowHiding || column.visible)
@@ -48,9 +64,13 @@ export const TableSettings = ({
           sortable: column.sortable,
           canHide: column.canHide,
           visible: column.visible,
-        })),
-    [columnsWithStatus, allowHiding]
-  )
+          removable:
+            !!onRemoveColumn &&
+            !lockedIds.has(column.column.id) &&
+            !column.column.noRemoving,
+        }))
+    )
+  }, [columnsWithStatus, allowHiding, frozenColumns, onRemoveColumn])
 
   return (
     <SortAndHideSettings
@@ -58,6 +78,8 @@ export const TableSettings = ({
       visualizationKey={visualizationKey}
       allowSorting={allowSorting}
       allowHiding={allowHiding}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
     />
   )
 }

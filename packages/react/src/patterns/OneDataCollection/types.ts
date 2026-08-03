@@ -108,4 +108,11 @@ export type CollectionProps<
   tmpFullWidth?: boolean
   /** Indicates the source visualization type */
   fromVisualization?: TableVisualizationType
+  /**
+   * Bumps on every shared-search result selection. Lets a visualization
+   * re-fire its reveal/focus even when the selected record (hence the derived
+   * reveal target) is unchanged — so re-searching the same node re-centers,
+   * like the graph's "Find me". Only the graph view reads it today.
+   */
+  searchSelectionNonce?: number
 } & VisualizationOptions

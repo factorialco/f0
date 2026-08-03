@@ -19,7 +19,7 @@ export type EditableCellProps<R extends RecordType> = {
   error?: string
   loading?: boolean
   onChange: (
-    value: string | null,
+    value: string | string[] | null,
     context?: { selectedItem?: RecordType }
   ) => void
   item: R

@@ -2,18 +2,21 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
-import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { MicrophoneNegative, PalmTree } from "@/icons/app"
+import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
 import {
+  isUserMessage,
   type F0ChatAttachment,
   type F0ChatEditInput,
+  type F0ChatItem,
   type F0ChatRuntime,
   type F0ChatSearchResult,
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 import {
   type Seed,
   ME,
@@ -42,6 +45,24 @@ export const MockChatAppProvider = ({
   )
 }
 
+export const resolveMockReactionUsers = (
+  seed: Seed | undefined,
+  messages: F0ChatItem[],
+  messageId: string,
+  emoji: string
+): F0ChatUser[] => {
+  const message = messages.find(
+    (item) => isUserMessage(item) && item.id === messageId
+  )
+  if (!seed || !message || !isUserMessage(message)) return []
+
+  const reaction = message.reactions?.find((item) => item.emoji === emoji)
+  if (!reaction) return []
+  if (reaction.users?.length === reaction.count) return reaction.users
+
+  return seed.participants.slice(0, reaction.count)
+}
+
 /** F0ChatRuntime for one conversation, backed by the shared store. */
 export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const app = useMockChatApp()
@@ -52,12 +73,32 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (input: F0ChatSendInput) => app.send(convId, input),
     [app, convId]
   )
+  const retryMessage = useCallback(
+    (messageId: string) => app.retry(convId, messageId),
+    [app, convId]
+  )
   const markRead = useCallback(() => app.markRead(convId), [app, convId])
   const togglePin = useCallback(() => app.togglePin(convId), [app, convId])
+  const toggleMute = useCallback(() => app.toggleMute(convId), [app, convId])
+  const reconnect = useCallback(() => app.reconnect(convId), [app, convId])
+  const deleteFailedMessage = useCallback(
+    (messageId: string) => app.discardFailed(convId, messageId),
+    [app, convId]
+  )
   const toggleReaction = useCallback(
     (messageId: string, emoji: string) =>
       app.toggleReaction(convId, messageId, emoji),
     [app, convId]
+  )
+  const loadReactionUsers = useCallback(
+    async (messageId: string, emoji: string): Promise<F0ChatUser[]> =>
+      resolveMockReactionUsers(
+        seed,
+        app.states[convId]?.messages ?? [],
+        messageId,
+        emoji
+      ),
+    [app.states, convId, seed]
   )
   const deleteMessage = useCallback(
     (messageId: string) => app.deleteMessage(convId, messageId),
@@ -86,6 +127,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
                       name: file.name,
                       size: file.size,
                       mimeType: file.type,
+                      thumbnailUrl: file.type.startsWith("video/")
+                        ? "/video-poster.webp"
+                        : undefined,
                     }
               })
             ),
@@ -101,6 +145,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (query: string): Promise<F0ChatSearchResult[]> => {
       const needle = query.trim().toLowerCase()
       const hits = (app.states[convId]?.messages ?? [])
+        .filter(isUserMessage)
         .filter((m) => !m.deleted && m.body.toLowerCase().includes(needle))
         .map((m): F0ChatSearchResult => ({ id: m.id }))
       return Promise.resolve(hits)
@@ -140,7 +185,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const idx = state?.lastReadId
     ? messages.findIndex((m) => m.id === state.lastReadId)
     : -1
-  const unread = messages.slice(idx + 1).filter((m) => !m.isMine)
+  const unread = messages
+    .slice(idx + 1)
+    .filter((m) => isUserMessage(m) && !m.isMine)
 
   return {
     currentUserId: ME.id,
@@ -154,7 +201,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
         lastName: "",
       },
       presence: seed?.presence,
-      muted: seed?.muted,
+      muted: app.muted[convId] ?? false,
       pinned: app.pinned[convId] ?? false,
       // Surface the same states the sidebar shows (e.g. on vacation) in the header.
       statuses:
@@ -166,7 +213,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
       user:
         seed?.type === "dm" ? (seed.participants[0] ?? undefined) : undefined,
     },
-    status: "ready",
+    status: app.loadState[convId] ?? "ready",
     messages,
     typingUsers,
     hasMoreOlder: app.hasMoreOlder(convId),
@@ -174,22 +221,37 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     unreadCount: unread.length,
     firstUnreadId: unread[0]?.id ?? null,
     sendMessage,
-    retryMessage: () => {},
+    retryMessage,
     loadOlder,
     toggleReaction,
+    loadReactionUsers,
     deleteMessage,
+    deleteFailedMessage,
     editMessage,
     // Generous window so the seeded "mine" messages stay editable in the demo.
     editWindowMs: 24 * 60 * 60 * 1000,
     onInputActivity: () => {},
+    // Nothing to visualize for OWN typing in the mock — wired so the composer's
+    // send/clear/unmount calls are exercised.
+    stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
-    maxFiles: 5,
+    maxFiles: 8,
+    // ApplicationFrame demonstrates a 100 MB per-file upload limit.
+    maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     transcribe: mockTranscribe,
     markRead,
     searchMessages,
     togglePin,
+    toggleMute,
     searchMembers: seed ? searchMembers : undefined,
+    // Read-only channels (frozen / announcements): composer, reactions and
+    // uploads disappear; existing pills stay visible.
+    capabilities: seed?.readOnly
+      ? { canSend: false, canReact: false, canUpload: false }
+      : undefined,
+    // Failed-to-load conversations recover through the error state's Retry.
+    reconnect: seed?.failsToLoad ? reconnect : undefined,
   }
 }
 
@@ -201,7 +263,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
 export const useMockChatGroups = (
   onSelect: (convId: string) => void
 ): SidebarChatGroup[] => {
-  const { states, pinned, togglePin } = useMockChatApp()
+  const { states, pinned, togglePin, muted } = useMockChatApp()
   return useMemo(() => {
     const toChat = (seed: Seed) => {
       const state = states[seed.id]
@@ -226,7 +288,7 @@ export const useMockChatGroups = (
         // On-vacation takes precedence over the mute icon.
         status: dmPerson?.vacation
           ? { icon: PalmTree, label: "On vacation" }
-          : seed.muted
+          : muted[seed.id]
             ? { icon: MicrophoneNegative, label: "Muted" }
             : undefined,
       }
@@ -250,5 +312,5 @@ export const useMockChatGroups = (
         ? [{ id: "groups", title: "Groups", chats: groups }]
         : []),
     ]
-  }, [states, pinned, togglePin, onSelect])
+  }, [states, pinned, togglePin, muted, onSelect])
 }
