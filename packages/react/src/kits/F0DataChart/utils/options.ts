@@ -538,6 +538,7 @@ export function buildAxes({
   showValueAxis = true,
   categoryMaxLabelWidth,
   valueAxisSplitNumber,
+  secondaryValueAxis,
 }: {
   isVertical: boolean
   categories: string[]
@@ -560,8 +561,18 @@ export function buildAxes({
   categoryMaxLabelWidth?: number
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   valueAxisSplitNumber?: number
+  /**
+   * Adds a second value axis on the opposite edge, for charts that plot two
+   * measures on different scales (see the combo chart). Its formatter is
+   * separate because two scales is the reason to have two axes at all.
+   *
+   * Vertical charts only: on a horizontal chart the value axis is the X axis,
+   * so a second one would sit above the plot and read as a header.
+   */
+  secondaryValueAxis?: { formatter?: (value: number) => string }
 }) {
   const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
+  const hasSecondaryValueAxis = isVertical && secondaryValueAxis !== undefined
 
   // Estimate the horizontal space taken by the value (Y) axis labels + grid
   // padding so the smart layout knows how wide the plot area really is.
@@ -569,7 +580,10 @@ export function buildAxes({
   // grid handles the precise reservation.
   const Y_AXIS_RESERVED = 56
   const xPlotLength = containerWidth
-    ? Math.max(0, containerWidth - Y_AXIS_RESERVED)
+    ? Math.max(
+        0,
+        containerWidth - Y_AXIS_RESERVED * (hasSecondaryValueAxis ? 2 : 1)
+      )
     : undefined
 
   // On a horizontal chart the category labels stack vertically on the Y axis,
@@ -607,6 +621,19 @@ export function buildAxes({
     ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
+  // Only the primary axis draws grid lines: two independent scales would lay
+  // down two interleaved sets of horizontal rules.
+  const secondaryAxis = hasSecondaryValueAxis
+    ? buildValueAxis({
+        theme,
+        showGrid: false,
+        formatter: secondaryValueAxis?.formatter ?? valueFormatter,
+        show: showValueAxis,
+        splitNumber: valueAxisSplitNumber,
+        maxLabelWidth: yAxisMaxLabelWidth,
+      })
+    : undefined
+
   return {
     xAxis: (isVertical
       ? { ...categoryAxis }
@@ -616,7 +643,9 @@ export function buildAxes({
     // keeps rows reading top-to-bottom in data order, mirroring how vertical
     // bars read left-to-right.
     yAxis: (isVertical
-      ? { ...valueAxis }
+      ? secondaryAxis
+        ? [{ ...valueAxis }, { ...secondaryAxis }]
+        : { ...valueAxis }
       : { ...categoryAxis, inverse: true }) as echarts.EChartsOption["yAxis"],
   }
 }
@@ -666,14 +695,20 @@ interface BaseChartOptionsParams {
   categoryMaxLabelWidth?: number
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   valueAxisSplitNumber?: number
+  /**
+   * Adds a second value axis on the opposite edge (vertical charts only), for
+   * charts plotting two measures on different scales. Series opt into it with
+   * `yAxisIndex: 1`. See {@link buildAxes}.
+   */
+  secondaryValueAxis?: { formatter?: (value: number) => string }
 }
 
 /**
  * Assemble a complete ECharts option from pre-built series.
  *
- * Both bar and line hooks delegate here so that axes, legend, grid, tooltip,
- * and emphasis are built in exactly one place. Future chart types (pie,
- * scatter, etc.) should also delegate here for consistent styling.
+ * The bar, line, and combo hooks delegate here so that axes, legend, grid,
+ * tooltip, and emphasis are built in exactly one place. Future chart types
+ * should also delegate here for consistent styling.
  */
 export function buildBaseChartOptions({
   categories,
@@ -696,6 +731,7 @@ export function buildBaseChartOptions({
   showValueAxis = true,
   categoryMaxLabelWidth,
   valueAxisSplitNumber,
+  secondaryValueAxis,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -711,6 +747,7 @@ export function buildBaseChartOptions({
     showValueAxis,
     categoryMaxLabelWidth,
     valueAxisSplitNumber,
+    secondaryValueAxis,
   })
 
   const baseOptions: echarts.EChartsOption = {

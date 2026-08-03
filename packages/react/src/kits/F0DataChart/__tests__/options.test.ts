@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  buildAxes,
   computeCategoryAxisLayout,
   computeLabelInterval,
   escapeTooltipText,
 } from "../utils/options"
+import { resolveChartTheme } from "../utils/theme"
 
 describe("escapeTooltipText", () => {
   it("escapes HTML-significant characters in consumer-provided text", () => {
@@ -99,5 +101,65 @@ describe("computeCategoryAxisLayout", () => {
     const layout = computeCategoryAxisLayout(50, 100, true)
     expect(layout).toBeDefined()
     expect(layout!.labelWidth).toBeGreaterThanOrEqual(24)
+  })
+})
+
+describe("buildAxes — secondary value axis", () => {
+  const theme = resolveChartTheme()
+  const base = {
+    categories: ["Jan", "Feb"],
+    theme,
+    showGrid: true,
+    containerWidth: 800,
+  }
+
+  it("returns a single value axis when none is requested", () => {
+    const { yAxis } = buildAxes({ ...base, isVertical: true })
+    expect(Array.isArray(yAxis)).toBe(false)
+  })
+
+  it("returns both value axes when one is requested", () => {
+    const { yAxis } = buildAxes({
+      ...base,
+      isVertical: true,
+      secondaryValueAxis: {},
+    })
+    expect(Array.isArray(yAxis)).toBe(true)
+    expect(yAxis).toHaveLength(2)
+  })
+
+  it("draws grid lines from the primary axis only", () => {
+    const { yAxis } = buildAxes({
+      ...base,
+      isVertical: true,
+      secondaryValueAxis: {},
+    }) as unknown as { yAxis: { splitLine: { show: boolean } }[] }
+
+    expect(yAxis[0].splitLine.show).toBe(true)
+    expect(yAxis[1].splitLine.show).toBe(false)
+  })
+
+  it("gives the secondary axis its own formatter", () => {
+    const { yAxis } = buildAxes({
+      ...base,
+      isVertical: true,
+      valueFormatter: (v) => `${v} u`,
+      secondaryValueAxis: { formatter: (v) => `${v}%` },
+    }) as unknown as {
+      yAxis: { axisLabel: { formatter: (v: number) => string } }[]
+    }
+
+    expect(yAxis[0].axisLabel.formatter(4)).toBe("4 u")
+    expect(yAxis[1].axisLabel.formatter(4)).toBe("4%")
+  })
+
+  it("ignores the request on a horizontal chart, whose value axis is X", () => {
+    // A second value axis there would sit above the plot and read as a header.
+    const { yAxis } = buildAxes({
+      ...base,
+      isVertical: false,
+      secondaryValueAxis: {},
+    })
+    expect(Array.isArray(yAxis)).toBe(false)
   })
 })
