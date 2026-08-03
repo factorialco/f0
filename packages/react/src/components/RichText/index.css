@@ -147,27 +147,28 @@
    because the sanitizer read-only content passes through allows `class` but not
    `style`.
 
-   Line heights follow the core typography tokens wherever one has the same
-   size: 12/14/16/18 are `sm`/`base`/`lg`/`xl`. The remaining steps sit in gaps
-   the token scale does not cover. */
+   Steps that match a typography token use the token class -- 12/14/16/18 are
+   `sm`/`base`/`lg`/`xl` -- so they track it, tracking included, and match the
+   heading rules above. The remaining steps sit in gaps the token scale does
+   not cover and carry their own values. */
 .rich-text-editor-container .f0-fs-12,
 .rich-text-display-container .f0-fs-12 {
-  @apply text-[12px] leading-[16px];
+  @apply text-sm;
 }
 
 .rich-text-editor-container .f0-fs-14,
 .rich-text-display-container .f0-fs-14 {
-  @apply text-[14px] leading-[20px];
+  @apply text-base;
 }
 
 .rich-text-editor-container .f0-fs-16,
 .rich-text-display-container .f0-fs-16 {
-  @apply text-[16px] leading-[24px];
+  @apply text-lg;
 }
 
 .rich-text-editor-container .f0-fs-18,
 .rich-text-display-container .f0-fs-18 {
-  @apply text-[18px] leading-[28px];
+  @apply text-xl;
 }
 
 .rich-text-editor-container .f0-fs-20,

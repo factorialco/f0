@@ -9,8 +9,6 @@ import { Extension } from "@tiptap/core"
  */
 export const FONT_SIZE_SCALE = [12, 14, 16, 18, 20, 24, 29] as const
 
-export type FontSizeValue = `${(typeof FONT_SIZE_SCALE)[number]}px`
-
 const CLASS_PREFIX = "f0-fs-"
 
 const classNameFor = (fontSize: string): string | null => {
@@ -24,27 +22,23 @@ const classNameFor = (fontSize: string): string | null => {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     fontSize: {
-      /** Sets a font size on the selection, e.g. `"24px"`. */
       setFontSize: (fontSize: string) => ReturnType
-      /** Removes the font size, falling back to the body size. */
       unsetFontSize: () => ReturnType
     }
   }
 }
 
 export interface FontSizeOptions {
-  /** Marks the attribute is added to. */
   types: string[]
 }
 
 /**
- * Adds a `fontSize` attribute to the `textStyle` mark, so a document can carry
- * text at a size other than the body size.
+ * Carries a `fontSize` attribute on the `textStyle` mark.
  *
- * A size on the scale renders as a class rather than an inline style, because
- * the sanitizer that read-only content passes through allows `class` but not
- * `style`; an inline style would be dropped there. Sizes off the scale keep the
- * inline style, so a value we do not recognise degrades instead of vanishing.
+ * A size on the scale renders as a class, not an inline style, because the
+ * sanitizer read-only content passes through allows `class` but not `style`.
+ * Sizes off the scale keep the inline style, so an unrecognised value degrades
+ * instead of vanishing.
  */
 export const FontSizeExtension = Extension.create<FontSizeOptions>({
   name: "fontSize",
