@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.74.0](https://github.com/factorialco/f0/compare/f0-react-v4.73.1...f0-react-v4.74.0) (2026-08-03)
+
+
+### Features
+
+* **RichText:** carry a font size on textStyle ([#4922](https://github.com/factorialco/f0/issues/4922)) ([bef4985](https://github.com/factorialco/f0/commit/bef49857991eb6275db4b693ab71f1983f47ee7d))
+
 ## [4.73.1](https://github.com/factorialco/f0/compare/f0-react-v4.73.0...f0-react-v4.73.1) (2026-08-03)
 
 
