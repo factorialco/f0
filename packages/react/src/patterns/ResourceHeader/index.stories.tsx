@@ -340,18 +340,7 @@ export const CompanyHeader: Story = {
       },
     ],
   },
-  parameters: {
-    a11y: {
-      config: {
-        rules: [
-          {
-            id: "color-contrast",
-            enabled: false,
-          },
-        ],
-      },
-    },
-  },
+  parameters: {},
 }
 
 export const PersonHeader: Story = {
