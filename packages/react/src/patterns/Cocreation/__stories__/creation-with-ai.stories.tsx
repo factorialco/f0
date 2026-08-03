@@ -2746,10 +2746,19 @@ function FlowContent({
     type?: string
     mode?: string
   } | null
+  // A survey on the canvas in any mode but `preview` has already been created:
+  // the blank-survey path creates it, opens it and posts its "created" card
+  // BEFORE asking the clarifying questions, so `clarifyingQuestion != null` on
+  // its own does not mean "nothing created yet". Gating here would show a
+  // warning that claims the opposite and then an exit note saying nothing was
+  // created, for a survey that exists and has already been saved.
+  const surveyAlreadyCreated =
+    canvas?.type === "survey" && canvas.mode !== "preview"
   const selectionInProgress =
-    clarifyingQuestion != null ||
-    canvas?.type === "templates" ||
-    (canvas?.type === "survey" && canvas.mode === "preview")
+    !surveyAlreadyCreated &&
+    (clarifyingQuestion != null ||
+      canvas?.type === "templates" ||
+      (canvas?.type === "survey" && canvas.mode === "preview"))
   const confirmOnClose =
     (config.entryMode !== "cards" || noCredits) && selectionInProgress
   const confirmOnCloseRef = useRef(confirmOnClose)
@@ -3034,6 +3043,59 @@ export const GuidedChatLeaveCreationGate: Story = {
           page.queryByRole("button", { name: "Cancel" })
         ).not.toBeInTheDocument()
       }, BEAT)
+    })
+  },
+}
+
+// The other half of the gate: once a survey EXISTS, closing must NOT ask to
+// confirm. "Empty Survey" creates the survey, opens it and posts its "created"
+// card *before* asking the clarifying questions, so a gate keyed only on "a
+// clarifying panel is open" would claim "you haven't picked a template or an
+// empty survey yet" and then post an exit note saying nothing was created —
+// about a survey that exists and has been saved. Hidden from the sidebar.
+export const GuidedEntryEmptySurveyClosesWithoutGate: Story = {
+  name: "Guided Chat · Empty-survey close (test)",
+  tags: ["no-sidebar"],
+  render: () => <CreationWithAIFlow flowId="engagementGuided" />,
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+    const BEAT = { timeout: 15_000 }
+
+    await step("Create opens the entry-action panel", async () => {
+      await userEvent.click(
+        await page.findByRole("button", { name: "Create" }, BEAT)
+      )
+      await page.findByRole("button", { name: "Cancel" }, BEAT)
+    })
+
+    await step("Picking Empty Survey creates the survey", async () => {
+      await userEvent.click(
+        await page.findByRole("radio", { name: "Empty Survey" }, BEAT)
+      )
+      await userEvent.click(page.getByRole("button", { name: "Submit" }))
+      // The blank survey is created and opened up front — this is the state the
+      // gate used to misread as "nothing created yet".
+      await page.findAllByText("Untitled survey", undefined, BEAT)
+      // ...and the drafting clarifying panel follows it.
+      await page.findByText(
+        "What kind of survey are you working on?",
+        undefined,
+        BEAT
+      )
+    })
+
+    await step("Closing the chat does not ask to confirm", async () => {
+      await userEvent.click(
+        page.getByRole("button", { name: "Close Chat with One AI" })
+      )
+      // The chat closes straight away. If the gate had fired, the confirmation
+      // would be up and the chat would still be open.
+      await waitFor(() => {
+        expect(
+          page.queryByRole("button", { name: "Close Chat with One AI" })
+        ).not.toBeInTheDocument()
+      }, BEAT)
+      expect(page.queryByText("Leave creation?")).not.toBeInTheDocument()
     })
   },
 }

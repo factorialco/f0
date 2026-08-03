@@ -779,20 +779,31 @@ export const MockAiChatRuntimeProvider = ({
     }
   })()
 
-  const clear = useCallback(() => {
-    clearTimers()
-    setMessages([])
+  // The transient state a guided flow can be sitting in mid-beat: a hidden
+  // composer, an open clarifying panel, a pending send interceptor, the
+  // in-progress spinner. Anything that calls `clearTimers()` drops the
+  // continuation that would have reset these, so it MUST reset them itself —
+  // otherwise `composerHidden` can survive with no clarifying panel to take its
+  // place, and `MockConnectedChatInput` renders no input at all. Shared by
+  // `clear` and `loadThread` so the two can't drift apart again.
+  const resetScriptedFlowState = useCallback(() => {
     setInProgress(false)
     setComposerHidden(false)
-    setCurrentThreadTitle(null)
-    setCurrentThreadId(null)
-    setIsLoadingThread(false)
-    scriptTurnRef.current = 0
     setClarifyingConfig(null)
     setClarifyingStepIndex(0)
     setClarifyingInteractions({})
     interceptorRef.current = null
-  }, [clearTimers])
+  }, [])
+
+  const clear = useCallback(() => {
+    clearTimers()
+    resetScriptedFlowState()
+    setMessages([])
+    setCurrentThreadTitle(null)
+    setCurrentThreadId(null)
+    setIsLoadingThread(false)
+    scriptTurnRef.current = 0
+  }, [clearTimers, resetScriptedFlowState])
 
   // ── Chat history ────────────────────────────────────────────────
 
@@ -829,6 +840,9 @@ export const MockAiChatRuntimeProvider = ({
   const loadThread = useCallback<MockAiChatRuntime["loadThread"]>(
     (id, title) => {
       clearTimers()
+      // Loading a thread abandons whatever scripted beat was mid-flight, so the
+      // composer/clarifying state has to come back with it.
+      resetScriptedFlowState()
       setIsLoadingThread(true)
       setCurrentThreadTitle(title)
       setCurrentThreadId(id)
@@ -857,7 +871,7 @@ export const MockAiChatRuntimeProvider = ({
       }, LOAD_THREAD_DELAY_MS)
       timersRef.current.push(t)
     },
-    [clearTimers]
+    [clearTimers, resetScriptedFlowState]
   )
 
   return (
