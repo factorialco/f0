@@ -12,6 +12,7 @@ import "@testing-library/jest-dom/vitest"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
+import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
 import { resolveChartTheme } from "../utils/theme"
 
 // ---------------------------------------------------------------------------
@@ -237,6 +238,61 @@ describe("BarChart — responsive breakpoints", () => {
     const option = getLatestOption()
     expect(option.xAxis.inverse).toBeUndefined()
     expect(option.yAxis.inverse).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Horizontal bars deviate from the shared matrix: they keep the category axis
+// at `md`, where every other chart family hides it (see
+// `resolveResponsiveDisplay`). That deviation costs plot width — the category
+// labels take `min(80, width * 0.2)` — so these pin the exact width the
+// behavior changes at, one pixel either side of both band edges. A breakpoint
+// tweak that moves the flip has to fail here rather than quietly reflow every
+// horizontal chart in a chat card.
+// ---------------------------------------------------------------------------
+
+describe("BarChart — category axis at the breakpoint boundaries", () => {
+  const props = {
+    type: "bar" as const,
+    categories: ["Jan", "Feb", "Mar"],
+    series: [{ name: "A", data: [1, 2, 3] }],
+  }
+
+  /** Category-axis visibility at `width`. Horizontal keeps categories on Y. */
+  function categoryAxisShownAt(
+    width: number,
+    orientation: "vertical" | "horizontal"
+  ) {
+    containerSize.width = width
+    render(<F0DataChart {...props} orientation={orientation} />)
+    const option = getLatestOption()
+    return orientation === "vertical"
+      ? option.xAxis.axisLabel.show
+      : option.yAxis.axisLabel.show
+  }
+
+  it("hides the horizontal category axis at the last sm width (219px)", () => {
+    expect(categoryAxisShownAt(SM_MAX_WIDTH - 1, "horizontal")).toBe(false)
+  })
+
+  it("shows the horizontal category axis from the first md width (220px)", () => {
+    expect(categoryAxisShownAt(SM_MAX_WIDTH, "horizontal")).toBe(true)
+  })
+
+  it("keeps the horizontal category axis across the md → lg edge (519/520px)", () => {
+    // Already visible at md, so crossing into lg must not toggle anything.
+    expect(categoryAxisShownAt(MD_MAX_WIDTH - 1, "horizontal")).toBe(true)
+    expect(categoryAxisShownAt(MD_MAX_WIDTH, "horizontal")).toBe(true)
+  })
+
+  it("keeps the vertical category axis hidden across the whole md band", () => {
+    // The deviation is horizontal-only: vertical still flips at lg alone.
+    expect(categoryAxisShownAt(SM_MAX_WIDTH, "vertical")).toBe(false)
+    expect(categoryAxisShownAt(MD_MAX_WIDTH - 1, "vertical")).toBe(false)
+  })
+
+  it("shows the vertical category axis from the first lg width (520px)", () => {
+    expect(categoryAxisShownAt(MD_MAX_WIDTH, "vertical")).toBe(true)
   })
 })
 

@@ -471,6 +471,70 @@ export const ResponsiveSnapshotMatrixHorizontal: Story = {
   render: () => <ResponsiveSnapshot getProps={responsivePropsHorizontal} />,
 }
 
+// ---------------------------------------------------------------------------
+// Category-axis boundary widths
+//
+// Horizontal bars keep their category axis at `md`, where every other chart
+// family hides it (see `resolveResponsiveDisplay`). The deviation is deliberate
+// — a row label names the bar beside it — but it costs plot width: the labels
+// take `min(80, width * 0.2)`, so bars in a 220–519px container are up to 20%
+// shorter than they were. This story renders one pixel either side of both band
+// edges so Chromatic diffs that trade-off instead of leaving it to prose. The
+// vertical column is the control: it still gains its axis only at `lg`.
+// ---------------------------------------------------------------------------
+
+const CATEGORY_AXIS_BOUNDARY_WIDTHS = [
+  { label: "219px — last sm", widthClass: "w-[219px]" },
+  { label: "220px — first md", widthClass: "w-[220px]" },
+  { label: "519px — last md", widthClass: "w-[519px]" },
+  { label: "520px — first lg", widthClass: "w-[520px]" },
+] as const
+
+const boundaryProps = (
+  orientation: "vertical" | "horizontal"
+): F0DataChartProps => ({
+  type: "bar",
+  orientation,
+  categories: ["Engineering", "Design", "Product", "Sales"],
+  series: [{ name: "Headcount", data: [145, 89, 67, 90] }],
+  showLegend: false,
+})
+
+/**
+ * The exact widths at which the category axis appears, per orientation.
+ * Horizontal gains it at 220px (`sm` → `md`); vertical not until 520px
+ * (`md` → `lg`). Paired with the boundary assertions in `BarChart.test.tsx`.
+ */
+export const CategoryAxisBoundaries: Story = {
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="flex w-fit flex-col gap-8 p-6">
+      {(["horizontal", "vertical"] as const).map((orientation) => (
+        <div key={orientation} className="flex flex-col gap-3">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {orientation}
+          </span>
+          <div className="flex flex-row items-start gap-4">
+            {CATEGORY_AXIS_BOUNDARY_WIDTHS.map(({ label, widthClass }) => (
+              <div key={label} className="flex flex-col gap-2">
+                <span className="text-xs text-f1-foreground-secondary">
+                  {label}
+                </span>
+                <div
+                  className={`${widthClass} h-[240px] rounded-md border border-solid border-f1-border-secondary bg-f1-background p-3`}
+                >
+                  <F0DataChart {...boundaryProps(orientation)} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+}
+
 /**
  * Many series with long names — the legend paginates with arrow controls
  * while the chart area stays the same size.
