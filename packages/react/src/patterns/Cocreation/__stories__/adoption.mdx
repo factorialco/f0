@@ -14,7 +14,7 @@ the few things that are actually specific to your resource.
 ## 1. Own a single `phase`
 
 A cocreation flow runs on one chat-enabled
-[`ApplicationFrame`](?path=/docs/patterns-applicationframe--documentation) and is driven by a
+[`ApplicationFrame`](?path=/docs/patterns-app-shell-applicationframe--documentation) and is driven by a
 single `phase` value — `"collection" | "chat" | "split"`. Everything else (whether the chat
 is open, and whether it shows full width or as a side panel) is **derived** from `phase`,
 never set independently, so the header trigger and the in-flow buttons can't disagree. See
