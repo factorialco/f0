@@ -1749,7 +1749,12 @@ export declare type BigNumberProps = {
     label?: string;
     trend?: boolean | TrendConfig;
     comparisonHint?: string;
-    comparison: Numeric | NumberWithFormatter | number;
+    /**
+     * The previous-period figure the value is compared against, rendered as a
+     * balance tag. Optional: when omitted, no balance tag renders — prefer that
+     * over inventing a baseline when there is no comparable previous period.
+     */
+    comparison?: Numeric | NumberWithFormatter | number;
 };
 
 /**
