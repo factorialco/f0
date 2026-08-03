@@ -14,7 +14,7 @@ export function DisabledCell<R extends RecordType>({
       disabled
       borderOnHover={false}
       hint={hint}
-      hintPosition="right"
+      hintPosition={hint?.hintPosition ?? "right"}
       cursor="not-allowed"
     >
       <ReadOnlyCellContent
