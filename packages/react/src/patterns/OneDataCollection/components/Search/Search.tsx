@@ -72,6 +72,9 @@ export const Search = ({
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const activeItemRef = useRef<HTMLButtonElement>(null)
+  // Rows loaded on the previous render, to tell an appended page (keep the
+  // highlight) from a replaced result set (move it back to the top).
+  const previousResultsRef = useRef<SearchResultItem[]>([])
   const i18n = useI18n()
 
   // Render every loaded row; growth is bounded by paginated loading, not a cap.
@@ -90,10 +93,23 @@ export const Search = ({
     }
   }
 
-  // Highlight the first row whenever results change, so a plain Enter jumps to
-  // the top match without the user having to arrow down or click first.
+  // Highlight the first row whenever the result set is REPLACED, so a plain Enter
+  // jumps to the top match without the user having to arrow down or click first.
+  // An appended page must be exempt: it leaves the rows the user is reading in
+  // place, so resetting the highlight there sends Enter to the top match instead
+  // of the row they had reached by scrolling.
   useEffect(() => {
-    setActiveIndex((results ?? []).length > 0 ? 0 : -1)
+    const next = results ?? []
+    const previous = previousResultsRef.current
+    previousResultsRef.current = next
+
+    const isAppendedPage =
+      previous.length > 0 &&
+      next.length > previous.length &&
+      previous.every((result, index) => result.id === next[index]?.id)
+    if (isAppendedPage) return
+
+    setActiveIndex(next.length > 0 ? 0 : -1)
   }, [results])
 
   // Keep the highlighted row visible as the user arrows past the fold.
