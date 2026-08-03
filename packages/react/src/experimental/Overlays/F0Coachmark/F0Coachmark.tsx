@@ -83,10 +83,15 @@ export const F0Coachmark = ({
         onInteractOutside={(event) => event.preventDefault()}
         // The surface swaps the foreground/background pair rather than using
         // the `inverse` tokens: both sit on the --neutral-* ramp, so they flip
-        // with the theme and the panel always contrasts against the page. The
-        // `inverse` pair does not — f1-foreground-inverse is white in both
-        // themes while f1-background-inverse flips, so together they collapse
-        // to white-on-white in dark mode.
+        // with the theme and the panel always contrasts against the page.
+        //
+        // Deliberately not the `inverse` tokens, for two separate reasons:
+        //   - f1-foreground-inverse is white in *both* themes (it maps to
+        //     --white-*, not --neutral-*), so pairing it with the flipping
+        //     f1-background-inverse collapses to white-on-white in dark mode.
+        //   - f1-background-inverse is 0.92/0.9 alpha. This panel floats over
+        //     arbitrary page content and has no backdrop blur, so it needs an
+        //     opaque surface to stay legible.
         className={cn(
           "w-[17.5rem] rounded-lg border-f1-background/20 bg-f1-foreground p-4",
           "text-f1-background shadow-md"
