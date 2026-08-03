@@ -16,6 +16,7 @@ import {
   buildLegend,
   buildValueAxis,
   renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import type { ChartTheme } from "../../utils/theme"
@@ -124,8 +125,9 @@ type ScatterTooltipOptions = {
  * The point's own label is the title, with the series name beneath it whenever
  * the two differ.
  *
- * Values are shown in full ("82,000", not the axis's compact "82k"), matching
- * every other chart's tooltip.
+ * Both coordinates go through `tooltipValueFormat`, so they read the same as
+ * every other chart's tooltip: the full number ("82,000", not the axis's
+ * compact "82k") unless the caller formats it.
  */
 function buildTooltipFormatter(
   {
@@ -136,6 +138,9 @@ function buildTooltipFormatter(
   }: ScatterTooltipOptions,
   theme: ChartTheme
 ) {
+  const formatX = tooltipValueFormat(xTooltipValueFormatter)
+  const formatY = tooltipValueFormat(tooltipValueFormatter)
+
   return (params: unknown): string => {
     const point = params as {
       marker?: string
@@ -158,16 +163,12 @@ function buildTooltipFormatter(
         ...(seriesName && seriesName !== title ? { subtitle: seriesName } : {}),
         rows: [
           {
-            value: xTooltipValueFormatter
-              ? xTooltipValueFormatter(x)
-              : x.toLocaleString(),
+            value: formatX(x),
             label: xAxisName ?? "",
             size: "large",
           },
           {
-            value: tooltipValueFormatter
-              ? tooltipValueFormatter(y)
-              : y.toLocaleString(),
+            value: formatY(y),
             label: yAxisName ?? "",
             size: "large",
           },
