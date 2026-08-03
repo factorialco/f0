@@ -1,5 +1,6 @@
 import {
   afterAll,
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -123,6 +124,19 @@ function getAnimationOptions() {
     stateAnimation?: { duration?: number; easing?: string }
   }
 }
+
+/** Drive `useReducedMotion()` — the setup default has no query matching. */
+const setReducedMotion = (matches: boolean) =>
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: matches && query.includes("prefers-reduced-motion"),
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
 
 /** Corner radii of every bar in a series, `undefined` for plain-number data */
 function getBorderRadii(seriesIndex: number) {
@@ -597,6 +611,43 @@ describe("BarChart — stacked segment polish", () => {
 
     const options = getAnimationOptions()
     expect(options.stateAnimation).toBeUndefined()
+  })
+
+  describe("reduced motion", () => {
+    afterEach(() => {
+      // Restore the setup default (motion allowed) for the rest of the suite.
+      setReducedMotion(false)
+    })
+
+    it("drops the cross-fade to zero duration", () => {
+      setReducedMotion(true)
+      render(<F0DataChart {...base} stacked />)
+
+      // The highlight itself stays — hovering still isolates the series, it
+      // just arrives instantly instead of fading.
+      expect(getAnimationOptions().stateAnimation?.duration).toBe(0)
+      expect(getMainSeries()[0]?.emphasis?.focus).toBe("series")
+      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBe(0.4)
+    })
+
+    it("overrides a consumer-provided cross-fade duration", () => {
+      setReducedMotion(true)
+      render(
+        <F0DataChart
+          {...base}
+          stacked
+          echartsOptions={{
+            stateAnimation: { duration: 120, easing: "linear" },
+          }}
+        />
+      )
+
+      // The preference is the user's, so it wins over the consumer's duration.
+      expect(getAnimationOptions().stateAnimation).toEqual({
+        duration: 0,
+        easing: "linear",
+      })
+    })
   })
 })
 

@@ -1,6 +1,8 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
+
 import type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
@@ -52,7 +54,10 @@ const STACK_GAP_BORDER_WIDTH = 0.5
 /** Opacity of the series that are *not* hovered, while one series has focus. */
 const BLUR_OPACITY = 0.4
 
-/** Cross-fade duration (ms) in and out of the hover blur state. */
+/**
+ * Cross-fade duration (ms) in and out of the hover blur state. Drops to 0 when
+ * the user prefers reduced motion.
+ */
 const STATE_ANIMATION_DURATION = 500
 
 function resolveGridRightSpace(
@@ -454,6 +459,7 @@ export function useBarChartOptions(
   const theme = useChartTheme(containerRef)
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
+  const prefersReducedMotion = useReducedMotion()
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
@@ -688,15 +694,22 @@ export function useBarChartOptions(
     // This runs after `buildBaseChartOptions` merged the consumer's
     // `echartsOptions`, so each key defers to an explicitly-provided value —
     // same convention as the `userGridRight` guard below.
+    //
+    // `prefers-reduced-motion` zeroes the duration rather than dropping the
+    // state: the hover highlight still isolates the series, it just arrives
+    // instantly. The preference belongs to the user, not the consumer, so it
+    // also flattens an explicitly-provided `stateAnimation` duration.
     if (stacked) {
       options.animation = echartsOptions?.animation ?? true
       options.animationDuration = echartsOptions?.animationDuration ?? 0
       options.animationDurationUpdate =
         echartsOptions?.animationDurationUpdate ?? 0
-      options.stateAnimation = echartsOptions?.stateAnimation ?? {
-        duration: STATE_ANIMATION_DURATION,
-        easing: "cubicOut",
-      }
+      options.stateAnimation = prefersReducedMotion
+        ? { ...echartsOptions?.stateAnimation, duration: 0 }
+        : (echartsOptions?.stateAnimation ?? {
+            duration: STATE_ANIMATION_DURATION,
+            easing: "cubicOut",
+          })
     }
 
     // Non-stacked horizontal bars render labels BESIDE the bar end, so the
@@ -733,5 +746,6 @@ export function useBarChartOptions(
     containerWidth,
     containerHeight,
     size,
+    prefersReducedMotion,
   ])
 }
