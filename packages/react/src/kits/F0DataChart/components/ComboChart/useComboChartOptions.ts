@@ -9,6 +9,8 @@ import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import {
+  ARIA_MAX_SERIES,
+  ARIA_MAX_VALUES_PER_SERIES,
   buildBorderRadiusResolver,
   buildSeriesEntries as buildBarSeriesEntries,
 } from "../BarChart/useBarChartOptions"
@@ -34,6 +36,53 @@ function resolveResponsiveDisplay(size: ComboChartSize) {
     showCategoryAxis: size === "lg",
     showValueAxis: size !== "sm",
   }
+}
+
+/**
+ * Screen-reader description over both series lists, bars first — the same
+ * bounded shape the bar chart emits (`ARIA_MAX_SERIES` × `ARIA_MAX_VALUES_PER_SERIES`),
+ * with each half formatted by its own axis formatter.
+ */
+function buildAriaDescription(
+  categories: string[],
+  barSeries: { name: string; data: unknown[] }[],
+  lineSeries: { name: string; data: unknown[] }[],
+  primaryFormatter: ((value: number) => string) | undefined,
+  secondaryFormatter: ((value: number) => string) | undefined
+): string {
+  const pointValue = (point: unknown): number =>
+    typeof point === "number"
+      ? point
+      : ((point as { value?: number })?.value ?? 0)
+
+  const describe = (
+    series: { name: string; data: unknown[] }[],
+    formatter: ((value: number) => string) | undefined
+  ): string[] =>
+    series.slice(0, ARIA_MAX_SERIES).map((currentSeries) => {
+      const values = currentSeries.data
+        .slice(0, ARIA_MAX_VALUES_PER_SERIES)
+        .map((point, categoryIndex) => {
+          const value = pointValue(point)
+          return `${categories[categoryIndex] ?? categoryIndex + 1}: ${formatter ? formatter(value) : String(value)}`
+        })
+        .join("; ")
+      const remaining = Math.max(
+        0,
+        currentSeries.data.length - ARIA_MAX_VALUES_PER_SERIES
+      )
+      return `${currentSeries.name}: ${values}${remaining > 0 ? `; ${remaining} more values` : ""}.`
+    })
+
+  const descriptions = [
+    ...describe(barSeries, primaryFormatter),
+    ...describe(lineSeries, secondaryFormatter),
+  ]
+  const totalSeries = barSeries.length + lineSeries.length
+  if (totalSeries > descriptions.length) {
+    descriptions.push(`${totalSeries - descriptions.length} more series.`)
+  }
+  return descriptions.join(" ")
 }
 
 /**
@@ -181,7 +230,7 @@ export function useComboChartOptions(
       lineEntries.map((_, index) => barEntries.length + index)
     )
 
-    return buildBaseChartOptions({
+    const options = buildBaseChartOptions({
       categories,
       theme,
       series: [
@@ -212,6 +261,22 @@ export function useComboChartOptions(
       containerWidth,
       containerHeight,
     })
+
+    options.aria = {
+      enabled: true,
+      label: {
+        enabled: true,
+        description: buildAriaDescription(
+          categories,
+          barSeries,
+          lineSeries,
+          valueFormatter,
+          lineFormatter
+        ),
+      },
+    }
+
+    return options
   }, [
     categories,
     barSeries,

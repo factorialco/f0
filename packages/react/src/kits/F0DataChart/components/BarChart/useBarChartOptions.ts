@@ -25,8 +25,10 @@ const STACKED_LABEL_FIT_PADDING = 12
 const OUTSIDE_LABEL_FIT_PADDING = 0
 const HORIZONTAL_LABEL_GRID_RIGHT = 60
 const HORIZONTAL_LABEL_GAP = 8
-const ARIA_MAX_SERIES = 10
-const ARIA_MAX_VALUES_PER_SERIES = 20
+// Exported for the combo chart, which describes its bar and line series with
+// the same bounds so the DOM attribute stays bounded for large datasets.
+export const ARIA_MAX_SERIES = 10
+export const ARIA_MAX_VALUES_PER_SERIES = 20
 
 /**
  * Pick the black/white foreground for text on a colored fill. Prefers white on

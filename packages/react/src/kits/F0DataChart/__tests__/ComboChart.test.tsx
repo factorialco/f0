@@ -244,6 +244,26 @@ describe("ComboChart — series appearance", () => {
   })
 })
 
+describe("ComboChart — accessibility", () => {
+  it("describes both series lists, each with its own axis formatter", () => {
+    render(
+      <F0DataChart
+        {...comboProps}
+        valueFormatter={(v) => `${v} people`}
+        secondaryValueFormatter={(v) => `${v}%`}
+      />
+    )
+
+    const option = setOptionMock.mock.calls.at(-1)?.[0] as {
+      aria?: { enabled?: boolean; label?: { description?: string } }
+    }
+    expect(option.aria?.enabled).toBe(true)
+    const description = option.aria?.label?.description ?? ""
+    expect(description).toContain("Headcount: Jan: 120 people")
+    expect(description).toContain("Turnover rate: Jan: 4.1%")
+  })
+})
+
 describe("ComboChart — responsive breakpoints", () => {
   it("hides both axes and the legend at the small breakpoint", () => {
     containerSize.width = 180
