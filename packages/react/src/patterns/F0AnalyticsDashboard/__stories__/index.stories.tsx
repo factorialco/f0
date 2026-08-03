@@ -7,7 +7,7 @@ import type { FiltersState } from "@/patterns/OneFilterPicker/types"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { DashboardItem } from "../types"
+import type { DashboardItem, DashboardMetricData } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
 import {
@@ -596,5 +596,156 @@ export const EmptyDashboard: Story = {
     await expect(await canvas.findAllByText("No data available")).toHaveLength(
       emptyItems.length
     )
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Per-item empty-state copy, the metric empty branch, and the table fallback
+// ---------------------------------------------------------------------------
+
+const perItemEmptyStateItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "empty-metric",
+    title: "Average salary",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: async () => undefined as unknown as DashboardMetricData,
+  },
+  {
+    id: "empty-metric-custom-copy",
+    title: "Headcount",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 0,
+    itemHeight: 144,
+    emptyState: {
+      title: "Nobody on payroll yet",
+      description: "Add an employee to start tracking headcount.",
+    },
+    fetchData: async () => undefined as unknown as DashboardMetricData,
+  },
+  {
+    id: "empty-chart-custom-copy",
+    title: "Spend by month",
+    description: "Total spend by month.",
+    type: "chart",
+    colSpan: 4,
+    x: 8,
+    y: 0,
+    itemHeight: 336,
+    chart: { type: "bar" },
+    emptyState: {
+      title: "No expenses to show",
+      description: "Submit an expense to see it tracked here.",
+    },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+  {
+    // A heatmap is the one chart the adapter cannot build from 1D series, so
+    // this tile renders its data as a table instead of an empty frame. The
+    // chart-type menu still switches it back to a chart.
+    id: "unbuildable-heatmap",
+    title: "Headcount by team",
+    description: "Requested as a heatmap, but the data is one-dimensional.",
+    type: "chart",
+    colSpan: 12,
+    x: 0,
+    y: 3,
+    itemHeight: 336,
+    chart: { type: "heatmap" },
+    fetchData: async () => ({
+      categories: ["Engineering", "Product", "Design"],
+      series: [{ name: "Headcount", data: [12, 7, 4] }],
+    }),
+  },
+  {
+    // Zero rows: the collection swaps its grid for an empty state rather than
+    // leaving column headers over a blank body. The per-item copy feeds it.
+    id: "empty-collection",
+    title: "Employee directory",
+    type: "collection",
+    colSpan: 12,
+    x: 0,
+    y: 10,
+    itemHeight: 336,
+    emptyState: {
+      title: "No employees to list",
+      description: "Nobody matches the current report filters.",
+    },
+    createSource: () => ({
+      dataAdapter: {
+        paginationType: "pages" as const,
+        perPage: 10,
+        fetchData: async () => ({
+          type: "pages" as const,
+          records: [] as { id: string; name: string }[],
+          total: 0,
+          currentPage: 1,
+          perPage: 10,
+          pagesCount: 0,
+        }),
+      },
+    }),
+    visualizations: [
+      {
+        type: "table" as const,
+        options: {
+          columns: [
+            {
+              id: "name",
+              label: "Name",
+              render: (item: { name: string }) => item.name,
+            },
+          ],
+        },
+      },
+    ],
+  },
+]
+
+/**
+ * Per-item `emptyState` copy on a metric, a chart and a collection, a metric
+ * with no value at all, and the automatic chart → table fallback for data the
+ * requested chart type cannot place.
+ */
+export const PerItemEmptyStates: Story = {
+  tags: ["no-sidebar"],
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "Every widget here has nothing conventional to render. The two left metrics show the default copy and a per-item override; the chart shows a per-item override; the wide tile was configured as a heatmap but fed one-dimensional series, so it falls back to the table view of the same data rather than painting an empty frame.",
+      },
+    },
+  }),
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      items={perItemEmptyStateItems}
+      onTransformChart={() => {}}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Default copy on the first metric, overrides on the other two items.
+    await expect(
+      await canvas.findByText("No data available")
+    ).toBeInTheDocument()
+    await expect(canvas.getByText("Nobody on payroll yet")).toBeInTheDocument()
+    await expect(canvas.getByText("No expenses to show")).toBeInTheDocument()
+
+    // The unbuildable heatmap fell back to the table view of its own data.
+    await expect(await canvas.findByText("Engineering")).toBeInTheDocument()
+
+    // The zero-row collection reports itself instead of showing bare headers.
+    await expect(
+      await canvas.findByText("No employees to list")
+    ).toBeInTheDocument()
   },
 }
