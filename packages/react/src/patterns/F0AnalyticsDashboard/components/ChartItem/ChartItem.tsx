@@ -195,6 +195,12 @@ export function buildChartProps(
   if ("valueFormatter" in item.chart && item.chart.valueFormatter) {
     shared.valueFormatter = item.chart.valueFormatter
   }
+  if (
+    "tooltipValueFormatter" in item.chart &&
+    item.chart.tooltipValueFormatter
+  ) {
+    shared.tooltipValueFormatter = item.chart.tooltipValueFormatter
+  }
   if ("showLegend" in item.chart) {
     shared.showLegend = item.chart.showLegend
   }

@@ -97,3 +97,60 @@ describe("buildChartProps — bar label default (transform path)", () => {
     ).toBeUndefined()
   })
 })
+
+// ---------------------------------------------------------------------------
+// A dashboard chart can format its tooltip separately from its axis — the pair
+// exists so the axis can compact ("€60K") while the tooltip stays exact
+// ("€46,390.86"). Both routes into the props have to carry it.
+// ---------------------------------------------------------------------------
+
+describe("buildChartProps — tooltipValueFormatter", () => {
+  const axis = (value: number) => `€${Math.round(value / 1000)}K`
+  const exact = (value: number) => `€${value.toLocaleString("en-US")}`
+
+  it("passes both formatters through on the native path", () => {
+    const props = buildChartProps(
+      chartItem({
+        type: "bar",
+        valueFormatter: axis,
+        tooltipValueFormatter: exact,
+      }),
+      barData
+    ) as {
+      valueFormatter?: (value: number) => string
+      tooltipValueFormatter?: (value: number) => string
+    }
+
+    expect(props.valueFormatter?.(60000)).toBe("€60K")
+    expect(props.tooltipValueFormatter?.(46390.8632)).toBe("€46,390.863")
+  })
+
+  it("keeps both across a cross-type transform", () => {
+    const props = buildChartProps(
+      chartItem({
+        type: "bar",
+        valueFormatter: axis,
+        tooltipValueFormatter: exact,
+      }),
+      barData,
+      "line"
+    ) as {
+      valueFormatter?: (value: number) => string
+      tooltipValueFormatter?: (value: number) => string
+    }
+
+    expect(props.valueFormatter?.(60000)).toBe("€60K")
+    expect(props.tooltipValueFormatter?.(60000)).toBe("€60,000")
+  })
+
+  it("leaves the tooltip formatter unset when the config has none", () => {
+    const props = buildChartProps(
+      chartItem({ type: "bar", valueFormatter: axis }),
+      barData,
+      "line"
+    ) as { tooltipValueFormatter?: (value: number) => string }
+
+    // Unset means F0DataChart falls back to `valueFormatter` itself.
+    expect(props.tooltipValueFormatter).toBeUndefined()
+  })
+})
