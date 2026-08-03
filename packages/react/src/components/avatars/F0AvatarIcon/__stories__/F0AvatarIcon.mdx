@@ -1,5 +1,9 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as IconStories from "./F0AvatarIcon.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as Icons from "@/icons/app"
+import { F0AvatarIcon } from "../F0AvatarIcon"
 
 <Meta of={IconStories} />
 
@@ -20,11 +24,17 @@ The avatar for a generic entity represented by an icon.
 ### Anatomy
 
 An icon avatar is square and renders a system icon in the default icon color. It
-is available in sizes `sm`–`lg`.
+is available in sizes `sm`–`lg` — a 24, 32 or 40px box, with the icon and the
+corner radius scaling with it.
 
 <Canvas of={IconStories.Default} />
 
 <Controls of={IconStories.Default} />
+
+The box, the icon and the corner radius all scale together, so the icon keeps the
+same optical weight at every size.
+
+<Canvas of={IconStories.Sizes} />
 
 ---
 
@@ -41,3 +51,48 @@ is available in sizes `sm`–`lg`.
 
 - The entity type is dynamic: use `F0Avatar`
 - The marker is an emoji rather than a system icon: use `F0AvatarEmoji`
+- The entity is a file, a person, a company or a team: use the matching
+  `F0Avatar*` component, which knows how to derive its own visual
+
+<DoDonts
+  do={{
+    description:
+      "Pick an icon that names the entity kind, and keep the entity's own name as visible text next to the avatar.",
+    children: <F0AvatarIcon size="lg" icon={Icons.Building} />,
+  }}
+  dont={{
+    description:
+      "Don't ship Placeholder as a stand-in for a real entity type — it tells the reader nothing, and there is no accessible name behind it to make up the difference.",
+    children: <F0AvatarIcon size="lg" icon={Icons.Placeholder} />,
+  }}
+/>
+
+---
+
+## Behavior
+
+`state` is forwarded to the icon, but it only animates icons that ship an
+animated variant. None of the icons exported from `@/icons/app` do, so for this
+component it is effectively inert.
+
+---
+
+## Accessibility
+
+The avatar renders an icon and no text, and it contributes **no accessible
+name**. The entity's name has to come from the surrounding row, cell or caption
+as visible text — that is the only thing screen reader users get.
+
+<Canvas of={IconStories.WithVisibleLabel} />
+
+Two known limitations, both in the current implementation rather than by design:
+
+- The root is a plain `<div>` with no `role` and no `aria-hidden`, so it is
+  exposed as an unnamed generic node instead of being either labelled or hidden.
+- `aria-label` and `aria-labelledby` are part of the public type, but they land
+  on that role-less root, where ARIA prohibits them. They produce no accessible
+  name, and axe reports `aria-prohibited-attr` (WCAG 2.1 A, 4.1.2) for that
+  markup. Do not use them to name the avatar.
+
+Until that changes, the entity's name has to sit next to the avatar as visible
+text, as in the example above.
