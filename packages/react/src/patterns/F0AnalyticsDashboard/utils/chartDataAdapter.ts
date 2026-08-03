@@ -77,6 +77,35 @@ function barLineToCanonical(data: DashboardChartData): CanonicalChartData {
   }
 }
 
+/**
+ * Flatten a combo's two axes into one canonical series list, bars first.
+ *
+ * Lossy on purpose and only used for the tabular view, which lists every series
+ * as its own column and so keeps them readable. It is deliberately NOT offered
+ * as a chart-type conversion — see `compatibleTargetTypes`.
+ */
+function comboToCanonical(data: DashboardChartData): CanonicalChartData {
+  const toSeries = (
+    series: { name: string; data: unknown[] }[] | undefined
+  ): { name: string; data: number[] }[] =>
+    (series ?? []).map((s) => ({
+      name: s.name,
+      data: (s.data ?? []).map(numericValue),
+    }))
+
+  return {
+    categories: data.categories ?? [],
+    series: [
+      ...toSeries(
+        data.barSeries as { name: string; data: unknown[] }[] | undefined
+      ),
+      ...toSeries(
+        data.lineSeries as { name: string; data: unknown[] }[] | undefined
+      ),
+    ],
+  }
+}
+
 function funnelToCanonical(data: DashboardChartData): CanonicalChartData {
   if (Array.isArray(data.series)) {
     // Bar/line shaped
@@ -153,6 +182,13 @@ export function detectDataShape(
   data: DashboardChartData,
   hint?: DashboardChartConfig["type"]
 ): DashboardChartConfig["type"] {
+  // Combo: carries its own two series fields. Detected on the fields' presence
+  // rather than their length, so a combo still mid-fetch on one axis is routed
+  // to the combo renderer (which draws what it has) instead of falling through
+  // to the bar branch below.
+  if (data.barSeries !== undefined || data.lineSeries !== undefined) {
+    return "combo"
+  }
   // Heatmap: has xCategories/yCategories + data tuples
   if (
     data.xCategories?.length ||
@@ -200,6 +236,8 @@ export function toCanonical(
     case "bar":
     case "line":
       return barLineToCanonical(data)
+    case "combo":
+      return comboToCanonical(data)
     case "funnel":
       return funnelToCanonical(data)
     case "pie":
@@ -297,6 +335,19 @@ export function fromCanonical(
     case "bar":
     case "line":
       return canonicalToBarLine(canonical)
+    case "combo":
+      // Unreachable through the type switcher, which never offers combo as a
+      // target (a 1D canonical shape carries no axis assignment). Everything
+      // lands on the primary axis so the branch stays total and lossless.
+      return {
+        categories: canonical.categories,
+        series: undefined,
+        barSeries: canonical.series.map((s) => ({
+          name: s.name,
+          data: s.data,
+        })) as F0DataChartBarSeries[],
+        lineSeries: [],
+      }
     case "funnel":
       return canonicalToFunnel(canonical)
     case "pie":
@@ -367,6 +418,13 @@ export function compatibleTargetTypes(
       targets.add("pie")
       break
 
+    case "combo":
+      // Only table and itself. Flattening two scales onto one axis is exactly
+      // what a combo exists to avoid: a 0–100% rate rendered against 0–5000
+      // headcount bars is an invisible line along the baseline. Silently
+      // misleading output is worse than offering no conversion at all.
+      break
+
     case "gauge":
       // Single value — only table and itself make sense
       break
@@ -399,6 +457,8 @@ export function defaultChartConfig(
       return { type: "bar", orientation: "vertical" }
     case "line":
       return { type: "line", lineType: "linear", showArea: true }
+    case "combo":
+      return { type: "combo", lineType: "linear" }
     case "funnel":
       return { type: "funnel", showConversion: true, colorScale: true }
     case "pie":

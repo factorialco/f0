@@ -6,6 +6,7 @@ import type { F0DataChartProps } from "../../types"
 
 import {
   BarChartSkeleton,
+  ComboChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,
@@ -26,6 +27,7 @@ export interface DataChartEmptyStateProps {
 const skeletonByType: Record<F0DataChartProps["type"], () => ReactNode> = {
   bar: () => <BarChartSkeleton showLegend={false} />,
   line: () => <LineChartSkeleton showLegend={false} />,
+  combo: () => <ComboChartSkeleton showLegend={false} />,
   funnel: () => <FunnelChartSkeleton showLegend={false} />,
   pie: () => <PieChartSkeleton showLegend={false} />,
   radar: () => <RadarChartSkeleton showLegend={false} />,

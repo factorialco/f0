@@ -6,6 +6,7 @@ export type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
   F0DataChartBarSeries,
+  F0DataChartComboProps,
   F0DataChartEmptyStateProps,
   F0DataChartFunnelDataPoint,
   F0DataChartFunnelProps,
@@ -30,6 +31,7 @@ export { type ChartColorToken, chartColorTokens } from "./utils/colors"
 export type { ChartTheme } from "./utils/theme"
 export {
   BarChartSkeleton,
+  ComboChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,

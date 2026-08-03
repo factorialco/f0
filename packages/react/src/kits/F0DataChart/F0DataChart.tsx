@@ -1,6 +1,7 @@
 import type { F0DataChartProps } from "./types"
 
 import { BarChart } from "./components/BarChart/BarChart"
+import { ComboChart } from "./components/ComboChart/ComboChart"
 import { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"
 import { FunnelChart } from "./components/FunnelChart/FunnelChart"
 import { GaugeChart } from "./components/GaugeChart/GaugeChart"
@@ -25,6 +26,8 @@ export const F0DataChart = (props: F0DataChartProps) => {
       return <BarChart {...props} />
     case "line":
       return <LineChart {...props} />
+    case "combo":
+      return <ComboChart {...props} />
     case "funnel":
       return <FunnelChart {...props} />
     case "pie":

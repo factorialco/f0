@@ -4,6 +4,7 @@ import { F0AnalyticsDashboard as _F0AnalyticsDashboard } from "./F0AnalyticsDash
 
 export type {
   BarChartConfig,
+  ComboChartConfig,
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,

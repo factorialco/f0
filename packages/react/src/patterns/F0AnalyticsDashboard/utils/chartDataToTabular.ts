@@ -37,6 +37,8 @@ export function chartDataToTabular(
     case "bar":
     case "line":
       return barLineToTabular(data)
+    case "combo":
+      return comboToTabular(data)
     case "funnel":
       return funnelToTabular(data)
     case "pie":
@@ -65,6 +67,30 @@ function barLineToTabular(data: DashboardChartData): TabularResult {
       row[s.name] = numericValue(
         (s as { name: string; data: unknown[] }).data[i]
       )
+    }
+    return row
+  })
+
+  return { columns, rows }
+}
+
+/**
+ * One column per series, bars first then lines — the axis a series belongs to
+ * doesn't survive into a table, but each column keeps its own units because it
+ * keeps its own name.
+ */
+function comboToTabular(data: DashboardChartData): TabularResult {
+  const categories = data.categories ?? []
+  const series = [...(data.barSeries ?? []), ...(data.lineSeries ?? [])] as {
+    name: string
+    data: unknown[]
+  }[]
+  const columns = ["Category", ...series.map((s) => s.name)]
+
+  const rows = categories.map((cat, i) => {
+    const row: Record<string, unknown> = { Category: cat }
+    for (const s of series) {
+      row[s.name] = numericValue(s.data[i])
     }
     return row
   })

@@ -1,6 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as BarStories from "./Bar.stories"
 import * as LineStories from "./Line.stories"
+import * as ComboStories from "./Combo.stories"
 import * as FunnelStories from "./Funnel.stories"
 import * as PieStories from "./Pie.stories"
 import * as RadarStories from "./Radar.stories"
@@ -21,15 +22,16 @@ import { F0DataChart } from "@factorialco/f0-react"
 
 ## Quick Reference
 
-| Type      | Best for                             | Key props                                                  |
-| --------- | ------------------------------------ | ---------------------------------------------------------- |
-| `bar`     | Comparing categories or time periods | `series`, `categories`, `orientation`, `stacked`           |
-| `line`    | Trends over time                     | `series`, `categories`, `lineType`, `showArea`, `showDots` |
-| `funnel`  | Conversion pipelines, hiring stages  | `series`, `sort`, `orient`, `showConversion`, `colorScale` |
-| `pie`     | Part-of-whole distributions          | `series`, `innerRadius`, `showPercentage`                  |
-| `radar`   | Multi-dimensional comparisons        | `series`, `indicators`, `showArea`                         |
-| `gauge`   | Single KPI / progress indicator      | `value`, `min`, `max`, `name`                              |
-| `heatmap` | Density across two dimensions        | `data`, `xCategories`, `yCategories`, `showLabels`         |
+| Type      | Best for                               | Key props                                                          |
+| --------- | -------------------------------------- | ------------------------------------------------------------------ |
+| `bar`     | Comparing categories or time periods   | `series`, `categories`, `orientation`, `stacked`                   |
+| `line`    | Trends over time                       | `series`, `categories`, `lineType`, `showArea`, `showDots`         |
+| `combo`   | A measure against one on another scale | `barSeries`, `lineSeries`, `categories`, `secondaryValueFormatter` |
+| `funnel`  | Conversion pipelines, hiring stages    | `series`, `sort`, `orient`, `showConversion`, `colorScale`         |
+| `pie`     | Part-of-whole distributions            | `series`, `innerRadius`, `showPercentage`                          |
+| `radar`   | Multi-dimensional comparisons          | `series`, `indicators`, `showArea`                                 |
+| `gauge`   | Single KPI / progress indicator        | `value`, `min`, `max`, `name`                                      |
+| `heatmap` | Density across two dimensions          | `data`, `xCategories`, `yCategories`, `showLabels`                 |
 
 All variants share an optional `emptyState` prop — see [Empty states](#empty-states).
 
@@ -163,6 +165,61 @@ Use `dashed: true` on a series to render a target / projection line.
 The same chart rendered in every breakpoint (small / medium / large) and every series count (low / normal / large) — mirrors the AI Analytics Figma matrix.
 
 <Canvas of={LineStories.ResponsiveSnapshotMatrix} />
+
+---
+
+## Combo Chart
+
+Bars on a primary (left) value axis, lines on a secondary (right) one, over a shared category axis. Reach for it when you need to read a measure against a measure on a different scale or unit — headcount against turnover rate, absence days against absence rate, worked against expected hours. On one axis, a 0–5% rate next to 0–142 headcount bars is a flat line along the bottom.
+
+<Canvas of={ComboStories.HeadcountAndTurnoverRate} />
+<Controls of={ComboStories.HeadcountAndTurnoverRate} />
+
+Bars and lines are separate props rather than one tagged `series` array: "bars left, lines right" is structural, and a combo with nothing on one axis is a bar or line chart that should be declared as one.
+
+### Two units, two formatters
+
+`valueFormatter` formats the primary axis, `secondaryValueFormatter` the secondary — including their tooltip rows, each with the formatter of the axis it belongs to. Set both whenever the axes carry different units, which is the reason to pick a combo in the first place.
+
+<Canvas of={ComboStories.AbsenceDaysAndRate} />
+
+### One shared unit
+
+When both measures share a unit, omit `secondaryValueFormatter` and the secondary axis inherits `valueFormatter`.
+
+<Canvas of={ComboStories.WorkedAgainstExpectedHours} />
+
+### Stacked bars with a rate line
+
+<Canvas of={ComboStories.StackedBarsWithRateLine} />
+
+### A rate against its target
+
+<Canvas of={ComboStories.TwoRateLines} />
+
+### Smooth line with dots
+
+<Canvas of={ComboStories.SmoothLineWithDots} />
+
+### Value labels
+
+<Canvas of={ComboStories.WithValueLabels} />
+
+### Partial data
+
+Only the primary axis has data — the chart renders rather than showing an empty state, so a combo whose two measures resolve at different times doesn't flash. The empty state appears only when neither axis has a single point.
+
+<Canvas of={ComboStories.OnlyBars} />
+
+### Responsive breakpoints
+
+Same matrix as bar and line: at `sm` both value axes and the legend drop, at `md` the value axes return, at `lg` the category axis joins them.
+
+<Canvas of={ComboStories.BreakpointSmall} />
+<Canvas of={ComboStories.BreakpointMedium} />
+<Canvas of={ComboStories.BreakpointLarge} />
+
+There is deliberately no `orientation` (a dual-axis chart reads top-down; a horizontal one would need its second axis on top) and no `showArea` (a fill on the secondary scale reads as if it belonged to the bars).
 
 ---
 

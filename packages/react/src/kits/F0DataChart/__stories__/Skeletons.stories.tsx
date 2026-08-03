@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
   BarChartSkeleton,
+  ComboChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,
@@ -53,6 +54,14 @@ export const LineNoArea: StoryObj = {
 
 export const LineWithDots: StoryObj = {
   render: () => <LineChartSkeleton showDots />,
+}
+
+export const Combo: StoryObj = {
+  render: () => <ComboChartSkeleton />,
+}
+
+export const ComboStacked: StoryObj = {
+  render: () => <ComboChartSkeleton stacked />,
 }
 
 export const Funnel: StoryObj = {

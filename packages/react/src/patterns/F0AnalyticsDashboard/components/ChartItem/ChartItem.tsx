@@ -20,6 +20,7 @@ import {
 import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
+  ComboChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,
@@ -130,6 +131,13 @@ function chartSkeleton(config: DashboardChartConfig) {
           showLegend={config.showLegend}
         />
       )
+    case "combo":
+      return (
+        <ComboChartSkeleton
+          stacked={config.stacked}
+          showLegend={config.showLegend}
+        />
+      )
     case "funnel":
       return (
         <FunnelChartSkeleton
@@ -222,6 +230,14 @@ function buildChartProps(
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
+    case "combo":
+      return {
+        ...config,
+        ...shared,
+        categories: adapted.categories ?? [],
+        barSeries: adapted.barSeries ?? [],
+        lineSeries: adapted.lineSeries ?? [],
+      } as F0DataChartProps
     case "funnel":
       return {
         ...config,
@@ -270,6 +286,13 @@ function buildNativeChartProps(
   const { chart } = item
 
   switch (chart.type) {
+    case "combo":
+      return {
+        ...chart,
+        categories: data.categories ?? [],
+        barSeries: data.barSeries ?? [],
+        lineSeries: data.lineSeries ?? [],
+      } as F0DataChartProps
     case "funnel": {
       let funnelSeries = data.series
       if (Array.isArray(data.series)) {

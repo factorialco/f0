@@ -37,6 +37,10 @@ export const EmptyLine: Story = {
   args: { type: "line", categories: [], series: [] },
 }
 
+export const EmptyCombo: Story = {
+  args: { type: "combo", categories: [], barSeries: [], lineSeries: [] },
+}
+
 export const EmptyPie: Story = {
   args: { type: "pie", series: { name: "", data: [] } },
 }
@@ -120,6 +124,10 @@ export const Disabled: Story = {
 const SNAPSHOT_VARIANTS: { label: string; props: F0DataChartProps }[] = [
   { label: "Bar", props: { type: "bar", categories: [], series: [] } },
   { label: "Line", props: { type: "line", categories: [], series: [] } },
+  {
+    label: "Combo",
+    props: { type: "combo", categories: [], barSeries: [], lineSeries: [] },
+  },
   { label: "Pie", props: { type: "pie", series: { name: "", data: [] } } },
   {
     label: "Funnel",

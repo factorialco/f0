@@ -161,7 +161,7 @@ type BorderRadiusResolver = (
  * an earlier series is the one actually touching the outer edge there), so
  * this can't be reduced to a single fixed series index.
  */
-function buildBorderRadiusResolver(
+export function buildBorderRadiusResolver(
   series: F0DataChartBarSeries[],
   isVertical: boolean,
   stacked: boolean
@@ -206,8 +206,12 @@ function buildBorderRadiusResolver(
  * When the series contains target data points, two ECharts series are produced:
  *  1. The main (solid) bar showing `value`
  *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
+ *
+ * Exported for the combo chart, whose bars are these bars — it passes the
+ * label-fit arguments as defaults because it opts out of that machinery
+ * (see `useComboChartOptions`).
  */
-function buildSeriesEntries(
+export function buildSeriesEntries(
   series: F0DataChartBarSeries,
   index: number,
   isVertical: boolean,

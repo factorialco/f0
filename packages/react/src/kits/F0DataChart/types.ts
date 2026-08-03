@@ -207,6 +207,55 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
 }
 
 // ---------------------------------------------------------------------------
+// Discriminated union: combo variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Combo (dual-axis) chart variant props.
+ *
+ * Bars on a primary (left) value axis and lines on a secondary (right) one,
+ * over a shared category axis. Use it to read a measure against a measure on a
+ * different scale or unit — headcount against turnover rate, worked hours
+ * against expected hours.
+ *
+ * Bars and lines are separate fields rather than one tagged `series` array so
+ * that "bars left, lines right" is structural: a combo with nothing on one axis
+ * is a bar or line chart, and should be declared as one.
+ *
+ * There is deliberately no `orientation` (a dual-axis chart reads top-down, and
+ * a horizontal one would need its second axis on top) and no `showArea` (a fill
+ * on the secondary scale reads as if it belonged to the bars).
+ */
+export interface F0DataChartComboProps extends F0DataChartBaseProps {
+  /** Chart type */
+  type: "combo"
+  /** Series rendered as bars against the primary (left) value axis */
+  barSeries: F0DataChartBarSeries[]
+  /** Series rendered as lines against the secondary (right) value axis */
+  lineSeries: F0DataChartLineSeries[]
+  /** Stack the bar series into one bar per category. @default false */
+  stacked?: boolean
+  /** Line interpolation type for the line series. @default "linear" */
+  lineType?: F0DataChartLineType
+  /** Show data point dots on the lines. @default false */
+  showDots?: boolean
+  /**
+   * Format the secondary (line) value axis, its labels, and its tooltip rows.
+   * Falls back to {@link F0DataChartBaseProps.valueFormatter}. Set it whenever
+   * the two axes carry different units — which is the reason to pick a combo in
+   * the first place.
+   */
+  secondaryValueFormatter?: (value: number) => string
+  /**
+   * Suggested number of segments on both value axes. Kept shared so the two
+   * axes draw the same number of grid lines and their ticks stay aligned —
+   * independent split counts produce two interleaved sets of grid lines.
+   * @default 2
+   */
+  valueAxisSplitNumber?: number
+}
+
+// ---------------------------------------------------------------------------
 // Funnel data types
 // ---------------------------------------------------------------------------
 
@@ -460,12 +509,13 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
 /**
  * Props for the F0DataChart component.
  *
- * A unified chart component that supports bar, line, funnel, pie, radar,
- * gauge, and heatmap chart types via a discriminated `type` prop.
+ * A unified chart component that supports bar, line, combo, funnel, pie,
+ * radar, gauge, and heatmap chart types via a discriminated `type` prop.
  */
 export type F0DataChartProps =
   | F0DataChartBarProps
   | F0DataChartLineProps
+  | F0DataChartComboProps
   | F0DataChartFunnelProps
   | F0DataChartPieProps
   | F0DataChartRadarProps

@@ -64,8 +64,10 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
 
 /**
  * Build a single ECharts line series entry from an F0DataChartLineSeries.
+ *
+ * Exported for the combo chart, whose lines are these lines.
  */
-function buildSeriesEntry(
+export function buildSeriesEntry(
   series: F0DataChartLineSeries,
   index: number,
   globalLineType: F0DataChartLineType,
