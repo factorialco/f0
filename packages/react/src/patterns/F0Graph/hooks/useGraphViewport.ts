@@ -1,4 +1,9 @@
-import { type Viewport, useReactFlow, useStoreApi } from "@xyflow/react"
+import {
+  type Viewport,
+  getViewportForBounds,
+  useReactFlow,
+  useStoreApi,
+} from "@xyflow/react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { FIT_VIEW_PADDING_LOOSE, FIT_VIEW_PADDING_TIGHT } from "../constants"
@@ -69,20 +74,26 @@ export interface UseGraphViewportResult {
   centerOnNode: (nodeId: string, duration: number, zoom?: number) => boolean
   /**
    * Build a React Flow `fitView` padding that layers the current `viewportInset`
-   * on top of a symmetric base fraction, so id-based fits also clear the panel.
-   * Returns the plain `base` (identical to before) when there is no inset.
+   * on top of the symmetric `base`, so id-based fits also clear the panel. With
+   * an inset it returns per-side px; with none, the plain `base` fraction
+   * (identical to before).
    */
   getFitPadding: (base: number) => number | ViewportInsetPadding
   /** True when a non-zero `viewportInset` is currently set. */
   hasViewportInset: boolean
 }
 
-/** Per-side fitView padding (fractions), returned by {@link getFitPadding}. */
+/**
+ * Per-side fitView padding in px, returned by {@link getFitPadding}. Px (not
+ * fractions) because React Flow resolves a *numeric* padding non-linearly —
+ * `p` becomes `(dimension - dimension / (1 + p)) / 2` px per side — so a
+ * fraction cannot express "shift by exactly this many px".
+ */
 interface ViewportInsetPadding {
-  top: number
-  right: number
-  bottom: number
-  left: number
+  top: `${number}px`
+  right: `${number}px`
+  bottom: `${number}px`
+  left: `${number}px`
 }
 
 /** True when any side of the inset actually occludes part of the canvas. */
@@ -174,23 +185,27 @@ export function useGraphViewport({
     reactFlow.zoomOut({ duration: 300 })
   }, [reactFlow])
 
-  // Layer the current inset (screen px) onto a symmetric base fraction, so
+  // Layer the current inset onto the symmetric base, per side and in px, so
   // id-based fits frame their content in the free area rather than behind the
-  // panel. Each side's px is converted to a fraction of the container dimension
-  // it applies to (width for left/right, height for top/bottom) and added to the
-  // base. With no inset, returns the plain `base` — byte-for-byte the old call.
+  // panel. The base fraction is first resolved to the px React Flow would derive
+  // from it, then the inset px are added on the occluded sides — mixing the two
+  // scales instead (base + insetPx / dimension) lands far short of the panel
+  // edge, because a numeric padding is not linear in the dimension.
+  // With no inset, returns the plain `base` — byte-for-byte the old call.
   const getFitPadding = useCallback(
     (base: number): number | ViewportInsetPadding => {
       const inset = insetRef.current
       if (!insetOccludes(inset)) return base
       const { width, height } = storeApi.getState()
-      const fx = width > 0 ? width : 1
-      const fy = height > 0 ? height : 1
+      const basePx = (dimension: number) =>
+        (dimension - dimension / (1 + base)) / 2
+      const x = basePx(width)
+      const y = basePx(height)
       return {
-        top: base + (inset!.top ?? 0) / fy,
-        right: base + (inset!.right ?? 0) / fx,
-        bottom: base + (inset!.bottom ?? 0) / fy,
-        left: base + (inset!.left ?? 0) / fx,
+        top: `${y + (inset!.top ?? 0)}px`,
+        right: `${x + (inset!.right ?? 0)}px`,
+        bottom: `${y + (inset!.bottom ?? 0)}px`,
+        left: `${x + (inset!.left ?? 0)}px`,
       }
     },
     [storeApi]
@@ -201,17 +216,33 @@ export function useGraphViewport({
     // fit the window, not the graph. Fit the full layout bounds instead.
     const bounds = nodeWindowingActive ? getContentBounds?.() : null
     if (bounds) {
-      reactFlow.fitBounds(bounds, {
-        duration: 400,
-        padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
-      })
+      const padding = getFitPadding(FIT_VIEW_PADDING_TIGHT)
+      if (typeof padding === "number") {
+        reactFlow.fitBounds(bounds, { duration: 400, padding })
+        return
+      }
+      // `fitBounds`'s own `padding` is typed as a plain number, so a per-side
+      // inset cannot go through it. Resolve the viewport with the very helper
+      // `fitBounds` uses internally — that one does take per-side padding — and
+      // apply it directly, which is what `fitBounds` would have done.
+      const { width, height, minZoom, maxZoom } = storeApi.getState()
+      reactFlow.setViewport(
+        getViewportForBounds(bounds, width, height, minZoom, maxZoom, padding),
+        { duration: 400 }
+      )
       return
     }
     reactFlow.fitView({
       duration: 400,
       padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
     })
-  }, [reactFlow, nodeWindowingActive, getContentBounds, getFitPadding])
+  }, [
+    reactFlow,
+    storeApi,
+    nodeWindowingActive,
+    getContentBounds,
+    getFitPadding,
+  ])
 
   // Fly to a node by its full-layout position (works even when windowing has
   // dropped it from React Flow's store). Returns false when the position is

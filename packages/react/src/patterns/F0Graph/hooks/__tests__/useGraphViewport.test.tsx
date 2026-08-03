@@ -1,3 +1,4 @@
+import type { Viewport } from "@xyflow/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRenderHook } from "@/testing/test-utils"
@@ -17,7 +18,9 @@ const mockReactFlow = {
   setViewport: vi.fn(),
   getViewport: () => ({ x: 0, y: 0, zoom: 1 }),
 }
-const mockStoreState = { width: 1200, height: 800 }
+// `minZoom` / `maxZoom` are read by the real `getViewportForBounds` on the
+// windowing (bounds) fit path.
+const mockStoreState = { width: 1200, height: 800, minZoom: 0.05, maxZoom: 2 }
 vi.mock("@xyflow/react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@xyflow/react")>()
   return {
@@ -46,9 +49,36 @@ const setup = (opts?: {
     { initialProps: opts ?? {} }
   )
 
+// The px React Flow derives from a numeric padding, mirroring its own formula.
+const basePx = (dimension: number, base: number) =>
+  (dimension - dimension / (1 + base)) / 2
+const BASE_PX_X = basePx(mockStoreState.width, FIT_VIEW_PADDING_TIGHT)
+const BASE_PX_Y = basePx(mockStoreState.height, FIT_VIEW_PADDING_TIGHT)
+
+/** Renders the hook on the windowing path (fit resolved from full-layout bounds). */
+const renderFitViewWithBounds = (
+  bounds: { x: number; y: number; width: number; height: number },
+  viewportInset?: ViewportInset
+) => {
+  const { result } = zeroRenderHook(
+    () =>
+      useGraphViewport({
+        defaultZoom: 1,
+        nodeWindowingActive: true,
+        getContentBounds: () => bounds,
+        viewportInset,
+      }),
+    { initialProps: {} }
+  )
+  result.current.handleFitView()
+  return mockReactFlow
+}
+
 afterEach(() => {
   mockReactFlow.setCenter.mockClear()
   mockReactFlow.fitView.mockClear()
+  mockReactFlow.fitBounds.mockClear()
+  mockReactFlow.setViewport.mockClear()
 })
 
 describe("useGraphViewport — centerOnNode zoom", () => {
@@ -130,15 +160,16 @@ describe("useGraphViewport — getFitPadding / hasViewportInset", () => {
     )
   })
 
-  it("layers the px inset onto the base as per-side fractions of the container", () => {
+  it("layers the px inset onto the base as per-side px", () => {
     const { result } = setup({ viewportInset: { right: 480 } })
     expect(result.current.hasViewportInset).toBe(true)
-    // right = base + 480/width(1200) = 0.1 + 0.4 = 0.5; others = base.
+    // The base fraction resolved to px the way React Flow does it:
+    // (dimension - dimension / (1 + base)) / 2 — then the inset added on `right`.
     expect(result.current.getFitPadding(FIT_VIEW_PADDING_TIGHT)).toEqual({
-      top: FIT_VIEW_PADDING_TIGHT,
-      right: FIT_VIEW_PADDING_TIGHT + 480 / 1200,
-      bottom: FIT_VIEW_PADDING_TIGHT,
-      left: FIT_VIEW_PADDING_TIGHT,
+      top: `${BASE_PX_Y}px`,
+      right: `${BASE_PX_X + 480}px`,
+      bottom: `${BASE_PX_Y}px`,
+      left: `${BASE_PX_X}px`,
     })
   })
 
@@ -148,12 +179,35 @@ describe("useGraphViewport — getFitPadding / hasViewportInset", () => {
     expect(mockReactFlow.fitView).toHaveBeenCalledWith(
       expect.objectContaining({
         padding: {
-          top: FIT_VIEW_PADDING_TIGHT,
-          right: FIT_VIEW_PADDING_TIGHT + 480 / 1200,
-          bottom: FIT_VIEW_PADDING_TIGHT,
-          left: FIT_VIEW_PADDING_TIGHT,
+          top: `${BASE_PX_Y}px`,
+          right: `${BASE_PX_X + 480}px`,
+          bottom: `${BASE_PX_Y}px`,
+          left: `${BASE_PX_X}px`,
         },
       })
     )
+  })
+
+  // The inset must move the fit by exactly the panel width. Asserting the px
+  // padding alone would not catch a wrong scale, so this pins the outcome: the
+  // content center must land in the middle of the region left of the panel.
+  it("frames the content in the free area when windowing uses the bounds path", () => {
+    const bounds = { x: 0, y: 0, width: 400, height: 300 }
+    const rf = renderFitViewWithBounds(bounds, { right: 480 })
+    expect(rf.setViewport).toHaveBeenCalledTimes(1)
+    const viewport = rf.setViewport.mock.calls[0]![0] as Viewport
+    const screenX = viewport.x + (bounds.x + bounds.width / 2) * viewport.zoom
+    // Free area is [0, 1200 - 480] → its center is 360.
+    expect(screenX).toBeCloseTo((mockStoreState.width - 480) / 2, 1)
+  })
+
+  it("keeps the plain fitBounds call on the windowing path with no inset", () => {
+    const bounds = { x: 0, y: 0, width: 400, height: 300 }
+    const rf = renderFitViewWithBounds(bounds)
+    expect(rf.setViewport).not.toHaveBeenCalled()
+    expect(rf.fitBounds).toHaveBeenCalledWith(bounds, {
+      duration: 400,
+      padding: FIT_VIEW_PADDING_TIGHT,
+    })
   })
 })
