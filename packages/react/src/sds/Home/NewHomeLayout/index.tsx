@@ -200,12 +200,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       return node
     }
 
-    // The rail is its own scroll region — it sticks to the top of the viewport
-    // and takes the height left once the page gutter is off, with both ends
-    // faded rather than cut. The main column, by contrast, is never clipped: it
-    // grows and the page scrolls it.
+    // EACH COLUMN SCROLLS ITSELF. The grid is bounded to the viewport minus the
+    // gutter it sits in — so the page itself never scrolls and never overflows
+    // that padding — and both columns take `min-h-0 overflow-y-auto` inside it.
+    //
+    // Only the RAIL fades at its ends: it is a stack of discrete cards, and a
+    // hard edge through one reads as breakage. The main column is a reading
+    // column, where a fade would dim the text you are actually reading, so it
+    // clips plainly at the viewport edge like any scroll region.
     const railStyle: CSSProperties = {
-      maxHeight: `calc(100svh - ${2 * bleed}px)`,
       maskImage: railMask(RAIL_FADE_PX),
       WebkitMaskImage: railMask(RAIL_FADE_PX),
     }
@@ -258,6 +261,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         style={
           {
             "--home-aside-w": `${railWidth}px`,
+            height: `calc(100svh - ${2 * bleed}px)`,
           } as CSSProperties
         }
       >
@@ -288,9 +292,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             onClick={toggleEditing}
           />
         </div>
-        {/* Main column: no scroll container of its own, so it is never clipped —
-            it grows and the PAGE scrolls it, top to bottom. */}
-        <div className="relative">
+        {/* Main column: its own scroll region, no mask — a reading column should
+            not have the text you are reading dimmed at the edges. */}
+        <div className="relative min-h-0 overflow-y-auto">
           <WidgetContainer
             side="main"
             className="relative mx-auto w-full"
@@ -321,7 +325,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
             <aside
-              className="sticky top-0 flex flex-col gap-2 overflow-y-auto"
+              className="flex min-h-0 flex-col gap-2 overflow-y-auto"
               style={railStyle}
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
@@ -363,7 +367,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </aside>
           ) : (
-            <aside className="sticky top-0 overflow-y-auto" style={railStyle}>
+            <aside className="min-h-0 overflow-y-auto" style={railStyle}>
               <WidgetContainer
                 side="right"
                 widgets={rightWidgets}
