@@ -164,7 +164,11 @@ export const Card: Story = {
   ],
 }
 
-/** Single consolidated visual-regression story: both orientations side by side. */
+/**
+ * Single consolidated visual-regression story: every orientation in one
+ * snapshot (Chromatic bills per snapshot). Content is intentionally neutral —
+ * the illustrative copy lives in the individual stories.
+ */
 export const Snapshot: Story = {
   args: Default.args,
   parameters: withSnapshot({ layout: "padded" }),
@@ -181,16 +185,16 @@ export const Snapshot: Story = {
       <div className="w-[308px]">
         <BaseBanner
           variant="card"
-          title="Submit expenses in seconds"
-          subtitle="Upload receipts. One organizes everything for you. Just review and send."
+          title="Boost your productivity"
+          subtitle="Discover new features that will help you work more efficiently"
           mediaUrl={Default.args.mediaUrl}
           primaryAction={{
-            label: "Try it out",
+            label: "Get Started",
             onClick: () => {},
             variant: "outline",
           }}
           secondaryAction={{
-            label: "Not now",
+            label: "Learn More",
             onClick: () => {},
             variant: "ghost",
           }}
