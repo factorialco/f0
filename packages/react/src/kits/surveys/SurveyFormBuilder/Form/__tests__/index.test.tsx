@@ -363,6 +363,46 @@ describe("SurveyFormBuilder — custom placeholders", () => {
   })
 })
 
+describe("SurveyFormBuilder — custom action labels", () => {
+  it("overrides the add-question button label", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Q1")]}
+        onChange={vi.fn()}
+        labels={{ addQuestion: "New field" }}
+      />
+    )
+
+    expect(screen.getAllByLabelText("New field").length).toBeGreaterThan(0)
+    expect(screen.queryByLabelText("Add question")).not.toBeInTheDocument()
+  })
+})
+
+describe("SurveyFormBuilder — hideAnswerPreview", () => {
+  it("shows the answer preview by default", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Q1")]}
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByLabelText("Answer")).toBeInTheDocument()
+  })
+
+  it("hides the answer preview when hideAnswerPreview is set", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Q1")]}
+        onChange={vi.fn()}
+        hideAnswerPreview
+      />
+    )
+
+    expect(screen.queryByLabelText("Answer")).not.toBeInTheDocument()
+  })
+})
+
 // --- Dataset question tests ---
 
 const mockDataSource = {

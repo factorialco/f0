@@ -23,6 +23,7 @@ import {
   SectionElement,
   SurveyDatasets,
   SurveyFormBuilderPlaceholders,
+  SurveyFormBuilderLabels,
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
@@ -42,6 +43,8 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
   placeholders?: SurveyFormBuilderPlaceholders
+  labels?: SurveyFormBuilderLabels
+  hideAnswerPreview?: boolean
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -61,7 +64,9 @@ type SurveyFormBuilderProviderProps = {
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
   placeholders?: SurveyFormBuilderPlaceholders
+  labels?: SurveyFormBuilderLabels
   skipDefaultSection?: boolean
+  hideAnswerPreview?: boolean
 }
 
 export function SurveyFormBuilderProvider({
@@ -77,7 +82,9 @@ export function SurveyFormBuilderProvider({
   useUpload,
   datasets,
   placeholders,
+  labels,
   skipDefaultSection,
+  hideAnswerPreview,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -449,6 +456,8 @@ export function SurveyFormBuilderProvider({
       useUpload,
       datasets,
       placeholders,
+      labels,
+      hideAnswerPreview,
     }),
     [
       handleQuestionChange,
@@ -469,6 +478,8 @@ export function SurveyFormBuilderProvider({
       useUpload,
       datasets,
       placeholders,
+      labels,
+      hideAnswerPreview,
     ]
   )
 

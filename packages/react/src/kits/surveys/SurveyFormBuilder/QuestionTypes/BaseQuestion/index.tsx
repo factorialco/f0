@@ -53,6 +53,8 @@ export const BaseQuestion = ({
     getSectionContainingQuestion,
     isQuestionTypeAllowed,
     placeholders,
+    labels,
+    hideAnswerPreview,
   } = useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(id)
@@ -73,6 +75,9 @@ export const BaseQuestion = ({
   const titlePlaceholder =
     placeholders?.questionTitle ??
     t("surveyFormBuilder.labels.titlePlaceholder")
+
+  const addQuestionLabel =
+    labels?.addQuestion ?? t("surveyFormBuilder.actions.addQuestion")
 
   const handleChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onQuestionChange?.({
@@ -293,7 +298,7 @@ export const BaseQuestion = ({
           />
         ) : null}
       </div>
-      {children}
+      {(answering || !hideAnswerPreview) && children}
       {answering && (
         <FormMessage
           className="-mt-2"
@@ -318,7 +323,7 @@ export const BaseQuestion = ({
             <DropdownMenuTrigger asChild>
               <F0Button
                 icon={Add}
-                label={t("surveyFormBuilder.actions.addQuestion")}
+                label={addQuestionLabel}
                 size="sm"
                 variant="outline"
                 hideLabel

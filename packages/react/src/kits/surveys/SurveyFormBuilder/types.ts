@@ -226,6 +226,11 @@ export type SurveyFormBuilderPlaceholders = {
   sectionTitle?: string
 }
 
+export type SurveyFormBuilderLabels = {
+  /** Overrides the label/tooltip of the "add" buttons (default: "Add question"). */
+  addQuestion?: string
+}
+
 export type SurveyFormBuilderProps = {
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
@@ -237,10 +242,18 @@ export type SurveyFormBuilderProps = {
   datasets?: SurveyDatasets
   /** Per-instance overrides for the builder's title placeholders. Falls back to i18n defaults. */
   placeholders?: SurveyFormBuilderPlaceholders
+  /** Per-instance overrides for the builder's action labels. Falls back to i18n defaults. */
+  labels?: SurveyFormBuilderLabels
   /**
    * When true, an empty builder does NOT auto-insert a default section on mount,
    * letting the consumer start from a blank form. Defaults to the legacy behaviour
    * (a section is created).
    */
   skipDefaultSection?: boolean
+  /**
+   * When true, the read-only answer-widget preview rendered under each question in
+   * edit mode is hidden. Useful when the builder defines fields rather than a form
+   * to be answered. Does not affect answering mode. Defaults to showing the preview.
+   */
+  hideAnswerPreview?: boolean
 }

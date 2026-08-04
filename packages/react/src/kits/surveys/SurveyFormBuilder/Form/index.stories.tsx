@@ -494,15 +494,20 @@ export const WithLockedQuestions: Story = {
 
 /**
  * Consumers that model something other than a "survey" can relabel the empty-state
- * placeholders per instance (falling back to the i18n defaults when omitted) and
- * opt out of the auto-inserted default section to start from a blank form.
+ * placeholders and action labels per instance (falling back to the i18n defaults
+ * when omitted), opt out of the auto-inserted default section to start from a blank
+ * form, and hide the read-only answer preview when the builder defines fields.
  */
 export const BlankStartWithCustomPlaceholders: Story = {
   args: {
     skipDefaultSection: true,
+    hideAnswerPreview: true,
     placeholders: {
       questionTitle: "Field name",
       sectionTitle: "Group name",
+    },
+    labels: {
+      addQuestion: "New field",
     },
     elements: [
       {
