@@ -128,7 +128,26 @@ export function WidgetContainer({
     const from = ids.indexOf(String(active.id))
     const to = ids.indexOf(String(over.id))
     if (from < 0 || to < 0) return
-    onReorder?.(arrayMove(ids, from, to))
+    // A locked widget is PINNED to its index. `disabled` stops it being picked
+    // up, but a plain arrayMove would still slide it along when another widget
+    // crosses it — so the moved order is replayed into the free slots only, and
+    // every pinned widget is put back exactly where it was.
+    const pinned = new Map(
+      widgets.flatMap((widget, index) =>
+        widget.locked ? [[index, widget.id]] : []
+      )
+    )
+    if (pinned.size === 0) {
+      onReorder?.(arrayMove(ids, from, to))
+      return
+    }
+    // Dropping onto a pinned widget has no meaning: it can't give up its place.
+    if ([...pinned.values()].includes(String(over.id))) return
+    const moved = arrayMove(ids, from, to).filter(
+      (id) => !pinned.has(ids.indexOf(id))
+    )
+    const next = ids.map((_, index) => pinned.get(index) ?? moved.shift()!)
+    onReorder?.(next)
   }
 
   const render = (
