@@ -255,7 +255,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         <div className="col-span-full flex justify-end">
           <F0Button
             variant="outline"
-            size="sm"
+            size="md"
             hideLabel
             icon={Pencil}
             label={isEditing ? "Done editing" : "Edit Home"}
@@ -357,7 +357,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         {openWidget ? (
           <div className="pointer-events-none absolute inset-0">
             <div
-              className="pointer-events-auto absolute rounded-xl bg-f1-background shadow-md"
+              className="pointer-events-auto absolute rounded-xl bg-f1-background"
               style={{
                 top: panelTop,
                 right: COLLAPSED_RAIL_WIDTH + 8,

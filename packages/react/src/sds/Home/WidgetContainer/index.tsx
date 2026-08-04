@@ -91,10 +91,10 @@ export function WidgetContainer({
         ctx={ctx}
       />
     )
-    // A locked widget is inert in edit mode: no remove control, no wiggle.
+    // A locked widget is inert in edit mode: no remove control.
     if (!canEdit || widget.locked) return node
     return (
-      <div className="relative animate-widget-wiggle motion-reduce:animate-none">
+      <div className="relative">
         {node}
         <button
           type="button"
@@ -111,7 +111,7 @@ export function WidgetContainer({
   return (
     <div
       className={cn(
-        "flex flex-col",
+        "flex flex-col [&>*]:shadow-none",
         // The main column's freeform content wants more air than the rail's
         // stack of cards.
         side === "main" ? "gap-6" : "gap-4",
