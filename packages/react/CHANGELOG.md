@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.77.0](https://github.com/factorialco/f0/compare/f0-react-v4.76.0...f0-react-v4.77.0) (2026-08-04)
+
+
+### Features
+
+* **Cocreation:** add Training Surveys guided-type flow ([#4667](https://github.com/factorialco/f0/issues/4667)) ([aa0e3d0](https://github.com/factorialco/f0/commit/aa0e3d00efce39fe00cf0c99346224f5827cf4f3))
+
 ## [4.76.0](https://github.com/factorialco/f0/compare/f0-react-v4.75.1...f0-react-v4.76.0) (2026-08-04)
 
 
