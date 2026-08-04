@@ -1,5 +1,4 @@
 import { renderHook } from "@testing-library/react"
-import { createElement } from "react"
 import { describe, expect, it } from "vitest"
 
 import { L10nProvider } from "./l10n-provider"
@@ -7,8 +6,9 @@ import { useDateFnsLocale } from "./use-date-fns-locale"
 
 const localeCodeFor = (locale: string) =>
   renderHook(() => useDateFnsLocale(), {
-    wrapper: ({ children }) =>
-      createElement(L10nProvider, { l10n: { locale } }, children),
+    wrapper: ({ children }) => (
+      <L10nProvider l10n={{ locale }}>{children}</L10nProvider>
+    ),
   }).result.current.code
 
 describe("useDateFnsLocale", () => {
