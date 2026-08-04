@@ -196,4 +196,34 @@ describe("isDataChartEmpty", () => {
       ).toBe(false)
     })
   })
+
+  describe("categoryBar", () => {
+    it("empty data array is empty", () => {
+      expect(isDataChartEmpty({ type: "categoryBar", data: [] })).toBe(true)
+    })
+
+    it("all-zero segments ARE empty (zero-width segments render nothing)", () => {
+      expect(
+        isDataChartEmpty({
+          type: "categoryBar",
+          data: [
+            { name: "a", value: 0 },
+            { name: "b", value: 0 },
+          ],
+        })
+      ).toBe(true)
+    })
+
+    it("one non-zero segment is not empty", () => {
+      expect(
+        isDataChartEmpty({
+          type: "categoryBar",
+          data: [
+            { name: "a", value: 0 },
+            { name: "b", value: 5 },
+          ],
+        })
+      ).toBe(false)
+    })
+  })
 })
