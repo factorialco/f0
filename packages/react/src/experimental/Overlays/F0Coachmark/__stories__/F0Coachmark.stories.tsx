@@ -32,10 +32,16 @@ const meta = {
     onDismiss: fn(),
   },
   decorators: [
-    // The panel is portalled out of this box, so the decorator has to be tall
-    // enough to contain it visually or it spills onto the next docs block.
+    // The panel is portalled, so it never stretches this box. Anchoring at the
+    // TOP of a box tall enough to hold the panel keeps it inside the example
+    // instead of spilling onto whatever follows in the docs.
+    //
+    // min-h-72 (288px) is sized off the tallest panel in the docs column:
+    // 8px top padding + 32px anchor + 8px sideOffset + 198px panel = 246px,
+    // leaving ~42px of slack for copy wrapping differently at narrow widths.
+    // `min-h` rather than `h` so the Snapshot story's grid can still grow.
     (Story) => (
-      <div className="flex min-h-80 items-center justify-center p-6">
+      <div className="flex min-h-72 items-start justify-center px-6 pb-6 pt-2">
         {Story()}
       </div>
     ),
@@ -120,7 +126,9 @@ export const CollisionAware: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="flex h-64 items-start justify-start p-2">{Story()}</div>
+      <div className="flex h-72 w-full items-end justify-center pb-2">
+        {Story()}
+      </div>
     ),
   ],
 }
@@ -193,7 +201,8 @@ export const KeyboardAndDismissal: Story = {
 
 // F0Coachmark calls useI18n, so it cannot be rendered as inline JSX in MDX.
 // These render inside the full decorator chain and are embedded in the docs
-// through <Canvas> as DoDonts children.
+// through <Canvas> as DoDonts children. The meta decorator's top anchoring is
+// what keeps each panel off the caption underneath its card.
 
 export const DoDontsGoodCopy: Story = {
   tags: ["no-sidebar"],

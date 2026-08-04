@@ -337,7 +337,7 @@ The consumer owns `open` and decides when the coachmark appears. Dismissal is on
 
 **Near a viewport edge**
 
-`side="top"` on an anchor at the top of the viewport: the panel flips below rather than being clipped.
+The anchor sits at the bottom of the space with `side="top"`, so the panel opens above it and stays fully visible. Near a bottom edge this is the side to ask for; if you ask for one there is no room for, the panel flips to the opposite side on its own.
 
 <Canvas of={Stories.CollisionAware} />
 
