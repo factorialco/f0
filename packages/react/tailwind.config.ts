@@ -26,6 +26,12 @@ export default {
           from: { "--gradient-angle": "0deg" },
           to: { "--gradient-angle": "360deg" },
         },
+        // Home edit mode: a subtle wiggle marking the widgets a user may move or
+        // remove. Deliberately tiny — it says "this is loose", not "this is broken".
+        "widget-wiggle": {
+          "0%, 100%": { transform: "rotate(-0.4deg)" },
+          "50%": { transform: "rotate(0.4deg)" },
+        },
         // Green "flash on add" highlight for newly-inserted data collection rows.
         "row-flash": {
           from: { backgroundColor: "hsl(var(--positive-50) / 0.2)" },
@@ -44,6 +50,7 @@ export default {
         "rotate-gradient": "rotate-gradient 2s linear infinite",
         "row-flash": "row-flash 1.5s ease-out",
         "typing-dot": "typing-dot 1.3s ease-in-out infinite",
+        "widget-wiggle": "widget-wiggle 0.45s ease-in-out infinite",
       },
     },
   },

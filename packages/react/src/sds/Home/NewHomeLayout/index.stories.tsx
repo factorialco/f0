@@ -311,6 +311,8 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   {
     id: "clock-in",
     icon: Clock,
+    // Pinned: you always want the clock, so edit mode leaves it alone.
+    locked: true,
     header: {
       title: "Clock in",
       link: { title: "Time tracking", onClick: () => {} },

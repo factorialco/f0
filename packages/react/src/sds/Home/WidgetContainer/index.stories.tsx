@@ -60,9 +60,16 @@ type Story = StoryObj<typeof meta>
 /** View mode: just the widgets — no remove controls, no add placeholder. */
 export const Default: Story = {}
 
-/** Edit mode: every widget gains a remove control, and the column ends in the add placeholder. */
+/**
+ * Edit mode: the movable widgets wiggle and gain a remove control, and the
+ * column ends in the add placeholder. A `locked` widget (the first here) stays
+ * inert — no wiggle, no remove.
+ */
 export const Editing: Story = {
-  args: { editing: true },
+  args: {
+    editing: true,
+    widgets: [{ ...WIDGETS[0], locked: true }, WIDGETS[1]],
+  },
 }
 
 /**

@@ -91,9 +91,10 @@ export function WidgetContainer({
         ctx={ctx}
       />
     )
-    if (!canEdit) return node
+    // A locked widget is inert in edit mode: no remove control, no wiggle.
+    if (!canEdit || widget.locked) return node
     return (
-      <div className="relative">
+      <div className="relative animate-widget-wiggle motion-reduce:animate-none">
         {node}
         <button
           type="button"

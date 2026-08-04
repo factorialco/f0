@@ -85,6 +85,12 @@ export interface HomeWidgetItem {
    * "Add widget" picker, so the strip can never drift from the catalog.
    */
   icon?: IconType
+  /**
+   * PINNED: the widget stays put. In edit mode it shows no remove control and
+   * does not wiggle (nor drag, once dragging lands) — for widgets a user must
+   * always have, like Clock in.
+   */
+  locked?: boolean
   slots: HomeWidgetSlot[]
 }
 
