@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.78.0](https://github.com/factorialco/f0/compare/f0-react-v4.77.0...f0-react-v4.78.0) (2026-08-04)
+
+
+### Features
+
+* **RichText:** support heading levels 4 to 6 and source indentation ([#4920](https://github.com/factorialco/f0/issues/4920)) ([d0342bc](https://github.com/factorialco/f0/commit/d0342bc3c14ee79ef1d374cea5f82a66f061742d))
+
 ## [4.77.0](https://github.com/factorialco/f0/compare/f0-react-v4.76.0...f0-react-v4.77.0) (2026-08-04)
 
 
