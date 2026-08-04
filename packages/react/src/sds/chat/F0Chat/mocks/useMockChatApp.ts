@@ -10,6 +10,8 @@ import {
   useState,
 } from "react"
 
+import { VolumeMuted } from "@/icons/app"
+
 import {
   isUserMessage,
   type F0ChatEditInput,
@@ -85,10 +87,15 @@ export const useMockChatStore = (): MockChatAppValue => {
   const togglePin = useCallback((convId: string) => {
     setPinned((prev) => ({ ...prev, [convId]: !prev[convId] }))
   }, [])
-  // Live muted state (seeded from the seeds' static flag) so the header's
-  // Mute/Unmute action updates the sidebar icon too.
+  // Live transport state seeded from the channel's generic statuses. The
+  // public F0 shapes keep using statuses; this boolean only drives the mock's
+  // interactive Mute/Unmute toggle.
   const [muted, setMuted] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(SEEDS.filter((s) => s.muted).map((s) => [s.id, true]))
+    Object.fromEntries(
+      SEEDS.filter((seed) =>
+        seed.statuses?.some((status) => status.icon === VolumeMuted)
+      ).map((seed) => [seed.id, true])
+    )
   )
   const toggleMute = useCallback((convId: string) => {
     setMuted((prev) => ({ ...prev, [convId]: !prev[convId] }))

@@ -1,13 +1,16 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
+import { VolumeMuted } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
   isUserMessage,
   type F0ChatAttachment,
+  type F0ChatChannelStatus,
   type F0ChatItem,
   type F0ChatLinkPreview,
   type F0ChatMention,
   type F0ChatReaction,
+  type F0ChatSenderColor,
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
@@ -18,12 +21,23 @@ import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./constants"
 // ---------------------------------------------------------------------------
 
 /** A mock participant. `online` gates replies (offline people never respond);
- * `vacation` shows the "on vacation" affordance and implies offline. */
+ * `vacation` shows the "on vacation" affordance independently of presence. */
 export type MockPerson = F0ChatUser & {
   avatar: AvatarVariant
   online: boolean
   vacation?: boolean
 }
+
+const PHOTO_AVATAR_COLORS = [
+  "viridian",
+  "orange",
+  "malibu",
+  "barbie",
+  "purple",
+  "army",
+  "flubber",
+  "camel",
+] as const satisfies readonly F0ChatSenderColor[]
 
 const person = (
   id: string,
@@ -32,7 +46,12 @@ const person = (
   subtitle: string,
   // `image` (index into the mock photo set) gives a photo avatar; omit it to use
   // the initials + colour avatar — the mock mixes both on purpose.
-  opts: { online?: boolean; vacation?: boolean; image?: number } = {}
+  opts: {
+    online?: boolean
+    vacation?: boolean
+    image?: number
+    avatarColor?: F0ChatSenderColor
+  } = {}
 ): MockPerson =>
   ({
     id,
@@ -46,6 +65,14 @@ const person = (
         ? { src: mockImage("person", opts.image) }
         : {}),
     },
+    ...(opts.avatarColor
+      ? { avatarColor: opts.avatarColor }
+      : opts.image !== undefined
+        ? {
+            avatarColor:
+              PHOTO_AVATAR_COLORS[opts.image % PHOTO_AVATAR_COLORS.length],
+          }
+        : {}),
     profileHref: `/people/${id}`,
     online: opts.online ?? false,
     vacation: opts.vacation,
@@ -71,6 +98,7 @@ const MARCUS = person("u_marcus", "Marcus", "Bennett", "Engineering Manager", {
 })
 const PRIYA = person("u_priya", "Priya", "Raman", "Account Executive", {
   online: true,
+  vacation: true,
   image: 2,
 })
 // No photo — initials + colour avatar.
@@ -156,7 +184,8 @@ export type Seed = {
   title: string
   avatar: AvatarVariant
   presence?: "online" | "offline"
-  muted?: boolean
+  /** Channel statuses shown consistently in the header and sidebar. */
+  statuses?: F0ChatChannelStatus[]
   /** Demo: starts in the "Pinned" sidebar group (favourited). */
   pinned?: boolean
   participants: MockPerson[]
@@ -354,14 +383,14 @@ export const SEEDS: Seed[] = [
       },
     ],
   },
-  // DM — muted (online): the conversation is silenced (mute icon in the sidebar).
+  // DM — vacation + muted + online + unread: showcases all states together.
   {
     id: "dm-priya",
     type: "dm",
     title: PRIYA.name,
     avatar: PRIYA.avatar,
     presence: "online",
-    muted: true,
+    statuses: [{ icon: VolumeMuted, label: "Muted" }],
     participants: [PRIYA],
     unread: 4,
     lines: [

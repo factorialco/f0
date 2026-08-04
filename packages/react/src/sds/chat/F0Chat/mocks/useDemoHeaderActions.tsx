@@ -3,11 +3,11 @@ import { useState, type ReactNode } from "react"
 import { F0TextInput } from "@/components/F0TextInput"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import {
-  Microphone,
-  MicrophoneNegative,
   Pencil,
   PushPin,
   PushPinSolid,
+  VolumeHigh,
+  VolumeMuted,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -56,10 +56,13 @@ export function useDemoHeaderActions(
       })
     }
     if (toggleMute) {
+      const muted = channel.statuses?.some(
+        (status) => status.icon === VolumeMuted
+      )
       headerActions.push({
         id: "mute",
-        label: channel.muted ? i18n.chat.unmute : i18n.chat.mute,
-        icon: channel.muted ? Microphone : MicrophoneNegative,
+        label: muted ? i18n.chat.unmute : i18n.chat.mute,
+        icon: muted ? VolumeHigh : VolumeMuted,
         onClick: () => void toggleMute(),
       })
     }

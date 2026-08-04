@@ -1,7 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import { MicrophoneNegative, PalmTree } from "@/icons/app"
+import { Clock, PalmTree, VolumeMuted } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { SidebarChatList } from "../SidebarChatList"
@@ -207,7 +207,7 @@ describe("SidebarChatList", () => {
     expect(screen.getByText("All quiet")).toBeInTheDocument()
   })
 
-  it("shows a status icon for people but not for groups", () => {
+  it("shows multiple consumer-provided status icons on the same chat", () => {
     const { container } = render(
       <SidebarChatProvider
         initialGroups={[
@@ -219,7 +219,13 @@ describe("SidebarChatList", () => {
                 id: "p",
                 label: "Person",
                 avatar: { type: "person", firstName: "P", lastName: "X" },
-                status: { icon: PalmTree, label: "On holidays" },
+                presence: "online",
+                unreadCount: 4,
+                status: { icon: Clock, label: "Ignored fallback" },
+                statuses: [
+                  { icon: PalmTree, label: "On holidays" },
+                  { icon: VolumeMuted, label: "Muted" },
+                ],
               },
             ],
           },
@@ -231,7 +237,7 @@ describe("SidebarChatList", () => {
                 id: "c",
                 label: "Company",
                 avatar: { type: "company", name: "Co" },
-                status: { icon: MicrophoneNegative, label: "Muted" },
+                status: { icon: Clock, label: "Away" },
               },
             ],
           },
@@ -243,8 +249,15 @@ describe("SidebarChatList", () => {
     expect(
       container.querySelector('[aria-label="On holidays"]')
     ).toBeInTheDocument()
-    // Groups never show the status, even if one is set.
-    expect(container.querySelector('[aria-label="Muted"]')).toBeNull()
+    expect(container.querySelector('[aria-label="Muted"]')).toBeInTheDocument()
+    expect(container.querySelector('[aria-label="Online"]')).toBeInTheDocument()
+    expect(
+      container.querySelector('[aria-label="4 unread"]')
+    ).toBeInTheDocument()
+    expect(container.querySelector('[aria-label="Away"]')).toBeInTheDocument()
+    expect(
+      container.querySelector('[aria-label="Ignored fallback"]')
+    ).not.toBeInTheDocument()
   })
 
   it("renders top actions as ghost buttons and fires their onClick", async () => {

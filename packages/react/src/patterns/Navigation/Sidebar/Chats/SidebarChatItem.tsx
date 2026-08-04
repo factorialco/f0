@@ -30,13 +30,19 @@ const Dots = () => (
 const PresenceDot = ({
   presence,
   isActive,
+  label,
 }: {
   presence: SidebarChatPresence
   isActive: boolean
+  label: string
 }) => {
   if (presence === "offline") return null
   return (
-    <div className="absolute -bottom-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
+    <div
+      role="img"
+      aria-label={label}
+      className="absolute -bottom-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background"
+    >
       <span
         aria-hidden="true"
         className={cn(
@@ -78,8 +84,8 @@ export const SidebarChatItem = ({
   const presence =
     chat.presence ?? (chat.avatar?.type === "person" ? "offline" : undefined)
 
-  // Status — people only; the consumer provides the emoji/icon + label.
-  const status = chat.avatar?.type === "person" ? chat.status : undefined
+  // The consumer owns the status icons and labels for every conversation type.
+  const statuses = chat.statuses ?? (chat.status ? [chat.status] : [])
   const showGroupFallback =
     (chat.avatar?.type === "team" || chat.avatar?.type === "company") &&
     !chat.avatar.src
@@ -113,7 +119,7 @@ export const SidebarChatItem = ({
               // shrunk inside the bordered avatar box.
               <span
                 aria-hidden={showGroupFallback || undefined}
-                className="flex size-5 text-lg font-medium items-center justify-center text-f1-foreground-secondary"
+                className="flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary"
                 data-testid={
                   showGroupFallback
                     ? "sidebar-group-avatar-fallback"
@@ -126,7 +132,11 @@ export const SidebarChatItem = ({
               <F0Avatar size="xs" avatar={chat.avatar} />
             )}
             {presence && (
-              <PresenceDot presence={presence} isActive={isActive} />
+              <PresenceDot
+                presence={presence}
+                isActive={isActive}
+                label={i18n.chat.online}
+              />
             )}
           </div>
         ) : null}
@@ -147,7 +157,7 @@ export const SidebarChatItem = ({
         >
           {chat.label}
         </OneEllipsis>
-        {(status || chat.unreadCount) && (
+        {(statuses.length > 0 || chat.unreadCount) && (
           <div
             className={cn(
               "gap-1 flex items-center justify-center transition-opacity",
@@ -157,8 +167,11 @@ export const SidebarChatItem = ({
               chat.pinPending && "opacity-0"
             )}
           >
-            {status && (
-              <div className="flex h-5 w-5 items-center justify-center">
+            {statuses.map((status, index) => (
+              <div
+                key={`${status.label}-${index}`}
+                className="flex h-5 w-5 items-center justify-center"
+              >
                 <F0Icon
                   icon={status.icon}
                   size="sm"
@@ -166,7 +179,7 @@ export const SidebarChatItem = ({
                   color="default"
                 />
               </div>
-            )}
+            ))}
             {/* A mention in the unread run just prefixes the count with `@`. */}
             {chat.unreadCount ? (
               <UnreadBadge

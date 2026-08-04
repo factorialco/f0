@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { VolumeMuted } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import {
@@ -518,11 +520,16 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     []
   )
 
+  const i18n = useI18n()
+
   // Pinned (favourite) / muted state — surfaced by the host as header actions
   // (F0ChatHeaderAction) wired to these transport methods.
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
-  const [muted, setMuted] = useState(seed.channel.muted ?? false)
+  const [muted, setMuted] = useState(
+    seed.channel.statuses?.some((status) => status.icon === VolumeMuted) ??
+      false
+  )
   const toggleMute = useCallback(() => setMuted((value) => !value), [])
 
   // Membership events (groups): each appends a centered system row — one item
@@ -586,7 +593,17 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
 
   return {
     currentUserId: seed.me.id,
-    channel: { ...seed.channel, pinned, muted, memberCount },
+    channel: {
+      ...seed.channel,
+      pinned,
+      statuses: [
+        ...(seed.channel.statuses?.filter(
+          (status) => status.icon !== VolumeMuted
+        ) ?? []),
+        ...(muted ? [{ icon: VolumeMuted, label: i18n.chat.muted }] : []),
+      ],
+      memberCount,
+    },
     status: "ready",
     messages,
     typingUsers,

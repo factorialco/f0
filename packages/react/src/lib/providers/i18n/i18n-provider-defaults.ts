@@ -529,6 +529,7 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",

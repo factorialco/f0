@@ -955,6 +955,36 @@ export const CommunicationsGroupAvatarFallback: Story = {
 }
 
 /**
+ * A direct message can surface several independent states at once. Priya is
+ * online and on vacation, while the conversation is muted and has unread
+ * messages.
+ */
+export const CommunicationsCombinedUserStatuses: Story = {
+  name: "Communications — combined user statuses",
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar initialTab="messages" />}
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
  * The standalone AI assistant: no communications sidebar, the chat docked on the
  * right as a resizable side panel, with the full feature set (credits, file
  * attachments, dictation, entity refs, disclaimer + quick actions footer).

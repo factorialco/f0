@@ -14,7 +14,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 <Controls of={Stories.Default} />
 
-### Receipt, reaction, and upload contracts
+### Participant, receipt, reaction, and upload contracts
 
 <Unstyled>
   <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
@@ -28,6 +28,28 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
       </tr>
     </thead>
     <tbody>
+      <tr>
+        <td>
+          <code>user.avatarColor</code>
+        </td>
+        <td>
+          <code>F0ChatSenderColor</code>
+        </td>
+        <td>Name-derived</td>
+        <td>—</td>
+        <td>
+          Stable accent shared by the sender name and incoming bubble. For a
+          photo avatar, choose the palette hue closest to the image&apos;s
+          dominant colour. Generated person avatars can omit it and use their
+          existing name-derived colour. Allowed values are exported as{" "}
+          <code>f0ChatSenderColors</code>: <code>viridian</code>,{" "}
+          <code>malibu</code>, <code>yellow</code>, <code>purple</code>,{" "}
+          <code>lilac</code>, <code>barbie</code>, <code>smoke</code>,{" "}
+          <code>army</code>, <code>flubber</code>, <code>indigo</code>,{" "}
+          <code>camel</code>, <code>radical</code>, <code>orange</code>,{" "}
+          <code>red</code>, and <code>grass</code>.
+        </td>
+      </tr>
       <tr>
         <td>
           <code>channel.memberCount</code>
@@ -178,6 +200,9 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 ### Behavior
 
+- WHEN a user provides <code>avatarColor</code> → THEN incoming bubbles and the
+  sender name share that stable accent; when omitted, generated person avatars
+  use their existing name-derived colour. Own-message bubbles remain neutral.
 - WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
 - WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.

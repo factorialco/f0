@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react"
 import { action } from "storybook/actions"
 
 import { F0Button } from "@/components/F0Button"
-import { Clock, MicrophoneNegative, New, PalmTree, People } from "@/icons/app"
+import { Clock, New, PalmTree, People, VolumeMuted } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { SidebarChatList, type SidebarChatEmptyState } from "./SidebarChatList"
 import {
@@ -55,13 +56,13 @@ export const exampleGroups: SidebarChatGroup[] = [
         label: "Alexander Whitmore-Brown",
         avatar: person("Alexander", "Whitmore-Brown", "/avatars/person02.jpg"),
         presence: "online",
-        status: { icon: MicrophoneNegative, label: "Muted" },
+        statuses: [{ icon: VolumeMuted, label: "Muted" }],
       },
       {
         id: "jean-baptiste",
         label: "Jean-Baptiste Lefèvre",
         avatar: person("Jean-Baptiste", "Lefèvre", "/avatars/person03.jpg"),
-        status: { icon: PalmTree, label: "On holidays" },
+        statuses: [{ icon: PalmTree, label: "On holidays" }],
       },
       {
         id: "priyanka",
@@ -74,7 +75,7 @@ export const exampleGroups: SidebarChatGroup[] = [
         id: "mohammed",
         label: "Mohammed Al-Rashid",
         avatar: person("Mohammed", "Al-Rashid", "/avatars/person05.jpg"),
-        status: { icon: Clock, label: "Away" },
+        statuses: [{ icon: Clock, label: "Away" }],
       },
       {
         id: "anastasia",
@@ -94,7 +95,10 @@ export const exampleGroups: SidebarChatGroup[] = [
         avatar: person("Sofía", "Gutiérrez del Río", "/avatars/person08.jpg"),
         presence: "online",
         unreadCount: 1,
-        status: { icon: MicrophoneNegative, label: "Muted" },
+        statuses: [
+          { icon: PalmTree, label: "On holidays" },
+          { icon: VolumeMuted, label: "Muted" },
+        ],
       },
     ],
   },
@@ -151,7 +155,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   // These are exported data fixtures reused by other stories, not stories
   // themselves — keep Storybook from rendering them as standalone stories
   // (they'd mount without a SidebarChatProvider and throw).
@@ -177,6 +181,7 @@ export const Default: Story = {
 
 /** Blank state shown when the user hasn't started any conversation yet. */
 export const Empty: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <SidebarChatProvider initialGroups={[]}>
       <SidebarChatList
@@ -192,6 +197,7 @@ export const Empty: Story = {
  * state is intentionally NOT shown here (that would read as "no conversations").
  */
 export const Loading: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <SidebarChatProvider initialGroups={[]}>
       <SidebarChatList
@@ -209,6 +215,7 @@ export const Loading: Story = {
  * normally. As each one resolves, flip its `loading` to false.
  */
 export const CascadeLoading: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <SidebarChatProvider
       initialGroups={exampleGroups.map((group, groupIndex) => ({
@@ -266,6 +273,7 @@ const LiveControls = () => {
 }
 
 export const LiveUpdates: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <SidebarChatProvider initialGroups={exampleGroups}>
       <LiveControls />
@@ -349,6 +357,7 @@ const PinController = () => {
  * spinner while the simulated backend confirms.
  */
 export const PinnedReordering: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <SidebarChatProvider initialGroups={[]}>
       <PinController />
@@ -357,5 +366,29 @@ export const PinnedReordering: Story = {
         emptyState={exampleEmptyState}
       />
     </SidebarChatProvider>
+  ),
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex w-fit items-start gap-4">
+      <SidebarChatProvider
+        initialGroups={exampleGroups}
+        initialActiveChatId="priyanka"
+      >
+        <SidebarChatList
+          actions={exampleActions}
+          emptyState={exampleEmptyState}
+        />
+      </SidebarChatProvider>
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList emptyState={exampleEmptyState} />
+      </SidebarChatProvider>
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList emptyState={exampleEmptyState} loading />
+      </SidebarChatProvider>
+    </div>
   ),
 }

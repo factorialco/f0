@@ -2,7 +2,8 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
-import { MicrophoneNegative, PalmTree } from "@/icons/app"
+import { PalmTree, VolumeMuted } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
@@ -66,6 +67,7 @@ export const resolveMockReactionUsers = (
 /** F0ChatRuntime for one conversation, backed by the shared store. */
 export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const app = useMockChatApp()
+  const i18n = useI18n()
   const seed = SEED_BY_ID.get(convId)
   const state = app.states[convId]
 
@@ -201,13 +203,18 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
         lastName: "",
       },
       presence: seed?.presence,
-      muted: app.muted[convId] ?? false,
       pinned: app.pinned[convId] ?? false,
       // Surface the same states the sidebar shows (e.g. on vacation) in the header.
-      statuses:
-        seed?.type === "dm" && seed.participants[0]?.vacation
+      statuses: [
+        ...(seed?.statuses?.filter((status) => status.icon !== VolumeMuted) ??
+          []),
+        ...(app.muted[convId]
+          ? [{ icon: VolumeMuted, label: i18n.chat.muted }]
+          : []),
+        ...(seed?.type === "dm" && seed.participants[0]?.vacation
           ? [{ icon: PalmTree, label: "On vacation" }]
-          : undefined,
+          : []),
+      ],
       memberCount: seed ? seed.participants.length + 1 : undefined,
       // DMs expose the counterpart for the header identity hover card.
       user:
@@ -285,12 +292,12 @@ export const useMockChatGroups = (
         // Live "Writing…" while the other side is typing in this conversation.
         typing: (state?.typingIds.length ?? 0) > 0,
         presence: seed.type === "dm" ? seed.presence : undefined,
-        // On-vacation takes precedence over the mute icon.
-        status: dmPerson?.vacation
-          ? { icon: PalmTree, label: "On vacation" }
-          : muted[seed.id]
-            ? { icon: MicrophoneNegative, label: "Muted" }
-            : undefined,
+        statuses: [
+          ...(dmPerson?.vacation
+            ? [{ icon: PalmTree, label: "On vacation" }]
+            : []),
+          ...(muted[seed.id] ? [{ icon: VolumeMuted, label: "Muted" }] : []),
+        ],
       }
     }
     // Pinned (favourite) chats — both people and groups — surface in their own

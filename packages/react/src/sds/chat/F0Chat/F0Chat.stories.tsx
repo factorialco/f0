@@ -47,7 +47,13 @@ const bruno: F0ChatUser = {
   id: "bruno",
   name: "Bruno Martínez",
   subtitle: "Engineering Manager",
-  avatar: { type: "person", firstName: "Bruno", lastName: "Martínez" },
+  avatar: {
+    type: "person",
+    firstName: "Bruno",
+    lastName: "Martínez",
+    src: "/avatars/person02.jpg",
+  },
+  avatarColor: "orange",
   profileHref: "/people/bruno",
 }
 const carmen: F0ChatUser = {
@@ -69,8 +75,8 @@ const groupChannel = {
 /**
  * Group conversation with `@`-mentions: type `@` to open the popover (with
  * `@here` pinned on top), pick a member or everyone, and send — the sent chip
- * is highlighted. The two seeded incoming messages demo a mention of you and an
- * `@here`, both rendered with the self-mention emphasis.
+ * uses the same accessible neutral styling. The two seeded incoming messages
+ * demo a mention of you and an `@here`.
  */
 const GroupConversation = (): ReactNode => {
   const runtime = useMockChatRuntime({

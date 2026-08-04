@@ -1,6 +1,5 @@
-import { memo, type ReactNode, useMemo, useRef } from "react"
-
 import { motion } from "motion/react"
+import { memo, type ReactNode, useMemo, useRef } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
@@ -8,7 +7,10 @@ import { cn } from "@/lib/utils"
 
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
-import { senderNameColorClass } from "../utils/sender-color"
+import {
+  senderBubbleColorClass,
+  senderNameColorClass,
+} from "../utils/sender-color"
 import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
@@ -122,7 +124,6 @@ const ChatBubbleImpl = ({
           corners,
           "w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
-          "border border-solid border-f1-border-secondary",
           isMine ? "bg-f1-background-tertiary" : "bg-f1-background"
         )}
       >
@@ -141,9 +142,10 @@ const ChatBubbleImpl = ({
           "transition-[border-radius,opacity] duration-150",
           "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
-          "border border-solid border-f1-border-secondary",
-          // Mine: grey. Others: white with a subtle border (matches the design).
-          isMine ? "bg-f1-background-tertiary" : "bg-transparent",
+          // Incoming bubbles share the author's hue at a much quieter tint.
+          isMine
+            ? "bg-f1-background-tertiary"
+            : senderBubbleColorClass(message.author),
           message.status === "failed" && "opacity-60"
         )}
       >
@@ -181,7 +183,7 @@ const ChatBubbleImpl = ({
           {message.editedAt && (
             // WhatsApp-style "edited" marker; sits at the end of the body (the
             // bubble shows no timestamp, so there's no time to pair it with).
-            <span className="ml-1 align-baseline text-sm text-f1-foreground-tertiary">
+            <span className="ml-1 align-baseline text-sm text-f1-foreground-secondary">
               {i18n.chat.edited}
             </span>
           )}
