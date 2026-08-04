@@ -2382,6 +2382,17 @@ export declare type CoachmarkAction = {
     onClick: () => void;
 };
 
+/**
+ * Position of this coachmark within a sequence, rendered as `current/total`
+ * beside the action. Presentational only: the component does not sequence
+ * anything itself, so the consumer stays in control of what each step shows and
+ * when it advances.
+ */
+export declare type CoachmarkStep = {
+    current: number;
+    total: number;
+};
+
 declare type ColId = string;
 
 declare interface CollectionComputation {
@@ -5795,7 +5806,7 @@ export declare type F0ChatVoiceAttachment = {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0Coachmark: WithDataTestIdReturnType_3<    {
-({ open, onDismiss, title, description, action, arrow, side, align, sideOffset, children, }: F0CoachmarkProps_2): JSX_2.Element;
+({ open, onDismiss, title, description, action, step, arrow, side, align, sideOffset, children, }: F0CoachmarkProps_2): JSX_2.Element;
 displayName: string;
 }>;
 
@@ -5816,8 +5827,13 @@ export declare interface F0CoachmarkProps {
     title: string;
     /** Supporting copy shown under the title. */
     description?: string;
-    /** The single call to action rendered at the bottom. */
+    /** The single call to action rendered at the bottom, right aligned. */
     action: CoachmarkAction;
+    /**
+     * Optional position within a sequence, shown as `1/3` to the left of the
+     * action. Use it when the coachmark is one step of a guided walkthrough.
+     */
+    step?: CoachmarkStep;
     /** Renders a triangle pointing at the anchored element. Defaults to `true`. */
     arrow?: boolean;
     /**

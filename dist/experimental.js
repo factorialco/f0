@@ -7175,42 +7175,43 @@ const Xn = 12, Jn = 6, Qs = ({
   title: r,
   description: o,
   action: i,
-  arrow: a = !0,
-  side: s = "bottom",
-  align: l = "center",
-  sideOffset: c = a ? Jn + 2 : 4,
-  children: d
+  step: a,
+  arrow: s = !0,
+  side: l = "bottom",
+  align: c = "center",
+  sideOffset: d = s ? Jn + 2 : 4,
+  children: u
 }) => {
-  const u = se(), f = D(null), m = D(null), p = xn(), g = `${p}-title`, x = `${p}-description`;
+  const f = se(), m = D(null), p = D(null), g = xn(), x = `${g}-title`, b = `${g}-description`;
   return /* @__PURE__ */ h(
     kr,
     {
       open: e,
-      onOpenChange: (b) => {
-        b || t();
+      onOpenChange: (y) => {
+        y || t();
       },
       children: [
-        /* @__PURE__ */ n(Ad, { asChild: !0, children: d }),
+        /* @__PURE__ */ n(Ad, { asChild: !0, children: u }),
         /* @__PURE__ */ h(
           Sr,
           {
-            ref: f,
-            side: s,
-            align: l,
-            sideOffset: c,
+            ref: m,
+            side: l,
+            align: c,
+            sideOffset: d,
             collisionPadding: 8,
             tabIndex: -1,
-            "aria-labelledby": g,
-            "aria-describedby": o ? x : void 0,
-            onOpenAutoFocus: (b) => {
-              b.preventDefault(), m.current = document.activeElement, f.current?.focus();
+            "aria-labelledby": x,
+            "aria-describedby": o ? b : void 0,
+            onOpenAutoFocus: (y) => {
+              y.preventDefault(), p.current = document.activeElement, m.current?.focus();
             },
-            onCloseAutoFocus: (b) => {
-              b.preventDefault();
-              const y = m.current;
-              m.current = null, y && y !== document.body && document.contains(y) && y.focus();
+            onCloseAutoFocus: (y) => {
+              y.preventDefault();
+              const v = p.current;
+              p.current = null, v && v !== document.body && document.contains(v) && v.focus();
             },
-            onInteractOutside: (b) => b.preventDefault(),
+            onInteractOutside: (y) => y.preventDefault(),
             className: k(
               "w-72 overflow-visible rounded-lg border-none p-4",
               "shadow-lg backdrop-blur-sm",
@@ -7220,32 +7221,48 @@ const Xn = 12, Jn = 6, Qs = ({
             children: [
               /* @__PURE__ */ h("div", { className: "dark flex flex-col gap-3", children: [
                 /* @__PURE__ */ h("div", { className: "flex flex-row items-start justify-between gap-2", children: [
-                  /* @__PURE__ */ n("p", { id: g, className: "font-semibold", children: r }),
+                  /* @__PURE__ */ n("p", { id: x, className: "font-semibold", children: r }),
                   /* @__PURE__ */ n(
                     we,
                     {
-                      variant: "outline",
+                      variant: "ghost",
                       icon: gt,
                       size: "sm",
                       hideLabel: !0,
                       onClick: t,
-                      label: u.actions.close,
+                      label: f.actions.close,
                       className: "flex-shrink-0"
                     }
                   )
                 ] }),
-                o && /* @__PURE__ */ n("p", { id: x, className: "font-normal", children: o }),
+                o && // One level down from the title, which keeps the panel's own
+                // colour. Same pairing F0Toast uses for title vs description.
                 /* @__PURE__ */ n(
-                  we,
+                  "p",
                   {
-                    variant: "outline",
-                    label: i.label,
-                    onClick: i.onClick,
-                    block: !0
+                    id: b,
+                    className: "font-normal text-f1-foreground-inverse-secondary",
+                    children: o
                   }
-                )
+                ),
+                /* @__PURE__ */ h("div", { className: "flex flex-row items-center gap-3", children: [
+                  a && /* @__PURE__ */ h("p", { className: "text-f1-foreground-inverse-secondary", children: [
+                    a.current,
+                    "/",
+                    a.total
+                  ] }),
+                  /* @__PURE__ */ n(
+                    we,
+                    {
+                      variant: "outline",
+                      label: i.label,
+                      onClick: i.onClick,
+                      className: "ml-auto"
+                    }
+                  )
+                ] })
               ] }),
-              a && /* @__PURE__ */ n(Fd, { asChild: !0, width: Xn, height: Jn, children: /* @__PURE__ */ n("svg", { viewBox: `0 0 ${Xn} ${Jn}`, children: /* @__PURE__ */ n(
+              s && /* @__PURE__ */ n(Fd, { asChild: !0, width: Xn, height: Jn, children: /* @__PURE__ */ n("svg", { viewBox: `0 0 ${Xn} ${Jn}`, children: /* @__PURE__ */ n(
                 "path",
                 {
                   d: `M0 0L${Xn / 2} ${Jn}L${Xn} 0Z`,
