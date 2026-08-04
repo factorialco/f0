@@ -537,7 +537,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
         )
       ) : !isLoading ? (
         <div className="h-full w-full px-4 py-3">
-          <DataChartEmptyStateView chartType={item.chart.type} />
+          <DataChartEmptyStateView />
         </div>
       ) : null}
     </DashboardItem>

@@ -37,7 +37,7 @@ All variants share an optional `emptyState` prop — see [Empty states](#empty-s
 
 ## Empty states
 
-When data is empty (empty `series`, empty `data`, all-zero values, or a missing gauge `value`), `F0DataChart` auto-renders a faded chart skeleton with a centered message so you never see a bare axis. No prop is required — it is the default behavior.
+When data is empty (empty `series`, empty `data`, or a missing gauge `value`), `F0DataChart` auto-renders a centered message so you never see a bare axis. No prop is required — it is the default behavior. All-zero datasets are **not** empty — `[0, 0, 0]` is a legitimate zero-valued chart and renders as usual.
 
 Default copy is **"No data available"** / **"Try a different date or fewer filters"**.
 
