@@ -4,7 +4,6 @@ import {
   DEFAULT_NODE_WINDOW_PADDING,
   NODE_WINDOW_QUANTIZE_STEP,
 } from "../constants"
-import { bump, bumpIfChanged, traceCameraFrame } from "../perfTrace"
 import type { ViewportRect } from "../utils"
 
 interface UseViewportGeometryOptions {
@@ -45,10 +44,6 @@ export function useViewportGeometry({
       if (!enabled) return null
       const [tx, ty, zoom] = s.transform
       const { width, height } = s
-      // DIAGNOSTIC: the selector runs on every store update, so this observes
-      // every camera frame and classifies the gesture WITHOUT adding a
-      // subscription (which would re-create the very re-render we measure).
-      traceCameraFrame(tx, ty, zoom)
       if (width <= 0 || height <= 0 || zoom <= 0) return null
 
       // Flow-space rect of what the camera currently shows, grown by `padding`.
@@ -70,12 +65,6 @@ export function useViewportGeometry({
         a.maxX === b.maxX &&
         a.maxY === b.maxY)
   )
-
-  bump("useViewportGeometry.render")
-  // The load-bearing check: does the quantized rect hold its identity while the
-  // camera moves? Compare this against `camera.storeUpdate` — if they track each
-  // other, the quantization is not throttling anything.
-  bumpIfChanged("viewportRect.identity", rect)
 
   return rect
 }
