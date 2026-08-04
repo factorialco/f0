@@ -14,8 +14,10 @@ import {
   WidgetAvatarsListItem,
   WidgetAvatarsListItemProps,
 } from "@/experimental/Widgets/Content/ListItems/WidgetAvatarsListItem"
-import { type CalendarEventProps } from "@/experimental/Widgets/Content/CalendarEvent"
-import { CalendarEventList } from "@/experimental/Widgets/Content/CalendarEventList"
+import {
+  CalendarEvent,
+  type CalendarEventProps,
+} from "@/experimental/Widgets/Content/CalendarEvent"
 import { WidgetInboxListItemProps } from "@/experimental/Widgets/Content/ListItems/WidgetInboxListItem"
 import { WidgetSimpleListItemProps } from "@/experimental/Widgets/Content/ListItems/WidgetSimpleListItem"
 import { WidgetInboxList } from "@/experimental/Widgets/Content/Lists/WidgetInboxList"
@@ -142,11 +144,17 @@ export const defaultSlotRenderers: SlotRenderers = {
       </div>
     )
   },
+  // The events are rendered here rather than through `CalendarEventList` for one
+  // reason: that component's `showAllItems` container has no gap, and its `gap`
+  // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
+  // DIRECT parent of the event items, which is this container.
   "event-list": (params) => {
-    const { events, showAllItems } = params as EventListParams
+    const { events } = params as EventListParams
     return (
       <div className={cn(SLOT_ROW_BLEED, "flex flex-col", EVENT_LIST_GAP)}>
-        <CalendarEventList events={events} showAllItems={showAllItems} />
+        {events.map((event) => (
+          <CalendarEvent key={event.title} {...event} />
+        ))}
       </div>
     )
   },
