@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://github.com/factorialco/f0/compare/f0-react-v6.0.0...f0-react-v6.1.0) (2026-08-04)
+
+
+### Features
+
+* **F0DataChart:** render text-only empty state ([#4946](https://github.com/factorialco/f0/issues/4946)) ([f722d8c](https://github.com/factorialco/f0/commit/f722d8c80b917d1f891ca90c2b9fe3a1fe5e92a8))
+
 ## [6.0.0](https://github.com/factorialco/f0/compare/f0-react-v5.0.1...f0-react-v6.0.0) (2026-08-04)
 
 
