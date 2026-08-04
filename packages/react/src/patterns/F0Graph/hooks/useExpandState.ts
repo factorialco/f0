@@ -84,6 +84,18 @@ export function useExpandState<T>({
     expandedNodesRef.current = expandedNodes
   }, [expandedNodes])
 
+  // Both get a fresh identity on every hydration batch, so the expand callbacks
+  // read them through refs to stay referentially stable (see `toggleExpand`).
+  const nodeMapRef = useRef(nodeMap)
+  useEffect(() => {
+    nodeMapRef.current = nodeMap
+  }, [nodeMap])
+
+  const lazyTreeRef = useRef(lazyTree)
+  useEffect(() => {
+    lazyTreeRef.current = lazyTree
+  }, [lazyTree])
+
   const toggleExpand = useCallback(
     (nodeId: string) => {
       const current = expandedNodesRef.current
@@ -114,25 +126,22 @@ export function useExpandState<T>({
         setInternalExpanded(next)
       }
 
-      // Lazy mode: trigger fetch when expanding
+      // Lazy mode: trigger fetch when expanding. Read through refs: `nodeMap`
+      // and `lazyTree` both get a fresh identity whenever nodes hydrate, and
+      // depending on them here made this callback — and with it the actions
+      // context every node wrapper consumes — churn during pan/zoom, forcing a
+      // re-render of every on-screen node per hydration batch.
       if (isLazyMode && !wasExpanded) {
-        const treeNode = nodeMap.get(nodeId)
+        const treeNode = nodeMapRef.current.get(nodeId)
         if (treeNode && !treeNode.childrenLoaded) {
-          lazyTree.expandNode(nodeId)
+          lazyTreeRef.current.expandNode(nodeId)
         }
       }
 
       onExpandToggle?.(nodeId, !wasExpanded)
       onExpandedNodesChange?.(next)
     },
-    [
-      controlledExpanded,
-      onExpandToggle,
-      onExpandedNodesChange,
-      isLazyMode,
-      nodeMap,
-      lazyTree,
-    ]
+    [controlledExpanded, onExpandToggle, onExpandedNodesChange, isLazyMode]
   )
 
   // ── Bulk expand / collapse (refs so async closures see latest data) ──
@@ -191,7 +200,7 @@ export function useExpandState<T>({
       // cascade.
       const results = await Promise.all(
         frontier.map((id) =>
-          lazyTree
+          lazyTreeRef.current
             .expandNode(id)
             .then((children) => ({ id, children }))
             .catch(() => ({ id, children: [] as typeof lazyTree.nodes }))
@@ -216,7 +225,9 @@ export function useExpandState<T>({
       setInternalExpanded(accumulated)
     }
     onExpandedNodesChange?.(accumulated)
-  }, [isLazyMode, controlledExpanded, onExpandedNodesChange, lazyTree])
+    // `lazyTree` is read through `lazyTreeRef` so a hydration batch does not
+    // recreate this callback and invalidate the actions context.
+  }, [isLazyMode, controlledExpanded, onExpandedNodesChange])
 
   const collapseAll = useCallback((): void => {
     const empty = new Set<string>()
