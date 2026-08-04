@@ -442,6 +442,11 @@ export function useGraphRenderModel<T>({
     nodeMap,
   ])
 
+  // Identity-stable projections of tree nodes into the shape node wrappers
+  // receive, keyed by node id. One entry per node ever materialized — the same
+  // order of magnitude the tree itself already holds.
+  const graphNodeCacheRef = useRef(new Map<string, GraphNode<T>>())
+
   // ── React Flow nodes ── Only the windowed nodes are materialized (all of them
   // when windowing is off). Building here — rather than building everything and
   // filtering — is what makes the work O(on-screen) instead of O(visible tree).
@@ -481,13 +486,33 @@ export function useGraphRenderModel<T>({
     for (const treeNode of visibleTreeNodes) {
       if (!inWindow(treeNode.id)) continue
       const pos = positionMap.get(treeNode.id)
-      const graphNode: GraphNode<T> = {
-        id: treeNode.id,
-        parentId: treeNode.parentId,
-        data: treeNode.data,
-        childrenCount: treeNode.childrenCount,
-        childrenLoaded: treeNode.childrenLoaded,
-        dataLoaded: treeNode.dataLoaded,
+
+      // The node wrapper's `memo` compares `data.graphNode` by identity, so
+      // building a fresh projection on every rebuild made that check fail
+      // unconditionally — every windowing recompute re-rendered every on-screen
+      // node, even when nothing about the node had changed. Reuse the previous
+      // object whenever all projected fields are equal.
+      const cached = graphNodeCacheRef.current.get(treeNode.id)
+      let graphNode: GraphNode<T>
+      if (
+        cached !== undefined &&
+        cached.parentId === treeNode.parentId &&
+        cached.data === treeNode.data &&
+        cached.childrenCount === treeNode.childrenCount &&
+        cached.childrenLoaded === treeNode.childrenLoaded &&
+        cached.dataLoaded === treeNode.dataLoaded
+      ) {
+        graphNode = cached
+      } else {
+        graphNode = {
+          id: treeNode.id,
+          parentId: treeNode.parentId,
+          data: treeNode.data,
+          childrenCount: treeNode.childrenCount,
+          childrenLoaded: treeNode.childrenLoaded,
+          dataLoaded: treeNode.dataLoaded,
+        }
+        graphNodeCacheRef.current.set(treeNode.id, graphNode)
       }
       const aria = ariaTreeInfo.get(treeNode.id)
 
