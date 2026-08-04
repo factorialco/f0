@@ -16,17 +16,6 @@ const EMOJI_BUTTON_RADIUS = "10px"
 const EMOJI_SIZE = 24
 const MAX_FREQUENT_ROWS = 2
 
-const EMOJI_PICKER_STYLE = {
-  "--background-rgb": "255, 255, 255",
-  "--border-radius": "12px",
-  "--category-icon-size": "20px",
-  "--font-size": "14px",
-  "--rgb-accent": "1, 22, 55",
-  "--rgb-background": "255, 255, 255",
-  "--rgb-color": "1, 22, 55",
-  "--rgb-input": "255, 255, 255",
-} as CSSProperties
-
 const LIGHT_SURFACE_STYLE = {
   "--neutral-0": "0 0% 100%",
   "--neutral-5": "220 88% 17% / 0.04",
@@ -35,6 +24,18 @@ const LIGHT_SURFACE_STYLE = {
   "--neutral-30": "213 87% 15% / 0.2",
   "--neutral-40": "219 97% 15% / 0.45",
   "--neutral-100": "218 48% 10%",
+} as CSSProperties
+
+const EMOJI_PICKER_STYLE = {
+  ...LIGHT_SURFACE_STYLE,
+  "--background-rgb": "255, 255, 255",
+  "--border-radius": "12px",
+  "--category-icon-size": "20px",
+  "--font-size": "14px",
+  "--rgb-accent": "1, 22, 55",
+  "--rgb-background": "255, 255, 255",
+  "--rgb-color": "1, 22, 55",
+  "--rgb-input": "255, 255, 255",
 } as CSSProperties
 
 export const F0EmojiPicker = ({
@@ -96,11 +97,11 @@ export const F0EmojiPicker = ({
         collisionPadding={16}
         aria-label={label}
         style={EMOJI_PICKER_STYLE}
-        className="flex h-[min(500px,var(--radix-popover-content-available-height))] w-fit flex-col !overflow-y-auto rounded-xl border-none bg-transparent p-0 shadow-none [&>div:first-child]:min-h-0 [&>div:first-child]:flex-1 [&>div:first-child]:overflow-hidden [&_em-emoji-picker]:!h-full [&_em-emoji-picker]:!min-h-0 [&_em-emoji-picker]:!max-h-[min(451px,calc(100vh-81px))] [&_em-emoji-picker]:!w-[372px] [&_em-emoji-picker]:!max-w-[calc(100vw-32px)] [@media(max-height:320px)]:[&>div:first-child]:!min-h-[230px] [@media(max-height:320px)]:[&_em-emoji-picker]:!min-h-[230px]"
+        className="flex w-fit flex-col !overflow-y-auto rounded-md border-none p-0 shadow-none [&>div:first-child]:min-h-0 [&>div:first-child]:overflow-hidden [&_em-emoji-picker]:!h-full [&_em-emoji-picker]:!min-h-0 [&_em-emoji-picker]:!max-h-[min(451px,calc(100vh-81px))] [&_em-emoji-picker]:!w-[372px] [&_em-emoji-picker]:!max-w-[calc(100vw-32px)] [@media(max-height:320px)]:[&>div:first-child]:!min-h-[230px] [@media(max-height:320px)]:[&_em-emoji-picker]:!min-h-[230px]"
       >
         <EmojiPicker
           className={cn(
-            "box-border border border-solid border-[rgba(1,22,55,0.2)] shadow-none [--color-border-over:rgba(1,22,55,0.2)] [--color-border:rgba(1,22,55,0.08)] [--shadow:none]",
+            "box-border border border-solid border-f1-border-secondary shadow-none [--color-border-over:rgba(1,22,55,0.2)] [--color-border:rgba(1,22,55,0.08)] [--shadow:none]",
             hasClearAction && "rounded-b-none border-b-0"
           )}
           data={data}
@@ -121,7 +122,7 @@ export const F0EmojiPicker = ({
         />
         {hasClearAction ? (
           <div
-            className="flex items-center justify-end rounded-b-md border border-solid border-[rgba(1,22,55,0.2)] border-t-[rgba(1,22,55,0.1)] bg-[rgb(255,255,255)] p-2 [@media(max-height:320px)]:px-1 [@media(max-height:320px)]:py-0"
+            className="flex items-center justify-end rounded-b-md border border-solid border-f1-border-secondary border-t-f1-border-secondary p-2 [@media(max-height:320px)]:px-1 [@media(max-height:320px)]:py-0"
             style={LIGHT_SURFACE_STYLE}
           >
             <F0Button

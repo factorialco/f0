@@ -209,7 +209,8 @@ describe("F0EmojiPicker", () => {
     ).not.toBeInTheDocument()
     expect(screen.getByTestId("emoji-picker")).toHaveClass(
       "border",
-      "border-solid"
+      "border-solid",
+      "border-f1-border-secondary"
     )
     expect(screen.getByTestId("emoji-picker")).not.toHaveClass(
       "rounded-b-none",
@@ -264,9 +265,12 @@ describe("F0EmojiPicker", () => {
       "data-search-position",
       "top"
     )
-    expect(
-      screen.getByRole("button", { name: "Clear" }).parentElement
-    ).toHaveClass(
+    const clearFooter = screen
+      .getByRole("button", { name: "Clear" })
+      .closest("div.rounded-b-md")
+
+    expect(clearFooter).toHaveClass(
+      "border-f1-border-secondary",
       "[@media(max-height:320px)]:px-1",
       "[@media(max-height:320px)]:py-0"
     )
