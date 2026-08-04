@@ -1,5 +1,7 @@
-import { render, waitFor } from "@testing-library/react"
+import { waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render } from "@/testing/test-utils"
 
 import { EmojiPicker } from "./EmojiPicker"
 
@@ -37,6 +39,31 @@ describe("EmojiPicker", () => {
 
     expect(createElementSpy).toHaveBeenCalledWith("em-emoji-picker")
     expect(container.contains(stub)).toBe(true)
+  })
+
+  it("applies className directly to the emoji picker element", () => {
+    const stub = stubPickerElement()
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) =>
+      tag === "em-emoji-picker" ? stub : realCreateElement(tag)
+    )
+
+    const { rerender } = render(
+      <EmojiPicker data={{}} className="border border-f1-border-hover" />
+    )
+
+    expect(stub).toHaveClass("border", "border-f1-border-hover")
+    expect(stub.props).not.toHaveProperty("className")
+
+    rerender(<EmojiPicker data={{}} className="border-2" />)
+
+    expect(stub).toHaveClass("border-2")
+    expect(stub).not.toHaveClass("border", "border-f1-border-hover")
+    expect(stub.update).toHaveBeenLastCalledWith({ data: {} })
+
+    rerender(<EmojiPicker data={{}} />)
+
+    expect(stub.className).toBe("")
+    expect(stub.update).toHaveBeenLastCalledWith({ data: {} })
   })
 
   it("seeds props onto the element before appending so callbacks are wired", () => {
