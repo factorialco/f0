@@ -7224,13 +7224,13 @@ const Xn = 12, Jn = 6, Qs = ({
                   /* @__PURE__ */ n(
                     we,
                     {
-                      variant: "ghost",
+                      variant: "outline",
                       icon: gt,
                       size: "sm",
                       hideLabel: !0,
                       onClick: t,
                       label: u.actions.close,
-                      className: "-mr-2 -mt-1 flex-shrink-0"
+                      className: "flex-shrink-0"
                     }
                   )
                 ] }),
