@@ -155,7 +155,7 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   /**
    * Per-side clearance in pixels the widest value must have before
    * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
-   * Overrides the default, which is placement-based: **12** for stacked (inside)
+   * Overrides the default, which is placement-based: **6** for stacked (inside)
    * labels, **0** for labels outside the bar.
    */
   labelFitPadding?: number
@@ -178,6 +178,17 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    * which lay categories out along the width. @default false
    */
   showAllCategories?: boolean
+  /**
+   * Reports how many categories the row window is hiding — `0` when every
+   * category is on screen. Fires whenever the count changes, which includes
+   * container resizes and {@link F0DataChartBarProps.showAllCategories} being
+   * switched on.
+   *
+   * The chart states the fact rather than rendering an affordance for it: only
+   * the surrounding UI knows where a "see everything" control belongs. The
+   * dashboard puts it in the widget's description, next to the count.
+   */
+  onHiddenCategoriesChange?: (hiddenCategoryCount: number) => void
   /**
    * Suggested number of segments on the value axis — lower values draw fewer
    * grid lines. Applies to whichever axis is the value axis (Y for vertical

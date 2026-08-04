@@ -65,6 +65,41 @@ const MIN_LABEL_WIDTH = 60
 const MIN_TRUNCATED_LABEL_WIDTH = 24
 
 /**
+ * The most a chart may spend on axis labels: a share of the container, itself
+ * capped, so a wide chart can afford longer names without a huge one handing
+ * most of itself over to text.
+ *
+ * This is a ceiling, not an allowance. A horizontal bar chart measures its own
+ * category names and asks for exactly what they need (see
+ * `measuredCategoryLabelWidth` in `useBarChartOptions`), so labels short enough
+ * to fit leave the rest of the width to the bars, and only a name that would
+ * cross this line gets truncated.
+ */
+const CATEGORY_LABEL_MAX_WIDTH = 400
+const CATEGORY_LABEL_WIDTH_SHARE = 0.3
+
+/**
+ * Ceiling on the width labels may take at this container size.
+ *
+ * Exported for charts that measure their own labels and need to clamp the
+ * result — the fallback below applies to callers that don't.
+ */
+export function labelWidthCap(containerWidth: number | undefined): number {
+  return Math.min(
+    CATEGORY_LABEL_MAX_WIDTH,
+    (containerWidth ?? 600) * CATEGORY_LABEL_WIDTH_SHARE
+  )
+}
+
+/**
+ * Gap between a category label and the axis line it names, up from ECharts' own
+ * default of 8. On a horizontal chart this is the channel between the names and
+ * the bars, and at 8 the two read as one block. `containLabel` accounts for it,
+ * so the plot gives up the width rather than the label being clipped.
+ */
+const CATEGORY_LABEL_MARGIN = 12
+
+/**
  * Breathing room reserved between adjacent labels. Zero: the label box is the
  * whole slot, so a label is only skipped when it genuinely has no room. ECharts
  * still drops labels that would actually collide, via `axisLabel.hideOverlap`.
@@ -200,6 +235,7 @@ export function buildCategoryAxis({
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
       hideOverlap: true,
+      margin: CATEGORY_LABEL_MARGIN,
       // Edge-aligned charts must always render the first and last labels —
       // skipping either of them would expose an unlabelled chart edge.
       ...(edgeAligned ? { showMinLabel: true, showMaxLabel: true } : {}),
@@ -241,6 +277,8 @@ interface ValueAxisOptions {
   show?: boolean
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   splitNumber?: number
+  /** Pins the axis maximum, replacing ECharts' rounded-up nice value. */
+  max?: number
   /**
    * Which edge the axis labels sit on. Horizontal charts pass `"top"`: their
    * value axis is the X axis, and a tall category list pushes a bottom axis
@@ -257,11 +295,13 @@ export function buildValueAxis({
   maxLabelWidth,
   show = true,
   splitNumber,
+  max,
   position,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
     ...(splitNumber !== undefined ? { splitNumber } : {}),
+    ...(max !== undefined ? { max } : {}),
     ...(position !== undefined ? { position } : {}),
     axisLine: {
       show: false,
@@ -684,6 +724,7 @@ export function buildAxes({
   categoryMaxLabelWidth,
   categoryVisibleCount,
   valueAxisSplitNumber,
+  valueAxisMax,
 }: {
   isVertical: boolean
   categories: string[]
@@ -711,8 +752,14 @@ export function buildAxes({
   categoryVisibleCount?: number
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   valueAxisSplitNumber?: number
+  /**
+   * Pins the value axis maximum instead of letting ECharts round up to a nice
+   * number. Set by a chart whose value-axis labels are hidden, where that
+   * rounding buys no readable ticks and only costs plot space.
+   */
+  valueAxisMax?: number
 }) {
-  const yAxisMaxLabelWidth = Math.min(120, (containerWidth ?? 600) * 0.2)
+  const yAxisMaxLabelWidth = labelWidthCap(containerWidth)
 
   // Estimate the horizontal space taken by the value (Y) axis labels + grid
   // padding so the smart layout knows how wide the plot area really is.
@@ -758,6 +805,7 @@ export function buildAxes({
     formatter: valueFormatter,
     show: showValueAxis,
     splitNumber: valueAxisSplitNumber,
+    ...(valueAxisMax !== undefined ? { max: valueAxisMax } : {}),
     // Vertical charts keep the value axis on the left. Horizontal charts move
     // it to the top: rows are read top-down from the first category, so the
     // scale belongs where the reading starts — and it stays in view when a
@@ -831,6 +879,11 @@ interface BaseChartOptionsParams {
   categoryVisibleCount?: number
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   valueAxisSplitNumber?: number
+  /**
+   * Pins the value axis maximum instead of letting ECharts round up to a nice
+   * number. Set by a chart whose value-axis labels are hidden.
+   */
+  valueAxisMax?: number
 }
 
 /**
@@ -862,6 +915,7 @@ export function buildBaseChartOptions({
   categoryMaxLabelWidth,
   categoryVisibleCount,
   valueAxisSplitNumber,
+  valueAxisMax,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -878,6 +932,7 @@ export function buildBaseChartOptions({
     categoryMaxLabelWidth,
     categoryVisibleCount,
     valueAxisSplitNumber,
+    valueAxisMax,
   })
 
   const baseOptions: echarts.EChartsOption = {

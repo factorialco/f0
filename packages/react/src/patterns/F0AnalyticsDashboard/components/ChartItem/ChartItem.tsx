@@ -558,10 +558,60 @@ export function ChartItem<Filters extends FiltersDefinition>({
 
   const fitContent = !!isFullscreen && chartItemFitsContent(item)
 
+  // Reported by the chart itself: only it knows how many rows its window fits
+  // at the current size. Surfaced on the expand button rather than inside the
+  // chart, so the affordance sits with the action that reveals them.
+  const [hiddenCategories, setHiddenCategories] = useState(0)
+  const canRevealCategories = !!onFullscreenChange && chartItemFitsContent(item)
+  const isWindowed =
+    canRevealCategories && !isFullscreen && hiddenCategories > 0
+
+  // Expanded, the same slot offers the way back. Derived from props rather than
+  // remembered from the collapsed state: expanding swaps the grid to a different
+  // tree (see `DashboardGrid`'s fullscreen branch), so this component unmounts
+  // and any latched "it was windowed" flag would be gone by the time the
+  // expanded view rendered.
+  //
+  // The cost of deriving it is that a chart short enough to have fitted whole
+  // also gets the link — harmless, since collapsing is exactly what it does, and
+  // it duplicates the header's collapse button rather than inventing anything.
+  const canCollapseCategories = canRevealCategories && !!isFullscreen
+
+  // While rows are windowed, the item's own description is replaced by what the
+  // reader is actually looking at: a subset. Both counts come from the data and
+  // the chart's reported hidden count, so they track resizes without a second
+  // source of truth. "Top" is accurate because the window takes the first rows in
+  // data order and dashboard series arrive sorted by amount — a chart fed in some
+  // other order would make that wording wrong.
+  const totalCategories = data?.categories?.length ?? 0
+  const windowedDescription = isWindowed
+    ? translations.dataChart.windowedCategories
+        .replace(
+          "{{count}}",
+          String(Math.max(0, totalCategories - hiddenCategories))
+        )
+        .replace("{{total}}", String(totalCategories))
+    : undefined
+
+  // The same slot carries both directions of the toggle, so the control the
+  // reader used to get here is the one that takes them back.
+  const descriptionAction = isWindowed
+    ? {
+        label: translations.dataChart.showAllCategories,
+        onClick: () => onFullscreenChange?.(true),
+      }
+    : canCollapseCategories
+      ? {
+          label: translations.actions.showLess,
+          onClick: () => onFullscreenChange?.(false),
+        }
+      : undefined
+
   return (
     <DashboardItem
       title={item.title}
-      description={item.description}
+      description={windowedDescription ?? item.description}
+      {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
       isLoading={isLoading}
       error={error}
@@ -587,6 +637,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
               // horizontal bar chart drops its scrollable row window and draws
               // every category at a fixed row height, growing the widget.
               {...(fitContent ? { showAllCategories: true } : {})}
+              // Hidden-row count drives the expand button's label. Only
+              // subscribed when expanding is actually available, so a static
+              // chart never holds a count nothing can act on.
+              {...(canRevealCategories
+                ? { onHiddenCategoriesChange: setHiddenCategories }
+                : {})}
             />
           </div>
         )

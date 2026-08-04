@@ -672,6 +672,8 @@ export const defaultTranslations = {
       title: "No data available",
       description: "Try a different date or fewer filters",
     },
+    showAllCategories: "Show all",
+    windowedCategories: "Top {{count}} of {{total}} categories",
     tooltip: {
       ofTotal: "of total",
       total: "total",

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
@@ -111,5 +111,60 @@ describe("DashboardItem", () => {
 
     expect(screen.queryByLabelText("Expand")).not.toBeInTheDocument()
     expect(screen.queryByLabelText("Collapse")).not.toBeInTheDocument()
+  })
+})
+
+describe("DashboardItem — description action", () => {
+  it("renders the action as a button beside the description and calls it", async () => {
+    const onClick = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <DashboardItem
+        title="Salary by workplace"
+        description="Top 6 of 29 categories"
+        descriptionAction={{ label: "Show all", onClick }}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(screen.getByText("Top 6 of 29 categories")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Show all" }))
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("hides the separator from the accessibility tree", () => {
+    render(
+      <DashboardItem
+        title="Salary by workplace"
+        description="Top 6 of 29 categories"
+        descriptionAction={{ label: "Show all", onClick: vi.fn() }}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    // The dot joins two independent things; it must not read as part of either.
+    const separator = screen.getByText("·")
+    expect(separator).toHaveAttribute("aria-hidden", "true")
+  })
+
+  it("renders the action alone when there is no description", () => {
+    render(
+      <DashboardItem
+        title="Salary by workplace"
+        descriptionAction={{ label: "Show less", onClick: vi.fn() }}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Show less" })
+    ).toBeInTheDocument()
+    expect(screen.queryByText("·")).not.toBeInTheDocument()
   })
 })

@@ -545,7 +545,7 @@ const ResizableSalaryDynamicsReport = () => {
     // on it: the dashboard root switches to `h-full` and can only fill a parent
     // whose height is known, so an auto-height wrapper collapses the expanded
     // item to its header.
-    <div className="flex h-screen flex-col gap-4 py-1">
+    <div className="flex h-screen flex-col gap-4 px-4 py-1">
       <header>
         <h2 className="m-0 text-2xl font-semibold text-f1-foreground">
           {salaryDynamicsTitle}
@@ -606,6 +606,11 @@ const ResizableSalaryDynamicsReport = () => {
 export const OneSalaryDynamicsReport: Story = {
   tags: ["no-sidebar"],
   parameters: {
+    // The wrapper below is `h-screen`, which only lines up with the preview if
+    // the preview has no padding of its own — otherwise the story hangs 1rem
+    // past the window and an expanded widget's bottom edge can never be
+    // scrolled into view.
+    layout: "fullscreen",
     docs: {
       description: {
         story:
