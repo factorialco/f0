@@ -1,4 +1,5 @@
 import { getAbbreviateMonth, getDayOfMonth } from "@/lib/date"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 
@@ -11,8 +12,9 @@ export const F0AvatarDate = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
 }: F0AvatarDateProps) => {
+  const locale = useDateFnsLocale()
   const dateDay = getDayOfMonth(date)
-  const month = getAbbreviateMonth(date)
+  const month = getAbbreviateMonth(date, locale)
 
   return (
     <div
