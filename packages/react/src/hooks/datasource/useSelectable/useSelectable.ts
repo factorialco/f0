@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { trace } from "./selectionTrace"
+
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import type { SortingsDefinition } from "../types/sortings.typings"
@@ -61,16 +63,37 @@ export function useSelectable<
 
   // State & Refs
 
-  const [localSelectedState, setLocalSelectedState] = useState<
+  const [localSelectedState, _setLocalSelectedState] = useState<
     SelectedItemsState<R>
   >(parseSelectedState(selectedState))
 
-  const [groupsState, setGroupsState] = useState<
+  const [groupsState, _setGroupsState] = useState<
     Map<string, { group: GroupRecord<R>; checked: boolean }>
   >(new Map())
 
-  const [allSelectedCheck, setAllSelectedCheck] = useState(false)
-  const [selectAllTotal, setSelectAllTotal] = useState<number | null>(null)
+  const [allSelectedCheck, _setAllSelectedCheck] = useState(false)
+  const [selectAllTotal, _setSelectAllTotal] = useState<number | null>(null)
+
+  // DIAGNOSTIC: wrapping the setters traces every write regardless of call site,
+  // so an effect that writes state shows up without instrumenting each call.
+  const setLocalSelectedState: typeof _setLocalSelectedState = (v) => {
+    trace("set:localSelectedState")
+    _setLocalSelectedState(v)
+  }
+  const setGroupsState: typeof _setGroupsState = (v) => {
+    trace("set:groupsState")
+    _setGroupsState(v)
+  }
+  const setAllSelectedCheck: typeof _setAllSelectedCheck = (v) => {
+    trace("set:allSelectedCheck")
+    _setAllSelectedCheck(v)
+  }
+  const setSelectAllTotal: typeof _setSelectAllTotal = (v) => {
+    trace("set:selectAllTotal")
+    _setSelectAllTotal(v)
+  }
+
+  trace("render")
 
   // Refs for tracking state changes and avoiding unnecessary re-renders
   const wasExplicitSelectAll = useRef(false)
@@ -776,6 +799,7 @@ export function useSelectable<
 
   // Sync allSelected state back to localSelectedState
   useEffect(() => {
+    trace("fx:syncAllSelectedToLocal")
     setLocalSelectedState((current) => ({
       ...current,
       allSelected: allSelectedState,
@@ -784,6 +808,7 @@ export function useSelectable<
 
   // Sync external selectedState with local state
   useEffect(() => {
+    trace("fx:syncExternalSelectedState")
     const currentKey = getSelectedStateKey(selectedState)
 
     if (!hasInitialized.current) {
@@ -803,6 +828,7 @@ export function useSelectable<
   // the page-change effect skips cursor advances so this effect is the only
   // mechanism that clears on a true dataset reset caused by sortings/search.
   useEffect(() => {
+    trace("fx:datasetIdentityReset")
     if (isInitialMount.current) {
       isInitialMount.current = false
       previousFilters.current = source.currentFilters
@@ -860,6 +886,7 @@ export function useSelectable<
   // user has not navigated away. We never clear for infinite-scroll; the
   // dataset-identity effect above handles the case where the dataset truly resets.
   useEffect(() => {
+    trace("fx:pageChangeReset")
     if (!resetOnPageChange) return
 
     // Infinite-scroll loadMore is not a page navigation — skip.
@@ -892,11 +919,13 @@ export function useSelectable<
 
   // Store isAllSelected in ref to avoid circular dependencies
   useEffect(() => {
+    trace("fx:mirrorIsAllSelectedRef")
     isAllSelectedRef.current = isAllSelected
   }, [isAllSelected])
 
   // Sync selection state when data changes
   useEffect(() => {
+    trace("fx:syncOnDataChange")
     const allRecords = getAllRecords()
     if (allRecords.length === 0) return
 
@@ -986,6 +1015,7 @@ export function useSelectable<
 
   // Reset "all selected" state when empty
   useEffect(() => {
+    trace("fx:resetAllSelectedWhenEmpty")
     if (checkedCount === 0) {
       setAllSelectedCheck(false)
       wasExplicitSelectAll.current = false
@@ -994,6 +1024,7 @@ export function useSelectable<
 
   // Notify parent component when selection changes
   useEffect(() => {
+    trace("fx:notifyParent")
     const stateKey = JSON.stringify({
       allSelectedCheck,
       allSelectedState,
