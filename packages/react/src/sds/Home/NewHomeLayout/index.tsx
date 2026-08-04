@@ -293,8 +293,22 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           />
         </div>
         {/* Main column: its own scroll region, no mask — a reading column should
-            not have the text you are reading dimmed at the edges. */}
-        <div className="relative min-h-0 overflow-y-auto">
+            not have the text you are reading dimmed at the edges.
+
+            It BLEEDS through the page gutter: a negative vertical margin grows
+            its box by the gutter at each end while an equal padding puts the
+            content back on the line it was on. So the column's clip edge is the
+            window's edge rather than the padding line — content scrolls off the
+            screen instead of being cut short inside the page. */}
+        <div
+          className="relative min-h-0 overflow-y-auto"
+          style={{
+            marginTop: -bleed,
+            marginBottom: -bleed,
+            paddingTop: bleed,
+            paddingBottom: bleed,
+          }}
+        >
           <WidgetContainer
             side="main"
             className="relative mx-auto w-full"
