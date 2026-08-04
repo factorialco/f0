@@ -174,6 +174,45 @@ describe("F0Coachmark", () => {
     expect(dialog.className).not.toContain("f1-background-inverse")
   })
 
+  // Both controls carry a documented workaround (THEME_FLIP_CTA /
+  // THEME_FLIP_DISMISS in F0Coachmark.tsx): Action variants resolve colour
+  // against the page theme, so on this polarity-flipping panel they land the
+  // wrong way round. This pins it so the workaround cannot be half-removed
+  // without a failing test pointing at the reason.
+  it("colours both controls from the panel's own background/foreground pair", () => {
+    renderCoachmark()
+    const dialog = screen.getByRole("dialog")
+    const [dismiss, cta] = [
+      screen.getByRole("button", { name: "Close" }),
+      screen.getByRole("button", { name: "Learn more" }),
+    ]
+
+    expect(dialog).toHaveClass("bg-f1-foreground", "text-f1-background")
+    // Label and glyph must both track the surface, not the page theme.
+    expect(cta).toHaveClass("text-f1-background")
+    // The `!` is load-bearing: Action's own glyph rule has identical
+    // specificity, so without it the winner depends on CSS emission order.
+    expect(dismiss).toHaveClass(
+      "text-f1-background",
+      "[&_svg:not([data-has-color])]:!text-f1-background"
+    )
+    // `bg-transparent` is what neutralises the outline variant's 60% white fill.
+    expect(cta).toHaveClass("bg-transparent")
+
+    // The workaround itself must add no mode-specific classes. The variant does
+    // leak one (`dark:bg-f1-background-tertiary`) that twMerge cannot strip,
+    // since it cannot dedupe across variant prefixes — harmless, because a 5%
+    // white wash is invisible on the white dark-mode panel. Assert only that
+    // the classes this component contributes are mode-agnostic.
+    const ourClasses = [cta, dismiss].flatMap((el) =>
+      el.className
+        .split(/\s+/)
+        .filter((c) => c.includes("f1-background/") || c === "bg-transparent")
+    )
+    expect(ourClasses.length).toBeGreaterThan(0)
+    expect(ourClasses.filter((c) => c.includes("dark:"))).toEqual([])
+  })
+
   it("renders the arrow by default and hides it when arrow is false", () => {
     const { unmount } = renderCoachmark()
     expect(

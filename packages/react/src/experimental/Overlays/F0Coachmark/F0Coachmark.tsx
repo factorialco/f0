@@ -16,6 +16,54 @@ import type { F0CoachmarkProps } from "./types"
 const ARROW_WIDTH = 12
 const ARROW_HEIGHT = 6
 
+/**
+ * TODO: delete both of these once button variants derive their colour from the
+ * surface they sit on (currentColor) instead of from the active theme. Tracked
+ * as its own initiative; nothing else in this file needs to change.
+ *
+ * Action variants resolve colour against the PAGE theme. This panel flips
+ * polarity against the page (dark on a light page, light on a dark one), so
+ * those variants land the wrong way round on it:
+ *   - `outline` paints a 60% white fill (its base is
+ *     `bg-f1-background-inverse-secondary`) with dark label text on the dark
+ *     panel — measured rgba(255,255,255,0.6) on rgb(13,22,38).
+ *   - icon-only buttons pin the glyph to `f1-icon-bold` (--neutral-100), which
+ *     is the exact value this panel uses as its background, so the icon is
+ *     invisible in both themes.
+ *
+ * Each string below restates the control using the same background/foreground
+ * pair the panel itself uses, so it flips with the surface. Deliberately no
+ * mode-specific (`dark:`) classes.
+ *
+ * Known residual: the `outline` variant's own `dark:bg-f1-background-tertiary`
+ * survives, because tailwind-merge cannot dedupe across variant prefixes and
+ * `bg-transparent` here is unprefixed. It is harmless — a 5% white wash is
+ * invisible on the white dark-mode panel — and it disappears with the fix below
+ * rather than being worth another override now.
+ *
+ * A fix at the variant level was prototyped and measured correct in all four
+ * contexts (light/dark page, light/dark panel) with zero overrides here:
+ * `bg-transparent text-current` + `after:ring-current after:opacity-20`. It is
+ * not applied because it changes 141 existing `variant="outline"` call sites
+ * and there is no dark-mode CI to verify them.
+ */
+const THEME_FLIP_CTA =
+  "bg-transparent text-f1-background after:ring-f1-background/30 hover:bg-f1-background/10 hover:after:ring-f1-background/50"
+
+/**
+ * TODO: see {@link THEME_FLIP_CTA} — same workaround, for the dismiss button.
+ *
+ * The icon rule is `!important` on purpose. Action sets the glyph colour with
+ * an identically-shaped selector on its inner `.main` element, so both rules
+ * have the same specificity (0,2,1) and the winner comes down to the order
+ * Tailwind happens to emit them in — which shifted, and silently inverted the
+ * icon, when these classes were moved into this constant. `!important` makes it
+ * deterministic without coupling to Action's internal class names. Do not
+ * "clean up" the `!` without checking the icon in both themes.
+ */
+const THEME_FLIP_DISMISS =
+  "text-f1-background hover:bg-f1-background/10 [&_svg:not([data-has-color])]:!text-f1-background"
+
 export const F0Coachmark = ({
   open,
   onDismiss,
@@ -115,7 +163,9 @@ export const F0Coachmark = ({
               hideLabel
               onClick={onDismiss}
               label={i18n.actions.close}
-              className="-mr-2 -mt-1 flex-shrink-0 text-f1-background hover:bg-f1-background/10 [&_svg:not([data-has-color])]:text-f1-background"
+              // Layout first, then the theme workaround — keeping them apart so
+              // the second can be deleted without touching the first.
+              className={cn("-mr-2 -mt-1 flex-shrink-0", THEME_FLIP_DISMISS)}
             />
           </div>
           {description && (
@@ -123,23 +173,12 @@ export const F0Coachmark = ({
               {description}
             </p>
           )}
-          {/* HARDCODED, deliberately. Action variants resolve their colours
-              against the page theme, so on a surface that flips polarity like
-              this one they land the wrong way round: `outline` would paint a
-              60% white fill (its base is `bg-f1-background-inverse-secondary`)
-              and dark label text on the dark panel.
-              These four classes restate the button in terms of the same
-              background/foreground pair the panel uses, so they flip with it —
-              no mode-specific classes. They should all be deleted once the
-              button variants express colour relative to their surface
-              (currentColor) rather than to the active theme; that is tracked as
-              its own initiative. See also the dismiss button below. */}
           <ButtonInternal
             variant="outline"
             label={action.label}
             onClick={action.onClick}
             block
-            className="bg-transparent text-f1-background after:ring-f1-background/30 hover:bg-f1-background/10 hover:after:ring-f1-background/50"
+            className={THEME_FLIP_CTA}
           />
         </div>
         {arrow && (
