@@ -304,6 +304,65 @@ describe("SurveyFormBuilder", () => {
   })
 })
 
+describe("SurveyFormBuilder — skipDefaultSection", () => {
+  it("auto-inserts a default section on mount when empty (default behaviour)", () => {
+    const onChange = vi.fn()
+
+    render(<SurveyFormBuilder elements={[]} onChange={onChange} />)
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ type: "section" })])
+    )
+  })
+
+  it("does not auto-insert a section when skipDefaultSection is set", () => {
+    const onChange = vi.fn()
+
+    render(
+      <SurveyFormBuilder elements={[]} onChange={onChange} skipDefaultSection />
+    )
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+})
+
+describe("SurveyFormBuilder — custom placeholders", () => {
+  it("overrides the empty question title placeholder", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "")]}
+        onChange={vi.fn()}
+        placeholders={{ questionTitle: "Field name" }}
+      />
+    )
+
+    expect(screen.getByPlaceholderText("Field name")).toBeInTheDocument()
+  })
+
+  it("overrides the empty section title placeholder", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeSection("s1", "", [{ id: "q1", title: "Q1" }])]}
+        onChange={vi.fn()}
+        placeholders={{ sectionTitle: "Group name" }}
+      />
+    )
+
+    expect(screen.getByPlaceholderText("Group name")).toBeInTheDocument()
+  })
+
+  it("falls back to the i18n default placeholder when not provided", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "")]}
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByPlaceholderText("Question title")).toBeInTheDocument()
+  })
+})
+
 // --- Dataset question tests ---
 
 const mockDataSource = {

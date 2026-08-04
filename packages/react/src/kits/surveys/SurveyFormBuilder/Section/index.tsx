@@ -34,10 +34,15 @@ export const Section = ({
     answering,
     deleteElement,
     onDuplicateElement,
+    placeholders,
   } = useSurveyFormBuilderContext()
 
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
   const { t } = useI18n()
+
+  const sectionTitlePlaceholder =
+    placeholders?.sectionTitle ??
+    t("surveyFormBuilder.labels.sectionTitlePlaceholder")
 
   const baseOnChangeParams: OnChangeSectionParams = useMemo(
     () => ({
@@ -138,9 +143,7 @@ export const Section = ({
                   type="text"
                   aria-label={t("surveyFormBuilder.labels.title")}
                   value={title}
-                  placeholder={t(
-                    "surveyFormBuilder.labels.sectionTitlePlaceholder"
-                  )}
+                  placeholder={sectionTitlePlaceholder}
                   onChange={handleChangeTitle}
                   disabled={inputDisabled}
                   className={cn(

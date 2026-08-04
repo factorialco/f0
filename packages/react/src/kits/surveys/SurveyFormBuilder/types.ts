@@ -219,6 +219,13 @@ export type SurveyFormBuilderCallbacks = {
   onDuplicateElement?: (params: OnDuplicateElementParams) => void
 }
 
+export type SurveyFormBuilderPlaceholders = {
+  /** Overrides the default "Question title" placeholder shown on empty questions. */
+  questionTitle?: string
+  /** Overrides the default "Section title" placeholder shown on empty sections. */
+  sectionTitle?: string
+}
+
 export type SurveyFormBuilderProps = {
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
@@ -228,4 +235,12 @@ export type SurveyFormBuilderProps = {
   applyingChanges?: boolean
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  /** Per-instance overrides for the builder's title placeholders. Falls back to i18n defaults. */
+  placeholders?: SurveyFormBuilderPlaceholders
+  /**
+   * When true, an empty builder does NOT auto-insert a default section on mount,
+   * letting the consumer start from a blank form. Defaults to the legacy behaviour
+   * (a section is created).
+   */
+  skipDefaultSection?: boolean
 }

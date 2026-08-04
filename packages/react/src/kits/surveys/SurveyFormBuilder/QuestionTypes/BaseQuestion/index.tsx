@@ -52,6 +52,7 @@ export const BaseQuestion = ({
     getIsSingleQuestionInSection,
     getSectionContainingQuestion,
     isQuestionTypeAllowed,
+    placeholders,
   } = useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(id)
@@ -68,6 +69,10 @@ export const BaseQuestion = ({
 
   const { isDragging } = useDragContext()
   const { t } = useI18n()
+
+  const titlePlaceholder =
+    placeholders?.questionTitle ??
+    t("surveyFormBuilder.labels.titlePlaceholder")
 
   const handleChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onQuestionChange?.({
@@ -171,7 +176,7 @@ export const BaseQuestion = ({
           <div className="relative w-full">
             {answering ? (
               <div className="w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold text-f1-foreground">
-                {title || t("surveyFormBuilder.labels.titlePlaceholder")}
+                {title || titlePlaceholder}
                 {required && (
                   <span className="text-f1-foreground-critical"> *</span>
                 )}
@@ -182,7 +187,7 @@ export const BaseQuestion = ({
                   ref={titleRef}
                   value={title}
                   aria-label={t("surveyFormBuilder.labels.title")}
-                  placeholder={t("surveyFormBuilder.labels.titlePlaceholder")}
+                  placeholder={titlePlaceholder}
                   onChange={handleChangeTitle}
                   disabled={inputDisabled}
                   className={cn(
@@ -192,9 +197,7 @@ export const BaseQuestion = ({
                   style={TEXT_AREA_STYLE}
                 />
                 <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
-                  <span className="opacity-0">
-                    {title || t("surveyFormBuilder.labels.titlePlaceholder")}
-                  </span>
+                  <span className="opacity-0">{title || titlePlaceholder}</span>
                   {required && (
                     <span
                       className={cn(

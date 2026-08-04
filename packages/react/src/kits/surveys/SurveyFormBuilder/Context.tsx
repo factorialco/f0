@@ -22,6 +22,7 @@ import {
   QuestionType,
   SectionElement,
   SurveyDatasets,
+  SurveyFormBuilderPlaceholders,
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
@@ -40,6 +41,7 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  placeholders?: SurveyFormBuilderPlaceholders
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -58,6 +60,8 @@ type SurveyFormBuilderProviderProps = {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  placeholders?: SurveyFormBuilderPlaceholders
+  skipDefaultSection?: boolean
 }
 
 export function SurveyFormBuilderProvider({
@@ -72,6 +76,8 @@ export function SurveyFormBuilderProvider({
   onFieldBlur,
   useUpload,
   datasets,
+  placeholders,
+  skipDefaultSection,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -402,14 +408,14 @@ export function SurveyFormBuilderProvider({
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      if (isEmpty && !disabled && !answering) {
+      if (isEmpty && !disabled && !answering && !skipDefaultSection) {
         handleAddNewElement({
           type: "section",
         })
       }
       return
     }
-  }, [isEmpty, handleAddNewElement, disabled])
+  }, [isEmpty, handleAddNewElement, disabled, answering, skipDefaultSection])
 
   const isQuestionTypeAllowed = useCallback(
     (questionType: QuestionType) => {
@@ -442,6 +448,7 @@ export function SurveyFormBuilderProvider({
       onFieldBlur,
       useUpload,
       datasets,
+      placeholders,
     }),
     [
       handleQuestionChange,
@@ -461,6 +468,7 @@ export function SurveyFormBuilderProvider({
       onFieldBlur,
       useUpload,
       datasets,
+      placeholders,
     ]
   )
 
