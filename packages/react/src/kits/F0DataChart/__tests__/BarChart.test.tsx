@@ -951,11 +951,11 @@ describe("BarChart — hideOverflowingLabels", () => {
 })
 
 // ---------------------------------------------------------------------------
-// tooltipValueFormatter — the tooltip can show precise values while the
-// axis/labels stay compact.
+// Item tooltip — bar charts describe the hovered bar/segment: precise value,
+// change vs. the previous category, and (multi-series) share of the total.
 // ---------------------------------------------------------------------------
 
-describe("BarChart — tooltipValueFormatter", () => {
+describe("BarChart — item tooltip", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
     if (!call) throw new Error("setOption was never called")
@@ -973,31 +973,42 @@ describe("BarChart — tooltipValueFormatter", () => {
         tooltipValueFormatter={(v) => v.toLocaleString("en-US")}
       />
     )
-    const html = getTooltipFormatter()?.([
-      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
-    ])
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 107505,
+      dataIndex: 0,
+    })
     expect(html).toContain("107,505") // precise, grouped
     expect(html).not.toContain("K") // not the compact form
     expect(getLatestOption().aria?.enabled).toBe(true)
     expect(getLatestOption().aria?.label?.description).toContain("107,505")
   })
 
-  it("falls back to valueFormatter when no tooltipValueFormatter is given", () => {
+  // The tooltip reads the number the way the axis does, so a unit written by
+  // `valueFormatter` (a currency, a "%") is not silently dropped on hover.
+  it("falls back to the axis formatter when no tooltipValueFormatter is given", () => {
     render(
       <F0DataChart
         type="bar"
         categories={["A"]}
-        series={[{ name: "S", data: [107505] }]}
-        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        series={[{ name: "S", data: [107505.8632] }]}
+        valueFormatter={(v) =>
+          `€${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
       />
     )
-    const html = getTooltipFormatter()?.([
-      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
-    ])
-    expect(html).toContain("108K")
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 107505.8632,
+      dataIndex: 0,
+    })
+    expect(html).toContain("€107,505.86")
+    expect(html).not.toContain("107505.8632") // no raw float precision
   })
 
-  it("formats and escapes actual and target values in target tooltips", () => {
+  it("formats and escapes values in target tooltips, and hides ghost series", () => {
     render(
       <F0DataChart
         type="bar"
@@ -1014,50 +1025,209 @@ describe("BarChart — tooltipValueFormatter", () => {
       />
     )
 
-    const html = getTooltipFormatter()?.([
-      {
-        axisValueLabel: "<script>category</script>",
-        seriesName: "<strong>Revenue</strong>",
-        value: 107505,
-        dataIndex: 0,
-        marker: '<span class="trusted-marker"></span>',
-      },
-    ])
+    const formatter = getTooltipFormatter()
+    const html = formatter?.({
+      name: "<script>category</script>",
+      seriesName: "<strong>Revenue</strong>",
+      value: 107505,
+      dataIndex: 0,
+      marker: '<span class="trusted-marker"></span>',
+    })
 
+    // ECharts' own coloured dot is trusted HTML and survives unescaped.
     expect(html).toContain('<span class="trusted-marker"></span>')
     expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
     expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
     expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
-    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;")
+    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;") // target row
     expect(html).not.toContain("<script>")
+    // Hovering the ghost gradient bar renders no tooltip.
+    expect(
+      formatter?.({
+        seriesName: "<strong>Revenue</strong> (target)",
+        value: 17495,
+        dataIndex: 0,
+      })
+    ).toBe("")
   })
 
-  it("escapes the ordinary tooltip while preserving ECharts marker HTML", () => {
+  it("shows share of total only for multi-series charts", () => {
     render(
       <F0DataChart
         type="bar"
-        categories={["<script>category</script>"]}
-        series={[{ name: "<strong>Revenue</strong>", data: [107505] }]}
-        tooltipValueFormatter={(value) =>
-          `<em>${value.toLocaleString("en-US")}</em>`
-        }
+        categories={["A", "B"]}
+        series={[
+          { name: "S1", data: [30, 10] },
+          { name: "S2", data: [70, 90] },
+        ]}
       />
     )
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S1",
+      value: 30,
+      dataIndex: 0,
+    })
+    expect(html).toContain("30.0%")
+    expect(html).toContain("of total")
+    expect(html).toContain((100).toLocaleString())
+  })
 
-    const html = getTooltipFormatter()?.([
-      {
-        axisValueLabel: "<script>category</script>",
-        seriesName: "<strong>Revenue</strong>",
-        value: 107505,
-        marker: '<span class="trusted-marker"></span>',
-      },
-    ])
+  it("hides share of total for single-series charts", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [100] }]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 100,
+      dataIndex: 0,
+    })
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("total<")
+  })
 
-    expect(html).toContain('<span class="trusted-marker"></span>')
-    expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
-    expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
-    expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
-    expect(html).not.toContain("<script>")
+  // A stacked chart mixing gains with losses has no total its parts add up
+  // to: the net sum is smaller than the segments it is made of, so a share of
+  // it can exceed 100% (or blow up entirely near cancellation).
+  it("omits share and total when the category mixes positive and negative values", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1", "Q2"]}
+        series={[
+          { name: "Hires", data: [24, 18] },
+          { name: "Internal moves", data: [6, 4] },
+          { name: "Voluntary exits", data: [-8, -12] },
+          { name: "Involuntary exits", data: [-3, -2] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 24,
+      dataIndex: 0,
+    })
+    // 24 / (24 + 6 - 8 - 3) would have read 126.3%, and the misleading net
+    // total goes with it — both rows carry the word "total".
+    expect(html).toContain((24).toLocaleString())
+    expect(html).not.toContain("total")
+    expect(html).not.toContain("126.3%")
+    expect(html).not.toContain((19).toLocaleString())
+  })
+
+  it("omits share and total when positive and negative series cancel out", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Hires", data: [1000] },
+          { name: "Exits", data: [-999.9] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 1000,
+      dataIndex: 0,
+    })
+    // A net of 0.1 would have turned 1000 into 1,000,000% of total.
+    expect(html).not.toContain("total")
+    expect(html).not.toContain("%</strong>")
+  })
+
+  it("keeps share and total when every series is negative", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Voluntary exits", data: [-8] },
+          { name: "Involuntary exits", data: [-2] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Voluntary exits",
+      value: -8,
+      dataIndex: 0,
+    })
+    // Both sides share a sign, so the ratio still reads as a positive share.
+    expect(html).toContain("80.0%")
+    expect(html).toContain("of total")
+    expect(html).toContain((-10).toLocaleString())
+  })
+
+  it("treats a series that runs short of the categories as zero there", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["A", "B"]}
+        series={[
+          { name: "S1", data: [30, 40] },
+          { name: "S2", data: [70] }, // no value for "B"
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "B",
+      seriesName: "S1",
+      value: 40,
+      dataIndex: 1,
+    })
+    expect(html).toContain("100.0%")
+    expect(html).not.toContain("NaN")
+  })
+
+  it("omits the share but keeps the total when every value is zero", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Hires", data: [0] },
+          { name: "Exits", data: [0] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 0,
+      dataIndex: 0,
+    })
+    // No division by zero, and "0 total" is still true.
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("Infinity")
+    expect(html).not.toContain("NaN")
+    expect(html).toContain("total")
+  })
+
+  it("never compares a bar with the previous category — that is a line-chart concept", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A", "B"]}
+        series={[{ name: "S", data: [100, 125] }]}
+      />
+    )
+    const formatter = getTooltipFormatter()
+    expect(
+      formatter?.({ name: "B", seriesName: "S", value: 125, dataIndex: 1 })
+    ).not.toContain("from previous")
   })
 
   it("bounds the accessible description for large datasets", () => {
@@ -1082,6 +1252,23 @@ describe("BarChart — tooltipValueFormatter", () => {
     expect(description).toContain("Category 20: 20")
     expect(description).toContain("5 more values")
     expect(description).not.toContain("Category 21")
+  })
+
+  it("lets a caller's own echartsOptions.tooltip win over the built-in one", () => {
+    const ownFormatter = () => "custom tooltip"
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [1] }]}
+        echartsOptions={{
+          tooltip: { trigger: "axis", formatter: ownFormatter },
+        }}
+      />
+    )
+
+    const tooltip = getTooltipFormatter()
+    expect(tooltip).toBe(ownFormatter)
   })
 })
 

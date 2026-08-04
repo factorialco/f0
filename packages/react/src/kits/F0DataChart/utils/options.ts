@@ -384,6 +384,130 @@ export function escapeTooltipText(value: unknown): string {
     .replace(/'/g, "&#039;")
 }
 
+// ---------------------------------------------------------------------------
+// Shared tooltip content renderer
+// ---------------------------------------------------------------------------
+
+/** Minimum tooltip width (px) so short values don't produce a cramped box. */
+const TOOLTIP_MIN_WIDTH = 130
+
+/** A context line below the headline value, e.g. "14.1% of total". */
+export interface ValueTooltipRow {
+  /** Emphasized leading text — a value, percentage, or delta. */
+  value: string
+  /** Trailing description, e.g. "of total", "target", "from previous". */
+  label: string
+  /** Color for the emphasized part. Defaults to the primary foreground. */
+  color?: string
+  /** ECharts' colored dot, for rows that stand for a series. Trusted HTML. */
+  marker?: string
+}
+
+export interface ValueTooltipContent {
+  /**
+   * ECharts' own colored dot. Trusted HTML generated per data point (it
+   * reflects per-point color overrides), so it is the one part rendered
+   * unescaped. Everything else is escaped.
+   */
+  marker?: string
+  /** Series, slice, or stage name. */
+  title?: string
+  /** Secondary line under the title — usually the category. */
+  subtitle?: string
+  /** Headline value, already formatted. Omit for tooltips that only list rows. */
+  value?: string
+  /** Context lines below the headline. Falsy entries are skipped. */
+  rows?: (ValueTooltipRow | undefined | false)[]
+}
+
+/**
+ * Render the shared F0 chart tooltip: colored dot + name, category, a large
+ * value, then context rows. Every chart type uses this so a tooltip reads the
+ * same regardless of which visualization the user is hovering.
+ */
+export function renderValueTooltip(
+  { marker, title, subtitle, value, rows = [] }: ValueTooltipContent,
+  theme: ChartTheme
+): string {
+  const secondary = `color: ${theme.colors.foregroundSecondary}; font-size: 12px`
+  const visibleRows = rows.filter((row): row is ValueTooltipRow => Boolean(row))
+
+  const html = [
+    title !== undefined
+      ? `<div style="font-weight: 600">${String(marker ?? "")}${escapeTooltipText(title)}</div>`
+      : "",
+    subtitle !== undefined
+      ? `<div style="${secondary}">${escapeTooltipText(subtitle)}</div>`
+      : "",
+    value !== undefined
+      ? `<div style="font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 6px">${escapeTooltipText(value)}</div>`
+      : "",
+    visibleRows.length > 0
+      ? `<div style="margin-top: 6px">${visibleRows
+          .map(
+            (row) =>
+              `<div style="${secondary}">${String(row.marker ?? "")}<strong style="color: ${row.color ?? theme.colors.foreground}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
+          )
+          .join("")}</div>`
+      : "",
+  ].join("")
+
+  return `<div style="min-width: ${TOOLTIP_MIN_WIDTH}px">${html}</div>`
+}
+
+/**
+ * The formatter every chart type uses for the values in its tooltip.
+ *
+ * A tooltip reads the number the same way the rest of the chart does, so it
+ * takes `valueFormatter` — the one that writes the axis and the labels. That is
+ * what carries a unit across: a chart whose axis says "€46,390.86" would
+ * otherwise hover as "46390.863", dropping the currency and exposing raw
+ * float precision.
+ *
+ * `tooltipValueFormatter` overrides it, for the case where the axis has to stay
+ * compact ("125k") but the tooltip should be exact ("125,000"). With neither,
+ * the value falls back to a plain localized number.
+ */
+export function tooltipValueFormat(
+  tooltipValueFormatter?: (value: number) => string,
+  valueFormatter?: (value: number) => string
+): (value: number) => string {
+  const format = tooltipValueFormatter ?? valueFormatter
+  return (value) => (format ? format(value) : value.toLocaleString())
+}
+
+/**
+ * Build a tooltip dot in an explicit color, matching the one ECharts injects
+ * as `params.marker`. Needed where ECharts' own marker uses the palette rather
+ * than the color actually painted (e.g. the gauge arc).
+ */
+export function renderMarker(color: string): string {
+  // The color lands in a style attribute — keep it to CSS color syntax.
+  const safe = color.replace(/[^a-zA-Z0-9#(),.%\s/-]/g, "")
+  return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${safe}"></span>`
+}
+
+/**
+ * Format a signed percentage delta ("+22.2%") and pick its semantic color.
+ * Returns `undefined` when there is nothing meaningful to compare against.
+ */
+export function deltaRow(
+  value: number,
+  previous: number | undefined,
+  label: string,
+  theme: ChartTheme
+): ValueTooltipRow | undefined {
+  if (previous === undefined || previous === 0 || !Number.isFinite(value)) {
+    return undefined
+  }
+  const change = ((value - previous) / Math.abs(previous)) * 100
+  return {
+    value: `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`,
+    label,
+    color: change >= 0 ? theme.colors.positive : theme.colors.critical,
+  }
+}
+
 /**
  * Build a fully styled axis-triggered tooltip that optionally filters out
  * ghost series (e.g. target gradient bars).

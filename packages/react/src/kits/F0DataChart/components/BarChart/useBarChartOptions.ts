@@ -2,6 +2,7 @@ import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   F0DataChartBarDataPoint,
@@ -10,7 +11,12 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions, escapeTooltipText } from "../../utils/options"
+import {
+  buildBaseChartOptions,
+  buildItemTooltip,
+  renderValueTooltip,
+  tooltipValueFormat,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -458,6 +464,7 @@ export function useBarChartOptions(
   size: BarChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
   const prefersReducedMotion = useReducedMotion()
@@ -582,48 +589,14 @@ export function useBarChartOptions(
       }
     }
 
-    const hasAnyTargets = targetMap.size > 0
-
-    // Tooltip values use their own formatter when provided (precise numbers),
-    // otherwise fall back to the shared value formatter.
+    // Aria descriptions use their own formatter when provided (precise
+    // numbers), otherwise fall back to the shared value formatter.
     const tooltipValue = tooltipValueFormatter ?? valueFormatter
 
-    const tooltipFormatter = hasAnyTargets
-      ? (params: unknown) => {
-          if (!Array.isArray(params)) return ""
-          const filtered = params.filter(
-            (p: { seriesName?: string }) =>
-              !String(p.seriesName ?? "").endsWith(" (target)")
-          )
-          if (filtered.length === 0) return ""
-
-          const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
-          const items = filtered
-            .map(
-              (p: {
-                marker?: string
-                seriesName?: string
-                value?: number
-                dataIndex?: number
-              }) => {
-                const val = Number(p.value)
-                const formattedValue = tooltipValue
-                  ? tooltipValue(val)
-                  : String(val)
-                const targets = targetMap.get(String(p.seriesName ?? ""))
-                const target = targets?.[p.dataIndex ?? 0]
-                const targetHtml =
-                  target !== undefined
-                    ? ` <span style="opacity: 0.6">/ ${escapeTooltipText(tooltipValue ? tooltipValue(target) : String(target))}</span>`
-                    : ""
-                return `<div>${String(p.marker ?? "")} ${escapeTooltipText(p.seriesName ?? "")} <strong>${escapeTooltipText(formattedValue)}</strong>${targetHtml}</div>`
-              }
-            )
-            .join("")
-
-          return `${header}${items}`
-        }
-      : undefined
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const options = buildBaseChartOptions({
       categories,
@@ -639,8 +612,6 @@ export function useBarChartOptions(
       showValueAxis,
       valueFormatter,
       categoryFormatter,
-      tooltipFilterSeries: (name) => name.endsWith(" (target)"),
-      tooltipFormatter,
       tooltipValueFormatter,
       valueAxisSplitNumber,
       echartsOptions,
@@ -713,6 +684,81 @@ export function useBarChartOptions(
           })
     }
 
+    // Bar charts use an item-triggered tooltip about the hovered bar or
+    // segment (pairing with the stacked series highlight) instead of the axis
+    // tooltip listing every series: value large, then — with several
+    // same-signed series — the hovered value's share of the category total,
+    // that total, and the target when there is one.
+    //
+    // `buildBaseChartOptions` has already merged `echartsOptions`, so a caller
+    // that passed its own tooltip keeps it: only build ours when it didn't.
+    if (echartsOptions?.tooltip === undefined) {
+      options.tooltip = buildItemTooltip({
+        theme,
+        formatter: (params: unknown) => {
+          const p = params as {
+            seriesName?: string
+            name?: string
+            value?: number
+            dataIndex?: number
+            marker?: string
+          }
+          const seriesName = String(p.seriesName ?? "")
+          if (seriesName.endsWith(" (target)")) return ""
+
+          const value = Number(p.value)
+          const dataIndex = p.dataIndex ?? 0
+          const target = targetMap.get(seriesName)?.[dataIndex]
+          // Share-of-total context only means something with several series
+          // pushing the same way: a single-series bar is always 100% of its own
+          // category, and a category mixing gains with losses has no "total"
+          // the parts add up to — 24 hires against a net of 19 would read as
+          // 126.3%, and near-cancellation makes that ratio arbitrarily large.
+          // Signed categories therefore show the value alone.
+          const categoryValues = series.map((s) => {
+            // A series can be shorter than `categories`.
+            const point = s.data[dataIndex]
+            return point === undefined ? 0 : getValue(point) || 0
+          })
+          const hasMixedSigns =
+            categoryValues.some((v) => v > 0) &&
+            categoryValues.some((v) => v < 0)
+          const total = categoryValues.reduce((sum, v) => sum + v, 0)
+          const showTotal = series.length > 1 && !hasMixedSigns
+
+          // No "from previous" row here: bar categories are not necessarily a
+          // sequence (locations, departments), so comparing a bar with the one
+          // to its left is only meaningful on a trend — i.e. a line chart.
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: seriesName,
+              subtitle: String(p.name ?? ""),
+              value: formatTooltipValue(value),
+              rows: [
+                showTotal &&
+                  total !== 0 && {
+                    // Same sign on both sides, so the ratio is positive even
+                    // when the whole category is negative.
+                    value: `${((value / total) * 100).toFixed(1)}%`,
+                    label: i18n.dataChart.tooltip.ofTotal,
+                  },
+                showTotal && {
+                  value: formatTooltipValue(total),
+                  label: i18n.dataChart.tooltip.total,
+                },
+                target !== undefined && {
+                  value: formatTooltipValue(target),
+                  label: i18n.dataChart.tooltip.target,
+                },
+              ],
+            },
+            theme
+          )
+        },
+      })
+    }
+
     // Non-stacked horizontal bars render labels BESIDE the bar end, so the
     // grid reserves room for them on the right. Stacked labels sit inside
     // their segments — no reservation needed, the plot keeps its full width.
@@ -744,6 +790,7 @@ export function useBarChartOptions(
     valueAxisSplitNumber,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     containerHeight,
     size,

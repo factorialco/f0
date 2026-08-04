@@ -2,6 +2,8 @@ import type * as echarts from "echarts"
 
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type { F0DataChartFunnelProps } from "../../types"
 
 import {
@@ -12,8 +14,10 @@ import { formatPercent } from "../../utils/formatters"
 import {
   buildGrid,
   buildItemTooltip,
+  renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
+  tooltipValueFormat,
 } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -30,10 +34,12 @@ export function useFunnelChartOptions(
     showConversion = false,
     colorScale = true,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartFunnelProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth } = useContainerSize(containerRef)
 
   return useMemo(() => {
@@ -114,7 +120,10 @@ export function useFunnelChartOptions(
       },
     }
 
-    const { colors } = theme
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const buildTooltipFormatter = () => {
       // Use sorted order for step-over-step conversion
@@ -137,28 +146,37 @@ export function useFunnelChartOptions(
           value?: number
         }
         const val = Number(p.value ?? 0)
-        const formattedValue = valueFormatter
-          ? valueFormatter(val)
-          : String(val)
+        const formattedValue = formatTooltipValue(val)
         const name = String(p.name ?? "")
         const sortedIndex = sortedIndexMap.get(name)
 
-        let conversionHtml = ""
+        const conversionRows = []
         if (showConversion && firstValue > 0 && sortedIndex !== undefined) {
-          const overallPct = formatPercent(val, firstValue)
-          conversionHtml = `<div style="margin-top: 4px; color: ${colors.foregroundTertiary}; font-size: 11px">Overall: ${overallPct}</div>`
+          conversionRows.push({
+            value: formatPercent(val, firstValue),
+            label: i18n.dataChart.tooltip.ofTotal,
+          })
 
-          const prevIndex = sortedIndex - 1
-          if (prevIndex >= 0) {
-            const prevData = sorted[prevIndex]
-            if (prevData && prevData.value > 0) {
-              const stepPct = formatPercent(val, prevData.value)
-              conversionHtml += `<div style="color: ${colors.foregroundTertiary}; font-size: 11px">From ${prevData.name}: ${stepPct}</div>`
-            }
+          const prevData = sortedIndex > 0 ? sorted[sortedIndex - 1] : undefined
+          if (prevData && prevData.value > 0) {
+            conversionRows.push({
+              value: formatPercent(val, prevData.value),
+              label: i18n.t("dataChart.tooltip.fromStage", {
+                stage: prevData.name,
+              }),
+            })
           }
         }
 
-        return `<div>${String(p.marker ?? "")} <strong>${name}</strong></div><div style="margin-top: 2px">${formattedValue}</div>${conversionHtml}`
+        return renderValueTooltip(
+          {
+            marker: p.marker,
+            title: name,
+            value: formattedValue,
+            rows: conversionRows,
+          },
+          theme
+        )
       }
     }
 
@@ -197,8 +215,10 @@ export function useFunnelChartOptions(
     showConversion,
     colorScale,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
   ])
 }
