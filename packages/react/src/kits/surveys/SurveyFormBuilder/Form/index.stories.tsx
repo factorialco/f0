@@ -370,6 +370,76 @@ export const WithAllowCreate: Story = {
 }
 
 /**
+ * Every rating scale the question-type menu offers, side by side. Open a
+ * question's actions menu → Rating to switch between them; the submenu shows a
+ * checkmark next to the scale currently in use, which is re-derived from the
+ * stored options rather than persisted separately.
+ *
+ * 0-10 is the standard eNPS scale. It is the only preset containing a `0`,
+ * which is why an unanswered rating question carries no value at all instead of
+ * defaulting to 0 — otherwise its first cell would look pre-selected.
+ */
+export const WithRatingScales: Story = {
+  args: {
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-rating-1-5",
+          title: "How would you rate your onboarding? (1 - 5)",
+          type: "rating" as const,
+          options: Array.from({ length: 5 }, (_, index) => ({
+            value: index + 1,
+            label: String(index + 1),
+          })),
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-rating-1-10",
+          title: "How clear are your goals for this quarter? (1 - 10)",
+          type: "rating" as const,
+          options: Array.from({ length: 10 }, (_, index) => ({
+            value: index + 1,
+            label: String(index + 1),
+          })),
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-rating-0-10",
+          title:
+            "How likely are you to recommend us as a place to work? (0 - 10)",
+          description: "0 is not at all likely, 10 is extremely likely.",
+          type: "rating" as const,
+          options: Array.from({ length: 11 }, (_, value) => ({
+            value,
+            label: String(value),
+          })),
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-rating-emojis",
+          title: "How was your week? (Emojis)",
+          type: "rating" as const,
+          options: [
+            { value: 1, label: "😠" },
+            { value: 2, label: "😐" },
+            { value: 3, label: "😊" },
+            { value: 4, label: "😍" },
+            { value: 5, label: "🤩" },
+          ],
+        },
+      },
+    ],
+  },
+}
+
+/**
  * A blocked, predefined section: `locked` on the section disables its fields,
  * removes its edit menu and drag handle, and makes the questions inside it
  * non-interactive. The section's `lockedNote` surfaces as the "Locked" tag
