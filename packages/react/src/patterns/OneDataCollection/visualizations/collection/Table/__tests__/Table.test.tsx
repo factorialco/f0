@@ -1219,6 +1219,36 @@ describe("TableCollection", () => {
       )
     })
 
+    it("labels the summary row in the leading column instead of each value", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={summaryColumns}
+          source={createSummarySource({ salarySummary: 1200 })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+
+      expect(within(summaryCells[0]).getByText("Total sum")).toHaveClass(
+        "text-f1-foreground-secondary"
+      )
+      expect(within(summaryCells[2]).getByText("1200")).toBeInTheDocument()
+      expect(
+        within(summaryCells[2]).queryByText(/sum/i)
+      ).not.toBeInTheDocument()
+    })
+
     it("applies row-level summaryPlaceholder to empty summary and non-summary cells", async () => {
       render(
         <TableCollection<
@@ -1294,7 +1324,7 @@ describe("TableCollection", () => {
       expect(within(salaryCell).getByText("COLUMN")).toBeInTheDocument()
     })
 
-    it("keeps sum prefix for non-empty values and treats 0 as non-empty", async () => {
+    it("renders the value without a type prefix and treats 0 as non-empty", async () => {
       render(
         <TableCollection<
           SummaryPerson,
@@ -1317,8 +1347,8 @@ describe("TableCollection", () => {
       const summaryCells = await getSummaryRowCells()
       const salaryCell = summaryCells[2]
 
-      expect(within(salaryCell).getByText(/sum/i)).toBeInTheDocument()
       expect(within(salaryCell).getByText("0")).toBeInTheDocument()
+      expect(within(salaryCell).queryByText(/sum/i)).not.toBeInTheDocument()
       expect(within(salaryCell).queryByText("ROW")).not.toBeInTheDocument()
     })
 

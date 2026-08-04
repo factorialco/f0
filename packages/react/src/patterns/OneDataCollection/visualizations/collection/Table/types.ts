@@ -1,6 +1,6 @@
 import { ComponentProps, ComponentType, ReactNode } from "react"
 
-import { TableHead } from "@/experimental/OneTable"
+import { TableHead, type TableScroll } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -165,6 +165,27 @@ export type TableVisualizationOptions<
    * Useful for embedding the table inside panels or detail views.
    */
   bordered?: boolean
+
+  /**
+   * Which element the sticky column header and summary row pin to.
+   *
+   * - `"self"`: the rows scroll inside the table's own container, so the
+   *   filter bar above it stays in place. Pair with the collection's
+   *   `fullHeight` prop, which is what constrains that container's height.
+   * - `"page"`: the collection scrolls with the page, so the filter bar
+   *   scrolls away while the column header pins to the top of the viewport
+   *   and the summary row to the bottom. Leave `fullHeight` off, otherwise the
+   *   rows are clipped to the collection's height instead of extending the
+   *   page. Horizontal overflow also moves to the page scroller, which drags
+   *   the filter bar sideways with the rows — so prefer `"self"` for tables
+   *   wide enough to scroll horizontally, and for frozen columns.
+   *
+   * Note the sticky rows pin to the scrollport's content edge: a scroll
+   * container with top padding leaves a band where rows show above the header.
+   *
+   * @default "self"
+   */
+  scroll?: TableScroll
 }
 
 export type TableCollectionProps<

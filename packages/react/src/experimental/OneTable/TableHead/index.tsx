@@ -286,8 +286,12 @@ export function TableHead({
       className={cn(
         "group h-11",
         "bg-f1-background",
-        isSticky &&
-          (isScrolled || isScrolledRight) &&
+        // Gated per axis, matching the shadow gradient below. A left-frozen
+        // cell only floats over content once scrolled horizontally; keying it
+        // off isScrolledRight lifted the leading header cell and gave it its
+        // own hairline on any table that merely had overflow to the right,
+        // leaving that column out of step with the rest of the header.
+        ((isStickyLeft && isScrolled) || (isStickyRight && isScrolledRight)) &&
           "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
         isSticky && "sticky",
         hidden && "after:hidden",
