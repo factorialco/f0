@@ -75,6 +75,11 @@ export function useExpandState<T>({
   )
   const expandedNodes = controlledExpanded ?? internalExpanded
 
+  // The expand callbacks only ever ask WHETHER expansion is controlled, never
+  // what it contains. Depending on the Set itself recreated them — and with them
+  // the actions context every node wrapper consumes — on every expansion.
+  const isControlled = controlledExpanded !== undefined
+
   // ── Anchor: track last toggled node to preserve position ──
   const anchorNodeRef = useRef<string | null>(null)
 
@@ -113,7 +118,7 @@ export function useExpandState<T>({
             collapseDescendants(child)
           }
         }
-        const toggled = nodeMap.get(nodeId)
+        const toggled = nodeMapRef.current.get(nodeId)
         if (toggled) collapseDescendants(toggled)
       } else {
         next.add(nodeId)
@@ -122,7 +127,7 @@ export function useExpandState<T>({
       // Track which node to anchor
       anchorNodeRef.current = nodeId
 
-      if (!controlledExpanded) {
+      if (!isControlled) {
         setInternalExpanded(next)
       }
 
@@ -141,7 +146,7 @@ export function useExpandState<T>({
       onExpandToggle?.(nodeId, !wasExpanded)
       onExpandedNodesChange?.(next)
     },
-    [controlledExpanded, onExpandToggle, onExpandedNodesChange, isLazyMode]
+    [isControlled, onExpandToggle, onExpandedNodesChange, isLazyMode]
   )
 
   // ── Bulk expand / collapse (refs so async closures see latest data) ──
@@ -162,7 +167,7 @@ export function useExpandState<T>({
     // ── Eager mode: full tree is known synchronously ──
     if (!isLazyMode) {
       const next = collectExpandableNodeIds(rootsRef.current)
-      if (!controlledExpanded) {
+      if (!isControlled) {
         setInternalExpanded(next)
       }
       onExpandedNodesChange?.(next)
@@ -221,21 +226,21 @@ export function useExpandState<T>({
       frontier = next
     }
 
-    if (!controlledExpanded) {
+    if (!isControlled) {
       setInternalExpanded(accumulated)
     }
     onExpandedNodesChange?.(accumulated)
     // `lazyTree` is read through `lazyTreeRef` so a hydration batch does not
     // recreate this callback and invalidate the actions context.
-  }, [isLazyMode, controlledExpanded, onExpandedNodesChange])
+  }, [isLazyMode, isControlled, onExpandedNodesChange])
 
   const collapseAll = useCallback((): void => {
     const empty = new Set<string>()
-    if (!controlledExpanded) {
+    if (!isControlled) {
       setInternalExpanded(empty)
     }
     onExpandedNodesChange?.(empty)
-  }, [controlledExpanded, onExpandedNodesChange])
+  }, [isControlled, onExpandedNodesChange])
 
   return {
     expandedNodes,

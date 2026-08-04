@@ -394,7 +394,6 @@ export function F0GraphView<T = unknown>(
     rfNodes,
     rfEdges,
     reservedTagHeight,
-    tagsAffectLayout,
     renderedNodeCount,
     renderedNodeIds,
     contentBounds,
@@ -592,6 +591,12 @@ export function F0GraphView<T = unknown>(
     deferredNodes !== undefined &&
     deferredMerge.deferredStatus === "loading"
 
+  // Depend on the derived flag, not the raw count: every node wrapper consumes
+  // this context, so keying it on `visibleTreeNodes.length` re-rendered all of
+  // them on every expansion (measured during a search-and-reveal navigation)
+  // even though only the threshold crossing changes what anything renders.
+  const isLargeGraph = visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD
+
   const renderConfigContextValue = useMemo(
     () => ({
       renderEdge,
@@ -600,7 +605,7 @@ export function F0GraphView<T = unknown>(
       deferredLoading: isDeferredLoading || undefined,
       dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
-      largeGraph: visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD,
+      largeGraph: isLargeGraph,
     }),
     [
       renderEdge,
@@ -608,8 +613,7 @@ export function F0GraphView<T = unknown>(
       visibleTagTypesSet,
       isDeferredLoading,
       loadVisibleNodeData,
-      visibleTreeNodes.length,
-      tagsAffectLayout,
+      isLargeGraph,
       reservedTagHeight,
     ]
   )
