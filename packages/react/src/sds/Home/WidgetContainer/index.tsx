@@ -2,6 +2,7 @@ import { type CSSProperties, Fragment, ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { Cross, LockLocked } from "@/icons/app"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
@@ -115,10 +116,15 @@ export function WidgetContainer({
           )}
           <span
             className="absolute right-4 top-4 z-10"
-            title={lockedLabel}
             aria-label={lockedLabel}
           >
-            <F0Icon size="md" icon={LockLocked} className="text-f1-icon-bold" />
+            <Tooltip label={lockedLabel}>
+              <F0Icon
+                size="md"
+                icon={LockLocked}
+                className="text-f1-icon-bold"
+              />
+            </Tooltip>
           </span>
         </div>
       )
