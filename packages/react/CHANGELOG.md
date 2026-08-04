@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.0](https://github.com/factorialco/f0/compare/f0-react-v5.0.1...f0-react-v6.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **toast:** stabilize F0Toast + docs ([#4751](https://github.com/factorialco/f0/issues/4751))
+
+### Features
+
+* **toast:** stabilize F0Toast + docs ([#4751](https://github.com/factorialco/f0/issues/4751)) ([c3d809a](https://github.com/factorialco/f0/commit/c3d809a5831d75fd91ff3cc4319dc99d1f3b9846))
+
 ## [5.0.1](https://github.com/factorialco/f0/compare/f0-react-v5.0.0...f0-react-v5.0.1) (2026-08-04)
 
 
