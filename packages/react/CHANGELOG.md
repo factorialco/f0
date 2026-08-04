@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.75.0](https://github.com/factorialco/f0/compare/f0-react-v4.74.0...f0-react-v4.75.0) (2026-08-04)
+
+
+### Features
+
+* **SurveyFormBuilder:** add a 0-10 rating scale (FCT-59663) ([#4870](https://github.com/factorialco/f0/issues/4870)) ([c80eb59](https://github.com/factorialco/f0/commit/c80eb592bd464289339a21f823a8f286a202d594))
+
 ## [4.74.0](https://github.com/factorialco/f0/compare/f0-react-v4.73.1...f0-react-v4.74.0) (2026-08-03)
 
 
