@@ -9,7 +9,9 @@ import {
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
+import Menu from "@/icons/app/Menu"
 import { Pencil } from "@/icons/app"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
@@ -144,6 +146,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     },
     ref
   ) {
+    const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
     const rootRef = useRef<HTMLDivElement | null>(null)
     const [rootWidth, setRootWidth] = useState(0)
     // Hover state of the collapsed strip: which widget floats, and where.
@@ -269,7 +272,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             Entering edit mode is what makes `editableWidgetContainers` take
             effect (remove controls + the add placeholder appear in the
             containers it lists). */}
-        <div className="col-span-full flex justify-end">
+        <div className="col-span-full flex flex-row items-center justify-between">
+          {/* The main-menu trigger, on the same terms as `DaytimePage`: shown
+              only when the sidebar isn't already there to be seen. */}
+          {isSmallScreen || sidebarState === "hidden" ? (
+            <F0Button
+              variant="ghost"
+              onClick={() => toggleSidebar()}
+              label="Open main menu"
+              icon={Menu}
+              hideLabel
+            />
+          ) : (
+            <span />
+          )}
           <F0Button
             variant="outline"
             size="md"

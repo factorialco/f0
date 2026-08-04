@@ -27,6 +27,15 @@ import { SlotWidget } from "../SlotWidget"
 import { type HomeWidgetItem } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog } from "../WidgetCatalog"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
+import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
+import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
+import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
+import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
+import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
+
 import { NewHomeLayout } from "./index"
 
 /* =============================== main column =============================== */
@@ -481,6 +490,21 @@ const meta = {
   component: NewHomeLayout,
   tags: ["autodocs", "experimental"],
   parameters: { layout: "fullscreen" },
+  decorators: [
+    (Story) => (
+      <ApplicationFrame
+        sidebar={
+          <Sidebar
+            header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
+            body={<SidebarMenu {...SidebarMenuStories.Default.args} />}
+            footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
+          />
+        }
+      >
+        <Story />
+      </ApplicationFrame>
+    ),
+  ],
 } satisfies Meta<typeof NewHomeLayout>
 
 export default meta
