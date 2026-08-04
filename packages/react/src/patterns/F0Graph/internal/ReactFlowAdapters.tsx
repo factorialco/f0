@@ -4,7 +4,7 @@ import {
   type Node as RFNode,
   type NodeProps,
 } from "@xyflow/react"
-import { type ReactNode, memo } from "react"
+import { type ReactNode, memo, useRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
@@ -16,6 +16,7 @@ import type {
   GraphNodeState,
   GraphNodeVariant,
 } from "../components/F0GraphNode"
+import { bump, bumpIfChanged } from "../perfTrace"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
 function handlePositions(direction: LayoutDirection): {
@@ -117,7 +118,25 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
   const actionsCtx = useF0GraphActionsInternal()
   const focusCtx = useF0GraphFocusInternal()
   const renderCfg = useF0GraphRenderConfigInternal()
+
+  // DIAGNOSTIC: a mount is legitimate work (a node entered the windowed set);
+  // an update on an already-mounted node is an invalidation leak. A render-count
+  // overlay reports both as one number, which is why this split exists.
+  const perfMounted = useRef(false)
+  bump(perfMounted.current ? "node.update" : "node.mount")
+  perfMounted.current = true
+
   if (!zoomCtx || !expandCtx || !selectionCtx || !actionsCtx) return null
+
+  // DIAGNOSTIC: which context is churning. Keyed globally, so the first node to
+  // observe a new identity records it and the other ~460 see the same value —
+  // these count context changes, not per-node renders.
+  bumpIfChanged("ctx.zoom", zoomCtx)
+  bumpIfChanged("ctx.expand", expandCtx)
+  bumpIfChanged("ctx.selection", selectionCtx)
+  bumpIfChanged("ctx.actions", actionsCtx)
+  bumpIfChanged("ctx.focus", focusCtx)
+  bumpIfChanged("ctx.renderConfig", renderCfg)
 
   const { zoomLevel } = zoomCtx
   const { expandedNodes } = expandCtx

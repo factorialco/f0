@@ -40,6 +40,7 @@ import {
   deriveEdgesFromTree,
   nodeIntersectsRect,
 } from "../utils"
+import { bump, gauge } from "../perfTrace"
 import { useLayoutEngine } from "./useLayoutEngine"
 import { useViewportGeometry } from "./useViewportGeometry"
 
@@ -396,6 +397,7 @@ export function useGraphRenderModel<T>({
   // pan/zoom on large graphs: without it every pan cell-crossing and every
   // zoom-level change would rebuild an object per visible node.
   const windowedIds = useMemo((): Set<string> | null => {
+    bump("windowedIds.rebuild")
     if (!enableNodeWindowing || !viewportRect) return null
     const fallbackWidth = nodeWidthProp ?? 256
     const ids = new Set<string>()
@@ -444,6 +446,9 @@ export function useGraphRenderModel<T>({
   // when windowing is off). Building here — rather than building everything and
   // filtering — is what makes the work O(on-screen) instead of O(visible tree).
   const rfNodes = useMemo((): RFNode[] => {
+    // A rebuild hands React Flow fresh node objects, which is the most likely
+    // route to re-rendering already-mounted nodes.
+    bump("rfNodes.rebuild")
     const BASE_W = nodeWidthProp ?? 256
     const BASE_H = effectiveNodeHeight
     const yStretch = 1
@@ -660,6 +665,13 @@ export function useGraphRenderModel<T>({
     hoveredEdgeId,
     windowedIds,
   ])
+
+  // How many nodes are materialized right now, vs the whole expanded tree.
+  // Zooming out grows the first number, and those extra nodes MOUNT — that is
+  // legitimate windowing work, not a leak, so it must be read alongside
+  // `node.mount` / `node.update`.
+  gauge("windowed.nodeCount", renderedNodeIds.length)
+  gauge("visibleTree.nodeCount", visibleTreeNodes.length)
 
   return {
     visibleTreeNodes,

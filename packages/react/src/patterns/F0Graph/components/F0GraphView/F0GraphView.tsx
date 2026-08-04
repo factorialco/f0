@@ -52,6 +52,7 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
+import { bump } from "../../perfTrace"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
@@ -135,6 +136,7 @@ const customEdgeTypes: EdgeTypes = {
 export function F0GraphView<T = unknown>(
   props: F0GraphProps<T> & { handleRef?: ForwardedRef<F0GraphHandle> }
 ) {
+  bump("F0GraphView.render")
   const {
     handleRef,
     nodes: nodesProp,
