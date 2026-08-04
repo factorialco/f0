@@ -171,13 +171,6 @@ export function useLazyTree<T>(
       collapseNode,
       retryNode,
     }),
-    [
-      allNodes,
-      loadingNodes,
-      errorNodes,
-      expandNode,
-      collapseNode,
-      retryNode,
-    ]
+    [allNodes, loadingNodes, errorNodes, expandNode, collapseNode, retryNode]
   )
 }
