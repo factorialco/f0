@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/factorialco/f0/compare/f0-react-v5.0.0...f0-react-v5.0.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **react:** resolve date-fns locale from L10nProvider ([#4969](https://github.com/factorialco/f0/issues/4969)) ([ba24f53](https://github.com/factorialco/f0/commit/ba24f539aa0f5fb0adb49c02ce1b4d15b93ba26c))
+
 ## [5.0.0](https://github.com/factorialco/f0/compare/f0-react-v4.78.0...f0-react-v5.0.0) (2026-08-04)
 
 
