@@ -13,6 +13,7 @@ import { Pencil } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
+import { useScrollFade } from "../useScrollFade"
 import { WidgetContainer, type WidgetContainerSide } from "../WidgetContainer"
 import {
   type HomeRenderCtx,
@@ -50,15 +51,6 @@ const GradientWash = ({
     )}
   />
 )
-
-/**
- * How far each end of the rail's own scroll is faded out. A hard `overflow` edge
- * slices a card mid-row, which reads as breakage rather than as more content
- * past the fold; the fade says "this continues".
- */
-const RAIL_FADE_PX = 24
-const railMask = (fade: number) =>
-  `linear-gradient(to bottom, transparent 0, black ${fade}px, black calc(100% - ${fade}px), transparent 100%)`
 
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
@@ -200,18 +192,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       return node
     }
 
-    // EACH COLUMN SCROLLS ITSELF. The grid is bounded to the viewport minus the
-    // gutter it sits in — so the page itself never scrolls and never overflows
-    // that padding — and both columns take `min-h-0 overflow-y-auto` inside it.
-    //
-    // Only the RAIL fades at its ends: it is a stack of discrete cards, and a
-    // hard edge through one reads as breakage. The main column is a reading
-    // column, where a fade would dim the text you are actually reading, so it
-    // clips plainly at the viewport edge like any scroll region.
-    const railStyle: CSSProperties = {
-      maskImage: railMask(RAIL_FADE_PX),
-      WebkitMaskImage: railMask(RAIL_FADE_PX),
-    }
+    // EACH COLUMN SCROLLS ITSELF: the grid is bounded to the viewport minus the
+    // gutter it sits in, and each column takes its own overflow inside it. Both
+    // fade at an end only while content is really hidden past it (see
+    // `useScrollFade`), so nothing is masked before you scroll or once you have
+    // reached the end.
+    const mainFade = useScrollFade()
+    const railFade = useScrollFade()
 
     const hasSide =
       aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
@@ -301,12 +288,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             window's edge rather than the padding line — content scrolls off the
             screen instead of being cut short inside the page. */}
         <div
+          ref={mainFade.ref}
           className="relative min-h-0 overflow-y-auto"
           style={{
             marginTop: -bleed,
             marginBottom: -bleed,
             paddingTop: bleed,
             paddingBottom: bleed,
+            ...mainFade.style,
           }}
         >
           <WidgetContainer
@@ -339,8 +328,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
             <aside
+              ref={railFade.ref}
               className="flex min-h-0 flex-col gap-2 overflow-y-auto"
-              style={railStyle}
+              style={railFade.style}
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
@@ -381,7 +371,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </aside>
           ) : (
-            <aside className="min-h-0 overflow-y-auto" style={railStyle}>
+            <aside
+              ref={railFade.ref}
+              className="min-h-0 overflow-y-auto"
+              style={railFade.style}
+            >
               <WidgetContainer
                 side="right"
                 widgets={rightWidgets}
