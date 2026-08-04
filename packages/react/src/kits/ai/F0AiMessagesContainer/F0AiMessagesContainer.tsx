@@ -53,6 +53,11 @@ export type F0AiMessagesContainerProps = {
   /** Welcome phrase shown centered when the chat is empty. Falls back to
    *  `translations.ai.defaultInitialMessage` if omitted. */
   initialMessage?: string | string[]
+  /** Static line above the welcome phrase, same size but secondary color
+   *  (e.g. "Analytics mode:"). */
+  initialMessageCaption?: string
+  /** Smaller secondary line below the welcome phrase. */
+  initialMessageSubtitle?: string
   /** Called when the user clicks the welcome phrase (used by F0AiChat to open
    *  the pong easter egg). When omitted the phrase is non-interactive. */
   onWelcomeClick?: () => void
@@ -107,6 +112,8 @@ const Messages = ({
   isLoadingThread = false,
   interrupt,
   initialMessage,
+  initialMessageCaption,
+  initialMessageSubtitle,
   onWelcomeClick,
   renderToolCall,
   onReplyQuote,
@@ -291,6 +298,8 @@ const Messages = ({
               {showWelcomeBlock && (
                 <WelcomeScreen
                   messages={welcomeMessages}
+                  caption={initialMessageCaption}
+                  subtitle={initialMessageSubtitle}
                   onClick={onWelcomeClick}
                   fullscreen={fullscreen}
                 />
