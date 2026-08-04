@@ -125,7 +125,11 @@ export function WidgetContainer({
       renderWidget(widget, ctx)
     ) : (
       <SlotWidget
-        header={widget.header}
+        header={
+          // In edit mode the remove control takes the arrow's place, so the
+          // link is dropped rather than sitting under it.
+          canEdit ? { ...widget.header, link: undefined } : widget.header
+        }
         fullHeight={widget.fullHeight}
         slots={widget.slots}
         slotRenderers={slotRenderers}
@@ -184,7 +188,7 @@ export function WidgetContainer({
   return (
     <div
       className={cn(
-        "flex flex-col [&>*]:shadow-none",
+        "flex flex-col [&_*]:shadow-none",
         // The main column's freeform content wants more air than the rail's
         // stack of cards.
         side === "main" ? "gap-6" : "gap-4",
