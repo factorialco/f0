@@ -236,6 +236,11 @@ export const TableCollection = <
     [source, showItemActionsProp]
   )
 
+  // Called with no arguments at every use site, so the result is always the same
+  // object by value. Building it once stops every row receiving a fresh
+  // `variants` prop on each render.
+  const rowAnimationVariants = useMemo(() => getAnimationVariants(), [])
+
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
     paginationInfo,
@@ -824,7 +829,7 @@ export const TableCollection = <
                             const rowKey = `row-${groupIndex}-${getRowKey(item, index)}`
                             const motionRow = (
                               <MotionRow
-                                variants={getAnimationVariants()}
+                                variants={rowAnimationVariants}
                                 initial={collapsible ? "hidden" : "visible"}
                                 animate="visible"
                                 exit="hidden"
@@ -886,7 +891,7 @@ export const TableCollection = <
                   const isNew = addedRowKeys.has(rowKey)
                   const motionRow = (
                     <MotionRow
-                      variants={getAnimationVariants()}
+                      variants={rowAnimationVariants}
                       // Only a genuinely-inserted row plays the enter
                       // animation; rows arriving via pagination or the initial
                       // load appear in place, without movement.
