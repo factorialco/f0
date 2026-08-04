@@ -1,6 +1,6 @@
-import { type CSSProperties, forwardRef, Fragment, ReactNode } from "react"
+import { Fragment, ReactNode } from "react"
 
-import { cn } from "@/lib/utils"
+import { TwoColumnLayout } from "@/layouts/TwoColumnLayout"
 
 import {
   defaultRenderWidget,
@@ -15,124 +15,106 @@ export * from "./slotRenderers"
 /**
  * NewHomeLayout — the shell for the redesigned Home.
  *
- * A two-column CSS grid (following the `AsideLayout` from the custom-home
- * prototype): a growing MAIN column and a FIXED-width right `aside`. The
- * `header` sits in its own row above the MAIN column only — so the aside starts
- * level with the main column's content, not with the header. There is no number
- * to keep in sync: a header that grows can't drift the alignment.
+ * Composes f0's `TwoColumnLayout`: a growing main column (freeform `children` on
+ * top, plus an optional stack of `leftWidgets`) and a side rail (`aside` +
+ * `rightWidgets`). `responsiveStackOrder` decides which column comes first when
+ * the layout collapses to one column — defaulting to `"main"` so Home reads main
+ * content first on narrow viewports.
  *
- * Every widget is expressed as a `header` + an ordered list of SLOTS; the layout
- * draws each widget's slots separated by a dashed divider. It is data-agnostic:
+ * Every widget is a `header` + an ordered list of SLOTS; each widget's slots are
+ * drawn with a dashed divider between them. The layout is data-agnostic:
  * `defaultSlotRenderers` covers the standard visualizations; pass `slotRenderers`
  * to add/override any visualization (required for bespoke slots like `clock-in`),
  * or `renderWidget` to replace the whole widget shell. See `./slotRenderers`.
  */
-
-const COLUMN_GAP = 16
-const ROW_GAP = 16
-
 export interface NewHomeLayoutProps {
-  /** Sits above the MAIN column only, in row 1 — the aside clears it. */
-  header?: ReactNode
-  /** Main column, top: freeform, product-composed (greeting, clock-in hero, …). */
+  /** Freeform main-column content on top (greeting, clock-in hero, …). */
   children?: ReactNode
   /** Main column: widget slots stacked below `children`. */
   leftWidgets?: HomeWidgetItem[]
-  /** Right rail widgets (fixed-width column). */
+  /** Side rail: spec-conforming widgets. */
   rightWidgets?: HomeWidgetItem[]
+  /** Freeform side-rail content (e.g. an AI chat), rendered above `rightWidgets`. */
+  aside?: ReactNode
   /** Per-visualization renderers, MERGED OVER `defaultSlotRenderers`. */
   slotRenderers?: SlotRenderers
   /** Full override of how a whole widget is drawn. Defaults to `defaultRenderWidget`. */
   renderWidget?: (widget: HomeWidgetItem, ctx: HomeRenderCtx) => ReactNode
-  /** Fixed px width of the right column. */
-  asideWidth?: number
+  /** Edit mode: show per-widget chrome (a remove control) over every widget. */
+  editing?: boolean
+  /** Called with a widget id when its remove control is clicked (edit mode only). */
+  onRemoveWidget?: (id: string) => void
+  /** Which column stacks first when collapsed to one column. Defaults to `"main"`. */
+  responsiveStackOrder?: "side" | "main"
+  sticky?: boolean
   ctx?: HomeRenderCtx
-  className?: string
 }
 
-export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
-  function NewHomeLayout(
-    {
-      header,
-      children,
-      leftWidgets = [],
-      rightWidgets = [],
-      slotRenderers,
-      renderWidget,
-      asideWidth = 320,
-      ctx = {},
-      className,
-    },
-    ref
-  ) {
-    const renderers = slotRenderers
-      ? { ...defaultSlotRenderers, ...slotRenderers }
-      : defaultSlotRenderers
-    const render = (widget: HomeWidgetItem) =>
-      renderWidget
-        ? renderWidget(widget, ctx)
-        : defaultRenderWidget(widget, ctx, renderers)
+export function NewHomeLayout({
+  children,
+  leftWidgets = [],
+  rightWidgets = [],
+  aside,
+  slotRenderers,
+  renderWidget,
+  editing = false,
+  onRemoveWidget,
+  responsiveStackOrder = "main",
+  sticky = false,
+  ctx = {},
+}: NewHomeLayoutProps) {
+  const renderers = slotRenderers
+    ? { ...defaultSlotRenderers, ...slotRenderers }
+    : defaultSlotRenderers
 
-    const hasAside = rightWidgets.length > 0
-    // Without a header there is no row 1: content sits in row 1 and the row gap
-    // is dropped. Pinning content to row 2 unconditionally would leave a phantom
-    // gap band at the top of the page.
-    const contentRow = header ? 2 : 1
-
-    const grid: CSSProperties = {
-      display: "grid",
-      // One flexible column + (optionally) one FIXED-px column — a shape F0Box's
-      // equal-fraction `columns` prop can't express. `minmax(0, 1fr)` (not `1fr`)
-      // so the main content can shrink instead of forcing the grid wider.
-      gridTemplateColumns: hasAside
-        ? `minmax(0, 1fr) ${asideWidth}px`
-        : "minmax(0, 1fr)",
-      columnGap: COLUMN_GAP,
-      ...(header ? { rowGap: ROW_GAP } : null),
-      alignItems: "start",
-    }
-
+  const render = (widget: HomeWidgetItem) => {
+    const node = renderWidget
+      ? renderWidget(widget, ctx)
+      : defaultRenderWidget(widget, ctx, renderers)
+    if (!editing) return node
+    // Edit chrome: a remove control over the widget, where its header link/arrow
+    // sits in view mode (mirrors the prototype board's edit affordance).
     return (
-      <div
-        ref={ref}
-        className={cn("text-f1-foreground", className)}
-        style={grid}
-      >
-        {header ? (
-          <div style={{ gridColumn: 1, gridRow: 1, minWidth: 0 }}>{header}</div>
-        ) : null}
-        <div
-          style={{
-            gridColumn: 1,
-            gridRow: contentRow,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: ROW_GAP,
-          }}
+      <div className="relative">
+        {node}
+        <button
+          type="button"
+          aria-label="Remove widget"
+          onClick={() => onRemoveWidget?.(widget.id)}
+          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-solid border-f1-border bg-f1-background text-f1-foreground-secondary hover:text-f1-foreground"
         >
-          {children}
-          {leftWidgets.map((widget) => (
-            <Fragment key={widget.id}>{render(widget)}</Fragment>
-          ))}
-        </div>
-        {hasAside ? (
-          <aside
-            style={{
-              gridColumn: 2,
-              gridRow: contentRow,
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: ROW_GAP,
-            }}
-          >
-            {rightWidgets.map((widget) => (
-              <Fragment key={widget.id}>{render(widget)}</Fragment>
-            ))}
-          </aside>
-        ) : null}
+          ✕
+        </button>
       </div>
     )
   }
-)
+
+  const main = (
+    <div className="flex flex-col gap-4">
+      {children}
+      {leftWidgets.map((widget) => (
+        <Fragment key={widget.id}>{render(widget)}</Fragment>
+      ))}
+    </div>
+  )
+
+  const hasSide = aside != null || rightWidgets.length > 0
+  const side = hasSide ? (
+    <div className="flex flex-col gap-4">
+      {aside}
+      {rightWidgets.map((widget) => (
+        <Fragment key={widget.id}>{render(widget)}</Fragment>
+      ))}
+    </div>
+  ) : null
+
+  return (
+    <TwoColumnLayout
+      sideContent={side}
+      responsiveStackOrder={responsiveStackOrder}
+      sticky={sticky}
+    >
+      {main}
+    </TwoColumnLayout>
+  )
+}
