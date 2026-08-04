@@ -1,6 +1,10 @@
 import { ReactNode } from "react"
 
 import {
+  F0AvatarList,
+  F0AvatarListProps,
+} from "@/components/avatars/F0AvatarList"
+import {
   IndicatorsList,
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
@@ -53,9 +57,23 @@ export interface HomeWidgetItem {
  * `carousel`) are intentionally absent — supply them via `slotRenderers`.
  */
 export const defaultSlotRenderers: SlotRenderers = {
-  list: (params) => <WidgetSimpleList {...(params as WidgetSimpleListProps)} />,
+  // `minSize: 0` so a short list doesn't reserve WidgetSimpleList's 184px
+  // floor inside a multi-slot widget; a caller can still pass its own.
+  list: (params) => (
+    <WidgetSimpleList minSize={0} {...(params as WidgetSimpleListProps)} />
+  ),
   indicators: (params) => (
     <IndicatorsList {...(params as IndicatorsListProps)} />
+  ),
+  "avatar-list": (params) => (
+    <F0AvatarList
+      size="md"
+      {...(params as Omit<
+        Extract<F0AvatarListProps, { type: "person" }>,
+        "type"
+      >)}
+      type="person"
+    />
   ),
   "status-rows": (params, ctx) => (
     <div className="flex flex-col gap-1">

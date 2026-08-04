@@ -43,21 +43,32 @@ export function SlotWidget({
 
   return (
     <Widget header={header} fullHeight={fullHeight}>
-      {slots.map((slot, index) => {
-        const renderer = renderers[slot.visualization]
-        return (
-          <Fragment key={index}>
-            {index > 0 ? <Separator bare className="my-3" /> : null}
-            {renderer ? (
-              renderer(slot.params, ctx)
-            ) : (
-              <div className="rounded-md border border-dashed border-f1-border p-2 text-f1-foreground-secondary">
-                {`No renderer for slot "${slot.visualization}"`}
-              </div>
-            )}
-          </Fragment>
-        )
-      })}
+      {/* ONE child, so the Widget frame's internal `gap-4` applies once to the
+          whole slot stack instead of around every slot AND every divider. */}
+      <div className="flex flex-col">
+        {slots.map((slot, index) => {
+          const renderer = renderers[slot.visualization]
+          return (
+            <Fragment key={index}>
+              {/* Wrapped rather than passing className: Separator spreads its
+                  rest props AFTER its own classes, so a className would replace
+                  them (and its 1px height) instead of adding the margin. */}
+              {index > 0 ? (
+                <div className="my-3">
+                  <Separator bare />
+                </div>
+              ) : null}
+              {renderer ? (
+                renderer(slot.params, ctx)
+              ) : (
+                <div className="rounded-md border border-dashed border-f1-border p-2 text-f1-foreground-secondary">
+                  {`No renderer for slot "${slot.visualization}"`}
+                </div>
+              )}
+            </Fragment>
+          )
+        })}
+      </div>
     </Widget>
   )
 }

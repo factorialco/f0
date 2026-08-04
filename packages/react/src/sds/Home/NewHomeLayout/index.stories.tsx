@@ -288,7 +288,7 @@ const CommunicationsCard = () => (
           className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-f1-background-tertiary"
         >
           <div className="relative shrink-0">
-            <F0AvatarIcon icon={Envelope} size="md" />
+            <F0AvatarIcon icon={Envelope} size="lg" />
             {c.unread ? (
               <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold" />
             ) : null}
