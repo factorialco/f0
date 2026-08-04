@@ -224,6 +224,10 @@ export type SurveyFormBuilderPlaceholders = {
   questionTitle?: string
   /** Overrides the default "Section title" placeholder shown on empty sections. */
   sectionTitle?: string
+  /** Overrides the default question description placeholder (pass "" to hide the hint). */
+  questionDescription?: string
+  /** Overrides the default text-answer preview placeholder (pass "" to hide the hint). */
+  answer?: string
 }
 
 export type SurveyFormBuilderLabels = {
@@ -250,10 +254,4 @@ export type SurveyFormBuilderProps = {
    * (a section is created).
    */
   skipDefaultSection?: boolean
-  /**
-   * When true, the read-only answer-widget preview rendered under each question in
-   * edit mode is hidden. Useful when the builder defines fields rather than a form
-   * to be answered. Does not affect answering mode. Defaults to showing the preview.
-   */
-  hideAnswerPreview?: boolean
 }

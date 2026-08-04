@@ -378,28 +378,38 @@ describe("SurveyFormBuilder — custom action labels", () => {
   })
 })
 
-describe("SurveyFormBuilder — hideAnswerPreview", () => {
-  it("shows the answer preview by default", () => {
+describe("SurveyFormBuilder — description & answer placeholders", () => {
+  it("overrides the question description placeholder", () => {
     render(
       <SurveyFormBuilder
-        elements={[makeQuestion("q1", "Q1")]}
+        elements={[makeQuestion("q1", "")]}
         onChange={vi.fn()}
+        placeholders={{ questionDescription: "Explain this field" }}
       />
     )
 
-    expect(screen.getByLabelText("Answer")).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText("Explain this field")
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByPlaceholderText("Describe the question in a few words")
+    ).not.toBeInTheDocument()
   })
 
-  it("hides the answer preview when hideAnswerPreview is set", () => {
-    render(
+  it("overrides the answer preview placeholder while keeping the input", () => {
+    const { container } = render(
       <SurveyFormBuilder
-        elements={[makeQuestion("q1", "Q1")]}
+        elements={[makeQuestion("q1", "")]}
         onChange={vi.fn()}
-        hideAnswerPreview
+        placeholders={{ answer: "Custom answer hint" }}
       />
     )
 
-    expect(screen.queryByLabelText("Answer")).not.toBeInTheDocument()
+    // The answer preview input stays rendered…
+    expect(screen.getByLabelText("Answer")).toBeInTheDocument()
+    // …with the overridden placeholder text, not the i18n default.
+    expect(container.innerHTML).toContain("Custom answer hint")
+    expect(container.innerHTML).not.toContain("Type your answer")
   })
 })
 

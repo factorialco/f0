@@ -54,7 +54,6 @@ export const BaseQuestion = ({
     isQuestionTypeAllowed,
     placeholders,
     labels,
-    hideAnswerPreview,
   } = useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(id)
@@ -78,6 +77,10 @@ export const BaseQuestion = ({
 
   const addQuestionLabel =
     labels?.addQuestion ?? t("surveyFormBuilder.actions.addQuestion")
+
+  const descriptionPlaceholder =
+    placeholders?.questionDescription ??
+    t("surveyFormBuilder.labels.questionDescriptionPlaceholder")
 
   const handleChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onQuestionChange?.({
@@ -285,9 +288,7 @@ export const BaseQuestion = ({
           <textarea
             value={description}
             aria-label={t("surveyFormBuilder.labels.description")}
-            placeholder={t(
-              "surveyFormBuilder.labels.questionDescriptionPlaceholder"
-            )}
+            placeholder={descriptionPlaceholder}
             onChange={handleChangeDescription}
             disabled={inputDisabled}
             className={cn(
@@ -298,7 +299,7 @@ export const BaseQuestion = ({
           />
         ) : null}
       </div>
-      {(answering || !hideAnswerPreview) && children}
+      {children}
       {answering && (
         <FormMessage
           className="-mt-2"

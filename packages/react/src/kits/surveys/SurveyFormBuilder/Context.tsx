@@ -44,7 +44,6 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   datasets?: SurveyDatasets
   placeholders?: SurveyFormBuilderPlaceholders
   labels?: SurveyFormBuilderLabels
-  hideAnswerPreview?: boolean
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -66,7 +65,6 @@ type SurveyFormBuilderProviderProps = {
   placeholders?: SurveyFormBuilderPlaceholders
   labels?: SurveyFormBuilderLabels
   skipDefaultSection?: boolean
-  hideAnswerPreview?: boolean
 }
 
 export function SurveyFormBuilderProvider({
@@ -84,7 +82,6 @@ export function SurveyFormBuilderProvider({
   placeholders,
   labels,
   skipDefaultSection,
-  hideAnswerPreview,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -457,7 +454,6 @@ export function SurveyFormBuilderProvider({
       datasets,
       placeholders,
       labels,
-      hideAnswerPreview,
     }),
     [
       handleQuestionChange,
@@ -479,7 +475,6 @@ export function SurveyFormBuilderProvider({
       datasets,
       placeholders,
       labels,
-      hideAnswerPreview,
     ]
   )
 

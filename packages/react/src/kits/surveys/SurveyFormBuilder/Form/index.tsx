@@ -51,7 +51,6 @@ const _SurveyFormBuilder = ({
   placeholders,
   labels,
   skipDefaultSection,
-  hideAnswerPreview,
 }: SurveyFormBuilderProps) => {
   const shouldShowAddButton = !disabled
 
@@ -158,7 +157,6 @@ const _SurveyFormBuilder = ({
       placeholders={placeholders}
       labels={labels}
       skipDefaultSection={skipDefaultSection}
-      hideAnswerPreview={hideAnswerPreview}
     >
       <DragProvider>
         <DragSelectGuard>
