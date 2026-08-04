@@ -11,7 +11,6 @@ import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
-  Add,
   Calendar,
   ChevronRight,
   Clock,
@@ -19,7 +18,6 @@ import {
   Envelope,
   File,
   PalmTree,
-  Pencil,
   Receipt,
   SolidPlay,
   Target,
@@ -27,6 +25,7 @@ import {
 
 import { SlotWidget } from "../SlotWidget"
 import { type HomeWidgetItem } from "../slotRenderers"
+import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog } from "../WidgetCatalog"
 import { NewHomeLayout } from "./index"
 
@@ -125,7 +124,7 @@ const FeedSection = ({
         {label}
       </h3>
     ) : null}
-    <div className="flex flex-col divide-y divide-solid divide-f1-border-secondary overflow-hidden rounded-xl border-x-0 border-y border-solid border-f1-border bg-f1-background">
+    <div className="flex flex-col divide-y divide-solid divide-f1-border-secondary overflow-hidden rounded-xl border border-solid border-f1-border bg-f1-background">
       {rows.map((r) => (
         <FeedRow key={r.title} {...r} />
       ))}
@@ -270,7 +269,7 @@ const RAIL_EVENTS = [
   {
     title: "Sarah's birthday",
     subtitle: "Turns 30 🎉",
-    description: "",
+    description: "Sarah Nowak turns 30 — the team is signing a card.",
     isPending: false,
     color: "#F59E0B",
     fromDate: new Date(2026, 6, 24),
@@ -278,7 +277,7 @@ const RAIL_EVENTS = [
   {
     title: "Company holiday",
     subtitle: "2 days off",
-    description: "",
+    description: "Offices closed Thursday and Friday for the summer break.",
     isPending: false,
     color: "#10B981",
     fromDate: new Date(2026, 6, 30),
@@ -287,7 +286,7 @@ const RAIL_EVENTS = [
   {
     title: "Team offsite",
     subtitle: "Costa Brava · not confirmed",
-    description: "",
+    description: "Two days in Costa Brava — waiting on final numbers.",
     isPending: false,
     color: "#14B8A6",
     fromDate: new Date(2026, 7, 3),
@@ -296,7 +295,7 @@ const RAIL_EVENTS = [
   {
     title: "Monthly all-hands",
     subtitle: "Q3 roadmap update",
-    description: "",
+    description: "Q3 roadmap and hiring update — bring questions.",
     isPending: false,
     color: "#6366F1",
     fromDate: new Date(2026, 7, 7),
@@ -445,14 +444,13 @@ const CATALOG = [
 
 const Home = () => {
   const [open, setOpen] = useState(false)
-  const [side, setSide] = useState<"right" | "center">("center")
-  const [editing, setEditing] = useState(false)
+  const [side, setSide] = useState<WidgetContainerSide>("main")
   return (
     <div className="p-6">
       <NewHomeLayout
         rightWidgets={RIGHT_WIDGETS}
         slotRenderers={SLOT_RENDERERS}
-        editing={editing}
+        editableWidgetContainers={["right"]}
         onRemoveWidget={() => {}}
         onClickAddNewWidget={(s) => {
           setSide(s)
@@ -461,14 +459,6 @@ const Home = () => {
       >
         <MainColumn />
       </NewHomeLayout>
-      <div className="flex justify-center pt-4">
-        <F0Button
-          variant="outline"
-          icon={editing ? Add : Pencil}
-          label={editing ? "Done" : "Edit Home"}
-          onClick={() => setEditing((e) => !e)}
-        />
-      </div>
       <WidgetCatalog
         isOpen={open}
         onClose={() => setOpen(false)}

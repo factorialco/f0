@@ -110,7 +110,8 @@ export const AllSlots: Story = {
             {
               title: "Company holiday",
               subtitle: "2 days off",
-              description: "",
+              description:
+                "Offices closed Thursday and Friday for the summer break.",
               isPending: false,
               color: "#10B981",
               fromDate: new Date(2026, 6, 30),
@@ -119,7 +120,7 @@ export const AllSlots: Story = {
             {
               title: "Monthly all-hands",
               subtitle: "Q3 roadmap update",
-              description: "",
+              description: "Q3 roadmap and hiring update — bring questions.",
               isPending: false,
               color: "#6366F1",
               fromDate: new Date(2026, 7, 7),

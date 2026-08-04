@@ -1,7 +1,6 @@
 import {
   type CSSProperties,
   forwardRef,
-  Fragment,
   ReactNode,
   useLayoutEffect,
   useRef,
@@ -9,24 +8,17 @@ import {
 } from "react"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { F0Button } from "@/components/F0Button"
+import { Pencil } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
+import { WidgetContainer, type WidgetContainerSide } from "../WidgetContainer"
 import {
   type HomeRenderCtx,
   type HomeWidgetItem,
   type SlotRenderers,
 } from "../slotRenderers"
-
-const AddWidgetBox = ({ onClick }: { onClick: () => void }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="flex items-center justify-center gap-1 rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:text-f1-foreground"
-  >
-    <span aria-hidden>+</span> Add widget
-  </button>
-)
 
 /**
  * The DaytimePage gradient wash, by period — the same stops and the same 8%
@@ -77,12 +69,22 @@ export interface NewHomeLayoutProps {
   slotRenderers?: SlotRenderers
   /** Full override of how a whole widget is drawn. Defaults to `SlotWidget`. */
   renderWidget?: (widget: HomeWidgetItem, ctx: HomeRenderCtx) => ReactNode
-  /** Edit mode: show per-widget chrome (a remove control) over every widget. */
+  /**
+   * Edit mode. Omit it and the layout owns the state itself, toggled by its own
+   * edit button; pass it to drive edit mode from outside.
+   */
   editing?: boolean
+  /** Called when the layout's edit button is pressed. */
+  onEditingChange?: (editing: boolean) => void
+  /**
+   * Which containers a user may actually edit. In edit mode only these show
+   * remove controls and the add placeholder; the others stay put. Both by default.
+   */
+  editableWidgetContainers?: WidgetContainerSide[]
   /** Called with a widget id when its remove control is clicked (edit mode only). */
   onRemoveWidget?: (id: string) => void
   /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
-  onClickAddNewWidget?: (side: "right" | "center") => void
+  onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** The daytime gradient period for the page surface. */
   period?: HomePeriod
   /** Fixed px width of the side rail. */
@@ -124,7 +126,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       aside,
       slotRenderers,
       renderWidget,
-      editing = false,
+      editing,
+      onEditingChange,
+      editableWidgetContainers = ["main", "right"],
       onRemoveWidget,
       onClickAddNewWidget,
       period = "morning",
@@ -157,6 +161,18 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       return () => observer.disconnect()
     }, [])
 
+    // Uncontrolled by default: the layout's own edit button drives it. Passing
+    // `editing` hands control to the caller.
+    const [editingState, setEditingState] = useState(false)
+    const isEditing = editing ?? editingState
+    const toggleEditing = () => {
+      const next = !isEditing
+      if (editing === undefined) setEditingState(next)
+      onEditingChange?.(next)
+    }
+    const canEditSide = (side: WidgetContainerSide) =>
+      editableWidgetContainers.includes(side)
+
     const render = (widget: HomeWidgetItem) => {
       const node = renderWidget ? (
         renderWidget(widget, ctx)
@@ -169,20 +185,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           ctx={ctx}
         />
       )
-      if (!editing) return node
-      return (
-        <div className="relative">
-          {node}
-          <button
-            type="button"
-            aria-label="Remove widget"
-            onClick={() => onRemoveWidget?.(widget.id)}
-            className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-solid border-f1-border bg-f1-background text-f1-foreground-secondary hover:text-f1-foreground"
-          >
-            ✕
-          </button>
-        </div>
-      )
+      return node
     }
 
     const hasSide =
@@ -225,7 +228,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           else if (ref) ref.current = node
         }}
         className={cn(
-          "relative grid h-screen grid-cols-1 items-stretch gap-4 overflow-hidden text-f1-foreground",
+          "relative grid h-screen grid-cols-1 items-stretch gap-4 text-f1-foreground",
           hasSide &&
             "md:[grid-template-columns:minmax(0,1fr)_var(--home-aside-w)]",
           className
@@ -244,21 +247,41 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         >
           <GradientWash period={period} />
         </div>
+        {/* The edit toggle, top-right of the whole layout: entering edit mode is
+            what makes `editableWidgetContainers` take effect (remove controls +
+            the add placeholder appear in the containers it lists). */}
+        <div className="absolute right-0 top-0 z-20">
+          <F0Button
+            variant="outline"
+            size="sm"
+            hideLabel
+            icon={Pencil}
+            label={isEditing ? "Done editing" : "Edit Home"}
+            onClick={toggleEditing}
+          />
+        </div>
         {/* Main column. `min-h-0` + `overflow-y-auto` so THIS column scrolls
             itself rather than growing the page — the rail scrolls separately. */}
         <div className="relative min-h-0 overflow-y-auto">
-          <div
-            className="relative mx-auto flex w-full flex-col gap-6"
+          <WidgetContainer
+            side="main"
+            className="relative mx-auto w-full"
             style={{ maxWidth: `${mainWidth}px` }}
+            widgets={leftWidgets}
+            slotRenderers={slotRenderers}
+            renderWidget={renderWidget}
+            ctx={ctx}
+            editing={isEditing}
+            disableEdition={!canEditSide("main")}
+            onRemoveWidget={onRemoveWidget}
+            onClickAddNewWidget={
+              onClickAddNewWidget
+                ? () => onClickAddNewWidget("main")
+                : undefined
+            }
           >
             {children}
-            {leftWidgets.map((widget) => (
-              <Fragment key={widget.id}>{render(widget)}</Fragment>
-            ))}
-            {onClickAddNewWidget ? (
-              <AddWidgetBox onClick={() => onClickAddNewWidget("center")} />
-            ) : null}
-          </div>
+          </WidgetContainer>
         </div>
         {hasSide ? (
           collapsed ? (
@@ -294,7 +317,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   )}
                 </button>
               ))}
-              {onClickAddNewWidget ? (
+              {isEditing && canEditSide("right") && onClickAddNewWidget ? (
                 <button
                   type="button"
                   aria-label="Add widget"
@@ -306,14 +329,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </aside>
           ) : (
-            <aside className="relative flex min-h-0 flex-col gap-4 overflow-y-auto">
-              {aside}
-              {rightWidgets.map((widget) => (
-                <Fragment key={widget.id}>{render(widget)}</Fragment>
-              ))}
-              {onClickAddNewWidget ? (
-                <AddWidgetBox onClick={() => onClickAddNewWidget("right")} />
-              ) : null}
+            <aside className="relative min-h-0 overflow-y-auto">
+              <WidgetContainer
+                side="right"
+                widgets={rightWidgets}
+                slotRenderers={slotRenderers}
+                renderWidget={renderWidget}
+                ctx={ctx}
+                editing={isEditing}
+                disableEdition={!canEditSide("right")}
+                onRemoveWidget={onRemoveWidget}
+                onClickAddNewWidget={
+                  onClickAddNewWidget
+                    ? () => onClickAddNewWidget("right")
+                    : undefined
+                }
+              >
+                {aside}
+              </WidgetContainer>
             </aside>
           )
         ) : null}
