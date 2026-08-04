@@ -83,12 +83,18 @@ export interface NewHomeLayoutProps {
   onRemoveWidget?: (id: string) => void
   /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
   onClickAddNewWidget?: (side: "right" | "center") => void
-  /** The daytime gradient period for the main area. */
+  /** The daytime gradient period for the page surface. */
   period?: HomePeriod
   /** Fixed px width of the side rail. */
   asideWidth?: number
   /** Max px width of the (centered) main-column content. */
   mainWidth?: number
+  /**
+   * How far the page surface reaches past this layout's box, in px — set it to
+   * the page's own gutter so the gradient runs to the window's edges instead of
+   * stopping at that padding.
+   */
+  bleed?: number
   ctx?: HomeRenderCtx
   className?: string
 }
@@ -98,10 +104,10 @@ export interface NewHomeLayoutProps {
  * prototype's Feed page.
  *
  * A growing MAIN column (content capped to a centered `mainWidth`) next to a
- * FIXED-width side rail, separated only by a gap — no divider. The main area
- * sits on the DaytimePage gradient (`period`); the rail on plain background.
- * Below `md` everything stacks into one column, main first, and the gradient
- * covers the whole page.
+ * FIXED-width side rail, separated only by a gap — no divider. The WHOLE page
+ * sits on one full-bleed DaytimePage gradient (`period`): neither column paints
+ * a background, so the wash runs under both and across the gap, out to the
+ * window's edges. Below `md` everything stacks into one column, main first.
  *
  * WHEN THE LAYOUT IS TOO NARROW for both columns at full width (but still two
  * columns), the rail COLLAPSES: one `lg` avatar per widget carrying that
@@ -124,6 +130,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       period = "morning",
       asideWidth = 396,
       mainWidth = 800,
+      bleed = 24,
       ctx = {},
       className,
     },
@@ -217,20 +224,28 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           if (typeof ref === "function") ref(node)
           else if (ref) ref.current = node
         }}
-        // Below `md` (one column) the WHOLE page sits on the gradient surface.
         className={cn(
           "relative grid min-h-screen grid-cols-1 items-stretch gap-4 text-f1-foreground",
-          "bg-f1-special-page md:bg-transparent",
           hasSide &&
             "md:[grid-template-columns:minmax(0,1fr)_var(--home-aside-w)]",
           className
         )}
         style={{ "--home-aside-w": `${railWidth}px` } as CSSProperties}
       >
-        <GradientWash period={period} className="md:hidden" />
-        {/* Main column: the DaytimePage gradient surface; content centered. */}
-        <div className="relative overflow-hidden md:bg-f1-special-page">
-          <GradientWash period={period} className="hidden md:block" />
+        {/* ONE full-bleed surface for the WHOLE page, under BOTH columns: the
+            gradient reaches `bleed` past every edge, so it runs to the window
+            instead of stopping at the page's own padding. Neither column paints
+            a background of its own — the gradient shows through beneath them,
+            including across the grid's gap. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute overflow-hidden bg-f1-special-page"
+          style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
+        >
+          <GradientWash period={period} />
+        </div>
+        {/* Main column */}
+        <div className="relative">
           <div
             className="relative mx-auto flex w-full flex-col gap-6"
             style={{ maxWidth: `${mainWidth}px` }}
@@ -249,7 +264,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
             <aside
-              className="flex flex-col gap-2 md:bg-f1-background"
+              className="relative flex flex-col gap-2"
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
@@ -290,7 +305,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </aside>
           ) : (
-            <aside className="flex flex-col gap-4 md:bg-f1-background">
+            <aside className="relative flex flex-col gap-4">
               {aside}
               {rightWidgets.map((widget) => (
                 <Fragment key={widget.id}>{render(widget)}</Fragment>
