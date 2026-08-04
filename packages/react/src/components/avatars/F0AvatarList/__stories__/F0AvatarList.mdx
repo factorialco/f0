@@ -1,5 +1,8 @@
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as ListStories from "./F0AvatarList.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import { F0AvatarList } from "../F0AvatarList"
 
 <Meta of={ListStories} />
 
@@ -44,12 +47,17 @@ for each entry.
 #### Overflow
 
 Use `max` to cap how many avatars are visible; the rest collapse into a `+N`
-counter. When you already know the total, pass `remainingCount` to set the
-number shown in the counter directly.
+counter. `remainingCount` adds to that number rather than replacing it — the
+counter renders `remainingCount` plus whatever `max` collapsed
+(`F0AvatarList.tsx:134`), so it is for entities that are not in `avatars` at all.
 
 <Canvas of={ListStories.WithRemainingCount} />
 
-Hovering the `+N` counter opens a popover listing the hidden avatars by name.
+The `+N` counter is a disclosure button. Hovering it opens a popover listing the
+hidden avatars by name; reaching it with Tab and pressing Enter does the same and
+moves focus into the card, so the list can be scrolled from the keyboard. The
+card is capped at the available viewport height, so a large cluster scrolls
+rather than running off the screen.
 
 <Canvas of={ListStories.OverflowPopover} />
 
@@ -62,40 +70,9 @@ the tooltip's secondary line. Hover any avatar to see it.
 
 #### Sizes
 
-AvatarList uses the shared avatar size scale, so a token means the same pixels
-as every other avatar. It supports the three smaller sizes; `md` (medium) is the
-default.
-
-<Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
-    <thead>
-      <tr>
-        <th className="text-left">Size</th>
-        <th className="text-left">Dimensions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <code>md</code> (medium, default)
-        </td>
-        <td>32px</td>
-      </tr>
-      <tr>
-        <td>
-          <code>sm</code> (small)
-        </td>
-        <td>24px</td>
-      </tr>
-      <tr>
-        <td>
-          <code>xs</code> (extra small)
-        </td>
-        <td>20px</td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
+AvatarList supports only `xs`, `sm` and `md` from the shared avatar size scale
+(`2xl` down to `lg` are not available here); `md` is the default. Each token
+means the same pixels as it does on a standalone avatar.
 
 ---
 
@@ -114,3 +91,83 @@ default.
 - A single entity: use the matching `F0Avatar*` component directly
 - Mixing entity types in one list: a list is homogeneous by design — render
   separate lists instead
+
+<DoDonts
+  do={{
+    description:
+      "Cap the row with `max` and let the rest collapse into the `+N` counter — the cluster keeps a fixed footprint and hovering the counter discloses who is hidden",
+    children: (
+      <F0AvatarList
+        type="person"
+        max={3}
+        avatars={[
+          { firstName: "Nik", lastName: "Lopin" },
+          { firstName: "Josep Jaume", lastName: "Rey" },
+          { firstName: "Saúl", lastName: "Domínguez" },
+          { firstName: "Dani", lastName: "Moreno" },
+          { firstName: "Hellen", lastName: "Fernández" },
+          { firstName: "Marie", lastName: "Curie" },
+        ]}
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't add `remainingCount` to a list that already overflows. It is the same six people and the same `max` as on the left, plus `remainingCount={12}` — so the counter reads `+15`, not `+3` or `+12`, and that one prop switches the counter's `list` off, so the three avatars that collapsed out of `avatars` (Dani, Hellen, Marie) can no longer be disclosed by hovering. Reserve `remainingCount` for entities that are not in `avatars` at all",
+    children: (
+      <F0AvatarList
+        type="person"
+        max={3}
+        remainingCount={12}
+        avatars={[
+          { firstName: "Nik", lastName: "Lopin" },
+          { firstName: "Josep Jaume", lastName: "Rey" },
+          { firstName: "Saúl", lastName: "Domínguez" },
+          { firstName: "Dani", lastName: "Moreno" },
+          { firstName: "Hellen", lastName: "Fernández" },
+          { firstName: "Marie", lastName: "Curie" },
+        ]}
+      />
+    ),
+  }}
+/>
+
+---
+
+## Accessibility
+
+The `+N` counter is a `<button>` with `aria-expanded`, so the collapsed names are
+reachable by keyboard: Tab to it, press Enter, and focus moves into the card
+where the list scrolls with the arrow keys. Escape dismisses and returns focus to
+the counter. Hover still opens the card for pointer users, without stealing
+focus.
+
+The card is a `Popover` rather than a `HoverCard` for that reason. A hover card
+cannot contain anything that has to be operated: Radix sets `tabindex="-1"` on
+every tabbable node inside it on each render, which strips the `tabIndex={0}`
+that makes `ScrollArea` keyboard-accessible everywhere else in F0 — leaving a
+scroll region nobody can scroll (axe `scrollable-region-focusable`, WCAG 2.1.1).
+
+Two known limitations remain, and axe can see neither of them, so a green
+automated check does not mean this component is accessible.
+
+- **The cluster is silent to a screen reader** (WCAG 1.1.1, 4.1.2). Every avatar
+  renders `aria-hidden`, because `BaseAvatar` un-hides only when it receives an
+  `aria-label` and AvatarList never forwards one — even though it already
+  computes each display name for the tooltip. A screen reader therefore gets
+  nothing from the cluster except the literal `+N` of the counter. This is a gap
+  in the component, not a design decision; fixing it means labelling the group or
+  forwarding the names, which is a behaviour change and out of scope here. Until
+  then, the names must be available somewhere else — the row, cell or heading the
+  cluster belongs to. A consumer can un-hide one entry by putting `aria-label` on
+  it: `aria-label` and `aria-labelledby` are the only extra keys an entry
+  forwards to the avatar (see `F0Avatar.tsx`, which enumerates props per type
+  rather than spreading them), so any other key on an entry is silently dropped.
+- **Per-avatar tooltips are hover-only.** Unlike the counter, an avatar is not
+  focusable, so a `tooltipDescription` is mouse-only detail (WCAG 2.1.1). Never
+  put anything there that is not also available in the surrounding UI.
+
+At `xs` the counter renders an ellipsis icon rather than `+N`, so it carries no
+visible count. It gets one as visually hidden text, which is also the button's
+accessible name — the same `+N` string it shows at every other size, so the
+accessible name always matches the visible label (WCAG 2.5.3).
