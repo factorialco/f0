@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.0](https://github.com/factorialco/f0/compare/f0-react-v6.1.0...f0-react-v6.2.0) (2026-08-04)
+
+
+### Features
+
+* **F0DataChart:** bar labels by default and stacked bar polish ([#4947](https://github.com/factorialco/f0/issues/4947)) ([ee591bc](https://github.com/factorialco/f0/commit/ee591bc9268ca8baa9cc478aa11a314915755f81))
+
 ## [6.1.0](https://github.com/factorialco/f0/compare/f0-react-v6.0.0...f0-react-v6.1.0) (2026-08-04)
 
 
