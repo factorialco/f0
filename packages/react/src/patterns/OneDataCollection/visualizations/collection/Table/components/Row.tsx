@@ -253,6 +253,7 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         headerGroups={headerGroups}
+        collapsingCellClasses={collapsingCellClasses}
         key={key}
         fromVisualization={fromVisualization}
         registerSelectable={registerSelectable}

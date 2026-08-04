@@ -34,6 +34,7 @@ import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import type {
   CellRendererProps,
+  ColId,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
@@ -99,6 +100,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  /** Marker classes the collapse animation looks the cells up by. */
+  collapsingCellClasses?: ReadonlyMap<ColId, string>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
