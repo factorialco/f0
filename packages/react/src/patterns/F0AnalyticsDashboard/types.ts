@@ -1,6 +1,7 @@
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
+  F0DataChartEmptyStateProps,
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
@@ -214,6 +215,23 @@ export interface DashboardItemBase {
    * @default true
    */
   useDashboardFilters?: boolean
+  /**
+   * Customize the empty state shown when this item has no data to show.
+   *
+   * Same contract as the `F0DataChart` prop of the same name. `title` /
+   * `description` override the default copy everywhere; support for the rest
+   * depends on what the item renders:
+   *
+   * - **chart** — full support. `render` replaces the UI, and `disabled` keeps
+   *   the chart rendered when its data has no points, which also opts the item
+   *   out of the automatic chart → table fallback.
+   * - **metric** — `render` is honoured. `disabled` is not: a metric with no
+   *   value always shows its empty state, since there is nothing to render in
+   *   its place.
+   * - **collection** — the copy feeds the collection's own "no data" and "no
+   *   results" states. `render` and `disabled` do not apply.
+   */
+  emptyState?: F0DataChartEmptyStateProps
 }
 
 // ---------------------------------------------------------------------------

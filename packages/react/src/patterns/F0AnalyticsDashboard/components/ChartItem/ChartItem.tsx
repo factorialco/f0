@@ -47,6 +47,10 @@ import {
   toCanonical,
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
+import {
+  canRenderChart,
+  hasChartDataPoints,
+} from "../../utils/chartRenderability"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 // ---------------------------------------------------------------------------
@@ -317,6 +321,21 @@ function buildNativeChartProps(
 // Table view — renders chart data as a OneDataCollection table
 // ---------------------------------------------------------------------------
 
+/**
+ * The config the tabular converter should run with. After a chart type
+ * transform `config.type` may not match the actual data shape, so the shape
+ * detected from the data wins — that is what picks the right converter.
+ */
+function tabularConfig(
+  config: DashboardChartConfig,
+  data: DashboardChartData
+): DashboardChartConfig {
+  const dataShape = detectDataShape(data, config.type)
+  return dataShape !== config.type
+    ? ({ ...config, type: dataShape } as DashboardChartConfig)
+    : config
+}
+
 function ChartTableView({
   config,
   data,
@@ -324,17 +343,9 @@ function ChartTableView({
   config: DashboardChartConfig
   data: DashboardChartData
 }) {
-  // After a chart type transform, item.chart.type may not match the actual
-  // data shape. Use detectDataShape to pick the right tabular converter.
-  const dataShape = detectDataShape(data, config.type)
-  const effectiveConfig =
-    dataShape !== config.type
-      ? ({ ...config, type: dataShape } as DashboardChartConfig)
-      : config
-
   const tabular = useMemo(
-    () => chartDataToTabular(effectiveConfig, data),
-    [effectiveConfig, data]
+    () => chartDataToTabular(tabularConfig(config, data), data),
+    [config, data]
   )
 
   const sourceDefinition = useMemo(
@@ -409,7 +420,15 @@ export function ChartItem<Filters extends FiltersDefinition>({
   onFullscreenChange,
 }: ChartItemProps<Filters>) {
   const translations = useI18n()
-  const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
+  /**
+   * The view the user picked from the chart-type menu. `null` means they have
+   * not picked one, which leaves the choice to the automatic table fallback
+   * below. Once set it wins forever — an explicit "show me the chart" is not
+   * overridden by our own heuristics.
+   */
+  const [userViewMode, setUserViewMode] = useState<"chart" | "table" | null>(
+    null
+  )
 
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -442,11 +461,36 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // re-renders. Fresh props objects would rebuild the ECharts options and
   // trigger a full `setOption(notMerge)` — which recreates the tooltip and
   // hides it mid-hover — on every parent render.
-  const chartProps = useMemo(
-    () =>
-      data ? buildChartProps(item as DashboardChartItem, data) : undefined,
-    [item, data]
-  )
+  const chartProps = useMemo(() => {
+    if (!data) return undefined
+    const props = buildChartProps(item as DashboardChartItem, data)
+    // Threaded so the in-chart empty state (data present but with no points)
+    // reads the same copy as the wrapper-level one below.
+    return item.emptyState ? { ...props, emptyState: item.emptyState } : props
+  }, [item, data])
+
+  /**
+   * Data came back with points, but the requested chart type cannot place
+   * them — a heatmap fed one-dimensional series is the case the adapter
+   * itself admits it cannot build. Rather than paint an empty frame we show
+   * the same data as a table, which `chartDataToTabular` can always produce.
+   *
+   * Deliberately conservative: it needs data points (empty results stay with
+   * the empty state), a table that would actually have rows, and no
+   * `emptyState.disabled` — that flag means the consumer wants the chart
+   * rendered as-is and no second-guessing from us.
+   */
+  const fallsBackToTable = useMemo(() => {
+    if (!data || !chartProps) return false
+    if (item.emptyState?.disabled) return false
+    if (!hasChartDataPoints(data)) return false
+    if (canRenderChart(chartProps)) return false
+    return (
+      chartDataToTabular(tabularConfig(item.chart, data), data).rows.length > 0
+    )
+  }, [chartProps, data, item.chart, item.emptyState?.disabled])
+
+  const viewMode = userViewMode ?? (fallsBackToTable ? "table" : "chart")
 
   // Determine which chart type options are available for this chart
   const currentOrientation =
@@ -495,9 +539,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
           isActive,
           onSelect: () => {
             if (isTable) {
-              setViewMode("table")
+              setUserViewMode("table")
             } else {
-              setViewMode("chart")
+              setUserViewMode("chart")
               if (
                 item.chart.type !== opt.type ||
                 (opt.type === "bar" && currentOrientation !== opt.orientation)
@@ -537,7 +581,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
         )
       ) : !isLoading ? (
         <div className="h-full w-full px-4 py-3">
-          <DataChartEmptyStateView chartType={item.chart.type} />
+          <DataChartEmptyStateView
+            chartType={item.chart.type}
+            emptyState={item.emptyState}
+          />
         </div>
       ) : null}
     </DashboardItem>

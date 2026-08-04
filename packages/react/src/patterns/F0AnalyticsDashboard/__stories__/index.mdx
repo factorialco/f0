@@ -124,6 +124,30 @@ const [filtersValue, setFiltersValue] = useState<FiltersState<typeof filters>>(
 - WHEN an item sets `useDashboardFilters=false` → THEN that item fetches with an empty filter object.
 - WHEN `items` is empty → THEN the filter bar remains usable without a grid item fetch.
 
+### Empty results
+
+Every item type reports an empty result rather than rendering an empty frame. No prop is required — set `emptyState` on an item to replace the shared default copy with something the reader can act on.
+
+```tsx
+{
+  id: "expenses-by-month",
+  type: "chart",
+  title: "Spend by month",
+  chart: { type: "bar" },
+  emptyState: {
+    title: "No expenses to show",
+    description: "Submit an expense to see it tracked here.",
+  },
+  fetchData,
+}
+```
+
+- WHEN a chart's data has no points → THEN the chart area shows the empty state, with the item's copy when it sets any.
+- WHEN a metric resolves without a usable number → THEN the tile shows the empty state instead of a blank body. A value of `0` is a metric, not an absence.
+- WHEN a collection loads zero rows → THEN it shows its own empty state, fed by the item's copy, instead of column headers over a blank body.
+- WHEN data has points the requested chart type cannot place (for example a heatmap fed one-dimensional series) → THEN the item renders that data as a table, and the chart-type menu still switches back.
+- WHEN an item sets `emptyState.disabled` → THEN its chart renders as-is, including the table fallback opt-out. It has no effect on metrics or collections.
+
 ### Usage examples
 
 Every example keeps the applied value visible above the report, so committed changes can be reviewed without inspecting component internals.

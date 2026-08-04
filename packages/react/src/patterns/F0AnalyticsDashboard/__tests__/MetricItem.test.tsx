@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import type { DashboardMetricItem } from "../types"
+import type { DashboardMetricData, DashboardMetricItem } from "../types"
 
 import { MetricItem, MetricValue } from "../components/MetricItem/MetricItem"
 
@@ -170,6 +170,88 @@ describe("MetricItem", () => {
     await waitFor(() =>
       expect(currentContainer).toHaveAttribute("tabindex", "0")
     )
+  })
+
+  describe("empty state", () => {
+    const noData = () =>
+      metricItem({
+        fetchData: () =>
+          Promise.resolve(undefined as unknown as DashboardMetricData),
+      })
+
+    it("shows the default copy instead of a blank tile", async () => {
+      render(<MetricItem item={noData()} filters={{}} />)
+
+      expect(await screen.findByText("No data available")).toBeInTheDocument()
+      expect(
+        screen.getByText("Try a different date or fewer filters")
+      ).toBeInTheDocument()
+    })
+
+    it("prefers the per-item copy", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            fetchData: () =>
+              Promise.resolve(undefined as unknown as DashboardMetricData),
+            emptyState: {
+              title: "No salaries yet",
+              description: "Add a contract to see this metric.",
+            },
+          })}
+          filters={{}}
+        />
+      )
+
+      expect(await screen.findByText("No salaries yet")).toBeInTheDocument()
+      expect(
+        screen.getByText("Add a contract to see this metric.")
+      ).toBeInTheDocument()
+      expect(screen.queryByText("No data available")).not.toBeInTheDocument()
+    })
+
+    it("honours the render escape hatch", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            fetchData: () =>
+              Promise.resolve(undefined as unknown as DashboardMetricData),
+            emptyState: { render: () => <div>Nothing to report</div> },
+          })}
+          filters={{}}
+        />
+      )
+
+      expect(await screen.findByText("Nothing to report")).toBeInTheDocument()
+    })
+
+    it.each([NaN, Infinity])(
+      "treats %s as empty rather than formatting it",
+      async (value) => {
+        render(
+          <MetricItem
+            item={metricItem({ fetchData: () => Promise.resolve({ value }) })}
+            filters={{}}
+          />
+        )
+
+        expect(await screen.findByText("No data available")).toBeInTheDocument()
+        expect(screen.queryByText("NaN")).not.toBeInTheDocument()
+        expect(screen.queryByText("∞")).not.toBeInTheDocument()
+      }
+    )
+
+    it("still renders a zero value — 0 is a metric, not an absence", async () => {
+      render(
+        <MetricItem
+          item={metricItem({ fetchData: () => Promise.resolve({ value: 0 }) })}
+          filters={{}}
+        />
+      )
+
+      expect(await screen.findByText("0")).toBeInTheDocument()
+      expect(screen.queryByText("No data available")).not.toBeInTheDocument()
+    })
   })
 
   it("rechecks overflow when the same metric is resized", async () => {

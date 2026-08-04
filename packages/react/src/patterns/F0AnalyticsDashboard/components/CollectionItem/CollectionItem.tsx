@@ -7,6 +7,7 @@ import type {
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -44,20 +45,61 @@ export function CollectionItem<Filters extends FiltersDefinition>({
 }: CollectionItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
+  const translations = useI18n()
+
+  /**
+   * Bumped by the error state's retry action. `OneDataCollection`'s built-in
+   * retry re-applies the current filters to trigger a refetch, which is a
+   * no-op for a dashboard collection: its source declares no filters of its
+   * own (the dashboard bakes them in), so the "changed" filters compare equal,
+   * nothing is refetched, and clearing the error uncovers a header-only grid
+   * with no message. Rebuilding the source from here forces the fetch.
+   */
+  const [retryNonce, setRetryNonce] = useState(0)
 
   // Memoize the source definition to avoid re-creating on every render.
-  // Re-creates when filters change (JSON key).
+  // Re-creates when filters change (JSON key) or on an explicit retry.
   const filtersKey = JSON.stringify(effectiveFilters)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sourceDefinition = useMemo(
     () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey]
+    [filtersKey, retryNonce]
   )
 
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
+    retryNonce,
   ])
+
+  /**
+   * The collection already detects "loaded, but zero rows" and swaps the grid
+   * for an empty state; this only feeds it the per-item copy and the working
+   * retry. `emptyState.render` / `disabled` have no counterpart here — see the
+   * per-type notes on `DashboardItemBase.emptyState`.
+   */
+  const emptyStates = useMemo(() => {
+    const copy = {
+      ...(item.emptyState?.title ? { title: item.emptyState.title } : {}),
+      ...(item.emptyState?.description
+        ? { description: item.emptyState.description }
+        : {}),
+    }
+
+    return {
+      "no-data": copy,
+      "no-results": copy,
+      error: {
+        actions: [
+          {
+            label: translations.collections.emptyStates.error.retry,
+            onClick: () => setRetryNonce((nonce) => nonce + 1),
+            variant: "neutral" as const,
+          },
+        ],
+      },
+    }
+  }, [item.emptyState?.description, item.emptyState?.title, translations])
 
   // We capture the current table visualization settings (hidden columns +
   // user-chosen order) via OneDataCollection's `onStateChange` callback so
@@ -132,6 +174,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
         fullHeight
         source={source}
         visualizations={item.visualizations}
+        emptyStates={emptyStates}
         // We deliberately do NOT enable `csvExport` here — the dashboard
         // surface already exposes Excel + CSV downloads from the
         // DashboardItem 3-dot menu (`downloadActions` above) and both
