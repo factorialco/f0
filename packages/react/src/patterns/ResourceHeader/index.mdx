@@ -48,6 +48,32 @@ Designed to display information about a team.
 
 <Canvas of={ResourceHeaderStories.TeamHeader} />
 
+### Condensed
+
+The header gives up its height as the reader scrolls down the page: the metadata
+closes away, the avatar drops two sizes, and the name and role read as one line
+of identity. Scrolling back to the top brings it all back.
+
+**There is nothing to switch on.** Inside `Navigation/Page` this happens on its
+own, because the page owns both the header slot and the scrolling body and is
+therefore the only thing that can drive it. There is no prop for it and no
+distance to set, which is what keeps every resource page in the product
+condensing the same way. A tab strip in the same slot rises with the header.
+
+`collapsed` renders the condensed state directly, for a header with no scrolling
+page around it, such as one in a dialog. It is not an off switch: passing `false`
+does not stop the scroll collapse.
+
+**Accessibility.** A reader who prefers reduced motion keeps the header open at
+full size, since a header that morphs continuously under a scroll is exactly the
+motion that preference asks to avoid. The `collapsed` state still renders, and
+its 150ms tween is dropped.
+
+The collapse also stays out of the way on a page that barely scrolls, where
+giving the height back would leave nothing left to scroll.
+
+<Canvas of={ResourceHeaderStories.Condensed} />
+
 ---
 
 # Guidelines

@@ -398,6 +398,23 @@ export const PersonHeader: Story = {
   },
 }
 
+/**
+ * The condensed state, for a resource header with no scrolling page around it,
+ * such as one in a dialog. The metadata is closed away, the avatar has dropped
+ * two sizes, and the name and role read as one line of identity.
+ *
+ * Inside `Navigation/Page` this happens on its own as the reader scrolls, and
+ * `collapsed` is not how that is controlled. Passing `false` does not switch it
+ * off, and there is deliberately no way to: every resource page in the product
+ * condenses over the same distance.
+ */
+export const Condensed: Story = {
+  args: {
+    ...PersonHeader.args,
+    collapsed: true,
+  },
+}
+
 export const EmojiHeader: Story = {
   tags: ["!dev"],
   args: {
