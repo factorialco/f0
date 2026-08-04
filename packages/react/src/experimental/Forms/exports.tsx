@@ -7,3 +7,4 @@ export * from "../../components/CardSelectable"
  */
 export * from "../../deprecated/EntitySelect/exports"
 export * from "./Fields/exports"
+export * from "./F0FilterTagPicker"

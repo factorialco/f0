@@ -1,0 +1,424 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0FilterTagPicker.stories"
+
+<Meta of={Stories} />
+
+# F0FilterTagPicker
+
+`F0FilterTagPicker` selects concrete employee filters as removable dot tags. It can either preserve natural-language intent alongside those tags or use typed text only as a transient search.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>filters</code>
+        </td>
+        <td>
+          <code>F0FilterTagPickerFiltersDefinition</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Option definitions restricted to <code>type: "in"</code>, including
+          local, asynchronous, hierarchical, and remote sources.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>F0FilterTagPickerValue&lt;Filters&gt;</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Controlled sequence of free-text and filter tokens.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onChange</code>
+        </td>
+        <td>
+          <code>(value: F0FilterTagPickerValue&lt;Filters&gt;) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Receives the complete normalized token sequence after every edit.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Visible label and accessible name for the editor.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>mode</code>
+        </td>
+        <td>
+          <code>"mixed" | "tags"</code>
+        </td>
+        <td>
+          <code>"mixed"</code>
+        </td>
+        <td>—</td>
+        <td>
+          Persists free text alongside tags or uses it only as a transient
+          search query.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>placeholder</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>Localized mode-specific prompt</td>
+        <td>—</td>
+        <td>Prompt displayed while the token document is empty.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>categoryColors</code>
+        </td>
+        <td>
+          <code>Partial&lt;Record&lt;keyof Filters, NewColor&gt;&gt;</code>
+        </td>
+        <td>Stable generated colors</td>
+        <td>—</td>
+        <td>Overrides the dot color for individual filter categories.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Preserves content while preventing editing, searching, selection, and
+          removal.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dataTestId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds a test identifier to the component root.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Modes
+
+<Canvas of={Stories.Modes} />
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Mode</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>mixed</code> (default)
+        </td>
+        <td>
+          Keeps free text, line breaks, and tags in the ordered controlled
+          value.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>tags</code>
+        </td>
+        <td>
+          Uses typed text only to find options. Emits filter tokens and clears
+          unfinished text when focus leaves the editor.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### States
+
+<Canvas of={Stories.Disabled} />
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Visual indicator</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Focused</td>
+        <td>
+          Edits text and searches the fragment immediately before the caret.
+        </td>
+        <td>Selected border and focus ring.</td>
+      </tr>
+      <tr>
+        <td>Loading</td>
+        <td>Keeps resolved options usable while another provider loads.</td>
+        <td>Skeleton rows and a live loading announcement.</td>
+      </tr>
+      <tr>
+        <td>Error</td>
+        <td>
+          Keeps healthy sources usable and retries only the failed category.
+        </td>
+        <td>Flat critical retry row named after the category.</td>
+      </tr>
+      <tr>
+        <td>Disabled</td>
+        <td>Displays the token document without allowing changes.</td>
+        <td>Disabled surface and remove controls.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0FilterTagPicker when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Employee audience definition</td>
+        <td>Recognizable attributes and explanatory text need to coexist.</td>
+      </tr>
+      <tr>
+        <td>Large mixed catalogs</td>
+        <td>
+          Teams, workplaces, locations, and roles should be searched from one
+          field.
+        </td>
+      </tr>
+      <tr>
+        <td>Future interpretation</td>
+        <td>
+          Free text must remain available alongside today&apos;s structured
+          filters.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Date, number range, or custom filter editors</td>
+        <td>
+          <code>F0FilterPickerContent</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Advanced nested AND/OR rules</td>
+        <td>A query-builder pattern</td>
+      </tr>
+      <tr>
+        <td>One short option list without free text</td>
+        <td>
+          <code>F0Select</code> in multiple-selection mode
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do&apos;s and don&apos;ts**
+
+<DoDonts
+  do={{
+    description:
+      "Combine recognizable intent and values, such as ‘People in [Madrid] who work as [Engineer]’.",
+  }}
+  dont={{
+    description:
+      "Expose operators or backend identifiers, such as ‘location_id IN 42’.",
+  }}
+/>
+
+### Content best practices
+
+- Use a label that names the audience or records being defined.
+- Keep category and option labels concise enough to scan inside tags.
+- Use employee-facing language rather than database terminology.
+  - **Correct:** “Software engineer”, “Barcelona”, “Remote”
+  - **Incorrect:** “role_id: 12”, “location_eq”, “workplace_flag”
+
+<DoDonts
+  do={{
+    description: "Use employee-facing labels such as ‘Customer support agent’.",
+  }}
+  dont={{
+    description:
+      "Expose implementation labels such as ‘role_id: support_agent’.",
+  }}
+/>
+
+### Behavior
+
+- `Filters` preserves each filter key&apos;s option-value type. `value` and `onChange: (value: F0FilterTagPickerValue<Filters>) => void` use the same generic definition.
+- WHEN `mode="mixed"` → THEN `onChange` receives the full ordered sequence, with adjacent text merged, empty text removed, and line breaks preserved as `\n`.
+- WHEN `mode="tags"` → THEN typed text remains a transient query, `onChange` emits only filter tokens, Enter never inserts a line break, and unfinished text clears on blur.
+- WHEN `filterTagPickerValueToFiltersState(value)` runs → THEN it omits text, groups selected values by filter key, and removes duplicates.
+- WHEN the active fragment has two or more characters → THEN every remote source is queried after a 250 ms debounce; local and asynchronous providers are filtered immediately.
+- WHEN a suggestion is selected → THEN the longest matching phrase immediately before the caret becomes a tag.
+- TipTap is an internal editor implementation; HTML is not part of the public API and pasted external content becomes plain text.
+
+### Usage examples
+
+**Employee audience with mixed text and filters**
+
+The story combines Teams, Workplace, Location, and Role and displays both the canonical token JSON and derived `FiltersState`.
+
+<Canvas of={Stories.MixedTextAndFilters} />
+
+**Remote people search**
+
+Type at least two characters, such as `gr`, to query the remote source. Existing remote values resolve through `getLabel` without storing display metadata in the token.
+
+<Canvas of={Stories.RemoteSource} />
+
+**Hierarchical office selection**
+
+Type `floor` to reveal child options. A selected child keeps its parent path in the tag and writes to the child&apos;s declared `filterKey`.
+
+<Canvas of={Stories.HierarchicalOptions} />
+
+**Loading and retry**
+
+Type any team fragment in the loading story to reveal its live loading state. Type `team` in the error story to reveal the flat `Retry Teams` action.
+
+<Canvas of={Stories.Loading} />
+
+<Canvas of={Stories.ErrorAndRetry} />
+
+## Accessibility
+
+The editable surface uses a combobox linked to a flat listbox. Option rows include visible category text in addition to their colored dots, and tags expose their category in their accessible name. Additions, removals, loading, and source failures use live announcements.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Arrow Down</kbd> / <kbd>Arrow Up</kbd>
+        </td>
+        <td>Move through suggestion, retry, and pagination rows.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd>
+        </td>
+        <td>
+          Select the active row. Without an active row, insert a line break in
+          mixed mode or keep the transient query unchanged in tags mode.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Shift</kbd> + <kbd>Enter</kbd>
+        </td>
+        <td>Insert a line break in mixed mode. Tags mode does not add one.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Close suggestions without deleting free text.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Backspace</kbd> / <kbd>Delete</kbd>
+        </td>
+        <td>Remove an adjacent filter tag or edit ordinary text.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Move focus without trapping it in the editor.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- `aria-expanded`, `aria-controls`, and `aria-activedescendant` expose the current suggestion state while focus stays in the editor.
+- Each option announces its display label and category; already-selected options are omitted.
+- The disabled editor exposes `aria-disabled="true"` and every remove action is disabled.
+- Loading, filter additions and removals, and individual source failures are announced without moving focus.

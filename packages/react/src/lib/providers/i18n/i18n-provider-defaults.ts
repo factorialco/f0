@@ -153,6 +153,22 @@ export const defaultTranslations = {
     inFilter: {
       searchPlaceholder: "Search options...",
     },
+    tagPicker: {
+      searchPlaceholder: "Describe people or type a location, role, team...",
+      tagsPlaceholder: "Search locations, roles, teams...",
+      availableOptions: "Available filter options",
+      removeValue: "Remove {{value}} from {{category}}",
+      loadingOptions: "Loading options...",
+      failedToLoad: "Failed to load {{category}} options",
+      retryCategory: "Retry {{category}}",
+      loadMoreCategory: "Load more {{category}}",
+      keyboardHint:
+        "Write freely. Use arrow keys to navigate suggestions, Enter to add a filter, Shift+Enter to insert a line break, Escape to close, and Backspace or Delete to remove tags.",
+      keyboardHintTags:
+        "Type to search. Use arrow keys to navigate suggestions, Enter to add a filter, Escape to close, and Backspace or Delete to remove tags.",
+      added: "{{value}} added to {{category}}",
+      removed: "{{value}} removed from {{category}}",
+    },
     activeFilters: "Active filters: {{filters}}",
     filteringBy: "Filtering by {{label}}",
     availableFilters: "Available filters",
@@ -528,6 +544,7 @@ export const defaultTranslations = {
     searchPlaceholder: "Search messages",
     closeSearch: "Close search",
     noResults: "No chats found",
+    online: "Online",
     backToLatest: "Jump to latest",
     muted: "Muted",
     mute: "Mute",
