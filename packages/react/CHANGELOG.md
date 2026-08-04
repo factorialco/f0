@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.76.0](https://github.com/factorialco/f0/compare/f0-react-v4.75.1...f0-react-v4.76.0) (2026-08-04)
+
+
+### Features
+
+* **F0AiMessagesContainer:** welcome screen caption and subtitle ([#4843](https://github.com/factorialco/f0/issues/4843)) ([7566b5e](https://github.com/factorialco/f0/commit/7566b5e545f5144c60a371a6e484b1c2fb749946))
+
 ## [4.75.1](https://github.com/factorialco/f0/compare/f0-react-v4.75.0...f0-react-v4.75.1) (2026-08-04)
 
 
