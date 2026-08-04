@@ -1513,6 +1513,13 @@ export declare type ChatThread = {
     title: string;
     createdAt: string;
     updatedAt: string;
+    /** Rendered before the title (e.g. a chart icon for Analytics chats). */
+    icon?: IconType;
+    /**
+     * Secondary label at the row's end, revealed on hover/focus like the date
+     * (e.g. "Analytics" for mode-bound chats).
+     */
+    trailingLabel?: string;
 };
 
 /**
@@ -2539,6 +2546,14 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+        readonly tooltip: {
+            readonly ofTotal: "of total";
+            readonly total: "total";
+            readonly target: "target";
+            readonly ofRange: "of range";
+            readonly fromPrevious: "from previous";
+            readonly fromStage: "from {{stage}}";
+        };
     };
     readonly progressSeries: {
         readonly noData: "No data";
@@ -3370,6 +3385,11 @@ export declare type F0AiMessagesContainerProps = {
     /** Welcome phrase shown centered when the chat is empty. Falls back to
      *  `translations.ai.defaultInitialMessage` if omitted. */
     initialMessage?: string | string[];
+    /** Static line above the welcome phrase, same size but secondary color
+     *  (e.g. "Analytics mode:"). */
+    initialMessageCaption?: string;
+    /** Smaller secondary line below the welcome phrase. */
+    initialMessageSubtitle?: string;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -3726,7 +3746,7 @@ declare type F0AvatarTeamProps = {
  * Shows an avatar, title, optional description, and a configurable action button.
  *
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
- * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * The AI Cocreation flow already renders these cards with `F0CardHorizontal` directly
  * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
  * wrapper). Don't add new usages; migrate the remaining one
  * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
@@ -3938,7 +3958,7 @@ declare const f0FileItemSizes: readonly ["md", "lg"];
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
  * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
  * `rejectAction` for the pending state, `status` for the resolved outcome, and
- * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * `secondaryActions` for a single CTA. The AI Cocreation flow no longer uses this component —
  * don't add new usages.
  * @removeIn 5.0.0
  */
@@ -5277,6 +5297,27 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

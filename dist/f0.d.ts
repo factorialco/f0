@@ -2695,10 +2695,19 @@ declare interface ChartConfigBase {
     showLegend?: boolean;
     /** Show background grid lines. @default true */
     showGrid?: boolean;
-    /** Show value labels on each data point. @default false */
+    /**
+     * Show value labels on each data point.
+     * @default true for bar charts, false otherwise
+     */
     showLabels?: boolean;
     /** Format the value axis tick labels */
     valueFormatter?: (value: number) => string;
+    /**
+     * Format the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}; set it when the axis and labels must stay compact
+     * while the tooltip carries the exact figure.
+     */
+    tooltipValueFormatter?: (value: number) => string;
     /** Format category axis tick labels */
     categoryFormatter?: (value: string) => string;
 }
@@ -2745,8 +2754,27 @@ declare interface ChartThemeColors {
     border: string;
     /** Tooltip background color (CSS rgba string) */
     tooltipBackground: string;
-    /** Chart container background — used when chart needs to know its own bg */
+    /** Page-level background token for the active mode */
     background: string;
+    /**
+     * The color actually painted behind the chart — the nearest ancestor with a
+     * non-transparent background, falling back to {@link background}. Use this
+     * when a chart needs to blend into its own surface (a tinted card, a modal)
+     * rather than into the page.
+     *
+     * Always set by {@link resolveChartTheme}; optional only so that themes built
+     * by hand (test fixtures, consumer overrides) keep compiling — read it as
+     * `containerBackground ?? background`.
+     */
+    containerBackground?: string;
+    /**
+     * Positive delta text (e.g. tooltip "+x% from previous"). Resolves from
+     * --positive-70. Optional so a hand-built theme stays valid — tooltip rows
+     * fall back to `foreground` when it is absent.
+     */
+    positive?: string;
+    /** Negative delta text. Resolves from --critical-70. Optional, as `positive`. */
+    critical?: string;
 }
 
 /** Typography configuration */
@@ -2992,6 +3020,13 @@ export declare type ChatThread = {
     title: string;
     createdAt: string;
     updatedAt: string;
+    /** Rendered before the title (e.g. a chart icon for Analytics chats). */
+    icon?: IconType;
+    /**
+     * Secondary label at the row's end, revealed on hover/focus like the date
+     * (e.g. "Analytics" for mode-bound chats).
+     */
+    trailingLabel?: string;
 };
 
 /**
@@ -3873,11 +3908,15 @@ declare type DataAttributes_2 = {
  * + render-prop) into rendered output. Used internally by `F0DataChart` and
  * reused by dashboard wrappers when data is absent.
  */
-export declare const DataChartEmptyStateView: ({ chartType, emptyState, }: DataChartEmptyStateViewProps) => JSX_2.Element;
+export declare const DataChartEmptyStateView: ({ emptyState, }: DataChartEmptyStateViewProps) => JSX_2.Element;
 
 declare interface DataChartEmptyStateViewProps {
-    /** The chart variant — drives the background skeleton illustration. */
-    chartType: F0DataChartProps["type"];
+    /**
+     * @deprecated No longer used — the empty state renders text only. Remove the prop.
+     * @removeIn 5.0.0
+     * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-datachart-emptystate-charttype-removal.md
+     */
+    chartType?: F0DataChartProps["type"];
     emptyState?: F0DataChartEmptyStateProps;
 }
 
@@ -5156,6 +5195,14 @@ export declare const defaultTranslations: {
         readonly emptyState: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
+        };
+        readonly tooltip: {
+            readonly ofTotal: "of total";
+            readonly total: "total";
+            readonly target: "target";
+            readonly ofRange: "of range";
+            readonly fromPrevious: "from previous";
+            readonly fromStage: "from {{stage}}";
         };
     };
     readonly progressSeries: {
@@ -6875,6 +6922,11 @@ export declare type F0AiMessagesContainerProps = {
     /** Welcome phrase shown centered when the chat is empty. Falls back to
      *  `translations.ai.defaultInitialMessage` if omitted. */
     initialMessage?: string | string[];
+    /** Static line above the welcome phrase, same size but secondary color
+     *  (e.g. "Analytics mode:"). */
+    initialMessageCaption?: string;
+    /** Smaller secondary line below the welcome phrase. */
+    initialMessageSubtitle?: string;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -7928,7 +7980,7 @@ export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typ
  * Shows an avatar, title, optional description, and a configurable action button.
  *
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
- * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * The AI Cocreation flow already renders these cards with `F0CardHorizontal` directly
  * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
  * wrapper). Don't add new usages; migrate the remaining one
  * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
@@ -8370,8 +8422,10 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     labelFontSize?: number;
     /**
      * Formatter for the values shown in the hover tooltip. Defaults to
-     * {@link F0DataChartBaseProps.valueFormatter}; set it to show precise values
-     * (e.g. "107,505") while the axis and labels stay compact ("107.5K").
+     * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the
+     * axis reads the same on hover, then to a plain localized number. Set it when
+     * the axis has to stay compact ("107.5K") but the tooltip should be exact
+     * ("107,505").
      */
     tooltipValueFormatter?: (value: number) => string;
 }
@@ -8482,6 +8536,13 @@ export declare interface F0DataChartFunnelProps extends F0DataChartCommonProps {
     /** Format the value displayed in labels and tooltip */
     valueFormatter?: (value: number) => string;
     /**
+     * Formatter for the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+     * on hover, then to a plain localized number. Set it when the labels have to
+     * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+     */
+    tooltipValueFormatter?: (value: number) => string;
+    /**
      * Map stage colors to their values using a gradient scale (light→dark).
      * When enabled, higher values get a more intense color. @default true
      */
@@ -8524,6 +8585,13 @@ export declare interface F0DataChartGaugeProps extends F0DataChartCommonProps {
     showValue?: boolean;
     /** Format the value displayed */
     valueFormatter?: (value: number) => string;
+    /**
+     * Formatter for the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+     * on hover, then to a plain localized number. Set it when the labels have to
+     * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+     */
+    tooltipValueFormatter?: (value: number) => string;
     /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
     echartsOptions?: Partial<echarts_2.EChartsOption>;
 }
@@ -8554,6 +8622,13 @@ export declare interface F0DataChartHeatmapProps extends F0DataChartCommonProps 
     showVisualMap?: boolean;
     /** Format values in labels and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Formatter for the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+     * on hover, then to a plain localized number. Set it when the labels have to
+     * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+     */
+    tooltipValueFormatter?: (value: number) => string;
     /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
     echartsOptions?: Partial<echarts_2.EChartsOption>;
 }
@@ -8580,6 +8655,14 @@ export declare interface F0DataChartLineProps extends F0DataChartBaseProps {
     showArea?: boolean;
     /** Show data point dots on the lines. @default false */
     showDots?: boolean;
+    /**
+     * Formatter for the values shown in the hover tooltip. Defaults to
+     * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the
+     * axis reads the same on hover, then to a plain localized number. Set it when
+     * the axis has to stay compact ("107.5K") but the tooltip should be exact
+     * ("107,505").
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -8636,6 +8719,13 @@ export declare interface F0DataChartPieProps extends F0DataChartCommonProps {
     showPercentage?: boolean;
     /** Format the value displayed in labels and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Formatter for the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+     * on hover, then to a plain localized number. Set it when the labels have to
+     * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+     */
+    tooltipValueFormatter?: (value: number) => string;
     /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
     echartsOptions?: Partial<echarts_2.EChartsOption>;
 }
@@ -8690,6 +8780,13 @@ export declare interface F0DataChartRadarProps extends F0DataChartCommonProps {
     showLabels?: boolean;
     /** Format values in labels and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Formatter for the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+     * on hover, then to a plain localized number. Set it when the labels have to
+     * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+     */
+    tooltipValueFormatter?: (value: number) => string;
     /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
     echartsOptions?: Partial<echarts_2.EChartsOption>;
 }
@@ -10668,7 +10765,7 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
  * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
  * `rejectAction` for the pending state, `status` for the resolved outcome, and
- * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * `secondaryActions` for a single CTA. The AI Cocreation flow no longer uses this component —
  * don't add new usages.
  * @removeIn 5.0.0
  */
@@ -12790,6 +12887,12 @@ export declare interface FunnelChartConfig {
     colorScale?: boolean;
     /** Format the value displayed in labels and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Format the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}; set it when the axis and labels must stay compact
+     * while the tooltip carries the exact figure.
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -12843,6 +12946,12 @@ export declare interface GaugeChartConfig {
     showValue?: boolean;
     /** Format the value displayed inside the gauge */
     valueFormatter?: (value: number) => string;
+    /**
+     * Format the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}; set it when the axis and labels must stay compact
+     * while the tooltip carries the exact figure.
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -13262,6 +13371,36 @@ export declare type GroupRecord<RecordType> = {
  */
 export declare function hasF0Config(schema: ZodTypeAny): boolean;
 
+/**
+ * Configuration for a single header group, keyed by `headerGroupId` in the
+ * `headerGroups` visualization option.
+ */
+declare type HeaderGroupDefinition = {
+    /**
+     * The label rendered in the spanning header row.
+     */
+    label: string;
+    /**
+     * Ids of the columns in this group that stay visible while the group is
+     * collapsed — the group's "summary" columns. Providing this key is what
+     * makes the group collapsible; omit it for a purely visual group.
+     *
+     * Ids are matched against each column's `id` (falling back to its `label`,
+     * mirroring how column ids are resolved elsewhere). Ids that don't belong to
+     * this group are ignored. A collapsed group always keeps at least one
+     * column, so passing `[]` — or only unknown ids — leaves the group's first
+     * column visible.
+     */
+    collapsedColumns?: ColId[];
+    /**
+     * Whether the group renders collapsed on first render. Only meaningful for
+     * collapsible groups. Read once on mount; afterwards the collapsed state is
+     * owned by the table.
+     * @default false
+     */
+    defaultCollapsed?: boolean;
+};
+
 export declare interface HeaderProps {
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -13303,6 +13442,12 @@ export declare interface HeatmapChartConfig {
     showVisualMap?: boolean;
     /** Format the value displayed in cells and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Format the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}; set it when the axis and labels must stay compact
+     * while the tooltip carries the exact figure.
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -14769,7 +14914,7 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
     value?: string | null;
 } | {
     type: "rating";
-    value: number;
+    value?: number;
     options?: {
         value: number;
         label: string;
@@ -15279,6 +15424,12 @@ export declare interface PieChartConfig {
     showPercentage?: boolean;
     /** Format the value displayed in labels and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Format the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}; set it when the axis and labels must stay compact
+     * while the tooltip carries the exact figure.
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -15689,6 +15840,12 @@ export declare interface RadarChartConfig {
     showLabels?: boolean;
     /** Format the value displayed in labels and tooltip */
     valueFormatter?: (value: number) => string;
+    /**
+     * Format the value shown in the hover tooltip. Defaults to
+     * {@link valueFormatter}; set it when the axis and labels must stay compact
+     * while the tooltip carries the exact figure.
+     */
+    tooltipValueFormatter?: (value: number) => string;
 }
 
 /**
@@ -16741,13 +16898,13 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
     /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
-     * The label for each group is provided via `headerGroupLabels` in
-     * the visualization options.
+     * Each group is configured via `headerGroups` in the visualization
+     * options, which also controls whether the group can be collapsed.
      */
     headerGroupId?: string;
 };
 
-declare function TableHead({ children, width, minWidth, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
+declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
 declare type TableHeaderInfo = {
     title: string;
@@ -16794,10 +16951,16 @@ declare interface TableHeadProps {
      */
     sortState?: "none" | "asc" | "desc";
     /**
-     * Callback fired when the sort button is clicked.
+     * Callback fired when the header is clicked to sort.
      * Use this to handle toggling between sort states.
      */
     onSortClick?: () => void;
+    /**
+     * Callback fired when the header cell is clicked, for cells that are
+     * actionable beyond sorting. Like {@link onSortClick}, the whole cell is the
+     * target — see the note on the cell's click handler.
+     */
+    onClick?: () => void;
     /**
      * Optional header info. When provided, displays an info icon next to the
      * header content. Pass a string for a short text tooltip, or a
@@ -16872,10 +17035,31 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
-     * Labels for header groups. Keys are headerGroupId values used in column
-     * definitions, values are the display labels rendered in the spanning header row.
+     * Header group configuration. Keys are the `headerGroupId` values used in
+     * column definitions. Pass a string for a plain spanning label, or a
+     * {@link HeaderGroupDefinition} to also make the group collapsible:
+     *
+     * ```ts
+     * headerGroups: {
+     *   personal: "Personal information",
+     *   january: {
+     *     label: "January",
+     *     collapsedColumns: ["january-total"],
+     *     defaultCollapsed: true,
+     *   },
+     * }
+     * ```
+     *
+     * A collapsed group hides every column in it except the ones listed in
+     * `collapsedColumns`, and renders a toggle next to its label.
      */
-    headerGroupLabels?: Record<string, string>;
+    headerGroups?: Record<string, string | HeaderGroupDefinition>;
+    /**
+     * Called when the user collapses or expands a header group. Fires after the
+     * table has applied the change; use it to persist the state, not to control
+     * it.
+     */
+    onHeaderGroupCollapsedChange?: (groupId: string, collapsed: boolean) => void;
     /**
      * Wraps the table in a rounded border container.
      * Useful for embedding the table inside panels or detail views.
@@ -17327,7 +17511,9 @@ export declare type ToastOptions = {
     id?: ToastId;
 } & ({
     /**
-     * The duration of the toast in milliseconds (if not provided, the toast will stay open until the user closes it)
+     * The duration of the toast in milliseconds. Defaults to 5000ms, or
+     * 10000ms when the toast has an action (more time to read and reach it).
+     * Use `persistent: true` to keep it open until the user closes it.
      * @default 5000
      */
     duration?: number;
@@ -17384,7 +17570,7 @@ export declare const toasts: {
     closeAll: () => void;
 };
 
-declare const toastVariants: readonly ["error", "warning", "success", "default"];
+declare const toastVariants: readonly ["error", "warning", "success", "loading", "default"];
 
 /** A button rendered in the footer at the bottom of the table of contents */
 declare type TOCAction = {
@@ -18883,6 +19069,27 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

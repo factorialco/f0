@@ -766,6 +766,14 @@ const e = {
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters"
+    },
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}"
     }
   },
   progressSeries: {
