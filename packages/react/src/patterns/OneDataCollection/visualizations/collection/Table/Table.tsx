@@ -472,17 +472,33 @@ export const TableCollection = <
                       groupBorderClass,
                       !isClickable && "hover:after:bg-transparent"
                     )
+                    // The spanning label takes the alignment of the columns
+                    // under it, so it sits on the same edge as their content
+                    // instead of floating over the middle of the span.
+                    const align = entry.columnIndices.every(
+                      (columnIndex) => columns[columnIndex].align === "right"
+                    )
+                      ? "right"
+                      : "left"
                     return entry.type === "group" ? (
                       <TableHead
-                        align="right"
+                        align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
+                        // The toggle lives on the cell, not on the button, so
+                        // the whole header is the hit area. The button keeps
+                        // the focus ring and `aria-expanded` and lets its click
+                        // bubble up to here.
+                        onClick={
+                          entry.collapsible
+                            ? () => toggleHeaderGroup(entry.id)
+                            : undefined
+                        }
                         key={`header-group-${entry.id}-${entryIndex}`}
                       >
                         {entry.collapsible ? (
                           <button
                             type="button"
-                            onClick={() => toggleHeaderGroup(entry.id)}
                             aria-expanded={!entry.collapsed}
                             // Restates the header cell's own typography so the
                             // label reads exactly like the non-collapsible
@@ -495,6 +511,10 @@ export const TableCollection = <
                             // `inherit` key, so that utility doesn't exist.
                             className={cn(
                               "flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary transition-colors hover:text-f1-foreground",
+                              // The icon takes the side the label is not
+                              // aligned to, so the label keeps its column's
+                              // edge instead of being pushed off it.
+                              align === "right" && "flex-row-reverse",
                               focusRing()
                             )}
                           >
@@ -518,7 +538,7 @@ export const TableCollection = <
                       </TableHead>
                     ) : (
                       <TableHead
-                        align="right"
+                        align={align}
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}

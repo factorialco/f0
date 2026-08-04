@@ -499,7 +499,8 @@ Replace the group's string label with an object and list the columns that should
 survive a collapse in `collapsedColumns` — typically the group's summary or
 total column. Declaring `collapsedColumns` is what turns the group into a
 collapsible one: the table renders a toggle next to the label, and collapsing
-hides every other column in the group, cells included.
+hides every other column in the group, cells included. The whole header cell is
+the click target, so the toggle never has to be hit precisely.
 
 ```tsx
 {
@@ -542,6 +543,10 @@ Notes:
   only ids that don't belong to the group, leaves the group's first column.
 - `defaultCollapsed` is read once on mount. Afterwards the collapsed state
   belongs to the table; use `onHeaderGroupCollapsedChange` to observe it.
+- The group label takes the alignment of the columns under it, and the toggle
+  goes on the side the label is not aligned to. A group of right-aligned money
+  columns therefore reads `↔ January`, with the label on the same edge as the
+  figures below it.
 
 <Canvas
   of={TableStories.TableWithCollapsibleHeaderGroups}

@@ -1377,6 +1377,94 @@ describe("TableCollection", () => {
       expect(inert.classList.contains("hover:after:bg-transparent")).toBe(true)
     })
 
+    it("toggles the group from anywhere in the header cell", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      // The cell is the hit area, not just the toggle drawn inside it.
+      await userEvent.click(
+        screen.getByRole("columnheader", { name: "Contact" })
+      )
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(testData[0].displayName)
+        ).not.toBeInTheDocument()
+      })
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith("contact", true)
+    })
+
+    it("toggles once, not twice, when the toggle itself is clicked", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      // The toggle holds no handler of its own and lets the click bubble to
+      // the cell. Wired up on both, this would collapse and re-expand at once.
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledTimes(1)
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith("contact", true)
+    })
+
+    it("puts the toggle on the side the group label is not aligned to", async () => {
+      // A right-aligned group would otherwise have its label pushed off the
+      // edge its columns' content sits on, so the two stop lining up.
+      renderTable({
+        columns: groupedColumns.map((column) =>
+          column.headerGroupId ? { ...column, align: "right" as const } : column
+        ),
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen
+          .getByRole("button", { name: "Contact" })
+          .classList.contains("flex-row-reverse")
+      ).toBe(true)
+    })
+
+    it("keeps the toggle after the label when the group is left-aligned", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen
+          .getByRole("button", { name: "Contact" })
+          .classList.contains("flex-row-reverse")
+      ).toBe(false)
+    })
+
     describe("interaction with sorting", () => {
       const sortableColumns: TableColumnDefinition<
         Person,
