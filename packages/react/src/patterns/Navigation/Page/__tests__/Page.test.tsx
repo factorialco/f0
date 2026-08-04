@@ -222,6 +222,50 @@ describe("Page collapse driver", () => {
     expect(screen.getByTestId("body").textContent).toBe("0")
   })
 
+  it("follows the scroller the content brought with it", () => {
+    // The normal case, not the exception. `StandardLayout` renders its own
+    // `overflow-auto` section, and so does the monolith's page body, so the
+    // element that actually scrolls is a descendant rather than the body itself.
+    // `scroll` does not bubble, which is why the listener captures.
+    render(
+      <Page header={<CollapsingHeader />}>
+        <div style={{ overflowY: "auto" }} data-testid="content">
+          <div>Body</div>
+        </div>
+      </Page>
+    )
+    tall()
+
+    metrics.scrollTop = 96
+    act(() => {
+      screen.getByTestId("content").dispatchEvent(new Event("scroll"))
+    })
+
+    expect(progressOf()).toBe("1")
+  })
+
+  it("ignores a scroll area nested inside the page's own", () => {
+    render(
+      <Page header={<CollapsingHeader />}>
+        <div style={{ overflowY: "auto" }}>
+          <div style={{ overflowY: "auto" }} data-testid="table">
+            Rows
+          </div>
+        </div>
+      </Page>
+    )
+    tall()
+
+    metrics.scrollTop = 96
+    act(() => {
+      screen.getByTestId("table").dispatchEvent(new Event("scroll"))
+    })
+
+    // Scrolling a table inside the page is not scrolling the page, so the header
+    // stays where it is.
+    expect(progressOf()).toBe("0")
+  })
+
   it("stops watching on unmount", () => {
     const forget = spyOnBodyListeners("removeEventListener")
 
