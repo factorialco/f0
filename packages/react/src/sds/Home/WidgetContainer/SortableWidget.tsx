@@ -3,6 +3,8 @@ import { type CSSProperties, ReactNode } from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
+import { cn } from "@/lib/utils"
+
 /** What the sortable state hands to the widget being rendered. */
 export interface SortableWidgetState {
   /** Show the widget's own drag handle. False for a locked widget. */
@@ -58,7 +60,14 @@ export const SortableWidget = ({
       style={style}
       // The WHOLE card is the drag surface — the handle beside the title is the
       // affordance that says so, not the only place you can grab.
-      className={disabled ? undefined : "cursor-grab active:cursor-grabbing"}
+      //
+      // While dragging, a SOLID backdrop sits behind the card: `Card`'s own
+      // background is translucent, so lifted over the page (and over whatever it
+      // passes) it would otherwise show the content beneath through it.
+      className={cn(
+        !disabled && "cursor-grab active:cursor-grabbing",
+        isDragging && "rounded-xl bg-f1-background"
+      )}
       {...(disabled ? {} : attributes)}
       {...(disabled ? {} : listeners)}
     >
