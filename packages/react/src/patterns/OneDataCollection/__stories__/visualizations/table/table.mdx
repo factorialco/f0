@@ -96,6 +96,53 @@ type TableVisualizationOptions<T> = {
    * Maps a row to a visual variant. Supported variants: `"striped"`, `"striked"`, `"none"`.
    */
   referenceRowType?: (item: T) => ReferenceType
+
+  /**
+   * Placeholder for summary-row cells with no value. Column-level
+   * `summaryPlaceholder` takes precedence. Defaults to `"-"`.
+   */
+  summaryPlaceholder?: string
+
+  /**
+   * Shows an "Add column" entry at the top of the column-settings popover.
+   * Open your own picker and update `columns` in response.
+   */
+  onAddColumn?: () => void
+
+  /**
+   * Shows a remove affordance per row in the column-settings popover. Removing
+   * is distinct from hiding: drop the column from `columns` in response.
+   */
+  onRemoveColumn?: (columnId: string) => void
+
+  /** Wraps the table in a rounded border container. */
+  bordered?: boolean
+
+  /**
+   * Spanning header groups, keyed by the `headerGroupId` used in the columns.
+   * A string is just a label; an object can also make the group collapsible.
+   * See "Grouped Headers" below.
+   */
+  headerGroups?: Record<string, string | HeaderGroupDefinition>
+
+  /**
+   * Called after the user collapses or expands a header group.
+   */
+  onHeaderGroupCollapsedChange?: (groupId: string, collapsed: boolean) => void
+}
+
+type HeaderGroupDefinition = {
+  /** The label rendered in the spanning header row. */
+  label: string
+
+  /**
+   * Ids of the columns in this group that stay visible while it is collapsed.
+   * Providing this key is what makes the group collapsible.
+   */
+  collapsedColumns?: string[]
+
+  /** Whether the group renders collapsed on first render. */
+  defaultCollapsed?: boolean
 }
 ```
 
@@ -410,6 +457,122 @@ strike so their labels stay legible — see the Status column below.
 ```
 
 <Canvas of={TableStories.StrikedRowsVisualization} meta={TableStories} />
+
+### Grouped Headers
+
+Give columns a shared `headerGroupId` and declare the group in `headerGroups` to
+render a second, spanning header row above them. Adjacent columns sharing an id
+are merged into one spanning cell; columns without an id keep their own header.
+A group can span a single column — `personal` below does — but it earns its keep
+once it spans several, like `employment`.
+
+> **Migrating from `headerGroupLabels`** — the option was replaced by
+> `headerGroups`, which takes the same `{ [groupId]: label }` shape. Rename the
+> prop and you are done; no other change is needed unless you want collapsing.
+
+```tsx
+{
+  type: "table",
+  options: {
+    frozenColumns: 2,
+    headerGroups: {
+      personal: "Personal Information",
+      employment: "Employment Details",
+    },
+    columns: [
+      { label: "Employee", id: "name", render: (item) => item.name },
+      { label: "Email", id: "email", headerGroupId: "personal", render: (item) => item.email },
+      { label: "Role", id: "role", headerGroupId: "employment", render: (item) => item.role },
+      { label: "Department", id: "department", headerGroupId: "employment", render: (item) => item.department },
+      { label: "Manager", id: "manager", headerGroupId: "employment", render: (item) => item.manager },
+      { label: "Status", id: "status", render: (item) => item.status },
+    ],
+  },
+}
+```
+
+<Canvas of={TableStories.TableWithGroupedHeaders} meta={TableStories} />
+
+### Collapsible Header Groups
+
+Replace the group's string label with an object and list the columns that should
+survive a collapse in `collapsedColumns` — typically the group's summary or
+total column. Declaring `collapsedColumns` is what turns the group into a
+collapsible one: the table renders a toggle next to the label, and collapsing
+hides every other column in the group, cells included. The whole header cell is
+the click target, so the toggle never has to be hit precisely.
+
+```tsx
+{
+  type: "table",
+  options: {
+    headerGroups: {
+      // Plain label — not collapsible
+      headcount: "Headcount",
+      january: {
+        label: "January",
+        // Ids of the columns that stay visible while collapsed
+        collapsedColumns: ["jan-total"],
+      },
+      february: {
+        label: "February",
+        collapsedColumns: ["feb-total"],
+        // Starts collapsed
+        defaultCollapsed: true,
+      },
+    },
+    onHeaderGroupCollapsedChange: (groupId, collapsed) => {
+      // Persist the state if you need it to survive a reload
+    },
+    columns: [
+      { label: "Team", id: "team", render: (item) => item.team },
+      { label: "Salaries", id: "jan-salaries", headerGroupId: "january", render: (item) => item.janSalaries },
+      { label: "Bonuses", id: "jan-bonuses", headerGroupId: "january", render: (item) => item.janBonuses },
+      { label: "Total", id: "jan-total", headerGroupId: "january", render: (item) => item.janTotal },
+    ],
+  },
+}
+```
+
+Notes:
+
+- Ids in `collapsedColumns` are matched against each column's `id`, falling back
+  to its `label` when no `id` is set — the same resolution used by column
+  ordering and hiding.
+- A collapsed group always keeps at least one column visible. Passing `[]`, or
+  only ids that don't belong to the group, leaves the group's first column.
+- `defaultCollapsed` is read once on mount. Afterwards the collapsed state
+  belongs to the table; use `onHeaderGroupCollapsedChange` to observe it.
+- The group label takes the alignment of the columns under it, and the toggle
+  goes on the side the label is not aligned to. A group of right-aligned money
+  columns therefore reads `↔ January`, with the label on the same edge as the
+  figures below it.
+
+<Canvas
+  of={TableStories.TableWithCollapsibleHeaderGroups}
+  meta={TableStories}
+/>
+
+#### Collapsing and sorting
+
+The two don't compete. The collapse toggle lives in the spanning header row and
+the sort control in the column row below it, so a group's own cell never carries
+a sort affordance.
+
+Sorting is owned by the datasource and keyed by sorting key, not by column, so
+collapsing never resets it. Sort by a column, collapse its group, and the rows
+keep that order even though the column — and its sort indicator — is gone;
+expanding brings the indicator back. This is the same thing that already happens
+when a column is hidden from the column-settings popover, so it should read as
+familiar rather than surprising.
+
+If a sorted column disappearing without a trace is a problem for your table,
+keep the sorted column in `collapsedColumns` so it survives the collapse.
+
+<Canvas
+  of={TableStories.TableWithCollapsibleHeaderGroupsAndSorting}
+  meta={TableStories}
+/>
 
 ## Nested Tables
 

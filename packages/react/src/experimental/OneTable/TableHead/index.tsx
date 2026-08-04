@@ -116,10 +116,17 @@ interface TableHeadProps {
   sortState?: "none" | "asc" | "desc"
 
   /**
-   * Callback fired when the sort button is clicked.
+   * Callback fired when the header is clicked to sort.
    * Use this to handle toggling between sort states.
    */
   onSortClick?: () => void
+
+  /**
+   * Callback fired when the header cell is clicked, for cells that are
+   * actionable beyond sorting. Like {@link onSortClick}, the whole cell is the
+   * target — see the note on the cell's click handler.
+   */
+  onClick?: () => void
 
   /**
    * Optional header info. When provided, displays an info icon next to the
@@ -163,6 +170,7 @@ export function TableHead({
   minWidth,
   sortState = "none",
   onSortClick,
+  onClick,
   info,
   infoIcon = InfoCircleLine,
   sticky,
@@ -180,6 +188,21 @@ export function TableHead({
   const stickyRight = sticky?.right ?? 0
 
   const hasContent = onSortClick || info
+
+  // The whole cell is the click target, not just the control drawn inside it:
+  // a 20px icon that only appears on hover is a small thing to aim at, and the
+  // cell already lights up on hover to advertise the hit area. The controls
+  // stay real buttons — for focus, `aria-*` and AT — but hold no handler of
+  // their own; their click bubbles up to here, so pointer and keyboard both
+  // arrive through one path. Anything else interactive in the cell has to stop
+  // propagation, or it would trigger this on the way out.
+  const handleCellClick =
+    onSortClick || onClick
+      ? () => {
+          onSortClick?.()
+          onClick?.()
+        }
+      : undefined
 
   const content = (
     <>
@@ -204,7 +227,11 @@ export function TableHead({
         {hasContent && (
           <div className="flex items-center">
             {info && (
-              <div className="flex h-6 w-6 items-center justify-center text-f1-foreground-secondary">
+              <div
+                className="flex h-6 w-6 items-center justify-center text-f1-foreground-secondary"
+                // Reading the column's help text is not asking to sort by it.
+                onClick={(event) => event.stopPropagation()}
+              >
                 {typeof info === "string" ? (
                   <Tooltip label={info}>
                     <div
@@ -228,7 +255,6 @@ export function TableHead({
             )}
             {onSortClick && (
               <motion.button
-                onClick={onSortClick}
                 className={cn(
                   "relative h-5 w-5 rounded-xs p-1 text-f1-foreground-secondary opacity-0 transition-all focus-within:opacity-100 hover:bg-f1-background-hover group-hover:opacity-100",
                   focusRing()
@@ -291,8 +317,10 @@ export function TableHead({
           "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
         isSticky && "sticky",
         hidden && "after:hidden",
+        handleCellClick && "cursor-pointer",
         className
       )}
+      onClick={handleCellClick}
       tabIndex={sticky ? 0 : undefined}
       colSpan={colSpan}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled

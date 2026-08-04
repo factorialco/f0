@@ -26,12 +26,14 @@ import { Checkbox } from "@/ui/checkbox"
 
 import type {
   CellRendererProps,
+  ColId,
   ReferenceType,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { getColumnId } from "../hooks/useColums"
 import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
@@ -80,6 +82,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  /** Marker class for each animating column's cells, keyed by column id. */
+  collapsingCellClasses?: ReadonlyMap<ColId, string>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
@@ -155,6 +159,7 @@ const RowComponentInner = <
     rowWrapper,
     fromVisualization,
     headerGroups,
+    collapsingCellClasses,
     registerSelectable,
     unregisterSelectable,
   }: RowProps<
@@ -350,7 +355,11 @@ const RowComponentInner = <
             }}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
-            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
+            className={cn(
+              cellRenderedClass,
+              isLastInGroup && groupBorderClass,
+              collapsingCellClasses?.get(getColumnId(column))
+            )}
           >
             {CellRenderer ? (
               <CellRenderer
