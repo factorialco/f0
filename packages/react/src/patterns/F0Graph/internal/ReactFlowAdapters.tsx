@@ -226,20 +226,31 @@ F0GraphNodeWrapperInner.displayName = "F0GraphNodeWrapper"
 export const F0GraphNodeWrapper = memo(
   F0GraphNodeWrapperInner,
   (prev, next) => {
-    if (prev.id !== next.id) return false
+    // DIAGNOSTIC: `node.update` counts renders that got PAST this comparator, so
+    // each one means some check below returned false. These counters name which
+    // field — the one thing no component-level profiler can report.
+    const miss = (field: string): false => {
+      bump(`memoMiss.${field}`)
+      return false
+    }
+    if (prev.id !== next.id) return miss("id")
     const prevData = prev.data as GraphNodeData
     const nextData = next.data as GraphNodeData
-    if (prevData.graphNode !== nextData.graphNode) return false
-    if (prevData.ariaLevel !== nextData.ariaLevel) return false
-    if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
-    if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
+    if (prevData.graphNode !== nextData.graphNode) return miss("graphNode")
+    if (prevData.ariaLevel !== nextData.ariaLevel) return miss("ariaLevel")
+    if (prevData.ariaSetSize !== nextData.ariaSetSize) return miss("ariaSetSize")
+    if (prevData.ariaPosInSet !== nextData.ariaPosInSet)
+      return miss("ariaPosInSet")
     if (
       (prevData.visibleChildIds?.join(",") ?? "") !==
       (nextData.visibleChildIds?.join(",") ?? "")
     )
-      return false
-    if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-    if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
+      return miss("visibleChildIds")
+    if (prev.positionAbsoluteX !== next.positionAbsoluteX)
+      return miss("positionAbsoluteX")
+    if (prev.positionAbsoluteY !== next.positionAbsoluteY)
+      return miss("positionAbsoluteY")
+    bump("memoHit")
     return true
   }
 )
