@@ -228,7 +228,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           else if (ref) ref.current = node
         }}
         className={cn(
-          "relative grid h-screen grid-cols-1 items-stretch gap-4 text-f1-foreground",
+          "relative grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
           hasSide &&
             "md:[grid-template-columns:minmax(0,1fr)_var(--home-aside-w)]",
           className
@@ -247,10 +247,12 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         >
           <GradientWash period={period} />
         </div>
-        {/* The edit toggle, top-right of the whole layout: entering edit mode is
-            what makes `editableWidgetContainers` take effect (remove controls +
-            the add placeholder appear in the containers it lists). */}
-        <div className="absolute right-0 top-0 z-20">
+        {/* The edit toggle sits in its OWN grid row spanning both columns, so it
+            takes real layout space instead of floating over the widgets below.
+            Entering edit mode is what makes `editableWidgetContainers` take
+            effect (remove controls + the add placeholder appear in the
+            containers it lists). */}
+        <div className="col-span-full flex justify-end">
           <F0Button
             variant="outline"
             size="sm"
