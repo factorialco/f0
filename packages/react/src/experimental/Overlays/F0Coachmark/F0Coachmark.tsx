@@ -117,14 +117,17 @@ export const F0Coachmark = ({
             <p id={titleId} className="font-semibold">
               {title}
             </p>
+            {/* Same treatment as F0Toast's close button: outline, sm, icon-only,
+                inset by the panel's own padding rather than pulled into the
+                corner, so the two components read consistently. */}
             <ButtonInternal
-              variant="ghost"
+              variant="outline"
               icon={Cross}
               size="sm"
               hideLabel
               onClick={onDismiss}
               label={i18n.actions.close}
-              className="-mr-2 -mt-1 flex-shrink-0"
+              className="flex-shrink-0"
             />
           </div>
           {description && (
