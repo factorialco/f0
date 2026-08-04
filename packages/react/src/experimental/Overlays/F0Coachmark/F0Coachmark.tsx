@@ -114,32 +114,37 @@ export const F0Coachmark = ({
             because this panel is dark in both themes. This is what keeps the
             buttons below free of colour overrides. */}
         <div className="dark flex flex-col gap-3">
-          <div className="flex flex-row items-start justify-between gap-2">
-            <p id={titleId} className="font-semibold">
-              {title}
-            </p>
-            {/* Inset by the panel's own padding rather than pulled into the
-                corner, matching F0Toast's placement. */}
-            <ButtonInternal
-              variant="ghost"
-              icon={Cross}
-              size="sm"
-              hideLabel
-              onClick={onDismiss}
-              label={i18n.actions.close}
-              className="flex-shrink-0"
-            />
+          {/* Title and description are their own group on a tighter gap-1, the
+              same pairing F0Toast uses, so they read as one block. The outer
+              gap-3 still separates that block from the action row. */}
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-row items-start justify-between gap-2">
+              <p id={titleId} className="font-semibold">
+                {title}
+              </p>
+              {/* Inset by the panel's own padding rather than pulled into the
+                  corner, matching F0Toast's placement. */}
+              <ButtonInternal
+                variant="ghost"
+                icon={Cross}
+                size="sm"
+                hideLabel
+                onClick={onDismiss}
+                label={i18n.actions.close}
+                className="flex-shrink-0"
+              />
+            </div>
+            {description && (
+              // One level down from the title, which keeps the panel's own
+              // colour. Same pairing F0Toast uses for title vs description.
+              <p
+                id={descriptionId}
+                className="font-normal text-f1-foreground-inverse-secondary"
+              >
+                {description}
+              </p>
+            )}
           </div>
-          {description && (
-            // One level down from the title, which keeps the panel's own
-            // colour. Same pairing F0Toast uses for title vs description.
-            <p
-              id={descriptionId}
-              className="font-normal text-f1-foreground-inverse-secondary"
-            >
-              {description}
-            </p>
-          )}
           {/* `ml-auto` on the action rather than `justify-end` on the row, so
               the action stays right aligned whether or not a step is present. */}
           <div className="flex flex-row items-center gap-3">

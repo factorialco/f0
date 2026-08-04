@@ -88,7 +88,23 @@ A dismissible panel anchored to an element, used to point out a feature the user
         </td>
         <td>—</td>
         <td>Yes</td>
-        <td>The single call to action rendered at the bottom, full width.</td>
+        <td>
+          The single call to action, rendered at the bottom right of the panel.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>step</code>
+        </td>
+        <td>
+          <code>{"{ current: number; total: number }"}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Position within a sequence, shown as <code>1/3</code> to the left of
+          the action. Presentational only — see Behavior.
+        </td>
       </tr>
       <tr>
         <td>
@@ -314,6 +330,7 @@ Reach for a coachmark when a feature is already on screen but users are walking 
 - **Outside clicks do not dismiss.** Only the close button and Escape call `onDismiss`. The page behind stays interactive; the panel is not modal and does not trap focus.
 - **Focus moves to the panel on open,** not to the close button, so a screen reader announces the message and Enter does not immediately discard it. On dismissal focus returns to whatever had it before.
 - **`children` is an anchor, not a trigger.** It renders in place and is never made clickable — clicking it does nothing unless it already did something.
+- **`step` is presentational.** It renders the position you give it and nothing more: no sequencing, no state, no next/previous. The consumer advances the counter and decides what each step shows, which keeps this a primitive rather than a tour engine. Only one coachmark should be visible at a time, so show step N+1 after N is acted on.
 
 ### Usage examples
 
@@ -322,6 +339,14 @@ Reach for a coachmark when a feature is already on screen but users are walking 
 The consumer owns `open` and decides when the coachmark appears. Dismissal is one-way: the component never reopens itself.
 
 <Canvas of={Stories.Controlled} />
+
+**One step of a walkthrough**
+
+Pass `step` when the coachmark is part of a sequence. It renders as `1/3` beside the action, so the user can see how much is left before committing to the next step. Pair it with an action label that says what happens next — `Next` rather than `Learn more`.
+
+The component does not sequence anything itself: advance your own counter in the action handler and keep `open` true until the last step is dismissed.
+
+<Canvas of={Stories.WithStep} />
 
 **Without an arrow**
 
