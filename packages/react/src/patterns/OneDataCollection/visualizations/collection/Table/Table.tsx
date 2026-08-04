@@ -344,6 +344,30 @@ export const TableCollection = <
     getRenderedSelectableEntries: selectionRegistry.getEntries,
     renderedSelectableCount: selectionRegistry.ids.length,
   })
+
+  // `handleSelectItemChange` is rebuilt whenever the consumer's `selectable`
+  // changes identity, which for an inline definition is every render. Rows get a
+  // stable wrapper instead, so the latest handler still runs.
+  const latestSelectItemChangeRef = useRef(handleSelectItemChange)
+  latestSelectItemChangeRef.current = handleSelectItemChange
+  const stableSelectItemChange = useMemo(
+    () => (item: R, checked: boolean) =>
+      latestSelectItemChangeRef.current(item, checked),
+    []
+  )
+
+  // Selection is handed to each row as its own boolean. Passing the whole Map made
+  // every row's props differ on any selection change (measured: 25 mismatches for
+  // 25 rows), so one checkbox re-rendered the entire table.
+  const isItemSelected = (record: R): boolean => {
+    const id = stableSource.selectable?.(record)
+    return id !== undefined && selectedItems.has(id)
+  }
+
+  // Only rows that render nested children need the Map, to derive their own
+  // children's state. Flat rows get `undefined`, which is stable.
+  const nestedSelectedItems = (record: R): typeof selectedItems | undefined =>
+    stableSource.itemsWithChildren?.(record) ? selectedItems : undefined
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
@@ -886,11 +910,9 @@ export const TableCollection = <
                                 item={item}
                                 index={index}
                                 groupIndex={groupIndex}
-                                onItemCheckedChange={handleSelectItemChange}
-                                onCheckedChange={(checked) =>
-                                  handleSelectItemChange(item, checked)
-                                }
-                                selectedItems={selectedItems}
+                                onItemCheckedChange={stableSelectItemChange}
+                                isSelected={isItemSelected(item)}
+                                selectedItems={nestedSelectedItems(item)}
                                 columns={columns}
                                 frozenColumnsLeft={frozenColumnsLeft}
                                 checkColumnWidth={checkColumnWidth}
@@ -951,11 +973,9 @@ export const TableCollection = <
                       source={stableSource}
                       item={item}
                       index={index}
-                      onItemCheckedChange={handleSelectItemChange}
-                      onCheckedChange={(checked) =>
-                        handleSelectItemChange(item, checked)
-                      }
-                      selectedItems={selectedItems}
+                      onItemCheckedChange={stableSelectItemChange}
+                      isSelected={isItemSelected(item)}
+                      selectedItems={nestedSelectedItems(item)}
                       columns={columns}
                       frozenColumnsLeft={frozenColumnsLeft}
                       checkColumnWidth={checkColumnWidth}

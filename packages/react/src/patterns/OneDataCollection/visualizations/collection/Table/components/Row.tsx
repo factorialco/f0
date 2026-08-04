@@ -1,5 +1,5 @@
 import { useIsPresent } from "motion/react"
-import { forwardRef, useEffect, useState } from "react"
+import { forwardRef, useCallback, useEffect, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -61,9 +61,14 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
   onItemCheckedChange?: (item: R, checked: boolean) => void
-  selectedItems: Map<string | number, R>
+  /** This row's own selected state. Passed as a scalar so a selection change
+   * only alters the prop of the row that changed, not of every row. */
+  isSelected?: boolean
+  /** Only supplied for rows that render nested children, which need it to derive
+   * their own children's state. Absent for flat rows, so their props stay
+   * identical across a selection change. */
+  selectedItems?: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
   checkColumnWidth: number
@@ -144,8 +149,8 @@ const RowComponentInner = <
   {
     source,
     item,
-    onCheckedChange,
     onItemCheckedChange,
+    isSelected: isSelectedProp,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -189,6 +194,14 @@ const RowComponentInner = <
     id !== undefined &&
     (selectionInherited || source.selectionDisabled?.(item) === true)
   const rowWithChildren = !!source.itemsWithChildren?.(item)
+
+  // Derived here rather than passed in: as a prop it was an inline arrow built
+  // per row per render, which alone made the row's memo comparison fail every
+  // time (measured: 50 mismatches for 25 rows across two commits).
+  const onCheckedChange = useCallback(
+    (checked: boolean) => onItemCheckedChange?.(item, checked),
+    [onItemCheckedChange, item]
+  )
 
   const i18n = useI18n()
 
@@ -272,7 +285,6 @@ const RowComponentInner = <
       <NestedRow
         source={source}
         item={item}
-        onCheckedChange={onCheckedChange}
         onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}
         columns={columns}
@@ -296,7 +308,7 @@ const RowComponentInner = <
     )
   }
 
-  const isSelected = id !== undefined && selectedItems.has(id)
+  const isSelected = isSelectedProp ?? false
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   const cellRenderedClass = CellRenderer
@@ -350,7 +362,7 @@ const RowComponentInner = <
               )}
             >
               <Checkbox
-                checked={selectionInherited || selectedItems.has(id)}
+                checked={selectionInherited || isSelected}
                 indeterminate={selectionInherited}
                 onCheckedChange={onCheckedChange}
                 disabled={selectionDisabled}
