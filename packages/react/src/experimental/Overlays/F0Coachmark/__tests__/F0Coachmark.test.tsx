@@ -158,59 +158,36 @@ describe("F0Coachmark", () => {
     await waitFor(() => expect(anchor).toHaveFocus())
   })
 
-  // The panel has to invert against the page in *both* themes. Two ways of
-  // building it are wrong and look fine in light mode, so they are pinned here:
-  // a hardcoded `dark` class makes the panel match the page background in dark
-  // mode, and the `inverse` pair collapses to white-on-white because
-  // f1-foreground-inverse is white in both themes while f1-background-inverse
-  // flips. f1-foreground/f1-background both sit on --neutral-* and flip together.
-  it("builds the surface from tokens that flip with the theme", () => {
+  // The panel uses the same surface recipe as F0Toast and F0ActionBar, and
+  // wraps its content in `dark`. Those two facts depend on each other: the
+  // wrapper is only safe because the surface is dark in BOTH themes, and it is
+  // what lets the controls below stay on stock variants. Pinned together.
+  it("uses the shared floating-dark-panel surface and re-themes its content", () => {
     renderCoachmark()
     const dialog = screen.getByRole("dialog")
 
-    expect(dialog).toHaveClass("bg-f1-foreground", "text-f1-background")
-    expect(dialog.className.split(/\s+/)).not.toContain("dark")
-    expect(dialog.className).not.toContain("f1-foreground-inverse")
-    expect(dialog.className).not.toContain("f1-background-inverse")
+    expect(dialog).toHaveClass(
+      "bg-f1-background-inverse",
+      "dark:bg-f1-background-tertiary",
+      "text-f1-foreground-inverse"
+    )
+    expect(dialog.querySelector(".dark")).toBeInTheDocument()
   })
 
-  // Both controls carry a documented workaround (THEME_FLIP_CTA /
-  // THEME_FLIP_DISMISS in F0Coachmark.tsx): Action variants resolve colour
-  // against the page theme, so on this polarity-flipping panel they land the
-  // wrong way round. This pins it so the workaround cannot be half-removed
-  // without a failing test pointing at the reason.
-  it("colours both controls from the panel's own background/foreground pair", () => {
+  it("keeps both controls on stock variants, with no colour overrides", () => {
     renderCoachmark()
-    const dialog = screen.getByRole("dialog")
-    const [dismiss, cta] = [
-      screen.getByRole("button", { name: "Close" }),
-      screen.getByRole("button", { name: "Learn more" }),
-    ]
+    const cta = screen.getByRole("button", { name: "Learn more" })
+    const dismiss = screen.getByRole("button", { name: "Close" })
 
-    expect(dialog).toHaveClass("bg-f1-foreground", "text-f1-background")
-    // Label and glyph must both track the surface, not the page theme.
-    expect(cta).toHaveClass("text-f1-background")
-    // The `!` is load-bearing: Action's own glyph rule has identical
-    // specificity, so without it the winner depends on CSS emission order.
-    expect(dismiss).toHaveClass(
-      "text-f1-background",
-      "[&_svg:not([data-has-color])]:!text-f1-background"
-    )
-    // `bg-transparent` is what neutralises the outline variant's 60% white fill.
-    expect(cta).toHaveClass("bg-transparent")
-
-    // The workaround itself must add no mode-specific classes. The variant does
-    // leak one (`dark:bg-f1-background-tertiary`) that twMerge cannot strip,
-    // since it cannot dedupe across variant prefixes — harmless, because a 5%
-    // white wash is invisible on the white dark-mode panel. Assert only that
-    // the classes this component contributes are mode-agnostic.
-    const ourClasses = [cta, dismiss].flatMap((el) =>
-      el.className
-        .split(/\s+/)
-        .filter((c) => c.includes("f1-background/") || c === "bg-transparent")
-    )
-    expect(ourClasses.length).toBeGreaterThan(0)
-    expect(ourClasses.filter((c) => c.includes("dark:"))).toEqual([])
+    // This component may only contribute layout classes to the controls. These
+    // are the shapes the removed workaround used; any of them reappearing means
+    // the `dark` wrapper stopped doing its job. (`bg-transparent` is NOT listed:
+    // the stock ghost variant sets it itself.)
+    const contributed = [
+      ...cta.className.split(/\s+/),
+      ...dismiss.className.split(/\s+/),
+    ].filter((c) => /f1-background\/|f1-icon-inverse|data-has-color/.test(c))
+    expect(contributed).toEqual([])
   })
 
   it("renders the arrow by default and hides it when arrow is false", () => {
