@@ -315,7 +315,6 @@ export function F0GraphView<T = unknown>(
 
   // ── Viewport zoom + control handlers ──
   const {
-    currentZoom,
     zoomLevel,
     viewportReady,
     handleViewportChange,
@@ -567,9 +566,11 @@ export function F0GraphView<T = unknown>(
   )
 
   // ── Split context values (wrappers subscribe to only what they need) ──
+  // `currentZoom` is intentionally NOT published: it changes on every zoom frame
+  // and would invalidate this context — and with it every node wrapper — 60×/s.
   const zoomContextValue = useMemo(
-    () => ({ zoomLevel, currentZoom, direction }),
-    [zoomLevel, currentZoom, direction]
+    () => ({ zoomLevel, direction }),
+    [zoomLevel, direction]
   )
 
   const expandContextValue = useMemo(() => ({ expandedNodes }), [expandedNodes])
