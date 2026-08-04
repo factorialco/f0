@@ -56,6 +56,9 @@ export const SortableWidget = ({
     <div
       ref={setNodeRef}
       style={style}
+      // The WHOLE card is the drag surface — the handle beside the title is the
+      // affordance that says so, not the only place you can grab.
+      className={disabled ? undefined : "cursor-grab active:cursor-grabbing"}
       {...(disabled ? {} : attributes)}
       {...(disabled ? {} : listeners)}
     >
