@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/factorialco/f0/compare/f0-react-v4.78.0...f0-react-v5.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884))
+
+### Features
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884)) ([c0c0c57](https://github.com/factorialco/f0/commit/c0c0c5780cf2b295849dda8db3b69734f6f9a91d))
+
 ## [4.78.0](https://github.com/factorialco/f0/compare/f0-react-v4.77.0...f0-react-v4.78.0) (2026-08-04)
 
 
