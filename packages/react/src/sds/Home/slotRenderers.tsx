@@ -5,6 +5,7 @@ import {
   F0AvatarListProps,
 } from "@/components/avatars/F0AvatarList"
 import { type IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
 import {
   IndicatorsList,
   IndicatorsListProps,
@@ -80,6 +81,16 @@ export interface HomeWidgetItem {
 }
 
 /**
+ * Row-based slots cancel their rows' own padding so the rows sit flush with the
+ * widget's content box — every list-like slot carries this. `avatar-list` and
+ * `indicators` don't: they aren't rows and have no padding to cancel.
+ */
+export const SLOT_ROW_BLEED = "-m-2"
+
+/** The gap between rows of the `event-list` slot. */
+export const EVENT_LIST_GAP = "gap-1"
+
+/**
  * Built-in renderers for the standard visualizations. Each spreads the slot's
  * params straight onto the matching f0 content component, so a slot's `params`
  * shape IS that component's prop shape. Bespoke visualizations (e.g. `clock-in`,
@@ -99,12 +110,14 @@ export const defaultSlotRenderers: SlotRenderers = {
       else window.location.assign(href)
     }
     return (
-      <WidgetSimpleList
-        minSize={0}
-        showAllItems={showAllItems}
-        items={items}
-        onClickItem={go}
-      />
+      <div className={SLOT_ROW_BLEED}>
+        <WidgetSimpleList
+          minSize={0}
+          showAllItems={showAllItems}
+          items={items}
+          onClickItem={go}
+        />
+      </div>
     )
   },
   // Module-avatar rows (Communications-style). Same rule: every row navigates
@@ -119,17 +132,23 @@ export const defaultSlotRenderers: SlotRenderers = {
       else window.location.assign(href)
     }
     return (
-      <WidgetInboxList
-        minSize={0}
-        showAllItems={showAllItems}
-        items={items}
-        onClickItem={go}
-      />
+      <div className={SLOT_ROW_BLEED}>
+        <WidgetInboxList
+          minSize={0}
+          showAllItems={showAllItems}
+          items={items}
+          onClickItem={go}
+        />
+      </div>
     )
   },
   "event-list": (params) => {
     const { events, showAllItems } = params as EventListParams
-    return <CalendarEventList events={events} showAllItems={showAllItems} />
+    return (
+      <div className={cn(SLOT_ROW_BLEED, "flex flex-col", EVENT_LIST_GAP)}>
+        <CalendarEventList events={events} showAllItems={showAllItems} />
+      </div>
+    )
   },
   indicators: (params) => (
     <IndicatorsList {...(params as IndicatorsListProps)} />
@@ -145,7 +164,7 @@ export const defaultSlotRenderers: SlotRenderers = {
     />
   ),
   "status-rows": (params, ctx) => (
-    <div className="flex flex-col gap-1">
+    <div className={cn(SLOT_ROW_BLEED, "flex flex-col gap-1")}>
       {(params as { rows: WidgetAvatarsListItemProps[] }).rows.map((row) => (
         <WidgetAvatarsListItem
           key={row.id}

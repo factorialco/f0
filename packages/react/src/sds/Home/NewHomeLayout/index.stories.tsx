@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useRef, useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
@@ -7,6 +7,7 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Card } from "@/components/F0Card"
+import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
@@ -125,7 +126,7 @@ const FeedSection = ({
         {label}
       </h3>
     ) : null}
-    <div className="flex flex-col divide-y divide-solid divide-f1-border-secondary overflow-hidden rounded-xl border border-solid border-f1-border">
+    <div className="flex flex-col divide-y divide-solid divide-f1-border-secondary overflow-hidden rounded-xl border-x-0 border-y border-solid border-f1-border bg-f1-background">
       {rows.map((r) => (
         <FeedRow key={r.title} {...r} />
       ))}
@@ -143,9 +144,28 @@ const FeedSection = ({
   </div>
 )
 
+const AskAi = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <div className="overflow-hidden rounded-xl bg-f1-background">
+      <F0AiChatTextArea
+        ref={ref}
+        onSubmit={() => {}}
+        onTranscribe={async () => ""}
+        placeholders={[
+          "Ask anything about your work…",
+          "How many days off do I have left?",
+          "Draft my self-review",
+        ]}
+      />
+    </div>
+  )
+}
+
 const MainColumn = () => (
   <>
     <Greeting />
+    <AskAi />
     <ShortcutCards />
     <FeedSection
       label="Needs you"
@@ -312,7 +332,6 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   {
     id: "clock-in",
     icon: Clock,
-    fullHeight: true,
     header: {
       title: "Clock in",
       link: { title: "Time tracking", onClick: () => {} },
