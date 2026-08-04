@@ -56,7 +56,6 @@ import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
-import { count } from "@/hooks/datasource/useSelectable/selectionTrace"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -156,29 +155,7 @@ export const TableCollection = <
           NavigationFilters,
           Grouping
         >
-      ),
-      // DIAGNOSTIC (remove with the instrumentation): identical semantics to the
-      // default shallow comparison — equal only when every prop is `Object.is`
-      // equal — but it records WHICH prop differed. Stabilizing `source` and
-      // `variants` did not move the measured 47ms commit, so at least one other
-      // prop changes identity every render, and this names it instead of guessing.
-      (prev, next) => {
-        const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
-        let equal = true
-        for (const key of keys) {
-          if (
-            !Object.is(
-              (prev as Record<string, unknown>)[key],
-              (next as Record<string, unknown>)[key]
-            )
-          ) {
-            count(`propDiff:${key}`)
-            equal = false
-          }
-        }
-        if (equal) count("memoHit")
-        return equal
-      }
+      )
     )
   )
 
