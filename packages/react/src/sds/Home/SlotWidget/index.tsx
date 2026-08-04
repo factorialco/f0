@@ -59,7 +59,10 @@ export function SlotWidget({
                 </div>
               ) : null}
               {renderer ? (
-                renderer(slot.params, ctx)
+                renderer(slot.params, {
+                  ...ctx,
+                  isLastSlot: index === slots.length - 1,
+                })
               ) : (
                 <div className="rounded-md border border-dashed border-f1-border p-2 text-f1-foreground-secondary">
                   {`No renderer for slot "${slot.visualization}"`}

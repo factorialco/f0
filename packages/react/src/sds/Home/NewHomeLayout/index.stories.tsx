@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
@@ -7,7 +7,6 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Card } from "@/components/F0Card"
-import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
@@ -91,7 +90,7 @@ type FeedRowProps = {
 
 /** One feed row: domain glyph, title + subtitle, optional tag, chevron. */
 const FeedRow = ({ icon, title, subtitle, unread, tag }: FeedRowProps) => (
-  <div className="flex cursor-pointer items-center gap-3 p-3 hover:bg-f1-background-tertiary">
+  <div className="flex cursor-pointer items-center gap-3 border-x-0 p-3 hover:bg-f1-background-tertiary">
     <div className="relative shrink-0">
       <F0AvatarIcon icon={icon} size="lg" />
       {unread ? (
@@ -144,28 +143,9 @@ const FeedSection = ({
   </div>
 )
 
-const AskAi = () => {
-  const ref = useRef<HTMLDivElement>(null)
-  return (
-    <div className="overflow-hidden rounded-xl bg-f1-background">
-      <F0AiChatTextArea
-        ref={ref}
-        onSubmit={() => {}}
-        onTranscribe={async () => ""}
-        placeholders={[
-          "Ask anything about your work…",
-          "How many days off do I have left?",
-          "Draft my self-review",
-        ]}
-      />
-    </div>
-  )
-}
-
 const MainColumn = () => (
   <>
     <Greeting />
-    <AskAi />
     <ShortcutCards />
     <FeedSection
       label="Needs you"

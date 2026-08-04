@@ -33,6 +33,12 @@ import { WidgetProps } from "@/experimental/Widgets/Widget"
 /** Context threaded into every slot renderer so it can wire navigation. */
 export interface HomeRenderCtx {
   navigate?: (to: string) => void
+  /**
+   * Whether this slot is the LAST one in its widget. `SlotWidget` sets it per
+   * slot; row-based slots use it to keep their bottom bleed (see
+   * { slotRowBleed}).
+   */
+  isLastSlot?: boolean
 }
 
 /** Draws ONE slot from its params. Keyed by `visualization` in a renderer map. */
@@ -89,8 +95,17 @@ export interface HomeWidgetItem {
  */
 export const SLOT_ROW_BLEED = "-m-2"
 
+/**
+ * The bleed a row-based slot applies to itself: `SLOT_ROW_BLEED` with its
+ * VERTICAL halves put back — `mt-0` always (the widget header already spaces
+ * the first slot, and a divider spaces the rest), and `mb-0` unless this is the
+ * widget's last slot, where the bleed should reach the card's bottom edge.
+ */
+export const slotRowBleed = (ctx: HomeRenderCtx) =>
+  cn(SLOT_ROW_BLEED, "mt-0", !ctx.isLastSlot && "mb-0")
+
 /** The gap between rows of the `event-list` slot. */
-export const EVENT_LIST_GAP = "gap-1"
+export const EVENT_LIST_GAP = "gap-2"
 
 /**
  * Built-in renderers for the standard visualizations. Each spreads the slot's
@@ -112,7 +127,7 @@ export const defaultSlotRenderers: SlotRenderers = {
       else window.location.assign(href)
     }
     return (
-      <div className={SLOT_ROW_BLEED}>
+      <div className={slotRowBleed(ctx)}>
         <WidgetSimpleList
           minSize={0}
           showAllItems={showAllItems}
@@ -134,7 +149,7 @@ export const defaultSlotRenderers: SlotRenderers = {
       else window.location.assign(href)
     }
     return (
-      <div className={SLOT_ROW_BLEED}>
+      <div className={slotRowBleed(ctx)}>
         <WidgetInboxList
           minSize={0}
           showAllItems={showAllItems}
@@ -148,10 +163,10 @@ export const defaultSlotRenderers: SlotRenderers = {
   // reason: that component's `showAllItems` container has no gap, and its `gap`
   // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
   // DIRECT parent of the event items, which is this container.
-  "event-list": (params) => {
+  "event-list": (params, ctx) => {
     const { events } = params as EventListParams
     return (
-      <div className={cn(SLOT_ROW_BLEED, "flex flex-col", EVENT_LIST_GAP)}>
+      <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
         {events.map((event) => (
           <CalendarEvent key={event.title} {...event} />
         ))}
@@ -172,7 +187,7 @@ export const defaultSlotRenderers: SlotRenderers = {
     />
   ),
   "status-rows": (params, ctx) => (
-    <div className={cn(SLOT_ROW_BLEED, "flex flex-col gap-1")}>
+    <div className={cn(slotRowBleed(ctx), "flex flex-col gap-1")}>
       {(params as { rows: WidgetAvatarsListItemProps[] }).rows.map((row) => (
         <WidgetAvatarsListItem
           key={row.id}

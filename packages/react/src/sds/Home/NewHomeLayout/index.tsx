@@ -225,7 +225,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           else if (ref) ref.current = node
         }}
         className={cn(
-          "relative grid min-h-screen grid-cols-1 items-stretch gap-4 text-f1-foreground",
+          "relative grid h-screen grid-cols-1 items-stretch gap-4 overflow-hidden text-f1-foreground",
           hasSide &&
             "md:[grid-template-columns:minmax(0,1fr)_var(--home-aside-w)]",
           className
@@ -244,8 +244,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         >
           <GradientWash period={period} />
         </div>
-        {/* Main column */}
-        <div className="relative">
+        {/* Main column. `min-h-0` + `overflow-y-auto` so THIS column scrolls
+            itself rather than growing the page — the rail scrolls separately. */}
+        <div className="relative min-h-0 overflow-y-auto">
           <div
             className="relative mx-auto flex w-full flex-col gap-6"
             style={{ maxWidth: `${mainWidth}px` }}
@@ -264,7 +265,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
             <aside
-              className="relative flex flex-col gap-2"
+              className="relative flex min-h-0 flex-col gap-2 overflow-y-auto"
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
@@ -305,7 +306,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </aside>
           ) : (
-            <aside className="relative flex flex-col gap-4">
+            <aside className="relative flex min-h-0 flex-col gap-4 overflow-y-auto">
               {aside}
               {rightWidgets.map((widget) => (
                 <Fragment key={widget.id}>{render(widget)}</Fragment>
