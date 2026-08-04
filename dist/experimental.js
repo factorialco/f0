@@ -7220,31 +7220,33 @@ const Jn = 12, Qn = 6, Zs = ({
             ),
             children: [
               /* @__PURE__ */ h("div", { className: "dark flex flex-col gap-3", children: [
-                /* @__PURE__ */ h("div", { className: "flex flex-row items-start justify-between gap-2", children: [
-                  /* @__PURE__ */ n("p", { id: x, className: "font-semibold", children: r }),
+                /* @__PURE__ */ h("div", { className: "flex flex-col gap-1", children: [
+                  /* @__PURE__ */ h("div", { className: "flex flex-row items-start justify-between gap-2", children: [
+                    /* @__PURE__ */ n("p", { id: x, className: "font-semibold", children: r }),
+                    /* @__PURE__ */ n(
+                      we,
+                      {
+                        variant: "ghost",
+                        icon: gt,
+                        size: "sm",
+                        hideLabel: !0,
+                        onClick: t,
+                        label: f.actions.close,
+                        className: "flex-shrink-0"
+                      }
+                    )
+                  ] }),
+                  o && // One level down from the title, which keeps the panel's own
+                  // colour. Same pairing F0Toast uses for title vs description.
                   /* @__PURE__ */ n(
-                    we,
+                    "p",
                     {
-                      variant: "ghost",
-                      icon: gt,
-                      size: "sm",
-                      hideLabel: !0,
-                      onClick: t,
-                      label: f.actions.close,
-                      className: "flex-shrink-0"
+                      id: b,
+                      className: "font-normal text-f1-foreground-inverse-secondary",
+                      children: o
                     }
                   )
                 ] }),
-                o && // One level down from the title, which keeps the panel's own
-                // colour. Same pairing F0Toast uses for title vs description.
-                /* @__PURE__ */ n(
-                  "p",
-                  {
-                    id: b,
-                    className: "font-normal text-f1-foreground-inverse-secondary",
-                    children: o
-                  }
-                ),
                 /* @__PURE__ */ h("div", { className: "flex flex-row items-center gap-3", children: [
                   a && /* @__PURE__ */ h("p", { className: "text-f1-foreground-inverse-secondary", children: [
                     a.current,
