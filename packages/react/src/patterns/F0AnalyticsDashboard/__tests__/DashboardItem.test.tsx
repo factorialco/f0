@@ -121,7 +121,7 @@ describe("DashboardItem — description action", () => {
     render(
       <DashboardItem
         title="Salary by workplace"
-        description="Top 6 of 29 categories"
+        description="Showing 6 of 29 categories"
         descriptionAction={{ label: "Show all", onClick }}
         isLoading={false}
       >
@@ -129,7 +129,7 @@ describe("DashboardItem — description action", () => {
       </DashboardItem>
     )
 
-    expect(screen.getByText("Top 6 of 29 categories")).toBeInTheDocument()
+    expect(screen.getByText("Showing 6 of 29 categories")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Show all" }))
     expect(onClick).toHaveBeenCalledTimes(1)
   })
@@ -138,7 +138,7 @@ describe("DashboardItem — description action", () => {
     render(
       <DashboardItem
         title="Salary by workplace"
-        description="Top 6 of 29 categories"
+        description="Showing 6 of 29 categories"
         descriptionAction={{ label: "Show all", onClick: vi.fn() }}
         isLoading={false}
       >

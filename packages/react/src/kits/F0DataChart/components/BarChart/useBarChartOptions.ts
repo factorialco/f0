@@ -340,6 +340,7 @@ export function expandedHorizontalChartHeight(
  */
 export function horizontalCategoryWindow({
   isVertical,
+  windowCategories,
   showAllCategories,
   stacked,
   categoryCount,
@@ -347,13 +348,16 @@ export function horizontalCategoryWindow({
   containerHeight,
 }: {
   isVertical: boolean
+  windowCategories: boolean
   showAllCategories: boolean
   stacked: boolean
   categoryCount: number
   seriesCount: number
   containerHeight: number | undefined
 }): number | undefined {
-  if (showAllCategories) return undefined
+  // Hiding rows is opt-in: without it a dense chart compresses instead, which
+  // keeps every category reachable. See `windowCategories` in the prop docs.
+  if (!windowCategories || showAllCategories) return undefined
   if (isVertical || !containerHeight || categoryCount === 0) return undefined
 
   const plotHeight = containerHeight - HORIZONTAL_CHART_CHROME
@@ -661,12 +665,16 @@ const VALUE_AXIS_HEADROOM = 1.05
  *
  * A target turns into a ghost stacked on its bar, so the drawn extent of a point
  * is the further of value and target. Stacked categories draw their parts end to
- * end, so their extent is the sum. (A stacked chart that also carries targets
- * splits into one stack per series, which makes the sum an over-estimate — the
- * safe direction, since it only leaves slack rather than clipping a bar.)
+ * end, so their extent is the sum — but only of the parts pointing the same way:
+ * ECharts stacks each sign away from zero independently, so a category of +100,
+ * +100, -150 reaches +200 and a signed sum would pin the axis at 52.5 and clip
+ * most of the positive stack. (A stacked chart that also carries targets splits
+ * into one stack per series, which makes the sum an over-estimate — the safe
+ * direction, since it only leaves slack rather than clipping a bar.)
  *
  * Negative-only data returns `undefined`: the maximum is not the far end of
- * anything there, and pinning it would squash the axis against zero.
+ * anything there, and pinning it would squash the axis against zero. The
+ * negative side is left to the automatic minimum in every case.
  */
 function dataValueAxisMax(
   series: F0DataChartBarSeries[],
@@ -681,14 +689,22 @@ function dataValueAxisMax(
 
   let widest = 0
   for (let dataIndex = 0; dataIndex < categoryCount; dataIndex++) {
-    let extent = 0
+    // Positive and negative parts of a stack grow away from zero in opposite
+    // directions rather than cancelling, so they accumulate separately: a
+    // category of +100, +100, -150 reaches +200 on the axis, not the +50 a
+    // signed sum would report. Only the positive side can set the maximum.
+    // Negatives are left out of the running total rather than subtracted from
+    // it: they extend the other way, and the axis minimum stays automatic, so
+    // they can't be what pins the maximum.
+    let positive = 0
     for (const s of series) {
       const point = s.data[dataIndex]
       if (point === undefined) continue
       const own = pointExtent(point)
-      extent = stacked ? extent + own : Math.max(extent, own)
+      if (own <= 0) continue
+      positive = stacked ? positive + own : Math.max(positive, own)
     }
-    widest = Math.max(widest, extent)
+    widest = Math.max(widest, positive)
   }
 
   return widest > 0 ? widest * VALUE_AXIS_HEADROOM : undefined
@@ -838,6 +854,7 @@ export function useBarChartOptions(
     hideOverflowingLabels = true,
     labelFitPadding,
     hideAllLabelsOnOverflow = true,
+    windowCategories = false,
     showAllCategories = false,
     valueFormatter,
     tooltipValueFormatter,
@@ -846,7 +863,13 @@ export function useBarChartOptions(
     valueAxisSplitNumber = 2,
     echartsOptions,
   }: F0DataChartBarProps,
-  size: BarChartSize
+  size: BarChartSize,
+  /**
+   * Which series the legend has selected, or `null` for all of them. Numbers
+   * derived from more than one series are computed from these, so they keep
+   * describing the bars the reader can actually see.
+   */
+  legendSelection: Record<string, boolean> | null = null
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
   const i18n = useI18n()
@@ -859,6 +882,12 @@ export function useBarChartOptions(
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
+    // Isolating a series from the legend makes ECharts re-stack around what is
+    // left. Anything summed across series follows that, or the number stops
+    // matching the bar it sits on.
+    const visibleSeries = legendSelection
+      ? series.filter((s) => legendSelection[s.name] !== false)
+      : series
     const resolvedLabelFontSize = labelFontSize ?? DEFAULT_LABEL_FONT_SIZE
     const userGridRight = (
       echartsOptions?.grid as { right?: number | string } | undefined
@@ -891,7 +920,7 @@ export function useBarChartOptions(
     // the ticks it lands on. With them hidden, a 106 max rounded to 150 spends a
     // third of the plot labelling nothing, so take the extent from the data.
     const valueAxisMax = labelsReplaceValueAxis
-      ? dataValueAxisMax(series, stacked, categories.length)
+      ? dataValueAxisMax(visibleSeries, stacked, categories.length)
       : undefined
 
     // Horizontal rows carry their category names along the side, where the axis
@@ -1005,7 +1034,7 @@ export function useBarChartOptions(
     // top, where the value axis already gives the reader the number.
     const totals =
       showLabels && stacked && !isVertical
-        ? stackTotals(series, categories)
+        ? stackTotals(visibleSeries, categories)
         : undefined
     if (totals) {
       echartsSeries.push(
@@ -1061,6 +1090,7 @@ export function useBarChartOptions(
     // the rows it actually draws.
     const categoryWindow = horizontalCategoryWindow({
       isVertical,
+      windowCategories,
       showAllCategories,
       stacked,
       categoryCount: categories.length,
@@ -1190,7 +1220,7 @@ export function useBarChartOptions(
           // the parts add up to — 24 hires against a net of 19 would read as
           // 126.3%, and near-cancellation makes that ratio arbitrarily large.
           // Signed categories therefore show the value alone.
-          const categoryValues = series.map((s) => {
+          const categoryValues = visibleSeries.map((s) => {
             // A series can be shorter than `categories`.
             const point = s.data[dataIndex]
             return point === undefined ? 0 : getValue(point) || 0
@@ -1199,7 +1229,7 @@ export function useBarChartOptions(
             categoryValues.some((v) => v > 0) &&
             categoryValues.some((v) => v < 0)
           const total = categoryValues.reduce((sum, v) => sum + v, 0)
-          const showTotal = series.length > 1 && !hasMixedSigns
+          const showTotal = visibleSeries.length > 1 && !hasMixedSigns
 
           // No "from previous" row here: bar categories are not necessarily a
           // sequence (locations, departments), so comparing a bar with the one
@@ -1320,6 +1350,7 @@ export function useBarChartOptions(
     hideOverflowingLabels,
     labelFitPadding,
     hideAllLabelsOnOverflow,
+    windowCategories,
     showAllCategories,
     valueFormatter,
     tooltipValueFormatter,
@@ -1334,5 +1365,6 @@ export function useBarChartOptions(
     size,
     prefersReducedMotion,
     fontsReady,
+    legendSelection,
   ])
 }

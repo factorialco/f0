@@ -673,7 +673,7 @@ export const defaultTranslations = {
       description: "Try a different date or fewer filters",
     },
     showAllCategories: "Show all",
-    windowedCategories: "Top {{count}} of {{total}} categories",
+    windowedCategories: "Showing {{count}} of {{total}} categories",
     tooltip: {
       ofTotal: "of total",
       total: "total",

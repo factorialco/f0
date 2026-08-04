@@ -9,7 +9,7 @@ import {
   vi,
 } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render } from "@/testing/test-utils"
+import { act, zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
 import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
@@ -22,14 +22,29 @@ import { resolveChartTheme } from "../utils/theme"
 
 const setOptionMock = vi.fn()
 
+/** Handlers the chart registered, so tests can fire ECharts events at it. */
+const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
+
+/** Fire an ECharts event at every handler the component registered for it. */
+function emitChartEvent(event: string, params: unknown) {
+  // Wrapped in `act` because the handlers set React state, and the assertion
+  // reads the `setOption` payload that the resulting render produces.
+  act(() => {
+    for (const handler of chartHandlers[event] ?? []) handler(params)
+  })
+}
+
 vi.mock("echarts", () => ({
   init: vi.fn(() => ({
     setOption: setOptionMock,
     resize: vi.fn(),
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
-    on: vi.fn(),
+    on: vi.fn((event: string, handler: (params: unknown) => void) => {
+      ;(chartHandlers[event] ??= []).push(handler)
+    }),
     off: vi.fn(),
+    dispatchAction: vi.fn(),
   })),
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
@@ -148,6 +163,7 @@ function getBorderRadii(seriesIndex: number) {
 
 beforeEach(() => {
   setOptionMock.mockClear()
+  for (const key of Object.keys(chartHandlers)) delete chartHandlers[key]
   containerSize.width = 800
   containerSize.height = 320
 })
@@ -1794,5 +1810,317 @@ describe("BarChart — category label gutter padding", () => {
       />
     )
     expect(getGridLeft()).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Review follow-ups: PR #4984
+// ---------------------------------------------------------------------------
+
+/** 20 rows at a height where only a handful fit at the thickness floor. */
+const denseRows = (count = 20) => ({
+  type: "bar" as const,
+  orientation: "horizontal" as const,
+  categories: Array.from({ length: count }, (_, i) => `Row ${i + 1}`),
+  series: [
+    {
+      name: "Headcount",
+      data: Array.from({ length: count }, (_, i) => count - i),
+    },
+  ],
+})
+
+function getDataZoom() {
+  return (
+    getLatestOption() as unknown as {
+      dataZoom?: {
+        type?: string
+        startValue?: number
+        endValue?: number
+        disabled?: boolean
+        zoomLock?: boolean
+        filterMode?: string
+      }[]
+    }
+  ).dataZoom
+}
+
+describe("BarChart — windowing is opt-in", () => {
+  it("keeps every category by default, however dense", () => {
+    containerSize.height = 200
+    render(<F0DataChart {...denseRows()} />)
+    // No window: the rows compress instead, which keeps them all reachable for
+    // a consumer that has nowhere to put a "show all" control.
+    expect(getDataZoom()).toBeUndefined()
+  })
+
+  it("reports nothing hidden when it is not windowing", () => {
+    containerSize.height = 200
+    const onHidden = vi.fn()
+    render(<F0DataChart {...denseRows()} onHiddenCategoriesChange={onHidden} />)
+    expect(onHidden).toHaveBeenCalledWith(0)
+  })
+
+  it("creates a locked, non-interactive window when asked to", () => {
+    containerSize.height = 200
+    render(<F0DataChart {...denseRows()} windowCategories />)
+
+    const zoom = getDataZoom()?.[0]
+    expect(zoom?.type).toBe("inside")
+    expect(zoom?.startValue).toBe(0)
+    // Neither gesture moves it, and its size cannot change under it.
+    expect(zoom?.disabled).toBe(true)
+    expect(zoom?.zoomLock).toBe(true)
+    // Every row stays in the dataset so `dataIndex` still lines up.
+    expect(zoom?.filterMode).toBe("none")
+    expect(zoom?.endValue).toBeGreaterThanOrEqual(1)
+    expect(zoom?.endValue).toBeLessThan(19)
+  })
+
+  it("reports how many rows the window is hiding", () => {
+    containerSize.height = 200
+    const onHidden = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        onHiddenCategoriesChange={onHidden}
+      />
+    )
+
+    const hidden = onHidden.mock.calls.at(-1)?.[0] as number
+    expect(hidden).toBeGreaterThan(0)
+    const shown = (getDataZoom()?.[0]?.endValue ?? 0) + 1
+    expect(hidden).toBe(20 - shown)
+  })
+
+  it("hides fewer rows as the container grows", () => {
+    containerSize.height = 200
+    const short = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        onHiddenCategoriesChange={short}
+      />
+    )
+
+    containerSize.height = 900
+    const tall = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        onHiddenCategoriesChange={tall}
+      />
+    )
+
+    expect(tall.mock.calls.at(-1)?.[0]).toBeLessThan(
+      short.mock.calls.at(-1)?.[0] as number
+    )
+  })
+
+  it("drops the window and reports nothing hidden once expanded", () => {
+    containerSize.height = 200
+    const onHidden = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        showAllCategories
+        onHiddenCategoriesChange={onHidden}
+      />
+    )
+
+    expect(getDataZoom()).toBeUndefined()
+    expect(onHidden).toHaveBeenLastCalledWith(0)
+  })
+
+  it("never windows a vertical chart, which lays categories along the width", () => {
+    containerSize.height = 200
+    render(
+      <F0DataChart {...denseRows()} orientation="vertical" windowCategories />
+    )
+    expect(getDataZoom()).toBeUndefined()
+  })
+})
+
+describe("BarChart — value axis extent by sign", () => {
+  function getValueAxisMax() {
+    return (getLatestOption().xAxis as unknown as { max?: number }).max
+  }
+
+  it("measures a mixed-sign stack by its positive side, not its net", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        stacked
+        showLabels
+        categories={["Madrid"]}
+        series={[
+          { name: "A", data: [100] },
+          { name: "B", data: [100] },
+          { name: "C", data: [-150] },
+        ]}
+      />
+    )
+    // The stack visibly reaches +200; a signed sum would have said 50 and pinned
+    // the axis at 52.5, clipping most of the positive stack.
+    expect(getValueAxisMax()).toBeCloseTo(210, 5)
+  })
+
+  it("ignores negative-only data, leaving the axis to ECharts", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        stacked
+        showLabels
+        categories={["Madrid"]}
+        series={[
+          { name: "A", data: [-100] },
+          { name: "B", data: [-50] },
+        ]}
+      />
+    )
+    expect(getValueAxisMax()).toBeUndefined()
+  })
+})
+
+describe("BarChart — legend isolation", () => {
+  const stacked = {
+    type: "bar" as const,
+    orientation: "horizontal" as const,
+    stacked: true,
+    showLabels: true,
+    categories: ["Madrid"],
+    series: [
+      { name: "Women", data: [30] },
+      { name: "Men", data: [70] },
+    ],
+  }
+
+  function getTotalLabel() {
+    const total = getMainSeries().find(
+      (s) => (s as { name?: string }).name === "__stackTotal"
+    )
+    return total?.label?.formatter?.({ dataIndex: 0 } as never)
+  }
+
+  it("totals every series while the whole legend is selected", () => {
+    render(<F0DataChart {...stacked} />)
+    expect(getTotalLabel()).toBe("100")
+  })
+
+  it("re-totals from the selected series when one is dropped", () => {
+    render(
+      <F0DataChart
+        {...stacked}
+        series={[
+          { name: "Women", data: [30] },
+          { name: "Men", data: [70] },
+          { name: "Unspecified", data: [20] },
+        ]}
+      />
+    )
+    expect(getTotalLabel()).toBe("120")
+
+    emitChartEvent("legendselectchanged", {
+      name: "Unspecified",
+      selected: { Women: true, Men: true, Unspecified: false },
+    })
+    // ECharts re-stacks around the visible series, so the number has to follow
+    // the bar rather than keep describing the hidden one.
+    expect(getTotalLabel()).toBe("100")
+  })
+
+  it("drops the total once a single series is left", () => {
+    render(<F0DataChart {...stacked} />)
+    emitChartEvent("legendselectchanged", {
+      name: "Women",
+      selected: { Women: false, Men: true },
+    })
+    // One visible series makes the total a restatement of its own segment label.
+    expect(getTotalLabel()).toBeUndefined()
+  })
+
+  it("rescales the value axis to the visible series", () => {
+    render(<F0DataChart {...stacked} />)
+    const full = (getLatestOption().xAxis as unknown as { max?: number }).max
+
+    emitChartEvent("legendselectchanged", {
+      name: "Women",
+      selected: { Women: true, Men: false },
+    })
+    const isolated = (getLatestOption().xAxis as unknown as { max?: number })
+      .max
+    expect(isolated).toBeLessThan(full as number)
+  })
+
+  it("restores the full total when the legend is fully selected again", () => {
+    render(<F0DataChart {...stacked} />)
+    emitChartEvent("legendselectchanged", {
+      selected: { Women: true, Men: false },
+    })
+    emitChartEvent("legendselectchanged", {
+      selected: { Women: true, Men: true },
+    })
+    expect(getTotalLabel()).toBe("100")
+  })
+})
+
+describe("BarChart — the window takes data order, not rank", () => {
+  it("windows the first rows as given, whatever the order", () => {
+    containerSize.height = 200
+    // Alphabetical, not amount-descending: the window is positional, so nothing
+    // here is the "top" of anything. `ChartItem`'s copy says "showing N of M".
+    const categories = [
+      "Amsterdam",
+      "Barcelona",
+      "Berlin",
+      "Copenhagen",
+      "Dublin",
+      "Lisbon",
+      "London",
+      "Madrid",
+      "Milan",
+      "Munich",
+      "Paris",
+      "Prague",
+      "Rome",
+      "Stockholm",
+      "Vienna",
+      "Warsaw",
+      "Zurich",
+    ]
+    const onHidden = vi.fn()
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        windowCategories
+        onHiddenCategoriesChange={onHidden}
+        categories={categories}
+        // Deliberately unsorted values, so the drawn rows can only be explained
+        // by position.
+        series={[
+          {
+            name: "Headcount",
+            data: [
+              5, 90, 12, 40, 3, 77, 21, 8, 60, 15, 30, 2, 55, 9, 44, 18, 70,
+            ],
+          },
+        ]}
+      />
+    )
+
+    const zoom = getDataZoom()?.[0]
+    expect(zoom?.startValue).toBe(0)
+    const shown = (zoom?.endValue ?? 0) + 1
+    // The window starts at Amsterdam and runs down the list; the largest value
+    // (Barcelona, 90) being inside it is a coincidence of position.
+    expect(shown).toBeLessThan(categories.length)
+    expect(onHidden).toHaveBeenLastCalledWith(categories.length - shown)
   })
 })

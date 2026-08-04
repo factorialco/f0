@@ -580,9 +580,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // While rows are windowed, the item's own description is replaced by what the
   // reader is actually looking at: a subset. Both counts come from the data and
   // the chart's reported hidden count, so they track resizes without a second
-  // source of truth. "Top" is accurate because the window takes the first rows in
-  // data order and dashboard series arrive sorted by amount — a chart fed in some
-  // other order would make that wording wrong.
+  // source of truth.
+  //
+  // The copy says "showing", not "top": the window takes the first rows in data
+  // order, and an item is free to arrive sorted by date, alphabetically, or any
+  // other way, none of which "top" would describe truthfully.
   const totalCategories = data?.categories?.length ?? 0
   const windowedDescription = isWindowed
     ? translations.dataChart.windowedCategories
@@ -633,16 +635,23 @@ export function ChartItem<Filters extends FiltersDefinition>({
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
             <F0DataChart
               {...chartProps}
-              // Expanding is the reader asking for the whole picture, so a
-              // horizontal bar chart drops its scrollable row window and draws
-              // every category at a fixed row height, growing the widget.
-              {...(fitContent ? { showAllCategories: true } : {})}
-              // Hidden-row count drives the expand button's label. Only
-              // subscribed when expanding is actually available, so a static
-              // chart never holds a count nothing can act on.
+              // Windowing rows is only offered where the reader can get them
+              // back: this widget puts the count and a "show all" link in its
+              // description. Without an expand handler there is nowhere for that
+              // link to go, so the chart keeps every category and compresses
+              // instead.
               {...(canRevealCategories
-                ? { onHiddenCategoriesChange: setHiddenCategories }
+                ? {
+                    windowCategories: true,
+                    // Drives the count in the description; subscribed only
+                    // alongside the window it describes.
+                    onHiddenCategoriesChange: setHiddenCategories,
+                  }
                 : {})}
+              // Expanding is the reader asking for the whole picture, so a
+              // horizontal bar chart drops its row window and draws every
+              // category at a fixed row height, growing the widget.
+              {...(fitContent ? { showAllCategories: true } : {})}
             />
           </div>
         )

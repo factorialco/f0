@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import type { F0DataChartBarProps } from "../../types"
 
@@ -8,6 +8,7 @@ import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
+import { useLegendSelection } from "../../utils/useLegendSelection"
 import {
   expandedHorizontalChartHeight,
   horizontalCategoryWindow,
@@ -18,11 +19,26 @@ export const BarChart = (props: F0DataChartBarProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const { width, height } = useContainerSize(ref)
   const size = resolveChartSize(width)
-  const options = useBarChartOptions(ref, props, size)
+  // Held here rather than inside the options hook: the options have to exist
+  // before the chart does, and the chart is what reports legend changes. State
+  // flows down into the options, the subscription is attached below.
+  const [legendSelection, setLegendSelection] = useState<Record<
+    string,
+    boolean
+  > | null>(null)
+  const options = useBarChartOptions(ref, props, size, legendSelection)
   const chartRef = useEChartsInstance(ref, options)
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
   useLegendInteraction(chartRef)
+  useLegendSelection(
+    chartRef,
+    useCallback(
+      (selected: Record<string, boolean> | null) =>
+        setLegendSelection(selected),
+      []
+    )
+  )
 
   // Expanded horizontal charts draw every category at a fixed row height rather
   // than compressing them into the container, so the canvas can end up taller
@@ -37,6 +53,7 @@ export const BarChart = (props: F0DataChartBarProps) => {
   // can never disagree with the window the chart actually rendered.
   const categoryWindow = horizontalCategoryWindow({
     isVertical: props.orientation !== "horizontal",
+    windowCategories: props.windowCategories ?? false,
     showAllCategories: props.showAllCategories ?? false,
     stacked: props.stacked ?? false,
     categoryCount: props.categories?.length ?? 0,
