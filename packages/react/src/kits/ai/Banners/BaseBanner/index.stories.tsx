@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
 import { Download, Upsell } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { BaseBanner } from "./index"
 
@@ -12,7 +13,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof BaseBanner>
 
 export default meta
@@ -132,6 +133,72 @@ export const FullWidthText: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
+}
+
+export const Card: Story = {
+  args: {
+    variant: "card",
+    title: "Submit expenses in seconds",
+    subtitle:
+      "Upload receipts. One organizes everything for you. Just review and send.",
+    mediaUrl:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    primaryAction: {
+      label: "Try it out",
+      onClick: () => alert("Try it out clicked"),
+      variant: "outline",
+    },
+    secondaryAction: {
+      label: "Not now",
+      onClick: () => alert("Dismissed"),
+      variant: "ghost",
+    },
+    onClose: () => alert("Banner closed"),
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[308px]">
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+/** Single consolidated visual-regression story: both orientations side by side. */
+export const Snapshot: Story = {
+  args: Default.args,
+  parameters: withSnapshot({ layout: "padded" }),
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <BaseBanner
+        title="Boost your productivity"
+        subtitle="Discover new features that will help you work more efficiently"
+        mediaUrl={Default.args.mediaUrl}
+        primaryAction={{ label: "Get Started", onClick: () => {} }}
+        secondaryAction={{ label: "Learn More", onClick: () => {} }}
+        onClose={() => {}}
+      />
+      <div className="w-[308px]">
+        <BaseBanner
+          variant="card"
+          title="Submit expenses in seconds"
+          subtitle="Upload receipts. One organizes everything for you. Just review and send."
+          mediaUrl={Default.args.mediaUrl}
+          primaryAction={{
+            label: "Try it out",
+            onClick: () => {},
+            variant: "outline",
+          }}
+          secondaryAction={{
+            label: "Not now",
+            onClick: () => {},
+            variant: "ghost",
+          }}
+          onClose={() => {}}
+        />
+      </div>
+    </div>
+  ),
 }
 
 export const WithDataTestId: Story = {

@@ -24,7 +24,12 @@ export type BaseBannerProps = {
   onClose?: () => void
   isLoading?: boolean
   children?: React.ReactNode
-  variant?: "default" | "full-width"
+  /**
+   * `default` and `full-width` are horizontal banners (media beside the text on
+   * wider viewports). `card` keeps the vertical stack at every viewport — media
+   * on top, content below — for narrow surfaces such as popovers and side panels.
+   */
+  variant?: "default" | "full-width" | "card"
 }
 
 const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
@@ -43,6 +48,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
     ref
   ) {
     const isVideo = mediaUrl?.includes(".mp4")
+    const isCard = variant === "card"
     const [isDismissed, setIsDismissed] = useState(false)
 
     const handleClose = () => {
@@ -59,10 +65,22 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
     return !isDismissed ? (
       <div
         ref={ref}
-        className="bg-white relative flex w-full flex-col gap-4 rounded-xl border border-f1-border-secondary shadow-md sm:flex-row sm:gap-5"
+        className={cn(
+          "relative flex w-full flex-col rounded-xl border border-f1-border-secondary shadow-md",
+          isCard
+            ? // `bg-white` renders transparent and the border does not draw without
+              // an explicit style; scoped to `card` so existing banners are untouched.
+              "gap-0 border-solid bg-f1-background"
+            : "bg-white gap-4 sm:flex-row sm:gap-5"
+        )}
       >
         {/* Media 16:9 */}
-        <div className="aspect-video w-full flex-shrink-0 overflow-hidden rounded-xl px-1 pb-0 pt-1 sm:max-w-80 sm:py-1 sm:pl-1">
+        <div
+          className={cn(
+            "aspect-video w-full flex-shrink-0 overflow-hidden rounded-xl",
+            isCard ? "p-1" : "px-1 pb-0 pt-1 sm:max-w-80 sm:py-1 sm:pl-1"
+          )}
+        >
           {isVideo ? (
             <video
               src={mediaUrl}
@@ -81,23 +99,40 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
         </div>
 
         {/* Content */}
-        <div className="flex flex-col justify-center gap-5 px-3 pb-3 sm:py-3 sm:pl-0 sm:pr-3">
+        <div
+          className={cn(
+            "flex flex-col justify-center",
+            isCard ? "gap-2 p-3" : "gap-5 px-3 pb-3 sm:py-3 sm:pl-0 sm:pr-3"
+          )}
+        >
           <div
             className={cn(
               "flex w-full flex-col gap-1",
               variant === "default" ? "sm:max-w-lg" : undefined
             )}
           >
-            <h3 className="font-bold text-xl text-f1-foreground">{title}</h3>
+            <h3
+              className={cn(
+                "text-f1-foreground",
+                isCard ? "font-medium text-lg" : "font-bold text-xl"
+              )}
+            >
+              {title}
+            </h3>
             {subtitle && (
-              <p className="text-base text-f1-foreground-secondary">
+              <p
+                className={cn(
+                  "text-base text-f1-foreground-secondary",
+                  isCard && "line-clamp-2"
+                )}
+              >
                 {subtitle}
               </p>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className={cn("flex", isCard ? "gap-2" : "gap-3")}>
             {primaryAction && (
               <F0Button
                 onClick={primaryAction.onClick}
