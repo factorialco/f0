@@ -200,6 +200,15 @@ export function BaseHeader({
   const avatarOffset =
     Math.max(0, ((identityHeight ?? 0) - avatarSize) / 2) * progress
 
+  /*
+   * Whether anything is actually condensed yet. A `transform`, even `scale(1)`,
+   * makes an element a stacking context and a containing block for absolutely
+   * positioned descendants, so applying one at rest would change the ground the
+   * avatar's own internals stand on. Both transforms wait until there is
+   * something to move.
+   */
+  const condensing = progress > 0
+
   return (
     <div
       style={{ paddingBottom: px(lerp(20, 12, progress)) }}
@@ -245,15 +254,20 @@ export function BaseHeader({
               // identity sit side by side. Stacked below that the avatar is above
               // the text and there is nothing to centre against.
               className={cn(
-                "flex shrink-0 items-start md:translate-y-[var(--avatar-offset)]",
+                "flex shrink-0 items-start",
+                condensing && "md:translate-y-[var(--avatar-offset)]",
                 tween
               )}
             >
               <div
-                style={{
-                  transform: `scale(${lerp(1, 32 / 56, progress)})`,
-                  transformOrigin: "top left",
-                }}
+                style={
+                  condensing
+                    ? {
+                        transform: `scale(${lerp(1, 32 / 56, progress)})`,
+                        transformOrigin: "top left",
+                      }
+                    : undefined
+                }
                 className={tween}
               >
                 <F0Avatar
@@ -475,7 +489,7 @@ export function BaseHeader({
             // Height and clipping only once there is something to close, so a
             // header at rest carries no inline height and nothing can be clipped
             // that was not clipped before.
-            ...(progress > 0
+            ...(condensing
               ? {
                   height: px(lerp(metadataHeight ?? 0, 0, progress)),
                   overflow: "hidden",

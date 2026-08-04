@@ -85,11 +85,15 @@ describe("BaseHeader at rest", () => {
     expect(metadataRow().style.overflow).toBe("")
   })
 
-  it("does not scale the avatar at rest", () => {
+  it("applies no transform at all at rest", () => {
     alone()
 
+    // Not even `scale(1)`. A transform makes the element a stacking context and
+    // a containing block for absolutely positioned descendants, so applying one
+    // here would change the ground the avatar's own internals stand on.
     const scaled = avatarBox().firstElementChild as HTMLElement
-    expect(scaled.style.transform).toBe("scale(1)")
+    expect(scaled.style.transform).toBe("")
+    expect(avatarBox().className).not.toContain("translate-y")
     expect(avatarBox().style.getPropertyValue("--avatar-offset")).toBe("0px")
   })
 })
@@ -124,6 +128,14 @@ describe("BaseHeader condensed", () => {
     expect(title().style.fontSize).toBe("19px")
     expect(avatarBox().style.width).toBe("44px")
     expect(root().style.paddingBottom).toBe("16px")
+  })
+
+  it("scales the avatar once there is something to scale", () => {
+    at(1)
+
+    const scaled = avatarBox().firstElementChild as HTMLElement
+    expect(scaled.style.transform).toBe(`scale(${32 / 56})`)
+    expect(avatarBox().className).toContain("translate-y")
   })
 })
 

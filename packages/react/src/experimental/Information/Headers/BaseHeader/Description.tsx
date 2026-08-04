@@ -51,6 +51,19 @@ export const Description = ({
     lineHeight: px(lerp(24, 20, progress)),
   }
 
+  /*
+   * The box below eases its height so that showing and hiding the rest of the
+   * description feels like an expansion rather than a jump. But the height also
+   * changes when the text size does, and easing that would leave the description
+   * 150ms behind the scroll, and the header's whole height with it.
+   *
+   * So the ease is kept for a height change the reader asked for and dropped for
+   * one the scroll caused, which is what this tells apart.
+   */
+  const lastProgress = useRef(progress)
+  const changedByScroll = lastProgress.current !== progress
+  lastProgress.current = progress
+
   return (
     <div className="flex max-w-[640px] flex-col gap-1">
       <motion.div
@@ -61,7 +74,7 @@ export const Description = ({
             : (descriptionSize.height ?? "3rem"),
         }}
         transition={{
-          duration: needsTruncation ? 0.15 : 0,
+          duration: needsTruncation && !changedByScroll ? 0.15 : 0,
           ease: [0.165, 0.84, 0.44, 1],
         }}
         className={cn(
