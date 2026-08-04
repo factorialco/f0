@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import React from "react"
-import { expect, waitFor, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import {
   avatarVariants,
@@ -303,10 +303,10 @@ export const WithTooltipDescription: Story = {
 }
 
 /**
- * The `+N` counter is a disclosure button: hover it, focus it with the keyboard,
- * or click it, and a popover lists the hidden avatars by name. It never scrolls
- * — the card grows with its list, because a scroll region inside a hover card
- * can never be operated by keyboard.
+ * The `+N` counter is a disclosure button: hover it, or reach it with Tab and
+ * press Enter, and a popover lists the hidden avatars by name. The card is
+ * capped at the available viewport height and its list scrolls — reachable by
+ * keyboard, because opening from the keyboard moves focus into the card.
  */
 export const OverflowPopover: Story = {
   args: {
@@ -333,25 +333,26 @@ export const OverflowPopover: Story = {
       )
     })
 
-    await step("the counter is reachable by keyboard", async () => {
+    await step("the counter opens from the keyboard alone", async () => {
       // The regression this pins: the counter used to be a role-less <div>, so
-      // it was not in the tab order and Radix's focus-to-open path could never
-      // fire — the collapsed names were mouse-only (WCAG 2.1.1). Name it by
+      // it was not in the tab order at all and the collapsed names were
+      // mouse-only (WCAG 2.1.1). No pointer anywhere in this step. Name it by
       // pattern, never by the literal "+12".
       const trigger = canvas.getByRole("button", { name: /^\+\d+ more$/ })
       await expect(trigger).toHaveAttribute("aria-expanded", "false")
 
       trigger.focus()
       await expect(trigger).toHaveFocus()
+      await userEvent.keyboard("{Enter}")
       await waitFor(() =>
         expect(trigger).toHaveAttribute("aria-expanded", "true")
       )
     })
 
     await step("the counter discloses every collapsed entry", async () => {
-      // The popover is portalled out of the canvas (ui/hover-card.tsx passes no
-      // `container`) and carries no role, so scope to <body> and pick the open
-      // radix content. Then count rows by the one avatar each row renders
+      // The popover is portalled out of the canvas (ui/popover.tsx passes no
+      // `container`), so scope to <body> and pick the open radix content. Then
+      // count rows by the one avatar each row renders
       // (MaxCounter.tsx) — the number of rows is AvatarList's contract, whereas
       // a per-name multiplicity would just encode how many distinct people
       // `getDummyAvatars` cycles.

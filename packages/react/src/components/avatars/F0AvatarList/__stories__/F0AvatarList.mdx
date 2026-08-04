@@ -53,11 +53,11 @@ counter renders `remainingCount` plus whatever `max` collapsed
 
 <Canvas of={ListStories.WithRemainingCount} />
 
-The `+N` counter is a disclosure button. Hovering it, focusing it with the
-keyboard, or clicking it opens a popover listing the hidden avatars by name. The
-popover grows with its list rather than scrolling, so a very large cluster
-produces a very tall card — cap `max` with that in mind, and keep the full list
-available somewhere the page itself can scroll.
+The `+N` counter is a disclosure button. Hovering it opens a popover listing the
+hidden avatars by name; reaching it with Tab and pressing Enter does the same and
+moves focus into the card, so the list can be scrolled from the keyboard. The
+card is capped at the available viewport height, so a large cluster scrolls
+rather than running off the screen.
 
 <Canvas of={ListStories.OverflowPopover} />
 
@@ -137,11 +137,16 @@ means the same pixels as it does on a standalone avatar.
 ## Accessibility
 
 The `+N` counter is a `<button>` with `aria-expanded`, so the collapsed names are
-reachable by keyboard: Tab to it and the popover opens on focus, Escape
-dismisses. Click and touch work too. The popover deliberately does not scroll —
-inside a hover card a scroll region can never be operated, because Radix sets
-`tabindex="-1"` on every tabbable node it contains on each render, stripping the
-`tabIndex={0}` that makes `ScrollArea` accessible everywhere else.
+reachable by keyboard: Tab to it, press Enter, and focus moves into the card
+where the list scrolls with the arrow keys. Escape dismisses and returns focus to
+the counter. Hover still opens the card for pointer users, without stealing
+focus.
+
+The card is a `Popover` rather than a `HoverCard` for that reason. A hover card
+cannot contain anything that has to be operated: Radix sets `tabindex="-1"` on
+every tabbable node inside it on each render, which strips the `tabIndex={0}`
+that makes `ScrollArea` keyboard-accessible everywhere else in F0 — leaving a
+scroll region nobody can scroll (axe `scrollable-region-focusable`, WCAG 2.1.1).
 
 Two known limitations remain, and axe can see neither of them, so a green
 automated check does not mean this component is accessible.
@@ -163,5 +168,6 @@ automated check does not mean this component is accessible.
   put anything there that is not also available in the surrounding UI.
 
 At `xs` the counter renders an ellipsis icon rather than `+N`, so it carries no
-visible count — its `aria-label` still names one ("+12 more"), which is why the
-label includes the number rather than saying only "more".
+visible count. It gets one as visually hidden text ("+12 more"), which is also
+the button's accessible name — the number is in the label deliberately, so that
+name still contains the visible `+N` at the larger sizes (WCAG 2.5.3).

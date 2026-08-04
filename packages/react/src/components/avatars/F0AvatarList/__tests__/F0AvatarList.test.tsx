@@ -1,7 +1,12 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { act, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  act,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { F0AvatarList } from "../F0AvatarList"
 
@@ -121,22 +126,24 @@ describe("F0AvatarList", () => {
       expect(trigger).toHaveAttribute("aria-expanded", "false")
     })
 
-    it("is reachable by Tab and discloses the names on focus alone", async () => {
+    it("is reachable by Tab and opens on Enter, with no pointer involved", async () => {
       const user = userEvent.setup()
       render(overflowing)
 
       // The regression this pins: the trigger used to be a role-less <div>, so
-      // Tab never reached it and Radix's focus-to-open path could never fire.
-      // No hover anywhere in this test — keyboard only.
+      // Tab never reached it and the collapsed names were mouse-only. No hover
+      // anywhere in this test — keyboard only, start to finish.
       await user.tab()
       const trigger = screen.getByRole("button", { name: "+1 more" })
       expect(trigger).toHaveFocus()
+
+      await user.keyboard("{Enter}")
 
       expect(await screen.findByText("Marie Curie")).toBeInTheDocument()
       expect(trigger).toHaveAttribute("aria-expanded", "true")
     })
 
-    it("toggles on click, which is the only path that works on touch", async () => {
+    it("toggles on click, which is also the path that works on touch", async () => {
       const user = userEvent.setup()
       render(overflowing)
 
@@ -147,19 +154,48 @@ describe("F0AvatarList", () => {
       expect(trigger).toHaveAttribute("aria-expanded", "true")
     })
 
-    it("renders no scroll region in the popover", async () => {
+    it("never moves focus when the card is opened and closed by hover", async () => {
+      const user = userEvent.setup()
+      render(overflowing)
+
+      const trigger = screen.getByRole("button", { name: "+1 more" })
+      const before = document.activeElement
+
+      await user.hover(trigger)
+      expect(await screen.findByText("Marie Curie")).toBeInTheDocument()
+      // Hover must not pull focus out of whatever the user was doing.
+      expect(document.activeElement).toBe(before)
+
+      await user.unhover(trigger)
+      // ...and Radix must not hand it back either. Without
+      // `onCloseAutoFocus` being suppressed, closing returns focus to the
+      // trigger, which leaves the counter sitting there with a focus ring as
+      // though it had been tabbed to — reported as looking "selected" on
+      // nothing more than a mouse-over.
+      await waitFor(() =>
+        expect(screen.queryByText("Marie Curie")).not.toBeInTheDocument()
+      )
+      expect(trigger).not.toHaveFocus()
+      expect(document.activeElement).toBe(before)
+    })
+
+    it("moves focus into the popover so its scroll region is operable", async () => {
       const user = userEvent.setup()
       render(overflowing)
 
       await user.click(screen.getByRole("button", { name: "+1 more" }))
       expect(await screen.findByText("Marie Curie")).toBeInTheDocument()
 
-      // The whole point of the fix. `ScrollArea` stamps `data-scroll-container`
-      // on its viewport (ui/scrollarea.tsx), and inside a hover card that
-      // viewport can never be focused, so its presence is the defect itself.
-      expect(
-        document.querySelector("[data-scroll-container]")
-      ).not.toBeInTheDocument()
+      // This is what buys the scrolling. Radix Popover moves focus into the
+      // content on open and, unlike HoverCard, does not strip tab stops — so
+      // the ScrollArea viewport keeps the `tabIndex={0}` that makes it
+      // keyboard-operable (verified against axe in a real browser).
+      const viewport = document.querySelector("[data-scroll-container]")
+      expect(viewport).toBeInTheDocument()
+      expect(viewport).toHaveAttribute("tabindex", "0")
+      expect(document.querySelector('[role="dialog"]')).toContainElement(
+        viewport as HTMLElement
+      )
     })
 
     it("keeps the counter role-less when there is nothing to disclose", () => {

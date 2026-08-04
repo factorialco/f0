@@ -25,8 +25,9 @@ type AvatarListValue = {
    */
   max?: number
   /**
-   * @deprecated No longer has any effect; the `+N` popover never scrolls and
-   * always grows to fit its entries. See `F0AvatarListProps["tooltipScroll"]`.
+   * @deprecated No longer has any effect; the `+N` popover always caps at the
+   * available viewport height and scrolls. See
+   * `F0AvatarListProps["tooltipScroll"]`.
    * @removeIn 5.0
    * @migration Remove the prop.
    */

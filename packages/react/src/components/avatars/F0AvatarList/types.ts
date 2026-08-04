@@ -85,17 +85,16 @@ export type F0AvatarListProps = {
   layout?: "fill" | "compact"
 
   /**
-   * @deprecated No longer has any effect; the `+N` popover never scrolls and
-   * always grows to fit its entries. The previous `"vertical"` behaviour capped
-   * the height and scrolled, which no keyboard user could operate: Radix
-   * `HoverCardContent` sets `tabindex="-1"` on every tabbable node it contains
-   * on each render, stripping the `tabIndex={0}` that makes `ScrollArea`
-   * accessible everywhere else (axe `scrollable-region-focusable`, WCAG 2.1.1).
+   * @deprecated No longer has any effect. The `+N` popover now always caps at
+   * the available viewport height and scrolls, and that scrolling is reachable
+   * by keyboard — neither of the old values is worth selecting. `"vertical"`
+   * used to cap and scroll inside a hover card, where Radix strips every tab
+   * stop on each render, so no keyboard user could operate the scroll (axe
+   * `scrollable-region-focusable`, WCAG 2.1.1); `"none"` avoided that by
+   * letting the card grow without limit, off the screen for a large cluster.
    * @removeIn 5.0
-   * @migration Remove the prop. There is no replacement — the behaviour it
-   * selected was inaccessible. If a cluster is large enough that the popover
-   * becomes unwieldy, surface the full list somewhere the page can scroll
-   * normally instead of hiding it behind a hover card.
+   * @migration Remove the prop. The current behaviour is what `"vertical"`
+   * always intended, minus the accessibility defect.
    */
   tooltipScroll?: "vertical" | "none"
 } & F0AvatarListPropsAvatars
