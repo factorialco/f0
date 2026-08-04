@@ -21,7 +21,6 @@
     "DatePicker",
     "EmptyState",
     "Filters/FilterPicker",
-    "Forms/F0Form",
     "Graph/F0Graph",
     "Graph/F0GraphControls",
     "Graph/F0GraphEdge",

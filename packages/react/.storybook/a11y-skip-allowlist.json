@@ -18,8 +18,6 @@
     "src/hooks/datasource/useDataSourceItemNavigation/__stories__/useDataSourceItemNavigation.stories.tsx": 1,
     "src/layouts/Dashboard/__stories__/Dashboard.stories.tsx": 1,
     "src/layouts/Layout/__stories__/Layout.stories.tsx": 1,
-    "src/patterns/F0Form/__stories__/F0Form.stories.tsx": 1,
-    "src/patterns/F0Form/__stories__/ValidationIssues.test.stories.tsx": 1,
     "src/patterns/F0FormField/__stories__/F0FormField.stories.tsx": 1,
     "src/patterns/OneDataCollection/__stories__/actions/collection-actions.stories.tsx": 1,
     "src/patterns/OneDataCollection/__stories__/actions/item-actions.stories.tsx": 1,

@@ -860,10 +860,10 @@ export function EntitiesListFieldRenderer({
     : false
   const header = (
     <div className="flex w-full items-center justify-between gap-3">
-      <label
-        htmlFor={field.id}
-        className="text-base font-medium leading-normal text-f1-foreground-secondary"
-      >
+      {/* No `htmlFor` — `field.id` matches no element, and this label heads a
+          collection rather than a single control. See the note in
+          FieldRenderer.tsx. */}
+      <label className="text-base font-medium leading-normal text-f1-foreground-secondary">
         {field.label}
         {isRequired && (
           <span className="ml-0.5 text-f1-foreground-critical">*</span>

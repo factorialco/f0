@@ -219,10 +219,16 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       render={({ field: formField, fieldState }) => (
         <FormItem id={anchorId} className="scroll-mt-4">
           {showLabel && (
-            <label
-              htmlFor={field.id}
-              className="text-base font-medium leading-normal text-f1-foreground-secondary"
-            >
+            /* No `htmlFor`: it used to be `field.id`, which matches no element
+               in the DOM — the rendered input gets its own id from
+               `F0InputField` (`props.id ?? useId()`), and the field renderers
+               (TextFieldRenderer et al.) do not thread one down. A `for` that
+               resolves to nothing is a worse lie than no `for` at all, so it is
+               gone until the id can be threaded through all 15 field renderers.
+               The control is still named: `F0InputField` sets `aria-label` from
+               the same `label` (F0InputField.tsx:512). Clicking the label does
+               not focus the input — tracked separately. */
+            <label className="text-base font-medium leading-normal text-f1-foreground-secondary">
               {field.label}
               {isRequired && (
                 <span className="ml-0.5 text-f1-foreground-critical">*</span>

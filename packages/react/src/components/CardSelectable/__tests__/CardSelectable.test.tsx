@@ -134,3 +134,85 @@ describe("CardSelectable selectedContent", () => {
     expect(screen.getByTestId("content-a")).toBeInTheDocument()
   })
 })
+
+const linkItems: CardSelectableItem<string>[] = [
+  {
+    value: "workflows",
+    title: "Link this course with Workflows",
+    description: "Automate certificates and questionnaires.",
+    moreInfoLink: {
+      href: "https://help.example.com/workflows",
+      label: "Learn more",
+    },
+  },
+]
+
+/**
+ * The card header carries `role="switch" | "checkbox" | "radio"` and is
+ * focusable. A link inside it makes an interactive control wrap another one,
+ * which axe flags as `nested-interactive` (WCAG 2.0 SC 4.1.2, "Element has
+ * focusable descendants"). The link is a sibling row below the header instead.
+ */
+describe("CardSelectable moreInfoLink", () => {
+  it.each(["switch", "checkbox", "radio"] as const)(
+    "renders the link outside the %s element",
+    (role) => {
+      render(
+        <CardSelectableContainer
+          {...(role === "switch"
+            ? { multiple: true as const, isToggle: true }
+            : role === "checkbox"
+              ? { multiple: true as const }
+              : { multiple: false as const })}
+          items={linkItems}
+          value={role === "radio" ? undefined : []}
+          onChange={vi.fn()}
+          label="test"
+        />
+      )
+
+      const control = screen.getByRole(role)
+      const link = screen.getByRole("link", { name: /Learn more/ })
+
+      expect(link).toBeInTheDocument()
+      expect(control.contains(link)).toBe(false)
+    }
+  )
+
+  it("leaves no focusable descendant inside the interactive header", () => {
+    render(
+      <CardSelectableContainer
+        multiple
+        isToggle
+        items={linkItems}
+        value={[]}
+        onChange={vi.fn()}
+        label="test"
+      />
+    )
+
+    const control = screen.getByRole("switch")
+    expect(
+      control.querySelectorAll(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).toHaveLength(0)
+  })
+
+  it("does not toggle the card when the link is activated", async () => {
+    const onChange = vi.fn()
+    render(
+      <CardSelectableContainer
+        multiple
+        isToggle
+        items={linkItems}
+        value={[]}
+        onChange={onChange}
+        label="test"
+      />
+    )
+
+    await userEvent.click(screen.getByRole("link", { name: /Learn more/ }))
+    expect(onChange).not.toHaveBeenCalled()
+  })
+})

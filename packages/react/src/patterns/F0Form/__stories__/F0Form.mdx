@@ -661,8 +661,14 @@ links: f0FormField.entitiesList({
 ## Accessibility
 
 - All fields rendered by F0Form include ARIA labels derived from the `label` config.
-- Error messages are linked to their field via `aria-describedby`.
+- Each field's visible label is associated with its control via `for`/`id`, so
+  clicking the label focuses the input.
+- Help text and error messages are linked to their field via `aria-describedby`,
+  and the attribute is only emitted for the ones actually rendered — a field with
+  no `helpText` and no error carries no `aria-describedby`.
 - The form's submit button manages `aria-busy` during async submission.
+- Every story in this section runs axe in CI at blocking severity
+  (`a11y: { test: "error" }`), covering WCAG 2.0/2.1/2.2 at levels A and AA.
 
 ---
 

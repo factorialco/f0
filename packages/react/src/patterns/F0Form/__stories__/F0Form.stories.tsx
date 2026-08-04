@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState, useCallback, useMemo, useRef } from "react"
+import { useState, useCallback, useId, useMemo, useRef } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
@@ -32,7 +33,7 @@ const meta: Meta = {
   title: "Forms/F0Form",
   component: F0Form,
   tags: ["stable", "!autodocs"],
-  parameters: { a11y: { skipCi: true } },
+  parameters: { a11y: { test: "error" } },
 }
 
 export default meta
@@ -154,6 +155,28 @@ export const CriticalAlertBlocksSubmit: Story = {
     })
 
     return <F0Form formDefinition={formDefinition} />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const quantity = () => canvas.getByRole("textbox", { name: "Quantity" })
+    const submit = () => canvas.getByRole("button", { name: "Submit" })
+
+    // `errorTriggerMode` defaults to "on-submit" and the critical alert only
+    // becomes a form error inside the resolver, so the gate is closed by
+    // submitting — not on first render. The alert itself is visible immediately.
+    await expect(canvas.getByText("Not enough stock")).toBeVisible()
+    await expect(submit()).toBeEnabled()
+
+    await userEvent.click(submit())
+    await waitFor(() => expect(submit()).toBeDisabled())
+
+    await userEvent.clear(quantity())
+    await userEvent.type(quantity(), "5")
+
+    await waitFor(() =>
+      expect(canvas.queryByText("Not enough stock")).not.toBeInTheDocument()
+    )
+    await waitFor(() => expect(submit()).toBeEnabled())
   },
 }
 
@@ -2354,31 +2377,41 @@ export const CustomField: Story = {
       disabled?: boolean
       options: { id: string; name: string }[]
       placeholder?: string
-    }) => (
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-f1-foreground-secondary">
-          {label}
-        </label>
-        <select
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value || undefined)}
-          disabled={disabled}
-          className={`rounded-lg border px-3 py-2 text-sm ${
-            error ? "border-f1-border-critical" : "border-f1-border-secondary"
-          } ${disabled ? "opacity-50" : ""}`}
-        >
-          <option value="">{placeholder ?? "Select an option..."}</option>
-          {options.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name}
-            </option>
-          ))}
-        </select>
-        {error && (
-          <span className="text-sm text-f1-foreground-critical">{error}</span>
-        )}
-      </div>
-    )
+    }) => {
+      // The label must be wired to the control, or the select has no accessible
+      // name (axe `select-name`, WCAG 2.0 SC 4.1.2). A docs example is the last
+      // place to leave that broken.
+      const selectId = useId()
+      return (
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor={selectId}
+            className="text-sm font-medium text-f1-foreground-secondary"
+          >
+            {label}
+          </label>
+          <select
+            id={selectId}
+            value={value ?? ""}
+            onChange={(e) => onChange(e.target.value || undefined)}
+            disabled={disabled}
+            className={`rounded-lg border px-3 py-2 text-sm ${
+              error ? "border-f1-border-critical" : "border-f1-border-secondary"
+            } ${disabled ? "opacity-50" : ""}`}
+          >
+            <option value="">{placeholder ?? "Select an option..."}</option>
+            {options.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.name}
+              </option>
+            ))}
+          </select>
+          {error && (
+            <span className="text-sm text-f1-foreground-critical">{error}</span>
+          )}
+        </div>
+      )
+    }
 
     const PriorityPicker = ({
       label,
@@ -4190,7 +4223,9 @@ export const ActionBarWiggle: Story = {
  */
 export const Snapshot: Story = {
   ...AllFieldTypes,
-  // a11y is already skipped for F0Form at the meta level; don't add another
-  // skipCi call-site (the allowlist burndown test forbids increasing counts).
+  // Inherits the meta-level `a11y: { test: "error" }` — do not opt this story
+  // out of axe. Note `a11yTierOf` in scripts/component-status-build.mjs regexes
+  // the raw file text, so even naming the opt-out parameter in a comment drops
+  // this file's a11y tier back to "skipped" and the stable-DoD gate with it.
   parameters: withSnapshot({}),
 }
