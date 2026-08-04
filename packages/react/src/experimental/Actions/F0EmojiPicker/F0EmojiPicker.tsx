@@ -6,6 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { Reaction } from "@/icons/app"
 import { EmojiPicker } from "@/lib/EmojiPicker"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import type { F0EmojiPickerProps } from "./types"
@@ -19,14 +20,21 @@ const EMOJI_PICKER_STYLE = {
   "--background-rgb": "255, 255, 255",
   "--border-radius": "12px",
   "--category-icon-size": "20px",
-  "--color-border-over": "hsl(var(--neutral-10))",
-  "--color-border": "hsl(var(--neutral-10))",
   "--font-size": "14px",
   "--rgb-accent": "1, 22, 55",
   "--rgb-background": "255, 255, 255",
   "--rgb-color": "1, 22, 55",
   "--rgb-input": "255, 255, 255",
-  "--shadow": "0px 4px 20px 0px #0d162514",
+} as CSSProperties
+
+const LIGHT_SURFACE_STYLE = {
+  "--neutral-0": "0 0% 100%",
+  "--neutral-5": "220 88% 17% / 0.04",
+  "--neutral-10": "216 89% 18% / 0.06",
+  "--neutral-20": "214 70% 20% / 0.1",
+  "--neutral-30": "213 87% 15% / 0.2",
+  "--neutral-40": "219 97% 15% / 0.45",
+  "--neutral-100": "218 48% 10%",
 } as CSSProperties
 
 export const F0EmojiPicker = ({
@@ -63,6 +71,8 @@ export const F0EmojiPicker = ({
     setIsOpen(false)
   }
 
+  const hasClearAction = clearable && Boolean(selectedEmoji)
+
   return (
     <Popover
       open={!disabled && isOpen}
@@ -83,12 +93,16 @@ export const F0EmojiPicker = ({
       <PopoverContent
         side="bottom"
         align="start"
+        collisionPadding={16}
         aria-label={label}
         style={EMOJI_PICKER_STYLE}
-        className="flex h-[min(500px,var(--radix-popover-content-available-height))] w-fit flex-col !overflow-hidden border-none bg-transparent p-4 shadow-none [&>div:first-child]:min-h-0 [&>div:first-child]:flex-1 [&>div:first-child]:overflow-hidden [&_em-emoji-picker]:!h-full [&_em-emoji-picker]:!max-h-[min(451px,calc(100vh-81px))] [&_em-emoji-picker]:!w-[372px] [&_em-emoji-picker]:!max-w-[calc(100vw-32px)]"
+        className="flex h-[min(500px,var(--radix-popover-content-available-height))] w-fit flex-col !overflow-y-auto rounded-xl border-none bg-transparent p-0 shadow-none [&>div:first-child]:min-h-0 [&>div:first-child]:flex-1 [&>div:first-child]:overflow-hidden [&_em-emoji-picker]:!h-full [&_em-emoji-picker]:!min-h-0 [&_em-emoji-picker]:!max-h-[min(451px,calc(100vh-81px))] [&_em-emoji-picker]:!w-[372px] [&_em-emoji-picker]:!max-w-[calc(100vw-32px)] [@media(max-height:320px)]:[&>div:first-child]:!min-h-[230px] [@media(max-height:320px)]:[&_em-emoji-picker]:!min-h-[230px]"
       >
         <EmojiPicker
-          className="box-border border border-solid border-f1-border-hover"
+          className={cn(
+            "box-border border border-solid border-[rgba(1,22,55,0.2)] shadow-none [--color-border-over:rgba(1,22,55,0.2)] [--color-border:rgba(1,22,55,0.08)] [--shadow:none]",
+            hasClearAction && "rounded-b-none border-b-0"
+          )}
           data={data}
           onEmojiSelect={handleEmojiSelect}
           locale={locale}
@@ -105,8 +119,11 @@ export const F0EmojiPicker = ({
           navPosition="top"
           dynamicWidth
         />
-        {clearable && selectedEmoji ? (
-          <div className="border-neutral-10 flex items-end justify-end border-t px-2 pt-1">
+        {hasClearAction ? (
+          <div
+            className="flex items-center justify-end rounded-b-md border border-solid border-[rgba(1,22,55,0.2)] border-t-[rgba(1,22,55,0.1)] bg-[rgb(255,255,255)] p-2 [@media(max-height:320px)]:px-1 [@media(max-height:320px)]:py-0"
+            style={LIGHT_SURFACE_STYLE}
+          >
             <F0Button
               label={i18n.actions.clear}
               variant="outline"

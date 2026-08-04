@@ -154,6 +154,33 @@ export const Clearable: Story = {
   },
 }
 
+export const CompactHeight: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    clearable: true,
+    defaultValue: "💬",
+  },
+  parameters: {
+    viewport: {
+      options: {
+        compactHeight: {
+          name: "Compact height",
+          styles: {
+            width: "320px",
+            height: "256px",
+          },
+        },
+      },
+    },
+  },
+  globals: {
+    viewport: {
+      value: "compactHeight",
+      isRotated: false,
+    },
+  },
+}
+
 export const ClearableInteraction: Story = {
   tags: ["no-sidebar"],
   args: {

@@ -8,13 +8,24 @@ import { F0EmojiPicker } from "../index"
 
 vi.mock("@/lib/EmojiPicker", () => ({
   EmojiPicker: ({
+    className,
     locale,
+    navPosition,
     onEmojiSelect,
+    searchPosition,
   }: {
+    className?: string
     locale?: string
+    navPosition?: string
     onEmojiSelect?: (emoji: { native: string }) => void
+    searchPosition?: string
   }) => (
-    <>
+    <div
+      className={className}
+      data-nav-position={navPosition}
+      data-search-position={searchPosition}
+      data-testid="emoji-picker"
+    >
       <button
         type="button"
         data-locale={locale}
@@ -25,7 +36,7 @@ vi.mock("@/lib/EmojiPicker", () => ({
       <button type="button" onClick={() => onEmojiSelect?.({ native: "👨‍👩‍👧‍👦" })}>
         Select family
       </button>
-    </>
+    </div>
   ),
 }))
 
@@ -196,6 +207,14 @@ describe("F0EmojiPicker", () => {
     expect(
       screen.queryByRole("button", { name: "Clear" })
     ).not.toBeInTheDocument()
+    expect(screen.getByTestId("emoji-picker")).toHaveClass(
+      "border",
+      "border-solid"
+    )
+    expect(screen.getByTestId("emoji-picker")).not.toHaveClass(
+      "rounded-b-none",
+      "border-b-0"
+    )
 
     unmount()
     render(<F0EmojiPicker label="Choose group emoji" clearable />)
@@ -204,6 +223,53 @@ describe("F0EmojiPicker", () => {
     expect(
       screen.queryByRole("button", { name: "Clear" })
     ).not.toBeInTheDocument()
+    expect(screen.getByTestId("emoji-picker")).not.toHaveClass(
+      "rounded-b-none",
+      "border-b-0"
+    )
+  })
+
+  it("joins the picker border to the clear action footer", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0EmojiPicker label="Choose group emoji" defaultValue="💬" clearable />
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: "Choose group emoji: 💬" })
+    )
+
+    expect(screen.getByTestId("emoji-picker")).toHaveClass(
+      "rounded-b-none",
+      "border-b-0"
+    )
+    expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument()
+  })
+
+  it("preserves search and category navigation in short viewports", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0EmojiPicker label="Choose group emoji" defaultValue="💬" clearable />
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: "Choose group emoji: 💬" })
+    )
+
+    expect(screen.getByTestId("emoji-picker")).toHaveAttribute(
+      "data-nav-position",
+      "top"
+    )
+    expect(screen.getByTestId("emoji-picker")).toHaveAttribute(
+      "data-search-position",
+      "top"
+    )
+    expect(
+      screen.getByRole("button", { name: "Clear" }).parentElement
+    ).toHaveClass(
+      "[@media(max-height:320px)]:px-1",
+      "[@media(max-height:320px)]:py-0"
+    )
   })
 
   it.each([
