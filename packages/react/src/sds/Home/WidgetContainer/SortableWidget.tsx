@@ -46,7 +46,11 @@ export const SortableWidget = ({
   } = useSortable({ id, disabled })
 
   const style: CSSProperties = {
-    transform: CSS.Translate.toString(transform),
+    // VERTICAL ONLY: a column is one dimension, so the card follows the pointer
+    // up and down and ignores its horizontal travel. dnd-kit reports both axes;
+    // dropping x here is the same thing `restrictToVerticalAxis` does, without
+    // taking on @dnd-kit/modifiers for it.
+    transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
     transition,
     // The dragged card rides above its neighbours so the gap it will land in
     // stays readable underneath.
