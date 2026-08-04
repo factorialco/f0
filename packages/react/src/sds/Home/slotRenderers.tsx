@@ -1,27 +1,26 @@
-import { Fragment, ReactNode } from "react"
-
-import { Separator } from "@/ui/separator"
+import { ReactNode } from "react"
 
 import {
   IndicatorsList,
   IndicatorsListProps,
-} from "../../Content/IndicatorsList"
+} from "@/experimental/Widgets/Content/IndicatorsList"
 import {
   WidgetAvatarsListItem,
   WidgetAvatarsListItemProps,
-} from "../../Content/ListItems/WidgetAvatarsListItem"
+} from "@/experimental/Widgets/Content/ListItems/WidgetAvatarsListItem"
 import {
   WidgetSimpleList,
   WidgetSimpleListProps,
-} from "../../Content/Lists/WidgetSimpleList"
-import { Widget, WidgetProps } from "../../Widget"
+} from "@/experimental/Widgets/Content/Lists/WidgetSimpleList"
+import { WidgetProps } from "@/experimental/Widgets/Widget"
 
 /**
- * Slot vocabulary + how each slot is drawn. Kept in its own file so the layout
- * (`index.tsx`) stays pure placement and this stays "what a slot renders".
+ * The Home kit's slot vocabulary and how each slot is drawn. `SlotWidget`
+ * renders a widget from these; the layout (`NewHomeLayout`) stays pure
+ * placement.
  */
 
-/** Context threaded into every slot/widget renderer so it can wire navigation. */
+/** Context threaded into every slot renderer so it can wire navigation. */
 export interface HomeRenderCtx {
   navigate?: (to: string) => void
 }
@@ -69,35 +68,4 @@ export const defaultSlotRenderers: SlotRenderers = {
       ))}
     </div>
   ),
-}
-
-/**
- * The default widget renderer: the f0 `Widget` frame (header + count + link) with
- * its slots stacked below, a DASHED divider between consecutive slots. Consumers
- * rarely replace this — usually they only add bespoke entries to `slotRenderers`.
- */
-export function defaultRenderWidget(
-  widget: HomeWidgetItem,
-  ctx: HomeRenderCtx,
-  renderers: SlotRenderers
-): ReactNode {
-  return (
-    <Widget header={widget.header} fullHeight={widget.fullHeight}>
-      {widget.slots.map((slot, index) => {
-        const renderer = renderers[slot.visualization]
-        return (
-          <Fragment key={index}>
-            {index > 0 ? <Separator bare className="my-3" /> : null}
-            {renderer ? (
-              renderer(slot.params, ctx)
-            ) : (
-              <div className="rounded-md border border-dashed border-f1-border p-2 text-f1-foreground-secondary">
-                {`No renderer for slot "${slot.visualization}"`}
-              </div>
-            )}
-          </Fragment>
-        )
-      })}
-    </Widget>
-  )
 }
