@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import type { ClarifyingQuestionState } from "../types"
+
 import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
 
 function buildState(
@@ -243,6 +243,47 @@ describe("F0ClarifyingPanel", () => {
       await Promise.resolve()
       expect(state.toggleOption).not.toHaveBeenCalled()
       expect(state.confirm).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("custom answer selection indicator", () => {
+    // The RadioIndicator is presentational (the textarea is the focusable
+    // control), so the selected state is asserted through its filled inner
+    // dot, which only renders when marked.
+    const getIndicator = () =>
+      screen.getByRole("textbox").previousElementSibling as HTMLElement
+
+    it("marks the custom answer row as soon as it is active, before any text", () => {
+      const state = buildState(
+        {},
+        { allowCustomAnswer: true, isCustomAnswerActive: true }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      expect(getIndicator().firstElementChild).not.toBeNull()
+    })
+
+    it("does not mark the custom answer row while a predefined option is selected", () => {
+      const state = buildState(
+        {},
+        {
+          allowCustomAnswer: true,
+          isCustomAnswerActive: true,
+          customAnswerText: "my answer",
+          selectedOptionIds: ["this-month"],
+        }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      expect(getIndicator().firstElementChild).toBeNull()
+    })
+
+    it("activates the custom answer when clicking the row, not just the textarea", async () => {
+      const state = buildState({}, { allowCustomAnswer: true })
+      render(<F0ClarifyingPanel clarifyingQuestion={state} />)
+      // Click lands on the radio indicator — outside the textarea — and must
+      // still focus the input and activate the custom answer.
+      await userEvent.click(getIndicator())
+      expect(state.activateCustomAnswer).toHaveBeenCalled()
+      expect(screen.getByRole("textbox")).toHaveFocus()
     })
   })
 

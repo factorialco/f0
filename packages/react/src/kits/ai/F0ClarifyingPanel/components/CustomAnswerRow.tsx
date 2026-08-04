@@ -61,9 +61,16 @@ export const CustomAnswerRow = ({
       textarea.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden"
   }, [customAnswerText])
 
+  // The row behaves like one more option: activating it (click or focus)
+  // marks the radio right away — not only once text has been typed — and a
+  // predefined selection always wins, so hosts that don't reset
+  // `isCustomAnswerActive` on option toggle can't show two marked radios.
+  const isMarkedSelected =
+    (isCustomAnswerActive || hasCustomText) && !hasSelection
+
   const indicator =
     mode === "single" ? (
-      <RadioIndicator isSelected={hasCustomText && !hasSelection} />
+      <RadioIndicator isSelected={isMarkedSelected} />
     ) : (
       <F0Checkbox
         checked={isCustomAnswerActive}
@@ -76,9 +83,13 @@ export const CustomAnswerRow = ({
   return (
     <div
       className={cn(
-        "flex items-start gap-2 rounded-md px-2 py-2",
+        "flex cursor-text items-start gap-2 rounded-md px-2 py-2",
         "transition-colors hover:bg-f1-background-hover"
       )}
+      // Clicking anywhere in the row (radio indicator, padding) activates the
+      // custom answer, mirroring how OptionRow selects on row click. Focusing
+      // the textarea fires `onActivate` via its own onFocus.
+      onClick={() => textareaRef.current?.focus()}
     >
       {indicator}
       <textarea
