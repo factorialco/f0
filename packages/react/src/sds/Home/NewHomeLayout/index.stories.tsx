@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Card } from "@/components/F0Card"
@@ -32,12 +32,12 @@ import { NewHomeLayout } from "./index"
 /* =============================== main column =============================== */
 
 /**
- * The Ask-AI greeting on one line: avatar, the gradient welcome phrase, the muted
+ * The Ask-AI greeting: the One mark, the gradient welcome phrase, the muted
  * question. The gradient stops are F0's own welcome-phrase literals.
  */
 const Greeting = () => (
   <div className="flex flex-col items-center gap-3 py-2">
-    <F0AvatarPerson firstName="Hellen" lastName="R" size="lg" />
+    <F0OneIcon size="lg" />
     <p className="m-0 text-2xl font-semibold">
       <span
         style={{
