@@ -201,22 +201,38 @@ export function BaseHeader({
     Math.max(0, ((identityHeight ?? 0) - avatarSize) / 2) * progress
 
   /*
-   * Whether anything is actually condensed yet. A `transform`, even `scale(1)`,
-   * makes an element a stacking context and a containing block for absolutely
-   * positioned descendants, so applying one at rest would change the ground the
-   * avatar's own internals stand on. Both transforms wait until there is
-   * something to move.
+   * Whether anything is actually condensed yet.
+   *
+   * Nothing below is expressed inline until this is true, and at rest the header
+   * renders the same classes it always did. That is not tidiness, it is the only
+   * way the promise holds that a hundred existing call sites are untouched:
+   *
+   *   - The type classes carry more than a size. `text-2xl` and `text-lg` also set
+   *     `letter-spacing`, and they size in rem so the header follows the root font
+   *     size. An inline `fontSize` in px silently drops both.
+   *   - Inline styles outrank the cascade. `F0Dialog` and the drawers cancel this
+   *     header's padding with `[&_.resource-header]:p-0`, which beats a class and
+   *     loses to an inline style, so an unconditional inline padding would put it
+   *     back.
+   *   - `xl` is not 56px for every avatar variant, so an explicit box is only safe
+   *     once we are the ones deciding the size.
+   *   - A `transform`, even `scale(1)`, makes an element a stacking context and a
+   *     containing block for absolutely positioned descendants.
    */
   const condensing = progress > 0
 
   return (
     <div
-      style={{ paddingBottom: px(lerp(20, 12, progress)) }}
+      style={
+        condensing ? { paddingBottom: px(lerp(20, 12, progress)) } : undefined
+      }
       className={cn(
-        // No `gap` between the identity row and the metadata: the metadata row
-        // owns that spacing as padding, so it closes along with the row instead
-        // of leaving a hole behind.
         "resource-header px-page flex flex-col pt-3",
+        // While condensing, the 12px between the identity row and the metadata
+        // moves onto the metadata row as padding so it can close along with the
+        // row instead of leaving a hole behind. At rest it stays a `gap` here,
+        // which is exactly what shipped.
+        !condensing && "gap-3 pb-5",
         tween,
         // `border-0` zeroes all sides first so this renders bottom-only even in apps that
         // don't load the Tailwind preflight border reset (otherwise `border-solid` would
@@ -244,18 +260,20 @@ export function BaseHeader({
             // the scale, so the layout follows.
             <div
               style={
-                {
-                  width: px(avatarSize),
-                  height: px(avatarSize),
-                  "--avatar-offset": px(avatarOffset),
-                } as CSSProperties
+                condensing
+                  ? ({
+                      width: px(avatarSize),
+                      height: px(avatarSize),
+                      "--avatar-offset": px(avatarOffset),
+                    } as CSSProperties)
+                  : undefined
               }
               // The centring only lands from `md` up, where the avatar and the
               // identity sit side by side. Stacked below that the avatar is above
               // the text and there is nothing to centre against.
               className={cn(
-                "flex shrink-0 items-start",
-                condensing && "md:translate-y-[var(--avatar-offset)]",
+                "flex items-start",
+                condensing && "shrink-0 md:translate-y-[var(--avatar-offset)]",
                 tween
               )}
             >
@@ -285,17 +303,24 @@ export function BaseHeader({
             ref={identityRef}
             // Condensed, the name and the role read as one line of identity, so
             // the gap between them closes.
-            style={{ gap: px(lerp(4, 0, progress)) }}
-            className={cn("flex flex-col", tween)}
+            style={condensing ? { gap: px(lerp(4, 0, progress)) } : undefined}
+            className={cn("flex flex-col", !condensing && "gap-1", tween)}
           >
             <span
-              // From the large heading type down to the heading type.
-              style={{
-                fontSize: px(lerp(22, 16, progress)),
-                lineHeight: px(lerp(28, 24, progress)),
-              }}
+              // From the large heading type down to the heading type. Inline only
+              // while condensing, so at rest `text-2xl` keeps its letter-spacing
+              // and its rem sizing.
+              style={
+                condensing
+                  ? {
+                      fontSize: px(lerp(22, 16, progress)),
+                      lineHeight: px(lerp(28, 24, progress)),
+                    }
+                  : undefined
+              }
               className={cn(
                 "font-semibold",
+                !condensing && "text-2xl",
                 tween,
                 deactivated ? "text-f1-foreground/[0.61]" : "text-f1-foreground"
               )}
@@ -305,7 +330,7 @@ export function BaseHeader({
             {description && (
               <Description
                 description={description}
-                progress={progress}
+                progress={condensing ? progress : undefined}
                 tween={tween}
               />
             )}
@@ -481,21 +506,29 @@ export function BaseHeader({
       </div>
       {allMetadata.length > 0 && (
         <div
-          style={{
-            // The 12px that used to be the header's own `gap`, now closing with
-            // the row it belongs to.
-            paddingTop: px(lerp(12, 0, progress)),
-            opacity: fade(progress),
-            // Height and clipping only once there is something to close, so a
-            // header at rest carries no inline height and nothing can be clipped
-            // that was not clipped before.
-            ...(condensing
+          style={
+            condensing
               ? {
-                  height: px(lerp(metadataHeight ?? 0, 0, progress)),
-                  overflow: "hidden",
+                  // The 12px that was the header's own `gap` at rest, now closing
+                  // along with the row it belongs to.
+                  paddingTop: px(lerp(12, 0, progress)),
+                  opacity: fade(progress),
+                  // The measured height is the content's; the applied height
+                  // includes the padding above it, so the padding is added back
+                  // in or the row jumps by 12px and slices its own text on the
+                  // first pixel of scroll. Left unset until something has been
+                  // measured, since treating "not measured yet" as zero would
+                  // close the row for a frame.
+                  ...(metadataHeight !== undefined
+                    ? {
+                        boxSizing: "border-box" as const,
+                        height: px(lerp(metadataHeight + 12, 0, progress)),
+                        overflow: "hidden",
+                      }
+                    : {}),
                 }
-              : {}),
-          }}
+              : undefined
+          }
           className={cn(
             "hidden flex-wrap items-center gap-x-3 gap-y-1 md:block",
             tween

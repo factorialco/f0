@@ -88,7 +88,11 @@ describe("ResourceHeader", () => {
     it("renders open by default", () => {
       render(<ResourceHeader title="Payroll" />)
 
-      expect(titleOf("Payroll").style.fontSize).toBe("22px")
+      // Open means the type class is still in charge, with no inline override:
+      // `text-2xl` carries letter-spacing and rem sizing that a px font-size
+      // would drop.
+      expect(titleOf("Payroll").className).toContain("text-2xl")
+      expect(titleOf("Payroll").getAttribute("style")).toBeNull()
     })
 
     it("renders condensed when told to", () => {

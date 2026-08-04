@@ -1,5 +1,7 @@
 import { RefObject, useEffect, useRef, useState } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
+
 /**
  * How many pixels of scroll it takes to condense the header completely. The
  * collapse is linked to the scroll rather than tweened over time, so this is a
@@ -84,6 +86,21 @@ export function useHeaderCollapseDriver(): {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [hasHeader, setHasHeader] = useState(false)
   const [progress, setProgress] = useState(0)
+  const reducedMotion = useReducedMotion()
+
+  /*
+   * The element this page scrolls in, remembered from the first scroll event that
+   * qualified.
+   *
+   * Latching it is what keeps one page to one scroller. Re-deciding per event
+   * would let the first inner scroller to be touched become "the page", and worse,
+   * returning that inner scroller to its own top would reset the engagement latch
+   * and snap the header open in the middle of the page.
+   *
+   * It also takes the ancestor walk off the scroll path: once this is set, an
+   * event is accepted or rejected by one identity comparison.
+   */
+  const scrollerRef = useRef<HTMLElement | null>(null)
 
   /*
    * Whether this page is tall enough to be worth condensing, latched for the
@@ -110,23 +127,30 @@ export function useHeaderCollapseDriver(): {
       return
     }
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+    /** Back to knowing nothing: the next scroll decides again, from the top. */
+    const forget = () => {
+      scrollerRef.current = null
+      engaged.current = false
+      setProgress(0)
+    }
+
+    if (reducedMotion) {
+      // Nothing to watch: a reader who asked for less motion gets a header that
+      // stays put, so there is no reason to listen or measure at all.
+      forget()
+      return
+    }
 
     // Read in the handler rather than deferred to a frame: scroll events are
     // already frame-aligned, so coalescing them buys nothing, and a deferred read
     // stops arriving when the tab is hidden and frames stop.
     const measure = (scroller: HTMLElement) => {
-      if (reducedMotion.matches) {
-        engaged.current = false
-        setProgress(0)
-        return
-      }
-
       const top = scroller.scrollTop
 
       // Back at the top the header has reopened, so the previous verdict is stale
-      // and the range can be trusted again.
-      if (top === 0) engaged.current = false
+      // and the range can be trusted again. `<=` rather than `===`: elastic
+      // overscroll reports a negative position, and that is still the top.
+      if (top <= 0) engaged.current = false
 
       if (!engaged.current) {
         engaged.current =
@@ -144,25 +168,45 @@ export function useHeaderCollapseDriver(): {
      */
     const onScroll = (event: Event) => {
       const target = event.target as HTMLElement
-      if (!isPageScroller(target, body)) return
+
+      // The remembered scroller can be replaced under us by a route change that
+      // keeps this page mounted, in which case it is no longer ours to follow.
+      if (scrollerRef.current && !body.contains(scrollerRef.current)) forget()
+
+      if (scrollerRef.current) {
+        if (target !== scrollerRef.current) return
+      } else {
+        if (!isPageScroller(target, body)) return
+        scrollerRef.current = target
+      }
+
       measure(target)
     }
 
-    const onPreferenceChange = () => measure(findPageScroller(body))
+    /*
+     * A route change can swap the whole body without a scroll event, leaving a
+     * condensed header over a page that is back at its top. Watching the body's
+     * own children is enough to notice, and it is quiet: it fires when the page
+     * changes, not while it scrolls.
+     */
+    const swaps = new MutationObserver(forget)
+    swaps.observe(body, { childList: true })
 
-    // Mounting mid-scroll is normal: a route change keeps the scroll position.
+    /*
+     * Mounting mid-scroll is normal, since a route change keeps the scroll
+     * position. This measures without remembering: at mount the content may not
+     * have rendered its scroller yet, and latching the body as "the scroller"
+     * would then reject the real one when it arrives.
+     */
     measure(findPageScroller(body))
 
     body.addEventListener("scroll", onScroll, { capture: true, passive: true })
-    // Watched rather than read once, so turning the preference off mid-session
-    // starts working without a reload.
-    reducedMotion.addEventListener("change", onPreferenceChange)
 
     return () => {
       body.removeEventListener("scroll", onScroll, { capture: true })
-      reducedMotion.removeEventListener("change", onPreferenceChange)
+      swaps.disconnect()
     }
-  }, [hasHeader])
+  }, [hasHeader, reducedMotion])
 
   return { bodyRef, progress, setHasHeader }
 }

@@ -1,27 +1,57 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { useHeaderCollapse } from "@/lib/providers/headerCollapse"
-import { act, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  act,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { Page } from "../index"
 
+type Metrics = { scrollTop: number; scrollHeight: number; clientHeight: number }
+
+const flat = (): Metrics => ({
+  scrollTop: 0,
+  scrollHeight: 0,
+  clientHeight: 0,
+})
+
 /**
  * jsdom does no layout, so the three numbers the driver reads are all 0. Shadow
- * them on the prototype with getters over a mutable object, which is the only
- * way to have them already set while the driver takes its first read on mount.
+ * them on the prototype with getters, which is the only way to have them already
+ * set while the driver takes its first read on mount.
+ *
+ * Per element, not shared. One mutable object for the whole tree would let a
+ * driver that measured the wrong element pass every assertion in this file, which
+ * is the exact regression a browser had to catch once already: measuring the
+ * page's body instead of the scroller inside the content. Elements without their
+ * own entry read flat, so an accidental measurement of the wrong one never engages.
  */
-const metrics = { scrollTop: 0, scrollHeight: 0, clientHeight: 0 }
+const metricsFor = new WeakMap<HTMLElement, Metrics>()
+
+/** The metrics of whichever element scrolls, defaulting to the page's own body. */
+const metrics = (element?: HTMLElement | null): Metrics => {
+  const target =
+    element ?? document.querySelector<HTMLElement>(".overflow-auto")
+  if (!target) throw new Error("no element to give metrics to")
+  const existing = metricsFor.get(target)
+  if (existing) return existing
+  const created = flat()
+  metricsFor.set(target, created)
+  return created
+}
+
 const measured = ["scrollTop", "scrollHeight", "clientHeight"] as const
 
 beforeEach(() => {
-  metrics.scrollTop = 0
-  metrics.scrollHeight = 0
-  metrics.clientHeight = 0
-
   measured.forEach((key) => {
     Object.defineProperty(HTMLDivElement.prototype, key, {
       configurable: true,
-      get: () => metrics[key],
+      get(this: HTMLElement) {
+        return metricsFor.get(this)?.[key] ?? 0
+      },
     })
   })
 })
@@ -34,23 +64,26 @@ afterEach(() => {
   })
 })
 
-/** A page tall enough to be worth condensing: 400px of scroll range. */
-const tall = () => {
-  metrics.scrollHeight = 1000
-  metrics.clientHeight = 600
+/** A scroller tall enough to be worth condensing: 400px of range. */
+const tall = (element?: HTMLElement) => {
+  const own = metrics(element)
+  own.scrollHeight = 1000
+  own.clientHeight = 600
 }
 
-/** A page barely taller than its viewport, under the 96px collapse distance. */
-const short = () => {
-  metrics.scrollHeight = 640
-  metrics.clientHeight = 600
+/** A scroller barely taller than its viewport, under the 96px collapse distance. */
+const short = (element?: HTMLElement) => {
+  const own = metrics(element)
+  own.scrollHeight = 640
+  own.clientHeight = 600
 }
 
-const scrollTo = (top: number) => {
-  metrics.scrollTop = top
-  const body = document.querySelector(".overflow-auto")
+const scrollTo = (top: number, element?: HTMLElement) => {
+  const target =
+    element ?? document.querySelector<HTMLElement>(".overflow-auto")!
+  metrics(target).scrollTop = top
   act(() => {
-    body?.dispatchEvent(new Event("scroll"))
+    target.dispatchEvent(new Event("scroll"))
   })
 }
 
@@ -157,8 +190,7 @@ describe("Page collapse driver", () => {
     // The header gave up height, so the body grew and the scroll range shrank
     // below the collapse distance. Re-reading the range here is what makes the
     // header snap open, hand the height back, and start over.
-    metrics.scrollHeight = 640
-    metrics.clientHeight = 600
+    short()
 
     scrollTo(72)
     expect(progressOf()).toBe("0.75")
@@ -197,23 +229,28 @@ describe("Page collapse driver", () => {
   })
 
   it("condenses on mount when a route change restored the scroll", () => {
-    metrics.scrollTop = 200
-    metrics.scrollHeight = 1000
-    metrics.clientHeight = 600
+    // The body has to exist before it can be given metrics, and the driver reads
+    // on mount, so the metrics are installed against the element the render is
+    // about to produce by rendering once and re-rendering into the same container.
+    const { container } = renderPage()
+    const body = container.querySelector<HTMLElement>(".overflow-auto")!
 
-    renderPage()
+    tall(body)
+    metrics(body).scrollTop = 200
+    act(() => {
+      body.dispatchEvent(new Event("scroll"))
+    })
 
     expect(progressOf()).toBe("1")
   })
 
   it("provides the progress to the header slot only", () => {
-    tall()
-
     render(
       <Page header={<CollapsingHeader />}>
         <BodyHeader />
       </Page>
     )
+    tall()
     scrollTo(96)
 
     // A header rendered inside the page body scrolls away rather than staying
@@ -227,21 +264,83 @@ describe("Page collapse driver", () => {
     // `overflow-auto` section, and so does the monolith's page body, so the
     // element that actually scrolls is a descendant rather than the body itself.
     // `scroll` does not bubble, which is why the listener captures.
-    render(
+    const { container } = render(
       <Page header={<CollapsingHeader />}>
         <div style={{ overflowY: "auto" }} data-testid="content">
           <div>Body</div>
         </div>
       </Page>
     )
-    tall()
 
-    metrics.scrollTop = 96
-    act(() => {
-      screen.getByTestId("content").dispatchEvent(new Event("scroll"))
-    })
+    // Only the content's scroller gets a range. The page's own body stays flat,
+    // so a driver that measured the body instead would read nothing to scroll and
+    // never engage. That is what makes this test able to fail.
+    const content = screen.getByTestId("content")
+    tall(content)
+    expect(
+      metrics(container.querySelector<HTMLElement>(".overflow-auto")!)
+        .scrollHeight
+    ).toBe(0)
+
+    scrollTo(96, content)
 
     expect(progressOf()).toBe("1")
+  })
+
+  it("keeps following the scroller it first accepted, and nothing else", () => {
+    // Two sibling scrollers under the body. Whichever moves first is the page;
+    // the other must never touch the header, and must never reset the latch by
+    // sitting at its own top.
+    render(
+      <Page header={<CollapsingHeader />}>
+        <div style={{ overflowY: "auto" }} data-testid="first">
+          Content
+        </div>
+        <div style={{ overflowY: "auto" }} data-testid="second">
+          Aside
+        </div>
+      </Page>
+    )
+
+    const first = screen.getByTestId("first")
+    const second = screen.getByTestId("second")
+    tall(first)
+    tall(second)
+
+    scrollTo(96, first)
+    expect(progressOf()).toBe("1")
+
+    // The second one is at its own top. Honouring it would snap the header open
+    // in the middle of the page.
+    scrollTo(0, second)
+    expect(progressOf()).toBe("1")
+
+    scrollTo(48, second)
+    expect(progressOf()).toBe("1")
+  })
+
+  it("forgets the scroller when the content under it is replaced", async () => {
+    const Swappable = ({ which }: { which: "a" | "b" }) => (
+      <Page header={<CollapsingHeader />}>
+        <div style={{ overflowY: "auto" }} data-testid={which} key={which}>
+          Content
+        </div>
+      </Page>
+    )
+
+    const { rerender } = render(<Swappable which="a" />)
+    const a = screen.getByTestId("a")
+    tall(a)
+
+    scrollTo(96, a)
+    expect(progressOf()).toBe("1")
+
+    // A route change swaps the body for a fresh one sitting at its top. Leaving
+    // the header condensed over it would be a lie. The reset comes from a
+    // MutationObserver, so it lands a microtask later.
+    rerender(<Swappable which="b" />)
+
+    await waitFor(() => expect(progressOf()).toBe("0"))
   })
 
   it("ignores a scroll area nested inside the page's own", () => {
@@ -254,12 +353,10 @@ describe("Page collapse driver", () => {
         </div>
       </Page>
     )
-    tall()
+    const table = screen.getByTestId("table")
+    tall(table)
 
-    metrics.scrollTop = 96
-    act(() => {
-      screen.getByTestId("table").dispatchEvent(new Event("scroll"))
-    })
+    scrollTo(96, table)
 
     // Scrolling a table inside the page is not scrolling the page, so the header
     // stays where it is.
@@ -286,32 +383,22 @@ describe("Page collapse driver", () => {
 })
 
 describe("Page collapse driver and reduced motion", () => {
-  /** Replaces the global stub with one this test can flip and fire. */
-  const stubMotionPreference = (reduce: boolean) => {
-    const listeners = new Set<() => void>()
-    const query = {
-      matches: reduce,
-      media: "(prefers-reduced-motion: reduce)",
+  /**
+   * The preference itself comes from `useReducedMotion`, so only its initial
+   * value needs stubbing here. Whether that hook notices a mid-session change is
+   * the hook's business, not this driver's.
+   */
+  const preferReducedMotion = () => {
+    vi.stubGlobal("matchMedia", (media: string) => ({
+      matches: true,
+      media,
       onchange: null,
       addListener: vi.fn(),
       removeListener: vi.fn(),
-      addEventListener: (_: string, listener: () => void) =>
-        listeners.add(listener),
-      removeEventListener: (_: string, listener: () => void) =>
-        listeners.delete(listener),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
-    }
-
-    vi.stubGlobal("matchMedia", () => query)
-
-    return {
-      set: (next: boolean) => {
-        query.matches = next
-        act(() => {
-          listeners.forEach((listener) => listener())
-        })
-      },
-    }
+    }))
   }
 
   afterEach(() => {
@@ -319,7 +406,7 @@ describe("Page collapse driver and reduced motion", () => {
   })
 
   it("does not condense for a reader who prefers reduced motion", () => {
-    stubMotionPreference(true)
+    preferReducedMotion()
 
     renderPage()
     tall()
@@ -328,17 +415,16 @@ describe("Page collapse driver and reduced motion", () => {
     expect(progressOf()).toBe("0")
   })
 
-  it("starts condensing if the preference is turned off mid-session", () => {
-    const motion = stubMotionPreference(true)
+  it("does not even watch the scroll under reduced motion", () => {
+    // Stronger than zeroing the progress: there is nothing to zero, because the
+    // page never starts listening or measuring in the first place.
+    preferReducedMotion()
+    const listen = spyOnBodyListeners("addEventListener")
 
     renderPage()
-    tall()
 
-    scrollTo(96)
-    expect(progressOf()).toBe("0")
+    expect(listen.scrollListenerCount()).toBe(0)
 
-    motion.set(false)
-
-    expect(progressOf()).toBe("1")
+    listen.restore()
   })
 })

@@ -40,9 +40,22 @@ const title = () => screen.getByText("Angel Moreno")
 /** The identity column, which holds the name over the role. */
 const identity = () => title().parentElement as HTMLElement
 
-/** The box around the avatar, the only element carrying the offset variable. */
-const avatarBox = () =>
-  root().querySelector<HTMLElement>('[style*="--avatar-offset"]') as HTMLElement
+/**
+ * The box around the avatar. Found structurally, as the identity column's
+ * sibling, because at rest it carries no inline style to select it by, which is
+ * the whole point of the at-rest contract.
+ */
+const avatarBox = () => identity().previousElementSibling as HTMLElement
+
+/** Every element whose styling this change touches. */
+const styledByCollapse = () => [
+  root(),
+  avatarBox(),
+  title(),
+  identity(),
+  descriptionText(),
+  metadataRow(),
+]
 
 /** The desktop metadata row, which is the header's last block. */
 const metadataRow = () => root().lastElementChild as HTMLElement
@@ -50,51 +63,80 @@ const metadataRow = () => root().lastElementChild as HTMLElement
 const descriptionText = () => screen.getAllByText("Senior Product Designer")[0]
 
 describe("BaseHeader at rest", () => {
-  it("renders every size exactly as it did before the collapse existed", () => {
-    // The compatibility contract. `BaseHeader` has around a hundred call sites
-    // in the product, none of which are changing, so a header with no container
-    // driving it has to be indistinguishable from the one that shipped.
+  /**
+   * The compatibility contract, and the only test in this file that really
+   * matters. `BaseHeader` has around a hundred call sites in the product and none
+   * of them are changing.
+   *
+   * It asserts the *absence* of inline style rather than its value, which is the
+   * only form of the assertion that can catch a regression. Pinning the inline
+   * numbers is circular: it proves this component still says what this component
+   * says. A declaration silently dropped along with its class, `letter-spacing`
+   * riding on `text-2xl` being the real example, is invisible that way.
+   */
+  it("writes no inline style at all while the header is open", () => {
     alone()
 
-    expect(root().style.paddingBottom).toBe("20px")
-    expect(avatarBox().style.width).toBe("56px")
-    expect(avatarBox().style.height).toBe("56px")
-    expect(title().style.fontSize).toBe("22px")
-    expect(title().style.lineHeight).toBe("28px")
-    expect(identity().style.gap).toBe("4px")
-    expect(descriptionText().style.fontSize).toBe("16px")
-    expect(descriptionText().style.lineHeight).toBe("24px")
+    styledByCollapse().forEach((element) => {
+      expect(element.getAttribute("style")).toBeNull()
+    })
   })
 
-  it("keeps the 12px between the identity and the metadata", () => {
-    // It used to be a `gap` on the header itself. It moved onto the metadata row
-    // so it can close along with the row rather than leaving a hole behind, and
-    // the distance has to come out the same.
+  it("keeps the classes that carry more than a size", () => {
+    // `text-2xl` and `text-lg` also set letter-spacing, and size in rem so the
+    // header follows the root font size. An inline px font-size drops both.
     alone()
 
-    expect(metadataRow().style.paddingTop).toBe("12px")
-    expect(root().className).not.toContain("gap-3")
+    expect(title().className).toContain("text-2xl")
+    expect(descriptionText().className).toContain("text-lg")
   })
 
-  it("leaves the metadata row untouched at rest", () => {
+  it("keeps the spacing classes so the cascade can still reach them", () => {
+    // `F0Dialog` and the drawers cancel this header's padding with
+    // `[&_.resource-header]:p-0`, which beats a class and loses to inline style.
     alone()
 
-    expect(metadataRow().style.opacity).toBe("1")
-    // No height and no clipping until there is something to close.
-    expect(metadataRow().style.height).toBe("")
-    expect(metadataRow().style.overflow).toBe("")
+    expect(root().className).toContain("pb-5")
+    expect(root().className).toContain("gap-3")
+    expect(identity().className).toContain("gap-1")
   })
 
-  it("applies no transform at all at rest", () => {
+  it("applies no transform and no explicit avatar box at rest", () => {
     alone()
 
-    // Not even `scale(1)`. A transform makes the element a stacking context and
-    // a containing block for absolutely positioned descendants, so applying one
-    // here would change the ground the avatar's own internals stand on.
+    // Not even `scale(1)`: a transform makes the element a stacking context and a
+    // containing block for absolutely positioned descendants. And no width or
+    // height, because `xl` is not 56px for every avatar variant, so an explicit
+    // box is only safe once we are the ones choosing the size.
     const scaled = avatarBox().firstElementChild as HTMLElement
     expect(scaled.style.transform).toBe("")
     expect(avatarBox().className).not.toContain("translate-y")
-    expect(avatarBox().style.getPropertyValue("--avatar-offset")).toBe("0px")
+    expect(avatarBox().className).not.toContain("shrink-0")
+  })
+
+  it("stays inline-free with every optional part present", () => {
+    // The same contract over a maximally loaded header, covering the props the
+    // narrower tests never render: a status tag, a deactivated title, all three
+    // action clusters, a close button and the bottom border.
+    render(
+      <BaseHeader
+        title="Angel Moreno"
+        description="Senior Product Designer"
+        avatar={{ type: "person", firstName: "Angel", lastName: "Moreno" }}
+        metadata={metadata}
+        status={{ label: "Status", text: "Active", variant: "positive" }}
+        deactivated
+        showBottomBorder
+        primaryAction={{ label: "Edit", onClick: () => {} }}
+        secondaryActions={[{ label: "Share", onClick: () => {} }]}
+        otherActions={[{ label: "Archive", onClick: () => {} }]}
+        onClose={() => {}}
+      />
+    )
+
+    styledByCollapse().forEach((element) => {
+      expect(element.getAttribute("style")).toBeNull()
+    })
   })
 })
 
@@ -112,12 +154,33 @@ describe("BaseHeader condensed", () => {
     expect(descriptionText().style.lineHeight).toBe("20px")
   })
 
+  it("drops the classes it is now overriding inline", () => {
+    // Or the class and the inline value would fight, and which wins would depend
+    // on specificity rather than on progress.
+    at(1)
+
+    expect(title().className).not.toContain("text-2xl")
+    expect(root().className).not.toContain("pb-5")
+    expect(root().className).not.toContain("gap-3")
+    expect(identity().className).not.toContain("gap-1")
+  })
+
   it("closes the metadata row and blanks it on the way", () => {
     at(1)
 
     expect(metadataRow().style.paddingTop).toBe("0px")
     expect(metadataRow().style.opacity).toBe("0")
-    expect(metadataRow().style.overflow).toBe("hidden")
+  })
+
+  it("leaves the row's height alone until something has been measured", () => {
+    // jsdom never delivers a ResizeObserver entry, so the row's height is
+    // unknown here, and an unknown height must not be read as zero: that would
+    // close the row for a frame on a page mounted mid-scroll. The height's own
+    // continuity across progress needs a real layout engine to test.
+    at(1)
+
+    expect(metadataRow().style.height).toBe("")
+    expect(metadataRow().style.overflow).toBe("")
   })
 
   it("interpolates rather than switching", () => {
