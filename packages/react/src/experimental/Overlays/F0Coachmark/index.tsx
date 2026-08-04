@@ -3,7 +3,7 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Coachmark as _F0Coachmark } from "./F0Coachmark"
 
-export type { CoachmarkAction, F0CoachmarkProps } from "./types"
+export type { CoachmarkAction, CoachmarkStep, F0CoachmarkProps } from "./types"
 
 /**
  * @experimental This is an experimental component use it at your own risk

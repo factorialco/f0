@@ -22,6 +22,7 @@ export const F0Coachmark = ({
   title,
   description,
   action,
+  step,
   arrow = true,
   side = "bottom",
   align = "center",
@@ -117,11 +118,10 @@ export const F0Coachmark = ({
             <p id={titleId} className="font-semibold">
               {title}
             </p>
-            {/* Same treatment as F0Toast's close button: outline, sm, icon-only,
-                inset by the panel's own padding rather than pulled into the
-                corner, so the two components read consistently. */}
+            {/* Inset by the panel's own padding rather than pulled into the
+                corner, matching F0Toast's placement. */}
             <ButtonInternal
-              variant="outline"
+              variant="ghost"
               icon={Cross}
               size="sm"
               hideLabel
@@ -131,16 +131,30 @@ export const F0Coachmark = ({
             />
           </div>
           {description && (
-            <p id={descriptionId} className="font-normal">
+            // One level down from the title, which keeps the panel's own
+            // colour. Same pairing F0Toast uses for title vs description.
+            <p
+              id={descriptionId}
+              className="font-normal text-f1-foreground-inverse-secondary"
+            >
               {description}
             </p>
           )}
-          <ButtonInternal
-            variant="outline"
-            label={action.label}
-            onClick={action.onClick}
-            block
-          />
+          {/* `ml-auto` on the action rather than `justify-end` on the row, so
+              the action stays right aligned whether or not a step is present. */}
+          <div className="flex flex-row items-center gap-3">
+            {step && (
+              <p className="text-f1-foreground-inverse-secondary">
+                {step.current}/{step.total}
+              </p>
+            )}
+            <ButtonInternal
+              variant="outline"
+              label={action.label}
+              onClick={action.onClick}
+              className="ml-auto"
+            />
+          </div>
         </div>
         {arrow && (
           <PopoverArrow asChild width={ARROW_WIDTH} height={ARROW_HEIGHT}>

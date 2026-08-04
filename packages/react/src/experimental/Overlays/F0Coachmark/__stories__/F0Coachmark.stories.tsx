@@ -102,6 +102,20 @@ export const WithoutArrow: Story = {
 }
 
 /**
+ * `step` shows the coachmark's position in a sequence, beside the action. It is
+ * presentational: the consumer owns advancing between steps.
+ */
+export const WithStep: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    open: true,
+    step: { current: 1, total: 3 },
+    action: { label: "Next", onClick: fn() },
+    children: <F0Button variant="outline" label="Filters" />,
+  },
+}
+
+/**
  * Title and CTA only — `description` is optional.
  */
 export const WithoutDescription: Story = {
