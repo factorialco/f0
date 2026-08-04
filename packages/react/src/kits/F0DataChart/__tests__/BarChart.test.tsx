@@ -1,5 +1,6 @@
 import {
   afterAll,
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -11,6 +12,8 @@ import "@testing-library/jest-dom/vitest"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
+import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
+import { resolveChartTheme } from "../utils/theme"
 
 // ---------------------------------------------------------------------------
 // Same ECharts mock + container size mock as LineChart.test.tsx so the two
@@ -96,12 +99,45 @@ function getMainSeries() {
           fontSize?: number
           formatter?: (params: { value: number }) => string
         }
-        emphasis?: { label?: { color?: string; show?: boolean } }
+        itemStyle?: { borderColor?: string; borderWidth?: number }
+        emphasis?: {
+          label?: { color?: string; show?: boolean }
+          focus?: string
+        }
+        blur?: {
+          itemStyle?: { opacity?: number }
+          label?: { opacity?: number }
+        }
         labelLayout?: (p: LabelLayoutParams) => { fontSize?: number }
       }[]
     }
   ).series
 }
+
+/** Root-level animation keys that drive the hover blur cross-fade */
+function getAnimationOptions() {
+  const call = setOptionMock.mock.calls.at(-1)
+  if (!call) throw new Error("setOption was never called")
+  return call[0] as {
+    animation?: boolean
+    animationDuration?: number
+    animationDurationUpdate?: number
+    stateAnimation?: { duration?: number; easing?: string }
+  }
+}
+
+/** Drive `useReducedMotion()` — the setup default has no query matching. */
+const setReducedMotion = (matches: boolean) =>
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: matches && query.includes("prefers-reduced-motion"),
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
 
 /** Corner radii of every bar in a series, `undefined` for plain-number data */
 function getBorderRadii(seriesIndex: number) {
@@ -134,14 +170,15 @@ describe("BarChart — responsive breakpoints", () => {
     expect(option.yAxis.axisLabel.show).toBe(false)
   })
 
-  it("shows legend and the value axis but hides the category axis at the medium breakpoint", () => {
+  it("shows legend and both axes at the medium breakpoint", () => {
     containerSize.width = 320
     render(<F0DataChart {...verticalProps} />)
 
     const option = getLatestOption()
     expect(option.legend?.show).toBe(true)
-    // X = category (hidden at md), Y = value (shown at md)
-    expect(option.xAxis.axisLabel.show).toBe(false)
+    // Bars keep their categories wherever they keep any chrome — X = category,
+    // Y = value. Crowding is handled by the smart axis layout, not by hiding.
+    expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(true)
   })
 
@@ -155,14 +192,36 @@ describe("BarChart — responsive breakpoints", () => {
     expect(option.yAxis.axisLabel.show).toBe(true)
   })
 
-  it("respects orientation: in horizontal bars the category axis lives on Y", () => {
-    containerSize.width = 320 // medium breakpoint → category axis hidden
+  it("keeps the category axis on horizontal bars at the medium breakpoint", () => {
+    containerSize.width = 320
     render(<F0DataChart {...verticalProps} orientation="horizontal" />)
 
     const option = getLatestOption()
     expect(option.legend?.show).toBe(true)
-    // Horizontal bars: X = value axis (shown at md), Y = category axis (hidden at md)
+    // Horizontal bars: X = value axis, Y = category axis. Both orientations
+    // keep their categories at md; dropping them would leave a stack of
+    // anonymous bars the value axis can't explain.
     expect(option.xAxis.axisLabel.show).toBe(true)
+    expect(option.yAxis.axisLabel.show).toBe(true)
+  })
+
+  it("still hides the category axis on horizontal bars at the small breakpoint", () => {
+    containerSize.width = 180
+    render(<F0DataChart {...verticalProps} orientation="horizontal" />)
+
+    const option = getLatestOption()
+    expect(option.legend).toBeUndefined()
+    expect(option.xAxis.axisLabel.show).toBe(false)
+    expect(option.yAxis.axisLabel.show).toBe(false)
+  })
+
+  it("still hides the category axis on vertical bars at the small breakpoint", () => {
+    containerSize.width = 180
+    render(<F0DataChart {...verticalProps} />)
+
+    const option = getLatestOption()
+    // `sm` is the only size that drops the categories, in either orientation.
+    expect(option.xAxis.axisLabel.show).toBe(false)
     expect(option.yAxis.axisLabel.show).toBe(false)
   })
 
@@ -181,6 +240,53 @@ describe("BarChart — responsive breakpoints", () => {
     expect(option.xAxis.inverse).toBeUndefined()
     expect(option.yAxis.inverse).toBeUndefined()
   })
+})
+
+// ---------------------------------------------------------------------------
+// Bars deviate from the shared matrix: both orientations keep the category axis
+// at `md`, where every other chart family hides it (see
+// `resolveResponsiveDisplay`). That deviation costs plot area — horizontal
+// labels take `min(80, width * 0.2)` of the width, vertical ones a row of
+// height — so these pin the exact width the behavior changes at, one pixel
+// either side of both band edges. A breakpoint tweak that moves the flip has to
+// fail here rather than quietly reflow every bar chart in a chat card.
+// ---------------------------------------------------------------------------
+
+describe("BarChart — category axis at the breakpoint boundaries", () => {
+  const props = {
+    type: "bar" as const,
+    categories: ["Jan", "Feb", "Mar"],
+    series: [{ name: "A", data: [1, 2, 3] }],
+  }
+
+  /** Category-axis visibility at `width`. Horizontal keeps categories on Y. */
+  function categoryAxisShownAt(
+    width: number,
+    orientation: "vertical" | "horizontal"
+  ) {
+    containerSize.width = width
+    render(<F0DataChart {...props} orientation={orientation} />)
+    const option = getLatestOption()
+    return orientation === "vertical"
+      ? option.xAxis.axisLabel.show
+      : option.yAxis.axisLabel.show
+  }
+
+  for (const orientation of ["horizontal", "vertical"] as const) {
+    it(`hides the ${orientation} category axis at the last sm width (219px)`, () => {
+      expect(categoryAxisShownAt(SM_MAX_WIDTH - 1, orientation)).toBe(false)
+    })
+
+    it(`shows the ${orientation} category axis from the first md width (220px)`, () => {
+      expect(categoryAxisShownAt(SM_MAX_WIDTH, orientation)).toBe(true)
+    })
+
+    it(`keeps the ${orientation} category axis across the md → lg edge (519/520px)`, () => {
+      // Already visible at md, so crossing into lg must not toggle anything.
+      expect(categoryAxisShownAt(MD_MAX_WIDTH - 1, orientation)).toBe(true)
+      expect(categoryAxisShownAt(MD_MAX_WIDTH, orientation)).toBe(true)
+    })
+  }
 })
 
 describe("BarChart — corner rounding", () => {
@@ -404,7 +510,7 @@ describe("BarChart — label placement", () => {
     expect(getMainSeries()[0]?.label?.fontSize).toBe(11)
   })
 
-  it("chooses contrast-safe label colours for per-bar fills", () => {
+  it("keeps inside labels white on every fill, including light ones", () => {
     render(
       <F0DataChart
         {...base}
@@ -421,11 +527,176 @@ describe("BarChart — label placement", () => {
       />
     )
 
-    const data = getMainSeries()[0]?.data
-    expect(data?.[0]?.label?.color).toBe("#ffffff")
-    expect(data?.[1]?.label?.color).toBe("#000000")
-    expect(data?.[0]?.emphasis?.label?.color).toBe("#ffffff")
-    expect(data?.[1]?.emphasis?.label?.color).toBe("#000000")
+    const mainSeries = getMainSeries()[0]
+    // A per-bar colour override no longer carries its own label colour: the
+    // series-level white applies to dark indigo and light yellow alike.
+    expect(mainSeries?.label?.color).toBe("#ffffff")
+    expect(mainSeries?.emphasis?.label?.color).toBe("#ffffff")
+    expect(mainSeries?.data?.[1]?.label).toBeUndefined()
+  })
+})
+
+describe("BarChart — stacked segment polish", () => {
+  const base = {
+    type: "bar" as const,
+    categories: ["A", "B"],
+    series: [
+      { name: "X", data: [1, 2] },
+      { name: "Y", data: [3, 4] },
+    ],
+  }
+
+  /**
+   * Nothing in the jsdom tree paints a background, so the container lookup
+   * falls back to the light-mode page token.
+   */
+  const themeBackground = resolveChartTheme(null).colors.background
+
+  it("separates stacked segments with a hairline in the theme background", () => {
+    render(<F0DataChart {...base} stacked />)
+
+    const itemStyle = getMainSeries()[0]?.itemStyle
+    expect(itemStyle?.borderColor).toBe(themeBackground)
+    // Both neighbours stroke the shared edge and canvas strokes are centered on
+    // it, so the two cover the same band rather than adding up: 0.5 reads as a
+    // hairline, not a 1px gap.
+    expect(itemStyle?.borderWidth).toBe(0.5)
+  })
+
+  it("paints the separator in the nearest surface colour, not the page colour", () => {
+    render(
+      <div style={{ backgroundColor: "rgb(1, 2, 3)" }}>
+        <F0DataChart {...base} stacked />
+      </div>
+    )
+
+    // A chart on a tinted card / modal must blend into that surface.
+    expect(getMainSeries()[0]?.itemStyle?.borderColor).toBe("rgb(1, 2, 3)")
+  })
+
+  it("leaves non-stacked bars without a separator border", () => {
+    render(<F0DataChart {...base} />)
+
+    const itemStyle = getMainSeries()[0]?.itemStyle
+    expect(itemStyle?.borderColor).toBeUndefined()
+    expect(itemStyle?.borderWidth).toBeUndefined()
+  })
+
+  it("isolates the hovered series and fades the rest to 40%", () => {
+    render(<F0DataChart {...base} stacked />)
+
+    const series = getMainSeries()
+    for (const entry of series) {
+      expect(entry?.emphasis?.focus).toBe("series")
+      expect(entry?.blur?.itemStyle?.opacity).toBe(0.4)
+      expect(entry?.blur?.label?.opacity).toBe(0.4)
+    }
+  })
+
+  it("does not blur or focus when the bars are not stacked", () => {
+    render(<F0DataChart {...base} />)
+
+    const mainSeries = getMainSeries()[0]
+    expect(mainSeries?.emphasis?.focus).toBeUndefined()
+    expect(mainSeries?.blur).toBeUndefined()
+  })
+
+  it("fades the target ghost with its stack instead of the echarts default", () => {
+    render(
+      <F0DataChart
+        {...base}
+        stacked
+        series={[{ name: "X", data: [{ value: 1, target: 5 }] }]}
+        categories={["A"]}
+      />
+    )
+
+    // [main, target] — the ghost is a separate series, so `focus: "series"`
+    // blurs it too; it must dim to the same 40%.
+    const target = getMainSeries()[1]
+    expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
+  })
+
+  it("runs the blur cross-fade without animating entrance or updates", () => {
+    render(<F0DataChart {...base} stacked />)
+
+    const options = getAnimationOptions()
+    // The engine must be on for state transitions, but entrance and update
+    // animations stay at zero so only the blur fade is visible.
+    expect(options.animation).toBe(true)
+    expect(options.animationDuration).toBe(0)
+    expect(options.animationDurationUpdate).toBe(0)
+    expect(options.stateAnimation).toEqual({
+      duration: 500,
+      easing: "cubicOut",
+    })
+  })
+
+  it("defers to consumer-provided animation options", () => {
+    render(
+      <F0DataChart
+        {...base}
+        stacked
+        echartsOptions={{
+          animationDuration: 900,
+          stateAnimation: { duration: 120, easing: "linear" },
+        }}
+      />
+    )
+
+    const options = getAnimationOptions()
+    expect(options.animationDuration).toBe(900)
+    expect(options.stateAnimation).toEqual({
+      duration: 120,
+      easing: "linear",
+    })
+    // Untouched keys still get their stacked defaults.
+    expect(options.animation).toBe(true)
+    expect(options.animationDurationUpdate).toBe(0)
+  })
+
+  it("leaves non-stacked charts' animation options alone", () => {
+    render(<F0DataChart {...base} />)
+
+    const options = getAnimationOptions()
+    expect(options.stateAnimation).toBeUndefined()
+  })
+
+  describe("reduced motion", () => {
+    afterEach(() => {
+      // Restore the setup default (motion allowed) for the rest of the suite.
+      setReducedMotion(false)
+    })
+
+    it("drops the cross-fade to zero duration", () => {
+      setReducedMotion(true)
+      render(<F0DataChart {...base} stacked />)
+
+      // The highlight itself stays — hovering still isolates the series, it
+      // just arrives instantly instead of fading.
+      expect(getAnimationOptions().stateAnimation?.duration).toBe(0)
+      expect(getMainSeries()[0]?.emphasis?.focus).toBe("series")
+      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBe(0.4)
+    })
+
+    it("overrides a consumer-provided cross-fade duration", () => {
+      setReducedMotion(true)
+      render(
+        <F0DataChart
+          {...base}
+          stacked
+          echartsOptions={{
+            stateAnimation: { duration: 120, easing: "linear" },
+          }}
+        />
+      )
+
+      // The preference is the user's, so it wins over the consumer's duration.
+      expect(getAnimationOptions().stateAnimation).toEqual({
+        duration: 0,
+        easing: "linear",
+      })
+    })
   })
 })
 
@@ -680,11 +951,11 @@ describe("BarChart — hideOverflowingLabels", () => {
 })
 
 // ---------------------------------------------------------------------------
-// tooltipValueFormatter — the tooltip can show precise values while the
-// axis/labels stay compact.
+// Item tooltip — bar charts describe the hovered bar/segment: precise value,
+// change vs. the previous category, and (multi-series) share of the total.
 // ---------------------------------------------------------------------------
 
-describe("BarChart — tooltipValueFormatter", () => {
+describe("BarChart — item tooltip", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
     if (!call) throw new Error("setOption was never called")
@@ -702,31 +973,42 @@ describe("BarChart — tooltipValueFormatter", () => {
         tooltipValueFormatter={(v) => v.toLocaleString("en-US")}
       />
     )
-    const html = getTooltipFormatter()?.([
-      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
-    ])
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 107505,
+      dataIndex: 0,
+    })
     expect(html).toContain("107,505") // precise, grouped
     expect(html).not.toContain("K") // not the compact form
     expect(getLatestOption().aria?.enabled).toBe(true)
     expect(getLatestOption().aria?.label?.description).toContain("107,505")
   })
 
-  it("falls back to valueFormatter when no tooltipValueFormatter is given", () => {
+  // The tooltip reads the number the way the axis does, so a unit written by
+  // `valueFormatter` (a currency, a "%") is not silently dropped on hover.
+  it("falls back to the axis formatter when no tooltipValueFormatter is given", () => {
     render(
       <F0DataChart
         type="bar"
         categories={["A"]}
-        series={[{ name: "S", data: [107505] }]}
-        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        series={[{ name: "S", data: [107505.8632] }]}
+        valueFormatter={(v) =>
+          `€${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
       />
     )
-    const html = getTooltipFormatter()?.([
-      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
-    ])
-    expect(html).toContain("108K")
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 107505.8632,
+      dataIndex: 0,
+    })
+    expect(html).toContain("€107,505.86")
+    expect(html).not.toContain("107505.8632") // no raw float precision
   })
 
-  it("formats and escapes actual and target values in target tooltips", () => {
+  it("formats and escapes values in target tooltips, and hides ghost series", () => {
     render(
       <F0DataChart
         type="bar"
@@ -743,50 +1025,209 @@ describe("BarChart — tooltipValueFormatter", () => {
       />
     )
 
-    const html = getTooltipFormatter()?.([
-      {
-        axisValueLabel: "<script>category</script>",
-        seriesName: "<strong>Revenue</strong>",
-        value: 107505,
-        dataIndex: 0,
-        marker: '<span class="trusted-marker"></span>',
-      },
-    ])
+    const formatter = getTooltipFormatter()
+    const html = formatter?.({
+      name: "<script>category</script>",
+      seriesName: "<strong>Revenue</strong>",
+      value: 107505,
+      dataIndex: 0,
+      marker: '<span class="trusted-marker"></span>',
+    })
 
+    // ECharts' own coloured dot is trusted HTML and survives unescaped.
     expect(html).toContain('<span class="trusted-marker"></span>')
     expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
     expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
     expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
-    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;")
+    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;") // target row
     expect(html).not.toContain("<script>")
+    // Hovering the ghost gradient bar renders no tooltip.
+    expect(
+      formatter?.({
+        seriesName: "<strong>Revenue</strong> (target)",
+        value: 17495,
+        dataIndex: 0,
+      })
+    ).toBe("")
   })
 
-  it("escapes the ordinary tooltip while preserving ECharts marker HTML", () => {
+  it("shows share of total only for multi-series charts", () => {
     render(
       <F0DataChart
         type="bar"
-        categories={["<script>category</script>"]}
-        series={[{ name: "<strong>Revenue</strong>", data: [107505] }]}
-        tooltipValueFormatter={(value) =>
-          `<em>${value.toLocaleString("en-US")}</em>`
-        }
+        categories={["A", "B"]}
+        series={[
+          { name: "S1", data: [30, 10] },
+          { name: "S2", data: [70, 90] },
+        ]}
       />
     )
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S1",
+      value: 30,
+      dataIndex: 0,
+    })
+    expect(html).toContain("30.0%")
+    expect(html).toContain("of total")
+    expect(html).toContain((100).toLocaleString())
+  })
 
-    const html = getTooltipFormatter()?.([
-      {
-        axisValueLabel: "<script>category</script>",
-        seriesName: "<strong>Revenue</strong>",
-        value: 107505,
-        marker: '<span class="trusted-marker"></span>',
-      },
-    ])
+  it("hides share of total for single-series charts", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [100] }]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "A",
+      seriesName: "S",
+      value: 100,
+      dataIndex: 0,
+    })
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("total<")
+  })
 
-    expect(html).toContain('<span class="trusted-marker"></span>')
-    expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
-    expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
-    expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
-    expect(html).not.toContain("<script>")
+  // A stacked chart mixing gains with losses has no total its parts add up
+  // to: the net sum is smaller than the segments it is made of, so a share of
+  // it can exceed 100% (or blow up entirely near cancellation).
+  it("omits share and total when the category mixes positive and negative values", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1", "Q2"]}
+        series={[
+          { name: "Hires", data: [24, 18] },
+          { name: "Internal moves", data: [6, 4] },
+          { name: "Voluntary exits", data: [-8, -12] },
+          { name: "Involuntary exits", data: [-3, -2] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 24,
+      dataIndex: 0,
+    })
+    // 24 / (24 + 6 - 8 - 3) would have read 126.3%, and the misleading net
+    // total goes with it — both rows carry the word "total".
+    expect(html).toContain((24).toLocaleString())
+    expect(html).not.toContain("total")
+    expect(html).not.toContain("126.3%")
+    expect(html).not.toContain((19).toLocaleString())
+  })
+
+  it("omits share and total when positive and negative series cancel out", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Hires", data: [1000] },
+          { name: "Exits", data: [-999.9] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 1000,
+      dataIndex: 0,
+    })
+    // A net of 0.1 would have turned 1000 into 1,000,000% of total.
+    expect(html).not.toContain("total")
+    expect(html).not.toContain("%</strong>")
+  })
+
+  it("keeps share and total when every series is negative", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Voluntary exits", data: [-8] },
+          { name: "Involuntary exits", data: [-2] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Voluntary exits",
+      value: -8,
+      dataIndex: 0,
+    })
+    // Both sides share a sign, so the ratio still reads as a positive share.
+    expect(html).toContain("80.0%")
+    expect(html).toContain("of total")
+    expect(html).toContain((-10).toLocaleString())
+  })
+
+  it("treats a series that runs short of the categories as zero there", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["A", "B"]}
+        series={[
+          { name: "S1", data: [30, 40] },
+          { name: "S2", data: [70] }, // no value for "B"
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "B",
+      seriesName: "S1",
+      value: 40,
+      dataIndex: 1,
+    })
+    expect(html).toContain("100.0%")
+    expect(html).not.toContain("NaN")
+  })
+
+  it("omits the share but keeps the total when every value is zero", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Q1"]}
+        series={[
+          { name: "Hires", data: [0] },
+          { name: "Exits", data: [0] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Q1",
+      seriesName: "Hires",
+      value: 0,
+      dataIndex: 0,
+    })
+    // No division by zero, and "0 total" is still true.
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("Infinity")
+    expect(html).not.toContain("NaN")
+    expect(html).toContain("total")
+  })
+
+  it("never compares a bar with the previous category — that is a line-chart concept", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A", "B"]}
+        series={[{ name: "S", data: [100, 125] }]}
+      />
+    )
+    const formatter = getTooltipFormatter()
+    expect(
+      formatter?.({ name: "B", seriesName: "S", value: 125, dataIndex: 1 })
+    ).not.toContain("from previous")
   })
 
   it("bounds the accessible description for large datasets", () => {
@@ -811,6 +1252,23 @@ describe("BarChart — tooltipValueFormatter", () => {
     expect(description).toContain("Category 20: 20")
     expect(description).toContain("5 more values")
     expect(description).not.toContain("Category 21")
+  })
+
+  it("lets a caller's own echartsOptions.tooltip win over the built-in one", () => {
+    const ownFormatter = () => "custom tooltip"
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [1] }]}
+        echartsOptions={{
+          tooltip: { trigger: "axis", formatter: ownFormatter },
+        }}
+      />
+    )
+
+    const tooltip = getTooltipFormatter()
+    expect(tooltip).toBe(ownFormatter)
   })
 })
 

@@ -454,9 +454,10 @@ export const ResponsiveSnapshotMatrix: Story = {
 
 /**
  * Same matrix as `ResponsiveSnapshotMatrix` but rendered with
- * `orientation: "horizontal"`. The category axis lives on Y instead of X, so
- * at the medium breakpoint it's the Y axis (categories) that gets hidden and
- * the X axis (values) that stays visible — the inverse of the vertical case.
+ * `orientation: "horizontal"`. The category axis lives on Y instead of X; as in
+ * the vertical case it survives the medium breakpoint, since the categories are
+ * the subjects being compared. Both axes are visible from `md` up; `sm` still
+ * drops all chrome.
  */
 const responsivePropsHorizontal = (
   column: "low" | "normal" | "large"
@@ -468,6 +469,78 @@ const responsivePropsHorizontal = (
 export const ResponsiveSnapshotMatrixHorizontal: Story = {
   decorators: [(Story) => <Story />],
   render: () => <ResponsiveSnapshot getProps={responsivePropsHorizontal} />,
+}
+
+// ---------------------------------------------------------------------------
+// Category-axis boundary widths
+//
+// Bar charts keep their category axis at `md` in both orientations, where every
+// other chart family hides it (see `resolveResponsiveDisplay`). The deviation is
+// deliberate — the categories are the subjects being compared — but it costs
+// plot area: horizontal labels take `min(80, width * 0.2)` of the width,
+// vertical ones a row of height. This story renders one pixel either side of
+// both band edges so Chromatic diffs that trade-off instead of leaving it to
+// prose, and shows what the smart axis layout does with the space it gets.
+// ---------------------------------------------------------------------------
+
+const CATEGORY_AXIS_BOUNDARY_WIDTHS = [
+  { label: "219px — last sm", widthClass: "w-[219px]" },
+  { label: "220px — first md", widthClass: "w-[220px]" },
+  { label: "519px — last md", widthClass: "w-[519px]" },
+  { label: "520px — first lg", widthClass: "w-[520px]" },
+] as const
+
+const boundaryProps = (
+  orientation: "vertical" | "horizontal"
+): F0DataChartProps => ({
+  type: "bar",
+  orientation,
+  categories: ["Engineering", "Design", "Product", "Sales"],
+  series: [{ name: "Headcount", data: [145, 89, 67, 90] }],
+  showLegend: false,
+})
+
+/**
+ * The exact widths at which the category axis appears. Both orientations gain
+ * it at 220px (`sm` → `md`) and keep it across 519/520px, so the only visible
+ * step is between the first two columns. Paired with the boundary assertions in
+ * `BarChart.test.tsx`.
+ */
+export const CategoryAxisBoundaries: Story = {
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="flex w-fit flex-col gap-8 p-6">
+      {(["horizontal", "vertical"] as const).map((orientation) => (
+        <div key={orientation} className="flex flex-col gap-3">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {orientation}
+          </span>
+          <div className="flex flex-row items-start gap-4">
+            {CATEGORY_AXIS_BOUNDARY_WIDTHS.map(({ label, widthClass }) => (
+              <div key={label} className="flex flex-col gap-2">
+                <span className="text-xs text-f1-foreground-secondary">
+                  {label}
+                </span>
+                {/*
+                 * The sized box carries no border or padding of its own. The
+                 * chart measures its container, and `box-sizing: border-box`
+                 * means any inset would shift the effective width off the
+                 * boundary being demonstrated — a padded 220px box measures as
+                 * `sm`. The frame lives on the wrapper instead.
+                 */}
+                <div className="w-fit rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+                  <div className={`${widthClass} h-[240px]`}>
+                    <F0DataChart {...boundaryProps(orientation)} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
 }
 
 /**

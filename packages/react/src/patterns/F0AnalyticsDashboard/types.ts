@@ -23,10 +23,19 @@ interface ChartConfigBase {
   showLegend?: boolean
   /** Show background grid lines. @default true */
   showGrid?: boolean
-  /** Show value labels on each data point. @default false */
+  /**
+   * Show value labels on each data point.
+   * @default true for bar charts, false otherwise
+   */
   showLabels?: boolean
   /** Format the value axis tick labels */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Format category axis tick labels */
   categoryFormatter?: (value: string) => string
 }
@@ -69,6 +78,12 @@ export interface FunnelChartConfig {
   colorScale?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface PieChartConfig {
@@ -83,6 +98,12 @@ export interface PieChartConfig {
   showPercentage?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface RadarChartConfig {
@@ -95,6 +116,12 @@ export interface RadarChartConfig {
   showLabels?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface GaugeChartConfig {
@@ -109,6 +136,12 @@ export interface GaugeChartConfig {
   showValue?: boolean
   /** Format the value displayed inside the gauge */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface HeatmapChartConfig {
@@ -123,6 +156,12 @@ export interface HeatmapChartConfig {
   showVisualMap?: boolean
   /** Format the value displayed in cells and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 /**

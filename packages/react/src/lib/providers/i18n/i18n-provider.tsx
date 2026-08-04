@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, ReactNode, useContext } from "react"
+import { createContext, ReactNode, useContext, useMemo } from "react"
 
 import {
   defaultTranslations,
@@ -37,10 +37,49 @@ const getKey = (
   return typeof current === "string" ? current : undefined
 }
 
+const isSubtree = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+/**
+ * Fill the gaps in a consumer's dictionary from the built-in (English)
+ * defaults, recursively.
+ *
+ * f0 gains translation keys as it gains features, and components read many of
+ * them by property access (`i18n.dataChart.tooltip.total`) rather than through
+ * `t`, so a dictionary written against an older version would otherwise render
+ * `undefined` — or throw on a whole missing subtree — instead of degrading to
+ * English. Arrays and non-objects are treated as leaves: the consumer's value
+ * wins outright.
+ */
+const withDefaults = <T extends Record<string, unknown>>(
+  defaults: T,
+  overrides: Record<string, unknown>
+): T => {
+  const merged: Record<string, unknown> = { ...defaults }
+
+  for (const [key, value] of Object.entries(overrides)) {
+    // An explicit `undefined` means "not translated", not "erase the default".
+    if (value === undefined) continue
+
+    const fallback = merged[key]
+    merged[key] =
+      isSubtree(value) && isSubtree(fallback)
+        ? withDefaults(fallback, value)
+        : value
+  }
+
+  return merged as T
+}
+
 export function I18nProvider({
   children,
   translations,
 }: I18nProviderProps): JSX.Element {
+  const resolved = useMemo(
+    () => withDefaults(defaultTranslations, translations),
+    [translations]
+  )
+
   /*
    * Create a function that returns a translation for a given key and replaces the arguments.
    * If the key is not found, it will return undefined.
@@ -50,7 +89,7 @@ export function I18nProvider({
     key: TranslationKey,
     args: Record<string, string | number> = {}
   ) => {
-    let translation = getKey(key, translations)
+    let translation = getKey(key, resolved)
     if (translation === undefined) {
       console.warn(`Translation key ${key} not found`)
       return key
@@ -63,7 +102,7 @@ export function I18nProvider({
     return translation
   }
   return (
-    <I18nContext.Provider value={{ ...translations, t }}>
+    <I18nContext.Provider value={{ ...resolved, t }}>
       {children}
     </I18nContext.Provider>
   )

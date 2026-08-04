@@ -1,6 +1,9 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
@@ -8,7 +11,12 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions, escapeTooltipText } from "../../utils/options"
+import {
+  buildBaseChartOptions,
+  buildItemTooltip,
+  renderValueTooltip,
+  tooltipValueFormat,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -29,34 +37,34 @@ const ARIA_MAX_SERIES = 10
 const ARIA_MAX_VALUES_PER_SERIES = 20
 
 /**
- * Pick the black/white foreground for text on a colored fill. Prefers white on
- * mid-tone fills (the strict WCAG crossover at 0.179 reads as "black too
- * eagerly" on saturated mid-tones like teal or purple); black only wins on
- * genuinely light fills (e.g. yellow), where white text would be illegible.
+ * Foreground for a value label sitting inside a colored fill.
+ *
+ * Always white: a stacked bar reads as one object, and per-segment black/white
+ * switching made a single bar look like two unrelated label styles. Every
+ * selectable series color is a shade-50 chromatic token, so white stays
+ * legible — though on the two lightest (flubber, yellow) it is a deliberate
+ * design call rather than a WCAG AA pass.
  */
-function readableLabelColor(background: string): "#000000" | "#ffffff" {
-  const hex = background.replace("#", "")
-  const normalized =
-    hex.length === 3
-      ? hex
-          .split("")
-          .map((value) => `${value}${value}`)
-          .join("")
-      : hex
-  const channels = [0, 2, 4].map((offset) => {
-    const value =
-      Number.parseInt(normalized.slice(offset, offset + 2), 16) / 255
-    return value <= 0.04045
-      ? value / 12.92
-      : Math.pow((value + 0.055) / 1.055, 2.4)
-  })
-  const luminance =
-    0.2126 * (channels[0] ?? 0) +
-    0.7152 * (channels[1] ?? 0) +
-    0.0722 * (channels[2] ?? 0)
+const INSIDE_LABEL_COLOR = "#ffffff"
 
-  return luminance > 0.4 ? "#000000" : "#ffffff"
-}
+/**
+ * Stroke width (px) of the hairline separating stacked segments.
+ *
+ * Adjacent segments both stroke the shared edge and canvas strokes are centered
+ * on the path, so the two cover the same band rather than adding to it: the
+ * visible separation equals this width, not twice it. 0.5 is deliberate — it
+ * renders as a hairline at 1x and a crisp single device pixel at 2x.
+ */
+const STACK_GAP_BORDER_WIDTH = 0.5
+
+/** Opacity of the series that are *not* hovered, while one series has focus. */
+const BLUR_OPACITY = 0.4
+
+/**
+ * Cross-fade duration (ms) in and out of the hover blur state. Drops to 0 when
+ * the user prefers reduced motion.
+ */
+const STATE_ANIMATION_DURATION = 500
 
 function resolveGridRightSpace(
   right: number | string | undefined,
@@ -214,6 +222,7 @@ function buildSeriesEntries(
   showLabels: boolean,
   stacked: boolean,
   labelColor: string,
+  stackGapColor: string,
   labelFontSize: number,
   resolveBorderRadius: BorderRadiusResolver | undefined,
   labelLayout?: echarts.BarSeriesOption["labelLayout"],
@@ -240,10 +249,6 @@ function buildSeriesEntries(
     if (pointColor === undefined && pointBorderRadius === undefined) {
       return value
     }
-    // Inside a stacked segment with a per-bar colour override, the label must
-    // recompute its contrast colour against that override, not the series fill.
-    const contrastColor =
-      pointColor !== undefined ? readableLabelColor(pointColor) : undefined
     return {
       value,
       itemStyle: {
@@ -252,12 +257,9 @@ function buildSeriesEntries(
           borderRadius: pointBorderRadius,
         }),
       },
-      ...(stacked && contrastColor !== undefined
-        ? {
-            label: { color: contrastColor },
-            emphasis: { label: { color: contrastColor } },
-          }
-        : {}),
+      // Inside labels are white regardless of the fill, so a per-bar colour
+      // override needs no label colour of its own — the series-level one
+      // already applies.
     }
   })
 
@@ -278,16 +280,22 @@ function buildSeriesEntries(
     itemStyle: {
       color,
       borderRadius,
+      // ECharts has no native gap between stacked segments — a border in the
+      // container's background color is the standard way to separate them.
+      ...(stacked && {
+        borderColor: stackGapColor,
+        borderWidth: STACK_GAP_BORDER_WIDTH,
+      }),
     },
     label: {
       show: showLabels,
       // Stacked bars are segmented, so center the value inside its own segment;
       // single/grouped bars keep the value just outside the bar (above / beside).
       position: stacked ? "inside" : isVertical ? "top" : "right",
-      // Inside a coloured segment, choose black or white per fill so small
-      // canvas text retains WCAG AA contrast. Outside labels use the semantic
-      // secondary foreground colour from the active theme.
-      color: stacked ? readableLabelColor(color) : labelColor,
+      // Inside a coloured segment the label is always white (see
+      // INSIDE_LABEL_COLOR). Outside labels use the semantic secondary
+      // foreground colour from the active theme.
+      color: stacked ? INSIDE_LABEL_COLOR : labelColor,
       fontWeight: "bold",
       fontSize: labelFontSize,
       overflow: "truncate",
@@ -304,13 +312,22 @@ function buildSeriesEntries(
         shadowOffsetX: 0,
         shadowColor: "transparent",
       },
-      // Keep the same contrast-safe colour on hover. With labels off, add
-      // nothing here — otherwise hovering a stacked bar would reveal numbers
-      // that are meant to stay off.
+      // Hovering a stacked segment highlights that series across all bars by
+      // sending every other series into the blur state (see `blur` below).
+      ...(stacked && { focus: "series" as const }),
+      // Keep the same colour on hover. With labels off, add nothing here —
+      // otherwise hovering a stacked bar would reveal numbers that are meant
+      // to stay off.
       ...(stacked && showLabels
-        ? { label: { show: true, color: readableLabelColor(color) } }
+        ? { label: { show: true, color: INSIDE_LABEL_COLOR } }
         : {}),
     },
+    ...(stacked && {
+      blur: {
+        itemStyle: { opacity: BLUR_OPACITY },
+        label: { opacity: BLUR_OPACITY },
+      },
+    }),
   }
 
   if (!hasTargetData) {
@@ -378,6 +395,14 @@ function buildSeriesEntries(
     emphasis: {
       disabled: true,
     },
+    // The target ghost is a separate series, so `focus: "series"` blurs it even
+    // when its own bar is the one hovered. Match the main series' blur opacity
+    // so it fades with its stack instead of dropping to the ECharts default.
+    ...(stacked && {
+      blur: {
+        itemStyle: { opacity: BLUR_OPACITY },
+      },
+    }),
   }
 
   return [mainSeries, targetSeries]
@@ -387,18 +412,28 @@ function buildSeriesEntries(
 export type BarChartSize = ChartResponsiveSize
 
 /**
- * Maps a discrete `size` to which chrome (legend, axes) is rendered. The
- * matrix is identical to `LineChart.resolveResponsiveDisplay` so the two
- * chart families behave the same at every breakpoint:
+ * Maps a discrete `size` to which chrome (legend, axes) is rendered:
  *
  * - `sm` → just the bars, no axes, no legend
- * - `md` → bars + legend + value axis, no category axis
- * - `lg` → bars + legend + both axes (with smart truncation on the category axis)
+ * - `md` / `lg` → bars + legend + both axes (with smart truncation on the
+ *   category axis)
+ *
+ * Bars deviate from `LineChart.resolveResponsiveDisplay`, which keeps the
+ * category axis for `lg` alone. A bar chart's categories are its subjects — a
+ * plot without them is a set of lengths with nothing to compare, which the
+ * value axis can't rescue. So bars show them wherever there is room for any
+ * chrome at all, and `sm` is the only size that drops them.
+ *
+ * Crowding is handled rather than avoided: `computeCategoryAxisLayout` runs
+ * whenever the axis is shown, fitting every label with ellipsis truncation and
+ * only skipping labels when even a 3-char stub won't fit. The cost is plot
+ * area — horizontal labels take `min(80, width * 0.2)` of the width, vertical
+ * ones a row of height.
  */
 function resolveResponsiveDisplay(size: BarChartSize) {
   return {
     showLegend: size !== "sm",
-    showCategoryAxis: size === "lg",
+    showCategoryAxis: size !== "sm",
     showValueAxis: size !== "sm",
   }
 }
@@ -429,8 +464,10 @@ export function useBarChartOptions(
   size: BarChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
+  const prefersReducedMotion = useReducedMotion()
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
@@ -532,6 +569,7 @@ export function useBarChartOptions(
         showLabels,
         stacked,
         theme.colors.foregroundSecondary,
+        theme.colors.containerBackground ?? theme.colors.background,
         resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
@@ -551,48 +589,14 @@ export function useBarChartOptions(
       }
     }
 
-    const hasAnyTargets = targetMap.size > 0
-
-    // Tooltip values use their own formatter when provided (precise numbers),
-    // otherwise fall back to the shared value formatter.
+    // Aria descriptions use their own formatter when provided (precise
+    // numbers), otherwise fall back to the shared value formatter.
     const tooltipValue = tooltipValueFormatter ?? valueFormatter
 
-    const tooltipFormatter = hasAnyTargets
-      ? (params: unknown) => {
-          if (!Array.isArray(params)) return ""
-          const filtered = params.filter(
-            (p: { seriesName?: string }) =>
-              !String(p.seriesName ?? "").endsWith(" (target)")
-          )
-          if (filtered.length === 0) return ""
-
-          const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
-          const items = filtered
-            .map(
-              (p: {
-                marker?: string
-                seriesName?: string
-                value?: number
-                dataIndex?: number
-              }) => {
-                const val = Number(p.value)
-                const formattedValue = tooltipValue
-                  ? tooltipValue(val)
-                  : String(val)
-                const targets = targetMap.get(String(p.seriesName ?? ""))
-                const target = targets?.[p.dataIndex ?? 0]
-                const targetHtml =
-                  target !== undefined
-                    ? ` <span style="opacity: 0.6">/ ${escapeTooltipText(tooltipValue ? tooltipValue(target) : String(target))}</span>`
-                    : ""
-                return `<div>${String(p.marker ?? "")} ${escapeTooltipText(p.seriesName ?? "")} <strong>${escapeTooltipText(formattedValue)}</strong>${targetHtml}</div>`
-              }
-            )
-            .join("")
-
-          return `${header}${items}`
-        }
-      : undefined
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const options = buildBaseChartOptions({
       categories,
@@ -608,8 +612,6 @@ export function useBarChartOptions(
       showValueAxis,
       valueFormatter,
       categoryFormatter,
-      tooltipFilterSeries: (name) => name.endsWith(" (target)"),
-      tooltipFormatter,
       tooltipValueFormatter,
       valueAxisSplitNumber,
       echartsOptions,
@@ -654,6 +656,109 @@ export function useBarChartOptions(
       },
     }
 
+    // Fade in/out of the hover blur state (see `blur` on the series). Two
+    // requirements: `stateAnimation` is only honored at the option root (the
+    // series-level one in the types is ignored), and the base options'
+    // `animation: false` — there to skip entrance animations — disables state
+    // transitions too. Re-enable the engine with zero-duration entrance and
+    // update animations so only the blur fade animates.
+    //
+    // This runs after `buildBaseChartOptions` merged the consumer's
+    // `echartsOptions`, so each key defers to an explicitly-provided value —
+    // same convention as the `userGridRight` guard below.
+    //
+    // `prefers-reduced-motion` zeroes the duration rather than dropping the
+    // state: the hover highlight still isolates the series, it just arrives
+    // instantly. The preference belongs to the user, not the consumer, so it
+    // also flattens an explicitly-provided `stateAnimation` duration.
+    if (stacked) {
+      options.animation = echartsOptions?.animation ?? true
+      options.animationDuration = echartsOptions?.animationDuration ?? 0
+      options.animationDurationUpdate =
+        echartsOptions?.animationDurationUpdate ?? 0
+      options.stateAnimation = prefersReducedMotion
+        ? { ...echartsOptions?.stateAnimation, duration: 0 }
+        : (echartsOptions?.stateAnimation ?? {
+            duration: STATE_ANIMATION_DURATION,
+            easing: "cubicOut",
+          })
+    }
+
+    // Bar charts use an item-triggered tooltip about the hovered bar or
+    // segment (pairing with the stacked series highlight) instead of the axis
+    // tooltip listing every series: value large, then — with several
+    // same-signed series — the hovered value's share of the category total,
+    // that total, and the target when there is one.
+    //
+    // `buildBaseChartOptions` has already merged `echartsOptions`, so a caller
+    // that passed its own tooltip keeps it: only build ours when it didn't.
+    if (echartsOptions?.tooltip === undefined) {
+      options.tooltip = buildItemTooltip({
+        theme,
+        formatter: (params: unknown) => {
+          const p = params as {
+            seriesName?: string
+            name?: string
+            value?: number
+            dataIndex?: number
+            marker?: string
+          }
+          const seriesName = String(p.seriesName ?? "")
+          if (seriesName.endsWith(" (target)")) return ""
+
+          const value = Number(p.value)
+          const dataIndex = p.dataIndex ?? 0
+          const target = targetMap.get(seriesName)?.[dataIndex]
+          // Share-of-total context only means something with several series
+          // pushing the same way: a single-series bar is always 100% of its own
+          // category, and a category mixing gains with losses has no "total"
+          // the parts add up to — 24 hires against a net of 19 would read as
+          // 126.3%, and near-cancellation makes that ratio arbitrarily large.
+          // Signed categories therefore show the value alone.
+          const categoryValues = series.map((s) => {
+            // A series can be shorter than `categories`.
+            const point = s.data[dataIndex]
+            return point === undefined ? 0 : getValue(point) || 0
+          })
+          const hasMixedSigns =
+            categoryValues.some((v) => v > 0) &&
+            categoryValues.some((v) => v < 0)
+          const total = categoryValues.reduce((sum, v) => sum + v, 0)
+          const showTotal = series.length > 1 && !hasMixedSigns
+
+          // No "from previous" row here: bar categories are not necessarily a
+          // sequence (locations, departments), so comparing a bar with the one
+          // to its left is only meaningful on a trend — i.e. a line chart.
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: seriesName,
+              subtitle: String(p.name ?? ""),
+              value: formatTooltipValue(value),
+              rows: [
+                showTotal &&
+                  total !== 0 && {
+                    // Same sign on both sides, so the ratio is positive even
+                    // when the whole category is negative.
+                    value: `${((value / total) * 100).toFixed(1)}%`,
+                    label: i18n.dataChart.tooltip.ofTotal,
+                  },
+                showTotal && {
+                  value: formatTooltipValue(total),
+                  label: i18n.dataChart.tooltip.total,
+                },
+                target !== undefined && {
+                  value: formatTooltipValue(target),
+                  label: i18n.dataChart.tooltip.target,
+                },
+              ],
+            },
+            theme
+          )
+        },
+      })
+    }
+
     // Non-stacked horizontal bars render labels BESIDE the bar end, so the
     // grid reserves room for them on the right. Stacked labels sit inside
     // their segments — no reservation needed, the plot keeps its full width.
@@ -685,8 +790,10 @@ export function useBarChartOptions(
     valueAxisSplitNumber,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     containerHeight,
     size,
+    prefersReducedMotion,
   ])
 }
