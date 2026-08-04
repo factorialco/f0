@@ -1,11 +1,26 @@
 import { type CSSProperties, Fragment, ReactNode } from "react"
 
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+
 import { F0Icon } from "@/components/F0Icon"
 import { Cross, LockLocked } from "@/icons/app"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
+import { SortableWidget } from "./SortableWidget"
 import {
   type HomeRenderCtx,
   type HomeWidgetItem,
@@ -48,6 +63,11 @@ export interface WidgetContainerProps {
   onRemoveWidget?: (id: string) => void
   /** Called when the add placeholder is clicked. The container knows its side. */
   onClickAddNewWidget?: () => void
+  /**
+   * Called with the column's widget ids in their new order after a drag. Omit
+   * it and the column is not draggable, even in edit mode.
+   */
+  onReorder?: (ids: string[]) => void
   /** Tooltip on a locked widget's lock icon. */
   lockedLabel?: string
   ctx?: HomeRenderCtx
@@ -78,12 +98,27 @@ export function WidgetContainer({
   disableEdition = false,
   onRemoveWidget,
   onClickAddNewWidget,
+  onReorder,
   lockedLabel = "This widget is mandatory in your company.",
   ctx = {},
   className,
   style,
 }: WidgetContainerProps) {
   const canEdit = editing && !disableEdition
+  const canDrag = canEdit && onReorder != null && widgets.length > 1
+  // A small activation distance so a click on a widget's own control still
+  // reads as a click rather than the start of a drag.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
+  )
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return
+    const ids = widgets.map((widget) => widget.id)
+    const from = ids.indexOf(String(active.id))
+    const to = ids.indexOf(String(over.id))
+    if (from < 0 || to < 0) return
+    onReorder?.(arrayMove(ids, from, to))
+  }
 
   const render = (widget: HomeWidgetItem) => {
     const node = renderWidget ? (
@@ -158,9 +193,41 @@ export function WidgetContainer({
       style={style}
     >
       {children}
-      {widgets.map((widget) => (
-        <Fragment key={widget.id}>{render(widget)}</Fragment>
-      ))}
+      {canDrag ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={widgets.map((widget) => widget.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {/* The same gap the static list uses, so entering edit mode doesn't
+                reflow the column. */}
+            <div
+              className={cn(
+                "flex flex-col",
+                side === "main" ? "gap-6" : "gap-4"
+              )}
+            >
+              {widgets.map((widget) => (
+                <SortableWidget
+                  key={widget.id}
+                  id={widget.id}
+                  disabled={widget.locked}
+                >
+                  {render(widget)}
+                </SortableWidget>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      ) : (
+        widgets.map((widget) => (
+          <Fragment key={widget.id}>{render(widget)}</Fragment>
+        ))
+      )}
       {canEdit && onClickAddNewWidget ? (
         <AddWidgetPlaceholder onClick={onClickAddNewWidget} />
       ) : null}

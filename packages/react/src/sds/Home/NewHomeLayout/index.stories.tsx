@@ -447,13 +447,17 @@ const CATALOG = [
 const Home = () => {
   const [open, setOpen] = useState(false)
   const [side, setSide] = useState<WidgetContainerSide>("main")
+  const [rail, setRail] = useState(RIGHT_WIDGETS)
   return (
     <div className="p-6">
       <NewHomeLayout
-        rightWidgets={RIGHT_WIDGETS}
+        rightWidgets={rail}
         slotRenderers={SLOT_RENDERERS}
         editableWidgetContainers={["right"]}
-        onRemoveWidget={() => {}}
+        onRemoveWidget={(id) => setRail((w) => w.filter((x) => x.id !== id))}
+        onReorderWidgets={(_, ids) =>
+          setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
+        }
         onClickAddNewWidget={(s) => {
           setSide(s)
           setOpen(true)

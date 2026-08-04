@@ -44,6 +44,7 @@ const meta = {
     widgets: WIDGETS,
     onRemoveWidget: () => {},
     onClickAddNewWidget: () => {},
+    onReorder: () => {},
   },
   decorators: [
     (Story) => (

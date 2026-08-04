@@ -85,6 +85,8 @@ export interface NewHomeLayoutProps {
   onRemoveWidget?: (id: string) => void
   /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
+  /** Called with a side and its widget ids in their new order after a drag. */
+  onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
   /** The daytime gradient period for the page surface. */
   period?: HomePeriod
   /** Fixed px width of the side rail. */
@@ -131,6 +133,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       editableWidgetContainers = ["main", "right"],
       onRemoveWidget,
       onClickAddNewWidget,
+      onReorderWidgets,
       period = "morning",
       asideWidth = 396,
       mainWidth = 800,
@@ -275,6 +278,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             ctx={ctx}
             editing={isEditing}
             disableEdition={!canEditSide("main")}
+            onReorder={
+              onReorderWidgets
+                ? (ids) => onReorderWidgets("main", ids)
+                : undefined
+            }
             onRemoveWidget={onRemoveWidget}
             onClickAddNewWidget={
               onClickAddNewWidget
@@ -340,6 +348,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 ctx={ctx}
                 editing={isEditing}
                 disableEdition={!canEditSide("right")}
+                onReorder={
+                  onReorderWidgets
+                    ? (ids) => onReorderWidgets("right", ids)
+                    : undefined
+                }
                 onRemoveWidget={onRemoveWidget}
                 onClickAddNewWidget={
                   onClickAddNewWidget
