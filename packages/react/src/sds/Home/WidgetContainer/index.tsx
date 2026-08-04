@@ -131,7 +131,10 @@ export function WidgetContainer({
     onReorder?.(arrayMove(ids, from, to))
   }
 
-  const render = (widget: HomeWidgetItem) => {
+  const render = (
+    widget: HomeWidgetItem,
+    drag?: { draggable: boolean; isDragging: boolean }
+  ) => {
     const node = renderWidget ? (
       renderWidget(widget, ctx)
     ) : (
@@ -145,6 +148,8 @@ export function WidgetContainer({
         slots={widget.slots}
         slotRenderers={slotRenderers}
         ctx={ctx}
+        draggable={drag?.draggable}
+        isDragging={drag?.isDragging}
       />
     )
     if (!canEdit) return node
@@ -231,12 +236,8 @@ export function WidgetContainer({
                   key={widget.id}
                   id={widget.id}
                   disabled={widget.locked}
-                  handleClassName={cn(
-                    "absolute left-4 top-4 z-10",
-                    CARD_LINK_CLASS
-                  )}
                 >
-                  {render(widget)}
+                  {(state) => render(widget, state)}
                 </SortableWidget>
               ))}
             </div>

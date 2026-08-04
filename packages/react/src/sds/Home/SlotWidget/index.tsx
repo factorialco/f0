@@ -27,6 +27,10 @@ export interface SlotWidgetProps {
   slots: HomeWidgetSlot[]
   /** Per-visualization renderers, MERGED OVER `defaultSlotRenderers`. */
   slotRenderers?: SlotRenderers
+  /** Forwarded to the f0 `Widget`: its own drag handle and dragging state. */
+  draggable?: boolean
+  onDragStart?: () => void
+  isDragging?: boolean
   ctx?: HomeRenderCtx
 }
 
@@ -35,6 +39,9 @@ export function SlotWidget({
   fullHeight,
   slots,
   slotRenderers,
+  draggable,
+  onDragStart,
+  isDragging,
   ctx = {},
 }: SlotWidgetProps) {
   const renderers = slotRenderers
@@ -42,7 +49,13 @@ export function SlotWidget({
     : defaultSlotRenderers
 
   return (
-    <Widget header={header} fullHeight={fullHeight}>
+    <Widget
+      header={header}
+      fullHeight={fullHeight}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      isDragging={isDragging}
+    >
       {/* ONE child, so the Widget frame's internal `gap-4` applies once to the
           whole slot stack instead of around every slot AND every divider. */}
       <div className="flex flex-col">

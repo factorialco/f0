@@ -1,4 +1,4 @@
-import { F0Widget } from "@/components/F0Widget"
+import { Widget } from "@/experimental/Widgets/Widget"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 export interface DashboardWidgetProps {
@@ -19,13 +19,14 @@ export const DashboardWidget = ({
   aiButton,
 }: DashboardWidgetProps) => {
   return (
-    <F0Widget
-      title={title}
+    <Widget
+      header={{ title }}
       draggable={draggable}
       actions={actions}
       AIButton={aiButton}
+      fullHeight
     >
       {children}
-    </F0Widget>
+    </Widget>
   )
 }
