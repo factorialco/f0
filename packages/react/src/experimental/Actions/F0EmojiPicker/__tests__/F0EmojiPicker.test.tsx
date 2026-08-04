@@ -36,7 +36,7 @@ describe("F0EmojiPicker", () => {
     const trigger = screen.getByRole("button", { name: "Choose group emoji" })
 
     expect(trigger).toHaveAttribute("type", "button")
-    expect(trigger).toHaveAttribute("title", "Choose group emoji")
+    expect(trigger).toHaveAttribute("aria-label", "Choose group emoji")
     expect(container.querySelector("svg")).toBeInTheDocument()
     expect(container.querySelector("img")).not.toBeInTheDocument()
   })
@@ -207,9 +207,9 @@ describe("F0EmojiPicker", () => {
   })
 
   it.each([
-    ["sm", "size-6"],
-    ["md", "size-8"],
-    ["lg", "size-10"],
+    ["sm", "[&_.main]:h-6"],
+    ["md", "[&_.main]:h-8"],
+    ["lg", "[&_.main]:h-10"],
   ] as const)(
     "renders the %s trigger size in both states",
     (size, className) => {
@@ -219,7 +219,6 @@ describe("F0EmojiPicker", () => {
 
       expect(
         screen.getByRole("button", { name: "Choose group emoji" })
-          .firstElementChild
       ).toHaveClass(className)
 
       rerender(
@@ -228,7 +227,6 @@ describe("F0EmojiPicker", () => {
 
       expect(
         screen.getByRole("button", { name: "Choose group emoji: 🎉" })
-          .firstElementChild
       ).toHaveClass(className)
     }
   )
