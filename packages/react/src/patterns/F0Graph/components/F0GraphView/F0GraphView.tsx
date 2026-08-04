@@ -52,7 +52,6 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
-import { bump, bumpIfChanged } from "../../perfTrace"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
@@ -564,25 +563,6 @@ export function F0GraphView<T = unknown>(
     }),
     []
   )
-
-  // ── DIAGNOSTIC: what caused this render? ──
-  // `chg.props` is the discriminator: React allocates a fresh props object when
-  // the PARENT renders and reuses it when this component re-renders from its own
-  // state. Everything else attributes the own-state case to a specific value.
-  bump("view.render")
-  bumpIfChanged("chg.props", props)
-  bumpIfChanged("chg.hoveredEdgeId", hoveredEdgeId)
-  bumpIfChanged("chg.lazyTree", lazyTree)
-  bumpIfChanged("chg.lazyTree.nodes", lazyTree.nodes)
-  bumpIfChanged("chg.lazyTree.loadingNodes", lazyTree.loadingNodes)
-  bumpIfChanged("chg.deferredStatus", deferredMerge.deferredStatus)
-  bumpIfChanged("chg.expandedNodes", expandedNodes)
-  bumpIfChanged("chg.selectedNodes", selectedNodes)
-  bumpIfChanged("chg.focusedNodeId", focusedNodeId)
-  bumpIfChanged("chg.zoomLevel", zoomLevel)
-  bumpIfChanged("chg.viewportReady", viewportReady)
-  bumpIfChanged("chg.visibleTreeNodes", visibleTreeNodes)
-  bumpIfChanged("chg.rfNodes", rfNodes)
 
   // ── Split context values (wrappers subscribe to only what they need) ──
   // `currentZoom` is intentionally NOT published: it changes on every zoom frame
