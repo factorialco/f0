@@ -509,8 +509,14 @@ export const TableCollection = <
                             // darker. `text-inherit` is no help either — the
                             // theme replaces Tailwind's palette and has no
                             // `inherit` key, so that utility doesn't exist.
+                            //
+                            // The colour holds on hover, label and icon alike:
+                            // the cell's own highlight is the affordance, and
+                            // darkening the text on top of it made a group
+                            // header look like a different kind of header from
+                            // the inert ones beside it.
                             className={cn(
-                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary transition-colors hover:text-f1-foreground",
+                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary",
                               // The icon takes the side the label is not
                               // aligned to, so the label keeps its column's
                               // edge instead of being pushed off it.

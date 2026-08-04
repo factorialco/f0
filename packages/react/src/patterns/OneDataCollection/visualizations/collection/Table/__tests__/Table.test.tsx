@@ -1377,6 +1377,27 @@ describe("TableCollection", () => {
       expect(inert.classList.contains("hover:after:bg-transparent")).toBe(true)
     })
 
+    it("keeps the group label's colour on hover", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // The cell highlight is the hover affordance. Darkening the label and
+      // icon on top of it made a collapsible group read as a different kind of
+      // header from the inert ones beside it.
+      const toggle = screen.getByRole("button", { name: "Contact" })
+      expect(toggle.classList.contains("text-f1-foreground-secondary")).toBe(
+        true
+      )
+      expect(toggle.classList.contains("hover:text-f1-foreground")).toBe(false)
+    })
+
     it("toggles the group from anywhere in the header cell", async () => {
       const onHeaderGroupCollapsedChange = vi.fn()
       renderTable({
