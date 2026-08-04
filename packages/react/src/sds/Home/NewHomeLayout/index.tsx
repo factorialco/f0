@@ -51,6 +51,15 @@ const GradientWash = ({
   />
 )
 
+/**
+ * How far each end of the rail's own scroll is faded out. A hard `overflow` edge
+ * slices a card mid-row, which reads as breakage rather than as more content
+ * past the fold; the fade says "this continues".
+ */
+const RAIL_FADE_PX = 24
+const railMask = (fade: number) =>
+  `linear-gradient(to bottom, transparent 0, black ${fade}px, black calc(100% - ${fade}px), transparent 100%)`
+
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
 const COLUMN_GAP_PX = 16
@@ -191,6 +200,16 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       return node
     }
 
+    // The rail is its own scroll region — it sticks to the top of the viewport
+    // and takes the height left once the page gutter is off, with both ends
+    // faded rather than cut. The main column, by contrast, is never clipped: it
+    // grows and the page scrolls it.
+    const railStyle: CSSProperties = {
+      maxHeight: `calc(100svh - ${2 * bleed}px)`,
+      maskImage: railMask(RAIL_FADE_PX),
+      WebkitMaskImage: railMask(RAIL_FADE_PX),
+    }
+
     const hasSide =
       aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
     const collapsed =
@@ -239,10 +258,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         style={
           {
             "--home-aside-w": `${railWidth}px`,
-            // Fill the viewport MINUS the gutter this layout is inset by, so the
-            // page itself never gains a scrollbar for the padding around it —
-            // each column scrolls inside instead.
-            height: `calc(100svh - ${2 * bleed}px)`,
           } as CSSProperties
         }
       >
@@ -273,9 +288,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             onClick={toggleEditing}
           />
         </div>
-        {/* Main column. `min-h-0` + `overflow-y-auto` so THIS column scrolls
-            itself rather than growing the page — the rail scrolls separately. */}
-        <div className="relative min-h-0 overflow-y-auto">
+        {/* Main column: no scroll container of its own, so it is never clipped —
+            it grows and the PAGE scrolls it, top to bottom. */}
+        <div className="relative">
           <WidgetContainer
             side="main"
             className="relative mx-auto w-full"
@@ -306,7 +321,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
             <aside
-              className="relative flex min-h-0 flex-col gap-2 overflow-y-auto"
+              className="sticky top-0 flex flex-col gap-2 overflow-y-auto"
+              style={railStyle}
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
@@ -347,7 +363,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </aside>
           ) : (
-            <aside className="relative min-h-0 overflow-y-auto">
+            <aside className="sticky top-0 overflow-y-auto" style={railStyle}>
               <WidgetContainer
                 side="right"
                 widgets={rightWidgets}
