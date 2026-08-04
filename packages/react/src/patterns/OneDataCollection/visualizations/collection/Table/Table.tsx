@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -137,18 +137,30 @@ export const TableCollection = <
   TableCustomizationProps<R, Sortings, Summaries>) => {
   const { t, ...i18n } = useI18n()
   const addRow = useAddRow()
-  // Created a motion component for the row
+  // Created a motion component for the row.
+  //
+  // Memoized on the OUTSIDE of `motion.create`, not on `Row`: rows carry framer's
+  // `layout` prop, so the wrapper measures each row's box on every commit. A memo
+  // inside would skip React's render of the row but still pay that measurement,
+  // which is a large part of what makes a full-table commit expensive.
+  //
+  // Default shallow comparison on purpose. A hand-written comparator is faster but
+  // fails unsafely — omit a prop and a row silently shows stale data. Shallow only
+  // skips when every prop is identical, so a prop we have not stabilized costs a
+  // render rather than correctness.
   const [MotionRow] = useState(() =>
-    motion.create(
-      Row<
-        R,
-        Filters,
-        Sortings,
-        Summaries,
-        ItemActions,
-        NavigationFilters,
-        Grouping
-      >
+    memo(
+      motion.create(
+        Row<
+          R,
+          Filters,
+          Sortings,
+          Summaries,
+          ItemActions,
+          NavigationFilters,
+          Grouping
+        >
+      )
     )
   )
 
