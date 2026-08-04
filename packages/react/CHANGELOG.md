@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.75.1](https://github.com/factorialco/f0/compare/f0-react-v4.75.0...f0-react-v4.75.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **DatePickerPopup:** render the calendar in the dialog container so its dropdowns stay clickable ([#4966](https://github.com/factorialco/f0/issues/4966)) ([18497ac](https://github.com/factorialco/f0/commit/18497acffca5764c1bc451276f4ccd3b7882efa3))
+
 ## [4.75.0](https://github.com/factorialco/f0/compare/f0-react-v4.74.0...f0-react-v4.75.0) (2026-08-04)
 
 
