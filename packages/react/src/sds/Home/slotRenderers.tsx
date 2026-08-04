@@ -4,6 +4,7 @@ import {
   F0AvatarList,
   F0AvatarListProps,
 } from "@/components/avatars/F0AvatarList"
+import { type IconType } from "@/components/F0Icon"
 import {
   IndicatorsList,
   IndicatorsListProps,
@@ -12,10 +13,12 @@ import {
   WidgetAvatarsListItem,
   WidgetAvatarsListItemProps,
 } from "@/experimental/Widgets/Content/ListItems/WidgetAvatarsListItem"
-import {
-  WidgetSimpleList,
-  WidgetSimpleListProps,
-} from "@/experimental/Widgets/Content/Lists/WidgetSimpleList"
+import { type CalendarEventProps } from "@/experimental/Widgets/Content/CalendarEvent"
+import { CalendarEventList } from "@/experimental/Widgets/Content/CalendarEventList"
+import { WidgetInboxListItemProps } from "@/experimental/Widgets/Content/ListItems/WidgetInboxListItem"
+import { WidgetSimpleListItemProps } from "@/experimental/Widgets/Content/ListItems/WidgetSimpleListItem"
+import { WidgetInboxList } from "@/experimental/Widgets/Content/Lists/WidgetInboxList"
+import { WidgetSimpleList } from "@/experimental/Widgets/Content/Lists/WidgetSimpleList"
 import { WidgetProps } from "@/experimental/Widgets/Widget"
 
 /**
@@ -36,6 +39,27 @@ export type SlotRenderer<P = unknown> = (
 ) => ReactNode
 export type SlotRenderers = Record<string, SlotRenderer>
 
+/**
+ * `simple-line-list` params: every item MUST carry an `href` — rows on Home are
+ * always a door to the thing they describe, never inert text.
+ */
+export interface SimpleLineListParams {
+  items: Array<Omit<WidgetSimpleListItemProps, "onClick"> & { href: string }>
+  showAllItems?: boolean
+}
+
+/** `inbox-list` params: module-avatar rows (title + subtitle), every row an `href`. */
+export interface InboxListParams {
+  items: Array<Omit<WidgetInboxListItemProps, "onClick"> & { href: string }>
+  showAllItems?: boolean
+}
+
+/** `event-list` params: f0 calendar-event rows (color band + date avatars). */
+export interface EventListParams {
+  events: CalendarEventProps[]
+  showAllItems?: boolean
+}
+
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
 export interface HomeWidgetSlot {
   visualization: string
@@ -47,6 +71,11 @@ export interface HomeWidgetItem {
   id: string
   header?: WidgetProps["header"]
   fullHeight?: boolean
+  /**
+   * The widget's catalog glyph — shown for it in the collapsed rail and in the
+   * "Add widget" picker, so the strip can never drift from the catalog.
+   */
+  icon?: IconType
   slots: HomeWidgetSlot[]
 }
 
@@ -57,11 +86,51 @@ export interface HomeWidgetItem {
  * `carousel`) are intentionally absent — supply them via `slotRenderers`.
  */
 export const defaultSlotRenderers: SlotRenderers = {
-  // `minSize: 0` so a short list doesn't reserve WidgetSimpleList's 184px
-  // floor inside a multi-slot widget; a caller can still pass its own.
-  list: (params) => (
-    <WidgetSimpleList minSize={0} {...(params as WidgetSimpleListProps)} />
-  ),
+  // Every row navigates to its item's `href` (via ctx.navigate when the app
+  // provides it). `minSize: 0` so a short list doesn't reserve
+  // WidgetSimpleList's 184px floor inside a multi-slot widget.
+  "simple-line-list": (params, ctx) => {
+    const { items, showAllItems } = params as SimpleLineListParams
+    const hrefById = new Map(items.map((item) => [item.id, item.href]))
+    const go = (id: string | number) => {
+      const href = hrefById.get(id)
+      if (!href) return
+      if (ctx.navigate) ctx.navigate(href)
+      else window.location.assign(href)
+    }
+    return (
+      <WidgetSimpleList
+        minSize={0}
+        showAllItems={showAllItems}
+        items={items}
+        onClickItem={go}
+      />
+    )
+  },
+  // Module-avatar rows (Communications-style). Same rule: every row navigates
+  // to its `href`.
+  "inbox-list": (params, ctx) => {
+    const { items, showAllItems } = params as InboxListParams
+    const hrefById = new Map(items.map((item) => [item.id, item.href]))
+    const go = (id: string | number) => {
+      const href = hrefById.get(id)
+      if (!href) return
+      if (ctx.navigate) ctx.navigate(href)
+      else window.location.assign(href)
+    }
+    return (
+      <WidgetInboxList
+        minSize={0}
+        showAllItems={showAllItems}
+        items={items}
+        onClickItem={go}
+      />
+    )
+  },
+  "event-list": (params) => {
+    const { events, showAllItems } = params as EventListParams
+    return <CalendarEventList events={events} showAllItems={showAllItems} />
+  },
   indicators: (params) => (
     <IndicatorsList {...(params as IndicatorsListProps)} />
   ),

@@ -25,9 +25,8 @@ import {
   Target,
 } from "@/icons/app"
 
-import { CalendarEventList } from "@/experimental/Widgets/Content/CalendarEventList"
-import { Widget } from "@/experimental/Widgets/Widget"
 import { SlotWidget } from "../SlotWidget"
+import { type HomeWidgetItem } from "../slotRenderers"
 import { WidgetCatalog } from "../WidgetCatalog"
 import { NewHomeLayout } from "./index"
 
@@ -198,47 +197,40 @@ const MainColumn = () => (
 /* ================================ side rail ================================ */
 
 /**
- * The prototype's Clock in tile, verbatim composition: state + running total on
- * one heading line, the day as a progress bar, started/left below it, and the
- * location selector + brand clock-in control on the last line — inside the f0
- * `Widget` frame (the only allowed widget wrapper).
+ * The prototype's Clock in tile body, verbatim composition: state + running
+ * total on one heading line, the day as a progress bar, started/left below it,
+ * and the location selector + brand clock-in control on the last line. This is
+ * the BESPOKE `clock-in` slot's renderer — the `Widget` frame + header come
+ * from `SlotWidget`, like every other widget.
  */
-const ClockInCard = () => (
-  <Widget
-    fullHeight
-    header={{
-      title: "Clock in",
-      link: { title: "Time tracking", onClick: () => {} },
-    }}
-  >
-    <div className="flex flex-col gap-2">
-      <div className="flex items-end justify-between">
-        <span className="text-xl font-semibold text-f1-foreground">
-          Clocked out
-        </span>
-        <span className="text-xl font-semibold tabular-nums text-f1-foreground">
-          0:00
-        </span>
-      </div>
-      <div className="h-1.5 rounded-full bg-f1-background-secondary" />
-      <div className="flex justify-between text-base text-f1-foreground-secondary">
-        <span>15:54</span>
-        <span>8h 00m left</span>
-      </div>
-      <div className="flex items-center justify-between pt-1">
-        <F0ButtonDropdown
-          mode="dropdown"
-          trigger="Remote"
-          items={[
-            { label: "Remote", value: "remote" },
-            { label: "Office", value: "office" },
-          ]}
-          onClick={() => {}}
-        />
-        <F0Button label="Clock in" icon={SolidPlay} onClick={() => {}} />
-      </div>
+const ClockInBody = () => (
+  <div className="flex flex-col gap-2">
+    <div className="flex items-end justify-between">
+      <span className="text-xl font-semibold text-f1-foreground">
+        Clocked out
+      </span>
+      <span className="text-xl font-semibold tabular-nums text-f1-foreground">
+        0:00
+      </span>
     </div>
-  </Widget>
+    <div className="h-1.5 rounded-full bg-f1-background-secondary" />
+    <div className="flex justify-between text-base text-f1-foreground-secondary">
+      <span>15:54</span>
+      <span>8h 00m left</span>
+    </div>
+    <div className="flex items-center justify-between pt-1">
+      <F0ButtonDropdown
+        mode="dropdown"
+        trigger="Remote"
+        items={[
+          { label: "Remote", value: "remote" },
+          { label: "Office", value: "office" },
+        ]}
+        onClick={() => {}}
+      />
+      <F0Button label="Clock in" icon={SolidPlay} onClick={() => {}} />
+    </div>
+  </div>
 )
 
 const COMMS = [
@@ -274,112 +266,127 @@ const COMMS = [
   },
 ]
 
-const CommunicationsCard = () => (
-  <Widget
-    header={{
+const RAIL_EVENTS = [
+  {
+    title: "Sarah's birthday",
+    subtitle: "Turns 30 🎉",
+    description: "",
+    isPending: false,
+    color: "#F59E0B",
+    fromDate: new Date(2026, 6, 24),
+  },
+  {
+    title: "Company holiday",
+    subtitle: "2 days off",
+    description: "",
+    isPending: false,
+    color: "#10B981",
+    fromDate: new Date(2026, 6, 30),
+    toDate: new Date(2026, 6, 31),
+  },
+  {
+    title: "Team offsite",
+    subtitle: "Costa Brava · not confirmed",
+    description: "",
+    isPending: false,
+    color: "#14B8A6",
+    fromDate: new Date(2026, 7, 3),
+    toDate: new Date(2026, 7, 4),
+  },
+  {
+    title: "Monthly all-hands",
+    subtitle: "Q3 roadmap update",
+    description: "",
+    isPending: false,
+    color: "#6366F1",
+    fromDate: new Date(2026, 7, 7),
+  },
+]
+
+/**
+ * The rail as DATA — HomeWidgetItems with their catalog `icon`, so the layout
+ * can collapse them to an avatar strip when it runs out of width. The bespoke
+ * `clock-in` slot's renderer is passed once at the layout level.
+ */
+const RIGHT_WIDGETS: HomeWidgetItem[] = [
+  {
+    id: "clock-in",
+    icon: Clock,
+    fullHeight: true,
+    header: {
+      title: "Clock in",
+      link: { title: "Time tracking", onClick: () => {} },
+    },
+    slots: [{ visualization: "clock-in", params: {} }],
+  },
+  {
+    id: "communications",
+    icon: Envelope,
+    header: {
       title: "Communications",
       link: { title: "Open", onClick: () => {} },
-    }}
-  >
-    <div className="flex flex-col">
-      {COMMS.map((c) => (
-        <div
-          key={c.title}
-          className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-f1-background-tertiary"
-        >
-          <div className="relative shrink-0">
-            <F0AvatarIcon icon={Envelope} size="lg" />
-            {c.unread ? (
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold" />
-            ) : null}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-f1-foreground">{c.title}</div>
-            <div className="text-base text-f1-foreground-secondary">
-              {c.time}
-            </div>
-          </div>
-          <F0AvatarPerson firstName={c.who[0]} lastName={c.who[1]} size="sm" />
-        </div>
-      ))}
-    </div>
-  </Widget>
-)
-
-/** Events through f0's own CalendarEventList — color band + date avatars. */
-const EventsCard = () => (
-  <Widget
-    header={{
+    },
+    slots: [
+      {
+        visualization: "inbox-list",
+        params: {
+          showAllItems: true,
+          items: COMMS.map((c, index) => ({
+            id: String(index),
+            module: "communities",
+            title: c.title,
+            subtitle: c.time,
+            href: `/posts/${index}`,
+          })),
+        },
+      },
+    ],
+  },
+  {
+    id: "events",
+    icon: Calendar,
+    header: {
       title: "Events",
       count: 8,
       link: { title: "Calendar", onClick: () => {} },
-    }}
-  >
-    <CalendarEventList
-      showAllItems
-      events={[
-        {
-          title: "Sarah's birthday",
-          subtitle: "Turns 30 🎉",
-          description: "",
-          isPending: false,
-          color: "#F59E0B",
-          fromDate: new Date(2026, 6, 24),
+    },
+    slots: [
+      {
+        visualization: "event-list",
+        params: {
+          showAllItems: true,
+          events: RAIL_EVENTS,
         },
-        {
-          title: "Company holiday",
-          subtitle: "2 days off",
-          description: "",
-          isPending: false,
-          color: "#10B981",
-          fromDate: new Date(2026, 6, 30),
-          toDate: new Date(2026, 6, 31),
-        },
-        {
-          title: "Team offsite",
-          subtitle: "Costa Brava · not confirmed",
-          description: "",
-          isPending: false,
-          color: "#14B8A6",
-          fromDate: new Date(2026, 7, 3),
-          toDate: new Date(2026, 7, 4),
-        },
-        {
-          title: "Monthly all-hands",
-          subtitle: "Q3 roadmap update",
-          description: "",
-          isPending: false,
-          color: "#6366F1",
-          fromDate: new Date(2026, 7, 7),
-        },
-      ]}
-    />
-  </Widget>
-)
+      },
+    ],
+  },
+]
 
-const Rail = () => (
-  <>
-    <ClockInCard />
-    <CommunicationsCard />
-    <EventsCard />
-  </>
-)
+/**
+ * The bespoke slot renderers this Home supplies — only `clock-in` here; every
+ * other slot the rail and the feed use is a kit default.
+ */
+const SLOT_RENDERERS = { "clock-in": () => <ClockInBody /> }
 
 /* ============================ add-widget catalog ============================ */
 
 /**
  * The catalog the picker offers. Every preview is the REAL widget — the same
- * node the rail renders — so what you preview is what gets added.
+ * `SlotWidget` render the rail makes — so what you preview is what gets added.
  */
 const CATALOG = [
-  { id: "clock-in", title: "Clock in", icon: Clock, preview: <ClockInCard /> },
-  {
-    id: "comms",
-    title: "Communications",
-    icon: Envelope,
-    preview: <CommunicationsCard />,
-  },
-  { id: "events", title: "Events", icon: Calendar, preview: <EventsCard /> },
+  ...RIGHT_WIDGETS.map((widget) => ({
+    id: widget.id,
+    title: widget.header?.title ?? widget.id,
+    icon: widget.icon!,
+    preview: (
+      <SlotWidget
+        header={widget.header}
+        slots={widget.slots}
+        slotRenderers={SLOT_RENDERERS}
+      />
+    ),
+  })),
   {
     id: "time-off",
     title: "Time off",
@@ -405,13 +412,13 @@ const CATALOG = [
         header={{ title: "Tasks", count: 3 }}
         slots={[
           {
-            visualization: "list",
+            visualization: "simple-line-list",
             params: {
               showAllItems: true,
               items: [
-                { id: "1", title: "Sign the Q3 addendum" },
-                { id: "2", title: "Review expense report" },
-                { id: "3", title: "Approve time off" },
+                { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
+                { id: "2", title: "Review expense report", href: "/tasks/2" },
+                { id: "3", title: "Approve time off", href: "/tasks/3" },
               ],
             },
           },
@@ -444,7 +451,8 @@ const Home = () => {
   return (
     <div className="p-6">
       <NewHomeLayout
-        aside={<Rail />}
+        rightWidgets={RIGHT_WIDGETS}
+        slotRenderers={SLOT_RENDERERS}
         editing={editing}
         onRemoveWidget={() => {}}
         onClickAddNewWidget={(s) => {

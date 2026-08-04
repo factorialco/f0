@@ -19,9 +19,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Every DEFAULT slot the kit ships, stacked in one widget with the dashed
- * divider between consecutive slots: `indicators`, `avatar-list`,
- * `status-rows` and `list`.
+ * Every DEFAULT slot, stacked in one widget with the dashed divider between
+ * consecutive slots: `indicators`, `avatar-list`, `status-rows`,
+ * `simple-line-list`, `inbox-list` and `event-list`.
  */
 export const AllSlots: Story = {
   args: {
@@ -71,12 +71,59 @@ export const AllSlots: Story = {
         },
       },
       {
-        visualization: "list",
+        visualization: "simple-line-list",
         params: {
           showAllItems: true,
           items: [
-            { id: "1", title: "Design sync", description: "Today · 10:00" },
-            { id: "2", title: "All hands", description: "Tomorrow · 16:00" },
+            { id: "1", title: "Barcelona", count: 3, href: "/positions/bcn" },
+            { id: "2", title: "Madrid", count: 2, href: "/positions/mad" },
+          ],
+        },
+      },
+      {
+        visualization: "inbox-list",
+        params: {
+          showAllItems: true,
+          items: [
+            {
+              id: "1",
+              module: "communities",
+              title: "Deploy 2026.7.3 is live 🚀",
+              subtitle: "8:47",
+              href: "/posts/1",
+            },
+            {
+              id: "2",
+              module: "communities",
+              title: "Summer office hours ☀️",
+              subtitle: "Jul 18",
+              href: "/posts/2",
+            },
+          ],
+        },
+      },
+      {
+        visualization: "event-list",
+        params: {
+          showAllItems: true,
+          events: [
+            {
+              title: "Company holiday",
+              subtitle: "2 days off",
+              description: "",
+              isPending: false,
+              color: "#10B981",
+              fromDate: new Date(2026, 6, 30),
+              toDate: new Date(2026, 6, 31),
+            },
+            {
+              title: "Monthly all-hands",
+              subtitle: "Q3 roadmap update",
+              description: "",
+              isPending: false,
+              color: "#6366F1",
+              fromDate: new Date(2026, 7, 7),
+            },
           ],
         },
       },

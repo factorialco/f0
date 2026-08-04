@@ -31,16 +31,12 @@ const CATALOG = [
         header={{ title: "Events", count: 2 }}
         slots={[
           {
-            visualization: "list",
+            visualization: "simple-line-list",
             params: {
               showAllItems: true,
               items: [
-                { id: "1", title: "Design sync", description: "Today · 10:00" },
-                {
-                  id: "2",
-                  title: "All hands",
-                  description: "Tomorrow · 16:00",
-                },
+                { id: "1", title: "Design sync", href: "/calendar/1" },
+                { id: "2", title: "All hands", href: "/calendar/2" },
               ],
             },
           },
