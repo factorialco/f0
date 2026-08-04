@@ -27,6 +27,17 @@ import {
   type SlotRenderers,
 } from "../slotRenderers"
 
+/**
+ * The interaction the header arrow has (copied from `CardLink`), so a control
+ * standing in its place feels identical on hover and focus.
+ */
+const CARD_LINK_CLASS = cn(
+  "group inline-flex aspect-square h-6 items-center justify-center gap-1",
+  "rounded-sm border border-solid border-transparent bg-transparent",
+  "whitespace-nowrap px-0 text-base font-medium text-f1-foreground",
+  "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1"
+)
+
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
 
@@ -177,7 +188,7 @@ export function WidgetContainer({
           type="button"
           aria-label="Remove widget"
           onClick={() => onRemoveWidget?.(widget.id)}
-          className="absolute right-4 top-4 z-10 cursor-pointer border-0 bg-transparent p-0"
+          className={cn("absolute right-4 top-4 z-10", CARD_LINK_CLASS)}
         >
           <F0Icon size="sm" icon={Cross} className="text-f1-icon-bold" />
         </button>
@@ -220,6 +231,10 @@ export function WidgetContainer({
                   key={widget.id}
                   id={widget.id}
                   disabled={widget.locked}
+                  handleClassName={cn(
+                    "absolute left-4 top-4 z-10",
+                    CARD_LINK_CLASS
+                  )}
                 >
                   {render(widget)}
                 </SortableWidget>

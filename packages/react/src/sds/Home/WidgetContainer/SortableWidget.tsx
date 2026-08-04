@@ -3,7 +3,13 @@ import { type CSSProperties, ReactNode } from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
+import { F0Icon } from "@/components/F0Icon"
+import { Sort } from "@/icons/app"
+import { cn } from "@/lib/utils"
+
 export interface SortableWidgetProps {
+  /** Classes for the drag handle, so it matches the widget header controls. */
+  handleClassName?: string
   id: string
   /** A locked widget can neither be picked up nor displaced by another. */
   disabled?: boolean
@@ -11,8 +17,10 @@ export interface SortableWidgetProps {
 }
 
 /**
- * One draggable widget in an editable column. The whole card is the drag
- * surface, as in `GroupMasonry` — the only other sortable grid in f0.
+ * One draggable widget in an editable column. The drag surface is a HANDLE in
+ * the widget's top-left — styled like its header controls — rather than the
+ * whole card: a widget body is full of links, and making all of it draggable
+ * would swallow them.
  *
  * A `disabled` (locked) widget is neither draggable nor a drop target, so a
  * pinned widget can't be picked up OR pushed out of its place.
@@ -20,6 +28,7 @@ export interface SortableWidgetProps {
 export const SortableWidget = ({
   id,
   disabled = false,
+  handleClassName,
   children,
 }: SortableWidgetProps) => {
   const {
@@ -42,14 +51,19 @@ export const SortableWidget = ({
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={disabled ? undefined : "cursor-grab active:cursor-grabbing"}
-      {...(disabled ? {} : attributes)}
-      {...(disabled ? {} : listeners)}
-    >
+    <div ref={setNodeRef} style={style}>
       {children}
+      {disabled ? null : (
+        <button
+          type="button"
+          aria-label="Reorder widget"
+          className={cn(handleClassName, "cursor-grab active:cursor-grabbing")}
+          {...attributes}
+          {...listeners}
+        >
+          <F0Icon size="sm" icon={Sort} className="text-f1-icon-bold" />
+        </button>
+      )}
     </div>
   )
 }
