@@ -458,7 +458,7 @@ const Home = () => {
   const [side, setSide] = useState<WidgetContainerSide>("main")
   const [rail, setRail] = useState(RIGHT_WIDGETS)
   return (
-    <div className="p-6">
+    <div className="h-full w-full p-6">
       <NewHomeLayout
         rightWidgets={rail}
         slotRenderers={SLOT_RENDERERS}
