@@ -1,5 +1,7 @@
 import { type CSSProperties, Fragment, ReactNode } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
+import { Cross, LockLocked } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
@@ -45,6 +47,8 @@ export interface WidgetContainerProps {
   onRemoveWidget?: (id: string) => void
   /** Called when the add placeholder is clicked. The container knows its side. */
   onClickAddNewWidget?: () => void
+  /** Tooltip on a locked widget's lock icon. */
+  lockedLabel?: string
   ctx?: HomeRenderCtx
   className?: string
   style?: CSSProperties
@@ -73,6 +77,7 @@ export function WidgetContainer({
   disableEdition = false,
   onRemoveWidget,
   onClickAddNewWidget,
+  lockedLabel = "This widget is mandatory in your company.",
   ctx = {},
   className,
   style,
@@ -91,18 +96,45 @@ export function WidgetContainer({
         ctx={ctx}
       />
     )
-    // A locked widget is inert in edit mode: no remove control.
-    if (!canEdit || widget.locked) return node
+    if (!canEdit) return node
+    // A locked widget can't be removed. In edit mode it swaps its header arrow
+    // for a lock, in that same spot, so it reads as deliberately fixed.
+    if (widget.locked)
+      return (
+        <div className="relative">
+          {renderWidget ? (
+            renderWidget(widget, ctx)
+          ) : (
+            <SlotWidget
+              header={{ ...widget.header, link: undefined }}
+              fullHeight={widget.fullHeight}
+              slots={widget.slots}
+              slotRenderers={slotRenderers}
+              ctx={ctx}
+            />
+          )}
+          <span
+            className="absolute right-4 top-4 z-10"
+            title={lockedLabel}
+            aria-label={lockedLabel}
+          >
+            <F0Icon size="md" icon={LockLocked} className="text-f1-icon-bold" />
+          </span>
+        </div>
+      )
     return (
       <div className="relative">
         {node}
+        {/* The same control the header's arrow is — a bare button around an
+            `sm` F0Icon in `text-f1-icon-bold` (see `CardLink`) — sitting exactly
+            where that arrow sits, so removing reads as replacing it. */}
         <button
           type="button"
           aria-label="Remove widget"
           onClick={() => onRemoveWidget?.(widget.id)}
-          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-solid border-f1-border bg-f1-background text-f1-foreground-secondary hover:text-f1-foreground"
+          className="absolute right-4 top-4 z-10 cursor-pointer border-0 bg-transparent p-0"
         >
-          ✕
+          <F0Icon size="sm" icon={Cross} className="text-f1-icon-bold" />
         </button>
       </div>
     )
