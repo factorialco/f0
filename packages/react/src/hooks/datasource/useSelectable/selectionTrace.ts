@@ -22,6 +22,7 @@
 type Entry = { at: number; label: string }
 
 const entries: Entry[] = []
+const counts = new Map<string, number>()
 let startedAt = 0
 // Bounded so a forgotten reset cannot grow without limit during a long session.
 const MAX_ENTRIES = 2000
@@ -32,8 +33,19 @@ export function trace(label: string): void {
   entries.push({ at: performance.now() - startedAt, label })
 }
 
+/**
+ * Accumulate a total without adding to the ordered sequence. For things that
+ * happen once per row (a memo comparison finding a prop unequal), where the
+ * count is the signal and 25 interleaved entries per commit would bury it.
+ */
+export function count(label: string): void {
+  if (startedAt === 0) startedAt = performance.now()
+  counts.set(label, (counts.get(label) ?? 0) + 1)
+}
+
 function reset(): void {
   entries.length = 0
+  counts.clear()
   startedAt = 0
 }
 
@@ -62,8 +74,16 @@ function dump(): void {
       return acc
     }, {})
   console.table(
-    Object.entries(writers).map(([label, count]) => ({ label, count }))
+    Object.entries(writers).map(([label, total]) => ({ label, total }))
   )
+
+  if (counts.size > 0) {
+    console.table(
+      [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, total]) => ({ label, total }))
+    )
+  }
   /* eslint-enable no-console */
 }
 
