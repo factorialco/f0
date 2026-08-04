@@ -1,9 +1,10 @@
-import { format, isValid } from "date-fns"
+import { format, isValid, type Locale } from "date-fns"
 import { type MouseEvent, useMemo } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 
 import { ChevronRight, Delete, Pencil } from "@/icons/app"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -92,10 +93,10 @@ interface EntitiesListViewProps {
 }
 
 /** Renders a value for a description line: dates format, arrays join. */
-function formatValue(value: unknown): string {
+function formatValue(value: unknown, locale: Locale): string {
   if (value === null || value === undefined) return ""
   if (value instanceof Date)
-    return isValid(value) ? format(value, "dd MMM yyyy") : ""
+    return isValid(value) ? format(value, "dd MMM yyyy", { locale }) : ""
   if (Array.isArray(value)) return value.map((v) => String(v)).join(", ")
   return String(value)
 }
@@ -121,6 +122,7 @@ export function EntitiesListView({
   removeLabel,
   viewLabel,
 }: EntitiesListViewProps) {
+  const locale = useDateFnsLocale()
   const titleField = fields[0]
   // Fields after the title split into right-side tags and description lines.
   const restFields = fields.slice(1)
@@ -215,11 +217,11 @@ export function EntitiesListView({
           itemDefinition: (record: ListRecord) => ({
             title:
               listItem?.title?.(record) ??
-              (titleField ? formatValue(record[titleField.id]) : ""),
+              (titleField ? formatValue(record[titleField.id], locale) : ""),
             description:
               listItem?.description?.(record) ??
               descriptionFields
-                .map((field) => formatValue(record[field.id]))
+                .map((field) => formatValue(record[field.id], locale))
                 .filter(Boolean),
             avatar: listItem?.avatar?.(record),
           }),
@@ -255,6 +257,7 @@ export function EntitiesListView({
       },
     ],
     [
+      locale,
       listItem,
       titleField,
       descriptionFields,

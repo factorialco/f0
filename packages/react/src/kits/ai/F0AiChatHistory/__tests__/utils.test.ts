@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { enUS, es } from "date-fns/locale"
+
 import { formatThreadDate, getDateGroup } from "../utils"
 
 const labels = { today: "Today", yesterday: "Yesterday" }
@@ -17,17 +19,17 @@ describe("formatThreadDate", () => {
   })
 
   it("formats today timestamps with the today label", () => {
-    const result = formatThreadDate("2026-04-28T11:51:00Z", labels)
+    const result = formatThreadDate("2026-04-28T11:51:00Z", labels, enUS)
     expect(result.startsWith("Today, ")).toBe(true)
   })
 
   it("formats yesterday timestamps with the yesterday label", () => {
-    const result = formatThreadDate("2026-04-27T07:59:00Z", labels)
+    const result = formatThreadDate("2026-04-27T07:59:00Z", labels, enUS)
     expect(result.startsWith("Yesterday, ")).toBe(true)
   })
 
   it("formats current-year timestamps as month + day, no year", () => {
-    const result = formatThreadDate("2026-04-23T11:51:00Z", labels)
+    const result = formatThreadDate("2026-04-23T11:51:00Z", labels, enUS)
     // No year segment for the current year
     expect(result).not.toMatch(/\b\d{4}\b/)
     // Includes the month abbreviation and day
@@ -36,10 +38,16 @@ describe("formatThreadDate", () => {
   })
 
   it("formats older timestamps with year included", () => {
-    const result = formatThreadDate("2025-04-06T11:51:00Z", labels)
+    const result = formatThreadDate("2025-04-06T11:51:00Z", labels, enUS)
     expect(result).toContain("2025")
     expect(result).toMatch(/Apr\s+6\s+2025/)
     expect(result).toContain(", ")
+  })
+
+  it("formats the date segments in the locale it is given", () => {
+    const result = formatThreadDate("2026-04-23T11:51:00Z", labels, es)
+
+    expect(result).toMatch(/abr/)
   })
 })
 

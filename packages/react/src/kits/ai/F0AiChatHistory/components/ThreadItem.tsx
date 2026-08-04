@@ -11,6 +11,7 @@ import PushPin from "@/icons/app/PushPin"
 import PushPinSolid from "@/icons/app/PushPinSolid"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
 
@@ -47,6 +48,7 @@ export function ThreadItem({
   className,
 }: ThreadItemProps) {
   const translations = useI18n()
+  const locale = useDateFnsLocale()
   const dropdownItems: DropdownItemType[] = useMemo(
     () => [
       {
@@ -66,11 +68,15 @@ export function ThreadItem({
 
   const formattedDate = useMemo(
     () =>
-      formatThreadDate(thread.updatedAt, {
-        today: translations.ai.today,
-        yesterday: translations.ai.yesterday,
-      }),
-    [thread.updatedAt, translations.ai.today, translations.ai.yesterday]
+      formatThreadDate(
+        thread.updatedAt,
+        {
+          today: translations.ai.today,
+          yesterday: translations.ai.yesterday,
+        },
+        locale
+      ),
+    [thread.updatedAt, translations.ai.today, translations.ai.yesterday, locale]
   )
 
   return (
