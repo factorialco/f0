@@ -165,6 +165,25 @@ describe("dayGranularity", () => {
         to: invalidDate,
       })
     })
+
+    it("rejects out-of-range parts instead of rolling them over", () => {
+      expect(dayGranularity.fromString("15-20-2024", i18n)).toEqual({
+        from: invalidDate,
+        to: invalidDate,
+      })
+
+      expect(dayGranularity.fromString("31-02-2024", i18n)).toEqual({
+        from: invalidDate,
+        to: invalidDate,
+      })
+    })
+
+    it("rejects two-digit years instead of mapping them to the 1900s", () => {
+      expect(dayGranularity.fromString("15-01-24", i18n)).toEqual({
+        from: invalidDate,
+        to: invalidDate,
+      })
+    })
   })
 
   describe("navigate", () => {
@@ -267,6 +286,55 @@ describe("dayGranularity", () => {
     it("returns the start of month for any date", () => {
       const result = dayGranularity.getViewDateFromDate(baseDate)
       expect(result).toEqual(startOfMonth(baseDate))
+    })
+  })
+
+  describe("with a month-first locale", () => {
+    const locale = "en-US"
+
+    it("formats a date in the locale's field order", () => {
+      expect(dayGranularity.toString(baseDate, i18n, "default", locale)).toBe(
+        "01/15/2024"
+      )
+    })
+
+    it("formats a range in the locale's field order", () => {
+      const result = dayGranularity.toString(
+        { from: baseDate, to: nextDayDate },
+        i18n,
+        "default",
+        locale
+      )
+      expect(result).toBe("01/15/2024 → 01/16/2024")
+    })
+
+    it("announces the locale's field order in the placeholder", () => {
+      expect(dayGranularity.placeholder(locale)).toBe("mm/dd/yyyy")
+    })
+
+    it("parses back the string it just formatted", () => {
+      const formatted = dayGranularity.toString(
+        baseDate,
+        i18n,
+        "default",
+        locale
+      )
+      expect(dayGranularity.fromString(formatted, i18n, locale)).toEqual({
+        from: startOfDay(baseDate),
+        to: endOfDay(baseDate),
+      })
+    })
+
+    it("reads other separators in the locale's field order too", () => {
+      expect(dayGranularity.fromString("01-15-2024", i18n, locale)).toEqual({
+        from: startOfDay(baseDate),
+        to: endOfDay(baseDate),
+      })
+    })
+
+    it("keeps day-first output when no locale is given", () => {
+      expect(dayGranularity.toString(baseDate, i18n)).toBe("15/01/2024")
+      expect(dayGranularity.placeholder()).toBe("dd/mm/yyyy")
     })
   })
 })

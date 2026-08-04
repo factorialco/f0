@@ -38,6 +38,9 @@ export type FilterTypeContext<Options extends object = never> = {
   i18n: I18nContextType
   /** The key of this filter in the FiltersDefinition (passed to chipLabel for nested label lookups) */
   filterKey?: string
+  locale?: string
+  /** Provider-level default from `l10n.date.localizedDayFormat`; per-filter options override it */
+  localizedDayFormat?: boolean
 }
 
 export type ChipLabel = {

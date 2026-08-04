@@ -10,6 +10,62 @@ import {
   startOfYear,
 } from "date-fns"
 
+const numericDateOptions: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+}
+
+const numericDateTokens: Partial<Record<Intl.DateTimeFormatPartTypes, string>> =
+  {
+    day: "dd",
+    month: "MM",
+    year: "yyyy",
+  }
+
+const bidiMarks = /[‎‏؜]/g
+
+const languageOf = (locale: string) => locale.split("-")[0]?.toLowerCase()
+
+export function getNumericDateFormat(
+  localeKey: string | undefined | null,
+  fallback: string
+): string {
+  const locale = localeKey?.replace(/_/g, "-")
+  if (!locale) {
+    return fallback
+  }
+
+  let formatter: Intl.DateTimeFormat
+  try {
+    formatter = new Intl.DateTimeFormat(locale, numericDateOptions)
+  } catch {
+    return fallback
+  }
+
+  const resolved = formatter.resolvedOptions().locale
+  if (languageOf(resolved) !== languageOf(locale)) {
+    return fallback
+  }
+
+  let pattern = ""
+  for (const part of formatter.formatToParts(new Date(2026, 0, 1))) {
+    const token = numericDateTokens[part.type]
+    if (token) {
+      pattern += token
+      continue
+    }
+    if (part.type !== "literal") {
+      return fallback
+    }
+    pattern += part.value.replace(bidiMarks, "")
+  }
+
+  return /dd/.test(pattern) && /MM/.test(pattern) && /yyyy/.test(pattern)
+    ? pattern
+    : fallback
+}
+
 export function formatTime(date: Date) {
   return format(date, "p")
 }

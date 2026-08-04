@@ -10,6 +10,8 @@ import {
   startOfMonth,
 } from "date-fns"
 
+import { getNumericDateFormat } from "@/lib/date"
+
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDate,
@@ -25,7 +27,10 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { DayView } from "./DayView"
 
-export const DAY_FORMAT = "dd/MM/yyyy"
+export const DAY_FORMAT_FALLBACK = "dd/MM/yyyy"
+
+export const getDayFormat = (locale?: string): string =>
+  getNumericDateFormat(locale, DAY_FORMAT_FALLBACK)
 
 export function toDayGranularityDateRange<
   T extends Date | DateRange | undefined | null,
@@ -95,17 +100,18 @@ export const dayGranularity: GranularityDefinition = {
     }
   },
   toRange: (date) => toDayGranularityDateRange(date),
-  toRangeString: (date) => formatDateRange(date, DAY_FORMAT),
-  toString: (date, _, format = "default") => {
+  toRangeString: (date, _i18n, _format, locale) =>
+    formatDateRange(date, getDayFormat(locale)),
+  toString: (date, _, format = "default", locale) => {
     const formats: Record<DateStringFormat, string> = {
-      default: formatDateToString(date, DAY_FORMAT),
+      default: formatDateToString(date, getDayFormat(locale)),
       long: formatLong(date),
     }
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 160,
-  placeholder: () => formatToPlaceholder(DAY_FORMAT),
-  fromString: (dateStr) => {
+  placeholder: (locale) => formatToPlaceholder(getDayFormat(locale)),
+  fromString: (dateStr, _i18n, locale) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
       return null
@@ -123,15 +129,29 @@ export const dayGranularity: GranularityDefinition = {
       }
 
       // Try numeric format: "20/02/2026"
-      const numericDate = parse(trimmed, DAY_FORMAT, referenceDate)
+      const dayFormat = getDayFormat(locale)
+      const numericDate = parse(trimmed, dayFormat, referenceDate)
       if (!isNaN(numericDate.getTime())) {
         return numericDate
       }
 
       // Fallback: manual parsing for other separators (dot, dash)
-      const [day, month, year] = trimmed.split(/[/.-]/)
-      if (!day || !month || !year) return new Date(NaN)
-      return new Date(Number(year), Number(month) - 1, Number(day))
+      const parts = trimmed.split(/[/.-]/)
+      const tokens = dayFormat.match(/[dMy]+/g) ?? []
+      const partFor = (token: "d" | "M" | "y") =>
+        parts[tokens.findIndex((candidate) => candidate.startsWith(token))]
+
+      const day = Number(partFor("d"))
+      const month = Number(partFor("M"))
+      const year = Number(partFor("y"))
+      const parsed = new Date(year, month - 1, day)
+
+      // The year check also rejects two-digit years, which Date() would map to 1900–1999
+      return parsed.getFullYear() === year &&
+        parsed.getMonth() === month - 1 &&
+        parsed.getDate() === day
+        ? parsed
+        : new Date(NaN)
     }
 
     return toDayGranularityDateRange({
