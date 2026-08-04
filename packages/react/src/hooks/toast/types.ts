@@ -27,7 +27,9 @@ export type ToastOptions = {
 } & (
   | {
       /**
-       * The duration of the toast in milliseconds (if not provided, the toast will stay open until the user closes it)
+       * The duration of the toast in milliseconds. Defaults to 5000ms, or
+       * 10000ms when the toast has an action (more time to read and reach it).
+       * Use `persistent: true` to keep it open until the user closes it.
        * @default 5000
        */
       duration?: number
