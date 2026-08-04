@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
@@ -13,6 +13,7 @@ import {
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { getCompareToValue } from "./compareTo"
@@ -84,6 +85,19 @@ export function DatePickerPopup({
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
+
+  // The calendar's year/month dropdowns are selects that portal into the dialog's
+  // container — a stacking context. A calendar left in `document.body` would paint over
+  // that subtree and cover the dropdowns it owns, so share the container instead.
+  // Side panels (left/right) stay in body to prevent clipping.
+  const dialogContext = useContext(F0DialogContext)
+  const shouldUseDialogContainer =
+    dialogContext.portalContainer &&
+    (dialogContext.position === "center" ||
+      dialogContext.position === "fullscreen")
+  const portalContainer = shouldUseDialogContainer
+    ? dialogContext.portalContainer
+    : undefined
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -245,7 +259,11 @@ export function DatePickerPopup({
   return (
     <Popover open={props.open} onOpenChange={props.onOpenChange}>
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
-      <PopoverContent className="w-full overflow-auto" align="start">
+      <PopoverContent
+        className="w-full overflow-auto"
+        align="start"
+        container={portalContainer}
+      >
         {showPresets ? (
           <PresetList
             presets={presets}

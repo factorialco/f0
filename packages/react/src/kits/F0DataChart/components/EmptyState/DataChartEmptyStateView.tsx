@@ -5,8 +5,12 @@ import type { F0DataChartEmptyStateProps, F0DataChartProps } from "../../types"
 import { DataChartEmptyState } from "./EmptyState"
 
 interface DataChartEmptyStateViewProps {
-  /** The chart variant — drives the background skeleton illustration. */
-  chartType: F0DataChartProps["type"]
+  /**
+   * @deprecated No longer used — the empty state renders text only. Remove the prop.
+   * @removeIn 5.0.0
+   * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-datachart-emptystate-charttype-removal.md
+   */
+  chartType?: F0DataChartProps["type"]
   emptyState?: F0DataChartEmptyStateProps
 }
 
@@ -16,7 +20,6 @@ interface DataChartEmptyStateViewProps {
  * reused by dashboard wrappers when data is absent.
  */
 export const DataChartEmptyStateView = ({
-  chartType,
   emptyState,
 }: DataChartEmptyStateViewProps) => {
   const i18n = useI18n()
@@ -27,7 +30,6 @@ export const DataChartEmptyStateView = ({
 
   return (
     <DataChartEmptyState
-      chartType={chartType}
       content={emptyState?.title ?? defaults.title}
       description={emptyState?.description ?? defaults.description}
     />

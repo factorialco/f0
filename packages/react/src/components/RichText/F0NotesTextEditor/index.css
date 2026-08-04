@@ -15,16 +15,32 @@
   @apply mb-0;
 }
 
+/* One typography token per level, matching the shared stylesheet so both
+   editors render a heading the same way. Each token carries its own line
+   height and tracking, so the bespoke px values those rules used to repeat are
+   gone. Margins stay as they were: spacing is a separate decision from type. */
 .notes-text-editor h1 {
-  @apply mb-2.5 p-0 text-[29px] font-semibold leading-[39px] tracking-[-0.58px];
+  @apply mb-2.5 p-0 text-3xl font-semibold;
 }
 
 .notes-text-editor h2 {
-  @apply mb-2 p-0 text-[24px] font-semibold leading-[32px] tracking-[-0.48px];
+  @apply mb-2 p-0 text-2xl font-semibold;
 }
 
 .notes-text-editor h3 {
-  @apply mb-[7px] p-0 text-[19px] font-semibold leading-[26px] tracking-[-0.19px];
+  @apply mb-[7px] p-0 text-xl font-semibold;
+}
+
+.notes-text-editor h4 {
+  @apply mb-[6px] p-0 text-lg font-semibold;
+}
+
+.notes-text-editor h5 {
+  @apply mb-[6px] p-0 text-base font-semibold;
+}
+
+.notes-text-editor h6 {
+  @apply mb-[6px] p-0 text-sm font-semibold;
 }
 
 .notes-text-editor ul {
@@ -33,6 +49,61 @@
 
 .notes-text-editor ol {
   @apply m-0 mb-2 list-decimal;
+}
+
+/* Nested lists repeat the parent marker without these; depth is otherwise only
+   conveyed by indentation. Selected by class, not by `ul ul`: the list classes
+   below already set a marker at specificity 0,2,0, which any element-based
+   selector loses to. */
+.notes-text-editor .f1-bullet-list .f1-bullet-list {
+  list-style-type: circle;
+}
+
+.notes-text-editor .f1-bullet-list .f1-bullet-list .f1-bullet-list {
+  list-style-type: square;
+}
+
+.notes-text-editor .f1-ordered-list .f1-ordered-list {
+  list-style-type: lower-alpha;
+}
+
+.notes-text-editor .f1-ordered-list .f1-ordered-list .f1-ordered-list {
+  list-style-type: lower-roman;
+}
+
+/* Source indentation carried by the indent attribute on paragraphs and
+   headings. A class rather than only an inline style because the sanitizer
+   read-only content passes through allows `class` but not `style`. */
+.notes-text-editor .f0-indent-1 {
+  @apply pl-[24px];
+}
+
+.notes-text-editor .f0-indent-2 {
+  @apply pl-[48px];
+}
+
+.notes-text-editor .f0-indent-3 {
+  @apply pl-[72px];
+}
+
+.notes-text-editor .f0-indent-4 {
+  @apply pl-[96px];
+}
+
+.notes-text-editor .f0-indent-5 {
+  @apply pl-[120px];
+}
+
+.notes-text-editor .f0-indent-6 {
+  @apply pl-[144px];
+}
+
+.notes-text-editor .f0-indent-7 {
+  @apply pl-[168px];
+}
+
+.notes-text-editor .f0-indent-8 {
+  @apply pl-[192px];
 }
 
 .notes-text-editor a:not([data-type="mention"]):not(.mention) {
@@ -52,6 +123,38 @@
 }
 .notes-text-editor a.mention:not([data-type="mention"]):focus {
   @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
+}
+
+/* Font sizes carried by the textStyle mark. A class rather than an inline style
+   because the sanitizer read-only content passes through allows `class` but not
+   `style`. 16px is the body size and needs no mark; it is here for when a size
+   is set explicitly. */
+.notes-text-editor .f0-fs-12 {
+  @apply text-[12px] leading-[16px] tracking-[-0.12px];
+}
+
+.notes-text-editor .f0-fs-14 {
+  @apply text-[14px] leading-[20px] tracking-[-0.14px];
+}
+
+.notes-text-editor .f0-fs-16 {
+  @apply text-[16px] leading-[24px] tracking-[-0.16px];
+}
+
+.notes-text-editor .f0-fs-18 {
+  @apply text-[18px] leading-[28px] tracking-[-0.18px];
+}
+
+.notes-text-editor .f0-fs-20 {
+  @apply text-[20px] leading-[28px] tracking-[-0.2px];
+}
+
+.notes-text-editor .f0-fs-24 {
+  @apply text-[24px] leading-[32px] tracking-[-0.24px];
+}
+
+.notes-text-editor .f0-fs-29 {
+  @apply text-[29px] leading-[39px] tracking-[-0.29px];
 }
 
 .notes-text-editor strong {

@@ -16,7 +16,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "When `F0DataChart` receives empty data (empty `series`, empty `data`, all-zero values, or missing `value` for gauges), it auto-renders a faded chart skeleton + centered message so the chart never appears as a bare axis. Use the `emptyState` prop to override copy, escape-hatch with a custom render, or skip detection entirely.",
+          "When `F0DataChart` receives empty data (empty `series`, empty `data`, or missing `value` for gauges), it auto-renders a centered message so the chart never appears as a bare axis. All-zero datasets are **not** empty — they render as usual. Use the `emptyState` prop to override copy, escape-hatch with a custom render, or skip detection entirely.",
       },
     },
   },

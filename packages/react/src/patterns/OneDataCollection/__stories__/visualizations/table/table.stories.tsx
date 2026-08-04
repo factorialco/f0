@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { useState, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
@@ -630,7 +630,7 @@ export const TableWithGroupedHeaders: Story = {
             type: "table",
             options: {
               ...baseOptions,
-              headerGroupLabels: {
+              headerGroups: {
                 personal: "Personal Information",
                 employment: "Employment Details",
               },
@@ -686,6 +686,400 @@ export const TableWithGroupedHeaders: Story = {
         ]}
       />
     )
+  },
+}
+
+export const TableWithCollapsibleHeaderGroups: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A header group becomes collapsible as soon as its definition declares `collapsedColumns`: the ids of the columns that stay visible while the group is collapsed. Everything else in the group is hidden until the user expands it. Groups declared as a plain string (`headcount` here) stay purely visual.",
+      },
+    },
+  },
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        team: "Engineering",
+        headcount: 42,
+        janSalaries: "€310,400",
+        janBonuses: "€24,000",
+        janTotal: "€334,400",
+        febSalaries: "€318,900",
+        febBonuses: "€12,500",
+        febTotal: "€331,400",
+      },
+      {
+        id: 2,
+        team: "Design",
+        headcount: 11,
+        janSalaries: "€78,200",
+        janBonuses: "€4,000",
+        janTotal: "€82,200",
+        febSalaries: "€80,100",
+        febBonuses: "€2,000",
+        febTotal: "€82,100",
+      },
+      {
+        id: 3,
+        team: "Sales",
+        headcount: 27,
+        janSalaries: "€164,700",
+        janBonuses: "€38,900",
+        janTotal: "€203,600",
+        febSalaries: "€169,300",
+        febBonuses: "€41,200",
+        febTotal: "€210,500",
+      },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: {
+                headcount: "Headcount",
+                january: {
+                  label: "January",
+                  // Only the total stays visible while the group is collapsed
+                  collapsedColumns: ["jan-total"],
+                },
+                february: {
+                  label: "February",
+                  collapsedColumns: ["feb-total"],
+                  defaultCollapsed: true,
+                },
+              },
+              onHeaderGroupCollapsedChange: (groupId, collapsed) => {
+                console.log(`Header group "${groupId}" collapsed:`, collapsed)
+              },
+              columns: [
+                {
+                  label: "Team",
+                  id: "team",
+                  render: (item) => item.team,
+                },
+                {
+                  label: "People",
+                  id: "people",
+                  align: "right",
+                  headerGroupId: "headcount",
+                  render: (item) => `${item.headcount}`,
+                },
+                {
+                  label: "Salaries",
+                  id: "jan-salaries",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janSalaries,
+                },
+                {
+                  label: "Bonuses",
+                  id: "jan-bonuses",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janBonuses,
+                },
+                {
+                  label: "Total",
+                  id: "jan-total",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janTotal,
+                },
+                {
+                  label: "Salaries",
+                  id: "feb-salaries",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febSalaries,
+                },
+                {
+                  label: "Bonuses",
+                  id: "feb-bonuses",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febBonuses,
+                },
+                {
+                  label: "Total",
+                  id: "feb-total",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febTotal,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // February starts collapsed: only its total column is rendered.
+    const february = await canvas.findByRole("button", { name: "February" })
+    expect(february).toHaveAttribute("aria-expanded", "false")
+    expect(canvas.queryByText("€318,900")).not.toBeInTheDocument()
+
+    await userEvent.click(february)
+
+    await expect(await canvas.findByText("€318,900")).toBeInTheDocument()
+    expect(february).toHaveAttribute("aria-expanded", "true")
+  },
+}
+
+export const TableWithCollapsibleHeaderGroupsAndSorting: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Sorting and collapsing don't compete: the collapse toggle lives in the spanning header row and the sort control in the column row below it, so a group's own cell never carries a sort affordance. Sorting is owned by the datasource and keyed by sorting key, not by column, so collapsing a group never resets it — sort by *Bonuses*, collapse *January*, and the rows keep that order even though the column (and its indicator) is gone. Expanding brings the indicator back. This mirrors what already happens when a column is hidden from the column-settings popover.",
+      },
+    },
+  },
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        team: "Engineering",
+        headcount: 42,
+        janSalaries: 310400,
+        janBonuses: 24000,
+        febSalaries: 318900,
+        febBonuses: 12500,
+      },
+      {
+        id: 2,
+        team: "Design",
+        headcount: 11,
+        janSalaries: 78200,
+        janBonuses: 4000,
+        febSalaries: 80100,
+        febBonuses: 2000,
+      },
+      {
+        id: 3,
+        team: "Sales",
+        headcount: 27,
+        janSalaries: 164700,
+        janBonuses: 38900,
+        febSalaries: 169300,
+        febBonuses: 41200,
+      },
+      {
+        id: 4,
+        team: "Support",
+        headcount: 19,
+        janSalaries: 96500,
+        janBonuses: 11200,
+        febSalaries: 98400,
+        febBonuses: 9800,
+      },
+    ]
+
+    const eur = (value: number) => `€${value.toLocaleString("en-US")}`
+    const janTotal = (item: (typeof records)[number]) =>
+      item.janSalaries + item.janBonuses
+    const febTotal = (item: (typeof records)[number]) =>
+      item.febSalaries + item.febBonuses
+
+    const sortValue: Record<
+      string,
+      (item: (typeof records)[number]) => number | string
+    > = {
+      team: (item) => item.team,
+      "jan-salaries": (item) => item.janSalaries,
+      "jan-bonuses": (item) => item.janBonuses,
+      "jan-total": janTotal,
+      "feb-salaries": (item) => item.febSalaries,
+      "feb-bonuses": (item) => item.febBonuses,
+      "feb-total": febTotal,
+    }
+
+    const source = useDataCollectionSource({
+      sortings: {
+        team: { label: "Team" },
+        "jan-salaries": { label: "January salaries" },
+        "jan-bonuses": { label: "January bonuses" },
+        "jan-total": { label: "January total" },
+        "feb-salaries": { label: "February salaries" },
+        "feb-bonuses": { label: "February bonuses" },
+        "feb-total": { label: "February total" },
+      },
+      dataAdapter: {
+        fetchData: async ({ sortings }) => {
+          if (!sortings || sortings.length === 0) return { records }
+
+          const [{ field, order }] = sortings
+          const read = sortValue[field as string]
+          if (!read) return { records }
+
+          const sorted = [...records].sort((a, b) => {
+            const left = read(a)
+            const right = read(b)
+            const diff =
+              typeof left === "string" && typeof right === "string"
+                ? left.localeCompare(right)
+                : Number(left) - Number(right)
+            return order === "asc" ? diff : -diff
+          })
+
+          return { records: sorted }
+        },
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: {
+                headcount: "Headcount",
+                january: {
+                  label: "January",
+                  collapsedColumns: ["jan-total"],
+                },
+                february: {
+                  label: "February",
+                  collapsedColumns: ["feb-total"],
+                },
+              },
+              columns: [
+                {
+                  label: "Team",
+                  id: "team",
+                  sorting: "team",
+                  render: (item) => item.team,
+                },
+                {
+                  label: "People",
+                  id: "people",
+                  align: "right",
+                  headerGroupId: "headcount",
+                  render: (item) => `${item.headcount}`,
+                },
+                {
+                  label: "Salaries",
+                  id: "jan-salaries",
+                  align: "right",
+                  sorting: "jan-salaries",
+                  headerGroupId: "january",
+                  render: (item) => eur(item.janSalaries),
+                },
+                {
+                  label: "Bonuses",
+                  id: "jan-bonuses",
+                  align: "right",
+                  sorting: "jan-bonuses",
+                  headerGroupId: "january",
+                  render: (item) => eur(item.janBonuses),
+                },
+                {
+                  label: "Total",
+                  id: "jan-total",
+                  align: "right",
+                  sorting: "jan-total",
+                  headerGroupId: "january",
+                  render: (item) => eur(janTotal(item)),
+                },
+                {
+                  label: "Salaries",
+                  id: "feb-salaries",
+                  align: "right",
+                  sorting: "feb-salaries",
+                  headerGroupId: "february",
+                  render: (item) => eur(item.febSalaries),
+                },
+                {
+                  label: "Bonuses",
+                  id: "feb-bonuses",
+                  align: "right",
+                  sorting: "feb-bonuses",
+                  headerGroupId: "february",
+                  render: (item) => eur(item.febBonuses),
+                },
+                {
+                  label: "Total",
+                  id: "feb-total",
+                  align: "right",
+                  sorting: "feb-total",
+                  headerGroupId: "february",
+                  render: (item) => eur(febTotal(item)),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Grouping is what lets two columns share a label, so "Bonuses" is
+    // deliberately ambiguous: January's comes first, February's second.
+    const bonusesHeaders = () =>
+      canvas
+        .getAllByRole("columnheader")
+        .filter((cell) => cell.textContent?.includes("Bonuses"))
+
+    // The first two rows are the spanning group row and the column row.
+    const firstTeam = () =>
+      canvas.getAllByRole("row")[2]?.querySelector("td")?.textContent
+
+    const january = await canvas.findByRole("button", { name: "January" })
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(2))
+
+    // The group's own cell carries the collapse toggle and nothing else — the
+    // sort control sits in the column header row below it.
+    expect(january.closest("th")).not.toHaveAttribute("aria-sort")
+
+    // Sort ascending by January's Bonuses, which January will hide on collapse.
+    await userEvent.click(
+      within(bonusesHeaders()[0]).getByRole("button", { name: "Sort" })
+    )
+    await waitFor(() =>
+      expect(bonusesHeaders()[0]).toHaveAttribute("aria-sort", "ascending")
+    )
+
+    // Design has the smallest January bonus, so it leads after sorting.
+    await waitFor(() => expect(firstTeam()).toContain("Design"))
+
+    // Collapsing hides the sorted column, but the order it produced survives.
+    await userEvent.click(january)
+
+    // The toggle answers the click straight away, while the columns only swap
+    // once the fade reaches its dimmest point — so the count has to be waited
+    // for separately rather than inferred from aria-expanded.
+    expect(january).toHaveAttribute("aria-expanded", "false")
+
+    // February stays expanded, so one "Bonuses" header remains — its own.
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(1))
+    expect(bonusesHeaders()[0]).not.toHaveAttribute("aria-sort", "ascending")
+    expect(firstTeam()).toContain("Design")
+
+    // Expanding restores January's column with its indicator intact.
+    await userEvent.click(january)
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(2))
+    expect(bonusesHeaders()[0]).toHaveAttribute("aria-sort", "ascending")
   },
 }
 

@@ -404,7 +404,7 @@ describe("TableCollection", () => {
         >
           columns={groupedColumns}
           source={createTestSource()}
-          headerGroupLabels={{ identity: "Identity" }}
+          headerGroups={{ identity: "Identity" }}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
@@ -1107,6 +1107,612 @@ describe("TableCollection", () => {
 
       // Verify data from hidden column is NOT shown
       expect(screen.queryByText(testData[0].email)).not.toBeInTheDocument()
+    })
+  })
+
+  describe("collapsible header groups", () => {
+    const groupedColumns: TableColumnDefinition<
+      Person,
+      SortingsDefinition,
+      SummariesDefinition
+    >[] = [
+      { label: "Name", id: "name", render: (item: Person) => item.name },
+      {
+        label: "Email",
+        id: "email",
+        headerGroupId: "contact",
+        render: (item: Person) => item.email,
+      },
+      {
+        label: "Display",
+        id: "display",
+        headerGroupId: "contact",
+        render: (item: Person) => item.displayName,
+      },
+    ]
+
+    const renderTable = (
+      props: Partial<
+        React.ComponentProps<
+          typeof TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+        >
+      >
+    ) =>
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          {...props}
+        />
+      )
+
+    it("renders no toggle for groups without collapsedColumns", async () => {
+      renderTable({ headerGroups: { contact: "Contact" } })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen.getByRole("columnheader", { name: "Contact" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Contact" })
+      ).not.toBeInTheDocument()
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+    })
+
+    it("hides every column but the collapsedColumns when collapsed by default", async () => {
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(screen.getByRole("button", { name: "Contact" })).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      )
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(
+        screen.queryByText(testData[0].displayName)
+      ).not.toBeInTheDocument()
+    })
+
+    it("reveals the hidden columns when the group toggle is clicked", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+      expect(screen.getByRole("button", { name: "Contact" })).toHaveAttribute(
+        "aria-expanded",
+        "true"
+      )
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith(
+        "contact",
+        false
+      )
+    })
+
+    it("collapses an expanded group and reports the change", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(testData[0].displayName)
+        ).not.toBeInTheDocument()
+      })
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith("contact", true)
+    })
+
+    it("keeps the first column of the group when collapsedColumns is empty", async () => {
+      renderTable({
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: [],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // A header spanning zero columns would stretch across the rest of the
+      // row, so the group always keeps at least one column.
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(
+        screen.queryByText(testData[0].displayName)
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders no group header row when headerGroups is omitted", async () => {
+      renderTable({})
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Without a definition the grouped columns fall back to the single-row
+      // header, so every column keeps its own label and nothing is hidden.
+      expect(
+        screen.queryByRole("columnheader", { name: "Contact" })
+      ).not.toBeInTheDocument()
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+    })
+
+    it("still collapses where the Web Animations API is unavailable", async () => {
+      // The open/close movement is driven by element.animate, which jsdom does
+      // not implement — so this is that path. The columns must settle anyway
+      // rather than be left mounted mid-flight forever.
+      expect(
+        typeof (
+          document.createElement("td") as HTMLElement & {
+            animate?: unknown
+          }
+        ).animate
+      ).not.toBe("function")
+
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      const toggle = screen.getByRole("button", { name: "Contact" })
+      await userEvent.click(toggle)
+
+      expect(toggle).toHaveAttribute("aria-expanded", "false")
+      await waitFor(() => {
+        expect(
+          screen.queryByText(testData[0].displayName)
+        ).not.toBeInTheDocument()
+      })
+
+      await userEvent.click(toggle)
+
+      expect(toggle).toHaveAttribute("aria-expanded", "true")
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+    })
+
+    it("gives a collapsible group header the hover highlight, and an inert one none", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Clickable, so it keeps the cell highlight a sortable header shows.
+      // Matched on class tokens, not substrings: the cell also carries a
+      // checkbox-scoped `...:hover:after:bg-transparent` that a substring
+      // check would trip over.
+      const collapsible = screen
+        .getByRole("button", { name: "Contact" })
+        .closest("th")
+      expect(
+        collapsible?.classList.contains("hover:after:bg-f1-background-hover")
+      ).toBe(true)
+      expect(
+        collapsible?.classList.contains("hover:after:bg-transparent")
+      ).toBe(false)
+    })
+
+    it("opts an inert group header out of the hover highlight", async () => {
+      renderTable({ headerGroups: { contact: "Contact" } })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const inert = screen.getByRole("columnheader", { name: "Contact" })
+      expect(inert.classList.contains("hover:after:bg-transparent")).toBe(true)
+    })
+
+    it("keeps the group label's colour on hover", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // The cell highlight is the hover affordance. Darkening the label and
+      // icon on top of it made a collapsible group read as a different kind of
+      // header from the inert ones beside it.
+      const toggle = screen.getByRole("button", { name: "Contact" })
+      expect(toggle.classList.contains("text-f1-foreground-secondary")).toBe(
+        true
+      )
+      expect(toggle.classList.contains("hover:text-f1-foreground")).toBe(false)
+    })
+
+    it("toggles the group from anywhere in the header cell", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      // The cell is the hit area, not just the toggle drawn inside it.
+      await userEvent.click(
+        screen.getByRole("columnheader", { name: "Contact" })
+      )
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(testData[0].displayName)
+        ).not.toBeInTheDocument()
+      })
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith("contact", true)
+    })
+
+    it("toggles once, not twice, when the toggle itself is clicked", async () => {
+      const onHeaderGroupCollapsedChange = vi.fn()
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+        onHeaderGroupCollapsedChange,
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      })
+
+      // The toggle holds no handler of its own and lets the click bubble to
+      // the cell. Wired up on both, this would collapse and re-expand at once.
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledTimes(1)
+      expect(onHeaderGroupCollapsedChange).toHaveBeenCalledWith("contact", true)
+    })
+
+    it("puts the toggle on the side the group label is not aligned to", async () => {
+      // A right-aligned group would otherwise have its label pushed off the
+      // edge its columns' content sits on, so the two stop lining up.
+      renderTable({
+        columns: groupedColumns.map((column) =>
+          column.headerGroupId ? { ...column, align: "right" as const } : column
+        ),
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen
+          .getByRole("button", { name: "Contact" })
+          .classList.contains("flex-row-reverse")
+      ).toBe(true)
+    })
+
+    it("keeps the toggle after the label when the group is left-aligned", async () => {
+      renderTable({
+        headerGroups: {
+          contact: { label: "Contact", collapsedColumns: ["email"] },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen
+          .getByRole("button", { name: "Contact" })
+          .classList.contains("flex-row-reverse")
+      ).toBe(false)
+    })
+
+    describe("interaction with sorting", () => {
+      const sortableColumns: TableColumnDefinition<
+        Person,
+        SortingsDefinition,
+        SummariesDefinition
+      >[] = [
+        { label: "Name", id: "name", render: (item: Person) => item.name },
+        {
+          label: "Email",
+          id: "email",
+          headerGroupId: "contact",
+          sorting: "email",
+          render: (item: Person) => item.email,
+        },
+        {
+          label: "Display",
+          id: "display",
+          headerGroupId: "contact",
+          sorting: "display",
+          render: (item: Person) => item.displayName,
+        },
+      ]
+
+      const createSortableSource = (
+        currentSortings: { field: string; order: "asc" | "desc" } | null,
+        setCurrentSortings = vi.fn()
+      ) => ({
+        ...createTestSource(),
+        currentSortings,
+        setCurrentSortings,
+        sortings: {
+          email: { label: "Email" },
+          display: { label: "Display" },
+        },
+      })
+
+      it("keeps a group's own header free of sort state", async () => {
+        renderTable({
+          columns: sortableColumns,
+          source: createSortableSource(null),
+          headerGroups: {
+            contact: { label: "Contact", collapsedColumns: ["email"] },
+          },
+        })
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+        })
+
+        // The two affordances live in different rows, so the group cell never
+        // carries a sort control that could compete with the collapse toggle.
+        const groupHeader = screen
+          .getByRole("button", { name: "Contact" })
+          .closest("th")
+        expect(groupHeader).not.toHaveAttribute("aria-sort")
+        expect(
+          within(groupHeader as HTMLElement).queryByRole("button", {
+            name: "Sort",
+          })
+        ).not.toBeInTheDocument()
+      })
+
+      it("leaves the active sorting untouched when the sorted column collapses away", async () => {
+        const setCurrentSortings = vi.fn()
+        renderTable({
+          columns: sortableColumns,
+          source: createSortableSource(
+            { field: "display", order: "asc" },
+            setCurrentSortings
+          ),
+          headerGroups: {
+            contact: { label: "Contact", collapsedColumns: ["email"] },
+          },
+        })
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+        })
+
+        const displayHeader = screen
+          .getAllByRole("columnheader")
+          .find((cell) => cell.textContent?.includes("Display"))
+        expect(displayHeader).toHaveAttribute("aria-sort", "ascending")
+
+        await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+        await waitFor(() => {
+          expect(
+            screen.queryByText(testData[0].displayName)
+          ).not.toBeInTheDocument()
+        })
+
+        // Collapsing is a presentation concern: the datasource keeps sorting by
+        // the now-hidden column, so the row order is preserved and re-expanding
+        // brings the indicator back. Nothing resets the sorting.
+        expect(setCurrentSortings).not.toHaveBeenCalled()
+
+        await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+        })
+        expect(
+          screen
+            .getAllByRole("columnheader")
+            .find((cell) => cell.textContent?.includes("Display"))
+        ).toHaveAttribute("aria-sort", "ascending")
+      })
+
+      it("collapses one group without touching a sibling group's like-named column", async () => {
+        // Grouping is what lets two columns share a label, so collapsing one
+        // group must leave the sibling's identically-labelled column alone.
+        const twoGroupColumns: TableColumnDefinition<
+          Person,
+          SortingsDefinition,
+          SummariesDefinition
+        >[] = [
+          { label: "Name", id: "name", render: (item: Person) => item.name },
+          {
+            label: "Detail",
+            id: "a-detail",
+            headerGroupId: "a",
+            render: (item: Person) => item.email,
+          },
+          {
+            label: "Total",
+            id: "a-total",
+            headerGroupId: "a",
+            render: () => "A total",
+          },
+          {
+            label: "Detail",
+            id: "b-detail",
+            headerGroupId: "b",
+            render: (item: Person) => item.displayName,
+          },
+          {
+            label: "Total",
+            id: "b-total",
+            headerGroupId: "b",
+            render: () => "B total",
+          },
+        ]
+
+        renderTable({
+          columns: twoGroupColumns,
+          headerGroups: {
+            a: { label: "Group A", collapsedColumns: ["a-total"] },
+            b: { label: "Group B", collapsedColumns: ["b-total"] },
+          },
+        })
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+        })
+
+        const detailHeaders = () =>
+          screen
+            .getAllByRole("columnheader")
+            .filter((cell) => cell.textContent?.includes("Detail"))
+
+        expect(detailHeaders()).toHaveLength(2)
+
+        await userEvent.click(screen.getByRole("button", { name: "Group A" }))
+
+        await waitFor(() => expect(detailHeaders()).toHaveLength(1))
+        // The survivor is B's, so B's data is untouched and A's is gone.
+        expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+        expect(screen.queryByText(testData[0].email)).not.toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Group B" })).toHaveAttribute(
+          "aria-expanded",
+          "true"
+        )
+      })
+
+      it("puts the first body row after the two header rows", async () => {
+        // The story's play function indexes rows to assert sort order; this
+        // pins the offset the spanning header row introduces.
+        renderTable({
+          headerGroups: {
+            contact: { label: "Contact", collapsedColumns: ["email"] },
+          },
+        })
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+        })
+
+        const rows = screen.getAllByRole("row")
+        expect(
+          within(rows[0]).getByRole("button", { name: "Contact" })
+        ).toBeInTheDocument()
+        expect(rows[1].textContent).toContain("Email")
+        expect(rows[2].querySelector("td")?.textContent).toContain(
+          testData[0].name
+        )
+      })
+
+      it("keeps a visible column in the group sortable while collapsed", async () => {
+        const setCurrentSortings = vi.fn()
+        renderTable({
+          columns: sortableColumns,
+          source: createSortableSource(null, setCurrentSortings),
+          headerGroups: {
+            contact: {
+              label: "Contact",
+              collapsedColumns: ["email"],
+              defaultCollapsed: true,
+            },
+          },
+        })
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+        })
+
+        const emailHeader = screen
+          .getAllByRole("columnheader")
+          .find((cell) => cell.textContent?.includes("Email"))
+        await userEvent.click(
+          within(emailHeader as HTMLElement).getByRole("button", {
+            name: "Sort",
+          })
+        )
+
+        expect(setCurrentSortings).toHaveBeenCalled()
+      })
     })
   })
 

@@ -4,49 +4,53 @@ import {
   formatDistanceToNowStrict,
   isToday,
   isYesterday,
+  type Locale,
   startOfDay,
   startOfMonth,
   startOfWeek,
   startOfYear,
 } from "date-fns"
 
-export function formatTime(date: Date) {
-  return format(date, "p")
+export function formatTime(date: Date, locale: Locale) {
+  return format(date, "p", { locale })
 }
 
 export function formatTime24Hours(date: Date) {
   return format(date, "HH:mm")
 }
 
-export function getAbbreviateMonth(date: Date) {
-  return format(date, "LLL")
+export function getAbbreviateMonth(date: Date, locale: Locale) {
+  return format(date, "LLL", { locale })
 }
 
 export function getDayOfMonth(date: Date) {
   return date.getDate()
 }
 
-export function getAgo(date: Date, addSuffix = true) {
-  return formatDistanceToNowStrict(date, { addSuffix })
+export function getAgo(date: Date, locale: Locale) {
+  return formatDistanceToNowStrict(date, { addSuffix: true, locale })
 }
 
 type GetDisplayDateBasedOnDurationOptions = {
+  locale: Locale
   yesterdayRelative?: boolean
 }
 
 export function getDisplayDateBasedOnDuration(
   date: Date,
-  { yesterdayRelative = true }: GetDisplayDateBasedOnDurationOptions = {}
+  { locale, yesterdayRelative = true }: GetDisplayDateBasedOnDurationOptions
 ) {
   if (isToday(date)) {
-    return getAgo(date)
+    return getAgo(date, locale)
   }
 
   if (isYesterday(date)) {
-    return yesterdayRelative ? getAgo(date) : format(date, "p")
+    return yesterdayRelative
+      ? getAgo(date, locale)
+      : format(date, "p", { locale })
   }
 
-  return format(date, "PPPp")
+  return format(date, "PPPp", { locale })
 }
 
 type DateGroup = "today" | "yesterday" | "lastWeek" | "lastMonth" | number

@@ -1,5 +1,4 @@
 import { format, isAfter, isBefore, isEqual } from "date-fns"
-import * as locales from "date-fns/locale"
 import { Matcher } from "react-day-picker"
 
 import { GranularityDefinition } from "./granularities"
@@ -18,13 +17,6 @@ export const formatToPlaceholder = (formatStr: string): string => {
     .replace(/yyyy/g, "yyyy") // Year → yyyy
     .replace(/I/g, "nn") // ISO week number → nn
     .replace(/Q/g, "n") // Quarter number → n
-}
-
-// Get the locale object from date-fns/locale
-
-export const getLocale = (localeKey: string) => {
-  const key = localeKey.split("-")[0] // Handle both 'es' and 'es-ES' formats
-  return locales[key as keyof typeof locales]
 }
 
 export const toDateRange = (

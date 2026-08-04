@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Icon } from "@/components/F0Icon"
 import {
   OneTable,
   TableBody,
@@ -26,9 +27,9 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { Add } from "@/icons/app"
+import { Add, MaximizeHorizontal, MinimizeHorizontal } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
@@ -50,7 +51,8 @@ import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
-import { useColumns } from "./hooks/useColums"
+import { getColumnId, useColumns } from "./hooks/useColums"
+import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
@@ -108,7 +110,8 @@ export const TableCollection = <
   allowColumnHiding,
   allowColumnReordering,
   referenceRowType,
-  headerGroupLabels,
+  headerGroups: headerGroupsOption,
+  onHeaderGroupCollapsedChange,
   bordered,
   rowWrapper: RowWrapper,
   cellRenderer,
@@ -147,12 +150,33 @@ export const TableCollection = <
   const { settings } = useDataCollectionSettings()
 
   // Sorted and hidden columns
-  const { columns } = useColumns(
+  const { columns: orderedColumns } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
     allowColumnHiding
+  )
+
+  // Header groups own the collapsed state and drop the columns hidden by a
+  // collapsed group, so everything downstream renders off `columns` unchanged.
+  const {
+    columns,
+    headerGroups,
+    toggleHeaderGroup,
+    collapsingCellClasses,
+    collapseTransitions,
+    settleHeaderGroup,
+  } = useHeaderGroups(orderedColumns, {
+    headerGroups: headerGroupsOption,
+    onCollapsedChange: onHeaderGroupCollapsedChange,
+  })
+
+  const tableContainerRef = useRef<HTMLDivElement>(null)
+  useColumnCollapseAnimation(
+    tableContainerRef,
+    collapseTransitions,
+    settleHeaderGroup
   )
 
   const {
@@ -340,8 +364,6 @@ export const TableCollection = <
     !!source.selectable
   )
 
-  const headerGroups = useHeaderGroups(columns, headerGroupLabels)
-
   const tableWithChildren = data?.records.some((item) =>
     source.itemsWithChildren?.(item)
   )
@@ -416,6 +438,7 @@ export const TableCollection = <
     <div className="flex h-full min-h-0 flex-col gap-4">
       <TableWrapper>
         <div
+          ref={tableContainerRef}
           className={cn(
             "min-h-0",
             bordered &&
@@ -440,22 +463,88 @@ export const TableCollection = <
                     </TableHead>
                   )}
                   {headerGroups.map((entry, entryIndex) => {
+                    // A collapsible group is clickable, so it keeps the cell's
+                    // hover highlight — the same one a sortable column header
+                    // shows. Everything else in this row is inert and opts out.
+                    const isClickable =
+                      entry.type === "group" && entry.collapsible
                     const borderClass = cn(
                       groupBorderClass,
-                      "hover:after:bg-transparent"
+                      !isClickable && "hover:after:bg-transparent"
                     )
+                    // The spanning label takes the alignment of the columns
+                    // under it, so it sits on the same edge as their content
+                    // instead of floating over the middle of the span.
+                    const align = entry.columnIndices.every(
+                      (columnIndex) => columns[columnIndex].align === "right"
+                    )
+                      ? "right"
+                      : "left"
                     return entry.type === "group" ? (
                       <TableHead
-                        align="right"
+                        align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
+                        // The toggle lives on the cell, not on the button, so
+                        // the whole header is the hit area. The button keeps
+                        // the focus ring and `aria-expanded` and lets its click
+                        // bubble up to here.
+                        onClick={
+                          entry.collapsible
+                            ? () => toggleHeaderGroup(entry.id)
+                            : undefined
+                        }
                         key={`header-group-${entry.id}-${entryIndex}`}
                       >
-                        {entry.label}
+                        {entry.collapsible ? (
+                          <button
+                            type="button"
+                            aria-expanded={!entry.collapsed}
+                            // Restates the header cell's own typography so the
+                            // label reads exactly like the non-collapsible
+                            // headers around it. The colour can't be left to
+                            // inherit: preflight is off and ress gives buttons
+                            // `font: inherit` but not `color`, so the label
+                            // would fall back to the UA buttontext and render
+                            // darker. `text-inherit` is no help either — the
+                            // theme replaces Tailwind's palette and has no
+                            // `inherit` key, so that utility doesn't exist.
+                            //
+                            // The colour holds on hover, label and icon alike:
+                            // the cell's own highlight is the affordance, and
+                            // darkening the text on top of it made a group
+                            // header look like a different kind of header from
+                            // the inert ones beside it.
+                            className={cn(
+                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary",
+                              // The icon takes the side the label is not
+                              // aligned to, so the label keeps its column's
+                              // edge instead of being pushed off it.
+                              align === "right" && "flex-row-reverse",
+                              focusRing()
+                            )}
+                          >
+                            <span className="truncate">{entry.label}</span>
+                            {/* Hints at the action, not the state: arrows out
+                                to open the group, in to shut it. Hidden from
+                                AT — `aria-expanded` conveys the state. */}
+                            <F0Icon
+                              aria-hidden="true"
+                              size="sm"
+                              icon={
+                                entry.collapsed
+                                  ? MaximizeHorizontal
+                                  : MinimizeHorizontal
+                              }
+                            />
+                          </button>
+                        ) : (
+                          entry.label
+                        )}
                       </TableHead>
                     ) : (
                       <TableHead
-                        align="right"
+                        align={align}
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}
@@ -549,7 +638,10 @@ export const TableCollection = <
                           isLastInGroup && groupBorderClass,
                           fromVisualization === "editableTable" &&
                             (index !== columns.length - 1 || showItemActions) &&
-                            "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                            "border-0 border-r-[1px] border-solid border-f1-border-secondary",
+                          collapsingCellClasses.get(
+                            getColumnId({ id: column.id, label })
+                          )
                         ) || undefined
                       }
                       onSortClick={
@@ -722,6 +814,7 @@ export const TableCollection = <
                                 rowWrapper={RowWrapper}
                                 cellRenderer={cellRenderer}
                                 headerGroups={headerGroups}
+                                collapsingCellClasses={collapsingCellClasses}
                                 fromVisualization={fromVisualization}
                                 registerSelectable={selectionRegistry.register}
                                 unregisterSelectable={
@@ -788,6 +881,7 @@ export const TableCollection = <
                       cellRenderer={cellRenderer}
                       fromVisualization={fromVisualization}
                       headerGroups={headerGroups}
+                      collapsingCellClasses={collapsingCellClasses}
                       registerSelectable={selectionRegistry.register}
                       unregisterSelectable={selectionRegistry.unregister}
                     />
@@ -872,7 +966,8 @@ export const TableCollection = <
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||
                                 showItemActions) &&
-                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary",
+                            collapsingCellClasses.get(getColumnId(column))
                           )}
                         >
                           {cellIndex === 0 &&

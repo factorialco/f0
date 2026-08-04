@@ -1,5 +1,118 @@
 # Changelog
 
+## [6.2.0](https://github.com/factorialco/f0/compare/f0-react-v6.1.0...f0-react-v6.2.0) (2026-08-04)
+
+
+### Features
+
+* **F0DataChart:** bar labels by default and stacked bar polish ([#4947](https://github.com/factorialco/f0/issues/4947)) ([ee591bc](https://github.com/factorialco/f0/commit/ee591bc9268ca8baa9cc478aa11a314915755f81))
+
+## [6.1.0](https://github.com/factorialco/f0/compare/f0-react-v6.0.0...f0-react-v6.1.0) (2026-08-04)
+
+
+### Features
+
+* **F0DataChart:** render text-only empty state ([#4946](https://github.com/factorialco/f0/issues/4946)) ([f722d8c](https://github.com/factorialco/f0/commit/f722d8c80b917d1f891ca90c2b9fe3a1fe5e92a8))
+
+## [6.0.0](https://github.com/factorialco/f0/compare/f0-react-v5.0.1...f0-react-v6.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **toast:** stabilize F0Toast + docs ([#4751](https://github.com/factorialco/f0/issues/4751))
+
+### Features
+
+* **toast:** stabilize F0Toast + docs ([#4751](https://github.com/factorialco/f0/issues/4751)) ([c3d809a](https://github.com/factorialco/f0/commit/c3d809a5831d75fd91ff3cc4319dc99d1f3b9846))
+
+## [5.0.1](https://github.com/factorialco/f0/compare/f0-react-v5.0.0...f0-react-v5.0.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **react:** resolve date-fns locale from L10nProvider ([#4969](https://github.com/factorialco/f0/issues/4969)) ([ba24f53](https://github.com/factorialco/f0/commit/ba24f539aa0f5fb0adb49c02ce1b4d15b93ba26c))
+
+## [5.0.0](https://github.com/factorialco/f0/compare/f0-react-v4.78.0...f0-react-v5.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884))
+
+### Features
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884)) ([c0c0c57](https://github.com/factorialco/f0/commit/c0c0c5780cf2b295849dda8db3b69734f6f9a91d))
+
+## [4.78.0](https://github.com/factorialco/f0/compare/f0-react-v4.77.0...f0-react-v4.78.0) (2026-08-04)
+
+
+### Features
+
+* **RichText:** support heading levels 4 to 6 and source indentation ([#4920](https://github.com/factorialco/f0/issues/4920)) ([d0342bc](https://github.com/factorialco/f0/commit/d0342bc3c14ee79ef1d374cea5f82a66f061742d))
+
+## [4.77.0](https://github.com/factorialco/f0/compare/f0-react-v4.76.0...f0-react-v4.77.0) (2026-08-04)
+
+
+### Features
+
+* **Cocreation:** add Training Surveys guided-type flow ([#4667](https://github.com/factorialco/f0/issues/4667)) ([aa0e3d0](https://github.com/factorialco/f0/commit/aa0e3d00efce39fe00cf0c99346224f5827cf4f3))
+
+## [4.76.0](https://github.com/factorialco/f0/compare/f0-react-v4.75.1...f0-react-v4.76.0) (2026-08-04)
+
+
+### Features
+
+* **F0AiMessagesContainer:** welcome screen caption and subtitle ([#4843](https://github.com/factorialco/f0/issues/4843)) ([7566b5e](https://github.com/factorialco/f0/commit/7566b5e545f5144c60a371a6e484b1c2fb749946))
+
+## [4.75.1](https://github.com/factorialco/f0/compare/f0-react-v4.75.0...f0-react-v4.75.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **DatePickerPopup:** render the calendar in the dialog container so its dropdowns stay clickable ([#4966](https://github.com/factorialco/f0/issues/4966)) ([18497ac](https://github.com/factorialco/f0/commit/18497acffca5764c1bc451276f4ccd3b7882efa3))
+
+## [4.75.0](https://github.com/factorialco/f0/compare/f0-react-v4.74.0...f0-react-v4.75.0) (2026-08-04)
+
+
+### Features
+
+* **SurveyFormBuilder:** add a 0-10 rating scale (FCT-59663) ([#4870](https://github.com/factorialco/f0/issues/4870)) ([c80eb59](https://github.com/factorialco/f0/commit/c80eb592bd464289339a21f823a8f286a202d594))
+
+## [4.74.0](https://github.com/factorialco/f0/compare/f0-react-v4.73.1...f0-react-v4.74.0) (2026-08-03)
+
+
+### Features
+
+* **RichText:** carry a font size on textStyle ([#4922](https://github.com/factorialco/f0/issues/4922)) ([bef4985](https://github.com/factorialco/f0/commit/bef49857991eb6275db4b693ab71f1983f47ee7d))
+
+## [4.73.1](https://github.com/factorialco/f0/compare/f0-react-v4.73.0...f0-react-v4.73.1) (2026-08-03)
+
+
+### Bug Fixes
+
+* **EditableTable:** allow overriding read-only cellHint icon position ([#4924](https://github.com/factorialco/f0/issues/4924)) ([3c8986d](https://github.com/factorialco/f0/commit/3c8986dba984a995aa5ffed5f3a584dc29ae4268))
+
+## [4.73.0](https://github.com/factorialco/f0/compare/f0-react-v4.72.3...f0-react-v4.73.0) (2026-08-03)
+
+
+### Features
+
+* **Card:** default the header link to a ghost appearance ([#4770](https://github.com/factorialco/f0/issues/4770)) ([49207c5](https://github.com/factorialco/f0/commit/49207c52a4a36a25aa90e3a0c506419558c8531c))
+
+## [4.72.3](https://github.com/factorialco/f0/compare/f0-react-v4.72.2...f0-react-v4.72.3) (2026-08-03)
+
+
+### Bug Fixes
+
+* **SectionHeader:** draw the separator with a 3px/4px dash ([#4941](https://github.com/factorialco/f0/issues/4941)) ([448d338](https://github.com/factorialco/f0/commit/448d33885838663f82e5a9b3c92e375ca66a3d27))
+
+## [4.72.2](https://github.com/factorialco/f0/compare/f0-react-v4.72.1...f0-react-v4.72.2) (2026-08-03)
+
+
+### Bug Fixes
+
+* **a11y:** [FCT-59951] remove axe rule suppressions and gate future ones ([#4866](https://github.com/factorialco/f0/issues/4866)) ([8252657](https://github.com/factorialco/f0/commit/8252657e31cd43bb1f835729e4270ac82c3336a4))
+
 ## [4.72.1](https://github.com/factorialco/f0/compare/f0-react-v4.72.0...f0-react-v4.72.1) (2026-07-31)
 
 

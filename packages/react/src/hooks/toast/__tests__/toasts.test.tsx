@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   act,
+  fireEvent,
   screen,
   waitFor,
   zeroRender as render,
@@ -234,7 +235,7 @@ describe("toasts API", () => {
       vi.useRealTimers()
     })
 
-    it("auto-dismisses a non-persistent toast after its duration", async () => {
+    it("auto-dismisses an action-less toast after 5s, not 10s", async () => {
       renderProvider()
 
       act(() => {
@@ -242,13 +243,122 @@ describe("toasts API", () => {
       })
       expect(screen.getByText("Temporary")).toBeInTheDocument()
 
-      // Default lifetime is 10s; advance past it.
+      // Still there just before 5s (would already be gone if the default were
+      // shorter; would linger to 10s under the old default).
       act(() => {
-        vi.advanceTimersByTime(10_100)
+        vi.advanceTimersByTime(4_800)
       })
+      expect(screen.getByText("Temporary")).toBeInTheDocument()
 
+      // Gone just after 5s.
+      act(() => {
+        vi.advanceTimersByTime(400)
+      })
       await waitFor(() =>
         expect(screen.queryByText("Temporary")).not.toBeInTheDocument()
+      )
+    })
+
+    it("gives a toast with an action a 10s window", async () => {
+      renderProvider()
+
+      act(() => {
+        toasts.open({
+          title: "Undo me",
+          actions: { type: "button", label: "Undo", onClick: () => {} },
+        })
+      })
+      expect(screen.getByText("Undo me")).toBeInTheDocument()
+
+      // Alive past the 5s action-less default...
+      act(() => {
+        vi.advanceTimersByTime(5_100)
+      })
+      expect(screen.getByText("Undo me")).toBeInTheDocument()
+
+      // ...and gone by 10s.
+      act(() => {
+        vi.advanceTimersByTime(5_000)
+      })
+      await waitFor(() =>
+        expect(screen.queryByText("Undo me")).not.toBeInTheDocument()
+      )
+    })
+
+    it("restarts the countdown when a toast resolves in place on the same id", async () => {
+      renderProvider()
+
+      // Open a toast and let it run down to almost nothing.
+      act(() => {
+        toasts.open({ id: "sync", variant: "success", title: "Saved" })
+      })
+      act(() => {
+        vi.advanceTimersByTime(4_800)
+      })
+
+      // Resolve in place to a SAME-duration variant (both 5s, no action). The
+      // replacement must get a fresh 5s, not inherit the ~200ms that was left.
+      act(() => {
+        toasts.open({ id: "sync", variant: "error", title: "Failed" })
+      })
+      expect(screen.getByText("Failed")).toBeInTheDocument()
+
+      // Past when the old timer would have fired — it must still be here.
+      act(() => {
+        vi.advanceTimersByTime(1_000)
+      })
+      expect(screen.getByText("Failed")).toBeInTheDocument()
+
+      // Dismisses ~5s after IT appeared.
+      act(() => {
+        vi.advanceTimersByTime(4_300)
+      })
+      await waitFor(() =>
+        expect(screen.queryByText("Failed")).not.toBeInTheDocument()
+      )
+    })
+
+    it("holds a hovered toast paused across an in-place resolve, resuming on leave", async () => {
+      renderProvider()
+
+      act(() => {
+        toasts.open({ id: "op", variant: "error", title: "Failed to send" })
+      })
+      // Hover the toast root → pauses its timer. (The critical avatar also has
+      // role="alert", so target the root via the title's closest alert.)
+      act(() => {
+        const root = screen
+          .getByText("Failed to send")
+          .closest('[role="alert"]')
+        fireEvent.mouseEnter(root as HTMLElement)
+      })
+
+      // Resolve in place while still hovered: error → loading → success.
+      act(() => {
+        toasts.open({ id: "op", variant: "loading", title: "Retrying…" })
+      })
+      act(() => {
+        toasts.open({ id: "op", variant: "success", title: "Sent" })
+      })
+      expect(screen.getByText("Sent")).toBeInTheDocument()
+
+      // Still hovered → paused → does NOT dismiss even past its duration (pause is
+      // tracked from live hover, so it survives the in-place update).
+      act(() => {
+        vi.advanceTimersByTime(6_000)
+      })
+      expect(screen.getByText("Sent")).toBeInTheDocument()
+
+      // Mouse leaves → the countdown resumes and the toast dismisses.
+      act(() => {
+        const root = screen.getByText("Sent").closest("[role]")
+        fireEvent.mouseLeave(root as HTMLElement)
+      })
+      act(() => {
+        vi.advanceTimersByTime(5_200)
+      })
+      await waitFor(() =>
+        expect(screen.queryByText("Sent")).not.toBeInTheDocument()
       )
     })
 
