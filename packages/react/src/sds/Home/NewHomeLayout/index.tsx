@@ -231,12 +231,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           else if (ref) ref.current = node
         }}
         className={cn(
-          "relative grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
+          "relative grid grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
           hasSide &&
             "md:[grid-template-columns:minmax(0,1fr)_var(--home-aside-w)]",
           className
         )}
-        style={{ "--home-aside-w": `${railWidth}px` } as CSSProperties}
+        style={
+          {
+            "--home-aside-w": `${railWidth}px`,
+            // Fill the viewport MINUS the gutter this layout is inset by, so the
+            // page itself never gains a scrollbar for the padding around it —
+            // each column scrolls inside instead.
+            height: `calc(100svh - ${2 * bleed}px)`,
+          } as CSSProperties
+        }
       >
         {/* ONE full-bleed surface for the WHOLE page, under BOTH columns: the
             gradient reaches `bleed` past every edge, so it runs to the window
