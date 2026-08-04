@@ -160,6 +160,8 @@ export type GraphVisualizationOptions<
    * Whether clicking a node flies to it (centers + zooms in close), passed
    * through to F0Graph. Defaults to `true` — pass `false` for a static camera on
    * click (selection still happens). Re-centers on every click, even a repeat.
+   * The fly starts a beat after the click so it picks up a `viewportInset` set in
+   * response to that same click (a side panel opening).
    */
   centerOnNodeClick?: boolean
   /**

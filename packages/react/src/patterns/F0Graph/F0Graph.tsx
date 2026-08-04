@@ -140,6 +140,11 @@ export interface F0GraphProps<T = unknown> {
    *
    * Re-fires on **every** click, including a click on the already-selected node,
    * so a click after panning away always re-centers.
+   *
+   * The fly starts a beat after the click (the same settle delay the reveal path
+   * uses) so it can see a `viewportInset` the click itself brought in — the usual
+   * case, where clicking a node is what opens the side panel. A second click
+   * within that window supersedes the first.
    */
   centerOnNodeClick?: boolean
   /**

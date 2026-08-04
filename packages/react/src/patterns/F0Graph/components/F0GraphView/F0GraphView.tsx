@@ -582,10 +582,36 @@ export function F0GraphView<T = unknown>(
   // Click handler shared by both selection paths: select the node, then (unless
   // opted out) fly to it. Kept out of `selectNode` itself so keyboard navigation
   // — which also calls `selectNode` — never moves the camera.
+  //
+  // The fly is deferred by the same settle delay the `focusedNode` path uses,
+  // because the consumer's side panel usually opens *as a result of* this click:
+  // its `viewportInset` only reaches us on a later render, so flying synchronously
+  // would read an empty inset and center on the full canvas — the very case the
+  // inset exists for — and the panel would then open over the node.
+  const nodeClickFlyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  useEffect(
+    () => () => {
+      if (nodeClickFlyTimerRef.current) {
+        clearTimeout(nodeClickFlyTimerRef.current)
+      }
+    },
+    []
+  )
+
   const handleNodeClick = useCallback(
     (id: string) => {
       selectNode(id)
-      if (centerOnNodeClick) flyToNodeClickRef.current(id)
+      if (!centerOnNodeClick) return
+      // A second click supersedes a still-pending fly rather than queueing both.
+      if (nodeClickFlyTimerRef.current) {
+        clearTimeout(nodeClickFlyTimerRef.current)
+      }
+      nodeClickFlyTimerRef.current = setTimeout(
+        () => flyToNodeClickRef.current(id),
+        FOCUS_SETTLE_DELAY_MS
+      )
     },
     [selectNode, centerOnNodeClick]
   )
