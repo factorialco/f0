@@ -551,6 +551,11 @@ const e = {
       controls: "← → to move",
       escToExit: "Esc to exit"
     },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss"
+    },
     attachFile: "Attach file",
     recordAudio: "Record audio",
     listening: "Listening…",
