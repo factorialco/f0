@@ -34,9 +34,8 @@ import { HomeListItem } from "./HomeListItem"
  * placement.
  */
 
-/** Context threaded into every slot renderer so it can wire navigation. */
+/** Context threaded into every slot renderer. */
 export interface HomeRenderCtx {
-  navigate?: (to: string) => void
   /**
    * Whether this slot is the LAST one in its widget. `SlotWidget` sets it per
    * slot; row-based slots use it to keep their bottom bleed (see
@@ -89,9 +88,9 @@ export interface ListSchema {
   /** Every row carries a second line — this is what makes rows two-line. */
   descriptionRequired?: boolean
   /**
-   * How rows respond: `"link"` rows each carry an `href` (navigated via
-   * `ctx.navigate`), `"onClick"` rows each carry a handler. Omit for inert
-   * rows.
+   * How rows respond: `"link"` rows each carry an `href` and render as REAL
+   * anchors (role `link`, routed through the app's `LinkProvider` — never an
+   * onClick), `"onClick"` rows each carry a handler. Omit for inert rows.
    */
   clickBehavior?: "link" | "onClick"
   /**
@@ -166,12 +165,6 @@ export type AvatarListParams = Omit<
   Extract<F0AvatarListProps, { type: "person" }>,
   "type"
 >
-
-/** A row's click handler: navigate to its `href`, however the app navigates. */
-const go = (ctx: HomeRenderCtx, href?: string) =>
-  href
-    ? () => (ctx.navigate ? ctx.navigate(href) : window.location.assign(href))
-    : undefined
 
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
 export interface HomeWidgetSlot {
@@ -359,13 +352,8 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             unread={row.unread}
             {...listLeft(schema.left, row, avatarSize)}
             right={listRight(schema.right, row)}
-            onClick={
-              schema.clickBehavior === "link"
-                ? go(ctx, href)
-                : schema.clickBehavior === "onClick"
-                  ? onClick
-                  : undefined
-            }
+            href={schema.clickBehavior === "link" ? href : undefined}
+            onClick={schema.clickBehavior === "onClick" ? onClick : undefined}
           />
         )
         return compact && description ? (

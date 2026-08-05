@@ -4,6 +4,7 @@ import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronRight } from "@/icons/app"
+import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
 /**
@@ -37,6 +38,12 @@ export interface HomeListItemProps {
   right?: ReactNode
   /** An accent dot on the left slot's corner — unseen/pending. */
   unread?: boolean
+  /**
+   * Renders the row as a REAL link — an anchor with this href (role `link`,
+   * middle-click, copy address), routed through the app's `LinkProvider`.
+   * Wins over `onClick`.
+   */
+  href?: string
   onClick?: () => void
   /** Defaults to whether the row is clickable. */
   showChevron?: boolean
@@ -51,8 +58,9 @@ export function HomeListItem({
   description,
   right,
   unread = false,
+  href,
   onClick,
-  showChevron = onClick != null,
+  showChevron = href != null || onClick != null,
 }: HomeListItemProps) {
   const leading =
     left ?? (avatar ? <F0Avatar avatar={avatar} size={avatarSize} /> : null)
@@ -95,11 +103,15 @@ export function HomeListItem({
 
   const className = cn(
     "flex w-full items-center gap-3 rounded-md p-2 text-left",
-    onClick &&
+    (href || onClick) &&
       "cursor-pointer hover:bg-f1-background-tertiary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
   )
 
-  return onClick ? (
+  return href ? (
+    <Link href={href} className={cn(className, "no-underline")}>
+      {content}
+    </Link>
+  ) : onClick ? (
     <button type="button" className={className} onClick={onClick}>
       {content}
     </button>

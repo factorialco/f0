@@ -57,14 +57,14 @@ listSlot(
 
 ### The schema
 
-| Field                 | Values                                                                                                         | Effect on items                                                             |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `left`                | any avatar type (`person`, `team`, `company`, `file`, `flag`, `emoji`, `icon`), `module`, `alert` — or omitted | each row supplies that kind's data (`avatar`, `module`, or `alert`)         |
-| `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`) |
-| `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                      |
-| `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                         |
-| `clickBehavior`       | `"link"` \| `"onClick"` — or omitted for inert rows                                                            | every row carries an `href` (navigated via `ctx.navigate`) or an `onClick`  |
-| `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom |
+| Field                 | Values                                                                                                         | Effect on items                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `left`                | any avatar type (`person`, `team`, `company`, `file`, `flag`, `emoji`, `icon`), `module`, `alert` — or omitted | each row supplies that kind's data (`avatar`, `module`, or `alert`)                        |
+| `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`)                |
+| `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                                     |
+| `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                        |
+| `clickBehavior`       | `"link"` \| `"onClick"` — or omitted for inert rows                                                            | every row carries an `href` (a REAL anchor, routed through `LinkProvider`) or an `onClick` |
+| `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom                |
 
 Rows may also carry `unread` for the accent dot on the left glyph.
 

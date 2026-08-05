@@ -370,8 +370,8 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   },
   // External navigation, both flavors: the header's link carries a real `url`
   // (an anchor, opened by the browser), and every row's `href` is an outside
-  // website — rows go through `ctx.navigate` when the app provides one and
-  // fall back to a plain location change, so external URLs just work.
+  // website — link rows render as REAL anchors (via the app's LinkProvider),
+  // so external URLs just work.
   {
     id: "resources",
     icon: Globe,

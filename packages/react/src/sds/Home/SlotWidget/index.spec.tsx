@@ -191,12 +191,10 @@ describe("list slot schema", () => {
     expect(screen.getByText("Detail 0")).toBeInTheDocument()
   })
 
-  test("link rows navigate through ctx.navigate; onClick rows call their handler", async () => {
-    const navigate = vi.fn()
+  test("link rows are REAL anchors with the href; onClick rows are buttons", async () => {
     const onClick = vi.fn()
     zeroRender(
       <SlotWidget
-        ctx={{ navigate }}
         slots={[
           listSlot({ clickBehavior: "link" }, [
             { id: "1", title: "Barcelona", href: "/bcn" },
@@ -208,8 +206,11 @@ describe("list slot schema", () => {
       />
     )
 
-    await userEvent.click(screen.getByRole("button", { name: "Barcelona" }))
-    expect(navigate).toHaveBeenCalledWith("/bcn")
+    // No onClick navigation: the row IS a link, href and all.
+    expect(screen.getByRole("link", { name: "Barcelona" })).toHaveAttribute(
+      "href",
+      "/bcn"
+    )
 
     await userEvent.click(screen.getByRole("button", { name: "Start timer" }))
     expect(onClick).toHaveBeenCalled()
