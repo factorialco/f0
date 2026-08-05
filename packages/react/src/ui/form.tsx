@@ -63,7 +63,13 @@ const useFormField = () => {
     throw new Error("useFormField should be used within <FormField>")
   }
 
-  const { id } = itemContext
+  const {
+    id,
+    hasDescription,
+    registerDescription,
+    hasMessage,
+    registerMessage,
+  } = itemContext
 
   return {
     id,
@@ -71,12 +77,29 @@ const useFormField = () => {
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
+    hasDescription,
+    registerDescription,
+    hasMessage,
+    registerMessage,
     ...fieldState,
   }
 }
 
 type FormItemContextValue = {
   id: string
+  /**
+   * Whether a `FormDescription` / `FormMessage` is actually mounted in this
+   * item. `FormControl` used to reference both ids unconditionally, but both
+   * render conditionally (`FormDescription` only with `helpText`,
+   * `FormMessage` returns null with no body), so every field without help text
+   * shipped an `aria-describedby` pointing at a nonexistent element — a
+   * WCAG 2.0 SC 1.3.1 / 4.1.2 defect that axe only reports as *incomplete*
+   * (`aria-valid-attr-value`), so CI never caught it.
+   */
+  hasDescription: boolean
+  registerDescription: (present: boolean) => void
+  hasMessage: boolean
+  registerMessage: (present: boolean) => void
 }
 
 const FormItemContext = React.createContext<FormItemContextValue>(
@@ -88,9 +111,22 @@ const FormItem = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
   const id = React.useId()
+  const [hasDescription, registerDescription] = React.useState(false)
+  const [hasMessage, registerMessage] = React.useState(false)
+
+  const value = React.useMemo(
+    () => ({
+      id,
+      hasDescription,
+      registerDescription,
+      hasMessage,
+      registerMessage,
+    }),
+    [id, hasDescription, hasMessage]
+  )
 
   return (
-    <FormItemContext.Provider value={{ id }}>
+    <FormItemContext.Provider value={value}>
       <div ref={ref} className={cn("space-y-2", className)} {...props} />
     </FormItemContext.Provider>
   )
@@ -118,17 +154,27 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const {
+    error,
+    formItemId,
+    formDescriptionId,
+    formMessageId,
+    hasDescription,
+    hasMessage,
+  } = useFormField()
+
+  // Only reference ids that are actually in the DOM — see the note on
+  // `FormItemContextValue`. Omit the attribute entirely when neither is.
+  const describedBy =
+    [hasDescription && formDescriptionId, hasMessage && formMessageId]
+      .filter(Boolean)
+      .join(" ") || undefined
 
   return (
     <Slot
       ref={ref}
       id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
+      aria-describedby={describedBy}
       aria-invalid={!!error}
       {...props}
     />
@@ -140,7 +186,12 @@ const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
-  const { formDescriptionId } = useFormField()
+  const { formDescriptionId, registerDescription } = useFormField()
+
+  React.useEffect(() => {
+    registerDescription?.(true)
+    return () => registerDescription?.(false)
+  }, [registerDescription])
 
   return (
     <p
@@ -160,12 +211,20 @@ interface FormMessageProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const FormMessage = React.forwardRef<HTMLDivElement, FormMessageProps>(
   ({ className, children, fallback, ...props }, ref) => {
-    const { error, formMessageId } = useFormField()
+    const { error, formMessageId, registerMessage } = useFormField()
     const { forms } = useI18n()
     // Use fallback message when error exists but message is undefined
     const body = error
       ? (error.message ?? fallback ?? forms.validation.invalidType)
       : children
+
+    // Registered from the rendered/not-rendered outcome, not from mounting —
+    // this component returns null whenever `body` is empty.
+    const present = !!body
+    React.useEffect(() => {
+      registerMessage?.(present)
+      return () => registerMessage?.(false)
+    }, [registerMessage, present])
 
     if (!body) {
       return null
