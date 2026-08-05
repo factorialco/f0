@@ -176,3 +176,34 @@ describe("TableHead rich header info", () => {
     ).not.toBeInTheDocument()
   })
 })
+
+describe("TableHead and TableCell focused", () => {
+  it("emphasizes only the focused header and cell, and marks the header for scroll targeting", () => {
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead focused>Email</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>John</TableCell>
+            <TableCell focused>john@example.com</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    const [plainHead, focusedHead] = screen.getAllByRole("columnheader")
+    expect(focusedHead.className).toMatch(/bg-f1-background-secondary/)
+    expect(focusedHead).toHaveAttribute("data-focused", "true")
+    expect(plainHead.className).not.toMatch(/bg-f1-background-secondary/)
+    expect(plainHead).not.toHaveAttribute("data-focused")
+
+    const [plainCell, focusedCell] = screen.getAllByRole("cell")
+    expect(focusedCell.className).toMatch(/bg-f1-background-secondary/)
+    expect(plainCell.className).not.toMatch(/bg-f1-background-secondary/)
+  })
+})

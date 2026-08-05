@@ -88,6 +88,16 @@ export type TableColumnDefinition<
     noHiding?: boolean
 
     /**
+     * Visually focuses the column: its header and cells render with a subtle
+     * gray background, and the spanning header of its group (if any) is
+     * emphasized too. Only one column may be focused — when several columns
+     * set this, the first one (in definition order) wins and the rest are
+     * ignored. Combine with the `scrollToFocusedColumn` visualization option
+     * to also scroll the table to this column.
+     */
+    focused?: boolean
+
+    /**
      * Avoid removing the column by the user. Only relevant when the
      * visualization sets `onRemoveColumn`; the per-row trash affordance in the
      * settings popover is hidden for this column. Mirrors `noHiding`.
@@ -219,6 +229,15 @@ export type TableVisualizationOptions<
    * Useful for embedding the table inside panels or detail views.
    */
   bordered?: boolean
+
+  /**
+   * When true and a column is `focused`, the table scrolls horizontally to
+   * bring that column into view — once the data has loaded, and again if the
+   * focused column changes. Frozen columns stay visible: the scroll offset
+   * accounts for their width.
+   * @default false
+   */
+  scrollToFocusedColumn?: boolean
 }
 
 export type TableCollectionProps<

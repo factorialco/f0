@@ -378,6 +378,216 @@ describe("TableCollection", () => {
       expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
+    it("applies the focused background to the focused column's header and cells", async () => {
+      const columnsWithFocused = [
+        { label: "name", render: (item: Person) => item.name },
+        { label: "email", render: (item: Person) => item.email, focused: true },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithFocused}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailHeader).toHaveAttribute("data-focused", "true")
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+
+      const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
+      expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
+
+      const nameCell = screen.getAllByText(testData[0].name)[0].closest("td")
+      expect(nameCell?.className).not.toMatch(/bg-f1-background-secondary/)
+    })
+
+    it("keeps only the first focused column and warns when several are focused", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      const columnsWithFocused = [
+        { label: "name", render: (item: Person) => item.name, focused: true },
+        { label: "email", render: (item: Person) => item.email, focused: true },
+      ]
+
+      try {
+        render(
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={columnsWithFocused}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        )
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+        })
+
+        expect(warn).toHaveBeenCalledWith(
+          "Only one column can be focused: keeping the first focused column and ignoring the rest"
+        )
+
+        const nameHeader = screen.getByRole("columnheader", { name: "name" })
+        expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
+
+        const emailHeader = screen.getByRole("columnheader", { name: "email" })
+        expect(emailHeader.className).not.toMatch(/bg-f1-background-secondary/)
+      } finally {
+        warn.mockRestore()
+      }
+    })
+
+    it("highlights the spanning header of the focused column's group", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          headerGroupId: "identity",
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+          focused: true,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ identity: "Identity", contact: "Contact" }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const contactGroupHeader = screen.getByRole("columnheader", {
+        name: "Contact",
+      })
+      expect(contactGroupHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const identityGroupHeader = screen.getByRole("columnheader", {
+        name: "Identity",
+      })
+      expect(identityGroupHeader.className).not.toMatch(
+        /bg-f1-background-secondary/
+      )
+    })
+
+    it("scrolls the table to the focused column when scrollToFocusedColumn is set", async () => {
+      const scrollTo = vi.fn()
+      const originalScrollTo = HTMLElement.prototype.scrollTo
+      HTMLElement.prototype.scrollTo = scrollTo
+
+      // jsdom applies no stylesheets, so the scroll container's `overflow-auto`
+      // utility class has to be surfaced through getComputedStyle by hand.
+      const originalGetComputedStyle = window.getComputedStyle
+      const computedStyleSpy = vi
+        .spyOn(window, "getComputedStyle")
+        .mockImplementation((element) => {
+          const style = originalGetComputedStyle(element as Element)
+          if ((element as HTMLElement).classList?.contains("overflow-auto")) {
+            return { ...style, overflow: "auto" } as CSSStyleDeclaration
+          }
+          return style
+        })
+
+      // jsdom reports offsetLeft as 0 for every element; give the focused
+      // header a real horizontal position so the scroll target is meaningful.
+      Object.defineProperty(HTMLTableCellElement.prototype, "offsetLeft", {
+        configurable: true,
+        get() {
+          return this.dataset?.focused ? 500 : 0
+        },
+      })
+
+      const columnsWithFocused = [
+        { label: "name", render: (item: Person) => item.name, width: 100 },
+        { label: "email", render: (item: Person) => item.email, focused: true },
+      ]
+
+      try {
+        render(
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={columnsWithFocused}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+            frozenColumns={1}
+            scrollToFocusedColumn
+          />
+        )
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+        })
+
+        // The frozen "name" column is 100px wide, so the 500px target lands at 400.
+        await waitFor(() => {
+          expect(scrollTo).toHaveBeenCalledWith(
+            expect.objectContaining({ left: 400 })
+          )
+        })
+      } finally {
+        HTMLElement.prototype.scrollTo = originalScrollTo
+        computedStyleSpy.mockRestore()
+        delete (
+          HTMLTableCellElement.prototype as unknown as Record<string, unknown>
+        ).offsetLeft
+      }
+    })
+
     it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
       const groupedColumns = [
         {

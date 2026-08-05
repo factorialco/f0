@@ -54,6 +54,7 @@ import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { getColumnId, useColumns } from "./hooks/useColums"
 import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
+import { useScrollToFocusedColumn } from "./hooks/useScrollToFocusedColumn"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
@@ -113,6 +114,7 @@ export const TableCollection = <
   headerGroups: headerGroupsOption,
   onHeaderGroupCollapsedChange,
   bordered,
+  scrollToFocusedColumn = false,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
@@ -149,9 +151,28 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
+  // Only one column may be focused: the first focused column (in definition
+  // order) wins and the rest are ignored.
+  const normalizedColumns = useMemo(() => {
+    const focusedIndex = originalColumns.findIndex((column) => column.focused)
+    const extraFocused = originalColumns.some(
+      (column, index) => column.focused && index !== focusedIndex
+    )
+    if (!extraFocused) return originalColumns
+
+    console.warn(
+      "Only one column can be focused: keeping the first focused column and ignoring the rest"
+    )
+    return originalColumns.map((column, index) =>
+      index === focusedIndex || !column.focused
+        ? column
+        : { ...column, focused: false }
+    )
+  }, [originalColumns])
+
   // Sorted and hidden columns
   const { columns: orderedColumns } = useColumns(
-    originalColumns,
+    normalizedColumns,
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
@@ -364,6 +385,19 @@ export const TableCollection = <
     !!source.selectable
   )
 
+  const focusedColumn = columns.find((column) => column.focused)
+  useScrollToFocusedColumn(tableContainerRef, {
+    enabled: scrollToFocusedColumn,
+    focusedColumnId: focusedColumn ? getColumnId(focusedColumn) : undefined,
+    stickyOffset: columns
+      .slice(0, frozenColumnsLeft)
+      .reduce(
+        (acc, column) => acc + (column.width ?? column.minWidth ?? 0),
+        checkColumnWidth
+      ),
+    ready: !isInitialLoading,
+  })
+
   const tableWithChildren = data?.records.some((item) =>
     source.itemsWithChildren?.(item)
   )
@@ -485,6 +519,9 @@ export const TableCollection = <
                         align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
+                        focused={entry.columnIndices.some(
+                          (columnIndex) => columns[columnIndex].focused
+                        )}
                         // The toggle lives on the cell, not on the button, so
                         // the whole header is the hit area. The button keeps
                         // the focus ring and `aria-expanded` and lets its click
@@ -548,6 +585,7 @@ export const TableCollection = <
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}
+                        focused={!!columns[entry.columnIndices[0]].focused}
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
@@ -962,6 +1000,7 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          focused={!!column.focused}
                           className={cn(
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||

@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, waitFor, within } from "storybook/test"
 import { useState, useMemo } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -8,10 +8,10 @@ import {
   CompoundTone,
 } from "@/ui/value-display/types/compound"
 
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { ItemActionsDefinition } from "../../../item-actions"
 import { OneDataCollection } from "../../../index"
+import { ItemActionsDefinition } from "../../../item-actions"
+import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/Table",
@@ -122,6 +122,105 @@ export const TableFrozenColsWithMinWidth: Story = {
     expect(emailTd && getComputedStyle(emailTd).position).toBe("sticky")
     expect(nameTd && getComputedStyle(nameTd).left).toBe("0px")
     expect(emailTd && getComputedStyle(emailTd).left).toBe("200px")
+  },
+}
+
+export const TableWithFocusedColumn: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A column can be visually focused with the `focused` column option: its header and cells render with a subtle gray background. Only one column may be focused — when several set it, the first one wins. Pair it with the `scrollToFocusedColumn` visualization option to scroll the table horizontally to that column once the data loads.",
+      },
+    },
+  },
+  render: () => {
+    const records = Array.from({ length: 6 }, (_, i) => ({
+      id: i + 1,
+      name: `Person ${i + 1}`,
+      jan: 10 * (i + 1),
+      feb: 12 * (i + 1),
+      mar: 14 * (i + 1),
+      apr: 16 * (i + 1),
+      may: 18 * (i + 1),
+      jun: 20 * (i + 1),
+      jul: 22 * (i + 1),
+      // Odd values, unique in the table (every other column is even), so the
+      // play function can target a focused cell unambiguously.
+      aug: 24 * (i + 1) + 1,
+      sep: 26 * (i + 1),
+      oct: 28 * (i + 1),
+      nov: 30 * (i + 1),
+      dec: 32 * (i + 1),
+    }))
+
+    const monthColumns = [
+      ["jan", "Jan"],
+      ["feb", "Feb"],
+      ["mar", "Mar"],
+      ["apr", "Apr"],
+      ["may", "May"],
+      ["jun", "Jun"],
+      ["jul", "Jul"],
+      ["aug", "Aug"],
+      ["sep", "Sep"],
+      ["oct", "Oct"],
+      ["nov", "Nov"],
+      ["dec", "Dec"],
+    ] as const
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+    })
+
+    return (
+      <div style={{ maxWidth: 700 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 1,
+                scrollToFocusedColumn: true,
+                columns: [
+                  {
+                    id: "name",
+                    label: "Name",
+                    width: 160,
+                    render: (item) => item.name,
+                  },
+                  ...monthColumns.map(([key, label]) => ({
+                    id: key,
+                    label,
+                    width: 110,
+                    align: "right" as const,
+                    focused: key === "aug",
+                    render: (item: (typeof records)[number]) => item[key],
+                  })),
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const focusedHeader = (await canvas.findByText("Aug")).closest("th")
+
+    expect(focusedHeader?.dataset.focused).toBe("true")
+    expect(focusedHeader?.className).toContain("bg-f1-background-secondary")
+
+    const focusedCell = (await canvas.findByText("25")).closest("td")
+    expect(focusedCell?.className).toContain("bg-f1-background-secondary")
+
+    // The table auto-scrolls to the focused column (smooth scroll, so it may
+    // still be on its way when the assertions start).
+    const scroller =
+      focusedHeader?.closest("table")?.parentElement?.parentElement
+    await waitFor(() => expect(scroller?.scrollLeft ?? 0).toBeGreaterThan(0))
   },
 }
 
