@@ -27,6 +27,7 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  DEFAULT_NODE_WINDOW_PADDING,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
@@ -384,10 +385,10 @@ export function useGraphRenderModel<T>({
   ])
 
   // ── Node-array windowing ──
-  // Ids that have ever been materialized into React Flow. Once a node has been
-  // rendered (seen + hydrated), we keep it in the window so it never re-enters
-  // React Flow un-measured on a later pan — see the sticky union below.
-  const seenWindowedIdsRef = useRef<Set<string>>(new Set())
+  // The previous commit's windowed id set, used for the release hysteresis
+  // below (a node is only dropped once it leaves a margin larger than the one
+  // that added it).
+  const prevWindowedIdsRef = useRef<Set<string>>(new Set())
 
   // Ids of the LAYOUT nodes (graph pills + expanders) whose box intersects the
   // padded viewport. `null` means "no windowing" (feature off, or viewport not
@@ -401,19 +402,44 @@ export function useGraphRenderModel<T>({
   // pan/zoom on large graphs: without it every pan cell-crossing and every
   // zoom-level change would rebuild an object per visible node.
   const windowedIds = useMemo((): Set<string> | null => {
-    if (!enableNodeWindowing || !viewportRect) return null
+    if (!enableNodeWindowing || !viewportRect) {
+      prevWindowedIdsRef.current = new Set()
+      return null
+    }
     const fallbackWidth = nodeWidthProp ?? 256
+
+    // Asymmetric release hysteresis. A node is ADDED as soon as it enters the
+    // padded viewport, but is only RELEASED once it leaves a larger margin
+    // (`viewportRect` grown by `release`). Without this, a node hovering on the
+    // window boundary flip-flops in/out on every pan cell-crossing; React Flow
+    // drops the edges touching any node re-added un-measured, so a node you can
+    // still see blinks disconnected ("connections get lost while panning"). The
+    // retained band is bounded (it never exceeds the release rect), so per-frame
+    // work stays ~O(on-screen) — FPS is preserved and never-seen parts of a flat
+    // or deep tree stay windowed out and un-hydrated. Nodes panned well past the
+    // release margin are dropped as before; a visible node's line to an
+    // off-window ancestor is instead guaranteed by the ancestry walk below.
+    const release = nodeWindowPadding ?? DEFAULT_NODE_WINDOW_PADDING
+    const keepRect = {
+      minX: viewportRect.minX - release,
+      minY: viewportRect.minY - release,
+      maxX: viewportRect.maxX + release,
+      maxY: viewportRect.maxY + release,
+    }
+    const prev = prevWindowedIdsRef.current
+
     const ids = new Set<string>()
     for (const pn of layout.nodes) {
-      if (
-        nodeIntersectsRect(
-          pn.x,
-          pn.y,
-          pn.width || fallbackWidth,
-          pn.height || effectiveNodeHeight,
-          viewportRect
-        )
+      const w = pn.width || fallbackWidth
+      const h = pn.height || effectiveNodeHeight
+      if (nodeIntersectsRect(pn.x, pn.y, w, h, viewportRect)) {
+        ids.add(pn.id)
+      } else if (
+        prev.has(pn.id) &&
+        nodeIntersectsRect(pn.x, pn.y, w, h, keepRect)
       ) {
+        // Retained: was in the window last commit and hasn't left the release
+        // margin yet — keep it (and its measurement) so its edges don't drop.
         ids.add(pn.id)
       }
     }
@@ -436,28 +462,12 @@ export function useGraphRenderModel<T>({
       }
     }
 
-    // ── Sticky window ──
-    // Keep every node we have already materialized so it never re-enters React
-    // Flow un-measured on a later pan. When a node is re-added un-measured, React
-    // Flow can't resolve the endpoints of the edges touching it and drops them
-    // from the DOM for that commit — so a node you have ALREADY seen connected
-    // flickers/goes disconnected while panning (the "connections get lost"
-    // report). Only nodes actually seen are retained, so never-seen parts of a
-    // flat or deep tree stay windowed out and un-hydrated — the whole point of
-    // windowing. The set is pruned to ids still present in the current layout so
-    // it can't grow unbounded or resurrect collapsed nodes; it grows only with
-    // the region the user has actually looked at.
-    const layoutIds = new Set(layout.nodes.map((pn) => pn.id))
-    for (const seenId of seenWindowedIdsRef.current) {
-      if (layoutIds.has(seenId)) ids.add(seenId)
-      else seenWindowedIdsRef.current.delete(seenId)
-    }
-    for (const id of ids) seenWindowedIdsRef.current.add(id)
-
+    prevWindowedIdsRef.current = ids
     return ids
   }, [
     enableNodeWindowing,
     viewportRect,
+    nodeWindowPadding,
     layout.nodes,
     nodeWidthProp,
     effectiveNodeHeight,
