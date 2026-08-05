@@ -2,49 +2,40 @@ import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { type CSSProperties, useEffect, useState } from "react"
 
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { Reaction } from "@/icons/app"
 import { EmojiPicker } from "@/lib/EmojiPicker"
-import { EmojiImage, type EmojiImageProps } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import type { F0EmojiPickerProps, F0EmojiPickerSize } from "./types"
+import type { F0EmojiPickerProps } from "./types"
 
 const EMOJI_BUTTON_SIZE = 36
 const EMOJI_BUTTON_RADIUS = "10px"
 const EMOJI_SIZE = 24
 const MAX_FREQUENT_ROWS = 2
-const TRIGGER_CLASSES = {
-  sm: "rounded-sm",
-  md: "rounded-md",
-  lg: "rounded-lg",
-}
-const SELECTED_AVATAR_CLASSES = {
-  sm: "size-6 rounded-sm",
-  md: "size-8 rounded",
-  lg: "size-10 rounded-md",
-}
-const SELECTED_EMOJI_SIZES: Record<F0EmojiPickerSize, EmojiImageProps["size"]> =
-  {
-    sm: "xs",
-    md: "sm",
-    lg: "md",
-  }
+
+const LIGHT_SURFACE_STYLE = {
+  "--neutral-0": "0 0% 100%",
+  "--neutral-5": "220 88% 17% / 0.04",
+  "--neutral-10": "216 89% 18% / 0.06",
+  "--neutral-20": "214 70% 20% / 0.1",
+  "--neutral-30": "213 87% 15% / 0.2",
+  "--neutral-40": "219 97% 15% / 0.45",
+  "--neutral-100": "218 48% 10%",
+} as CSSProperties
+
 const EMOJI_PICKER_STYLE = {
+  ...LIGHT_SURFACE_STYLE,
   "--background-rgb": "255, 255, 255",
   "--border-radius": "12px",
   "--category-icon-size": "20px",
-  "--color-border-over": "hsl(var(--neutral-10))",
-  "--color-border": "hsl(var(--neutral-10))",
   "--font-size": "14px",
   "--rgb-accent": "1, 22, 55",
   "--rgb-background": "255, 255, 255",
   "--rgb-color": "1, 22, 55",
   "--rgb-input": "255, 255, 255",
-  "--shadow": "0px 4px 20px 0px #0d162514",
 } as CSSProperties
 
 export const F0EmojiPicker = ({
@@ -81,49 +72,38 @@ export const F0EmojiPicker = ({
     setIsOpen(false)
   }
 
+  const hasClearAction = clearable && Boolean(selectedEmoji)
+
   return (
     <Popover
       open={!disabled && isOpen}
       onOpenChange={disabled ? undefined : setIsOpen}
     >
       <PopoverTrigger asChild>
-        <button
-          type="button"
+        <F0Button
+          emoji={selectedEmoji ?? undefined}
+          label={label}
           aria-label={selectedEmoji ? `${label}: ${selectedEmoji}` : label}
-          title={label}
+          variant="outline"
+          size={size}
+          hideLabel
           disabled={disabled}
-          className={cn(
-            "disabled:cursor-not-allowed disabled:opacity-30",
-            TRIGGER_CLASSES[size],
-            focusRing()
-          )}
-        >
-          {selectedEmoji ? (
-            <div
-              className={cn(
-                "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary",
-                SELECTED_AVATAR_CLASSES[size]
-              )}
-            >
-              <EmojiImage
-                emoji={selectedEmoji}
-                size={SELECTED_EMOJI_SIZES[size]}
-                alt=""
-              />
-            </div>
-          ) : (
-            <F0AvatarIcon icon={Reaction} size={size} />
-          )}
-        </button>
+          icon={!selectedEmoji ? Reaction : undefined}
+        />
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
+        collisionPadding={16}
         aria-label={label}
         style={EMOJI_PICKER_STYLE}
-        className="flex h-[min(500px,var(--radix-popover-content-available-height))] w-fit flex-col !overflow-hidden border-none bg-transparent p-2 shadow-none [&>div:first-child]:min-h-0 [&>div:first-child]:flex-1 [&>div:first-child]:overflow-hidden [&_em-emoji-picker]:!h-full [&_em-emoji-picker]:!w-[372px] [&_em-emoji-picker]:!max-w-[calc(100vw-32px)] [&_em-emoji-picker]:!max-h-[min(451px,calc(100vh-81px))]"
+        className="flex w-fit flex-col !overflow-y-auto rounded-md border-none p-0 shadow-none [&>div:first-child]:min-h-0 [&>div:first-child]:overflow-hidden [&_em-emoji-picker]:!h-full [&_em-emoji-picker]:!min-h-0 [&_em-emoji-picker]:!max-h-[min(451px,calc(100vh-81px))] [&_em-emoji-picker]:!w-[372px] [&_em-emoji-picker]:!max-w-[calc(100vw-32px)] [@media(max-height:320px)]:[&>div:first-child]:!min-h-[230px] [@media(max-height:320px)]:[&_em-emoji-picker]:!min-h-[230px]"
       >
         <EmojiPicker
+          className={cn(
+            "box-border border border-solid border-f1-border-secondary shadow-none [--color-border-over:rgba(1,22,55,0.2)] [--color-border:rgba(1,22,55,0.08)] [--shadow:none]",
+            hasClearAction && "rounded-b-none border-b-0"
+          )}
           data={data}
           onEmojiSelect={handleEmojiSelect}
           locale={locale}
@@ -140,11 +120,14 @@ export const F0EmojiPicker = ({
           navPosition="top"
           dynamicWidth
         />
-        {clearable && selectedEmoji ? (
-          <div className="flex shrink-0 justify-end border-0 border-t border-solid border-[#e5e7eb] bg-white pt-2 [&_button]:!text-[#011637] [&_button:hover]:!bg-[#f5f6f8]">
+        {hasClearAction ? (
+          <div
+            className="flex items-center justify-end rounded-b-md border border-solid border-f1-border-secondary border-t-f1-border-secondary p-2 [@media(max-height:320px)]:px-1 [@media(max-height:320px)]:py-0"
+            style={LIGHT_SURFACE_STYLE}
+          >
             <F0Button
               label={i18n.actions.clear}
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleClear}
             />
