@@ -477,7 +477,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                       </span>
                     )}
                     {widget.hasUpdates ? (
-                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold" />
+                      // Same dot HomeListItem draws for unread rows — the ring
+                      // keeps it legible over any glyph.
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
                     ) : null}
                   </span>
                 </button>

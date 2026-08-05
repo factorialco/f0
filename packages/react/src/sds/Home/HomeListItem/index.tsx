@@ -63,7 +63,9 @@ export function HomeListItem({
         <div className="relative shrink-0">
           {leading}
           {unread ? (
-            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold" />
+            // The ring guarantees contrast against any glyph under the dot
+            // (e.g. the Communities module's red).
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
           ) : null}
         </div>
       ) : null}
