@@ -17,7 +17,9 @@ import {
   Clock,
   Comment,
   Envelope,
+  ExternalLink,
   File,
+  Globe,
   PalmTree,
   Person,
   Receipt,
@@ -364,6 +366,40 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     },
     slots: [
       homeSlot("event-list", { showAllItems: true, events: RAIL_EVENTS }),
+    ],
+  },
+  // External navigation, both flavors: the header's link carries a real `url`
+  // (an anchor, opened by the browser), and every row's `href` is an outside
+  // website — rows go through `ctx.navigate` when the app provides one and
+  // fall back to a plain location change, so external URLs just work.
+  {
+    id: "resources",
+    icon: Globe,
+    header: {
+      title: "Resources",
+      link: { title: "factorial.co", url: "https://factorial.co" },
+    },
+    slots: [
+      listSlot({ left: "icon", clickBehavior: "link" }, [
+        {
+          id: "handbook",
+          title: "Employee handbook",
+          avatar: { icon: File },
+          href: "https://factorial.co/employee-handbook",
+        },
+        {
+          id: "mdn",
+          title: "MDN Web Docs",
+          avatar: { icon: Globe },
+          href: "https://developer.mozilla.org",
+        },
+        {
+          id: "status",
+          title: "Factorial status page",
+          avatar: { icon: ExternalLink },
+          href: "https://status.factorial.co",
+        },
+      ]),
     ],
   },
 ]
