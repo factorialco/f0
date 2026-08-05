@@ -151,56 +151,58 @@ const FeedSection = ({
   </div>
 )
 
-const MainColumn = () => (
-  <>
-    <Greeting />
-    <ShortcutCards />
-    <FeedSection
-      label="Needs you"
-      viewMore={12}
-      rows={[
-        {
-          icon: PalmTree,
-          title: "Request time off",
-          subtitle: "You have 5 days of leave expiring next month.",
-        },
-        {
-          icon: Clock,
-          title: "Missing clock-out",
-          subtitle: "You clocked in but never clocked out yesterday.",
-        },
-        {
-          icon: Receipt,
-          title: "Submit an expense",
-          subtitle: "Snap a receipt and I'll file the expense.",
-        },
-        {
-          icon: Comment,
-          title: "Ask HR anything",
-          subtitle: "Get a policy answer, or have it raised with HR.",
-        },
-        {
-          icon: Target,
-          title: "Draft my self-review",
-          subtitle: "Turn your bullet points into review-ready text.",
-        },
-        { icon: File, title: "Contract to sign", subtitle: "Q3 addendum" },
-      ]}
-    />
-    <FeedSection
-      label="One working for you"
-      rows={[
-        {
-          icon: One,
-          unread: true,
-          title: "Parental leave policy",
-          subtitle: "Answer ready with sources",
-          tag: <F0TagStatus text="Answer ready" variant="positive" />,
-        },
-      ]}
-    />
-  </>
-)
+// An ARRAY, not a fragment: the layout inserts pinned widgets BETWEEN these
+// blocks when it stacks, and `Children.toArray` only sees seams in an array.
+const mainColumnBlocks = () => [
+  <Greeting key="greeting" />,
+  <ShortcutCards key="shortcuts" />,
+  <FeedSection
+    key="needs-you"
+    label="Needs you"
+    viewMore={12}
+    rows={[
+      {
+        icon: PalmTree,
+        title: "Request time off",
+        subtitle: "You have 5 days of leave expiring next month.",
+      },
+      {
+        icon: Clock,
+        title: "Missing clock-out",
+        subtitle: "You clocked in but never clocked out yesterday.",
+      },
+      {
+        icon: Receipt,
+        title: "Submit an expense",
+        subtitle: "Snap a receipt and I'll file the expense.",
+      },
+      {
+        icon: Comment,
+        title: "Ask HR anything",
+        subtitle: "Get a policy answer, or have it raised with HR.",
+      },
+      {
+        icon: Target,
+        title: "Draft my self-review",
+        subtitle: "Turn your bullet points into review-ready text.",
+      },
+      { icon: File, title: "Contract to sign", subtitle: "Q3 addendum" },
+    ]}
+  />,
+  <FeedSection
+    key="one-working"
+    label="One working for you"
+    rows={[
+      {
+        icon: One,
+        unread: true,
+        title: "Parental leave policy",
+        subtitle: "Answer ready with sources",
+        tag: <F0TagStatus text="Answer ready" variant="positive" />,
+      },
+    ]}
+  />,
+]
 
 /* ================================ side rail ================================ */
 
@@ -472,7 +474,7 @@ const Home = () => {
           setOpen(true)
         }}
       >
-        <MainColumn />
+        {mainColumnBlocks()}
       </NewHomeLayout>
       <WidgetCatalog
         isOpen={open}

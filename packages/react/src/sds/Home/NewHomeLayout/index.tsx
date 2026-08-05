@@ -1,6 +1,8 @@
 import {
+  Children,
   type CSSProperties,
   forwardRef,
+  Fragment,
   ReactNode,
   useLayoutEffect,
   useRef,
@@ -106,6 +108,12 @@ export interface NewHomeLayoutProps {
    * stopping at that padding.
    */
   bleed?: number
+  /**
+   * When the layout stacks (below `md` there is no rail), how many leading
+   * blocks of `children` come before the pinned widgets folded in from it.
+   * Defaults to 2 — a greeting and the shortcuts under it.
+   */
+  stackedPinsAfter?: number
   ctx?: HomeRenderCtx
   className?: string
 }
@@ -145,6 +153,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       asideWidth = 396,
       mainWidth = 800,
       bleed = 24,
+      stackedPinsAfter = 2,
       ctx = {},
       className,
     },
@@ -222,6 +231,33 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
 
+    // STACKED (below `md`): there is no rail at all, not even the strip — the
+    // window is too narrow to spend 40px on a column. The rail's widgets fold
+    // into the main column instead: the PINNED ones near the top, where a
+    // mandatory widget belongs, and the rest at the very bottom.
+    const stacked = rootWidth > 0 && rootWidth < TWO_COLUMN_MIN_PX
+    const loosePins = {
+      pinned: stacked ? rightWidgets.filter((widget) => widget.locked) : [],
+      rest: stacked ? rightWidgets.filter((widget) => !widget.locked) : [],
+    }
+    // The pins go BETWEEN blocks of `children` — after `stackedPinsAfter` of
+    // them — because "just under the shortcuts" is a place inside content this
+    // layout doesn't own. Splitting the children is the only way to reach it.
+    const stackedChildren = !stacked
+      ? children
+      : (() => {
+          const blocks = Children.toArray(children)
+          return (
+            <>
+              {blocks.slice(0, stackedPinsAfter)}
+              {loosePins.pinned.map((widget) => (
+                <Fragment key={widget.id}>{render(widget)}</Fragment>
+              ))}
+              {blocks.slice(stackedPinsAfter)}
+            </>
+          )
+        })()
+
     const openWidget = collapsed
       ? rightWidgets.find((widget) => widget.id === openId)
       : undefined
@@ -267,8 +303,12 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // lost the specificity contest and the rail silently fell out of its
             // column. A COLLAPSED rail is a column at any width — a 40px strip
             // always fits; an expanded one waits until there is room for both.
+            // `!stacked` first: stacked renders no rail at all, so reserving its
+            // column would leave an empty strip down the side.
             gridTemplateColumns:
-              hasSide && (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
+              hasSide &&
+              !stacked &&
+              (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
                 ? `minmax(0, 1fr) ${railWidth}px`
                 : "minmax(0, 1fr)",
           } as CSSProperties
@@ -372,7 +412,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             side="main"
             className="relative mx-auto w-full"
             style={{ maxWidth: `${mainWidth}px` }}
-            widgets={leftWidgets}
+            widgets={
+              stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets
+            }
             slotRenderers={slotRenderers}
             renderWidget={renderWidget}
             ctx={ctx}
@@ -390,10 +432,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 : undefined
             }
           >
-            {children}
+            {stackedChildren}
           </WidgetContainer>
         </div>
-        {hasSide ? (
+        {stacked ? null : hasSide ? (
           collapsed ? (
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
