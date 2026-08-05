@@ -529,6 +529,16 @@ export function useGraphRenderModel<T>({
           y: (pos?.y ?? 0) * yStretch,
         },
         width: BASE_W,
+        height: BASE_H,
+        // Seed the measured size from the layout so React Flow can route this
+        // node's edges on the SAME commit it is added, instead of waiting for
+        // its ResizeObserver. Without it, a node that windowing pans into view
+        // is handed to React Flow un-measured for one commit; edges touching it
+        // resolve to a null position and are dropped from the DOM that frame, so
+        // connecting lines flicker/vanish while panning a large or deep tree
+        // (the on-screen node stays, its reporting line disappears). The real
+        // DOM measurement still runs and overwrites this with the exact size.
+        measured: { width: BASE_W, height: BASE_H },
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
