@@ -58,9 +58,6 @@ const F0AiChatProviderComponent = ({
   entityRefs,
   canvasActions,
   canvasEntities,
-  credits,
-  employeeCredits,
-  creditWarning,
   fileAttachments,
   onTranscribe,
   onThumbsUp,
@@ -95,9 +92,6 @@ const F0AiChatProviderComponent = ({
       entityRefs={entityRefs}
       canvasActions={canvasActions}
       canvasEntities={canvasEntities}
-      credits={credits}
-      employeeCredits={employeeCredits}
-      creditWarning={creditWarning}
       fileAttachments={fileAttachments}
       onTranscribe={onTranscribe}
     >

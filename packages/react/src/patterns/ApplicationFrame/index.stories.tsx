@@ -21,7 +21,6 @@ import {
   New,
   Pencil,
   Search,
-  Sliders,
   Comment,
 } from "@/icons/app"
 import * as Icons from "@/icons/app"
@@ -46,7 +45,6 @@ import {
   type UploadedFile,
   type VacancyProfile,
 } from "@/kits/ai/F0AiChat/types"
-import { F0AiChatCreditsButton } from "@/kits/ai/F0AiChatHeader"
 import {
   ThreadItem,
   ThreadListSkeleton,
@@ -381,24 +379,6 @@ const mockExpenseResolver = (id: string): Promise<ExpenseProfile> =>
   })
 
 /**
- * Mock fetchCreditsUsage — simulates a 500ms API call returning usage data.
- */
-const mockFetchCreditsUsage = () =>
-  new Promise<{ used: number; total: number }>((resolve) => {
-    setTimeout(() => resolve({ used: 750, total: 1000 }), 500)
-  })
-
-/**
- * Mock fetchEmployeeCreditsUsage — same shape as above but used by the
- * employee-only popover. Smaller monthly allocation to reflect the
- * per-employee variant.
- */
-const mockFetchEmployeeCreditsUsage = () =>
-  new Promise<{ used: number; total: number }>((resolve) => {
-    setTimeout(() => resolve({ used: 50, total: 250 }), 500)
-  })
-
-/**
  * Mock file upload handler for Storybook.
  * Simulates a 1-second upload and returns metadata with a fake URL.
  */
@@ -629,23 +609,6 @@ const meta = {
           vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
           requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
         },
-      },
-      credits: {
-        fetchUsage: mockFetchCreditsUsage,
-        upgradePlanUrl: "https://example.com/upgrade",
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
-      },
-      // When both are set the employee-only popover wins (see
-      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
-      // stays as a documented fallback for hosts that haven't opted into
-      // per-employee allocations.
-      employeeCredits: {
-        fetchUsage: mockFetchEmployeeCreditsUsage,
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
       },
       welcomeScreenSuggestions: [
         {
@@ -956,7 +919,7 @@ export const CommunicationsGroupAvatarFallback: Story = {
 
 /**
  * The standalone AI assistant: no communications sidebar, the chat docked on the
- * right as a resizable side panel, with the full feature set (credits, file
+ * right as a resizable side panel, with the full feature set (file
  * attachments, dictation, entity refs, disclaimer + quick actions footer).
  */
 export const WithAiAssistant: Story = {
@@ -1007,23 +970,6 @@ export const WithAiAssistant: Story = {
           vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
           requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
         },
-      },
-      credits: {
-        fetchUsage: mockFetchCreditsUsage,
-        upgradePlanUrl: "https://example.com/upgrade",
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
-      },
-      // When both are set the employee-only popover wins (see
-      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
-      // stays as a documented fallback for hosts that haven't opted into
-      // per-employee allocations.
-      employeeCredits: {
-        fetchUsage: mockFetchEmployeeCreditsUsage,
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
       },
       fileAttachments: {
         onUploadFiles: mockUploadFiles,
@@ -1277,14 +1223,7 @@ const OneHistoryTab = ({
 }: { forceEmpty?: boolean } = {}) => {
   const { fetchThreads, deleteThread, loadThread, clear, currentThreadId } =
     useMockAiChatRuntime()
-  const {
-    clearPanelContent,
-    setOpen,
-    open,
-    panelContent,
-    credits,
-    employeeCredits,
-  } = useAiChat()
+  const { clearPanelContent, setOpen, open, panelContent } = useAiChat()
   // Demo-only: an empty history to showcase the blank state.
   const fetchEmpty = useCallback(async () => [], [])
   const {
@@ -1383,24 +1322,11 @@ const OneHistoryTab = ({
           items: conversations.map((t) => toItem(t, false)),
         },
       ]}
-      // New chat + Settings as one action stack. Both use the panel's standard
-      // ghost button; Settings just wraps it as the credits popover trigger.
       actions={[
         {
           label: "New AI chat",
           icon: New,
           onClick: startNewChat,
-        },
-        {
-          label: "Settings",
-          icon: Sliders,
-          render: (trigger) => (
-            <F0AiChatCreditsButton
-              credits={credits}
-              employeeCredits={employeeCredits}
-              trigger={trigger}
-            />
-          ),
         },
       ]}
     />

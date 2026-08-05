@@ -1,7 +1,6 @@
 import type { ReactNode, RefObject } from "react"
 
 import type {
-  AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
   PendingContext,
@@ -61,9 +60,6 @@ export type F0AiChatTextAreaProps = {
 
   /** Rotating placeholders for the typewriter effect. Empty/single-entry skips the typewriter. */
   placeholders?: string[]
-
-  /** Credit warning banner shown above the composer. */
-  creditWarning?: AiChatCreditWarning
 
   /**
    * Optional ReactNode rendered in place of the input. When present the

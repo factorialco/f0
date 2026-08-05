@@ -12,7 +12,6 @@ import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
-import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
 import { MentionPopover } from "./components/MentionPopover"
 import { PendingQuoteChip } from "./components/PendingQuoteChip"
 import { TextareaField } from "./components/TextareaField"
@@ -66,7 +65,6 @@ export const F0AiChatTextArea = ({
   inProgress,
   onBeforeSubmit,
   placeholders,
-  creditWarning,
   clarifyingUI,
   pendingContext = null,
   onPendingContextChange,
@@ -381,186 +379,184 @@ export const F0AiChatTextArea = ({
     >
       <div className="flex w-full max-w-content flex-col gap-2">
         {suggestionsRow && <div>{suggestionsRow}</div>}
-        <CreditWarningWrapper creditWarning={creditWarning}>
-          <motion.form
-            aria-busy={inProgress}
-            ref={formRef}
-            className={cn(
-              "relative isolate z-20",
-              "flex flex-col items-stretch md:gap-3 gap-2",
-              "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-background-tertiary",
-              "transition-all hover:cursor-text",
-              "p-0",
-              "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
-              "before:rounded-[inherit] before:bg-f1-background before:content-['']",
-              "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
-              "after:rounded-md after:blur-[6px] after:content-['']",
-              "after:scale-90 after:opacity-0",
-              "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-              "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-              "after:transition-all after:delay-200 after:duration-300",
-              "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-              isClarifying &&
-                "after:scale-100 after:opacity-100 border-f1-background-tertiary"
-            )}
-            animate={{
-              "--gradient-angle": ["0deg", "360deg"],
-            }}
-            transition={{
-              duration: 6,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            style={
-              {
-                "--gradient-angle": "180deg",
-              } as React.CSSProperties
+        <motion.form
+          aria-busy={inProgress}
+          ref={formRef}
+          className={cn(
+            "relative isolate z-20",
+            "flex flex-col items-stretch md:gap-3 gap-2",
+            "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-background-tertiary",
+            "transition-all hover:cursor-text",
+            "p-0",
+            "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
+            "before:rounded-[inherit] before:bg-f1-background before:content-['']",
+            "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
+            "after:rounded-md after:blur-[6px] after:content-['']",
+            "after:scale-90 after:opacity-0",
+            "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
+            "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
+            "after:transition-all after:delay-200 after:duration-300",
+            "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
+            isClarifying &&
+              "after:scale-100 after:opacity-100 border-f1-background-tertiary"
+          )}
+          animate={{
+            "--gradient-angle": ["0deg", "360deg"],
+          }}
+          transition={{
+            duration: 6,
+            ease: "linear",
+            repeat: Infinity,
+          }}
+          style={
+            {
+              "--gradient-angle": "180deg",
+            } as React.CSSProperties
+          }
+          onClick={() => {
+            if (!isClarifying) {
+              textareaRef.current?.focus()
             }
-            onClick={() => {
-              if (!isClarifying) {
-                textareaRef.current?.focus()
-              }
-            }}
-            onSubmit={handleSubmit}
-          >
-            <MentionPopover
-              isOpen={mentions.isOpen}
-              results={mentions.results}
-              isLoading={mentions.isLoading}
-              selectedIndex={mentions.selectedIndex}
-              position={mentions.popoverPosition}
-              onSelect={mentions.selectPerson}
-            />
+          }}
+          onSubmit={handleSubmit}
+        >
+          <MentionPopover
+            isOpen={mentions.isOpen}
+            results={mentions.results}
+            isLoading={mentions.isLoading}
+            selectedIndex={mentions.selectedIndex}
+            position={mentions.popoverPosition}
+            onSelect={mentions.selectPerson}
+          />
 
-            <AnimatePresence initial={false}>
-              {isClarifying ? (
-                <motion.div
-                  key="clarifying"
-                  className="overflow-hidden"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{
-                    height: 0,
-                    opacity: 0,
-                    transition: {
-                      duration: shouldReduceMotion ? 0 : 0.22,
-                      ease: [0.4, 0, 1, 1],
-                    },
-                  }}
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : 0.4,
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                >
-                  {clarifyingUI}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="input"
-                  className="overflow-hidden"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{
-                    height: 0,
-                    opacity: 0,
-                    transition: {
-                      duration: shouldReduceMotion ? 0 : 0.15,
-                      ease: [0.55, 0, 1, 0.45],
-                    },
-                  }}
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : 0.4,
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                >
-                  {pendingQuote && (
-                    <PendingQuoteChip
-                      quote={pendingQuote}
-                      onRemove={() => onPendingQuoteChange?.(null)}
-                    />
-                  )}
+          <AnimatePresence initial={false}>
+            {isClarifying ? (
+              <motion.div
+                key="clarifying"
+                className="overflow-hidden"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: {
+                    duration: shouldReduceMotion ? 0 : 0.22,
+                    ease: [0.4, 0, 1, 1],
+                  },
+                }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.4,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+              >
+                {clarifyingUI}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="input"
+                className="overflow-hidden"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: {
+                    duration: shouldReduceMotion ? 0 : 0.15,
+                    ease: [0.55, 0, 1, 0.45],
+                  },
+                }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.4,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+              >
+                {pendingQuote && (
+                  <PendingQuoteChip
+                    quote={pendingQuote}
+                    onRemove={() => onPendingQuoteChange?.(null)}
+                  />
+                )}
 
-                  <AnimatePresence initial={false}>
-                    {transientError && (
-                      <motion.div
-                        key="transient-error"
-                        role="alert"
-                        aria-live="polite"
-                        className="p-1"
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{
-                          duration: shouldReduceMotion ? 0 : 0.2,
-                          ease: "easeOut",
-                        }}
+                <AnimatePresence initial={false}>
+                  {transientError && (
+                    <motion.div
+                      key="transient-error"
+                      role="alert"
+                      aria-live="polite"
+                      className="p-1"
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{
+                        duration: shouldReduceMotion ? 0 : 0.2,
+                        ease: "easeOut",
+                      }}
+                    >
+                      <div
+                        className={cn(
+                          "flex w-full flex-row items-center gap-2 rounded-md p-2 pr-3",
+                          "bg-f1-background-critical text-f1-foreground"
+                        )}
                       >
-                        <div
-                          className={cn(
-                            "flex w-full flex-row items-center gap-2 rounded-md p-2 pr-3",
-                            "bg-f1-background-critical text-f1-foreground"
-                          )}
-                        >
-                          <div className="h-6 w-6 flex-shrink-0">
-                            <F0AvatarAlert type="critical" size="sm" />
-                          </div>
-                          <p className="font-medium text-f1-foreground-critical">
-                            {transientError}
-                          </p>
+                        <div className="h-6 w-6 flex-shrink-0">
+                          <F0AvatarAlert type="critical" size="sm" />
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        <p className="font-medium text-f1-foreground-critical">
+                          {transientError}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                  <AttachedFilesList
-                    attachedFiles={attachedFiles}
-                    isUploading={isUploading}
-                    onRemove={handleRemoveFile}
-                    removeLabel={translation.ai.removeFile}
-                  />
+                <AttachedFilesList
+                  attachedFiles={attachedFiles}
+                  isUploading={isUploading}
+                  onRemove={handleRemoveFile}
+                  removeLabel={translation.ai.removeFile}
+                />
 
-                  <TextareaField
-                    textareaRef={textareaRef}
-                    highlightRef={highlightRef}
-                    inputValue={inputValue}
-                    onInputChange={(value, cursorPos) => {
-                      setInputValue(value)
-                      setCursorPosition(cursorPos)
-                    }}
-                    onKeyDown={handleKeyDown}
-                    onCursorUpdate={updateCursorPosition}
-                    onScroll={syncHighlightScroll}
-                    highlightSegments={highlightSegments}
-                    hasOverlay={hasOverlay}
-                    multiplePlaceholders={multiplePlaceholders}
-                    placeholders={effectivePlaceholders}
-                    resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
-                    inProgress={inProgress}
-                  />
+                <TextareaField
+                  textareaRef={textareaRef}
+                  highlightRef={highlightRef}
+                  inputValue={inputValue}
+                  onInputChange={(value, cursorPos) => {
+                    setInputValue(value)
+                    setCursorPosition(cursorPos)
+                  }}
+                  onKeyDown={handleKeyDown}
+                  onCursorUpdate={updateCursorPosition}
+                  onScroll={syncHighlightScroll}
+                  highlightSegments={highlightSegments}
+                  hasOverlay={hasOverlay}
+                  multiplePlaceholders={multiplePlaceholders}
+                  placeholders={effectivePlaceholders}
+                  resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
+                  inProgress={inProgress}
+                />
 
-                  <ActionBar
-                    onUploadFiles={onUploadFiles}
-                    toolbarStart={toolbarStart}
-                    isAtMaxFiles={isAtMaxFiles}
-                    maxFiles={maxFiles}
-                    acceptValue={acceptValue}
-                    fileInputRef={fileInputRef}
-                    handleFileSelect={handleFileSelect}
-                    inProgress={inProgress}
-                    hasDataToSend={hasDataToSend}
-                    isPreSending={isPreSending || pendingSubmit}
-                    canRecord={canRecord}
-                    recordingStatus={recorder.status}
-                    recordingStream={recorder.stream}
-                    onStartRecording={handleStartRecording}
-                    onStopRecording={recorder.stop}
-                    onCancelRecording={handleCancelRecording}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.form>
-        </CreditWarningWrapper>
+                <ActionBar
+                  onUploadFiles={onUploadFiles}
+                  toolbarStart={toolbarStart}
+                  isAtMaxFiles={isAtMaxFiles}
+                  maxFiles={maxFiles}
+                  acceptValue={acceptValue}
+                  fileInputRef={fileInputRef}
+                  handleFileSelect={handleFileSelect}
+                  inProgress={inProgress}
+                  hasDataToSend={hasDataToSend}
+                  isPreSending={isPreSending || pendingSubmit}
+                  canRecord={canRecord}
+                  recordingStatus={recorder.status}
+                  recordingStream={recorder.stream}
+                  onStartRecording={handleStartRecording}
+                  onStopRecording={recorder.stop}
+                  onCancelRecording={handleCancelRecording}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.form>
       </div>
 
       {showWelcomeCards && (

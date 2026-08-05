@@ -421,15 +421,6 @@ export const defaultTranslations = {
         status: "Status",
       },
     },
-    credits: {
-      title: "Credits",
-      employeeCredits: "Your credits",
-      creditsLeft: "{{total}} left",
-      monthlyCredits: "Monthly credits",
-      creditsError: "Could not load credits",
-      upgradePlan: "Upgrade",
-      needMoreCredits: "Need more credits?",
-    },
     reportCard: {
       tableLabel: "Table",
       openButton: "Open",
@@ -461,11 +452,6 @@ export const defaultTranslations = {
       goal: "Goal",
       controls: "← → to move",
       escToExit: "Esc to exit",
-    },
-    creditWarning: {
-      soft: "You're running low on AI credits.",
-      getCredits: "Get credits",
-      dismiss: "Dismiss",
     },
     attachFile: "Attach file",
     recordAudio: "Record audio",

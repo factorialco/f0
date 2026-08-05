@@ -18,7 +18,6 @@ import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
-  AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
   F0AiChatWelcomeCard,
@@ -94,12 +93,6 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
   },
   allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
   maxFiles: 3,
-}
-
-const CREDIT_WARNING: AiChatCreditWarning = {
-  level: "soft",
-  onGetCredits: () => console.log("get credits clicked"),
-  onDismiss: () => console.log("dismiss clicked"),
 }
 
 const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
@@ -220,7 +213,6 @@ type WrapperProps = {
   initialPendingContext?: PendingContext | null
   initialPendingQuote?: PendingQuote | null
   clarifyingQuestion?: ClarifyingQuestionState | null
-  creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
@@ -239,7 +231,6 @@ const Wrapper = ({
   initialPendingContext = null,
   initialPendingQuote = null,
   clarifyingQuestion = null,
-  creditWarning,
   disclaimer,
   footer,
   welcomeScreenSuggestions,
@@ -293,7 +284,6 @@ const Wrapper = ({
         onStop={() => console.log("stop")}
         inProgress={inProgress}
         placeholders={placeholders}
-        creditWarning={creditWarning}
         clarifyingUI={
           clarifyingQuestion ? (
             <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
@@ -497,12 +487,6 @@ export const InProgress: Story = {
   },
 }
 
-export const WithCreditWarning: Story = {
-  args: {
-    creditWarning: CREDIT_WARNING,
-  },
-}
-
 export const WithPendingContext: Story = {
   args: {
     initialPendingContext: PENDING_CONTEXT,
@@ -587,7 +571,6 @@ export const Everything: Story = {
     fileAttachments: FILE_UPLOAD_CONFIG,
     onTranscribe: mockTranscribe,
     searchPersons: mockSearchPersons,
-    creditWarning: CREDIT_WARNING,
     disclaimer: DISCLAIMER,
     initialPendingContext: PENDING_CONTEXT,
     initialPendingQuote: PENDING_QUOTE,

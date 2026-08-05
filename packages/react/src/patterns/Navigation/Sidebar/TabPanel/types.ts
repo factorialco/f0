@@ -14,7 +14,7 @@ export type SidebarTabPanelAction = {
   onClick?: () => void
   /**
    * Wrap the default ghost button (received as `button`) in custom chrome —
-   * e.g. a popover/credits trigger. Return the wrapped node. The button keeps
+   * e.g. a popover trigger. Return the wrapped node. The button keeps
    * the standard action design; only its surroundings change.
    */
   render?: (button: ReactNode) => ReactNode

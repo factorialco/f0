@@ -39,8 +39,6 @@ export const MockConnectedChatHeader = ({
     setVisualizationMode,
     lockVisualizationMode,
     tracking,
-    credits,
-    employeeCredits,
   } = useAiChat()
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const fullscreen = visualizationMode === "fullscreen"
@@ -96,8 +94,6 @@ export const MockConnectedChatHeader = ({
         onNewChat={handleNewChat}
         onOpenHistory={() => setIsHistoryOpen(true)}
         hasMessages={hasMessages}
-        credits={credits}
-        employeeCredits={employeeCredits}
       />
       {isHistoryOpen && historyEnabled && (
         <MockChatHistoryDialog

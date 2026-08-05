@@ -132,82 +132,6 @@ export type PendingQuote = {
 }
 
 /**
- * Credits usage data returned by the host app
- */
-export type CreditsUsage = {
-  used: number
-  total: number
-}
-
-/**
- * Credits configuration for the AI chat.
- * Groups all credits-related props into a single object.
- *
- * When provided, a credits button is shown in the chat header.
- */
-export type AiChatCredits = {
-  /** Async function to fetch credits usage. Called each time the popover opens. */
-  fetchUsage: () => Promise<CreditsUsage>
-  /** URL to the plan upgrade page. When provided, a link is shown in the popover. */
-  upgradePlanUrl?: string
-  /** Company name displayed in the popover header. */
-  companyName?: string
-  /** Company logo URL displayed in the popover header. */
-  companyLogoUrl?: string
-  /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
-  planName?: string
-}
-
-/**
- * Credit warning configuration.
- * Groups severity level and action callbacks into a single object.
- *
- * When provided, a warning banner is shown above the chat textarea.
- */
-export type AiChatCreditWarning = {
-  /** The severity level of the warning. */
-  level: "soft"
-  /** Called when the user dismisses the credit warning banner. */
-  onDismiss?: () => void
-  /** Called when the user clicks the "Get Credits" button. */
-  onGetCredits?: () => void
-}
-
-/**
- * Employee credits usage data returned by the host app.
- *
- * Represents the logged-in employee's personal monthly allocation,
- * independent of any company-wide pool.
- */
-export type EmployeeCreditsUsage = {
-  used: number
-  total: number
-}
-
-/**
- * Employee credits configuration for the AI chat.
- *
- * Independent from `credits` (the classic company-level popover).
- * When provided, a separate, employee-only credits popover trigger is shown
- * in the chat header **instead of** the classic one — the host opts into
- * this mode by passing `employeeCredits` only for employees who have a
- * per-employee monthly allocation configured.
- *
- * Hosts that don't use per-employee allocations should keep using `credits`
- * and leave `employeeCredits` undefined; behavior is unchanged.
- */
-export type AiChatEmployeeCredits = {
-  /** Async function to fetch the employee's credits usage. Called each time the popover opens. */
-  fetchUsage: () => Promise<EmployeeCreditsUsage>
-  /** Company name displayed in the popover header. */
-  companyName?: string
-  /** Company logo URL displayed in the popover header. */
-  companyLogoUrl?: string
-  /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
-  planName?: string
-}
-
-/**
  * Interaction mode for the AI chat
  */
 export type AiChatMode = "chat" | "voice"
@@ -391,26 +315,6 @@ export type AiChatProviderProps = {
    * them here so canvas logic lives in one place.
    */
   canvasEntities?: Record<string, CanvasEntityDefinition>
-  /**
-   * Credits configuration. When provided, a credits button is shown in the chat header.
-   * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
-   */
-  credits?: AiChatCredits
-  /**
-   * Employee-only credits configuration. When provided, replaces the classic
-   * `credits` popover trigger with a simpler employee-only popover that shows
-   * just the logged-in employee's monthly allocation. Hosts opt in by passing
-   * this only when an employee has a configured per-employee allocation.
-   *
-   * Takes precedence over `credits` — when both are provided, only the
-   * employee-only popover is rendered.
-   */
-  employeeCredits?: AiChatEmployeeCredits
-  /**
-   * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
-   * Groups severity level and action callbacks.
-   */
-  creditWarning?: AiChatCreditWarning
   /**
    * File attachment configuration. When provided, enables file uploads in the chat.
    */
