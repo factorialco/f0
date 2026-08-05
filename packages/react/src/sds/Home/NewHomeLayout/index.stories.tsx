@@ -75,7 +75,7 @@ const SHORTCUTS: Array<{ icon: IconType; title: string }> = [
 
 /** Shortcuts as real F0Cards, icon through the card's own avatar slot. */
 const ShortcutCards = () => (
-  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+  <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-4">
     {SHORTCUTS.map((s) => (
       <F0Card
         key={s.title}
