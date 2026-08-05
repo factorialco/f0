@@ -156,7 +156,49 @@ const e = {
     position: "{{current}} of {{total}}",
     viewDetail: "View detail",
     hideDetail: "Hide detail",
-    details: "Recording details"
+    viewTranscription: "View transcription",
+    hideTranscription: "Hide transcription",
+    viewSummary: "View summary",
+    hideSummary: "Hide summary",
+    details: "Recording details",
+    summary: "Summary",
+    transcription: "Transcription",
+    language: "Language",
+    audio: "Audio"
+  },
+  meetingCard: {
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    inProgress: "In progress",
+    inProgressTitle: "Call in progress",
+    summarizing: "Summarizing",
+    finished: "Finished",
+    cancelled: "Cancelled",
+    startingNow: "Starting now",
+    startsIn: {
+      one: "In {{count}} min",
+      other: "In {{count}} mins"
+    },
+    startedAgo: {
+      one: "{{count}} min ago",
+      other: "{{count}} mins ago"
+    },
+    invited: {
+      one: "{{count}} guest",
+      other: "{{count}} guests"
+    },
+    inside: {
+      one: "{{count}} inside",
+      other: "{{count}} inside"
+    },
+    duration: {
+      one: "{{count}} min",
+      other: "{{count}} mins"
+    },
+    attendees: "Attendees",
+    join: "Join",
+    summary: "Summary"
   },
   actions: {
     add: "Add",
@@ -347,6 +389,8 @@ const e = {
     date: "Date",
     custom: "Custom period",
     selectDate: "Select Date",
+    selectMonth: "Select month",
+    selectYear: "Select year",
     compareTo: "Compare to",
     presets: {
       last7Days: "Last 7 days",
@@ -582,6 +626,8 @@ const e = {
     noResults: "No chats found",
     backToLatest: "Jump to latest",
     muted: "Muted",
+    mute: "Mute",
+    unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
     recordAudio: "Record audio",
@@ -590,8 +636,10 @@ const e = {
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
-    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    removeNamedFile: "Remove {{name}}",
+    // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
     fileUploadError: "Upload failed",
     micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
     micError: "Couldn't access the microphone.",
@@ -611,6 +659,17 @@ const e = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
+    // Shared-location attachments (map preview card + reply quote descriptor).
+    location: "Location",
+    // Voice notes (mic in the composer records + sends audio, no transcript).
+    voiceNote: "Voice note",
+    sendVoiceNote: "Send voice note",
+    sendingVoiceNote: "Sending voice note…",
+    // Delivery-state indicators beside your own bubble (icon labels + the
+    // failed message's reduced actions menu).
+    sending: "Sending…",
+    notSent: "Not sent",
+    retry: "Retry",
     moreActions: "Message actions",
     // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
@@ -625,6 +684,7 @@ const e = {
     reply: "Reply",
     react: "Add reaction",
     download: "Download",
+    downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
     // Editing your own message (within the edit window). `editing` heads the
     // composer chip; `edited` is the muted marker after an edited message body.
@@ -641,6 +701,11 @@ const e = {
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
+    openDocument: "Open document",
+    openNamedDocument: "Open {{name}}",
+    documentPreview: "Document preview",
+    videoPlayerLabel: "Video player: {{name}}",
+    loadingVideo: "Loading video: {{name}}",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
@@ -658,6 +723,29 @@ const e = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
+    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
+    // are replaced with React nodes (`@name` hover-card chips) by the component
+    // via token split — NOT through `t(key, args)`, whose interpolation is
+    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
+    // @Raúl" / "…and 5 more") so every language words the conjunction its own
+    // way. Plural shape mirrors `readBy`.
+    system: {
+      memberAdded: {
+        one: "{{members}} was added to the group",
+        other: "{{members}} were added to the group"
+      },
+      memberRemoved: {
+        one: "{{members}} was removed from the group",
+        other: "{{members}} were removed from the group"
+      },
+      memberLeft: {
+        one: "{{members}} left the group",
+        other: "{{members}} left the group"
+      },
+      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
+      membersWithLast: "{{names}} and {{last}}",
+      membersWithMore: "{{names}} and {{count}} more"
+    },
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread"
@@ -678,7 +766,19 @@ const e = {
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters"
+    },
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}"
     }
+  },
+  progressSeries: {
+    noData: "No data",
+    canceled: "Canceled"
   },
   select: {
     noResults: "No results found",
@@ -871,7 +971,11 @@ const e = {
       view: "View",
       addBlockedHint: "Finish filling out the last item you just added in order to add another one",
       addBlockedErrorHint: "Fix the errors in the existing items before adding another one",
-      addBlockedMaxHint: "You've reached the maximum number of items"
+      addBlockedMaxHint: "You've reached the maximum number of items",
+      removeConfirmTitle: "Remove item?",
+      removeConfirmMessage: "This item will be removed. This action cannot be undone.",
+      removeError: "Couldn't remove the item. Please try again.",
+      removeErrorTitle: "Remove failed"
     },
     moreInformation: "More information",
     validation: {
@@ -933,7 +1037,35 @@ const e = {
     rotate: "Rotate",
     print: "Print",
     download: "Download",
-    loading: "Loading document"
+    loading: "Loading document",
+    previewFailed: "Preview isn't available for this file",
+    showingFirstRows: {
+      one: "Showing the first row",
+      other: "Showing the first {{count}} rows"
+    }
+  },
+  videoPlayer: {
+    regionLabel: "Video player",
+    play: "Play",
+    pause: "Pause",
+    playing: "Playing",
+    paused: "Paused",
+    mute: "Mute",
+    unmute: "Unmute",
+    noAudio: "No audio",
+    volume: "Volume",
+    seekLabel: "Seek",
+    enterFullscreen: "Enter fullscreen",
+    exitFullscreen: "Exit fullscreen",
+    playbackSpeed: "Playback speed ({{rate}})",
+    playbackSpeedLabel: "Playback speed",
+    timeProgress: "{{current}} of {{total}}",
+    captions: "Captions",
+    audioDescription: "Audio description",
+    audio: "Audio",
+    subtitles: "Subtitles",
+    settings: "Settings",
+    off: "Off"
   }
 };
 export {
