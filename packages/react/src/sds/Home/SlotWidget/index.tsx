@@ -6,6 +6,7 @@ import { Widget, WidgetProps } from "@/experimental/Widgets/Widget"
 
 import {
   defaultSlotRenderers,
+  type HomeWidgetChrome,
   type HomeRenderCtx,
   type HomeWidgetSlot,
   type SlotRenderers,
@@ -21,7 +22,7 @@ import {
  * prop). Bespoke visualizations (e.g. `clock-in`) have no default and must be
  * supplied via `slotRenderers`.
  */
-export interface SlotWidgetProps {
+export type SlotWidgetProps = HomeWidgetChrome & {
   header?: WidgetProps["header"]
   fullHeight?: boolean
   slots: HomeWidgetSlot[]
@@ -37,6 +38,10 @@ export interface SlotWidgetProps {
 export function SlotWidget({
   header,
   fullHeight,
+  action,
+  summaries,
+  alert,
+  status,
   slots,
   slotRenderers,
   draggable,
@@ -52,6 +57,9 @@ export function SlotWidget({
     <Widget
       header={header}
       fullHeight={fullHeight}
+      action={action}
+      summaries={summaries}
+      {...(alert ? { alert } : { status })}
       draggable={draggable}
       onDragStart={onDragStart}
       isDragging={isDragging}

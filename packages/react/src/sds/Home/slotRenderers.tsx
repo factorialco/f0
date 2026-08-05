@@ -75,8 +75,21 @@ export interface HomeWidgetSlot {
   params: unknown
 }
 
+/**
+ * The `Widget` chrome a Home widget may carry beyond its header, passed straight
+ * through to the frame.
+ *
+ * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
+ * type says so rather than leaving it to blow up at runtime.
+ */
+export type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> &
+  (
+    | { alert?: WidgetProps["alert"]; status?: never }
+    | { status?: WidgetProps["status"]; alert?: never }
+  )
+
 /** A widget as handed to the layout: header + an ordered list of slots. */
-export interface HomeWidgetItem {
+export type HomeWidgetItem = HomeWidgetChrome & {
   id: string
   header?: WidgetProps["header"]
   fullHeight?: boolean

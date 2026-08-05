@@ -129,3 +129,54 @@ describe("SlotWidget", () => {
     expect(seen).toEqual([false, true])
   })
 })
+
+describe("SlotWidget chrome", () => {
+  const slots = [
+    {
+      visualization: "indicators",
+      params: { items: [{ label: "a", content: "1" }] },
+    },
+  ]
+
+  test("passes the header's count through to the frame", () => {
+    zeroRender(
+      <SlotWidget
+        // `info` is accepted too, but it renders inside a Tooltip whose content
+        // is lazy, so there is nothing to assert on until hover.
+        header={{ title: "Payroll", count: 3, info: "Before deductions." }}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByText("3")).toBeInTheDocument()
+  })
+
+  test("renders a status tag", () => {
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Payroll" }}
+        status={{ text: "Approved", variant: "positive" }}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByText("Approved")).toBeInTheDocument()
+  })
+
+  test("renders an alert, and summaries, and an action", () => {
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Documents" }}
+        alert="2 documents need signing"
+        action={{ label: "Sign now", onClick: () => {} }}
+        summaries={[{ label: "Gross", value: "3,200" }]}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByText("2 documents need signing")).toBeInTheDocument()
+    expect(screen.getByText("Gross")).toBeInTheDocument()
+    expect(screen.getByText("3,200")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Sign now" })).toBeInTheDocument()
+  })
+})

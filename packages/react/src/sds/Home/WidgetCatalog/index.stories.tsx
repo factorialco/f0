@@ -1,11 +1,72 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Calendar, Clock, PalmTree, Target } from "@/icons/app"
+import { Calendar, Clock, File, PalmTree, Receipt, Target } from "@/icons/app"
 
 import { SlotWidget } from "../SlotWidget"
 import { WidgetCatalog } from "./index"
 
+/**
+ * Beyond its header and slots, a widget may carry the `Widget` frame's own
+ * chrome: a `status` tag OR an `alert` (never both — the type forbids it), an
+ * `action` button, and `summaries`. These entries show each one.
+ */
+const CHROME_CATALOG = [
+  {
+    id: "payroll",
+    title: "Payroll",
+    icon: Receipt,
+    preview: (
+      <SlotWidget
+        header={{
+          title: "Payroll",
+          subtitle: "June",
+          count: 3,
+          info: "Gross, before deductions.",
+        }}
+        status={{ text: "Approved", variant: "positive" }}
+        summaries={[
+          { label: "Gross", value: "3,200", postfixUnit: "€" },
+          { label: "Net", value: "2,480", postfixUnit: "€" },
+        ]}
+        slots={[
+          {
+            visualization: "simple-line-list",
+            params: {
+              showAllItems: true,
+              items: [
+                { id: "1", title: "June payslip", href: "/payroll/june" },
+              ],
+            },
+          },
+        ]}
+      />
+    ),
+  },
+  {
+    id: "documents",
+    title: "Documents",
+    icon: File,
+    preview: (
+      <SlotWidget
+        header={{ title: "Documents" }}
+        alert="2 documents need signing"
+        action={{ label: "Sign now", onClick: () => {} }}
+        slots={[
+          {
+            visualization: "simple-line-list",
+            params: {
+              showAllItems: true,
+              items: [{ id: "1", title: "Q3 addendum", href: "/docs/1" }],
+            },
+          },
+        ]}
+      />
+    ),
+  },
+]
+
 const CATALOG = [
+  ...CHROME_CATALOG,
   {
     id: "time-off",
     title: "Time off",

@@ -23,6 +23,7 @@ import { SlotWidget } from "../SlotWidget"
 import { SortableWidget } from "./SortableWidget"
 import {
   type HomeRenderCtx,
+  type HomeWidgetChrome,
   type HomeWidgetItem,
   type SlotRenderers,
 } from "../slotRenderers"
@@ -37,6 +38,20 @@ const CARD_LINK_CLASS = cn(
   "whitespace-nowrap px-0 text-base font-medium text-f1-foreground",
   "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1"
 )
+
+/** The `Widget` chrome an item carries, ready to spread onto `SlotWidget`. */
+const widgetChrome = (widget: HomeWidgetItem) =>
+  ("alert" in widget && widget.alert !== undefined
+    ? {
+        action: widget.action,
+        summaries: widget.summaries,
+        alert: widget.alert,
+      }
+    : {
+        action: widget.action,
+        summaries: widget.summaries,
+        status: "status" in widget ? widget.status : undefined,
+      }) as HomeWidgetChrome
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
@@ -158,6 +173,7 @@ export function WidgetContainer({
       renderWidget(widget, ctx)
     ) : (
       <SlotWidget
+        {...widgetChrome(widget)}
         header={
           // In edit mode the remove control takes the arrow's place, so the
           // link is dropped rather than sitting under it.
@@ -181,6 +197,7 @@ export function WidgetContainer({
             renderWidget(widget, ctx)
           ) : (
             <SlotWidget
+              {...widgetChrome(widget)}
               header={{ ...widget.header, link: undefined }}
               fullHeight={widget.fullHeight}
               slots={widget.slots}
