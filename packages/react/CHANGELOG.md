@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.0](https://github.com/factorialco/f0/compare/f0-react-v6.4.0...f0-react-v6.5.0) (2026-08-05)
+
+
+### Features
+
+* **F0DataChart:** make a dense horizontal bar chart readable ([#4984](https://github.com/factorialco/f0/issues/4984)) ([6b85f03](https://github.com/factorialco/f0/commit/6b85f039d862ed9ed1bb40a119cd26139ab54f77))
+
 ## [6.4.0](https://github.com/factorialco/f0/compare/f0-react-v6.3.3...f0-react-v6.4.0) (2026-08-05)
 
 
