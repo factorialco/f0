@@ -155,7 +155,7 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   /**
    * Per-side clearance in pixels the widest value must have before
    * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
-   * Overrides the default, which is placement-based: **12** for stacked (inside)
+   * Overrides the default, which is placement-based: **6** for stacked (inside)
    * labels, **0** for labels outside the bar.
    */
   labelFitPadding?: number
@@ -168,6 +168,43 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    * widths differ. Height overflow is also evaluated per bar. @default true
    */
   hideAllLabelsOnOverflow?: boolean
+  /**
+   * Draw only as many categories as fit at a readable bar thickness, instead of
+   * compressing every one of them into the available height.
+   *
+   * Opt-in, because it hides data: a windowed chart shows the first N rows in
+   * data order and nothing in the chart itself leads to the rest. Set it only
+   * where the surrounding UI offers the way back — subscribe to
+   * {@link F0DataChartBarProps.onHiddenCategoriesChange} and put a control next
+   * to the count, as `F0AnalyticsDashboard` does. Left off, a dense chart stays
+   * complete and its bars get thinner, which is the readable-but-honest end of
+   * the trade.
+   *
+   * Ignored by vertical charts, which lay categories out along the width.
+   * @default false
+   */
+  windowCategories?: boolean
+  /**
+   * Render every category at once, overriding
+   * {@link F0DataChartBarProps.windowCategories}.
+   *
+   * Set this when the reader has asked to see the whole distribution — an
+   * expanded or fullscreen view — and accepts thinner bars in exchange. Ignored
+   * by vertical charts, which lay categories out along the width.
+   * @default false
+   */
+  showAllCategories?: boolean
+  /**
+   * Reports how many categories the row window is hiding — `0` when every
+   * category is on screen. Fires whenever the count changes, which includes
+   * container resizes and {@link F0DataChartBarProps.showAllCategories} being
+   * switched on.
+   *
+   * The chart states the fact rather than rendering an affordance for it: only
+   * the surrounding UI knows where a "see everything" control belongs. The
+   * dashboard puts it in the widget's description, next to the count.
+   */
+  onHiddenCategoriesChange?: (hiddenCategoryCount: number) => void
   /**
    * Suggested number of segments on the value axis — lower values draw fewer
    * grid lines. Applies to whichever axis is the value axis (Y for vertical
