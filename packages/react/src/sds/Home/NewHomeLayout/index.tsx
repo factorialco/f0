@@ -464,13 +464,19 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   }
                   className="rounded-lg"
                 >
-                  {widget.icon ? (
-                    <F0AvatarIcon icon={widget.icon} size="lg" />
-                  ) : (
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
-                      {(widget.header?.title ?? widget.id).charAt(0)}
-                    </span>
-                  )}
+                  {/* Same accent dot HomeListItem uses for unread rows. */}
+                  <span className="relative inline-flex">
+                    {widget.icon ? (
+                      <F0AvatarIcon icon={widget.icon} size="lg" />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
+                        {(widget.header?.title ?? widget.id).charAt(0)}
+                      </span>
+                    )}
+                    {widget.hasUpdates ? (
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold" />
+                    ) : null}
+                  </span>
                 </button>
               ))}
               {/* Always offered, not only in edit mode: collapsed, the strip has

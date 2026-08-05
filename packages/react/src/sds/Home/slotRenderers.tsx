@@ -129,6 +129,11 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    * always have, like Clock in.
    */
   locked?: boolean
+  /**
+   * Something new since the user last looked (unread messages, a pending
+   * request). The collapsed rail badges the widget's glyph with an accent dot.
+   */
+  hasUpdates?: boolean
   slots: HomeWidgetSlot[]
 }
 

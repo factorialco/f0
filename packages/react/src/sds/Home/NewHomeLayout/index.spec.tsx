@@ -29,7 +29,10 @@ const widget = (
   ...extra,
 })
 
-const RAIL = [widget("clock", { locked: true }), widget("events")]
+const RAIL = [
+  widget("clock", { locked: true }),
+  widget("events", { hasUpdates: true }),
+]
 
 const renderLayout = (width: number, props = {}) => {
   layoutWidth = width
@@ -127,6 +130,18 @@ describe("NewHomeLayout", () => {
 
       expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
       expect(screen.getByLabelText("Add widget")).toBeInTheDocument()
+    })
+
+    test("badges the glyph of a widget with updates, and only that one", () => {
+      renderLayout(1000)
+
+      const dot = ".bg-f1-background-accent-bold"
+      expect(
+        screen.getByRole("button", { name: "events" }).querySelector(dot)
+      ).not.toBeNull()
+      expect(
+        screen.getByRole("button", { name: "clock" }).querySelector(dot)
+      ).toBeNull()
     })
   })
 

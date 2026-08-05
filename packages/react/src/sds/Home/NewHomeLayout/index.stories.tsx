@@ -333,6 +333,8 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   {
     id: "communications",
     icon: Envelope,
+    // Badges the glyph in the collapsed rail: there are unread messages.
+    hasUpdates: true,
     header: {
       title: "Communications",
       link: { title: "Open", onClick: () => {} },
