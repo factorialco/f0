@@ -24,7 +24,7 @@ import {
 } from "@/icons/app"
 
 import { SlotWidget } from "../SlotWidget"
-import { type HomeWidgetItem } from "../slotRenderers"
+import { homeSlot, type HomeWidgetItem } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog } from "../WidgetCatalog"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
@@ -340,19 +340,17 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       link: { title: "Open", onClick: () => {} },
     },
     slots: [
-      {
-        visualization: "inbox-list",
-        params: {
-          showAllItems: true,
-          items: COMMS.map((c, index) => ({
-            id: String(index),
-            module: "communities",
-            title: c.title,
-            subtitle: c.time,
-            href: `/posts/${index}`,
-          })),
-        },
-      },
+      homeSlot("inbox-list", {
+        showAllItems: true,
+        left: "module",
+        items: COMMS.map((c, index) => ({
+          id: String(index),
+          module: "communities" as const,
+          title: c.title,
+          subtitle: c.time,
+          href: `/posts/${index}`,
+        })),
+      }),
     ],
   },
   {
@@ -364,13 +362,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       link: { title: "Calendar", onClick: () => {} },
     },
     slots: [
-      {
-        visualization: "event-list",
-        params: {
-          showAllItems: true,
-          events: RAIL_EVENTS,
-        },
-      },
+      homeSlot("event-list", { showAllItems: true, events: RAIL_EVENTS }),
     ],
   },
 ]

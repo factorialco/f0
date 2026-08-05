@@ -1,9 +1,12 @@
 import { ReactNode } from "react"
 
+import { type AvatarVariant } from "@/components/avatars/F0Avatar"
+import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import {
   F0AvatarList,
   F0AvatarListProps,
 } from "@/components/avatars/F0AvatarList"
+import { type ModuleId } from "@/components/avatars/F0AvatarModule"
 import { type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import {
@@ -50,37 +53,83 @@ export type SlotRenderer<P = unknown> = (
 export type SlotRenderers = Record<string, SlotRenderer>
 
 /**
- * `simple-line-list` params: every item MUST carry an `href` — rows on Home are
- * always a door to the thing they describe, never inert text. The left slot is
- * an `icon` shorthand or any `avatar` type (person, team, company, file, flag,
- * emoji, icon).
+ * CONSISTENT ROWS: within one slot every row draws the SAME left treatment.
+ * The slot declares its `left` kind ONCE — each row then supplies only that
+ * kind's data — so a slot is a list of people, or a list of files, never a
+ * mix. The right side is fixed per visualization (a counter on
+ * `simple-line-list`, a sender on `inbox-list`, faces on `status-rows`), so
+ * consistency there comes free.
  */
-export interface SimpleLineListParams {
-  items: Array<
-    Omit<SimpleLineListItemProps, "onClick"> & {
-      id: string | number
-      href: string
+type AvatarLeftRows<Row, RowsKey extends string> = {
+  [T in AvatarVariant["type"]]: {
+    /** The ONE avatar type every row of this slot draws on its left. */
+    left: T
+    /** One size for every row's avatar. */
+    avatarSize?: AvatarSize
+  } & {
+    [K in RowsKey]: Array<
+      Row & { avatar: Omit<Extract<AvatarVariant, { type: T }>, "type"> }
+    >
+  }
+}[AvatarVariant["type"]]
+
+type SimpleLineRow = Omit<
+  SimpleLineListItemProps,
+  "onClick" | "icon" | "avatar" | "avatarSize"
+> & { id: string | number; href: string }
+
+/**
+ * `simple-line-list` params: one-line rows, every one an `href` — rows on Home
+ * are always a door to the thing they describe, never inert text. The slot
+ * draws ONE `left` kind for all its rows: any avatar type, or none.
+ */
+export type SimpleLineListParams = {
+  /** @deprecated the list always shows every row now. */
+  showAllItems?: boolean
+} & (
+  | { left?: never; avatarSize?: never; items: SimpleLineRow[] }
+  | AvatarLeftRows<SimpleLineRow, "items">
+)
+
+type InboxRow = Omit<
+  InboxListItemProps,
+  "onClick" | "module" | "avatar" | "avatarSize"
+> & { id: string | number; href: string }
+
+/**
+ * `inbox-list` params: message rows, every one an `href`. The slot draws ONE
+ * `left` kind for all its rows: the owning module's glyph, or any avatar type.
+ */
+export type InboxListParams = {
+  /** @deprecated the list always shows every row now. */
+  showAllItems?: boolean
+} & (
+  | {
+      left: "module"
+      avatarSize?: never
+      items: Array<InboxRow & { module: ModuleId }>
     }
-  >
-  /** @deprecated the list always shows every row now. */
-  showAllItems?: boolean
-}
+  | AvatarLeftRows<InboxRow, "items">
+)
 
-/** `inbox-list` params: message rows (module glyph or any avatar), every row an `href`. */
-export interface InboxListParams {
-  items: Array<
-    Omit<InboxListItemProps, "onClick"> & { id: string | number; href: string }
-  >
-  /** @deprecated the list always shows every row now. */
-  showAllItems?: boolean
-}
+type StatusRow = Omit<
+  StatusListItemProps,
+  "onClick" | "alert" | "avatar" | "avatarSize"
+> & { id: string; href?: string }
 
-/** `status-rows` params: who-is-where rows — alert or avatar, count, faces. */
-export interface StatusRowsParams {
-  rows: Array<
-    Omit<StatusListItemProps, "onClick"> & { id: string; href?: string }
-  >
-}
+/**
+ * `status-rows` params: who-is-where rows — count, trailing faces. The slot
+ * draws ONE `left` kind for all its rows: an alert glyph, or any avatar type.
+ */
+export type StatusRowsParams =
+  | {
+      left: "alert"
+      avatarSize?: never
+      rows: Array<
+        StatusRow & { alert: NonNullable<StatusListItemProps["alert"]> }
+      >
+    }
+  | AvatarLeftRows<StatusRow, "rows">
 
 /** `event-list` params: f0 calendar-event rows (color band + date avatars). */
 export interface EventListParams {
@@ -88,17 +137,52 @@ export interface EventListParams {
   showAllItems?: boolean
 }
 
+/** `avatar-list` params: a strip of person avatars. */
+export type AvatarListParams = Omit<
+  Extract<F0AvatarListProps, { type: "person" }>,
+  "type"
+>
+
 /** A row's click handler: navigate to its `href`, however the app navigates. */
 const go = (ctx: HomeRenderCtx, href?: string) =>
   href
     ? () => (ctx.navigate ? ctx.navigate(href) : window.location.assign(href))
     : undefined
 
+/** The left props one row gets from its slot-level `left` declaration. */
+const leftFor = (
+  left: AvatarVariant["type"] | undefined,
+  avatar: object | undefined,
+  avatarSize: AvatarSize | undefined
+) =>
+  left ? { avatar: { type: left, ...avatar } as AvatarVariant, avatarSize } : {}
+
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
 export interface HomeWidgetSlot {
   visualization: string
   params: unknown
 }
+
+/** The built-in slot vocabulary: each visualization and its params shape. */
+export interface HomeSlotParamsMap {
+  "simple-line-list": SimpleLineListParams
+  "inbox-list": InboxListParams
+  "event-list": EventListParams
+  indicators: IndicatorsListProps
+  "avatar-list": AvatarListParams
+  "status-rows": StatusRowsParams
+}
+
+/**
+ * Builds a slot with its params CHECKED against its visualization.
+ * `HomeWidgetSlot`'s `params` is `unknown` (bespoke slots need it to be), so a
+ * plain `{ visualization, params }` literal gets no checking — use this for
+ * the built-in vocabulary and keep literals for bespoke visualizations.
+ */
+export const homeSlot = <V extends keyof HomeSlotParamsMap>(
+  visualization: V,
+  params: HomeSlotParamsMap[V]
+): HomeWidgetSlot => ({ visualization, params })
 
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
@@ -164,14 +248,19 @@ export const EVENT_LIST_GAP = "gap-2"
  */
 export const defaultSlotRenderers: SlotRenderers = {
   // Every row navigates to its item's `href` (via ctx.navigate when the app
-  // provides it). Rows are the Home kit's own list items, so the left slot
-  // takes any avatar type.
+  // provides it). The slot's `left` declaration decides every row's glyph.
   "simple-line-list": (params, ctx) => {
-    const { items } = params as SimpleLineListParams
+    const { items, left, avatarSize } = params as SimpleLineListParams
+    const rows = items as Array<SimpleLineRow & { avatar?: object }>
     return (
       <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-        {items.map(({ id, href, ...item }) => (
-          <SimpleLineListItem key={id} {...item} onClick={go(ctx, href)} />
+        {rows.map(({ id, href, avatar, ...item }) => (
+          <SimpleLineListItem
+            key={id}
+            {...item}
+            {...leftFor(left, avatar, avatarSize)}
+            onClick={go(ctx, href)}
+          />
         ))}
       </div>
     )
@@ -179,11 +268,21 @@ export const defaultSlotRenderers: SlotRenderers = {
   // Message rows (Communications-style). Same rule: every row navigates to its
   // `href`.
   "inbox-list": (params, ctx) => {
-    const { items } = params as InboxListParams
+    const { items, left, avatarSize } = params as InboxListParams
+    const rows = items as Array<
+      InboxRow & { avatar?: object; module?: ModuleId }
+    >
     return (
       <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-        {items.map(({ id, href, ...item }) => (
-          <InboxListItem key={id} {...item} onClick={go(ctx, href)} />
+        {rows.map(({ id, href, avatar, module, ...item }) => (
+          <InboxListItem
+            key={id}
+            {...item}
+            {...(left === "module"
+              ? { module }
+              : leftFor(left, avatar, avatarSize))}
+            onClick={go(ctx, href)}
+          />
         ))}
       </div>
     )
@@ -206,20 +305,29 @@ export const defaultSlotRenderers: SlotRenderers = {
     <IndicatorsList {...(params as IndicatorsListProps)} />
   ),
   "avatar-list": (params) => (
-    <F0AvatarList
-      size="md"
-      {...(params as Omit<
-        Extract<F0AvatarListProps, { type: "person" }>,
-        "type"
-      >)}
-      type="person"
-    />
+    <F0AvatarList size="md" {...(params as AvatarListParams)} type="person" />
   ),
-  "status-rows": (params, ctx) => (
-    <div className={cn(slotRowBleed(ctx), "flex flex-col gap-1")}>
-      {(params as StatusRowsParams).rows.map(({ id, href, ...row }) => (
-        <StatusListItem key={id} {...row} onClick={go(ctx, href)} />
-      ))}
-    </div>
-  ),
+  "status-rows": (params, ctx) => {
+    const { rows, left, avatarSize } = params as StatusRowsParams
+    const list = rows as Array<
+      StatusRow & {
+        avatar?: object
+        alert?: NonNullable<StatusListItemProps["alert"]>
+      }
+    >
+    return (
+      <div className={cn(slotRowBleed(ctx), "flex flex-col gap-1")}>
+        {list.map(({ id, href, avatar, alert, ...row }) => (
+          <StatusListItem
+            key={id}
+            {...row}
+            {...(left === "alert"
+              ? { alert }
+              : leftFor(left, avatar, avatarSize))}
+            onClick={go(ctx, href)}
+          />
+        ))}
+      </div>
+    )
+  },
 }

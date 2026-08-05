@@ -1,0 +1,195 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+
+import * as SlotWidgetStories from "./index.stories"
+
+<Meta of={SlotWidgetStories} />
+
+# SlotWidget
+
+`SlotWidget` draws one Home widget: the `Widget` frame (header, and optionally
+`status` _or_ `alert`, `action`, `summaries`) around an **ordered list of
+slots**, with a dashed divider between consecutive slots.
+
+A slot is data, not JSX:
+
+```tsx
+{ visualization: "simple-line-list", params: { ... } }
+```
+
+`SlotWidget` looks the `visualization` up in its renderer map — the built-in
+vocabulary below, extended per app through the `slotRenderers` prop — and hands
+it the `params`. A visualization nobody registered renders a dashed fallback
+instead of crashing.
+
+<Canvas of={SlotWidgetStories.AllSlots} />
+<Controls of={SlotWidgetStories.AllSlots} />
+
+## Building slots: `homeSlot`
+
+`HomeWidgetSlot.params` is `unknown` (bespoke slots need it to be), so a plain
+`{ visualization, params }` literal gets **no type checking**. For the built-in
+vocabulary, build slots with `homeSlot` — it checks the params against the
+visualization:
+
+```tsx
+import { homeSlot } from "@/sds/Home/slotRenderers"
+
+homeSlot("simple-line-list", {
+  left: "person",
+  items: [
+    {
+      id: "ada",
+      avatar: { firstName: "Ada", lastName: "Lovelace" },
+      title: "Ada Lovelace",
+      href: "/employees/ada",
+    },
+  ],
+})
+```
+
+## Consistent rows
+
+Within one slot, **every row draws the same left treatment**. The slot declares
+its `left` kind once — each row then supplies only that kind's data — so a slot
+is a list of people, or a list of files, never a mix. Mixing kinds means
+mixing slots, and the dashed divider marks the seam.
+
+The right side is fixed per visualization (a counter on `simple-line-list`, a
+sender on `inbox-list`, faces on `status-rows`), so consistency there comes
+free.
+
+For the avatar-drawn kinds, `avatarSize` — one size for every row of the slot —
+accepts any `F0Avatar` size (`xs` to `2xl`).
+
+## The built-in vocabulary
+
+### `simple-line-list`
+
+One-line rows: a left glyph, `title` (with an inline `subtitle` and a
+`description` second line when given), an optional trailing `count`. Every row
+**must** carry an `href` — rows on Home are always a door to the thing they
+describe, never inert text.
+
+`left` is any `F0Avatar` type — `"icon"`, `"person"`, `"team"`, `"company"`,
+`"file"`, `"flag"`, `"emoji"` — or omitted for plain text rows.
+
+```tsx
+homeSlot("simple-line-list", {
+  left: "icon",
+  items: [
+    {
+      id: "bcn",
+      avatar: { icon: PalmTree },
+      title: "Barcelona",
+      count: 3,
+      href: "/positions/bcn",
+    },
+  ],
+})
+```
+
+### `inbox-list`
+
+Message rows (Communications-style): a left glyph, the message `title`, when it
+happened as `subtitle` (drawn on the second line), an `unread` accent dot, and
+optionally the sender trailing as a small person avatar. Every row must carry
+an `href`.
+
+`left` is `"module"` — the owning module's glyph, each row naming its
+`module` — or any avatar type.
+
+```tsx
+homeSlot("inbox-list", {
+  left: "module",
+  items: [
+    {
+      id: "deploy",
+      module: "communities",
+      title: "Deploy 2026.7.3 is live 🚀",
+      subtitle: "8:47",
+      unread: true,
+      person: { firstName: "Leo", lastName: "Costa" },
+      href: "/posts/1",
+    },
+  ],
+})
+```
+
+### `status-rows`
+
+Who-is-where rows: a left glyph, a `title` with a count `subtitle` below, and
+the people themselves trailing as a compact `F0AvatarList` with an optional
+`remainingCount`. `href` is optional here — a row with one gets a chevron and
+navigates, a row without stays inert.
+
+`left` is `"alert"` — each row naming its alert `type` (`positive`, `warning`,
+…) — or any avatar type.
+
+```tsx
+homeSlot("status-rows", {
+  left: "alert",
+  rows: [
+    {
+      id: "in",
+      title: "Clocked in",
+      subtitle: "4 people",
+      alert: "positive",
+      avatars: [{ firstName: "Ada", lastName: "Lovelace" }],
+      remainingCount: 3,
+      href: "/attendance",
+    },
+  ],
+})
+```
+
+### `event-list`
+
+Calendar-event rows drawn with f0's `CalendarEvent` (color band + date
+avatars): `title`, `subtitle`, `description`, an `isPending` state, and a
+`fromDate`/`toDate` range or a single day.
+
+```tsx
+homeSlot("event-list", {
+  events: [
+    {
+      title: "Company holiday",
+      subtitle: "2 days off",
+      color: "#10B981",
+      fromDate: new Date(2026, 6, 30),
+      toDate: new Date(2026, 6, 31),
+    },
+  ],
+})
+```
+
+### `indicators`
+
+Big-number KPIs drawn with `IndicatorsList` — the slot's params are that
+component's props.
+
+```tsx
+homeSlot("indicators", {
+  items: [{ label: "On holidays", content: "6" }],
+})
+```
+
+### `avatar-list`
+
+A strip of person avatars, `max` faces then a `+n` overflow — the params are
+`F0AvatarList`'s person props.
+
+```tsx
+homeSlot("avatar-list", {
+  avatars: [{ firstName: "Ada", lastName: "Lovelace" }],
+  max: 3,
+})
+```
+
+## Bespoke slots
+
+Visualizations only one surface knows (`clock-in`, `carousel`, …) don't ship a
+default renderer — pass theirs through the `slotRenderers` prop, keyed by
+visualization. A consumer renderer also **overrides** a built-in one for the
+same key.
+
+<Canvas of={SlotWidgetStories.BespokeAndFallback} />

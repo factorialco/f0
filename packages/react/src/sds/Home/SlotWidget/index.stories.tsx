@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Comment, PalmTree } from "@/icons/app"
 
+import { homeSlot } from "../slotRenderers"
 import { SlotWidget } from "./index"
 
 const meta = {
@@ -22,13 +23,14 @@ type Story = StoryObj<typeof meta>
 
 /**
  * Every DEFAULT slot, stacked in one widget with the dashed divider between
- * consecutive slots: `indicators`, `avatar-list`, `status-rows`,
- * `simple-line-list`, `inbox-list` and `event-list` — and, within the row-based
- * slots, every case a row can take: an icon shorthand, EVERY avatar type
- * (person, team, company, file, flag, emoji), an `avatarSize` override, the
- * three text voices (title, inline subtitle, description), a count, an unread
- * dot, a trailing sender, trailing faces with a remaining count, and rows with
- * and without an `href` (with → chevron, without → inert).
+ * consecutive slots — and, across the row-based slots, every case a slot can
+ * take. Rows are CONSISTENT within a slot: the slot declares its `left` kind
+ * once (an icon, any avatar type, a module glyph, an alert — or none) and every
+ * row draws it, so mixing kinds needs mixing slots, exactly as shown here.
+ * Also on display: `avatarSize`, the three text voices (title, inline
+ * subtitle, description), counts, the unread dot, a trailing sender, trailing
+ * faces with a remaining count, and rows with and without an `href`
+ * (with → chevron, without → inert).
  */
 export const AllSlots: Story = {
   args: {
@@ -38,196 +40,226 @@ export const AllSlots: Story = {
       link: { title: "Open", onClick: () => {} },
     },
     slots: [
-      {
-        visualization: "indicators",
-        params: {
-          items: [
-            { label: "On holidays", content: "6" },
-            { label: "Remote", content: "3" },
-          ],
-        },
-      },
-      {
-        visualization: "avatar-list",
-        params: {
-          avatars: [
-            { firstName: "Ada", lastName: "Lovelace" },
-            { firstName: "Alan", lastName: "Turing" },
-            { firstName: "Grace", lastName: "Hopper" },
-          ],
-          max: 3,
-        },
-      },
-      {
-        visualization: "status-rows",
-        params: {
-          rows: [
-            // Alert glyph + trailing faces + remaining count, clickable.
-            {
-              id: "in",
-              title: "Clocked in",
-              subtitle: "4 people",
-              alert: "positive",
-              avatars: [
-                { firstName: "Ada", lastName: "Lovelace" },
-                { firstName: "Alan", lastName: "Turing" },
-              ],
-              remainingCount: 2,
-              href: "/attendance",
-            },
-            // No `href` — an inert row, no chevron.
-            {
-              id: "away",
-              title: "Away",
-              subtitle: "2 people",
-              alert: "warning",
-              avatars: [{ firstName: "Grace", lastName: "Hopper" }],
-            },
-            // A data avatar instead of an alert, sized down.
-            {
-              id: "office",
-              title: "Barcelona office",
-              subtitle: "18 people",
-              avatar: { type: "company", name: "Factorial" },
-              avatarSize: "sm",
-              href: "/offices/bcn",
-            },
-          ],
-        },
-      },
-      {
-        visualization: "simple-line-list",
-        params: {
-          showAllItems: true,
-          items: [
-            // Icon shorthand + count.
-            {
-              id: "icon",
-              icon: PalmTree,
-              title: "Barcelona",
-              count: 3,
-              href: "/positions/bcn",
-            },
-            // Person avatar, sized down, inline subtitle.
-            {
-              id: "person",
-              avatar: {
-                type: "person",
-                firstName: "Ada",
-                lastName: "Lovelace",
-              },
-              avatarSize: "sm",
-              title: "Ada Lovelace",
-              subtitle: "Engineering",
-              href: "/employees/ada",
-            },
-            // Team avatar + description line.
-            {
-              id: "team",
-              avatar: { type: "team", name: "Payroll" },
-              title: "Payroll",
-              description: "12 members",
-              href: "/teams/payroll",
-            },
-            // File avatar, mid size.
-            {
-              id: "file",
-              avatar: {
-                type: "file",
-                file: { name: "contract.pdf", type: "application/pdf" },
-              },
-              avatarSize: "md",
-              title: "Contract.pdf",
-              description: "Needs your signature",
-              href: "/documents/1",
-            },
-            // Flag avatar + count.
-            {
-              id: "flag",
-              avatar: { type: "flag", flag: "es" },
-              title: "Spain",
-              count: 24,
-              href: "/offices/es",
-            },
-            // Emoji avatar with all three text voices at once.
-            {
-              id: "emoji",
-              avatar: { type: "emoji", emoji: "🌴" },
-              title: "Time off",
-              subtitle: "12 days left",
-              description: "Next: Aug 15",
-              href: "/time-off",
-            },
-          ],
-        },
-      },
-      {
-        visualization: "inbox-list",
-        params: {
-          showAllItems: true,
-          items: [
-            // Module glyph + unread dot + trailing sender.
-            {
-              id: "1",
-              module: "communities",
-              title: "Deploy 2026.7.3 is live 🚀",
-              subtitle: "8:47",
-              unread: true,
-              person: { firstName: "Leo", lastName: "Costa" },
-              href: "/posts/1",
-            },
-            // A data avatar instead of a module, sized down.
-            {
-              id: "2",
-              avatar: {
-                type: "person",
-                firstName: "Grace",
-                lastName: "Hopper",
-              },
-              avatarSize: "md",
-              title: "Welcome our new joiners 👋",
-              subtitle: "Jul 18",
-              href: "/posts/2",
-            },
-            // Icon avatar, no sender.
-            {
-              id: "3",
-              avatar: { type: "icon", icon: Comment },
-              title: "Summer office hours ☀️",
-              subtitle: "Jul 12",
-              href: "/posts/3",
-            },
-          ],
-        },
-      },
-      {
-        visualization: "event-list",
-        params: {
-          showAllItems: true,
-          events: [
-            // A date range.
-            {
-              title: "Company holiday",
-              subtitle: "2 days off",
-              description:
-                "Offices closed Thursday and Friday for the summer break.",
-              isPending: false,
-              color: "#10B981",
-              fromDate: new Date(2026, 6, 30),
-              toDate: new Date(2026, 6, 31),
-            },
-            // A single day, still pending.
-            {
-              title: "Monthly all-hands",
-              subtitle: "Q3 roadmap update",
-              description: "Q3 roadmap and hiring update — bring questions.",
-              isPending: true,
-              color: "#6366F1",
-              fromDate: new Date(2026, 7, 7),
-            },
-          ],
-        },
-      },
+      homeSlot("indicators", {
+        items: [
+          { label: "On holidays", content: "6" },
+          { label: "Remote", content: "3" },
+        ],
+      }),
+      homeSlot("avatar-list", {
+        avatars: [
+          { firstName: "Ada", lastName: "Lovelace" },
+          { firstName: "Alan", lastName: "Turing" },
+          { firstName: "Grace", lastName: "Hopper" },
+        ],
+        max: 3,
+      }),
+      // status-rows, alert left: faces + remaining count; the away row has no
+      // `href`, so it draws no chevron and stays inert.
+      homeSlot("status-rows", {
+        left: "alert",
+        rows: [
+          {
+            id: "in",
+            title: "Clocked in",
+            subtitle: "4 people",
+            alert: "positive",
+            avatars: [
+              { firstName: "Ada", lastName: "Lovelace" },
+              { firstName: "Alan", lastName: "Turing" },
+            ],
+            remainingCount: 2,
+            href: "/attendance",
+          },
+          {
+            id: "away",
+            title: "Away",
+            subtitle: "2 people",
+            alert: "warning",
+            avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+          },
+        ],
+      }),
+      // status-rows, company left, sized down.
+      homeSlot("status-rows", {
+        left: "company",
+        avatarSize: "sm",
+        rows: [
+          {
+            id: "office",
+            title: "Barcelona office",
+            subtitle: "18 people",
+            avatar: { name: "Factorial" },
+            href: "/offices/bcn",
+          },
+        ],
+      }),
+      // simple-line-list, icon left, trailing counts.
+      homeSlot("simple-line-list", {
+        left: "icon",
+        items: [
+          {
+            id: "bcn",
+            avatar: { icon: PalmTree },
+            title: "Barcelona",
+            count: 3,
+            href: "/positions/bcn",
+          },
+          {
+            id: "mad",
+            avatar: { icon: Comment },
+            title: "Madrid",
+            count: 2,
+            href: "/positions/mad",
+          },
+        ],
+      }),
+      // simple-line-list, person left, sized down; the two secondary voices.
+      homeSlot("simple-line-list", {
+        left: "person",
+        avatarSize: "sm",
+        items: [
+          {
+            id: "ada",
+            avatar: { firstName: "Ada", lastName: "Lovelace" },
+            title: "Ada Lovelace",
+            subtitle: "Engineering",
+            href: "/employees/ada",
+          },
+          {
+            id: "grace",
+            avatar: { firstName: "Grace", lastName: "Hopper" },
+            title: "Grace Hopper",
+            description: "Out until Friday",
+            href: "/employees/grace",
+          },
+        ],
+      }),
+      // simple-line-list, team left.
+      homeSlot("simple-line-list", {
+        left: "team",
+        items: [
+          {
+            id: "payroll",
+            avatar: { name: "Payroll" },
+            title: "Payroll",
+            description: "12 members",
+            href: "/teams/payroll",
+          },
+        ],
+      }),
+      // simple-line-list, file left, mid size.
+      homeSlot("simple-line-list", {
+        left: "file",
+        avatarSize: "md",
+        items: [
+          {
+            id: "contract",
+            avatar: { file: { name: "contract.pdf", type: "application/pdf" } },
+            title: "Contract.pdf",
+            description: "Needs your signature",
+            href: "/documents/1",
+          },
+        ],
+      }),
+      // simple-line-list, flag left.
+      homeSlot("simple-line-list", {
+        left: "flag",
+        items: [
+          {
+            id: "es",
+            avatar: { flag: "es" },
+            title: "Spain",
+            count: 24,
+            href: "/offices/es",
+          },
+        ],
+      }),
+      // simple-line-list, emoji left, all three text voices at once.
+      homeSlot("simple-line-list", {
+        left: "emoji",
+        items: [
+          {
+            id: "pto",
+            avatar: { emoji: "🌴" },
+            title: "Time off",
+            subtitle: "12 days left",
+            description: "Next: Aug 15",
+            href: "/time-off",
+          },
+        ],
+      }),
+      // simple-line-list with NO left at all: plain text rows.
+      homeSlot("simple-line-list", {
+        items: [
+          {
+            id: "requests",
+            title: "Review pending requests",
+            count: 5,
+            href: "/requests",
+          },
+        ],
+      }),
+      // inbox-list, module left: the unread dot and a trailing sender.
+      homeSlot("inbox-list", {
+        left: "module",
+        items: [
+          {
+            id: "deploy",
+            module: "communities",
+            title: "Deploy 2026.7.3 is live 🚀",
+            subtitle: "8:47",
+            unread: true,
+            person: { firstName: "Leo", lastName: "Costa" },
+            href: "/posts/1",
+          },
+          {
+            id: "summer",
+            module: "communities",
+            title: "Summer office hours ☀️",
+            subtitle: "Jul 18",
+            href: "/posts/2",
+          },
+        ],
+      }),
+      // inbox-list, person left, sized down.
+      homeSlot("inbox-list", {
+        left: "person",
+        avatarSize: "md",
+        items: [
+          {
+            id: "joiners",
+            avatar: { firstName: "Grace", lastName: "Hopper" },
+            title: "Welcome our new joiners 👋",
+            subtitle: "Jul 12",
+            href: "/posts/3",
+          },
+        ],
+      }),
+      homeSlot("event-list", {
+        events: [
+          // A date range.
+          {
+            title: "Company holiday",
+            subtitle: "2 days off",
+            description:
+              "Offices closed Thursday and Friday for the summer break.",
+            isPending: false,
+            color: "#10B981",
+            fromDate: new Date(2026, 6, 30),
+            toDate: new Date(2026, 6, 31),
+          },
+          // A single day, still pending.
+          {
+            title: "Monthly all-hands",
+            subtitle: "Q3 roadmap update",
+            description: "Q3 roadmap and hiring update — bring questions.",
+            isPending: true,
+            color: "#6366F1",
+            fromDate: new Date(2026, 7, 7),
+          },
+        ],
+      }),
     ],
   },
 }
