@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.3.2](https://github.com/factorialco/f0/compare/f0-react-v6.3.1...f0-react-v6.3.2) (2026-08-05)
+
+
+### Performance Improvements
+
+* **F0Graph:** stop the camera re-rendering every node on zoom/pan ([#4978](https://github.com/factorialco/f0/issues/4978)) ([484946e](https://github.com/factorialco/f0/commit/484946ea4028da5f06edac141120851e329a4c04))
+
 ## [6.3.1](https://github.com/factorialco/f0/compare/f0-react-v6.3.0...f0-react-v6.3.1) (2026-08-05)
 
 
