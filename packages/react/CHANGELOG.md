@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.6.0](https://github.com/factorialco/f0/compare/f0-react-v6.5.0...f0-react-v6.6.0) (2026-08-05)
+
+
+### Features
+
+* **F0Form:** add showOnlySelectedSection styling option ([#4424](https://github.com/factorialco/f0/issues/4424)) ([99fd5e4](https://github.com/factorialco/f0/commit/99fd5e4cd1a8a329e7d81486a54c8ab50c4a058c))
+
 ## [6.5.0](https://github.com/factorialco/f0/compare/f0-react-v6.4.0...f0-react-v6.5.0) (2026-08-05)
 
 
