@@ -7552,11 +7552,16 @@ export declare type F0AvatarListProps = {
      */
     layout?: "fill" | "compact";
     /**
-     * Controls the scroll behavior of the `+N` overflow popover that lists
-     * collapsed avatars (including their `tooltipDescription` entries).
-     * - `"vertical"` (default): caps the popover height and scrolls vertically.
-     * - `"none"`: lets the popover grow to fit all entries.
-     * @default "vertical"
+     * @deprecated No longer has any effect. The `+N` popover now always caps at
+     * the available viewport height and scrolls, and that scrolling is reachable
+     * by keyboard — neither of the old values is worth selecting. `"vertical"`
+     * used to cap and scroll inside a hover card, where Radix strips every tab
+     * stop on each render, so no keyboard user could operate the scroll (axe
+     * `scrollable-region-focusable`, WCAG 2.1.1); `"none"` avoided that by
+     * letting the card grow without limit, off the screen for a large cluster.
+     * @removeIn 5.0
+     * @migration Remove the prop. The current behaviour is what `"vertical"`
+     * always intended, minus the accessibility defect.
      */
     tooltipScroll?: "vertical" | "none";
 } & F0AvatarListPropsAvatars;
@@ -16803,7 +16808,7 @@ export declare type SurveyDataset = {
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
 
-export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
+export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, placeholders, labels, skipDefaultSection, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -16820,6 +16825,22 @@ export declare type SurveyFormBuilderElement = {
     question: QuestionElement;
 };
 
+export declare type SurveyFormBuilderLabels = {
+    /** Overrides the label/tooltip of the "add" buttons (default: "Add question"). */
+    addQuestion?: string;
+};
+
+export declare type SurveyFormBuilderPlaceholders = {
+    /** Overrides the default "Question title" placeholder shown on empty questions. */
+    questionTitle?: string;
+    /** Overrides the default "Section title" placeholder shown on empty sections. */
+    sectionTitle?: string;
+    /** Overrides the default question description placeholder (pass "" to hide the hint). */
+    questionDescription?: string;
+    /** Overrides the default text-answer preview placeholder (pass "" to hide the hint). */
+    answer?: string;
+};
+
 export declare type SurveyFormBuilderProps = {
     elements: SurveyFormBuilderElement[];
     onChange: (elements: SurveyFormBuilderElement[]) => void;
@@ -16829,6 +16850,16 @@ export declare type SurveyFormBuilderProps = {
     applyingChanges?: boolean;
     useUpload?: UseFileUpload;
     datasets?: SurveyDatasets;
+    /** Per-instance overrides for the builder's title placeholders. Falls back to i18n defaults. */
+    placeholders?: SurveyFormBuilderPlaceholders;
+    /** Per-instance overrides for the builder's action labels. Falls back to i18n defaults. */
+    labels?: SurveyFormBuilderLabels;
+    /**
+     * When true, an empty builder does NOT auto-insert a default section on mount,
+     * letting the consumer start from a blank form. Defaults to the legacy behaviour
+     * (a section is created).
+     */
+    skipDefaultSection?: boolean;
 };
 
 export declare type SurveyFormSubmitResult = {
