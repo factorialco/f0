@@ -200,6 +200,10 @@ const e = {
     join: "Join",
     summary: "Summary"
   },
+  coachmark: {
+    next: "Next",
+    done: "Got it"
+  },
   actions: {
     add: "Add",
     edit: "Edit",

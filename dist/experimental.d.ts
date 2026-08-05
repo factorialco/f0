@@ -38,7 +38,6 @@ import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
-import { F0CoachmarkProps as F0CoachmarkProps_2 } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -2377,21 +2376,168 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
+/**
+ * The single call to action at the bottom of the panel. Both fields are
+ * optional: the coachmark always advances to the next step (or closes on the
+ * last one) when the button is pressed, so `onClick` is only for side effects
+ * and `label` only for overriding the default wording.
+ */
 export declare type CoachmarkAction = {
-    label: string;
-    onClick: () => void;
+    /** Defaults to `Next` on every step but the last, `Got it` on the last. */
+    label?: string;
+    /** Extra side effect. Advancing and closing happen either way. */
+    onClick?: () => void;
+};
+
+declare type CoachmarkBase = CoachmarkPlacement & {
+    /**
+     * Stable identity. Opening again with the same id replaces that coachmark
+     * instead of queueing a second one, so an effect that runs twice shows one
+     * coachmark. Defaults to a generated id.
+     */
+    id?: CoachmarkId;
+    /**
+     * Called when the user closes the coachmark with the close button or Escape,
+     * before the last step is reached. For tracking only — the coachmark closes
+     * itself either way.
+     */
+    onDismiss?: () => void;
+    /**
+     * Called when the user presses the action on the last step. For tracking only
+     * — the coachmark closes itself either way.
+     */
+    onComplete?: () => void;
+};
+
+declare type CoachmarkContent = {
+    /** Headline. Also the accessible name of the panel. */
+    title: string;
+    /** Supporting copy under the title. */
+    description?: string;
+    /** The single call to action, rendered at the bottom right. */
+    action?: CoachmarkAction;
+};
+
+export declare type CoachmarkId = string;
+
+/**
+ * What `coachmarks.open` accepts: either one coachmark, or a sequence of steps
+ * shown one at a time. The two shapes are mutually exclusive.
+ */
+export declare type CoachmarkOptions = CoachmarkSingleOptions | CoachmarkSequenceOptions;
+
+/**
+ * Where the panel sits relative to its target. `side` is a preference: the
+ * panel flips and shifts on its own when it would overflow the viewport.
+ */
+declare type CoachmarkPlacement = {
+    /** Renders a triangle pointing at the target. Defaults to `true`. */
+    arrow?: boolean;
+    /** Preferred side of the target. Defaults to `"bottom"`. */
+    side?: PopoverContentProps["side"];
+    /** Alignment along the target's edge. Defaults to `"center"`. */
+    align?: PopoverContentProps["align"];
+    /** Distance in pixels between the target and the panel. */
+    sideOffset?: number;
 };
 
 /**
- * Position of this coachmark within a sequence, rendered as `current/total`
- * beside the action. Presentational only: the component does not sequence
- * anything itself, so the consumer stays in control of what each step shows and
- * when it advances.
+ * Renders the coachmark at the head of the queue. Mounted by `F0Provider`, so
+ * `coachmarks.open` works from anywhere without a hook or a wrapper component.
  */
-export declare type CoachmarkStep = {
-    current: number;
-    total: number;
+export declare const CoachmarkProvider: ({ children, portalTarget, }: CoachmarkProviderProps) => JSX_2.Element;
+
+declare type CoachmarkProviderProps = {
+    children: React.ReactNode;
+    /**
+     * Selector for the element the panel is portalled into. Defaults to the
+     * top-level overlay root, which keeps the coachmark above app content (the
+     * ApplicationFrame's `isolate`, the fullscreen AI chat) while staying inside
+     * `#f0-layout` so design tokens and the theme class still apply. Falls back to
+     * `document.body` when the element is absent.
+     */
+    portalTarget?: string;
 };
+
+/**
+ * Imperative API for coachmarks: a panel anchored to an element, pointing out a
+ * feature the user has not discovered yet. Can be called from anywhere — no hook
+ * required — as long as `<F0Provider>` (which mounts `CoachmarkProvider`) is in
+ * the tree.
+ *
+ * There is no `open` prop and no component to render: the coachmark closes
+ * itself when the user acknowledges it, and only one is ever on screen — a
+ * second `open` waits its turn.
+ *
+ * @example
+ * import { coachmarks } from "@factorialco/f0-react/experimental"
+ *
+ * coachmarks.open({
+ *   id: "smart-filters",
+ *   targetElement: "#filters-button",
+ *   title: "Filters got smarter",
+ *   description: "Stack filters, then save the combination as a view.",
+ *   action: { label: "Learn more", onClick: () => openDocs() },
+ * })
+ *
+ * @example A walkthrough, one step at a time
+ * coachmarks.open({
+ *   steps: [
+ *     { targetElement: "#filters-button", title: "Start with a filter" },
+ *     { targetElement: "#save-view", title: "Then save it as a view" },
+ *   ],
+ *   onComplete: () => track("tour-finished"),
+ * })
+ */
+export declare const coachmarks: {
+    /**
+     * Show a coachmark, or queue it behind the one already on screen.
+     * @param options One coachmark, or a sequence of `steps`
+     * @returns The id of the coachmark (pass it to `coachmarks.close`)
+     */
+    open: (options: CoachmarkOptions) => CoachmarkId;
+    /**
+     * Remove a coachmark by id, whether it is on screen or still queued. For
+     * closing it programmatically — the user does not need this.
+     * @param id The id returned by `coachmarks.open`
+     */
+    close: (id: CoachmarkId) => void;
+    /** Remove every coachmark, on screen and queued. */
+    closeAll: () => void;
+};
+
+/** A walkthrough: several steps, shown one at a time in order. */
+export declare type CoachmarkSequenceOptions = CoachmarkBase & {
+    /** Shared fallback target for steps that do not name their own. */
+    targetElement?: CoachmarkTarget;
+    steps: CoachmarkStep[];
+    title?: never;
+    description?: never;
+    action?: never;
+};
+
+/** One coachmark: its own copy, anchored to one element. */
+export declare type CoachmarkSingleOptions = CoachmarkBase & CoachmarkContent & {
+    targetElement: CoachmarkTarget;
+    steps?: never;
+};
+
+/**
+ * One step of a walkthrough. Each step can point at its own element and carry
+ * its own placement; anything it leaves out falls back to the value passed
+ * alongside `steps`.
+ */
+export declare type CoachmarkStep = CoachmarkContent & CoachmarkPlacement & {
+    /** Falls back to the `targetElement` passed alongside `steps`. */
+    targetElement?: CoachmarkTarget;
+};
+
+/**
+ * What the coachmark points at: a CSS selector that must match exactly one
+ * element, or the element itself. A selector is re-resolved while the coachmark
+ * is queued, so it may point at something that mounts later.
+ */
+export declare type CoachmarkTarget = string | HTMLElement;
 
 declare type ColId = string;
 
@@ -3381,6 +3527,10 @@ declare const defaultTranslations: {
         readonly attendees: "Attendees";
         readonly join: "Join";
         readonly summary: "Summary";
+    };
+    readonly coachmark: {
+        readonly next: "Next";
+        readonly done: "Got it";
     };
     readonly actions: {
         readonly add: "Add";
@@ -5809,53 +5959,6 @@ export declare type F0ChatVoiceAttachment = {
     mimeType?: string;
     name?: string;
 };
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const F0Coachmark: WithDataTestIdReturnType_3<    {
-({ open, onDismiss, title, description, action, step, arrow, side, align, sideOffset, children, }: F0CoachmarkProps_2): JSX_2.Element;
-displayName: string;
-}>;
-
-export declare interface F0CoachmarkProps {
-    /**
-     * Whether the coachmark is visible. The coachmark is fully controlled: the
-     * consumer owns visibility so it can decide when to show it and persist the
-     * dismissal.
-     */
-    open: boolean;
-    /**
-     * Called when the user dismisses the coachmark, either with the close button
-     * or the Escape key. Clicking outside does **not** dismiss it — a coachmark
-     * stays until it is explicitly acknowledged.
-     */
-    onDismiss: () => void;
-    /** Headline of the coachmark. */
-    title: string;
-    /** Supporting copy shown under the title. */
-    description?: string;
-    /** The single call to action rendered at the bottom, right aligned. */
-    action: CoachmarkAction;
-    /**
-     * Optional position within a sequence, shown as `1/3` to the left of the
-     * action. Use it when the coachmark is one step of a guided walkthrough.
-     */
-    step?: CoachmarkStep;
-    /** Renders a triangle pointing at the anchored element. Defaults to `true`. */
-    arrow?: boolean;
-    /**
-     * Preferred side of the anchor to render on. The coachmark flips and shifts
-     * automatically when it would overflow the viewport.
-     */
-    side?: PopoverContentProps["side"];
-    /** Alignment against the anchor. */
-    align?: PopoverContentProps["align"];
-    /** Distance in pixels between the anchor and the coachmark. */
-    sideOffset?: number;
-    /** The element the coachmark points at. */
-    children: ReactNode;
-}
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -12041,10 +12144,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -12052,9 +12154,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
