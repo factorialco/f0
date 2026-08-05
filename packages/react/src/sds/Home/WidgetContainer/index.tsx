@@ -106,9 +106,10 @@ export interface WidgetContainerProps {
  * how a column is edited.
  *
  * It renders its `children` (freeform content) followed by each widget through
- * `SlotWidget`. In EDIT MODE (`editing`) every widget gains a remove control and
- * the column ends in an "Add widget" placeholder — unless `disableEdition` opts
- * this column out, in which case it never shows either.
+ * `SlotWidget`, ending in an "Add widget" placeholder — adding is ALWAYS on
+ * offer. EDIT MODE (`editing`) is for arranging what's already there: every
+ * widget gains a remove control and becomes draggable. `disableEdition` opts
+ * a column out of all of it, placeholder included.
  *
  * `NewHomeLayout` uses one of these per side; nothing about the column's own
  * width or background lives here (that's the layout's job), so the same
@@ -284,7 +285,10 @@ export function WidgetContainer({
           <Fragment key={widget.id}>{render(widget)}</Fragment>
         ))
       )}
-      {canEdit && onClickAddNewWidget ? (
+      {/* NOT edit-gated: adding is always on offer — edit mode is for
+          arranging and removing what's already there. `disableEdition`
+          columns still never offer it. */}
+      {!disableEdition && onClickAddNewWidget ? (
         <AddWidgetPlaceholder onClick={onClickAddNewWidget} />
       ) : null}
     </div>

@@ -52,13 +52,15 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** View mode: just the widgets — no remove controls, no add placeholder. */
+/**
+ * View mode: the widgets and the add placeholder — adding is ALWAYS on offer;
+ * edit mode is only for arranging what's already there.
+ */
 export const Default: Story = {}
 
 /**
- * Edit mode: the movable widgets wiggle and gain a remove control, and the
- * column ends in the add placeholder. A `locked` widget (the first here) stays
- * inert — no wiggle, no remove.
+ * Edit mode: the movable widgets gain a remove control and become draggable.
+ * A `locked` widget (the first here) stays inert — no drag, no remove.
  */
 export const Editing: Story = {
   args: {
@@ -68,8 +70,8 @@ export const Editing: Story = {
 }
 
 /**
- * `disableEdition` opts a column out entirely: even in edit mode it shows
- * neither remove controls nor the add placeholder.
+ * `disableEdition` opts a column out entirely: no remove controls, no
+ * dragging, and not even the add placeholder.
  */
 export const EditingDisabled: Story = {
   args: { editing: true, disableEdition: true },

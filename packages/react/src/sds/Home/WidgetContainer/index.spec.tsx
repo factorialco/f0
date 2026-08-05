@@ -22,7 +22,7 @@ const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
 const WIDGETS = [widget("clock"), widget("events")]
 
 describe("WidgetContainer", () => {
-  test("view mode offers no editing affordances", () => {
+  test("view mode offers no arranging — but adding is always on offer", () => {
     zeroRender(
       <WidgetContainer
         widgets={WIDGETS}
@@ -32,10 +32,10 @@ describe("WidgetContainer", () => {
     )
 
     expect(screen.queryAllByLabelText("Remove widget")).toHaveLength(0)
-    expect(screen.queryByText(/Add widget/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Add widget/)).toBeInTheDocument()
   })
 
-  test("edit mode gives every widget a remove control and ends in the add placeholder", () => {
+  test("edit mode gives every widget a remove control", () => {
     zeroRender(
       <WidgetContainer
         widgets={WIDGETS}
@@ -49,7 +49,7 @@ describe("WidgetContainer", () => {
     expect(screen.getByText(/Add widget/)).toBeInTheDocument()
   })
 
-  test("disableEdition opts the column out even in edit mode", () => {
+  test("disableEdition opts the column out of everything, adding included", () => {
     zeroRender(
       <WidgetContainer
         widgets={WIDGETS}
