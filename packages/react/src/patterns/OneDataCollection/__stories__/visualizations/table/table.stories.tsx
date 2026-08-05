@@ -224,6 +224,151 @@ export const TableWithFocusedColumn: Story = {
   },
 }
 
+export const TableWithFocusedColumnInCollapsibleGroups: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`focused` composes with collapsible header groups: when the focused column belongs to a group, the group's spanning header is emphasized too, and the emphasis survives collapsing the group as long as the focused column stays visible. Here every month starts collapsed except May, whose total column is focused, and `scrollToFocusedColumn` brings it into view.",
+      },
+    },
+  },
+  render: () => {
+    const months = ["jan", "feb", "mar", "apr", "may", "jun"] as const
+    type Month = (typeof months)[number]
+
+    const monthLabels: Record<Month, string> = {
+      jan: "January",
+      feb: "February",
+      mar: "March",
+      apr: "April",
+      may: "May",
+      jun: "June",
+    }
+
+    const focusedMonth: Month = "may"
+
+    const monthly = (base: number) =>
+      Object.fromEntries(
+        months.map((month, index) => {
+          const salaries = base + index * 10
+          const bonuses = Math.round(base / 10) + index
+          return [month, { salaries, bonuses, total: salaries + bonuses }]
+        })
+      ) as Record<Month, { salaries: number; bonuses: number; total: number }>
+
+    const records = [
+      { id: 1, team: "Engineering", months: monthly(310) },
+      { id: 2, team: "Design", months: monthly(80) },
+      { id: 3, team: "Sales", months: monthly(160) },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+    })
+
+    return (
+      <div style={{ maxWidth: 700 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 1,
+                scrollToFocusedColumn: true,
+                headerGroups: Object.fromEntries(
+                  months.map((month) => [
+                    month,
+                    {
+                      label: monthLabels[month],
+                      // Only the total stays visible while collapsed
+                      collapsedColumns: [`${month}-total`],
+                      defaultCollapsed: month !== focusedMonth,
+                    },
+                  ])
+                ),
+                columns: [
+                  {
+                    id: "team",
+                    label: "Team",
+                    width: 160,
+                    render: (item) => item.team,
+                  },
+                  ...months.flatMap((month) => [
+                    {
+                      id: `${month}-salaries`,
+                      label: "Salaries",
+                      width: 110,
+                      align: "right" as const,
+                      headerGroupId: month,
+                      render: (item: (typeof records)[number]) =>
+                        item.months[month].salaries,
+                    },
+                    {
+                      id: `${month}-bonuses`,
+                      label: "Bonuses",
+                      width: 110,
+                      align: "right" as const,
+                      headerGroupId: month,
+                      render: (item: (typeof records)[number]) =>
+                        item.months[month].bonuses,
+                    },
+                    {
+                      id: `${month}-total`,
+                      label: "Total",
+                      width: 110,
+                      align: "right" as const,
+                      headerGroupId: month,
+                      focused: month === focusedMonth,
+                      render: (item: (typeof records)[number]) =>
+                        item.months[month].total,
+                    },
+                  ]),
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The focused column's group header is emphasized along with the column.
+    const mayGroup = await canvas.findByRole("button", { name: "May" })
+    expect(mayGroup.closest("th")?.className).toContain(
+      "bg-f1-background-secondary"
+    )
+
+    // Both the group header and the column header carry the marker; the
+    // column's own header is the last one.
+    const focusedHeaders = canvasElement.querySelectorAll("th[data-focused]")
+    const focusedHeader = focusedHeaders[focusedHeaders.length - 1]
+    expect(focusedHeader?.className).toContain("bg-f1-background-secondary")
+
+    // The table auto-scrolls to the focused column.
+    const scroller =
+      focusedHeader?.closest("table")?.parentElement?.parentElement
+    await waitFor(() => expect(scroller?.scrollLeft ?? 0).toBeGreaterThan(0))
+
+    // Collapsing the focused month keeps its visible total column emphasized.
+    await userEvent.click(mayGroup)
+    await waitFor(() =>
+      expect(mayGroup).toHaveAttribute("aria-expanded", "false")
+    )
+    await waitFor(() => {
+      const collapsedFocused =
+        canvasElement.querySelectorAll("th[data-focused]")
+      expect(collapsedFocused.length).toBeGreaterThan(0)
+      expect(collapsedFocused[collapsedFocused.length - 1].className).toContain(
+        "bg-f1-background-secondary"
+      )
+    })
+  },
+}
+
 export const TableColumnOrderingAndHidden: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
