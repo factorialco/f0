@@ -443,8 +443,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // mask over those washes the glyphs themselves out rather than
             // hinting at content past an edge. The fade belongs to the expanded
             // rail, where the content is tall cards.
+            // `-m-1 p-1`: the hasUpdates dot pokes 2px past the 40px glyphs,
+            // and the scrollport would clip it — bleed the scrollport out by
+            // 4px (padding puts the glyphs back) so the dot stays inside it.
             <aside
-              className="flex min-h-0 flex-col gap-2 overflow-y-auto"
+              className="-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1"
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
