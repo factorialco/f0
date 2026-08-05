@@ -120,6 +120,23 @@ export function useHeaderCollapseDriver(): {
    */
   const engaged = useRef(false)
 
+  /*
+   * How far into the collapse we are, in pixels of scrolling, and the position
+   * that was last read.
+   *
+   * The collapse follows how far the reader has scrolled *since they last changed
+   * direction*, not where they are in the page. Mapping the absolute position
+   * instead looks fine going down and is broken coming back up: a reader 400px
+   * into a page is pinned at fully condensed, so scrolling up does nothing at all
+   * until they cross back under the collapse distance. The header sits there
+   * frozen for hundreds of pixels, which reads as stuck.
+   *
+   * Accumulating the travel means a reversal answers immediately, wherever it
+   * happens, and the header reopens over the same distance it closed.
+   */
+  const travelled = useRef(0)
+  const lastTop = useRef(0)
+
   useEffect(() => {
     const body = bodyRef.current
     if (!body || !hasHeader) {
@@ -131,8 +148,14 @@ export function useHeaderCollapseDriver(): {
     const forget = () => {
       scrollerRef.current = null
       engaged.current = false
+      travelled.current = 0
+      lastTop.current = 0
       setProgress(0)
     }
+
+    /** Whether this scroller has enough range to be worth condensing at all. */
+    const worthCondensing = (scroller: HTMLElement) =>
+      scroller.scrollHeight - scroller.clientHeight > COLLAPSE_OVER
 
     if (reducedMotion) {
       // Nothing to watch: a reader who asked for less motion gets a header that
@@ -146,18 +169,27 @@ export function useHeaderCollapseDriver(): {
     // stops arriving when the tab is hidden and frames stop.
     const measure = (scroller: HTMLElement) => {
       const top = scroller.scrollTop
+      const delta = top - lastTop.current
+      lastTop.current = top
 
-      // Back at the top the header has reopened, so the previous verdict is stale
-      // and the range can be trusted again. `<=` rather than `===`: elastic
-      // overscroll reports a negative position, and that is still the top.
-      if (top <= 0) engaged.current = false
-
-      if (!engaged.current) {
-        engaged.current =
-          scroller.scrollHeight - scroller.clientHeight > COLLAPSE_OVER
+      if (top <= 0) {
+        // At the very top the header is open, whatever the reader did to get here.
+        // `<=` rather than `===`: elastic overscroll reports a negative position,
+        // and that is still the top. The range can be trusted again from here.
+        travelled.current = 0
+        engaged.current = false
+      } else {
+        travelled.current = Math.min(
+          COLLAPSE_OVER,
+          Math.max(0, travelled.current + delta)
+        )
       }
 
-      setProgress(engaged.current ? clamp(top / COLLAPSE_OVER) : 0)
+      if (!engaged.current) engaged.current = worthCondensing(scroller)
+
+      setProgress(
+        engaged.current ? clamp(travelled.current / COLLAPSE_OVER) : 0
+      )
     }
 
     /*
@@ -194,11 +226,20 @@ export function useHeaderCollapseDriver(): {
 
     /*
      * Mounting mid-scroll is normal, since a route change keeps the scroll
-     * position. This measures without remembering: at mount the content may not
-     * have rendered its scroller yet, and latching the body as "the scroller"
-     * would then reject the real one when it arrives.
+     * position. Seeded rather than measured, because there is no travel to
+     * accumulate yet, and because a restored scroll is deep in the page: a page
+     * that merely starts a handful of pixels down has not been scrolled, and
+     * condensing for those pixels leaves an untouched page looking half closed.
+     *
+     * Nothing is remembered as the scroller here. At mount the content may not
+     * have rendered its own yet, and latching the body would then reject the real
+     * one when it arrives.
      */
-    measure(findPageScroller(body))
+    const atMount = findPageScroller(body)
+    lastTop.current = atMount.scrollTop
+    travelled.current = atMount.scrollTop >= COLLAPSE_OVER ? COLLAPSE_OVER : 0
+    engaged.current = worthCondensing(atMount)
+    setProgress(engaged.current ? travelled.current / COLLAPSE_OVER : 0)
 
     body.addEventListener("scroll", onScroll, { capture: true, passive: true })
 

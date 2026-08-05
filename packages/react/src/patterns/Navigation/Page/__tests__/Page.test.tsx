@@ -167,6 +167,84 @@ describe("Page collapse driver", () => {
     listen.restore()
   })
 
+  it("reopens as soon as the reader turns back, wherever they are", () => {
+    // The bug this exists for: mapping the absolute position pins the header at
+    // fully condensed anywhere past the collapse distance, so a reader 400px down
+    // could scroll up for 300px and watch nothing happen. It follows travel since
+    // the last change of direction instead.
+    renderPage()
+    tall()
+
+    scrollTo(400)
+    expect(progressOf()).toBe("1")
+
+    scrollTo(352)
+    expect(progressOf()).toBe("0.5")
+
+    scrollTo(304)
+    expect(progressOf()).toBe("0")
+  })
+
+  it("closes again on the way back down from mid-collapse", () => {
+    renderPage()
+    tall()
+
+    scrollTo(400)
+    scrollTo(352)
+    expect(progressOf()).toBe("0.5")
+
+    // Reversing twice inside one gesture has to keep answering, not latch.
+    scrollTo(376)
+    expect(progressOf()).toBe("0.75")
+
+    scrollTo(400)
+    expect(progressOf()).toBe("1")
+  })
+
+  it("does not condense a page that merely mounts a few pixels down", () => {
+    // A restored scroll is deep in the page. Storybook, an anchor, or a stray
+    // pixel of overscroll are not restorations, and condensing for them leaves an
+    // untouched page looking half closed.
+    //
+    // Blanket rather than per element: the body does not exist until the render
+    // whose mount read is under test, so it cannot be given metrics beforehand.
+    Object.defineProperty(HTMLDivElement.prototype, "scrollTop", {
+      configurable: true,
+      get: () => 5,
+    })
+    Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {
+      configurable: true,
+      get: () => 1000,
+    })
+    Object.defineProperty(HTMLDivElement.prototype, "clientHeight", {
+      configurable: true,
+      get: () => 600,
+    })
+
+    renderPage()
+
+    expect(progressOf()).toBe("0")
+  })
+
+  it("still opens condensed when the restored scroll is a real one", () => {
+    Object.defineProperty(HTMLDivElement.prototype, "scrollTop", {
+      configurable: true,
+      get: () => 300,
+    })
+    Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {
+      configurable: true,
+      get: () => 1000,
+    })
+    Object.defineProperty(HTMLDivElement.prototype, "clientHeight", {
+      configurable: true,
+      get: () => 600,
+    })
+
+    renderPage()
+
+    expect(progressOf()).toBe("1")
+  })
+
   it("leaves a page that barely scrolls alone", () => {
     renderPage()
     short()
