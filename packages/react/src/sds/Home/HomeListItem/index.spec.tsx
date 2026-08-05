@@ -39,6 +39,27 @@ describe("HomeListItem", () => {
     expect(container.querySelector(".relative.shrink-0")).toBeNull()
   })
 
+  test("sizes the data avatar via avatarSize, lg by default", () => {
+    const { container, rerender } = zeroRender(
+      <HomeListItem
+        avatar={{ type: "person", firstName: "Ada", lastName: "Lovelace" }}
+        title="Time off"
+      />
+    )
+
+    expect(container.querySelector(".size-10")).not.toBeNull()
+
+    rerender(
+      <HomeListItem
+        avatar={{ type: "person", firstName: "Ada", lastName: "Lovelace" }}
+        avatarSize="sm"
+        title="Time off"
+      />
+    )
+    expect(container.querySelector(".size-6")).not.toBeNull()
+    expect(container.querySelector(".size-10")).toBeNull()
+  })
+
   test("fills the right slot with whatever the variant hands it", () => {
     zeroRender(<HomeListItem title="row" right={<span>trailing</span>} />)
 

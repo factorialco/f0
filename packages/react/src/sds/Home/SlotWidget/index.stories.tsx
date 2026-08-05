@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { Comment, PalmTree } from "@/icons/app"
+
 import { SlotWidget } from "./index"
 
 const meta = {
@@ -21,7 +23,12 @@ type Story = StoryObj<typeof meta>
 /**
  * Every DEFAULT slot, stacked in one widget with the dashed divider between
  * consecutive slots: `indicators`, `avatar-list`, `status-rows`,
- * `simple-line-list`, `inbox-list` and `event-list`.
+ * `simple-line-list`, `inbox-list` and `event-list` — and, within the row-based
+ * slots, every case a row can take: an icon shorthand, EVERY avatar type
+ * (person, team, company, file, flag, emoji), an `avatarSize` override, the
+ * three text voices (title, inline subtitle, description), a count, an unread
+ * dot, a trailing sender, trailing faces with a remaining count, and rows with
+ * and without an `href` (with → chevron, without → inert).
  */
 export const AllSlots: Story = {
   args: {
@@ -33,7 +40,12 @@ export const AllSlots: Story = {
     slots: [
       {
         visualization: "indicators",
-        params: { items: [{ label: "On holidays", content: "6" }] },
+        params: {
+          items: [
+            { label: "On holidays", content: "6" },
+            { label: "Remote", content: "3" },
+          ],
+        },
       },
       {
         visualization: "avatar-list",
@@ -50,6 +62,7 @@ export const AllSlots: Story = {
         visualization: "status-rows",
         params: {
           rows: [
+            // Alert glyph + trailing faces + remaining count, clickable.
             {
               id: "in",
               title: "Clocked in",
@@ -59,13 +72,25 @@ export const AllSlots: Story = {
                 { firstName: "Ada", lastName: "Lovelace" },
                 { firstName: "Alan", lastName: "Turing" },
               ],
+              remainingCount: 2,
+              href: "/attendance",
             },
+            // No `href` — an inert row, no chevron.
             {
               id: "away",
               title: "Away",
               subtitle: "2 people",
               alert: "warning",
               avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+            },
+            // A data avatar instead of an alert, sized down.
+            {
+              id: "office",
+              title: "Barcelona office",
+              subtitle: "18 people",
+              avatar: { type: "company", name: "Factorial" },
+              avatarSize: "sm",
+              href: "/offices/bcn",
             },
           ],
         },
@@ -75,8 +100,64 @@ export const AllSlots: Story = {
         params: {
           showAllItems: true,
           items: [
-            { id: "1", title: "Barcelona", count: 3, href: "/positions/bcn" },
-            { id: "2", title: "Madrid", count: 2, href: "/positions/mad" },
+            // Icon shorthand + count.
+            {
+              id: "icon",
+              icon: PalmTree,
+              title: "Barcelona",
+              count: 3,
+              href: "/positions/bcn",
+            },
+            // Person avatar, sized down, inline subtitle.
+            {
+              id: "person",
+              avatar: {
+                type: "person",
+                firstName: "Ada",
+                lastName: "Lovelace",
+              },
+              avatarSize: "sm",
+              title: "Ada Lovelace",
+              subtitle: "Engineering",
+              href: "/employees/ada",
+            },
+            // Team avatar + description line.
+            {
+              id: "team",
+              avatar: { type: "team", name: "Payroll" },
+              title: "Payroll",
+              description: "12 members",
+              href: "/teams/payroll",
+            },
+            // File avatar, mid size.
+            {
+              id: "file",
+              avatar: {
+                type: "file",
+                file: { name: "contract.pdf", type: "application/pdf" },
+              },
+              avatarSize: "md",
+              title: "Contract.pdf",
+              description: "Needs your signature",
+              href: "/documents/1",
+            },
+            // Flag avatar + count.
+            {
+              id: "flag",
+              avatar: { type: "flag", flag: "es" },
+              title: "Spain",
+              count: 24,
+              href: "/offices/es",
+            },
+            // Emoji avatar with all three text voices at once.
+            {
+              id: "emoji",
+              avatar: { type: "emoji", emoji: "🌴" },
+              title: "Time off",
+              subtitle: "12 days left",
+              description: "Next: Aug 15",
+              href: "/time-off",
+            },
           ],
         },
       },
@@ -85,19 +166,36 @@ export const AllSlots: Story = {
         params: {
           showAllItems: true,
           items: [
+            // Module glyph + unread dot + trailing sender.
             {
               id: "1",
               module: "communities",
               title: "Deploy 2026.7.3 is live 🚀",
               subtitle: "8:47",
+              unread: true,
+              person: { firstName: "Leo", lastName: "Costa" },
               href: "/posts/1",
             },
+            // A data avatar instead of a module, sized down.
             {
               id: "2",
-              module: "communities",
-              title: "Summer office hours ☀️",
+              avatar: {
+                type: "person",
+                firstName: "Grace",
+                lastName: "Hopper",
+              },
+              avatarSize: "md",
+              title: "Welcome our new joiners 👋",
               subtitle: "Jul 18",
               href: "/posts/2",
+            },
+            // Icon avatar, no sender.
+            {
+              id: "3",
+              avatar: { type: "icon", icon: Comment },
+              title: "Summer office hours ☀️",
+              subtitle: "Jul 12",
+              href: "/posts/3",
             },
           ],
         },
@@ -107,6 +205,7 @@ export const AllSlots: Story = {
         params: {
           showAllItems: true,
           events: [
+            // A date range.
             {
               title: "Company holiday",
               subtitle: "2 days off",
@@ -117,11 +216,12 @@ export const AllSlots: Story = {
               fromDate: new Date(2026, 6, 30),
               toDate: new Date(2026, 6, 31),
             },
+            // A single day, still pending.
             {
               title: "Monthly all-hands",
               subtitle: "Q3 roadmap update",
               description: "Q3 roadmap and hiring update — bring questions.",
-              isPending: false,
+              isPending: true,
               color: "#6366F1",
               fromDate: new Date(2026, 7, 7),
             },

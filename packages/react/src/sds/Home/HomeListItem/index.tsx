@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
+import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
   F0AvatarList,
@@ -32,6 +33,8 @@ type PersonAvatars = Extract<F0AvatarListProps, { type: "person" }>["avatars"]
 export interface HomeListItemProps {
   /** Left slot, as data: any avatar type. */
   avatar?: AvatarVariant
+  /** The data avatar's size — `left` nodes carry their own sizing. */
+  avatarSize?: AvatarSize
   /** Left slot, as a node — wins over `avatar`. For the variants' own glyphs. */
   left?: ReactNode
   title: string
@@ -50,6 +53,7 @@ export interface HomeListItemProps {
 
 export function HomeListItem({
   avatar,
+  avatarSize = "lg",
   left,
   title,
   subtitle,
@@ -60,7 +64,7 @@ export function HomeListItem({
   showChevron = onClick != null,
 }: HomeListItemProps) {
   const leading =
-    left ?? (avatar ? <F0Avatar avatar={avatar} size="lg" /> : null)
+    left ?? (avatar ? <F0Avatar avatar={avatar} size={avatarSize} /> : null)
 
   const content = (
     <>
@@ -116,7 +120,7 @@ export function HomeListItem({
 /** A one-line row: icon or any avatar, title, an optional count. */
 export interface SimpleLineListItemProps extends Pick<
   HomeListItemProps,
-  "avatar" | "title" | "subtitle" | "description" | "onClick"
+  "avatar" | "avatarSize" | "title" | "subtitle" | "description" | "onClick"
 > {
   /** Shorthand for `avatar: { type: "icon", icon }`. */
   icon?: IconType
@@ -141,7 +145,7 @@ export function SimpleLineListItem({
 /** A message-like row: module glyph or avatar, title, its time below, a sender. */
 export interface InboxListItemProps extends Pick<
   HomeListItemProps,
-  "avatar" | "title" | "unread" | "onClick"
+  "avatar" | "avatarSize" | "title" | "unread" | "onClick"
 > {
   /** The module the message belongs to — wins over `avatar`. */
   module?: ModuleId
@@ -176,7 +180,7 @@ export function InboxListItem({
 /** A who-is-where row: an alert or any avatar, a count subtitle, faces trailing. */
 export interface StatusListItemProps extends Pick<
   HomeListItemProps,
-  "avatar" | "title" | "onClick"
+  "avatar" | "avatarSize" | "title" | "onClick"
 > {
   /** Alert glyph on the left — wins over `avatar`. */
   alert?: Parameters<typeof F0AvatarAlert>[0]["type"]
