@@ -384,6 +384,11 @@ export function useGraphRenderModel<T>({
   ])
 
   // ── Node-array windowing ──
+  // Ids that have ever been materialized into React Flow. Once a node has been
+  // rendered (seen + hydrated), we keep it in the window so it never re-enters
+  // React Flow un-measured on a later pan — see the sticky union below.
+  const seenWindowedIdsRef = useRef<Set<string>>(new Set())
+
   // Ids of the LAYOUT nodes (graph pills + expanders) whose box intersects the
   // padded viewport. `null` means "no windowing" (feature off, or viewport not
   // yet measured) → render everything, which is also what the initial `fitView`
@@ -430,6 +435,25 @@ export function useGraphRenderModel<T>({
         parentId = nodeMap.get(parentId)?.parentId ?? null
       }
     }
+
+    // ── Sticky window ──
+    // Keep every node we have already materialized so it never re-enters React
+    // Flow un-measured on a later pan. When a node is re-added un-measured, React
+    // Flow can't resolve the endpoints of the edges touching it and drops them
+    // from the DOM for that commit — so a node you have ALREADY seen connected
+    // flickers/goes disconnected while panning (the "connections get lost"
+    // report). Only nodes actually seen are retained, so never-seen parts of a
+    // flat or deep tree stay windowed out and un-hydrated — the whole point of
+    // windowing. The set is pruned to ids still present in the current layout so
+    // it can't grow unbounded or resurrect collapsed nodes; it grows only with
+    // the region the user has actually looked at.
+    const layoutIds = new Set(layout.nodes.map((pn) => pn.id))
+    for (const seenId of seenWindowedIdsRef.current) {
+      if (layoutIds.has(seenId)) ids.add(seenId)
+      else seenWindowedIdsRef.current.delete(seenId)
+    }
+    for (const id of ids) seenWindowedIdsRef.current.add(id)
+
     return ids
   }, [
     enableNodeWindowing,
@@ -529,16 +553,6 @@ export function useGraphRenderModel<T>({
           y: (pos?.y ?? 0) * yStretch,
         },
         width: BASE_W,
-        height: BASE_H,
-        // Seed the measured size from the layout so React Flow can route this
-        // node's edges on the SAME commit it is added, instead of waiting for
-        // its ResizeObserver. Without it, a node that windowing pans into view
-        // is handed to React Flow un-measured for one commit; edges touching it
-        // resolve to a null position and are dropped from the DOM that frame, so
-        // connecting lines flicker/vanish while panning a large or deep tree
-        // (the on-screen node stays, its reporting line disappears). The real
-        // DOM measurement still runs and overwrites this with the exact size.
-        measured: { width: BASE_W, height: BASE_H },
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
