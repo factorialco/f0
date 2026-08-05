@@ -51,7 +51,9 @@ export const SortableWidget = ({
     // dropping x here is the same thing `restrictToVerticalAxis` does, without
     // taking on @dnd-kit/modifiers for it.
     transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
-    transition,
+    // dnd-kit only supplies a transition WHILE sorting; on release it is null,
+    // so the card would snap to its slot. The fallback carries it there.
+    transition: transition ?? "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
     // The dragged card rides above its neighbours so the gap it will land in
     // stays readable underneath.
     zIndex: isDragging ? 10 : undefined,
