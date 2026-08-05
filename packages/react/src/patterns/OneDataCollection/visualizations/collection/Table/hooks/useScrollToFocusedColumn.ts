@@ -21,8 +21,9 @@ type UseScrollToFocusedColumnOptions = {
 /**
  * Scrolls the table's horizontal scroll container to the focused column, once
  * the table has rendered — and again if the focused column changes. Focused
- * header cells carry a `data-focused` marker; the last match is the column's
- * own header (the group row, when present, is matched first).
+ * header cells carry a `data-focused` marker; the leftmost one wins, so a
+ * focused header group (where every column carries the marker) scrolls to the
+ * group's start.
  */
 export const useScrollToFocusedColumn = (
   containerRef: RefObject<HTMLDivElement | null>,
@@ -41,9 +42,13 @@ export const useScrollToFocusedColumn = (
     const container = containerRef.current
     if (!container) return
 
-    const markers = container.querySelectorAll<HTMLElement>("th[data-focused]")
-    const target = markers[markers.length - 1]
-    if (!target) return
+    const markers = Array.from(
+      container.querySelectorAll<HTMLElement>("th[data-focused]")
+    )
+    if (markers.length === 0) return
+    const target = markers.reduce((leftmost, marker) =>
+      marker.offsetLeft < leftmost.offsetLeft ? marker : leftmost
+    )
 
     const scrollContainer = findScrollContainer(target)
     if (!scrollContainer) return

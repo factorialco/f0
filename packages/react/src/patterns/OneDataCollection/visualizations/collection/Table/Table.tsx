@@ -151,9 +151,39 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
-  // Only one column may be focused: the first focused column (in definition
-  // order) wins and the rest are ignored.
+  // Only one focus area is allowed: a focused header group focuses every
+  // column in it and takes precedence; otherwise the first focused column (in
+  // definition order) wins and the rest are ignored.
   const normalizedColumns = useMemo(() => {
+    const focusedGroupIds = Object.entries(headerGroupsOption ?? {})
+      .filter(
+        ([, definition]) => typeof definition !== "string" && definition.focused
+      )
+      .map(([groupId]) => groupId)
+
+    if (focusedGroupIds.length > 1) {
+      console.warn(
+        "Only one header group can be focused: keeping the first focused group and ignoring the rest"
+      )
+    }
+
+    const focusedGroupId = focusedGroupIds[0]
+    if (focusedGroupId) {
+      if (
+        originalColumns.some(
+          (column) => column.focused && column.headerGroupId !== focusedGroupId
+        )
+      ) {
+        console.warn(
+          "A header group is focused: column-level focus outside the group is ignored"
+        )
+      }
+      return originalColumns.map((column) => ({
+        ...column,
+        focused: column.headerGroupId === focusedGroupId,
+      }))
+    }
+
     const focusedIndex = originalColumns.findIndex((column) => column.focused)
     const extraFocused = originalColumns.some(
       (column, index) => column.focused && index !== focusedIndex
@@ -168,7 +198,7 @@ export const TableCollection = <
         ? column
         : { ...column, focused: false }
     )
-  }, [originalColumns])
+  }, [originalColumns, headerGroupsOption])
 
   // Sorted and hidden columns
   const { columns: orderedColumns } = useColumns(

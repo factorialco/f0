@@ -229,7 +229,7 @@ export const TableWithFocusedColumnInCollapsibleGroups: Story = {
     docs: {
       description: {
         story:
-          "`focused` composes with collapsible header groups: when the focused column belongs to a group, the group's spanning header is emphasized too, and the emphasis survives collapsing the group as long as the focused column stays visible. Here every month starts collapsed except May, whose total column is focused, and `scrollToFocusedColumn` brings it into view.",
+          "A whole header group can be focused by setting `focused` on its definition: the spanning header and every column in the group get the emphasis, and it survives collapsing the group. A focused group is the single focus area — column-level `focused` flags outside it are ignored. Here every month starts collapsed except May, which is focused, and `scrollToFocusedColumn` scrolls to the group's start.",
       },
     },
   },
@@ -285,6 +285,8 @@ export const TableWithFocusedColumnInCollapsibleGroups: Story = {
                       // Only the total stays visible while collapsed
                       collapsedColumns: [`${month}-total`],
                       defaultCollapsed: month !== focusedMonth,
+                      // Focuses the spanning header and every column in the group
+                      focused: month === focusedMonth,
                     },
                   ])
                 ),
@@ -320,7 +322,6 @@ export const TableWithFocusedColumnInCollapsibleGroups: Story = {
                       width: 110,
                       align: "right" as const,
                       headerGroupId: month,
-                      focused: month === focusedMonth,
                       render: (item: (typeof records)[number]) =>
                         item.months[month].total,
                     },
@@ -336,21 +337,22 @@ export const TableWithFocusedColumnInCollapsibleGroups: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // The focused column's group header is emphasized along with the column.
+    // The focused group's spanning header is emphasized.
     const mayGroup = await canvas.findByRole("button", { name: "May" })
     expect(mayGroup.closest("th")?.className).toContain(
       "bg-f1-background-secondary"
     )
 
-    // Both the group header and the column header carry the marker; the
-    // column's own header is the last one.
+    // Every column of the focused group carries the emphasis and the marker:
+    // the group header plus its three expanded columns.
     const focusedHeaders = canvasElement.querySelectorAll("th[data-focused]")
-    const focusedHeader = focusedHeaders[focusedHeaders.length - 1]
-    expect(focusedHeader?.className).toContain("bg-f1-background-secondary")
+    expect(focusedHeaders.length).toBe(4)
+    focusedHeaders.forEach((header) => {
+      expect(header.className).toContain("bg-f1-background-secondary")
+    })
 
-    // The table auto-scrolls to the focused column.
-    const scroller =
-      focusedHeader?.closest("table")?.parentElement?.parentElement
+    // The table auto-scrolls to the focused group.
+    const scroller = mayGroup.closest("table")?.parentElement?.parentElement
     await waitFor(() => expect(scroller?.scrollLeft ?? 0).toBeGreaterThan(0))
 
     // Collapsing the focused month keeps its visible total column emphasized.
@@ -361,7 +363,8 @@ export const TableWithFocusedColumnInCollapsibleGroups: Story = {
     await waitFor(() => {
       const collapsedFocused =
         canvasElement.querySelectorAll("th[data-focused]")
-      expect(collapsedFocused.length).toBeGreaterThan(0)
+      // The group header plus the remaining total column.
+      expect(collapsedFocused.length).toBe(2)
       expect(collapsedFocused[collapsedFocused.length - 1].className).toContain(
         "bg-f1-background-secondary"
       )

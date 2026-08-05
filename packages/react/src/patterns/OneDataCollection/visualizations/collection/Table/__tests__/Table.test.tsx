@@ -516,6 +516,114 @@ describe("TableCollection", () => {
       )
     })
 
+    it("focuses every column of a focused header group", async () => {
+      const groupedColumns = [
+        { label: "name", render: (item: Person) => item.name },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+        },
+        {
+          label: "displayName",
+          render: (item: Person) => item.displayName,
+          headerGroupId: "contact",
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ contact: { label: "Contact", focused: true } }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const contactGroupHeader = screen.getByRole("columnheader", {
+        name: "Contact",
+      })
+      expect(contactGroupHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const displayNameHeader = screen.getByRole("columnheader", {
+        name: "displayName",
+      })
+      expect(displayNameHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+
+      const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
+      expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
+    })
+
+    it("ignores column focus outside a focused header group and warns", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      const groupedColumns = [
+        { label: "name", render: (item: Person) => item.name, focused: true },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+        },
+      ]
+
+      try {
+        render(
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={groupedColumns}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+            headerGroups={{ contact: { label: "Contact", focused: true } }}
+          />
+        )
+
+        await waitFor(() => {
+          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+        })
+
+        expect(warn).toHaveBeenCalledWith(
+          "A header group is focused: column-level focus outside the group is ignored"
+        )
+
+        const nameHeader = screen.getByRole("columnheader", { name: "name" })
+        expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+
+        const emailHeader = screen.getByRole("columnheader", { name: "email" })
+        expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      } finally {
+        warn.mockRestore()
+      }
+    })
+
     it("scrolls the table to the focused column when scrollToFocusedColumn is set", async () => {
       const scrollTo = vi.fn()
       const originalScrollTo = HTMLElement.prototype.scrollTo
