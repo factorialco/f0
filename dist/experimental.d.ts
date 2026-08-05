@@ -7354,6 +7354,14 @@ declare type HeaderGroupDefinition = {
      * @default false
      */
     defaultCollapsed?: boolean;
+    /**
+     * Visually focuses the whole group: its spanning header and every column in
+     * it render with the focused emphasis. Only one focus area is allowed in
+     * the table — a focused group takes precedence, and column-level `focused`
+     * flags outside it are ignored. Combine with the `scrollToFocusedColumn`
+     * visualization option to also scroll the table to the group.
+     */
+    focused?: boolean;
 };
 
 export declare interface HeaderProps {
@@ -10544,8 +10552,9 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      * gray background, and the spanning header of its group (if any) is
      * emphasized too. Only one column may be focused — when several columns
      * set this, the first one (in definition order) wins and the rest are
-     * ignored. Combine with the `scrollToFocusedColumn` visualization option
-     * to also scroll the table to this column.
+     * ignored. To focus a whole header group instead, set `focused` on its
+     * {@link HeaderGroupDefinition}. Combine with the `scrollToFocusedColumn`
+     * visualization option to also scroll the table to this column.
      */
     focused?: boolean;
     /**
