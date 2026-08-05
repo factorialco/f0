@@ -53,7 +53,6 @@ import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { getColumnId, useColumns } from "./hooks/useColums"
 import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
-import { useFocusedColumns } from "./hooks/useFocusedColumns"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
@@ -150,12 +149,9 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
-  // Focus resolved onto the columns: one focused column, or a whole group.
-  const focusedColumns = useFocusedColumns(originalColumns, headerGroupsOption)
-
   // Sorted and hidden columns
   const { columns: orderedColumns } = useColumns(
-    focusedColumns,
+    originalColumns,
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,

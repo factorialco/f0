@@ -1088,7 +1088,7 @@ export const TableWithFocusedHeaderGroup: Story = {
     docs: {
       description: {
         story:
-          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background, and the emphasis survives collapsing the group. A focused group is the table's single focus area — column-level `focused` flags outside it are ignored (a single column can also be focused directly via the `focused` column option when no group is focused). Here a full year of sortable, collapsible months starts collapsed except August, the focused month — the same shape as a monthly cost overview highlighting the current month.",
+          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background — equivalent to setting the `focused` column option on each of its columns — and the emphasis survives collapsing the group. Here a full year of sortable, collapsible months starts collapsed except August, the focused month — the same shape as a monthly cost overview highlighting the current month.",
       },
     },
   },

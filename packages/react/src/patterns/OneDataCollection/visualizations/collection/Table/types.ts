@@ -90,10 +90,8 @@ export type TableColumnDefinition<
     /**
      * Visually focuses the column: its header and cells render with a subtle
      * gray background, and the spanning header of its group (if any) is
-     * emphasized too. Only one column may be focused — when several columns
-     * set this, the first one (in definition order) wins and the rest are
-     * ignored. To focus a whole header group instead, set `focused` on its
-     * {@link HeaderGroupDefinition}.
+     * emphasized too. To focus a whole header group at once, set `focused` on
+     * its {@link HeaderGroupDefinition} instead.
      */
     focused?: boolean
 
@@ -146,9 +144,8 @@ export type HeaderGroupDefinition = {
 
   /**
    * Visually focuses the whole group: its spanning header and every column in
-   * it render with the focused emphasis. Only one focus area is allowed in
-   * the table — a focused group takes precedence, and column-level `focused`
-   * flags outside it are ignored.
+   * it render with the focused emphasis. Equivalent to setting `focused` on
+   * each of the group's columns.
    */
   focused?: boolean
 }

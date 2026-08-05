@@ -44,6 +44,7 @@ type NormalizedHeaderGroup = {
   label: string
   collapsedColumns?: ColId[]
   defaultCollapsed: boolean
+  focused: boolean
 }
 
 type NormalizedHeaderGroups = Record<string, NormalizedHeaderGroup>
@@ -68,11 +69,12 @@ export const normalizeHeaderGroups = (
   Object.entries(headerGroups).forEach(([groupId, definition]) => {
     normalized[groupId] =
       typeof definition === "string"
-        ? { label: definition, defaultCollapsed: false }
+        ? { label: definition, defaultCollapsed: false, focused: false }
         : {
             label: definition.label,
             collapsedColumns: definition.collapsedColumns,
             defaultCollapsed: definition.defaultCollapsed ?? false,
+            focused: definition.focused ?? false,
           }
   })
 
@@ -302,16 +304,29 @@ export const useHeaderGroups = <
   }, [collapsedGroups, animatingGroups])
 
   const visibleColumns = useMemo(() => {
-    if (!definitions || settledCollapsedGroups.size === 0) return columns
+    const kept =
+      !definitions || settledCollapsedGroups.size === 0
+        ? columns
+        : (() => {
+            const hidden = getCollapsedColumnIndices(
+              columns,
+              definitions,
+              settledCollapsedGroups
+            )
+            return hidden.size === 0
+              ? columns
+              : columns.filter((_, index) => !hidden.has(index))
+          })()
 
-    const hidden = getCollapsedColumnIndices(
-      columns,
-      definitions,
-      settledCollapsedGroups
+    // A focused group's emphasis lives on its columns — equivalent to setting
+    // `focused` on each of them — so headers, body cells and the summary row
+    // can all read `column.focused` directly.
+    if (!definitions) return kept
+    return kept.map((column) =>
+      column.headerGroupId && definitions[column.headerGroupId]?.focused
+        ? { ...column, focused: true }
+        : column
     )
-    if (hidden.size === 0) return columns
-
-    return columns.filter((_, index) => !hidden.has(index))
   }, [columns, definitions, settledCollapsedGroups])
 
   // Stable order, so a group's marker class does not change between renders.

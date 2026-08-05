@@ -420,49 +420,47 @@ describe("TableCollection", () => {
       expect(nameCell?.className).not.toMatch(/bg-f1-background-secondary/)
     })
 
-    it("keeps only the first focused column and warns when several are focused", async () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-
+    it("emphasizes every focused column", async () => {
       const columnsWithFocused = [
         { label: "name", render: (item: Person) => item.name, focused: true },
         { label: "email", render: (item: Person) => item.email, focused: true },
+        { label: "displayName", render: (item: Person) => item.displayName },
       ]
 
-      try {
-        render(
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={columnsWithFocused}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        )
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithFocused}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
 
-        await waitFor(() => {
-          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-        })
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
 
-        expect(warn).toHaveBeenCalledWith(
-          "Only one column can be focused: keeping the first focused column and ignoring the rest"
-        )
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
 
-        const nameHeader = screen.getByRole("columnheader", { name: "name" })
-        expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
 
-        const emailHeader = screen.getByRole("columnheader", { name: "email" })
-        expect(emailHeader.className).not.toMatch(/bg-f1-background-secondary/)
-      } finally {
-        warn.mockRestore()
-      }
+      const displayNameHeader = screen.getByRole("columnheader", {
+        name: "displayName",
+      })
+      expect(displayNameHeader.className).not.toMatch(
+        /bg-f1-background-secondary/
+      )
     })
 
     it("highlights the spanning header of the focused column's group", async () => {
@@ -574,9 +572,7 @@ describe("TableCollection", () => {
       expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
     })
 
-    it("ignores column focus outside a focused header group and warns", async () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-
+    it("combines a focused header group with independently focused columns", async () => {
       const groupedColumns = [
         { label: "name", render: (item: Person) => item.name, focused: true },
         {
@@ -586,42 +582,34 @@ describe("TableCollection", () => {
         },
       ]
 
-      try {
-        render(
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={groupedColumns}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-            headerGroups={{ contact: { label: "Contact", focused: true } }}
-          />
-        )
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ contact: { label: "Contact", focused: true } }}
+        />
+      )
 
-        await waitFor(() => {
-          expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-        })
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
 
-        expect(warn).toHaveBeenCalledWith(
-          "A header group is focused: column-level focus outside the group is ignored"
-        )
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
 
-        const nameHeader = screen.getByRole("columnheader", { name: "name" })
-        expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
-
-        const emailHeader = screen.getByRole("columnheader", { name: "email" })
-        expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
-      } finally {
-        warn.mockRestore()
-      }
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
     })
 
     it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
