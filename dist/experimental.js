@@ -7226,7 +7226,7 @@ const Jn = 12, Qn = 6, Zs = ({
                     /* @__PURE__ */ n(
                       we,
                       {
-                        variant: "ghost",
+                        variant: "outline",
                         icon: gt,
                         size: "sm",
                         hideLabel: !0,
