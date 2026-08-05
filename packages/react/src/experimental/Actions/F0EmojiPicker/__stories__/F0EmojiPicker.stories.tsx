@@ -64,7 +64,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  args: {
+    clearable: true,
+  },
+}
 
 const ControlledExample = () => {
   const [emoji, setEmoji] = useState<string | null>("💬")
@@ -147,6 +151,33 @@ export const Clearable: Story = {
       name: "Clear",
     })
     await waitFor(() => expect(clearButton).toBeVisible())
+  },
+}
+
+export const CompactHeight: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    clearable: true,
+    defaultValue: "💬",
+  },
+  parameters: {
+    viewport: {
+      options: {
+        compactHeight: {
+          name: "Compact height",
+          styles: {
+            width: "320px",
+            height: "256px",
+          },
+        },
+      },
+    },
+  },
+  globals: {
+    viewport: {
+      value: "compactHeight",
+      isRotated: false,
+    },
   },
 }
 

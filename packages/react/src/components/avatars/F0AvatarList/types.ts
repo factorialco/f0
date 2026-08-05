@@ -85,11 +85,16 @@ export type F0AvatarListProps = {
   layout?: "fill" | "compact"
 
   /**
-   * Controls the scroll behavior of the `+N` overflow popover that lists
-   * collapsed avatars (including their `tooltipDescription` entries).
-   * - `"vertical"` (default): caps the popover height and scrolls vertically.
-   * - `"none"`: lets the popover grow to fit all entries.
-   * @default "vertical"
+   * @deprecated No longer has any effect. The `+N` popover now always caps at
+   * the available viewport height and scrolls, and that scrolling is reachable
+   * by keyboard — neither of the old values is worth selecting. `"vertical"`
+   * used to cap and scroll inside a hover card, where Radix strips every tab
+   * stop on each render, so no keyboard user could operate the scroll (axe
+   * `scrollable-region-focusable`, WCAG 2.1.1); `"none"` avoided that by
+   * letting the card grow without limit, off the screen for a large cluster.
+   * @removeIn 5.0
+   * @migration Remove the prop. The current behaviour is what `"vertical"`
+   * always intended, minus the accessibility defect.
    */
   tooltipScroll?: "vertical" | "none"
 } & F0AvatarListPropsAvatars

@@ -48,6 +48,9 @@ const _SurveyFormBuilder = ({
   applyingChanges,
   useUpload,
   datasets,
+  placeholders,
+  labels,
+  skipDefaultSection,
 }: SurveyFormBuilderProps) => {
   const shouldShowAddButton = !disabled
 
@@ -151,6 +154,9 @@ const _SurveyFormBuilder = ({
       allowedQuestionTypes={allowedQuestionTypes}
       useUpload={useUpload}
       datasets={datasets}
+      placeholders={placeholders}
+      labels={labels}
+      skipDefaultSection={skipDefaultSection}
     >
       <DragProvider>
         <DragSelectGuard>
