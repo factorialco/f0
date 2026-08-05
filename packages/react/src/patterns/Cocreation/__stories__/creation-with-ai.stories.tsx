@@ -2844,8 +2844,8 @@ function CreationWithAIFlow({
   noCredits = false,
 }: {
   flowId: FlowConfig["id"]
-  /** Demo the credit-exhausted state: free-text AI is blocked, so typed
-   * requests get an out-of-credits reply and only guided entry keeps working. */
+  /** Demo the credit-exhausted state: shows the soft credit-warning banner
+   * above the composer (see `creditWarning` below). */
   noCredits?: boolean
 }) {
   // Reset persisted chat state once, before the provider reads it, so the chat
@@ -2858,6 +2858,9 @@ function CreationWithAIFlow({
 
   const config = FLOW_CONFIGS[flowId]
   const [phase, setPhase] = useState<Phase>("collection")
+  // The credit warning is dismissable — hide it once dismissed (rebuilding
+  // `ai.creditWarning` as undefined re-renders the composer without the banner).
+  const [creditWarningDismissed, setCreditWarningDismissed] = useState(false)
 
   const ai: ComponentProps<typeof ApplicationFrame>["ai"] = {
     enabled: true,
@@ -2906,6 +2909,21 @@ function CreationWithAIFlow({
       templates: toCanvasEntity(templatesCanvasEntity),
       survey: toCanvasEntity(surveyCanvasEntity),
     },
+    // No-credits demo: a soft warning banner above the composer with a "Get
+    // credits" CTA and a dismiss. `MockConnectedChatInput` suppresses it while
+    // a clarifying panel is up, so it only ever sits on the actual text input.
+    creditWarning:
+      noCredits && !creditWarningDismissed
+        ? {
+            level: "soft",
+            onGetCredits: () =>
+              toasts.open({
+                title: "Redirecting you to billing to top up credits…",
+                variant: "default",
+              }),
+            onDismiss: () => setCreditWarningDismissed(true),
+          }
+        : undefined,
     resizable: true,
     // Start closed in sidepanel mode so the chat plays its entrance animation
     // when opened from the collection view.

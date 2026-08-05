@@ -40,6 +40,7 @@ export const MockConnectedChatInput = () => {
     disclaimer,
     footer,
     visualizationMode,
+    creditWarning,
     welcomeScreenSuggestions,
     welcomeScreenCards,
     tracking,
@@ -103,6 +104,10 @@ export const MockConnectedChatInput = () => {
       onSubmit={handleSubmit}
       inProgress={inProgress}
       placeholders={placeholders}
+      // The credit warning belongs to the composer, so suppress it while a
+      // clarifying panel occupies the input slot — it would otherwise sit above
+      // the guiding questions, which isn't the input it's warning about.
+      creditWarning={clarifyingQuestion ? undefined : creditWarning}
       pendingContext={pendingContext}
       onPendingContextChange={setPendingContext}
       pendingQuote={pendingQuote}

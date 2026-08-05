@@ -9,6 +9,7 @@ export {
 
 // Types
 export type {
+  AiChatCreditWarning,
   AiChatMode,
   AiChatFileAttachmentConfig,
   AiChatProviderProps,

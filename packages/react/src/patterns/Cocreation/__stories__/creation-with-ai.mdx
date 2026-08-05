@@ -257,9 +257,11 @@ accepts or rejects it, and an overlay covers the canvas while an accepted change
 
 ### Out of credits
 
-The two **· No Credits** stories show the flow when AI credits are exhausted. Free-text AI needs
-credits, but **guided creation does not** — templates and blank surveys still work — so a typed
-message is never a dead end: it gets a short "can't do that right now" reply and redirects into the
+The two **· No Credits** stories show the flow when AI credits are exhausted. A soft
+credit-warning banner sits above the composer with a "Get credits" CTA and a dismiss; it only
+ever appears on the text input, never over a clarifying panel. Free-text AI needs credits, but
+**guided creation does not** — templates and blank surveys still work — so a typed message is
+never a dead end: it gets a short "can't do that right now" reply and redirects into the
 credit-free guided-entry panel (Empty Survey / Use a Template / most-used templates). Once a survey
 exists, typed edit requests get an out-of-credits reply with an upgrade nudge instead of a
 proposal.

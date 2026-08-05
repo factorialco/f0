@@ -8,6 +8,7 @@ import {
   type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
   type CanvasContent,
+  type AiChatCreditWarning,
   type EntityRefs,
   type F0AIMessage,
   type PendingContext,
@@ -48,6 +49,7 @@ export interface AiChatState {
   entityRefs?: EntityRefs
   canvasActions?: CanvasActions
   canvasEntities?: Record<string, CanvasEntityDefinition>
+  creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
   onTranscribe?: TranscribeFn
   placeholders?: string[]
@@ -232,6 +234,7 @@ export type AiChatProviderReturnValue = {
   | "entityRefs"
   | "canvasActions"
   | "canvasEntities"
+  | "creditWarning"
   | "fileAttachments"
   | "onTranscribe"
 > & {

@@ -132,6 +132,21 @@ export type PendingQuote = {
 }
 
 /**
+ * Credit warning configuration.
+ * Groups severity level and action callbacks into a single object.
+ *
+ * When provided, a warning banner is shown above the chat textarea.
+ */
+export type AiChatCreditWarning = {
+  /** The severity level of the warning. */
+  level: "soft"
+  /** Called when the user dismisses the credit warning banner. */
+  onDismiss?: () => void
+  /** Called when the user clicks the "Get Credits" button. */
+  onGetCredits?: () => void
+}
+
+/**
  * Interaction mode for the AI chat
  */
 export type AiChatMode = "chat" | "voice"
@@ -315,6 +330,11 @@ export type AiChatProviderProps = {
    * them here so canvas logic lives in one place.
    */
   canvasEntities?: Record<string, CanvasEntityDefinition>
+  /**
+   * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
+   * Groups severity level and action callbacks.
+   */
+  creditWarning?: AiChatCreditWarning
   /**
    * File attachment configuration. When provided, enables file uploads in the chat.
    */
