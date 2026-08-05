@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.3.1](https://github.com/factorialco/f0/compare/f0-react-v6.3.0...f0-react-v6.3.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **icons:** strip stale non-scaling-stroke from Maximize/MinimizeHorizontal ([#4999](https://github.com/factorialco/f0/issues/4999)) ([6d86359](https://github.com/factorialco/f0/commit/6d86359e3bae4e5da88de09bf4668ac5c78d78ec))
+
 ## [6.3.0](https://github.com/factorialco/f0/compare/f0-react-v6.2.2...f0-react-v6.3.0) (2026-08-05)
 
 
