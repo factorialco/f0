@@ -589,11 +589,18 @@ export function F0GraphView<T = unknown>(
     deferredNodes !== undefined &&
     deferredMerge.deferredStatus === "loading"
 
+  // Count what actually reaches the DOM. The threshold exists to spare the
+  // compositor from animating thousands of pills at once, so windowing — which
+  // hands React Flow only the nodes near the camera — has to be accounted for:
+  // keyed on the un-windowed `visibleTreeNodes`, a windowed 3k-node graph
+  // disabled motion permanently while rendering ~15 nodes that animate freely.
+  // Identical without windowing, where every visible node is a rendered one.
+  //
   // Depend on the derived flag, not the raw count: every node wrapper consumes
-  // this context, so keying it on `visibleTreeNodes.length` re-rendered all of
-  // them on every expansion (measured during a search-and-reveal navigation)
-  // even though only the threshold crossing changes what anything renders.
-  const isLargeGraph = visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD
+  // this context, so keying it on the count itself re-rendered all of them on
+  // every expansion (measured during a search-and-reveal navigation) even
+  // though only the threshold crossing changes what anything renders.
+  const isLargeGraph = renderedNodeCount > LARGE_GRAPH_SNAP_THRESHOLD
 
   const renderConfigContextValue = useMemo(
     () => ({
