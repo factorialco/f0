@@ -27,7 +27,6 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-  DEFAULT_NODE_WINDOW_PADDING,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
@@ -385,11 +384,6 @@ export function useGraphRenderModel<T>({
   ])
 
   // ── Node-array windowing ──
-  // The previous commit's windowed id set, used for the release hysteresis
-  // below (a node is only dropped once it leaves a margin larger than the one
-  // that added it).
-  const prevWindowedIdsRef = useRef<Set<string>>(new Set())
-
   // Ids of the LAYOUT nodes (graph pills + expanders) whose box intersects the
   // padded viewport. `null` means "no windowing" (feature off, or viewport not
   // yet measured) → render everything, which is also what the initial `fitView`
@@ -402,44 +396,19 @@ export function useGraphRenderModel<T>({
   // pan/zoom on large graphs: without it every pan cell-crossing and every
   // zoom-level change would rebuild an object per visible node.
   const windowedIds = useMemo((): Set<string> | null => {
-    if (!enableNodeWindowing || !viewportRect) {
-      prevWindowedIdsRef.current = new Set()
-      return null
-    }
+    if (!enableNodeWindowing || !viewportRect) return null
     const fallbackWidth = nodeWidthProp ?? 256
-
-    // Asymmetric release hysteresis. A node is ADDED as soon as it enters the
-    // padded viewport, but is only RELEASED once it leaves a larger margin
-    // (`viewportRect` grown by `release`). Without this, a node hovering on the
-    // window boundary flip-flops in/out on every pan cell-crossing; React Flow
-    // drops the edges touching any node re-added un-measured, so a node you can
-    // still see blinks disconnected ("connections get lost while panning"). The
-    // retained band is bounded (it never exceeds the release rect), so per-frame
-    // work stays ~O(on-screen) — FPS is preserved and never-seen parts of a flat
-    // or deep tree stay windowed out and un-hydrated. Nodes panned well past the
-    // release margin are dropped as before; a visible node's line to an
-    // off-window ancestor is instead guaranteed by the ancestry walk below.
-    const release = nodeWindowPadding ?? DEFAULT_NODE_WINDOW_PADDING
-    const keepRect = {
-      minX: viewportRect.minX - release,
-      minY: viewportRect.minY - release,
-      maxX: viewportRect.maxX + release,
-      maxY: viewportRect.maxY + release,
-    }
-    const prev = prevWindowedIdsRef.current
-
     const ids = new Set<string>()
     for (const pn of layout.nodes) {
-      const w = pn.width || fallbackWidth
-      const h = pn.height || effectiveNodeHeight
-      if (nodeIntersectsRect(pn.x, pn.y, w, h, viewportRect)) {
-        ids.add(pn.id)
-      } else if (
-        prev.has(pn.id) &&
-        nodeIntersectsRect(pn.x, pn.y, w, h, keepRect)
+      if (
+        nodeIntersectsRect(
+          pn.x,
+          pn.y,
+          pn.width || fallbackWidth,
+          pn.height || effectiveNodeHeight,
+          viewportRect
+        )
       ) {
-        // Retained: was in the window last commit and hasn't left the release
-        // margin yet — keep it (and its measurement) so its edges don't drop.
         ids.add(pn.id)
       }
     }
@@ -461,13 +430,10 @@ export function useGraphRenderModel<T>({
         parentId = nodeMap.get(parentId)?.parentId ?? null
       }
     }
-
-    prevWindowedIdsRef.current = ids
     return ids
   }, [
     enableNodeWindowing,
     viewportRect,
-    nodeWindowPadding,
     layout.nodes,
     nodeWidthProp,
     effectiveNodeHeight,
@@ -491,6 +457,14 @@ export function useGraphRenderModel<T>({
     const inWindow = (id: string): boolean =>
       !windowedIds || windowedIds.has(id)
 
+    // Whether windowing is actually driving this render (a viewport is measured
+    // and the feature is on). Only then do we seed `handles`/dimensions on the
+    // nodes — see the handle geometry below. With windowing off, React Flow's own
+    // `onlyRenderVisibleElements` is active, and marking nodes measured up front
+    // would let it cull them before their real size is known; leaving it as-is
+    // keeps the original non-windowed behavior untouched.
+    const windowingActive = windowedIds !== null
+
     // Direction-aware port positions for React Flow edge routing
     const isHorizontal = direction === "LR" || direction === "RL"
     const sourcePos =
@@ -509,6 +483,40 @@ export function useGraphRenderModel<T>({
           : direction === "LR"
             ? Position.Left
             : Position.Right
+
+    // Precomputed handle geometry so React Flow can route a node's edges on the
+    // very commit the node is added — before its DOM handles are measured.
+    // Without a `handles` array React Flow has no handle bounds for a freshly
+    // windowed-in node, so `getEdgePosition` returns null and every edge touching
+    // it is dropped from the DOM for that frame — connecting/reporting lines
+    // flicker or vanish while panning a large/flat/deep tree. Providing the port
+    // offsets lets React Flow derive the endpoint immediately; the real measured
+    // handle bounds take over once the node's DOM mounts. Node dimensions are
+    // supplied below (`width`/`height`) so the node also counts as "initialized".
+    const handleOffset = (p: Position): { x: number; y: number } =>
+      p === Position.Top
+        ? { x: BASE_W / 2, y: 0 }
+        : p === Position.Bottom
+          ? { x: BASE_W / 2, y: BASE_H }
+          : p === Position.Left
+            ? { x: 0, y: BASE_H / 2 }
+            : { x: BASE_W, y: BASE_H / 2 }
+    const graphNodeHandles = [
+      {
+        type: "source" as const,
+        position: sourcePos,
+        ...handleOffset(sourcePos),
+        width: 1,
+        height: 1,
+      },
+      {
+        type: "target" as const,
+        position: targetPos,
+        ...handleOffset(targetPos),
+        width: 1,
+        height: 1,
+      },
+    ] as RFNode["handles"]
 
     const nodes: RFNode[] = []
 
@@ -563,6 +571,14 @@ export function useGraphRenderModel<T>({
           y: (pos?.y ?? 0) * yStretch,
         },
         width: BASE_W,
+        // Only while windowing drives the render: seed the node's size and port
+        // handles so React Flow can route its edges on the commit it is added,
+        // before the DOM is measured (otherwise a freshly windowed-in node's
+        // connecting lines drop for that frame). Omitted when windowing is off so
+        // React Flow's own viewport culling keeps its original behavior.
+        ...(windowingActive
+          ? { height: BASE_H, handles: graphNodeHandles }
+          : null),
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
