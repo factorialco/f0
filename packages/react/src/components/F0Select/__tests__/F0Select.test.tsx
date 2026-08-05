@@ -168,19 +168,20 @@ describe("Select", () => {
     expect(screen.getByText("+82")).toBeInTheDocument()
   })
 
-  it("warns in dev when a metadata dial code is malformed", async () => {
+  it("warns in dev when a metadata dial code is malformed, once per value", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     const user = userEvent.setup()
-    render(
+    const brokenOptions = [
+      {
+        value: "xx",
+        label: "Broken",
+        metadata: { type: "dialCode", dialCode: "34" } as const,
+      },
+    ]
+    const { rerender } = render(
       <F0Select
         {...defaultSelectProps}
-        options={[
-          {
-            value: "xx",
-            label: "Broken",
-            metadata: { type: "dialCode", dialCode: "34" },
-          },
-        ]}
+        options={brokenOptions}
         onChange={() => {}}
       />
     )
@@ -190,6 +191,17 @@ describe("Select", () => {
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('dialCode "34" is not a valid dial code')
     )
+
+    // Virtualized rows re-render on every scroll-in — the warning must not repeat
+    const warnCalls = warn.mock.calls.length
+    rerender(
+      <F0Select
+        {...defaultSelectProps}
+        options={brokenOptions}
+        onChange={() => {}}
+      />
+    )
+    expect(warn).toHaveBeenCalledTimes(warnCalls)
     warn.mockRestore()
   })
 

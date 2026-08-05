@@ -12,7 +12,7 @@ import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types
 import {
   isPossiblePhoneValue,
   isValidPhoneValue,
-} from "@/experimental/Forms/F0PhoneInput"
+} from "@/experimental/Forms/F0PhoneInput/lib/phone"
 
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
@@ -1331,11 +1331,12 @@ export namespace f0FormField {
       })
       .superRefine((value, ctx) => {
         if (validate === false) return
+        if (optional && !value.number?.trim()) return
         const pair = { prefix: value.prefix, number: value.number }
         const isOk =
           validate === "possible"
-            ? isPossiblePhoneValue(pair)
-            : isValidPhoneValue(pair)
+            ? isPossiblePhoneValue(pair, config.defaultCountry)
+            : isValidPhoneValue(pair, config.defaultCountry)
         if (!isOk) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

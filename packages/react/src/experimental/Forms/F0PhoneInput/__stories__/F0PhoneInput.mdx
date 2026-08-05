@@ -193,9 +193,13 @@ const schema = z.object({
 - `validate` controls strictness: `"valid"` (default) checks the country's
   number patterns, `"possible"` only checks the length, `false` disables
   validation. `invalidMessage` overrides the error copy.
+- Validation matches what the input renders: prefix-less legacy values are
+  resolved through `defaultCountry`, and `optional` fields accept empty-shaped
+  pairs (`{ prefix: "", number: "" }`) as well as `undefined`.
 - Outside F0Form, the same checks are exported as `isValidPhoneValue` and
   `isPossiblePhoneValue` — they take the `{ prefix, number }` pair directly
-  and mirror the `isValid` / `isPossible` flags of the change meta.
+  (plus an optional fallback country mirroring `defaultCountry`) and match
+  the `isValid` / `isPossible` flags of the change meta.
 
 ### Accessibility
 

@@ -11,13 +11,17 @@ import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
 
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
 
+const warnedDialCodes = new Set<string>()
+
 const metadataText = (metadata: F0SelectItemMetadata): string => {
   switch (metadata.type) {
     case "dialCode":
       if (
         process.env.NODE_ENV !== "production" &&
-        !DIAL_CODE_PATTERN.test(metadata.dialCode)
+        !DIAL_CODE_PATTERN.test(metadata.dialCode) &&
+        !warnedDialCodes.has(metadata.dialCode)
       ) {
+        warnedDialCodes.add(metadata.dialCode)
         console.warn(
           `[F0Select] metadata dialCode "${metadata.dialCode}" is not a valid dial code (expected "+" followed by 1-4 digits).`
         )

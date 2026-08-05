@@ -193,6 +193,17 @@ describe("isValidPhoneValue / isPossiblePhoneValue", () => {
     ).toBe(true)
   })
 
+  it("resolves prefix-less values through the fallback country", () => {
+    const legacy = { prefix: undefined, number: "674897945" }
+    expect(isValidPhoneValue(legacy, "es")).toBe(true)
+    expect(isPossiblePhoneValue(legacy, "es")).toBe(true)
+    expect(isValidPhoneValue(legacy)).toBe(false)
+    // An explicit prefix wins over the fallback country
+    expect(
+      isValidPhoneValue({ prefix: "+44", number: "7911123456" }, "es")
+    ).toBe(true)
+  })
+
   it("rejects empty values", () => {
     expect(isValidPhoneValue(undefined)).toBe(false)
     expect(isValidPhoneValue({ prefix: "+34", number: "" })).toBe(false)

@@ -98,4 +98,47 @@ describe("f0FormField.phone", () => {
     expect(optional.safeParse(undefined).success).toBe(true)
     expect(required.safeParse(undefined).success).toBe(false)
   })
+
+  it("accepts empty-shaped pairs when optional, as the input renders them empty", () => {
+    const optional = f0FormField.phone({ label: "Phone", optional: true })
+    const required = f0FormField.phone({ label: "Phone" })
+
+    // Backends serialize an empty optional phone as an empty pair
+    expect(optional.safeParse({ prefix: "", number: "" }).success).toBe(true)
+    expect(optional.safeParse({ prefix: "+34", number: "" }).success).toBe(true)
+    expect(optional.safeParse({ number: "  " }).success).toBe(true)
+
+    expect(required.safeParse({ prefix: "", number: "" }).success).toBe(false)
+  })
+
+  it("validates prefix-less legacy values against defaultCountry, matching the render", () => {
+    const withCountry = f0FormField.phone({
+      label: "Phone",
+      defaultCountry: "es",
+    })
+    const withoutCountry = f0FormField.phone({ label: "Phone" })
+
+    // Legacy stored shape: national number, no prefix — the input renders it
+    // as a valid Spanish number when defaultCountry is "es"
+    const legacy = { number: "674897945" }
+
+    expect(withCountry.safeParse(legacy).success).toBe(true)
+    expect(withoutCountry.safeParse(legacy).success).toBe(false)
+
+    // A full international number still wins over the fallback country
+    expect(withCountry.safeParse({ number: "+44 7911 123456" }).success).toBe(
+      true
+    )
+  })
+
+  it('applies defaultCountry with validate: "possible" too', () => {
+    const schema = f0FormField.phone({
+      label: "Phone",
+      defaultCountry: "es",
+      validate: "possible",
+    })
+
+    expect(schema.safeParse({ number: "674897945" }).success).toBe(true)
+    expect(schema.safeParse({ number: "67" }).success).toBe(false)
+  })
 })
