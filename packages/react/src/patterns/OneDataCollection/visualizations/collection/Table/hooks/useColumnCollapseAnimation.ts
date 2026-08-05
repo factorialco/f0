@@ -113,21 +113,29 @@ export const useColumnCollapseAnimation = (
           fill: closing ? "forwards" : "backwards",
         })
 
-        const fade = cell.animate(
-          closing
-            ? [{ opacity: 1 }, { opacity: 0 }]
-            : [{ opacity: 0 }, { opacity: 1 }],
-          closing
-            ? { duration: 80, easing: "ease-out", fill: "forwards" }
-            : {
-                duration: 120,
-                delay: 110,
-                easing: "ease-out",
-                fill: "backwards",
-              }
-        )
+        // Only the cell's contents fade, never the cell itself: a focused
+        // column paints its own background on the cell, and fading the whole
+        // cell would show the row's background through it while it moves.
+        Array.from(cell.children).forEach((child) => {
+          if (!(child instanceof HTMLElement)) return
+          animations.push(
+            child.animate(
+              closing
+                ? [{ opacity: 1 }, { opacity: 0 }]
+                : [{ opacity: 0 }, { opacity: 1 }],
+              closing
+                ? { duration: 80, easing: "ease-out", fill: "forwards" }
+                : {
+                    duration: 120,
+                    delay: 110,
+                    easing: "ease-out",
+                    fill: "backwards",
+                  }
+            )
+          )
+        })
 
-        animations.push(size, fade)
+        animations.push(size)
         settled.push(size.finished.catch(() => undefined))
       })
 
