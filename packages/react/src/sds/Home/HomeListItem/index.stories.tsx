@@ -1,14 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { Comment, PalmTree } from "@/icons/app"
+import { Comment } from "@/icons/app"
 
-import {
-  HomeListItem,
-  InboxListItem,
-  SimpleLineListItem,
-  StatusListItem,
-} from "./index"
+import { HomeListItem } from "./index"
 
 const meta = {
   title: "Home/HomeListItem",
@@ -26,10 +21,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The base row: any avatar left, three text voices, anything right. */
+/**
+ * The base row: any avatar left, three text voices, anything right. The `list`
+ * slot builds these from its schema — prefer that over composing rows by hand.
+ */
 export const Default: Story = {
   args: {
     avatar: { type: "person", firstName: "Ada", lastName: "Lovelace" },
+    avatarSize: "md",
     title: "Ada Lovelace",
     subtitle: "Engineering",
     description: "Requested 3 days off",
@@ -80,40 +79,6 @@ export const AvatarTypes: Story = {
         avatar={{ type: "icon", icon: Comment }}
         title="Icon"
         description="Ask HR"
-        onClick={() => {}}
-      />
-    </div>
-  ),
-}
-
-/** The variants the default slots draw with. */
-export const Variants: Story = {
-  args: { title: "unused" },
-  render: () => (
-    <div className="flex flex-col">
-      <SimpleLineListItem
-        icon={PalmTree}
-        title="Barcelona"
-        count={3}
-        onClick={() => {}}
-      />
-      <InboxListItem
-        module="communities"
-        title="Deploy 2026.7.3 is live 🚀"
-        subtitle="8:47"
-        unread
-        person={{ firstName: "Leo", lastName: "Costa" }}
-        onClick={() => {}}
-      />
-      <StatusListItem
-        alert="positive"
-        title="Clocked in"
-        subtitle="4 people"
-        avatars={[
-          { firstName: "Ada", lastName: "Lovelace" },
-          { firstName: "Alan", lastName: "Turing" },
-        ]}
-        remainingCount={2}
         onClick={() => {}}
       />
     </div>

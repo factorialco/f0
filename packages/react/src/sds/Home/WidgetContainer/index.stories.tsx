@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Calendar, Clock } from "@/icons/app"
 
-import { type HomeWidgetItem } from "../slotRenderers"
+import { type HomeWidgetItem, listSlot } from "../slotRenderers"
 import { WidgetContainer } from "./index"
 
 const WIDGETS: HomeWidgetItem[] = [
@@ -22,16 +22,10 @@ const WIDGETS: HomeWidgetItem[] = [
     icon: Calendar,
     header: { title: "Events", count: 2 },
     slots: [
-      {
-        visualization: "simple-line-list",
-        params: {
-          showAllItems: true,
-          items: [
-            { id: "1", title: "Design sync", href: "/calendar/1" },
-            { id: "2", title: "All hands", href: "/calendar/2" },
-          ],
-        },
-      },
+      listSlot({ clickBehavior: "link" }, [
+        { id: "1", title: "Design sync", href: "/calendar/1" },
+        { id: "2", title: "All hands", href: "/calendar/2" },
+      ]),
     ],
   },
 ]

@@ -11,6 +11,7 @@ import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
+  Building,
   Calendar,
   ChevronRight,
   Clock,
@@ -18,13 +19,14 @@ import {
   Envelope,
   File,
   PalmTree,
+  Person,
   Receipt,
   SolidPlay,
   Target,
 } from "@/icons/app"
 
 import { SlotWidget } from "../SlotWidget"
-import { homeSlot, type HomeWidgetItem } from "../slotRenderers"
+import { homeSlot, type HomeWidgetItem, listSlot } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog } from "../WidgetCatalog"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
@@ -340,17 +342,16 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       link: { title: "Open", onClick: () => {} },
     },
     slots: [
-      homeSlot("inbox-list", {
-        showAllItems: true,
-        left: "module",
-        items: COMMS.map((c, index) => ({
+      listSlot(
+        { left: "module", descriptionRequired: true, clickBehavior: "link" },
+        COMMS.map((c, index) => ({
           id: String(index),
           module: "communities" as const,
           title: c.title,
-          subtitle: c.time,
+          description: c.time,
           href: `/posts/${index}`,
-        })),
-      }),
+        }))
+      ),
     ],
   },
   {
@@ -416,17 +417,11 @@ const CATALOG = [
       <SlotWidget
         header={{ title: "Tasks", count: 3 }}
         slots={[
-          {
-            visualization: "simple-line-list",
-            params: {
-              showAllItems: true,
-              items: [
-                { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
-                { id: "2", title: "Review expense report", href: "/tasks/2" },
-                { id: "3", title: "Approve time off", href: "/tasks/3" },
-              ],
-            },
-          },
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
+            { id: "2", title: "Review expense report", href: "/tasks/2" },
+            { id: "3", title: "Approve time off", href: "/tasks/3" },
+          ]),
         ]}
       />
     ),
@@ -443,6 +438,157 @@ const CATALOG = [
             visualization: "indicators",
             params: { items: [{ label: "On track", content: "4/5" }] },
           },
+        ]}
+      />
+    ),
+  },
+  // The schema showcase: each of these leans on a different `list` schema —
+  // what you preview here is exactly what the slot vocabulary can say.
+  {
+    id: "team",
+    title: "Team",
+    icon: Person,
+    preview: (
+      <SlotWidget
+        header={{ title: "Team", count: 6 }}
+        slots={[
+          // Alert left + the people themselves trailing: two-line rows (md).
+          listSlot(
+            {
+              left: "alert",
+              right: "person-list",
+              descriptionRequired: true,
+              clickBehavior: "link",
+            },
+            [
+              {
+                id: "in",
+                title: "Clocked in",
+                description: "4 people",
+                alert: "positive",
+                avatars: [
+                  { firstName: "Ada", lastName: "Lovelace" },
+                  { firstName: "Alan", lastName: "Turing" },
+                ],
+                remainingCount: 2,
+                href: "/attendance",
+              },
+              {
+                id: "away",
+                title: "Away",
+                description: "2 people",
+                alert: "warning",
+                avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+                href: "/attendance/away",
+              },
+            ]
+          ),
+        ]}
+      />
+    ),
+  },
+  {
+    id: "people",
+    title: "People",
+    icon: Person,
+    preview: (
+      <SlotWidget
+        header={{ title: "New joiners", count: 7 }}
+        slots={[
+          // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
+          listSlot(
+            {
+              left: "person",
+              subtitleRequired: true,
+              clickBehavior: "link",
+              maxVisibleItems: 3,
+            },
+            [
+              "Ada Lovelace",
+              "Alan Turing",
+              "Grace Hopper",
+              "Katherine Johnson",
+              "Margaret Hamilton",
+              "Annie Easley",
+              "Mary Jackson",
+            ].map((name, index) => ({
+              id: String(index),
+              title: name,
+              subtitle: "Engineering",
+              avatar: {
+                firstName: name.split(" ")[0],
+                lastName: name.split(" ")[1],
+              },
+              href: `/employees/${index}`,
+            }))
+          ),
+        ]}
+      />
+    ),
+  },
+  {
+    id: "documents",
+    title: "Documents",
+    icon: File,
+    preview: (
+      <SlotWidget
+        header={{ title: "Documents" }}
+        alert="2 documents need signing"
+        action={{ label: "Sign now", onClick: () => {} }}
+        slots={[
+          // File avatars, two-line rows (md).
+          listSlot(
+            { left: "file", descriptionRequired: true, clickBehavior: "link" },
+            [
+              {
+                id: "1",
+                title: "Q3 addendum.pdf",
+                description: "Needs your signature",
+                avatar: {
+                  file: { name: "q3-addendum.pdf", type: "application/pdf" },
+                },
+                href: "/documents/1",
+              },
+              {
+                id: "2",
+                title: "Remote policy.pdf",
+                description: "Needs your signature",
+                avatar: {
+                  file: { name: "remote-policy.pdf", type: "application/pdf" },
+                },
+                href: "/documents/2",
+              },
+            ]
+          ),
+        ]}
+      />
+    ),
+  },
+  {
+    id: "offices",
+    title: "Offices",
+    icon: Building,
+    preview: (
+      <SlotWidget
+        header={{ title: "Offices" }}
+        slots={[
+          // Flag left + counter right: one-line rows (sm).
+          listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
+            {
+              id: "es",
+              title: "Spain",
+              avatar: { flag: "es" },
+              count: 24,
+              href: "/offices/es",
+            },
+            {
+              id: "pt",
+              title: "Portugal",
+              avatar: { flag: "pt" },
+              count: 9,
+              href: "/offices/pt",
+            },
+          ]),
         ]}
       />
     ),

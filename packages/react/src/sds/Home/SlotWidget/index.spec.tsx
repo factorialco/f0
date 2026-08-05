@@ -1,7 +1,8 @@
-import { describe, expect, test } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 
-import { screen, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
+import { LIST_COMPACT_AFTER, listSlot } from "../slotRenderers"
 import { SlotWidget } from "./index"
 
 describe("SlotWidget", () => {
@@ -14,13 +15,9 @@ describe("SlotWidget", () => {
             visualization: "indicators",
             params: { items: [{ label: "On holidays", content: "6" }] },
           },
-          {
-            visualization: "simple-line-list",
-            params: {
-              showAllItems: true,
-              items: [{ id: "1", title: "Barcelona", href: "/bcn" }],
-            },
-          },
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Barcelona", href: "/bcn" },
+          ]),
         ]}
       />
     )
@@ -127,6 +124,167 @@ describe("SlotWidget", () => {
     )
 
     expect(seen).toEqual([false, true])
+  })
+})
+
+describe("list slot schema", () => {
+  const person = (id: string, name: string, description: string) => ({
+    id,
+    title: name,
+    description,
+    avatar: { firstName: name, lastName: "Doe" },
+  })
+
+  test("sizes are prescriptive: two-line rows draw md glyphs, one-line rows sm", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "person", descriptionRequired: true }, [
+            person("1", "Ada", "Out until Friday"),
+          ]),
+        ]}
+      />
+    )
+
+    // md avatar = size-8.
+    expect(container.querySelector(".size-8")).not.toBeNull()
+
+    rerender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "person" }, [
+            { id: "1", title: "Ada", avatar: { firstName: "Ada" } },
+          ]),
+        ]}
+      />
+    )
+    // sm avatar = size-6.
+    expect(container.querySelector(".size-6")).not.toBeNull()
+    expect(container.querySelector(".size-8")).toBeNull()
+  })
+
+  test(`past ${LIST_COMPACT_AFTER} rows the second line folds away (into a tooltip) and rows go sm`, () => {
+    const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) =>
+      person(String(i), `Person ${i}`, `Detail ${i}`)
+    )
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[listSlot({ left: "person", descriptionRequired: true }, many)]}
+      />
+    )
+
+    expect(screen.queryByText("Detail 0")).not.toBeInTheDocument()
+    expect(container.querySelector(".size-6")).not.toBeNull()
+    expect(container.querySelector(".size-8")).toBeNull()
+  })
+
+  test(`at ${LIST_COMPACT_AFTER} rows or fewer the second line stays visible`, () => {
+    const some = Array.from({ length: LIST_COMPACT_AFTER }, (_, i) =>
+      person(String(i), `Person ${i}`, `Detail ${i}`)
+    )
+    zeroRender(
+      <SlotWidget
+        slots={[listSlot({ left: "person", descriptionRequired: true }, some)]}
+      />
+    )
+
+    expect(screen.getByText("Detail 0")).toBeInTheDocument()
+  })
+
+  test("link rows navigate through ctx.navigate; onClick rows call their handler", async () => {
+    const navigate = vi.fn()
+    const onClick = vi.fn()
+    zeroRender(
+      <SlotWidget
+        ctx={{ navigate }}
+        slots={[
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Barcelona", href: "/bcn" },
+          ]),
+          listSlot({ clickBehavior: "onClick" }, [
+            { id: "1", title: "Start timer", onClick },
+          ]),
+        ]}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Barcelona" }))
+    expect(navigate).toHaveBeenCalledWith("/bcn")
+
+    await userEvent.click(screen.getByRole("button", { name: "Start timer" }))
+    expect(onClick).toHaveBeenCalled()
+  })
+
+  test("maxVisibleItems folds the rest behind View more, then View less", async () => {
+    const many = Array.from({ length: 5 }, (_, i) =>
+      person(String(i), `Person ${i}`, `Detail ${i}`)
+    )
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", descriptionRequired: true, maxVisibleItems: 2 },
+            many
+          ),
+        ]}
+      />
+    )
+
+    expect(screen.getByText("Person 1")).toBeInTheDocument()
+    expect(screen.queryByText("Person 2")).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: "View more (3)" }))
+    expect(screen.getByText("Person 4")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: "View less" }))
+    expect(screen.queryByText("Person 4")).not.toBeInTheDocument()
+  })
+
+  test("compacting follows the VISIBLE rows: truncated lists stay two-line, expanding past the threshold compacts", async () => {
+    const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) =>
+      person(String(i), `Person ${i}`, `Detail ${i}`)
+    )
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot(
+            {
+              left: "person",
+              descriptionRequired: true,
+              maxVisibleItems: 2,
+            },
+            many
+          ),
+        ]}
+      />
+    )
+
+    // Truncated to 2 visible rows: still two-line, still md.
+    expect(screen.getByText("Detail 0")).toBeInTheDocument()
+    expect(container.querySelector(".size-8")).not.toBeNull()
+
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: `View more (${many.length - 2})`,
+      })
+    )
+    // Expanded past the threshold: compact — second line folds, sm glyphs.
+    expect(screen.queryByText("Detail 0")).not.toBeInTheDocument()
+    expect(container.querySelector(".size-8")).toBeNull()
+  })
+
+  test("the schema's right kind draws every row's trailing slot", () => {
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ right: "counter" }, [
+            { id: "1", title: "Barcelona", count: 3 },
+          ]),
+        ]}
+      />
+    )
+
+    expect(screen.getByText("3")).toBeInTheDocument()
   })
 })
 

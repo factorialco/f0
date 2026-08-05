@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Calendar, Clock, File, PalmTree, Receipt, Target } from "@/icons/app"
 
+import { homeSlot, listSlot } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import { WidgetCatalog } from "./index"
 
@@ -29,15 +30,9 @@ const CHROME_CATALOG = [
           { label: "Net", value: "2,480", postfixUnit: "€" },
         ]}
         slots={[
-          {
-            visualization: "simple-line-list",
-            params: {
-              showAllItems: true,
-              items: [
-                { id: "1", title: "June payslip", href: "/payroll/june" },
-              ],
-            },
-          },
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "June payslip", href: "/payroll/june" },
+          ]),
         ]}
       />
     ),
@@ -52,13 +47,9 @@ const CHROME_CATALOG = [
         alert="2 documents need signing"
         action={{ label: "Sign now", onClick: () => {} }}
         slots={[
-          {
-            visualization: "simple-line-list",
-            params: {
-              showAllItems: true,
-              items: [{ id: "1", title: "Q3 addendum", href: "/docs/1" }],
-            },
-          },
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Q3 addendum", href: "/docs/1" },
+          ]),
         ]}
       />
     ),
@@ -75,10 +66,9 @@ const CATALOG = [
       <SlotWidget
         header={{ title: "Time off" }}
         slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "Days left", content: "12" }] },
-          },
+          homeSlot("indicators", {
+            items: [{ label: "Days left", content: "12" }],
+          }),
         ]}
       />
     ),
@@ -91,16 +81,10 @@ const CATALOG = [
       <SlotWidget
         header={{ title: "Events", count: 2 }}
         slots={[
-          {
-            visualization: "simple-line-list",
-            params: {
-              showAllItems: true,
-              items: [
-                { id: "1", title: "Design sync", href: "/calendar/1" },
-                { id: "2", title: "All hands", href: "/calendar/2" },
-              ],
-            },
-          },
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Design sync", href: "/calendar/1" },
+            { id: "2", title: "All hands", href: "/calendar/2" },
+          ]),
         ]}
       />
     ),
@@ -113,10 +97,9 @@ const CATALOG = [
       <SlotWidget
         header={{ title: "Goals" }}
         slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "On track", content: "4/5" }] },
-          },
+          homeSlot("indicators", {
+            items: [{ label: "On track", content: "4/5" }],
+          }),
         ]}
       />
     ),
@@ -129,10 +112,9 @@ const CATALOG = [
       <SlotWidget
         header={{ title: "Clock in" }}
         slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "Worked today", content: "0:00" }] },
-          },
+          homeSlot("indicators", {
+            items: [{ label: "Worked today", content: "0:00" }],
+          }),
         ]}
       />
     ),

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Comment, PalmTree } from "@/icons/app"
 
-import { homeSlot } from "../slotRenderers"
+import { homeSlot, listSlot } from "../slotRenderers"
 import { SlotWidget } from "./index"
 
 const meta = {
@@ -23,14 +23,15 @@ type Story = StoryObj<typeof meta>
 
 /**
  * Every DEFAULT slot, stacked in one widget with the dashed divider between
- * consecutive slots — and, across the row-based slots, every case a slot can
- * take. Rows are CONSISTENT within a slot: the slot declares its `left` kind
- * once (an icon, any avatar type, a module glyph, an alert — or none) and every
- * row draws it, so mixing kinds needs mixing slots, exactly as shown here.
- * Also on display: `avatarSize`, the three text voices (title, inline
- * subtitle, description), counts, the unread dot, a trailing sender, trailing
- * faces with a remaining count, and rows with and without an `href`
- * (with → chevron, without → inert).
+ * consecutive slots — and, across the `list` slots, every schema a list can
+ * declare. A list's SCHEMA is declared once for the whole slot (its `left` and
+ * `right` kinds, which text voices its rows carry, how rows respond to a
+ * click) and every row follows it, so mixing kinds means mixing slots.
+ * Sizing is prescriptive: two-line rows (a required description) draw `md`
+ * glyphs, one-line rows `sm` — and past `LIST_COMPACT_AFTER` (6) visible rows
+ * the second line folds into a tooltip and the whole list compacts to `sm`.
+ * A list with `maxVisibleItems` folds the rest behind "View more (n)" /
+ * "View less" at its bottom — the second-to-last list here shows both.
  */
 export const AllSlots: Story = {
   args: {
@@ -54,15 +55,19 @@ export const AllSlots: Story = {
         ],
         max: 3,
       }),
-      // status-rows, alert left: faces + remaining count; the away row has no
-      // `href`, so it draws no chevron and stays inert.
-      homeSlot("status-rows", {
-        left: "alert",
-        rows: [
+      // Alert left + faces right: two-line rows (md glyphs), every row a link.
+      listSlot(
+        {
+          left: "alert",
+          right: "person-list",
+          descriptionRequired: true,
+          clickBehavior: "link",
+        },
+        [
           {
             id: "in",
             title: "Clocked in",
-            subtitle: "4 people",
+            description: "4 people",
             alert: "positive",
             avatars: [
               { firstName: "Ada", lastName: "Lovelace" },
@@ -74,17 +79,93 @@ export const AllSlots: Story = {
           {
             id: "away",
             title: "Away",
-            subtitle: "2 people",
+            description: "2 people",
             alert: "warning",
             avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+            href: "/attendance/away",
           },
-        ],
-      }),
-      // status-rows, company left, sized down.
-      homeSlot("status-rows", {
-        left: "company",
-        avatarSize: "sm",
-        rows: [
+        ]
+      ),
+      // Icon left + counter right: one-line rows (sm glyphs).
+      listSlot({ left: "icon", right: "counter", clickBehavior: "link" }, [
+        {
+          id: "bcn",
+          title: "Barcelona",
+          avatar: { icon: PalmTree },
+          count: 3,
+          href: "/positions/bcn",
+        },
+        {
+          id: "mad",
+          title: "Madrid",
+          avatar: { icon: Comment },
+          count: 2,
+          href: "/positions/mad",
+        },
+      ]),
+      // Person left with BOTH text voices: inline subtitle + second line (md).
+      listSlot(
+        {
+          left: "person",
+          subtitleRequired: true,
+          descriptionRequired: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "ada",
+            title: "Ada Lovelace",
+            subtitle: "Engineering",
+            description: "Out until Friday",
+            avatar: { firstName: "Ada", lastName: "Lovelace" },
+            href: "/employees/ada",
+          },
+        ]
+      ),
+      // Module left + sender right, with the unread dot: an inbox.
+      listSlot(
+        {
+          left: "module",
+          right: "person",
+          descriptionRequired: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "deploy",
+            title: "Deploy 2026.7.3 is live 🚀",
+            description: "8:47",
+            module: "communities",
+            unread: true,
+            rightAvatar: { firstName: "Leo", lastName: "Costa" },
+            href: "/posts/1",
+          },
+          {
+            id: "summer",
+            title: "Summer office hours ☀️",
+            description: "Jul 18",
+            module: "communities",
+            rightAvatar: { firstName: "Mia", lastName: "Ruiz" },
+            href: "/posts/2",
+          },
+        ]
+      ),
+      // One-line rows over the remaining avatar kinds, one slot each.
+      listSlot(
+        { left: "team", subtitleRequired: true, clickBehavior: "link" },
+        [
+          {
+            id: "payroll",
+            title: "Payroll",
+            subtitle: "12 members",
+            avatar: { name: "Payroll" },
+            href: "/teams/payroll",
+          },
+        ]
+      ),
+      listSlot(
+        { left: "company", subtitleRequired: true, clickBehavior: "link" },
+        [
           {
             id: "office",
             title: "Barcelona office",
@@ -92,150 +173,79 @@ export const AllSlots: Story = {
             avatar: { name: "Factorial" },
             href: "/offices/bcn",
           },
-        ],
-      }),
-      // simple-line-list, icon left, trailing counts.
-      homeSlot("simple-line-list", {
-        left: "icon",
-        items: [
-          {
-            id: "bcn",
-            avatar: { icon: PalmTree },
-            title: "Barcelona",
-            count: 3,
-            href: "/positions/bcn",
-          },
-          {
-            id: "mad",
-            avatar: { icon: Comment },
-            title: "Madrid",
-            count: 2,
-            href: "/positions/mad",
-          },
-        ],
-      }),
-      // simple-line-list, person left, sized down; the two secondary voices.
-      homeSlot("simple-line-list", {
-        left: "person",
-        avatarSize: "sm",
-        items: [
-          {
-            id: "ada",
-            avatar: { firstName: "Ada", lastName: "Lovelace" },
-            title: "Ada Lovelace",
-            subtitle: "Engineering",
-            href: "/employees/ada",
-          },
-          {
-            id: "grace",
-            avatar: { firstName: "Grace", lastName: "Hopper" },
-            title: "Grace Hopper",
-            description: "Out until Friday",
-            href: "/employees/grace",
-          },
-        ],
-      }),
-      // simple-line-list, team left.
-      homeSlot("simple-line-list", {
-        left: "team",
-        items: [
-          {
-            id: "payroll",
-            avatar: { name: "Payroll" },
-            title: "Payroll",
-            description: "12 members",
-            href: "/teams/payroll",
-          },
-        ],
-      }),
-      // simple-line-list, file left, mid size.
-      homeSlot("simple-line-list", {
-        left: "file",
-        avatarSize: "md",
-        items: [
+        ]
+      ),
+      listSlot(
+        { left: "file", descriptionRequired: true, clickBehavior: "link" },
+        [
           {
             id: "contract",
-            avatar: { file: { name: "contract.pdf", type: "application/pdf" } },
             title: "Contract.pdf",
             description: "Needs your signature",
+            avatar: { file: { name: "contract.pdf", type: "application/pdf" } },
             href: "/documents/1",
           },
-        ],
-      }),
-      // simple-line-list, flag left.
-      homeSlot("simple-line-list", {
-        left: "flag",
-        items: [
-          {
-            id: "es",
-            avatar: { flag: "es" },
-            title: "Spain",
-            count: 24,
-            href: "/offices/es",
-          },
-        ],
-      }),
-      // simple-line-list, emoji left, all three text voices at once.
-      homeSlot("simple-line-list", {
-        left: "emoji",
-        items: [
+        ]
+      ),
+      listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
+        {
+          id: "es",
+          title: "Spain",
+          avatar: { flag: "es" },
+          count: 24,
+          href: "/offices/es",
+        },
+      ]),
+      listSlot(
+        { left: "emoji", subtitleRequired: true, clickBehavior: "link" },
+        [
           {
             id: "pto",
-            avatar: { emoji: "🌴" },
             title: "Time off",
             subtitle: "12 days left",
-            description: "Next: Aug 15",
+            avatar: { emoji: "🌴" },
             href: "/time-off",
           },
-        ],
-      }),
-      // simple-line-list with NO left at all: plain text rows.
-      homeSlot("simple-line-list", {
-        items: [
-          {
-            id: "requests",
-            title: "Review pending requests",
-            count: 5,
-            href: "/requests",
+        ]
+      ),
+      // No left, no right: plain text rows — and `onClick` instead of a link.
+      listSlot({ clickBehavior: "onClick" }, [
+        {
+          id: "timer",
+          title: "Start a timer",
+          onClick: () => {},
+        },
+      ]),
+      // maxVisibleItems: 3 of 7 rows show, the rest behind "View more (4)" at
+      // the bottom (then "View less"). Expanded, the list passes
+      // LIST_COMPACT_AFTER and auto-compacts — the second line folds into a
+      // tooltip and the glyphs drop to sm.
+      listSlot(
+        {
+          left: "person",
+          descriptionRequired: true,
+          clickBehavior: "link",
+          maxVisibleItems: 3,
+        },
+        [
+          "Ada Lovelace",
+          "Alan Turing",
+          "Grace Hopper",
+          "Katherine Johnson",
+          "Margaret Hamilton",
+          "Annie Easley",
+          "Mary Jackson",
+        ].map((name, index) => ({
+          id: String(index),
+          title: name,
+          description: `Joined in 20${10 + index}`,
+          avatar: {
+            firstName: name.split(" ")[0],
+            lastName: name.split(" ")[1],
           },
-        ],
-      }),
-      // inbox-list, module left: the unread dot and a trailing sender.
-      homeSlot("inbox-list", {
-        left: "module",
-        items: [
-          {
-            id: "deploy",
-            module: "communities",
-            title: "Deploy 2026.7.3 is live 🚀",
-            subtitle: "8:47",
-            unread: true,
-            person: { firstName: "Leo", lastName: "Costa" },
-            href: "/posts/1",
-          },
-          {
-            id: "summer",
-            module: "communities",
-            title: "Summer office hours ☀️",
-            subtitle: "Jul 18",
-            href: "/posts/2",
-          },
-        ],
-      }),
-      // inbox-list, person left, sized down.
-      homeSlot("inbox-list", {
-        left: "person",
-        avatarSize: "md",
-        items: [
-          {
-            id: "joiners",
-            avatar: { firstName: "Grace", lastName: "Hopper" },
-            title: "Welcome our new joiners 👋",
-            subtitle: "Jul 12",
-            href: "/posts/3",
-          },
-        ],
-      }),
+          href: `/employees/${index}`,
+        }))
+      ),
       homeSlot("event-list", {
         events: [
           // A date range.

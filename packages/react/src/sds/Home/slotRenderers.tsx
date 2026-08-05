@@ -1,32 +1,32 @@
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 
-import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
+import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
   F0AvatarList,
   F0AvatarListProps,
 } from "@/components/avatars/F0AvatarList"
-import { type ModuleId } from "@/components/avatars/F0AvatarModule"
+import {
+  F0AvatarModule,
+  type ModuleId,
+} from "@/components/avatars/F0AvatarModule"
+import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
+import { F0Button } from "@/components/F0Button"
 import { type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-import {
-  IndicatorsList,
-  IndicatorsListProps,
-} from "@/experimental/Widgets/Content/IndicatorsList"
+import { Counter } from "@/ui/Counter"
 import {
   CalendarEvent,
   type CalendarEventProps,
 } from "@/experimental/Widgets/Content/CalendarEvent"
+import {
+  IndicatorsList,
+  IndicatorsListProps,
+} from "@/experimental/Widgets/Content/IndicatorsList"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { WidgetProps } from "@/experimental/Widgets/Widget"
 
-import {
-  InboxListItem,
-  type InboxListItemProps,
-  SimpleLineListItem,
-  type SimpleLineListItemProps,
-  StatusListItem,
-  type StatusListItemProps,
-} from "./HomeListItem"
+import { HomeListItem } from "./HomeListItem"
 
 /**
  * The Home kit's slot vocabulary and how each slot is drawn. `SlotWidget`
@@ -52,84 +52,108 @@ export type SlotRenderer<P = unknown> = (
 ) => ReactNode
 export type SlotRenderers = Record<string, SlotRenderer>
 
-/**
- * CONSISTENT ROWS: within one slot every row draws the SAME left treatment.
- * The slot declares its `left` kind ONCE — each row then supplies only that
- * kind's data — so a slot is a list of people, or a list of files, never a
- * mix. The right side is fixed per visualization (a counter on
- * `simple-line-list`, a sender on `inbox-list`, faces on `status-rows`), so
- * consistency there comes free.
- */
-type AvatarLeftRows<Row, RowsKey extends string> = {
-  [T in AvatarVariant["type"]]: {
-    /** The ONE avatar type every row of this slot draws on its left. */
-    left: T
-    /** One size for every row's avatar. */
-    avatarSize?: AvatarSize
-  } & {
-    [K in RowsKey]: Array<
-      Row & { avatar: Omit<Extract<AvatarVariant, { type: T }>, "type"> }
-    >
-  }
-}[AvatarVariant["type"]]
+/* ------------------------------ list schema ------------------------------ */
 
-type SimpleLineRow = Omit<
-  SimpleLineListItemProps,
-  "onClick" | "icon" | "avatar" | "avatarSize"
-> & { id: string | number; href: string }
+type AlertType = Parameters<typeof F0AvatarAlert>[0]["type"]
+type AvatarData<T extends AvatarVariant["type"]> = Omit<
+  Extract<AvatarVariant, { type: T }>,
+  "type"
+>
+
+/** What every row of a `list` slot draws on its LEFT. */
+export type ListLeftKind = AvatarVariant["type"] | "module" | "alert"
 
 /**
- * `simple-line-list` params: one-line rows, every one an `href` — rows on Home
- * are always a door to the thing they describe, never inert text. The slot
- * draws ONE `left` kind for all its rows: any avatar type, or none.
+ * What every row draws on its RIGHT: a counter, one avatar (e.g. the sender),
+ * or a compact strip of avatars with an optional `remainingCount`.
  */
-export type SimpleLineListParams = {
-  /** @deprecated the list always shows every row now. */
-  showAllItems?: boolean
-} & (
-  | { left?: never; avatarSize?: never; items: SimpleLineRow[] }
-  | AvatarLeftRows<SimpleLineRow, "items">
-)
-
-type InboxRow = Omit<
-  InboxListItemProps,
-  "onClick" | "module" | "avatar" | "avatarSize"
-> & { id: string | number; href: string }
+export type ListRightKind =
+  | "counter"
+  | AvatarVariant["type"]
+  | `${F0AvatarListProps["type"]}-list`
 
 /**
- * `inbox-list` params: message rows, every one an `href`. The slot draws ONE
- * `left` kind for all its rows: the owning module's glyph, or any avatar type.
+ * A `list` slot's SCHEMA: declared once for the whole slot, it decides what
+ * every row looks like — the rows are CONSISTENT by construction, and the item
+ * type follows from it (see {@link ListItem}). Sizing is prescriptive, not
+ * configurable: two text lines (a required `description`) draw an `md` glyph,
+ * one line draws `sm`.
  */
-export type InboxListParams = {
-  /** @deprecated the list always shows every row now. */
-  showAllItems?: boolean
-} & (
-  | {
-      left: "module"
-      avatarSize?: never
-      items: Array<InboxRow & { module: ModuleId }>
-    }
-  | AvatarLeftRows<InboxRow, "items">
-)
+export interface ListSchema {
+  /** The one left treatment every row draws. Omit for plain text rows. */
+  left?: ListLeftKind
+  /** The one right treatment every row draws. Omit for none. */
+  right?: ListRightKind
+  /** Every row carries an inline subtitle (on the title's line, after a dot). */
+  subtitleRequired?: boolean
+  /** Every row carries a second line — this is what makes rows two-line. */
+  descriptionRequired?: boolean
+  /**
+   * How rows respond: `"link"` rows each carry an `href` (navigated via
+   * `ctx.navigate`), `"onClick"` rows each carry a handler. Omit for inert
+   * rows.
+   */
+  clickBehavior?: "link" | "onClick"
+  /**
+   * How many rows show before the rest fold behind a "View more (n)" button at
+   * the list's bottom (which turns into "View less" once expanded). Omit to
+   * always show every row.
+   */
+  maxVisibleItems?: number
+}
 
-type StatusRow = Omit<
-  StatusListItemProps,
-  "onClick" | "alert" | "avatar" | "avatarSize"
-> & { id: string; href?: string }
+type ListLeftData<L> = L extends "module"
+  ? { module: ModuleId }
+  : L extends "alert"
+    ? { alert: AlertType }
+    : L extends AvatarVariant["type"]
+      ? { avatar: AvatarData<L> }
+      : object
+
+type ListRightData<R> = R extends "counter"
+  ? { count: number }
+  : R extends `${infer T extends F0AvatarListProps["type"]}-list`
+    ? { avatars: Array<AvatarData<T>>; remainingCount?: number }
+    : R extends AvatarVariant["type"]
+      ? { rightAvatar: AvatarData<R> }
+      : object
+
+type ListClickData<C> = C extends "link"
+  ? { href: string }
+  : C extends "onClick"
+    ? { onClick: () => void }
+    : object
+
+type ListTextData<S extends ListSchema> = {
+  title: string
+} & (S["subtitleRequired"] extends true
+  ? { subtitle: string }
+  : { subtitle?: never }) &
+  (S["descriptionRequired"] extends true
+    ? { description: string }
+    : { description?: never })
+
+/** One row of a `list` slot — its shape FOLLOWS from the slot's schema. */
+export type ListItem<S extends ListSchema = ListSchema> = {
+  id: string | number
+  /** An accent dot on the left glyph — unseen/pending. */
+  unread?: boolean
+} & ListTextData<S> &
+  ListLeftData<S["left"]> &
+  ListRightData<S["right"]> &
+  ListClickData<S["clickBehavior"]>
+
+/** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
+export interface ListParams<S extends ListSchema = ListSchema> {
+  schema: S
+  items: Array<ListItem<S>>
+}
 
 /**
- * `status-rows` params: who-is-where rows — count, trailing faces. The slot
- * draws ONE `left` kind for all its rows: an alert glyph, or any avatar type.
+ * Past this many rows a list auto-compacts: every row's second line folds into
+ * a tooltip on the row, and the glyphs drop to `sm`.
  */
-export type StatusRowsParams =
-  | {
-      left: "alert"
-      avatarSize?: never
-      rows: Array<
-        StatusRow & { alert: NonNullable<StatusListItemProps["alert"]> }
-      >
-    }
-  | AvatarLeftRows<StatusRow, "rows">
+export const LIST_COMPACT_AFTER = 6
 
 /** `event-list` params: f0 calendar-event rows (color band + date avatars). */
 export interface EventListParams {
@@ -149,14 +173,6 @@ const go = (ctx: HomeRenderCtx, href?: string) =>
     ? () => (ctx.navigate ? ctx.navigate(href) : window.location.assign(href))
     : undefined
 
-/** The left props one row gets from its slot-level `left` declaration. */
-const leftFor = (
-  left: AvatarVariant["type"] | undefined,
-  avatar: object | undefined,
-  avatarSize: AvatarSize | undefined
-) =>
-  left ? { avatar: { type: left, ...avatar } as AvatarVariant, avatarSize } : {}
-
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
 export interface HomeWidgetSlot {
   visualization: string
@@ -165,24 +181,32 @@ export interface HomeWidgetSlot {
 
 /** The built-in slot vocabulary: each visualization and its params shape. */
 export interface HomeSlotParamsMap {
-  "simple-line-list": SimpleLineListParams
-  "inbox-list": InboxListParams
   "event-list": EventListParams
   indicators: IndicatorsListProps
   "avatar-list": AvatarListParams
-  "status-rows": StatusRowsParams
 }
 
 /**
  * Builds a slot with its params CHECKED against its visualization.
  * `HomeWidgetSlot`'s `params` is `unknown` (bespoke slots need it to be), so a
  * plain `{ visualization, params }` literal gets no checking — use this for
- * the built-in vocabulary and keep literals for bespoke visualizations.
+ * the built-in vocabulary (and {@link listSlot} for `list` slots), keeping
+ * literals for bespoke visualizations.
  */
 export const homeSlot = <V extends keyof HomeSlotParamsMap>(
   visualization: V,
   params: HomeSlotParamsMap[V]
 ): HomeWidgetSlot => ({ visualization, params })
+
+/**
+ * Builds a `list` slot: the schema is declared once, and the items' shape is
+ * CHECKED against it — a `left: "person"` slot only takes person data, a
+ * `clickBehavior: "link"` slot demands an `href` on every row.
+ */
+export const listSlot = <const S extends ListSchema>(
+  schema: S,
+  items: Array<ListItem<S>>
+): HomeWidgetSlot => ({ visualization: "list", params: { schema, items } })
 
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
@@ -240,53 +264,145 @@ export const slotRowBleed = (ctx: HomeRenderCtx) =>
 /** The gap between rows of the `event-list` slot. */
 export const EVENT_LIST_GAP = "gap-2"
 
+/** A row as the `list` renderer sees it — the schema already vouched for it. */
+type ListRow = {
+  id: string | number
+  title: string
+  subtitle?: string
+  description?: string
+  unread?: boolean
+  avatar?: object
+  module?: ModuleId
+  alert?: AlertType
+  count?: number
+  rightAvatar?: object
+  avatars?: AvatarData<F0AvatarListProps["type"]>[]
+  remainingCount?: number
+  href?: string
+  onClick?: () => void
+}
+
+/** The left props a row gets from its schema's `left` kind. */
+const listLeft = (
+  left: ListLeftKind | undefined,
+  row: ListRow,
+  avatarSize: AvatarSize & ("sm" | "md")
+) => {
+  if (left === "module" && row.module)
+    return { left: <F0AvatarModule module={row.module} size={avatarSize} /> }
+  if (left === "alert" && row.alert)
+    return { left: <F0AvatarAlert type={row.alert} size={avatarSize} /> }
+  if (left && row.avatar)
+    return {
+      avatar: { type: left, ...row.avatar } as AvatarVariant,
+      avatarSize,
+    }
+  return {}
+}
+
+/** The right node a row gets from its schema's `right` kind. */
+const listRight = (
+  right: ListRightKind | undefined,
+  row: ListRow
+): ReactNode => {
+  if (!right) return undefined
+  if (right === "counter")
+    return row.count != null ? <Counter value={row.count} /> : undefined
+  if (right.endsWith("-list"))
+    return row.avatars && row.avatars.length > 0 ? (
+      <F0AvatarList
+        type={right.slice(0, -"-list".length) as F0AvatarListProps["type"]}
+        size="sm"
+        layout="compact"
+        avatars={row.avatars as never}
+        remainingCount={row.remainingCount}
+      />
+    ) : undefined
+  return row.rightAvatar ? (
+    <F0Avatar
+      avatar={{ type: right, ...row.rightAvatar } as AvatarVariant}
+      size="sm"
+    />
+  ) : undefined
+}
+
 /**
- * Built-in renderers for the standard visualizations. Each spreads the slot's
- * params straight onto the matching f0 content component, so a slot's `params`
- * shape IS that component's prop shape. Bespoke visualizations (e.g. `clock-in`,
- * `carousel`) are intentionally absent — supply them via `slotRenderers`.
+ * The `list` slot's body. A component rather than a plain render function
+ * because "View more" is state: whether the rows past `maxVisibleItems` show.
+ *
+ * Sizing is prescriptive: two-line rows (required description) draw md glyphs,
+ * one-line rows sm. Past LIST_COMPACT_AFTER VISIBLE rows the list
+ * auto-compacts — the second line folds into a tooltip and the rows become
+ * one-line (so sm).
+ */
+function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
+  const { schema, items } = params
+  const allRows = items as ListRow[]
+  const [expanded, setExpanded] = useState(false)
+
+  const max = schema.maxVisibleItems
+  const overflows = max != null && allRows.length > max
+  const rows = overflows && !expanded ? allRows.slice(0, max) : allRows
+
+  const compact = rows.length > LIST_COMPACT_AFTER
+  const twoLine = Boolean(schema.descriptionRequired) && !compact
+  const avatarSize = twoLine ? "md" : "sm"
+
+  return (
+    <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
+      {rows.map(({ href, onClick, description, ...row }) => {
+        const node = (
+          <HomeListItem
+            title={row.title}
+            subtitle={row.subtitle}
+            description={compact ? undefined : description}
+            unread={row.unread}
+            {...listLeft(schema.left, row, avatarSize)}
+            right={listRight(schema.right, row)}
+            onClick={
+              schema.clickBehavior === "link"
+                ? go(ctx, href)
+                : schema.clickBehavior === "onClick"
+                  ? onClick
+                  : undefined
+            }
+          />
+        )
+        return compact && description ? (
+          // The hidden second line surfaces on hover. The span is the
+          // tooltip's trigger — HomeListItem doesn't forward trigger props.
+          <Tooltip key={row.id} label={description}>
+            <span className="block">{node}</span>
+          </Tooltip>
+        ) : (
+          <div key={row.id}>{node}</div>
+        )
+      })}
+      {overflows ? (
+        <div className="mt-1 self-start">
+          <F0Button
+            variant="ghost"
+            size="sm"
+            label={
+              expanded ? "View less" : `View more (${allRows.length - max})`
+            }
+            onClick={() => setExpanded(!expanded)}
+          />
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * Built-in renderers for the standard visualizations. `list` covers every
+ * row-based slot through its schema; `event-list`, `indicators` and
+ * `avatar-list` spread their params onto the matching f0 content component.
+ * Bespoke visualizations (e.g. `clock-in`, `carousel`) are intentionally
+ * absent — supply them via `slotRenderers`.
  */
 export const defaultSlotRenderers: SlotRenderers = {
-  // Every row navigates to its item's `href` (via ctx.navigate when the app
-  // provides it). The slot's `left` declaration decides every row's glyph.
-  "simple-line-list": (params, ctx) => {
-    const { items, left, avatarSize } = params as SimpleLineListParams
-    const rows = items as Array<SimpleLineRow & { avatar?: object }>
-    return (
-      <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-        {rows.map(({ id, href, avatar, ...item }) => (
-          <SimpleLineListItem
-            key={id}
-            {...item}
-            {...leftFor(left, avatar, avatarSize)}
-            onClick={go(ctx, href)}
-          />
-        ))}
-      </div>
-    )
-  },
-  // Message rows (Communications-style). Same rule: every row navigates to its
-  // `href`.
-  "inbox-list": (params, ctx) => {
-    const { items, left, avatarSize } = params as InboxListParams
-    const rows = items as Array<
-      InboxRow & { avatar?: object; module?: ModuleId }
-    >
-    return (
-      <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-        {rows.map(({ id, href, avatar, module, ...item }) => (
-          <InboxListItem
-            key={id}
-            {...item}
-            {...(left === "module"
-              ? { module }
-              : leftFor(left, avatar, avatarSize))}
-            onClick={go(ctx, href)}
-          />
-        ))}
-      </div>
-    )
-  },
+  list: (params, ctx) => <ListSlot params={params as ListParams} ctx={ctx} />,
   // The events are rendered here rather than through `CalendarEventList` for one
   // reason: that component's `showAllItems` container has no gap, and its `gap`
   // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
@@ -307,27 +423,4 @@ export const defaultSlotRenderers: SlotRenderers = {
   "avatar-list": (params) => (
     <F0AvatarList size="md" {...(params as AvatarListParams)} type="person" />
   ),
-  "status-rows": (params, ctx) => {
-    const { rows, left, avatarSize } = params as StatusRowsParams
-    const list = rows as Array<
-      StatusRow & {
-        avatar?: object
-        alert?: NonNullable<StatusListItemProps["alert"]>
-      }
-    >
-    return (
-      <div className={cn(slotRowBleed(ctx), "flex flex-col gap-1")}>
-        {list.map(({ id, href, avatar, alert, ...row }) => (
-          <StatusListItem
-            key={id}
-            {...row}
-            {...(left === "alert"
-              ? { alert }
-              : leftFor(left, avatar, avatarSize))}
-            onClick={go(ctx, href)}
-          />
-        ))}
-      </div>
-    )
-  },
 }
