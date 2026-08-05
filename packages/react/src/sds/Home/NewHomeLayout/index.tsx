@@ -10,8 +10,10 @@ import {
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import Menu from "@/icons/app/Menu"
-import { Pencil } from "@/icons/app"
+import { Check, Pencil } from "@/icons/app"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
+import { Action } from "@/ui/Action"
 import { cn } from "@/lib/utils"
 
 import { SlotWidget } from "../SlotWidget"
@@ -171,6 +173,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // Uncontrolled by default: the layout's own edit button drives it. Passing
     // `editing` hands control to the caller.
     const [editingState, setEditingState] = useState(false)
+    const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const isEditing = editing ?? editingState
     const toggleEditing = () => {
       const next = !isEditing
@@ -205,11 +208,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
 
     const hasSide =
       aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
+    // The rail collapses automatically when there isn't room for both columns,
+    // but a manual choice outranks that: `null` means "follow the room", and the
+    // toolbar's toggle pins it either way at any width.
+    const autoCollapsed =
+      rootWidth > 0 && rootWidth < mainWidth + COLUMN_GAP_PX + asideWidth
     const collapsed =
-      hasSide &&
-      rightWidgets.length > 0 &&
-      rootWidth > 0 &&
-      rootWidth < mainWidth + COLUMN_GAP_PX + asideWidth
+      hasSide && rightWidgets.length > 0 && (manualCollapsed ?? autoCollapsed)
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
 
     const openWidget = collapsed
@@ -286,14 +291,39 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           ) : (
             <span />
           )}
-          <F0Button
-            variant="outline"
-            size="md"
-            hideLabel
-            icon={Pencil}
-            label={isEditing ? "Done editing" : "Edit Home"}
-            onClick={toggleEditing}
-          />
+          <div className="flex flex-row items-center gap-2">
+            {/* In edit mode the button becomes the primary action — a check to
+                confirm — rather than staying the pencil that got you here. */}
+            <F0Button
+              variant={isEditing ? "default" : "outline"}
+              size="md"
+              hideLabel
+              icon={isEditing ? Check : Pencil}
+              label={isEditing ? "Done editing" : "Edit Home"}
+              onClick={toggleEditing}
+            />
+            {/* Collapsing the rail by hand, at any width: the automatic collapse
+                only speaks to how much room there is, not to whether you want
+                the space. */}
+            {hasSide && rightWidgets.length > 0 ? (
+              <Action
+                variant="ghost"
+                size="md"
+                compact
+                onClick={() => setManualCollapsed(!collapsed)}
+                title={
+                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
+                }
+                aria-label={
+                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
+                }
+              >
+                {/* The sidebar's own collapse glyph, so collapsing the rail and
+                    collapsing the sidebar read as the same gesture. */}
+                <SidebarIconSvg isExpanded={!collapsed} />
+              </Action>
+            ) : null}
+          </div>
         </div>
         {/* Main column: its own scroll region, no mask — a reading column should
             not have the text you are reading dimmed at the edges.
