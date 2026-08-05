@@ -311,16 +311,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             <span />
           )}
           <div className="flex flex-row items-center gap-2">
-            {/* In edit mode the button becomes the primary action — a check to
-                confirm — rather than staying the pencil that got you here. */}
-            <F0Button
-              variant={isEditing ? "default" : "ghost"}
-              size="md"
-              hideLabel
-              icon={isEditing ? Check : Pencil}
-              label={isEditing ? "Done editing" : "Edit Home"}
-              onClick={toggleEditing}
-            />
+            {/* Not while the rail is collapsed: arranging widgets you cannot see
+                is not an offer worth making. In edit mode the button becomes the
+                primary action — a check to confirm — rather than staying the
+                pencil that got you here. */}
+            {collapsed ? null : (
+              <F0Button
+                variant={isEditing ? "default" : "ghost"}
+                size="md"
+                hideLabel
+                icon={isEditing ? Check : Pencil}
+                label={isEditing ? "Done editing" : "Edit Home"}
+                onClick={toggleEditing}
+              />
+            )}
             {/* Collapsing the rail by hand — but only while that is a real
                 choice. Once the layout is too narrow for both columns the rail
                 is collapsed regardless, so a toggle there would be a control
@@ -427,7 +431,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   )}
                 </button>
               ))}
-              {isEditing && canEditSide("right") && onClickAddNewWidget ? (
+              {/* Always offered, not only in edit mode: collapsed, the strip has
+                  no edit affordance of its own, and adding a widget is the one
+                  thing you would still want from it. */}
+              {canEditSide("right") && onClickAddNewWidget ? (
                 <button
                   type="button"
                   aria-label="Add widget"
