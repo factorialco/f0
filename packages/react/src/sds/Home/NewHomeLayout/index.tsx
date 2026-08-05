@@ -253,7 +253,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           else if (ref) ref.current = node
         }}
         className={cn(
-          "relative grid grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
+          // `isolate` so the surface layer's -z-10 stays INSIDE this layout
+          // instead of escaping behind an ancestor's background.
+          "relative isolate grid grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
           className
         )}
         style={
@@ -277,9 +279,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             instead of stopping at the page's own padding. Neither column paints
             a background of its own — the gradient shows through beneath them,
             including across the grid's gap. */}
+        {/* `-z-10`: as a positioned element with auto z-index this OPAQUE layer
+            painted over every non-positioned descendant — the collapsed strip's
+            buttons were in place, opacity 1, and invisible under the page
+            surface. A negative z-index puts the background where a background
+            belongs: under everything in this (isolated) layout. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute overflow-hidden bg-f1-special-page"
+          className="pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page"
           style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
         >
           <GradientWash period={period} />
