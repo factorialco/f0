@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.3.0](https://github.com/factorialco/f0/compare/f0-react-v6.2.2...f0-react-v6.3.0) (2026-08-05)
+
+
+### Features
+
+* **SurveyFormBuilder:** configurable title placeholders + skipDefaultSection ([#4972](https://github.com/factorialco/f0/issues/4972)) ([7275e9a](https://github.com/factorialco/f0/commit/7275e9ad318897274d2d596a5b047a60c6fab8f1))
+
 ## [6.2.2](https://github.com/factorialco/f0/compare/f0-react-v6.2.1...f0-react-v6.2.2) (2026-08-05)
 
 
