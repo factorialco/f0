@@ -601,9 +601,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
       isLoading={isLoading}
       error={
         error ??
-        (unrenderableChart
-          ? new Error(translations.ai.dashboardItem.unsupportedChart)
-          : undefined)
+        // Deliberately message-less: the shared "Error loading data" title
+        // already states it, and a dedicated string would add a required key
+        // to `TranslationsType` — a compile break for every consumer that
+        // maintains a complete dictionary. The absent Retry below is the tell
+        // that distinguishes this from a fetch failure.
+        (unrenderableChart ? new Error() : undefined)
       }
       // Refetching cannot conjure a chart config this build understands, so
       // an unrenderable item gets no Retry button.

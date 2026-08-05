@@ -239,13 +239,9 @@ describe("F0AnalyticsDashboard — unrenderable chart config", () => {
       />
     )
 
-    // The bad widget names the actual condition…
+    // The bad widget degrades to the shared error state…
     await waitFor(() =>
-      expect(
-        getVisibleByText(
-          "This widget uses a chart type this version can't show"
-        )
-      ).toBeInTheDocument()
+      expect(getVisibleByText("Error loading data")).toBeInTheDocument()
     )
     // …and its neighbour still renders.
     expect(getVisibleByText("Headcount")).toBeInTheDocument()
@@ -268,18 +264,16 @@ describe("F0AnalyticsDashboard — unrenderable chart config", () => {
     )
 
     await waitFor(() =>
-      expect(
-        getVisibleByText(
-          "This widget uses a chart type this version can't show"
-        )
-      ).toBeInTheDocument()
+      expect(getVisibleByText("Error loading data")).toBeInTheDocument()
     )
     expect(screen.queryByRole("button", { name: "Retry" })).toBeNull()
   })
 
   it("states the condition once, not as both title and description", async () => {
-    // `getVisibleByText` picks the first match, so it would happily pass on a
-    // duplicated render — assert the count directly instead.
+    // The error state has no dedicated string for this condition, so nothing
+    // should land in the description slot — reusing the title there would
+    // render it twice. `getVisibleByText` picks the first match and would
+    // happily pass on that, so assert the count directly instead.
     render(
       <F0AnalyticsDashboard
         filters={filters}
@@ -296,11 +290,7 @@ describe("F0AnalyticsDashboard — unrenderable chart config", () => {
     )
 
     await waitFor(() =>
-      expect(
-        screen.getAllByText(
-          "This widget uses a chart type this version can't show"
-        )
-      ).toHaveLength(1)
+      expect(screen.getAllByText("Error loading data")).toHaveLength(1)
     )
   })
 })
