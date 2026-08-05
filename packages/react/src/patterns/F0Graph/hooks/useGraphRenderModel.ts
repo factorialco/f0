@@ -430,10 +430,34 @@ export function useGraphRenderModel<T>({
         parentId = nodeMap.get(parentId)?.parentId ?? null
       }
     }
+
+    // Draw every edge that passes through the window. An edge's path enters the
+    // viewport only when one of its endpoints sits inside it, so for each visible
+    // edge with exactly one endpoint IN THE VIEWPORT (not merely materialized via
+    // the ancestry spine), pull the other endpoint in too — React Flow can then
+    // route the edge even when the layout pushed that endpoint off-viewport. This
+    // keeps a visible parent's line to an off-screen child: expanding a wide node
+    // spreads its siblings past the screen edge, and without this the parent
+    // would look connected only to the child that stayed on screen. The reverse
+    // (a visible child's line up to an off-screen parent) is already covered by
+    // the ancestry walk above. Keyed on the VIEWPORT set — not `ids` — so an
+    // off-screen spine ancestor does not drag in all of its children at every
+    // level. A collapsed parent contributes only its expander-stub edge (its real
+    // children aren't in `visibleEdges`), so closed subtrees stay windowed out.
+    const viewportIds = new Set(base)
+    for (const edge of visibleEdges) {
+      const sourceIn = viewportIds.has(edge.source)
+      const targetIn = viewportIds.has(edge.target)
+      if (sourceIn !== targetIn) {
+        ids.add(edge.source)
+        ids.add(edge.target)
+      }
+    }
     return ids
   }, [
     enableNodeWindowing,
     viewportRect,
+    visibleEdges,
     layout.nodes,
     nodeWidthProp,
     effectiveNodeHeight,
