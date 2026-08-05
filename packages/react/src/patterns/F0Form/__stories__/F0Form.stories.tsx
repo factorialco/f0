@@ -574,89 +574,71 @@ export const WithSectionsSidepanel: Story = {
  */
 export const WithOnlySelectedSection: Story = {
   render() {
-    const formSchema = z.object({
-      firstName: f0FormField.text({
-        label: "First name",
-        section: "personal",
-        row: "personal-name",
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField.text({
+          label: "First name",
+          row: "name",
+        }),
+        lastName: f0FormField.text({
+          label: "Last name",
+          row: "name",
+        }),
+        birthdate: f0FormField.date({
+          label: "Birthdate",
+          optional: true,
+        }),
       }),
-      lastName: f0FormField.text({
-        label: "Last name",
-        section: "personal",
-        row: "personal-name",
+      contact: z.object({
+        email: f0FormField.email({ label: "Email" }),
+        phone: f0FormField.text({ label: "Phone", optional: true }),
       }),
-      birthdate: f0FormField.date({
-        label: "Birthdate",
-        section: "personal",
-        optional: true,
+      address: z.object({
+        street: f0FormField.text({ label: "Street" }),
+        city: f0FormField.text({ label: "City", row: "city-zip" }),
+        postalCode: f0FormField.text({
+          label: "Postal code",
+          row: "city-zip",
+        }),
       }),
-      email: f0FormField.email({
-        label: "Email",
-        section: "contact",
+      preferences: z.object({
+        newsletter: f0FormField.boolean({
+          label: "Subscribe to the newsletter",
+          optional: true,
+        }),
+        language: f0FormField.select({
+          label: "Language",
+          options: [
+            { value: "en", label: "English" },
+            { value: "es", label: "Spanish" },
+          ],
+        }),
       }),
-      phone: f0FormField.text({
-        label: "Phone",
-        section: "contact",
-        optional: true,
-      }),
-      street: f0FormField.text({
-        label: "Street",
-        section: "address",
-      }),
-      city: f0FormField.text({
-        label: "City",
-        section: "address",
-        row: "address-city",
-      }),
-      postalCode: f0FormField.text({
-        label: "Postal code",
-        section: "address",
-        row: "address-city",
-      }),
-      newsletter: f0FormField.boolean({
-        label: "Subscribe to the newsletter",
-        section: "preferences",
-        optional: true,
-      }),
-      language: f0FormField.select({
-        label: "Language",
-        section: "preferences",
-        options: [
-          { value: "en", label: "English" },
-          { value: "es", label: "Spanish" },
-        ],
-      }),
-    })
-
-    const sections: Record<string, F0SectionConfig> = {
-      personal: { title: "Personal information" },
-      contact: { title: "Contact" },
-      address: { title: "Address" },
-      preferences: { title: "Preferences" },
     }
 
     const formDefinition = useF0FormDefinition({
       name: "employee-profile",
-      schema: formSchema,
-      sections,
-      defaultValues: {
-        firstName: "",
-        lastName: "",
-        birthdate: undefined,
-        email: "",
-        phone: "",
-        street: "",
-        city: "",
-        postalCode: "",
-        newsletter: false,
-        language: "en",
+      schema,
+      sections: {
+        personal: { title: "Personal information" },
+        contact: { title: "Contact" },
+        address: { title: "Address" },
+        preferences: { title: "Preferences" },
       },
-      onSubmit: async ({ data }) => {
+      defaultValues: {
+        personal: { firstName: "", lastName: "", birthdate: undefined },
+        contact: { email: "", phone: "" },
+        address: { street: "", city: "", postalCode: "" },
+        preferences: { newsletter: false, language: "en" },
+      },
+      onSubmit: async ({ sectionId, data }) => {
         await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
         return { success: true }
       },
-      submitConfig: { label: "Save profile" },
+      submitConfig: { label: "Save" },
     })
 
     return (

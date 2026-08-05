@@ -262,6 +262,19 @@ export interface F0FormStylingConfig {
    */
   showSectionsSidepanel?: boolean
   /**
+   * Removes the default padding around the form content.
+   * @default false
+   */
+  noPadding?: boolean
+}
+
+/**
+ * Styling configuration for per-section schema forms.
+ * Extends the base config with options that only apply when each section
+ * has its own independent schema and submit button.
+ */
+export interface F0FormPerSectionStylingConfig extends F0FormStylingConfig {
+  /**
    * Renders only the section selected in the sidepanel instead of stacking
    * all sections. Useful for large forms where showing every section at once
    * is overwhelming. Hidden sections stay mounted so their values, dirty
@@ -270,11 +283,6 @@ export interface F0FormStylingConfig {
    * @default false
    */
   showOnlySelectedSection?: boolean
-  /**
-   * Removes the default padding around the form content.
-   * @default false
-   */
-  noPadding?: boolean
 }
 
 /**
@@ -526,7 +534,7 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   /**
    * Styling configuration for form layout and appearance.
    */
-  styling?: F0FormStylingConfig
+  styling?: F0FormPerSectionStylingConfig
   /**
    * Ref to control the form programmatically from outside.
    */
@@ -591,7 +599,7 @@ export interface F0FormPropsWithPerSectionDefinition<
 > {
   formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<T>
   className?: string
-  styling?: F0FormStylingConfig
+  styling?: F0FormPerSectionStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
   /** Upload hook shared by all file fields in the form. */
