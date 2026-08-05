@@ -377,10 +377,12 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           collapsed ? (
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
+            // NO FADE HERE: the strip is a short column of 40px glyphs, and a
+            // mask over those washes the glyphs themselves out rather than
+            // hinting at content past an edge. The fade belongs to the expanded
+            // rail, where the content is tall cards.
             <aside
-              ref={railFade.ref}
               className="flex min-h-0 flex-col gap-2 overflow-y-auto"
-              style={railFade.style}
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
