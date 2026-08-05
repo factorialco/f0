@@ -208,13 +208,16 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
 
     const hasSide =
       aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
-    // The rail collapses automatically when there isn't room for both columns,
-    // but a manual choice outranks that: `null` means "follow the room", and the
-    // toolbar's toggle pins it either way at any width.
+    // Two reasons the rail collapses, and they don't compete: there ISN'T ROOM
+    // for both columns, or you ASKED for the space. Narrowness always wins —
+    // expanding by hand can't conjure room the layout doesn't have — so the
+    // manual choice only decides while both would fit.
     const autoCollapsed =
       rootWidth > 0 && rootWidth < mainWidth + COLUMN_GAP_PX + asideWidth
     const collapsed =
-      hasSide && rightWidgets.length > 0 && (manualCollapsed ?? autoCollapsed)
+      hasSide &&
+      rightWidgets.length > 0 &&
+      (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
 
     const openWidget = collapsed
@@ -295,7 +298,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             {/* In edit mode the button becomes the primary action — a check to
                 confirm — rather than staying the pencil that got you here. */}
             <F0Button
-              variant={isEditing ? "default" : "outline"}
+              variant={isEditing ? "default" : "ghost"}
               size="md"
               hideLabel
               icon={isEditing ? Check : Pencil}
