@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.1](https://github.com/factorialco/f0/compare/f0-react-v6.2.0...f0-react-v6.2.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **F0AvatarList:** make the +N popover keyboard reachable ([#4964](https://github.com/factorialco/f0/issues/4964)) ([e660844](https://github.com/factorialco/f0/commit/e6608446c2ae340c29deb42b04fea901127aa5d4))
+
 ## [6.2.0](https://github.com/factorialco/f0/compare/f0-react-v6.1.0...f0-react-v6.2.0) (2026-08-04)
 
 
