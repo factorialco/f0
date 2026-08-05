@@ -305,10 +305,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               label={isEditing ? "Done editing" : "Edit Home"}
               onClick={toggleEditing}
             />
-            {/* Collapsing the rail by hand, at any width: the automatic collapse
-                only speaks to how much room there is, not to whether you want
-                the space. */}
-            {hasSide && rightWidgets.length > 0 ? (
+            {/* Collapsing the rail by hand — but only while that is a real
+                choice. Once the layout is too narrow for both columns the rail
+                is collapsed regardless, so a toggle there would be a control
+                that does nothing. */}
+            {hasSide && rightWidgets.length > 0 && !autoCollapsed ? (
               <Action
                 variant="ghost"
                 size="md"
