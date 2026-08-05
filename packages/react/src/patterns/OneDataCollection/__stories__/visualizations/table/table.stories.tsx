@@ -1088,7 +1088,7 @@ export const TableWithFocusedHeaderGroup: Story = {
     docs: {
       description: {
         story:
-          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background, and the emphasis survives collapsing the group. A focused group is the table's single focus area — column-level `focused` flags outside it are ignored (a single column can also be focused directly via the `focused` column option when no group is focused). With `scrollToFocusedColumn`, the table scrolls horizontally to the group's start once the data loads. Here a full year of sortable, collapsible months starts collapsed except August, which is focused — the same shape as a monthly cost overview highlighting the current month.",
+          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background, and the emphasis survives collapsing the group. A focused group is the table's single focus area — column-level `focused` flags outside it are ignored (a single column can also be focused directly via the `focused` column option when no group is focused). With `scrollToFocusedColumn`, the table scrolls horizontally to the group's start once the data loads. Here a full year of sortable, collapsible months overflows the viewport and the table lands on August, the focused month — the same shape as a monthly cost overview highlighting the current month.",
       },
     },
   },
@@ -1209,7 +1209,6 @@ export const TableWithFocusedHeaderGroup: Story = {
                     label: monthLabels[month],
                     // Only the total stays visible while collapsed
                     collapsedColumns: [`${month}-total`],
-                    defaultCollapsed: month !== focusedMonth,
                     // Focuses the spanning header and every column in the group
                     focused: month === focusedMonth,
                   },
@@ -1225,13 +1224,10 @@ export const TableWithFocusedHeaderGroup: Story = {
                   sorting: "team",
                   render: (item) => item.team,
                 },
-                // Fixed month widths keep the year wider than the viewport,
-                // so the auto-scroll to the focused month has room to act.
                 ...months.flatMap((month) => [
                   {
                     id: `${month}-salaries`,
                     label: "Salaries",
-                    width: 120,
                     align: "right" as const,
                     headerGroupId: month,
                     sorting: `${month}-salaries`,
@@ -1241,7 +1237,6 @@ export const TableWithFocusedHeaderGroup: Story = {
                   {
                     id: `${month}-bonuses`,
                     label: "Bonuses",
-                    width: 120,
                     align: "right" as const,
                     headerGroupId: month,
                     sorting: `${month}-bonuses`,
@@ -1251,7 +1246,6 @@ export const TableWithFocusedHeaderGroup: Story = {
                   {
                     id: `${month}-total`,
                     label: "Total",
-                    width: 120,
                     align: "right" as const,
                     headerGroupId: month,
                     sorting: `${month}-total`,
