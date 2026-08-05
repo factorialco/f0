@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.2](https://github.com/factorialco/f0/compare/f0-react-v6.2.1...f0-react-v6.2.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** make the header group collapse animate in tree tables ([#4994](https://github.com/factorialco/f0/issues/4994)) ([20f82da](https://github.com/factorialco/f0/commit/20f82da15c28fd1d184f69a563ea2d12e6393326))
+
 ## [6.2.1](https://github.com/factorialco/f0/compare/f0-react-v6.2.0...f0-react-v6.2.1) (2026-08-05)
 
 
