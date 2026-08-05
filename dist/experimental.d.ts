@@ -7358,8 +7358,7 @@ declare type HeaderGroupDefinition = {
      * Visually focuses the whole group: its spanning header and every column in
      * it render with the focused emphasis. Only one focus area is allowed in
      * the table — a focused group takes precedence, and column-level `focused`
-     * flags outside it are ignored. Combine with the `scrollToFocusedColumn`
-     * visualization option to also scroll the table to the group.
+     * flags outside it are ignored.
      */
     focused?: boolean;
 };
@@ -10553,8 +10552,7 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      * emphasized too. Only one column may be focused — when several columns
      * set this, the first one (in definition order) wins and the rest are
      * ignored. To focus a whole header group instead, set `focused` on its
-     * {@link HeaderGroupDefinition}. Combine with the `scrollToFocusedColumn`
-     * visualization option to also scroll the table to this column.
+     * {@link HeaderGroupDefinition}.
      */
     focused?: boolean;
     /**
@@ -10737,14 +10735,6 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Useful for embedding the table inside panels or detail views.
      */
     bordered?: boolean;
-    /**
-     * When true and a column is `focused`, the table scrolls horizontally to
-     * bring that column into view — once the data has loaded, and again if the
-     * focused column changes. Frozen columns stay visible: the scroll offset
-     * accounts for their width.
-     * @default false
-     */
-    scrollToFocusedColumn?: boolean;
 };
 
 declare type TableVisualizationSettings = {
@@ -12051,8 +12041,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -12060,10 +12052,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
