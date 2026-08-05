@@ -60,6 +60,12 @@ const GradientWash = ({
 
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
+
+/**
+ * The columns scroll without showing a bar — the scroll-aware fades already
+ * hint at overflowed content, so a bar is just noise on the gradient.
+ */
+const SCROLLBAR_HIDDEN = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
@@ -399,7 +405,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             screen instead of being cut short inside the page. */}
         <div
           ref={mainFade.ref}
-          className="relative min-h-0 overflow-y-auto"
+          className={cn("relative min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
           style={{
             marginTop: -bleed,
             marginBottom: -bleed,
@@ -447,7 +453,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // and the scrollport would clip it — bleed the scrollport out by
             // 4px (padding puts the glyphs back) so the dot stays inside it.
             <aside
-              className="-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1"
+              className={cn(
+                "-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1",
+                SCROLLBAR_HIDDEN
+              )}
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
@@ -501,7 +510,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           ) : (
             <aside
               ref={railFade.ref}
-              className="min-h-0 overflow-y-auto"
+              className={cn("min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
               style={railFade.style}
             >
               <WidgetContainer

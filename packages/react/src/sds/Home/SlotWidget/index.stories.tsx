@@ -200,12 +200,18 @@ export const AllSlots: Story = {
           },
         ]
       ),
-      // No left, no right: plain text rows — and `onClick` instead of a link.
-      listSlot({ clickBehavior: "onClick" }, [
+      // No left, no right: plain text rows. An external href opens in a new
+      // tab; relative ones stay in this one.
+      listSlot({ clickBehavior: "link" }, [
         {
-          id: "timer",
-          title: "Start a timer",
-          onClick: () => {},
+          id: "requests",
+          title: "Review pending requests",
+          href: "/requests",
+        },
+        {
+          id: "help",
+          title: "Help center",
+          href: "https://help.factorial.co",
         },
       ]),
       // compact: true — the second line folds into a tooltip even under the

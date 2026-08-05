@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
@@ -208,29 +208,27 @@ describe("list slot schema", () => {
     expect(screen.getByText("Detail 0")).toBeInTheDocument()
   })
 
-  test("link rows are REAL anchors with the href; onClick rows are buttons", async () => {
-    const onClick = vi.fn()
+  test("link rows are REAL anchors — same tab inside, a new one for other domains", () => {
     zeroRender(
       <SlotWidget
         slots={[
           listSlot({ clickBehavior: "link" }, [
             { id: "1", title: "Barcelona", href: "/bcn" },
-          ]),
-          listSlot({ clickBehavior: "onClick" }, [
-            { id: "1", title: "Start timer", onClick },
+            { id: "2", title: "Help center", href: "https://help.example.com" },
           ]),
         ]}
       />
     )
 
-    // No onClick navigation: the row IS a link, href and all.
-    expect(screen.getByRole("link", { name: "Barcelona" })).toHaveAttribute(
-      "href",
-      "/bcn"
-    )
+    // No onClick navigation anywhere: the row IS a link, href and all.
+    const inside = screen.getByRole("link", { name: "Barcelona" })
+    expect(inside).toHaveAttribute("href", "/bcn")
+    expect(inside).not.toHaveAttribute("target")
 
-    await userEvent.click(screen.getByRole("button", { name: "Start timer" }))
-    expect(onClick).toHaveBeenCalled()
+    expect(screen.getByRole("link", { name: "Help center" })).toHaveAttribute(
+      "target",
+      "_blank"
+    )
   })
 
   test("maxVisibleItems folds the rest behind View more, then View less", async () => {

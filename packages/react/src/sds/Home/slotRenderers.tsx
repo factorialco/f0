@@ -88,11 +88,12 @@ export interface ListSchema {
   /** Every row carries a second line — this is what makes rows two-line. */
   descriptionRequired?: boolean
   /**
-   * How rows respond: `"link"` rows each carry an `href` and render as REAL
-   * anchors (role `link`, routed through the app's `LinkProvider` — never an
-   * onClick), `"onClick"` rows each carry a handler. Omit for inert rows.
+   * `"link"` rows each carry an `href` and render as REAL anchors (role
+   * `link`, routed through the app's `LinkProvider`) — never an onClick;
+   * that's the only click behavior rows have. Omit for inert rows.
+   * Same-tab for relative and `#` hrefs, `target="_blank"` for other domains.
    */
-  clickBehavior?: "link" | "onClick"
+  clickBehavior?: "link"
   /**
    * How many rows show before the rest fold behind a "View more (n)" button at
    * the list's bottom (which turns into "View less" once expanded). Omit to
@@ -123,11 +124,7 @@ type ListRightData<R> = R extends "counter"
       ? { rightAvatar: AvatarData<R> }
       : object
 
-type ListClickData<C> = C extends "link"
-  ? { href: string }
-  : C extends "onClick"
-    ? { onClick: () => void }
-    : object
+type ListClickData<C> = C extends "link" ? { href: string } : object
 
 type ListTextData<S extends ListSchema> = {
   title: string
@@ -271,7 +268,6 @@ type ListRow = {
   avatars?: AvatarData<F0AvatarListProps["type"]>[]
   remainingCount?: number
   href?: string
-  onClick?: () => void
 }
 
 /** The left props a row gets from its schema's `left` kind. */
@@ -342,7 +338,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
 
   return (
     <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-      {rows.map(({ href, onClick, description, ...row }) => {
+      {rows.map(({ href, description, ...row }) => {
         const node = (
           <HomeListItem
             title={row.title}
@@ -352,7 +348,6 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             {...listLeft(schema.left, row, avatarSize)}
             right={listRight(schema.right, row)}
             href={schema.clickBehavior === "link" ? href : undefined}
-            onClick={schema.clickBehavior === "onClick" ? onClick : undefined}
           />
         )
         return compact && description ? (

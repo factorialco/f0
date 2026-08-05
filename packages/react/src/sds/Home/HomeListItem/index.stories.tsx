@@ -33,7 +33,7 @@ export const Default: Story = {
     subtitle: "Engineering",
     description: "Requested 3 days off",
     right: <F0TagStatus text="Pending" variant="warning" />,
-    onClick: () => {},
+    href: "#",
   },
 }
 
@@ -49,37 +49,37 @@ export const AvatarTypes: Story = {
         avatar={{ type: "person", firstName: "Ada", lastName: "Lovelace" }}
         title="Person"
         description="Ada Lovelace"
-        onClick={() => {}}
+        href="#"
       />
       <HomeListItem
         avatar={{ type: "team", name: "Payroll" }}
         title="Team"
         description="Payroll"
-        onClick={() => {}}
+        href="#"
       />
       <HomeListItem
         avatar={{ type: "company", name: "Factorial" }}
         title="Company"
         description="Factorial"
-        onClick={() => {}}
+        href="#"
       />
       <HomeListItem
         avatar={{ type: "flag", flag: "ES" }}
         title="Flag"
         description="Spain"
-        onClick={() => {}}
+        href="#"
       />
       <HomeListItem
         avatar={{ type: "emoji", emoji: "🌴" }}
         title="Emoji"
         description="Time off"
-        onClick={() => {}}
+        href="#"
       />
       <HomeListItem
         avatar={{ type: "icon", icon: Comment }}
         title="Icon"
         description="Ask HR"
-        onClick={() => {}}
+        href="#"
       />
     </div>
   ),

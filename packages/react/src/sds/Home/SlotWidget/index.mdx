@@ -57,17 +57,32 @@ listSlot(
 
 ### The schema
 
-| Field                 | Values                                                                                                         | Effect on items                                                                            |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `left`                | any avatar type (`person`, `team`, `company`, `file`, `flag`, `emoji`, `icon`), `module`, `alert` — or omitted | each row supplies that kind's data (`avatar`, `module`, or `alert`)                        |
-| `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`)                |
-| `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                                     |
-| `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                        |
-| `clickBehavior`       | `"link"` \| `"onClick"` — or omitted for inert rows                                                            | every row carries an `href` (a REAL anchor, routed through `LinkProvider`) or an `onClick` |
-| `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom                |
-| `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs        |
+| Field                 | Values                                                                                                         | Effect on items                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `left`                | any avatar type (`person`, `team`, `company`, `file`, `flag`, `emoji`, `icon`), `module`, `alert` — or omitted | each row supplies that kind's data (`avatar`, `module`, or `alert`)                 |
+| `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`)         |
+| `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                              |
+| `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                 |
+| `clickBehavior`       | `"link"` — or omitted for inert rows                                                                           | every row carries an `href` and renders as a REAL anchor (see Click handling)       |
+| `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom         |
+| `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs |
 
 Rows may also carry `unread` for the accent dot on the left glyph.
+
+### Click handling
+
+Rows do **not** take an `onClick` — there is nothing to capture. A clickable
+row IS a link: the slot declares `clickBehavior: "link"`, every row carries an
+`href`, and the row renders as a real anchor (role `link` — middle-click,
+cmd-click, and copy-address all behave). Where the anchor goes:
+
+- **Relative paths** (`/employees/ada`) and **fragments** (`#section`) open in
+  the **same tab**, routed through the app's `LinkProvider` for client-side
+  navigation.
+- **Other domains** (`https://developer.mozilla.org`) open in a **new tab**
+  (`target="_blank"` with `rel="noreferrer"`), always as a native anchor.
+
+Rows without `clickBehavior` are inert — no hover state, no chevron.
 
 ### Prescriptive sizing
 
@@ -144,11 +159,13 @@ listSlot(
 )
 ```
 
-**Plain text rows** that run a handler instead of navigating:
+**Plain text rows**, one inside the app and one leaving it (that one opens in
+a new tab on its own):
 
 ```tsx
-listSlot({ clickBehavior: "onClick" }, [
-  { id: "timer", title: "Start a timer", onClick: startTimer },
+listSlot({ clickBehavior: "link" }, [
+  { id: "requests", title: "Review pending requests", href: "/requests" },
+  { id: "help", title: "Help center", href: "https://help.factorial.co" },
 ])
 ```
 

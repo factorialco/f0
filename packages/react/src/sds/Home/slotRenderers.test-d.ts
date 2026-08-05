@@ -103,26 +103,21 @@ test("the schema's text voices are required — and forbidden when not declared"
   ])
 })
 
-test("clickBehavior decides how rows respond", () => {
+test("clickBehavior: link is the ONLY click behavior — href, never onClick", () => {
   listSlot({ clickBehavior: "link" }, [{ id: 1, title: "x", href: "/x" }])
-  listSlot({ clickBehavior: "onClick" }, [
-    { id: 1, title: "x", onClick: () => {} },
-  ])
 
   listSlot({ clickBehavior: "link" }, [
     // @ts-expect-error link rows demand an href
     { id: 1, title: "x" },
   ])
   listSlot({ clickBehavior: "link" }, [
-    // @ts-expect-error link rows take an href, not a handler
+    // @ts-expect-error rows never take an onClick — navigation is href-only
     { id: 1, title: "x", href: "/x", onClick: () => {} },
   ])
-  listSlot({ clickBehavior: "onClick" }, [
-    // @ts-expect-error onClick rows demand a handler
-    { id: 1, title: "x" },
-  ])
+  // @ts-expect-error "onClick" is not a click behavior — rows are links or inert
+  listSlot({ clickBehavior: "onClick" }, [])
   listSlot({}, [
-    // @ts-expect-error inert rows take neither
+    // @ts-expect-error inert rows take no href
     { id: 1, title: "x", href: "/x" },
   ])
 })

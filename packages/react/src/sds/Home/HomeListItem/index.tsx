@@ -41,12 +41,28 @@ export interface HomeListItemProps {
   /**
    * Renders the row as a REAL link — an anchor with this href (role `link`,
    * middle-click, copy address), routed through the app's `LinkProvider`.
-   * Wins over `onClick`.
+   * The row's ONLY click behavior: relative and `#` hrefs open in the same
+   * tab, hrefs to other domains open in a new one.
    */
   href?: string
-  onClick?: () => void
   /** Defaults to whether the row is clickable. */
   showChevron?: boolean
+}
+
+/**
+ * Whether an href leaves the current domain — those rows open in a new tab.
+ * Relative paths and `#` fragments resolve against the current origin, so
+ * they stay in this one.
+ */
+const isExternal = (href: string) => {
+  if (typeof window === "undefined") return false
+  try {
+    return (
+      new URL(href, window.location.origin).origin !== window.location.origin
+    )
+  } catch {
+    return false
+  }
 }
 
 export function HomeListItem({
@@ -59,8 +75,7 @@ export function HomeListItem({
   right,
   unread = false,
   href,
-  onClick,
-  showChevron = href != null || onClick != null,
+  showChevron = href != null,
 }: HomeListItemProps) {
   const leading =
     left ?? (avatar ? <F0Avatar avatar={avatar} size={avatarSize} /> : null)
@@ -103,18 +118,18 @@ export function HomeListItem({
 
   const className = cn(
     "flex w-full items-center gap-3 rounded-md p-2 text-left",
-    (href || onClick) &&
+    href &&
       "cursor-pointer hover:bg-f1-background-tertiary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
   )
 
   return href ? (
-    <Link href={href} className={cn(className, "no-underline")}>
+    <Link
+      href={href}
+      className={cn(className, "no-underline")}
+      {...(isExternal(href) ? { target: "_blank", rel: "noreferrer" } : {})}
+    >
       {content}
     </Link>
-  ) : onClick ? (
-    <button type="button" className={className} onClick={onClick}>
-      {content}
-    </button>
   ) : (
     <div className={className}>{content}</div>
   )

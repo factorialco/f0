@@ -1,6 +1,6 @@
-import { describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { screen, zeroRender } from "@/testing/test-utils"
 
 import { HomeListItem } from "./index"
 
@@ -60,16 +60,28 @@ describe("HomeListItem", () => {
     expect(screen.getByText("trailing")).toBeInTheDocument()
   })
 
-  test("is a button with a chevron when clickable, inert otherwise", async () => {
-    const onClick = vi.fn()
-    const { rerender } = zeroRender(
-      <HomeListItem title="row" onClick={onClick} />
+  test("is a REAL link with a chevron when it has an href, inert otherwise", () => {
+    const { rerender } = zeroRender(<HomeListItem title="row" href="/x" />)
+
+    expect(screen.getByRole("link", { name: "row" })).toHaveAttribute(
+      "href",
+      "/x"
     )
 
-    await userEvent.click(screen.getByRole("button"))
-    expect(onClick).toHaveBeenCalled()
-
     rerender(<HomeListItem title="row" />)
-    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+    expect(screen.queryByRole("link")).not.toBeInTheDocument()
+  })
+
+  test("relative and # hrefs stay in this tab; other domains open a new one", () => {
+    const { rerender } = zeroRender(<HomeListItem title="row" href="/inside" />)
+
+    expect(screen.getByRole("link")).not.toHaveAttribute("target")
+
+    rerender(<HomeListItem title="row" href="#section" />)
+    expect(screen.getByRole("link")).not.toHaveAttribute("target")
+
+    rerender(<HomeListItem title="row" href="https://developer.mozilla.org" />)
+    expect(screen.getByRole("link")).toHaveAttribute("target", "_blank")
+    expect(screen.getByRole("link")).toHaveAttribute("rel", "noreferrer")
   })
 })
