@@ -1088,7 +1088,7 @@ export const TableWithFocusedHeaderGroup: Story = {
     docs: {
       description: {
         story:
-          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background, and the emphasis survives collapsing the group. A focused group is the table's single focus area — column-level `focused` flags outside it are ignored (a single column can also be focused directly via the `focused` column option when no group is focused). With `scrollToFocusedColumn`, the table scrolls horizontally to the group's start once the data loads. Here a full year of sortable, collapsible months overflows the viewport and the table lands on August, the focused month — the same shape as a monthly cost overview highlighting the current month.",
+          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background, and the emphasis survives collapsing the group. A focused group is the table's single focus area — column-level `focused` flags outside it are ignored (a single column can also be focused directly via the `focused` column option when no group is focused). Here a full year of sortable, collapsible months starts collapsed except August, the focused month — the same shape as a monthly cost overview highlighting the current month.",
       },
     },
   },
@@ -1201,7 +1201,6 @@ export const TableWithFocusedHeaderGroup: Story = {
             type: "table",
             options: {
               frozenColumns: 1,
-              scrollToFocusedColumn: true,
               headerGroups: Object.fromEntries(
                 months.map((month) => [
                   month,
@@ -1209,6 +1208,7 @@ export const TableWithFocusedHeaderGroup: Story = {
                     label: monthLabels[month],
                     // Only the total stays visible while collapsed
                     collapsedColumns: [`${month}-total`],
+                    defaultCollapsed: month !== focusedMonth,
                     // Focuses the spanning header and every column in the group
                     focused: month === focusedMonth,
                   },
@@ -1218,9 +1218,6 @@ export const TableWithFocusedHeaderGroup: Story = {
                 {
                   id: "team",
                   label: "Team",
-                  // The frozen column needs a width so the auto-scroll can
-                  // offset it and the focused group is not hidden under it.
-                  width: 160,
                   sorting: "team",
                   render: (item) => item.team,
                 },
@@ -1276,19 +1273,6 @@ export const TableWithFocusedHeaderGroup: Story = {
     focusedHeaders.forEach((header) => {
       expect(header.className).toContain("bg-f1-background-secondary")
     })
-
-    // The table auto-scrolls to the focused group. Smooth scrolling takes a
-    // moment, and on a viewport wide enough to fit the whole year there is
-    // nothing to scroll — so the assertion only applies when it overflows.
-    const scroller = augustGroup.closest("table")?.parentElement?.parentElement
-    expect(scroller).toBeTruthy()
-    await waitFor(
-      () => {
-        if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return
-        expect(scroller.scrollLeft).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
 
     // Collapsing the focused month keeps its visible total column emphasized.
     await userEvent.click(augustGroup)

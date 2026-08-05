@@ -54,7 +54,6 @@ import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { getColumnId, useColumns } from "./hooks/useColums"
 import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
-import { useScrollToFocusedColumn } from "./hooks/useScrollToFocusedColumn"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
@@ -114,7 +113,6 @@ export const TableCollection = <
   headerGroups: headerGroupsOption,
   onHeaderGroupCollapsedChange,
   bordered,
-  scrollToFocusedColumn = false,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
@@ -414,19 +412,6 @@ export const TableCollection = <
     columns,
     !!source.selectable
   )
-
-  const focusedColumn = columns.find((column) => column.focused)
-  useScrollToFocusedColumn(tableContainerRef, {
-    enabled: scrollToFocusedColumn,
-    focusedColumnId: focusedColumn ? getColumnId(focusedColumn) : undefined,
-    stickyOffset: columns
-      .slice(0, frozenColumnsLeft)
-      .reduce(
-        (acc, column) => acc + (column.width ?? column.minWidth ?? 0),
-        checkColumnWidth
-      ),
-    ready: !isInitialLoading,
-  })
 
   const tableWithChildren = data?.records.some((item) =>
     source.itemsWithChildren?.(item)
