@@ -65,6 +65,7 @@ listSlot(
 | `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                        |
 | `clickBehavior`       | `"link"` \| `"onClick"` — or omitted for inert rows                                                            | every row carries an `href` (a REAL anchor, routed through `LinkProvider`) or an `onClick` |
 | `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom                |
+| `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs        |
 
 Rows may also carry `unread` for the accent dot on the left glyph.
 
@@ -86,6 +87,10 @@ row's second line folds into a tooltip on the row, and — now being one-line �
 the glyphs drop to `sm`. A truncated list therefore stays two-line, and
 compacts only once "View more" expands it past the threshold — the
 second-to-last list in the story above shows the whole pipeline.
+
+A slot can also opt into this presentation at any count with `compact: true` —
+useful when the descriptions are secondary enough to live in tooltips even on
+a short list.
 
 ### Recipes
 
@@ -180,18 +185,6 @@ component's props.
 ```tsx
 homeSlot("indicators", {
   items: [{ label: "On holidays", content: "6" }],
-})
-```
-
-### `avatar-list`
-
-A strip of person avatars, `max` faces then a `+n` overflow — the params are
-`F0AvatarList`'s person props.
-
-```tsx
-homeSlot("avatar-list", {
-  avatars: [{ firstName: "Ada", lastName: "Lovelace" }],
-  max: 3,
 })
 ```
 

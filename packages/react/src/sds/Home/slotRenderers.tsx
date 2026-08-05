@@ -99,6 +99,12 @@ export interface ListSchema {
    * always show every row.
    */
   maxVisibleItems?: number
+  /**
+   * Forces the COMPACT presentation at any count: every row's `description`
+   * folds into a tooltip on the row and the glyphs draw `sm`. Without it,
+   * lists compact on their own past `LIST_COMPACT_AFTER` visible rows.
+   */
+  compact?: boolean
 }
 
 type ListLeftData<L> = L extends "module"
@@ -160,12 +166,6 @@ export interface EventListParams {
   showAllItems?: boolean
 }
 
-/** `avatar-list` params: a strip of person avatars. */
-export type AvatarListParams = Omit<
-  Extract<F0AvatarListProps, { type: "person" }>,
-  "type"
->
-
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
 export interface HomeWidgetSlot {
   visualization: string
@@ -176,7 +176,6 @@ export interface HomeWidgetSlot {
 export interface HomeSlotParamsMap {
   "event-list": EventListParams
   indicators: IndicatorsListProps
-  "avatar-list": AvatarListParams
 }
 
 /**
@@ -240,8 +239,8 @@ export type HomeWidgetItem = HomeWidgetChrome & {
 
 /**
  * Row-based slots cancel their rows' own padding so the rows sit flush with the
- * widget's content box — every list-like slot carries this. `avatar-list` and
- * `indicators` don't: they aren't rows and have no padding to cancel.
+ * widget's content box — every list-like slot carries this. `indicators`
+ * doesn't: it isn't rows and has no padding to cancel.
  */
 export const SLOT_ROW_BLEED = "-m-2"
 
@@ -337,7 +336,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const overflows = max != null && allRows.length > max
   const rows = overflows && !expanded ? allRows.slice(0, max) : allRows
 
-  const compact = rows.length > LIST_COMPACT_AFTER
+  const compact = Boolean(schema.compact) || rows.length > LIST_COMPACT_AFTER
   const twoLine = Boolean(schema.descriptionRequired) && !compact
   const avatarSize = twoLine ? "md" : "sm"
 
@@ -384,10 +383,10 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
 
 /**
  * Built-in renderers for the standard visualizations. `list` covers every
- * row-based slot through its schema; `event-list`, `indicators` and
- * `avatar-list` spread their params onto the matching f0 content component.
- * Bespoke visualizations (e.g. `clock-in`, `carousel`) are intentionally
- * absent — supply them via `slotRenderers`.
+ * row-based slot through its schema; `event-list` and `indicators` spread
+ * their params onto the matching f0 content component. Bespoke visualizations
+ * (e.g. `clock-in`, `carousel`) are intentionally absent — supply them via
+ * `slotRenderers`.
  */
 export const defaultSlotRenderers: SlotRenderers = {
   list: (params, ctx) => <ListSlot params={params as ListParams} ctx={ctx} />,
@@ -407,8 +406,5 @@ export const defaultSlotRenderers: SlotRenderers = {
   },
   indicators: (params) => (
     <IndicatorsList {...(params as IndicatorsListProps)} />
-  ),
-  "avatar-list": (params) => (
-    <F0AvatarList size="md" {...(params as AvatarListParams)} type="person" />
   ),
 }

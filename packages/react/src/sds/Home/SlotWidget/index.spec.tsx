@@ -178,6 +178,23 @@ describe("list slot schema", () => {
     expect(container.querySelector(".size-8")).toBeNull()
   })
 
+  test("compact: true folds the second line into a tooltip at any count", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", descriptionRequired: true, compact: true },
+            [person("1", "Ada", "Out until Friday")]
+          ),
+        ]}
+      />
+    )
+
+    expect(screen.queryByText("Out until Friday")).not.toBeInTheDocument()
+    expect(container.querySelector(".size-6")).not.toBeNull()
+    expect(container.querySelector(".size-8")).toBeNull()
+  })
+
   test(`at ${LIST_COMPACT_AFTER} rows or fewer the second line stays visible`, () => {
     const some = Array.from({ length: LIST_COMPACT_AFTER }, (_, i) =>
       person(String(i), `Person ${i}`, `Detail ${i}`)

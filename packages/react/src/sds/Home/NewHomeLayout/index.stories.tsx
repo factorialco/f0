@@ -380,26 +380,39 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       link: { title: "factorial.co", url: "https://factorial.co" },
     },
     slots: [
-      listSlot({ left: "icon", clickBehavior: "link" }, [
+      // `compact` keeps the rows one-line even with 3 items — every row's
+      // description lives in a tooltip instead (hover a row for it).
+      listSlot(
         {
-          id: "handbook",
-          title: "Employee handbook",
-          avatar: { icon: File },
-          href: "https://factorial.co/employee-handbook",
+          left: "icon",
+          descriptionRequired: true,
+          compact: true,
+          clickBehavior: "link",
         },
-        {
-          id: "mdn",
-          title: "MDN Web Docs",
-          avatar: { icon: Globe },
-          href: "https://developer.mozilla.org",
-        },
-        {
-          id: "status",
-          title: "Factorial status page",
-          avatar: { icon: ExternalLink },
-          href: "https://status.factorial.co",
-        },
-      ]),
+        [
+          {
+            id: "handbook",
+            title: "Employee handbook",
+            description: "Policies, benefits and how-tos",
+            avatar: { icon: File },
+            href: "https://factorial.co/employee-handbook",
+          },
+          {
+            id: "mdn",
+            title: "MDN Web Docs",
+            description: "Reference for web platform APIs",
+            avatar: { icon: Globe },
+            href: "https://developer.mozilla.org",
+          },
+          {
+            id: "status",
+            title: "Factorial status page",
+            description: "Live uptime and incident history",
+            avatar: { icon: ExternalLink },
+            href: "https://status.factorial.co",
+          },
+        ]
+      ),
     ],
   },
 ]

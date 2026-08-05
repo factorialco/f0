@@ -47,14 +47,6 @@ export const AllSlots: Story = {
           { label: "Remote", content: "3" },
         ],
       }),
-      homeSlot("avatar-list", {
-        avatars: [
-          { firstName: "Ada", lastName: "Lovelace" },
-          { firstName: "Alan", lastName: "Turing" },
-          { firstName: "Grace", lastName: "Hopper" },
-        ],
-        max: 3,
-      }),
       // Alert left + faces right: two-line rows (md glyphs), every row a link.
       listSlot(
         {
@@ -216,6 +208,25 @@ export const AllSlots: Story = {
           onClick: () => {},
         },
       ]),
+      // compact: true — the second line folds into a tooltip even under the
+      // threshold (hover the row for it), and the glyph draws sm.
+      listSlot(
+        {
+          left: "icon",
+          descriptionRequired: true,
+          compact: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "faq",
+            title: "FAQs",
+            description: "Answers to the most common questions",
+            avatar: { icon: Comment },
+            href: "/faq",
+          },
+        ]
+      ),
       // maxVisibleItems: 3 of 7 rows show, the rest behind "View more (4)" at
       // the bottom (then "View less"). Expanded, the list passes
       // LIST_COMPACT_AFTER and auto-compacts — the second line folds into a
