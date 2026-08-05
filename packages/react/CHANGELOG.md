@@ -1,5 +1,40 @@
 # Changelog
 
+## [6.3.2](https://github.com/factorialco/f0/compare/f0-react-v6.3.1...f0-react-v6.3.2) (2026-08-05)
+
+
+### Performance Improvements
+
+* **F0Graph:** stop the camera re-rendering every node on zoom/pan ([#4978](https://github.com/factorialco/f0/issues/4978)) ([484946e](https://github.com/factorialco/f0/commit/484946ea4028da5f06edac141120851e329a4c04))
+
+## [6.3.1](https://github.com/factorialco/f0/compare/f0-react-v6.3.0...f0-react-v6.3.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **icons:** strip stale non-scaling-stroke from Maximize/MinimizeHorizontal ([#4999](https://github.com/factorialco/f0/issues/4999)) ([6d86359](https://github.com/factorialco/f0/commit/6d86359e3bae4e5da88de09bf4668ac5c78d78ec))
+
+## [6.3.0](https://github.com/factorialco/f0/compare/f0-react-v6.2.2...f0-react-v6.3.0) (2026-08-05)
+
+
+### Features
+
+* **SurveyFormBuilder:** configurable title placeholders + skipDefaultSection ([#4972](https://github.com/factorialco/f0/issues/4972)) ([7275e9a](https://github.com/factorialco/f0/commit/7275e9ad318897274d2d596a5b047a60c6fab8f1))
+
+## [6.2.2](https://github.com/factorialco/f0/compare/f0-react-v6.2.1...f0-react-v6.2.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** make the header group collapse animate in tree tables ([#4994](https://github.com/factorialco/f0/issues/4994)) ([20f82da](https://github.com/factorialco/f0/commit/20f82da15c28fd1d184f69a563ea2d12e6393326))
+
+## [6.2.1](https://github.com/factorialco/f0/compare/f0-react-v6.2.0...f0-react-v6.2.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **F0AvatarList:** make the +N popover keyboard reachable ([#4964](https://github.com/factorialco/f0/issues/4964)) ([e660844](https://github.com/factorialco/f0/commit/e6608446c2ae340c29deb42b04fea901127aa5d4))
+
 ## [6.2.0](https://github.com/factorialco/f0/compare/f0-react-v6.1.0...f0-react-v6.2.0) (2026-08-04)
 
 

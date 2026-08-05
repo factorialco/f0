@@ -561,3 +561,48 @@ export const WithLockedQuestions: Story = {
     ],
   },
 }
+
+/**
+ * Consumers that model something other than a "survey" can relabel the placeholders
+ * and action labels per instance (falling back to the i18n defaults when omitted) and
+ * opt out of the auto-inserted default section to start from a blank form. Passing an
+ * empty string blanks a placeholder without removing its input.
+ */
+export const BlankStartWithCustomPlaceholders: Story = {
+  args: {
+    skipDefaultSection: true,
+    placeholders: {
+      questionTitle: "Field name",
+      sectionTitle: "Group name",
+      questionDescription: "",
+      answer: "",
+    },
+    labels: {
+      addQuestion: "New field",
+    },
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "field-1",
+          title: "",
+          type: "text" as const,
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "group-1",
+          title: "",
+          questions: [
+            {
+              id: "field-2",
+              title: "",
+              type: "text" as const,
+            },
+          ],
+        },
+      },
+    ],
+  },
+}

@@ -1,5 +1,4 @@
 import { useStore } from "@xyflow/react"
-import { useMemo } from "react"
 
 import {
   DEFAULT_NODE_WINDOW_PADDING,
@@ -21,39 +20,51 @@ interface UseViewportGeometryOptions {
  * "no windowing, render everything", which is also the correct behavior for the
  * first paint (React Flow's own `fitView` needs all nodes present to fit them).
  *
- * The rect edges are snapped to {@link NODE_WINDOW_QUANTIZE_STEP} so the
- * returned object identity is stable while the camera stays within a grid cell.
- * That throttles the O(N) intersection downstream to fire only when the camera
- * crosses a cell boundary rather than on every pan frame.
- *
- * Each viewport field is read as a separate primitive selector so the default
- * `Object.is` equality already prevents re-renders on unrelated store changes;
- * when disabled the selectors return a constant `0`, so no subscription churn.
+ * The rect edges are snapped to {@link NODE_WINDOW_QUANTIZE_STEP} so both the
+ * returned identity AND this hook's own subscription are stable while the camera
+ * stays within a grid cell. That throttles the O(N) intersection downstream —
+ * and the host component's re-render — to cell crossings rather than every
+ * pan/zoom frame. The snapping must happen inside the store selector: quantizing
+ * a raw `transform` read afterwards stabilizes the value but not the render.
  */
 export function useViewportGeometry({
   enabled,
   padding = DEFAULT_NODE_WINDOW_PADDING,
 }: UseViewportGeometryOptions): ViewportRect | null {
-  const tx = useStore((s) => (enabled ? s.transform[0] : 0))
-  const ty = useStore((s) => (enabled ? s.transform[1] : 0))
-  const zoom = useStore((s) => (enabled ? s.transform[2] : 0))
-  const width = useStore((s) => (enabled ? s.width : 0))
-  const height = useStore((s) => (enabled ? s.height : 0))
+  // The quantization happens INSIDE the selector, and the equality function
+  // compares the quantized edges. Both matter: `useStore` only skips a re-render
+  // when the selected value is equal, so reading the raw `transform` here (and
+  // quantizing afterwards) would re-render this hook's host — F0GraphView, and
+  // its whole subtree — on every single pan/zoom frame, even though the windowed
+  // node set is unchanged. Quantizing first turns that into one re-render per
+  // grid-cell crossing, and the equality function keeps the previous object
+  // identity in between, so every downstream memo stays stable too.
+  const rect = useStore(
+    (s): ViewportRect | null => {
+      if (!enabled) return null
+      const [tx, ty, zoom] = s.transform
+      const { width, height } = s
+      if (width <= 0 || height <= 0 || zoom <= 0) return null
 
-  const hasViewport = enabled && width > 0 && height > 0 && zoom > 0
+      // Flow-space rect of what the camera currently shows, grown by `padding`.
+      // Screen point p maps to flow coordinate (p - t) / zoom.
+      const step = NODE_WINDOW_QUANTIZE_STEP
+      return {
+        minX: Math.floor((-tx / zoom - padding) / step) * step,
+        minY: Math.floor((-ty / zoom - padding) / step) * step,
+        maxX: Math.ceil(((-tx + width) / zoom + padding) / step) * step,
+        maxY: Math.ceil(((-ty + height) / zoom + padding) / step) * step,
+      }
+    },
+    (a, b) =>
+      a === b ||
+      (a !== null &&
+        b !== null &&
+        a.minX === b.minX &&
+        a.minY === b.minY &&
+        a.maxX === b.maxX &&
+        a.maxY === b.maxY)
+  )
 
-  // Flow-space rect of what the camera currently shows, grown by `padding`.
-  // Screen point p maps to flow coordinate (p - t) / zoom.
-  const step = NODE_WINDOW_QUANTIZE_STEP
-  const minX = Math.floor((-tx / zoom - padding) / step) * step
-  const minY = Math.floor((-ty / zoom - padding) / step) * step
-  const maxX = Math.ceil(((-tx + width) / zoom + padding) / step) * step
-  const maxY = Math.ceil(((-ty + height) / zoom + padding) / step) * step
-
-  // Depend on the quantized scalars so the rect object identity only changes
-  // when the camera crosses a grid cell — this is the throttle.
-  return useMemo(() => {
-    if (!hasViewport) return null
-    return { minX, minY, maxX, maxY }
-  }, [hasViewport, minX, minY, maxX, maxY])
+  return rect
 }

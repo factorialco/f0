@@ -34,7 +34,11 @@ interface UseGraphViewportOptions {
 }
 
 export interface UseGraphViewportResult {
-  currentZoom: number
+  /**
+   * Derived, DISCRETE zoom step. The continuous zoom factor is deliberately not
+   * exposed: it changes every zoom frame, and anything that renders from it
+   * re-renders at frame rate. Consumers that need to react to zoom want this.
+   */
   zoomLevel: ZoomLevel
   /**
    * True once React Flow has emitted its first viewport update (i.e. the
@@ -157,7 +161,6 @@ export function useGraphViewport({
   }, [currentUserNodeId, reactFlow, nodeWindowingActive, centerOnNode])
 
   return {
-    currentZoom,
     zoomLevel,
     viewportReady,
     handleViewportChange,
