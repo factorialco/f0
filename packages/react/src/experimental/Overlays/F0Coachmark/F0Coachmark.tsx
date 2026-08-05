@@ -1,7 +1,8 @@
-import { useId, useRef } from "react"
+import { useEffect, useId, useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -16,18 +17,25 @@ import type { F0CoachmarkProps } from "./types"
 const ARROW_WIDTH = 12
 const ARROW_HEIGHT = 6
 
-export const F0Coachmark = ({
-  open,
-  onDismiss,
+/**
+ * The coachmark panel. Rendered by `CoachmarkProvider` for whichever coachmark
+ * is at the head of the queue — consumers call `coachmarks.open` instead of
+ * rendering this, which is why it takes an already-resolved DOM element and has
+ * no `open` prop: being mounted IS being open.
+ */
+const CoachmarkPanel = ({
+  target,
   title,
   description,
-  action,
+  actionLabel,
+  onAction,
+  onClose,
   step,
   arrow = true,
   side = "bottom",
   align = "center",
   sideOffset = arrow ? ARROW_HEIGHT + 2 : 4,
-  children,
+  container,
 }: F0CoachmarkProps) => {
   const i18n = useI18n()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -37,17 +45,42 @@ export const F0Coachmark = ({
   const titleId = `${id}-title`
   const descriptionId = `${id}-description`
 
+  // The target is a DOM element rather than a child, so Radix positions against
+  // it as a "virtual" anchor: a DOM element already satisfies `Measurable`. A
+  // fresh ref object per target is what makes Radix re-measure when a step moves
+  // the coachmark to a different element.
+  const anchorRef = useMemo(() => ({ current: target }), [target])
+
+  // Advancing keeps the panel mounted, so focus would stay on the action button
+  // — where a second Enter fires the NEXT step's action before the user has read
+  // it, and where the new copy is never announced. Pulling focus back to the
+  // panel on each step is what makes a step read like a new message.
+  const announcedStep = useRef(step?.current)
+  useEffect(() => {
+    if (announcedStep.current === step?.current) return
+    announcedStep.current = step?.current
+    contentRef.current?.focus()
+  }, [step?.current])
+
+  // On the last step (or a single-step coachmark) the action ends the coachmark,
+  // so it says so; earlier steps say where the button goes.
+  const isLastStep = !step || step.current >= step.total
+  const label =
+    actionLabel ?? (isLastStep ? i18n.coachmark.done : i18n.coachmark.next)
+
   return (
     <Popover
-      open={open}
+      open
       onOpenChange={(nextOpen) => {
-        // Radix only requests closing (escape key); opening is consumer-driven.
-        if (!nextOpen) onDismiss()
+        // Radix only ever requests closing here (Escape). The coachmark closes
+        // itself: there is no `open` prop for a consumer to keep in sync.
+        if (!nextOpen) onClose()
       }}
     >
-      <PopoverAnchor asChild>{children}</PopoverAnchor>
+      <PopoverAnchor virtualRef={anchorRef} />
       <PopoverContent
         ref={contentRef}
+        container={container}
         side={side}
         align={align}
         sideOffset={sideOffset}
@@ -129,7 +162,7 @@ export const F0Coachmark = ({
                 icon={Cross}
                 size="sm"
                 hideLabel
-                onClick={onDismiss}
+                onClick={onClose}
                 label={i18n.actions.close}
                 className="flex-shrink-0"
               />
@@ -155,8 +188,8 @@ export const F0Coachmark = ({
             )}
             <ButtonInternal
               variant="outline"
-              label={action.label}
-              onClick={action.onClick}
+              label={label}
+              onClick={onAction}
               className="ml-auto"
             />
           </div>
@@ -181,4 +214,13 @@ export const F0Coachmark = ({
   )
 }
 
-F0Coachmark.displayName = "F0Coachmark"
+CoachmarkPanel.displayName = "F0Coachmark"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ *
+ * Not part of the public API: usage is counted here, where a coachmark actually
+ * reaches the screen, because consumers reach coachmarks through
+ * `coachmarks.open` rather than by rendering anything.
+ */
+export const F0Coachmark = experimentalComponent("F0Coachmark", CoachmarkPanel)

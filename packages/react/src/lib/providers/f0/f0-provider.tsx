@@ -10,6 +10,7 @@ import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
 import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
 
+import { CoachmarkProvider } from "@/experimental/Overlays/F0Coachmark"
 import { FormCardValueFormatterProvider } from "@/kits/ai/F0AiChat/providers/FormCardValueFormatterProvider"
 
 import { ToastProvider } from "../../../hooks/toast/ToastProvider"
@@ -159,7 +160,9 @@ export const F0Provider: React.FC<{
                                 value={formComponent}
                               >
                                 <FormCardValueFormatterProvider>
-                                  {children}
+                                  <CoachmarkProvider>
+                                    {children}
+                                  </CoachmarkProvider>
                                 </FormCardValueFormatterProvider>
                               </FormComponentContext.Provider>
                             </FormOverlaysProvider>

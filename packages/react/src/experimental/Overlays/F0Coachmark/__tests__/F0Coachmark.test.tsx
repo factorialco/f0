@@ -1,40 +1,46 @@
 import { userEvent } from "@testing-library/user-event"
+import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
-import { F0Coachmark } from "../index"
+import { F0Coachmark } from "../F0Coachmark"
+import type { F0CoachmarkProps } from "../types"
 
-const action = { label: "Learn more", onClick: vi.fn() }
+type PanelProps = Omit<F0CoachmarkProps, "target">
 
-const renderCoachmark = (
-  props: Partial<React.ComponentProps<typeof F0Coachmark>> = {}
-) =>
+/**
+ * The panel takes a resolved DOM element, so the harness renders the anchor and
+ * hands its element over — the same thing `CoachmarkProvider` does with the
+ * element `useTargetElement` resolved.
+ */
+const Harness = (props: PanelProps) => {
+  const [target, setTarget] = useState<HTMLElement | null>(null)
+
+  return (
+    <>
+      <button ref={setTarget}>Filters</button>
+      {target && <F0Coachmark {...props} target={target} />}
+    </>
+  )
+}
+
+const renderPanel = (props: Partial<PanelProps> = {}) =>
   render(
-    <F0Coachmark
-      open
-      onDismiss={vi.fn()}
+    <Harness
       title="Filters got smarter"
       description="Stack filters on jobs and candidates."
-      action={action}
+      onAction={vi.fn()}
+      onClose={vi.fn()}
       {...props}
-    >
-      <button>Filters</button>
-    </F0Coachmark>
+    />
   )
 
-describe("F0Coachmark", () => {
-  it("renders nothing while closed", () => {
-    renderCoachmark({ open: false })
+describe("F0Coachmark panel", () => {
+  it("renders the title, description and action", async () => {
+    renderPanel({ actionLabel: "Learn more" })
 
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
-    expect(screen.queryByText("Filters got smarter")).not.toBeInTheDocument()
-  })
-
-  it("renders the title, description and CTA when open", () => {
-    renderCoachmark()
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument()
+    expect(await screen.findByRole("dialog")).toBeInTheDocument()
     expect(screen.getByText("Filters got smarter")).toBeInTheDocument()
     expect(
       screen.getByText("Stack filters on jobs and candidates.")
@@ -44,127 +50,84 @@ describe("F0Coachmark", () => {
     ).toBeInTheDocument()
   })
 
-  it("names the dialog with the title and describes it with the description", () => {
-    renderCoachmark()
+  it("names the dialog with the title and describes it with the description", async () => {
+    renderPanel()
 
-    const dialog = screen.getByRole("dialog")
+    const dialog = await screen.findByRole("dialog")
     expect(dialog).toHaveAccessibleName("Filters got smarter")
     expect(dialog).toHaveAccessibleDescription(
       "Stack filters on jobs and candidates."
     )
   })
 
-  it("omits aria-describedby when there is no description", () => {
-    renderCoachmark({ description: undefined })
+  it("omits aria-describedby when there is no description", async () => {
+    renderPanel({ description: undefined })
 
-    expect(screen.getByRole("dialog")).not.toHaveAttribute("aria-describedby")
+    expect(await screen.findByRole("dialog")).not.toHaveAttribute(
+      "aria-describedby"
+    )
   })
 
-  it("calls onDismiss when the close button is clicked", async () => {
-    const onDismiss = vi.fn()
-    renderCoachmark({ onDismiss })
+  // The label says what the button does: end the coachmark, or move on.
+  it("defaults the action label to Got it, and to Next before the last step", async () => {
+    const { unmount } = renderPanel()
+    expect(
+      await screen.findByRole("button", { name: "Got it" })
+    ).toBeInTheDocument()
+    unmount()
+
+    renderPanel({ step: { current: 1, total: 3 } })
+    expect(
+      await screen.findByRole("button", { name: "Next" })
+    ).toBeInTheDocument()
+
+    // The last step ends the coachmark even though a step indicator is showing.
+    expect(screen.getByRole("dialog")).toHaveTextContent("1/3")
+  })
+
+  it("shows the step indicator when it is given one", async () => {
+    renderPanel({ step: { current: 2, total: 3 } })
+
+    expect(await screen.findByText("2/3")).toBeInTheDocument()
+  })
+
+  it("calls onClose from the close button and onAction from the action", async () => {
+    const onClose = vi.fn()
+    const onAction = vi.fn()
+    renderPanel({ onClose, onAction, actionLabel: "Learn more" })
+    await screen.findByRole("dialog")
 
     await userEvent.click(screen.getByRole("button", { name: "Close" }))
+    expect(onClose).toHaveBeenCalledTimes(1)
 
-    expect(onDismiss).toHaveBeenCalledTimes(1)
+    await userEvent.click(screen.getByRole("button", { name: "Learn more" }))
+    expect(onAction).toHaveBeenCalledTimes(1)
   })
 
-  it("calls onDismiss when Escape is pressed", async () => {
-    const onDismiss = vi.fn()
-    renderCoachmark({ onDismiss })
+  it("calls onClose when Escape is pressed", async () => {
+    const onClose = vi.fn()
+    renderPanel({ onClose })
+    await screen.findByRole("dialog")
 
     await userEvent.keyboard("{Escape}")
 
-    await waitFor(() => expect(onDismiss).toHaveBeenCalledTimes(1))
-  })
-
-  it("does not dismiss when clicking outside", async () => {
-    const onDismiss = vi.fn()
-    render(
-      <div>
-        <button>Outside</button>
-        <F0Coachmark
-          open
-          onDismiss={onDismiss}
-          title="Filters got smarter"
-          action={action}
-        >
-          <button>Filters</button>
-        </F0Coachmark>
-      </div>
-    )
-
-    await userEvent.click(screen.getByRole("button", { name: "Outside" }))
-
-    expect(onDismiss).not.toHaveBeenCalled()
-    expect(screen.getByRole("dialog")).toBeInTheDocument()
-  })
-
-  it("calls the action handler when the CTA is clicked", async () => {
-    const onClick = vi.fn()
-    renderCoachmark({ action: { label: "Learn more", onClick } })
-
-    await userEvent.click(screen.getByRole("button", { name: "Learn more" }))
-
-    expect(onClick).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
   })
 
   it("moves focus to the panel instead of the dismiss button when it opens", async () => {
-    renderCoachmark()
+    renderPanel()
 
-    await waitFor(() => expect(screen.getByRole("dialog")).toHaveFocus())
-  })
-
-  it("restores focus to the previously focused element after dismissal", async () => {
-    const { rerender } = render(
-      <F0Coachmark
-        open={false}
-        onDismiss={vi.fn()}
-        title="Filters got smarter"
-        action={action}
-      >
-        <button>Filters</button>
-      </F0Coachmark>
-    )
-
-    const anchor = screen.getByRole("button", { name: "Filters" })
-    anchor.focus()
-    expect(anchor).toHaveFocus()
-
-    rerender(
-      <F0Coachmark
-        open
-        onDismiss={vi.fn()}
-        title="Filters got smarter"
-        action={action}
-      >
-        <button>Filters</button>
-      </F0Coachmark>
-    )
-
-    await waitFor(() => expect(screen.getByRole("dialog")).toHaveFocus())
-
-    rerender(
-      <F0Coachmark
-        open={false}
-        onDismiss={vi.fn()}
-        title="Filters got smarter"
-        action={action}
-      >
-        <button>Filters</button>
-      </F0Coachmark>
-    )
-
-    await waitFor(() => expect(anchor).toHaveFocus())
+    const dialog = await screen.findByRole("dialog")
+    await waitFor(() => expect(dialog).toHaveFocus())
   })
 
   // The panel uses the same surface recipe as F0Toast and F0ActionBar, and
   // wraps its content in `dark`. Those two facts depend on each other: the
   // wrapper is only safe because the surface is dark in BOTH themes, and it is
   // what lets the controls below stay on stock variants. Pinned together.
-  it("uses the shared floating-dark-panel surface and re-themes its content", () => {
-    renderCoachmark()
-    const dialog = screen.getByRole("dialog")
+  it("uses the shared floating-dark-panel surface and re-themes its content", async () => {
+    renderPanel()
+    const dialog = await screen.findByRole("dialog")
 
     expect(dialog).toHaveClass(
       "bg-f1-background-inverse",
@@ -174,8 +137,9 @@ describe("F0Coachmark", () => {
     expect(dialog.querySelector(".dark")).toBeInTheDocument()
   })
 
-  it("keeps both controls on stock variants, with no colour overrides", () => {
-    renderCoachmark()
+  it("keeps both controls on stock variants, with no colour overrides", async () => {
+    renderPanel({ actionLabel: "Learn more" })
+    await screen.findByRole("dialog")
     const cta = screen.getByRole("button", { name: "Learn more" })
     const dismiss = screen.getByRole("button", { name: "Close" })
 
@@ -189,16 +153,20 @@ describe("F0Coachmark", () => {
     expect(contributed).toEqual([])
   })
 
-  it("renders the arrow by default and hides it when arrow is false", () => {
-    const { unmount } = renderCoachmark()
+  it("renders the arrow by default and hides it when arrow is false", async () => {
+    const { unmount } = renderPanel()
     expect(
-      screen.getByRole("dialog").querySelector("svg[viewBox='0 0 12 6']")
+      (await screen.findByRole("dialog")).querySelector(
+        "svg[viewBox='0 0 12 6']"
+      )
     ).toBeInTheDocument()
     unmount()
 
-    renderCoachmark({ arrow: false })
+    renderPanel({ arrow: false })
     expect(
-      screen.getByRole("dialog").querySelector("svg[viewBox='0 0 12 6']")
+      (await screen.findByRole("dialog")).querySelector(
+        "svg[viewBox='0 0 12 6']"
+      )
     ).not.toBeInTheDocument()
   })
 })

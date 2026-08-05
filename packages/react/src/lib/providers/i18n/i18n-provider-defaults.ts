@@ -100,6 +100,10 @@ export const defaultTranslations = {
     join: "Join",
     summary: "Summary",
   },
+  coachmark: {
+    next: "Next",
+    done: "Got it",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
