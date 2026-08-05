@@ -132,25 +132,29 @@ export const DialogWrapper = ({
     setContainerElement(node)
   }, [])
 
+  // The inner content box — the actually-sized element — reported by
+  // DialogContent via `contentBoxRef`. Measured (below) instead of
+  // `containerElement`, which is the full-viewport `fixed inset-0` positioner.
+  const [contentBox, setContentBox] = useState<HTMLDivElement | null>(null)
+
   // Report the content box's width to consumers that need to reserve space for
   // the dialog (e.g. offsetting a graph so a node isn't hidden behind a side
-  // drawer). Observe the same node `setContentRef` captured; emit `0` on unmount
-  // so an offset can be cleared. Read through a ref so a changing callback
-  // identity doesn't re-create the observer.
+  // drawer). Emit `0` on unmount so an offset can be cleared. Read the callback
+  // through a ref so a changing identity doesn't re-create the observer.
   const onWidthChangeRef = useRef(onWidthChange)
   onWidthChangeRef.current = onWidthChange
   useEffect(() => {
-    if (!containerElement || !onWidthChangeRef.current) return
+    if (!contentBox || !onWidthChangeRef.current) return
     const emit = () =>
-      onWidthChangeRef.current?.(containerElement.getBoundingClientRect().width)
+      onWidthChangeRef.current?.(contentBox.getBoundingClientRect().width)
     emit()
     const observer = new ResizeObserver(emit)
-    observer.observe(containerElement)
+    observer.observe(contentBox)
     return () => {
       observer.disconnect()
       onWidthChangeRef.current?.(0)
     }
-  }, [containerElement])
+  }, [contentBox])
 
   const isSmallScreen = useIsSmallScreen()
 
@@ -242,6 +246,7 @@ export const DialogWrapper = ({
         >
           <DialogContent
             ref={setContentRef}
+            contentBoxRef={setContentBox}
             container={container}
             defaultContainerId={defaultContainerId}
             wrapperClassName={dialogWrapperClassName({ position })}

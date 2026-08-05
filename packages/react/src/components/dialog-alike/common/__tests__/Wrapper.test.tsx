@@ -15,18 +15,24 @@ vi.mock("../dialog-primitive", () => ({
   // Passthrough so its children always render.
   Dialog: ({ children }: { children?: ReactNode }) => <>{children}</>,
   // forwardRef so the ref DialogWrapper passes doesn't warn; the spy records
-  // props. The ref is attached to the div so DialogWrapper's content-width
-  // observer has a real node to measure.
-  DialogContent: forwardRef<HTMLDivElement, { children?: ReactNode }>(
-    function DialogContentMock(props, ref) {
-      dialogContentSpy(props)
-      return (
-        <div ref={ref} data-testid="dialog-content">
+  // props. The real DialogContent hands the inner content box to `contentBoxRef`
+  // (the element DialogWrapper measures), so the mock does the same with the div.
+  DialogContent: forwardRef<
+    HTMLDivElement,
+    {
+      children?: ReactNode
+      contentBoxRef?: (el: HTMLDivElement | null) => void
+    }
+  >(function DialogContentMock(props, ref) {
+    dialogContentSpy(props)
+    return (
+      <div ref={ref} data-testid="dialog-content">
+        <div ref={props.contentBoxRef} data-testid="dialog-content-box">
           {props.children}
         </div>
-      )
-    }
-  ),
+      </div>
+    )
+  }),
 }))
 
 // Force the desktop (Dialog) branch so DialogContent renders — on small screens
@@ -129,5 +135,23 @@ describe("DialogWrapper onWidthChange", () => {
     unmount()
 
     expect(onWidthChange).toHaveBeenCalledWith(0)
+  })
+
+  // Regression: the width must come from the inner content box (`contentBoxRef`),
+  // NOT the full-viewport `fixed inset-0` positioner the forwarded `ref` lands
+  // on. Give the two different widths and assert the box's wins.
+  it("measures the inner content box, not the full-viewport positioner", () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        const width =
+          this.getAttribute("data-testid") === "dialog-content-box" ? 492 : 1440
+        return { width } as DOMRect
+      }
+    )
+    const onWidthChange = vi.fn()
+    render(<DialogWrapper {...baseProps} onWidthChange={onWidthChange} />)
+
+    expect(onWidthChange).toHaveBeenCalledWith(492)
+    expect(onWidthChange).not.toHaveBeenCalledWith(1440)
   })
 })

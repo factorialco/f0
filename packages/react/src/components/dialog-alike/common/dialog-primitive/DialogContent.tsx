@@ -40,6 +40,12 @@ export const DialogContent = forwardRef<
      */
     defaultContainerId?: string
     animation?: DialogAnimation
+    /**
+     * Ref to the inner content box — the actually-sized element (`max-w-*`),
+     * not the full-viewport `fixed inset-0` positioner the forwarded `ref`
+     * lands on. Lets a parent measure the visible panel's width.
+     */
+    contentBoxRef?: (el: HTMLDivElement | null) => void
   }
 >(
   (
@@ -50,12 +56,23 @@ export const DialogContent = forwardRef<
       children,
       container: propContainer,
       defaultContainerId = "content",
+      contentBoxRef,
       ...props
     },
     ref
   ) => {
     const [container, setContainer] = useState<HTMLElement | null>()
-    const contentRef = useRef<HTMLDivElement>(null)
+    // Mutable (not RefObject) because `setContentEl` assigns `.current` directly.
+    const contentRef = useRef<HTMLDivElement | null>(null)
+    // Keep `contentRef` (used by `shake`) and hand the same node to the optional
+    // `contentBoxRef` so a parent can measure the box.
+    const setContentEl = useCallback(
+      (el: HTMLDivElement | null) => {
+        contentRef.current = el
+        contentBoxRef?.(el)
+      },
+      [contentBoxRef]
+    )
 
     // Shake the content when the dialog is opened and clicked outside in modal mode
     const shake = useCallback(() => {
@@ -121,7 +138,7 @@ export const DialogContent = forwardRef<
           }}
         >
           <div
-            ref={contentRef}
+            ref={setContentEl}
             className={cn(
               "relative flex w-[90%] flex-col rounded-xl bg-f1-background shadow-lg pointer-events-auto",
               "group-data-[state=open]/dialog:animate-in group-data-[state=closed]/dialog:animate-out overflow-hidden",
