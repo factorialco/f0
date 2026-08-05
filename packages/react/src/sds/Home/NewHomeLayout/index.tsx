@@ -59,6 +59,8 @@ const GradientWash = ({
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
 const COLUMN_GAP_PX = 16
+/** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
+const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
 
 export interface NewHomeLayoutProps {
@@ -251,15 +253,22 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           else if (ref) ref.current = node
         }}
         className={cn(
-          "relative grid grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
-          hasSide &&
-            "md:[grid-template-columns:minmax(0,1fr)_var(--home-aside-w)]",
+          "relative grid grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
           className
         )}
         style={
           {
             "--home-aside-w": `${railWidth}px`,
             height: `calc(100svh - ${2 * bleed}px)`,
+            // The column template lives HERE rather than in a class: it is the
+            // same property Tailwind's `grid-cols-*` sets, so as a utility it
+            // lost the specificity contest and the rail silently fell out of its
+            // column. A COLLAPSED rail is a column at any width — a 40px strip
+            // always fits; an expanded one waits until there is room for both.
+            gridTemplateColumns:
+              hasSide && (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
+                ? `minmax(0, 1fr) ${railWidth}px`
+                : "minmax(0, 1fr)",
           } as CSSProperties
         }
       >
