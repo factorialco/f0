@@ -1,16 +1,55 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
-import { expect, fn, screen, userEvent, waitFor, within } from "storybook/test"
+import { useEffect, useState } from "react"
+import { expect, screen, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0Coachmark } from "../index"
+import { F0Coachmark } from "../F0Coachmark"
+import { coachmarks } from "../imperative"
+import type { F0CoachmarkProps } from "../types"
+
+type AnchoredCoachmarkProps = Omit<
+  F0CoachmarkProps,
+  "target" | "onAction" | "onClose"
+> & {
+  /** Label of the element the panel points at. */
+  anchorLabel?: string
+}
+
+/**
+ * Visual stories drive the panel directly, the way `CoachmarkProvider` does:
+ * with an already-resolved element. It is the only way to render several at once
+ * (the four sides of the Chromatic snapshot) — through the public
+ * `coachmarks.open` API only one is ever on screen, by design.
+ */
+const AnchoredCoachmark = ({
+  anchorLabel = "Filters",
+  ...props
+}: AnchoredCoachmarkProps) => {
+  const [target, setTarget] = useState<HTMLElement | null>(null)
+
+  return (
+    <>
+      <span ref={setTarget} className="inline-flex">
+        <F0Button variant="outline" label={anchorLabel} />
+      </span>
+      {target && (
+        <F0Coachmark
+          {...props}
+          target={target}
+          onAction={() => undefined}
+          onClose={() => undefined}
+        />
+      )}
+    </>
+  )
+}
 
 const meta = {
   title: "F0Coachmark",
-  component: F0Coachmark,
+  component: AnchoredCoachmark,
   // !autodocs is required to opt out — autodocs is enabled globally in
   // .storybook/preview.tsx, so dropping the tag alone has no effect.
   tags: ["!autodocs", "experimental"],
@@ -28,8 +67,7 @@ const meta = {
     title: "Filters got smarter",
     description:
       "Stack filters on jobs and candidates, then save the combination as a view your whole team can reuse.",
-    action: { label: "Learn more", onClick: fn() },
-    onDismiss: fn(),
+    actionLabel: "Learn more",
   },
   decorators: [
     // The panel is portalled, so it never stretches this box. Anchoring at the
@@ -46,98 +84,61 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof F0Coachmark>
+} satisfies Meta<typeof AnchoredCoachmark>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Basic: Story = {
-  args: {
-    open: true,
-    children: <F0Button variant="outline" label="Filters" />,
-  },
-}
+export const Basic: Story = {}
 
 /**
- * The coachmark is fully controlled. The consumer decides when to show it and
- * persists the dismissal — the component never reopens itself.
- */
-export const Controlled: Story = {
-  tags: ["no-sidebar"],
-  args: {
-    open: true,
-    children: <F0Button variant="outline" label="Filters" />,
-  },
-  render: function Controlled(args) {
-    const [open, setOpen] = useState(true)
-
-    return (
-      <div className="flex flex-col items-center gap-4">
-        <F0Coachmark {...args} open={open} onDismiss={() => setOpen(false)}>
-          <F0Button variant="outline" label="Filters" />
-        </F0Coachmark>
-        {!open && (
-          <F0Button
-            variant="ghost"
-            label="Show again"
-            onClick={() => setOpen(true)}
-          />
-        )}
-      </div>
-    )
-  },
-}
-
-/**
- * `arrow={false}` removes the pointer while keeping the anchored positioning.
- */
-export const WithoutArrow: Story = {
-  tags: ["no-sidebar"],
-  args: {
-    open: true,
-    arrow: false,
-    children: <F0Button variant="outline" label="Filters" />,
-  },
-}
-
-/**
- * `step` shows the coachmark's position in a sequence, beside the action. It is
- * presentational: the consumer owns advancing between steps.
+ * A step indicator appears on its own once a coachmark has more than one step.
+ * The action label follows: `Next` until the last step, then `Got it`.
  */
 export const WithStep: Story = {
   tags: ["no-sidebar"],
   args: {
-    open: true,
     step: { current: 1, total: 3 },
-    action: { label: "Next", onClick: fn() },
-    children: <F0Button variant="outline" label="Filters" />,
+    actionLabel: undefined,
   },
 }
 
 /**
- * Title and CTA only — `description` is optional.
+ * The last step of a sequence ends it, so its action says so rather than
+ * pointing forward.
+ */
+export const LastStep: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    step: { current: 3, total: 3 },
+    actionLabel: undefined,
+  },
+}
+
+/**
+ * `arrow: false` removes the pointer while keeping the anchored positioning.
+ */
+export const WithoutArrow: Story = {
+  tags: ["no-sidebar"],
+  args: { arrow: false },
+}
+
+/**
+ * Title and action only — `description` is optional.
  */
 export const WithoutDescription: Story = {
   tags: ["no-sidebar"],
-  args: {
-    open: true,
-    description: undefined,
-    children: <F0Button variant="outline" label="Filters" />,
-  },
+  args: { description: undefined },
 }
 
 /**
- * The coachmark flips to the opposite side and shifts along the anchor when it
+ * The coachmark flips to the opposite side and shifts along its target when it
  * would overflow the viewport, so it stays visible near a screen edge.
  */
 export const CollisionAware: Story = {
   tags: ["no-sidebar"],
-  args: {
-    open: true,
-    side: "top",
-    children: <F0Button variant="outline" label="Filters" />,
-  },
+  args: { side: "top" },
   decorators: [
     (Story) => (
       <div className="flex h-72 w-full items-end justify-center pb-2">
@@ -151,10 +152,6 @@ const sides = ["top", "right", "bottom", "left"] as const
 
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
-  args: {
-    open: true,
-    children: <F0Button variant="outline" label="Filters" />,
-  },
   parameters: withSnapshot({}),
   decorators: [(Story) => <div className="p-16">{Story()}</div>],
   // Each cell is sized so the panel never collides with the viewport or a
@@ -167,9 +164,7 @@ export const Snapshot: Story = {
           key={side}
           className="flex h-96 w-[46rem] items-center justify-center"
         >
-          <F0Coachmark {...args} side={side} open>
-            <F0Button variant="outline" label={side} />
-          </F0Coachmark>
+          <AnchoredCoachmark {...args} side={side} anchorLabel={side} />
         </div>
       ))}
     </div>
@@ -177,38 +172,155 @@ export const Snapshot: Story = {
 }
 
 /**
- * Opening the coachmark moves focus to the panel itself rather than the
- * dismiss button, so a screen reader announces the message and Enter does not
- * immediately discard it. Escape and the close button both dismiss.
+ * The real API. `coachmarks.open` takes the element to point at and the copy;
+ * the coachmark closes itself, sequences its own steps, and queues behind
+ * whatever is already on screen. There is no component to render and no `open`
+ * state to keep in sync.
  */
-export const KeyboardAndDismissal: Story = {
-  tags: ["no-sidebar"],
-  args: {
-    open: true,
-    children: <F0Button variant="outline" label="Filters" />,
+export const Imperative: Story = {
+  // Fires real coachmarks into the global overlay (a shared, document-level
+  // layer), which can leak into other stories running in the same worker page.
+  // It's an interactive playground, not a visit target.
+  tags: ["!test", "no-sidebar"],
+  parameters: {
+    layout: "fullscreen",
+    docs: { story: { inline: false, height: "460px" } },
   },
-  play: async ({ args, step }) => {
+  decorators: [(Story) => <>{Story()}</>],
+  render: function Imperative() {
+    // Leave nothing behind for the next story on the docs page.
+    useEffect(() => () => coachmarks.closeAll(), [])
+
+    return (
+      <div className="flex flex-col gap-6 p-8">
+        <div className="flex flex-row gap-2">
+          <span id="story-filters">
+            <F0Button variant="outline" label="Filters" />
+          </span>
+          <span id="story-views">
+            <F0Button variant="outline" label="Views" />
+          </span>
+        </div>
+        <div className="flex flex-col items-start gap-2">
+          <F0Button
+            variant="ghost"
+            label="One coachmark"
+            onClick={() => {
+              coachmarks.open({
+                id: "story-single",
+                targetElement: "#story-filters",
+                title: "Filters got smarter",
+                description:
+                  "Stack filters on jobs and candidates, then save the combination as a view.",
+                action: { label: "Learn more" },
+              })
+            }}
+          />
+          <F0Button
+            variant="ghost"
+            label="A two-step walkthrough"
+            onClick={() => {
+              coachmarks.open({
+                id: "story-sequence",
+                steps: [
+                  {
+                    targetElement: "#story-filters",
+                    title: "Start with a filter",
+                    description: "Narrow the list down to what you care about.",
+                  },
+                  {
+                    targetElement: "#story-views",
+                    title: "Then save it as a view",
+                    description: "Your whole team can reuse it.",
+                    side: "bottom",
+                  },
+                ],
+              })
+            }}
+          />
+          <F0Button
+            variant="ghost"
+            label="Two at once — the second one queues"
+            onClick={() => {
+              coachmarks.open({
+                id: "story-queued-1",
+                targetElement: "#story-filters",
+                title: "First in line",
+              })
+              coachmarks.open({
+                id: "story-queued-2",
+                targetElement: "#story-views",
+                title: "Waits its turn",
+              })
+            }}
+          />
+        </div>
+      </div>
+    )
+  },
+}
+
+/**
+ * The imperative flow, exercised: a sequence advances on its own action and the
+ * coachmark closes itself on the last step. Nothing here tracks `open`.
+ */
+export const ImperativeBehavior: Story = {
+  tags: ["no-sidebar"],
+  parameters: { layout: "fullscreen" },
+  decorators: [(Story) => <>{Story()}</>],
+  render: function ImperativeBehavior() {
+    useEffect(() => {
+      coachmarks.closeAll()
+      coachmarks.open({
+        id: "story-behavior",
+        steps: [
+          { targetElement: "#behavior-anchor", title: "Start with a filter" },
+          {
+            targetElement: "#behavior-anchor",
+            title: "Then save it as a view",
+          },
+        ],
+      })
+      return () => coachmarks.closeAll()
+    }, [])
+
+    return (
+      <div className="p-8">
+        <span id="behavior-anchor">
+          <F0Button variant="outline" label="Filters" />
+        </span>
+      </div>
+    )
+  },
+  play: async ({ step }) => {
     const dialog = await screen.findByRole("dialog")
 
     await step("focus lands on the panel, not the dismiss button", async () => {
       await waitFor(() => expect(dialog).toHaveFocus())
+      await expect(dialog).toHaveAccessibleName("Start with a filter")
+      await expect(dialog).toHaveTextContent("1/2")
     })
 
-    await step("the panel is named and described by its copy", async () => {
-      await expect(dialog).toHaveAccessibleName("Filters got smarter")
-    })
-
-    await step("the CTA is reachable and fires its handler", async () => {
-      const cta = within(dialog).getByRole("button", { name: "Learn more" })
-      await userEvent.click(cta)
-      await expect(args.action.onClick).toHaveBeenCalled()
-    })
-
-    await step("the close button dismisses", async () => {
+    await step("the action advances to the next step", async () => {
       await userEvent.click(
-        within(dialog).getByRole("button", { name: "Close" })
+        within(dialog).getByRole("button", { name: "Next" })
       )
-      await expect(args.onDismiss).toHaveBeenCalled()
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName(
+          "Then save it as a view"
+        )
+      )
+    })
+
+    await step("the last step closes the coachmark", async () => {
+      await userEvent.click(
+        within(screen.getByRole("dialog")).getByRole("button", {
+          name: "Got it",
+        })
+      )
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      )
     })
   },
 }
@@ -221,23 +333,19 @@ export const KeyboardAndDismissal: Story = {
 export const DoDontsGoodCopy: Story = {
   tags: ["no-sidebar"],
   args: {
-    open: true,
     title: "Filters got smarter",
     description:
       "Stack filters on jobs and candidates, then save the combination as a view your whole team can reuse.",
-    action: { label: "Learn more", onClick: fn() },
-    children: <F0Button variant="outline" label="Filters" />,
+    actionLabel: "Learn more",
   },
 }
 
 export const DoDontsBadCopy: Story = {
   tags: ["no-sidebar"],
   args: {
-    open: true,
     title: "Update",
     description:
       "We have made some changes to this area of the product that you might find useful, so please take a moment to review them whenever you get the chance.",
-    action: { label: "OK", onClick: fn() },
-    children: <F0Button variant="outline" label="Filters" />,
+    actionLabel: "OK",
   },
 }
