@@ -179,10 +179,9 @@ describe("F0Coachmark", () => {
     const cta = screen.getByRole("button", { name: "Learn more" })
     const dismiss = screen.getByRole("button", { name: "Close" })
 
-    // This component may only contribute layout classes to the controls. These
-    // are the shapes the removed workaround used; any of them reappearing means
-    // the `dark` wrapper stopped doing its job. (`bg-transparent` is NOT listed:
-    // the stock ghost variant sets it itself.)
+    // Both controls are `outline`. This component may only contribute layout
+    // classes to them. These are the shapes the removed workaround used; any of
+    // them reappearing means the `dark` wrapper stopped doing its job.
     const contributed = [
       ...cta.className.split(/\s+/),
       ...dismiss.className.split(/\s+/),

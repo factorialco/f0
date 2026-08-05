@@ -125,7 +125,7 @@ export const F0Coachmark = ({
               {/* Inset by the panel's own padding rather than pulled into the
                   corner, matching F0Toast's placement. */}
               <ButtonInternal
-                variant="ghost"
+                variant="outline"
                 icon={Cross}
                 size="sm"
                 hideLabel
