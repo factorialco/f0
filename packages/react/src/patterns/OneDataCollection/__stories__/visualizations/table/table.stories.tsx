@@ -1225,10 +1225,13 @@ export const TableWithFocusedHeaderGroup: Story = {
                   sorting: "team",
                   render: (item) => item.team,
                 },
+                // Fixed month widths keep the year wider than the viewport,
+                // so the auto-scroll to the focused month has room to act.
                 ...months.flatMap((month) => [
                   {
                     id: `${month}-salaries`,
                     label: "Salaries",
+                    width: 120,
                     align: "right" as const,
                     headerGroupId: month,
                     sorting: `${month}-salaries`,
@@ -1238,6 +1241,7 @@ export const TableWithFocusedHeaderGroup: Story = {
                   {
                     id: `${month}-bonuses`,
                     label: "Bonuses",
+                    width: 120,
                     align: "right" as const,
                     headerGroupId: month,
                     sorting: `${month}-bonuses`,
@@ -1247,6 +1251,7 @@ export const TableWithFocusedHeaderGroup: Story = {
                   {
                     id: `${month}-total`,
                     label: "Total",
+                    width: 120,
                     align: "right" as const,
                     headerGroupId: month,
                     sorting: `${month}-total`,
@@ -1278,9 +1283,18 @@ export const TableWithFocusedHeaderGroup: Story = {
       expect(header.className).toContain("bg-f1-background-secondary")
     })
 
-    // The table auto-scrolls to the focused group.
+    // The table auto-scrolls to the focused group. Smooth scrolling takes a
+    // moment, and on a viewport wide enough to fit the whole year there is
+    // nothing to scroll — so the assertion only applies when it overflows.
     const scroller = augustGroup.closest("table")?.parentElement?.parentElement
-    await waitFor(() => expect(scroller?.scrollLeft ?? 0).toBeGreaterThan(0))
+    expect(scroller).toBeTruthy()
+    await waitFor(
+      () => {
+        if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return
+        expect(scroller.scrollLeft).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     // Collapsing the focused month keeps its visible total column emphasized.
     await userEvent.click(augustGroup)
