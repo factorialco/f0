@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.4.0](https://github.com/factorialco/f0/compare/f0-react-v6.3.3...f0-react-v6.4.0) (2026-08-05)
+
+
+### Features
+
+* **F0DataChart:** add a scatter chart type ([#4950](https://github.com/factorialco/f0/issues/4950)) ([1313e7e](https://github.com/factorialco/f0/commit/1313e7e3328e3347ed557bd059bc1939721e6709))
+
 ## [6.3.3](https://github.com/factorialco/f0/compare/f0-react-v6.3.2...f0-react-v6.3.3) (2026-08-05)
 
 
