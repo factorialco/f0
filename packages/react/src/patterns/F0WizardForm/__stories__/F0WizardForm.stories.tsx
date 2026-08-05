@@ -996,7 +996,14 @@ export const ScrollResetOnStepChange: Story = {
   render: () => <ManyFieldsStory extraDefaultValues={{ gender: "female" }} />,
   play: async ({ canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
-    const content = getStepContent(canvasElement)
+
+    // The wizard dialog mounts through a portal and animates in, so the pane is
+    // not in the DOM yet when the play function starts.
+    const content = await page.findByTestId(
+      "wizard-step-content",
+      {},
+      { timeout: 10000 }
+    )
 
     await step("The step content pane actually overflows", async () => {
       await waitFor(() =>
@@ -1008,7 +1015,11 @@ export const ScrollResetOnStepChange: Story = {
       content.scrollTop = content.scrollHeight
       await waitFor(() => expect(content.scrollTop).toBeGreaterThan(0))
 
-      await userEvent.click(page.getByRole("button", { name: /Continue/ }))
+      // Continue starts disabled until the section's validation settles, and
+      // userEvent.click on a disabled button is a silent no-op.
+      const nextButton = page.getByRole("button", { name: /Continue/ })
+      await waitFor(() => expect(nextButton).toBeEnabled(), { timeout: 10000 })
+      await userEvent.click(nextButton)
       // "Job title" only exists in the employment step. Advancing runs the
       // section's async validation, so this needs more than the 1s default.
       await waitFor(
@@ -1026,7 +1037,11 @@ export const ScrollResetOnStepChange: Story = {
       content.scrollTop = content.scrollHeight
       await waitFor(() => expect(content.scrollTop).toBeGreaterThan(0))
 
-      await userEvent.click(page.getByRole("button", { name: /Previous/ }))
+      const previousButton = page.getByRole("button", { name: /Previous/ })
+      await waitFor(() => expect(previousButton).toBeEnabled(), {
+        timeout: 10000,
+      })
+      await userEvent.click(previousButton)
       // "Emergency contact name" only exists in the personal step.
       await waitFor(
         () =>
