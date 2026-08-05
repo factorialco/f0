@@ -26,6 +26,7 @@ import {
   LineChartSkeleton,
   PieChartSkeleton,
   RadarChartSkeleton,
+  ScatterChartSkeleton,
 } from "@/kits/F0DataChart"
 import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
@@ -42,6 +43,7 @@ import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import {
   defaultChartConfig,
   detectDataShape,
+  isRenderableChart,
   fromCanonical,
   compatibleTargetTypes,
   toCanonical,
@@ -111,6 +113,9 @@ function buildChartTypeOptions(
 // Skeleton picker
 // ---------------------------------------------------------------------------
 
+/** Stands in for an unrenderable config so hooks stay on their happy path. */
+const FALLBACK_CHART_CONFIG: DashboardChartConfig = { type: "bar" }
+
 function chartSkeleton(config: DashboardChartConfig) {
   switch (config.type) {
     case "bar":
@@ -151,6 +156,12 @@ function chartSkeleton(config: DashboardChartConfig) {
       return <GaugeChartSkeleton />
     case "heatmap":
       return <HeatmapChartSkeleton />
+    case "scatter":
+      // Scatter is the only type whose legend depends on the data — it needs
+      // 2+ series — and the skeleton can't see the data. Default to reserving
+      // no legend row: single-series is the common case, and over-reserving
+      // makes the plot jump when the real chart replaces the skeleton.
+      return <ScatterChartSkeleton showLegend={config.showLegend ?? false} />
   }
 }
 
@@ -274,6 +285,17 @@ export function buildChartProps(
         yCategories: adapted.yCategories ?? [],
         data: adapted.data ?? [],
       } as F0DataChartProps
+    case "scatter":
+      // Reached only when the data doesn't look like a scatter: `detectDataShape`
+      // falls through to "bar" for an empty or errored result, which sends a
+      // scatter-configured item down the conversion path. Renders the empty
+      // state, so losing the axis names and pointSize that `shared` drops
+      // doesn't matter here.
+      return {
+        ...config,
+        ...shared,
+        series: adapted.scatterSeries ?? [],
+      } as F0DataChartProps
   }
 }
 
@@ -316,6 +338,11 @@ function buildNativeChartProps(
         xCategories: data.xCategories ?? [],
         yCategories: data.yCategories ?? [],
         data: data.data ?? [],
+      } as F0DataChartProps
+    case "scatter":
+      return {
+        ...chart,
+        series: data.scatterSeries ?? [],
       } as F0DataChartProps
     case "bar":
     case "line": {
@@ -389,9 +416,12 @@ function ChartTableView({
         {
           type: "table" as const,
           options: {
-            columns: tabular.columns.map((col) => ({
+            columns: tabular.columns.map((col, index) => ({
               label: col,
-              render: (row: RecordType) => String(row[col] ?? ""),
+              // Look up by the stable key when the converter supplies one —
+              // header labels can repeat, row keys cannot.
+              render: (row: RecordType) =>
+                String(row[tabular.keys?.[index] ?? col] ?? ""),
             })),
           },
         },
@@ -452,9 +482,17 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [translations]
   )
 
+  // An item can arrive with a chart config this build cannot render — most
+  // plausibly when a host app maps a wire type it has no case for and yields
+  // `undefined`. Every path below switches on `chart.type` without a default,
+  // so rendering it would throw and take the whole dashboard with it. Detect
+  // it once and degrade to this item's own error state.
+  const unrenderableChart = !isRenderableChart(item.chart)
+  const safeChart = unrenderableChart ? FALLBACK_CHART_CONFIG : item.chart
+
   const downloadActions = useChartDownloadActions({
     chartContainerRef,
-    chartConfig: item.chart,
+    chartConfig: safeChart,
     data,
     title: item.title,
   })
@@ -473,23 +511,25 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // hides it mid-hover — on every parent render.
   const chartProps = useMemo(
     () =>
-      data ? buildChartProps(item as DashboardChartItem, data) : undefined,
-    [item, data]
+      data && !unrenderableChart
+        ? buildChartProps(item as DashboardChartItem, data)
+        : undefined,
+    [item, data, unrenderableChart]
   )
 
   // Determine which chart type options are available for this chart
   const currentOrientation =
-    item.chart.type === "bar"
-      ? "orientation" in item.chart
-        ? (item.chart.orientation ?? "vertical")
+    safeChart.type === "bar"
+      ? "orientation" in safeChart
+        ? (safeChart.orientation ?? "vertical")
         : "vertical"
       : undefined
 
   // Compute which target types are valid based on the actual data shape
   // (not item.chart.type, which may have changed after a transform)
   const dataShape = data
-    ? detectDataShape(data, item.chart.type)
-    : item.chart.type
+    ? detectDataShape(data, safeChart.type)
+    : safeChart.type
   const allowedTargets = useMemo(
     () => compatibleTargetTypes(dataShape),
     [dataShape]
@@ -502,42 +542,56 @@ export function ChartItem<Filters extends FiltersDefinition>({
       : 1
     : 1
 
-  const chartTypeOptions = onTransformChart
-    ? CHART_TYPE_OPTIONS.filter((opt) => {
-        const typeToCheck = opt.type === "bar" ? "bar" : opt.type
-        if (!allowedTargets.has(typeToCheck)) return false
-        // Hide pie for multi-series data — it only shows one series
-        if (opt.type === "pie" && seriesCount > 1) return false
-        return true
-      }).map((opt) => {
-        const isTable = opt.type === "table"
-        const isActive = isTable
-          ? viewMode === "table"
-          : viewMode === "chart" &&
-            item.chart.type === opt.type &&
-            (opt.type !== "bar" || currentOrientation === opt.orientation)
+  const availableChartTypes = CHART_TYPE_OPTIONS.filter((opt) => {
+    const typeToCheck = opt.type === "bar" ? "bar" : opt.type
+    if (!allowedTargets.has(typeToCheck)) return false
+    // Hide pie for multi-series data — it only shows one series
+    if (opt.type === "pie" && seriesCount > 1) return false
+    return true
+  })
 
-        return {
-          label: opt.label,
-          value: opt.value,
-          icon: opt.icon,
-          isActive,
-          onSelect: () => {
-            if (isTable) {
-              setViewMode("table")
-            } else {
-              setViewMode("chart")
-              if (
-                item.chart.type !== opt.type ||
-                (opt.type === "bar" && currentOrientation !== opt.orientation)
-              ) {
-                onTransformChart(item.id, opt.type, opt.orientation)
+  // Scatter converts to nothing, so its picker would hold only "Table" — and
+  // the group is `required`, so selecting it would leave no route back to the
+  // chart. Gauge has the same shape and the same latent trap, but it also has
+  // that route today; taking it away is a change existing users would see, so
+  // it belongs in its own PR rather than riding along with a new chart type.
+  // Keyed on the data shape, not the config, because that is what the option
+  // list above is keyed on — an item configured as something else whose data
+  // arrives as `scatterSeries` gets the same one-entry list and needs the same
+  // treatment.
+  const hidesChartTypePicker = dataShape === "scatter"
+
+  const chartTypeOptions =
+    onTransformChart && !hidesChartTypePicker
+      ? availableChartTypes.map((opt) => {
+          const isTable = opt.type === "table"
+          const isActive = isTable
+            ? viewMode === "table"
+            : viewMode === "chart" &&
+              safeChart.type === opt.type &&
+              (opt.type !== "bar" || currentOrientation === opt.orientation)
+
+          return {
+            label: opt.label,
+            value: opt.value,
+            icon: opt.icon,
+            isActive,
+            onSelect: () => {
+              if (isTable) {
+                setViewMode("table")
+              } else {
+                setViewMode("chart")
+                if (
+                  safeChart.type !== opt.type ||
+                  (opt.type === "bar" && currentOrientation !== opt.orientation)
+                ) {
+                  onTransformChart(item.id, opt.type, opt.orientation)
+                }
               }
-            }
-          },
-        }
-      })
-    : undefined
+            },
+          }
+        })
+      : undefined
 
   return (
     <DashboardItem
@@ -545,9 +599,19 @@ export function ChartItem<Filters extends FiltersDefinition>({
       description={item.description}
       explanation={item.explanation}
       isLoading={isLoading}
-      error={error}
-      onRetry={retry}
-      skeleton={chartSkeleton(item.chart)}
+      error={
+        error ??
+        // Deliberately message-less: the shared "Error loading data" title
+        // already states it, and a dedicated string would add a required key
+        // to `TranslationsType` — a compile break for every consumer that
+        // maintains a complete dictionary. The absent Retry below is the tell
+        // that distinguishes this from a fetch failure.
+        (unrenderableChart ? new Error() : undefined)
+      }
+      // Refetching cannot conjure a chart config this build understands, so
+      // an unrenderable item gets no Retry button.
+      onRetry={unrenderableChart ? undefined : retry}
+      skeleton={chartSkeleton(safeChart)}
       actions={allActions}
       editMode={editMode}
       handleDelete={handleDelete}
@@ -558,7 +622,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     >
       {data && chartProps ? (
         viewMode === "table" ? (
-          <ChartTableView config={item.chart} data={data} />
+          <ChartTableView config={safeChart} data={data} />
         ) : (
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
             <F0DataChart {...chartProps} />

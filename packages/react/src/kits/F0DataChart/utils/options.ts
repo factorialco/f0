@@ -228,6 +228,20 @@ interface ValueAxisOptions {
   show?: boolean
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   splitNumber?: number
+  /**
+   * Fit the axis to the data range instead of anchoring it at zero. ECharts
+   * defaults this off, which is right for bar/line (a bar not starting at zero
+   * misstates its magnitude) but collapses a two-measure plot whose values sit
+   * far from the origin.
+   */
+  scale?: boolean
+  /**
+   * Anchor the first and last labels to the axis ends so they cannot overflow
+   * the chart container — the value-axis counterpart of `edgeAligned` on
+   * {@link buildCategoryAxis}. Needed when the axis bound coincides with the
+   * plot edge, which is the normal case for a scaled axis.
+   */
+  alignEdgeLabels?: boolean
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -238,10 +252,13 @@ export function buildValueAxis({
   maxLabelWidth,
   show = true,
   splitNumber,
+  scale,
+  alignEdgeLabels,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
     ...(splitNumber !== undefined ? { splitNumber } : {}),
+    ...(scale !== undefined ? { scale } : {}),
     axisLine: {
       show: false,
     },
@@ -254,6 +271,9 @@ export function buildValueAxis({
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
       hideOverlap: true,
+      ...(alignEdgeLabels
+        ? { alignMinLabel: "left" as const, alignMaxLabel: "right" as const }
+        : {}),
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(Number(_value)),
@@ -401,6 +421,13 @@ export interface ValueTooltipRow {
   color?: string
   /** ECharts' colored dot, for rows that stand for a series. Trusted HTML. */
   marker?: string
+  /**
+   * Render the value at headline size instead of the compact row size. For
+   * charts whose data point has no single headline value but whose numbers
+   * still deserve the emphasis every other chart's `value` gets — a scatter
+   * point is two coordinates, neither subordinate to the other.
+   */
+  size?: "large"
 }
 
 export interface ValueTooltipContent {
@@ -430,7 +457,21 @@ export function renderValueTooltip(
   theme: ChartTheme
 ): string {
   const secondary = `color: ${theme.colors.foregroundSecondary}; font-size: 12px`
+  const headline = "font-size: 20px; font-weight: 600; line-height: 1.2"
   const visibleRows = rows.filter((row): row is ValueTooltipRow => Boolean(row))
+
+  const renderRow = (row: ValueTooltipRow): string => {
+    const color = row.color ?? theme.colors.foreground
+    const marker = String(row.marker ?? "")
+
+    if (row.size === "large") {
+      // Label sits under its value rather than beside it: with two stacked
+      // large rows, trailing labels would leave the numbers ragged.
+      return `<div style="margin-top: 6px">${marker}<div style="${headline}; color: ${color}">${escapeTooltipText(row.value)}</div><div style="${secondary}">${escapeTooltipText(row.label)}</div></div>`
+    }
+
+    return `<div style="${secondary}">${marker}<strong style="color: ${color}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
+  }
 
   const html = [
     title !== undefined
@@ -440,15 +481,10 @@ export function renderValueTooltip(
       ? `<div style="${secondary}">${escapeTooltipText(subtitle)}</div>`
       : "",
     value !== undefined
-      ? `<div style="font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 6px">${escapeTooltipText(value)}</div>`
+      ? `<div style="${headline}; margin-top: 6px">${escapeTooltipText(value)}</div>`
       : "",
     visibleRows.length > 0
-      ? `<div style="margin-top: 6px">${visibleRows
-          .map(
-            (row) =>
-              `<div style="${secondary}">${String(row.marker ?? "")}<strong style="color: ${row.color ?? theme.colors.foreground}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
-          )
-          .join("")}</div>`
+      ? `<div style="margin-top: 6px">${visibleRows.map(renderRow).join("")}</div>`
       : "",
   ].join("")
 
