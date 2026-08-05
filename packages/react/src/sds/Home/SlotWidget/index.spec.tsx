@@ -153,7 +153,11 @@ describe("list slot schema", () => {
       <SlotWidget
         slots={[
           listSlot({ left: "person" }, [
-            { id: "1", title: "Ada", avatar: { firstName: "Ada" } },
+            {
+              id: "1",
+              title: "Ada",
+              avatar: { firstName: "Ada", lastName: "Lovelace" },
+            },
           ]),
         ]}
       />
