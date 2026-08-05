@@ -1,3 +1,4 @@
+export * from "../../../sds/Home/HomeListItem"
 export * from "../../../sds/Home/NewHomeLayout"
 export * from "../../../sds/Home/slotRenderers"
 export * from "../../../sds/Home/SlotWidget"

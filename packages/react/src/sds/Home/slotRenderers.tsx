@@ -11,18 +11,19 @@ import {
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
 import {
-  WidgetAvatarsListItem,
-  WidgetAvatarsListItemProps,
-} from "@/experimental/Widgets/Content/ListItems/WidgetAvatarsListItem"
-import {
   CalendarEvent,
   type CalendarEventProps,
 } from "@/experimental/Widgets/Content/CalendarEvent"
-import { WidgetInboxListItemProps } from "@/experimental/Widgets/Content/ListItems/WidgetInboxListItem"
-import { WidgetSimpleListItemProps } from "@/experimental/Widgets/Content/ListItems/WidgetSimpleListItem"
-import { WidgetInboxList } from "@/experimental/Widgets/Content/Lists/WidgetInboxList"
-import { WidgetSimpleList } from "@/experimental/Widgets/Content/Lists/WidgetSimpleList"
 import { WidgetProps } from "@/experimental/Widgets/Widget"
+
+import {
+  InboxListItem,
+  type InboxListItemProps,
+  SimpleLineListItem,
+  type SimpleLineListItemProps,
+  StatusListItem,
+  type StatusListItemProps,
+} from "./HomeListItem"
 
 /**
  * The Home kit's slot vocabulary and how each slot is drawn. `SlotWidget`
@@ -50,17 +51,35 @@ export type SlotRenderers = Record<string, SlotRenderer>
 
 /**
  * `simple-line-list` params: every item MUST carry an `href` — rows on Home are
- * always a door to the thing they describe, never inert text.
+ * always a door to the thing they describe, never inert text. The left slot is
+ * an `icon` shorthand or any `avatar` type (person, team, company, file, flag,
+ * emoji, icon).
  */
 export interface SimpleLineListParams {
-  items: Array<Omit<WidgetSimpleListItemProps, "onClick"> & { href: string }>
+  items: Array<
+    Omit<SimpleLineListItemProps, "onClick"> & {
+      id: string | number
+      href: string
+    }
+  >
+  /** @deprecated the list always shows every row now. */
   showAllItems?: boolean
 }
 
-/** `inbox-list` params: module-avatar rows (title + subtitle), every row an `href`. */
+/** `inbox-list` params: message rows (module glyph or any avatar), every row an `href`. */
 export interface InboxListParams {
-  items: Array<Omit<WidgetInboxListItemProps, "onClick"> & { href: string }>
+  items: Array<
+    Omit<InboxListItemProps, "onClick"> & { id: string | number; href: string }
+  >
+  /** @deprecated the list always shows every row now. */
   showAllItems?: boolean
+}
+
+/** `status-rows` params: who-is-where rows — alert or avatar, count, faces. */
+export interface StatusRowsParams {
+  rows: Array<
+    Omit<StatusListItemProps, "onClick"> & { id: string; href?: string }
+  >
 }
 
 /** `event-list` params: f0 calendar-event rows (color band + date avatars). */
@@ -68,6 +87,12 @@ export interface EventListParams {
   events: CalendarEventProps[]
   showAllItems?: boolean
 }
+
+/** A row's click handler: navigate to its `href`, however the app navigates. */
+const go = (ctx: HomeRenderCtx, href?: string) =>
+  href
+    ? () => (ctx.navigate ? ctx.navigate(href) : window.location.assign(href))
+    : undefined
 
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
 export interface HomeWidgetSlot {
@@ -134,47 +159,27 @@ export const EVENT_LIST_GAP = "gap-2"
  */
 export const defaultSlotRenderers: SlotRenderers = {
   // Every row navigates to its item's `href` (via ctx.navigate when the app
-  // provides it). `minSize: 0` so a short list doesn't reserve
-  // WidgetSimpleList's 184px floor inside a multi-slot widget.
+  // provides it). Rows are the Home kit's own list items, so the left slot
+  // takes any avatar type.
   "simple-line-list": (params, ctx) => {
-    const { items, showAllItems } = params as SimpleLineListParams
-    const hrefById = new Map(items.map((item) => [item.id, item.href]))
-    const go = (id: string | number) => {
-      const href = hrefById.get(id)
-      if (!href) return
-      if (ctx.navigate) ctx.navigate(href)
-      else window.location.assign(href)
-    }
+    const { items } = params as SimpleLineListParams
     return (
-      <div className={slotRowBleed(ctx)}>
-        <WidgetSimpleList
-          minSize={0}
-          showAllItems={showAllItems}
-          items={items}
-          onClickItem={go}
-        />
+      <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
+        {items.map(({ id, href, ...item }) => (
+          <SimpleLineListItem key={id} {...item} onClick={go(ctx, href)} />
+        ))}
       </div>
     )
   },
-  // Module-avatar rows (Communications-style). Same rule: every row navigates
-  // to its `href`.
+  // Message rows (Communications-style). Same rule: every row navigates to its
+  // `href`.
   "inbox-list": (params, ctx) => {
-    const { items, showAllItems } = params as InboxListParams
-    const hrefById = new Map(items.map((item) => [item.id, item.href]))
-    const go = (id: string | number) => {
-      const href = hrefById.get(id)
-      if (!href) return
-      if (ctx.navigate) ctx.navigate(href)
-      else window.location.assign(href)
-    }
+    const { items } = params as InboxListParams
     return (
-      <div className={slotRowBleed(ctx)}>
-        <WidgetInboxList
-          minSize={0}
-          showAllItems={showAllItems}
-          items={items}
-          onClickItem={go}
-        />
+      <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
+        {items.map(({ id, href, ...item }) => (
+          <InboxListItem key={id} {...item} onClick={go(ctx, href)} />
+        ))}
       </div>
     )
   },
@@ -207,12 +212,8 @@ export const defaultSlotRenderers: SlotRenderers = {
   ),
   "status-rows": (params, ctx) => (
     <div className={cn(slotRowBleed(ctx), "flex flex-col gap-1")}>
-      {(params as { rows: WidgetAvatarsListItemProps[] }).rows.map((row) => (
-        <WidgetAvatarsListItem
-          key={row.id}
-          {...row}
-          onClick={row.onClick ?? (ctx.navigate ? () => {} : undefined)}
-        />
+      {(params as StatusRowsParams).rows.map(({ id, href, ...row }) => (
+        <StatusListItem key={id} {...row} onClick={go(ctx, href)} />
       ))}
     </div>
   ),
