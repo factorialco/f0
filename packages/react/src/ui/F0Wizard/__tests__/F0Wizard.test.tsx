@@ -587,6 +587,151 @@ describe("F0Wizard", () => {
   })
 
   // ---------------------------------------------------------------------------
+  // scroll reset on step change
+  //
+  // jsdom does no layout, so the pane is never actually scrollable here. These
+  // tests assert the reset call reaches the content container; the visible
+  // behaviour is covered by the `ScrollResetOnStepChange` play test in
+  // patterns/F0WizardForm/__stories__/F0WizardForm.stories.tsx.
+  // ---------------------------------------------------------------------------
+
+  const stubContentScroll = () => {
+    const content = screen.getByTestId("wizard-step-content")
+    const scrollTo = vi.fn()
+    // jsdom does not implement Element.prototype.scrollTo at all.
+    Object.defineProperty(content, "scrollTo", {
+      value: scrollTo,
+      configurable: true,
+    })
+    content.scrollTop = 300
+    return { content, scrollTo }
+  }
+
+  it("resets the step content scroll when moving to the next step", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Wizard isOpen={true} onClose={() => {}} steps={makeSteps(3)}>
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const { scrollTo } = stubContentScroll()
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 1")
+    })
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" })
+  })
+
+  it("resets the step content scroll when going back to the previous step", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={makeSteps(3)}
+        defaultStepIndex={1}
+      >
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const { scrollTo } = stubContentScroll()
+
+    await user.click(screen.getByText("Previous"))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 0")
+    })
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" })
+  })
+
+  it("resets the step content scroll when jumping via the sidebar", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={makeSteps(3)}
+        defaultStepIndex={1}
+      >
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const { scrollTo } = stubContentScroll()
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    await user.click(nav.querySelectorAll("button")[0])
+
+    await waitFor(() => {
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 0")
+    })
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" })
+  })
+
+  it("does not reset the step content scroll when navigation is blocked", async () => {
+    const user = userEvent.setup()
+    const onNext = vi.fn().mockRejectedValue(new Error("Validation failed"))
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={[{ title: "Step 1", onNext }, { title: "Step 2" }]}
+      >
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const { scrollTo } = stubContentScroll()
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(onNext).toHaveBeenCalledOnce()
+    })
+    expect(screen.getByTestId("step-content")).toHaveTextContent("Step 0")
+    expect(scrollTo).not.toHaveBeenCalled()
+  })
+
+  it("falls back to scrollTop when the environment has no scrollTo", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Wizard isOpen={true} onClose={() => {}} steps={makeSteps(3)}>
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const content = screen.getByTestId("wizard-step-content")
+    expect(content.scrollTo).toBeUndefined()
+    content.scrollTop = 300
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 1")
+    })
+    expect(content.scrollTop).toBe(0)
+  })
+
+  // ---------------------------------------------------------------------------
   // autoCloseOnLastStepSubmit
   // ---------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react"
+import { FC, useLayoutEffect, useMemo, useRef } from "react"
 
 import type { F0DialogAction } from "@/components/dialog-alike/F0Dialog"
 // Import the unwrapped component directly to avoid the experimental-usage
@@ -59,6 +59,25 @@ export const F0Wizard: FC<F0WizardProps> = ({
   })
 
   const i18n = useI18n()
+
+  // The step-content pane is a single DOM node reused across every step, so its
+  // scrollTop survives the children swap. Without this, a step taller than the
+  // pane opens part-way down (the user had to scroll to reach "Next"). Layout
+  // effect so the reset lands before paint, and instant so it never animates.
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const content = contentRef.current
+    if (!content) return
+    // `behavior: "instant"` keeps it immune to a `scroll-behavior: smooth` on
+    // the element; jsdom (consumer unit tests) has no `scrollTo`, hence the
+    // `scrollTop` fallback.
+    if (typeof content.scrollTo === "function") {
+      content.scrollTo({ top: 0, behavior: "instant" })
+    } else {
+      content.scrollTop = 0
+    }
+  }, [navigation.currentStep])
 
   const currentStepDef = steps[navigation.currentStep]
   const isFirstStep = navigation.currentStep === 0
@@ -122,7 +141,11 @@ export const F0Wizard: FC<F0WizardProps> = ({
           <div className="w-1/3 shrink-0 overflow-y-auto border-x-0 border-b-0 border-r border-t-0 border-dashed border-f1-border-secondary p-2">
             <WizardSteps />
           </div>
-          <div className="flex-1 overflow-y-auto px-8">
+          <div
+            ref={contentRef}
+            data-testid="wizard-step-content"
+            className="flex-1 overflow-y-auto px-8"
+          >
             {children({
               currentStep: navigation.currentStep,
               goToStep: navigation.goToStep,
