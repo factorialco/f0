@@ -661,8 +661,13 @@ links: f0FormField.entitiesList({
 ## Accessibility
 
 - All fields rendered by F0Form include ARIA labels derived from the `label` config.
-- Each field's visible label is associated with its control via `for`/`id`, so
-  clicking the label focuses the input.
+  That `aria-label` is what names the control for assistive technology.
+- **Known limitation:** the visible label is _not_ programmatically associated with
+  its control, so clicking it does not move focus to the input. The label carries no
+  `for` attribute — the input's `id` is generated inside `F0InputField` and the field
+  renderers do not thread one through, so any `for` we could write today would point
+  at a nonexistent element. Screen-reader users are unaffected (the `aria-label`
+  above names the control); pointer users lose the click-to-focus affordance.
 - Help text and error messages are linked to their field via `aria-describedby`,
   and the attribute is only emitted for the ones actually rendered — a field with
   no `helpText` and no error carries no `aria-describedby`.
