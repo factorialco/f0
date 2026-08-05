@@ -599,7 +599,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // reader used to get here is the one that takes them back.
   const descriptionAction = isWindowed
     ? {
-        label: translations.dataChart.showAllCategories,
+        label: translations.actions.showAll,
         onClick: () => onFullscreenChange?.(true),
       }
     : canCollapseCategories
