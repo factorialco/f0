@@ -91,6 +91,15 @@ export type DialogWrapperProps = {
    * side -> `#content`). Pass `null` to portal to `document.body`.
    */
   container?: HTMLElement | null
+
+  /**
+   * Called with the content box's width in px whenever it changes (mount and on
+   * resize), and with `0` once it unmounts. Lets a consumer react to the space
+   * the dialog occupies — e.g. offsetting a graph so a node isn't hidden behind a
+   * side drawer — without hard-coding the width. The slide-in animates a
+   * transform, not the width, so the reported value is final from first paint.
+   */
+  onWidthChange?: (width: number) => void
 }
 /**
  * This is a helper component to wrap the dialog content in a drawer or dialog component.
@@ -109,6 +118,7 @@ export const DialogWrapper = ({
   size = "md",
   fullHeight = false,
   container,
+  onWidthChange,
 }: DialogWrapperProps) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -121,6 +131,26 @@ export const DialogWrapper = ({
     // Update state to trigger re-render so children get the new container
     setContainerElement(node)
   }, [])
+
+  // Report the content box's width to consumers that need to reserve space for
+  // the dialog (e.g. offsetting a graph so a node isn't hidden behind a side
+  // drawer). Observe the same node `setContentRef` captured; emit `0` on unmount
+  // so an offset can be cleared. Read through a ref so a changing callback
+  // identity doesn't re-create the observer.
+  const onWidthChangeRef = useRef(onWidthChange)
+  onWidthChangeRef.current = onWidthChange
+  useEffect(() => {
+    if (!containerElement || !onWidthChangeRef.current) return
+    const emit = () =>
+      onWidthChangeRef.current?.(containerElement.getBoundingClientRect().width)
+    emit()
+    const observer = new ResizeObserver(emit)
+    observer.observe(containerElement)
+    return () => {
+      observer.disconnect()
+      onWidthChangeRef.current?.(0)
+    }
+  }, [containerElement])
 
   const isSmallScreen = useIsSmallScreen()
 
