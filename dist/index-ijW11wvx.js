@@ -22679,16 +22679,20 @@ const SY = 220, CY = (t, e, n, i = !0) => {
           // Closing holds at zero until the columns are dropped; opening holds
           // at zero before it starts, so the natural width never flashes.
           fill: S ? "forwards" : "backwards"
-        }), C = g.animate(
-          S ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 0 }, { opacity: 1 }],
-          S ? { duration: 80, easing: "ease-out", fill: "forwards" } : {
-            duration: 120,
-            delay: 110,
-            easing: "ease-out",
-            fill: "backwards"
-          }
-        );
-        s.push(E, C), p.push(E.finished.catch(() => {
+        });
+        Array.from(g.children).forEach((C) => {
+          C instanceof HTMLElement && s.push(
+            C.animate(
+              S ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 0 }, { opacity: 1 }],
+              S ? { duration: 80, easing: "ease-out", fill: "forwards" } : {
+                duration: 120,
+                delay: 110,
+                easing: "ease-out",
+                fill: "backwards"
+              }
+            )
+          );
+        }), s.push(E), p.push(E.finished.catch(() => {
         }));
       }), Promise.all(p).then(() => {
         l || n(c);
