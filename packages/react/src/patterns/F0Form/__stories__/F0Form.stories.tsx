@@ -588,6 +588,95 @@ export const WithSectionsSidepanel: Story = {
 }
 
 /**
+ * Large form where only the section selected in the sidepanel is shown.
+ * Use `styling.showOnlySelectedSection` (together with `showSectionsSidepanel`)
+ * to avoid overwhelming the user with every section at once. Hidden sections
+ * stay mounted, so values, dirty state, and validation are preserved when
+ * switching — and submitting still validates the whole form, revealing the
+ * section that contains an error.
+ */
+export const WithOnlySelectedSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField.text({
+          label: "First name",
+          row: "name",
+        }),
+        lastName: f0FormField.text({
+          label: "Last name",
+          row: "name",
+        }),
+        birthdate: f0FormField.date({
+          label: "Birthdate",
+          optional: true,
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField.email({ label: "Email" }),
+        phone: f0FormField.text({ label: "Phone", optional: true }),
+      }),
+      address: z.object({
+        street: f0FormField.text({ label: "Street" }),
+        city: f0FormField.text({ label: "City", row: "city-zip" }),
+        postalCode: f0FormField.text({
+          label: "Postal code",
+          row: "city-zip",
+        }),
+      }),
+      preferences: z.object({
+        newsletter: f0FormField.boolean({
+          label: "Subscribe to the newsletter",
+          optional: true,
+        }),
+        language: f0FormField.select({
+          label: "Language",
+          options: [
+            { value: "en", label: "English" },
+            { value: "es", label: "Spanish" },
+          ],
+        }),
+      }),
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "employee-profile",
+      schema,
+      sections: {
+        personal: { title: "Personal information" },
+        contact: { title: "Contact" },
+        address: { title: "Address" },
+        preferences: { title: "Preferences" },
+      },
+      defaultValues: {
+        personal: { firstName: "", lastName: "", birthdate: undefined },
+        contact: { email: "", phone: "" },
+        address: { street: "", city: "", postalCode: "" },
+        preferences: { newsletter: false, language: "en" },
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return (
+      <F0Form
+        formDefinition={formDefinition}
+        styling={{
+          showSectionsSidepanel: true,
+          showOnlySelectedSection: true,
+        }}
+      />
+    )
+  },
+}
+
+/**
  * Form with conditional field rendering based on other field values.
  * Fields can use `renderIf` to conditionally show/hide based on other field values.
  * Supports both condition objects and functions.
