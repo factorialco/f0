@@ -149,6 +149,16 @@ describe("F0Graph — fly to node on click (default)", () => {
     expect(mockReactFlow.fitView).not.toHaveBeenCalled()
   })
 
+  // Regression: the canvas pointer-up also fires for the expander/collapser
+  // pseudo-nodes. Clicking one (to toggle) must not fly — it isn't a real node,
+  // so the camera would chase the toggle's shifting position.
+  it("does not fly when the expander/collapser pseudo-node is clicked", async () => {
+    mount()
+    await clickNode("expander-root")
+    expect(mockReactFlow.setCenter).not.toHaveBeenCalled()
+    expect(mockReactFlow.fitView).not.toHaveBeenCalled()
+  })
+
   it("offsets the center for a right-side viewportInset", async () => {
     const noInset = mount()
     await clickNode("root")

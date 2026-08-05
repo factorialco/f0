@@ -603,7 +603,12 @@ export function F0GraphView<T = unknown>(
   const handleNodeClick = useCallback(
     (id: string) => {
       selectNode(id)
-      if (!centerOnNodeClick) return
+      // Fly only for real data nodes. The canvas pointer-up also fires for the
+      // expander/collapser pseudo-nodes (their `.react-flow__node` wrappers carry
+      // `expander-`/`collapser-` ids, absent from `nodeMap`); flying to one would
+      // chase the toggle's position as it shifts on expand/collapse. Gating on
+      // `nodeMap` leaves the toggle itself untouched.
+      if (!centerOnNodeClick || !nodeMap.has(id)) return
       // A second click supersedes a still-pending fly rather than queueing both.
       if (nodeClickFlyTimerRef.current) {
         clearTimeout(nodeClickFlyTimerRef.current)
@@ -613,7 +618,7 @@ export function F0GraphView<T = unknown>(
         FOCUS_SETTLE_DELAY_MS
       )
     },
-    [selectNode, centerOnNodeClick]
+    [selectNode, centerOnNodeClick, nodeMap]
   )
 
   useEffect(() => {
