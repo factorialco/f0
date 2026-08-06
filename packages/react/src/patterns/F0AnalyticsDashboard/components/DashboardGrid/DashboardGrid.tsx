@@ -15,7 +15,7 @@ import type {
   DashboardItemLayout,
 } from "../../types"
 
-import { ChartItem } from "../ChartItem/ChartItem"
+import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
 import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricItem } from "../MetricItem/MetricItem"
@@ -457,8 +457,25 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   if (fullscreenItemId) {
     const fullscreenItem = itemMap.get(fullscreenItemId)
     if (fullscreenItem) {
+      // An expanded horizontal bar chart draws every category at a fixed row
+      // height, so it owns its height rather than being fitted to the viewport.
+      // `min-h-full` keeps the fill behaviour for everything else — and for a
+      // short chart — while letting that intrinsic height push past the fold,
+      // where the surrounding canvas scroll takes over. `shrink-0` is what lets
+      // it get there: this container is a flex item of the dashboard's grid
+      // wrapper, which is itself pinned to the viewport, so without it the
+      // container is shrunk back to that height and the card inside is clipped
+      // to the fold (see the matching note on `DashboardItem`'s root).
+      const fitsContent =
+        fullscreenItem.type === "chart" && chartItemFitsContent(fullscreenItem)
       return (
-        <div ref={containerRef} className="flex h-full min-h-0 flex-col">
+        <div
+          ref={containerRef}
+          className={cn(
+            "flex flex-col",
+            fitsContent ? "min-h-full shrink-0" : "h-full min-h-0"
+          )}
+        >
           <DashboardGridItem
             item={fullscreenItem}
             filters={filters}

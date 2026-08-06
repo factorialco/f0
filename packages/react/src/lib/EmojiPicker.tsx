@@ -77,6 +77,7 @@ function observeEmojiButtonAria(element: EmojiMartElement): () => void {
 }
 
 export type EmojiPickerProps = {
+  className?: string
   data?: unknown
   onEmojiSelect?: (emoji: { native: string }) => void
   locale?: string
@@ -94,11 +95,13 @@ export type EmojiPickerProps = {
   dynamicWidth?: boolean
 }
 
-function EmojiPickerElement(props: EmojiPickerProps) {
+function EmojiPickerElement({ className, ...props }: EmojiPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const elementRef = useRef<EmojiMartElement | null>(null)
   const propsRef = useRef(props)
+  const classNameRef = useRef(className)
   propsRef.current = props
+  classNameRef.current = className
 
   // createElement (not `new`, which @emoji-mart/react uses) instantiates the
   // *registered* element class. With a duplicated emoji-mart class in the
@@ -112,6 +115,7 @@ function EmojiPickerElement(props: EmojiPickerProps) {
       "em-emoji-picker"
     ) as EmojiMartElement
     elementRef.current = element
+    element.className = classNameRef.current ?? ""
     // Seed props *before* appending: connectedCallback reads `this.props`
     // synchronously on append to build the picker. A post-append `update()`
     // is dropped because emoji-mart's attributeChangedCallback bails while its
@@ -130,7 +134,11 @@ function EmojiPickerElement(props: EmojiPickerProps) {
 
   // Push later prop changes to the live element (as @emoji-mart/react does).
   useEffect(() => {
-    elementRef.current?.update?.(props)
+    const element = elementRef.current
+    if (!element) return
+
+    element.className = className ?? ""
+    element.update?.(props)
   })
 
   return <div ref={containerRef} />
