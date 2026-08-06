@@ -39,3 +39,7 @@ pnpm vitest:ci       # run once (CI)
 ## Promotion evidence
 
 Vitest unit test results count as evidence for **Phase 4 (Real use)** of the F0 component lifecycle. When promoting a component from `experimental/` to stable, attach the latest `pnpm vitest:ci` output to the #f0-support promotion thread. See the `f0-component-promotion` skill.
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-unit-testing` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.

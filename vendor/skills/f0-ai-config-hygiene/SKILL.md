@@ -31,7 +31,7 @@ Other files that reference the same topic must **link** to the owner, not restat
 
 | Layer | File                                                        | Owns                                                                                                                                 |
 | ----- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 1     | `AGENTS.md` (root)                                          | Monorepo structure, key principles (TypeScript strict, pnpm, English), factorial-skills bootstrap                                    |
+| 1     | `AGENTS.md` (root)                                          | Monorepo structure, key principles (TypeScript strict, pnpm, English), factorial-skills bootstrap, skill attribution marker          |
 | 1     | `.github/copilot-instructions.md`                           | Thin Copilot Chat / completion entry point only. Everything else defers to root AGENTS.md.                                           |
 | 2     | `packages/react/AGENTS.md`                                  | **All** F0 React component conventions: naming, folder structure, props, context, TypeScript, testing, styling, i18n, a11y, commands |
 | 2     | `packages/react/docs/definition-of-done.mdx`                | The lifecycle contract: phases, exit criteria, maturity levels, promotion gates                                                      |
@@ -194,3 +194,7 @@ Before merging any PR that touches AI config files, verify:
 - [ ] New skills are added to the `## Skills` section of `packages/react/AGENTS.md`
 - [ ] `copilot-instructions.md` remains under ~25 lines
 - [ ] Reference files contain code examples, not rule restatements
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-ai-config-hygiene` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.
