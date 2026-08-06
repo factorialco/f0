@@ -151,6 +151,102 @@ export const filterDefinition: FiltersDefinition = {
   },
 }
 
+// Nested subfilters (office → space → desk). Each nested level stores its
+// selections under a dedicated filter key declared with `hideSelector: true`,
+// so it doesn't show up as a standalone filter in the picker list.
+export const subfiltersDefinition = {
+  office: {
+    type: "in",
+    label: "Office",
+    options: {
+      options: [
+        {
+          value: "bcn",
+          label: "Barcelona HQ",
+          children: {
+            filterKey: "space",
+            options: [
+              {
+                value: "bcn-f1",
+                label: "Floor 1",
+                children: {
+                  filterKey: "desk",
+                  options: [
+                    { value: "bcn-f1-a1", label: "Desk A1" },
+                    { value: "bcn-f1-a2", label: "Desk A2" },
+                  ],
+                },
+              },
+              {
+                value: "bcn-f2",
+                label: "Floor 2",
+                children: {
+                  filterKey: "desk",
+                  options: [
+                    { value: "bcn-f2-b1", label: "Desk B1" },
+                    { value: "bcn-f2-b2", label: "Desk B2" },
+                  ],
+                },
+              },
+              { value: "bcn-rooftop", label: "Rooftop Terrace" },
+            ],
+          },
+        },
+        {
+          value: "mad",
+          label: "Madrid Office",
+          children: {
+            filterKey: "space",
+            options: [
+              { value: "mad-f1", label: "Floor 1" },
+              { value: "mad-f2", label: "Floor 2" },
+            ],
+          },
+        },
+        { value: "ldn", label: "London" },
+      ],
+    },
+  },
+  space: {
+    type: "in",
+    label: "Space",
+    hideSelector: true,
+    options: {
+      options: [
+        { value: "bcn-f1", label: "Floor 1" },
+        { value: "bcn-f2", label: "Floor 2" },
+        { value: "bcn-rooftop", label: "Rooftop Terrace" },
+        { value: "mad-f1", label: "Floor 1" },
+        { value: "mad-f2", label: "Floor 2" },
+      ],
+    },
+  },
+  desk: {
+    type: "in",
+    label: "Desk",
+    hideSelector: true,
+    options: {
+      options: [
+        { value: "bcn-f1-a1", label: "Desk A1" },
+        { value: "bcn-f1-a2", label: "Desk A2" },
+        { value: "bcn-f2-b1", label: "Desk B1" },
+        { value: "bcn-f2-b2", label: "Desk B2" },
+      ],
+    },
+  },
+  department: {
+    type: "in",
+    label: "Department",
+    options: {
+      options: [
+        { value: "engineering", label: "Engineering" },
+        { value: "marketing", label: "Marketing" },
+        { value: "sales", label: "Sales" },
+      ],
+    },
+  },
+} as const satisfies FiltersDefinition
+
 // Define sample presets for use in stories
 export const samplePresets: PresetsDefinition<typeof filterDefinition> = [
   {
