@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, within } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { Download, Upsell } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -145,15 +145,15 @@ export const Card: Story = {
       "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
     primaryAction: {
       label: "Try it out",
-      onClick: () => alert("Try it out clicked"),
+      onClick: fn(),
       variant: "outline",
     },
     secondaryAction: {
       label: "Not now",
-      onClick: () => alert("Dismissed"),
+      onClick: fn(),
       variant: "ghost",
     },
-    onClose: () => alert("Banner closed"),
+    onClose: fn(),
   },
   decorators: [
     (Story) => (
@@ -162,6 +162,21 @@ export const Card: Story = {
       </div>
     ),
   ],
+  // The flow the card exists for: read it, take the action, or dismiss it.
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getByText("Submit expenses in seconds")).toBeVisible()
+
+    await userEvent.click(canvas.getByRole("button", { name: "Try it out" }))
+    await expect(args.primaryAction?.onClick).toHaveBeenCalledOnce()
+
+    await userEvent.click(canvas.getByRole("button", { name: "Close" }))
+    await expect(args.onClose).toHaveBeenCalledOnce()
+    await expect(
+      canvas.queryByText("Submit expenses in seconds")
+    ).not.toBeInTheDocument()
+  },
 }
 
 /**
