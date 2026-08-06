@@ -1,8 +1,8 @@
-import { u as W, t as je, v as Ge, m as $, x as Xe, y as Ze, z as qe, A as Ye, B as Je, E as Qe, G as et, H as tt, J as nt, K as rt, L as at, M as ye, N as ot, O as Ce, l as st, Q as it, R as ct, U as lt, w as dt, r as ut } from "./F0CanvasPanel-CAY9Mu_e.js";
+import { u as W, t as je, v as Ge, m as $, x as Xe, y as Ze, z as qe, A as Ye, B as Je, E as Qe, G as et, H as tt, J as nt, K as rt, L as at, M as ot, N as ye, O as st, Q as Ce, l as it, R as ct, U as lt, V as dt, w as ut, r as ft } from "./F0CanvasPanel-BImifyj_.js";
 import { jsxs as R, jsx as l } from "react/jsx-runtime";
-import { forwardRef as re, useId as ft, useState as x, useRef as O, useEffect as _, useMemo as J, useCallback as M } from "react";
+import { forwardRef as re, useId as mt, useState as x, useRef as O, useEffect as _, useMemo as J, useCallback as M } from "react";
 import { d as H, f as de } from "./tooltip-Cik7KBQT.js";
-import { F as mt, a as pt, b as Pe, c as ht, d as gt } from "./VolumeMuted-BBB_OqPt.js";
+import { F as pt, a as Pe, b as ht, c as gt } from "./VolumeMuted-DKLKhxyd.js";
 function Se(e) {
   return Array.isArray(e);
 }
@@ -93,7 +93,7 @@ const De = {
 ));
 ue.displayName = "AudioDescriptionLineIcon";
 const Te = re(({ animate: e, ...t }, a) => {
-  const n = `ad-mask-${ft().replace(/:/g, "")}`;
+  const n = `ad-mask-${mt().replace(/:/g, "")}`;
   return /* @__PURE__ */ R(
     "svg",
     {
@@ -294,14 +294,14 @@ function ce({
   offLabel: d
 }) {
   const m = u !== void 0, g = n.find((c) => c.locale === o), y = m && !r ? d : g ? Le(g) : d;
-  return /* @__PURE__ */ R(Qe, { children: [
-    /* @__PURE__ */ R(et, { className: Ct, children: [
-      /* @__PURE__ */ l(tt, { icon: e }),
+  return /* @__PURE__ */ R(et, { children: [
+    /* @__PURE__ */ R(tt, { className: Ct, children: [
+      /* @__PURE__ */ l(nt, { icon: e }),
       /* @__PURE__ */ l("span", { className: "flex-1", children: t }),
       /* @__PURE__ */ l("span", { className: "text-f1-foreground-secondary", children: y })
     ] }),
-    /* @__PURE__ */ l(nt, { container: a ?? void 0, children: /* @__PURE__ */ l(rt, { className: Ae, children: /* @__PURE__ */ R(
-      at,
+    /* @__PURE__ */ l(rt, { container: a ?? void 0, children: /* @__PURE__ */ l(at, { className: Ae, children: /* @__PURE__ */ R(
+      ot,
       {
         value: m ? r ? o : ie : o,
         onValueChange: (c) => m && c === ie ? u() : i(c),
@@ -345,7 +345,7 @@ function Pt({
         variant: "ghost",
         size: "sm",
         hideLabel: !0,
-        icon: mt,
+        icon: pt,
         label: h("videoPlayer.settings")
       }
     ) }),
@@ -360,7 +360,7 @@ function Pt({
           t.length > 1 && /* @__PURE__ */ l(
             ce,
             {
-              icon: pt,
+              icon: Qe,
               label: h("videoPlayer.audio"),
               container: b,
               options: t,
@@ -654,11 +654,11 @@ function At({
   onPlaybackRateChange: K,
   onToggleFullscreen: G,
   onToggleCaptions: F,
-  onToggleAudioDescription: V,
+  onToggleAudioDescription: U,
   onSeek: Y,
   download: X
 }) {
-  const { t: p } = W(), N = g && L.length <= 1, z = c && I.length <= 1, U = St({
+  const { t: p } = W(), N = g && L.length <= 1, z = c && I.length <= 1, V = St({
     audioLanguages: E.length,
     captionLanguages: L.length,
     audioDescriptionLanguages: I.length
@@ -690,7 +690,7 @@ function At({
             variant: "ghost",
             size: "sm",
             hideLabel: !0,
-            icon: e ? ot : Ce,
+            icon: e ? st : Ce,
             label: p(e ? "videoPlayer.pause" : "videoPlayer.play"),
             onClick: D
           }
@@ -754,10 +754,10 @@ function At({
             icon: f ? Te : ue,
             label: p("videoPlayer.audioDescription"),
             "aria-pressed": f,
-            onClick: V
+            onClick: U
           }
         ),
-        U && /* @__PURE__ */ l(
+        V && /* @__PURE__ */ l(
           Pt,
           {
             containerRef: m,
@@ -782,7 +782,7 @@ function At({
             variant: "ghost",
             size: "sm",
             hideLabel: !0,
-            icon: st,
+            icon: it,
             label: X.label,
             onClick: X.onClick
           }
@@ -793,7 +793,7 @@ function At({
             variant: "ghost",
             size: "sm",
             hideLabel: !0,
-            icon: r ? it : ct,
+            icon: r ? ct : lt,
             label: p(r ? "videoPlayer.exitFullscreen" : "videoPlayer.enterFullscreen"),
             onClick: G
           }
@@ -963,8 +963,8 @@ function Ft({
 const Ee = /* @__PURE__ */ new Set([
   "captions",
   "subtitles"
-]), Ot = 2, Ut = 3;
-function Vt(e, t) {
+]), Ot = 2, Vt = 3;
+function Ut(e, t) {
   const { trackSrc: a, needsCrossOrigin: n } = Ie(t), [o, i] = x(!1), [r, u] = x(!1), [d, m] = x(!1), y = r || t !== void 0 && !d;
   return _(() => {
     m(!1), u(!1);
@@ -979,7 +979,7 @@ function Vt(e, t) {
         Ee.has(T.kind) && (T.mode = o ? "showing" : "hidden", T.cues && T.cues.length > 0 && (k = !0));
       }
       if (u(k), f) {
-        if (f.readyState === Ut)
+        if (f.readyState === Vt)
           m(!0);
         else if (f.readyState === Ot) {
           const L = f.track?.cues;
@@ -1084,8 +1084,8 @@ function Bt(e) {
     }, K = () => f(s.duration || 0), G = () => {
       xt(s.playbackRate) && L(s.playbackRate);
     }, F = () => {
-      const V = performance.now();
-      V - o.current >= bt && (o.current = V, y(s.currentTime));
+      const U = performance.now();
+      U - o.current >= bt && (o.current = U, y(s.currentTime));
     };
     return s.addEventListener("play", P), s.addEventListener("pause", D), s.addEventListener("ended", B), s.addEventListener("volumechange", j), s.addEventListener("loadedmetadata", K), s.addEventListener("ratechange", G), s.addEventListener("timeupdate", F), s.readyState >= 1 && s.duration && f(s.duration), () => {
       s.removeEventListener("play", P), s.removeEventListener("pause", D), s.removeEventListener("ended", B), s.removeEventListener("volumechange", j), s.removeEventListener("loadedmetadata", K), s.removeEventListener("ratechange", G), s.removeEventListener("timeupdate", F);
@@ -1194,11 +1194,11 @@ function Wt({
   ), F = ee(
     i?.describedSrc,
     K
-  ), [V, Y] = x(!1), X = V && F ? F : v, p = Bt(X), N = Vt(p.videoElement, P), z = It(p.videoElement, {
-    enabled: V,
+  ), [U, Y] = x(!1), X = U && F ? F : v, p = Bt(X), N = Ut(p.videoElement, P), z = It(p.videoElement, {
+    enabled: U,
     describedSrc: F,
     descriptions: G
-  }), U = M(() => {
+  }), V = M(() => {
     const w = p.videoRef.current;
     if (!w) return;
     const He = w.currentTime, We = !w.paused, be = () => {
@@ -1208,26 +1208,26 @@ function Wt({
     w.addEventListener("loadedmetadata", be);
   }, [p.videoRef]), Ne = M(
     (w) => {
-      U(), L(w);
+      V(), L(w);
     },
-    [U]
+    [V]
   ), _e = M(() => {
-    F && U(), Y((w) => !w);
-  }, [F, U]), Fe = M(
+    F && V(), Y((w) => !w);
+  }, [F, V]), Fe = M(
     (w) => {
       C(w), N.showing || N.toggle();
     },
     [N]
   ), Oe = M(() => {
     N.showing && N.toggle();
-  }, [N]), Ue = M(
+  }, [N]), Ve = M(
     (w) => {
-      F && U(), j(w), Y(!0);
+      F && V(), j(w), Y(!0);
     },
-    [F, U]
-  ), Ve = M(() => {
-    F && U(), Y(!1);
-  }, [F, U]);
+    [F, V]
+  ), Ue = M(() => {
+    F && V(), Y(!1);
+  }, [F, V]);
   Ht({ video: p.videoElement, onTrackAction: y }), zt({
     video: p.videoElement,
     onMilestone: c,
@@ -1247,7 +1247,7 @@ function Wt({
   ), { isFullscreen: Ke, toggleFullscreen: he } = Nt({
     targetRef: E
   }), ge = M(() => {
-  }, []), ve = !!(V && F);
+  }, []), ve = !!(U && F);
   _(() => {
     const w = p.videoRef.current;
     n && w && (w.muted = !ve);
@@ -1338,7 +1338,7 @@ function Wt({
                 tabIndex: -1,
                 onClick: p.togglePlay,
                 className: "dark pointer-events-auto flex size-14 items-center justify-center rounded-full bg-[#000000b3] pl-0.5 text-f1-foreground shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-transform duration-150 hover:scale-105 motion-reduce:transition-none [&_svg]:size-7",
-                children: /* @__PURE__ */ l(lt, { icon: Ce, size: "lg" })
+                children: /* @__PURE__ */ l(dt, { icon: Ce, size: "lg" })
               }
             )
           }
@@ -1375,7 +1375,7 @@ function Wt({
             captionsAvailable: N.available,
             captionsOn: N.showing,
             audioDescriptionAvailable: z.available,
-            audioDescriptionOn: V,
+            audioDescriptionOn: U,
             silent: n,
             persist: o,
             audioLanguages: A,
@@ -1387,8 +1387,8 @@ function Wt({
             onCaptionsOff: Oe,
             audioDescriptionLanguages: D,
             audioDescriptionLanguage: K,
-            onAudioDescriptionLanguageChange: Ue,
-            onAudioDescriptionOff: Ve,
+            onAudioDescriptionLanguageChange: Ve,
+            onAudioDescriptionOff: Ue,
             onTogglePlay: p.togglePlay,
             onToggleMute: p.toggleMute,
             onVolumeChange: p.setVolume,
@@ -1406,8 +1406,8 @@ function Wt({
     }
   );
 }
-const Yt = dt(
-  ut("F0VideoPlayer", Wt)
+const Yt = ut(
+  ft("F0VideoPlayer", Wt)
 );
 export {
   Yt as F,
