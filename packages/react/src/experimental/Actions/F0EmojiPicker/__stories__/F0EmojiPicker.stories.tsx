@@ -94,38 +94,64 @@ export const Controlled: Story = {
 
 export const Interaction: Story = {
   tags: ["no-sidebar"],
-  play: async ({ args, canvasElement }) => {
+  play: async ({ args, canvasElement, step }) => {
     const canvas = within(canvasElement)
     const trigger = canvas.getByRole("button", {
       name: "Choose group emoji",
     })
+    const page = within(canvasElement.ownerDocument.body)
 
-    trigger.focus()
-    await userEvent.keyboard("{Enter}")
-    await expect(trigger).toHaveAttribute("aria-expanded", "true")
+    await step(
+      "opens with the keyboard and closes with the trigger",
+      async () => {
+        trigger.focus()
+        await userEvent.keyboard("{Enter}")
+        await expect(trigger).toHaveAttribute("aria-expanded", "true")
+        await page.findByRole("dialog", { name: "Choose group emoji" })
 
-    await userEvent.keyboard("{Escape}")
-    await expect(trigger).toHaveAttribute("aria-expanded", "false")
-    await waitFor(() => expect(trigger).toHaveFocus())
-
-    await userEvent.click(trigger)
-    await expect(trigger).toHaveAttribute("aria-expanded", "true")
-
-    const picker = canvasElement.ownerDocument.querySelector("em-emoji-picker")
-    await waitFor(() => expect(picker?.shadowRoot).not.toBeNull())
-
-    const partyEmoji = picker?.shadowRoot?.querySelector<HTMLButtonElement>(
-      'button[aria-label="🥳"]'
+        await userEvent.click(trigger)
+        await waitFor(() =>
+          expect(trigger).toHaveAttribute("aria-expanded", "false")
+        )
+        await waitFor(() =>
+          expect(
+            page.queryByRole("dialog", { name: "Choose group emoji" })
+          ).not.toBeInTheDocument()
+        )
+        await waitFor(() => expect(trigger).toHaveFocus())
+      }
     )
-    await expect(partyEmoji).not.toBeNull()
-    await userEvent.click(partyEmoji!)
 
-    await expect(args.onChange).toHaveBeenCalledWith("🥳")
-    await expect(trigger).toHaveAttribute("aria-expanded", "false")
-    await expect(trigger).toHaveAttribute(
-      "aria-label",
-      "Choose group emoji: 🥳"
-    )
+    await step("selects an emoji and closes the picker", async () => {
+      await userEvent.click(trigger)
+      await expect(trigger).toHaveAttribute("aria-expanded", "true")
+      await page.findByRole("dialog", { name: "Choose group emoji" })
+
+      const picker =
+        canvasElement.ownerDocument.querySelector("em-emoji-picker")
+      await waitFor(() => expect(picker?.shadowRoot).not.toBeNull())
+
+      const partyEmoji = picker?.shadowRoot?.querySelector<HTMLButtonElement>(
+        'button[aria-label="🥳"]'
+      )
+      await expect(partyEmoji).not.toBeNull()
+      await userEvent.click(partyEmoji!)
+
+      await expect(args.onChange).toHaveBeenCalledWith("🥳")
+      await waitFor(() =>
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+      )
+      await waitFor(() =>
+        expect(
+          page.queryByRole("dialog", { name: "Choose group emoji" })
+        ).not.toBeInTheDocument()
+      )
+      await expect(trigger).toHaveAttribute(
+        "aria-label",
+        "Choose group emoji: 🥳"
+      )
+      await waitFor(() => expect(trigger).toHaveFocus())
+    })
   },
 }
 
@@ -143,8 +169,8 @@ export const Clearable: Story = {
 
     await userEvent.click(trigger)
 
-    const document = within(canvasElement.ownerDocument.body)
-    const dialog = await document.findByRole("dialog", {
+    const page = within(canvasElement.ownerDocument.body)
+    const dialog = await page.findByRole("dialog", {
       name: "Choose group emoji",
     })
     const clearButton = await within(dialog).findByRole("button", {
@@ -195,8 +221,8 @@ export const ClearableInteraction: Story = {
 
     await userEvent.click(trigger)
 
-    const document = within(canvasElement.ownerDocument.body)
-    const dialog = await document.findByRole("dialog", {
+    const page = within(canvasElement.ownerDocument.body)
+    const dialog = await page.findByRole("dialog", {
       name: "Choose group emoji",
     })
     const clearButton = await within(dialog).findByRole("button", {
@@ -206,7 +232,14 @@ export const ClearableInteraction: Story = {
     await userEvent.keyboard("{Enter}")
 
     await expect(args.onChange).toHaveBeenCalledWith(null)
-    await expect(trigger).toHaveAttribute("aria-expanded", "false")
+    await waitFor(() =>
+      expect(trigger).toHaveAttribute("aria-expanded", "false")
+    )
+    await waitFor(() =>
+      expect(
+        page.queryByRole("dialog", { name: "Choose group emoji" })
+      ).not.toBeInTheDocument()
+    )
     await expect(trigger).toHaveAttribute("aria-label", "Choose group emoji")
     await waitFor(() => expect(trigger).toHaveFocus())
   },

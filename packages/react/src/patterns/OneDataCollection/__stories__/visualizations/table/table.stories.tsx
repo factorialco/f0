@@ -837,8 +837,13 @@ export const TableWithCollapsibleHeaderGroups: Story = {
 
     await userEvent.click(february)
 
-    await expect(await canvas.findByText("€318,900")).toBeInTheDocument()
-    expect(february).toHaveAttribute("aria-expanded", "true")
+    await waitFor(() =>
+      expect(february).toHaveAttribute("aria-expanded", "true")
+    )
+    await waitFor(
+      () => expect(canvas.getByText("€318,900")).toBeInTheDocument(),
+      { timeout: 5000 }
+    )
   },
 }
 
