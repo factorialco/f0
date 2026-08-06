@@ -4478,6 +4478,7 @@ export declare const defaultTranslations: {
         readonly selectPlaceholder: "Select";
     };
     readonly countries: {
+        ac: string;
         ad: string;
         ae: string;
         af: string;
@@ -4502,14 +4503,19 @@ export declare const defaultTranslations: {
         bh: string;
         bi: string;
         bj: string;
+        bl: string;
         bm: string;
+        bn: string;
         bo: string;
+        bq: string;
         br: string;
+        bs: string;
         bt: string;
         bw: string;
         by: string;
         bz: string;
         ca: string;
+        cc: string;
         cd: string;
         cf: string;
         cg: string;
@@ -4524,6 +4530,7 @@ export declare const defaultTranslations: {
         cu: string;
         cv: string;
         cw: string;
+        cx: string;
         cy: string;
         cz: string;
         de: string;
@@ -4535,6 +4542,7 @@ export declare const defaultTranslations: {
         ec: string;
         ee: string;
         eg: string;
+        eh: string;
         er: string;
         es: string;
         et: string;
@@ -4548,17 +4556,20 @@ export declare const defaultTranslations: {
         gb: string;
         gd: string;
         ge: string;
+        gf: string;
         gg: string;
         gh: string;
         gi: string;
         gl: string;
         gm: string;
         gn: string;
+        gp: string;
         gq: string;
         gr: string;
         gt: string;
         gu: string;
         gw: string;
+        gy: string;
         hk: string;
         hn: string;
         hr: string;
@@ -4579,6 +4590,140 @@ export declare const defaultTranslations: {
         jo: string;
         jp: string;
         ke: string;
+        kg: string;
+        kh: string;
+        ki: string;
+        km: string;
+        kn: string;
+        kp: string;
+        kr: string;
+        kw: string;
+        ky: string;
+        kz: string;
+        la: string;
+        lb: string;
+        lc: string;
+        li: string;
+        lk: string;
+        lr: string;
+        ls: string;
+        lt: string;
+        lu: string;
+        lv: string;
+        ly: string;
+        ma: string;
+        mc: string;
+        md: string;
+        me: string;
+        mf: string;
+        mg: string;
+        mh: string;
+        mk: string;
+        ml: string;
+        mm: string;
+        mn: string;
+        mo: string;
+        mp: string;
+        mq: string;
+        mr: string;
+        ms: string;
+        mt: string;
+        mu: string;
+        mv: string;
+        mw: string;
+        mx: string;
+        my: string;
+        mz: string;
+        na: string;
+        nc: string;
+        ne: string;
+        nf: string;
+        ng: string;
+        ni: string;
+        nl: string;
+        no: string;
+        np: string;
+        nr: string;
+        nu: string;
+        nz: string;
+        om: string;
+        pa: string;
+        pe: string;
+        pf: string;
+        pg: string;
+        ph: string;
+        pk: string;
+        pl: string;
+        pm: string;
+        pn: string;
+        pr: string;
+        ps: string;
+        pt: string;
+        pw: string;
+        py: string;
+        qa: string;
+        re: string;
+        ro: string;
+        rs: string;
+        ru: string;
+        rw: string;
+        sa: string;
+        sb: string;
+        sc: string;
+        sd: string;
+        se: string;
+        sg: string;
+        sh: string;
+        si: string;
+        sj: string;
+        sk: string;
+        sl: string;
+        sm: string;
+        sn: string;
+        so: string;
+        sr: string;
+        ss: string;
+        st: string;
+        sv: string;
+        sx: string;
+        sy: string;
+        sz: string;
+        ta: string;
+        tc: string;
+        td: string;
+        tg: string;
+        th: string;
+        tj: string;
+        tk: string;
+        tl: string;
+        tm: string;
+        tn: string;
+        to: string;
+        tr: string;
+        tt: string;
+        tv: string;
+        tw: string;
+        tz: string;
+        ua: string;
+        ug: string;
+        us: string;
+        uy: string;
+        uz: string;
+        va: string;
+        vc: string;
+        ve: string;
+        vg: string;
+        vi: string;
+        vn: string;
+        vu: string;
+        wf: string;
+        ws: string;
+        xk: string;
+        ye: string;
+        yt: string;
+        za: string;
+        zm: string;
+        zw: string;
     };
     readonly approvals: {
         readonly history: "Approval history";
@@ -5219,6 +5364,7 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+        readonly windowedCategories: "Showing {{count}} of {{total}} categories";
         readonly tooltip: {
             readonly ofTotal: "of total";
             readonly total: "total";
@@ -5244,6 +5390,12 @@ export declare const defaultTranslations: {
         readonly between: "It should be between {{min}} and {{max}}";
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
+    };
+    readonly phoneInput: {
+        readonly country: "Country";
+        readonly countryWithDialCode: "{{country}} {{dialCode}}";
+        readonly searchCountry: "Search country or dial code";
+        readonly noResults: "No country found";
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -5457,6 +5609,9 @@ export declare const defaultTranslations: {
             };
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
+            };
+            readonly phone: {
+                readonly invalid: "Enter a valid phone number";
             };
         };
     };
@@ -8425,7 +8580,7 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     /**
      * Per-side clearance in pixels the widest value must have before
      * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
-     * Overrides the default, which is placement-based: **12** for stacked (inside)
+     * Overrides the default, which is placement-based: **6** for stacked (inside)
      * labels, **0** for labels outside the bar.
      */
     labelFitPadding?: number;
@@ -8438,6 +8593,43 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
      * widths differ. Height overflow is also evaluated per bar. @default true
      */
     hideAllLabelsOnOverflow?: boolean;
+    /**
+     * Draw only as many categories as fit at a readable bar thickness, instead of
+     * compressing every one of them into the available height.
+     *
+     * Opt-in, because it hides data: a windowed chart shows the first N rows in
+     * data order and nothing in the chart itself leads to the rest. Set it only
+     * where the surrounding UI offers the way back — subscribe to
+     * {@link F0DataChartBarProps.onHiddenCategoriesChange} and put a control next
+     * to the count, as `F0AnalyticsDashboard` does. Left off, a dense chart stays
+     * complete and its bars get thinner, which is the readable-but-honest end of
+     * the trade.
+     *
+     * Ignored by vertical charts, which lay categories out along the width.
+     * @default false
+     */
+    windowCategories?: boolean;
+    /**
+     * Render every category at once, overriding
+     * {@link F0DataChartBarProps.windowCategories}.
+     *
+     * Set this when the reader has asked to see the whole distribution — an
+     * expanded or fullscreen view — and accepts thinner bars in exchange. Ignored
+     * by vertical charts, which lay categories out along the width.
+     * @default false
+     */
+    showAllCategories?: boolean;
+    /**
+     * Reports how many categories the row window is hiding — `0` when every
+     * category is on screen. Fires whenever the count changes, which includes
+     * container resizes and {@link F0DataChartBarProps.showAllCategories} being
+     * switched on.
+     *
+     * The chart states the fact rather than rendering an affordance for it: only
+     * the surrounding UI knows where a "see everything" control belongs. The
+     * dashboard puts it in the widget's description, next to the count.
+     */
+    onHiddenCategoriesChange?: (hiddenCategoryCount: number) => void;
     /**
      * Suggested number of segments on the value axis — lower values draw fewer
      * grid lines. Applies to whichever axis is the value axis (Y for vertical
@@ -9239,6 +9431,7 @@ export declare type F0DropdownButtonProps<T = string> = {
 declare interface F0DurationConfig {
     units?: DurationUnit[];
     fields?: Partial<Record<DurationUnit, DurationFieldConfig>>;
+    allowNegative?: boolean;
     readonly?: boolean;
     size?: DurationInputSize;
 }
@@ -9271,6 +9464,13 @@ export declare interface F0DurationInputProps {
     hideLabel?: boolean;
     value: number;
     onChange: (seconds: number) => void;
+    /**
+     * Allows entering negative durations (e.g. to adjust tracked time).
+     * A leading minus sign typed in the first visible segment applies to the
+     * whole duration, and `value`/`onChange` carry negative total seconds.
+     * Defaults to false.
+     */
+    allowNegative?: boolean;
     onBlur?: () => void;
     units?: DurationUnit[];
     fields?: Partial<Record<DurationUnit, DurationFieldConfig>>;
@@ -9674,7 +9874,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -9714,7 +9914,7 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -10252,6 +10452,14 @@ export declare namespace f0FormField {
     export function datePeriod(config: DatePeriodConfig & {
         optional?: false | undefined;
     }): PeriodValueSchema & F0ZodType<PeriodValueSchema>;
+    /* Excluded from this release type: PhoneObjectSchema */
+    /* Excluded from this release type: PhoneFieldShortcutConfig */
+    export function phone(config: PhoneFieldShortcutConfig & {
+        optional: true;
+    }): z.ZodOptional<PhoneObjectSchema> & F0ZodType<z.ZodOptional<PhoneObjectSchema>>;
+    export function phone(config: PhoneFieldShortcutConfig & {
+        optional?: false | undefined;
+    }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -10402,6 +10610,23 @@ export declare type F0FormFieldProps = F0FormFieldFileProps | F0FormFieldNonFile
 export declare type F0FormLikeComponent = React.ComponentType<F0FormCommonProps>;
 
 /**
+ * Styling configuration for per-section schema forms.
+ * Extends the base config with options that only apply when each section
+ * has its own independent schema and submit button.
+ */
+declare interface F0FormPerSectionStylingConfig extends F0FormStylingConfig {
+    /**
+     * Renders only the section selected in the sidepanel instead of stacking
+     * all sections. Useful for large forms where showing every section at once
+     * is overwhelming. Hidden sections stay mounted so their values, dirty
+     * state, and validation are preserved.
+     * Has no effect unless `showSectionsSidepanel` is true.
+     * @default false
+     */
+    showOnlySelectedSection?: boolean;
+}
+
+/**
  * Union of all F0Form prop variants.
  * The component detects the mode based on whether `schema` is a single Zod schema
  * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.
@@ -10443,7 +10668,7 @@ declare interface F0FormPropsWithDefinition {
 export declare interface F0FormPropsWithPerSectionDefinition<T extends F0PerSectionSchema> {
     formDefinition: F0FormDefinitionPerSection_2<T>;
     className?: string;
-    styling?: F0FormStylingConfig;
+    styling?: F0FormPerSectionStylingConfig;
     formRef?: React.MutableRefObject<F0FormRef | null>;
     initialFiles?: InitialFile[];
     /** Upload hook shared by all file fields in the form. */
@@ -10491,7 +10716,7 @@ export declare interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionS
     /**
      * Styling configuration for form layout and appearance.
      */
-    styling?: F0FormStylingConfig;
+    styling?: F0FormPerSectionStylingConfig;
     /**
      * Ref to control the form programmatically from outside.
      */
@@ -10701,7 +10926,9 @@ declare type F0FormStateCallback = (state: {
  */
 export declare interface F0FormStylingConfig {
     /**
-     * Shows a sidebar with section navigation (Table of Contents)
+     * Shows a sidebar with section navigation (Table of Contents).
+     * Automatically hidden on small viewports (max-width 560px), where
+     * sections stack as in the regular layout.
      * @default false
      */
     showSectionsSidepanel?: boolean;
@@ -11132,12 +11359,12 @@ declare type F0NumberSelectConfig<R extends Record<string, unknown> = Record<str
 };
 
 /**
- * Config for object fields (richtext, daterange, or custom)
+ * Config for object fields (richtext, daterange, phone, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
+declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -11346,6 +11573,36 @@ export declare interface F0PerSectionSubmitConfig {
      */
     hideSubmitButton?: boolean;
 }
+
+/**
+ * F0 config options specific to phone fields
+ */
+export declare interface F0PhoneConfig {
+    /** Country pre-selected while the input is empty */
+    defaultCountry?: CountryCode;
+    /** Countries listed first in the selector, in the given order */
+    pinnedCountries?: CountryCode[];
+    /** Restricts both the selector and typed/pasted country detection */
+    allowedCountries?: CountryCode[];
+}
+
+/**
+ * Phone field with all properties for rendering
+ */
+export declare type F0PhoneField = F0BaseField & F0PhoneConfig & {
+    type: "phone";
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean;
+    /** Conditional rendering based on another field's value */
+    renderIf?: PhoneFieldRenderIf;
+};
+
+/**
+ * Config for phone fields (form value is a `{ prefix, number }` pair)
+ */
+export declare type F0PhoneFieldConfig = F0BaseConfig & F0PhoneConfig & {
+    fieldType: "phone";
+};
 
 export declare const F0Provider: React.FC<{
     children: React.ReactNode;
@@ -11769,11 +12026,28 @@ export declare type F0SelectField = F0BaseField & F0SelectConfig & {
     renderIf?: SelectFieldRenderIf;
 };
 
+/**
+ * Short token rendered next to the option label, in secondary color, on a
+ * single line — never wraps and never affects row height. For prose that
+ * deserves its own line use `description`; for chips/badges use `tag`.
+ * Can coexist with both.
+ *
+ * Deliberately strict: no free-form variant. Each variant carries semantics
+ * the component can validate and format — add new ones (e.g. currency,
+ * locale) as concrete use cases appear.
+ */
+export declare type F0SelectItemMetadata = {
+    type: "dialCode";
+    dialCode: string;
+};
+
 export declare type F0SelectItemObject<T, R = unknown> = {
     type?: "item";
     value: T;
     label: string;
     description?: string;
+    /** Short token shown next to the label (e.g. a dial code) */
+    metadata?: F0SelectItemMetadata;
     avatar?: AvatarVariant;
     tag?: F0SelectTagProp;
     icon?: IconType;
@@ -12593,7 +12867,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -15526,6 +15800,11 @@ export declare type PersonProfile = {
 };
 
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
+
+/**
+ * All valid renderIf conditions for phone fields
+ */
+declare type PhoneFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
 
 export declare const PieChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
