@@ -25,7 +25,6 @@
     "Graph/F0GraphEdge",
     "Graph/F0GraphNode",
     "Heading",
-    "Icon",
     "Image",
     "Inputs/Duration input",
     "Inputs/Number input",
