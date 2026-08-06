@@ -268,7 +268,7 @@ export const TableCollection = <
     source.currentSortings,
     source.currentGrouping,
   ])
-  const addedRowKeys = useAddedRowKeys(flatRowKeys, queryResetKey, isLoading)
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, queryResetKey)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {

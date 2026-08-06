@@ -77,47 +77,48 @@ describe("useAddedRowKeys", () => {
 
   it("does not flash the rows that come back after clearing a search that matched nothing", () => {
     const { result, rerender } = renderHook(
-      ({ keys, query, isLoading }) => useAddedRowKeys(keys, query, isLoading),
-      { initialProps: { keys: ["a", "b", "c"], query: "", isLoading: false } }
+      ({ keys, query }) => useAddedRowKeys(keys, query),
+      { initialProps: { keys: ["a", "b", "c"], query: "" } }
     )
 
-    // Searching empties the table...
-    rerender({ keys: ["a", "b", "c"], query: "zzz", isLoading: true })
-    rerender({ keys: [], query: "zzz", isLoading: false })
+    // Searching empties the table. The first render after the query change
+    // still shows the old rows — the data lands only on the next one.
+    rerender({ keys: ["a", "b", "c"], query: "zzz" })
+    rerender({ keys: [], query: "zzz" })
     expect([...result.current]).toEqual([])
 
     // ...and clearing it brings every row back. None of them are new.
-    rerender({ keys: [], query: "", isLoading: true })
-    rerender({ keys: ["a", "b", "c"], query: "", isLoading: false })
+    rerender({ keys: [], query: "" })
+    rerender({ keys: ["a", "b", "c"], query: "" })
     expect([...result.current]).toEqual([])
   })
 
-  it("does not take a mid-flight render as the baseline", () => {
+  it("does not take a stale render as the baseline", () => {
     const { result, rerender } = renderHook(
-      ({ keys, query, isLoading }) => useAddedRowKeys(keys, query, isLoading),
-      { initialProps: { keys: ["a", "b"], query: "", isLoading: false } }
+      ({ keys, query }) => useAddedRowKeys(keys, query),
+      { initialProps: { keys: ["a", "b"], query: "" } }
     )
 
     // The query changes while the old rows are still on screen. If that render
     // seeded the baseline, the real results would flash on arrival.
-    rerender({ keys: ["a", "b"], query: "q", isLoading: true })
+    rerender({ keys: ["a", "b"], query: "q" })
     expect([...result.current]).toEqual([])
 
-    rerender({ keys: ["c"], query: "q", isLoading: false })
+    rerender({ keys: ["c"], query: "q" })
     expect([...result.current]).toEqual([])
   })
 
   it("still flashes a genuine insert while a search is active", () => {
     const { result, rerender } = renderHook(
-      ({ keys, query, isLoading }) => useAddedRowKeys(keys, query, isLoading),
-      { initialProps: { keys: ["a", "b"], query: "", isLoading: false } }
+      ({ keys, query }) => useAddedRowKeys(keys, query),
+      { initialProps: { keys: ["a", "b"], query: "" } }
     )
 
-    rerender({ keys: ["a", "b"], query: "q", isLoading: true })
-    rerender({ keys: ["a"], query: "q", isLoading: false })
+    rerender({ keys: ["a", "b"], query: "q" })
+    rerender({ keys: ["a"], query: "q" })
 
     // A create that matches the active search: same query, new row → flash.
-    rerender({ keys: ["a", "new"], query: "q", isLoading: false })
+    rerender({ keys: ["a", "new"], query: "q" })
     expect([...result.current]).toEqual(["new"])
   })
 

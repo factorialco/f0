@@ -25,17 +25,15 @@ const sameKeys = (seen: ReadonlySet<string>, keys: string[]) =>
  * would memorise the wrong rows and flash the real results when they land.
  *
  * So a query change marks the baseline *pending*: nothing flashes, and the
- * baseline is adopted on the first settled render whose rows actually differ
- * from it — the only reliable evidence that the new query's data has arrived.
- * `isLoading` is deliberately not used to end the wait: it flickers back to
- * false between a query change and its debounced fetch, which resolves the
- * wait against the *previous* query's rows and flashes the whole table when
- * the real ones arrive. It is still used to skip renders mid-fetch.
+ * baseline is adopted on the first render whose rows actually differ from it —
+ * the only reliable evidence that the new query's data has arrived. Don't
+ * reach for the datasource's `isLoading` here: it flickers back to false
+ * between a query change and its debounced fetch, so ending the wait on it
+ * resolves against the *previous* query's rows and flashes the whole table.
  */
 export function useAddedRowKeys(
   keys: string[],
-  resetKey?: unknown,
-  isLoading: boolean = false
+  resetKey?: unknown
 ): ReadonlySet<string> {
   const seenRef = useRef<Set<string>>(new Set())
   const initializedRef = useRef(false)
@@ -48,7 +46,7 @@ export function useAddedRowKeys(
   const awaitingQueryData = pendingRef.current || didReset
 
   const added = new Set<string>()
-  if (initializedRef.current && !awaitingQueryData && !isLoading) {
+  if (initializedRef.current && !awaitingQueryData) {
     for (const key of keys) {
       if (!seenRef.current.has(key)) {
         added.add(key)
@@ -61,8 +59,6 @@ export function useAddedRowKeys(
       resetKeyRef.current = resetKey
       pendingRef.current = true
     }
-
-    if (isLoading) return
 
     if (pendingRef.current) {
       // Rows identical to the baseline can't be distinguished from the
