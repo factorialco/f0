@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, within } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -330,9 +331,15 @@ export const LongLocalizedAxisLabels: Story = {
 const SNAPSHOT_VARIANTS: {
   label: string
   props: F0DataChartProps
-  width?: "medium"
+  width?: "small" | "medium"
 }[] = [
   { label: "Two scales", props: responsiveArgs },
+  {
+    label: "Shared units",
+    props: {
+      ...WorkedAgainstExpectedHours.args,
+    },
+  },
   {
     label: "Long localized axis labels at medium width",
     width: "medium",
@@ -353,10 +360,28 @@ const SNAPSHOT_VARIANTS: {
     },
   },
   {
+    label: "Two secondary lines",
+    props: {
+      ...TwoRateLines.args,
+    },
+  },
+  {
     label: "Negative values",
     props: {
       ...responsiveArgs,
       barSeries: [{ name: "Net change", data: [12, -8, 5, -14, 9, 3] }],
+    },
+  },
+  {
+    label: "Four value-axis intervals",
+    props: {
+      ...FourValueAxisIntervals.args,
+    },
+  },
+  {
+    label: "Smooth line with dots",
+    props: {
+      ...SmoothLineWithDots.args,
     },
   },
   {
@@ -388,27 +413,64 @@ const SNAPSHOT_VARIANTS: {
       ...OnlyLinesWithValueLabels.args,
     },
   },
+  {
+    label: "Empty state",
+    props: {
+      ...Empty.args,
+    },
+  },
+  {
+    label: "Small breakpoint",
+    width: "small",
+    props: responsiveArgs,
+  },
+  {
+    label: "Medium breakpoint",
+    width: "medium",
+    props: responsiveArgs,
+  },
 ]
 
-/** Consolidated Chromatic coverage for combo scales and partial-data states. */
+/**
+ * Consolidated Chromatic coverage for every distinct combo behavior in both
+ * themes. Individual stories remain the focused review surface for each case.
+ */
 export const Snapshot: Story = {
   args: responsiveArgs,
   parameters: withSnapshot({}),
   decorators: [(Story) => <Story />],
   render: () => (
-    <div className="grid w-fit grid-cols-1 gap-6 p-6">
-      {SNAPSHOT_VARIANTS.map(({ label, props, width }) => (
-        <div key={label} className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
-            {label}
-          </span>
-          <div
-            className={`h-[300px] rounded-md border border-solid border-f1-border-secondary bg-f1-background ${width === "medium" ? "w-[320px]" : "w-[600px]"}`}
-          >
-            <F0DataChart {...props} />
-          </div>
-        </div>
+    <div className="grid w-fit grid-cols-[max-content_max-content] items-start gap-6 bg-f1-background-tertiary p-6">
+      {[
+        { label: "Light", themeClassName: "" },
+        { label: "Dark", themeClassName: "dark" },
+      ].map(({ label: themeLabel, themeClassName }) => (
+        <section
+          key={themeLabel}
+          className={`${themeClassName} flex flex-col gap-6 rounded-xl bg-f1-background p-4 text-f1-foreground`}
+          aria-label={`${themeLabel} theme`}
+        >
+          <h2 className="text-sm font-semibold">{themeLabel} theme</h2>
+          {SNAPSHOT_VARIANTS.map(({ label, props, width }) => (
+            <div key={label} className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+                {label}
+              </span>
+              <div
+                className={`h-[300px] rounded-md border border-solid border-f1-border-secondary bg-f1-background ${width === "small" ? "w-[180px]" : width === "medium" ? "w-[320px]" : "w-[600px]"}`}
+              >
+                <F0DataChart {...props} />
+              </div>
+            </div>
+          ))}
+        </section>
       ))}
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getAllByRole("img")).toHaveLength(26)
+    await expect(canvas.getAllByText("No data available")).toHaveLength(2)
+  },
 }

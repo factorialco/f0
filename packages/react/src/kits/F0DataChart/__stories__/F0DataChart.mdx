@@ -187,6 +187,14 @@ Bars and lines are separate props rather than one tagged `series` array: "bars l
 
 For a steady-state chart, declare both `barSeries` and `lineSeries`. The one-axis behavior below exists only for transient partial loading; use a standalone bar or line chart when one side is permanently empty.
 
+### API contract
+
+- `type="combo"`, `categories`, `barSeries`, `lineSeries`, `primaryAxisLabel`, and `secondaryAxisLabel` are required.
+- `stacked`, `showDots`, and `showLabels` default to `false`; `showLegend` and `showGrid` default to `true`.
+- `lineType` defaults to `"linear"`, and `valueAxisSplitNumber` defaults to `2`.
+- `valueFormatter` owns the primary axis. `secondaryValueFormatter` owns the secondary axis and falls back to `valueFormatter`. `tooltipValueFormatter` can make primary tooltip values more precise without changing the axis.
+- Common `F0DataChart` props such as `categoryFormatter`, `emptyState`, and `echartsOptions` work unchanged. Combo deliberately omits `orientation` and `showArea` because those presentations are ambiguous with a second value scale.
+
 ### Two units, two formatters
 
 `valueFormatter` formats the primary axis, `secondaryValueFormatter` the secondary — including their tooltip rows, each with the formatter of the axis it belongs to. Set both whenever the axes carry different units, which is the reason to pick a combo in the first place.
@@ -254,6 +262,12 @@ Long localized axis titles truncate rather than colliding in a medium tile.
 Hover a truncated title to reveal its full text.
 
 <Canvas of={ComboStories.LongLocalizedAxisLabels} />
+
+### Visual regression matrix
+
+Every distinct combo behavior above is rendered in light and dark themes in one Chromatic snapshot. Use the focused stories for controls and the matrix for a side-by-side release review.
+
+<Canvas of={ComboStories.Snapshot} />
 
 There is deliberately no `orientation` (a dual-axis chart reads top-down; a horizontal one would need its second axis on top) and no `showArea` (a fill on the secondary scale reads as if it belonged to the bars).
 
@@ -454,8 +468,13 @@ import {
 
 <Canvas of={SkeletonsStories.Bar} />
 <Canvas of={SkeletonsStories.Combo} />
+<Canvas of={SkeletonsStories.ComboStacked} />
 <Canvas of={SkeletonsStories.Line} />
 <Canvas of={SkeletonsStories.Funnel} />
+
+The combo skeleton snapshot renders default and stacked loading states in both light and dark themes.
+
+<Canvas of={SkeletonsStories.Snapshot} />
 
 ---
 
