@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react"
 
+const sameKeys = (seen: ReadonlySet<string>, keys: string[]) =>
+  keys.length === seen.size && keys.every((key) => seen.has(key))
+
 /**
  * Returns the row keys that should play the "flash on add" effect on the
  * current render: keys that were inserted into the current result set.
@@ -13,14 +16,21 @@ import { useEffect, useRef } from "react"
  *
  * `resetKey` identifies the current query (pagination position, search,
  * filters, sortings, grouping). Changing it swaps the whole row set for the
- * answer to a *different question* — navigation, not an insert — so a change to
- * `resetKey` reseeds the baseline and skips flashing for that render, just like
- * the initial load.
+ * answer to a *different question* — navigation, not an insert — so the
+ * baseline is reseeded and nothing flashes for that query change.
  *
- * `isLoading` suppresses both flashing and reseeding while a fetch is in
- * flight: between a query change and its results landing, the rows on screen
- * still answer the *previous* query, and taking them as the new baseline would
- * make the real results flash when they arrive.
+ * The subtlety is *when* to reseed. Query state updates on the render the user
+ * acts, but the matching rows arrive later, so there is always at least one
+ * render carrying the new query and the previous query's rows. Reseeding there
+ * would memorise the wrong rows and flash the real results when they land.
+ *
+ * So a query change marks the baseline *pending*: nothing flashes, and the
+ * baseline is adopted on the first settled render whose rows actually differ
+ * from it — the only reliable evidence that the new query's data has arrived.
+ * `isLoading` is deliberately not used to end the wait: it flickers back to
+ * false between a query change and its debounced fetch, which resolves the
+ * wait against the *previous* query's rows and flashes the whole table when
+ * the real ones arrive. It is still used to skip renders mid-fetch.
  */
 export function useAddedRowKeys(
   keys: string[],
@@ -30,13 +40,15 @@ export function useAddedRowKeys(
   const seenRef = useRef<Set<string>>(new Set())
   const initializedRef = useRef(false)
   const resetKeyRef = useRef(resetKey)
+  const pendingRef = useRef(false)
 
-  // A change to the query means the incoming rows arrived by navigation, not by
-  // insertion: reseed the baseline and don't flash them.
   const didReset = resetKeyRef.current !== resetKey
+  // Between a query change and its data landing, nothing on screen can be an
+  // insert: the rows shown still answer the previous query.
+  const awaitingQueryData = pendingRef.current || didReset
 
   const added = new Set<string>()
-  if (initializedRef.current && !didReset && !isLoading) {
+  if (initializedRef.current && !awaitingQueryData && !isLoading) {
     for (const key of keys) {
       if (!seenRef.current.has(key)) {
         added.add(key)
@@ -45,18 +57,30 @@ export function useAddedRowKeys(
   }
 
   useEffect(() => {
-    // Wait for the data to match the query before touching the baseline.
-    if (isLoading) return
-
     if (didReset) {
-      // Forget the previous query's keys entirely so the new result set is
-      // treated as a fresh baseline.
-      seenRef.current = new Set()
       resetKeyRef.current = resetKey
+      pendingRef.current = true
     }
 
-    // The first settled, non-empty render seeds the baseline (initial load never
-    // flashes); after that every key we've seen under this query is remembered
+    if (isLoading) return
+
+    if (pendingRef.current) {
+      // Rows identical to the baseline can't be distinguished from the
+      // previous query's, so keep waiting. A query that genuinely returns the
+      // same rows stays pending until something changes — nothing to flash
+      // either way.
+      if (sameKeys(seenRef.current, keys)) return
+
+      seenRef.current = new Set(keys)
+      pendingRef.current = false
+      if (keys.length > 0) {
+        initializedRef.current = true
+      }
+      return
+    }
+
+    // The first settled, non-empty render seeds the baseline (initial load
+    // never flashes); after that every key seen under this query is remembered
     // so it can only flash the first time it appears.
     if (!initializedRef.current && keys.length > 0) {
       initializedRef.current = true
