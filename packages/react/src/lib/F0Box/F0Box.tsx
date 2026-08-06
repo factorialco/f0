@@ -146,6 +146,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
       justifyContent,
       flexDirection,
       flexWrap,
+      flex,
       grow,
       shrink,
       // Responsive breakpoint overrides
@@ -235,6 +236,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
             justifyContent,
             flexDirection,
             flexWrap,
+            flex,
             grow,
             shrink,
             boxShadow,
