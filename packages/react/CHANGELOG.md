@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.4](https://github.com/factorialco/f0/compare/f0-react-v6.8.3...f0-react-v6.8.4) (2026-08-06)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** anchor suggestions menu to the chips ([#5026](https://github.com/factorialco/f0/issues/5026)) ([37e5b98](https://github.com/factorialco/f0/commit/37e5b989e377a024c94776929ec1b68ea658f8ae))
+
 ## [6.8.3](https://github.com/factorialco/f0/compare/f0-react-v6.8.2...f0-react-v6.8.3) (2026-08-06)
 
 
