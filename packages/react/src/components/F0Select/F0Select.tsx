@@ -115,7 +115,7 @@ const F0SelectComponent = forwardRef(function Select<
     placeholder,
     onChange,
     withApplySelection = false,
-    hideApplySelectionCancel = false,
+    applySelectionLabel,
     onChangeSelectedOption,
     value,
     options = [],
@@ -819,9 +819,13 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
+  // "Cancel" aborts the apply-selection flow by closing the dropdown. The
+  // close path (`handleChangeOpenLocal`) restores the committed selection, so
+  // staged changes are discarded — matching what clicking outside does, and
+  // what users expect from a Cancel action.
   const handleCancel = useCallback(() => {
-    restoreCommittedSelection()
-  }, [restoreCommittedSelection])
+    handleChangeOpenLocal(false)
+  }, [handleChangeOpenLocal])
 
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
@@ -1022,16 +1026,6 @@ const F0SelectComponent = forwardRef(function Select<
       .map((item) => String(item.id))
   }, [selectedState.items])
 
-  // Resolve whether the apply-selection "Cancel" button should render.
-  // `hideApplySelectionCancel` may hide it always (`true`) or only while the
-  // staged selection is empty (`"when-empty"`). Deferred apply is unaffected.
-  const hasStagedSelection =
-    selectedItemsValues.length > 0 || !!selectedState.allSelected
-  const showCancelButton =
-    hasDeferredApply &&
-    hideApplySelectionCancel !== true &&
-    !(hideApplySelectionCancel === "when-empty" && !hasStagedSelection)
-
   /**
    * Common props for the select primitive
    */
@@ -1110,9 +1104,10 @@ const F0SelectComponent = forwardRef(function Select<
           <SelectBottomActions
             actions={actions}
             showApplyButton={showApplyButton}
+            applyLabel={applySelectionLabel}
             onApply={handleApply}
             onCancel={handleCancel}
-            showCancelButton={showCancelButton}
+            showCancelButton={hasDeferredApply}
           />
         ) : null
       }

@@ -753,7 +753,7 @@ describe("Select", () => {
     )
   })
 
-  it("cancels staged changes without closing when cancel button is clicked", async () => {
+  it("closes the dropdown and discards staged changes when cancel is clicked", async () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
@@ -762,61 +762,34 @@ describe("Select", () => {
         {...defaultSelectProps}
         multiple
         options={mockOptions}
-        value={["option1", "option2"]}
+        value={["option1"]}
         onChange={handleChange}
         withApplySelection
       />
     )
 
     await openSelect(user)
-    await user.click(screen.getByText("Option 2"))
+    await user.click(screen.getByText("Option 2")) // stage an addition
     await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    // Cancel now closes the dropdown (like clicking outside) and commits nothing.
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
     expect(handleChange).not.toHaveBeenCalled()
 
-    await user.click(screen.getByText("Option 3"))
+    // The staged addition was discarded: reopening and applying without changes
+    // emits nothing, proving Option 2 did not persist.
+    await openSelect(user)
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.arrayContaining(["option1", "option2", "option3"]),
-      expect.arrayContaining([
-        {
-          id: "option1",
-          name: "Option 1",
-          description: "Description 1",
-        },
-        {
-          id: "option2",
-          name: "Option 2",
-          description: "Description 2",
-        },
-        {
-          id: "option3",
-          name: "Option 3",
-          description: "Description 3",
-        },
-      ]),
-      expect.arrayContaining([
-        expect.objectContaining({
-          label: "Option 1",
-          value: "option1",
-          description: "Description 1",
-        }),
-        expect.objectContaining({
-          label: "Option 2",
-          value: "option2",
-        }),
-        expect.objectContaining({
-          label: "Option 3",
-          value: "option3",
-        }),
-      ])
-    )
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+    expect(handleChange).not.toHaveBeenCalled()
   })
 
-  it("hides the cancel button but keeps deferred apply when hideApplySelectionCancel is set", async () => {
-    const handleChange = vi.fn()
+  it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
     const user = userEvent.setup()
 
     render(
@@ -825,79 +798,20 @@ describe("Select", () => {
         multiple
         options={mockOptions}
         value={[]}
-        onChange={handleChange}
+        onChange={vi.fn()}
         withApplySelection
-        hideApplySelectionCancel
+        applySelectionLabel="Add to schedule"
       />
     )
 
     await openSelect(user)
 
-    // Cancel is hidden, Apply is still present.
     expect(
-      screen.queryByRole("button", { name: "Cancel" })
+      screen.getByRole("button", { name: "Add to schedule" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Apply selection" })
     ).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("button", { name: "Apply selection" })
-    ).toBeInTheDocument()
-
-    // Selection is still deferred until Apply is clicked.
-    await user.click(screen.getByText("Option 1"))
-    expect(handleChange).not.toHaveBeenCalled()
-
-    await user.click(screen.getByRole("button", { name: "Apply selection" }))
-
-    await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledWith(
-        ["option1"],
-        expect.any(Array),
-        expect.any(Array)
-      )
-    })
-    expect(handleChange).toHaveBeenCalledTimes(1)
-  })
-
-  it("shows the cancel button only once something is staged when hideApplySelectionCancel is 'when-empty'", async () => {
-    const handleChange = vi.fn()
-    const user = userEvent.setup()
-
-    render(
-      <F0Select
-        {...defaultSelectProps}
-        multiple
-        options={mockOptions}
-        value={[]}
-        onChange={handleChange}
-        withApplySelection
-        hideApplySelectionCancel="when-empty"
-      />
-    )
-
-    await openSelect(user)
-
-    // Nothing staged yet: Cancel is hidden, Apply is present.
-    expect(
-      screen.queryByRole("button", { name: "Cancel" })
-    ).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("button", { name: "Apply selection" })
-    ).toBeInTheDocument()
-
-    // Staging an item reveals Cancel.
-    await user.click(screen.getByText("Option 1"))
-    expect(
-      await screen.findByRole("button", { name: "Cancel" })
-    ).toBeInTheDocument()
-    expect(handleChange).not.toHaveBeenCalled()
-
-    // Cancel clears the staged selection and hides itself again.
-    await user.click(screen.getByRole("button", { name: "Cancel" }))
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("button", { name: "Cancel" })
-      ).not.toBeInTheDocument()
-    })
-    expect(handleChange).not.toHaveBeenCalled()
   })
 
   describe("asList mode", () => {
