@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.7.2](https://github.com/factorialco/f0/compare/f0-react-v6.7.1...f0-react-v6.7.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* **dialog:** stop React propagation without stopping the DOM event ([#5009](https://github.com/factorialco/f0/issues/5009)) ([6f7d1fe](https://github.com/factorialco/f0/commit/6f7d1fefd48b24a767ab25fcdf6ddd0398680954))
+
 ## [6.7.1](https://github.com/factorialco/f0/compare/f0-react-v6.7.0...f0-react-v6.7.1) (2026-08-06)
 
 
