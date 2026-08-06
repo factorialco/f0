@@ -36,14 +36,8 @@ export const SortableWidget = ({
   disabled = false,
   children,
 }: SortableWidgetProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id, disabled })
+  const { listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id, disabled })
 
   const style: CSSProperties = {
     // VERTICAL ONLY: a column is one dimension, so the card follows the pointer
@@ -74,7 +68,13 @@ export const SortableWidget = ({
         !disabled && "cursor-grab active:cursor-grabbing",
         isDragging && "rounded-xl bg-f1-background"
       )}
-      {...(disabled ? {} : attributes)}
+      // dnd-kit's `attributes` are deliberately NOT spread: they make the whole
+      // card `role="button"` + focusable, which nests the widget's own links
+      // and buttons inside an interactive element (an axe `nested-interactive`
+      // violation) — and only a PointerSensor is wired, so they bought no
+      // keyboard support anyway. Keyboard reordering wants a KeyboardSensor
+      // with the Widget's handle as its activator; until then the card is a
+      // pointer-only drag surface.
       {...(disabled ? {} : listeners)}
     >
       {children({ draggable: !disabled, isDragging })}

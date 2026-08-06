@@ -123,9 +123,7 @@ describe("WidgetContainer", () => {
         <WidgetContainer widgets={WIDGETS} editing />
       )
 
-      expect(container.querySelectorAll("[aria-roledescription]")).toHaveLength(
-        0
-      )
+      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(0)
     })
 
     test("is not offered for a single widget", () => {
@@ -137,9 +135,7 @@ describe("WidgetContainer", () => {
         />
       )
 
-      expect(container.querySelectorAll("[aria-roledescription]")).toHaveLength(
-        0
-      )
+      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(0)
     })
 
     test("is offered in edit mode with onReorder, and skips the locked widget", () => {
@@ -151,10 +147,8 @@ describe("WidgetContainer", () => {
         />
       )
 
-      // dnd-kit marks each draggable; a disabled (locked) one is not one.
-      expect(
-        container.querySelectorAll("[aria-roledescription]").length
-      ).toBeLessThan(2)
+      // Each draggable wrapper carries the grab cursor; a locked one doesn't.
+      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(1)
     })
 
     test("is not offered in view mode", () => {
@@ -162,9 +156,7 @@ describe("WidgetContainer", () => {
         <WidgetContainer widgets={WIDGETS} onReorder={() => {}} />
       )
 
-      expect(container.querySelectorAll("[aria-roledescription]")).toHaveLength(
-        0
-      )
+      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(0)
     })
   })
 })

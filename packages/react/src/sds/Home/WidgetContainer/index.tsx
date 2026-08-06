@@ -208,6 +208,9 @@ export function WidgetContainer({
           )}
           <span
             className="absolute right-4 top-4 z-10"
+            // `img` because a bare span may not carry aria-label
+            // (axe: aria-prohibited-attr) — this names the lock glyph.
+            role="img"
             aria-label={lockedLabel}
           >
             <Tooltip label={lockedLabel}>

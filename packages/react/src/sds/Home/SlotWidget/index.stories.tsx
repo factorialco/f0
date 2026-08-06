@@ -312,7 +312,14 @@ export const BespokeAndFallback: Story = {
         </div>
       ),
       carousel: () => (
-        <div className="flex gap-3 overflow-x-auto">
+        // Focusable: a scrollable region whose content isn't must be keyboard
+        // reachable (axe: scrollable-region-focusable).
+        <div
+          className="flex gap-3 overflow-x-auto"
+          role="region"
+          aria-label="Celebrations"
+          tabIndex={0}
+        >
           {["🎂 Ada — birthday", "🎉 Alan — 2y", "👋 Grace — 1st day"].map(
             (c) => (
               <div
