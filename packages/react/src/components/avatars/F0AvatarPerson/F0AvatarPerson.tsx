@@ -12,6 +12,7 @@ export const F0AvatarPerson = ({
   "aria-labelledby": ariaLabelledby,
   badge,
   deactivated,
+  bgColor = "random",
 }: F0AvatarPersonProps) => {
   return (
     <BaseAvatar
@@ -19,7 +20,7 @@ export const F0AvatarPerson = ({
       name={[firstName, lastName]}
       src={src}
       size={size}
-      color="random"
+      color={bgColor}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
