@@ -165,6 +165,11 @@ export type AutofillTimesheetShift = {
   workable: boolean
   workplaceId?: string | null
   workAreaId?: string | null
+  /**
+   * Host-defined work-location kind. Left as a loose string to keep the kit
+   * host-agnostic; the factorial consumer narrows it to its attendance
+   * location-type enum (today: "office" | "work_from_home" | "business_trip").
+   */
   locationType?: string | null
 }
 
