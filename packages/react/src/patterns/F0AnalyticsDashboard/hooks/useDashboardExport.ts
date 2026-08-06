@@ -14,6 +14,7 @@ import type {
   DashboardMetricItem,
 } from "../types"
 
+import { isRenderableChart } from "../utils/chartDataAdapter"
 import {
   chartDataToTabular,
   type TabularLabels,
@@ -111,9 +112,17 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
           const data: DashboardChartData = await item.fetchData(
             getItemFilters(item, filters)
           )
-          const tabular = chartDataToTabular(item.chart, data, {
-            ...comboLabels,
-          })
+          // Same guard `ChartItem` applies when rendering: without it an
+          // unrenderable config throws inside the converter and the sheet is
+          // dropped by the catch below, which reads as a silent omission
+          // rather than a stated one.
+          if (!isRenderableChart(item.chart)) {
+            console.warn(
+              `[useDashboardExport] Skipped chart "${item.title}": unsupported chart type`
+            )
+            return null
+          }
+          const tabular = chartDataToTabular(item.chart, data, comboLabels)
           return {
             name: item.title,
             columns: tabular.columns,

@@ -5,6 +5,7 @@ import { IconType } from "@/components/F0Icon"
 import { Bell as BellIcon } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { experimentalComponent } from "@/lib/experimental"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -40,8 +41,11 @@ export const BaseActivityItem = ({
     },
   })
 
+  const locale = useDateFnsLocale()
+
   const ago = getDisplayDateBasedOnDuration(createdAt, {
     yesterdayRelative: false,
+    locale,
   })
 
   const handleClick = () => {

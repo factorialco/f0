@@ -2,10 +2,17 @@ import type * as echarts from "echarts"
 
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type { F0DataChartGaugeProps } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildItemTooltip } from "../../utils/options"
+import {
+  buildItemTooltip,
+  renderMarker,
+  renderValueTooltip,
+  tooltipValueFormat,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 
@@ -54,11 +61,13 @@ export function useGaugeChartOptions(
     color,
     showValue = true,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartGaugeProps,
   size: GaugeChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
 
   return useMemo(() => {
     const resolvedColor = color
@@ -131,16 +140,30 @@ export function useGaugeChartOptions(
         theme,
         formatter: (params: unknown) => {
           const p = params as {
-            marker?: string
             name?: string
             value?: number
           }
           const val = Number(p.value ?? 0)
-          const formattedValue = valueFormatter
-            ? valueFormatter(val)
-            : String(val)
-          const label = p.name ? `<strong>${String(p.name)}</strong><br/>` : ""
-          return `${label}${formattedValue}`
+          const span = max - min
+          return renderValueTooltip(
+            {
+              // ECharts' own marker for a gauge uses the palette, not the
+              // colour the arc is actually painted with.
+              marker: renderMarker(resolvedColor),
+              title: p.name ? String(p.name) : undefined,
+              value: tooltipValueFormat(
+                tooltipValueFormatter,
+                valueFormatter
+              )(val),
+              rows: [
+                span > 0 && {
+                  value: `${(((val - min) / span) * 100).toFixed(1)}%`,
+                  label: i18n.dataChart.tooltip.ofRange,
+                },
+              ],
+            },
+            theme
+          )
         },
       }),
     }
@@ -158,8 +181,10 @@ export function useGaugeChartOptions(
     color,
     showValue,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
+    i18n,
     size,
   ])
 }

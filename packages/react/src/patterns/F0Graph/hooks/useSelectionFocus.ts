@@ -53,6 +53,13 @@ export function useSelectionFocus<T>({
     new Set()
   )
   const selectedNodes = controlledSelected ?? internalSelected
+
+  // Like `controlledExpanded` in useExpandState: the callbacks only ask WHETHER
+  // selection is controlled, never what it contains. Depending on the Set itself
+  // recreated `selectNode`, which invalidated the actions context — and with it
+  // every node wrapper — on each selection change.
+  const isSelectionControlled = controlledSelected !== undefined
+
   const selectedNodesRef = useRef(selectedNodes)
   useEffect(() => {
     selectedNodesRef.current = selectedNodes
@@ -141,7 +148,7 @@ export function useSelectionFocus<T>({
               ? new Set([nodeId])
               : new Set([...current, nodeId])
 
-          if (!controlledSelected) {
+          if (!isSelectionControlled) {
             setInternalSelected(next)
           }
           onNodeSelect?.(nodeId, true)
@@ -149,12 +156,12 @@ export function useSelectionFocus<T>({
         }
       }
     },
-    [selectionMode, controlledSelected, onNodeSelect, onSelectedNodesChange]
+    [selectionMode, isSelectionControlled, onNodeSelect, onSelectedNodesChange]
   )
 
   const clearSelection = useCallback(() => {
     const current = selectedNodesRef.current
-    if (!controlledSelected) {
+    if (!isSelectionControlled) {
       setInternalSelected(new Set())
     }
     if (current.size > 0) {
@@ -162,7 +169,7 @@ export function useSelectionFocus<T>({
     }
     setFocusedNodeId(null)
     canvasRef.current?.focus()
-  }, [controlledSelected, onSelectedNodesChange, canvasRef])
+  }, [isSelectionControlled, onSelectedNodesChange, canvasRef])
 
   return {
     selectedNodes,

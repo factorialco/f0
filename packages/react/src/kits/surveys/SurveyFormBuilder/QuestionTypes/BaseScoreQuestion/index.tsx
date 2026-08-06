@@ -49,7 +49,9 @@ export const BaseScoreQuestion = ({
     onQuestionChange?.({
       id: baseQuestionComponentProps.id,
       type: "rating",
-      value: value ?? 0,
+      // Passed through untouched: coercing to 0 would mark the "0" cell of a
+      // 0-10 scale as selected just because a label was edited.
+      value,
       options: updatedOptions,
     } as Parameters<NonNullable<typeof onQuestionChange>>[0])
   }

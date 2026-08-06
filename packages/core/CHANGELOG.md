@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/factorialco/f0/compare/f0-core-v1.56.0...f0-core-v2.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884))
+
+### Features
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884)) ([c0c0c57](https://github.com/factorialco/f0/commit/c0c0c5780cf2b295849dda8db3b69734f6f9a91d))
+
 ## [1.56.0](https://github.com/factorialco/f0/compare/f0-core-v1.55.0...f0-core-v1.56.0) (2026-07-24)
 
 

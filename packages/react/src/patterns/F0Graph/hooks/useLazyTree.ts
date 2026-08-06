@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import type { GraphNode } from "../types"
 
@@ -156,12 +156,21 @@ export function useLazyTree<T>(
     [fetchChildren]
   )
 
-  return {
-    nodes: allNodes,
-    loadingNodes,
-    errorNodes,
-    expandNode,
-    collapseNode,
-    retryNode,
-  }
+  // Memoized: consumers keep this object in dependency arrays (the expand
+  // callbacks, and through them the actions context every node wrapper
+  // consumes). Returning a fresh literal gave it a new identity on every render
+  // of the host, which invalidated those callbacks — and re-rendered every
+  // on-screen node — even when no tree data had changed. Every member is either
+  // state or a `useCallback`, so this is stable exactly when the tree is.
+  return useMemo(
+    () => ({
+      nodes: allNodes,
+      loadingNodes,
+      errorNodes,
+      expandNode,
+      collapseNode,
+      retryNode,
+    }),
+    [allNodes, loadingNodes, errorNodes, expandNode, collapseNode, retryNode]
+  )
 }

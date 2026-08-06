@@ -21,6 +21,7 @@ export type {
   MetricFormat,
   PieChartConfig,
   RadarChartConfig,
+  ScatterChartConfig,
 } from "./types"
 
 /**

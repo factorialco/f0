@@ -9,6 +9,11 @@ import type {
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
+import {
+  isPossiblePhoneValue,
+  isValidPhoneValue,
+} from "@/experimental/Forms/F0PhoneInput/lib/phone"
+
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0CustomConfig } from "./fields/custom/types"
@@ -18,16 +23,17 @@ import type {
   F0TimeConfig,
 } from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
-import type { F0FileConfig } from "./fields/file/types"
-import type { F0NumberConfig } from "./fields/number/types"
-import type { F0PeriodConfig } from "./fields/period/types"
-import type { F0RichTextConfig } from "./fields/richtext/types"
-import type { F0SelectConfig } from "./fields/select/types"
 import type {
   EntitiesListItem,
   F0EntitiesListConfig,
   F0EntitiesListOptions,
 } from "./fields/entitiesList/types"
+import type { F0FileConfig } from "./fields/file/types"
+import type { F0NumberConfig } from "./fields/number/types"
+import type { F0PeriodConfig } from "./fields/period/types"
+import type { F0PhoneConfig } from "./fields/phone/types"
+import type { F0RichTextConfig } from "./fields/richtext/types"
+import type { F0SelectConfig } from "./fields/select/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
 import type { F0TextConfig } from "./fields/text/types"
 import type { F0TextareaConfig } from "./fields/textarea/types"
@@ -95,6 +101,7 @@ export type F0FieldType =
   | "datetime"
   | "daterange"
   | "period"
+  | "phone"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -223,6 +230,7 @@ export type {
   F0TimeConfig,
   F0DateRangeConfig,
   F0PeriodConfig,
+  F0PhoneConfig,
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
@@ -473,6 +481,14 @@ export type F0RichTextFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for phone fields (form value is a `{ prefix, number }` pair)
+ */
+export type F0PhoneFieldConfig = F0BaseConfig &
+  F0PhoneConfig & {
+    fieldType: "phone"
+  }
+
+/**
  * Config for file fields (single file upload, form value is a string identifier)
  */
 export type F0StringFileConfig = F0BaseConfig &
@@ -505,7 +521,7 @@ export type F0EntitiesListFieldConfig = F0BaseConfig &
   }
 
 /**
- * Config for object fields (richtext, daterange, or custom)
+ * Config for object fields (richtext, daterange, phone, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
@@ -513,6 +529,7 @@ export type F0EntitiesListFieldConfig = F0BaseConfig &
 export type F0ObjectConfig<TValue = unknown, TConfig = undefined> =
   | F0RichTextFieldConfig
   | F0DateRangeFieldConfig
+  | F0PhoneFieldConfig
   | F0CustomFieldConfig<TValue, TConfig>
 
 /**
@@ -1268,6 +1285,70 @@ export namespace f0FormField {
     return f0FormField(
       schema as never,
       { ...config, fieldType: "period" } as never
+    )
+  }
+
+  // ---- phone ---------------------------------------------------------------
+
+  /** @internal */
+  type PhoneObjectSchema = z.ZodEffects<
+    z.ZodObject<{
+      prefix: z.ZodOptional<z.ZodString>
+      number: z.ZodString
+    }>
+  >
+  /** @internal */
+  type PhoneFieldShortcutConfig = Omit<F0PhoneFieldConfig, "fieldType"> & {
+    optional?: boolean
+    /**
+     * Validation strictness against libphonenumber metadata: "valid" checks
+     * the country's number patterns, "possible" only checks the length,
+     * false disables validation.
+     * @default "valid"
+     */
+    validate?: "valid" | "possible" | false
+    /** Message shown when the number fails validation */
+    invalidMessage?: string
+  }
+
+  export function phone(
+    config: PhoneFieldShortcutConfig & { optional: true }
+  ): z.ZodOptional<PhoneObjectSchema> &
+    F0ZodType<z.ZodOptional<PhoneObjectSchema>>
+  export function phone(
+    config: PhoneFieldShortcutConfig & { optional?: false | undefined }
+  ): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>
+  export function phone({
+    optional,
+    validate = "valid",
+    invalidMessage,
+    ...config
+  }: PhoneFieldShortcutConfig) {
+    const schema = z
+      .object({
+        prefix: z.string().optional(),
+        number: z.string(),
+      })
+      .superRefine((value, ctx) => {
+        if (validate === false) return
+        if (optional && !value.number?.trim()) return
+        const pair = { prefix: value.prefix, number: value.number }
+        const isOk =
+          validate === "possible"
+            ? isPossiblePhoneValue(pair, config.defaultCountry)
+            : isValidPhoneValue(pair, config.defaultCountry)
+        if (!isOk) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            params: { type: "phone" },
+            ...(invalidMessage ? { message: invalidMessage } : {}),
+          })
+        }
+      })
+    const finalSchema = optional ? schema.optional() : schema
+    return f0FormField(
+      finalSchema as never,
+      { ...config, fieldType: "phone" } as never
     )
   }
 

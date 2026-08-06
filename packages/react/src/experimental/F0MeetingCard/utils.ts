@@ -1,7 +1,5 @@
 import { differenceInMinutes, format, isSameDay, type Locale } from "date-fns"
 
-import { getLocale } from "@/components/OneCalendar/utils"
-
 import type { AttendeesDisplay, MeetingAttendee, MeetingState } from "./types"
 
 export const DEFAULT_JOIN_WINDOW_MINUTES = 10
@@ -9,12 +7,6 @@ export const DEFAULT_JOIN_WINDOW_MINUTES = 10
 export const DEFAULT_MAX_AVATARS = 3
 
 export type MeetingDayKind = "today" | "yesterday" | "tomorrow" | "other"
-
-/** Resolve the browser's `date-fns` locale, falling back to the library default. */
-export const resolveLocale = (): Locale | undefined => {
-  if (typeof navigator === "undefined") return undefined
-  return getLocale(navigator.language)
-}
 
 const addDays = (date: Date, days: number): Date => {
   const result = new Date(date)
@@ -187,8 +179,8 @@ export const pluralize = (
 ): string =>
   (count === 1 ? forms.one : forms.other).replace("{{count}}", String(count))
 
-export const formatTime = (date: Date, locale?: Locale): string =>
+export const formatTime = (date: Date, locale: Locale): string =>
   format(date, "p", { locale })
 
-export const formatShortDate = (date: Date, locale?: Locale): string =>
+export const formatShortDate = (date: Date, locale: Locale): string =>
   format(date, "d MMM", { locale })

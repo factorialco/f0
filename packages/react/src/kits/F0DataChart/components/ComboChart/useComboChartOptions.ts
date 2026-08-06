@@ -320,6 +320,7 @@ export function useComboChartOptions(
         showLabels,
         stacked,
         theme.colors.foregroundSecondary,
+        theme.colors.containerBackground ?? theme.colors.background,
         theme.textStyle.fontSize,
         resolveBorderRadius,
         undefined,

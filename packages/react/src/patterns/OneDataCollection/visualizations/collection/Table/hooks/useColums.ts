@@ -9,7 +9,11 @@ import {
   TableVisualizationSettings,
 } from "../types"
 
-const getColumnId = <
+/**
+ * Resolves the stable id of a column: its explicit `id`, falling back to its
+ * `label`. Used for ordering, hiding and header-group collapsing.
+ */
+export const getColumnId = <
   Col extends Pick<TableColumnDefinition<never, never, never>, "id" | "label">,
 >(
   column: Col

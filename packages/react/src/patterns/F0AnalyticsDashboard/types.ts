@@ -7,6 +7,7 @@ import type {
   F0DataChartPieSeries,
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
+  F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
@@ -24,10 +25,19 @@ interface ChartConfigBase {
   showLegend?: boolean
   /** Show background grid lines. @default true */
   showGrid?: boolean
-  /** Show value labels on each data point. @default false */
+  /**
+   * Show value labels on each data point.
+   * @default true for bar charts, false otherwise
+   */
   showLabels?: boolean
   /** Format the value axis tick labels */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Format category axis tick labels */
   categoryFormatter?: (value: string) => string
 }
@@ -92,6 +102,12 @@ export interface FunnelChartConfig {
   colorScale?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface PieChartConfig {
@@ -106,6 +122,12 @@ export interface PieChartConfig {
   showPercentage?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface RadarChartConfig {
@@ -118,6 +140,12 @@ export interface RadarChartConfig {
   showLabels?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface GaugeChartConfig {
@@ -132,6 +160,12 @@ export interface GaugeChartConfig {
   showValue?: boolean
   /** Format the value displayed inside the gauge */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface HeatmapChartConfig {
@@ -146,6 +180,36 @@ export interface HeatmapChartConfig {
   showVisualMap?: boolean
   /** Format the value displayed in cells and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
+}
+
+export interface ScatterChartConfig {
+  type: "scatter"
+  /** Point diameter in pixels. @default 12 */
+  pointSize?: number
+  /** Fit each axis to its data range instead of anchoring it at zero. @default true */
+  scaleAxes?: boolean
+  /** Show the legend below the chart. Only rendered with 2+ series. @default true */
+  showLegend?: boolean
+  /** Show the background grid lines. @default true */
+  showGrid?: boolean
+  /** Format the Y axis tick labels */
+  valueFormatter?: (value: number) => string
+  /** Format the X axis tick labels */
+  xValueFormatter?: (value: number) => string
+  /** Format the y value in the tooltip, which shows full numbers */
+  tooltipValueFormatter?: (value: number) => string
+  /** Format the x value in the tooltip, which shows full numbers */
+  xTooltipValueFormatter?: (value: number) => string
+  /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
+  xAxisName?: string
+  /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */
+  yAxisName?: string
 }
 
 /**
@@ -161,6 +225,7 @@ export type DashboardChartConfig =
   | RadarChartConfig
   | GaugeChartConfig
   | HeatmapChartConfig
+  | ScatterChartConfig
 
 // ---------------------------------------------------------------------------
 // Chart data — the shape returned by a chart item's fetchData
@@ -196,6 +261,12 @@ export interface DashboardChartData {
     | { value: number; name?: string }
   /** Heatmap data points as [xIndex, yIndex, value] tuples. */
   data?: [number, number, number][]
+  /**
+   * Scatter series — x/y pairs, optionally split into color groups. Kept on
+   * its own field rather than reusing `series` or `data` so shape detection
+   * can never confuse it with a bar/line series array or the heatmap grid.
+   */
+  scatterSeries?: F0DataChartScatterSeries[]
 }
 
 // ---------------------------------------------------------------------------

@@ -16,7 +16,7 @@ const MOCK_TRANSCRIPTS = [
  * Builds a streaming STT mock from a pool of transcripts: picks a random one and
  * emits it word by word so the surface fills live (Wispr Flow feel) without any
  * backend. Use this to make voice dictation contextual to a given flow (e.g.
- * survey-refinement phrasing in the co-creation story) instead of the generic
+ * survey-refinement phrasing in the AI Cocreation story) instead of the generic
  * pool below.
  */
 export const makeMockTranscribe =

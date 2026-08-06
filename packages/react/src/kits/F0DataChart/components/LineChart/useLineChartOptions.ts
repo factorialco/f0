@@ -1,6 +1,8 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
@@ -10,7 +12,12 @@ import type {
 import type { ChartResponsiveSize } from "../../utils/responsive"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions } from "../../utils/options"
+import {
+  buildBaseChartOptions,
+  deltaRow,
+  renderValueTooltip,
+  tooltipValueFormat,
+} from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 
@@ -181,12 +188,14 @@ export function useLineChartOptions(
     showGrid = true,
     showLabels = false,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
     echartsOptions,
   }: F0DataChartLineProps,
   size: LineChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
 
@@ -230,6 +239,68 @@ export function useLineChartOptions(
         )
       : undefined
 
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
+
+    // Lines keep the axis trigger — a line is too thin to hover reliably —
+    // but render the shared tooltip card. With one series that is the same
+    // card every other chart type shows; with several, the category heads
+    // the card and each series becomes a row.
+    const tooltipFormatter = (params: unknown) => {
+      if (!Array.isArray(params) || params.length === 0) return ""
+      const points = params as {
+        seriesName?: string
+        axisValueLabel?: string
+        name?: string
+        value?: number
+        dataIndex?: number
+        marker?: string
+      }[]
+      const first = points[0]
+      const category = String(first?.axisValueLabel ?? first?.name ?? "")
+
+      if (points.length === 1 && first) {
+        const value = Number(first.value)
+        const dataIndex = first.dataIndex ?? 0
+        const hovered = series.find((s) => s.name === first.seriesName)
+        const previous =
+          dataIndex > 0 && hovered
+            ? getValue(hovered.data[dataIndex - 1])
+            : undefined
+        return renderValueTooltip(
+          {
+            marker: first.marker,
+            title: String(first.seriesName ?? ""),
+            subtitle: category,
+            value: formatTooltipValue(value),
+            rows: [
+              deltaRow(
+                value,
+                previous,
+                i18n.dataChart.tooltip.fromPrevious,
+                theme
+              ),
+            ],
+          },
+          theme
+        )
+      }
+
+      return renderValueTooltip(
+        {
+          title: category,
+          rows: points.map((point) => ({
+            marker: point.marker,
+            value: formatTooltipValue(Number(point.value)),
+            label: String(point.seriesName ?? ""),
+          })),
+        },
+        theme
+      )
+    }
+
     return buildBaseChartOptions({
       categories,
       theme,
@@ -241,6 +312,7 @@ export function useLineChartOptions(
       showCategoryAxis,
       showValueAxis,
       valueFormatter,
+      tooltipFormatter,
       categoryFormatter,
       echartsOptions,
       containerWidth,
@@ -258,9 +330,11 @@ export function useLineChartOptions(
     showGrid,
     showLabels,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     containerHeight,
     size,

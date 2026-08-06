@@ -12,6 +12,7 @@ import {
 } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -126,6 +127,7 @@ export const BaseCommunityPost = ({
 }: CommunityPostProps) => {
   const titleId = useId()
   const descriptionId = useId()
+  const locale = useDateFnsLocale()
   const descriptionRef = useRef<HTMLDivElement>(null)
   const [expandedDescription, setExpandedDescription] = useState<{
     id: string
@@ -142,7 +144,7 @@ export const BaseCommunityPost = ({
     expandedDescription?.id === id &&
     expandedDescription.description === description
   const descriptionCollapsed = !descriptionExpanded
-  const date = getDisplayDateBasedOnDuration(createdAt)
+  const date = getDisplayDateBasedOnDuration(createdAt, { locale })
 
   const handleClick = () => {
     onClick(id)

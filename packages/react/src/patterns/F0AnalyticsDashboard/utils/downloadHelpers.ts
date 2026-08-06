@@ -106,8 +106,9 @@ export function downloadMultiSheetExcel(
   sheets: {
     name: string
     columns: string[]
-    keys?: string[]
     rows: Record<string, unknown>[]
+    /** Row-lookup keys parallel to `columns`; see {@link downloadAsExcel}. */
+    keys?: string[]
   }[],
   filename: string
 ): void {
