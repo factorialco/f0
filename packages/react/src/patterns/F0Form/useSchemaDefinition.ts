@@ -159,6 +159,7 @@ function configToF0Field(
           "searchBoxPlaceholder" in config
             ? config.searchBoxPlaceholder
             : undefined,
+        onCreate: "onCreate" in config ? config.onCreate : undefined,
         renderIf: config.renderIf,
       } as F0Field
     }
