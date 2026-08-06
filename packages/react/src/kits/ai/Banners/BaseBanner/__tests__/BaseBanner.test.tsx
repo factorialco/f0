@@ -103,4 +103,30 @@ describe("BaseBanner", () => {
       expect(screen.queryByText(baseProps.title)).not.toBeInTheDocument()
     })
   })
+
+  // `bg-white` is not a class f0 emits: the palette defines `white` as numeric
+  // steps (`white-3` … `white-100`) with no `DEFAULT` key, so it produced
+  // nothing at all. And preflight is disabled repo-wide, so `border` sets a
+  // width with no style and never draws. Every variant needs the real
+  // background token and an explicit border style.
+  describe("surface", () => {
+    it.each(["default", "full-width", "card"] as const)(
+      "paints a background and a drawable border in the %s variant",
+      (variant) => {
+        render(<BaseBanner {...baseProps} variant={variant} />)
+
+        expect(getRoot().className).toMatch(/bg-f1-background/)
+        expect(getRoot().className).toMatch(/border-solid/)
+        expect(getRoot().className.split(" ")).not.toContain("bg-white")
+      }
+    )
+
+    it("paints the same surface while loading", () => {
+      render(<BaseBanner {...baseProps} isLoading />)
+
+      expect(getRoot().className).toMatch(/bg-f1-background/)
+      expect(getRoot().className).toMatch(/border-solid/)
+      expect(getRoot().className.split(" ")).not.toContain("bg-white")
+    })
+  })
 })
