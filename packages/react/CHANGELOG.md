@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.3](https://github.com/factorialco/f0/compare/f0-react-v6.8.2...f0-react-v6.8.3) (2026-08-06)
+
+
+### Bug Fixes
+
+* **F0Dialog:** unify dialog overlay context ([#5024](https://github.com/factorialco/f0/issues/5024)) ([975381a](https://github.com/factorialco/f0/commit/975381a726e7ce743f1c8bfadf225df7c7ec4c67))
+
 ## [6.8.2](https://github.com/factorialco/f0/compare/f0-react-v6.8.1...f0-react-v6.8.2) (2026-08-06)
 
 
