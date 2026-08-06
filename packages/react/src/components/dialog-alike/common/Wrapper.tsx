@@ -9,6 +9,8 @@ import { DialogWrapperProvider } from "./DialogWrapperProvider"
 import { DialogAlikeSize } from "./types"
 import { useIsSmallScreen } from "./utils"
 
+const OPEN_DISMISS_GRACE_MS = 300
+
 const dialogWrapperClassName = cva({
   variants: {
     position: {
@@ -124,8 +126,20 @@ export const DialogWrapper = ({
 
   const isSmallScreen = useIsSmallScreen()
 
+  const openedAtRef = useRef(0)
+  useEffect(() => {
+    if (isOpen) openedAtRef.current = Date.now()
+  }, [isOpen])
+
   const handleOpenChange = useCallback(
     (open: boolean) => {
+      // A non-modal dialog opened from a closing overlay (e.g. a menu item)
+      // sees that interaction's trailing events as an outside click and would
+      // dismiss itself in the same tick it opened. Ignore a close this soon
+      // after opening; real dismissals happen well after the grace window.
+      if (!open && Date.now() - openedAtRef.current < OPEN_DISMISS_GRACE_MS) {
+        return
+      }
       onOpenChange?.(open)
       // Do not call onClose here: the useEffect below runs when isOpen becomes
       // false and invokes onClose once. Calling onClose here would duplicate

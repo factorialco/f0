@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
+import { afterEach, describe, expect, it, vi, beforeEach } from "vitest"
 
 import { forwardRef, type ReactNode } from "react"
 
@@ -9,11 +9,17 @@ import { DialogWrapper } from "../Wrapper"
 // Spy on the props DialogWrapper hands to DialogContent. Hoisted so the vi.mock
 // factory can reference it. This mirrors the sibling F0Drawer test's approach of
 // mocking the internal and asserting the wiring.
-const { dialogContentSpy } = vi.hoisted(() => ({ dialogContentSpy: vi.fn() }))
+const { dialogContentSpy, dialogRootSpy } = vi.hoisted(() => ({
+  dialogContentSpy: vi.fn(),
+  dialogRootSpy: vi.fn(),
+}))
 
 vi.mock("../dialog-primitive", () => ({
-  // Passthrough so its children always render.
-  Dialog: ({ children }: { children?: ReactNode }) => <>{children}</>,
+  // Passthrough so its children always render; record props (incl. onOpenChange).
+  Dialog: ({ children, ...props }: { children?: ReactNode }) => {
+    dialogRootSpy(props)
+    return <>{children}</>
+  },
   // forwardRef so the ref DialogWrapper passes doesn't warn; the spy records props.
   DialogContent: forwardRef(function DialogContentMock(
     props: { children?: ReactNode },
@@ -78,5 +84,56 @@ describe("DialogWrapper portal target", () => {
     expect(dialogContentSpy).toHaveBeenCalledWith(
       expect.objectContaining({ container })
     )
+  })
+})
+
+describe("DialogWrapper open-dismiss grace window", () => {
+  const baseProps = {
+    isOpen: true,
+    onOpenChange: vi.fn(),
+    onClose: vi.fn(),
+    children: <div>Content</div>,
+    position: "center" as const,
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers({ now: 1_000_000 })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const getRootOnOpenChange = () => {
+    const call = dialogRootSpy.mock.calls.at(-1)?.[0] as {
+      onOpenChange?: (open: boolean) => void
+    }
+    return call.onOpenChange!
+  }
+
+  it("ignores a close that fires within the grace window of opening", () => {
+    render(<DialogWrapper {...baseProps} />)
+
+    getRootOnOpenChange()(false)
+
+    expect(baseProps.onOpenChange).not.toHaveBeenCalledWith(false)
+  })
+
+  it("propagates a close that fires after the grace window", () => {
+    render(<DialogWrapper {...baseProps} />)
+
+    vi.advanceTimersByTime(500)
+    getRootOnOpenChange()(false)
+
+    expect(baseProps.onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("always propagates open=true", () => {
+    render(<DialogWrapper {...baseProps} />)
+
+    getRootOnOpenChange()(true)
+
+    expect(baseProps.onOpenChange).toHaveBeenCalledWith(true)
   })
 })
