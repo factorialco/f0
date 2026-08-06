@@ -699,6 +699,12 @@ export const defaultTranslations = {
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
   },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found",
+  },
   imageUpload: {
     uploading: "Uploading...",
     uploadError: "Upload failed",
@@ -917,6 +923,9 @@ export const defaultTranslations = {
       },
       checkbox: {
         mustBeChecked: "This option must be selected",
+      },
+      phone: {
+        invalid: "Enter a valid phone number",
       },
     },
   },

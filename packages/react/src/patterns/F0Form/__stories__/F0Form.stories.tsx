@@ -9,6 +9,7 @@ import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { forms } from "@/patterns/forms"
 
 import type {
   FileUploadHookReturn,
@@ -16,8 +17,6 @@ import type {
   FileUploadStatus,
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
-
-import { forms } from "@/patterns/forms"
 
 import {
   f0FormField,
@@ -1081,6 +1080,11 @@ export const AllFieldTypes: Story = {
       emailField: f0FormField.email({
         label: "Email Field",
       }),
+      phoneField: f0FormField.phone({
+        label: "Phone Field",
+        defaultCountry: "es",
+        optional: true,
+      }),
       passwordField: f0FormField.text({
         label: "Password Field",
         placeholder: "Enter password",
@@ -1205,6 +1209,7 @@ export const AllFieldTypes: Story = {
       defaultValues: {
         textField: "",
         emailField: "",
+        phoneField: undefined,
         passwordField: "",
         numberField: 0,
         durationField: 0,
@@ -3530,7 +3535,7 @@ export const FormInDialog: Story = {
       <div className="flex flex-col items-start gap-3">
         <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
         {lastResult && (
-          <p className="text-f1-foreground-secondary text-sm">{lastResult}</p>
+          <p className="text-sm text-f1-foreground-secondary">{lastResult}</p>
         )}
       </div>
     )

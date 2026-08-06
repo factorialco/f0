@@ -17,6 +17,7 @@ import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRende
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
+import { PhoneFieldRenderer } from "./phone/PhoneFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
@@ -198,6 +199,15 @@ export function renderFieldInput({
             minDate: evaluateDateConstraint(field.minDate, values),
             maxDate: evaluateDateConstraint(field.maxDate, values),
           }}
+          formField={formField}
+          {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
+    case "phone":
+      return (
+        <PhoneFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}

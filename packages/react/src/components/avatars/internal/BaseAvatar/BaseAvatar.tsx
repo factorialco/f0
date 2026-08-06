@@ -143,13 +143,11 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
                   color={icon.color}
                   size={iconSize[mappedSize]}
                 />
+              ) : flag ? (
+                <span className="absolute inset-0">{flag}</span>
               ) : (
                 <>
-                  {!flag ? (
-                    <AvatarImage src={src} alt={initials} />
-                  ) : (
-                    <span className="absolute inset-0">{flag}</span>
-                  )}
+                  <AvatarImage src={src} alt={initials} />
                   <AvatarFallback
                     data-a11y-color-contrast-ignore
                     className="select-none"
