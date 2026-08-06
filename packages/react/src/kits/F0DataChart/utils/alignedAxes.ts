@@ -14,6 +14,66 @@ interface Extent {
   max: number
 }
 
+interface StackableSeries {
+  data?: readonly unknown[]
+  stack?: string
+}
+
+const MAX_ALIGNED_AXIS_INTERVALS = 10
+
+function pointValue(point: unknown): number | undefined {
+  if (typeof point === "number") return point
+  if (typeof point !== "object" || point === null || !("value" in point)) {
+    return undefined
+  }
+  const value = (point as { value?: unknown }).value
+  return typeof value === "number" ? value : undefined
+}
+
+/**
+ * Collect the extrema ECharts actually renders, including positive/negative
+ * stack totals. Target bars are already represented as a second stacked series
+ * by the bar builder, so this also includes their visible target extent.
+ */
+export function collectRenderedAxisValues(
+  series: readonly StackableSeries[]
+): number[] {
+  const values: number[] = []
+  const stackTotals = new Map<
+    string,
+    { positive: number[]; negative: number[] }
+  >()
+
+  for (const entry of series) {
+    if (!Array.isArray(entry.data)) continue
+    const stack = entry.stack
+
+    entry.data.forEach((point, dataIndex) => {
+      const value = pointValue(point)
+      if (value === undefined || !Number.isFinite(value)) return
+
+      if (!stack) {
+        values.push(value)
+        return
+      }
+
+      const totals = stackTotals.get(stack) ?? { positive: [], negative: [] }
+      const direction = value < 0 ? totals.negative : totals.positive
+      direction[dataIndex] = (direction[dataIndex] ?? 0) + value
+      stackTotals.set(stack, totals)
+    })
+  }
+
+  for (const totals of stackTotals.values()) {
+    values.push(
+      ...totals.positive.filter((value) => value !== undefined),
+      ...totals.negative.filter((value) => value !== undefined)
+    )
+  }
+
+  return values
+}
+
 /** Round a raw step up to a 1 / 2 / 2.5 / 5 / 10 multiple of a power of ten. */
 function niceStep(rawStep: number): number {
   if (!Number.isFinite(rawStep) || rawStep <= 0) return 1
@@ -155,7 +215,13 @@ export function computeAlignedValueAxes(
   secondaryValues: number[],
   splitNumber: number
 ): { primary: ValueAxisBounds; secondary: ValueAxisBounds } {
-  const intervals = Math.max(1, Math.round(splitNumber))
+  const requestedIntervals = Number.isFinite(splitNumber)
+    ? Math.round(splitNumber)
+    : 2
+  const intervals = Math.min(
+    MAX_ALIGNED_AXIS_INTERVALS,
+    Math.max(1, requestedIntervals)
+  )
   const extents: [Extent, Extent] = [
     zeroInclusiveExtent(primaryValues),
     zeroInclusiveExtent(secondaryValues),

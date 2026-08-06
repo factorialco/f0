@@ -1,4 +1,5 @@
 import type * as echarts from "echarts"
+
 import { type RefObject, useEffect } from "react"
 
 import type { ChartTheme } from "./theme"
@@ -151,12 +152,36 @@ export function useAxisLabelTooltip(
       const axisIndex = (params.componentIndex as number | undefined) ?? 0
       const axis = (Array.isArray(axes) ? axes[axisIndex] : axes) as
         | {
+            name?: string
+            nameTruncate?: { maxWidth?: number }
             axisLabel?: {
               width?: number
               formatter?: (value: string | number, index?: number) => string
             }
           }
         | undefined
+
+      // Axis titles use ECharts' width-aware `nameTruncate`, which keeps the
+      // complete name in the option/event data. Reveal that complete name on
+      // hover just like a truncated tick label.
+      if (params.targetType === "axisName") {
+        const fullName = axis?.name
+        const maxWidth = axis?.nameTruncate?.maxWidth
+        if (
+          !fullName ||
+          typeof maxWidth !== "number" ||
+          !isLabelTruncated(fullName, maxWidth, labelFont, labelFontFallback)
+        ) {
+          return
+        }
+        showTooltip({
+          value: fullName,
+          event: (params as { event: { offsetX: number; offsetY: number } })
+            .event,
+        })
+        return
+      }
+
       const maxWidth = axis?.axisLabel?.width
       if (typeof maxWidth !== "number") return
 

@@ -106,6 +106,7 @@ export function downloadMultiSheetExcel(
   sheets: {
     name: string
     columns: string[]
+    keys?: string[]
     rows: Record<string, unknown>[]
   }[],
   filename: string
@@ -113,10 +114,11 @@ export function downloadMultiSheetExcel(
   const workbook = XLSX.utils.book_new()
 
   for (const sheet of sheets) {
+    const rowKeys = sheet.keys ?? sheet.columns
     const wsData = [
       sheet.columns,
       ...sheet.rows.map((row) =>
-        sheet.columns.map((col) => serializeValue(row[col]))
+        rowKeys.map((key) => serializeValue(row[key]))
       ),
     ]
     const worksheet = XLSX.utils.aoa_to_sheet(wsData)

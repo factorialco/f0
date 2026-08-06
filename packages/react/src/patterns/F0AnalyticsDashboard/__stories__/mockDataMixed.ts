@@ -942,6 +942,8 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     rowSpan: 7,
     chart: {
       type: "combo",
+      primaryAxisLabel: "People",
+      secondaryAxisLabel: "Turnover rate",
       valueFormatter: (v: number) => `${v}`,
       secondaryValueFormatter: (v: number) => `${v.toFixed(1)}%`,
     },

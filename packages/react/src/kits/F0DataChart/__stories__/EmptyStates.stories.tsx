@@ -38,7 +38,14 @@ export const EmptyLine: Story = {
 }
 
 export const EmptyCombo: Story = {
-  args: { type: "combo", categories: [], barSeries: [], lineSeries: [] },
+  args: {
+    type: "combo",
+    primaryAxisLabel: "Primary measure",
+    secondaryAxisLabel: "Secondary measure",
+    categories: [],
+    barSeries: [],
+    lineSeries: [],
+  },
 }
 
 export const EmptyPie: Story = {
@@ -126,7 +133,14 @@ const SNAPSHOT_VARIANTS: { label: string; props: F0DataChartProps }[] = [
   { label: "Line", props: { type: "line", categories: [], series: [] } },
   {
     label: "Combo",
-    props: { type: "combo", categories: [], barSeries: [], lineSeries: [] },
+    props: {
+      type: "combo",
+      primaryAxisLabel: "Primary measure",
+      secondaryAxisLabel: "Secondary measure",
+      categories: [],
+      barSeries: [],
+      lineSeries: [],
+    },
   },
   { label: "Pie", props: { type: "pie", series: { name: "", data: [] } } },
   {

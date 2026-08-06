@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   buildAxes,
+  buildGrid,
   computeCategoryAxisLayout,
   computeLabelInterval,
   escapeTooltipText,
@@ -12,6 +13,25 @@ describe("escapeTooltipText", () => {
   it("escapes HTML-significant characters in consumer-provided text", () => {
     expect(escapeTooltipText(`<img src=x onerror="alert('xss')">&`)).toBe(
       "&lt;img src=x onerror=&quot;alert(&#039;xss&#039;)&quot;&gt;&amp;"
+    )
+  })
+})
+
+describe("buildGrid", () => {
+  it("reserves edge room only when series labels need it", () => {
+    expect(buildGrid({ showLegend: false })).toMatchObject({
+      left: 4,
+      right: 4,
+    })
+    expect(
+      buildGrid({ showLegend: false, seriesLabelEdgePadding: 24 })
+    ).toMatchObject({ left: 24, right: 24 })
+  })
+
+  it("reserves top room only for a visible value-axis title", () => {
+    expect(buildGrid({ showLegend: false }).top).toBe(8)
+    expect(buildGrid({ showLegend: false, showValueAxisName: true }).top).toBe(
+      28
     )
   })
 })
@@ -126,6 +146,81 @@ describe("buildAxes — secondary value axis", () => {
     })
     expect(Array.isArray(yAxis)).toBe(true)
     expect(yAxis).toHaveLength(2)
+  })
+
+  it("keeps axis titles inert when none are provided", () => {
+    const { yAxis } = buildAxes({
+      ...base,
+      isVertical: true,
+      secondaryValueAxis: {},
+    }) as unknown as {
+      yAxis: {
+        name?: string
+        nameTextStyle?: { align?: string }
+      }[]
+    }
+
+    expect(yAxis[0].name).toBeUndefined()
+    expect(yAxis[1].name).toBeUndefined()
+  })
+
+  it("titles both visible value axes and hides titles with the axes", () => {
+    const visible = buildAxes({
+      ...base,
+      isVertical: true,
+      primaryValueAxisName: "People",
+      secondaryValueAxis: { name: "Percent" },
+    }) as unknown as {
+      yAxis: {
+        name?: string
+        nameTextStyle?: { align?: string }
+      }[]
+    }
+    const hidden = buildAxes({
+      ...base,
+      isVertical: true,
+      showValueAxis: false,
+      primaryValueAxisName: "People",
+      secondaryValueAxis: { name: "Percent" },
+    }) as unknown as { yAxis: { name?: string }[] }
+
+    expect(visible.yAxis.map((axis) => axis.name)).toEqual([
+      "People",
+      "Percent",
+    ])
+    expect(visible.yAxis[0].nameTextStyle?.align).toBe("left")
+    expect(visible.yAxis[1].nameTextStyle?.align).toBe("right")
+    expect(hidden.yAxis.map((axis) => axis.name)).toEqual([
+      undefined,
+      undefined,
+    ])
+  })
+
+  it("retains long localized axis titles and gives ECharts a width-aware truncation limit", () => {
+    const { yAxis } = buildAxes({
+      ...base,
+      containerWidth: 320,
+      isVertical: true,
+      primaryValueAxisName: "Plantilla equivalente a tiempo completo",
+      secondaryValueAxis: { name: "Tasa de rotación anualizada" },
+    }) as unknown as {
+      yAxis: {
+        name?: string
+        nameTruncate?: { maxWidth?: number; ellipsis?: string }
+        triggerEvent?: boolean
+      }[]
+    }
+
+    expect(yAxis[0]).toMatchObject({
+      name: "Plantilla equivalente a tiempo completo",
+      nameTruncate: { maxWidth: 96, ellipsis: "..." },
+      triggerEvent: true,
+    })
+    expect(yAxis[1]).toMatchObject({
+      name: "Tasa de rotación anualizada",
+      nameTruncate: { maxWidth: 96, ellipsis: "..." },
+      triggerEvent: true,
+    })
   })
 
   it("draws grid lines from the primary axis only", () => {

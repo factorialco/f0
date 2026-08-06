@@ -105,6 +105,9 @@ export interface F0DataChartLineSeries {
   showArea?: boolean
 }
 
+/** A combo line cannot render an area fill across a second value scale. */
+export type F0DataChartComboLineSeries = Omit<F0DataChartLineSeries, "showArea">
+
 // ---------------------------------------------------------------------------
 // Shared base props
 // ---------------------------------------------------------------------------
@@ -229,10 +232,14 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
 export interface F0DataChartComboProps extends F0DataChartBaseProps {
   /** Chart type */
   type: "combo"
+  /** Non-empty visible label for the primary (left) value axis and its series. */
+  primaryAxisLabel: string
+  /** Non-empty visible label for the secondary (right) value axis and its series. */
+  secondaryAxisLabel: string
   /** Series rendered as bars against the primary (left) value axis */
   barSeries: F0DataChartBarSeries[]
   /** Series rendered as lines against the secondary (right) value axis */
-  lineSeries: F0DataChartLineSeries[]
+  lineSeries: F0DataChartComboLineSeries[]
   /** Stack the bar series into one bar per category. @default false */
   stacked?: boolean
   /** Line interpolation type for the line series. @default "linear" */

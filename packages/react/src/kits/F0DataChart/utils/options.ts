@@ -222,6 +222,12 @@ export function buildCategoryAxis({
 interface ValueAxisOptions {
   theme: ChartTheme
   showGrid: boolean
+  /** Visible axis title. */
+  name?: string
+  /** Keep an end-positioned title inside the chart edge. */
+  nameAlign?: "left" | "right"
+  /** Max title width in pixels; ECharts retains the full name for events. */
+  nameMaxWidth?: number
   formatter?: (value: number) => string
   /** Max label width in pixels — when set, labels are truncated with ellipsis */
   maxLabelWidth?: number
@@ -241,6 +247,9 @@ interface ValueAxisOptions {
 export function buildValueAxis({
   theme,
   showGrid,
+  name,
+  nameAlign,
+  nameMaxWidth,
   formatter,
   maxLabelWidth,
   show = true,
@@ -249,6 +258,27 @@ export function buildValueAxis({
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
+    ...(show && name
+      ? {
+          name,
+          nameLocation: "end" as const,
+          nameGap: 8,
+          nameTextStyle: {
+            color: theme.colors.foregroundSecondary,
+            fontSize: theme.textStyle.fontSize,
+            fontWeight: theme.textStyle.fontWeight,
+            align: nameAlign,
+          },
+          ...(nameMaxWidth !== undefined
+            ? {
+                nameTruncate: {
+                  maxWidth: nameMaxWidth,
+                  ellipsis: "...",
+                },
+              }
+            : {}),
+        }
+      : {}),
     // An explicit min/max/interval fully determines the scale, so splitNumber
     // would be redundant — and ECharts warns when both are supplied.
     ...(bounds
@@ -281,7 +311,10 @@ export function buildValueAxis({
           }
         : {}),
     },
-    ...(show && maxLabelWidth !== undefined ? { triggerEvent: true } : {}),
+    ...(show &&
+    (maxLabelWidth !== undefined || (name && nameMaxWidth !== undefined))
+      ? { triggerEvent: true }
+      : {}),
     splitLine: {
       show: showGrid,
       lineStyle: {
@@ -345,14 +378,25 @@ export function buildLegend({
 
 interface GridOptions {
   showLegend: boolean
+  showValueAxisName?: boolean
+  seriesLabelEdgePadding?: number
 }
 
 /** Standard chart grid — minimal padding, containLabel keeps axis labels visible */
-export function buildGrid({ showLegend }: GridOptions) {
+export function buildGrid({
+  showLegend,
+  showValueAxisName,
+  seriesLabelEdgePadding,
+}: GridOptions) {
   return {
-    left: 4,
-    right: 4,
-    top: 8,
+    // A line's first/last point is flush with the grid when boundaryGap=false.
+    // Series labels are not covered by `containLabel`, so reserve their
+    // half-width explicitly when labels are enabled.
+    left: seriesLabelEdgePadding ?? 4,
+    right: seriesLabelEdgePadding ?? 4,
+    // End-positioned Y-axis names sit above the highest tick. Reserve enough
+    // room for them because `containLabel` accounts for tick labels, not names.
+    top: showValueAxisName ? 28 : 8,
     // Legend height (~20px) + 12px breathing room between chart and legend
     bottom: showLegend ? 32 : 4,
     containLabel: true,
@@ -554,6 +598,7 @@ export function buildAxes({
   valueAxisSplitNumber,
   secondaryValueAxis,
   valueAxisBounds,
+  primaryValueAxisName,
 }: {
   isVertical: boolean
   categories: string[]
@@ -576,6 +621,8 @@ export function buildAxes({
   categoryMaxLabelWidth?: number
   /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
   valueAxisSplitNumber?: number
+  /** Visible title for the primary value axis. */
+  primaryValueAxisName?: string
   /**
    * Adds a second value axis on the opposite edge, for charts that plot two
    * measures on different scales (see the combo chart). Its formatter is
@@ -588,6 +635,7 @@ export function buildAxes({
    * the same tick positions — see {@link computeAlignedValueAxes}.
    */
   secondaryValueAxis?: {
+    name?: string
     formatter?: (value: number) => string
     bounds?: ValueAxisBounds
   }
@@ -595,6 +643,10 @@ export function buildAxes({
   valueAxisBounds?: ValueAxisBounds
 }) {
   const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
+  const axisNameMaxWidth = Math.max(
+    64,
+    Math.min(160, (containerWidth ?? 600) * 0.3)
+  )
   const hasSecondaryValueAxis = isVertical && secondaryValueAxis !== undefined
 
   // Estimate the horizontal space taken by the value (Y) axis labels + grid
@@ -638,6 +690,9 @@ export function buildAxes({
   const valueAxis = buildValueAxis({
     theme,
     showGrid,
+    name: primaryValueAxisName,
+    nameAlign: "left",
+    nameMaxWidth: axisNameMaxWidth,
     formatter: valueFormatter,
     show: showValueAxis,
     splitNumber: valueAxisSplitNumber,
@@ -651,6 +706,9 @@ export function buildAxes({
     ? buildValueAxis({
         theme,
         showGrid: false,
+        name: secondaryValueAxis?.name,
+        nameAlign: "right",
+        nameMaxWidth: axisNameMaxWidth,
         formatter: secondaryValueAxis?.formatter ?? valueFormatter,
         show: showValueAxis,
         splitNumber: valueAxisSplitNumber,
@@ -726,11 +784,16 @@ interface BaseChartOptionsParams {
    * `yAxisIndex: 1`. See {@link buildAxes}.
    */
   secondaryValueAxis?: {
+    name?: string
     formatter?: (value: number) => string
     bounds?: ValueAxisBounds
   }
   /** Pins the primary value axis' scale, overriding `valueAxisSplitNumber`. */
   valueAxisBounds?: ValueAxisBounds
+  /** Visible title for the primary value axis. */
+  primaryValueAxisName?: string
+  /** Horizontal room for labels anchored to edge data points. */
+  seriesLabelEdgePadding?: number
 }
 
 /**
@@ -763,6 +826,8 @@ export function buildBaseChartOptions({
   valueAxisSplitNumber,
   secondaryValueAxis,
   valueAxisBounds,
+  primaryValueAxisName,
+  seriesLabelEdgePadding,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -780,6 +845,7 @@ export function buildBaseChartOptions({
     valueAxisSplitNumber,
     secondaryValueAxis,
     valueAxisBounds,
+    primaryValueAxisName,
   })
 
   const baseOptions: echarts.EChartsOption = {
@@ -797,7 +863,13 @@ export function buildBaseChartOptions({
       data: legendData,
       theme,
     }),
-    grid: buildGrid({ showLegend }),
+    grid: buildGrid({
+      showLegend,
+      showValueAxisName:
+        showValueAxis &&
+        Boolean(primaryValueAxisName || secondaryValueAxis?.name),
+      seriesLabelEdgePadding,
+    }),
     tooltip: buildTooltip({
       theme,
       filterSeries: tooltipFilterSeries,

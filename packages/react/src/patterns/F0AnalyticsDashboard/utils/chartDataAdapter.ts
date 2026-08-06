@@ -7,6 +7,8 @@ import type {
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
 
+import { defaultTranslations } from "@/lib/providers/i18n"
+
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 
 // ---------------------------------------------------------------------------
@@ -450,7 +452,11 @@ export function compatibleTargetTypes(
  * source config by the caller.
  */
 export function defaultChartConfig(
-  type: DashboardChartConfig["type"]
+  type: DashboardChartConfig["type"],
+  comboAxisLabels: {
+    primaryMeasure: string
+    secondaryMeasure: string
+  } = defaultTranslations.dataChart.comboAxis
 ): DashboardChartConfig {
   switch (type) {
     case "bar":
@@ -458,7 +464,12 @@ export function defaultChartConfig(
     case "line":
       return { type: "line", lineType: "linear", showArea: true }
     case "combo":
-      return { type: "combo", lineType: "linear" }
+      return {
+        type: "combo",
+        lineType: "linear",
+        primaryAxisLabel: comboAxisLabels.primaryMeasure,
+        secondaryAxisLabel: comboAxisLabels.secondaryMeasure,
+      }
     case "funnel":
       return { type: "funnel", showConversion: true, colorScale: true }
     case "pie":

@@ -65,15 +65,23 @@ export function useChartDownloadActions({
 
   const handleExcel = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(effectiveConfig, data)
-    downloadAsExcel(tabular.columns, tabular.rows, title)
-  }, [effectiveConfig, data, title])
+    const tabular = chartDataToTabular(effectiveConfig, data, {
+      target: t("dataChart.comboAxis.target"),
+      primaryMeasure: t("dataChart.comboAxis.primaryMeasure"),
+      secondaryMeasure: t("dataChart.comboAxis.secondaryMeasure"),
+    })
+    downloadAsExcel(tabular.columns, tabular.rows, title, tabular.keys)
+  }, [effectiveConfig, data, title, t])
 
   const handleCsv = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(effectiveConfig, data)
-    downloadAsCsv(tabular.columns, tabular.rows, title)
-  }, [effectiveConfig, data, title])
+    const tabular = chartDataToTabular(effectiveConfig, data, {
+      target: t("dataChart.comboAxis.target"),
+      primaryMeasure: t("dataChart.comboAxis.primaryMeasure"),
+      secondaryMeasure: t("dataChart.comboAxis.secondaryMeasure"),
+    })
+    downloadAsCsv(tabular.columns, tabular.rows, title, tabular.keys)
+  }, [effectiveConfig, data, title, t])
 
   return useMemo(() => {
     if (!data) return []

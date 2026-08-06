@@ -174,7 +174,11 @@ function buildChartProps(
   item: DashboardChartItem,
   data: DashboardChartData,
   overrideType?: DashboardChartConfig["type"],
-  overrideOrientation?: "vertical" | "horizontal"
+  overrideOrientation?: "vertical" | "horizontal",
+  comboAxisLabels?: {
+    primaryMeasure: string
+    secondaryMeasure: string
+  }
 ): F0DataChartProps {
   const targetType = overrideType ?? item.chart.type
   // Detect actual data shape — after a transform, item.chart.type may have
@@ -194,7 +198,7 @@ function buildChartProps(
   // Cross-type transform: auto-detect source shape → canonical → target
   const canonical = toCanonical(data)
   const adapted = fromCanonical(canonical, targetType)
-  const config = defaultChartConfig(targetType)
+  const config = defaultChartConfig(targetType, comboAxisLabels)
 
   // Preserve shared props from the original config
   const shared: Record<string, unknown> = {}
@@ -340,13 +344,14 @@ function buildNativeChartProps(
 // Table view — renders chart data as a OneDataCollection table
 // ---------------------------------------------------------------------------
 
-function ChartTableView({
+export function ChartTableView({
   config,
   data,
 }: {
   config: DashboardChartConfig
   data: DashboardChartData
 }) {
+  const { t } = useI18n()
   // After a chart type transform, item.chart.type may not match the actual
   // data shape. Use detectDataShape to pick the right tabular converter.
   const dataShape = detectDataShape(data, config.type)
@@ -356,21 +361,27 @@ function ChartTableView({
       : config
 
   const tabular = useMemo(
-    () => chartDataToTabular(effectiveConfig, data),
-    [effectiveConfig, data]
+    () =>
+      chartDataToTabular(effectiveConfig, data, {
+        target: t("dataChart.comboAxis.target"),
+        primaryMeasure: t("dataChart.comboAxis.primaryMeasure"),
+        secondaryMeasure: t("dataChart.comboAxis.secondaryMeasure"),
+      }),
+    [effectiveConfig, data, t]
   )
+  const columnKeys = tabular.keys ?? tabular.columns
 
   const sourceDefinition = useMemo(
     () => ({
       dataAdapter: {
         fetchData: () => ({ records: tabular.rows as RecordType[] }),
       },
-      columns: tabular.columns.map((col) => ({
+      columns: tabular.columns.map((col, index) => ({
         label: col,
-        id: col,
+        id: columnKeys[index] ?? col,
       })),
     }),
-    [tabular]
+    [columnKeys, tabular]
   )
 
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
@@ -383,14 +394,15 @@ function ChartTableView({
         {
           type: "table" as const,
           options: {
-            columns: tabular.columns.map((col) => ({
+            columns: tabular.columns.map((col, index) => ({
               label: col,
-              render: (row: RecordType) => String(row[col] ?? ""),
+              render: (row: RecordType) =>
+                String(row[columnKeys[index] ?? col] ?? ""),
             })),
           },
         },
       ] as const,
-    [tabular.columns]
+    [columnKeys, tabular.columns]
   )
 
   return (
@@ -467,8 +479,20 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // hides it mid-hover — on every parent render.
   const chartProps = useMemo(
     () =>
-      data ? buildChartProps(item as DashboardChartItem, data) : undefined,
-    [item, data]
+      data
+        ? buildChartProps(
+            item as DashboardChartItem,
+            data,
+            undefined,
+            undefined,
+            {
+              primaryMeasure: translations.dataChart.comboAxis.primaryMeasure,
+              secondaryMeasure:
+                translations.dataChart.comboAxis.secondaryMeasure,
+            }
+          )
+        : undefined,
+    [item, data, translations.dataChart.comboAxis]
   )
 
   // Determine which chart type options are available for this chart

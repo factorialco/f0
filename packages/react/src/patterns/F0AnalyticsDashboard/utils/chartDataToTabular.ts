@@ -6,11 +6,22 @@ import type {
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
 
+import { qualifySeriesNames } from "@/kits/F0DataChart/utils/seriesNames"
+import { defaultTranslations } from "@/lib/providers/i18n"
+
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 
 interface TabularResult {
   columns: string[]
+  /** Stable row keys parallel to `columns` when display labels can repeat. */
+  keys?: string[]
   rows: Record<string, unknown>[]
+}
+
+export interface TabularLabels {
+  target: string
+  primaryMeasure: string
+  secondaryMeasure: string
 }
 
 /**
@@ -31,14 +42,15 @@ function numericValue(point: unknown): number | null {
  */
 export function chartDataToTabular(
   config: DashboardChartConfig,
-  data: DashboardChartData
+  data: DashboardChartData,
+  labels: TabularLabels = defaultTranslations.dataChart.comboAxis
 ): TabularResult {
   switch (config.type) {
     case "bar":
     case "line":
       return barLineToTabular(data)
     case "combo":
-      return comboToTabular(data)
+      return comboToTabular(config, data, labels)
     case "funnel":
       return funnelToTabular(data)
     case "pie":
@@ -75,27 +87,84 @@ function barLineToTabular(data: DashboardChartData): TabularResult {
 }
 
 /**
- * One column per series, bars first then lines — the axis a series belongs to
- * doesn't survive into a table, but each column keeps its own units because it
- * keeps its own name.
+ * One column per value series, bars first then lines, plus a target column when
+ * present. Stable keys stay distinct even when human-readable names repeat.
  */
-function comboToTabular(data: DashboardChartData): TabularResult {
+function comboToTabular(
+  config: Extract<DashboardChartConfig, { type: "combo" }>,
+  data: DashboardChartData,
+  labels: TabularLabels
+): TabularResult {
   const categories = data.categories ?? []
-  const series = [...(data.barSeries ?? []), ...(data.lineSeries ?? [])] as {
-    name: string
-    data: unknown[]
-  }[]
-  const columns = ["Category", ...series.map((s) => s.name)]
+  // Match the renderer/legend/ARIA contract: zero-length series are transient
+  // placeholders, not user-visible data columns.
+  const barSeries = (data.barSeries ?? []).filter(
+    (series) => series.data.length > 0
+  )
+  const lineSeries = (data.lineSeries ?? []).filter(
+    (series) => series.data.length > 0
+  )
+  const primaryAxisLabel =
+    config.primaryAxisLabel.trim() || labels.primaryMeasure
+  const secondaryAxisLabel =
+    config.secondaryAxisLabel.trim() || labels.secondaryMeasure
+  const qualifiedLabels = qualifySeriesNames(
+    [...barSeries, ...lineSeries],
+    [
+      ...barSeries.map(() => primaryAxisLabel),
+      ...lineSeries.map(() => secondaryAxisLabel),
+    ]
+  )
+  const barLabels = qualifiedLabels.slice(0, barSeries.length)
+  const lineLabels = qualifiedLabels.slice(barSeries.length)
+  const descriptors = [
+    ...barSeries.flatMap((series, index) => {
+      const valueDescriptor = {
+        label: barLabels[index],
+        key: `bar-${index}`,
+        value: (dataIndex: number) => numericValue(series.data[dataIndex]),
+      }
+      const hasTargets = series.data.some(
+        (point) =>
+          typeof point === "object" &&
+          point !== null &&
+          "target" in point &&
+          point.target !== undefined
+      )
+      if (!hasTargets) return [valueDescriptor]
+
+      return [
+        valueDescriptor,
+        {
+          label: `${barLabels[index]} ${labels.target}`,
+          key: `bar-${index}-target`,
+          value: (dataIndex: number) => {
+            const point = series.data[dataIndex]
+            return typeof point === "object" && point !== null
+              ? (point.target ?? null)
+              : null
+          },
+        },
+      ]
+    }),
+    ...lineSeries.map((series, index) => ({
+      label: lineLabels[index],
+      key: `line-${index}`,
+      value: (dataIndex: number) => numericValue(series.data[dataIndex]),
+    })),
+  ]
+  const columns = ["Category", ...descriptors.map(({ label }) => label)]
+  const keys = ["category", ...descriptors.map(({ key }) => key)]
 
   const rows = categories.map((cat, i) => {
-    const row: Record<string, unknown> = { Category: cat }
-    for (const s of series) {
-      row[s.name] = numericValue(s.data[i])
+    const row: Record<string, unknown> = { category: cat }
+    for (const descriptor of descriptors) {
+      row[descriptor.key] = descriptor.value(i)
     }
     return row
   })
 
-  return { columns, rows }
+  return { columns, keys, rows }
 }
 
 function funnelToTabular(data: DashboardChartData): TabularResult {

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest"
 
 import type { ValueAxisBounds } from "../utils/alignedAxes"
 
-import { computeAlignedValueAxes } from "../utils/alignedAxes"
+import {
+  collectRenderedAxisValues,
+  computeAlignedValueAxes,
+} from "../utils/alignedAxes"
 
 /** Tick intervals implied by a bounds triple. */
 const intervals = (bounds: ValueAxisBounds) =>
@@ -117,6 +120,66 @@ describe("computeAlignedValueAxes — scale choices", () => {
         bounds.interval / 10 ** Math.floor(Math.log10(bounds.interval))
       expect([1, 2, 2.5, 5, 10]).toContain(Number(mantissa.toFixed(10)))
     }
+  })
+
+  it("clamps invalid or excessive split counts", () => {
+    const invalid = computeAlignedValueAxes([10], [1], Number.NaN)
+    const infinite = computeAlignedValueAxes(
+      [10],
+      [1],
+      Number.POSITIVE_INFINITY
+    )
+    const excessive = computeAlignedValueAxes([10], [1], 100_000)
+    const negative = computeAlignedValueAxes([10], [1], -100)
+
+    expect(intervals(invalid.primary)).toBe(2)
+    expect(intervals(infinite.primary)).toBe(2)
+    expect(intervals(excessive.primary)).toBe(10)
+    expect(intervals(negative.primary)).toBe(1)
+    for (const result of [invalid, infinite, excessive, negative]) {
+      expect(intervals(result.secondary)).toBe(intervals(result.primary))
+    }
+  })
+})
+
+describe("collectRenderedAxisValues", () => {
+  it("collects positive and negative stack totals independently", () => {
+    expect(
+      collectRenderedAxisValues([
+        { stack: "shared", data: [40, -8] },
+        { stack: "shared", data: [60, -12] },
+        { data: [7, 9] },
+      ])
+    ).toEqual([7, 9, 100, -20])
+  })
+
+  it("includes a target ghost in the rendered stack total", () => {
+    expect(
+      collectRenderedAxisValues([
+        { stack: "target", data: [10] },
+        { stack: "target", data: [{ value: 90 }] },
+      ])
+    ).toEqual([100])
+  })
+
+  it("ignores malformed and non-finite rendered points", () => {
+    expect(
+      collectRenderedAxisValues([
+        {
+          data: [
+            5,
+            Number.NaN,
+            Number.POSITIVE_INFINITY,
+            null,
+            { value: 7 },
+            { value: "9" },
+            {},
+          ],
+        },
+        { stack: "empty", data: [{ value: Number.NEGATIVE_INFINITY }] },
+        {},
+      ])
+    ).toEqual([5, 7])
   })
 })
 

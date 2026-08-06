@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import type { F0DataChartProps } from "../types"
 
 import { F0DataChart } from "../index"
@@ -18,7 +20,7 @@ const meta = {
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
-type Story = StoryObj<typeof F0DataChart>
+type Story = StoryObj<typeof meta>
 
 // ---------------------------------------------------------------------------
 // Sample data — the three real analytics shapes a combo exists to serve.
@@ -64,6 +66,8 @@ const hours = (value: number) => `${(value / 1000).toFixed(1)}k h`
 export const HeadcountAndTurnoverRate: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
     categories: [...MONTHS],
     barSeries: HEADCOUNT,
     lineSeries: TURNOVER,
@@ -76,6 +80,8 @@ export const HeadcountAndTurnoverRate: Story = {
 export const AbsenceDaysAndRate: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "Absence days",
+    secondaryAxisLabel: "Absence rate",
     categories: [...MONTHS],
     barSeries: ABSENCE_DAYS,
     lineSeries: ABSENCE_RATE,
@@ -92,6 +98,8 @@ export const AbsenceDaysAndRate: Story = {
 export const WorkedAgainstExpectedHours: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "Worked hours",
+    secondaryAxisLabel: "Expected hours",
     categories: [...MONTHS],
     barSeries: WORKED_HOURS,
     lineSeries: EXPECTED_HOURS,
@@ -103,6 +111,8 @@ export const WorkedAgainstExpectedHours: Story = {
 export const StackedBarsWithRateLine: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
     categories: [...MONTHS],
     barSeries: [
       { name: "Engineering", data: [48, 52, 55, 56, 59, 62] },
@@ -120,6 +130,8 @@ export const StackedBarsWithRateLine: Story = {
 export const TwoRateLines: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Rate",
     categories: [...MONTHS],
     barSeries: HEADCOUNT,
     lineSeries: [
@@ -141,6 +153,8 @@ export const TwoRateLines: Story = {
 export const NegativeValues: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "Net change",
+    secondaryAxisLabel: "Turnover rate",
     categories: [...MONTHS],
     barSeries: [{ name: "Net change", data: [12, -8, 5, -14, 9, 3] }],
     lineSeries: TURNOVER,
@@ -153,6 +167,8 @@ export const NegativeValues: Story = {
 export const SmoothLineWithDots: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
     categories: [...MONTHS],
     barSeries: HEADCOUNT,
     lineSeries: TURNOVER,
@@ -167,6 +183,8 @@ export const SmoothLineWithDots: Story = {
 export const WithValueLabels: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
     categories: [...MONTHS],
     barSeries: HEADCOUNT,
     lineSeries: TURNOVER,
@@ -176,10 +194,31 @@ export const WithValueLabels: Story = {
   } satisfies F0DataChartProps,
 }
 
+/** Primary-axis targets remain visible and are included in scale and tooltip. */
+export const BarsWithTargets: Story = {
+  args: {
+    type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
+    categories: [...MONTHS],
+    barSeries: [
+      {
+        name: "Headcount",
+        data: HEADCOUNT[0].data.map((value) => ({ value, target: value + 12 })),
+      },
+    ],
+    lineSeries: TURNOVER,
+    valueFormatter: people,
+    secondaryValueFormatter: percent,
+  } satisfies F0DataChartProps,
+}
+
 /** Neither axis has a data point — the shared empty state takes over. */
 export const Empty: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "Primary measure",
+    secondaryAxisLabel: "Secondary measure",
     categories: [],
     barSeries: [],
     lineSeries: [],
@@ -193,10 +232,40 @@ export const Empty: Story = {
 export const OnlyBars: Story = {
   args: {
     type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
     categories: [...MONTHS],
     barSeries: HEADCOUNT,
     lineSeries: [],
     valueFormatter: people,
+  } satisfies F0DataChartProps,
+}
+
+/** The secondary measure arrived first; it temporarily uses the sole axis. */
+export const OnlyLines: Story = {
+  args: {
+    type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
+    categories: [...MONTHS],
+    barSeries: [],
+    lineSeries: TURNOVER,
+    secondaryValueFormatter: percent,
+  } satisfies F0DataChartProps,
+}
+
+/** Line-first partial state with long edge labels kept inside the tile. */
+export const OnlyLinesWithValueLabels: Story = {
+  args: {
+    type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
+    categories: [...MONTHS],
+    barSeries: [],
+    lineSeries: TURNOVER,
+    showLabels: true,
+    secondaryValueFormatter: (value) =>
+      `${value.toFixed(1)}% annualized turnover`,
   } satisfies F0DataChartProps,
 }
 
@@ -206,6 +275,8 @@ export const OnlyBars: Story = {
 
 const responsiveArgs = {
   type: "combo",
+  primaryAxisLabel: "People",
+  secondaryAxisLabel: "Turnover rate",
   categories: [...MONTHS],
   barSeries: HEADCOUNT,
   lineSeries: TURNOVER,
@@ -229,4 +300,100 @@ export const BreakpointMedium: Story = {
 export const BreakpointLarge: Story = {
   args: responsiveArgs,
   decorators: [ChartDecoratorLarge],
+}
+
+/** Long localized axis titles truncate safely in a medium dashboard tile. */
+export const LongLocalizedAxisLabels: Story = {
+  args: {
+    ...responsiveArgs,
+    primaryAxisLabel: "Plantilla equivalente a tiempo completo",
+    secondaryAxisLabel: "Tasa de rotación anualizada",
+  },
+  decorators: [ChartDecoratorMedium],
+}
+
+const SNAPSHOT_VARIANTS: {
+  label: string
+  props: F0DataChartProps
+  width?: "medium"
+}[] = [
+  { label: "Two scales", props: responsiveArgs },
+  {
+    label: "Long localized axis labels at medium width",
+    width: "medium",
+    props: {
+      ...LongLocalizedAxisLabels.args,
+    },
+  },
+  {
+    label: "Stacked totals",
+    props: {
+      ...responsiveArgs,
+      barSeries: [
+        { name: "Engineering", data: [48, 52, 55, 56, 59, 62] },
+        { name: "Sales", data: [40, 42, 44, 45, 47, 50] },
+        { name: "Support", data: [30, 30, 30, 30, 30, 30] },
+      ],
+      stacked: true,
+    },
+  },
+  {
+    label: "Negative values",
+    props: {
+      ...responsiveArgs,
+      barSeries: [{ name: "Net change", data: [12, -8, 5, -14, 9, 3] }],
+    },
+  },
+  {
+    label: "Targets and value labels",
+    props: {
+      ...responsiveArgs,
+      barSeries: [
+        {
+          name: "Headcount",
+          data: HEADCOUNT[0].data.map((value) => ({
+            value,
+            target: value + 12,
+          })),
+        },
+      ],
+      showLabels: true,
+    },
+  },
+  {
+    label: "Bars available first",
+    props: {
+      ...responsiveArgs,
+      lineSeries: [],
+    },
+  },
+  {
+    label: "Lines available first with value labels",
+    props: {
+      ...OnlyLinesWithValueLabels.args,
+    },
+  },
+]
+
+/** Consolidated Chromatic coverage for combo scales and partial-data states. */
+export const Snapshot: Story = {
+  args: responsiveArgs,
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="grid w-fit grid-cols-1 gap-6 p-6">
+      {SNAPSHOT_VARIANTS.map(({ label, props, width }) => (
+        <div key={label} className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {label}
+          </span>
+          <div
+            className={`h-[300px] rounded-md border border-solid border-f1-border-secondary bg-f1-background ${width === "medium" ? "w-[320px]" : "w-[600px]"}`}
+          >
+            <F0DataChart {...props} />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
 }

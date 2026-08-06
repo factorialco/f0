@@ -5,6 +5,8 @@ import type {
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   DashboardChartData,
   DashboardItem,
@@ -12,13 +14,17 @@ import type {
   DashboardMetricItem,
 } from "../types"
 
-import { chartDataToTabular } from "../utils/chartDataToTabular"
+import {
+  chartDataToTabular,
+  type TabularLabels,
+} from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"
 import { extractColumns } from "../utils/extractColumns"
 
 type SheetData = {
   name: string
   columns: string[]
+  keys?: string[]
   rows: Record<string, unknown>[]
 }
 
@@ -84,7 +90,8 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
 
 async function buildAllSheets<Filters extends FiltersDefinition>(
   items: DashboardItem<Filters>[],
-  filters: FiltersState<Filters>
+  filters: FiltersState<Filters>,
+  comboLabels: TabularLabels
 ): Promise<SheetData[]> {
   const sheets: SheetData[] = []
 
@@ -104,10 +111,13 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
           const data: DashboardChartData = await item.fetchData(
             getItemFilters(item, filters)
           )
-          const tabular = chartDataToTabular(item.chart, data)
+          const tabular = chartDataToTabular(item.chart, data, {
+            ...comboLabels,
+          })
           return {
             name: item.title,
             columns: tabular.columns,
+            keys: tabular.keys,
             rows: tabular.rows,
           }
         } catch (err) {
@@ -161,6 +171,7 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
   filename = "dashboard",
 }: UseDashboardExportOptions<Filters>): UseDashboardExportResult {
   const [isExporting, setIsExporting] = useState(false)
+  const { t } = useI18n()
 
   // The export callback must keep a STABLE identity across renders. It is
   // handed to consumers via `onExportReady`, which typically stores it in
@@ -173,11 +184,25 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
   filtersRef.current = filters
   const filenameRef = useRef(filename)
   filenameRef.current = filename
+  const comboLabelsRef = useRef<TabularLabels>({
+    target: t("dataChart.comboAxis.target"),
+    primaryMeasure: t("dataChart.comboAxis.primaryMeasure"),
+    secondaryMeasure: t("dataChart.comboAxis.secondaryMeasure"),
+  })
+  comboLabelsRef.current = {
+    target: t("dataChart.comboAxis.target"),
+    primaryMeasure: t("dataChart.comboAxis.primaryMeasure"),
+    secondaryMeasure: t("dataChart.comboAxis.secondaryMeasure"),
+  }
 
   const exportAsExcel = useCallback(async () => {
     setIsExporting(true)
     try {
-      const sheets = await buildAllSheets(itemsRef.current, filtersRef.current)
+      const sheets = await buildAllSheets(
+        itemsRef.current,
+        filtersRef.current,
+        comboLabelsRef.current
+      )
       if (sheets.length > 0) {
         downloadMultiSheetExcel(sheets, filenameRef.current)
       }

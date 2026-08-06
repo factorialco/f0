@@ -1,6 +1,7 @@
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
+  F0DataChartComboLineSeries,
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
@@ -51,6 +52,10 @@ export interface LineChartConfig extends ChartConfigBase {
 
 export interface ComboChartConfig extends ChartConfigBase {
   type: "combo"
+  /** Visible label for the primary (left) value axis and its series. */
+  primaryAxisLabel: string
+  /** Visible label for the secondary (right) value axis and its series. */
+  secondaryAxisLabel: string
   /** Stack the bar series into a single bar per category. @default false */
   stacked?: boolean
   /** Line interpolation for the line series. @default "linear" */
@@ -180,7 +185,7 @@ export interface DashboardChartData {
    */
   barSeries?: F0DataChartBarSeries[]
   /** Combo chart line series, plotted against the secondary value axis. */
-  lineSeries?: F0DataChartLineSeries[]
+  lineSeries?: F0DataChartComboLineSeries[]
   /** Chart series data — shape depends on chart type. Omit for heatmaps. */
   series?:
     | F0DataChartBarSeries[]

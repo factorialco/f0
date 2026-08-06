@@ -16,6 +16,12 @@ const comboData: DashboardChartData = {
   lineSeries: [{ name: "Turnover rate", data: [4.1, 3.8, 5.2] }],
 }
 
+const comboConfig = {
+  type: "combo" as const,
+  primaryAxisLabel: "People",
+  secondaryAxisLabel: "Percent",
+}
+
 describe("detectDataShape — combo", () => {
   it("routes combo data to the combo renderer", () => {
     expect(detectDataShape(comboData)).toBe("combo")
@@ -98,25 +104,167 @@ describe("toCanonical — combo", () => {
 
 describe("chartDataToTabular — combo", () => {
   it("gives every series its own column", () => {
-    expect(chartDataToTabular({ type: "combo" }, comboData)).toEqual({
-      columns: ["Category", "Headcount", "Turnover rate"],
+    expect(chartDataToTabular(comboConfig, comboData)).toEqual({
+      columns: ["Category", "Headcount · People", "Turnover rate · Percent"],
+      keys: ["category", "bar-0", "line-0"],
       rows: [
-        { Category: "Jan", Headcount: 120, "Turnover rate": 4.1 },
-        { Category: "Feb", Headcount: 128, "Turnover rate": 3.8 },
-        { Category: "Mar", Headcount: 131, "Turnover rate": 5.2 },
+        { category: "Jan", "bar-0": 120, "line-0": 4.1 },
+        { category: "Feb", "bar-0": 128, "line-0": 3.8 },
+        { category: "Mar", "bar-0": 131, "line-0": 5.2 },
       ],
     })
   })
 
   it("survives an axis with no series", () => {
     expect(
-      chartDataToTabular(
-        { type: "combo" },
-        { categories: ["Jan"], barSeries: comboData.barSeries }
-      )
+      chartDataToTabular(comboConfig, {
+        categories: ["Jan"],
+        barSeries: comboData.barSeries,
+      })
     ).toEqual({
-      columns: ["Category", "Headcount"],
-      rows: [{ Category: "Jan", Headcount: 120 }],
+      columns: ["Category", "Headcount · People"],
+      keys: ["category", "bar-0"],
+      rows: [{ category: "Jan", "bar-0": 120 }],
+    })
+  })
+
+  it("preserves duplicate labels and bar targets with stable row keys", () => {
+    expect(
+      chartDataToTabular(comboConfig, {
+        categories: ["Jan"],
+        barSeries: [{ name: "Revenue", data: [{ value: 10, target: 20 }] }],
+        lineSeries: [{ name: "Revenue", data: [5] }],
+      })
+    ).toEqual({
+      columns: [
+        "Category",
+        "Revenue · People",
+        "Revenue · People Target",
+        "Revenue · Percent",
+      ],
+      keys: ["category", "bar-0", "bar-0-target", "line-0"],
+      rows: [
+        {
+          category: "Jan",
+          "bar-0": 10,
+          "bar-0-target": 20,
+          "line-0": 5,
+        },
+      ],
+    })
+  })
+
+  it("disambiguates repeated names within the same axis", () => {
+    expect(
+      chartDataToTabular(comboConfig, {
+        categories: ["Jan"],
+        barSeries: [
+          { name: "Revenue", data: [10] },
+          { name: "Revenue", data: [20] },
+        ],
+        lineSeries: [],
+      })
+    ).toEqual({
+      columns: ["Category", "Revenue · People (1)", "Revenue · People (2)"],
+      keys: ["category", "bar-0", "bar-1"],
+      rows: [{ category: "Jan", "bar-0": 10, "bar-1": 20 }],
+    })
+  })
+
+  it("keeps equal names distinct when both axis labels also match", () => {
+    expect(
+      chartDataToTabular(
+        {
+          type: "combo",
+          primaryAxisLabel: "Amount",
+          secondaryAxisLabel: "Amount",
+        },
+        {
+          categories: ["Jan"],
+          barSeries: [{ name: "Revenue", data: [10] }],
+          lineSeries: [{ name: "Revenue", data: [5] }],
+        }
+      ).columns
+    ).toEqual(["Category", "Revenue · Amount (1)", "Revenue · Amount (2)"])
+  })
+
+  it("emits null targets for points without one in a mixed series", () => {
+    expect(
+      chartDataToTabular(comboConfig, {
+        categories: ["Jan", "Feb", "Mar"],
+        barSeries: [
+          {
+            name: "Revenue",
+            data: [10, { value: 20, target: 25 }, { value: 30 }],
+          },
+        ],
+        lineSeries: [],
+      }).rows
+    ).toEqual([
+      { category: "Jan", "bar-0": 10, "bar-0-target": null },
+      { category: "Feb", "bar-0": 20, "bar-0-target": 25 },
+      { category: "Mar", "bar-0": 30, "bar-0-target": null },
+    ])
+  })
+
+  it("uses the localized target column label supplied by the caller", () => {
+    expect(
+      chartDataToTabular(
+        comboConfig,
+        {
+          categories: ["Jan"],
+          barSeries: [{ name: "Revenue", data: [{ value: 10, target: 20 }] }],
+          lineSeries: [],
+        },
+        {
+          target: "Objetivo",
+          primaryMeasure: "Medida principal",
+          secondaryMeasure: "Medida secundaria",
+        }
+      ).columns
+    ).toContain("Revenue · People Objetivo")
+  })
+
+  it("uses localized fallbacks for blank axis labels", () => {
+    expect(
+      chartDataToTabular(
+        {
+          type: "combo",
+          primaryAxisLabel: " ",
+          secondaryAxisLabel: "",
+        },
+        {
+          categories: ["Jan"],
+          barSeries: [{ name: "Revenue", data: [10] }],
+          lineSeries: [{ name: "Margin", data: [5] }],
+        },
+        {
+          target: "Objetivo",
+          primaryMeasure: "Medida principal",
+          secondaryMeasure: "Medida secundaria",
+        }
+      ).columns
+    ).toEqual([
+      "Category",
+      "Revenue · Medida principal",
+      "Margin · Medida secundaria",
+    ])
+  })
+
+  it("omits empty placeholder series from table and export data", () => {
+    expect(
+      chartDataToTabular(comboConfig, {
+        categories: ["Jan"],
+        barSeries: [
+          { name: "Revenue", data: [] },
+          { name: "Revenue", data: [10] },
+        ],
+        lineSeries: [{ name: "Margin", data: [] }],
+      })
+    ).toEqual({
+      columns: ["Category", "Revenue · People"],
+      keys: ["category", "bar-0"],
+      rows: [{ category: "Jan", "bar-0": 10 }],
     })
   })
 })
@@ -126,6 +274,8 @@ describe("defaultChartConfig — combo", () => {
     expect(defaultChartConfig("combo")).toEqual({
       type: "combo",
       lineType: "linear",
+      primaryAxisLabel: "Primary measure",
+      secondaryAxisLabel: "Secondary measure",
     })
   })
 })

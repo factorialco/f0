@@ -51,8 +51,17 @@ function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
   if (!call) throw new Error("setOption was never called")
   return call[0] as {
-    series: Array<{ areaStyle?: unknown }>
+    series: Array<{
+      areaStyle?: unknown
+      showSymbol?: boolean
+      symbolSize?: number
+      label?: {
+        show?: boolean
+        formatter?: (params: { value: number }) => string
+      }
+    }>
     legend?: { show?: boolean }
+    grid: { left: number; right: number }
     xAxis: { axisLabel: { show: boolean } }
     yAxis: { axisLabel: { show: boolean } }
   }
@@ -117,6 +126,110 @@ describe("LineChart — area mode", () => {
     for (const s of option.series) {
       expect(s.areaStyle).toBeUndefined()
     }
+  })
+})
+
+describe("LineChart — value labels", () => {
+  it("formats labels without requiring visible dots", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Rate", data: [4.1, 5.2] }]}
+        showArea={false}
+        showLabels
+        valueFormatter={(value) => `${value}%`}
+      />
+    )
+
+    const line = getLatestOption().series[0]
+    expect(line.label?.show).toBe(true)
+    expect(line.label?.formatter?.({ value: 4.1 })).toBe("4.1%")
+    expect(line.showSymbol).toBe(true)
+    expect(line.symbolSize).toBe(0)
+  })
+
+  it("shows normal point symbols when dots are on and labels are off", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Rate", data: [4.1, 5.2] }]}
+        showDots
+      />
+    )
+
+    const line = getLatestOption().series[0]
+    expect(line.label?.show).toBe(false)
+    expect(line.showSymbol).toBe(true)
+    expect(line.symbolSize).toBe(6)
+  })
+
+  it("does not create symbols when both dots and labels are off", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Rate", data: [4.1, 5.2] }]}
+      />
+    )
+
+    const line = getLatestOption().series[0]
+    expect(line.label?.show).toBe(false)
+    expect(line.showSymbol).toBe(false)
+    expect(line.symbolSize).toBe(0)
+  })
+
+  it("derives edge padding from formatted label width only when labels show", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Revenue", data: [1, 2] }]}
+        showLabels
+        valueFormatter={(value) => `EUR ${value.toFixed(2)} million`}
+      />
+    )
+    const labeledPadding = getLatestOption().grid.right
+
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Revenue", data: [1, 2] }]}
+        showLabels
+        valueFormatter={(value) => `${value}`}
+      />
+    )
+    const shortLabelPadding = getLatestOption().grid.right
+
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Revenue", data: [1, 2] }]}
+        valueFormatter={(value) => `EUR ${value.toFixed(2)} million`}
+      />
+    )
+
+    expect(labeledPadding).toBeGreaterThan(shortLabelPadding)
+    expect(labeledPadding).toBeGreaterThan(24)
+    expect(getLatestOption().grid).toMatchObject({ left: 4, right: 4 })
+  })
+
+  it("caps edge-label padding at one fifth of the container", () => {
+    containerSize.width = 100
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[{ name: "Revenue", data: [1, 2] }]}
+        showLabels
+        valueFormatter={() => "An exceptionally long formatted value"}
+      />
+    )
+
+    expect(getLatestOption().grid).toMatchObject({ left: 20, right: 20 })
   })
 })
 
