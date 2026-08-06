@@ -56,7 +56,7 @@ const meta: Meta = {
   component: F0Select,
   parameters: {
     a11y: {
-      skipCi: true,
+      test: "error",
     },
     docs: {
       description: {
@@ -330,6 +330,23 @@ const meta: Meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+/**
+ * Deferred `target-size` debt (WCAG 2.2 SC 2.5.8).
+ *
+ * Every story that renders a value with `clearable` shows F0InputField's clear
+ * button, which is 20x20 (`h-5 w-5` in F0InputField.tsx) — under the 24px
+ * minimum. The button is shared by every F0InputField consumer, so enlarging it
+ * is a design decision rather than a Select fix, and is tracked separately in
+ * FCT-59916.
+ *
+ * These stories keep running axe and keep *reporting* the violation (CI job
+ * summary + the PR comment via a11y-violations.jsonl) — it just doesn't block.
+ * Every other rule stays enforced at the meta level, so the listbox naming and
+ * focusable-children fixes in this PR cannot regress silently. Remove this once
+ * the clear button meets 24px.
+ */
+const targetSizeTodo = { a11y: { test: "todo" as const } }
 
 export const Default: Story = {
   args: {
@@ -670,6 +687,7 @@ export const WithHint: Story = {
 }
 
 export const Clearable: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select a theme",
     value: "dark",
@@ -978,6 +996,7 @@ export const WithManyCollapsibleGroups: Story = {
 }
 
 export const MultipleNotPaginated: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
@@ -1002,6 +1021,7 @@ export const MultipleNotPaginated: Story = {
  * when some but not all are selected.
  */
 export const MultiplePaginated: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
@@ -1043,6 +1063,7 @@ export const MultiplePaginated: Story = {
  * Filters use inline (dual-pane) mode when preview is enabled.
  */
 export const MultiplePaginatedWithPreview: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
@@ -1079,6 +1100,7 @@ export const MultiplePaginatedWithPreview: Story = {
 }
 
 export const MultiplePaginatedWithApply: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
@@ -1115,6 +1137,7 @@ export const MultiplePaginatedWithApply: Story = {
 }
 
 export const MultipleWithApply: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
@@ -1140,6 +1163,17 @@ export const MultipleWithApply: Story = {
  * when some but not all are selected.
  */
 export const MultiplePaginatedAsList: Story = {
+  parameters: {
+    a11y: {
+      // Known architectural violations in multiple+asList mode, reported but
+      // not blocking: the search box, select-all and action buttons render
+      // inside the role="listbox" element (aria-required-children), and
+      // multi-select options wrap focusable checkboxes (nested-interactive).
+      // Fixing both requires moving role="listbox" onto the options container
+      // in ui/Select and making option checkboxes presentational.
+      test: "todo",
+    },
+  },
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
@@ -1210,6 +1244,7 @@ export const AsList: Story = {
  * `selectionStatus.allChecked` will remain `false` even when all are selected.
  */
 export const MultipleManualSelectionOnly: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members (Manual Only)",
     placeholder: "Search employees...",
@@ -1240,6 +1275,7 @@ export const MultipleManualSelectionOnly: Story = {
  * 5. Use a filter (e.g. department) — selections still preserved
  */
 export const MultiplePreserveSelections: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Preserve Selections (default)",
     placeholder: "Search employees...",
@@ -1267,6 +1303,7 @@ export const MultiplePreserveSelections: Story = {
  * same workflow as above — selections will be lost on each change.
  */
 export const MultipleClearSelectionsOnDatasetChange: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Clear Selections on change",
     placeholder: "Search employees...",
@@ -1300,6 +1337,7 @@ export const MultipleClearSelectionsOnDatasetChange: Story = {
  *    manual selection only.
  */
 export const MultipleSelectAllWithFilters: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Team Members (preserve + select all)",
     placeholder: "Search employees...",
@@ -1326,6 +1364,7 @@ export const MultipleSelectAllWithFilters: Story = {
  * Filter by department, office, or legal entity to narrow down results.
  */
 export const SingleSelectWithFilters: Story = {
+  parameters: targetSizeTodo,
   args: {
     label: "Select Employee",
     placeholder: "Choose an employee...",
