@@ -59,20 +59,6 @@ export type DataDownloadCanvasContent = CanvasContentBase & {
 }
 
 /**
- * A single proposed shift block in a timesheet-autofill preview. Clock times are
- * employee-local "HH:MM"; a null clock time marks an as-yet-unfilled bound.
- */
-export type AutofillTimesheetShift = {
-  date: string
-  clockIn: string | null
-  clockOut: string | null
-  workable: boolean
-  workplaceId?: string | null
-  workAreaId?: string | null
-  locationType?: string | null
-}
-
-/**
  * Autofill-timesheet canvas content — renders an editable timesheet proposal
  * (day-grouped shift blocks the user can adjust and confirm) in the canvas panel.
  */
@@ -162,6 +148,24 @@ export type DataDownloadDataset = {
    * Used for Excel/CSV headers. Falls back to the raw column name when absent.
    */
   columnLabels?: Record<string, string>
+}
+
+// ---------------------------------------------------------------------------
+// Autofill timesheet payload
+// ---------------------------------------------------------------------------
+
+/**
+ * A single proposed shift block in a timesheet-autofill preview. Clock times are
+ * employee-local "HH:MM"; a null clock time marks an as-yet-unfilled bound.
+ */
+export type AutofillTimesheetShift = {
+  date: string
+  clockIn: string | null
+  clockOut: string | null
+  workable: boolean
+  workplaceId?: string | null
+  workAreaId?: string | null
+  locationType?: string | null
 }
 
 // ---------------------------------------------------------------------------
