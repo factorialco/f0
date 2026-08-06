@@ -38,6 +38,13 @@ Membership of the three policy teams is mirrored in [`teams.yml`](teams.yml)
 (`policy_teams`) because the default Actions token cannot read org team
 membership. Keep it in sync with the GitHub org teams.
 
+For the same reason the workflow passes `REVIEW_REQUEST_TOKEN` — a token with
+org scope — used only to add the pending teams as reviewers. Without it every
+request fails with `422 Could not resolve to a node`, and teams that are not
+code owners (typically `f0-designers`, pulled in by rule 3 or the
+`needs-design-review` label) never land in anyone's review queue. The comment
+and the commit status keep using the default token.
+
 ## How it works
 
 - Every direct child of `sds/` must have a `package.yml` manifest:
