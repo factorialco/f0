@@ -9,7 +9,7 @@ import {
   vi,
 } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render } from "@/testing/test-utils"
+import { act, zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
 import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
@@ -22,14 +22,29 @@ import { resolveChartTheme } from "../utils/theme"
 
 const setOptionMock = vi.fn()
 
+/** Handlers the chart registered, so tests can fire ECharts events at it. */
+const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
+
+/** Fire an ECharts event at every handler the component registered for it. */
+function emitChartEvent(event: string, params: unknown) {
+  // Wrapped in `act` because the handlers set React state, and the assertion
+  // reads the `setOption` payload that the resulting render produces.
+  act(() => {
+    for (const handler of chartHandlers[event] ?? []) handler(params)
+  })
+}
+
 vi.mock("echarts", () => ({
   init: vi.fn(() => ({
     setOption: setOptionMock,
     resize: vi.fn(),
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
-    on: vi.fn(),
+    on: vi.fn((event: string, handler: (params: unknown) => void) => {
+      ;(chartHandlers[event] ??= []).push(handler)
+    }),
     off: vi.fn(),
+    dispatchAction: vi.fn(),
   })),
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
@@ -148,6 +163,7 @@ function getBorderRadii(seriesIndex: number) {
 
 beforeEach(() => {
   setOptionMock.mockClear()
+  for (const key of Object.keys(chartHandlers)) delete chartHandlers[key]
   containerSize.width = 800
   containerSize.height = 320
 })
@@ -450,7 +466,8 @@ describe("BarChart — label placement", () => {
     )
     expect(getLatestOption().grid?.right).toBe(60)
 
-    // Stacked horizontal: labels render inside segments → keep the full width
+    // Stacked horizontal: segment labels sit inside their own segments, and a
+    // category mixing signs gets no total either → keep the full width.
     render(
       <F0DataChart
         {...base}
@@ -458,7 +475,7 @@ describe("BarChart — label placement", () => {
         stacked
         series={[
           { name: "X", data: [1, 2] },
-          { name: "Y", data: [3, 4] },
+          { name: "Y", data: [-3, 4] },
         ]}
       />
     )
@@ -905,11 +922,11 @@ describe("BarChart — hideOverflowingLabels", () => {
     ).toEqual({ fontSize: 0 })
   })
 
-  it("defaults fit padding to 12 inside a stacked segment (override lowers it)", () => {
-    // A 100px label in a 120px segment fits only if per-side padding ≤ 10px, so
-    // it's hidden at the 12px stacked default but shown once padding drops to 0.
+  it("defaults fit padding to 6 inside a stacked segment (override lowers it)", () => {
+    // A 100px label in a 110px segment fits only if per-side padding ≤ 5px, so
+    // it's hidden at the 6px stacked default but shown once padding drops to 0.
     const seg: LabelLayoutParams = {
-      rect: { width: 120, height: 100 },
+      rect: { width: 110, height: 100 },
       labelRect: { width: 100, height: 12 },
       dataIndex: 0,
     }
@@ -1293,5 +1310,817 @@ describe("BarChart — horizontal category density", () => {
     )
 
     expect(getLatestOption().yAxis.axisLabel.interval ?? 0).toBe(0)
+  })
+})
+
+describe("BarChart — stacked totals (horizontal)", () => {
+  const stackedProps = {
+    type: "bar" as const,
+    orientation: "horizontal" as const,
+    stacked: true,
+    showLabels: true,
+    categories: ["Madrid", "Berlin"],
+    series: [
+      { name: "Women", data: [3, 10] },
+      { name: "Men", data: [4, 20] },
+    ],
+  }
+
+  /** The zero-value ghost carrying the total label, if it was added at all. */
+  function getTotalSeries() {
+    return getMainSeries().find(
+      (s) => (s as { name?: string }).name === "__stackTotal"
+    )
+  }
+
+  it("appends a zero-value ghost whose label reads the category total", () => {
+    render(<F0DataChart {...stackedProps} />)
+
+    const total = getTotalSeries()
+    expect(total).toBeDefined()
+    // Adds no length to the bar — it exists only to carry the label.
+    expect((total as { data: number[] }).data).toEqual([0, 0])
+    expect(total?.label?.position).toBe("right")
+    expect(total?.label?.formatter?.({ dataIndex: 0 } as never)).toBe("7")
+    expect(total?.label?.formatter?.({ dataIndex: 1 } as never)).toBe("30")
+  })
+
+  it("keeps the ghost out of the legend", () => {
+    render(<F0DataChart {...stackedProps} />)
+
+    const legend = getLatestOption().legend as { data?: string[] } | undefined
+    expect(legend?.data).toEqual(["Women", "Men"])
+  })
+
+  it("reserves room on the right for the total, which stacked bars otherwise skip", () => {
+    render(<F0DataChart {...stackedProps} />)
+    expect(getLatestOption().grid?.right).toBe(60)
+
+    setOptionMock.mockClear()
+    render(<F0DataChart {...stackedProps} showLabels={false} />)
+    expect(getLatestOption().grid?.right).not.toBe(60)
+  })
+
+  it("formats the total with the chart's value formatter", () => {
+    render(<F0DataChart {...stackedProps} valueFormatter={(v) => `${v} ppl`} />)
+
+    expect(
+      getTotalSeries()?.label?.formatter?.({ dataIndex: 1 } as never)
+    ).toBe("30 ppl")
+  })
+
+  it("drops a total that would run past the container edge", () => {
+    render(<F0DataChart {...stackedProps} />)
+    const layout = getTotalSeries()?.labelLayout
+
+    expect(
+      layout?.({
+        rect: { width: 0, height: 16 },
+        labelRect: { x: 700, width: 40, height: 12 },
+        dataIndex: 0,
+      })
+    ).toEqual({})
+    expect(
+      layout?.({
+        rect: { width: 0, height: 16 },
+        labelRect: { x: 790, width: 40, height: 12 },
+        dataIndex: 0,
+      })
+    ).toEqual({ fontSize: 0 })
+  })
+
+  it("skips the total for a single series, whose total is the bar itself", () => {
+    render(
+      <F0DataChart
+        {...stackedProps}
+        series={[{ name: "All", data: [3, 10] }]}
+      />
+    )
+    expect(getTotalSeries()).toBeUndefined()
+  })
+
+  it("skips the total when a category mixes signs", () => {
+    render(
+      <F0DataChart
+        {...stackedProps}
+        series={[
+          { name: "Joiners", data: [3, 10] },
+          { name: "Leavers", data: [-4, 2] },
+        ]}
+      />
+    )
+    expect(getTotalSeries()).toBeUndefined()
+  })
+
+  it("leaves vertical stacks alone — the value axis already gives the number", () => {
+    render(<F0DataChart {...stackedProps} orientation="vertical" />)
+    expect(getTotalSeries()).toBeUndefined()
+  })
+
+  it("skips the total when labels are off", () => {
+    render(<F0DataChart {...stackedProps} showLabels={false} />)
+    expect(getTotalSeries()).toBeUndefined()
+  })
+})
+
+describe("BarChart — value axis vs. bar labels", () => {
+  const horizontal = {
+    type: "bar" as const,
+    orientation: "horizontal" as const,
+    categories: ["Madrid", "Berlin"],
+    series: [{ name: "Headcount", data: [3, 10] }],
+  }
+
+  it("drops the value ticks when every horizontal bar carries its number", () => {
+    render(<F0DataChart {...horizontal} showLabels />)
+
+    const option = getLatestOption()
+    // Horizontal: X is the value axis, Y the categories.
+    expect(option.xAxis.axisLabel.show).toBe(false)
+    expect(option.yAxis.axisLabel.show).toBe(true)
+  })
+
+  it("keeps the grid lines the ticks were read against", () => {
+    render(<F0DataChart {...horizontal} showLabels />)
+
+    const xAxis = getLatestOption().xAxis as unknown as {
+      splitLine?: { show?: boolean }
+    }
+    expect(xAxis.splitLine?.show).toBe(true)
+  })
+
+  it("keeps the value ticks when the bars are unlabelled", () => {
+    render(<F0DataChart {...horizontal} />)
+    expect(getLatestOption().xAxis.axisLabel.show).toBe(true)
+  })
+
+  it("leaves a vertical chart's value axis alone — its labels sit clear of it", () => {
+    render(<F0DataChart {...horizontal} orientation="vertical" showLabels />)
+    // Vertical: Y is the value axis.
+    expect(getLatestOption().yAxis.axisLabel.show).toBe(true)
+  })
+})
+
+describe("BarChart — horizontal band geometry", () => {
+  function getGaps() {
+    const series = getMainSeries()[0] as unknown as {
+      barGap?: string
+      barCategoryGap?: string
+    }
+    return series
+  }
+
+  it("separates grouped categories by more than the bars inside them", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Madrid", "Berlin"]}
+        series={[
+          { name: "A", data: [1, 2] },
+          { name: "B", data: [3, 4] },
+          { name: "C", data: [5, 6] },
+        ]}
+      />
+    )
+
+    // 3 bars at 16px + 2 interior gaps of 8px + a 24px category gap = 88px band.
+    // barGap is a share of one bar (8/16), barCategoryGap a share of the band
+    // (24/88) — the pair ECharts needs to draw 8px inside and 24px between.
+    const { barGap, barCategoryGap } = getGaps()
+    expect(barGap).toBe("50.0%")
+    expect(barCategoryGap).toBe("27.3%")
+  })
+
+  it("keeps a single-bar category compact — nothing to distinguish it from", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Madrid", "Berlin"]}
+        series={[{ name: "A", data: [1, 2] }]}
+      />
+    )
+
+    // One 16px bar + an 8px gap = 24px band, so the gap is a third of it.
+    expect(getGaps().barCategoryGap).toBe("33.3%")
+  })
+
+  it("treats a stacked chart as one bar per category", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        stacked
+        categories={["Madrid", "Berlin"]}
+        series={[
+          { name: "A", data: [1, 2] },
+          { name: "B", data: [3, 4] },
+        ]}
+      />
+    )
+
+    expect(getGaps().barCategoryGap).toBe("33.3%")
+  })
+
+  it("leaves vertical charts on the ECharts defaults", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["Madrid", "Berlin"]}
+        series={[
+          { name: "A", data: [1, 2] },
+          { name: "B", data: [3, 4] },
+        ]}
+      />
+    )
+
+    expect(getGaps().barGap).toBeUndefined()
+    expect(getGaps().barCategoryGap).toBeUndefined()
+  })
+})
+
+describe("BarChart — headroom for labels above columns", () => {
+  const vertical = {
+    type: "bar" as const,
+    categories: ["Sep", "Oct"],
+    series: [{ name: "Salary", data: [59_000, 60_000] }],
+  }
+
+  function getGridTop() {
+    return (getLatestOption().grid as { top?: number } | undefined)?.top
+  }
+
+  it("reserves room above the columns so a full-height bar's label isn't clipped", () => {
+    render(<F0DataChart {...vertical} />)
+    const bare = getGridTop()
+
+    render(<F0DataChart {...vertical} showLabels />)
+    // 11px label → ceil(11 * 1.4) + 5 = 21px on top of the base padding.
+    expect(getGridTop()).toBe((bare ?? 0) + 21)
+  })
+
+  it("scales the headroom with the label font size", () => {
+    render(<F0DataChart {...vertical} showLabels />)
+    const atDefault = getGridTop() ?? 0
+
+    render(<F0DataChart {...vertical} showLabels labelFontSize={20} />)
+    expect(getGridTop()).toBeGreaterThan(atDefault)
+  })
+
+  it("adds no headroom for stacked columns, whose labels sit inside", () => {
+    render(<F0DataChart {...vertical} />)
+    const bare = getGridTop()
+
+    render(
+      <F0DataChart
+        {...vertical}
+        stacked
+        showLabels
+        series={[
+          { name: "A", data: [1, 2] },
+          { name: "B", data: [3, 4] },
+        ]}
+      />
+    )
+    expect(getGridTop()).toBe(bare)
+  })
+
+  it("adds no headroom for horizontal bars, which reserve width instead", () => {
+    render(<F0DataChart {...vertical} orientation="horizontal" />)
+    const bare = getGridTop()
+
+    render(<F0DataChart {...vertical} orientation="horizontal" showLabels />)
+    expect(getGridTop()).toBe(bare)
+  })
+
+  it("leaves a caller's own grid.top alone", () => {
+    render(
+      <F0DataChart
+        {...vertical}
+        showLabels
+        echartsOptions={{ grid: { top: 2 } }}
+      />
+    )
+    expect(getGridTop()).toBe(2)
+  })
+})
+
+describe("BarChart — category label width", () => {
+  // jsdom has no canvas, so `measureTextWidth` falls back to 8px per character:
+  // every expectation below is (longest label length × 8) + 4px of slack, or the
+  // container-derived cap where that is smaller.
+  const long = "A very long workplace name indeed" // 33 chars → 268
+  const short = "Berlin" // 6 chars → 52
+
+  const horizontal = (categories: string[]) => ({
+    type: "bar" as const,
+    orientation: "horizontal" as const,
+    categories,
+    series: [{ name: "Headcount", data: categories.map((_, i) => i + 1) }],
+  })
+
+  function getCategoryLabelWidth() {
+    // Horizontal charts put categories on the Y axis.
+    return (
+      getLatestOption().yAxis as unknown as {
+        axisLabel?: { width?: number }
+      }
+    ).axisLabel?.width
+  }
+
+  it("gives the axis exactly what its longest name needs when that fits", () => {
+    containerSize.width = 800
+    render(<F0DataChart {...horizontal([short, "Madrid"])} />)
+    // Well under the 160 cap, so the bars keep the rest of the width.
+    expect(getCategoryLabelWidth()).toBe(52)
+  })
+
+  it("measures the longest name, not the first or the last", () => {
+    containerSize.width = 800
+    render(<F0DataChart {...horizontal([short, "Rio de Janeiro", "Oslo"])} />)
+    expect(getCategoryLabelWidth()).toBe("Rio de Janeiro".length * 8 + 4)
+  })
+
+  it("clamps to a share of the container on a narrow chart", () => {
+    containerSize.width = 300
+    render(<F0DataChart {...horizontal([long, short])} />)
+    // 0.3 × 300 = 90, so this name truncates rather than taking 268px.
+    expect(getCategoryLabelWidth()).toBe(90)
+  })
+
+  it("gives a long name its full width when the chart is wide enough", () => {
+    containerSize.width = 1400
+    render(<F0DataChart {...horizontal([long, short])} />)
+    // 268 needed, 400 allowed — shown whole rather than truncated to a stub.
+    expect(getCategoryLabelWidth()).toBe(long.length * 8 + 4)
+  })
+
+  it("clamps to the absolute cap on a wide chart", () => {
+    containerSize.width = 1400
+    const veryLong = "Barcelona Poblenou innovation campus, building four"
+    render(<F0DataChart {...horizontal([veryLong, short])} />)
+    // 0.3 × 1400 = 420 would allow it and the name needs 404, but the absolute
+    // cap is the tighter of the three.
+    expect(getCategoryLabelWidth()).toBe(400)
+  })
+
+  it("measures the formatted label, since that is what gets drawn", () => {
+    containerSize.width = 800
+    render(
+      <F0DataChart
+        {...horizontal([short, "Madrid"])}
+        categoryFormatter={(value) => `Office: ${value}`}
+      />
+    )
+    expect(getCategoryLabelWidth()).toBe("Office: Madrid".length * 8 + 4)
+  })
+})
+
+describe("BarChart — value axis extent", () => {
+  const horizontal = {
+    type: "bar" as const,
+    orientation: "horizontal" as const,
+    categories: ["Madrid", "Berlin"],
+    series: [{ name: "Headcount", data: [62, 106] }],
+  }
+
+  function getValueAxisMax() {
+    // Horizontal: X is the value axis.
+    return (getLatestOption().xAxis as unknown as { max?: number }).max
+  }
+
+  it("pins the maximum just past the longest bar when the ticks are hidden", () => {
+    render(<F0DataChart {...horizontal} showLabels />)
+    // 106 × 1.05 — instead of ECharts rounding up to 150.
+    expect(getValueAxisMax()).toBeCloseTo(111.3, 5)
+  })
+
+  it("leaves ECharts to round when the ticks are the reader's scale", () => {
+    render(<F0DataChart {...horizontal} />)
+    expect(getValueAxisMax()).toBeUndefined()
+  })
+
+  it("measures a stacked category by its total, not its largest part", () => {
+    render(
+      <F0DataChart
+        {...horizontal}
+        stacked
+        showLabels
+        series={[
+          { name: "A", data: [10, 40] },
+          { name: "B", data: [20, 30] },
+        ]}
+      />
+    )
+    // Berlin totals 70; the largest single part is 40.
+    expect(getValueAxisMax()).toBeCloseTo(73.5, 5)
+  })
+
+  it("counts a target ghost as part of its bar's extent", () => {
+    render(
+      <F0DataChart
+        {...horizontal}
+        showLabels
+        series={[{ name: "A", data: [{ value: 60, target: 200 }, 50] }]}
+      />
+    )
+    expect(getValueAxisMax()).toBeCloseTo(210, 5)
+  })
+
+  it("leaves the axis alone for negative-only data", () => {
+    render(
+      <F0DataChart
+        {...horizontal}
+        showLabels
+        series={[{ name: "A", data: [-10, -40] }]}
+      />
+    )
+    expect(getValueAxisMax()).toBeUndefined()
+  })
+
+  it("leaves vertical charts to their rounded axis", () => {
+    render(<F0DataChart {...horizontal} orientation="vertical" showLabels />)
+    expect(
+      (getLatestOption().yAxis as unknown as { max?: number }).max
+    ).toBeUndefined()
+  })
+})
+
+describe("BarChart — category label gutter padding", () => {
+  function getGridLeft() {
+    return (getLatestOption().grid as { left?: number } | undefined)?.left
+  }
+
+  it("pads the gutter past what ECharts reserves, in proportion to the labels", () => {
+    containerSize.width = 800
+    // Vertical: no measured category width, so no padding — the baseline.
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["Berlin"]}
+        series={[{ name: "A", data: [1] }]}
+      />
+    )
+    const base = getGridLeft() ?? 0
+
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Berlin"]}
+        series={[{ name: "A", data: [1] }]}
+      />
+    )
+    // 6 chars → 48 + 4 slack = 52 wide; 8% of that, rounded up, is 5.
+    expect(getGridLeft()).toBe(base + 5)
+  })
+
+  it("pads more for longer names, which overflow by more", () => {
+    containerSize.width = 800
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Berlin"]}
+        series={[{ name: "A", data: [1] }]}
+      />
+    )
+    const shortPad = getGridLeft() ?? 0
+
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["A considerably longer workplace name"]}
+        series={[{ name: "A", data: [1] }]}
+      />
+    )
+    expect(getGridLeft()).toBeGreaterThan(shortPad)
+  })
+
+  it("leaves a caller's own grid.left alone", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Berlin"]}
+        series={[{ name: "A", data: [1] }]}
+        echartsOptions={{ grid: { left: 0 } }}
+      />
+    )
+    expect(getGridLeft()).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Review follow-ups: PR #4984
+// ---------------------------------------------------------------------------
+
+/** 20 rows at a height where only a handful fit at the thickness floor. */
+const denseRows = (count = 20) => ({
+  type: "bar" as const,
+  orientation: "horizontal" as const,
+  categories: Array.from({ length: count }, (_, i) => `Row ${i + 1}`),
+  series: [
+    {
+      name: "Headcount",
+      data: Array.from({ length: count }, (_, i) => count - i),
+    },
+  ],
+})
+
+function getDataZoom() {
+  return (
+    getLatestOption() as unknown as {
+      dataZoom?: {
+        type?: string
+        startValue?: number
+        endValue?: number
+        disabled?: boolean
+        zoomLock?: boolean
+        filterMode?: string
+      }[]
+    }
+  ).dataZoom
+}
+
+describe("BarChart — windowing is opt-in", () => {
+  it("keeps every category by default, however dense", () => {
+    containerSize.height = 200
+    render(<F0DataChart {...denseRows()} />)
+    // No window: the rows compress instead, which keeps them all reachable for
+    // a consumer that has nowhere to put a "show all" control.
+    expect(getDataZoom()).toBeUndefined()
+  })
+
+  it("reports nothing hidden when it is not windowing", () => {
+    containerSize.height = 200
+    const onHidden = vi.fn()
+    render(<F0DataChart {...denseRows()} onHiddenCategoriesChange={onHidden} />)
+    expect(onHidden).toHaveBeenCalledWith(0)
+  })
+
+  it("creates a locked, non-interactive window when asked to", () => {
+    containerSize.height = 200
+    render(<F0DataChart {...denseRows()} windowCategories />)
+
+    const zoom = getDataZoom()?.[0]
+    expect(zoom?.type).toBe("inside")
+    expect(zoom?.startValue).toBe(0)
+    // Neither gesture moves it, and its size cannot change under it.
+    expect(zoom?.disabled).toBe(true)
+    expect(zoom?.zoomLock).toBe(true)
+    // Every row stays in the dataset so `dataIndex` still lines up.
+    expect(zoom?.filterMode).toBe("none")
+    expect(zoom?.endValue).toBeGreaterThanOrEqual(1)
+    expect(zoom?.endValue).toBeLessThan(19)
+  })
+
+  it("reports how many rows the window is hiding", () => {
+    containerSize.height = 200
+    const onHidden = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        onHiddenCategoriesChange={onHidden}
+      />
+    )
+
+    const hidden = onHidden.mock.calls.at(-1)?.[0] as number
+    expect(hidden).toBeGreaterThan(0)
+    const shown = (getDataZoom()?.[0]?.endValue ?? 0) + 1
+    expect(hidden).toBe(20 - shown)
+  })
+
+  it("hides fewer rows as the container grows", () => {
+    containerSize.height = 200
+    const short = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        onHiddenCategoriesChange={short}
+      />
+    )
+
+    containerSize.height = 900
+    const tall = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        onHiddenCategoriesChange={tall}
+      />
+    )
+
+    expect(tall.mock.calls.at(-1)?.[0]).toBeLessThan(
+      short.mock.calls.at(-1)?.[0] as number
+    )
+  })
+
+  it("drops the window and reports nothing hidden once expanded", () => {
+    containerSize.height = 200
+    const onHidden = vi.fn()
+    render(
+      <F0DataChart
+        {...denseRows()}
+        windowCategories
+        showAllCategories
+        onHiddenCategoriesChange={onHidden}
+      />
+    )
+
+    expect(getDataZoom()).toBeUndefined()
+    expect(onHidden).toHaveBeenLastCalledWith(0)
+  })
+
+  it("never windows a vertical chart, which lays categories along the width", () => {
+    containerSize.height = 200
+    render(
+      <F0DataChart {...denseRows()} orientation="vertical" windowCategories />
+    )
+    expect(getDataZoom()).toBeUndefined()
+  })
+})
+
+describe("BarChart — value axis extent by sign", () => {
+  function getValueAxisMax() {
+    return (getLatestOption().xAxis as unknown as { max?: number }).max
+  }
+
+  it("measures a mixed-sign stack by its positive side, not its net", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        stacked
+        showLabels
+        categories={["Madrid"]}
+        series={[
+          { name: "A", data: [100] },
+          { name: "B", data: [100] },
+          { name: "C", data: [-150] },
+        ]}
+      />
+    )
+    // The stack visibly reaches +200; a signed sum would have said 50 and pinned
+    // the axis at 52.5, clipping most of the positive stack.
+    expect(getValueAxisMax()).toBeCloseTo(210, 5)
+  })
+
+  it("ignores negative-only data, leaving the axis to ECharts", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        stacked
+        showLabels
+        categories={["Madrid"]}
+        series={[
+          { name: "A", data: [-100] },
+          { name: "B", data: [-50] },
+        ]}
+      />
+    )
+    expect(getValueAxisMax()).toBeUndefined()
+  })
+})
+
+describe("BarChart — legend isolation", () => {
+  const stacked = {
+    type: "bar" as const,
+    orientation: "horizontal" as const,
+    stacked: true,
+    showLabels: true,
+    categories: ["Madrid"],
+    series: [
+      { name: "Women", data: [30] },
+      { name: "Men", data: [70] },
+    ],
+  }
+
+  function getTotalLabel() {
+    const total = getMainSeries().find(
+      (s) => (s as { name?: string }).name === "__stackTotal"
+    )
+    return total?.label?.formatter?.({ dataIndex: 0 } as never)
+  }
+
+  it("totals every series while the whole legend is selected", () => {
+    render(<F0DataChart {...stacked} />)
+    expect(getTotalLabel()).toBe("100")
+  })
+
+  it("re-totals from the selected series when one is dropped", () => {
+    render(
+      <F0DataChart
+        {...stacked}
+        series={[
+          { name: "Women", data: [30] },
+          { name: "Men", data: [70] },
+          { name: "Unspecified", data: [20] },
+        ]}
+      />
+    )
+    expect(getTotalLabel()).toBe("120")
+
+    emitChartEvent("legendselectchanged", {
+      name: "Unspecified",
+      selected: { Women: true, Men: true, Unspecified: false },
+    })
+    // ECharts re-stacks around the visible series, so the number has to follow
+    // the bar rather than keep describing the hidden one.
+    expect(getTotalLabel()).toBe("100")
+  })
+
+  it("drops the total once a single series is left", () => {
+    render(<F0DataChart {...stacked} />)
+    emitChartEvent("legendselectchanged", {
+      name: "Women",
+      selected: { Women: false, Men: true },
+    })
+    // One visible series makes the total a restatement of its own segment label.
+    expect(getTotalLabel()).toBeUndefined()
+  })
+
+  it("rescales the value axis to the visible series", () => {
+    render(<F0DataChart {...stacked} />)
+    const full = (getLatestOption().xAxis as unknown as { max?: number }).max
+
+    emitChartEvent("legendselectchanged", {
+      name: "Women",
+      selected: { Women: true, Men: false },
+    })
+    const isolated = (getLatestOption().xAxis as unknown as { max?: number })
+      .max
+    expect(isolated).toBeLessThan(full as number)
+  })
+
+  it("restores the full total when the legend is fully selected again", () => {
+    render(<F0DataChart {...stacked} />)
+    emitChartEvent("legendselectchanged", {
+      selected: { Women: true, Men: false },
+    })
+    emitChartEvent("legendselectchanged", {
+      selected: { Women: true, Men: true },
+    })
+    expect(getTotalLabel()).toBe("100")
+  })
+})
+
+describe("BarChart — the window takes data order, not rank", () => {
+  it("windows the first rows as given, whatever the order", () => {
+    containerSize.height = 200
+    // Alphabetical, not amount-descending: the window is positional, so nothing
+    // here is the "top" of anything. `ChartItem`'s copy says "showing N of M".
+    const categories = [
+      "Amsterdam",
+      "Barcelona",
+      "Berlin",
+      "Copenhagen",
+      "Dublin",
+      "Lisbon",
+      "London",
+      "Madrid",
+      "Milan",
+      "Munich",
+      "Paris",
+      "Prague",
+      "Rome",
+      "Stockholm",
+      "Vienna",
+      "Warsaw",
+      "Zurich",
+    ]
+    const onHidden = vi.fn()
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        windowCategories
+        onHiddenCategoriesChange={onHidden}
+        categories={categories}
+        // Deliberately unsorted values, so the drawn rows can only be explained
+        // by position.
+        series={[
+          {
+            name: "Headcount",
+            data: [
+              5, 90, 12, 40, 3, 77, 21, 8, 60, 15, 30, 2, 55, 9, 44, 18, 70,
+            ],
+          },
+        ]}
+      />
+    )
+
+    const zoom = getDataZoom()?.[0]
+    expect(zoom?.startValue).toBe(0)
+    const shown = (zoom?.endValue ?? 0) + 1
+    // The window starts at Amsterdam and runs down the list; the largest value
+    // (Barcelona, 90) being inside it is a coincidence of position.
+    expect(shown).toBeLessThan(categories.length)
+    expect(onHidden).toHaveBeenLastCalledWith(categories.length - shown)
   })
 })

@@ -496,6 +496,78 @@ function fetchHiringGoalGauge(filters: Filters): Promise<DashboardChartData> {
 // Heatmap fetch function
 // ---------------------------------------------------------------------------
 
+const SCATTER_DEPARTMENTS = [
+  { name: "Engineering", salaryBase: 52000, count: 26 },
+  { name: "Design", salaryBase: 46000, count: 16 },
+  { name: "Sales", salaryBase: 41000, count: 20 },
+] as const
+
+const SCATTER_FIRST_NAMES = [
+  "Ana",
+  "Marc",
+  "Júlia",
+  "Pau",
+  "Laia",
+  "Oriol",
+  "Nuria",
+  "Sergi",
+]
+const SCATTER_LAST_NAMES = ["Ruiz", "Vidal", "Serra", "Bosch", "Roca", "Ferrer"]
+
+/**
+ * Deliberate anomalies per department — a senior hire paid well above their
+ * tenure, and someone long-serving whose salary never caught up. Spotting these
+ * is the whole point of a scatter, so the demo data should contain some.
+ */
+const SCATTER_OUTLIERS: Record<
+  string,
+  { x: number; y: number; label: string }[]
+> = {
+  Engineering: [
+    { x: 128000, y: 0.6, label: "Roser Nogué" },
+    { x: 37000, y: 13.8, label: "Bernat Illa" },
+  ],
+  Design: [{ x: 96000, y: 1.4, label: "Ivet Prat" }],
+  Sales: [{ x: 34000, y: 11.9, label: "Genís Mas" }],
+}
+
+/**
+ * Salary against tenure, one point per employee, split by department. Salary
+ * rises with tenure plus noise, so the cloud shows the correlation a scatter
+ * is meant to reveal.
+ */
+function fetchSalaryTenureScatter(
+  filters: Filters
+): Promise<DashboardChartData> {
+  const w = weekSeed(filters)
+  return delay(600).then(() => ({
+    scatterSeries: SCATTER_DEPARTMENTS.map((department, deptIdx) => ({
+      name: department.name,
+      data: [
+        ...Array.from({ length: department.count }, (_, i) => {
+          const seed = deptIdx * 100 + i
+          const tenure = Math.round(seeded(w, 400 + seed) * 120) / 10
+          const salary =
+            Math.round(
+              (department.salaryBase +
+                tenure * 3200 +
+                (seeded(w, 700 + seed) - 0.5) * 14000) /
+                500
+            ) * 500
+          return {
+            x: salary,
+            y: tenure,
+            label: `${SCATTER_FIRST_NAMES[i % SCATTER_FIRST_NAMES.length]} ${
+              SCATTER_LAST_NAMES[i % SCATTER_LAST_NAMES.length]
+            }`,
+          }
+        }),
+        ...(SCATTER_OUTLIERS[department.name] ?? []),
+      ],
+    })),
+  }))
+}
+
 function fetchActivityHeatmap(filters: Filters): Promise<DashboardChartData> {
   const w = weekSeed(filters)
   return delay(700).then(() => ({
@@ -907,7 +979,28 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     chart: { type: "heatmap" },
     fetchData: fetchActivityHeatmap,
   },
-  // Row 5 — employee table (full width)
+  // Row 5 — salary vs tenure scatter (full width)
+  {
+    id: "salary-vs-tenure",
+    title: "Salary vs Tenure",
+    description: "One point per employee, split by department",
+    type: "chart",
+    colSpan: 12,
+    x: 0,
+    y: 31,
+    rowSpan: 7,
+    chart: {
+      type: "scatter",
+      xAxisName: "salary",
+      yAxisName: "tenure",
+      xValueFormatter: (v: number) => `€${Math.round(v / 1000)}k`,
+      valueFormatter: (v: number) => `${v} yrs`,
+      xTooltipValueFormatter: (v: number) => `€${v.toLocaleString()}`,
+      tooltipValueFormatter: (v: number) => `${v} yrs`,
+    },
+    fetchData: fetchSalaryTenureScatter,
+  },
+  // Row 6 — employee table (full width)
   collectionItem,
   // Row 6 — hiring funnel (full width)
   {
