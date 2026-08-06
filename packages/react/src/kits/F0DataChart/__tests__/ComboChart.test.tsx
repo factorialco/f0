@@ -58,6 +58,9 @@ type ChartOption = {
     stack?: string
     itemStyle?: { color?: string }
     areaStyle?: unknown
+    smooth?: boolean
+    step?: boolean | "start" | "middle" | "end"
+    lineStyle?: { type?: "solid" | "dashed" | "dotted" }
     showSymbol?: boolean
     symbolSize?: number
     label?: {
@@ -285,6 +288,53 @@ describe("ComboChart — formatters", () => {
     expect(html).toContain("4.1%")
   })
 
+  it("uses the precise primary tooltip formatter without changing the axis", () => {
+    render(
+      <F0DataChart
+        {...comboProps}
+        valueFormatter={(value) => `${value}K`}
+        tooltipValueFormatter={(value) => `${value.toLocaleString()} people`}
+      />
+    )
+
+    const option = getLatestOption()
+    expect(getValueAxes(option)[0].axisLabel.formatter?.(120)).toBe("120K")
+    expect(
+      option.tooltip.formatter([
+        {
+          seriesName: "Headcount · People",
+          seriesIndex: 0,
+          value: 120,
+          name: "Jan",
+        },
+      ])
+    ).toContain("120 people")
+  })
+
+  it("keeps the secondary formatter for a line-only partial state", () => {
+    render(
+      <F0DataChart
+        {...comboProps}
+        barSeries={[]}
+        valueFormatter={(value) => `${value} people`}
+        tooltipValueFormatter={(value) => `${value.toFixed(2)} people`}
+        secondaryValueFormatter={(value) => `${value}%`}
+      />
+    )
+
+    const option = getLatestOption()
+    expect(
+      option.tooltip.formatter([
+        {
+          seriesName: "Turnover rate · Percent",
+          seriesIndex: 0,
+          value: 4.1,
+          name: "Jan",
+        },
+      ])
+    ).toContain("4.1%")
+  })
+
   it("keeps rows on the right formatter when a bar series expands into a target ghost", () => {
     // A bar series carrying targets produces two ECharts series, so the
     // bar/line boundary is no longer `barSeries.length`.
@@ -365,7 +415,7 @@ describe("ComboChart — formatters", () => {
         name: "Jan",
       },
       {
-        seriesName: "Revenue (target) · People (target)",
+        seriesName: "Revenue (target) · People",
         seriesIndex: 1,
         dataIndex: 0,
         value: 10,
@@ -377,6 +427,10 @@ describe("ComboChart — formatters", () => {
     expect(html).toContain("10 EUR")
     expect(html).toContain("/ 20 EUR")
     expect(html).not.toContain("Revenue (target) · People (target)")
+    expect(option.series.slice(0, 2).map((series) => series.name)).toEqual([
+      "Revenue (target) · People",
+      "Revenue (target) · People",
+    ])
   })
 
   it("returns no tooltip for malformed or ghost-only payloads", () => {
@@ -444,6 +498,10 @@ describe("ComboChart — series appearance", () => {
       "Revenue · People (2)",
       "Revenue · Percent",
     ])
+    const description = getLatestOption().aria?.label?.description ?? ""
+    expect(description).toContain("Revenue · People (1)")
+    expect(description).toContain("Revenue · People (2)")
+    expect(description).toContain("Revenue · Percent")
   })
 
   it("keeps cross-axis identities unique when both axis labels match", () => {
@@ -472,6 +530,43 @@ describe("ComboChart — series appearance", () => {
     for (const series of getLatestOption().series) {
       expect(series.label?.show).toBe(false)
     }
+  })
+
+  it("applies global and per-series line appearance options", () => {
+    render(
+      <F0DataChart
+        {...comboProps}
+        lineType="smooth"
+        showDots
+        lineSeries={[
+          { name: "Actual", data: [4.1, 3.8, 5.2] },
+          {
+            name: "Forecast",
+            data: [4.3, 4.1, 4.8],
+            lineType: "step",
+            dashed: true,
+          },
+        ]}
+      />
+    )
+
+    const lines = getLatestOption().series.filter(
+      (series) => series.type === "line"
+    )
+    expect(lines[0]).toMatchObject({
+      smooth: true,
+      step: false,
+      showSymbol: true,
+      symbolSize: 6,
+      lineStyle: { type: "solid" },
+    })
+    expect(lines[1]).toMatchObject({
+      smooth: false,
+      step: "end",
+      showSymbol: true,
+      symbolSize: 6,
+      lineStyle: { type: "dashed" },
+    })
   })
 
   it("renders formatted line labels without requiring visible dots", () => {
@@ -546,9 +641,9 @@ describe("ComboChart — accessibility", () => {
     expect(option.aria?.enabled).toBe(true)
     const description = option.aria?.label?.description ?? ""
     expect(description).toContain("Left axis, bars: People")
-    expect(description).toContain("Headcount: Jan: 120 people")
+    expect(description).toContain("Headcount · People: Jan: 120 people")
     expect(description).toContain("Right axis, lines: Percent")
-    expect(description).toContain("Turnover rate: Jan: 4.1%")
+    expect(description).toContain("Turnover rate · Percent: Jan: 4.1%")
   })
 
   it("uses the visible category formatter in the accessible description", () => {

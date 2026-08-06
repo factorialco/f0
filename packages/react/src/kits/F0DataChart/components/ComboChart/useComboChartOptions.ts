@@ -258,6 +258,7 @@ export function useComboChartOptions(
     showGrid = true,
     showLabels = false,
     valueFormatter,
+    tooltipValueFormatter,
     secondaryValueFormatter,
     valueAxisSplitNumber = 2,
     categoryFormatter,
@@ -268,9 +269,9 @@ export function useComboChartOptions(
   const theme = useChartTheme(containerRef)
   const { t } = useI18n()
   const effectivePrimaryAxisLabel =
-    primaryAxisLabel.trim() || t("dataChart.comboAxis.primaryMeasure")
+    primaryAxisLabel?.trim() || t("dataChart.comboAxis.primaryMeasure")
   const effectiveSecondaryAxisLabel =
-    secondaryAxisLabel.trim() || t("dataChart.comboAxis.secondaryMeasure")
+    secondaryAxisLabel?.trim() || t("dataChart.comboAxis.secondaryMeasure")
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
 
@@ -325,9 +326,12 @@ export function useComboChartOptions(
         resolveBorderRadius,
         undefined,
         valueFormatter
-      ).map((entry, entryIndex) => ({
+      ).map((entry) => ({
         ...entry,
-        name: entryIndex === 0 ? displayName : `${displayName} (target)`,
+        // Target ghosts share the visible series identity so ECharts legend
+        // selection hides/restores both halves together. They remain absent
+        // from tooltip rows through `hiddenSeriesIndices`, not through naming.
+        name: displayName,
         yAxisIndex: 0,
       }))
 
@@ -388,6 +392,9 @@ export function useComboChartOptions(
       : undefined
 
     const primaryFormatter = hasBarData ? valueFormatter : lineFormatter
+    const firstAxisTooltipFormatter = hasBarData
+      ? (tooltipValueFormatter ?? valueFormatter)
+      : lineFormatter
     const seriesLabelEdgePadding = showLabels
       ? estimateEdgeLabelPadding(
           visibleLineSeries,
@@ -430,7 +437,7 @@ export function useComboChartOptions(
         hiddenSeriesIndices,
         secondaryAxisIndices,
         targetsBySeriesIndex,
-        primaryFormatter,
+        firstAxisTooltipFormatter,
         lineFormatter
       ),
       echartsOptions,
@@ -445,8 +452,14 @@ export function useComboChartOptions(
         enabled: true,
         description: buildAriaDescription(
           categories,
-          barSeries,
-          lineSeries,
+          visibleBarSeries.map((series, index) => ({
+            ...series,
+            name: qualifiedBarNames[index],
+          })),
+          visibleLineSeries.map((series, index) => ({
+            ...series,
+            name: qualifiedLineNames[index],
+          })),
           valueFormatter,
           lineFormatter,
           categoryFormatter,
@@ -488,6 +501,7 @@ export function useComboChartOptions(
     showGrid,
     showLabels,
     valueFormatter,
+    tooltipValueFormatter,
     secondaryValueFormatter,
     valueAxisSplitNumber,
     categoryFormatter,

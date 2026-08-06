@@ -4,6 +4,37 @@ import type { F0DataChartProps } from "../types"
 import { isDataChartEmpty } from "../utils/isDataChartEmpty"
 
 describe("isDataChartEmpty", () => {
+  describe("combo", () => {
+    const base = {
+      type: "combo" as const,
+      primaryAxisLabel: "People",
+      secondaryAxisLabel: "Rate",
+      categories: ["A", "B"],
+    }
+
+    it("treats all-zero values as renderable data", () => {
+      expect(
+        isDataChartEmpty({
+          ...base,
+          barSeries: [{ name: "Headcount", data: [0, 0] }],
+          lineSeries: [{ name: "Turnover", data: [0, 0] }],
+        })
+      ).toBe(false)
+    })
+
+    it("is null-safe for malformed series lists", () => {
+      expect(
+        isDataChartEmpty({
+          ...base,
+          // @ts-expect-error testing malformed runtime input
+          barSeries: undefined,
+          // @ts-expect-error testing malformed runtime input
+          lineSeries: undefined,
+        })
+      ).toBe(true)
+    })
+  })
+
   describe("bar / line", () => {
     it.each(["bar", "line"] as const)("%s — empty series array", (type) => {
       expect(

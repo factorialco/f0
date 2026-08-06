@@ -6,6 +6,7 @@ import {
   compatibleTargetTypes,
   defaultChartConfig,
   detectDataShape,
+  isRenderableChart,
   toCanonical,
 } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
@@ -52,6 +53,27 @@ describe("detectDataShape — combo", () => {
         series: [{ name: "Headcount", data: [1] }],
       })
     ).toBe("bar")
+  })
+})
+
+describe("isRenderableChart — combo runtime contract", () => {
+  it("rejects version-skewed combo configs without both axis labels", () => {
+    expect(
+      isRenderableChart({
+        type: "combo",
+        primaryAxisLabel: "People",
+      } as never)
+    ).toBe(false)
+    expect(
+      isRenderableChart({
+        type: "combo",
+        secondaryAxisLabel: "Rate",
+      } as never)
+    ).toBe(false)
+  })
+
+  it("accepts a complete combo config", () => {
+    expect(isRenderableChart(comboConfig)).toBe(true)
   })
 })
 

@@ -113,6 +113,15 @@ describe("computeAlignedValueAxes — scale choices", () => {
     expect(intervals(result.secondary)).toBe(4)
   })
 
+  it("uses two intervals for mixed-sign data when one would clip it", () => {
+    const result = computeAlignedValueAxes([-8, 12], [1, 2], 1)
+
+    expect(intervals(result.primary)).toBe(2)
+    expect(intervals(result.secondary)).toBe(2)
+    expect(result.primary.min).toBeLessThanOrEqual(-8)
+    expect(result.primary.max).toBeGreaterThanOrEqual(12)
+  })
+
   it("rounds steps to 1 / 2 / 2.5 / 5 / 10 decades", () => {
     const { primary, secondary } = expectSameIntervals([0, 137], [0, 0.043])
     for (const bounds of [primary, secondary]) {

@@ -218,14 +218,22 @@ export function computeAlignedValueAxes(
   const requestedIntervals = Number.isFinite(splitNumber)
     ? Math.round(splitNumber)
     : 2
-  const intervals = Math.min(
-    MAX_ALIGNED_AXIS_INTERVALS,
-    Math.max(1, requestedIntervals)
-  )
   const extents: [Extent, Extent] = [
     zeroInclusiveExtent(primaryValues),
     zeroInclusiveExtent(secondaryValues),
   ]
+  // One interval cannot cover values on both sides of the zero baseline while
+  // keeping zero as an axis boundary. Use the smallest representable count
+  // instead of falling through to placeholder bounds that would clip data.
+  const minimumIntervals = extents.some(
+    (extent) => extent.min < 0 && extent.max > 0
+  )
+    ? 2
+    : 1
+  const intervals = Math.min(
+    MAX_ALIGNED_AXIS_INTERVALS,
+    Math.max(minimumIntervals, requestedIntervals)
+  )
 
   if (extents.every((extent) => extent.min < 0)) {
     const shared = bestSharedBounds(extents, intervals)

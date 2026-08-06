@@ -13,7 +13,7 @@ import type {
 } from "@/patterns/OneFilterPicker/types"
 
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
-import type { DashboardMetricItem } from "../types"
+import type { DashboardChartItem, DashboardMetricItem } from "../types"
 
 const filters = {
   department: {
@@ -292,5 +292,40 @@ describe("F0AnalyticsDashboard — unrenderable chart config", () => {
     await waitFor(() =>
       expect(screen.getAllByText("Error loading data")).toHaveLength(1)
     )
+  })
+})
+
+describe("F0AnalyticsDashboard — combo chart type picker", () => {
+  it("does not expose the one-way Table toggle for a combo item", async () => {
+    const user = userEvent.setup()
+    const item: DashboardChartItem<typeof filters> = {
+      id: "combo",
+      title: "Headcount and turnover",
+      type: "chart",
+      chart: {
+        type: "combo",
+        primaryAxisLabel: "People",
+        secondaryAxisLabel: "Rate",
+      },
+      fetchData: vi.fn().mockResolvedValue({
+        // Deliberately omit both optional combo series lists: the config must
+        // keep the picker hidden even before a later refresh returns them.
+        categories: [],
+      }),
+    }
+
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[item]}
+        onTransformChart={vi.fn()}
+      />
+    )
+
+    await waitFor(() => expect(item.fetchData).toHaveBeenCalled())
+    await user.click(screen.getByLabelText("Other actions"))
+
+    expect(screen.queryByText("Chart type")).not.toBeInTheDocument()
+    expect(screen.queryByText("Table")).not.toBeInTheDocument()
   })
 })

@@ -616,7 +616,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
     return true
   })
 
-  // Scatter converts to nothing, so its picker would hold only "Table" — and
+  // Scatter and combo convert to nothing, so their picker would hold only
+  // "Table" — and
   // the group is `required`, so selecting it would leave no route back to the
   // chart. Gauge has the same shape and the same latent trap, but it also has
   // that route today; taking it away is a change existing users would see, so
@@ -625,7 +626,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // list above is keyed on — an item configured as something else whose data
   // arrives as `scatterSeries` gets the same one-entry list and needs the same
   // treatment.
-  const hidesChartTypePicker = dataShape === "scatter"
+  const hidesChartTypePicker =
+    safeChart.type === "combo" ||
+    dataShape === "scatter" ||
+    dataShape === "combo"
 
   const chartTypeOptions =
     onTransformChart && !hidesChartTypePicker

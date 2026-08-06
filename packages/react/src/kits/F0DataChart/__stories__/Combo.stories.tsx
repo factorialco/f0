@@ -163,6 +163,21 @@ export const NegativeValues: Story = {
   } satisfies F0DataChartProps,
 }
 
+/** Four aligned intervals on each value axis instead of the default two. */
+export const FourValueAxisIntervals: Story = {
+  args: {
+    type: "combo",
+    primaryAxisLabel: "People",
+    secondaryAxisLabel: "Turnover rate",
+    categories: [...MONTHS],
+    barSeries: HEADCOUNT,
+    lineSeries: TURNOVER,
+    valueFormatter: people,
+    secondaryValueFormatter: percent,
+    valueAxisSplitNumber: 4,
+  } satisfies F0DataChartProps,
+}
+
 /** Smoothed line, with dots marking each data point. */
 export const SmoothLineWithDots: Story = {
   args: {

@@ -301,6 +301,12 @@ export interface F0DataChartComboProps extends F0DataChartBaseProps {
    */
   secondaryValueFormatter?: (value: number) => string
   /**
+   * Format primary (bar) values in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}; set it when the left axis must
+   * stay compact while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
+  /**
    * Suggested number of segments on both value axes. Kept shared so the two
    * axes draw the same number of grid lines and their ticks stay aligned —
    * independent split counts produce two interleaved sets of grid lines.

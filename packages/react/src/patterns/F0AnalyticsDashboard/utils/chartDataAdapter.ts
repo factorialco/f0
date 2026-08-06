@@ -183,7 +183,17 @@ const RENDERABLE_CHART_TYPES = new Set(
 export function isRenderableChart(
   config: DashboardChartConfig | undefined | null
 ): config is DashboardChartConfig {
-  return config != null && RENDERABLE_CHART_TYPES.has(config.type)
+  if (config == null || !RENDERABLE_CHART_TYPES.has(config.type)) return false
+  if (config.type !== "combo") return true
+
+  // Combo introduced two required runtime fields. TypeScript protects direct
+  // callers, but host mappers can be version-skewed or consume untyped wire
+  // data; contain that mismatch to this dashboard item instead of calling
+  // `.trim()` on an absent label in the renderer.
+  return (
+    typeof config.primaryAxisLabel === "string" &&
+    typeof config.secondaryAxisLabel === "string"
+  )
 }
 
 /** A scatter point's category identity: its label, else its x value. */
