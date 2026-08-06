@@ -444,7 +444,7 @@ export const TableKpiCompoundValues: Story = {
     docs: {
       description: {
         story:
-          "A KPI-focused table showcasing multi-segment `compound` values with semantic tones and `value / value` formatting.",
+          "A KPI-highlighted table showcasing multi-segment `compound` values with semantic tones and `value / value` formatting.",
       },
     },
   },
@@ -1083,12 +1083,12 @@ export const TableWithCollapsibleHeaderGroupsAndSorting: Story = {
   },
 }
 
-export const TableWithFocusedHeaderGroup: Story = {
+export const TableWithHighlightedHeaderGroup: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Setting `focused` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background — equivalent to setting the `focused` column option on each of its columns — and the emphasis survives collapsing the group. Here a full year of sortable, collapsible months starts collapsed except August, the focused month — the same shape as a monthly cost overview highlighting the current month.",
+          "Setting `highlighted` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background — equivalent to setting the `highlighted` column option on each of its columns — and the emphasis survives collapsing the group. Here a full year of sortable, collapsible months starts collapsed except August, the highlighted month — the same shape as a monthly cost overview highlighting the current month.",
       },
     },
   },
@@ -1124,7 +1124,7 @@ export const TableWithFocusedHeaderGroup: Story = {
       dec: "December",
     }
 
-    const focusedMonth: Month = "aug"
+    const highlightedMonth: Month = "aug"
 
     const monthly = (baseSalaries: number, baseBonuses: number) =>
       Object.fromEntries(
@@ -1208,9 +1208,9 @@ export const TableWithFocusedHeaderGroup: Story = {
                     label: monthLabels[month],
                     // Only the total stays visible while collapsed
                     collapsedColumns: [`${month}-total`],
-                    defaultCollapsed: month !== focusedMonth,
+                    defaultCollapsed: month !== highlightedMonth,
                     // Focuses the spanning header and every column in the group
-                    focused: month === focusedMonth,
+                    highlighted: month === highlightedMonth,
                   },
                 ])
               ),
@@ -1260,33 +1260,36 @@ export const TableWithFocusedHeaderGroup: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // The focused group's spanning header is emphasized.
+    // The highlighted group's spanning header is emphasized.
     const augustGroup = await canvas.findByRole("button", { name: "August" })
     expect(augustGroup.closest("th")?.className).toContain(
       "bg-f1-background-secondary"
     )
 
-    // Every column of the focused group carries the emphasis and the marker:
+    // Every column of the highlighted group carries the emphasis and the marker:
     // the group header plus its three expanded columns.
-    const focusedHeaders = canvasElement.querySelectorAll("th[data-focused]")
-    expect(focusedHeaders.length).toBe(4)
-    focusedHeaders.forEach((header) => {
+    const highlightedHeaders = canvasElement.querySelectorAll(
+      "th[data-highlighted]"
+    )
+    expect(highlightedHeaders.length).toBe(4)
+    highlightedHeaders.forEach((header) => {
       expect(header.className).toContain("bg-f1-background-secondary")
     })
 
-    // Collapsing the focused month keeps its visible total column emphasized.
+    // Collapsing the highlighted month keeps its visible total column emphasized.
     await userEvent.click(augustGroup)
     await waitFor(() =>
       expect(augustGroup).toHaveAttribute("aria-expanded", "false")
     )
     await waitFor(() => {
-      const collapsedFocused =
-        canvasElement.querySelectorAll("th[data-focused]")
-      // The group header plus the remaining total column.
-      expect(collapsedFocused.length).toBe(2)
-      expect(collapsedFocused[collapsedFocused.length - 1].className).toContain(
-        "bg-f1-background-secondary"
+      const collapsedHighlighted = canvasElement.querySelectorAll(
+        "th[data-highlighted]"
       )
+      // The group header plus the remaining total column.
+      expect(collapsedHighlighted.length).toBe(2)
+      expect(
+        collapsedHighlighted[collapsedHighlighted.length - 1].className
+      ).toContain("bg-f1-background-secondary")
     })
   },
 }

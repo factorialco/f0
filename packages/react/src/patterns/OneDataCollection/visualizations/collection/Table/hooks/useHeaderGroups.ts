@@ -44,7 +44,7 @@ type NormalizedHeaderGroup = {
   label: string
   collapsedColumns?: ColId[]
   defaultCollapsed: boolean
-  focused: boolean
+  highlighted: boolean
 }
 
 type NormalizedHeaderGroups = Record<string, NormalizedHeaderGroup>
@@ -69,12 +69,12 @@ export const normalizeHeaderGroups = (
   Object.entries(headerGroups).forEach(([groupId, definition]) => {
     normalized[groupId] =
       typeof definition === "string"
-        ? { label: definition, defaultCollapsed: false, focused: false }
+        ? { label: definition, defaultCollapsed: false, highlighted: false }
         : {
             label: definition.label,
             collapsedColumns: definition.collapsedColumns,
             defaultCollapsed: definition.defaultCollapsed ?? false,
-            focused: definition.focused ?? false,
+            highlighted: definition.highlighted ?? false,
           }
   })
 
@@ -318,13 +318,13 @@ export const useHeaderGroups = <
               : columns.filter((_, index) => !hidden.has(index))
           })()
 
-    // A focused group's emphasis lives on its columns — equivalent to setting
-    // `focused` on each of them — so headers, body cells and the summary row
-    // can all read `column.focused` directly.
+    // A highlighted group's emphasis lives on its columns — equivalent to setting
+    // `highlighted` on each of them — so headers, body cells and the summary row
+    // can all read `column.highlighted` directly.
     if (!definitions) return kept
     return kept.map((column) =>
-      column.headerGroupId && definitions[column.headerGroupId]?.focused
-        ? { ...column, focused: true }
+      column.headerGroupId && definitions[column.headerGroupId]?.highlighted
+        ? { ...column, highlighted: true }
         : column
     )
   }, [columns, definitions, settledCollapsedGroups])

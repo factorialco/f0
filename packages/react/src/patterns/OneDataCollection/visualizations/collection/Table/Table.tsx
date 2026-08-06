@@ -485,8 +485,8 @@ export const TableCollection = <
                         align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
-                        focused={entry.columnIndices.some(
-                          (columnIndex) => columns[columnIndex].focused
+                        highlighted={entry.columnIndices.some(
+                          (columnIndex) => columns[columnIndex].highlighted
                         )}
                         // The toggle lives on the cell, not on the button, so
                         // the whole header is the hit area. The button keeps
@@ -551,7 +551,9 @@ export const TableCollection = <
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}
-                        focused={!!columns[entry.columnIndices[0]].focused}
+                        highlighted={
+                          !!columns[entry.columnIndices[0]].highlighted
+                        }
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
@@ -966,7 +968,7 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
-                          focused={!!column.focused}
+                          highlighted={!!column.highlighted}
                           className={cn(
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||

@@ -113,7 +113,7 @@ export const useColumnCollapseAnimation = (
           fill: closing ? "forwards" : "backwards",
         })
 
-        // Only the cell's contents fade, never the cell itself: a focused
+        // Only the cell's contents fade, never the cell itself: a highlighted
         // column paints its own background on the cell, and fading the whole
         // cell would show the row's background through it while it moves.
         Array.from(cell.children).forEach((child) => {

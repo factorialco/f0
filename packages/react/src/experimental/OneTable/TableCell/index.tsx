@@ -91,10 +91,10 @@ interface TableCellProps {
 
   /**
    * Emphasizes the cell with a subtle gray background, drawing attention to a
-   * focused column.
+   * highlighted column.
    * @default false
    */
-  focused?: boolean
+  highlighted?: boolean
 }
 
 const stripedLines =
@@ -123,7 +123,7 @@ export function TableCell({
   nestedRowProps,
   fromVisualization,
   referenceRowType = "none",
-  focused = false,
+  highlighted = false,
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -157,13 +157,13 @@ export function TableCell({
         isSticky && isScrolled && stickyScrollClasses[referenceRowType],
         isSticky && "sticky z-10",
         isStickyRight && stickyScrollClasses[referenceRowType],
-        // The row hover keeps reading through the focused cell, so a hovered
+        // The row hover keeps reading through the highlighted cell, so a hovered
         // row stays one uniform surface.
-        focused &&
+        highlighted &&
           "bg-f1-background-secondary group-hover:bg-f1-background-hover",
         // Sticky cells paint their opaque background on the `before` layer;
-        // the focused tint has to land there too or it stays hidden under it.
-        focused &&
+        // the highlighted tint has to land there too or it stays hidden under it.
+        highlighted &&
           isSticky &&
           "before:bg-f1-background-secondary group-hover:before:bg-f1-background-hover",
         href && "cursor-pointer",

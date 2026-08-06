@@ -149,10 +149,10 @@ interface TableHeadProps {
 
   /**
    * Emphasizes the cell with a subtle gray background, drawing attention to a
-   * focused column.
+   * highlighted column.
    * @default false
    */
-  focused?: boolean
+  highlighted?: boolean
 
   /**
    * Alingment of the cell
@@ -182,7 +182,7 @@ export function TableHead({
   infoIcon = InfoCircleLine,
   sticky,
   hidden = false,
-  focused = false,
+  highlighted = false,
   align = "left",
   className,
   colSpan,
@@ -324,12 +324,12 @@ export function TableHead({
           (isScrolled || isScrolledRight) &&
           "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
         isSticky && "sticky",
-        focused && "bg-f1-background-secondary",
+        highlighted && "bg-f1-background-secondary",
         hidden && "after:hidden",
         handleCellClick && "cursor-pointer",
         className
       )}
-      data-focused={focused ? "true" : undefined}
+      data-highlighted={highlighted ? "true" : undefined}
       onClick={handleCellClick}
       tabIndex={sticky ? 0 : undefined}
       colSpan={colSpan}

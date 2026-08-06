@@ -378,10 +378,14 @@ describe("TableCollection", () => {
       expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
-    it("applies the focused background to the focused column's header and cells", async () => {
-      const columnsWithFocused = [
+    it("applies the highlighted background to the highlighted column's header and cells", async () => {
+      const columnsWithHighlighted = [
         { label: "name", render: (item: Person) => item.name },
-        { label: "email", render: (item: Person) => item.email, focused: true },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          highlighted: true,
+        },
       ]
 
       render(
@@ -394,7 +398,7 @@ describe("TableCollection", () => {
           TestNavigationFilters,
           GroupingDefinition<Person>
         >
-          columns={columnsWithFocused}
+          columns={columnsWithHighlighted}
           source={createTestSource()}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
@@ -408,7 +412,7 @@ describe("TableCollection", () => {
 
       const emailHeader = screen.getByRole("columnheader", { name: "email" })
       expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
-      expect(emailHeader).toHaveAttribute("data-focused", "true")
+      expect(emailHeader).toHaveAttribute("data-highlighted", "true")
 
       const nameHeader = screen.getByRole("columnheader", { name: "name" })
       expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
@@ -420,10 +424,18 @@ describe("TableCollection", () => {
       expect(nameCell?.className).not.toMatch(/bg-f1-background-secondary/)
     })
 
-    it("emphasizes every focused column", async () => {
-      const columnsWithFocused = [
-        { label: "name", render: (item: Person) => item.name, focused: true },
-        { label: "email", render: (item: Person) => item.email, focused: true },
+    it("emphasizes every highlighted column", async () => {
+      const columnsWithHighlighted = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          highlighted: true,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          highlighted: true,
+        },
         { label: "displayName", render: (item: Person) => item.displayName },
       ]
 
@@ -437,7 +449,7 @@ describe("TableCollection", () => {
           TestNavigationFilters,
           GroupingDefinition<Person>
         >
-          columns={columnsWithFocused}
+          columns={columnsWithHighlighted}
           source={createTestSource()}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
@@ -463,7 +475,7 @@ describe("TableCollection", () => {
       )
     })
 
-    it("highlights the spanning header of the focused column's group", async () => {
+    it("highlights the spanning header of the highlighted column's group", async () => {
       const groupedColumns = [
         {
           label: "name",
@@ -474,7 +486,7 @@ describe("TableCollection", () => {
           label: "email",
           render: (item: Person) => item.email,
           headerGroupId: "contact",
-          focused: true,
+          highlighted: true,
         },
       ]
 
@@ -514,7 +526,7 @@ describe("TableCollection", () => {
       )
     })
 
-    it("focuses every column of a focused header group", async () => {
+    it("highlights every column of a highlighted header group", async () => {
       const groupedColumns = [
         { label: "name", render: (item: Person) => item.name },
         {
@@ -544,7 +556,7 @@ describe("TableCollection", () => {
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
-          headerGroups={{ contact: { label: "Contact", focused: true } }}
+          headerGroups={{ contact: { label: "Contact", highlighted: true } }}
         />
       )
 
@@ -572,9 +584,13 @@ describe("TableCollection", () => {
       expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
     })
 
-    it("combines a focused header group with independently focused columns", async () => {
+    it("combines a highlighted header group with independently highlighted columns", async () => {
       const groupedColumns = [
-        { label: "name", render: (item: Person) => item.name, focused: true },
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          highlighted: true,
+        },
         {
           label: "email",
           render: (item: Person) => item.email,
@@ -597,7 +613,7 @@ describe("TableCollection", () => {
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
-          headerGroups={{ contact: { label: "Contact", focused: true } }}
+          headerGroups={{ contact: { label: "Contact", highlighted: true } }}
         />
       )
 

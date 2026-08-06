@@ -177,33 +177,33 @@ describe("TableHead rich header info", () => {
   })
 })
 
-describe("TableHead and TableCell focused", () => {
-  it("emphasizes only the focused header and cell, and marks the header for scroll targeting", () => {
+describe("TableHead and TableCell highlighted", () => {
+  it("emphasizes only the highlighted header and cell, and marks the header for scroll targeting", () => {
     zeroRender(
       <OneTable>
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead focused>Email</TableHead>
+            <TableHead highlighted>Email</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>
             <TableCell>John</TableCell>
-            <TableCell focused>john@example.com</TableCell>
+            <TableCell highlighted>john@example.com</TableCell>
           </TableRow>
         </TableBody>
       </OneTable>
     )
 
-    const [plainHead, focusedHead] = screen.getAllByRole("columnheader")
-    expect(focusedHead.className).toMatch(/bg-f1-background-secondary/)
-    expect(focusedHead).toHaveAttribute("data-focused", "true")
+    const [plainHead, highlightedHead] = screen.getAllByRole("columnheader")
+    expect(highlightedHead.className).toMatch(/bg-f1-background-secondary/)
+    expect(highlightedHead).toHaveAttribute("data-highlighted", "true")
     expect(plainHead.className).not.toMatch(/bg-f1-background-secondary/)
-    expect(plainHead).not.toHaveAttribute("data-focused")
+    expect(plainHead).not.toHaveAttribute("data-highlighted")
 
-    const [plainCell, focusedCell] = screen.getAllByRole("cell")
-    expect(focusedCell.className).toMatch(/bg-f1-background-secondary/)
+    const [plainCell, highlightedCell] = screen.getAllByRole("cell")
+    expect(highlightedCell.className).toMatch(/bg-f1-background-secondary/)
     expect(plainCell.className).not.toMatch(/bg-f1-background-secondary/)
   })
 })
