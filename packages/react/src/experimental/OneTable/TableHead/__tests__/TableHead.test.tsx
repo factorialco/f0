@@ -205,7 +205,13 @@ describe("left-frozen column border", () => {
     renderFrozenTable()
     const [name, team, role] = screen.getAllByRole("columnheader")
 
-    expect(name).toHaveClass("border-l", "border-f1-border-secondary")
+    // border-solid is required: F0 disables Tailwind preflight, so a border-*
+    // width utility without an explicit style renders at 0px (invisible).
+    expect(name).toHaveClass(
+      "border-l",
+      "border-solid",
+      "border-f1-border-secondary"
+    )
     expect(team).not.toHaveClass("border-l")
     expect(role).not.toHaveClass("border-l")
   })
@@ -214,7 +220,13 @@ describe("left-frozen column border", () => {
     renderFrozenTable()
     const [name, team, role] = screen.getAllByRole("cell")
 
-    expect(name).toHaveClass("border-l", "border-f1-border-secondary")
+    // border-solid is required: F0 disables Tailwind preflight, so a border-*
+    // width utility without an explicit style renders at 0px (invisible).
+    expect(name).toHaveClass(
+      "border-l",
+      "border-solid",
+      "border-f1-border-secondary"
+    )
     expect(team).not.toHaveClass("border-l")
     expect(role).not.toHaveClass("border-l")
   })

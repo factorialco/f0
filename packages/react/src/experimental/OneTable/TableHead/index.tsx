@@ -321,7 +321,7 @@ export function TableHead({
         // sits to its left (e.g. the app sidebar).
         isStickyLeft &&
           stickyLeft === 0 &&
-          "border-l border-f1-border-secondary",
+          "border-l border-solid border-f1-border-secondary",
         hidden && "after:hidden",
         handleCellClick && "cursor-pointer",
         className

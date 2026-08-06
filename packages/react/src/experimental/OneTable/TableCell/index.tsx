@@ -153,7 +153,7 @@ export function TableCell({
         // its content never blends into whatever is to its left.
         isStickyLeft &&
           stickyLeft === 0 &&
-          "border-l border-f1-border-secondary",
+          "border-l border-solid border-f1-border-secondary",
         isStickyRight && stickyScrollClasses[referenceRowType],
         href && "cursor-pointer",
         className
