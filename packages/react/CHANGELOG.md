@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.1](https://github.com/factorialco/f0/compare/f0-react-v6.8.0...f0-react-v6.8.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* **F0Graph:** keep the node border visible on hover ([#5016](https://github.com/factorialco/f0/issues/5016)) ([b056751](https://github.com/factorialco/f0/commit/b056751ce7845b35747752cfb1bbfaddf9965765))
+
 ## [6.8.0](https://github.com/factorialco/f0/compare/f0-react-v6.7.2...f0-react-v6.8.0) (2026-08-06)
 
 
