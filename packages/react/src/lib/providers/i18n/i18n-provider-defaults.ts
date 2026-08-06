@@ -672,6 +672,15 @@ export const defaultTranslations = {
       title: "No data available",
       description: "Try a different date or fewer filters",
     },
+    windowedCategories: "Showing {{count}} of {{total}} categories",
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}",
+    },
   },
   progressSeries: {
     noData: "No data",
@@ -689,6 +698,12 @@ export const defaultTranslations = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
+  },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found",
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -908,6 +923,9 @@ export const defaultTranslations = {
       },
       checkbox: {
         mustBeChecked: "This option must be selected",
+      },
+      phone: {
+        invalid: "Enter a valid phone number",
       },
     },
   },

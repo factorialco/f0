@@ -117,14 +117,27 @@
   @apply m-0 mb-2.5 p-0 text-2xl font-medium;
 }
 
+/* One typography token per level, so every level differs by size rather than
+   leaning on weight. h3 takes `xl`, the step the scale skipped between h2 and
+   h3, which is what frees a distinct size for each of h4, h5 and h6. */
 .rich-text-editor-container h3,
 .rich-text-display-container h3 {
-  @apply m-0 mb-2.5 p-0 text-lg font-medium;
+  @apply m-0 mb-2.5 p-0 text-xl font-medium;
 }
 
 .rich-text-editor-container h4,
 .rich-text-display-container h4 {
   @apply m-0 mb-2.5 p-0 text-lg font-medium;
+}
+
+.rich-text-editor-container h5,
+.rich-text-display-container h5 {
+  @apply m-0 mb-2.5 p-0 text-base font-medium;
+}
+
+.rich-text-editor-container h6,
+.rich-text-display-container h6 {
+  @apply m-0 mb-2.5 p-0 text-sm font-medium;
 }
 
 .rich-text-editor-container ul,
@@ -136,6 +149,76 @@
 .rich-text-editor-container ol,
 .rich-text-display-container ol {
   @apply m-0 mb-2.5 list-decimal;
+}
+
+/* Nested lists repeat the parent marker without these; depth is otherwise only
+   conveyed by indentation. Selected by class, not by `ul ul`: the list classes
+   below already set a marker at specificity 0,2,0, which any element-based
+   selector loses to. */
+.rich-text-editor-container .f1-bullet-list .f1-bullet-list,
+.rich-text-display-container .f1-bullet-list .f1-bullet-list {
+  list-style-type: circle;
+}
+
+.rich-text-editor-container .f1-bullet-list .f1-bullet-list .f1-bullet-list,
+.rich-text-display-container .f1-bullet-list .f1-bullet-list .f1-bullet-list {
+  list-style-type: square;
+}
+
+.rich-text-editor-container .f1-ordered-list .f1-ordered-list,
+.rich-text-display-container .f1-ordered-list .f1-ordered-list {
+  list-style-type: lower-alpha;
+}
+
+.rich-text-editor-container .f1-ordered-list .f1-ordered-list .f1-ordered-list,
+.rich-text-display-container
+  .f1-ordered-list
+  .f1-ordered-list
+  .f1-ordered-list {
+  list-style-type: lower-roman;
+}
+
+/* Source indentation carried by the indent attribute on paragraphs and
+   headings. A class rather than only an inline style because the sanitizer
+   read-only content passes through allows `class` but not `style`. */
+.rich-text-editor-container .f0-indent-1,
+.rich-text-display-container .f0-indent-1 {
+  @apply pl-[24px];
+}
+
+.rich-text-editor-container .f0-indent-2,
+.rich-text-display-container .f0-indent-2 {
+  @apply pl-[48px];
+}
+
+.rich-text-editor-container .f0-indent-3,
+.rich-text-display-container .f0-indent-3 {
+  @apply pl-[72px];
+}
+
+.rich-text-editor-container .f0-indent-4,
+.rich-text-display-container .f0-indent-4 {
+  @apply pl-[96px];
+}
+
+.rich-text-editor-container .f0-indent-5,
+.rich-text-display-container .f0-indent-5 {
+  @apply pl-[120px];
+}
+
+.rich-text-editor-container .f0-indent-6,
+.rich-text-display-container .f0-indent-6 {
+  @apply pl-[144px];
+}
+
+.rich-text-editor-container .f0-indent-7,
+.rich-text-display-container .f0-indent-7 {
+  @apply pl-[168px];
+}
+
+.rich-text-editor-container .f0-indent-8,
+.rich-text-display-container .f0-indent-8 {
+  @apply pl-[192px];
 }
 
 .rich-text-editor-container a:not([data-type="mention"]):not(.mention),

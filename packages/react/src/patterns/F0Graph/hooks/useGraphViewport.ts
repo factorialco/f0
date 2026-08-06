@@ -34,7 +34,11 @@ interface UseGraphViewportOptions {
 }
 
 export interface UseGraphViewportResult {
-  currentZoom: number
+  /**
+   * Derived, DISCRETE zoom step. The continuous zoom factor is deliberately not
+   * exposed: it changes every zoom frame, and anything that renders from it
+   * re-renders at frame rate. Consumers that need to react to zoom want this.
+   */
   zoomLevel: ZoomLevel
   /**
    * True once React Flow has emitted its first viewport update (i.e. the
@@ -92,10 +96,26 @@ export function useGraphViewport({
 
   const [viewportReady, setViewportReady] = useState(false)
 
+  // React Flow calls this on every camera frame. Both setters used to run
+  // unconditionally, and React only *may* skip re-rendering when a state value
+  // is unchanged — it can still re-run the component body once before bailing
+  // out. Measured on a 4s pan: 180 renders of F0GraphView against 81 actual
+  // value changes, the ~100 remainder being these no-op writes (during a pan the
+  // zoom never changes, and `viewportReady` is already true after the first
+  // frame). The refs make the no-op case cost nothing.
+  const viewportReadyRef = useRef(false)
+  const zoomRef = useRef(defaultZoom)
+
   const handleViewportChange = useCallback(
     (vp: Viewport) => {
-      setViewportReady(true)
-      setCurrentZoom(vp.zoom)
+      if (!viewportReadyRef.current) {
+        viewportReadyRef.current = true
+        setViewportReady(true)
+      }
+      if (vp.zoom !== zoomRef.current) {
+        zoomRef.current = vp.zoom
+        setCurrentZoom(vp.zoom)
+      }
       onViewportChange?.({ x: vp.x, y: vp.y, zoom: vp.zoom })
     },
     [onViewportChange]
@@ -157,7 +177,6 @@ export function useGraphViewport({
   }, [currentUserNodeId, reactFlow, nodeWindowingActive, centerOnNode])
 
   return {
-    currentZoom,
     zoomLevel,
     viewportReady,
     handleViewportChange,

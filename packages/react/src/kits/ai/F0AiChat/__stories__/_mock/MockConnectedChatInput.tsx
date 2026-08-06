@@ -25,6 +25,7 @@ export const MockConnectedChatInput = () => {
     isLoadingThread,
     currentThreadTitle,
     clarifyingQuestion,
+    composerHidden,
   } = useMockAiChatRuntime()
   const {
     placeholders,
@@ -84,13 +85,29 @@ export const MockConnectedChatInput = () => {
     [sendMessage, tracking]
   )
 
-  return (
+  // Guided flows keep the composer out of view during the scripted intro (the
+  // "Let's create a Survey" + thinking beat), until the first clarifying panel
+  // is ready. Rendering nothing here — rather than adding a "hidden" state to
+  // F0AiChatTextArea — keeps the component's own layout/animation rules intact.
+  if (composerHidden && !clarifyingQuestion) return null
+
+  const clarifyingUI = clarifyingQuestion ? (
+    <F0ClarifyingPanel
+      clarifyingQuestion={clarifyingQuestion}
+      isSubmitDisabled={inProgress}
+    />
+  ) : undefined
+
+  const textArea = (
     <F0AiChatTextArea
       ref={containerRef}
       onSubmit={handleSubmit}
       inProgress={inProgress}
       placeholders={placeholders}
-      creditWarning={creditWarning}
+      // The credit warning belongs to the composer, so suppress it while a
+      // clarifying panel occupies the input slot — it would otherwise sit above
+      // the guiding questions, which isn't the input it's warning about.
+      creditWarning={clarifyingQuestion ? undefined : creditWarning}
       pendingContext={pendingContext}
       onPendingContextChange={setPendingContext}
       pendingQuote={pendingQuote}
@@ -106,14 +123,28 @@ export const MockConnectedChatInput = () => {
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       onSuggestionClick={handleSuggestionClick}
       welcomeScreenCards={welcomeScreenCards}
-      clarifyingUI={
-        clarifyingQuestion ? (
-          <F0ClarifyingPanel
-            clarifyingQuestion={clarifyingQuestion}
-            isSubmitDisabled={inProgress}
-          />
-        ) : undefined
-      }
+      clarifyingUI={clarifyingUI}
     />
   )
+
+  // The guided flows keep `composerHidden` true from the intro through their
+  // FIRST clarifying panel (it's cleared when the user answers), so this slot's
+  // first visible render is the whole clarifying CARD on a fresh mount — F0's
+  // own composer→clarifying transition never ran (its `AnimatePresence` is
+  // `initial={false}`), and it would pop in. Slide the entire card up (not just
+  // its inner questions) for that first appearance. Once the composer has taken
+  // over (composerHidden false), later clarifying panels use F0's built-in
+  // transition, so the entrance isn't doubled up. Driven by tailwindcss-animate
+  // (CSS keyframes) rather than framer, so it also plays where framer's global
+  // `skipAnimations` is set (the automation/Chromatic preview); respects
+  // reduced motion.
+  if (clarifyingQuestion && composerHidden) {
+    return (
+      <div className="duration-500 ease-out animate-in fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
+        {textArea}
+      </div>
+    )
+  }
+
+  return textArea
 }

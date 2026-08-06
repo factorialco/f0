@@ -125,6 +125,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       hideLabel = false,
       value,
       onChange,
+      allowNegative = false,
       onBlur,
       units = DEFAULT_UNITS,
       fields: fieldConfig,
@@ -148,8 +149,15 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const visibleUnitsKey = visibleUnits.join("|")
 
+    // The minus sign applies to the whole duration; segment fields always hold magnitudes.
+    const [negative, setNegative] = useState(() => allowNegative && value < 0)
+    const magnitudeOf = useCallback(
+      (seconds: number) => (allowNegative ? Math.abs(seconds) : seconds),
+      [allowNegative]
+    )
+
     const [localFields, setLocalFields] = useState<DurationFields>(() =>
-      secondsToVisibleFields(value, visibleUnits)
+      secondsToVisibleFields(magnitudeOf(value), visibleUnits)
     )
     const lastEmittedRef = useRef(value)
     const lastVisibleUnitsKeyRef = useRef(visibleUnitsKey)
@@ -160,7 +168,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     ) {
       lastEmittedRef.current = value
       lastVisibleUnitsKeyRef.current = visibleUnitsKey
-      setLocalFields(secondsToVisibleFields(value, visibleUnits))
+      setLocalFields(secondsToVisibleFields(magnitudeOf(value), visibleUnits))
+      setNegative(allowNegative && value < 0)
     }
 
     const firstUnitId = `${baseId}-${visibleUnits[0]}`
@@ -182,13 +191,14 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     )
 
     const emitChange = useCallback(
-      (updatedFields: DurationFields) => {
+      (updatedFields: DurationFields, isNegative: boolean) => {
         const normalized = toVisibleOnlyFields(updatedFields)
         const total = fieldsToSeconds(normalized)
+        const signed = isNegative && total > 0 ? -total : total
         // Keep typed values while editing; canonical rollover happens on blur.
         setLocalFields(normalized)
-        lastEmittedRef.current = total
-        onChange(total)
+        lastEmittedRef.current = signed
+        onChange(signed)
       },
       [onChange, toVisibleOnlyFields]
     )
@@ -197,42 +207,69 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       (unit: DurationUnit, max: number | undefined) =>
         (e: React.ChangeEvent<HTMLInputElement>) => {
           const raw = e.target.value
+          const isFirstUnit = unit === visibleUnits[0]
+          const hasLeadingMinus =
+            allowNegative && isFirstUnit && raw.trimStart().startsWith("-")
 
           if (raw === "") {
-            emitChange({ ...localFields, [unit]: 0 })
+            const nextNegative = isFirstUnit ? false : negative
+            setNegative(nextNegative)
+            emitChange({ ...localFields, [unit]: 0 }, nextNegative)
             return
           }
 
           const digits = raw.replace(/\D/g, "")
-          if (digits === "") return
+          if (digits === "") {
+            // A lone minus sign clears the segment but keeps the pending sign.
+            if (hasLeadingMinus) {
+              setNegative(true)
+              emitChange({ ...localFields, [unit]: 0 }, true)
+            }
+            return
+          }
 
           const parsed = parseInt(digits, 10)
           if (isNaN(parsed)) return
 
           const clamped = clampValue(parsed, max)
-          emitChange({ ...localFields, [unit]: clamped })
+          const nextNegative =
+            allowNegative && isFirstUnit ? hasLeadingMinus : negative
+          setNegative(nextNegative)
+          emitChange({ ...localFields, [unit]: clamped }, nextNegative)
         },
-      [localFields, emitChange]
+      [localFields, emitChange, allowNegative, negative, visibleUnits]
     )
 
     const handleFieldBlur = useCallback(() => {
       const normalized = toVisibleOnlyFields(localFields)
       const total = fieldsToSeconds(normalized)
-      // Normalize visible units on blur (e.g. 75 min -> 1h 15m).
+      const isNegative = negative && total > 0
+      // Normalize visible units on blur (e.g. 75 min -> 1h 15m) and drop a
+      // dangling minus sign when the duration is zero.
       setLocalFields(secondsToVisibleFields(total, visibleUnits))
-      lastEmittedRef.current = total
+      setNegative(isNegative)
+      lastEmittedRef.current = isNegative ? -total : total
       onBlur?.()
-    }, [localFields, onBlur, toVisibleOnlyFields, visibleUnits])
+    }, [localFields, negative, onBlur, toVisibleOnlyFields, visibleUnits])
 
     const handleKeyDown = useCallback(
-      (e: React.KeyboardEvent<HTMLInputElement>) => {
+      (unit: DurationUnit) => (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return
         if (e.key.length > 1) return
+        if (
+          allowNegative &&
+          e.key === "-" &&
+          unit === visibleUnits[0] &&
+          (e.currentTarget.selectionStart ?? 0) === 0 &&
+          !e.currentTarget.value.includes("-")
+        ) {
+          return
+        }
         if (!/^\d$/.test(e.key)) {
           e.preventDefault()
         }
       },
-      []
+      [allowNegative, visibleUnits]
     )
 
     const handleContainerClick = useCallback(
@@ -317,13 +354,15 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
             const max = fieldConfig?.[unit]?.max
             const fieldValue = localFields[unit]
             const suffix = fieldConfig?.[unit]?.suffix ?? STATIC_SUFFIXES[unit]
-            const displayValue = fieldValue > 0 ? String(fieldValue) : ""
+            const magnitude = fieldValue > 0 ? String(fieldValue) : ""
+            const showMinus = negative && index === 0
+            const displayValue = showMinus ? `-${magnitude}` : magnitude
             const maxVisibleDigits = fieldConfig?.[unit]?.maxVisibleDigits
             const resolvedMaxVisibleDigits =
-              typeof maxVisibleDigits === "number" &&
+              (typeof maxVisibleDigits === "number" &&
               Number.isFinite(maxVisibleDigits)
                 ? Math.max(1, Math.floor(maxVisibleDigits))
-                : DEFAULT_MAX_VISIBLE_DIGITS
+                : DEFAULT_MAX_VISIBLE_DIGITS) + (showMinus ? 1 : 0)
 
             return (
               <Fragment key={unit}>
@@ -359,7 +398,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   placeholder="0"
                   onChange={handleFieldChange(unit, max)}
                   onBlur={handleFieldBlur}
-                  onKeyDown={handleKeyDown}
+                  onKeyDown={handleKeyDown(unit)}
                   inputMode="numeric"
                   disabled={disabled}
                   readOnly={readonly}

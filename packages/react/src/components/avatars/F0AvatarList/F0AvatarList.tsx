@@ -33,8 +33,15 @@ export const F0AvatarList = ({
   noTooltip = false,
   remainingCount: initialRemainingCount,
   max,
+  // Deprecated and intentionally ignored — see `F0AvatarListProps`. Kept in the
+  // destructuring, under this exact name, because the pattern is emitted
+  // verbatim into the public .d.ts signature of `F0AvatarList`: dropping or
+  // renaming it reads as a breaking public API change for a prop that still
+  // exists and still typechecks. `void` below satisfies `noUnusedLocals`.
   tooltipScroll,
 }: F0AvatarListProps) => {
+  void tooltipScroll
+
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
     const sizesMappingList: Record<string, AvatarListSize> = {
@@ -135,7 +142,6 @@ export const F0AvatarList = ({
             size={size}
             type={type === "person" ? "rounded" : "base"}
             avatarType={type}
-            tooltipScroll={tooltipScroll}
             list={
               initialRemainingCount
                 ? undefined

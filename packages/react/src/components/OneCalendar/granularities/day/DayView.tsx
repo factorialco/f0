@@ -5,7 +5,7 @@ import {
   SelectSingleEventHandler,
 } from "react-day-picker"
 
-import { useL10n } from "@/lib/providers/l10n"
+import { useDateFnsLocale, useL10n } from "@/lib/providers/l10n"
 import { Calendar } from "@/ui/calendar"
 
 import {
@@ -14,7 +14,7 @@ import {
   WeekStartDay,
   WeekStartsOn,
 } from "../../types"
-import { getLocale, toCalendarPickerMatcher } from "../../utils"
+import { toCalendarPickerMatcher } from "../../utils"
 
 interface DayViewProps {
   mode: CalendarMode
@@ -52,7 +52,8 @@ export function DayView({
   compact = false,
   weekStartsOn,
 }: DayViewProps) {
-  const { locale, date } = useL10n()
+  const { date } = useL10n()
+  const locale = useDateFnsLocale()
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? date?.weekStartsOn ?? WeekStartDay.Monday
@@ -130,7 +131,7 @@ export function DayView({
             selected={selected as Date}
             onSelect={onSelect as SelectSingleEventHandler}
             month={month}
-            locale={getLocale(locale)}
+            locale={locale}
             weekStartsOn={effectiveWeekStartsOn}
             compact={compact}
           />
@@ -158,7 +159,7 @@ export function DayView({
           onSelect={handleRangeSelect}
           month={month}
           onMonthChange={onMonthChange}
-          locale={getLocale(locale)}
+          locale={locale}
           weekStartsOn={effectiveWeekStartsOn}
           compact={compact}
         />

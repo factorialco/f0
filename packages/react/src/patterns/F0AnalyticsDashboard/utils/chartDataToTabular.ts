@@ -6,11 +6,23 @@ import type {
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
 
-import type { DashboardChartConfig, DashboardChartData } from "../types"
+import type {
+  DashboardChartConfig,
+  DashboardChartData,
+  ScatterChartConfig,
+} from "../types"
 
 interface TabularResult {
+  /** Header labels, in order. May contain duplicates — they come from data. */
   columns: string[]
   rows: Record<string, unknown>[]
+  /**
+   * Stable row-lookup keys, parallel to `columns`. Set when a header label is
+   * user-controlled and could therefore collide with another column: rows are
+   * keyed by these instead, so two columns sharing a label stay distinct.
+   * Absent when every header is a safe literal.
+   */
+  keys?: string[]
 }
 
 /**
@@ -47,6 +59,8 @@ export function chartDataToTabular(
       return gaugeToTabular(data)
     case "heatmap":
       return heatmapToTabular(data)
+    case "scatter":
+      return scatterToTabular(config, data)
   }
 }
 
@@ -151,4 +165,40 @@ function heatmapToTabular(data: DashboardChartData): TabularResult {
   }))
 
   return { columns: ["X", "Y", "Value"], rows }
+}
+
+/**
+ * One row per point, long format — the same choice heatmap makes for its
+ * cells. The Series and Label columns stay in the header even when unused, so
+ * a single-series scatter and a colour-split one export the same shape.
+ *
+ * The axis names are user-controlled (LLM-generated on the chat path), so two
+ * measures called the same thing, or one called "Series", is an ordinary
+ * outcome. Rows are therefore keyed by fixed ids and the names used only as
+ * header labels — otherwise a later computed key silently overwrites an
+ * earlier one and a column's data vanishes from the table and every export.
+ */
+function scatterToTabular(
+  config: ScatterChartConfig,
+  data: DashboardChartData
+): TabularResult {
+  const rows = (data.scatterSeries ?? []).flatMap((series) =>
+    series.data.map((point) => ({
+      series: series.name,
+      label: Array.isArray(point) ? "" : (point.label ?? ""),
+      x: Array.isArray(point) ? point[0] : point.x,
+      y: Array.isArray(point) ? point[1] : point.y,
+    }))
+  )
+
+  return {
+    columns: [
+      "Series",
+      "Label",
+      config.xAxisName ?? "X",
+      config.yAxisName ?? "Y",
+    ],
+    keys: ["series", "label", "x", "y"],
+    rows,
+  }
 }

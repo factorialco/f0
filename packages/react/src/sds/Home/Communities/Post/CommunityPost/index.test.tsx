@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, expect, test, vi } from "vitest"
 
+import { L10nProvider } from "@/lib/providers/l10n"
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
 import { BaseCommunityPost, CommunityPostProps } from "./index"
 
@@ -37,6 +38,7 @@ beforeAll(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.useRealTimers()
 })
 
 const mockDescriptionDimensions = ({
@@ -134,4 +136,38 @@ test("resets expanded state when disabled, re-enabled, or reused for another pos
 
   expect(description).toHaveClass("line-clamp-5")
   expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
+})
+
+const renderPublishedAt = (createdAt: string, locale?: string) => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date("2026-07-31T15:00:00Z"))
+
+  const post = (
+    <BaseCommunityPost {...defaultProps} createdAt={new Date(createdAt)} />
+  )
+
+  return render(
+    locale ? <L10nProvider l10n={{ locale }}>{post}</L10nProvider> : post
+  )
+}
+
+test("formats the published date in the locale provided by L10nProvider", () => {
+  renderPublishedAt("2026-07-31T12:00:00Z", "de-DE")
+
+  expect(screen.getByText("vor 3 Stunden")).toBeInTheDocument()
+})
+
+// The test wrapper already supplies `en-US`, so this covers the ambient-locale
+// path rather than the no-provider default.
+test("formats the published date in the ambient locale", () => {
+  renderPublishedAt("2026-07-31T12:00:00Z")
+
+  expect(screen.getByText("3 hours ago")).toBeInTheDocument()
+})
+
+// A locale date-fns does not ship must still render, not throw.
+test("renders English for an unsupported locale", () => {
+  renderPublishedAt("2026-07-31T12:00:00Z", "xyz")
+
+  expect(screen.getByText("3 hours ago")).toBeInTheDocument()
 })

@@ -13,6 +13,7 @@ import { SurveyFormBuilderCallbacks, QuestionType } from "../../../types"
 export const RATING_OPTIONS: { label: string; value: RatingOptionType }[] = [
   { label: "1 - 5", value: "1-5" },
   { label: "1 - 10", value: "1-10" },
+  { label: "0 - 10", value: "0-10" },
   { label: "Emojis", value: "emojis" },
 ]
 
@@ -175,7 +176,9 @@ export function useQuestionActionsFactory() {
         onQuestionChange?.({
           id: questionId,
           type: "rating",
-          value: 0,
+          // Clear the selection rather than resetting it to 0, which is a real
+          // option on the 0-10 scale.
+          value: undefined,
           options: getRatingOptions(ratingType),
         } as Parameters<
           NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>

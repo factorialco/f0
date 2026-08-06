@@ -97,11 +97,43 @@ export type TableColumnDefinition<
     /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
-     * The label for each group is provided via `headerGroupLabels` in
-     * the visualization options.
+     * Each group is configured via `headerGroups` in the visualization
+     * options, which also controls whether the group can be collapsed.
      */
     headerGroupId?: string
   }
+
+/**
+ * Configuration for a single header group, keyed by `headerGroupId` in the
+ * `headerGroups` visualization option.
+ */
+export type HeaderGroupDefinition = {
+  /**
+   * The label rendered in the spanning header row.
+   */
+  label: string
+
+  /**
+   * Ids of the columns in this group that stay visible while the group is
+   * collapsed — the group's "summary" columns. Providing this key is what
+   * makes the group collapsible; omit it for a purely visual group.
+   *
+   * Ids are matched against each column's `id` (falling back to its `label`,
+   * mirroring how column ids are resolved elsewhere). Ids that don't belong to
+   * this group are ignored. A collapsed group always keeps at least one
+   * column, so passing `[]` — or only unknown ids — leaves the group's first
+   * column visible.
+   */
+  collapsedColumns?: ColId[]
+
+  /**
+   * Whether the group renders collapsed on first render. Only meaningful for
+   * collapsible groups. Read once on mount; afterwards the collapsed state is
+   * owned by the table.
+   * @default false
+   */
+  defaultCollapsed?: boolean
+}
 
 export type ReferenceType = "none" | "striped" | "striked"
 
@@ -155,10 +187,32 @@ export type TableVisualizationOptions<
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
   /**
-   * Labels for header groups. Keys are headerGroupId values used in column
-   * definitions, values are the display labels rendered in the spanning header row.
+   * Header group configuration. Keys are the `headerGroupId` values used in
+   * column definitions. Pass a string for a plain spanning label, or a
+   * {@link HeaderGroupDefinition} to also make the group collapsible:
+   *
+   * ```ts
+   * headerGroups: {
+   *   personal: "Personal information",
+   *   january: {
+   *     label: "January",
+   *     collapsedColumns: ["january-total"],
+   *     defaultCollapsed: true,
+   *   },
+   * }
+   * ```
+   *
+   * A collapsed group hides every column in it except the ones listed in
+   * `collapsedColumns`, and renders a toggle next to its label.
    */
-  headerGroupLabels?: Record<string, string>
+  headerGroups?: Record<string, string | HeaderGroupDefinition>
+
+  /**
+   * Called when the user collapses or expands a header group. Fires after the
+   * table has applied the change; use it to persist the state, not to control
+   * it.
+   */
+  onHeaderGroupCollapsedChange?: (groupId: string, collapsed: boolean) => void
 
   /**
    * Wraps the table in a rounded border container.

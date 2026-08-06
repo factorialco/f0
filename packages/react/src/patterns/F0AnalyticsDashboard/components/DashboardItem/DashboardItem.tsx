@@ -66,6 +66,20 @@ interface DashboardItemProps {
   explanation?: string
   /** Whether this item is currently expanded to fill the grid */
   isFullscreen?: boolean
+  /**
+   * A link rendered inline after the description, for something the description
+   * implies but can't do — a chart showing "13 of 29 categories" offers the way
+   * to see the rest. Kept out of the description string so the text stays
+   * translatable and truncatable on its own.
+   */
+  descriptionAction?: { label: string; onClick: () => void }
+  /**
+   * Take the height from the content instead of the available space. Set by an
+   * expanded item whose content has an intrinsic height it must not compress
+   * below — a horizontal bar chart drawing every category at a fixed row
+   * height. The widget then grows past the viewport and the page scrolls.
+   */
+  fitContent?: boolean
   /** Called when the user toggles fullscreen from the dropdown */
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -93,6 +107,8 @@ export function DashboardItem({
   chartTypeOptions,
   explanation,
   isFullscreen = false,
+  descriptionAction,
+  fitContent = false,
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -159,7 +175,17 @@ export function DashboardItem({
 
   return (
     <div
-      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
+      className={cn(
+        "group/dashitem flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
+        // `min-h-full` still fills the space when the content is shorter, but
+        // lets a taller intrinsic height win instead of being clipped to it.
+        // `shrink-0` is what makes that stick: as a flex item this card would
+        // otherwise be shrunk back down to the space available, and the
+        // percentage `min-height` can't stop it — a definite value replaces the
+        // content-based automatic minimum that normally does. Without it the
+        // border stops at the fold while the chart keeps drawing below it.
+        fitContent ? "min-h-full shrink-0" : "h-full"
+      )}
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
@@ -171,10 +197,38 @@ export function DashboardItem({
           >
             {title}
           </OneEllipsis>
-          {description && (
-            <OneEllipsis className="text-base text-f1-foreground-secondary">
-              {description}
-            </OneEllipsis>
+          {(description || descriptionAction) && (
+            // Baseline-aligned row so the link sits on the description's own
+            // line; the text keeps its own truncation, the link never shrinks.
+            <div className="flex items-baseline gap-1">
+              {description && (
+                <OneEllipsis className="text-base text-f1-foreground-secondary">
+                  {description}
+                </OneEllipsis>
+              )}
+              {descriptionAction && (
+                <>
+                  {description && (
+                    // Separator, not content: hidden from the accessibility tree
+                    // so the description and the action read as two things rather
+                    // than one sentence with a stray character in it.
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 text-base text-f1-foreground-tertiary"
+                    >
+                      ·
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={descriptionAction.onClick}
+                    className="shrink-0 cursor-pointer whitespace-nowrap border-0 bg-transparent p-0 text-base font-medium text-f1-foreground-secondary underline hover:text-f1-foreground"
+                  >
+                    {descriptionAction.label}
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </div>
         <div
@@ -331,7 +385,9 @@ export function DashboardItem({
           )}
         </div>
       </div>
-      <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>
+      <div className={cn("flex-1", !fitContent && "min-h-0")}>
+        {isLoading ? skeleton : children}
+      </div>
     </div>
   )
 }

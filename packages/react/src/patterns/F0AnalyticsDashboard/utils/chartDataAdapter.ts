@@ -5,6 +5,7 @@ import type {
   F0DataChartPieSeries,
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
+  F0DataChartScatterDataPoint,
 } from "@/kits/F0DataChart"
 
 import type { DashboardChartConfig, DashboardChartData } from "../types"
@@ -120,6 +121,90 @@ function gaugeToCanonical(data: DashboardChartData): CanonicalChartData {
   }
 }
 
+/**
+ * Chart types this build can render. Every consumer switches on `chart.type`
+ * without a default, so anything outside this set would throw.
+ *
+ * Declared as `satisfies Record<…>` rather than a `Set<Union>`: the latter
+ * only checks that listed members belong to the union, which would let a new
+ * chart type go unlisted and silently count as unsupported — the very skew
+ * this guard exists to absorb. This way, omitting one fails the build.
+ */
+const RENDERABLE_CHART_TYPES = new Set(
+  Object.keys({
+    bar: true,
+    line: true,
+    funnel: true,
+    pie: true,
+    radar: true,
+    gauge: true,
+    heatmap: true,
+    scatter: true,
+  } satisfies Record<DashboardChartConfig["type"], true>)
+)
+
+/**
+ * Whether this build knows how to render the given chart config. Guards the
+ * boundary where a host app maps a wire type it has no case for and hands
+ * back `undefined`.
+ */
+export function isRenderableChart(
+  config: DashboardChartConfig | undefined | null
+): config is DashboardChartConfig {
+  return config != null && RENDERABLE_CHART_TYPES.has(config.type)
+}
+
+/** A scatter point's category identity: its label, else its x value. */
+function scatterPointKey(point: F0DataChartScatterDataPoint): string {
+  return Array.isArray(point)
+    ? String(point[0])
+    : (point.label ?? String(point.x))
+}
+
+/**
+ * Scatter points have no shared category axis — each series carries its own
+ * point set, of its own length. The canonical form has exactly one shared
+ * `categories` array, so the conversion unions every series' point keys and
+ * looks each series up against that union rather than mapping positionally.
+ *
+ * Positional mapping would misalign the moment two series differed, which is
+ * the normal case for a scatter. Unreachable while scatter stays out of the
+ * type switcher, but correct, so lifting that restriction stays safe.
+ */
+function scatterToCanonical(data: DashboardChartData): CanonicalChartData {
+  const scatterSeries = data.scatterSeries ?? []
+
+  const categories: string[] = []
+  const seen = new Set<string>()
+  for (const entry of scatterSeries) {
+    for (const point of entry.data) {
+      const key = scatterPointKey(point)
+      if (!seen.has(key)) {
+        seen.add(key)
+        categories.push(key)
+      }
+    }
+  }
+
+  return {
+    categories,
+    series: scatterSeries.map((entry) => {
+      const byKey = new Map(
+        entry.data.map((point) => [
+          scatterPointKey(point),
+          Array.isArray(point) ? point[1] : point.y,
+        ])
+      )
+      // A series with no point at a given category contributes 0 there, the
+      // same gap-filling `grouped_cartesian_chart` uses on the Rails side.
+      return {
+        name: entry.name,
+        data: categories.map((category) => byKey.get(category) ?? 0),
+      }
+    }),
+  }
+}
+
 function heatmapToCanonical(data: DashboardChartData): CanonicalChartData {
   const xCats = data.xCategories ?? []
   const yCats = data.yCategories ?? []
@@ -153,6 +238,13 @@ export function detectDataShape(
   data: DashboardChartData,
   hint?: DashboardChartConfig["type"]
 ): DashboardChartConfig["type"] {
+  // Scatter: its own field, so it can never be confused with the heatmap
+  // tuples or a bar/line series array. Checked on presence rather than
+  // length, so an empty scatter still renders its own empty state instead
+  // of being misread as a bar chart.
+  if (data.scatterSeries !== undefined) {
+    return "scatter"
+  }
   // Heatmap: has xCategories/yCategories + data tuples
   if (
     data.xCategories?.length ||
@@ -210,6 +302,8 @@ export function toCanonical(
       return gaugeToCanonical(data)
     case "heatmap":
       return heatmapToCanonical(data)
+    case "scatter":
+      return scatterToCanonical(data)
   }
 }
 
@@ -275,6 +369,24 @@ function canonicalToRadar(canonical: CanonicalChartData): DashboardChartData {
   }
 }
 
+/**
+ * Canonical data has one shared category axis, so the x coordinate has to come
+ * from the category index — the original x measure is not recoverable. Lossy
+ * but never blank; unreachable while scatter stays out of the type switcher.
+ */
+function canonicalToScatter(canonical: CanonicalChartData): DashboardChartData {
+  return {
+    scatterSeries: canonical.series.map((s) => ({
+      name: s.name,
+      data: canonical.categories.map((category, index) => ({
+        x: index,
+        y: s.data[index] ?? 0,
+        label: category,
+      })),
+    })),
+  }
+}
+
 function canonicalToGauge(canonical: CanonicalChartData): DashboardChartData {
   const firstValue = canonical.series[0]?.data[0] ?? 0
   return {
@@ -308,6 +420,8 @@ export function fromCanonical(
     case "heatmap":
       // Heatmap needs 2D data — not meaningful from 1D canonical
       return { xCategories: [], yCategories: [], data: [] }
+    case "scatter":
+      return canonicalToScatter(canonical)
   }
 }
 
@@ -376,6 +490,11 @@ export function compatibleTargetTypes(
       targets.add("bar")
       targets.add("line")
       break
+
+    case "scatter":
+      // Measure against measure has no equivalent in any category-axis chart:
+      // converting either invents an x or discards one. Only table and itself.
+      break
   }
 
   return targets
@@ -396,7 +515,7 @@ export function defaultChartConfig(
 ): DashboardChartConfig {
   switch (type) {
     case "bar":
-      return { type: "bar", orientation: "vertical" }
+      return { type: "bar", orientation: "vertical", showLabels: true }
     case "line":
       return { type: "line", lineType: "linear", showArea: true }
     case "funnel":
@@ -409,5 +528,7 @@ export function defaultChartConfig(
       return { type: "gauge", showValue: true }
     case "heatmap":
       return { type: "heatmap" }
+    case "scatter":
+      return { type: "scatter", scaleAxes: true }
   }
 }

@@ -230,7 +230,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               state !== "selected" &&
                 state !== "highlighted" &&
                 !isDot &&
-                "group-hover/pill:border-transparent group-hover/pill:bg-f1-background-hover",
+                "group-hover/pill:bg-f1-background-hover",
               (state === "selected" || state === "highlighted") &&
                 "border-f1-border-selected-bold"
             )}

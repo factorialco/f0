@@ -30,6 +30,7 @@ export type {
   ChatDashboardPieChartConfig,
   ChatDashboardGaugeChartConfig,
   ChatDashboardHeatmapChartConfig,
+  ChatDashboardScatterChartConfig,
   ChatDashboardMetricFormat,
   ChatDashboardFilterDefinition,
   ChatDashboardNavigationFilterDefinition,
@@ -44,5 +45,6 @@ export type {
   PieComputation,
   GaugeComputation,
   HeatmapComputation,
+  ScatterComputation,
   CollectionComputation,
 } from "./types"

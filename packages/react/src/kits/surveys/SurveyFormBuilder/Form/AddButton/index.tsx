@@ -21,12 +21,20 @@ import { useSurveyFormBuilderContext } from "../../Context"
 import { QuestionType } from "../../types"
 
 export const AddButton = () => {
-  const { disabled, answering, onAddNewElement, isQuestionTypeAllowed } =
-    useSurveyFormBuilderContext()
+  const {
+    disabled,
+    answering,
+    onAddNewElement,
+    isQuestionTypeAllowed,
+    labels,
+  } = useSurveyFormBuilderContext()
   const [open, setOpen] = useState(false)
 
   const questionTypes = useQuestionTypes()
   const { t } = useI18n()
+
+  const addQuestionLabel =
+    labels?.addQuestion ?? t("surveyFormBuilder.actions.addQuestion")
 
   const handleAddNewQuestion = (type: QuestionType, datasetKey?: string) => {
     onAddNewElement?.({ type, datasetKey })
@@ -53,7 +61,7 @@ export const AddButton = () => {
         <DropdownMenuTrigger asChild>
           <F0Button
             icon={Add}
-            label={t("surveyFormBuilder.actions.addQuestion")}
+            label={addQuestionLabel}
             size="md"
             variant="outline"
             hideLabel
