@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { RecordType, useData, useDataSource } from "@/hooks/datasource"
 
@@ -135,8 +135,27 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
     [source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore, paginationInfo } =
-    useData({ ...dataSource, currentSearch: search }, {}, [source])
+  const {
+    data,
+    error: dataError,
+    isInitialLoading,
+    loadMore,
+    isLoadingMore,
+    paginationInfo,
+  } = useData({ ...dataSource, currentSearch: search }, {}, [source])
+
+  const sourceError = useMemo(() => {
+    if (!dataError) {
+      return null
+    }
+
+    const result = new Error(dataError.message)
+    if (dataError.cause !== undefined) {
+      const resultWithCause = result as Error & { cause?: unknown }
+      resultWithCause.cause = dataError.cause
+    }
+    return result
+  }, [dataError])
 
   const materializeOptions = useCallback(
     async (clearCache = false) => {
@@ -198,7 +217,7 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
   return {
     options,
     isLoading: isActuallyLoading,
-    error,
+    error: source ? (sourceError ?? error) : error,
     setOptions,
     loadOptions: materializeOptions,
     loadMore: source ? loadMore : undefined,
