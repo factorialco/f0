@@ -9,6 +9,8 @@ import type {
   DashboardCanvasContent,
   DataDownloadCanvasContent,
   FormCanvasContent,
+  AutofillTimesheetCanvasContent,
+  AutofillTimesheetShift,
 } from "../canvas/types"
 
 /**
@@ -55,6 +57,8 @@ export type {
   DashboardCanvasContent,
   DataDownloadCanvasContent,
   FormCanvasContent,
+  AutofillTimesheetCanvasContent,
+  AutofillTimesheetShift,
 }
 
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"

@@ -59,6 +59,32 @@ export type DataDownloadCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * A single proposed shift block in a timesheet-autofill preview. Clock times are
+ * employee-local "HH:MM"; a null clock time marks an as-yet-unfilled bound.
+ */
+export type AutofillTimesheetShift = {
+  date: string
+  clockIn: string | null
+  clockOut: string | null
+  workable: boolean
+  workplaceId?: string | null
+  workAreaId?: string | null
+  locationType?: string | null
+}
+
+/**
+ * Autofill-timesheet canvas content — renders an editable timesheet proposal
+ * (day-grouped shift blocks the user can adjust and confirm) in the canvas panel.
+ */
+export type AutofillTimesheetCanvasContent = CanvasContentBase & {
+  type: "autofillTimesheet"
+  employeeId: string
+  startOn: string
+  endOn: string
+  shifts: AutofillTimesheetShift[]
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
@@ -66,6 +92,7 @@ export type CanvasContent =
   | DashboardCanvasContent
   | FormCanvasContent
   | DataDownloadCanvasContent
+  | AutofillTimesheetCanvasContent
 
 // ---------------------------------------------------------------------------
 // Entity definition contract
