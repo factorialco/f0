@@ -36,21 +36,19 @@ const MAIN_ENTRY_PREFIXES = [
 /**
  * Directory prefixes exported through the experimental entry.
  *
- * The sds/Home modules live outside src/experimental/ but are re-exported
- * through its barrels (Widgets/Layout, Widgets/Content, Information,
- * Navigation) — everything there EXCEPT F0AvatarPulse, which stays internal,
- * so the prefixes are per-module rather than the whole folder.
+ * The sds/Home modules live outside src/experimental/ but SOME are
+ * re-exported through its barrels (Widgets/Layout, Widgets/Content,
+ * Information, Navigation). Only those appear here — the Home kit's building
+ * blocks (SlotWidget, WidgetContainer, HomeListItem, F0AvatarPulse) stay
+ * internal, so the prefixes are per-module rather than the whole folder.
  */
 const EXPERIMENTAL_ENTRY_PREFIXES = [
   "src/experimental/",
   "src/sds/Home/ClockIn/",
   "src/sds/Home/Communities/",
   "src/sds/Home/DaytimePage/",
-  "src/sds/Home/HomeListItem/",
   "src/sds/Home/NewHomeLayout/",
-  "src/sds/Home/SlotWidget/",
   "src/sds/Home/WidgetCatalog/",
-  "src/sds/Home/WidgetContainer/",
 ]
 
 /**
