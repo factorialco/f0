@@ -19116,7 +19116,7 @@ function On({
   nestedRowProps: d,
   fromVisualization: f,
   referenceRowType: u = "none",
-  focused: h = !1
+  highlighted: h = !1
 }) {
   const { isScrolled: p, isScrolledRight: g } = AO(), { actions: y } = ze(), v = s?.left !== void 0, w = s?.right !== void 0, x = v || w, b = s?.left, _ = s?.right, k = am(i), S = r !== void 0 ? am(r) : k, E = j(null), C = d?.depth ?? 0, T = d?.nestedVariant === "detailed", A = DO(
     o,
@@ -19134,11 +19134,11 @@ function On({
         x && p && q4[u],
         x && "sticky z-10",
         w && q4[u],
-        // The row hover keeps reading through the focused cell, so a hovered
+        // The row hover keeps reading through the highlighted cell, so a hovered
         // row stays one uniform surface.
         h && "bg-f1-background-secondary group-hover:bg-f1-background-hover",
         // Sticky cells paint their opaque background on the `before` layer;
-        // the focused tint has to land there too or it stays hidden under it.
+        // the highlighted tint has to land there too or it stays hidden under it.
         h && x && "before:bg-f1-background-secondary group-hover:before:bg-f1-background-hover",
         t && "cursor-pointer",
         l
@@ -19313,7 +19313,7 @@ function Ti({
   infoIcon: a = R$,
   sticky: l,
   hidden: c = !1,
-  focused: d = !1,
+  highlighted: d = !1,
   align: f = "left",
   className: u,
   colSpan: h
@@ -19426,7 +19426,7 @@ function Ti({
         k && "cursor-pointer",
         u
       ),
-      "data-focused": d ? "true" : void 0,
+      "data-highlighted": d ? "true" : void 0,
       onClick: k,
       tabIndex: l ? 0 : void 0,
       colSpan: h,
@@ -23122,11 +23122,11 @@ const lS = (e) => e ? e.indeterminate || e.selectedCount !== void 0 && e.selecte
   if (!e) return null;
   const t = {};
   return Object.entries(e).forEach(([n, i]) => {
-    t[n] = typeof i == "string" ? { label: i, defaultCollapsed: !1, focused: !1 } : {
+    t[n] = typeof i == "string" ? { label: i, defaultCollapsed: !1, highlighted: !1 } : {
       label: i.label,
       collapsedColumns: i.collapsedColumns,
       defaultCollapsed: i.defaultCollapsed ?? !1,
-      focused: i.focused ?? !1
+      highlighted: i.highlighted ?? !1
     };
   }), t;
 }, VZ = (e) => {
@@ -23209,7 +23209,7 @@ const lS = (e) => e ? e.indeterminate || e.selectedCount !== void 0 && e.selecte
       return w.size === 0 ? e : e.filter((x, b) => !w.has(b));
     })();
     return i ? v.map(
-      (w) => w.headerGroupId && i[w.headerGroupId]?.focused ? { ...w, focused: !0 } : w
+      (w) => w.headerGroupId && i[w.headerGroupId]?.highlighted ? { ...w, highlighted: !0 } : w
     ) : v;
   }, [e, i, f]), h = ee(
     () => Object.entries(i ?? {}).filter(([, v]) => v.collapsedColumns !== void 0).map(([v]) => v).sort(),
@@ -23969,7 +23969,7 @@ const eQ = (e, t) => /* @__PURE__ */ m(
               },
               fromVisualization: x,
               referenceRowType: re,
-              focused: !!oe.focused,
+              highlighted: !!oe.highlighted,
               className: X(
                 Q,
                 ce && Sl,
@@ -24563,8 +24563,8 @@ const mQ = 220, gQ = (e, t, n, i = !0) => {
                     align: dt,
                     colSpan: ye.colSpan,
                     className: qe,
-                    focused: ye.columnIndices.some(
-                      (mt) => E[mt].focused
+                    highlighted: ye.columnIndices.some(
+                      (mt) => E[mt].highlighted
                     ),
                     onClick: ye.collapsible ? () => T(ye.id) : void 0,
                     children: ye.collapsible ? /* @__PURE__ */ R(
@@ -24602,7 +24602,7 @@ const mQ = 220, gQ = (e, t, n, i = !0) => {
                     className: qe,
                     width: E[ye.columnIndices[0]].width,
                     minWidth: E[ye.columnIndices[0]].minWidth,
-                    focused: !!E[ye.columnIndices[0]].focused,
+                    highlighted: !!E[ye.columnIndices[0]].highlighted,
                     sticky: ot(ye.columnIndices[0]),
                     children: /* @__PURE__ */ m("span", {})
                   },
@@ -24917,7 +24917,7 @@ const mQ = 220, gQ = (e, t, n, i = !0) => {
                         firstCell: He === 0,
                         width: Ne.width,
                         sticky: ot(He),
-                        focused: !!Ne.focused,
+                        highlighted: !!Ne.highlighted,
                         className: X(
                           Z && (He !== E.length - 1 || H) && "border-0 border-r-[1px] border-solid border-f1-border-secondary",
                           A.get(pi(Ne))

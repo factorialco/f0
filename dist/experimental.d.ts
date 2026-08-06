@@ -7595,11 +7595,11 @@ declare type HeaderGroupDefinition = {
      */
     defaultCollapsed?: boolean;
     /**
-     * Visually focuses the whole group: its spanning header and every column in
-     * it render with the focused emphasis. Equivalent to setting `focused` on
-     * each of the group's columns.
+     * Visually highlights the whole group: its spanning header and every column
+     * in it render with the highlighted emphasis. Equivalent to setting
+     * `highlighted` on each of the group's columns.
      */
-    focused?: boolean;
+    highlighted?: boolean;
 };
 
 export declare interface HeaderProps {
@@ -10801,12 +10801,12 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      */
     noHiding?: boolean;
     /**
-     * Visually focuses the column: its header and cells render with a subtle
-     * gray background, and the spanning header of its group (if any) is
-     * emphasized too. To focus a whole header group at once, set `focused` on
-     * its {@link HeaderGroupDefinition} instead.
+     * Visually highlights the column: its header and cells render with a
+     * subtle gray background, and the spanning header of its group (if any)
+     * is emphasized too. To highlight a whole header group at once, set
+     * `highlighted` on its {@link HeaderGroupDefinition} instead.
      */
-    focused?: boolean;
+    highlighted?: boolean;
     /**
      * Avoid removing the column by the user. Only relevant when the
      * visualization sets `onRemoveColumn`; the per-row trash affordance in the
@@ -10822,7 +10822,7 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
     headerGroupId?: string;
 };
 
-declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, focused, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
+declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, highlighted, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
 declare type TableHeaderInfo = {
     title: string;
@@ -10897,10 +10897,10 @@ declare interface TableHeadProps {
     hidden?: boolean;
     /**
      * Emphasizes the cell with a subtle gray background, drawing attention to a
-     * focused column.
+     * highlighted column.
      * @default false
      */
-    focused?: boolean;
+    highlighted?: boolean;
     /**
      * Alingment of the cell
      * @default "left"
@@ -12283,9 +12283,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -12293,10 +12294,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
