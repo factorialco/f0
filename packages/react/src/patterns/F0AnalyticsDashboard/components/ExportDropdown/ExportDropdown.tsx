@@ -3,7 +3,7 @@ import { Download, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 interface ExportDropdownProps {
-  onExportExcel: () => void
+  onExportExcel: () => Promise<void>
   isExporting: boolean
 }
 
@@ -21,10 +21,10 @@ export function ExportDropdown({
             ? t("ai.dataDownload.exporting")
             : t("ai.dataDownload.exportDashboard", { format: "Excel" }),
           icon: Download,
-          // Dropdown items have no built-in disabled/loading state, so guard
-          // the click ourselves to avoid firing a second export while one is
-          // already in flight.
-          onClick: isExporting ? () => {} : onExportExcel,
+          onClick: () => {
+            void onExportExcel().catch(() => undefined)
+          },
+          disabled: isExporting,
         },
       ]}
       icon={Ellipsis}

@@ -13,6 +13,7 @@ import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useD
 import type { DashboardCollectionItem } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
+import { getDownloadableColumns } from "../../utils/collectionColumns"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
@@ -74,31 +75,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   // `columns` list — the table viz is the source of truth, mirroring
   // OneDataCollection's own `extractColumns` flow.
   const downloadableColumns = useMemo(() => {
-    const tableViz = item.visualizations?.find(
-      (v) => (v as { type?: string })?.type === "table"
-    ) as
-      | {
-          options?: {
-            columns?: Array<{
-              id?: string
-              label?: string
-              render?: (item: RecordType) => unknown
-            }>
-          }
-        }
-      | undefined
-
-    return (tableViz?.options?.columns ?? [])
-      .filter(
-        (
-          c
-        ): c is {
-          id: string
-          label: string
-          render?: (i: RecordType) => unknown
-        } => typeof c?.id === "string" && typeof c?.label === "string"
-      )
-      .map((c) => ({ id: c.id, label: c.label, render: c.render }))
+    return getDownloadableColumns(item.visualizations)
   }, [item])
 
   const downloadActions = useCollectionDownloadActions({

@@ -23,6 +23,65 @@ const scatterData: DashboardChartData = {
   ],
 }
 
+describe("chartDataToTabular — numeric values", () => {
+  it("exports numeric measure strings as spreadsheet numbers", () => {
+    const data = {
+      categories: ["2026-01-01"],
+      series: [{ name: "Headcount", data: ["36"] }],
+    } as unknown as DashboardChartData
+
+    expect(chartDataToTabular({ type: "line" }, data).rows).toEqual([
+      { Category: "2026-01-01", Headcount: 36 },
+    ])
+  })
+
+  it.each([
+    [
+      { type: "funnel" } as const,
+      { series: { data: [{ name: "Qualified", value: "12" }] } },
+      [{ Stage: "Qualified", Value: 12 }],
+    ],
+    [
+      { type: "pie" } as const,
+      { series: { data: [{ name: "Permanent", value: "21" }] } },
+      [{ Name: "Permanent", Value: 21 }],
+    ],
+    [
+      { type: "radar" } as const,
+      { indicators: ["Quality"], series: [{ name: "Score", data: ["8"] }] },
+      [{ Indicator: "Quality", Score: 8 }],
+    ],
+    [
+      { type: "gauge" } as const,
+      { series: { name: "Progress", value: "75" } },
+      [{ Name: "Progress", Value: 75 }],
+    ],
+    [
+      { type: "heatmap" } as const,
+      { xCategories: ["April"], yCategories: ["Madrid"], data: [[0, 0, "5"]] },
+      [{ X: "April", Y: "Madrid", Value: 5 }],
+    ],
+  ])("normalizes numeric strings for $type charts", (config, data, rows) => {
+    expect(
+      chartDataToTabular(config, data as unknown as DashboardChartData).rows
+    ).toEqual(rows)
+  })
+
+  it("uses null for non-finite and invalid measure values", () => {
+    const data = {
+      categories: ["Invalid", "Infinite"],
+      series: [
+        { name: "Value", data: ["not-a-number", Number.POSITIVE_INFINITY] },
+      ],
+    } as unknown as DashboardChartData
+
+    expect(chartDataToTabular({ type: "bar" }, data).rows).toEqual([
+      { Category: "Invalid", Value: null },
+      { Category: "Infinite", Value: null },
+    ])
+  })
+})
+
 describe("chartDataToTabular — scatter", () => {
   it("emits one row per point across every series", () => {
     const { rows } = chartDataToTabular(scatterConfig, scatterData)
