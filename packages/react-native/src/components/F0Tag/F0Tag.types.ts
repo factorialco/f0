@@ -18,6 +18,10 @@ export const dotTagColors = [
   "flubber",
   "indigo",
   "camel",
+  "radical",
+  "orange",
+  "red",
+  "grass",
 ] as const
 
 /**
