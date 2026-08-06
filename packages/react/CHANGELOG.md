@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.9.0](https://github.com/factorialco/f0/compare/f0-react-v6.8.4...f0-react-v6.9.0) (2026-08-06)
+
+
+### Features
+
+* **widgets:** NewHomeLayout — slot-based widget rendering for the new Home ([#4961](https://github.com/factorialco/f0/issues/4961)) ([259be52](https://github.com/factorialco/f0/commit/259be52d4af26ad7d1a0474cedcbe6333dd6f69a))
+
 ## [6.8.4](https://github.com/factorialco/f0/compare/f0-react-v6.8.3...f0-react-v6.8.4) (2026-08-06)
 
 
