@@ -6,12 +6,13 @@ import { CSS } from "@dnd-kit/utilities"
 import { cn } from "@/lib/utils"
 
 /**
- * The drop settle, tuned to feel like SurveyFormBuilder's: that builder
- * reorders with motion's `Reorder` (`layout="position"`), whose default layout
- * spring is underdamped — the card eases into its slot with a slight
- * overshoot over ~400ms. This curve is the CSS approximation of that spring.
+ * The drop settle, matching SurveyFormBuilder's: that builder reorders with
+ * motion's `Reorder` (`layout="position"`, no explicit transition), so its
+ * release uses motion's `defaultLayoutTransition` — literally
+ * `{ duration: 0.45, ease: [0.4, 0, 0.1, 1] }`. Same values here: a smooth
+ * 450ms glide into the slot, no bounce.
  */
-const DROP_TRANSITION = "transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+const DROP_TRANSITION = "transform 450ms cubic-bezier(0.4, 0, 0.1, 1)"
 
 /** What the sortable state hands to the widget being rendered. */
 export interface SortableWidgetState {
@@ -53,11 +54,12 @@ export const SortableWidget = ({
     // dropping x here is the same thing `restrictToVerticalAxis` does, without
     // taking on @dnd-kit/modifiers for it.
     transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
-    // dnd-kit only supplies a transition WHILE sorting; on release it is null,
-    // so the card would snap to its slot. The spring fallback carries it there
-    // (mid-sort shuffles keep dnd-kit's own transition — springing every
-    // displacement while dragging would jitter).
-    transition: transition ?? DROP_TRANSITION,
+    // The card being DRAGGED must have no transition at all — dnd-kit nulls it
+    // so the transform tracks the pointer 1:1; easing it makes the card lag
+    // the hand. The fallback is for everyone else: neighbours keep dnd-kit's
+    // own shuffle transition, and on release (isDragging flips off with the
+    // transform still winding down) it carries the card into its slot.
+    transition: isDragging ? undefined : (transition ?? DROP_TRANSITION),
     // The dragged card rides above its neighbours so the gap it will land in
     // stays readable underneath.
     zIndex: isDragging ? 10 : undefined,
