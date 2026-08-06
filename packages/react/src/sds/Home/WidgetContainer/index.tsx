@@ -1,9 +1,10 @@
-import { type CSSProperties, Fragment, ReactNode } from "react"
+import { type CSSProperties, Fragment, ReactNode, useState } from "react"
 
 import {
   closestCenter,
   DndContext,
   type DragEndEvent,
+  DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
@@ -38,6 +39,18 @@ const CARD_LINK_CLASS = cn(
   "whitespace-nowrap px-0 text-base font-medium text-f1-foreground",
   "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1"
 )
+
+/**
+ * The drop settle, matching SurveyFormBuilder's: that builder reorders with
+ * motion's `Reorder` (`layout="position"`, no explicit transition), so its
+ * release uses motion's `defaultLayoutTransition` — literally
+ * `{ duration: 0.45, ease: [0.4, 0, 0.1, 1] }`. The overlay clone glides from
+ * wherever it was released into its slot with those exact values.
+ */
+const DROP_ANIMATION = {
+  duration: 450,
+  easing: "cubic-bezier(0.4, 0, 0.1, 1)",
+}
 
 /** The `Widget` chrome an item carries, ready to spread onto `SlotWidget`. */
 const widgetChrome = (widget: HomeWidgetItem) =>
@@ -133,6 +146,9 @@ export function WidgetContainer({
 }: WidgetContainerProps) {
   const canEdit = editing && !disableEdition
   const canDrag = canEdit && onReorder != null && widgets.length > 1
+  // The widget being dragged: its in-list card hides while a clone rides the
+  // pointer in the DragOverlay (see below).
+  const [activeId, setActiveId] = useState<string | null>(null)
   // A small activation distance so a click on a widget's own control still
   // reads as a click rather than the start of a drag.
   const sensors = useSensors(
@@ -257,7 +273,12 @@ export function WidgetContainer({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
+          onDragStart={({ active }) => setActiveId(String(active.id))}
+          onDragCancel={() => setActiveId(null)}
+          onDragEnd={(event) => {
+            setActiveId(null)
+            handleDragEnd(event)
+          }}
         >
           <SortableContext
             items={widgets.map((widget) => widget.id)}
@@ -282,6 +303,24 @@ export function WidgetContainer({
               ))}
             </div>
           </SortableContext>
+          {/* The card that follows the pointer is a CLONE in an overlay — the
+              in-list card hides meanwhile (SortableWidget). On release the
+              clone GLIDES from where it was dropped into its final slot
+              (dropAnimation), which is what makes the drop soft: without the
+              overlay, committing the reorder snaps the real card's DOM slot
+              and transform in one frame. */}
+          <DragOverlay dropAnimation={DROP_ANIMATION}>
+            {(() => {
+              const active = widgets.find((widget) => widget.id === activeId)
+              return active ? (
+                // Solid backdrop: Card's own background is translucent, and the
+                // clone rides over whatever the column shows beneath it.
+                <div className="cursor-grabbing rounded-xl bg-f1-background [&_*]:shadow-none">
+                  {render(active, { draggable: true, isDragging: true })}
+                </div>
+              ) : null
+            })()}
+          </DragOverlay>
         </DndContext>
       ) : (
         widgets.map((widget) => (

@@ -5,15 +5,6 @@ import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@/lib/utils"
 
-/**
- * The drop settle, matching SurveyFormBuilder's: that builder reorders with
- * motion's `Reorder` (`layout="position"`, no explicit transition), so its
- * release uses motion's `defaultLayoutTransition` — literally
- * `{ duration: 0.45, ease: [0.4, 0, 0.1, 1] }`. Same values here: a smooth
- * 450ms glide into the slot, no bounce.
- */
-const DROP_TRANSITION = "transform 450ms cubic-bezier(0.4, 0, 0.1, 1)"
-
 /** What the sortable state hands to the widget being rendered. */
 export interface SortableWidgetState {
   /** Show the widget's own drag handle. False for a locked widget. */
@@ -37,6 +28,12 @@ export interface SortableWidgetProps {
  * dnd-kit's listeners sit on a wrapper rather than on the handle itself — the
  * handle lives inside `Widget`, so the events reach it by bubbling.
  *
+ * The card the pointer carries is NOT this one: while dragging, this in-list
+ * card turns invisible (still holding its slot for the shuffle) and a clone
+ * follows the pointer in `WidgetContainer`'s DragOverlay, whose dropAnimation
+ * owns the settle. Hiding rather than dimming: two copies of the same card is
+ * noise, and the overlay one is the real thing visually.
+ *
  * A `disabled` (locked) widget is neither draggable nor a drop target, so a
  * pinned widget can't be picked up OR pushed out of its place.
  */
@@ -49,36 +46,24 @@ export const SortableWidget = ({
     useSortable({ id, disabled })
 
   const style: CSSProperties = {
-    // VERTICAL ONLY: a column is one dimension, so the card follows the pointer
-    // up and down and ignores its horizontal travel. dnd-kit reports both axes;
-    // dropping x here is the same thing `restrictToVerticalAxis` does, without
-    // taking on @dnd-kit/modifiers for it.
+    // VERTICAL ONLY: a column is one dimension, so the neighbours' shuffles
+    // ignore any horizontal component. dnd-kit reports both axes; dropping x
+    // here is the same thing `restrictToVerticalAxis` does, without taking on
+    // @dnd-kit/modifiers for it.
     transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
-    // The card being DRAGGED must have no transition at all — dnd-kit nulls it
-    // so the transform tracks the pointer 1:1; easing it makes the card lag
-    // the hand. The fallback is for everyone else: neighbours keep dnd-kit's
-    // own shuffle transition, and on release (isDragging flips off with the
-    // transform still winding down) it carries the card into its slot.
-    transition: isDragging ? undefined : (transition ?? DROP_TRANSITION),
-    // The dragged card rides above its neighbours so the gap it will land in
-    // stays readable underneath.
-    zIndex: isDragging ? 10 : undefined,
-    position: "relative",
+    transition: transition ?? undefined,
   }
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      // The WHOLE card is the drag surface — the handle beside the title is the
-      // affordance that says so, not the only place you can grab.
-      //
-      // While dragging, a SOLID backdrop sits behind the card: `Card`'s own
-      // background is translucent, so lifted over the page (and over whatever it
-      // passes) it would otherwise show the content beneath through it.
       className={cn(
         !disabled && "cursor-grab active:cursor-grabbing",
-        isDragging && "rounded-xl bg-f1-background"
+        // The overlay clone is the visible card while this one is dragged;
+        // this stays in the flow (invisible, not display-none) so the other
+        // widgets shuffle around a real gap.
+        isDragging && "invisible"
       )}
       // dnd-kit's `attributes` are deliberately NOT spread: they make the whole
       // card `role="button"` + focusable, which nests the widget's own links
