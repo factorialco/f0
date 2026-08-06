@@ -138,10 +138,33 @@ export function useDataSource<
   }, [externalCurrentFilters])
 
   /******************* SORTINGS ***************************************************/
-  const [currentSortings, setCurrentSortings] =
+  const [currentSortings, _setCurrentSortings] =
     useState<SortingsState<Sortings> | null>(
       externalCurrentSortings ?? defaultSortings ?? null
     )
+
+  // Skip re-applying an equal-but-new sortings value (e.g. URL/storage hydration
+  // re-setting the current sort) so it doesn't trigger a redundant refetch.
+  // Mirrors `setCurrentFilters` above.
+  const setCurrentSortings: Dispatch<
+    SetStateAction<SortingsState<Sortings> | null>
+  > = (value) => {
+    if (typeof value === "function") {
+      _setCurrentSortings((prev) => {
+        const next = (
+          value as (
+            prevState: SortingsState<Sortings> | null
+          ) => SortingsState<Sortings> | null
+        )(prev)
+        return JSON.stringify(next) === JSON.stringify(prev) ? prev : next
+      })
+    } else {
+      if (JSON.stringify(currentSortings) === JSON.stringify(value)) {
+        return
+      }
+      _setCurrentSortings(value)
+    }
+  }
 
   useDeepCompareEffect(() => {
     if (!externalCurrentSortings) return
