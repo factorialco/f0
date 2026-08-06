@@ -6210,17 +6210,13 @@ export declare interface F0SegmentedControlProps {
 declare type F0SelectBaseProps<T extends string, R = unknown> = {
     withApplySelection?: boolean;
     /**
-     * Controls the "Cancel" button in the apply-selection footer. The
-     * deferred-apply behaviour is always preserved (changes are staged and only
-     * committed on "Apply selection"; closing the dropdown discards them). Has no
-     * effect unless `withApplySelection` is enabled in multi-select mode.
-     * - `false` (default): Cancel is always shown.
-     * - `true`: Cancel is always hidden.
-     * - `"when-empty"`: Cancel is hidden while nothing is staged and appears once
-     *   at least one item is selected — for surfaces where an explicit cancel is
-     *   only meaningful after the user has staged a change.
+     * Custom label for the apply button in the apply-selection footer. Defaults
+     * to the translated "Apply selection". Pass an already-translated string.
+     * Only has an effect when `withApplySelection` is enabled in multi-select
+     * mode. Keep it short — some locales (e.g. German, French) run long and can
+     * overflow the footer.
      */
-    hideApplySelectionCancel?: boolean | "when-empty";
+    applySelectionLabel?: string;
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
     open?: boolean;
