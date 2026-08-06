@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.7.0](https://github.com/factorialco/f0/compare/f0-react-v6.6.0...f0-react-v6.7.0) (2026-08-06)
+
+
+### Features
+
+* **F0PhoneInput:** add experimental phone input ([#4880](https://github.com/factorialco/f0/issues/4880)) ([a7c4e19](https://github.com/factorialco/f0/commit/a7c4e19f71d1d63fb57a1db6bfe6173dc9abefff))
+
 ## [6.6.0](https://github.com/factorialco/f0/compare/f0-react-v6.5.0...f0-react-v6.6.0) (2026-08-05)
 
 
