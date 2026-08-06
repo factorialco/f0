@@ -5,6 +5,14 @@ import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * The drop settle, tuned to feel like SurveyFormBuilder's: that builder
+ * reorders with motion's `Reorder` (`layout="position"`), whose default layout
+ * spring is underdamped — the card eases into its slot with a slight
+ * overshoot over ~400ms. This curve is the CSS approximation of that spring.
+ */
+const DROP_TRANSITION = "transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+
 /** What the sortable state hands to the widget being rendered. */
 export interface SortableWidgetState {
   /** Show the widget's own drag handle. False for a locked widget. */
@@ -46,8 +54,10 @@ export const SortableWidget = ({
     // taking on @dnd-kit/modifiers for it.
     transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
     // dnd-kit only supplies a transition WHILE sorting; on release it is null,
-    // so the card would snap to its slot. The fallback carries it there.
-    transition: transition ?? "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+    // so the card would snap to its slot. The spring fallback carries it there
+    // (mid-sort shuffles keep dnd-kit's own transition — springing every
+    // displacement while dragging would jitter).
+    transition: transition ?? DROP_TRANSITION,
     // The dragged card rides above its neighbours so the gap it will land in
     // stays readable underneath.
     zIndex: isDragging ? 10 : undefined,
