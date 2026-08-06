@@ -329,7 +329,14 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       zone,
       apiStatus,
       tags: tags.filter((t) => !["autodocs", "no-sidebar", "!dev"].includes(t)),
+      // Lifecycle gates need the explicit Storybook documentation opt-in. Keep
+      // this separate from the public tags array, where "autodocs" is hidden.
+      hasAutodocs: tags.includes("autodocs") && !tags.includes("!autodocs"),
       hasStories: true,
+      // Mechanical count of named story exports. Story files use `export const`
+      // for CSF stories; the default export is metadata and is not counted.
+      storyCount: (content.match(/\bexport\s+const\s+[A-Za-z_$][\w$]*/g) || [])
+        .length,
       hasUnitTests: hasUnitTests(filePath),
       // A Storybook play function (interaction test) — `play: async (…)` or
       // `play: (…)` in a story object.

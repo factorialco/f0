@@ -4,7 +4,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
+  contents: read
   pull-requests: write
   issues: write
 
@@ -13,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # This workflow executes code from the PR merge commit before updating labels.
+          # Keep the write-capable token out of the checkout's git config.
+          persist-credentials: false
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: changes
         with:
@@ -25,6 +35,7 @@ jobs:
             package_core: 
               - 'packages/core/**'
       - name: Ensure labels exist with correct colors
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v7
         with:
           script: |
@@ -33,12 +44,15 @@ jobs:
               { name: 'react', color: '61DBFB', description: 'Changes affect packages/react' },
               { name: 'react-native', color: '1C79C0', description: 'Changes affect packages/react-native' },
               { name: 'core', color: 'FF0000', description: 'Changes affect packages/core' },
+              { name: 'lifecycle: new component', color: '5319E7', description: 'Introduces a new experimental React component' },
+              { name: 'stability: ready to review', color: '0E8A16', description: 'Stability fix PR open, ready for review' },
             ];
 
-            // Get all existing labels
-            const { data: existingLabels } = await github.rest.issues.listLabelsForRepo({
+            // Get all existing labels, not only the API's first page.
+            const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
+              per_page: 100,
             });
 
             const existingLabelNames = existingLabels.map(label => label.name);
@@ -72,6 +86,7 @@ jobs:
               }
             }
       - name: Add package labels
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v7
         with:
           script: |
@@ -140,4 +155,72 @@ jobs:
               });
             } else {
               core.info('All applicable labels are already present');
+            }
+      - name: Resolve the PR base commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git cat-file -e "$BASE_SHA^{commit}"
+      - name: Classify component lifecycle changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          LIFECYCLE_REPORT: ${{ runner.temp }}/component-lifecycle.json
+        run: |
+          node packages/react/.scripts/check-component-lifecycle.mjs \
+            --base "$BASE_SHA" \
+            --json-output "$LIFECYCLE_REPORT" \
+            --report-only
+          jq -e '.desiredLabels | type == "array" and all(.[]; type == "string")' "$LIFECYCLE_REPORT" > /dev/null
+      - name: Reconcile component lifecycle labels
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v7
+        env:
+          LIFECYCLE_REPORT: ${{ runner.temp }}/component-lifecycle.json
+        with:
+          script: |
+            const fs = require('fs');
+            const managedLabels = [
+              'lifecycle: new component',
+              'stability: ready to review',
+            ];
+            const report = JSON.parse(fs.readFileSync(process.env.LIFECYCLE_REPORT, 'utf8'));
+            const desiredLabels = new Set(report.desiredLabels);
+            const unsupportedLabels = [...desiredLabels].filter(label => !managedLabels.includes(label));
+
+            if (unsupportedLabels.length > 0) {
+              core.setFailed(`Classifier returned unmanaged labels: ${unsupportedLabels.join(', ')}`);
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: issue_number,
+            });
+            const currentLabels = new Set(pullRequest.labels.map(label => label.name));
+            const labelsToAdd = managedLabels.filter(
+              label => desiredLabels.has(label) && !currentLabels.has(label)
+            );
+            const labelsToRemove = managedLabels.filter(
+              label => currentLabels.has(label) && !desiredLabels.has(label)
+            );
+
+            for (const name of labelsToRemove) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              core.info(`Removed label: ${name}`);
+            }
+
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: labelsToAdd,
+              });
+              core.info(`Added labels: ${labelsToAdd.join(', ')}`);
+            }
+
+            if (labelsToAdd.length === 0 && labelsToRemove.length === 0) {
+              core.info('Component lifecycle labels already match the classifier report');
             }
