@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.2](https://github.com/factorialco/f0/compare/f0-react-v6.8.1...f0-react-v6.8.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* **F0Graph:** keep windowed-in nodes' edges from vanishing on pan ([#5012](https://github.com/factorialco/f0/issues/5012)) ([fe41608](https://github.com/factorialco/f0/commit/fe41608bde877bff72462ced1befe3b4a03d63cc))
+
 ## [6.8.1](https://github.com/factorialco/f0/compare/f0-react-v6.8.0...f0-react-v6.8.1) (2026-08-06)
 
 
