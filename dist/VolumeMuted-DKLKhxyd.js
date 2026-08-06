@@ -9,41 +9,6 @@ const s = (r, e) => /* @__PURE__ */ n(
     ref: e,
     ...r,
     children: [
-      /* @__PURE__ */ o("circle", { cx: 12, cy: 12, r: 8, stroke: "currentColor" }),
-      /* @__PURE__ */ o(
-        "path",
-        {
-          stroke: "currentColor",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          d: "M19 12H5.00001"
-        }
-      ),
-      /* @__PURE__ */ o(
-        "path",
-        {
-          stroke: "currentColor",
-          d: "M12 20C10.2326 18.1964 9.00001 14.7247 9.00001 12C9.00001 9.27527 10.2326 5.80363 12 4"
-        }
-      ),
-      /* @__PURE__ */ o(
-        "path",
-        {
-          stroke: "currentColor",
-          d: "M12 20C13.7674 18.1964 15 14.7247 15 12C15 9.27527 13.7674 5.80363 12 4"
-        }
-      )
-    ]
-  }
-), C = t(s), i = (r, e) => /* @__PURE__ */ n(
-  "svg",
-  {
-    xmlns: "http://www.w3.org/2000/svg",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    ref: e,
-    ...r,
-    children: [
       /* @__PURE__ */ o(
         "path",
         {
@@ -54,7 +19,7 @@ const s = (r, e) => /* @__PURE__ */ n(
       /* @__PURE__ */ o("circle", { cx: 11.999, cy: 12, r: 2.5, stroke: "currentColor" })
     ]
   }
-), a = t(i), c = (r, e) => /* @__PURE__ */ n(
+), u = t(s), i = (r, e) => /* @__PURE__ */ n(
   "svg",
   {
     xmlns: "http://www.w3.org/2000/svg",
@@ -92,7 +57,7 @@ const s = (r, e) => /* @__PURE__ */ n(
       )
     ]
   }
-), w = t(c), d = (r, e) => /* @__PURE__ */ n(
+), a = t(i), L = (r, e) => /* @__PURE__ */ n(
   "svg",
   {
     xmlns: "http://www.w3.org/2000/svg",
@@ -121,7 +86,7 @@ const s = (r, e) => /* @__PURE__ */ n(
       )
     ]
   }
-), k = t(d), l = (r, e) => /* @__PURE__ */ n(
+), w = t(L), c = (r, e) => /* @__PURE__ */ n(
   "svg",
   {
     xmlns: "http://www.w3.org/2000/svg",
@@ -150,11 +115,10 @@ const s = (r, e) => /* @__PURE__ */ n(
       )
     ]
   }
-), p = t(l);
+), C = t(c);
 export {
-  a as F,
+  u as F,
   C as a,
-  p as b,
-  k as c,
-  w as d
+  w as b,
+  a as c
 };
