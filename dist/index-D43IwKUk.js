@@ -24032,23 +24032,21 @@ const eQ = (e, t) => /* @__PURE__ */ m(
     P
   );
 }, Ef = Qe(hQ), pQ = (e, t) => t.length === e.size && t.every((n) => e.has(n));
-function mQ(e, t, n = !1) {
-  const i = j(/* @__PURE__ */ new Set()), r = j(!1), o = j(t), s = j(!1), a = o.current !== t, l = s.current || a, c = /* @__PURE__ */ new Set();
-  if (r.current && !l && !n)
-    for (const d of e)
-      i.current.has(d) || c.add(d);
+function mQ(e, t) {
+  const n = j(/* @__PURE__ */ new Set()), i = j(!1), r = j(t), o = j(!1), s = r.current !== t, a = o.current || s, l = /* @__PURE__ */ new Set();
+  if (i.current && !a)
+    for (const c of e)
+      n.current.has(c) || l.add(c);
   return se(() => {
-    if (a && (o.current = t, s.current = !0), !n) {
-      if (s.current) {
-        if (pQ(i.current, e)) return;
-        i.current = new Set(e), s.current = !1, e.length > 0 && (r.current = !0);
-        return;
-      }
-      !r.current && e.length > 0 && (r.current = !0);
-      for (const d of e)
-        i.current.add(d);
+    if (s && (r.current = t, o.current = !0), o.current) {
+      if (pQ(n.current, e)) return;
+      n.current = new Set(e), o.current = !1, e.length > 0 && (i.current = !0);
+      return;
     }
-  }), c;
+    !i.current && e.length > 0 && (i.current = !0);
+    for (const c of e)
+      n.current.add(c);
+  }), l;
 }
 const gQ = 220, yQ = (e, t, n, i = !0) => {
   on(() => {
@@ -24463,7 +24461,7 @@ const gQ = 220, yQ = (e, t, n, i = !0) => {
     t.currentFilters,
     t.currentSortings,
     t.currentGrouping
-  ]), ce = mQ(q, G, Y), de = vQ(), {
+  ]), ce = mQ(q, G), de = vQ(), {
     selectedItems: ge,
     allSelectedStatus: ve,
     groupAllSelectedStatus: K,
