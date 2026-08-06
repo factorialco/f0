@@ -164,12 +164,17 @@ function useAutoCloseSidebar(
 
 /**
  * Z-index layers (within the isolate stacking context):
- *   z-5   Sidebar
+ *   z-0   Chat (normal)
  *   z-10  Main content
  *   z-15  Canvas dashboard panel
- *   z-20  Sidebar backdrop / Chat (fullscreen)
+ *   z-20  Locked sidebar · Sidebar backdrop · Chat (fullscreen)
  *   z-30  Sidebar (unlocked/floating)
- *   z-0   Chat (normal)
+ *
+ * The locked sidebar sits above the main content (z-20 > z-10) so a sticky
+ * first table column — whose left border pins to the content's left edge at the
+ * sidebar seam — cannot paint over the sidebar during horizontal scroll. Sharing
+ * z-20 with the backdrop and fullscreen chat is safe: both only appear while the
+ * sidebar is floating (z-30) or hidden, never while it is locked.
  */
 function ApplicationFrameContent({
   ai,
@@ -298,7 +303,7 @@ function ApplicationFrameContent({
             {/* Sidebar */}
             <div
               className={cn(
-                sidebarState !== "locked" ? "z-30" : "z-0",
+                sidebarState !== "locked" ? "z-30" : "z-20",
                 !shouldReduceMotion && "transition-all",
                 sidebarState === "locked" ? "w-[240px] shrink-0 pl-3" : "w-0"
               )}
