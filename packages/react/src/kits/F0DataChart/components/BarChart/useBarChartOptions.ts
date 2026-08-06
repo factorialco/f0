@@ -14,12 +14,14 @@ import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,
   buildItemTooltip,
+  labelWidthCap,
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
+import { useFontsReady } from "../../utils/useFontsReady"
 
 /** Default value-label font size (px) — slightly smaller than axis labels. */
 const DEFAULT_LABEL_FONT_SIZE = 11
@@ -29,10 +31,26 @@ const DEFAULT_LABEL_FONT_SIZE = 11
  * sit inside a segment and want breathing room; labels outside the bar (above /
  * beside) sit in open space and need none.
  */
-const STACKED_LABEL_FIT_PADDING = 12
+const STACKED_LABEL_FIT_PADDING = 6
 const OUTSIDE_LABEL_FIT_PADDING = 0
 const HORIZONTAL_LABEL_GRID_RIGHT = 60
 const HORIZONTAL_LABEL_GAP = 8
+
+/**
+ * Gap ECharts leaves between a bar and a label placed outside it, mirroring its
+ * own `label.distance` default for `position: "top"` / `"right"`. Named here
+ * only so the space reserved for such a label can account for it.
+ */
+const OUTSIDE_LABEL_DISTANCE = 5
+
+/**
+ * Vertical space (px) a value label above a column occupies: its own line box
+ * plus the gap to the bar. The 1.4 line-height ratio matches what the axis
+ * layout assumes for stacked text elsewhere in the kit.
+ */
+function verticalLabelHeadroom(labelFontSize: number): number {
+  return Math.ceil(labelFontSize * 1.4) + OUTSIDE_LABEL_DISTANCE
+}
 const ARIA_MAX_SERIES = 10
 const ARIA_MAX_VALUES_PER_SERIES = 20
 
@@ -96,6 +114,70 @@ function measureTextWidth(text: string, font: string): number {
   return measureContext.measureText(text).width
 }
 
+/**
+ * Slack added past the measured text, for the pixel or two by which our metrics
+ * and ECharts' own rounding disagree.
+ *
+ * It absorbs rounding, not a wrong font: label text is right-aligned against the
+ * axis, so a box narrower than its text overflows away from the plot and the
+ * first letter is shaved off by the edge of the canvas — and measuring with a
+ * fallback font understates the width by a share of the string, which no fixed
+ * slack can cover. {@link useFontsReady} is what keeps that from happening.
+ */
+const CATEGORY_LABEL_MEASURE_SLACK = 4
+
+/**
+ * Extra left inset, as a share of the label width, covering the gap between the
+ * space ECharts reserves for category labels and the space their glyphs actually
+ * occupy.
+ *
+ * `containLabel` sizes the gutter from ECharts' own measurement of the labels,
+ * which comes out at fallback-font metrics, while the canvas paints them in the
+ * real font — Inter runs ~6.7% wider than `sans-serif` at the same size (225.7px
+ * vs 211.5px for a 36-character name). Right-aligned text puts that difference
+ * past the left edge of the reservation, where the canvas clips it, and the first
+ * letter of every long name goes missing.
+ *
+ * This pads the reservation instead of correcting it: proportional because the
+ * error scales with the string, and 8% to stay ahead of the 6.7% observed. The
+ * honest fix is to stop relying on `containLabel` here and set the inset from our
+ * own measurement, which is a wider change than this buys.
+ */
+const CATEGORY_LABEL_RESERVATION_PAD = 0.08
+
+/**
+ * Width to give the category axis: what its longest name actually needs, clamped
+ * to what the container can afford ({@link labelWidthCap}).
+ *
+ * Sizing to the text rather than to a fixed allowance means a chart of short
+ * names ("Berlin") hands the width back to its bars instead of reserving a
+ * gutter for text that isn't there, while nothing truncates until a name genuinely
+ * outgrows the cap.
+ *
+ * Every category is measured, not just the ones currently on screen: a windowed
+ * chart draws the rest as soon as it expands, and sizing to the window would make
+ * the gutter jump on expand.
+ */
+function measuredCategoryLabelWidth(
+  categories: string[],
+  theme: {
+    textStyle: { fontSize: number; fontWeight: number; fontFamily: string }
+  },
+  containerWidth: number | undefined,
+  categoryFormatter?: (value: string) => string
+): number {
+  const font = `${theme.textStyle.fontWeight} ${theme.textStyle.fontSize}px ${theme.textStyle.fontFamily}`
+  let widest = 0
+  for (const category of categories) {
+    const text = categoryFormatter ? categoryFormatter(category) : category
+    widest = Math.max(widest, measureTextWidth(text, font))
+  }
+  return Math.min(
+    Math.ceil(widest) + CATEGORY_LABEL_MEASURE_SLACK,
+    labelWidthCap(containerWidth)
+  )
+}
+
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartBarDataPoint): number {
   return typeof point === "number" ? point : point.value
@@ -126,6 +208,167 @@ function hasTargets(series: F0DataChartBarSeries): boolean {
   return series.data.some(
     (d) => typeof d !== "number" && d.target !== undefined
   )
+}
+
+// ---------------------------------------------------------------------------
+// Horizontal category window
+// ---------------------------------------------------------------------------
+
+/** Thinnest a horizontal bar may get before the chart windows its categories. */
+const MIN_BAR_THICKNESS = 16
+
+/**
+ * Thickness every bar gets once `showAllCategories` is on. Expanding trades the
+ * pinned axis for the whole distribution, and at that point the rows are the
+ * content — so they get more room than in the windowed view, and the chart grows
+ * past its container to afford it.
+ */
+const EXPANDED_MIN_BAR_THICKNESS = 24
+
+/** Clearance between neighbouring bars within one category. */
+const MIN_BAR_GAP = 8
+
+/**
+ * Clearance between neighbouring categories, once a category holds more than
+ * one bar.
+ *
+ * Grouping is carried entirely by this being the larger of the two gaps: with
+ * both at {@link MIN_BAR_GAP} a chart of 6 categories × 3 series reads as one
+ * run of 18 evenly-spaced bars, and the reader has to count in threes to
+ * recover the groups. Doubling it makes each group a block.
+ */
+const MIN_CATEGORY_GAP = 24
+
+/**
+ * Gap separating two categories. A single bar per category — a plain or a
+ * stacked chart — has no interior gap for the category gap to distinguish
+ * itself from, so it stays at {@link MIN_BAR_GAP} and the rows stay compact.
+ */
+function categoryGap(barsPerBand: number): number {
+  return barsPerBand > 1 ? MIN_CATEGORY_GAP : MIN_BAR_GAP
+}
+
+/**
+ * Vertical space the chart spends on chrome rather than rows: the value axis on
+ * top, the grid's own padding, and the legend row. Deliberately one rough
+ * constant — it only shifts how many rows the window holds by one.
+ */
+const HORIZONTAL_CHART_CHROME = 64
+
+/**
+ * Band height (px) holding `barsPerBand` bars at `thickness` with
+ * {@link MIN_BAR_GAP} between them and a {@link categoryGap} separating this
+ * band from the next. Stacked series share a single bar per category, so they
+ * count as one. This is the geometry {@link horizontalBarGaps} expresses as the
+ * ratios ECharts actually takes.
+ */
+function minBandHeight(
+  barsPerBand: number,
+  thickness: number = MIN_BAR_THICKNESS
+): number {
+  const bars = Math.max(1, barsPerBand)
+  return bars * thickness + (bars - 1) * MIN_BAR_GAP + categoryGap(bars)
+}
+
+/**
+ * `barGap` / `barCategoryGap` for a horizontal chart, as the percentages
+ * ECharts expects — neither accepts pixels. `barGap` is a share of one bar's
+ * thickness; `barCategoryGap` is the share of the band left empty between
+ * adjacent categories.
+ *
+ * Expressing the gaps as ratios rather than pixels keeps them correct at any
+ * bar thickness: a chart with room to spare draws bars thicker than the
+ * thickness floor, and its gaps grow with them instead of staying pinned at
+ * {@link MIN_BAR_GAP}.
+ */
+function horizontalBarGaps(
+  barsPerBand: number,
+  thickness: number = MIN_BAR_THICKNESS
+): {
+  barGap: string
+  barCategoryGap: string
+} {
+  const gapShareOfBar = (MIN_BAR_GAP / thickness) * 100
+  const gapShareOfBand =
+    (categoryGap(Math.max(1, barsPerBand)) /
+      minBandHeight(barsPerBand, thickness)) *
+    100
+
+  return {
+    barGap: `${gapShareOfBar.toFixed(1)}%`,
+    barCategoryGap: `${gapShareOfBand.toFixed(1)}%`,
+  }
+}
+
+/**
+ * Height (px) a horizontal chart needs to draw every category at
+ * {@link EXPANDED_MIN_BAR_THICKNESS}, or `undefined` when the chart isn't in
+ * `showAllCategories` mode (where the window handles density instead).
+ *
+ * Applied by `BarChart` as a `min-height` on the ECharts host inside a
+ * scrolling wrapper: below its container the chart still fills it and the bars
+ * come out thicker; above it the container scrolls.
+ */
+export function expandedHorizontalChartHeight(
+  props: Pick<
+    F0DataChartBarProps,
+    "orientation" | "stacked" | "categories" | "showAllCategories"
+  > & { series?: F0DataChartBarSeries[] }
+): number | undefined {
+  if (!props.showAllCategories || props.orientation !== "horizontal") {
+    return undefined
+  }
+
+  const categoryCount = props.categories?.length ?? 0
+  if (categoryCount === 0) return undefined
+
+  const barsPerBand = props.stacked ? 1 : (props.series?.length ?? 1)
+  const band = minBandHeight(barsPerBand, EXPANDED_MIN_BAR_THICKNESS)
+
+  return Math.ceil(categoryCount * band) + HORIZONTAL_CHART_CHROME
+}
+
+/**
+ * How many categories a horizontal chart can show at
+ * {@link MIN_BAR_THICKNESS}, or `undefined` when every category already fits.
+ *
+ * The alternative — growing the canvas past its container and letting the DOM
+ * scroll — drags the value axis and legend along with the rows, because ECharts
+ * paints them into the same canvas. Windowing the category axis instead keeps
+ * the axis pinned to the top of the chart and the legend to the bottom, and
+ * only the rows move.
+ */
+export function horizontalCategoryWindow({
+  isVertical,
+  windowCategories,
+  showAllCategories,
+  stacked,
+  categoryCount,
+  seriesCount,
+  containerHeight,
+}: {
+  isVertical: boolean
+  windowCategories: boolean
+  showAllCategories: boolean
+  stacked: boolean
+  categoryCount: number
+  seriesCount: number
+  containerHeight: number | undefined
+}): number | undefined {
+  // Hiding rows is opt-in: without it a dense chart compresses instead, which
+  // keeps every category reachable. See `windowCategories` in the prop docs.
+  if (!windowCategories || showAllCategories) return undefined
+  if (isVertical || !containerHeight || categoryCount === 0) return undefined
+
+  const plotHeight = containerHeight - HORIZONTAL_CHART_CHROME
+  if (plotHeight <= 0) return undefined
+
+  const band = minBandHeight(stacked ? 1 : seriesCount)
+  if (plotHeight / categoryCount >= band) return undefined
+
+  // At least two rows, so the window can never collapse to a single bar that
+  // gives no sense of the surrounding data.
+  return Math.max(2, Math.floor(plotHeight / band))
 }
 
 const BAR_CORNER_RADIUS = 4
@@ -408,6 +651,163 @@ function buildSeriesEntries(
   return [mainSeries, targetSeries]
 }
 
+/**
+ * Slack left beyond the longest bar when the value axis maximum comes from the
+ * data. Enough that the bar doesn't read as jammed against its own label; small
+ * enough that the plot isn't paying for empty space.
+ */
+const VALUE_AXIS_HEADROOM = 1.05
+
+/**
+ * Value-axis maximum taken from the data — the longest extent any bar draws,
+ * plus {@link VALUE_AXIS_HEADROOM} — or `undefined` when the data gives nothing
+ * to scale to and ECharts' own choice should stand.
+ *
+ * A target turns into a ghost stacked on its bar, so the drawn extent of a point
+ * is the further of value and target. Stacked categories draw their parts end to
+ * end, so their extent is the sum — but only of the parts pointing the same way:
+ * ECharts stacks each sign away from zero independently, so a category of +100,
+ * +100, -150 reaches +200 and a signed sum would pin the axis at 52.5 and clip
+ * most of the positive stack. (A stacked chart that also carries targets splits
+ * into one stack per series, which makes the sum an over-estimate — the safe
+ * direction, since it only leaves slack rather than clipping a bar.)
+ *
+ * Negative-only data returns `undefined`: the maximum is not the far end of
+ * anything there, and pinning it would squash the axis against zero. The
+ * negative side is left to the automatic minimum in every case.
+ */
+function dataValueAxisMax(
+  series: F0DataChartBarSeries[],
+  stacked: boolean,
+  categoryCount: number
+): number | undefined {
+  const pointExtent = (point: F0DataChartBarDataPoint): number => {
+    const value = getValue(point)
+    const target = getTarget(point)
+    return target !== undefined && target > value ? target : value
+  }
+
+  let widest = 0
+  for (let dataIndex = 0; dataIndex < categoryCount; dataIndex++) {
+    // Positive and negative parts of a stack grow away from zero in opposite
+    // directions rather than cancelling, so they accumulate separately: a
+    // category of +100, +100, -150 reaches +200 on the axis, not the +50 a
+    // signed sum would report. Only the positive side can set the maximum.
+    // Negatives are left out of the running total rather than subtracted from
+    // it: they extend the other way, and the axis minimum stays automatic, so
+    // they can't be what pins the maximum.
+    let positive = 0
+    for (const s of series) {
+      const point = s.data[dataIndex]
+      if (point === undefined) continue
+      const own = pointExtent(point)
+      if (own <= 0) continue
+      positive = stacked ? positive + own : Math.max(positive, own)
+    }
+    widest = Math.max(widest, positive)
+  }
+
+  return widest > 0 ? widest * VALUE_AXIS_HEADROOM : undefined
+}
+
+/** Name of the ghost series carrying stacked totals. Kept out of `legendData`. */
+const STACK_TOTAL_SERIES_NAME = "__stackTotal"
+
+/**
+ * Per-category sums, or `undefined` when a stacked total would not mean
+ * anything.
+ *
+ * Two cases are excluded, mirroring the tooltip's own `showTotal` rule so the
+ * label and the tooltip never disagree:
+ *
+ * - **A single series.** Its total is the bar's own value, so the label would
+ *   restate the segment label already sitting inside the bar.
+ * - **Mixed signs within a category.** Parts pushing both ways don't add up to
+ *   the length the reader sees, and the ghost has no unambiguous end to sit at.
+ */
+function stackTotals(
+  series: F0DataChartBarSeries[],
+  categories: string[]
+): number[] | undefined {
+  if (series.length < 2) return undefined
+
+  const totals: number[] = []
+  for (let dataIndex = 0; dataIndex < categories.length; dataIndex++) {
+    let total = 0
+    let hasPositive = false
+    let hasNegative = false
+    for (const s of series) {
+      const point = s.data[dataIndex]
+      if (point === undefined) continue
+      const value = getValue(point) || 0
+      if (value > 0) hasPositive = true
+      else if (value < 0) hasNegative = true
+      total += value
+    }
+    if (hasPositive && hasNegative) return undefined
+    totals.push(total)
+  }
+  return totals
+}
+
+/**
+ * A zero-height ghost stacked on top of the real segments, carrying the
+ * category total as a label beside the bar's end.
+ *
+ * The ghost draws nothing — it exists because ECharts places a stacked series'
+ * label at that series' own position in the stack, so the only way to label the
+ * *end* of the whole bar is to stack something there. Its own value is 0, so it
+ * adds no length; the label text comes from {@link stackTotals} instead of from
+ * the datum.
+ *
+ * Consequence of precomputing the text: isolating a series from the legend
+ * moves the ghost (ECharts re-stacks without the hidden series) but the number
+ * still reads as the full total. The tooltip's total behaves the same way, so
+ * the two stay consistent with each other.
+ */
+function buildStackTotalSeries(
+  totals: number[],
+  labelColor: string,
+  labelFontSize: number,
+  containerWidth: number,
+  valueFormatter?: (value: number) => string
+): echarts.BarSeriesOption {
+  return {
+    name: STACK_TOTAL_SERIES_NAME,
+    type: "bar",
+    stack: "stacked",
+    data: totals.map(() => 0),
+    silent: true,
+    legendHoverLink: false,
+    tooltip: { show: false },
+    emphasis: { disabled: true },
+    itemStyle: { color: "transparent", borderWidth: 0 },
+    label: {
+      show: true,
+      position: "right",
+      color: labelColor,
+      fontWeight: "bold",
+      fontSize: labelFontSize,
+      formatter: (params) => {
+        const total = totals[params.dataIndex ?? 0]
+        if (total === undefined) return ""
+        return valueFormatter ? valueFormatter(total) : String(total)
+      },
+    },
+    // The reserved strip on the right is a fixed allowance, so a total wide
+    // enough to run past the container edge is dropped rather than clipped.
+    // Measured from the laid-out label itself, since its text is the total
+    // rather than any single datum the fit pass could look up.
+    labelLayout: (params) =>
+      params.labelRect.x + params.labelRect.width <= containerWidth
+        ? {}
+        : { fontSize: 0 },
+    // Hovering a segment blurs every other series, so match the segments'
+    // fade instead of staying at full strength while the bar dims.
+    blur: { label: { opacity: BLUR_OPACITY } },
+  }
+}
+
 /** Discrete responsive size for the bar chart (mirrors LineChart's `LineChartSize`) */
 export type BarChartSize = ChartResponsiveSize
 
@@ -454,6 +854,8 @@ export function useBarChartOptions(
     hideOverflowingLabels = true,
     labelFitPadding,
     hideAllLabelsOnOverflow = true,
+    windowCategories = false,
+    showAllCategories = false,
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
@@ -461,16 +863,31 @@ export function useBarChartOptions(
     valueAxisSplitNumber = 2,
     echartsOptions,
   }: F0DataChartBarProps,
-  size: BarChartSize
+  size: BarChartSize,
+  /**
+   * Which series the legend has selected, or `null` for all of them. Numbers
+   * derived from more than one series are computed from these, so they keep
+   * describing the bars the reader can actually see.
+   */
+  legendSelection: Record<string, boolean> | null = null
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
   const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
   const prefersReducedMotion = useReducedMotion()
+  // Only a dependency, never read: label widths are measured below, and the
+  // metrics change under us when the real font arrives. See `useFontsReady`.
+  const fontsReady = useFontsReady()
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
+    // Isolating a series from the legend makes ECharts re-stack around what is
+    // left. Anything summed across series follows that, or the number stops
+    // matching the bar it sits on.
+    const visibleSeries = legendSelection
+      ? series.filter((s) => legendSelection[s.name] !== false)
+      : series
     const resolvedLabelFontSize = labelFontSize ?? DEFAULT_LABEL_FONT_SIZE
     const userGridRight = (
       echartsOptions?.grid as { right?: number | string } | undefined
@@ -484,7 +901,41 @@ export function useBarChartOptions(
     // The user-provided `showLegend` prop can still force the legend off,
     // but it can never override the `sm` rule.
     const effectiveShowLegend = responsive.showLegend && showLegend
-    const { showCategoryAxis, showValueAxis } = responsive
+    const { showCategoryAxis } = responsive
+
+    // A horizontal bar with its value written beside it doesn't need the scale
+    // spelled out again along the top — the reader takes the number off the bar,
+    // and the ticks only compete with it. The grid lines stay: they're driven by
+    // `showGrid`, so the bars keep something to be read against, which is all
+    // the axis was contributing once every bar is labelled.
+    //
+    // Only the labels go. Without `showLabels` the ticks are the sole way to
+    // judge magnitude, and vertical charts keep theirs either way — their labels
+    // sit above the bars, clear of the axis rather than duplicating it.
+    const labelsReplaceValueAxis = !isVertical && showLabels
+    const showValueAxis = responsive.showValueAxis && !labelsReplaceValueAxis
+
+    // The same call, applied to the axis extent: ECharts rounds its maximum up to
+    // a nice number, which is worth the whitespace only while someone can read
+    // the ticks it lands on. With them hidden, a 106 max rounded to 150 spends a
+    // third of the plot labelling nothing, so take the extent from the data.
+    const valueAxisMax = labelsReplaceValueAxis
+      ? dataValueAxisMax(visibleSeries, stacked, categories.length)
+      : undefined
+
+    // Horizontal rows carry their category names along the side, where the axis
+    // can be sized to the names themselves. Vertical charts lay them out along
+    // the width, where the smart layout trades truncation against skipping
+    // labels and owns the decision.
+    const categoryMaxLabelWidth =
+      !isVertical && showCategoryAxis
+        ? measuredCategoryLabelWidth(
+            categories,
+            theme,
+            containerWidth,
+            categoryFormatter
+          )
+        : undefined
 
     const resolveBorderRadius = buildBorderRadiusResolver(
       series,
@@ -577,6 +1028,41 @@ export function useBarChartOptions(
       )
     )
 
+    // A horizontal stacked bar reads as one quantity split into parts, so the
+    // quantity itself gets a label at the end of the bar — the segments only
+    // carry their own shares. Vertical stacks are left alone: their end is the
+    // top, where the value axis already gives the reader the number.
+    const totals =
+      showLabels && stacked && !isVertical
+        ? stackTotals(visibleSeries, categories)
+        : undefined
+    if (totals) {
+      echartsSeries.push(
+        buildStackTotalSeries(
+          totals,
+          theme.colors.foregroundSecondary,
+          resolvedLabelFontSize,
+          containerWidth,
+          valueFormatter
+        )
+      )
+    }
+
+    // Horizontal rows carry an explicit gap geometry rather than ECharts'
+    // defaults (20% of the band, 30% of a bar), which at the thickness a dense
+    // chart lands on leaves bars visually touching. Vertical charts keep the
+    // defaults. ECharts reads these from the first series of a stack group, but
+    // setting them on every entry keeps that independent of series order.
+    if (!isVertical) {
+      const gaps = horizontalBarGaps(
+        stacked ? 1 : series.length,
+        showAllCategories ? EXPANDED_MIN_BAR_THICKNESS : MIN_BAR_THICKNESS
+      )
+      for (const entry of echartsSeries) {
+        Object.assign(entry, gaps)
+      }
+    }
+
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
 
@@ -598,6 +1084,20 @@ export function useBarChartOptions(
       valueFormatter
     )
 
+    // Too many categories to render at the minimum bar thickness: show a
+    // window of them and let the reader scroll through the rest. Resolved
+    // before the axes are built, because the axis decides label skipping from
+    // the rows it actually draws.
+    const categoryWindow = horizontalCategoryWindow({
+      isVertical,
+      windowCategories,
+      showAllCategories,
+      stacked,
+      categoryCount: categories.length,
+      seriesCount: series.length,
+      containerHeight,
+    })
+
     const options = buildBaseChartOptions({
       categories,
       theme,
@@ -610,10 +1110,15 @@ export function useBarChartOptions(
       // bars it's the Y axis. `buildAxes` already handles that mapping.
       showCategoryAxis,
       showValueAxis,
+      ...(categoryWindow !== undefined
+        ? { categoryVisibleCount: categoryWindow }
+        : {}),
       valueFormatter,
       categoryFormatter,
       tooltipValueFormatter,
       valueAxisSplitNumber,
+      ...(valueAxisMax !== undefined ? { valueAxisMax } : {}),
+      ...(categoryMaxLabelWidth !== undefined ? { categoryMaxLabelWidth } : {}),
       echartsOptions,
       containerWidth,
       containerHeight,
@@ -715,7 +1220,7 @@ export function useBarChartOptions(
           // the parts add up to — 24 hires against a net of 19 would read as
           // 126.3%, and near-cancellation makes that ratio arbitrarily large.
           // Signed categories therefore show the value alone.
-          const categoryValues = series.map((s) => {
+          const categoryValues = visibleSeries.map((s) => {
             // A series can be shorter than `categories`.
             const point = s.data[dataIndex]
             return point === undefined ? 0 : getValue(point) || 0
@@ -724,7 +1229,7 @@ export function useBarChartOptions(
             categoryValues.some((v) => v > 0) &&
             categoryValues.some((v) => v < 0)
           const total = categoryValues.reduce((sum, v) => sum + v, 0)
-          const showTotal = series.length > 1 && !hasMixedSigns
+          const showTotal = visibleSeries.length > 1 && !hasMixedSigns
 
           // No "from previous" row here: bar categories are not necessarily a
           // sequence (locations, departments), so comparing a bar with the one
@@ -759,16 +1264,78 @@ export function useBarChartOptions(
       })
     }
 
-    // Non-stacked horizontal bars render labels BESIDE the bar end, so the
-    // grid reserves room for them on the right. Stacked labels sit inside
-    // their segments — no reservation needed, the plot keeps its full width.
-    if (!isVertical && !stacked && showLabels) {
+    // Horizontal bars whose labels sit BESIDE the bar end need the grid to
+    // reserve room for them on the right: every category for a non-stacked
+    // chart, and the total for a stacked one. A stacked chart without totals
+    // keeps its full width — those labels sit inside their own segments.
+    if (!isVertical && (!stacked || totals) && showLabels) {
       if (userGridRight === undefined) {
         const grid = options.grid as { right?: number }
         if (grid) {
           grid.right = HORIZONTAL_LABEL_GRID_RIGHT
         }
       }
+    }
+
+    // The vertical equivalent: a column's label sits ABOVE the bar, so the grid
+    // needs headroom for it. `containLabel` doesn't provide any — it accounts for
+    // axis labels, and a vertical chart has none along the top — so a column
+    // reaching the axis maximum pushed its label off the top of the canvas, where
+    // it was clipped by the widget's header. Added to whatever padding `buildGrid`
+    // set rather than replacing it, so the base stays defined in one place.
+    //
+    // Stacked columns are exempt: their labels sit inside the segments.
+    if (isVertical && !stacked && showLabels) {
+      const userGridTop = (
+        echartsOptions?.grid as { top?: number | string } | undefined
+      )?.top
+      const grid = options.grid as { top?: number }
+      if (userGridTop === undefined && grid && typeof grid.top === "number") {
+        grid.top += verticalLabelHeadroom(resolvedLabelFontSize)
+      }
+    }
+
+    // Pad the gutter past what `containLabel` reserved for the category names,
+    // so the difference between ECharts' measurement of them and their painted
+    // width falls inside the chart instead of off its left edge. See
+    // `CATEGORY_LABEL_RESERVATION_PAD` for why the two disagree.
+    if (categoryMaxLabelWidth !== undefined) {
+      const userGridLeft = (
+        echartsOptions?.grid as { left?: number | string } | undefined
+      )?.left
+      const grid = options.grid as { left?: number }
+      if (userGridLeft === undefined && grid && typeof grid.left === "number") {
+        grid.left += Math.ceil(
+          categoryMaxLabelWidth * CATEGORY_LABEL_RESERVATION_PAD
+        )
+      }
+    }
+
+    // The window resolved above is fixed: it shows the top rows and nothing
+    // moves it. `disabled` turns off every `inside` interaction — drag-to-pan
+    // (`moveOnMouseMove`, on by default) and wheel-pan alike — while still
+    // applying `startValue`/`endValue` to the axis, so the window is a framing
+    // decision rather than a viewport the reader has to discover and operate.
+    // Expanding is the way to the rest of the rows, offered explicitly by the
+    // widget's "show all" link; panning duplicated that as a hidden gesture, and
+    // wheel-panning also swallowed the scroll of the page the chart sits on.
+    //
+    // `zoomLock` keeps the window's size fixed against a programmatic zoom, and
+    // `filterMode: "none"` keeps every row in the dataset so `dataIndex` still
+    // lines up with `categories` — the label layout and corner-radius resolvers
+    // index by it.
+    if (categoryWindow !== undefined) {
+      options.dataZoom = [
+        {
+          type: "inside",
+          yAxisIndex: 0,
+          startValue: 0,
+          endValue: categoryWindow - 1,
+          filterMode: "none",
+          zoomLock: true,
+          disabled: true,
+        },
+      ]
     }
 
     return options
@@ -783,6 +1350,8 @@ export function useBarChartOptions(
     hideOverflowingLabels,
     labelFitPadding,
     hideAllLabelsOnOverflow,
+    windowCategories,
+    showAllCategories,
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
@@ -795,5 +1364,7 @@ export function useBarChartOptions(
     containerHeight,
     size,
     prefersReducedMotion,
+    fontsReady,
+    legendSelection,
   ])
 }

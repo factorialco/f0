@@ -1,5 +1,54 @@
 # Changelog
 
+## [6.8.0](https://github.com/factorialco/f0/compare/f0-react-v6.7.2...f0-react-v6.8.0) (2026-08-06)
+
+
+### Features
+
+* **F0DurationInput:** allow negative durations ([#5002](https://github.com/factorialco/f0/issues/5002)) ([6fc0e66](https://github.com/factorialco/f0/commit/6fc0e66315b76379bf6629f241fe30776908680c))
+
+## [6.7.2](https://github.com/factorialco/f0/compare/f0-react-v6.7.1...f0-react-v6.7.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* **dialog:** stop React propagation without stopping the DOM event ([#5009](https://github.com/factorialco/f0/issues/5009)) ([6f7d1fe](https://github.com/factorialco/f0/commit/6f7d1fefd48b24a767ab25fcdf6ddd0398680954))
+
+## [6.7.1](https://github.com/factorialco/f0/compare/f0-react-v6.7.0...f0-react-v6.7.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* **react:** stabilize flaky Storybook tests ([#5014](https://github.com/factorialco/f0/issues/5014)) ([eef3d9d](https://github.com/factorialco/f0/commit/eef3d9d26fccceedd547c605539645c4d5f53755))
+
+## [6.7.0](https://github.com/factorialco/f0/compare/f0-react-v6.6.0...f0-react-v6.7.0) (2026-08-06)
+
+
+### Features
+
+* **F0PhoneInput:** add experimental phone input ([#4880](https://github.com/factorialco/f0/issues/4880)) ([a7c4e19](https://github.com/factorialco/f0/commit/a7c4e19f71d1d63fb57a1db6bfe6173dc9abefff))
+
+## [6.6.0](https://github.com/factorialco/f0/compare/f0-react-v6.5.0...f0-react-v6.6.0) (2026-08-05)
+
+
+### Features
+
+* **F0Form:** add showOnlySelectedSection styling option ([#4424](https://github.com/factorialco/f0/issues/4424)) ([99fd5e4](https://github.com/factorialco/f0/commit/99fd5e4cd1a8a329e7d81486a54c8ab50c4a058c))
+
+## [6.5.0](https://github.com/factorialco/f0/compare/f0-react-v6.4.0...f0-react-v6.5.0) (2026-08-05)
+
+
+### Features
+
+* **F0DataChart:** make a dense horizontal bar chart readable ([#4984](https://github.com/factorialco/f0/issues/4984)) ([6b85f03](https://github.com/factorialco/f0/commit/6b85f039d862ed9ed1bb40a119cd26139ab54f77))
+
+## [6.4.0](https://github.com/factorialco/f0/compare/f0-react-v6.3.3...f0-react-v6.4.0) (2026-08-05)
+
+
+### Features
+
+* **F0DataChart:** add a scatter chart type ([#4950](https://github.com/factorialco/f0/issues/4950)) ([1313e7e](https://github.com/factorialco/f0/commit/1313e7e3328e3347ed557bd059bc1939721e6709))
+
 ## [6.3.3](https://github.com/factorialco/f0/compare/f0-react-v6.3.2...f0-react-v6.3.3) (2026-08-05)
 
 

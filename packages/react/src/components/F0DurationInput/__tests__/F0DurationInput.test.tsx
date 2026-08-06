@@ -910,4 +910,288 @@ describe("F0DurationInput", () => {
       expect(fireEvent.keyDown(hours, { key: "x", altKey: true })).toBe(true)
     })
   })
+
+  describe("negative values", () => {
+    it("blocks the minus key by default", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      expect(
+        fireEvent.keyDown(screen.getByLabelText("Hours"), { key: "-" })
+      ).toBe(false)
+    })
+
+    it("ignores a pasted minus sign by default", () => {
+      const onChange = vi.fn()
+      render(<F0DurationInput label="Duration" value={0} onChange={onChange} />)
+
+      fireEvent.change(screen.getByLabelText("Hours"), {
+        target: { value: "-2" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(7200)
+    })
+
+    it("allows the minus key at the start of the first segment when allowNegative", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          allowNegative
+        />
+      )
+
+      expect(
+        fireEvent.keyDown(screen.getByLabelText("Hours"), { key: "-" })
+      ).toBe(true)
+    })
+
+    it("blocks the minus key in non-first segments when allowNegative", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          allowNegative
+        />
+      )
+
+      expect(
+        fireEvent.keyDown(screen.getByLabelText("Minutes"), { key: "-" })
+      ).toBe(false)
+    })
+
+    it("blocks a second minus key in the first segment", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={-3600}
+          onChange={() => {}}
+          allowNegative
+        />
+      )
+
+      const hours = screen.getByLabelText("Hours")
+      hours.focus()
+      const input = hours as HTMLInputElement
+      input.setSelectionRange(0, 0)
+
+      expect(fireEvent.keyDown(hours, { key: "-" })).toBe(false)
+    })
+
+    it("emits negative seconds when a negative amount is typed in the first segment", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          allowNegative
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Hours"), {
+        target: { value: "-2" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(-7200)
+    })
+
+    it("applies the sign to all visible segments", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={-7200}
+          onChange={onChange}
+          allowNegative
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Minutes"), {
+        target: { value: "30" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(-9000)
+    })
+
+    it("keeps a pending minus sign while the amount is empty and emits 0", () => {
+      const onChange = vi.fn()
+
+      function ControlledDurationInput() {
+        const [value, setValue] = useState(0)
+        return (
+          <F0DurationInput
+            label="Duration"
+            value={value}
+            onChange={(nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            }}
+            allowNegative
+          />
+        )
+      }
+
+      render(<ControlledDurationInput />)
+
+      const hours = screen.getByLabelText("Hours")
+      fireEvent.change(hours, { target: { value: "-" } })
+
+      expect(hours).toHaveValue("-")
+      expect(onChange).toHaveBeenLastCalledWith(0)
+
+      fireEvent.change(hours, { target: { value: "-2" } })
+
+      expect(hours).toHaveValue("-2")
+      expect(onChange).toHaveBeenLastCalledWith(-7200)
+    })
+
+    it("renders an external negative value with a minus on the first segment", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={-4500}
+          onChange={() => {}}
+          allowNegative
+        />
+      )
+
+      expect(screen.getByLabelText("Hours")).toHaveValue("-1")
+      expect(screen.getByLabelText("Minutes")).toHaveValue("15")
+    })
+
+    it("clamps a negative external value to zero when allowNegative is not set", () => {
+      render(
+        <F0DurationInput label="Duration" value={-4500} onChange={() => {}} />
+      )
+
+      expect(screen.getByLabelText("Hours")).toHaveValue("")
+      expect(screen.getByLabelText("Minutes")).toHaveValue("")
+    })
+
+    it("returns to positive when the minus sign is removed", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={-7200}
+          onChange={onChange}
+          allowNegative
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Hours"), {
+        target: { value: "2" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(7200)
+    })
+
+    it("clears the sign when the first segment is emptied", () => {
+      const onChange = vi.fn()
+
+      function ControlledDurationInput() {
+        const [value, setValue] = useState(-7200)
+        return (
+          <F0DurationInput
+            label="Duration"
+            value={value}
+            onChange={(nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            }}
+            allowNegative
+          />
+        )
+      }
+
+      render(<ControlledDurationInput />)
+
+      const hours = screen.getByLabelText("Hours")
+      expect(hours).toHaveValue("-2")
+
+      fireEvent.change(hours, { target: { value: "" } })
+
+      expect(hours).toHaveValue("")
+      expect(onChange).toHaveBeenLastCalledWith(0)
+    })
+
+    it("drops a dangling minus sign on blur", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          allowNegative
+        />
+      )
+
+      const hours = screen.getByLabelText("Hours")
+      fireEvent.change(hours, { target: { value: "-" } })
+      expect(hours).toHaveValue("-")
+
+      fireEvent.blur(hours)
+
+      expect(hours).toHaveValue("")
+      expect(onChange).toHaveBeenLastCalledWith(0)
+    })
+
+    it("normalizes visible units on blur while keeping the sign", () => {
+      const onChange = vi.fn()
+      const onBlur = vi.fn()
+
+      function ControlledDurationInput() {
+        const [value, setValue] = useState(0)
+        return (
+          <F0DurationInput
+            label="Duration"
+            value={value}
+            onChange={(nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            }}
+            onBlur={onBlur}
+            allowNegative
+          />
+        )
+      }
+
+      render(<ControlledDurationInput />)
+
+      const hours = screen.getByLabelText("Hours")
+      const minutes = screen.getByLabelText("Minutes")
+
+      fireEvent.change(hours, { target: { value: "-" } })
+      fireEvent.change(minutes, { target: { value: "75" } })
+
+      expect(onChange).toHaveBeenLastCalledWith(-4500)
+
+      fireEvent.blur(minutes)
+
+      expect(onBlur).toHaveBeenCalledTimes(1)
+      expect(hours).toHaveValue("-1")
+      expect(minutes).toHaveValue("15")
+    })
+
+    it("clamps the magnitude with the field max while negative", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          allowNegative
+          fields={{ hours: { max: 12 } }}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Hours"), {
+        target: { value: "-20" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(-43200)
+    })
+  })
 })
