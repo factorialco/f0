@@ -148,6 +148,12 @@ export function TableCell({
         firstCell && "peer font-medium",
         isSticky && isScrolled && stickyScrollClasses[referenceRowType],
         isSticky && "sticky z-10",
+        // The left-frozen first column can sit flush against an outer surface
+        // (e.g. the app sidebar). A left border keeps it visually separated so
+        // its content never blends into whatever is to its left.
+        isStickyLeft &&
+          stickyLeft === 0 &&
+          "border-l border-f1-border-secondary",
         isStickyRight && stickyScrollClasses[referenceRowType],
         href && "cursor-pointer",
         className

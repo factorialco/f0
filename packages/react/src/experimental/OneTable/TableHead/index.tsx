@@ -316,6 +316,12 @@ export function TableHead({
           (isScrolled || isScrolledRight) &&
           "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
         isSticky && "sticky",
+        // Match TableCell: the left-frozen first column keeps a left border so
+        // the header lines up with the body and stays separated from whatever
+        // sits to its left (e.g. the app sidebar).
+        isStickyLeft &&
+          stickyLeft === 0 &&
+          "border-l border-f1-border-secondary",
         hidden && "after:hidden",
         handleCellClick && "cursor-pointer",
         className

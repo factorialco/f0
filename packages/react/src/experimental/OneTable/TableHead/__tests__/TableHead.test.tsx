@@ -176,3 +176,46 @@ describe("TableHead rich header info", () => {
     ).not.toBeInTheDocument()
   })
 })
+
+describe("left-frozen column border", () => {
+  // Only the left-frozen FIRST column (left === 0) gets a left border, so it
+  // stays separated from whatever sits to its left (e.g. the app sidebar).
+  // Inner frozen columns (left > 0) and non-frozen columns do not. FCT-60739.
+  const renderFrozenTable = () =>
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead sticky={{ left: 0 }}>Name</TableHead>
+            <TableHead sticky={{ left: 120 }}>Team</TableHead>
+            <TableHead>Role</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell sticky={{ left: 0 }}>Ada</TableCell>
+            <TableCell sticky={{ left: 120 }}>Platform</TableCell>
+            <TableCell>Engineer</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+  it("borders only the left-frozen first header cell", () => {
+    renderFrozenTable()
+    const [name, team, role] = screen.getAllByRole("columnheader")
+
+    expect(name).toHaveClass("border-l", "border-f1-border-secondary")
+    expect(team).not.toHaveClass("border-l")
+    expect(role).not.toHaveClass("border-l")
+  })
+
+  it("borders only the left-frozen first body cell", () => {
+    renderFrozenTable()
+    const [name, team, role] = screen.getAllByRole("cell")
+
+    expect(name).toHaveClass("border-l", "border-f1-border-secondary")
+    expect(team).not.toHaveClass("border-l")
+    expect(role).not.toHaveClass("border-l")
+  })
+})
