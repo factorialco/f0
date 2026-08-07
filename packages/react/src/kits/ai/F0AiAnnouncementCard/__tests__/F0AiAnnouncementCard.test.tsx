@@ -45,6 +45,39 @@ describe("F0AiAnnouncementCard", () => {
     expect(onSecondary).toHaveBeenCalledOnce()
   })
 
+  describe("primary action", () => {
+    // The designed default. The AI treatment is opt-in, not the baseline —
+    // plenty of announcements open a screen rather than handing over to One.
+    it("renders a bordered button by default", () => {
+      render(
+        <F0AiAnnouncementCard
+          {...baseProps}
+          primaryAction={{ label: "Try it out", onClick: vi.fn() }}
+        />
+      )
+
+      const button = screen.getByRole("button", { name: "Try it out" })
+      expect(button.className).toMatch(/border/)
+      expect(button.querySelector("svg")).toBeNull()
+    })
+
+    it("renders the AI button with the One mark on variant ai", () => {
+      render(
+        <F0AiAnnouncementCard
+          {...baseProps}
+          primaryAction={{
+            label: "Try it out",
+            onClick: vi.fn(),
+            variant: "ai",
+          }}
+        />
+      )
+
+      const button = screen.getByRole("button", { name: "Try it out" })
+      expect(button.querySelector("svg")).not.toBeNull()
+    })
+  })
+
   it("calls onClose and removes itself when dismissed", async () => {
     const onClose = vi.fn()
     const user = userEvent.setup()

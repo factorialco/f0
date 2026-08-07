@@ -50,11 +50,17 @@ renders as an image. Media is optional; a text-only announcement is still valid.
 
 ## Actions
 
-`primaryAction` renders as the AI button, because taking the user into the
-capability is what an announcement is for. If the primary action is not "go and
-use this", this is probably the wrong component.
+`primaryAction` renders as a bordered button, and `secondaryAction` borderless
+beside it as an opt-out.
 
-`secondaryAction` renders borderless, as an opt-out beside it.
+| Primary variant     | When to use                                                                                                                                           |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `outline` (default) | The action opens a screen, a flow, or a setting — the user stays in charge of the next step                                                           |
+| `ai`                | The action hands the user over to One, which then does the work. Renders the AI button with the One mark, so the handover is visible before the click |
+
+<Canvas of={Stories.AiPrimaryAction} />
+
+The `ai` variant takes no icon of its own — the One mark is the point of it.
 
 Consumers that dispatch their own buttons — CMS-driven content, for instance —
 can put them in `children`, which lands in the actions row after both actions.

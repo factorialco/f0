@@ -1,23 +1,36 @@
 import type { IconType } from "@/components/F0Icon"
 import type { DataAttributes } from "@/global.types"
 
-/**
- * The action that takes the user into the capability. It carries no icon of its
- * own: it always renders as the AI button with the One mark, because that is
- * the promise the card is making.
- */
-export interface AnnouncementPrimaryAction {
+interface AnnouncementActionBase {
   /** Button label. */
   label: string
   /** Called when the button is clicked. */
   onClick: () => void
 }
 
-export interface AnnouncementSecondaryAction {
-  /** Button label. */
-  label: string
-  /** Called when the button is clicked. */
-  onClick: () => void
+/**
+ * The action that takes the user into the capability.
+ *
+ * A discriminated union rather than a plain `variant` string, because the two
+ * treatments do not accept the same things: the AI button carries the One mark
+ * and cannot take an icon of its own.
+ */
+export type AnnouncementPrimaryAction =
+  | (AnnouncementActionBase & {
+      /** Bordered button. The default. */
+      variant?: "outline"
+      /** Optional icon shown before the label. */
+      icon?: IconType
+    })
+  | (AnnouncementActionBase & {
+      /**
+       * Renders as the AI button with the One mark. Use it when the action
+       * hands the user over to One rather than opening a screen.
+       */
+      variant: "ai"
+    })
+
+export interface AnnouncementSecondaryAction extends AnnouncementActionBase {
   /** Optional icon shown before the label. */
   icon?: IconType
 }
@@ -33,9 +46,8 @@ export interface F0AiAnnouncementCardProps extends DataAttributes {
    */
   mediaUrl?: string
   /**
-   * The action that takes the user into the capability. Rendered as the AI
-   * button, because that is what an announcement is for — anything else is a
-   * sign this should be a different component.
+   * The action that takes the user into the capability. Bordered by default;
+   * `variant: "ai"` renders it as the AI button instead.
    */
   primaryAction?: AnnouncementPrimaryAction
   /** An opt-out alongside the primary action. Rendered borderless. */

@@ -87,14 +87,23 @@ const F0AiAnnouncementCardComponent = forwardRef<
         </div>
 
         <div className="flex gap-2">
-          {primaryAction && (
-            <AIButton
-              label={primaryAction.label}
-              onClick={primaryAction.onClick}
-              icon={OneIcon}
-              size="md"
-            />
-          )}
+          {primaryAction &&
+            (primaryAction.variant === "ai" ? (
+              <AIButton
+                label={primaryAction.label}
+                onClick={primaryAction.onClick}
+                icon={OneIcon}
+                size="md"
+              />
+            ) : (
+              <F0Button
+                label={primaryAction.label}
+                onClick={primaryAction.onClick}
+                icon={primaryAction.icon}
+                variant="outline"
+                size="md"
+              />
+            ))}
           {secondaryAction && (
             <F0Button
               label={secondaryAction.label}
