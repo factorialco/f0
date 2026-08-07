@@ -43,6 +43,7 @@
     "build-api": "pnpm --dir api install --ignore-workspace && pnpm --dir api run build",
     "serve-storybook": "http-server storybook-static",
     "test-storybook": "test-storybook --testTimeout=60000",
+    "unused-components": "node scripts/unused-components.mjs",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
