@@ -5,8 +5,18 @@ import { IconType } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
+
+import {
+  actionsVariants,
+  bannerVariants,
+  contentVariants,
+  mediaVariants,
+  subtitleVariants,
+  textWrapperVariants,
+  titleVariants,
+  type BaseBannerVariant,
+} from "./variants"
 
 export type BannerAction = {
   label: string
@@ -24,7 +34,7 @@ export type BaseBannerProps = {
   onClose?: () => void
   isLoading?: boolean
   children?: React.ReactNode
-  variant?: "default" | "full-width"
+  variant?: BaseBannerVariant
 }
 
 const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
@@ -57,12 +67,9 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
     }
 
     return !isDismissed ? (
-      <div
-        ref={ref}
-        className="bg-white relative flex w-full flex-col gap-4 rounded-xl border border-f1-border-secondary shadow-md sm:flex-row sm:gap-5"
-      >
+      <div ref={ref} className={bannerVariants({ variant })}>
         {/* Media 16:9 */}
-        <div className="aspect-video w-full flex-shrink-0 overflow-hidden rounded-xl px-1 pb-0 pt-1 sm:max-w-80 sm:py-1 sm:pl-1">
+        <div className={mediaVariants({ variant })}>
           {isVideo ? (
             <video
               src={mediaUrl}
@@ -81,23 +88,16 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
         </div>
 
         {/* Content */}
-        <div className="flex flex-col justify-center gap-5 px-3 pb-3 sm:py-3 sm:pl-0 sm:pr-3">
-          <div
-            className={cn(
-              "flex w-full flex-col gap-1",
-              variant === "default" ? "sm:max-w-lg" : undefined
-            )}
-          >
-            <h3 className="font-bold text-xl text-f1-foreground">{title}</h3>
+        <div className={contentVariants({ variant })}>
+          <div className={textWrapperVariants({ variant })}>
+            <h3 className={titleVariants({ variant })}>{title}</h3>
             {subtitle && (
-              <p className="text-base text-f1-foreground-secondary">
-                {subtitle}
-              </p>
+              <p className={subtitleVariants({ variant })}>{subtitle}</p>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className={actionsVariants({ variant })}>
             {primaryAction && (
               <F0Button
                 onClick={primaryAction.onClick}
@@ -138,28 +138,34 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
   }
 )
 
+// Built from the same slots as the banner itself, so the two cannot drift. The
+// variant is pinned to `default` for now, which is what the hard-coded classes
+// resolved to — making it follow the banner's own variant is a behaviour change,
+// not part of this refactor.
+const SKELETON_VARIANT = "default" satisfies BaseBannerVariant
+
 const BaseBannerSkeleton = forwardRef<HTMLDivElement>(
   function BaseBannerSkeleton(props, ref) {
     return (
       <div
         ref={ref}
-        className="bg-white relative flex w-full flex-col gap-4 rounded-xl border border-f1-border-secondary shadow-md sm:flex-row sm:gap-5"
+        className={bannerVariants({ variant: SKELETON_VARIANT })}
         role="status"
         aria-busy="true"
         aria-live="polite"
         {...props}
       >
-        <div className="aspect-video w-full flex-shrink-0 overflow-hidden rounded-xl px-1 pb-0 pt-1 sm:max-w-80 sm:py-1 sm:pl-1">
+        <div className={mediaVariants({ variant: SKELETON_VARIANT })}>
           <Skeleton className="h-full w-full rounded-lg" />
         </div>
 
-        <div className="flex flex-col justify-center gap-5 px-3 pb-3 sm:py-3 sm:pl-0 sm:pr-3">
-          <div className="flex w-full flex-col gap-1 sm:max-w-lg">
+        <div className={contentVariants({ variant: SKELETON_VARIANT })}>
+          <div className={textWrapperVariants({ variant: SKELETON_VARIANT })}>
             <Skeleton className="h-7 w-3/4" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-2/3" />
           </div>
-          <div className="flex gap-3">
+          <div className={actionsVariants({ variant: SKELETON_VARIANT })}>
             <Skeleton className="h-9 w-32" />
             <Skeleton className="h-9 w-24" />
           </div>
