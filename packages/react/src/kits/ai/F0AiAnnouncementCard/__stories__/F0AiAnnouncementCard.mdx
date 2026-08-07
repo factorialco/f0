@@ -53,14 +53,10 @@ renders as an image. Media is optional; a text-only announcement is still valid.
 `primaryAction` renders as a bordered button, and `secondaryAction` borderless
 beside it as an opt-out.
 
-| Primary variant     | When to use                                                                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `outline` (default) | The action opens a screen, a flow, or a setting — the user stays in charge of the next step                                                           |
-| `ai`                | The action hands the user over to One, which then does the work. Renders the AI button with the One mark, so the handover is visible before the click |
-
-<Canvas of={Stories.AiPrimaryAction} />
-
-The `ai` variant takes no icon of its own — the One mark is the point of it.
+The card does not brand its own primary action — no AI treatment, no One mark,
+even though it lives in the AI kit. Whether an action deserves to look different
+is the consumer's call, and f0 cannot know it: the same card announces things
+that hand you to One and things that open a screen.
 
 Some consumers cannot name their buttons ahead of time: which button an
 announcement gets is decided at runtime, by authored content, a feature flag, or

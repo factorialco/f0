@@ -64,18 +64,6 @@ export const Default: Story = {
   },
 }
 
-/**
- * `variant: "ai"` renders the primary action as the AI button with the One
- * mark — for announcements whose action hands the user over to One rather than
- * opening a screen.
- */
-export const AiPrimaryAction: Story = {
-  args: {
-    ...Default.args,
-    primaryAction: { label: "Try it out", onClick: fn(), variant: "ai" },
-  },
-}
-
 /** Media is optional — a text-only announcement is still a valid one. */
 export const WithoutMedia: Story = {
   args: {
@@ -141,14 +129,6 @@ export const Snapshot: Story = {
   render: (args) => (
     <div className="flex flex-col gap-6">
       <F0AiAnnouncementCard {...args} />
-      <F0AiAnnouncementCard
-        {...args}
-        primaryAction={{
-          label: "Try it out",
-          onClick: () => {},
-          variant: "ai",
-        }}
-      />
       <F0AiAnnouncementCard {...args} mediaUrl={undefined} />
       <F0AiAnnouncementCard {...args} isLoading />
     </div>

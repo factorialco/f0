@@ -2,9 +2,7 @@ import { forwardRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import type { DataAttributes } from "@/global.types"
-import { One as OneIcon } from "@/icons/ai"
 import CrossIcon from "@/icons/app/Cross"
-import { AIButton } from "@/kits/ai/AIButton"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -87,23 +85,15 @@ const F0AiAnnouncementCardComponent = forwardRef<
         </div>
 
         <div className="flex gap-2">
-          {primaryAction &&
-            (primaryAction.variant === "ai" ? (
-              <AIButton
-                label={primaryAction.label}
-                onClick={primaryAction.onClick}
-                icon={OneIcon}
-                size="md"
-              />
-            ) : (
-              <F0Button
-                label={primaryAction.label}
-                onClick={primaryAction.onClick}
-                icon={primaryAction.icon}
-                variant="outline"
-                size="md"
-              />
-            ))}
+          {primaryAction && (
+            <F0Button
+              label={primaryAction.label}
+              onClick={primaryAction.onClick}
+              icon={primaryAction.icon}
+              variant="outline"
+              size="md"
+            />
+          )}
           {secondaryAction && (
             <F0Button
               label={secondaryAction.label}

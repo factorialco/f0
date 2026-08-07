@@ -45,37 +45,19 @@ describe("F0AiAnnouncementCard", () => {
     expect(onSecondary).toHaveBeenCalledOnce()
   })
 
-  describe("primary action", () => {
-    // The designed default. The AI treatment is opt-in, not the baseline —
-    // plenty of announcements open a screen rather than handing over to One.
-    it("renders a bordered button by default", () => {
-      render(
-        <F0AiAnnouncementCard
-          {...baseProps}
-          primaryAction={{ label: "Try it out", onClick: vi.fn() }}
-        />
-      )
+  // The card does not brand its own primary action. Whether an action deserves
+  // a distinct treatment is the consumer's call, and f0 cannot know it.
+  it("renders the primary action as a plain bordered button", () => {
+    render(
+      <F0AiAnnouncementCard
+        {...baseProps}
+        primaryAction={{ label: "Try it out", onClick: vi.fn() }}
+      />
+    )
 
-      const button = screen.getByRole("button", { name: "Try it out" })
-      expect(button.className).toMatch(/border/)
-      expect(button.querySelector("svg")).toBeNull()
-    })
-
-    it("renders the AI button with the One mark on variant ai", () => {
-      render(
-        <F0AiAnnouncementCard
-          {...baseProps}
-          primaryAction={{
-            label: "Try it out",
-            onClick: vi.fn(),
-            variant: "ai",
-          }}
-        />
-      )
-
-      const button = screen.getByRole("button", { name: "Try it out" })
-      expect(button.querySelector("svg")).not.toBeNull()
-    })
+    const button = screen.getByRole("button", { name: "Try it out" })
+    expect(button.className).toMatch(/border/)
+    expect(button.querySelector("svg")).toBeNull()
   })
 
   it("calls onClose and removes itself when dismissed", async () => {
