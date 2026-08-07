@@ -55,6 +55,10 @@ web-build/
 # TypeScript
 *.tsbuildinfo
 
+# Node.js compile cache (Node 22+ NODE_COMPILE_CACHE) / tsx runtime cache
+node-compile-cache/
+tsx-*/
+
 # Environment files
 .env*.local
 

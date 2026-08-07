@@ -11,6 +11,7 @@ import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
+import { ChatForwardedTag } from "./ChatForwardedTag"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
@@ -121,6 +122,12 @@ export const ChatMessageItem = ({
                 actionsOpen && "bg-f1-background-hover"
               )}
             >
+              {/* "Forwarded" marker headers the whole message (attachments +
+                  bubble), so it shows even on a text-less forwarded media
+                  message that renders no bubble. */}
+              {message.forwardedFrom && !message.deleted && (
+                <ChatForwardedTag />
+              )}
               {hasAttachments && (
                 <ChatMessageAttachments
                   message={message}
@@ -147,7 +154,7 @@ export const ChatMessageItem = ({
                   attachment-only message has no bubble, so surface it here
                   instead — otherwise an edited media message shows no mark. */}
               {!hasBubble && message.editedAt && !message.deleted && (
-                <span className="px-1 text-sm text-f1-foreground-tertiary">
+                <span className="px-1 text-sm text-f1-foreground-tertiary italic">
                   {i18n.chat.edited}
                 </span>
               )}
