@@ -80,6 +80,27 @@ export function resolveImportPath(fileName: string | undefined): string | null {
 }
 
 /**
+ * Every name reachable from the package's public entry points, merged across
+ * the main and experimental barrels.
+ *
+ * This is the source of truth for "is this component actually importable?".
+ * A path prefix alone isn't enough: a component can live under
+ * `src/components/` (a main-entry prefix) and still be missing from its
+ * group's `exports.ts`, in which case no import statement would resolve.
+ */
+let exportedNamesCache: Set<string> | null = null
+
+export function exportedComponentNames(): Set<string> {
+  if (!exportedNamesCache) {
+    exportedNamesCache = new Set([
+      ...Object.keys(mainExports),
+      ...Object.keys(experimentalExports),
+    ])
+  }
+  return exportedNamesCache
+}
+
+/**
  * Extracts the component export name from a story file path.
  *
  * Strategy:
@@ -93,7 +114,11 @@ export function resolveImportPath(fileName: string | undefined): string | null {
  *   3. Second pass — fall back to the raw candidate if it is itself an
  *      export (covers components that don't use the F0 prefix, like
  *      `F0Form` field renderers).
- *   4. If nothing matches, return the first candidate as-is.
+ *   4. If nothing matches, return `null` — the component isn't exported, so
+ *      any import statement we rendered would be a broken copy-paste. Callers
+ *      treat `null` as "internal". (Notably NOT "first candidate as-is": that
+ *      produced import snippets for components under `src/components/` that
+ *      their group barrel never re-exported.)
  */
 export function extractComponentName(
   fileName: string | undefined,
@@ -125,23 +150,20 @@ export function extractComponentName(
     if (last) candidates.push(last)
   }
 
-  const exports = {
-    ...mainExports,
-    ...experimentalExports,
-  } as Record<string, unknown>
+  const exports = exportedComponentNames()
 
   // Pass 1: prefer the F0-prefixed variant of any candidate.
   for (const name of candidates) {
-    if (name.startsWith("F0") && name in exports) return name
+    if (name.startsWith("F0") && exports.has(name)) return name
     const f0Name = `F0${name}`
-    if (f0Name in exports) return f0Name
+    if (exports.has(f0Name)) return f0Name
   }
 
   // Pass 2: fall back to the raw candidate.
   for (const name of candidates) {
-    if (name in exports) return name
+    if (exports.has(name)) return name
   }
 
-  // Fallback: return the first candidate as-is
-  return candidates[0] ?? null
+  // Nothing matched a real export — the component is internal.
+  return null
 }

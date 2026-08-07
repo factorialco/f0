@@ -149,6 +149,10 @@ export function ImportBanner() {
 
   const importPath = resolveImportPath(fileName)
   const componentName = extractComponentName(fileName, title)
+  // Both checks matter: the path tells us which entry point *would* serve the
+  // component, but a component can sit under an exported prefix and still be
+  // absent from its group's `exports.ts`. Only when we resolved a real export
+  // name do we render a copyable import.
   const isInternal = !importPath || !componentName
 
   if (!portalTarget) {
