@@ -187,6 +187,7 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
+    committedQuery,
   } = useDataCollectionData<
     R,
     Filters,
@@ -254,21 +255,10 @@ export const TableCollection = <
     data?.type === "flat"
       ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
       : []
-  // Identity of the current query. When it changes the row set is swapped
-  // because a different question was asked (paging, loading more, searching,
-  // filtering, sorting, grouping), not by an insert, so the flash must be
-  // suppressed for that render.
-  const queryResetKey = JSON.stringify([
-    paginationInfo?.type === "pages" ? paginationInfo.currentPage : undefined,
-    paginationInfo?.type === "infinite-scroll"
-      ? paginationInfo.cursor
-      : undefined,
-    source.currentSearch,
-    source.currentFilters,
-    source.currentSortings,
-    source.currentGrouping,
-  ])
-  const addedRowKeys = useAddedRowKeys(flatRowKeys, queryResetKey)
+  // Keyed on the query these records answer, not the one the user has
+  // selected: the latter changes a render before its data arrives, and reseeding
+  // the flash baseline there memorises the previous query's rows.
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, committedQuery)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {

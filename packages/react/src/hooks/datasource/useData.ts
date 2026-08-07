@@ -112,6 +112,19 @@ export interface UseDataReturn<R extends RecordType> {
 
   // Merged filters (default values and current values)
   mergedFilters: FiltersState<FiltersDefinition>
+
+  /**
+   * Opaque identity of the query whose response produced `data` — filters,
+   * search, sortings and pagination position, as they were when that fetch was
+   * issued. Undefined until the first response commits.
+   *
+   * Compare it across renders to tell "these rows answer a different question"
+   * from "these rows changed". The live filter/search state on the source can't
+   * do that: it moves a render (and a debounce) before the matching rows do, so
+   * there is always a window where it describes a query the rendered rows do
+   * not answer.
+   */
+  committedQuery: string | undefined
 }
 
 type DataType<T> = PromiseState<T>
@@ -315,6 +328,15 @@ export function useData<
   const [totalItems, setTotalItems] = useState<number | undefined>(undefined)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
 
+  // Identifies the query whose response produced the records currently
+  // rendered — not the query the user has selected, which changes a render (or
+  // a debounce) before its data arrives. Consumers that must tell "these rows
+  // answer a different question" from "these rows changed" need this rather
+  // than the live filter/search state.
+  const [committedQuery, setCommittedQuery] = useState<string | undefined>(
+    undefined
+  )
+
   const isLoadingMoreRef = useRef(false)
 
   // Latest loaded records + the query/pageSize that produced them, so a
@@ -382,7 +404,8 @@ export function useData<
     (
       result: PaginatedResponse<R> | SimpleResult<R>,
       appendMode: boolean,
-      isLoadingYet?: boolean
+      isLoadingYet?: boolean,
+      query?: string
     ) => {
       /**
        * Call to the onResponse callback
@@ -452,6 +475,9 @@ export function useData<
       setIsLoading(!!isLoadingYet)
       setIsLoadingMore(false)
       isLoadingMoreRef.current = false
+      // Stamp the rendered records with the query they answer. Batched with
+      // the setters above, so this costs no extra render.
+      if (query !== undefined) setCommittedQuery(query)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -464,6 +490,7 @@ export function useData<
       setIsLoadingMore,
       setTotalItems,
       isLoadingMoreRef,
+      setCommittedQuery,
     ]
   )
 
@@ -612,6 +639,18 @@ export function useData<
           }
         )
 
+        // What this particular fetch is asking for. Stamped onto the records it
+        // returns so consumers can tell a different question from a changed
+        // answer. The pagination position is part of it: paging and load-more
+        // swap the rows by navigation, not by insertion.
+        const query = JSON.stringify({
+          filters,
+          search,
+          sortings,
+          currentPage,
+          cursor,
+        })
+
         function fetcher(): PromiseOrObservable<ResultType> {
           setTotalItems(undefined)
 
@@ -648,7 +687,7 @@ export function useData<
 
         // Handle synchronous data
         if (!("then" in result || "subscribe" in result)) {
-          handleFetchSuccess(result, appendMode)
+          handleFetchSuccess(result, appendMode, undefined, query)
           return
         }
 
@@ -659,7 +698,7 @@ export function useData<
         const subscription = observable.subscribe({
           next: (state) => {
             if (state.data) {
-              handleFetchSuccess(state.data, appendMode, state.loading)
+              handleFetchSuccess(state.data, appendMode, state.loading, query)
             } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
@@ -867,6 +906,7 @@ export function useData<
     loadMore,
     mergedFilters,
     totalItems: total,
+    committedQuery,
   }
 }
 

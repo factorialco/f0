@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { act, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -31,6 +31,13 @@ const people: Person[] = [
   { id: 3, name: "Carla" },
 ]
 
+// Every name contains "a", so searching "a" is a different query with the same
+// answer as no search at all.
+const allMatchA: Person[] = [
+  { id: 1, name: "Ana" },
+  { id: 2, name: "Marta" },
+]
+
 const columns = [{ label: "name", render: (item: Person) => item.name }]
 
 /**
@@ -39,7 +46,13 @@ const columns = [{ label: "name", render: (item: Person) => item.name }]
  * updates immediately, `isLoading` only in a later effect) is exercised end to
  * end.
  */
-const Harness = ({ extra = [] }: { extra?: Person[] }) => {
+const Harness = ({
+  extra = [],
+  base = people,
+}: {
+  extra?: Person[]
+  base?: Person[]
+}) => {
   const source = useDataCollectionSource<
     Person,
     FiltersDefinition,
@@ -55,7 +68,7 @@ const Harness = ({ extra = [] }: { extra?: Person[] }) => {
         fetchData: async ({ search }: { search?: string }) => {
           await new Promise((resolve) => setTimeout(resolve, 10))
           const term = (search ?? "").toLowerCase()
-          const all = [...people, ...extra]
+          const all = [...base, ...extra]
           return {
             records: term
               ? all.filter((p) => p.name.toLowerCase().includes(term))
@@ -140,6 +153,30 @@ describe("row flash — search round trip", () => {
 
     rerender(<Harness extra={[{ id: 4, name: "Diego" }]} />)
     await waitFor(() => expect(screen.getByText("Diego")).toBeInTheDocument())
+
+    expect(flashingRows()).toBe(1)
+  })
+
+  it("still flashes an insert after a search that returned the same rows", async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(<Harness base={allMatchA} />)
+
+    await waitFor(() => expect(screen.getByText("Marta")).toBeInTheDocument())
+
+    // A different query with the same answer: both names contain "a". Nothing
+    // in the DOM changes, so the search response has to be waited out rather
+    // than waited *for* — otherwise the insert below lands in the same commit.
+    const search = screen.getByLabelText("search")
+    await user.type(search, "a")
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    })
+    expect(flashingRows()).toBe(0)
+
+    // The insert that follows must still flash. Settling the wait on the rows
+    // changing rather than on the query committing swallowed this one.
+    rerender(<Harness base={allMatchA} extra={[{ id: 3, name: "Clara" }]} />)
+    await waitFor(() => expect(screen.getByText("Clara")).toBeInTheDocument())
 
     expect(flashingRows()).toBe(1)
   })
