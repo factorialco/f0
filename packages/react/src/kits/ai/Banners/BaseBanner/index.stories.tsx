@@ -162,20 +162,20 @@ export const Card: Story = {
       </div>
     ),
   ],
-  // The flow the card exists for: read it, take the action, or dismiss it.
+  // The flow the card exists for: read it, then take the action.
+  //
+  // Deliberately stops short of clicking Close. `play` runs on mount, so
+  // dismissing here would leave the story — and its autodocs entry — showing
+  // nothing but empty space. Dismissal is covered in the unit tests instead
+  // ("calls onClose and removes itself when dismissed").
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
 
     await expect(canvas.getByText("Submit expenses in seconds")).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Close" })).toBeVisible()
 
     await userEvent.click(canvas.getByRole("button", { name: "Try it out" }))
     await expect(args.primaryAction?.onClick).toHaveBeenCalledOnce()
-
-    await userEvent.click(canvas.getByRole("button", { name: "Close" }))
-    await expect(args.onClose).toHaveBeenCalledOnce()
-    await expect(
-      canvas.queryByText("Submit expenses in seconds")
-    ).not.toBeInTheDocument()
   },
 }
 
