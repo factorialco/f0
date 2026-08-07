@@ -201,6 +201,34 @@ function ProductSection({
 }
 
 /**
+ * Names the product repos that weren't scanned. Without this the count reads
+ * as the whole picture when a product surface is simply missing from disk.
+ */
+function MissingRepos({ missing }: { missing: ProductUsageData["missing"] }) {
+  if (missing.length === 0) return null
+
+  return (
+    <p className="m-0 mt-2 text-sm opacity-70">
+      Not checked:{" "}
+      {missing.map((repo, index) => (
+        <span key={repo.id}>
+          {index > 0 && ", "}
+          <code className="font-mono">{repo.id}</code>
+        </span>
+      ))}{" "}
+      — clone next to this repo or set{" "}
+      {missing.map((repo, index) => (
+        <span key={repo.id}>
+          {index > 0 && " / "}
+          <code className="font-mono">${repo.env}</code>
+        </span>
+      ))}
+      .
+    </p>
+  )
+}
+
+/**
  * Everything the tag needs about one component, resolved once so the trigger
  * label and the tooltip can't disagree.
  */
@@ -237,7 +265,10 @@ function UsageDetails({
   return (
     <div className="sb-unstyled max-w-xs p-3 text-base text-f1-foreground-inverse">
       {product ? (
-        <ProductSection data={product} names={names} />
+        <>
+          <ProductSection data={product} names={names} />
+          <MissingRepos missing={product.missing} />
+        </>
       ) : (
         <p className="m-0">
           No local factorial checkout — product usage unavailable.

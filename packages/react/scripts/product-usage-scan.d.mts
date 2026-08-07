@@ -34,6 +34,11 @@ export interface ProductUsageData {
     modules: number
     importingFiles: number
   }>
+  /**
+   * Consumer repos that weren't checked out, with the env var that would point
+   * at them. Their absence makes the counts partial, so the docs tag says so.
+   */
+  missing: Array<{ id: string; env: string }>
   totals: {
     modules: number
     scannedFiles: number

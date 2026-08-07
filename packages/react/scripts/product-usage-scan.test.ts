@@ -208,6 +208,16 @@ describe("scanProductUsage across repos", () => {
       "factorial",
       "factorial-it",
     ])
+    expect(result.missing).toEqual([])
+  })
+
+  test("reports a repo that wasn't checked out", () => {
+    const result = scanProductUsage({ repoRoot, itRepoRoot: null })
+    if (!result.available) throw new Error(result.reason)
+
+    // The docs tag turns this into "Not checked: factorial-it", so a partial
+    // count never reads as the whole picture.
+    expect(result.missing).toEqual([{ id: "factorial-it", env: "F0_IT_REPO" }])
   })
 })
 

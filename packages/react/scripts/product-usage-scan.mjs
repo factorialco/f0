@@ -268,27 +268,31 @@ function f0ImportsOf(path) {
  * called `frontend` can't be confused with a factorial feature module.
  */
 function consumerSources({ repoRoot, itRepoRoot, full }) {
-  const sources = []
-
-  if (repoRoot) {
-    sources.push({
+  const configured = [
+    {
       id: "factorial",
+      env: "F0_PRODUCT_REPO",
       root: repoRoot,
       scope: full ? "." : PRODUCT_SCOPE,
       prefix: "",
-    })
-  }
-
-  if (itRepoRoot) {
-    sources.push({
+    },
+    {
       id: "factorial-it",
+      env: "F0_IT_REPO",
       root: itRepoRoot,
       scope: ".",
       prefix: "factorial-it/",
-    })
-  }
+    },
+  ]
 
-  return sources
+  return {
+    sources: configured.filter((source) => source.root),
+    // Reported so the docs tag can say the numbers are partial rather than
+    // presenting a count that silently excludes a whole product surface.
+    missing: configured
+      .filter((source) => !source.root)
+      .map(({ id, env }) => ({ id, env })),
+  }
 }
 
 /**
@@ -303,7 +307,7 @@ export function scanProductUsage({
   itRepoRoot = resolveItRepoRoot(),
   full = false,
 } = {}) {
-  const sources = consumerSources({ repoRoot, itRepoRoot, full })
+  const { sources, missing } = consumerSources({ repoRoot, itRepoRoot, full })
 
   if (sources.length === 0) {
     return {
@@ -361,6 +365,7 @@ export function scanProductUsage({
     },
     scope: sources.map((source) => join(source.id, source.scope)).join(", "),
     repos,
+    missing,
     totals: {
       modules: moduleCount,
       scannedFiles,
