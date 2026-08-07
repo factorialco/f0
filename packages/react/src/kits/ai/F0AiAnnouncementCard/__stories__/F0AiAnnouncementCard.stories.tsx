@@ -56,6 +56,11 @@ export const Default: Story = {
 
     await userEvent.click(canvas.getByRole("button", { name: "Try it out" }))
     await expect(args.primaryAction?.onClick).toHaveBeenCalledOnce()
+
+    // Clicking leaves the button focused, and this story is the one embedded in
+    // the docs — without this, every reader sees the focus ring as if it were
+    // the button's own border.
+    ;(document.activeElement as HTMLElement | null)?.blur()
   },
 }
 
