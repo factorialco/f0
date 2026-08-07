@@ -910,6 +910,38 @@ export declare type AttachedFile = {
     errorMessage?: string;
 };
 
+/**
+ * Autofill-timesheet canvas content — renders an editable timesheet proposal
+ * (day-grouped shift blocks the user can adjust and confirm) in the canvas panel.
+ */
+export declare type AutofillTimesheetCanvasContent = CanvasContentBase & {
+    type: "autofillTimesheet";
+    employeeId: string;
+    startOn: string;
+    endOn: string;
+    shifts: AutofillTimesheetShift[];
+};
+
+/**
+ * A single proposed shift block in a timesheet-autofill preview. Every proposed
+ * block carries concrete employee-local clock times (ISO datetime or "HH:MM");
+ * days that cannot be proposed are omitted rather than emitted with empty bounds.
+ */
+export declare type AutofillTimesheetShift = {
+    date: string;
+    clockIn: string;
+    clockOut: string;
+    workable: boolean;
+    workplaceId?: string | null;
+    workAreaId?: string | null;
+    /**
+     * Host-defined work-location kind. Left as a loose string to keep the kit
+     * host-agnostic; the factorial consumer narrows it to its attendance
+     * location-type enum (today: "office" | "work_from_home" | "business_trip").
+     */
+    locationType?: string | null;
+};
+
 declare const Avatar: React_2.ForwardRefExoticComponent<Omit<AvatarPrimitive.AvatarProps & React_2.RefAttributes<HTMLSpanElement>, "ref"> & {
     size?: (typeof internalAvatarSizes)[number];
     type?: (typeof internalAvatarTypes)[number];
@@ -1085,7 +1117,7 @@ declare type CanvasCardAvatar = {
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export declare type CanvasContent = DashboardCanvasContent | FormCanvasContent | DataDownloadCanvasContent;
+export declare type CanvasContent = DashboardCanvasContent | FormCanvasContent | DataDownloadCanvasContent | AutofillTimesheetCanvasContent;
 
 /**
  * Base shape shared by all canvas content types.
@@ -1295,7 +1327,7 @@ export declare interface ChatDashboardBarChartConfig extends ChatDashboardChartC
     stacked?: boolean;
 }
 
-export declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig;
+export declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig | ChatDashboardScatterChartConfig;
 
 declare interface ChatDashboardChartConfigBase {
     showLegend?: boolean;
@@ -1307,7 +1339,7 @@ declare interface ChatDashboardChartConfigBase {
 export declare interface ChatDashboardChartItem extends ChatDashboardItemBase {
     type: "chart";
     chart: ChatDashboardChartConfig;
-    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation;
+    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation | ScatterComputation;
 }
 
 export declare interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
@@ -1494,6 +1526,23 @@ export declare interface ChatDashboardRadarChartConfig extends ChatDashboardChar
     showArea?: boolean;
 }
 
+export declare interface ChatDashboardScatterChartConfig {
+    type: "scatter";
+    pointSize?: number;
+    scaleAxes?: boolean;
+    showGrid?: boolean;
+    /** Only rendered with 2+ series, but still needed so a skeleton can reserve for it. */
+    showLegend?: boolean;
+    /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
+    xAxisName?: string;
+    /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */
+    yAxisName?: string;
+    /** Formats the Y measure */
+    valueFormat?: FormatPreset;
+    /** Formats the X measure, which is a second measure rather than a category */
+    xValueFormat?: FormatPreset;
+}
+
 export declare const ChatSpinner: ForwardRefExoticComponent<ChatSpinnerProps & RefAttributes<HTMLDivElement>>;
 
 declare interface ChatSpinnerProps {
@@ -1513,6 +1562,13 @@ export declare type ChatThread = {
     title: string;
     createdAt: string;
     updatedAt: string;
+    /** Rendered before the title (e.g. a chart icon for Analytics chats). */
+    icon?: IconType;
+    /**
+     * Secondary label at the row's end, revealed on hover/focus like the date
+     * (e.g. "Analytics" for mode-bound chats).
+     */
+    trailingLabel?: string;
 };
 
 /**
@@ -1798,6 +1854,7 @@ export declare const defaultTranslations: {
         readonly selectPlaceholder: "Select";
     };
     readonly countries: {
+        ac: string;
         ad: string;
         ae: string;
         af: string;
@@ -1822,14 +1879,19 @@ export declare const defaultTranslations: {
         bh: string;
         bi: string;
         bj: string;
+        bl: string;
         bm: string;
+        bn: string;
         bo: string;
+        bq: string;
         br: string;
+        bs: string;
         bt: string;
         bw: string;
         by: string;
         bz: string;
         ca: string;
+        cc: string;
         cd: string;
         cf: string;
         cg: string;
@@ -1844,6 +1906,7 @@ export declare const defaultTranslations: {
         cu: string;
         cv: string;
         cw: string;
+        cx: string;
         cy: string;
         cz: string;
         de: string;
@@ -1855,6 +1918,7 @@ export declare const defaultTranslations: {
         ec: string;
         ee: string;
         eg: string;
+        eh: string;
         er: string;
         es: string;
         et: string;
@@ -1868,17 +1932,20 @@ export declare const defaultTranslations: {
         gb: string;
         gd: string;
         ge: string;
+        gf: string;
         gg: string;
         gh: string;
         gi: string;
         gl: string;
         gm: string;
         gn: string;
+        gp: string;
         gq: string;
         gr: string;
         gt: string;
         gu: string;
         gw: string;
+        gy: string;
         hk: string;
         hn: string;
         hr: string;
@@ -1899,6 +1966,140 @@ export declare const defaultTranslations: {
         jo: string;
         jp: string;
         ke: string;
+        kg: string;
+        kh: string;
+        ki: string;
+        km: string;
+        kn: string;
+        kp: string;
+        kr: string;
+        kw: string;
+        ky: string;
+        kz: string;
+        la: string;
+        lb: string;
+        lc: string;
+        li: string;
+        lk: string;
+        lr: string;
+        ls: string;
+        lt: string;
+        lu: string;
+        lv: string;
+        ly: string;
+        ma: string;
+        mc: string;
+        md: string;
+        me: string;
+        mf: string;
+        mg: string;
+        mh: string;
+        mk: string;
+        ml: string;
+        mm: string;
+        mn: string;
+        mo: string;
+        mp: string;
+        mq: string;
+        mr: string;
+        ms: string;
+        mt: string;
+        mu: string;
+        mv: string;
+        mw: string;
+        mx: string;
+        my: string;
+        mz: string;
+        na: string;
+        nc: string;
+        ne: string;
+        nf: string;
+        ng: string;
+        ni: string;
+        nl: string;
+        no: string;
+        np: string;
+        nr: string;
+        nu: string;
+        nz: string;
+        om: string;
+        pa: string;
+        pe: string;
+        pf: string;
+        pg: string;
+        ph: string;
+        pk: string;
+        pl: string;
+        pm: string;
+        pn: string;
+        pr: string;
+        ps: string;
+        pt: string;
+        pw: string;
+        py: string;
+        qa: string;
+        re: string;
+        ro: string;
+        rs: string;
+        ru: string;
+        rw: string;
+        sa: string;
+        sb: string;
+        sc: string;
+        sd: string;
+        se: string;
+        sg: string;
+        sh: string;
+        si: string;
+        sj: string;
+        sk: string;
+        sl: string;
+        sm: string;
+        sn: string;
+        so: string;
+        sr: string;
+        ss: string;
+        st: string;
+        sv: string;
+        sx: string;
+        sy: string;
+        sz: string;
+        ta: string;
+        tc: string;
+        td: string;
+        tg: string;
+        th: string;
+        tj: string;
+        tk: string;
+        tl: string;
+        tm: string;
+        tn: string;
+        to: string;
+        tr: string;
+        tt: string;
+        tv: string;
+        tw: string;
+        tz: string;
+        ua: string;
+        ug: string;
+        us: string;
+        uy: string;
+        uz: string;
+        va: string;
+        vc: string;
+        ve: string;
+        vg: string;
+        vi: string;
+        vn: string;
+        vu: string;
+        wf: string;
+        ws: string;
+        xk: string;
+        ye: string;
+        yt: string;
+        za: string;
+        zm: string;
+        zw: string;
     };
     readonly approvals: {
         readonly history: "Approval history";
@@ -2539,6 +2740,15 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+        readonly windowedCategories: "Showing {{count}} of {{total}} categories";
+        readonly tooltip: {
+            readonly ofTotal: "of total";
+            readonly total: "total";
+            readonly target: "target";
+            readonly ofRange: "of range";
+            readonly fromPrevious: "from previous";
+            readonly fromStage: "from {{stage}}";
+        };
     };
     readonly progressSeries: {
         readonly noData: "No data";
@@ -2556,6 +2766,12 @@ export declare const defaultTranslations: {
         readonly between: "It should be between {{min}} and {{max}}";
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
+    };
+    readonly phoneInput: {
+        readonly country: "Country";
+        readonly countryWithDialCode: "{{country}} {{dialCode}}";
+        readonly searchCountry: "Search country or dial code";
+        readonly noResults: "No country found";
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -2769,6 +2985,9 @@ export declare const defaultTranslations: {
             };
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
+            };
+            readonly phone: {
+                readonly invalid: "Enter a valid phone number";
             };
         };
     };
@@ -3370,6 +3589,11 @@ export declare type F0AiMessagesContainerProps = {
     /** Welcome phrase shown centered when the chat is empty. Falls back to
      *  `translations.ai.defaultInitialMessage` if omitted. */
     initialMessage?: string | string[];
+    /** Static line above the welcome phrase, same size but secondary color
+     *  (e.g. "Analytics mode:"). */
+    initialMessageCaption?: string;
+    /** Smaller secondary line below the welcome phrase. */
+    initialMessageSubtitle?: string;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -3648,11 +3872,16 @@ declare type F0AvatarListProps = {
      */
     layout?: "fill" | "compact";
     /**
-     * Controls the scroll behavior of the `+N` overflow popover that lists
-     * collapsed avatars (including their `tooltipDescription` entries).
-     * - `"vertical"` (default): caps the popover height and scrolls vertically.
-     * - `"none"`: lets the popover grow to fit all entries.
-     * @default "vertical"
+     * @deprecated No longer has any effect. The `+N` popover now always caps at
+     * the available viewport height and scrolls, and that scrolling is reachable
+     * by keyboard — neither of the old values is worth selecting. `"vertical"`
+     * used to cap and scroll inside a hover card, where Radix strips every tab
+     * stop on each render, so no keyboard user could operate the scroll (axe
+     * `scrollable-region-focusable`, WCAG 2.1.1); `"none"` avoided that by
+     * letting the card grow without limit, off the screen for a large cluster.
+     * @removeIn 5.0
+     * @migration Remove the prop. The current behaviour is what `"vertical"`
+     * always intended, minus the accessibility defect.
      */
     tooltipScroll?: "vertical" | "none";
 } & F0AvatarListPropsAvatars;
@@ -3726,7 +3955,7 @@ declare type F0AvatarTeamProps = {
  * Shows an avatar, title, optional description, and a configurable action button.
  *
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
- * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * The AI Cocreation flow already renders these cards with `F0CardHorizontal` directly
  * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
  * wrapper). Don't add new usages; migrate the remaining one
  * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
@@ -3938,7 +4167,7 @@ declare const f0FileItemSizes: readonly ["md", "lg"];
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
  * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
  * `rejectAction` for the pending state, `status` for the resolved outcome, and
- * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * `secondaryActions` for a single CTA. The AI Cocreation flow no longer uses this component —
  * don't add new usages.
  * @removeIn 5.0.0
  */
@@ -4857,6 +5086,21 @@ export declare interface ResolvedStepAnswer {
     cancelled?: boolean;
 }
 
+/**
+ * Both axes are measures, so there is no aggregation: a scatter plots one
+ * point per row rather than grouping rows into categories. `label` names the
+ * column identifying each point, and `series` the optional column that splits
+ * the points into colour groups.
+ */
+export declare interface ScatterComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    label?: string;
+    series?: string;
+    limit?: number;
+}
+
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
@@ -5277,6 +5521,27 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

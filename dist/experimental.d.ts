@@ -39,6 +39,7 @@ import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
+import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
@@ -765,6 +766,8 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
+declare type AlertType = Parameters<typeof F0AvatarAlert>[0]["type"];
+
 declare type AlertVariant = (typeof alertVariantOptions)[number];
 
 declare const alertVariantOptions: readonly ["info", "warning", "critical", "neutral", "positive"];
@@ -865,6 +868,10 @@ declare type AvatarBadge = ({
 }) & {
     tooltip?: string;
 };
+
+declare type AvatarData<T extends AvatarVariant["type"]> = Omit<Extract<AvatarVariant, {
+    type: T;
+}>, "type">;
 
 declare const avatarEmojiSizes: readonly ["sm", "md", "lg", "xl"];
 
@@ -2045,7 +2052,7 @@ declare interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBa
     stacked?: boolean;
 }
 
-declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig;
+declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig | ChatDashboardScatterChartConfig;
 
 declare interface ChatDashboardChartConfigBase {
     showLegend?: boolean;
@@ -2057,7 +2064,7 @@ declare interface ChatDashboardChartConfigBase {
 declare interface ChatDashboardChartItem extends ChatDashboardItemBase {
     type: "chart";
     chart: ChatDashboardChartConfig;
-    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation;
+    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation | ScatterComputation;
 }
 
 declare interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
@@ -2242,6 +2249,23 @@ declare interface ChatDashboardPieChartConfig {
 declare interface ChatDashboardRadarChartConfig extends ChatDashboardChartConfigBase {
     type: "radar";
     showArea?: boolean;
+}
+
+declare interface ChatDashboardScatterChartConfig {
+    type: "scatter";
+    pointSize?: number;
+    scaleAxes?: boolean;
+    showGrid?: boolean;
+    /** Only rendered with 2+ series, but still needed so a skeleton can reserve for it. */
+    showLegend?: boolean;
+    /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
+    xAxisName?: string;
+    /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */
+    yAxisName?: string;
+    /** Formats the Y measure */
+    valueFormat?: FormatPreset;
+    /** Formats the X measure, which is a second measure rather than a category */
+    xValueFormat?: FormatPreset;
 }
 
 export declare type ChatWidgetEmptyStateProps = Props_6;
@@ -3162,11 +3186,21 @@ declare const daytimePageVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
+/**
+ * Built-in renderers for the standard visualizations. `list` covers every
+ * row-based slot through its schema; `event-list` and `indicators` spread
+ * their params onto the matching f0 content component. Bespoke visualizations
+ * (e.g. `clock-in`, `carousel`) are intentionally absent — supply them via
+ * `slotRenderers`.
+ */
+export declare const defaultSlotRenderers: SlotRenderers;
+
 declare const defaultTranslations: {
     readonly common: {
         readonly selectPlaceholder: "Select";
     };
     readonly countries: {
+        ac: string;
         ad: string;
         ae: string;
         af: string;
@@ -3191,14 +3225,19 @@ declare const defaultTranslations: {
         bh: string;
         bi: string;
         bj: string;
+        bl: string;
         bm: string;
+        bn: string;
         bo: string;
+        bq: string;
         br: string;
+        bs: string;
         bt: string;
         bw: string;
         by: string;
         bz: string;
         ca: string;
+        cc: string;
         cd: string;
         cf: string;
         cg: string;
@@ -3213,6 +3252,7 @@ declare const defaultTranslations: {
         cu: string;
         cv: string;
         cw: string;
+        cx: string;
         cy: string;
         cz: string;
         de: string;
@@ -3224,6 +3264,7 @@ declare const defaultTranslations: {
         ec: string;
         ee: string;
         eg: string;
+        eh: string;
         er: string;
         es: string;
         et: string;
@@ -3237,17 +3278,20 @@ declare const defaultTranslations: {
         gb: string;
         gd: string;
         ge: string;
+        gf: string;
         gg: string;
         gh: string;
         gi: string;
         gl: string;
         gm: string;
         gn: string;
+        gp: string;
         gq: string;
         gr: string;
         gt: string;
         gu: string;
         gw: string;
+        gy: string;
         hk: string;
         hn: string;
         hr: string;
@@ -3268,6 +3312,140 @@ declare const defaultTranslations: {
         jo: string;
         jp: string;
         ke: string;
+        kg: string;
+        kh: string;
+        ki: string;
+        km: string;
+        kn: string;
+        kp: string;
+        kr: string;
+        kw: string;
+        ky: string;
+        kz: string;
+        la: string;
+        lb: string;
+        lc: string;
+        li: string;
+        lk: string;
+        lr: string;
+        ls: string;
+        lt: string;
+        lu: string;
+        lv: string;
+        ly: string;
+        ma: string;
+        mc: string;
+        md: string;
+        me: string;
+        mf: string;
+        mg: string;
+        mh: string;
+        mk: string;
+        ml: string;
+        mm: string;
+        mn: string;
+        mo: string;
+        mp: string;
+        mq: string;
+        mr: string;
+        ms: string;
+        mt: string;
+        mu: string;
+        mv: string;
+        mw: string;
+        mx: string;
+        my: string;
+        mz: string;
+        na: string;
+        nc: string;
+        ne: string;
+        nf: string;
+        ng: string;
+        ni: string;
+        nl: string;
+        no: string;
+        np: string;
+        nr: string;
+        nu: string;
+        nz: string;
+        om: string;
+        pa: string;
+        pe: string;
+        pf: string;
+        pg: string;
+        ph: string;
+        pk: string;
+        pl: string;
+        pm: string;
+        pn: string;
+        pr: string;
+        ps: string;
+        pt: string;
+        pw: string;
+        py: string;
+        qa: string;
+        re: string;
+        ro: string;
+        rs: string;
+        ru: string;
+        rw: string;
+        sa: string;
+        sb: string;
+        sc: string;
+        sd: string;
+        se: string;
+        sg: string;
+        sh: string;
+        si: string;
+        sj: string;
+        sk: string;
+        sl: string;
+        sm: string;
+        sn: string;
+        so: string;
+        sr: string;
+        ss: string;
+        st: string;
+        sv: string;
+        sx: string;
+        sy: string;
+        sz: string;
+        ta: string;
+        tc: string;
+        td: string;
+        tg: string;
+        th: string;
+        tj: string;
+        tk: string;
+        tl: string;
+        tm: string;
+        tn: string;
+        to: string;
+        tr: string;
+        tt: string;
+        tv: string;
+        tw: string;
+        tz: string;
+        ua: string;
+        ug: string;
+        us: string;
+        uy: string;
+        uz: string;
+        va: string;
+        vc: string;
+        ve: string;
+        vg: string;
+        vi: string;
+        vn: string;
+        vu: string;
+        wf: string;
+        ws: string;
+        xk: string;
+        ye: string;
+        yt: string;
+        za: string;
+        zm: string;
+        zw: string;
     };
     readonly approvals: {
         readonly history: "Approval history";
@@ -3908,6 +4086,15 @@ declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+        readonly windowedCategories: "Showing {{count}} of {{total}} categories";
+        readonly tooltip: {
+            readonly ofTotal: "of total";
+            readonly total: "total";
+            readonly target: "target";
+            readonly ofRange: "of range";
+            readonly fromPrevious: "from previous";
+            readonly fromStage: "from {{stage}}";
+        };
     };
     readonly progressSeries: {
         readonly noData: "No data";
@@ -3925,6 +4112,12 @@ declare const defaultTranslations: {
         readonly between: "It should be between {{min}} and {{max}}";
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
+    };
+    readonly phoneInput: {
+        readonly country: "Country";
+        readonly countryWithDialCode: "{{country}} {{dialCode}}";
+        readonly searchCountry: "Search country or dial code";
+        readonly noResults: "No country found";
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -4138,6 +4331,9 @@ declare const defaultTranslations: {
             };
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
+            };
+            readonly phone: {
+                readonly invalid: "Enter a valid phone number";
             };
         };
     };
@@ -4709,6 +4905,15 @@ declare interface ErrorMessageProps {
     description: string;
 }
 
+/** The gap between rows of the `event-list` slot. */
+export declare const EVENT_LIST_GAP = "gap-2";
+
+/** `event-list` params: f0 calendar-event rows (color band + date avatars). */
+export declare interface EventListParams {
+    events: CalendarEventProps[];
+    showAllItems?: boolean;
+}
+
 /**
  * Profile data for an expense entity, resolved asynchronously
  * and displayed in the entity reference hover card.
@@ -4902,11 +5107,16 @@ declare type F0AvatarListProps = {
      */
     layout?: "fill" | "compact";
     /**
-     * Controls the scroll behavior of the `+N` overflow popover that lists
-     * collapsed avatars (including their `tooltipDescription` entries).
-     * - `"vertical"` (default): caps the popover height and scrolls vertically.
-     * - `"none"`: lets the popover grow to fit all entries.
-     * @default "vertical"
+     * @deprecated No longer has any effect. The `+N` popover now always caps at
+     * the available viewport height and scrolls, and that scrolling is reachable
+     * by keyboard — neither of the old values is worth selecting. `"vertical"`
+     * used to cap and scroll inside a hover card, where Radix strips every tab
+     * stop on each render, so no keyboard user could operate the scroll (axe
+     * `scrollable-region-focusable`, WCAG 2.1.1); `"none"` avoided that by
+     * letting the card grow without limit, off the screen for a large cluster.
+     * @removeIn 5.0
+     * @migration Remove the prop. The current behaviour is what `"vertical"`
+     * always intended, minus the accessibility defect.
      */
     tooltipScroll?: "vertical" | "none";
 } & F0AvatarListPropsAvatars;
@@ -6190,6 +6400,73 @@ export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInput
 
 export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
 
+/** @experimental This is an experimental component, use it at your own risk. */
+export declare const F0PhoneInput: ForwardRefExoticComponent<F0PhoneInputProps_2 & RefAttributes<HTMLInputElement>>;
+
+export declare type F0PhoneInputChangeMeta = {
+    /** Country resolved for the current value, e.g. `"es"` */
+    country: CountryCode | undefined;
+    /** Full E.164 representation when derivable, e.g. `"+34674897945"` */
+    e164: string | undefined;
+    /** libphonenumber validity — informative only, never enforced */
+    isValid: boolean;
+    isPossible: boolean;
+};
+
+export declare interface F0PhoneInputProps {
+    label: string;
+    /** Controlled value */
+    value?: F0PhoneInputValue;
+    /** Initial value when uncontrolled */
+    defaultValue?: F0PhoneInputValue;
+    onChange?: (value: F0PhoneInputValue | undefined, meta: F0PhoneInputChangeMeta) => void;
+    onCountryChange?: (country: CountryCode | undefined) => void;
+    /** Country pre-selected while the input is empty */
+    defaultCountry?: CountryCode;
+    /** Countries listed first in the selector, in the given order */
+    pinnedCountries?: CountryCode[];
+    /** Restricts both the selector and typed/pasted country detection */
+    allowedCountries?: CountryCode[];
+    /**
+     * Defaults to a national example number (`612 34 56 78`) for the selected
+     * country, or an international one (`+34 612 34 56 78`) while no country
+     * is selected
+     */
+    placeholder?: string;
+    hideLabel?: boolean;
+    labelIcon?: IconType;
+    hint?: string;
+    error?: string | boolean;
+    status?: InputFieldStatus;
+    required?: boolean;
+    disabled?: boolean;
+    readonly?: boolean;
+    loading?: boolean;
+    clearable?: boolean;
+    size?: PhoneInputSize;
+    name?: string;
+    id?: string;
+    autoFocus?: boolean;
+    onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+    onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+}
+
+/**
+ * Structured phone value matching how backends store the pair:
+ * a dial code plus the national number. Consumers never need to
+ * split or join the two parts themselves.
+ */
+export declare type F0PhoneInputValue = {
+    /** Dial code including the leading `+`, e.g. `"+34"` */
+    prefix: string | undefined;
+    /**
+     * National significant number (digits only, no trunk prefix) — or the raw
+     * stored string when it cannot be parsed (legacy data is passed through
+     * untouched until the user edits it).
+     */
+    number: string;
+};
+
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
@@ -6469,11 +6746,28 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     fitContentWidth?: boolean;
 } & WithDataTestIdProps;
 
+/**
+ * Short token rendered next to the option label, in secondary color, on a
+ * single line — never wraps and never affects row height. For prose that
+ * deserves its own line use `description`; for chips/badges use `tag`.
+ * Can coexist with both.
+ *
+ * Deliberately strict: no free-form variant. Each variant carries semantics
+ * the component can validate and format — add new ones (e.g. currency,
+ * locale) as concrete use cases appear.
+ */
+export declare type F0SelectItemMetadata = {
+    type: "dialCode";
+    dialCode: string;
+};
+
 declare type F0SelectItemObject<T, R = unknown> = {
     type?: "item";
     value: T;
     label: string;
     description?: string;
+    /** Short token shown next to the label (e.g. a dial code) */
+    metadata?: F0SelectItemMetadata;
     avatar?: AvatarVariant;
     tag?: F0SelectTagProp;
     icon?: IconType;
@@ -7026,6 +7320,16 @@ export declare const getSecondaryActions: (secondaryActions: SecondaryActionsDef
 
 export declare const getUpsellAction: (upsellAction: UpsellActionDefinitionFn | undefined) => UpsellActionDefinition | undefined;
 
+/**
+ * The DaytimePage gradient wash, by period — the same stops and the same 8%
+ * opacity, so Home and the daytime header read as one surface.
+ */
+declare const GRADIENTS: {
+    readonly morning: "bg-gradient-to-bl from-[#E51943] from-20% via-[#F97316] via-35% to-transparent to-50%";
+    readonly afternoon: "bg-gradient-to-bl from-[#5596F6] from-20% via-[#10B881] via-35% to-transparent to-50%";
+    readonly evening: "bg-gradient-to-bl from-[#3739A8] from-20% via-[#CB6687] via-35% to-transparent to-50%";
+};
+
 export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
@@ -7082,7 +7386,7 @@ declare type GraphCollectionProps<Record extends RecordType, Filters extends Fil
  * "the direct children of parentId" (`null` = the roots). Children are loaded
  * when a node is expanded.
  */
-declare type GraphVisualizationOptions<R extends RecordType, Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
+export declare type GraphVisualizationOptions<R extends RecordType, Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     /** Primary line of text for a node. */
     title: (record: R) => string;
     /** Secondary line of text for a node. */
@@ -7212,6 +7516,27 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     minZoom?: number;
     /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
     maxZoom?: number;
+    /**
+     * Whether clicking a node flies to it (centers + zooms in close), passed
+     * through to F0Graph. Defaults to `true` — pass `false` for a static camera on
+     * click (selection still happens). Re-centers on every click, even a repeat.
+     * The fly starts a beat after the click so it picks up a `viewportInset` set in
+     * response to that same click (a side panel opening).
+     */
+    centerOnNodeClick?: boolean;
+    /**
+     * Zoom a node click lands on (pass-through). Defaults to F0Graph's
+     * `NODE_CLICK_ZOOM` (`1.5`), clamped to `maxZoom`. Lower it for a dense tree.
+     */
+    nodeClickZoom?: number;
+    /**
+     * Region of the canvas (screen px) covered by a side panel / drawer the
+     * consumer opens over the graph (pass-through to F0Graph). Every fly-to path
+     * shifts its target so the clicked / revealed node lands centered in the free
+     * area beside the panel instead of behind it. For a fixed-width drawer, pass
+     * its width while open (e.g. `{ right: 480 }`) and omit it while closed.
+     */
+    viewportInset?: ViewportInset;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
     /**
@@ -7296,6 +7621,36 @@ declare type GroupRecord<RecordType> = {
     records: RecordType[];
 };
 
+/**
+ * Configuration for a single header group, keyed by `headerGroupId` in the
+ * `headerGroups` visualization option.
+ */
+declare type HeaderGroupDefinition = {
+    /**
+     * The label rendered in the spanning header row.
+     */
+    label: string;
+    /**
+     * Ids of the columns in this group that stay visible while the group is
+     * collapsed — the group's "summary" columns. Providing this key is what
+     * makes the group collapsible; omit it for a purely visual group.
+     *
+     * Ids are matched against each column's `id` (falling back to its `label`,
+     * mirroring how column ids are resolved elsewhere). Ids that don't belong to
+     * this group are ignored. A collapsed group always keeps at least one
+     * column, so passing `[]` — or only unknown ids — leaves the group's first
+     * column visible.
+     */
+    collapsedColumns?: ColId[];
+    /**
+     * Whether the group renders collapsed on first render. Only meaningful for
+     * collapsible groups. Read once on mount; afterwards the collapsed state is
+     * owned by the table.
+     * @default false
+     */
+    defaultCollapsed?: boolean;
+};
+
 export declare interface HeaderProps {
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -7374,6 +7729,83 @@ declare type HighlightBannerProps = {
     buttonLabel: string;
     onClick?: () => void;
 };
+
+export declare type HomePeriod = keyof typeof GRADIENTS;
+
+/**
+ * The Home kit's slot vocabulary and how each slot is drawn. `SlotWidget`
+ * renders a widget from these; the layout (`NewHomeLayout`) stays pure
+ * placement.
+ */
+/** Context threaded into every slot renderer. */
+export declare interface HomeRenderCtx {
+    /**
+     * Whether this slot is the LAST one in its widget. `SlotWidget` sets it per
+     * slot; row-based slots use it to keep their bottom bleed (see
+     * { slotRowBleed}).
+     */
+    isLastSlot?: boolean;
+}
+
+/**
+ * Builds a slot with its params CHECKED against its visualization.
+ * `HomeWidgetSlot`'s `params` is `unknown` (bespoke slots need it to be), so a
+ * plain `{ visualization, params }` literal gets no checking — use this for
+ * the built-in vocabulary (and {@link listSlot} for `list` slots), keeping
+ * literals for bespoke visualizations.
+ */
+export declare const homeSlot: <V extends keyof HomeSlotParamsMap>(visualization: V, params: HomeSlotParamsMap[V]) => HomeWidgetSlot;
+
+/** The built-in slot vocabulary: each visualization and its params shape. */
+export declare interface HomeSlotParamsMap {
+    "event-list": EventListParams;
+    indicators: IndicatorsListProps;
+}
+
+/**
+ * The `Widget` chrome a Home widget may carry beyond its header, passed straight
+ * through to the frame.
+ *
+ * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
+ * type says so rather than leaving it to blow up at runtime.
+ */
+export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> & ({
+    alert?: WidgetProps["alert"];
+    status?: never;
+} | {
+    status?: WidgetProps["status"];
+    alert?: never;
+});
+
+/** A widget as handed to the layout: header + an ordered list of slots. */
+export declare type HomeWidgetItem = HomeWidgetChrome & {
+    id: string;
+    header?: WidgetProps["header"];
+    fullHeight?: boolean;
+    /**
+     * The widget's catalog glyph — shown for it in the collapsed rail and in the
+     * "Add widget" picker, so the strip can never drift from the catalog.
+     */
+    icon?: IconType;
+    /**
+     * PINNED: the widget stays put. In edit mode it shows no remove control and
+     * does not wiggle (nor drag, once dragging lands) — for widgets a user must
+     * always have, like Clock in.
+     */
+    locked?: boolean;
+    /**
+     * Something new since the user last looked (unread messages, a pending
+     * request). The collapsed rail badges the widget's glyph with an accent dot.
+     */
+    hasUpdates?: boolean;
+    slots: HomeWidgetSlot[];
+};
+
+/** One slot of a widget: a visualization tag + its params (opaque to the layout). */
+export declare interface HomeWidgetSlot {
+    visualization: string;
+    params: unknown;
+}
 
 declare type HTMLString = string;
 
@@ -7682,9 +8114,20 @@ declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large
 
 declare const internalAvatarTypes: readonly ["base", "rounded"];
 
+export declare const isPossiblePhoneValue: (value: F0PhoneInputValue | undefined, fallbackCountry?: CountryCode) => boolean;
+
 export declare const isSystemMessage: (item: F0ChatItem) => item is F0ChatSystemMessage;
 
 export declare const isUserMessage: (item: F0ChatItem) => item is F0ChatMessage;
+
+/**
+ * Standalone validators for the structured pair, matching the `isValid` /
+ * `isPossible` flags of the change meta: "valid" checks the country's number
+ * patterns, "possible" only checks the length. For form schemas.
+ * `fallbackCountry` must mirror the input's `defaultCountry` so prefix-less
+ * legacy values validate exactly as the input renders them.
+ */
+export declare const isValidPhoneValue: (value: F0PhoneInputValue | undefined, fallbackCountry?: CountryCode) => boolean;
 
 export declare function Item({ item, counter, isActive, collapsible, isExpanded, onToggleExpanded, sortable, children, onDragOver, onDragLeave, onDrop, canDropInside, currentParentId, justDropped, }: TOCItemProps): JSX_2.Element;
 
@@ -7820,11 +8263,116 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 };
 
 /**
+ * Past this many rows a list auto-compacts: every row's second line folds into
+ * a tooltip on the row, and the glyphs drop to `sm`.
+ */
+export declare const LIST_COMPACT_AFTER = 6;
+
+declare type ListClickData<C> = C extends "link" ? {
+    href: string;
+} : object;
+
+/**
  * Group List: Renders the list for a group
  */
 declare type ListCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, ListVisualizationOptions<Record, Filters, Sortings>>;
 
+/** One row of a `list` slot — its shape FOLLOWS from the slot's schema. */
+export declare type ListItem<S extends ListSchema = ListSchema> = {
+    id: string | number;
+    /** An accent dot on the left glyph — unseen/pending. */
+    unread?: boolean;
+} & ListTextData<S> & ListLeftData<S["left"]> & ListRightData<S["right"]> & ListClickData<S["clickBehavior"]>;
+
+declare type ListLeftData<L> = L extends "module" ? {
+    module: ModuleId;
+} : L extends "alert" ? {
+    alert: AlertType;
+} : L extends AvatarVariant["type"] ? {
+    avatar: AvatarData<L>;
+} : object;
+
+/** What every row of a `list` slot draws on its LEFT. */
+export declare type ListLeftKind = AvatarVariant["type"] | "module" | "alert";
+
+/** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
+export declare interface ListParams<S extends ListSchema = ListSchema> {
+    schema: S;
+    items: Array<ListItem<S>>;
+}
+
 declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting_2<R, Sortings> & PropertyDefinition_2<R>;
+
+declare type ListRightData<R> = R extends "counter" ? {
+    count: number;
+} : R extends `${infer T extends F0AvatarListProps["type"]}-list` ? {
+    avatars: Array<AvatarData<T>>;
+    remainingCount?: number;
+} : R extends AvatarVariant["type"] ? {
+    rightAvatar: AvatarData<R>;
+} : object;
+
+/**
+ * What every row draws on its RIGHT: a counter, one avatar (e.g. the sender),
+ * or a compact strip of avatars with an optional `remainingCount`.
+ */
+export declare type ListRightKind = "counter" | AvatarVariant["type"] | `${F0AvatarListProps["type"]}-list`;
+
+/**
+ * A `list` slot's SCHEMA: declared once for the whole slot, it decides what
+ * every row looks like — the rows are CONSISTENT by construction, and the item
+ * type follows from it (see {@link ListItem}). Sizing is prescriptive, not
+ * configurable: two text lines (a required `description`) draw an `md` glyph,
+ * one line draws `sm`.
+ */
+export declare interface ListSchema {
+    /** The one left treatment every row draws. Omit for plain text rows. */
+    left?: ListLeftKind;
+    /** The one right treatment every row draws. Omit for none. */
+    right?: ListRightKind;
+    /** Every row carries an inline subtitle (on the title's line, after a dot). */
+    subtitleRequired?: boolean;
+    /** Every row carries a second line — this is what makes rows two-line. */
+    descriptionRequired?: boolean;
+    /**
+     * `"link"` rows each carry an `href` and render as REAL anchors (role
+     * `link`, routed through the app's `LinkProvider`) — never an onClick;
+     * that's the only click behavior rows have. Omit for inert rows.
+     * Same-tab for relative and `#` hrefs, `target="_blank"` for other domains.
+     */
+    clickBehavior?: "link";
+    /**
+     * How many rows show before the rest fold behind a "View more (n)" button at
+     * the list's bottom (which turns into "View less" once expanded). Omit to
+     * always show every row.
+     */
+    maxVisibleItems?: number;
+    /**
+     * Forces the COMPACT presentation at any count: every row's `description`
+     * folds into a tooltip on the row and the glyphs draw `sm`. Without it,
+     * lists compact on their own past `LIST_COMPACT_AFTER` visible rows.
+     */
+    compact?: boolean;
+}
+
+/**
+ * Builds a `list` slot: the schema is declared once, and the items' shape is
+ * CHECKED against it — a `left: "person"` slot only takes person data, a
+ * `clickBehavior: "link"` slot demands an `href` on every row.
+ */
+export declare const listSlot: <const S extends ListSchema>(schema: S, items: Array<ListItem<S>>) => HomeWidgetSlot;
+
+declare type ListTextData<S extends ListSchema> = {
+    title: string;
+} & (S["subtitleRequired"] extends true ? {
+    subtitle: string;
+} : {
+    subtitle?: never;
+}) & (S["descriptionRequired"] extends true ? {
+    description: string;
+} : {
+    description?: never;
+});
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
     itemDefinition: (record: R) => ItemDefinition;
@@ -8243,6 +8791,77 @@ declare type NestedResponseWithType<R extends RecordType> = {
 declare type NestedVariant = "basic" | "detailed";
 
 declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
+
+/**
+ * NewHomeLayout — the shell for the redesigned Home, modelled on the custom-home
+ * prototype's Feed page.
+ *
+ * A growing MAIN column (content capped to a centered `mainWidth`) next to a
+ * FIXED-width side rail, separated only by a gap — no divider. The WHOLE page
+ * sits on one full-bleed DaytimePage gradient (`period`): neither column paints
+ * a background, so the wash runs under both and across the gap, out to the
+ * window's edges. Below `md` everything stacks into one column, main first.
+ *
+ * WHEN THE LAYOUT IS TOO NARROW for both columns at full width (but still two
+ * columns), the rail COLLAPSES: one `lg` avatar per widget carrying that
+ * widget's own catalog `icon`. Hovering (or clicking) an avatar floats the SAME
+ * widget render out over the feed at the rail's expanded width — one render,
+ * two states, exactly like the prototype.
+ */
+export declare const NewHomeLayout: ForwardRefExoticComponent<NewHomeLayoutProps & RefAttributes<HTMLDivElement>>;
+
+export declare interface NewHomeLayoutProps {
+    /** Freeform main-column content on top (greeting, shortcut cards, ranked feed…). */
+    children?: ReactNode;
+    /** Main column: widget slots stacked below `children`. */
+    leftWidgets?: HomeWidgetItem[];
+    /** Side rail: spec-conforming widgets. */
+    rightWidgets?: HomeWidgetItem[];
+    /** Freeform side-rail content, rendered above `rightWidgets` (expanded rail only). */
+    aside?: ReactNode;
+    /** Per-visualization renderers, MERGED OVER the kit's `defaultSlotRenderers`. */
+    slotRenderers?: SlotRenderers;
+    /** Full override of how a whole widget is drawn. Defaults to `SlotWidget`. */
+    renderWidget?: (widget: HomeWidgetItem, ctx: HomeRenderCtx) => ReactNode;
+    /**
+     * Edit mode. Omit it and the layout owns the state itself, toggled by its own
+     * edit button; pass it to drive edit mode from outside.
+     */
+    editing?: boolean;
+    /** Called when the layout's edit button is pressed. */
+    onEditingChange?: (editing: boolean) => void;
+    /**
+     * Which containers a user may actually edit. In edit mode only these show
+     * remove controls and the add placeholder; the others stay put. Both by default.
+     */
+    editableWidgetContainers?: WidgetContainerSide[];
+    /** Called with a widget id when its remove control is clicked (edit mode only). */
+    onRemoveWidget?: (id: string) => void;
+    /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+    onClickAddNewWidget?: (side: WidgetContainerSide) => void;
+    /** Called with a side and its widget ids in their new order after a drag. */
+    onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
+    /** The daytime gradient period for the page surface. */
+    period?: HomePeriod;
+    /** Fixed px width of the side rail. */
+    asideWidth?: number;
+    /** Max px width of the (centered) main-column content. */
+    mainWidth?: number;
+    /**
+     * How far the page surface reaches past this layout's box, in px — set it to
+     * the page's own gutter so the gradient runs to the window's edges instead of
+     * stopping at that padding.
+     */
+    bleed?: number;
+    /**
+     * When the layout stacks (below `md` there is no rail), how many leading
+     * blocks of `children` come before the pinned widgets folded in from it.
+     * Defaults to 2 — a greeting and the shortcuts under it.
+     */
+    stackedPinsAfter?: number;
+    ctx?: HomeRenderCtx;
+    className?: string;
+}
 
 declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
 
@@ -9081,6 +9700,10 @@ declare type PersonProfile = {
 
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
+export declare type PhoneInputSize = (typeof phoneInputSizes)[number];
+
+export declare const phoneInputSizes: readonly ["sm", "md"];
+
 export declare const PieChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare const PieChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
@@ -9578,6 +10201,21 @@ export declare type RichTextEditorProps = F0RichTextEditorProps;
 
 /** @deprecated Use F0RichTextEditorSkeletonProps */
 export declare type RichTextEditorSkeletonProps = F0RichTextEditorSkeletonProps;
+
+/**
+ * Both axes are measures, so there is no aggregation: a scatter plots one
+ * point per row rather than grouping rows into categories. `label` names the
+ * column identifying each point, and `series` the optional column that splits
+ * the points into colour groups.
+ */
+declare interface ScatterComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    label?: string;
+    series?: string;
+    limit?: number;
+}
 
 export declare const ScrollArea: WithDataTestIdReturnType<ForwardRefExoticComponent<Omit<Omit<ScrollAreaProps & RefAttributes<HTMLDivElement>, "ref"> & {
 showBar?: boolean;
@@ -10231,6 +10869,26 @@ declare const skeletonVariants: (props?: ({
 })) | undefined) => string;
 
 /**
+ * Row-based slots cancel their rows' own padding so the rows sit flush with the
+ * widget's content box — every list-like slot carries this. `indicators`
+ * doesn't: it isn't rows and has no padding to cancel.
+ */
+export declare const SLOT_ROW_BLEED = "-m-2";
+
+/** Draws ONE slot from its params. Keyed by `visualization` in a renderer map. */
+export declare type SlotRenderer<P = unknown> = (params: P, ctx: HomeRenderCtx) => ReactNode;
+
+export declare type SlotRenderers = Record<string, SlotRenderer>;
+
+/**
+ * The bleed a row-based slot applies to itself: `SLOT_ROW_BLEED` with its
+ * VERTICAL halves put back — `mt-0` always (the widget header already spaces
+ * the first slot, and a divider spaces the rest), and `mb-0` unless this is the
+ * widget's last slot, where the bleed should reach the card's bottom edge.
+ */
+export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
+
+/**
  * Type helper to extract keys from a SortingsDefinition
  */
 export declare type SortingKey<Definition extends SortingsDefinition> = Definition extends readonly string[] ? Definition[number] : keyof Definition;
@@ -10473,13 +11131,13 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
     /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
-     * The label for each group is provided via `headerGroupLabels` in
-     * the visualization options.
+     * Each group is configured via `headerGroups` in the visualization
+     * options, which also controls whether the group can be collapsed.
      */
     headerGroupId?: string;
 };
 
-declare function TableHead({ children, width, minWidth, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
+declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
 declare type TableHeaderInfo = {
     title: string;
@@ -10526,10 +11184,16 @@ declare interface TableHeadProps {
      */
     sortState?: "none" | "asc" | "desc";
     /**
-     * Callback fired when the sort button is clicked.
+     * Callback fired when the header is clicked to sort.
      * Use this to handle toggling between sort states.
      */
     onSortClick?: () => void;
+    /**
+     * Callback fired when the header cell is clicked, for cells that are
+     * actionable beyond sorting. Like {@link onSortClick}, the whole cell is the
+     * target — see the note on the cell's click handler.
+     */
+    onClick?: () => void;
     /**
      * Optional header info. When provided, displays an info icon next to the
      * header content. Pass a string for a short text tooltip, or a
@@ -10602,10 +11266,31 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
-     * Labels for header groups. Keys are headerGroupId values used in column
-     * definitions, values are the display labels rendered in the spanning header row.
+     * Header group configuration. Keys are the `headerGroupId` values used in
+     * column definitions. Pass a string for a plain spanning label, or a
+     * {@link HeaderGroupDefinition} to also make the group collapsible:
+     *
+     * ```ts
+     * headerGroups: {
+     *   personal: "Personal information",
+     *   january: {
+     *     label: "January",
+     *     collapsedColumns: ["january-total"],
+     *     defaultCollapsed: true,
+     *   },
+     * }
+     * ```
+     *
+     * A collapsed group hides every column in it except the ones listed in
+     * `collapsedColumns`, and renders a toggle next to its label.
      */
-    headerGroupLabels?: Record<string, string>;
+    headerGroups?: Record<string, string | HeaderGroupDefinition>;
+    /**
+     * Called when the user collapses or expands a header group. Fires after the
+     * table has applied the change; use it to persist the state, not to control
+     * it.
+     */
+    onHeaderGroupCollapsedChange?: (groupId: string, collapsed: boolean) => void;
     /**
      * Wraps the table in a rounded border container.
      * Useful for embedding the table inside panels or detail views.
@@ -11450,6 +12135,24 @@ declare interface VideoPlayerContent {
 }
 
 /**
+ * Region of the canvas (in screen px) covered by external chrome — typically a
+ * side panel / drawer opened over the graph. All fly-to paths shift their target
+ * so the node lands centered in the *free* area instead of behind the panel.
+ *
+ * The consumer measures / knows this (e.g. a fixed-width drawer) and passes it;
+ * F0Graph has no notion of the panel itself. The side is encoded by which key is
+ * set — a right-hand drawer sets `right`, a left-hand one (or RTL layout) sets
+ * `left` — so no separate direction handling is needed. Omitted / `0` on every
+ * side behaves exactly as if there were no inset.
+ */
+export declare interface ViewportInset {
+    top?: number;
+    right?: number;
+    bottom?: number;
+    left?: number;
+}
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const VirtualList: default_2.ForwardRefExoticComponent<VirtualListProps & default_2.RefAttributes<HTMLDivElement>>;
@@ -11651,6 +12354,49 @@ export declare type WidgetAvatarsListItemProps = {
 });
 
 /**
+ * WidgetCatalog — the "Add widget" dialog, mirroring the custom-home prototype:
+ * a searchable picker on the left (icon + title rows, the selected row tinted),
+ * a LIVE preview of the highlighted widget on the right at the width it will
+ * really get, and the "Add widget" CTA in the dialog footer. `width="xl"`
+ * rather than fullscreen.
+ *
+ * Selection follows the filter: if the selected row is filtered out, the first
+ * remaining row takes over, so the preview always shows something the CTA can
+ * actually add.
+ */
+export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, previewWidth, title, }: WidgetCatalogProps): JSX_2.Element;
+
+/** One entry in the widget catalog dialog. */
+export declare interface WidgetCatalogItem {
+    id: string;
+    title: string;
+    icon: IconType;
+    /**
+     * The LIVE PREVIEW of the widget — the same node the Home renders (e.g. a
+     * `SlotWidget`), so the preview can't drift from what gets added.
+     */
+    preview: ReactNode;
+}
+
+export declare interface WidgetCatalogProps {
+    isOpen: boolean;
+    onClose: () => void;
+    /** The widgets that can be added, in the order to list them. */
+    widgets: WidgetCatalogItem[];
+    /** Called with the chosen widget id when the CTA is pressed. */
+    onAdd: (id: string) => void;
+    /**
+     * Content width of the column this was opened from — the preview is capped
+     * to it, so a rail-bound widget previews at rail width.
+     */
+    previewWidth?: number;
+    title?: string;
+}
+
+/** Which column a container is: the growing main one, or the fixed side rail. */
+export declare type WidgetContainerSide = "main" | "right";
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const WidgetEmptyState: WithDataTestIdReturnType_3<typeof _WidgetEmptyState>;
@@ -11702,6 +12448,21 @@ export declare interface WidgetProps {
         variant: StatusVariant;
     };
     fullHeight?: boolean;
+    /**
+     * Shows a drag handle to the left of the title. The handle carries
+     * `data-gs-handle`, so a gridstack board picks it up as its handle.
+     */
+    draggable?: boolean;
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
+    /** Lifts the card while it is being dragged. */
+    isDragging?: boolean;
+    /** Marks the card as picked out — a selected tile on an editable board. */
+    selected?: boolean;
+    /** An "Ask One" AI button in the header. */
+    AIButton?: () => void;
+    /** An overflow menu at the header's right, beside `link`. */
+    actions?: DropdownItem[];
 }
 
 /**
@@ -11900,6 +12661,27 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
