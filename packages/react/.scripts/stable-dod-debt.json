@@ -31,7 +31,6 @@
     "Inputs/Search input",
     "Inputs/Text area input",
     "Inputs/Text input",
-    "Primitives/F0InputField",
-    "Resource header"
+    "Primitives/F0InputField"
   ]
 }

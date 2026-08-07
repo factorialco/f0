@@ -61,6 +61,28 @@ Designed to display information about a team.
   (e.g., "Add to Factorial")
 - Ensure metadata labels are clear and consistent across the application
 
+## When to use
+
+Reach for Resource header on a page whose subject is one identifiable resource,
+where the user needs to recognize it and act on it without scrolling.
+
+- Display key information about a specific resource (employee, project,
+  document, course, job post, expense, performance review, etc.)
+- Provide quick access to common actions related to the resource
+- Show the current status and important metadata of a resource
+- Create consistent navigation patterns across resource detail pages
+
+## When not to use
+
+- You're displaying a data collection. Index and list pages are about many
+  records, so the title belongs to the collection, not to a resource: use the
+  module header instead
+- The page doesn't represent a specific resource
+- You need minimal identification without actions or metadata. Resource header
+  reserves space for the action row and the metadata row, and both read as empty
+  when unused
+- You're creating a dashboard overview
+
 ## Design best practices
 
 <DoDonts
@@ -132,6 +154,53 @@ Designed to display information about a team.
   src="docs/headers/resource-header-layout.png"
   alt="Layout structure with mandatory and optional components"
 />
+
+## Accessibility
+
+### The title is not a heading
+
+`title` renders as a styled `<span>`, not an `<h1>`–`<h6>`
+(`BaseHeader/index.tsx`: a `<span className="text-2xl font-semibold">` wrapping
+`{title}`, with no `role="heading"` and no `aria-level`). It looks like a page
+title and it is not one.
+
+What that means for you as a consumer:
+
+- **You own the page `<h1>`.** Resource header does not contribute a level to
+  the document outline, so a page that renders only a Resource header at the top
+  has no `<h1>`. Render your own heading in the page shell, or the page is
+  unreachable by heading navigation in a screen reader
+- **Don't rely on it for outline or landmark structure.** The component renders a
+  plain `<div>` wrapper: no `<header>` element, no `role="banner"`, no
+  `aria-label`. If the region needs to be announced or skipped, wrap it yourself
+- **Avoid duplicating the same string twice.** If you add an `<h1>` with the same
+  text as `title`, a screen reader user hears it twice. Prefer a visually hidden
+  `<h1>`, or place the visible heading where Resource header's title would
+  otherwise sit
+
+This is a known gap, not a design decision to copy. Treat the title as
+decorative text and put the semantics in your page.
+
+### State must not depend on color alone
+
+`deactivated` only dims the title (`text-f1-foreground/[0.61]`). It adds no text,
+no icon, and no ARIA state, so the distinction disappears for anyone who can't
+compare two shades of the same color. When a resource is deactivated, also pass
+the state as content, typically a `Status` metadata item or a tag, so it is
+announced and readable.
+
+### Actions
+
+- Every action needs a meaningful `label`. `hideLabel` only hides it visually:
+  the string still becomes the button's `aria-label` and its tooltip, so an empty
+  or vague label leaves the control unnamed for everyone who can't see the icon
+- On desktop the actions are laid out and tabbed in the same order (overflow
+  menu, then secondary actions, then the primary action on the far right), so
+  focus order matches reading order. Keep it that way: don't reorder actions with
+  CSS
+- Pair a destructive action with a confirmation dialog. It is the recoverable
+  step before an irreversible one, and it is a convention here, not something the
+  component enforces for you
 
 ---
 

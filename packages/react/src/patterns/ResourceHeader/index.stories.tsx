@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
+import { PrimaryDropdownAction } from "@/experimental/Information/utils"
 import * as Icon from "@/icons/app"
 import { Archive, Comment, Download, ExternalLink, Pencil } from "@/icons/app"
-import { PrimaryDropdownAction } from "@/experimental/Information/utils"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { ResourceHeader } from "./index"
 
 const meta: Meta<typeof ResourceHeader> = {
@@ -16,6 +16,7 @@ const meta: Meta<typeof ResourceHeader> = {
   tags: ["stable"],
   parameters: {
     layout: "padded",
+    a11y: { test: "error" },
   },
   argTypes: {
     title: {
@@ -50,6 +51,10 @@ export default meta
 
 type Story = StoryObj<typeof ResourceHeader>
 
+// Hoisted so the play function has a type-safe handle on the spy: `args.primaryAction`
+// is a union (PrimaryActionButton | PrimaryDropdownAction) and has no `onClick` in common.
+const publishAction = { label: "Publish", icon: Icon.ArrowUp, onClick: fn() }
+
 export const Default: Story = {
   tags: ["!dev"],
   args: {
@@ -69,11 +74,7 @@ export const Default: Story = {
       ],
     },
 
-    primaryAction: {
-      label: "Publish",
-      icon: Icon.ArrowUp,
-      onClick: fn(),
-    },
+    primaryAction: publishAction,
     secondaryActions: [
       {
         label: "Edit",
@@ -130,6 +131,13 @@ export const Default: Story = {
         },
       },
     ],
+  },
+  // BaseHeader renders the action row twice (mobile + desktop); only CSS hides one,
+  // so both matches exist in the DOM. Click the first.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getAllByRole("button", { name: "Publish" })[0])
+    await expect(publishAction.onClick).toHaveBeenCalledOnce()
   },
 }
 
