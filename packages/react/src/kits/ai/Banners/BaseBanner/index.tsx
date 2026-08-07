@@ -66,12 +66,8 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
       <div
         ref={ref}
         className={cn(
-          "relative flex w-full flex-col rounded-xl border border-f1-border-secondary shadow-md",
-          isCard
-            ? // `bg-white` renders transparent and the border does not draw without
-              // an explicit style; scoped to `card` so existing banners are untouched.
-              "gap-0 border-solid bg-f1-background"
-            : "bg-white gap-4 sm:flex-row sm:gap-5"
+          "relative flex w-full flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background shadow-md",
+          isCard ? "gap-0" : "gap-4 sm:flex-row sm:gap-5"
         )}
       >
         {/* Media 16:9 */}
@@ -178,7 +174,7 @@ const BaseBannerSkeleton = forwardRef<HTMLDivElement>(
     return (
       <div
         ref={ref}
-        className="bg-white relative flex w-full flex-col gap-4 rounded-xl border border-f1-border-secondary shadow-md sm:flex-row sm:gap-5"
+        className="relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background shadow-md sm:flex-row sm:gap-5"
         role="status"
         aria-busy="true"
         aria-live="polite"
