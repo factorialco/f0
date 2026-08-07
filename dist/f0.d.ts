@@ -6573,6 +6573,16 @@ export declare interface F0AiAnnouncementCardProps extends DataAttributes_2 {
      * used. The card removes itself; the consumer decides whether it comes back.
      */
     onClose?: () => void;
+    /**
+     * Clamps the description to two lines, so unbounded copy cannot grow the card
+     * past its surface. On by default.
+     *
+     * Turn it off when the description is the only place that information exists:
+     * the clamp truncates silently, with no "read more" and nowhere else to read
+     * the rest. A taller card is a problem an author can see and fix; hidden text
+     * is not.
+     */
+    clampDescription?: boolean;
     /** Renders the placeholder in the card's own shape. */
     isLoading?: boolean;
     /**
