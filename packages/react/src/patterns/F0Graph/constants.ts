@@ -19,6 +19,14 @@ export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
 // columns/rows snap onto the dot grid (nodes "squared" with the dots).
 export const BACKGROUND_DOT_GAP = 32
 
+// ─── Stacked children (`GraphNode.stackChildren`) ──────────────
+// Height of one stacked row and the gap between two of them. Shared by the
+// layout engine (which reserves the space) and F0GraphStackedNode (which fills
+// it) — the row must render exactly as tall as the layout believes it is, or
+// the column drifts out of its reserved band.
+export const STACKED_NODE_HEIGHT = 40
+export const STACKED_NODE_GAP = 8
+
 // Delay used after a layout-affecting change before calling `fitView`,
 // so React Flow can settle the new node positions in its store.
 export const FOCUS_SETTLE_DELAY_MS = 100

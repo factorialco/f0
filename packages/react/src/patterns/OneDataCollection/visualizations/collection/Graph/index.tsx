@@ -9,6 +9,7 @@ import {
   F0Graph,
   type F0GraphHandle,
   F0GraphNode,
+  F0GraphStackedNode,
   F0GraphSkeleton,
   tagColumn,
 } from "@/patterns/F0Graph"
@@ -65,6 +66,8 @@ export const GraphCollection = <
   currentUserNodeId,
   getNodeId,
   getChildrenCount,
+  stackChildren,
+  stackedTrailing,
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
@@ -123,6 +126,7 @@ export const GraphCollection = <
       tags,
       getNodeId,
       getChildrenCount,
+      stackChildren,
       childrenFilters,
       defaultExpandDepth,
       loadNodePath,
@@ -286,6 +290,23 @@ export const GraphCollection = <
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
+            // A stacked row is a compact strip, not a node card: it carries the
+            // title and an optional trailing control, and none of the card-only
+            // slots (avatar, subtitle, tags, selection toolbar) apply to it.
+            if (ctx.stacked) {
+              return (
+                <F0GraphStackedNode
+                  {...ctx}
+                  loading={ctx.dataLoading}
+                  title={title(node.data)}
+                  trailing={stackedTrailing?.(node.data)}
+                  onClick={() => {
+                    ctx.onClick()
+                    itemOnClick?.()
+                  }}
+                />
+              )
+            }
             return (
               <F0GraphNode
                 {...ctx}

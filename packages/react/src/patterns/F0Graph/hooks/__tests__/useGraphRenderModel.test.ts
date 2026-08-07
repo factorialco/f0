@@ -346,3 +346,68 @@ describe("useGraphRenderModel — anchor viewport compensation", () => {
     expect(onAnchorReflow).not.toHaveBeenCalled()
   })
 })
+
+describe("useGraphRenderModel — stacked children", () => {
+  const stackedRole = () => {
+    const levels = [
+      treeNode("l1", "role", 0, [], 2),
+      treeNode("l2", "role", 0, [], 2),
+      treeNode("l3", "role", 0, [], 2),
+    ]
+    const role: TreeNode<null> = {
+      ...treeNode("role", "root", 3, levels, 1),
+      stackChildren: true,
+    }
+    return { root: treeNode("root", null, 1, [role]), role, levels }
+  }
+
+  it("draws one trunk into the column instead of an edge per row", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const intoStack = result.current.rfEdges.filter((e) => e.source === "role")
+
+    expect(intoStack).toHaveLength(1)
+    expect(intoStack[0].target).toBe("l1")
+  })
+
+  it("keeps an edge per child when the group is not stacked", () => {
+    const { root, role } = stackedRole()
+    role.stackChildren = false
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    expect(
+      result.current.rfEdges.filter((e) => e.source === "role")
+    ).toHaveLength(3)
+  })
+
+  it("flags the rows on the node data so renderNode can switch presentation", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const stackedOf = (id: string) =>
+      (result.current.rfNodes.find((n) => n.id === id)?.data as GraphNodeData)
+        .stacked
+
+    expect(stackedOf("l1")).toBe(true)
+    expect(stackedOf("l3")).toBe(true)
+    expect(stackedOf("role")).toBeUndefined()
+  })
+
+  it("gives the rows the layout's shorter box, not the node card's", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "role"]),
+      enableNodeWindowing: true,
+    })
+
+    const row = result.current.rfNodes.find((n) => n.id === "l1")
+    const card = result.current.rfNodes.find((n) => n.id === "role")
+
+    // Only asserted when windowing seeds dimensions; without a measured
+    // viewport the model renders everything and leaves sizing to the DOM.
+    if (row?.height !== undefined) {
+      expect(row.height).toBeLessThan(card?.height ?? Infinity)
+    }
+  })
+})

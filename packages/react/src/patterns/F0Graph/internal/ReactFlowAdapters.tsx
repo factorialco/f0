@@ -57,6 +57,8 @@ export interface GraphNodeData extends Record<string, unknown> {
   ariaSetSize: number
   ariaPosInSet: number
   visibleChildIds?: string[]
+  /** Set when this node is one row of its parent's stacked column. */
+  stacked?: boolean
 }
 
 export type GraphRFNode = RFNode<GraphNodeData>
@@ -130,6 +132,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     ariaSetSize,
     ariaPosInSet,
     visibleChildIds,
+    stacked,
   } = data as GraphNodeData
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -173,6 +176,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     posInSet: ariaPosInSet,
     nodeId: id,
     ariaOwns,
+    stacked: stacked ?? false,
     onExpandToggle: () => toggleExpand(id),
     onClick: () => selectNode(id),
     nodeRef: nodeRefCallback,
@@ -192,7 +196,13 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
       >
         <div
           className="pointer-events-auto"
-          style={{ maxWidth: "calc(100% - 20px)" }}
+          // A card is content-sized inside the inset layout box; a stacked row
+          // fills that same inset width instead, so the column's rows line up
+          // flush with the edges of the parent card above them.
+          style={{
+            width: stacked ? "100%" : undefined,
+            maxWidth: "calc(100% - 20px)",
+          }}
         >
           {renderNode(graphNode, ctx)}
         </div>
@@ -214,6 +224,7 @@ export const F0GraphNodeWrapper = memo(
     if (prevData.ariaLevel !== nextData.ariaLevel) return false
     if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
     if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
+    if (prevData.stacked !== nextData.stacked) return false
     if (
       (prevData.visibleChildIds?.join(",") ?? "") !==
       (nextData.visibleChildIds?.join(",") ?? "")

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
+import { F0Checkbox } from "@/components/F0Checkbox"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { DeferredNodesPayload, GraphNode } from "../types"
@@ -13,6 +14,7 @@ import {
   type F0GraphProps,
 } from "../F0Graph"
 import { F0GraphNode } from "../components/F0GraphNode"
+import { F0GraphStackedNode } from "../components/F0GraphStackedNode"
 
 const meta = {
   title: "Graph/F0Graph",
@@ -1322,6 +1324,104 @@ export const StagedLoadingError: Story = {
       console.error("[StagedLoadingError] Deferred load failed:", error.message)
     },
   },
+}
+
+// ─── Stacked children ──────────────────────────────────────────
+
+/**
+ * Roles whose children are job levels. Each role sets `stackChildren`, so its
+ * levels render as a tight column of compact rows under it instead of fanning
+ * out — and the column costs no horizontal space, so the roles sit as close
+ * together as they would with no children at all.
+ */
+interface CatalogNode {
+  name: string
+  kind: "root" | "role" | "level"
+}
+
+const CATALOG_NODES: GraphNode<CatalogNode>[] = [
+  {
+    id: "catalog",
+    parentId: null,
+    data: { name: "Job catalog", kind: "root" },
+    childrenCount: 3,
+  },
+  ...["Engineering", "Design", "Sales"].flatMap((role, roleIndex) => {
+    const roleId = `role-${roleIndex}`
+    const levels = ["Junior", "Mid", "Senior", "Staff"].slice(0, 2 + roleIndex)
+    return [
+      {
+        id: roleId,
+        parentId: "catalog",
+        data: { name: role, kind: "role" as const },
+        childrenCount: levels.length,
+        // The opt-in: this role's children render as a stacked column.
+        stackChildren: true,
+      },
+      ...levels.map((level, levelIndex) => ({
+        id: `${roleId}-level-${levelIndex}`,
+        parentId: roleId,
+        data: { name: `${level} ${role}`, kind: "level" as const },
+        childrenCount: 0,
+      })),
+    ]
+  }),
+]
+
+const StackedChildrenDemo = () => {
+  const [checked, setChecked] = useState<ReadonlySet<string>>(new Set())
+
+  const toggle = useCallback((id: string) => {
+    setChecked((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  return (
+    <F0Graph<CatalogNode>
+      nodes={CATALOG_NODES}
+      defaultExpandDepth={2}
+      showControls
+      renderNode={(node, ctx) =>
+        ctx.stacked ? (
+          <F0GraphStackedNode
+            {...ctx}
+            title={node.data.name}
+            trailing={
+              <F0Checkbox
+                title={node.data.name}
+                hideLabel
+                checked={checked.has(node.id)}
+                onCheckedChange={() => toggle(node.id)}
+              />
+            }
+          />
+        ) : (
+          <F0GraphNode
+            {...ctx}
+            avatar={{ type: "team", name: node.data.name }}
+            title={node.data.name}
+            subtitle={node.data.kind === "root" ? undefined : "Role"}
+          />
+        )
+      }
+    />
+  )
+}
+
+export const StackedChildren: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A parent that sets `stackChildren` renders its (leaf) children as a vertical column of `F0GraphStackedNode` rows sharing its x, connected by a single trunk edge. Groups with an expandable child fall back to the normal fan-out.",
+      },
+    },
+  },
+  render: () => <StackedChildrenDemo />,
 }
 
 export const Snapshot: Story = {

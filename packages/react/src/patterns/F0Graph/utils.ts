@@ -140,6 +140,40 @@ export function deriveEdgesFromTree<T>(roots: TreeNode<T>[]): GraphEdge[] {
   return edges
 }
 
+/**
+ * Ids of the nodes whose children actually render as a vertical stack, and the
+ * ids of the stacked children themselves.
+ *
+ * `stackChildren` is a request, not a guarantee: a stacked row is a compact
+ * strip with no lane beneath it, so a child that can expand has nowhere to put
+ * its own subtree. Such a group falls back to the normal horizontal fan-out.
+ * Emptiness is the other fallback — an as-yet-unloaded group (children not
+ * fetched, or collapsed) stacks nothing and is left to the standard path until
+ * its children arrive.
+ *
+ * Resolved once per render and shared by the layout engine input and the node
+ * render context, so "is this stacked?" has a single answer everywhere.
+ */
+export function resolveStackedParents<T>(nodes: TreeNode<T>[]): {
+  stackedParentIds: Set<string>
+  /** Stacked child id → its 0-based position in the column. */
+  stackedChildIndex: Map<string, number>
+} {
+  const stackedParentIds = new Set<string>()
+  const stackedChildIndex = new Map<string, number>()
+
+  for (const node of nodes) {
+    if (!node.stackChildren || node.children.length === 0) continue
+    if (node.children.some((child) => child.childrenCount > 0)) continue
+    stackedParentIds.add(node.id)
+    node.children.forEach((child, index) => {
+      stackedChildIndex.set(child.id, index)
+    })
+  }
+
+  return { stackedParentIds, stackedChildIndex }
+}
+
 /** Collect the nodes currently visible, respecting the expanded set. */
 export function collectVisibleNodes<T>(
   roots: TreeNode<T>[],

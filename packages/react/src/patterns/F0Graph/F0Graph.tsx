@@ -176,6 +176,15 @@ export interface F0GraphProps<T = unknown> {
   nodeWidth?: number
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 56. Override for compact nodes (icons, file rows). */
   nodeHeight?: number
+  /**
+   * Height of one stacked child row (see `GraphNode.stackChildren`). Stacked
+   * rows are compact strips rather than node cards, so they size independently
+   * of `nodeHeight`. Defaults to 40 — keep it in step with whatever `renderNode`
+   * returns for a stacked node, or the rows will overlap or leave gaps.
+   */
+  stackedNodeHeight?: number
+  /** Vertical gap between two stacked child rows. Defaults to 8. */
+  stackedNodeGap?: number
   /** Optional custom layout engine. When provided, overrides the built-in tree layout. */
   layoutEngine?: LayoutEngine
 
@@ -354,6 +363,13 @@ export interface F0GraphNodeRenderContext {
   posInSet: number
   nodeId: string
   ariaOwns?: string
+  /**
+   * `true` when this node is one row of its parent's stacked column (the parent
+   * set `stackChildren` and the group qualified). Render a compact row — e.g.
+   * `<F0GraphStackedNode>` — instead of the full node card: the layout has
+   * already reserved only `stackedNodeHeight` for it.
+   */
+  stacked: boolean
   onExpandToggle: () => void
   onClick: () => void
   nodeRef: (el: HTMLDivElement | null) => void
