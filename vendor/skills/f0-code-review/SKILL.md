@@ -131,3 +131,7 @@ export const Snapshot: Story = {
 - Public interfaces are exported, internal types stay in `internal-types.ts`
 - Default prop values set inline during destructuring (not `defaultProps`)
 - `DataAttributes` from `@/global.types` used for `data-*` prop support where needed
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-code-review` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.
