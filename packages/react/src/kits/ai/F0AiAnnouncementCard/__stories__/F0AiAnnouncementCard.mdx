@@ -62,8 +62,10 @@ beside it as an opt-out.
 
 The `ai` variant takes no icon of its own — the One mark is the point of it.
 
-Consumers that dispatch their own buttons — CMS-driven content, for instance —
-can put them in `children`, which lands in the actions row after both actions.
+Some consumers cannot name their buttons ahead of time: which button an
+announcement gets is decided at runtime, by authored content, a feature flag, or
+a permission check. Those go in `children`, which lands in the actions row after
+both actions, and the consumer keeps its own dispatch.
 
 <Canvas of={Stories.WithCustomActions} />
 

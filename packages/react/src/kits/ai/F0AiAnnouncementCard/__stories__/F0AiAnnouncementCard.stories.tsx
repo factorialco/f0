@@ -107,9 +107,9 @@ export const Loading: Story = {
 }
 
 /**
- * `children` land in the actions row, for consumers that dispatch their own
- * buttons — CMS-driven content, for instance — and cannot express them as an
- * `AnnouncementAction`.
+ * `children` land in the actions row, for consumers whose buttons are decided
+ * at runtime rather than at build time — authored content, a feature flag, a
+ * permission check.
  */
 export const WithCustomActions: Story = {
   args: {
