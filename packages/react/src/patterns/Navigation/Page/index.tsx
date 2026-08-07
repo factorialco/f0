@@ -12,7 +12,7 @@ function _Page({ children, header, embedded = false }: PageProps) {
   return (
     <div
       className={cn(
-        "flex min-h-full w-full flex-col overflow-hidden bg-f1-special-page ring-1 ring-inset ring-f1-border-secondary",
+        "relative flex min-h-full w-full flex-col overflow-hidden bg-f1-special-page",
         !embedded && "xs:rounded-xl"
       )}
     >
@@ -20,6 +20,14 @@ function _Page({ children, header, embedded = false }: PageProps) {
       <div className="isolate flex w-full flex-1 flex-col overflow-auto [&>*]:flex-1">
         {children}
       </div>
+      {/* The frame is an overlay rather than a `ring-inset` on the page itself:
+          an inset ring is painted underneath descendants, so any full-bleed
+          child that reaches the edge with an opaque background covers it — a
+          table's header cells and its sticky rows do exactly that. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-10 rounded-[inherit] ring-1 ring-inset ring-f1-border-secondary"
+      />
     </div>
   )
 }
