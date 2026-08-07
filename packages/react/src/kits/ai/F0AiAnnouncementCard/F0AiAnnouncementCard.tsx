@@ -4,6 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import type { DataAttributes } from "@/global.types"
 import CrossIcon from "@/icons/app/Cross"
 import { withSkeleton } from "@/lib/skeleton"
+import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import type { F0AiAnnouncementCardProps } from "./types"
@@ -30,6 +31,7 @@ const F0AiAnnouncementCardComponent = forwardRef<
     primaryAction,
     secondaryAction,
     onClose,
+    clampDescription = true,
     isLoading = false,
     children,
   } = props
@@ -76,10 +78,15 @@ const F0AiAnnouncementCardComponent = forwardRef<
       <div className={CONTENT_CLASSES}>
         <div className="flex w-full flex-col gap-1">
           <h3 className="font-medium text-lg text-f1-foreground">{title}</h3>
-          {/* Clamped rather than truncated: the card sits in a narrow surface
-              and a long description would otherwise push the actions out of
-              view, which is the one thing it cannot afford to lose. */}
-          <p className="line-clamp-2 text-base text-f1-foreground-secondary">
+          {/* Clamped by default so unbounded copy cannot grow the card past a
+              narrow surface. Consumers whose description is the only place that
+              information exists should turn it off — it truncates silently. */}
+          <p
+            className={cn(
+              "text-base text-f1-foreground-secondary",
+              clampDescription && "line-clamp-2"
+            )}
+          >
             {description}
           </p>
         </div>

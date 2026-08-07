@@ -130,13 +130,23 @@ describe("F0AiAnnouncementCard", () => {
     expect(screen.queryByText(baseProps.title)).not.toBeInTheDocument()
   })
 
-  // The description is clamped rather than truncated in JS, so a long string
-  // stays fully available to assistive tech while the card keeps its height.
-  it("clamps the description to two lines", () => {
-    render(<F0AiAnnouncementCard {...baseProps} />)
+  describe("description", () => {
+    // Clamped in CSS rather than truncated in JS, so the full string stays
+    // available to assistive tech even when the card shows two lines.
+    it("clamps to two lines by default", () => {
+      render(<F0AiAnnouncementCard {...baseProps} />)
 
-    expect(screen.getByText(baseProps.description).className).toMatch(
-      /line-clamp-2/
-    )
+      expect(screen.getByText(baseProps.description).className).toMatch(
+        /line-clamp-2/
+      )
+    })
+
+    it("does not clamp when clampDescription is false", () => {
+      render(<F0AiAnnouncementCard {...baseProps} clampDescription={false} />)
+
+      expect(screen.getByText(baseProps.description).className).not.toMatch(
+        /line-clamp/
+      )
+    })
   })
 })

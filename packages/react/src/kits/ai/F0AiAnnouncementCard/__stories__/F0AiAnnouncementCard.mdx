@@ -67,14 +67,20 @@ both actions, and the consumer keeps its own dispatch.
 
 ## Behavior
 
-- The description clamps to two lines. The card lives in a narrow surface, and
-  an unbounded description would push the actions out of view — the one thing
-  it cannot afford to lose. The full text stays in the DOM for assistive tech.
+- The description clamps to two lines by default, so unbounded copy cannot grow
+  the card past a narrow surface. It clamps in CSS, so the full text stays in the
+  DOM for assistive tech.
+- **`clampDescription={false}` turns that off**, and you should when the
+  description is the only place that information exists. The clamp truncates
+  silently — there is no "read more" and nowhere else to read the rest. A taller
+  card is a problem an author can see and fix; hidden text is not.
 - `onClose` both shows the dismiss control and is called when it is used. The
   card removes itself; whether it comes back is the consumer's decision.
 - Without `onClose` no dismiss control is rendered.
 
 <Canvas of={Stories.LongDescription} />
+
+<Canvas of={Stories.UnclampedDescription} />
 
 ## Accessibility
 

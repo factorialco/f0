@@ -75,12 +75,27 @@ export const WithoutMedia: Story = {
   },
 }
 
-/** The description clamps at two lines so the actions never get pushed away. */
+const LONG_DESCRIPTION =
+  "Upload a receipt and One fills in the rest for you, then files it to the right category, matches it against the policy for your legal entity, flags anything that needs a manager's approval, and keeps the original attached for the audit trail."
+
+/** The description clamps at two lines so unbounded copy cannot grow the card. */
 export const LongDescription: Story = {
   args: {
     ...Default.args,
-    description:
-      "Upload a receipt and One fills in the rest for you, then files it to the right category, matches it against the policy for your legal entity, flags anything that needs a manager's approval, and keeps the original attached for the audit trail.",
+    description: LONG_DESCRIPTION,
+  },
+}
+
+/**
+ * `clampDescription={false}` lets the card grow instead. For consumers whose
+ * description is the only place that information exists — the clamp truncates
+ * silently, with no "read more" and nowhere else to read the rest.
+ */
+export const UnclampedDescription: Story = {
+  args: {
+    ...Default.args,
+    description: LONG_DESCRIPTION,
+    clampDescription: false,
   },
 }
 
