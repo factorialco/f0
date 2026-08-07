@@ -1,7 +1,13 @@
 import { userEvent } from "@testing-library/user-event"
+import { createRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { screen, zeroRender as render } from "@/testing/test-utils"
+import {
+  act,
+  screen,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { F0GraphControls } from "../F0GraphControls"
 
@@ -52,10 +58,12 @@ describe("F0GraphControls", () => {
     expect(screen.queryByLabelText("Find me")).not.toBeInTheDocument()
   })
 
-  it("has ARIA toolbar role", () => {
+  it("exposes its toolbar role with an accessible name", () => {
     render(<F0GraphControls />)
 
-    expect(screen.getByRole("toolbar")).toBeInTheDocument()
+    expect(
+      screen.getByRole("toolbar", { name: "Graph navigation" })
+    ).toBeInTheDocument()
   })
 
   it("all buttons have aria-labels", () => {
@@ -65,5 +73,69 @@ describe("F0GraphControls", () => {
     buttons.forEach((button) => {
       expect(button).toHaveAttribute("aria-label")
     })
+  })
+
+  it("uses custom labels as the button accessible names", () => {
+    render(
+      <F0GraphControls
+        onFocusUser={vi.fn()}
+        labels={{
+          findMe: "Center on my node",
+          fitView: "Show every node",
+          zoomIn: "Increase graph zoom",
+          zoomOut: "Decrease graph zoom",
+        }}
+      />
+    )
+
+    expect(screen.getByLabelText("Center on my node")).toBeInTheDocument()
+    expect(screen.getByLabelText("Show every node")).toBeInTheDocument()
+    expect(screen.getByLabelText("Increase graph zoom")).toBeInTheDocument()
+    expect(screen.getByLabelText("Decrease graph zoom")).toBeInTheDocument()
+  })
+
+  it("keeps localized defaults for labels that are not overridden", () => {
+    render(<F0GraphControls labels={{ zoomIn: "Increase scale" }} />)
+
+    expect(screen.getByLabelText("Fit to view")).toBeInTheDocument()
+    expect(screen.getByLabelText("Increase scale")).toBeInTheDocument()
+    expect(screen.getByLabelText("Zoom out")).toBeInTheDocument()
+  })
+
+  it("renders Find me first when it is available", () => {
+    render(<F0GraphControls onFocusUser={vi.fn()} />)
+
+    expect(
+      screen
+        .getAllByRole("button")
+        .map((button) => button.getAttribute("aria-label"))
+    ).toEqual(["Find me", "Fit to view", "Zoom in", "Zoom out"])
+  })
+
+  it("forwards its ref to the toolbar", () => {
+    const ref = createRef<HTMLDivElement>()
+
+    render(<F0GraphControls ref={ref} />)
+
+    expect(ref.current).toBe(screen.getByRole("toolbar"))
+  })
+
+  it("shows and clears the Find me loading state for async actions", async () => {
+    let resolveAction: () => void = () => {}
+    const pendingAction = new Promise<void>((resolve) => {
+      resolveAction = resolve
+    })
+    const onFocusUser = vi.fn(() => pendingAction)
+
+    render(<F0GraphControls onFocusUser={onFocusUser} />)
+
+    const findMe = screen.getByRole("button", { name: "Find me" })
+    await userEvent.click(findMe)
+
+    expect(onFocusUser).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(findMe).toBeDisabled())
+
+    act(() => resolveAction())
+    await waitFor(() => expect(findMe).toBeEnabled())
   })
 })
