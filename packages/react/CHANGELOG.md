@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.11.0](https://github.com/factorialco/f0/compare/f0-react-v6.10.0...f0-react-v6.11.0) (2026-08-07)
+
+
+### Features
+
+* **ai-canvas:** add AutofillTimesheetCanvasContent to the canvas union ([#5033](https://github.com/factorialco/f0/issues/5033)) ([ac05820](https://github.com/factorialco/f0/commit/ac05820e6b21dbac2cc0f4973f411afcbf00d6c0))
+
 ## [6.10.0](https://github.com/factorialco/f0/compare/f0-react-v6.9.1...f0-react-v6.10.0) (2026-08-07)
 
 
