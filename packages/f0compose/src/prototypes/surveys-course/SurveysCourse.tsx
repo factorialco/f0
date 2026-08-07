@@ -1,6 +1,7 @@
 import {
   F0Alert,
   F0Box,
+  ProgressBarChart,
   F0Card,
   F0Checkbox,
   F0DataChart,
@@ -73,6 +74,9 @@ import {
   Question,
   Upload,
   Video,
+  ChevronLeft,
+  Clock,
+  Target,
 } from "@factorialco/f0-react/icons/app"
 import { CheckCircleAnimated } from "@factorialco/f0-react/icons/animated"
 import { z } from "zod"
@@ -4942,30 +4946,41 @@ function DiscoverTrainingScreen({ onBack }: { onBack: () => void }) {
 }
 
 /**
- * Redirect flow (LMS → Knowledge Test / Survey) — cloned from Jon's Figma
- * (node 6046-23442, section "LMS"). States via ?st= :
- *   done      no KT required            → "Congratulations!"
- *   required  KT required to complete   → "Content complete!" + required step
- *   optional  KT configured, optional   → "Congratulations!" + optional step
- *   waiting   NEW (automation latency): survey still being created
- *   scheduled NEW (automation): survey programmed for a future date
+ * End of content (redirect flow) — cloned from the REAL implementation now
+ * shipped behind the quizzes-KT flag: frontend/src/modules/trainings/pages/
+ * content/CompletedTrainingInterstitial.tsx (+ Consumer.tsx for the player
+ * header, completedTrainingHelpers.ts + en.json for the copy).
+ *
+ * States via ?st= :
+ *   required  KT required and pending  → "Content complete!" + step card
+ *   optional  KT/survey optional       → "Congratulations!" + step card
+ *   done      nothing pending          → "Congratulations!"
+ *   waiting   NEW: evaluation still being created (automation latency)
+ *   scheduled NEW: evaluation scheduled for a future date
  */
 function EndOfCourseScreen() {
   const [searchParams, setSearchParams] = useSearchParams()
   const st = searchParams.get("st") ?? "required"
   const backToCourse = () => setSearchParams({ view: "learner-course", done: "1" })
 
-  const copy: Record<string, { title: string; sub: string; stepLabel?: string; noteTitle?: string; note?: string }> = {
-    done: { title: "Congratulations!", sub: "You have successfully completed the course." },
+  // Copy comes verbatim from trainings.content.consumer.completed.* (en.json).
+  const copy: Record<
+    string,
+    { title: string; sub: string; stepLabel?: string; noteTitle?: string; note?: string }
+  > = {
+    done: {
+      title: "Congratulations!",
+      sub: "You have successfully completed the course.",
+    },
     required: {
       title: "Content complete!",
       sub: "You have successfully completed all the content modules.",
-      stepLabel: "Complete the following step to finish the course:",
+      stepLabel: "Complete these steps to finish the course",
     },
     optional: {
       title: "Congratulations!",
       sub: "You have successfully completed the course.",
-      stepLabel: "You can complete this optional step:",
+      stepLabel: "You can complete these optional steps.",
     },
     waiting: {
       title: "Content complete!",
@@ -4983,73 +4998,112 @@ function EndOfCourseScreen() {
   const c = copy[st] ?? copy.required
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "var(--f1-background, #ffffff)", display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", flexShrink: 0 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--f1-foreground-secondary, #6b7280)" }}>
-          Progress
-          <span style={{ width: 18, height: 18, borderRadius: 999, border: "3px solid #00b26e", display: "inline-block" }} />
-          <span style={{ color: "var(--f1-foreground, #0d1424)", fontWeight: 500 }}>100%</span>
-        </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 13, color: "var(--f1-foreground-secondary, #9aa1ac)" }}>
-          4/4
-          <span style={{ color: "rgba(0,10,30,0.15)" }}>|</span>
-          <F0Button label="Exit course" variant="outline" size="sm" onClick={backToCourse} />
-        </span>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 100,
+        background: "var(--f1-background, #ffffff)",
+        overflowY: "auto",
+      }}
+    >
+      {/* Player header, cloned from Consumer.tsx: 64px tall, 16/24 padding. */}
+      <div style={{ height: 64, padding: "16px 24px" }}>
+        <F0Box display="flex" flexDirection="row" justifyContent="between" alignItems="center">
+          <div style={{ width: 200 }}>
+            <F0Box display="flex" flexDirection="row" alignItems="center" gap="md">
+              <F0Text content="Progress" variant="description" />
+              <div style={{ width: "100%" }}>
+                <ProgressBarChart value={4} max={4} label="100%" color="feedback-positive" />
+              </div>
+            </F0Box>
+          </div>
+          <F0Box display="flex" flexDirection="row" alignItems="center" gap="sm">
+            <F0Text content="4/4" variant="description" />
+            <F0Text content="|" variant="small" />
+            <F0Button label="Exit course" variant="outline" onClick={backToCourse} />
+          </F0Box>
+        </F0Box>
       </div>
 
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-          background: "linear-gradient(180deg, rgba(0,178,110,0.10) 0%, rgba(0,178,110,0) 42%)",
-        }}
-      >
-        <div style={{ maxWidth: 420, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-          <span
-            style={{ width: 72, height: 72, borderRadius: 999, background: "#00b26e", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}
-          >
-            <F0Icon icon={CheckCircle} size="lg" color="inverse" />
-          </span>
-
-          <F0Heading content={c.title} variant="heading" as="h1" />
-          <div style={{ marginTop: 6, color: "var(--f1-foreground-secondary, #6b7280)", fontSize: 14, lineHeight: 1.5 }}>{c.sub}</div>
+      <div style={{ paddingTop: 40, paddingBottom: 64 }}>
+        <F0Box display="flex" flexDirection="column" alignItems="center">
+          <F0Box display="flex" flexDirection="column" alignItems="center" gap="md">
+            {/* The real screen plays a Lottie success animation here; the
+                catalog's animated check is the closest thing available. */}
+            {/* The SVG's circle is currentColor, so the token comes from the
+                wrapper class — same way the real screen colours its Spinner. */}
+            <div className="text-f1-icon-positive">
+              <CheckCircleAnimated animate="normal" width={140} height={140} />
+            </div>
+            <F0Text variant="body" style={{ fontSize: "24px", fontWeight: 600 }} content={c.title} />
+            <F0Text variant="description" content={c.sub} />
+          </F0Box>
 
           {c.stepLabel && (
-            <>
-              <div style={{ marginTop: 32, fontSize: 14, color: "var(--f1-foreground, #0d1424)" }}>{c.stepLabel}</div>
-              <div
-                style={{ marginTop: 12, width: 260, textAlign: "left", background: "#fff", border: "1px solid rgba(0,10,30,0.06)", borderRadius: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", padding: "12px 14px" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>Knowledge test</span>
-                  <span style={{ fontSize: 13, color: "var(--f1-foreground-secondary, #9aa1ac)" }}>Description</span>
+            <div style={{ width: "100%", maxWidth: 360, marginTop: 32 }}>
+            <F0Box
+              width="full"
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap="lg"
+            >
+              <F0Text variant="description" content={c.stepLabel} />
+              <F0Box display="flex" flexDirection="column" gap="md" width="full">
+                <div
+                  style={{
+                    boxShadow: "0px 4px 20px 0px rgba(13, 22, 37, 0.08)",
+                    borderRadius: "12px",
+                    background: "white",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setSearchParams({ view: "survey-answer", survey: "kt-1" })}
+                >
+                  <F0Box padding="md" borderRadius="lg" display="flex" flexDirection="column" gap="sm">
+                    <F0Text variant="label" content="Knowledge test" />
+                    <F0Box display="flex" flexDirection="row" gap="md">
+                      <F0Box display="flex" flexDirection="row" alignItems="center" gap="sm">
+                        <F0Icon icon={Clock} size="md" />
+                        <F0Text variant="description" content="22 min" />
+                      </F0Box>
+                      <F0Box display="flex" flexDirection="row" alignItems="center" gap="sm">
+                        <F0Icon icon={Question} size="md" />
+                        <F0Text variant="description" content="11 questions" />
+                      </F0Box>
+                    </F0Box>
+                  </F0Box>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8, fontSize: 13, color: "var(--f1-foreground-secondary, #6b7280)" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><F0Icon icon={InProgressTask} size="sm" /> 22 min</span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><F0Icon icon={Question} size="sm" /> 11 questions</span>
-                </div>
-              </div>
-            </>
+              </F0Box>
+            </F0Box>
+            </div>
           )}
 
-          {c.note && c.noteTitle && (
-            <div style={{ marginTop: 28, textAlign: "left", width: "100%", alignSelf: "stretch" }}>
+          {c.noteTitle && c.note && (
+            <div style={{ width: "100%", maxWidth: 360, marginTop: 32 }}>
               <F0Alert variant="info" title={c.noteTitle} description={c.note} />
             </div>
           )}
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 40 }}>
-            <F0Button label="Back to home" icon={ArrowLeft} variant="outline" onClick={backToCourse} />
-            {(st === "required" || st === "optional") && (
-              <F0Button label="Start knowledge test" onClick={() => setSearchParams({ view: "survey-answer", survey: "kt-1" })} />
-            )}
-            {st === "waiting" && <F0Button label="Refresh" onClick={() => {}} />}
-          </div>
-        </div>
+          <F0Box marginTop="5xl">
+            <F0Box display="flex" flexDirection="row" gap="lg">
+              <F0Button
+                variant="outline"
+                icon={ChevronLeft}
+                label="Back to home"
+                onClick={backToCourse}
+              />
+              {(st === "required" || st === "optional") && (
+                <F0Button
+                  variant="default"
+                  icon={Target}
+                  label="Start knowledge test"
+                  onClick={() => setSearchParams({ view: "survey-answer", survey: "kt-1" })}
+                />
+              )}
+            </F0Box>
+          </F0Box>
+        </F0Box>
       </div>
     </div>
   )
