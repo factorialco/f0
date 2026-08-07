@@ -5037,7 +5037,7 @@ function EndOfCourseScreen() {
           )}
 
           {c.note && c.noteTitle && (
-            <div style={{ marginTop: 28, textAlign: "left" }}>
+            <div style={{ marginTop: 28, textAlign: "left", width: "100%", alignSelf: "stretch" }}>
               <F0Alert variant="info" title={c.noteTitle} description={c.note} />
             </div>
           )}
