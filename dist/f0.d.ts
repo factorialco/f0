@@ -1204,34 +1204,11 @@ declare type AnimationVariantsOptions = {
     maxDelay?: number;
 };
 
-declare interface AnnouncementActionBase {
+export declare interface AnnouncementAction {
     /** Button label. */
     label: string;
     /** Called when the button is clicked. */
     onClick: () => void;
-}
-
-/**
- * The action that takes the user into the capability.
- *
- * A discriminated union rather than a plain `variant` string, because the two
- * treatments do not accept the same things: the AI button carries the One mark
- * and cannot take an icon of its own.
- */
-export declare type AnnouncementPrimaryAction = (AnnouncementActionBase & {
-    /** Bordered button. The default. */
-    variant?: "outline";
-    /** Optional icon shown before the label. */
-    icon?: IconType;
-}) | (AnnouncementActionBase & {
-    /**
-     * Renders as the AI button with the One mark. Use it when the action
-     * hands the user over to One rather than opening a screen.
-     */
-    variant: "ai";
-});
-
-export declare interface AnnouncementSecondaryAction extends AnnouncementActionBase {
     /** Optional icon shown before the label. */
     icon?: IconType;
 }
@@ -6587,13 +6564,10 @@ export declare interface F0AiAnnouncementCardProps extends DataAttributes_2 {
      * muted, looping, autoplaying video. Omit it for a text-only announcement.
      */
     mediaUrl?: string;
-    /**
-     * The action that takes the user into the capability. Bordered by default;
-     * `variant: "ai"` renders it as the AI button instead.
-     */
-    primaryAction?: AnnouncementPrimaryAction;
+    /** The action that takes the user into the capability. Rendered bordered. */
+    primaryAction?: AnnouncementAction;
     /** An opt-out alongside the primary action. Rendered borderless. */
-    secondaryAction?: AnnouncementSecondaryAction;
+    secondaryAction?: AnnouncementAction;
     /**
      * Shows a dismiss control in the top-right corner and is called when it is
      * used. The card removes itself; the consumer decides whether it comes back.
@@ -19611,8 +19585,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -19620,10 +19596,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
