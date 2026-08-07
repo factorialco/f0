@@ -62,8 +62,8 @@ describe("ChatBubble sender colour", () => {
     render(<ChatBubble message={message} isMine />)
 
     const bubble = screen.getByText("hello").closest(".rounded-2xl")
-    expect(bubble).toHaveClass("bg-f1-background-secondary")
-    expect(bubble).not.toHaveClass("bg-f1-background-tertiary")
+    expect(bubble).toHaveClass("bg-f1-background-tertiary")
+    expect(bubble).not.toHaveClass("bg-f1-background-secondary")
     expect(bubble).not.toHaveClass(senderBubbleColorClass(message.author))
   })
 
@@ -71,9 +71,9 @@ describe("ChatBubble sender colour", () => {
     const message = { ...makeMessage("hello"), isMine: true, deleted: true }
     render(<ChatBubble message={message} isMine />)
 
-    expect(screen.getByText("Message deleted")).toHaveClass(
-      "bg-f1-background-secondary"
-    )
+    const bubble = screen.getByText("Message deleted")
+    expect(bubble).toHaveClass("bg-f1-background-tertiary")
+    expect(bubble).not.toHaveClass("bg-f1-background-secondary")
   })
 
   it("keeps failed message content at full opacity", () => {

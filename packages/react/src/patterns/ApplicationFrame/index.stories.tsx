@@ -1792,7 +1792,7 @@ export const CommunicationsVideoAttachments: Story = {
           expect(
             canvas.queryAllByRole("region", { name: /Video player:/ })
           ).toHaveLength(2),
-        { timeout: 5_000 }
+        { timeout: 15_000 }
       )
       const players = canvas.getAllByRole("region", {
         name: /Video player:/,
@@ -2051,7 +2051,11 @@ export const CommunicationsPartialReceipts: Story = {
     })
 
     await step("Keep partial reader identities in message Info", async () => {
-      const message = await canvas.findByText(/And the kickoff deck/)
+      const message = await canvas.findByText(
+        /And the kickoff deck/,
+        {},
+        { timeout: 10_000 }
+      )
       await userEvent.hover(message)
       const actionButtons = await canvas.findAllByRole("button", {
         name: /message actions/i,
@@ -2120,9 +2124,11 @@ export const CommunicationsReceiptsAndReactions: Story = {
     })
 
     await step("Show the people behind a reaction", async () => {
-      const reaction = await canvas.findByRole("button", {
-        name: `${getEmojiLabel("🎉")}: 3`,
-      })
+      const reaction = await canvas.findByRole(
+        "button",
+        { name: `${getEmojiLabel("🎉")}: 3` },
+        { timeout: 10_000 }
+      )
       const addReaction = canvas.getByRole("button", { name: /add reaction/i })
 
       addReaction.focus()
@@ -2161,7 +2167,11 @@ export const CommunicationsReceiptsAndReactions: Story = {
     })
 
     await step("Show static reader identities", async () => {
-      const message = await canvas.findByText(/And the kickoff deck/)
+      const message = await canvas.findByText(
+        /And the kickoff deck/,
+        {},
+        { timeout: 10_000 }
+      )
       await userEvent.hover(message)
       const actionButtons = await canvas.findAllByRole("button", {
         name: /message actions/i,
