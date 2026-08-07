@@ -318,10 +318,10 @@ type CourseResourceRow = {
 }
 
 export const meta: PrototypeMeta = {
-  slug: "quizzes-kt-content",
-  title: "Quizzes & KT — Course content",
+  slug: "surveys-course",
+  title: "Surveys in course content",
   description:
-    "Trainings clone exploring Quizzes & Knowledge Tests admin visibility: per-quiz KPIs (average attempts + question-failure warning) in the Course content tab.",
+    "Learner Evaluations in Course content (mobile parity), survey answer flow, Team evaluations for managers, and the end-of-course redirect states (waiting/scheduled/required).",
   category: "Talent",
   module: "my-training",
   audience: ["admin"],
@@ -1081,7 +1081,7 @@ const columns = [
   },
 ]
 
-export default function TrainingsExact() {
+export default function SurveysCourse() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [toast, setToast] = useState<ToastId>(null)
   const [courses, setCourses] = useState<ExactCourse[]>(exactCourses)
