@@ -1,0 +1,313 @@
+import React, { useEffect, useState } from "react"
+
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { LayersFront } from "@/icons/app"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/tooltip"
+
+import type {
+  ComposerPrototype,
+  ProductUsageData,
+  ProductUsageEntry,
+  UsageResult,
+} from "../scripts/product-usage-scan.mjs"
+
+/**
+ * Served by the Storybook dev server (see scripts/product-usage-scan.mjs).
+ * Kept as a literal rather than imported from the scanner so this module never
+ * pulls Node built-ins into the browser bundle.
+ */
+const ENDPOINT = "/f0-product-usage.json"
+
+/** How many modules to list before collapsing the rest into a "+N more". */
+const MODULES_SHOWN = 8
+
+/** How many prototypes to name before collapsing the rest into a "+N more". */
+const PROTOTYPES_SHOWN = 6
+
+/** How many f0 components to name before collapsing the rest. */
+const INTERNAL_SHOWN = 6
+
+/**
+ * One fetch per Storybook session, shared by every docs page. Resolves to
+ * `null` when the data isn't available, in which case the tag stays hidden.
+ */
+let request: Promise<UsageResult | null> | undefined
+
+function fetchUsage(): Promise<UsageResult | null> {
+  // Local dev only. This data — product module names, internal prototype
+  // titles — must never reach the public Storybook at f0.factorial.dev, which
+  // anyone outside the company can read. `import.meta.env.DEV` is inlined at
+  // build time, so the static bundle drops the request entirely rather than
+  // relying on the endpoint 404ing.
+  if (!import.meta.env.DEV) return Promise.resolve(null)
+
+  request ??= fetch(ENDPOINT)
+    .then(async (response) => {
+      // A static build serves index.html for unknown paths, so a 200 alone
+      // isn't proof the endpoint exists — check what came back.
+      if (!response.ok) return null
+      const contentType = response.headers.get("content-type") ?? ""
+      if (!contentType.includes("application/json")) return null
+      return (await response.json()) as UsageResult
+    })
+    .catch(() => null)
+  return request
+}
+
+function useUsage() {
+  const [result, setResult] = useState<UsageResult | null>()
+
+  useEffect(() => {
+    let active = true
+    void fetchUsage().then((data) => {
+      if (active) setResult(data)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  return result
+}
+
+/** Sums a component's usage across every name it is exported under. */
+function collectUsage(
+  data: ProductUsageData,
+  names: string[]
+): { entries: Array<[string, ProductUsageEntry]>; files: number } {
+  const entries = names
+    .map((name) => [name, data.components[name]] as const)
+    .filter((pair): pair is [string, ProductUsageEntry] => Boolean(pair[1]))
+
+  return {
+    entries: [...entries],
+    files: entries.reduce((total, [, entry]) => total + entry.files, 0),
+  }
+}
+
+/** Module → importing files, merged across aliases and sorted by weight. */
+function mergeModules(entries: Array<[string, ProductUsageEntry]>) {
+  const merged = new Map<string, number>()
+  for (const [, entry] of entries) {
+    for (const [module, files] of Object.entries(entry.modules)) {
+      merged.set(module, (merged.get(module) ?? 0) + files)
+    }
+  }
+  return [...merged.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+  )
+}
+
+/** The prototypes using any of the names, deduped by project + slug. */
+function collectPrototypes(
+  byComponent: Record<string, ComposerPrototype[]>,
+  names: string[]
+): ComposerPrototype[] {
+  const seen = new Map<string, ComposerPrototype>()
+  for (const name of names) {
+    for (const prototype of byComponent[name] ?? []) {
+      seen.set(`${prototype.project}/${prototype.slug}`, prototype)
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.title.localeCompare(b.title))
+}
+
+function plural(count: number, noun: string) {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`
+}
+
+/** The f0 components importing any of the names, deduped and sorted. */
+function collectInternal(
+  byComponent: Record<string, string[]>,
+  names: string[]
+): string[] {
+  const owners = new Set<string>()
+  for (const name of names) {
+    for (const owner of byComponent[name] ?? []) owners.add(owner)
+  }
+  // A component listing itself would be noise (its own docs page).
+  for (const name of names) owners.delete(name)
+  return [...owners].sort((a, b) => a.localeCompare(b))
+}
+
+/** A capped list of names under a heading, with a "+N more" tail. */
+function NameList({
+  heading,
+  items,
+  limit,
+  className,
+}: {
+  heading: string
+  items: string[]
+  limit: number
+  className?: string
+}) {
+  const shown = items.slice(0, limit)
+  const hidden = items.length - shown.length
+
+  return (
+    <div className={className}>
+      <p className="m-0 font-medium">{heading}</p>
+      <ul className="m-0 mt-2 list-none space-y-1 p-0">
+        {shown.map((item) => (
+          <li key={item} className="truncate">
+            {item}
+          </li>
+        ))}
+      </ul>
+      {hidden > 0 && <p className="m-0 mt-1 opacity-70">+{hidden} more</p>}
+    </div>
+  )
+}
+
+function ProductSection({
+  data,
+  names,
+}: {
+  data: ProductUsageData
+  names: string[]
+}) {
+  const { entries, files } = collectUsage(data, names)
+  const modules = mergeModules(entries)
+  const shown = modules.slice(0, MODULES_SHOWN)
+  const hidden = modules.length - shown.length
+
+  if (files === 0) {
+    return <p className="m-0">Not used anywhere in the product yet.</p>
+  }
+
+  return (
+    <>
+      <p className="m-0 font-medium">
+        Used in {plural(files, "file")} across{" "}
+        {plural(modules.length, "module")}
+      </p>
+      <ul className="m-0 mt-2 list-none space-y-1 p-0">
+        {shown.map(([module, count]) => (
+          <li key={module} className="flex justify-between gap-4">
+            <span className="truncate font-mono">{module}</span>
+            <span className="opacity-70">{count}</span>
+          </li>
+        ))}
+      </ul>
+      {hidden > 0 && <p className="m-0 mt-1 opacity-70">+{hidden} more</p>}
+      {entries.length > 1 && (
+        <p className="m-0 mt-2 opacity-70">
+          Counted across {entries.map(([name]) => name).join(", ")}.
+        </p>
+      )}
+    </>
+  )
+}
+
+/**
+ * Everything the tag needs about one component, resolved once so the trigger
+ * label and the tooltip can't disagree.
+ */
+function resolveUsage(result: UsageResult, names: string[]) {
+  const product = result.product.available ? result.product : null
+  const productFiles = product ? collectUsage(product, names).files : 0
+
+  const prototypes = result.composer.available
+    ? collectPrototypes(result.composer.prototypes, names)
+    : []
+
+  // Only worth surfacing when the component is absent from the product: it
+  // answers "is this dead, or just not shipped directly?".
+  const internal =
+    productFiles === 0 && result.internal.available
+      ? collectInternal(result.internal.components, names)
+      : []
+
+  return { product, productFiles, prototypes, internal }
+}
+
+function UsageDetails({
+  result,
+  names,
+}: {
+  result: UsageResult
+  names: string[]
+}) {
+  const { product, productFiles, prototypes, internal } = resolveUsage(
+    result,
+    names
+  )
+
+  return (
+    <div className="sb-unstyled max-w-xs p-3 text-base text-f1-foreground-inverse">
+      {product ? (
+        <ProductSection data={product} names={names} />
+      ) : (
+        <p className="m-0">
+          No local factorial checkout — product usage unavailable.
+        </p>
+      )}
+      {internal.length > 0 && (
+        <NameList
+          className="mt-3"
+          heading={`Used inside F0 by ${plural(internal.length, "component")}`}
+          items={internal}
+          limit={INTERNAL_SHOWN}
+        />
+      )}
+      {prototypes.length > 0 && (
+        <NameList
+          className={productFiles === 0 && internal.length === 0 ? "" : "mt-3"}
+          heading={`Used in ${plural(prototypes.length, "Composer prototype")}`}
+          items={prototypes.map((prototype) => prototype.title)}
+          limit={PROTOTYPES_SHOWN}
+        />
+      )}
+    </div>
+  )
+}
+
+/**
+ * Renders a usage tag next to the docs title, revealing on hover how many
+ * product files import this component and which modules they belong to, plus —
+ * when it isn't in the product — which f0 components and Composer prototypes
+ * use it.
+ *
+ * The data comes from a dev-server scan of this package's `src/` and of local
+ * `factorialco/factorial` and `factorialco/factorial-composer` checkouts, so
+ * the tag renders nothing on the public Storybook.
+ *
+ * @see scripts/product-usage-scan.mjs
+ */
+export function ProductUsageTag({ names }: { names: string[] }) {
+  const result = useUsage()
+
+  // Undefined while in flight, null when there's no endpoint — i.e. the
+  // public static build, where this internal data must not appear at all.
+  if (!result) return null
+  if (names.length === 0) return null
+
+  const { productFiles, internal } = resolveUsage(result, names)
+
+  // "Not used" would be misleading for the building blocks other components
+  // are made of, so say which of the two it is.
+  const label =
+    productFiles > 0
+      ? "Where is this used in the product?"
+      : internal.length > 0
+        ? "Only used internally in F0"
+        : "Not used in the product"
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="sb-unstyled inline-flex cursor-help align-middle">
+          <F0TagRaw text={label} icon={LayersFront} />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        align="start"
+        className="w-max max-w-[min(90vw,42rem)] overflow-hidden !p-0"
+      >
+        <UsageDetails result={result} names={names} />
+      </TooltipContent>
+    </Tooltip>
+  )
+}

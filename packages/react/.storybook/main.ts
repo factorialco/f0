@@ -14,6 +14,7 @@ import {
   computeComponentStatusData,
   effectiveStatusByLeaf,
 } from "../scripts/component-status-build.mjs"
+import { productUsageVitePlugin } from "../scripts/product-usage-scan.mjs"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -248,6 +249,15 @@ const config: StorybookConfig = {
     )
     if (!hasComponentStatus) {
       config.plugins.push(componentStatusVitePlugin())
+    }
+
+    // Serve usage data (scanned from local factorialco/factorial and
+    // factorial-composer checkouts) to the docs "Where is this used in the
+    // product?" tag. It only ever registers a dev-server route, and the tag
+    // itself is compiled out of production bundles — this data is internal and
+    // must not reach the public Storybook at f0.factorial.dev.
+    if (!process.env.STORYBOOK_PUBLIC_BUILD) {
+      config.plugins.push(productUsageVitePlugin())
     }
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served
