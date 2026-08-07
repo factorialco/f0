@@ -4122,7 +4122,8 @@ function LearnerCourseScreen() {
       <StandardLayout>
         <NotificationsLayer />
         <F0Box display="flex" flexDirection="column" gap="2xl">
-          <F0BoxWithClassName className="px-12">
+          <F0BoxWithClassName className="px-12 flex flex-col gap-4">
+          <F0Heading content="Modules" variant="heading" as="h2" />
           <OneDataCollection
             id={`${SLUG}/learner-content/v1`}
             storage={false}
