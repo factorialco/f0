@@ -17,6 +17,7 @@ import {
   SortingsState,
 } from "./types"
 import { SearchOptions } from "./types/search.typings"
+import { useSelectableTotal } from "./useSelectableTotal"
 
 /**
  * Get the pagination type of a data adapter
@@ -212,8 +213,19 @@ export function useDataSource<
   }, [externalCurrentGrouping])
   /******************************************************************* */
 
+  /******************* SELECTABLE TOTAL ***************************************/
+  // Resolved here rather than per-visualization so a collection only ever
+  // issues one count per filter/search combination.
+  const selectableTotal = useSelectableTotal<FiltersSchema>({
+    fetchSelectableTotal: rest.fetchSelectableTotal,
+    filters: currentFilters,
+    search: debouncedCurrentSearch,
+  })
+  /******************************************************************* */
+
   return {
     ...rest,
+    selectableTotal,
     // Filters
     filters: memoizedFilters,
     currentFilters,

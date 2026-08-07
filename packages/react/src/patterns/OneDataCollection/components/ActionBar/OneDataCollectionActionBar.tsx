@@ -86,8 +86,9 @@ export const OneDataCollectionActionBar = forwardRef<
 ) {
   const { t, ...i18n } = useI18n()
 
-  const showAllItemsSelected =
-    allPagesSelection && isAllItemsSelected && totalItems !== undefined
+  // No longer requires a known total: when the selectable total can't be
+  // trusted we still say "all items selected", just without a number.
+  const showAllItemsSelected = allPagesSelection && isAllItemsSelected
 
   // Prevent the Unselect button from clearing the selection while a bulk
   // action is in-flight. If it were clickable during loading/success, the
@@ -145,10 +146,12 @@ export const OneDataCollectionActionBar = forwardRef<
         {!!displayedSelectedNumber && (
           <div className="dark flex h-8 w-full items-center justify-between gap-3 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
             {showAllItemsSelected ? (
-              <span className="font-medium tabular-nums">
-                {t("status.selected.allItemsSelected", {
-                  total: totalItems ?? 0,
-                })}
+              <span className="font-medium tabular-nums text-f1-foreground">
+                {totalItems !== undefined
+                  ? t("status.selected.allItemsSelected", {
+                      total: totalItems,
+                    })
+                  : t("status.selected.allItemsSelectedUnknownTotal")}
               </span>
             ) : (
               <span className="flex items-center gap-1 font-medium tabular-nums">
