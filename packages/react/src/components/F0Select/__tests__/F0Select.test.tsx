@@ -823,7 +823,7 @@ describe("Select", () => {
     )
   })
 
-  it("cancels staged changes without closing when cancel button is clicked", async () => {
+  it("closes the dropdown and discards staged changes when cancel is clicked", async () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
@@ -832,7 +832,7 @@ describe("Select", () => {
         {...defaultSelectProps}
         multiple
         options={mockOptions}
-        value={["option1", "option2"]}
+        value={["option1"]}
         onChange={handleChange}
         withApplySelection
       />
@@ -842,47 +842,43 @@ describe("Select", () => {
     await user.click(screen.getByText("Option 2"))
     await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
     expect(handleChange).not.toHaveBeenCalled()
 
-    await user.click(screen.getByText("Option 3"))
+    await openSelect(user)
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.arrayContaining(["option1", "option2", "option3"]),
-      expect.arrayContaining([
-        {
-          id: "option1",
-          name: "Option 1",
-          description: "Description 1",
-        },
-        {
-          id: "option2",
-          name: "Option 2",
-          description: "Description 2",
-        },
-        {
-          id: "option3",
-          name: "Option 3",
-          description: "Description 3",
-        },
-      ]),
-      expect.arrayContaining([
-        expect.objectContaining({
-          label: "Option 1",
-          value: "option1",
-          description: "Description 1",
-        }),
-        expect.objectContaining({
-          label: "Option 2",
-          value: "option2",
-        }),
-        expect.objectContaining({
-          label: "Option 3",
-          value: "option3",
-        }),
-      ])
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={vi.fn()}
+        withApplySelection
+        applySelectionLabel="Add to schedule"
+      />
     )
+
+    await openSelect(user)
+
+    expect(
+      screen.getByRole("button", { name: "Add to schedule" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Apply selection" })
+    ).not.toBeInTheDocument()
   })
 
   describe("asList mode", () => {
