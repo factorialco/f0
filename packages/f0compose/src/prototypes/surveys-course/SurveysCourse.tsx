@@ -4175,7 +4175,7 @@ function LearnerCourseScreen() {
                       {
                         label: "Required",
                         render: (evaluation: LearnerEvaluation) =>
-                          evaluation.required && evaluation.status !== "Completed" && evaluation.status !== "Passed"
+                          evaluation.required
                             ? { type: "alertTag" as const, value: { level: "warning" as const, label: "Required" } }
                             : { type: "text" as const, value: "" },
                       },
