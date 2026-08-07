@@ -13,7 +13,7 @@ const meta = {
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
-type Story = StoryObj<typeof F0DataChart>
+type Story = StoryObj<typeof meta>
 
 // ---------------------------------------------------------------------------
 // Sample data — kept at the top so individual stories stay tiny and readable.
@@ -123,6 +123,7 @@ export const ActualVsTarget: Story = {
  * compare them at a glance.
  */
 export const LineStyles: Story = {
+  args: { type: "line", categories: [], series: [] },
   render: () => (
     <div className="grid grid-cols-3 gap-6">
       {(["linear", "smooth", "step"] as const).map((lineType) => (
@@ -158,6 +159,20 @@ export const WithDots: Story = {
     showDots: true,
     showArea: true,
     valueFormatter: (v) => `${(v / 1000).toFixed(1)}k`,
+  },
+}
+
+/** Value labels can be shown without drawing point symbols. */
+export const WithValueLabels: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "line",
+    categories: [...MONTHS_SHORT],
+    series: [{ name: "Turnover rate", data: [4.1, 3.8, 5.2, 4.6, 3.9, 3.4] }],
+    showArea: false,
+    showDots: false,
+    showLabels: true,
+    valueFormatter: (value) => `${value.toFixed(1)}%`,
   },
 }
 
@@ -241,6 +256,7 @@ const responsiveProps = (
 }
 
 export const ResponsiveSnapshotMatrix: Story = {
+  args: { type: "line", categories: [], series: [] },
   decorators: [(Story) => <Story />],
   render: () => <ResponsiveSnapshot getProps={responsiveProps} />,
 }
@@ -250,6 +266,7 @@ export const ResponsiveSnapshotMatrix: Story = {
  * with arrow controls — only the legend pages, the chart area is unaffected.
  */
 export const ScrollableLegend: Story = {
+  args: { type: "line", categories: [], series: [] },
   parameters: { layout: "centered" },
   decorators: [
     (Story) => (

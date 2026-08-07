@@ -493,6 +493,42 @@ function fetchHiringGoalGauge(filters: Filters): Promise<DashboardChartData> {
 }
 
 // ---------------------------------------------------------------------------
+// Combo fetch function
+// ---------------------------------------------------------------------------
+
+/**
+ * Headcount (people, primary axis) against turnover rate (%, secondary). The
+ * two scales are two orders of magnitude apart, which is the case a combo
+ * exists to serve — on one axis the rate line flattens onto the baseline.
+ */
+function fetchHeadcountVsTurnover(
+  filters: Filters
+): Promise<DashboardChartData> {
+  const w = weekSeed(filters)
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+
+  return delay(600).then(() => ({
+    categories: months,
+    barSeries: [
+      {
+        name: "Headcount",
+        data: months.map((_, idx) =>
+          Math.round(115 + idx * 5 + 8 * seeded(w, 300 + idx))
+        ),
+      },
+    ],
+    lineSeries: [
+      {
+        name: "Turnover rate",
+        data: months.map(
+          (_, idx) => Math.round((3.2 + 2.4 * seeded(w, 320 + idx)) * 10) / 10
+        ),
+      },
+    ],
+  }))
+}
+
+// ---------------------------------------------------------------------------
 // Heatmap fetch function
 // ---------------------------------------------------------------------------
 
@@ -966,7 +1002,26 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     chart: { type: "gauge" },
     fetchData: fetchHiringGoalGauge,
   },
-  // Row 4 — heatmap (full width)
+  // Row 4 — combo (full width)
+  {
+    id: "headcount-vs-turnover",
+    title: "Headcount vs Turnover Rate",
+    description: "Monthly headcount with the turnover rate it produced",
+    type: "chart",
+    colSpan: 12,
+    x: 0,
+    y: 24,
+    rowSpan: 7,
+    chart: {
+      type: "combo",
+      primaryAxisLabel: "People",
+      secondaryAxisLabel: "Turnover rate",
+      valueFormatter: (v: number) => `${v}`,
+      secondaryValueFormatter: (v: number) => `${v.toFixed(1)}%`,
+    },
+    fetchData: fetchHeadcountVsTurnover,
+  },
+  // Row 5 — heatmap (full width)
   {
     id: "office-activity",
     title: "Office Activity",
@@ -974,7 +1029,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     type: "chart",
     colSpan: 12,
     x: 0,
-    y: 24,
+    y: 31,
     rowSpan: 7,
     chart: { type: "heatmap" },
     fetchData: fetchActivityHeatmap,
@@ -1002,7 +1057,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   },
   // Row 6 — employee table (full width)
   collectionItem,
-  // Row 6 — hiring funnel (full width)
+  // Row 7 — hiring funnel (full width)
   {
     id: "hiring-funnel",
     title: "Hiring Funnel",

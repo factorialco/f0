@@ -165,8 +165,14 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
 }
 
 /**
- * Full dashboard with metrics, charts (bar, line, pie, radar, gauge, heatmap,
- * funnel), and a paginated collection — all wired to shared filters.
+ * Full dashboard with metrics, charts (bar, line, combo, pie, radar, gauge,
+ * heatmap, funnel), and a paginated collection — all wired to shared filters.
+ *
+ * **Headcount vs Turnover Rate** is the combo tile: it exercises the dual-axis
+ * chain end to end (skeleton → fetch → render → PNG/Excel export), and its
+ * type menu is hidden, because the only compatible alternative would be Table;
+ * the required single-option toggle would otherwise provide no route back to
+ * the chart after selection.
  *
  * Three items in `mixedItems` carry an `explanation` field — try the
  * three-dot menu on **Total Headcount**, **Headcount by Department**, and

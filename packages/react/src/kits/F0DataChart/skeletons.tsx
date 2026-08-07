@@ -1,4 +1,5 @@
 import { Skeleton } from "@/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
 // AxisSkeleton — shared axis frame for bar and line chart skeletons
@@ -12,6 +13,10 @@ import { Skeleton } from "@/ui/skeleton"
  * When `horizontal` is true the axes swap: category labels on the left (wider)
  * and value labels on the bottom — matching a horizontal bar chart layout.
  *
+ * `secondaryValueAxis` mirrors the value labels on the right edge, for the
+ * combo chart's second scale. Ignored when `horizontal` is set, which has no
+ * dual-axis form.
+ *
  * Wrapped in px-4 py-3 to match the padding of the real chart content area
  * inside ChartItem.
  */
@@ -19,14 +24,28 @@ function AxisSkeleton({
   children,
   showLegend = true,
   horizontal = false,
+  secondaryValueAxis = false,
+  darkContrast = false,
+  animateFrame = true,
 }: {
   children: React.ReactNode
   showLegend?: boolean
   horizontal?: boolean
+  secondaryValueAxis?: boolean
+  darkContrast?: boolean
+  animateFrame?: boolean
 }) {
   if (horizontal) {
     return (
-      <div className="flex h-full animate-pulse flex-col px-4 py-3">
+      <div
+        className={cn(
+          "flex h-full flex-col px-4 py-3",
+          animateFrame && "animate-pulse",
+          "[&_[data-testid='skeleton']]:motion-reduce:animate-none",
+          darkContrast &&
+            "dark:[&_[data-testid='skeleton']]:bg-f1-background-secondary-hover"
+        )}
+      >
         {/* Chart area: category labels (left) + plot area (right) */}
         <div className="flex min-h-0 flex-1 gap-2">
           {/* Category axis labels (left side for horizontal charts) */}
@@ -69,7 +88,15 @@ function AxisSkeleton({
   }
 
   return (
-    <div className="flex h-full animate-pulse flex-col px-4 py-3">
+    <div
+      className={cn(
+        "flex h-full flex-col px-4 py-3",
+        animateFrame && "animate-pulse",
+        "[&_[data-testid='skeleton']]:motion-reduce:animate-none",
+        darkContrast &&
+          "dark:[&_[data-testid='skeleton']]:bg-f1-background-secondary-hover"
+      )}
+    >
       {/* Chart area: value labels (left) + plot area (right) */}
       <div className="flex min-h-0 flex-1 gap-2">
         {/* Value axis labels */}
@@ -84,10 +111,22 @@ function AxisSkeleton({
         <div className="relative min-h-0 flex-1">
           <div className="relative h-full w-full">{children}</div>
         </div>
+
+        {/* Secondary value axis labels (combo charts) */}
+        {secondaryValueAxis && (
+          <div className="flex flex-col justify-between py-1">
+            <Skeleton className="h-2.5 w-5 rounded-sm" />
+            <Skeleton className="h-2.5 w-6 rounded-sm" />
+            <Skeleton className="h-2.5 w-5 rounded-sm" />
+            <Skeleton className="h-2.5 w-4 rounded-sm" />
+          </div>
+        )}
       </div>
 
       {/* Category axis labels */}
-      <div className="ml-9 flex justify-between pt-1">
+      <div
+        className={`flex justify-between pt-1 ${secondaryValueAxis ? "mx-9" : "ml-9"}`}
+      >
         <Skeleton className="h-2.5 w-6 rounded-sm" />
         <Skeleton className="h-2.5 w-8 rounded-sm" />
         <Skeleton className="h-2.5 w-5 rounded-sm" />
@@ -230,6 +269,92 @@ export function BarChartSkeleton({
         <Skeleton className="h-1/3 flex-1 rounded" />
         <Skeleton className="h-2/3 flex-1 rounded" />
         <Skeleton className="h-3/4 flex-1 rounded" />
+      </div>
+    </AxisSkeleton>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// ComboChartSkeleton
+// ---------------------------------------------------------------------------
+
+interface ComboChartSkeletonProps {
+  /** Show stacked bar segments. @default false */
+  stacked?: boolean
+  /** Show legend below chart. @default true */
+  showLegend?: boolean
+}
+
+/**
+ * Skeleton for the combo chart content area: vertical bars with a line drawn
+ * across them, and value labels on both edges to telegraph the second scale.
+ */
+export function ComboChartSkeleton({
+  stacked = false,
+  showLegend = true,
+}: ComboChartSkeletonProps = {}) {
+  return (
+    <AxisSkeleton
+      showLegend={showLegend}
+      secondaryValueAxis
+      darkContrast
+      animateFrame={false}
+    >
+      <div className="relative h-full w-full">
+        <div
+          className="flex h-full items-end gap-2"
+          data-testid="combo-skeleton-bars"
+        >
+          {stacked ? (
+            <>
+              <div className="flex h-full flex-1 flex-col justify-end gap-0.5">
+                <Skeleton className="h-1/4 w-full rounded" />
+                <Skeleton className="h-1/3 w-full rounded" />
+              </div>
+              <div className="flex h-full flex-1 flex-col justify-end gap-0.5">
+                <Skeleton className="h-1/5 w-full rounded" />
+                <Skeleton className="h-1/4 w-full rounded" />
+              </div>
+              <div className="flex h-full flex-1 flex-col justify-end gap-0.5">
+                <Skeleton className="h-1/3 w-full rounded" />
+                <Skeleton className="h-2/5 w-full rounded" />
+              </div>
+              <div className="flex h-full flex-1 flex-col justify-end gap-0.5">
+                <Skeleton className="h-1/6 w-full rounded" />
+                <Skeleton className="h-1/4 w-full rounded" />
+              </div>
+              <div className="flex h-full flex-1 flex-col justify-end gap-0.5">
+                <Skeleton className="h-1/4 w-full rounded" />
+                <Skeleton className="h-1/3 w-full rounded" />
+              </div>
+            </>
+          ) : (
+            <>
+              <Skeleton className="h-1/2 flex-1 rounded" />
+              <Skeleton className="h-1/3 flex-1 rounded" />
+              <Skeleton className="h-2/3 flex-1 rounded" />
+              <Skeleton className="h-1/4 flex-1 rounded" />
+              <Skeleton className="h-1/2 flex-1 rounded" />
+            </>
+          )}
+        </div>
+        {/*
+          The line rides above the bars on its own scale, so it is drawn in the
+          upper band of the plot area rather than tracking the bar heights.
+        */}
+        <svg
+          viewBox="0 0 200 80"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        >
+          <path
+            d="M0 30 L50 18 L100 26 L150 12 L200 20"
+            fill="none"
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+            className="animate-pulse stroke-f1-border-secondary motion-reduce:animate-none dark:stroke-f1-background-secondary-hover"
+          />
+        </svg>
       </div>
     </AxisSkeleton>
   )

@@ -35,6 +35,10 @@ const STACKED_LABEL_FIT_PADDING = 6
 const OUTSIDE_LABEL_FIT_PADDING = 0
 const HORIZONTAL_LABEL_GRID_RIGHT = 60
 const HORIZONTAL_LABEL_GAP = 8
+// Exported for the combo chart, which describes its bar and line series with
+// the same bounds so the DOM attribute stays bounded for large datasets.
+export const ARIA_MAX_SERIES = 10
+export const ARIA_MAX_VALUES_PER_SERIES = 20
 
 /**
  * Gap ECharts leaves between a bar and a label placed outside it, mirroring its
@@ -51,8 +55,6 @@ const OUTSIDE_LABEL_DISTANCE = 5
 function verticalLabelHeadroom(labelFontSize: number): number {
   return Math.ceil(labelFontSize * 1.4) + OUTSIDE_LABEL_DISTANCE
 }
-const ARIA_MAX_SERIES = 10
-const ARIA_MAX_VALUES_PER_SERIES = 20
 
 /**
  * Foreground for a value label sitting inside a colored fill.
@@ -412,7 +414,7 @@ type BorderRadiusResolver = (
  * an earlier series is the one actually touching the outer edge there), so
  * this can't be reduced to a single fixed series index.
  */
-function buildBorderRadiusResolver(
+export function buildBorderRadiusResolver(
   series: F0DataChartBarSeries[],
   isVertical: boolean,
   stacked: boolean
@@ -457,8 +459,12 @@ function buildBorderRadiusResolver(
  * When the series contains target data points, two ECharts series are produced:
  *  1. The main (solid) bar showing `value`
  *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
+ *
+ * Exported for the combo chart, whose bars are these bars — it passes the
+ * label-fit arguments as defaults because it opts out of that machinery
+ * (see `useComboChartOptions`).
  */
-function buildSeriesEntries(
+export function buildSeriesEntries(
   series: F0DataChartBarSeries,
   index: number,
   isVertical: boolean,

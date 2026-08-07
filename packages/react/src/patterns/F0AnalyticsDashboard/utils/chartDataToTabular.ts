@@ -6,6 +6,9 @@ import type {
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
 
+import { qualifySeriesNames } from "@/kits/F0DataChart/utils/seriesNames"
+import { defaultTranslations } from "@/lib/providers/i18n"
+
 import type {
   DashboardChartConfig,
   DashboardChartData,
@@ -23,6 +26,12 @@ interface TabularResult {
    * Absent when every header is a safe literal.
    */
   keys?: string[]
+}
+
+export interface TabularLabels {
+  target: string
+  primaryMeasure: string
+  secondaryMeasure: string
 }
 
 /**
@@ -43,12 +52,15 @@ function numericValue(point: unknown): number | null {
  */
 export function chartDataToTabular(
   config: DashboardChartConfig,
-  data: DashboardChartData
+  data: DashboardChartData,
+  labels: TabularLabels = defaultTranslations.dataChart.comboAxis
 ): TabularResult {
   switch (config.type) {
     case "bar":
     case "line":
       return barLineToTabular(data)
+    case "combo":
+      return comboToTabular(config, data, labels)
     case "funnel":
       return funnelToTabular(data)
     case "pie":
@@ -84,6 +96,87 @@ function barLineToTabular(data: DashboardChartData): TabularResult {
   })
 
   return { columns, rows }
+}
+
+/**
+ * One column per value series, bars first then lines, plus a target column when
+ * present. Stable keys stay distinct even when human-readable names repeat.
+ */
+function comboToTabular(
+  config: Extract<DashboardChartConfig, { type: "combo" }>,
+  data: DashboardChartData,
+  labels: TabularLabels
+): TabularResult {
+  const categories = data.categories ?? []
+  // Match the renderer/legend/ARIA contract: zero-length series are transient
+  // placeholders, not user-visible data columns.
+  const barSeries = (data.barSeries ?? []).filter(
+    (series) => series.data.length > 0
+  )
+  const lineSeries = (data.lineSeries ?? []).filter(
+    (series) => series.data.length > 0
+  )
+  const primaryAxisLabel =
+    config.primaryAxisLabel.trim() || labels.primaryMeasure
+  const secondaryAxisLabel =
+    config.secondaryAxisLabel.trim() || labels.secondaryMeasure
+  const qualifiedLabels = qualifySeriesNames(
+    [...barSeries, ...lineSeries],
+    [
+      ...barSeries.map(() => primaryAxisLabel),
+      ...lineSeries.map(() => secondaryAxisLabel),
+    ]
+  )
+  const barLabels = qualifiedLabels.slice(0, barSeries.length)
+  const lineLabels = qualifiedLabels.slice(barSeries.length)
+  const descriptors = [
+    ...barSeries.flatMap((series, index) => {
+      const valueDescriptor = {
+        label: barLabels[index],
+        key: `bar-${index}`,
+        value: (dataIndex: number) => numericValue(series.data[dataIndex]),
+      }
+      const hasTargets = series.data.some(
+        (point) =>
+          typeof point === "object" &&
+          point !== null &&
+          "target" in point &&
+          point.target !== undefined
+      )
+      if (!hasTargets) return [valueDescriptor]
+
+      return [
+        valueDescriptor,
+        {
+          label: `${barLabels[index]} ${labels.target}`,
+          key: `bar-${index}-target`,
+          value: (dataIndex: number) => {
+            const point = series.data[dataIndex]
+            return typeof point === "object" && point !== null
+              ? (point.target ?? null)
+              : null
+          },
+        },
+      ]
+    }),
+    ...lineSeries.map((series, index) => ({
+      label: lineLabels[index],
+      key: `line-${index}`,
+      value: (dataIndex: number) => numericValue(series.data[dataIndex]),
+    })),
+  ]
+  const columns = ["Category", ...descriptors.map(({ label }) => label)]
+  const keys = ["category", ...descriptors.map(({ key }) => key)]
+
+  const rows = categories.map((cat, i) => {
+    const row: Record<string, unknown> = { category: cat }
+    for (const descriptor of descriptors) {
+      row[descriptor.key] = descriptor.value(i)
+    }
+    return row
+  })
+
+  return { columns, keys, rows }
 }
 
 function funnelToTabular(data: DashboardChartData): TabularResult {
