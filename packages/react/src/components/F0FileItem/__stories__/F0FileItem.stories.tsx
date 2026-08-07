@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { fn } from "storybook/test"
 
+import { fn } from "storybook/test"
 import { expect, within } from "storybook/test"
 
 import { CrossedCircle, Download } from "@/icons/app"
@@ -77,6 +77,21 @@ export const WithoutActions: Story = {
       type: "application/pdf",
     }),
     actions: [],
+  },
+}
+
+export const WithSubtitle: Story = {
+  args: {
+    size: "lg",
+    file: new File(["test"], "invoice-F001.pdf", { type: "application/pdf" }),
+    subtitle: "09 June, 2026",
+    actions: [
+      {
+        icon: Download,
+        label: "Download file",
+        onClick: fn(),
+      },
+    ],
   },
 }
 
