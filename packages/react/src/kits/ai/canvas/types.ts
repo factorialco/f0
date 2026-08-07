@@ -155,13 +155,14 @@ export type DataDownloadDataset = {
 // ---------------------------------------------------------------------------
 
 /**
- * A single proposed shift block in a timesheet-autofill preview. Clock times are
- * employee-local "HH:MM"; a null clock time marks an as-yet-unfilled bound.
+ * A single proposed shift block in a timesheet-autofill preview. Every proposed
+ * block carries concrete employee-local clock times (ISO datetime or "HH:MM");
+ * days that cannot be proposed are omitted rather than emitted with empty bounds.
  */
 export type AutofillTimesheetShift = {
   date: string
-  clockIn: string | null
-  clockOut: string | null
+  clockIn: string
+  clockOut: string
   workable: boolean
   workplaceId?: string | null
   workAreaId?: string | null
