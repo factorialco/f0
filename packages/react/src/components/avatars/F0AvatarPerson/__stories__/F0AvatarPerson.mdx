@@ -1,5 +1,8 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as PersonStories from "./F0AvatarPerson.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import { F0AvatarPerson } from "../F0AvatarPerson"
 
 <Meta of={PersonStories} />
 
@@ -35,6 +38,12 @@ person icon to signal that the account is no longer active.
 
 <Canvas of={PersonStories.Deactivated} />
 
+#### Badge
+
+A badge marks a status on the avatar's corner.
+
+<Canvas of={PersonStories.WithBadge} />
+
 ---
 
 ## Guidelines
@@ -51,6 +60,19 @@ person icon to signal that the account is no longer active.
 - The entity type is dynamic (could be a team or company): use `F0Avatar`
 - The entity is not a person: use the matching `F0Avatar*` component
 
+<DoDonts
+  do={{
+    description:
+      "Pass the person's real first and last name, so the initials and the derived color identify them even with no photo",
+    children: <F0AvatarPerson size="lg" firstName="Dani" lastName="Moreno" />,
+  }}
+  dont={{
+    description:
+      "Don't paper over missing data with a placeholder name — every unknown person then shares the same initials and the same color",
+    children: <F0AvatarPerson size="lg" firstName="Unknown" lastName="User" />,
+  }}
+/>
+
 ---
 
 ## Behavior
@@ -60,3 +82,24 @@ person icon to signal that the account is no longer active.
 With no `src` — or if the image fails to load — the avatar shows the initials
 from the name over a color derived deterministically from it, so the same person
 always keeps the same color.
+
+#### With a photo
+
+<Canvas of={PersonStories.WithImage} />
+
+---
+
+## Accessibility
+
+The avatar is decorative by default: unless you pass `aria-label` or
+`aria-labelledby`, it renders `aria-hidden` and screen readers skip it entirely.
+
+- In a row, header or comment where the person's name is already text, leave the
+  label off and let that text carry the meaning. A labelled avatar next to the
+  same words is announced twice.
+- When the avatar stands alone — an assignee cell, a compact stack — pass
+  `aria-label` with the person's name so it is reachable at all.
+- `aria-labelledby` takes the **id** of the element holding the name, not the
+  name itself.
+- `deactivated` is conveyed by colour and a muted icon only. If that state
+  matters, say it in text next to the avatar.

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect } from "storybook/test"
+
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Avatar } from "../../F0Avatar"
@@ -11,6 +13,9 @@ const meta = {
   component: F0AvatarModule,
   title: "Avatars/AvatarModule",
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   argTypes: {
     size: {
       control: "radio",
@@ -32,6 +37,15 @@ export const Default: Story = {
   args: {
     module: "home",
     size: "md",
+  },
+  play: async ({ canvasElement }) => {
+    // The root is always aria-hidden and carries no role, so there is nothing
+    // to query by role or test id — the size class is the reachable contract.
+    const avatar = canvasElement.querySelector('[aria-hidden="true"]')
+    await expect(avatar).toBeInTheDocument()
+    await expect(avatar).toHaveClass("h-8", "w-8")
+    // The squircle gradient plus the module icon.
+    await expect(avatar!.querySelectorAll("svg")).toHaveLength(2)
   },
 }
 
