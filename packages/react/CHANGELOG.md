@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.11.1](https://github.com/factorialco/f0/compare/f0-react-v6.11.0...f0-react-v6.11.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **F0Form:** export f0FormField.phone types from the public rollup ([#5052](https://github.com/factorialco/f0/issues/5052)) ([f0a1fe6](https://github.com/factorialco/f0/commit/f0a1fe659aa75af6e97e47cc7d3eaf4cc3b8119a))
+
 ## [6.11.0](https://github.com/factorialco/f0/compare/f0-react-v6.10.0...f0-react-v6.11.0) (2026-08-07)
 
 
