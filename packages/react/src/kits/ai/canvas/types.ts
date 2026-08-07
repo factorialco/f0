@@ -59,6 +59,18 @@ export type DataDownloadCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * Autofill-timesheet canvas content — renders an editable timesheet proposal
+ * (day-grouped shift blocks the user can adjust and confirm) in the canvas panel.
+ */
+export type AutofillTimesheetCanvasContent = CanvasContentBase & {
+  type: "autofillTimesheet"
+  employeeId: string
+  startOn: string
+  endOn: string
+  shifts: AutofillTimesheetShift[]
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
@@ -66,6 +78,7 @@ export type CanvasContent =
   | DashboardCanvasContent
   | FormCanvasContent
   | DataDownloadCanvasContent
+  | AutofillTimesheetCanvasContent
 
 // ---------------------------------------------------------------------------
 // Entity definition contract
@@ -135,6 +148,30 @@ export type DataDownloadDataset = {
    * Used for Excel/CSV headers. Falls back to the raw column name when absent.
    */
   columnLabels?: Record<string, string>
+}
+
+// ---------------------------------------------------------------------------
+// Autofill timesheet payload
+// ---------------------------------------------------------------------------
+
+/**
+ * A single proposed shift block in a timesheet-autofill preview. Every proposed
+ * block carries concrete employee-local clock times (ISO datetime or "HH:MM");
+ * days that cannot be proposed are omitted rather than emitted with empty bounds.
+ */
+export type AutofillTimesheetShift = {
+  date: string
+  clockIn: string
+  clockOut: string
+  workable: boolean
+  workplaceId?: string | null
+  workAreaId?: string | null
+  /**
+   * Host-defined work-location kind. Left as a loose string to keep the kit
+   * host-agnostic; the factorial consumer narrows it to its attendance
+   * location-type enum (today: "office" | "work_from_home" | "business_trip").
+   */
+  locationType?: string | null
 }
 
 // ---------------------------------------------------------------------------
