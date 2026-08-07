@@ -174,6 +174,17 @@ describe("F0GraphNode", () => {
     expect(onExpandToggle).toHaveBeenCalledOnce()
   })
 
+  it("onExpandToggle fires on ArrowLeft when the node is expanded", async () => {
+    const onExpandToggle = vi.fn()
+    render(<F0GraphNode hasChildren expanded onExpandToggle={onExpandToggle} />)
+    const node = screen.getByRole("treeitem")
+    node.focus()
+    await import("@testing-library/user-event").then(({ userEvent }) =>
+      userEvent.setup().keyboard("{ArrowLeft}")
+    )
+    expect(onExpandToggle).toHaveBeenCalledOnce()
+  })
+
   it("keyboard Enter triggers onClick", async () => {
     const onClick = vi.fn()
     render(<F0GraphNode onClick={onClick} />)
@@ -267,6 +278,40 @@ describe("F0GraphNode", () => {
     expect(node).toHaveAttribute("aria-posinset", "2")
   })
 
+  it("forwards nodeId and ariaOwns to the treeitem", () => {
+    render(
+      <F0GraphNode
+        nodeId="manager"
+        ariaOwns="employee-1 employee-2"
+        ariaLabel="Engineering manager"
+      />
+    )
+    const node = screen.getByRole("treeitem", { name: "Engineering manager" })
+    expect(node).toHaveAttribute("id", "f0-graph-node-manager")
+    expect(node).toHaveAttribute("aria-owns", "employee-1 employee-2")
+  })
+
+  it("exposes loading semantics and keeps hidden content out of the hover card", () => {
+    render(
+      <F0GraphNode
+        loading
+        hoverCard
+        variant="compact"
+        avatar={personAvatar}
+        title="Alice"
+        subtitle="Engineer"
+      />
+    )
+
+    expect(screen.getAllByTestId("skeleton")).toHaveLength(2)
+    expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+    expect(screen.queryByText("Engineer")).not.toBeInTheDocument()
+
+    const node = screen.getByRole("treeitem", { name: "Alice" })
+    expect(node).toHaveAttribute("aria-busy", "true")
+    expect(node).not.toHaveAttribute("data-state")
+  })
+
   it("calls nodeRef callback on mount", () => {
     const nodeRef = vi.fn()
     render(<F0GraphNode nodeRef={nodeRef} />)
@@ -297,6 +342,33 @@ describe("F0GraphNode", () => {
       await waitFor(() => {
         expect(screen.getByText("Engineer")).toBeInTheDocument()
       })
+    })
+
+    it("dismisses keyboard-triggered content with Escape", async () => {
+      const { userEvent } = await import("@testing-library/user-event")
+      const { waitFor } = await import("@testing-library/react")
+      const user = userEvent.setup()
+
+      render(
+        <F0GraphNode
+          hoverCard
+          variant="compact"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+        />
+      )
+
+      await user.tab()
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+
+      await user.keyboard("{Escape}")
+      await waitFor(() => {
+        expect(screen.queryByText("Engineer")).not.toBeInTheDocument()
+      })
+      expect(screen.getByRole("treeitem")).toHaveFocus()
     })
 
     it("dot: reveals title and tags on hover", async () => {

@@ -104,22 +104,23 @@ export interface F0GraphNodeProps {
   tagLabels?: F0GraphNodeTagLabels
   /**
    * Floating toolbar shown above the node when it is selected (detail
-   * variant only). Rendered via ReactFlow `NodeToolbar`, so the host
-   * tree must be wrapped in a `ReactFlowProvider` for these actions to
-   * appear.
+   * variant only). Rendered via ReactFlow `NodeToolbar`, so the node must be
+   * registered inside a ReactFlow canvas for these actions to appear.
    */
   actions?: ReactNode
   /** Show a skeleton/loading placeholder instead of real content. */
   loading?: boolean
   /**
    * In the compacted modes (compact/dot), reveal the rest of the node's info in
-   * an F0Card popover on hover. Shows only the non-hidden tags (those allowed by
-   * `visibleTagTypes`). No-op in the detail variant, where everything is already
-   * on screen.
+   * an F0Card popover on hover or keyboard focus. Shows only the non-hidden tags
+   * (those allowed by `visibleTagTypes`). No-op in the detail variant, where
+   * everything is already on screen.
    */
   hoverCard?: boolean
   /** DOM id for aria-owns cross-references */
   nodeId?: string
   /** Space-separated DOM ids for aria-owns (accessible tree hierarchy) */
   ariaOwns?: string
+  /** Explicit accessible name, including for loading nodes with non-string titles. */
+  ariaLabel?: string
 }

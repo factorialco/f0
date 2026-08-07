@@ -23,7 +23,6 @@
     "Graph/F0Graph",
     "Graph/F0GraphControls",
     "Graph/F0GraphEdge",
-    "Graph/F0GraphNode",
     "Heading",
     "Image",
     "Inputs/Duration input",
