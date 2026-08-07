@@ -213,21 +213,16 @@ function MissingRepos({ missing }: { missing: ProductUsageData["missing"] }) {
 
   return (
     <p className="m-0 mt-2 text-sm opacity-70">
-      Not checked:{" "}
+      Not counted:{" "}
       {missing.map((repo, index) => (
         <span key={repo.id}>
           {index > 0 && ", "}
           <code className="font-mono">{repo.id}</code>
         </span>
       ))}{" "}
-      — clone next to this repo or set{" "}
-      {missing.map((repo, index) => (
-        <span key={repo.id}>
-          {index > 0 && " / "}
-          <code className="font-mono">${repo.env}</code>
-        </span>
-      ))}
-      .
+      — no local checkout. Clone it anywhere usual (next to this repo,{" "}
+      <code className="font-mono">~/code</code>…) and it&apos;s picked up
+      automatically.
     </p>
   )
 }

@@ -131,10 +131,33 @@ export function parseF0Imports(source) {
 }
 
 /**
- * Locates a sibling checkout named `repoName`, in order of preference:
- *   1. `envPath` (explicit opt-in / non-standard layouts)
+ * Where people keep their checkouts, relative to `~`. Ordered by how common
+ * they are; each is a single `existsSync` so the whole list is free.
+ *
+ * The point is that nobody should have to configure anything: if the repo is
+ * cloned anywhere conventional, it's found. `$F0_*_REPO` stays as the escape
+ * hatch for layouts this can't guess (an external drive, a nested workspace).
+ */
+const COMMON_CHECKOUT_PARENTS = [
+  "code",
+  "dev",
+  "src",
+  "repos",
+  "projects",
+  "work",
+  "workspace",
+  "Developer",
+  "Projects",
+  "Code",
+  join("Documents", "GitHub"),
+  join("Documents", "code"),
+]
+
+/**
+ * Locates a checkout named `repoName`, in order of preference:
+ *   1. `envPath` (explicit opt-in / unguessable layouts)
  *   2. a sibling of this repo (`../<repoName>`)
- *   3. `~/code/<repoName>`
+ *   3. `~/<common parent>/<repoName>` (see COMMON_CHECKOUT_PARENTS)
  *
  * A candidate only counts when it contains `marker`, so an unrelated directory
  * of the same name can't be mistaken for the repo. Note that this package may
@@ -154,7 +177,9 @@ function resolveSiblingRepo(repoName, marker, envPath) {
     dir = parent
   }
 
-  candidates.push(join(homedir(), "code", repoName))
+  for (const parent of COMMON_CHECKOUT_PARENTS) {
+    candidates.push(join(homedir(), parent, repoName))
+  }
 
   for (const candidate of candidates) {
     if (existsSync(join(candidate, marker))) return candidate
