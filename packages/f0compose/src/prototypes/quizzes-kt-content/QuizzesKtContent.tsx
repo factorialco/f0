@@ -4643,75 +4643,293 @@ function parseCurrencyValue(value: string) {
    --------------------------------------------------------------------------- */
 
 
-function CourseDocumentsTab(_props: Record<string, unknown>) {
+function CourseDocumentsTab({ onOpenDialog }: { onOpenDialog: (dialog: CourseActionDialogId) => void }) {
+  const source = useDataCollectionSource<CourseResourceRow>(
+    {
+      search: { enabled: true, sync: true },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: ({ pagination }: FetchOptions) => paginateRecords([], pagination, 20),
+      },
+      primaryActions: () => ({ label: "Upload", icon: Upload, onClick: () => onOpenDialog("upload-course-document") }),
+    },
+    [onOpenDialog]
+  )
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
+    <F0Box display="flex" flexDirection="column" gap="3xl">
+      <F0BoxWithClassName display="flex" flexDirection="column" gap="xs" style={{ maxWidth: 640 }}>
+        <F0Heading content="Course documents" variant="heading" as="h2" />
+        <F0Text content="Internal files for this course (e.g., attendance sheets, training records, or compliance documents). These are only visible to training managers and admins." variant="description" />
+      </F0BoxWithClassName>
+      <OneDataCollection
+        id={`${SLUG}/course-documents/v1`}
+        storage={false}
+        source={source}
+        emptyStates={{
+          "no-data": {
+            emoji: "📄",
+            title: "No documents yet",
+            description: "Add any course-related documents you want to store here. Participants won’t see them.",
+          },
+        }}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                { id: "name", label: "Name", render: (resource: CourseResourceRow) => resource.name },
+                { id: "type", label: "Type", render: (resource: CourseResourceRow) => resource.type },
+                { id: "updatedAt", label: "Updated", render: (resource: CourseResourceRow) => resource.updatedAt },
+              ],
+            },
+          },
+        ]}
       />
-    </StandardLayout>
+    </F0Box>
   )
 }
 
-function CourseGroupsTab(_props: Record<string, unknown>) {
+function CourseGroupsTab({
+  course,
+  onOpenDialog,
+  onOpenClassWizard,
+}: {
+  course: ExactCourse
+  onOpenDialog: (dialog: CourseActionDialogId) => void
+  onOpenClassWizard: () => void
+}) {
+  const groups: TrainingGroupRow[] = course.groups.map((group, index) => ({
+    id: `${course.id}-${index}`,
+    name: group,
+    startDate: index === 0 ? "1 Jan 2025" : "1 Nov 2025",
+    endDate: index === 0 ? "31 Jan 2025" : "30 Nov 2025",
+    sessions: 1,
+    participants: index === 0 ? ["Laura Martinez", "Marc Vidal", "Ana Ruiz"] : ["Hellen Howard", "Nora Perez"],
+    completionRate: 100,
+  }))
+  const source = useDataCollectionSource<TrainingGroupRow>(
+    {
+      search: { enabled: true, sync: true },
+      sortings: {
+        name: { label: "Training group" },
+        startDate: { label: "Start date" },
+        endDate: { label: "End date" },
+        completionRate: { label: "Group completion rate" },
+      },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: ({ search, sortings, pagination }: FetchOptions) => {
+          const term = (search ?? "").toLowerCase().trim()
+          const filtered = groups.filter((group) => term === "" || group.name.toLowerCase().includes(term))
+          const sorted = applySort(filtered, sortings ?? [], (group, field) => {
+            if (field === "name") return group.name.toLowerCase()
+            if (field === "startDate") return Date.parse(group.startDate)
+            if (field === "endDate") return Date.parse(group.endDate)
+            if (field === "completionRate") return group.completionRate
+            return null
+          })
+          return paginateRecords(sorted, pagination, 20)
+        },
+      },
+      primaryActions: () => ({ label: "New training group", icon: Add, onClick: onOpenClassWizard }),
+      itemUrl: (group) => `/p/${SLUG}?view=group-detail&course=${course.id}&group=${encodeURIComponent(group.name)}`,
+      itemActions: () => [
+        { label: "Delete", icon: Delete, onClick: () => onOpenDialog("delete-training-group"), critical: true },
+      ],
+      totalItemSummary: (total: number) => `${total} training groups`,
+    },
+    [groups, course.id, onOpenDialog, onOpenClassWizard]
+  )
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <OneDataCollection
+      id={`${SLUG}/course-groups/v1`}
+      storage={false}
+      source={source}
+      visualizations={[
+        {
+          type: "table",
+          options: {
+            columns: [
+              { id: "name", label: "Training group", sorting: "name", render: (group: TrainingGroupRow) => ({ type: "text" as const, value: group.name }) },
+              { id: "startDate", label: "Start date", sorting: "startDate", render: (group: TrainingGroupRow) => group.startDate },
+              { id: "endDate", label: "End date", sorting: "endDate", render: (group: TrainingGroupRow) => group.endDate },
+              { id: "sessions", label: "Sessions", render: (group: TrainingGroupRow) => group.sessions },
+              { id: "participants", label: "Participants", render: (group: TrainingGroupRow) => participantsValue(group.participants) },
+              { id: "completionRate", label: "Group completion rate", sorting: "completionRate", render: (group: TrainingGroupRow) => `${group.completionRate}%` },
+            ],
+            allowColumnReordering: true,
+            allowColumnHiding: true,
+          },
+        },
+      ]}
+    />
   )
 }
 
-function CourseMaterialsTab(_props: Record<string, unknown>) {
+function CourseMaterialsTab({ onOpenDialog }: { onOpenDialog: (dialog: CourseActionDialogId) => void }) {
+  const source = useDataCollectionSource<CourseResourceRow>(
+    {
+      search: { enabled: true, sync: true },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: ({ pagination }: FetchOptions) => paginateRecords([], pagination, 20),
+      },
+      primaryActions: () => [
+        { label: "Upload", icon: Upload, onClick: () => onOpenDialog("upload-course-material") },
+      ],
+      secondaryActions: { expanded: 1, actions: () => [{ label: "Embed link", icon: Link, onClick: () => onOpenDialog("embed-course-material") }] },
+    },
+    [onOpenDialog]
+  )
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
+    <F0Box display="flex" flexDirection="column" gap="3xl">
+      <F0BoxWithClassName display="flex" flexDirection="column" gap="xs" style={{ maxWidth: 640 }}>
+        <F0Heading content="Course materials" variant="heading" as="h2" />
+        <F0Text content="Files or links shared with participants (e.g., syllabus, slides, readings, and other helpful resources)." variant="description" />
+      </F0BoxWithClassName>
+      <OneDataCollection
+        id={`${SLUG}/course-materials/v1`}
+        storage={false}
+        source={source}
+        emptyStates={{
+          "no-data": {
+            emoji: "📄",
+            title: "No course materials yet",
+            description: "Upload files or embed links you want to share with participants.",
+          },
+        }}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                { id: "name", label: "Name", render: (resource: CourseResourceRow) => resource.name },
+                { id: "type", label: "Type", render: (resource: CourseResourceRow) => resource.type },
+                { id: "updatedAt", label: "Updated", render: (resource: CourseResourceRow) => resource.updatedAt },
+              ],
+            },
+          },
+        ]}
       />
-    </StandardLayout>
+    </F0Box>
   )
 }
 
-function CourseParticipantsTab(_props: Record<string, unknown>) {
+function CourseParticipantsTab() {
+  const source = useDataCollectionSource<CourseParticipantRow>(
+    {
+      search: { enabled: true, sync: true },
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "Ongoing", label: "Ongoing" },
+              { value: "Completed", label: "Completed" },
+            ],
+          },
+        },
+      },
+      sortings: {
+        name: { label: "Participant" },
+        status: { label: "Status" },
+        completionDate: { label: "Completion date" },
+      },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 25,
+        fetchData: ({ filters, search, sortings = [], pagination }: FetchOptions) => {
+          const term = (search ?? "").toLowerCase().trim()
+          const filtered = courseParticipants
+            .filter((participant) => matchArray(filters?.status, participant.status))
+            .filter((participant) => term === "" || participant.name.toLowerCase().includes(term))
+          const sorted = applySort(filtered, sortings, (participant, field) => {
+            if (field === "name") return participant.name.toLowerCase()
+            if (field === "status") return participant.status
+            if (field === "completionDate") return participant.completionDate
+            return null
+          })
+          return paginateRecords(sorted, pagination, 25)
+        },
+      },
+      selectable: (participant) => participant.id,
+      totalItemSummary: (total: number) => `${total} participants`,
+    },
+    []
+  )
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <OneDataCollection
+      id={`${SLUG}/course-participants/v1`}
+      storage={false}
+      source={source}
+      visualizations={[
+        {
+          type: "table",
+          options: {
+            columns: [
+              { id: "participant", label: "Participant", sorting: "name", render: (participant: CourseParticipantRow) => personValue(participant.name) },
+              { id: "status", label: "Status", sorting: "status", render: (participant: CourseParticipantRow) => ({ type: "status" as const, value: { status: "info", label: participant.status } }) },
+              { id: "certificate", label: "Certificate", render: (participant: CourseParticipantRow) => participant.certificate },
+              { id: "completionDate", label: "Completion date", sorting: "completionDate", render: (participant: CourseParticipantRow) => participant.completionDate },
+              { id: "courseValidity", label: "Course validity", render: (participant: CourseParticipantRow) => participant.courseValidity },
+              { id: "sessionAttendance", label: "Session attendance", render: (participant: CourseParticipantRow) => participant.sessionAttendance },
+              { id: "knowledgeTestResults", label: "Knowledge test results", render: (participant: CourseParticipantRow) => participant.knowledgeTestResults },
+              { id: "moduleProgress", label: "Module progress", render: (participant: CourseParticipantRow) => participant.moduleProgress },
+            ],
+            allowColumnReordering: true,
+            allowColumnHiding: true,
+          },
+        },
+      ]}
+    />
   )
 }
 
-function CourseSurveysTab(_props: Record<string, unknown>) {
+function CourseSurveysTab({ onOpenDialog }: { onOpenDialog: (dialog: CourseActionDialogId) => void }) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <F0Box display="flex" justifyContent="end">
+        <F0Button label="Add survey" icon={Add} onClick={() => onOpenDialog("add-course-survey")} />
+      </F0Box>
+      <F0Box display="grid" columns="1" md={{ columns: "3" }} gap="lg">
+        <MetricCard title="Satisfaction survey" value="Draft" description="Survey template attached" />
+        <MetricCard title="Effectiveness survey" value="-" description="No survey attached" />
+        <MetricCard title="Knowledge test" value="Published" description="Required for completion" />
+      </F0Box>
+    </F0Box>
   )
 }
 
-function DiscoverTrainingScreen(_props: Record<string, unknown>) {
+function DiscoverTrainingScreen({ onBack }: { onBack: () => void }) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <Page
+      header={
+        <>
+          <PageHeader module={moduleInfo} breadcrumbs={[{ id: "courses", label: "Courses", href: routes.courses }, { id: "discover", label: "Discover Training" }]} />
+          <ResourceHeader
+            title="Discover Training"
+            description="Training product updates, best practices and suggested content for admins."
+            secondaryActions={[{ label: "Cancel", icon: Cross, onClick: onBack }]}
+          />
+        </>
+      }
+    >
+      <StandardLayout>
+        <F0Box display="grid" columns="1" md={{ columns: "3" }} gap="lg">
+          <MetricCard title="EU AI Act" value="Required" description="Train your team before August 2nd." />
+          <MetricCard title="Catalog updates" value="3" description="New courses suggested for your company." />
+          <MetricCard title="Admin guides" value="5" description="Articles to improve completion tracking." />
+        </F0Box>
+      </StandardLayout>
+    </Page>
   )
 }
 
@@ -4827,89 +5045,411 @@ function EndOfCourseScreen() {
   )
 }
 
-function ExportScreen(_props: Record<string, unknown>) {
+function ExportScreen({
+  toast,
+  onBack,
+  onToast,
+}: {
+  toast: ToastId
+  onBack: () => void
+  onToast: (toast: ToastId) => void
+}) {
+  const [values, setValues] = useState<Record<string, unknown>>({
+    filename: `training-export-${new Date().toISOString().slice(0, 10)}`,
+    exportType: "employee",
+    format: "excel",
+    ids: [],
+    employeeSelection: [],
+  })
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <Page header={<PageHeader module={moduleInfo} breadcrumbs={[{ id: "courses", label: "Courses", href: routes.courses }, { id: "export", label: "Export courses" }]} />}>
+      <StandardLayout>
+        {toast && <FeedbackBanner toast={toast} />}
+        <F0Dialog
+          isOpen
+          onClose={onBack}
+          title="Export courses"
+          description="Export trainings according to the selected type, format, people and date range."
+          primaryAction={{ label: "Export", onClick: () => onToast("export") }}
+          secondaryAction={{ label: "Cancel", onClick: onBack }}
+        >
+          <F0Box display="flex" flexDirection="column" gap="lg">
+            {exportFieldsWithCourses.map((field) => (
+              <F0FormField
+                key={field.id}
+                field={field}
+                value={values[field.id]}
+                onChange={(value) => setValues((currentValues) => ({ ...currentValues, [field.id]: value }))}
+              />
+            ))}
+          </F0Box>
+        </F0Dialog>
+      </StandardLayout>
+    </Page>
   )
 }
 
-function ImportScreen(_props: Record<string, unknown>) {
+function ImportScreen({
+  mode,
+  toast,
+  onBack,
+  onToast,
+}: {
+  mode: "import" | "import-courses"
+  toast: ToastId
+  onBack: () => void
+  onToast: (toast: ToastId) => void
+}) {
+  const title =
+    mode === "import" ? "Course and participant import" : "Course import"
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <Page
+      header={
+        <>
+          <PageHeader
+            module={moduleInfo}
+            breadcrumbs={[
+              { id: "courses", label: "Courses", href: routes.courses },
+              { id: mode, label: title },
+            ]}
+          />
+          <ResourceHeader
+            title={title}
+            secondaryActions={[{ label: "Cancel", icon: Cross, onClick: onBack }]}
+          />
+        </>
+      }
+    >
+      <StandardLayout>
+        <F0Box display="flex" flexDirection="column" gap="2xl">
+          {toast && <FeedbackBanner toast={toast} />}
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap="md"
+            padding="2xl"
+            border="default"
+            borderColor="secondary"
+            borderRadius="lg"
+            background="secondary"
+          >
+            <F0Icon icon={Upload} size="lg" color="default" />
+            <F0Heading
+              content="Drag and drop or click here."
+              variant="heading"
+              as="h2"
+            />
+            <F0Text
+              content="Accepts .xls, .xlsx, and .csv files"
+              variant="description"
+            />
+          </F0Box>
+          <F0Box display="flex" flexDirection="column" gap="md">
+            <F0Heading content="Use a template" variant="heading" as="h2" />
+            <F0Text
+              content="Download this template, fill it out with your employees' information and then upload it."
+              variant="body"
+            />
+            <F0Box>
+              <F0Button
+                label="Download template"
+                icon={Download}
+                variant="outline"
+                onClick={() => onToast("template")}
+              />
+            </F0Box>
+          </F0Box>
+        </F0Box>
+      </StandardLayout>
+    </Page>
   )
 }
 
-function InfoPanel(_props: Record<string, unknown>) {
+function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="lg"
+      padding="lg"
+      border="default"
+      borderColor="secondary"
+      borderRadius="lg"
+      background="primary"
+    >
+      <F0Heading content={title} variant="heading" as="h3" />
+      <F0Box display="flex" flexDirection="column" gap="sm">
+        {items.map((item) => (
+          <F0Box key={item} display="flex" alignItems="center" gap="sm">
+            <F0Icon icon={CheckCircle} size="sm" color="positive" />
+            <F0Text content={item} variant="body" />
+          </F0Box>
+        ))}
+      </F0Box>
+    </F0Box>
   )
 }
 
-function InfoSection(_props: Record<string, unknown>) {
+function InfoSection({
+  title,
+  items,
+  description,
+}: {
+  title: string
+  items?: string[]
+  description?: string
+}) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <F0Box display="flex" flexDirection="column" gap="md">
+      <F0Heading content={title} variant="heading" as="h3" />
+      {items ? (
+        <F0Box display="flex" flexWrap="wrap" gap="sm">
+          {items.map((item) => (
+            <F0TagRaw key={item} text={item} />
+          ))}
+        </F0Box>
+      ) : (
+        <F0Text content={description ?? "-"} variant="body" />
+      )}
+    </F0Box>
   )
 }
 
 
 
-function MetricCard(_props: Record<string, unknown>) {
+function MetricCard({
+  title,
+  value,
+  description,
+}: {
+  title: string
+  value: string
+  description: string
+}) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="md"
+      padding="lg"
+      border="default"
+      borderColor="secondary"
+      borderRadius="lg"
+      background="primary"
+    >
+      <F0Text content={title} variant="label" />
+      <F0Heading content={value} variant="heading" as="h3" />
+      <F0Text content={description} variant="description" />
+    </F0Box>
   )
 }
 
-function MyCourseDetailScreen(_props: Record<string, unknown>) {
+function MyCourseDetailScreen({ onBack }: { onBack: () => void }) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <Page
+      header={
+        <>
+          <PageHeader
+            module={moduleInfo}
+            breadcrumbs={[
+              { id: "my-courses", label: "My courses", href: routes.myCourses },
+              { id: "ai-literacy", label: "AI literacy basics" },
+            ]}
+          />
+          <ResourceHeader
+            title="AI literacy basics"
+            description="Free course from Factorial campus."
+            secondaryActions={[{ label: "Cancel", icon: Cross, onClick: onBack }]}
+          />
+        </>
+      }
+    >
+      <StandardLayout>
+        <F0Box display="flex" flexDirection="column" gap="2xl">
+          <F0Box display="grid" columns="1" md={{ columns: "4" }} gap="lg">
+            <MetricCard title="Status" value="Not started" description="Learning status" />
+            <MetricCard title="Duration" value="30m" description="Estimated time" />
+            <MetricCard title="Provider" value="Factorial campus" description="Course source" />
+            <MetricCard title="Requirement" value="Mandatory" description="AI Act training" />
+          </F0Box>
+          <InfoPanel title="Course content" items={["Introduction to AI literacy", "Risks and responsible use", "Final acknowledgement"]} />
+        </F0Box>
+      </StandardLayout>
+    </Page>
   )
 }
 
-function MyCoursesScreen(_props: Record<string, unknown>) {
+function LearningSection({
+  title,
+  count,
+  onOpenCourse,
+}: {
+  title: string
+  count: string
+  onOpenCourse: () => void
+}) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
+    <F0Box display="flex" flexDirection="column" gap="md">
+      <F0Button label={`${title} ${count}`} variant="outline" onClick={onOpenCourse} />
+      <F0Box padding="lg" border="default" borderColor="secondary" borderRadius="lg" background="primary">
+        <F0Box display="flex" flexDirection="column" gap="md">
+          <F0Heading content="AI literacy basics" variant="heading" as="h3" />
+          <F0Text content="Free course from Factorial campus" variant="description" />
+          <F0Button label="View course" icon={ExternalLink} onClick={onOpenCourse} />
+        </F0Box>
+      </F0Box>
+    </F0Box>
+  )
+}
+
+function getCatalogActionDetail(dialog: CatalogActionDialogId): TrainingActionDialogDetail {
+  if (dialog === "catalog-search") {
+    return {
+      title: "Search catalog",
+      description: "Search available courses by name, provider or competency.",
+      primaryLabel: "Search",
+      summaryTitle: "Search scope",
+      summaryItems: ["Course title", "Provider", "Competencies"],
+      toast: "settings",
+    }
+  }
+
+  return {
+    title: "Catalog filters",
+    description: "Filter courses available to the employee.",
+    primaryLabel: "Apply filters",
+    summaryTitle: "Available filters",
+    summaryItems: ["Requirement", "Duration", "Competencies"],
+    toast: "settings",
+  }
+}
+
+function MyCoursesOverview({ onOpenCourse }: { onOpenCourse: () => void }) {
+  return (
+    <F0Box display="flex" flexDirection="column" gap="2xl">
+      <F0Box padding="lg" border="default" borderColor="secondary" borderRadius="lg" background="primary">
+        <F0Box display="flex" flexDirection="column" gap="lg">
+          <F0Heading content="Progress" variant="heading" as="h3" />
+          <F0Box display="grid" columns="1" md={{ columns: "3" }} gap="lg">
+            <MetricCard title="Mandatory learning" value="1" description="Course pending" />
+            <MetricCard title="Optional learning" value="2" description="Courses available" />
+            <MetricCard title="Completed" value="0" description="Courses finished" />
+          </F0Box>
+        </F0Box>
+      </F0Box>
+      <LearningSection title="Mandatory learning" count="1" onOpenCourse={onOpenCourse} />
+      <LearningSection title="Optional learning" count="2" onOpenCourse={onOpenCourse} />
+    </F0Box>
+  )
+}
+
+function MyCatalogTab({ onOpenCourse }: { onOpenCourse: () => void }) {
+  const [activeDialog, setActiveDialog] = useState<CatalogActionDialogId>(null)
+
+  return (
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <F0Box display="flex" justifyContent="between" alignItems="center">
+        <F0Button label="Filters" icon={Sliders} variant="outline" onClick={() => setActiveDialog("catalog-filters")} />
+        <F0Button label="Search" icon={Settings} variant="outline" onClick={() => setActiveDialog("catalog-search")} />
+      </F0Box>
+      <LearningSection title="Available courses" count="3" onOpenCourse={onOpenCourse} />
+      <TrainingActionDialog
+        detail={activeDialog ? getCatalogActionDetail(activeDialog) : null}
+        onClose={() => setActiveDialog(null)}
+        onConfirm={() => setActiveDialog(null)}
       />
-    </StandardLayout>
+    </F0Box>
+  )
+}
+
+function MyRequestsTab() {
+  return (
+    <InfoPanel title="My requests" items={["No pending request", "Requests submitted from catalog appear here"]} />
+  )
+}
+
+function MySurveysTab() {
+  return (
+    <InfoPanel title="My surveys" items={["No pending survey", "Completed course surveys appear here"]} />
+  )
+}
+
+function CourseThumbnailField({ course }: { course: ExactCourse }) {
+  const thumbnail = course.thumbnail
+
+  return (
+    <F0Box display="flex" flexDirection="column" gap="sm">
+      <F0Text content="Course thumbnail" variant="label" />
+      {thumbnail ? (
+        <F0BoxWithClassName
+          borderRadius="md"
+          role="img"
+          aria-label={course.name}
+          style={{
+            backgroundImage: `url(${thumbnail})`,
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "contain",
+            height: 140,
+            maxWidth: 360,
+          }}
+        />
+      ) : (
+        <F0Text content="-" variant="body" />
+      )}
+    </F0Box>
+  )
+}
+
+function SidebarField({ label, value }: { label: string; value: string }) {
+  return (
+    <F0Box display="flex" flexDirection="column" gap="xs">
+      <F0Text content={label} variant="label" />
+      <F0Text content={value} variant="body" />
+    </F0Box>
+  )
+}
+
+function MyCoursesScreen({ onBack }: { onBack: () => void }) {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeMyTab = getValidParam(
+    searchParams.get("mytab"),
+    new Set<string>(myCoursesTabs.map((tab) => tab.id)),
+    "my-courses"
+  ) as MyCoursesTabId
+  const tabs = myCoursesTabs.map((tab) => ({
+    ...tab,
+    onClick: () => setSearchParams({ view: "free-course", mytab: tab.id }),
+  }))
+
+  return (
+    <Page
+      header={
+        <>
+          <PageHeader
+            module={moduleInfo}
+            breadcrumbs={[{ id: "my-courses", label: "My courses", href: routes.myCourses }]}
+            actions={[{ label: "Discover Training", icon: Sparkles, onClick: () => setSearchParams({ view: "discover" }) }]}
+          />
+          <Tabs key={activeMyTab} tabs={tabs} activeTabId={activeMyTab} />
+        </>
+      }
+    >
+      <StandardLayout>
+        <F0Box display="flex" flexDirection="column" gap="2xl">
+          {activeMyTab === "my-courses" && <MyCoursesOverview onOpenCourse={() => setSearchParams({ view: "my-course-detail" })} />}
+          {activeMyTab === "catalog" && <MyCatalogTab onOpenCourse={() => setSearchParams({ view: "my-course-detail" })} />}
+          {activeMyTab === "my-requests" && <MyRequestsTab />}
+          {activeMyTab === "my-surveys" && <MySurveysTab />}
+          <F0Box>
+            <F0Button label="Back to Training" icon={Cross} variant="outline" onClick={onBack} />
+          </F0Box>
+        </F0Box>
+      </StandardLayout>
+    </Page>
   )
 }
 
@@ -5012,15 +5552,32 @@ function NotificationsLayer() {
 
 
 
-function SideInfo(_props: Record<string, unknown>) {
+function SideInfo({ course }: { course: ExactCourse }) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
+    <F0BoxWithClassName
+      display="flex"
+      flexDirection="column"
+      gap="xl"
+      paddingLeft="xl"
+      style={{ flex: 1 }}
+    >
+      <CourseThumbnailField course={course} />
+      <SidebarField
+        label="Completion settings"
+        value="Complete all modules, 100% attendance required, Pass knowledge test"
       />
-    </StandardLayout>
+      <SidebarField label="Subsidy" value="Non-subsidized" />
+      <SidebarField label="Workflow" value="Not linked to Workflows" />
+      <SidebarField label="Internal code" value={course.code} />
+      <SidebarField
+        label="Categories"
+        value={course.categories.length > 0 ? course.categories.join(", ") : "-"}
+      />
+      <SidebarField label="Total cost" value={course.totalCost} />
+      <SidebarField label="Total salary cost" value={course.salaryCost} />
+      <SidebarField label="Subsidized cost" value={course.subsidizedCost} />
+      <SidebarField label="Creation year" value={course.creationYear} />
+    </F0BoxWithClassName>
   )
 }
 
@@ -5562,26 +6119,317 @@ function TrainingGroupDetail(props: Record<string, unknown>) {
   )
 }
 
-function TrainingSettingsScreen(_props: Record<string, unknown>) {
+function TrainingSettingsScreen({ onBack }: { onBack: () => void }) {
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <Page
+      header={
+        <>
+          <PageHeader module={moduleInfo} breadcrumbs={[{ id: "courses", label: "Courses", href: routes.courses }, { id: "settings", label: "Settings" }]} />
+          <ResourceHeader
+            title="Training settings"
+            description="Configure catalog visibility, request approvals and completion defaults."
+            secondaryActions={[{ label: "Cancel", icon: Cross, onClick: onBack }]}
+          />
+        </>
+      }
+    >
+      <StandardLayout>
+        <F0Box display="grid" columns="1" md={{ columns: "2" }} gap="lg">
+          <InfoPanel
+            title="Catalog"
+            items={["Employees can browse published courses", "Categories are visible in the catalog", "Factorial campus courses are enabled"]}
+          />
+          <InfoPanel
+            title="Requests"
+            items={["Employees can request training", "Admins review requests before approval", "Budget assignment is required for paid courses"]}
+          />
+          <InfoPanel
+            title="Completion"
+            items={["Courses can require attendance", "Knowledge tests can be mandatory", "Expired validity creates retake alerts"]}
+          />
+          <InfoPanel
+            title="Imports"
+            items={["Courses can be imported", "Participants can be imported", "Templates are available from import screens"]}
+          />
+        </F0Box>
+      </StandardLayout>
+    </Page>
   )
 }
 
 /* Helpers and one dialog also lost in the same cut — neutral stubs. */
-function TrainingActionDialog(_props: Record<string, unknown>) {
-  return null
+function TrainingActionDialog({
+  detail,
+  onClose,
+  onConfirm,
+}: {
+  detail: TrainingActionDialogDetail | null
+  onClose: () => void
+  onConfirm: () => void
+}) {
+  if (!detail) return null
+
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position={detail.position ?? "center"}
+      width="md"
+      title={detail.title}
+      description={detail.description}
+      primaryAction={{ label: detail.primaryLabel, onClick: onConfirm }}
+      secondaryAction={{ label: "Cancel", onClick: onClose }}
+    >
+      <F0Box display="flex" flexDirection="column" gap="lg">
+        <InfoPanel title={detail.summaryTitle} items={detail.summaryItems} />
+      </F0Box>
+    </F0Dialog>
+  )
 }
-const getListActionDetail = (..._args: unknown[]): undefined => undefined
-const getInsightActionDetail = (..._args: unknown[]): undefined => undefined
-const getCourseActionDetail = (..._args: unknown[]): undefined => undefined
-const getBudgetActionDetail = (..._args: unknown[]): undefined => undefined
+function getListActionDetail(action: PendingListAction, courses: ExactCourse[]): TrainingActionDialogDetail {
+  const course = courses.find((item) => item.id === action.courseId)
+  const courseName = course?.name ?? "selected courses"
+
+  switch (action.dialog) {
+    case "duplicate-course":
+      return {
+        title: "Duplicate course",
+        description: `Create a draft copy of ${courseName}.`,
+        primaryLabel: "Duplicate",
+        summaryTitle: "Copied data",
+        summaryItems: ["Course information", "Content modules", "Completion settings"],
+        toast: "draft",
+      }
+    case "toggle-catalog-course":
+      return {
+        title: course?.catalogVisible ? "Remove from catalog" : "Add to catalog",
+        description: course?.catalogVisible ? `Hide ${courseName} from the employee catalog.` : `Display ${courseName} in the employee catalog.`,
+        primaryLabel: course?.catalogVisible ? "Remove from catalog" : "Add to catalog",
+        summaryTitle: "Catalog visibility",
+        summaryItems: ["Employees see catalog courses", "Admins keep course management access", "Existing participants keep progress"],
+        toast: "settings",
+      }
+    case "delete-course":
+      return {
+        title: "Delete course",
+        description: `Delete ${courseName} from the training catalog.`,
+        primaryLabel: "Delete course",
+        summaryTitle: "Before deleting",
+        summaryItems: ["Course content is removed", "Groups stop being visible", "Historical participant records remain in reports"],
+        toast: "settings",
+      }
+    case "export-connectivity-log":
+      return {
+        title: "Export connectivity log",
+        description: `Download the connectivity log for ${courseName}.`,
+        primaryLabel: "Export log",
+        summaryTitle: "Export content",
+        summaryItems: ["Employee name", "Last access", "Completion status"],
+        toast: "export",
+      }
+    case "bulk-archive":
+      return {
+        title: "Archive selected courses",
+        description: "Move the selected courses to draft for review.",
+        primaryLabel: "Archive courses",
+        summaryTitle: "Bulk action",
+        summaryItems: ["Applies to selected rows", "Catalog visibility can be restored", "Participants keep historical progress"],
+        toast: "draft",
+      }
+    case "bulk-delete":
+      return {
+        title: "Delete selected courses",
+        description: "Delete the selected training courses.",
+        primaryLabel: "Delete courses",
+        summaryTitle: "Bulk deletion",
+        summaryItems: ["Selected rows are affected", "Course groups are removed", "Reports keep historical records"],
+        toast: "settings",
+      }
+    case "bulk-display-catalog":
+      return {
+        title: "Display on catalog",
+        description: "Show selected courses in the employee catalog.",
+        primaryLabel: "Display courses",
+        summaryTitle: "Visibility update",
+        summaryItems: ["Selected published courses become visible", "Employees can request or start them", "Managers can still track progress"],
+        toast: "settings",
+      }
+    case "bulk-hide-catalog":
+    default:
+      return {
+        title: "Hide from catalog",
+        description: "Hide selected courses from the employee catalog.",
+        primaryLabel: "Hide courses",
+        summaryTitle: "Visibility update",
+        summaryItems: ["Selected courses disappear from catalog", "Current participants keep access", "Admins can show them again later"],
+        toast: "settings",
+      }
+  }
+}
+function getInsightActionDetail(dialog: InsightActionDialogId): TrainingActionDialogDetail {
+  if (dialog === "date-range") {
+    return {
+      title: "Date range",
+      description: "Filter insights by training activity period.",
+      primaryLabel: "Apply range",
+      summaryTitle: "Current range",
+      summaryItems: ["From 1 Jan 2026", "To 31 Dec 2026", "Includes completed and active courses"],
+      toast: "settings",
+    }
+  }
+
+  if (dialog === "trainings-filter") {
+    return {
+      title: "Trainings filter",
+      description: "Choose which courses are included in the dashboard.",
+      primaryLabel: "Apply filter",
+      summaryTitle: "Included courses",
+      summaryItems: ["Published courses", "Factorial campus courses", "Mandatory compliance courses"],
+      toast: "settings",
+    }
+  }
+
+  return {
+    title: "Teams filter",
+    description: "Choose which teams are included in the training dashboard.",
+    primaryLabel: "Apply filter",
+    summaryTitle: "Included teams",
+    summaryItems: ["Retail", "People", "Operations", "Finance"],
+    toast: "settings",
+  }
+}
+function getCourseActionDetail(dialog: CourseActionDialogId, course: ExactCourse): TrainingActionDialogDetail {
+  switch (dialog) {
+    case "course-settings":
+      return {
+        title: "Course settings",
+        description: "Review the administrative configuration used by this course.",
+        primaryLabel: "Save changes",
+        summaryTitle: "Settings",
+        summaryItems: ["Internal code and categories", "Course validity and completion rules", "Catalog visibility and linked workflows"],
+        toast: "settings",
+        position: "right",
+      }
+    case "revert-course":
+      return {
+        title: "Revert to draft",
+        description: `Move ${course.name} back to draft so it can be edited before publishing again.`,
+        primaryLabel: "Revert to draft",
+        summaryTitle: "What changes",
+        summaryItems: ["The course leaves the published state", "Participants keep their progress", "Admins can edit the course content again"],
+        toast: "draft",
+      }
+    case "edit-content":
+      return {
+        title: "Edit course content",
+        description: "Open the course builder for modules, pages, quizzes and videos.",
+        primaryLabel: "Open builder",
+        summaryTitle: "Content builder",
+        summaryItems: ["3 modules", "5 pages", "2 quizzes", "1 video"],
+        toast: "settings",
+        position: "right",
+      }
+    case "delete-training-group":
+      return {
+        title: "Delete training group",
+        description: "Remove this group from the course.",
+        primaryLabel: "Delete group",
+        summaryTitle: "Before deleting",
+        summaryItems: ["Participants are removed from this group", "Session attendance is no longer visible here", "Course content is not deleted"],
+        toast: "settings",
+      }
+    case "upload-course-material":
+      return {
+        title: "Upload material",
+        description: "Add participant-facing files to the course.",
+        primaryLabel: "Upload",
+        summaryTitle: "Accepted material",
+        summaryItems: ["PDF handbooks", "Slide decks", "Reading resources"],
+        toast: "draft",
+      }
+    case "embed-course-material":
+      return {
+        title: "Embed link",
+        description: "Attach an external resource to the course materials.",
+        primaryLabel: "Embed link",
+        summaryTitle: "Link details",
+        summaryItems: ["Resource URL", "Visible title", "Optional description for participants"],
+        toast: "draft",
+      }
+    case "download-course-material":
+      return {
+        title: "Download material",
+        description: "Download the selected participant material.",
+        primaryLabel: "Download",
+        summaryTitle: "File",
+        summaryItems: ["Course handbook.pdf", "Participant material", "Shared with every course group"],
+        toast: "export",
+      }
+    case "upload-course-document":
+      return {
+        title: "Upload document",
+        description: "Add an internal document for training managers and admins.",
+        primaryLabel: "Upload",
+        summaryTitle: "Internal document",
+        summaryItems: ["Certificate templates", "Compliance evidence", "Administrative attachments"],
+        toast: "draft",
+      }
+    case "download-course-document":
+      return {
+        title: "Download document",
+        description: "Download the selected internal course document.",
+        primaryLabel: "Download",
+        summaryTitle: "File",
+        summaryItems: ["Completion certificate template", "Training document", "Visible only to admins"],
+        toast: "export",
+      }
+    case "add-course-survey":
+    default:
+      return {
+        title: "Add survey",
+        description: "Attach a satisfaction, effectiveness or knowledge survey to this course.",
+        primaryLabel: "Add survey",
+        summaryTitle: "Survey options",
+        summaryItems: ["Course satisfaction", "Course effectiveness", "Knowledge test"],
+        toast: "draft",
+        position: "right",
+      }
+  }
+}
+function getBudgetActionDetail(dialog: "add-group" | "export" | "edit", budget: BudgetRow): TrainingActionDialogDetail {
+  switch (dialog) {
+    case "add-group":
+      return {
+        title: "Add training group",
+        description: "Select a training group and assign a cost to this budget.",
+        primaryLabel: "Add training group",
+        summaryTitle: budget.name,
+        summaryItems: ["Search existing training groups", "Assign budgeted cost", "Track payment status from the budget detail"],
+        toast: null,
+        position: "right",
+      }
+    case "export":
+      return {
+        title: "Export budget",
+        description: "Export the training groups and costs linked to this budget.",
+        primaryLabel: "Export",
+        summaryTitle: "Export contents",
+        summaryItems: ["Training group", "Group status", "Cost", "Provider", "Payment status", "Participants"],
+        toast: "export",
+        position: "right",
+      }
+    case "edit":
+      return {
+        title: "Edit budget",
+        description: "Update the training budget details.",
+        primaryLabel: "Save",
+        summaryTitle: "Budget settings",
+        summaryItems: ["Budget name", "Date", "Status", "Training groups"],
+        toast: "settings",
+        position: "right",
+      }
+  }
+}
 
 /* --- affected-groups model, rebuilt after the cut --------------------------- */
 type AffectedGroup = { id: string; name: string; dates: string; completed: number; notCompleted?: number; pending: number; wouldFail: number; wouldPass: number; reasons?: { requirement: string; value: string }[]; person?: FinishedPerson; direction?: "lose" | "gain" }
