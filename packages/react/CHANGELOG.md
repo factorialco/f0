@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.9.1](https://github.com/factorialco/f0/compare/f0-react-v6.9.0...f0-react-v6.9.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* centre UpsellRequestResponseDialog instead of double-offsetting it ([#5010](https://github.com/factorialco/f0/issues/5010)) ([302feb1](https://github.com/factorialco/f0/commit/302feb14adbeeb006b1d3e6df0f4fa9b44667d9b))
+* **video:** align player surface colors ([#4987](https://github.com/factorialco/f0/issues/4987)) ([4e7a1f0](https://github.com/factorialco/f0/commit/4e7a1f048d78df1b423314091b439cb536beaf42))
+
 ## [6.9.0](https://github.com/factorialco/f0/compare/f0-react-v6.8.4...f0-react-v6.9.0) (2026-08-06)
 
 
