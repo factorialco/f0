@@ -11336,13 +11336,6 @@ export declare const F0Select: <T extends string = string, R = unknown>(props: F
  */
 declare type F0SelectBaseProps<T extends string, R = unknown> = {
     withApplySelection?: boolean;
-    /**
-     * Custom label for the apply button in the apply-selection footer. Defaults
-     * to the translated "Apply selection". Pass an already-translated string.
-     * Only has an effect when `withApplySelection` is enabled in multi-select
-     * mode. Keep it short — some locales (e.g. German, French) run long and can
-     * overflow the footer.
-     */
     applySelectionLabel?: string;
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
