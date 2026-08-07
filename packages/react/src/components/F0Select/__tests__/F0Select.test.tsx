@@ -769,17 +769,14 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    await user.click(screen.getByText("Option 2")) // stage an addition
+    await user.click(screen.getByText("Option 2"))
     await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-    // Cancel now closes the dropdown (like clicking outside) and commits nothing.
     await waitFor(() => {
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
     })
     expect(handleChange).not.toHaveBeenCalled()
 
-    // The staged addition was discarded: reopening and applying without changes
-    // emits nothing, proving Option 2 did not persist.
     await openSelect(user)
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 

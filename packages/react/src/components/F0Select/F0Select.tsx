@@ -819,10 +819,6 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
-  // "Cancel" aborts the apply-selection flow by closing the dropdown. The
-  // close path (`handleChangeOpenLocal`) restores the committed selection, so
-  // staged changes are discarded — matching what clicking outside does, and
-  // what users expect from a Cancel action.
   const handleCancel = useCallback(() => {
     handleChangeOpenLocal(false)
   }, [handleChangeOpenLocal])
