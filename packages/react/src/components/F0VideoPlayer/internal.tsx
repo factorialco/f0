@@ -235,8 +235,8 @@ export function F0VideoPlayerInternal({
     <div
       ref={wrapperRef}
       className={cn(
-        "group relative h-full w-full overflow-hidden rounded-[inherit]",
-        "[&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:bg-[#000]",
+        "group relative h-full w-full overflow-hidden rounded-[inherit] bg-f1-foreground dark:bg-f1-background",
+        "[&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none",
         focusRing()
       )}
       role="region"
@@ -315,9 +315,9 @@ export function F0VideoPlayerInternal({
             type="button"
             tabIndex={-1}
             onClick={video.togglePlay}
-            className="dark pointer-events-auto flex size-14 items-center justify-center rounded-full bg-[#000000b3] pl-0.5 text-f1-foreground shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-transform duration-150 hover:scale-105 motion-reduce:transition-none [&_svg]:size-7"
+            className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-f1-foreground/70 pl-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-transform duration-150 hover:scale-105 motion-reduce:transition-none dark:bg-f1-background/70 [&_svg]:size-7"
           >
-            <F0Icon icon={SolidPlay} size="lg" />
+            <F0Icon icon={SolidPlay} size="lg" color="#fff" />
           </button>
         </div>
       )}
@@ -332,7 +332,7 @@ export function F0VideoPlayerInternal({
           aria-hidden
           className="dark pointer-events-none absolute inset-x-0 top-0 z-[2] flex justify-center p-3"
         >
-          <p className="max-w-[90%] rounded-md bg-[#000000b3] px-2 py-1 text-center text-base italic text-f1-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.55)]">
+          <p className="max-w-[90%] rounded-md bg-f1-background/70 px-2 py-1 text-center text-base italic text-f1-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.55)]">
             <span className="pr-1 font-medium not-italic opacity-70">
               [{t("videoPlayer.audioDescription")}]
             </span>
