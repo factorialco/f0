@@ -9,6 +9,7 @@ import {
   F0Graph,
   type F0GraphHandle,
   F0GraphNode,
+  F0GraphStackedNode,
   F0GraphSkeleton,
   tagColumn,
 } from "@/patterns/F0Graph"
@@ -65,6 +66,8 @@ export const GraphCollection = <
   currentUserNodeId,
   getNodeId,
   getChildrenCount,
+  stackChildren,
+  stackedTrailing,
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
@@ -123,6 +126,7 @@ export const GraphCollection = <
       tags,
       getNodeId,
       getChildrenCount,
+      stackChildren,
       childrenFilters,
       defaultExpandDepth,
       loadNodePath,
@@ -286,6 +290,25 @@ export const GraphCollection = <
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
+            // A stacked row mirrors the card's anatomy (same box, same leading
+            // avatar, same title) so a column reads as a continuation of its
+            // parent. The card-only extras — subtitle, tags, the selection
+            // toolbar — do not apply; a trailing slot takes their place.
+            if (ctx.stacked) {
+              return (
+                <F0GraphStackedNode
+                  {...ctx}
+                  loading={ctx.dataLoading}
+                  avatar={avatar?.(node.data)}
+                  title={title(node.data)}
+                  trailing={stackedTrailing?.(node.data)}
+                  onClick={() => {
+                    ctx.onClick()
+                    itemOnClick?.()
+                  }}
+                />
+              )
+            }
             return (
               <F0GraphNode
                 {...ctx}
