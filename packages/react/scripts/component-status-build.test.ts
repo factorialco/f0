@@ -1,7 +1,6 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
-
 import { afterAll, beforeAll, describe, expect, test } from "vitest"
 
 import {
@@ -75,7 +74,13 @@ beforeAll(() => {
   // 1) Stable component: stories in __stories__, unit tests, gold docs, play fn.
   write(
     "components/F0Alert/__stories__/F0Alert.stories.tsx",
-    story("Alert", ["autodocs", "stable"], "\n" + PLAY_STORY)
+    story(
+      "Alert",
+      ["autodocs", "stable"],
+      "\n" +
+        PLAY_STORY +
+        "\nexport const Secondary = {}\nexport const Tertiary = {}"
+    )
   )
   write("components/F0Alert/__stories__/F0Alert.mdx", GOLD_MDX)
   write("components/F0Alert/__tests__/F0Alert.test.tsx", "test('x', () => {})")
@@ -124,7 +129,13 @@ beforeAll(() => {
   // which of the two story files the scan visits first.)
   write(
     "components/F0Alert/__stories__/Extra.stories.tsx",
-    story("Alert", ["stable"], "\n" + PLAY_STORY)
+    story(
+      "Alert",
+      ["autodocs", "stable"],
+      "\n" +
+        PLAY_STORY +
+        "\nexport const Secondary = {}\nexport const Tertiary = {}"
+    )
   )
 
   // 10) The meta title must win over a `title:` in a sample-data/args object
@@ -152,7 +163,9 @@ describe("computeComponentStatusData (extraction)", () => {
       name: "Alert",
       zone: "components",
       apiStatus: "stable",
+      hasAutodocs: true,
       hasStories: true,
+      storyCount: 3,
       hasUnitTests: true,
       hasPlayFunction: true,
       hasMdxDocs: true,
@@ -173,6 +186,8 @@ describe("computeComponentStatusData (extraction)", () => {
   test("marks a story-only component as experimental with nothing else", () => {
     expect(byName("Widget")).toMatchObject({
       apiStatus: "experimental",
+      hasAutodocs: false,
+      storyCount: 0,
       hasUnitTests: false,
       hasPlayFunction: false,
       hasMdxDocs: false,
