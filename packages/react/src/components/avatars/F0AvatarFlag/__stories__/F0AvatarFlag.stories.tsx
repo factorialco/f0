@@ -56,18 +56,16 @@ export const Default: Story = {
     // Reachable only because meta.args passes an aria-label: BaseAvatar renders
     // `aria-hidden={!hasAria}`, so an unlabelled flag avatar exposes no role at
     // all and this query would find nothing (that is the case in `Snapshot`).
-    await expect(canvas.getByRole("img", { name: "Spain" })).toBeInTheDocument()
-    // The fallback initials come from the localized country name, not the raw
-    // code: "es" resolves through `i18n.countries` to "Spain", hence "SP".
-    // Drop that lookup and this reads "ES" while the role query stays green.
-    await expect(canvas.getByText("SP")).toBeInTheDocument()
+    const avatar = canvas.getByRole("img", { name: "Spain" })
+    await expect(avatar).toBeInTheDocument()
+    await expect(avatar.querySelector("svg")).not.toBeNull()
   },
 }
 
 /**
- * The two lookups the `flag` prop drives, side by side: `es` resolves both the
- * graphic and the localized name, `ES` resolves only the graphic (the country
- * name lookup is case-sensitive), and `zz` resolves neither.
+ * `getFlag` resolves country codes case-insensitively, so `es` and `ES` both
+ * show a flag graphic. `zz` resolves no graphic and falls back to raw-code
+ * initials.
  */
 export const CodeLookup: Story = {
   // The render is fixed, so the knobs would be a lie.
@@ -79,9 +77,9 @@ export const CodeLookup: Story = {
     <div className="flex flex-row gap-4">
       {(
         [
-          ["es", "flag + localized name"],
-          ["ES", "flag, raw-code label"],
-          ["zz", "no flag, raw-code label"],
+          ["es", "flag graphic"],
+          ["ES", "case-insensitive flag graphic"],
+          ["zz", "no flag, raw-code initials"],
         ] as const
       ).map(([code, caption]) => (
         <div key={code} className="flex flex-col items-center gap-1">

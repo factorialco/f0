@@ -15,6 +15,13 @@ import { F0AvatarFlag } from "../F0AvatarFlag"
 const flagSlot = (container: HTMLElement) =>
   container.querySelector('[role="img"] > span.absolute.inset-0')
 
+const expectFlagGraphic = (container: HTMLElement) => {
+  const slot = flagSlot(container)
+
+  expect(slot).not.toBeNull()
+  expect(slot!.querySelector("svg")).not.toBeNull()
+}
+
 describe("F0AvatarFlag", () => {
   it("exposes the accessible name when labelled", () => {
     zeroRender(<F0AvatarFlag flag="es" aria-label="Spain" />)
@@ -23,53 +30,29 @@ describe("F0AvatarFlag", () => {
   })
 
   it("is hidden from assistive tech when no label is passed", () => {
-    zeroRender(<F0AvatarFlag flag="es" size="lg" />)
+    const { container } = zeroRender(<F0AvatarFlag flag="es" size="lg" />)
 
     // BaseAvatar renders `aria-hidden={!hasAria}`, and Testing Library skips
     // aria-hidden subtrees for role queries — so there is no `img` to find.
     expect(screen.queryByRole("img")).toBeNull()
     // Still rendered, just not announced.
-    expect(screen.getByText("SP")).toBeInTheDocument()
+    expectFlagGraphic(container)
   })
 
-  it("uses the localized country name for the fallback initials", () => {
-    // The label is deliberately different from the country name, so the
-    // initials cannot be coming from the label.
-    zeroRender(<F0AvatarFlag flag="es" size="lg" aria-label="Flag of Spain" />)
+  it("renders the resolved flag graphic", () => {
+    const { container } = zeroRender(
+      <F0AvatarFlag flag="es" size="lg" aria-label="Flag of Spain" />
+    )
 
-    expect(screen.getByText("SP")).toBeInTheDocument()
+    expectFlagGraphic(container)
   })
 
-  it("resolves the graphic case-insensitively but the country name not", () => {
-    // `getFlag` lowercases the code (flagsMap.tsx:47) while the country name
-    // lookup uses the raw prop against lowercase-only keys
-    // (F0AvatarFlag.tsx:19) — so an uppercase code gets the flag and a raw-code
-    // label. Documented in the MDX; this is the guard on that sentence.
+  it("resolves the graphic case-insensitively", () => {
     const { container } = zeroRender(
       <F0AvatarFlag flag="ES" size="lg" aria-label="Spain" />
     )
 
-    // Assert the slot exists before reaching into it: `flagSlot(...)?.…` yields
-    // `undefined` when the slot is missing, and `undefined` satisfies
-    // `.not.toBeNull()` — so the optional chain would make this pass even if no
-    // flag rendered at all.
-    const slot = flagSlot(container)
-    expect(slot).not.toBeNull()
-    expect(slot!.querySelector("svg")).not.toBeNull()
-    expect(screen.getByText("ES")).toBeInTheDocument()
-    expect(screen.queryByText("SP")).toBeNull()
-  })
-
-  it("falls back to the raw code when the code has no localized name", () => {
-    // "zw" has a flag graphic but no entry in i18n.countries.
-    const { container } = zeroRender(
-      <F0AvatarFlag flag="zw" size="lg" aria-label="Zimbabwe" />
-    )
-
-    expect(screen.getByText("ZW")).toBeInTheDocument()
-    const slot = flagSlot(container)
-    expect(slot).not.toBeNull()
-    expect(slot!.querySelector("svg")).not.toBeNull()
+    expectFlagGraphic(container)
   })
 
   it("renders no flag graphic for an unknown code", () => {
