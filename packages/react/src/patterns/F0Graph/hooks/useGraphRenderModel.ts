@@ -30,6 +30,7 @@ import {
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
+  EXPANDER_Y_OFFSET_STACKED_BY_ZOOM,
   type CollapserNodeData,
   type ExpanderNodeData,
   type GraphNodeData,
@@ -347,6 +348,9 @@ export function useGraphRenderModel<T>({
   // Scales per zoom level (+100% each step) so the larger expander button remains
   // visually centered in its lane.
   const EXPANDER_Y_OFFSET = EXPANDER_Y_OFFSET_BY_ZOOM[zoomLevel]
+  // A stacked column hangs in a shortened lane, so its affordance is centered
+  // in that shorter gap instead of the full rank one.
+  const EXPANDER_Y_OFFSET_STACKED = EXPANDER_Y_OFFSET_STACKED_BY_ZOOM[zoomLevel]
   const COLLAPSER_OFFSET_ADJUSTMENT =
     COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM[zoomLevel]
 
@@ -671,15 +675,18 @@ export function useGraphRenderModel<T>({
       }
       const pw = parentNode.width ?? BASE_W
       const ph = parentNode.height ?? BASE_H
+      const laneOffset = stackedParentIds.has(exp.parentId)
+        ? EXPANDER_Y_OFFSET_STACKED
+        : EXPANDER_Y_OFFSET
       const expX = isHorizontal
         ? direction === "LR"
-          ? parentNode.x + pw + EXPANDER_Y_OFFSET
+          ? parentNode.x + pw + laneOffset
           : parentNode.x - pw
         : parentNode.x
       const expY = isHorizontal
         ? parentNode.y * yStretch
         : direction === "TB"
-          ? parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET
+          ? parentNode.y * yStretch + ph + laneOffset
           : parentNode.y * yStretch - ph
       nodes.push({
         id: exp.id,
@@ -708,15 +715,18 @@ export function useGraphRenderModel<T>({
       const py = parentPos?.y ?? 0
       const pw = parentPos?.width ?? BASE_W
       const ph = parentPos?.height ?? BASE_H
+      const laneOffset = stackedParentIds.has(parent.id)
+        ? EXPANDER_Y_OFFSET_STACKED
+        : EXPANDER_Y_OFFSET
       const colX = isHorizontal
         ? direction === "LR"
-          ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? px + pw + laneOffset + COLLAPSER_OFFSET_ADJUSTMENT
           : px - pw
         : px
       const colY = isHorizontal
         ? py * yStretch
         : direction === "TB"
-          ? py * yStretch + ph + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? py * yStretch + ph + laneOffset + COLLAPSER_OFFSET_ADJUSTMENT
           : py * yStretch - ph
       nodes.push({
         id: `collapser-${parent.id}`,
@@ -742,7 +752,9 @@ export function useGraphRenderModel<T>({
     expandedNodes,
     stableRenderNode,
     EXPANDER_Y_OFFSET,
+    EXPANDER_Y_OFFSET_STACKED,
     COLLAPSER_OFFSET_ADJUSTMENT,
+    stackedParentIds,
     nodeWidthProp,
     effectiveNodeHeight,
     direction,

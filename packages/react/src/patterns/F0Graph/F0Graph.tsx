@@ -177,10 +177,11 @@ export interface F0GraphProps<T = unknown> {
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 56. Override for compact nodes (icons, file rows). */
   nodeHeight?: number
   /**
-   * Height of one stacked child row (see `GraphNode.stackChildren`). Stacked
-   * rows are compact strips rather than node cards, so they size independently
-   * of `nodeHeight`. Defaults to 40 — keep it in step with whatever `renderNode`
-   * returns for a stacked node, or the rows will overlap or leave gaps.
+   * Height of one stacked child row (see `GraphNode.stackChildren`). A row
+   * inherits the card's width but not its height — it is a compact strip — so
+   * it sizes independently of `nodeHeight`. Defaults to 40. Keep it in step
+   * with whatever `renderNode` returns for a stacked node, or the rows will
+   * overlap or leave gaps.
    */
   stackedNodeHeight?: number
   /** Vertical gap between two stacked child rows. Defaults to 8. */

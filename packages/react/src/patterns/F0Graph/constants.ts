@@ -27,6 +27,12 @@ export const BACKGROUND_DOT_GAP = 32
 export const STACKED_NODE_HEIGHT = 40
 export const STACKED_NODE_GAP = 8
 
+// Fraction of the normal `rankSep` lane a stacked column hangs below its
+// parent. A stack reads as part of the parent rather than as the next rank, so
+// a full rank gap detaches it visually. Shared with the expander/collapser
+// placement below — the affordance sits in that same (shortened) lane.
+export const STACKED_RANK_SEP_RATIO = 0.5
+
 // Delay used after a layout-affecting change before calling `fitView`,
 // so React Flow can settle the new node positions in its store.
 export const FOCUS_SETTLE_DELAY_MS = 100

@@ -1,6 +1,10 @@
 import { useMemo } from "react"
 
-import { STACKED_NODE_GAP, STACKED_NODE_HEIGHT } from "../constants"
+import {
+  STACKED_NODE_GAP,
+  STACKED_NODE_HEIGHT,
+  STACKED_RANK_SEP_RATIO,
+} from "../constants"
 import type {
   GraphEdge,
   LayoutDirection,
@@ -54,8 +58,9 @@ interface UseLayoutEngineOptions {
   rootSep?: number
   /**
    * Main-axis size of a stacked child — its height in the default `TB`
-   * direction. Stacked rows are compact strips rather than full node cards, so
-   * they get their own size instead of `nodeHeight`. Defaults to 40.
+   * direction. A stacked row inherits the card's width but not its height: it
+   * is a compact strip, so it sizes independently of `nodeHeight`. Defaults
+   * to 40.
    */
   stackedNodeHeight?: number
   /** Gap between two consecutive stacked children. Defaults to 8. */
@@ -420,10 +425,18 @@ function computeTreeLayout(
     const stackOffset = isStacked
       ? stackIndex * (stackedNodeHeight + stackedNodeGap)
       : 0
+    // A stacked column reads as part of its parent, not as the next rank, so it
+    // hangs closer than a full `rankSep` lane — see `STACKED_RANK_SEP_RATIO`.
+    // The pull is toward the parent in both main-axis directions.
+    const stackedPull = rankSep * (1 - STACKED_RANK_SEP_RATIO)
     const mainCenter = isStacked
       ? flipMain
-        ? rankStart + mainSize - stackedNodeHeight / 2 - stackOffset
-        : rankStart + stackedNodeHeight / 2 + stackOffset
+        ? rankStart +
+          mainSize -
+          stackedNodeHeight / 2 -
+          stackOffset +
+          stackedPull
+        : rankStart + stackedNodeHeight / 2 + stackOffset - stackedPull
       : rankStart + mainSize / 2
 
     // Snap the cross axis to the grid; round the main (depth) axis only.

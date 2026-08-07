@@ -1389,6 +1389,7 @@ const StackedChildrenDemo = () => {
         ctx.stacked ? (
           <F0GraphStackedNode
             {...ctx}
+            avatar={{ type: "team", name: node.data.name }}
             title={node.data.name}
             trailing={
               <F0Checkbox

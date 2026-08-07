@@ -5,6 +5,7 @@ import {
   useCallback,
 } from "react"
 
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -13,12 +14,17 @@ import type { F0GraphStackedNodeProps } from "./types"
 import { STACKED_NODE_HEIGHT } from "../../constants"
 
 /**
- * One row of a stacked group — the compact strip F0Graph lays out when a parent
- * sets `stackChildren` (job levels under a role, plan tiers under a product).
+ * One row of a stacked group — what F0Graph lays out when a parent sets
+ * `stackChildren` (job levels under a role, plan tiers under a product).
  *
- * Unlike the node card, it does not morph with zoom: the layout reserves a fixed
- * band per row, so the row keeps the same box at every zoom level. It also has
- * no expand affordance — a stacked group is only formed from leaf children.
+ * It mirrors the node card's anatomy — full card width, a leading avatar, the
+ * same title type — so a column reads as a continuation of the parent above it
+ * rather than as a different kind of node. It is deliberately shorter, though:
+ * a row is a strip, so the avatar steps down to `md` (a `lg` one would fill the
+ * row edge to edge with no breathing room). It also does not morph with zoom —
+ * the layout reserves a fixed band per row, so the box is the same at every
+ * zoom level — and has no expand affordance, since a stacked group is only
+ * formed from leaf children.
  */
 const F0GraphStackedNodeBase = forwardRef<
   HTMLDivElement,
@@ -34,6 +40,7 @@ const F0GraphStackedNodeBase = forwardRef<
       onClick,
       nodeRef,
       nodeId,
+      avatar,
       title,
       trailing,
       loading,
@@ -73,7 +80,7 @@ const F0GraphStackedNodeBase = forwardRef<
         aria-posinset={posInSet}
         aria-selected={state === "selected"}
         className={cn(
-          "group flex w-full items-center gap-2 rounded-md border border-solid px-3",
+          "group flex w-full items-center gap-2 rounded-md border border-solid px-2",
           "bg-f1-background outline-none transition-[border-color,background-color,opacity] duration-200",
           isMarked
             ? "border-f1-border-selected-bold ring-2 ring-f1-background-selected ring-offset-0"
@@ -90,11 +97,21 @@ const F0GraphStackedNodeBase = forwardRef<
         onKeyDown={handleKeyDown}
       >
         {loading ? (
-          <Skeleton className="h-3 w-24 rounded-xs" />
+          <>
+            <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+            <Skeleton className="h-3 w-24 flex-1 rounded-xs" />
+          </>
         ) : (
-          <p className="min-w-0 flex-1 truncate text-base font-medium text-f1-foreground">
-            {title}
-          </p>
+          <>
+            {avatar && (
+              <div className="flex shrink-0 items-center justify-center">
+                <F0Avatar size="md" avatar={avatar} />
+              </div>
+            )}
+            <p className="min-w-0 flex-1 truncate text-base font-medium text-f1-foreground">
+              {title}
+            </p>
+          </>
         )}
         {trailing && (
           // Trailing controls are their own affordance: clicking a checkbox must

@@ -171,18 +171,19 @@ describe("useLayoutEngine — stacked children", () => {
     expect(l3.y - l2.y).toBe(48)
   })
 
-  it("starts the column at the rank the children would normally occupy", () => {
-    const { result } = zeroRenderHook(() => useLayoutEngine())
+  it("hangs the column half a rank below the parent", () => {
+    // A stack reads as part of its parent, so it sits closer than the full
+    // `rankSep` lane a normal child rank gets. The expander/collapser is
+    // centered in that same shortened lane (see EXPANDER_Y_OFFSET_STACKED).
+    const rankSep = 130
+    const { result } = zeroRenderHook(() => useLayoutEngine({ rankSep }))
     const { nodes, edges } = stackedTree()
 
     const layout = result.current.computeLayout(nodes, edges, "TB")
 
-    // `roleB` is a plain leaf at the same depth as `roleA`, so the first stacked
-    // row must line up with where roleB's own children would start: one rank
-    // below its parent. Same lane for the expander/collapser, either way.
     const roleA = byId(layout, "roleA")
     const l1 = byId(layout, "l1")
-    expect(l1.y).toBeGreaterThan(roleA.y + roleA.height)
+    expect(l1.y - (roleA.y + roleA.height)).toBe(rankSep / 2)
   })
 
   it("reserves no horizontal space for the column", () => {

@@ -18,6 +18,8 @@ import type {
 } from "../components/F0GraphNode"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
+import { STACKED_RANK_SEP_RATIO } from "../constants"
+
 function handlePositions(direction: LayoutDirection): {
   source: Position
   target: Position
@@ -108,6 +110,15 @@ export const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
   detail: (NODE_RANK_SEP - EXPANDER_SIZE.detail) / 2,
   compact: (NODE_RANK_SEP - EXPANDER_SIZE.compact) / 2,
   dot: (NODE_RANK_SEP - EXPANDER_SIZE.dot) / 2,
+}
+
+// Same centering, for the shortened lane above a stacked column. Without it the
+// affordance would keep the full-lane offset and overlap the first row.
+const STACKED_RANK_SEP = NODE_RANK_SEP * STACKED_RANK_SEP_RATIO
+export const EXPANDER_Y_OFFSET_STACKED_BY_ZOOM: Record<ZoomLevel, number> = {
+  detail: (STACKED_RANK_SEP - EXPANDER_SIZE.detail) / 2,
+  compact: (STACKED_RANK_SEP - EXPANDER_SIZE.compact) / 2,
+  dot: (STACKED_RANK_SEP - EXPANDER_SIZE.dot) / 2,
 }
 
 // ─── F0GraphNodeWrapper ────────────────────────────────────────

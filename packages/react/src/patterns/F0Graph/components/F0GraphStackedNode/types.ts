@@ -1,5 +1,7 @@
 import type { ReactNode } from "react"
 
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
+
 import type { GraphNodeState } from "../F0GraphNode"
 
 export interface F0GraphStackedNodeProps {
@@ -19,6 +21,13 @@ export interface F0GraphStackedNodeProps {
   nodeRef?: (el: HTMLDivElement | null) => void
   /** DOM id for aria-owns cross-references. */
   nodeId?: string
+  /**
+   * Avatar on the leading side of the row — the same slot the node card uses,
+   * so a column reads as a continuation of its parent. Rendered at `md` rather
+   * than the card's `lg`: the row is a compact strip, and a 40px avatar would
+   * fill it edge to edge.
+   */
+  avatar?: AvatarVariant
   /** The row's label. */
   title?: ReactNode
   /**
@@ -30,7 +39,8 @@ export interface F0GraphStackedNodeProps {
   loading?: boolean
   /**
    * Row height in px. Must match the graph's `stackedNodeHeight` (both default
-   * to 40) — the layout reserves exactly this much room per row.
+   * to 40) — the layout reserves exactly this much room per row. Only the width
+   * is inherited from the card; a row is deliberately shorter.
    */
   height?: number
 }

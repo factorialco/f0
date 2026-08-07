@@ -290,14 +290,16 @@ export const GraphCollection = <
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
-            // A stacked row is a compact strip, not a node card: it carries the
-            // title and an optional trailing control, and none of the card-only
-            // slots (avatar, subtitle, tags, selection toolbar) apply to it.
+            // A stacked row mirrors the card's anatomy (same box, same leading
+            // avatar, same title) so a column reads as a continuation of its
+            // parent. The card-only extras — subtitle, tags, the selection
+            // toolbar — do not apply; a trailing slot takes their place.
             if (ctx.stacked) {
               return (
                 <F0GraphStackedNode
                   {...ctx}
                   loading={ctx.dataLoading}
+                  avatar={avatar?.(node.data)}
                   title={title(node.data)}
                   trailing={stackedTrailing?.(node.data)}
                   onClick={() => {
