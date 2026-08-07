@@ -867,23 +867,34 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
-/**
- * The action that takes the user into the capability. It carries no icon of its
- * own: it always renders as the AI button with the One mark, because that is
- * the promise the card is making.
- */
-export declare interface AnnouncementPrimaryAction {
+declare interface AnnouncementActionBase {
     /** Button label. */
     label: string;
     /** Called when the button is clicked. */
     onClick: () => void;
 }
 
-export declare interface AnnouncementSecondaryAction {
-    /** Button label. */
-    label: string;
-    /** Called when the button is clicked. */
-    onClick: () => void;
+/**
+ * The action that takes the user into the capability.
+ *
+ * A discriminated union rather than a plain `variant` string, because the two
+ * treatments do not accept the same things: the AI button carries the One mark
+ * and cannot take an icon of its own.
+ */
+export declare type AnnouncementPrimaryAction = (AnnouncementActionBase & {
+    /** Bordered button. The default. */
+    variant?: "outline";
+    /** Optional icon shown before the label. */
+    icon?: IconType;
+}) | (AnnouncementActionBase & {
+    /**
+     * Renders as the AI button with the One mark. Use it when the action
+     * hands the user over to One rather than opening a screen.
+     */
+    variant: "ai";
+});
+
+export declare interface AnnouncementSecondaryAction extends AnnouncementActionBase {
     /** Optional icon shown before the label. */
     icon?: IconType;
 }
@@ -3220,9 +3231,8 @@ export declare interface F0AiAnnouncementCardProps extends DataAttributes_2 {
      */
     mediaUrl?: string;
     /**
-     * The action that takes the user into the capability. Rendered as the AI
-     * button, because that is what an announcement is for — anything else is a
-     * sign this should be a different component.
+     * The action that takes the user into the capability. Bordered by default;
+     * `variant: "ai"` renders it as the AI button instead.
      */
     primaryAction?: AnnouncementPrimaryAction;
     /** An opt-out alongside the primary action. Rendered borderless. */
@@ -5532,11 +5542,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -5544,9 +5552,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

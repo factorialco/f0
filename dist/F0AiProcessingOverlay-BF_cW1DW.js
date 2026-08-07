@@ -1,6 +1,6 @@
 import { jsxs as a, jsx as t, Fragment as F1 } from "react/jsx-runtime";
 import { useInsertionEffect as Pr, forwardRef as m, useRef as $, useEffect as W, useLayoutEffect as ie, useState as P, useId as G1, useMemo as K, useCallback as O, createContext as W1, useContext as I1, createElement as Dr, memo as jr } from "react";
-import { dc as _r, aI as Zr, dd as Or, an as nt, cf as Ur, de as zr, df as Gr, dg as Wr, dh as qr, cg as Xr, cl as st, ce as Yr, di as Kr, ax as ae, dj as Qr, b7 as Jr, dk as eo, dl as to, dm as ro, aP as oo, dn as no, cF as so, y as it, aC as io, dp as ao, o as le, ar as at, ai as q1, n as lt, bF as lo, cj as co, dq as uo, bs as fo, cE as ho, ap as k1, aZ as po, bJ as ct, dr as mo, cC as Co, l as M1, cA as go, ds as wo, ca as dt, br as vo, dt as xo, du as bo, dv as Lo, dw as ko, dx as yo, dy as ut, dz as Mo, dA as Ro, dB as Fo, dC as No, dD as Vo, dE as So, dF as To, bU as Ho, ci as Ao, dG as Eo, dH as $o, dI as Bo, E as Io, dJ as Po, dK as Do, dL as jo, dM as _o, dN as Zo, bT as Oo, cD as Uo, aA as zo, cx as Go, dO as Wo, dP as qo, dQ as Xo, dR as Yo, dS as Ko, dT as Qo, cG as Jo, aV as en, bV as tn, U as ft, dU as rn, ah as on, aq as nn, bW as ht, c9 as sn, R as pt, dV as an, i as ln, bI as cn, bH as dn, dW as un, dX as fn, bX as mt, bY as hn, bZ as pn, bq as mn, a$ as Cn, dY as gn, j as wn, bD as Ct, bC as gt, bx as vn, dZ as wt, az as xn, ch as ce, q as bn, bA as de, d_ as Ln, d$ as kn, e0 as ue, O as yn, Q as Mn, cB as vt, e1 as Rn, af as Fn, ae as Nn, e2 as Vn, e3 as Sn, e4 as Tn, e5 as Hn, c7 as An, e6 as xt, e7 as En, aH as $n, aB as Bn, e8 as In, a7 as H1, cq as Pn, u as G, c6 as Dn, ag as d1, S as i1, bS as bt, V as a1, as as jn, m as p1, e9 as _n, aD as l1, aJ as v1, ad as R1, a6 as Q, cM as Lt, t as fe, ea as Zn, x as he, b as y1, c4 as On, eb as Un, c5 as zn, aj as Gn, bp as Wn, av as pe, b_ as qn, b$ as Xn, c0 as Yn, c1 as Me, at as Kn, aQ as kt, bf as yt, bR as Qn, b6 as Jn, cU as es, ec as ts, ed as rs, bl as Mt, cH as os, cQ as ns, ee as ss, bh as B1, by as Rt, ef as Ft, bz as Nt, c as oe, ck as Re, eg as Vt, eh as is, ei as as, s as St, ej as Tt, ek as ls, aG as cs, el as ds, bE as me, cw as us, em as fs, en as hs, eo as ps, ep as ms, eq as Cs, w as gs, v as Ht, ab as ws, ac as vs, aE as Fe, er as At, es as Et, et as xs, eu as bs, aM as Ls, ay as ks, ev as ys, ew as Ms, d as Rs } from "./F0CanvasPanel-B1wViKzk.js";
+import { dc as _r, aI as Zr, dd as Or, an as nt, cf as Ur, de as zr, df as Gr, dg as Wr, dh as qr, cg as Xr, cl as st, ce as Yr, di as Kr, ax as ae, dj as Qr, b7 as Jr, dk as eo, dl as to, dm as ro, aP as oo, dn as no, cF as so, y as it, aC as io, dp as ao, o as le, ar as at, ai as q1, n as lt, bF as lo, cj as co, dq as uo, bs as fo, cE as ho, ap as k1, aZ as po, bJ as ct, dr as mo, cC as Co, l as M1, cA as go, ds as wo, ca as dt, br as vo, dt as xo, du as bo, dv as Lo, dw as ko, dx as yo, dy as ut, dz as Mo, dA as Ro, dB as Fo, dC as No, dD as Vo, dE as So, dF as To, bU as Ho, ci as Ao, dG as Eo, dH as $o, dI as Bo, E as Io, dJ as Po, dK as Do, dL as jo, dM as _o, dN as Zo, bT as Oo, cD as Uo, aA as zo, cx as Go, dO as Wo, dP as qo, dQ as Xo, dR as Yo, dS as Ko, dT as Qo, cG as Jo, aV as en, bV as tn, U as ft, dU as rn, ah as on, aq as nn, bW as ht, c9 as sn, R as pt, dV as an, i as ln, bI as cn, bH as dn, dW as un, dX as fn, bX as mt, bY as hn, bZ as pn, bq as mn, a$ as Cn, dY as gn, j as wn, bD as Ct, bC as gt, bx as vn, dZ as wt, az as xn, ch as ce, q as bn, bA as de, d_ as Ln, d$ as kn, e0 as ue, O as yn, Q as Mn, cB as vt, e1 as Rn, af as Fn, ae as Nn, e2 as Vn, e3 as Sn, e4 as Tn, e5 as Hn, c7 as An, e6 as xt, e7 as En, aH as $n, aB as Bn, e8 as In, a7 as H1, cq as Pn, u as G, c6 as Dn, ag as d1, S as i1, bS as bt, V as a1, as as jn, m as h1, e9 as _n, aD as l1, aJ as v1, ad as R1, a6 as Q, cM as Lt, t as fe, ea as Zn, x as he, b as y1, c4 as On, eb as Un, c5 as zn, aj as Gn, bp as Wn, av as pe, b_ as qn, b$ as Xn, c0 as Yn, c1 as Me, at as Kn, aQ as kt, bf as yt, bR as Qn, b6 as Jn, cU as es, ec as ts, ed as rs, bl as Mt, cH as os, cQ as ns, ee as ss, bh as B1, by as Rt, ef as Ft, bz as Nt, c as oe, ck as Re, eg as Vt, eh as is, ei as as, s as St, ej as Tt, ek as ls, aG as cs, el as ds, bE as me, cw as us, em as fs, en as hs, eo as ps, ep as ms, eq as Cs, w as gs, v as Ht, ab as ws, ac as vs, aE as Fe, er as At, es as Et, et as xs, eu as bs, aM as Ls, ay as ks, ev as ys, ew as Ms, d as Rs } from "./F0CanvasPanel-B1wViKzk.js";
 import { d as k, f as m1, g as Fs } from "./tooltip-Cik7KBQT.js";
 import { createPortal as $t } from "react-dom";
 import { defaultTranslations as Ns } from "./i18n-provider-defaults.js";
@@ -5099,7 +5099,7 @@ const I2 = H1({
     borderLeft: j,
     borderRight: o1,
     borderRadius: n1,
-    borderRadiusTopLeft: h1,
+    borderRadiusTopLeft: p1,
     borderRadiusTopRight: C1,
     borderRadiusBottomLeft: N1,
     borderRadiusBottomRight: u1,
@@ -5178,7 +5178,7 @@ const I2 = H1({
             borderLeft: j,
             borderRight: o1,
             borderRadius: n1,
-            borderRadiusTopLeft: h1,
+            borderRadiusTopLeft: p1,
             borderRadiusTopRight: C1,
             borderRadiusBottomLeft: N1,
             borderRadiusBottomRight: u1,
@@ -5443,7 +5443,7 @@ const Z2 = {
           ),
           /* @__PURE__ */ a("div", { className: "flex shrink-0 items-center gap-1", children: [
             e.onGetCredits && /* @__PURE__ */ t(
-              p1,
+              h1,
               {
                 label: o.ai.creditWarning.getCredits ?? "",
                 size: "sm",
@@ -5453,7 +5453,7 @@ const Z2 = {
               }
             ),
             e.onDismiss && /* @__PURE__ */ t(
-              p1,
+              h1,
               {
                 label: o.ai.creditWarning.dismiss ?? "",
                 size: "sm",
@@ -6281,7 +6281,7 @@ const cl = /[\\`*_{}[\]()#+\-.!|~>]/g, dl = (e) => e.split(/(<entity-ref\b[^>]*>
   welcomeScreenCards: x,
   ref: S
 }) => {
-  const y = G(), B = v1(), [N, T] = P(""), [I, U] = P(0), [Z, z] = P(!1), [J, t1] = P(!1), [q, X] = P(null), r1 = $(null), e1 = $(null), j = $(null), o1 = c != null, { tracking: n1 } = y1(), h1 = O(
+  const y = G(), B = v1(), [N, T] = P(""), [I, U] = P(0), [Z, z] = P(!1), [J, t1] = P(!1), [q, X] = P(null), r1 = $(null), e1 = $(null), j = $(null), o1 = c != null, { tracking: n1 } = y1(), p1 = O(
     (Y, b1) => {
       n1?.onWelcomeSuggestionClick?.({
         item: Y,
@@ -6399,7 +6399,7 @@ const cl = /[\\`*_{}[\]()#+\-.!|~>]/g, dl = (e) => e.split(/(<entity-ref\b[^>]*>
     Q2,
     {
       suggestions: V,
-      onItemClick: h1,
+      onItemClick: p1,
       onItemHover: X,
       side: "top"
     }
@@ -6768,7 +6768,7 @@ function ml({
       }
     ),
     /* @__PURE__ */ t("div", { className: "absolute right-2 top-2 rounded", children: /* @__PURE__ */ t(
-      p1,
+      h1,
       {
         variant: "neutral",
         label: "Download",
@@ -7508,7 +7508,7 @@ function lr({
             o && /* @__PURE__ */ t(l1, { className: "text-base text-f1-foreground-secondary", children: o })
           ] }),
           s.type === "open" && s.showButton !== !1 && /* @__PURE__ */ t(
-            p1,
+            h1,
             {
               variant: "outline",
               size: "md",
@@ -7517,7 +7517,7 @@ function lr({
             }
           ),
           s.type === "custom" && /* @__PURE__ */ t(
-            p1,
+            h1,
             {
               variant: "outline",
               size: "md",
@@ -8319,7 +8319,7 @@ const h4 = {
     turnsCount: e.length,
     freezeTurnMinHeight: h
   }), e1 = (j, o1) => {
-    const n1 = o1 === e.length - 1, h1 = {
+    const n1 = o1 === e.length - 1, p1 = {
       renderToolCall: d,
       onReplyQuote: l,
       onRendered: f,
@@ -8336,7 +8336,7 @@ const h4 = {
         onRegenerate: A,
         onCopy: V,
         rawData: u1.rawData || {},
-        ...h1
+        ...p1
       };
       return /* @__PURE__ */ t(
         N,
@@ -8356,7 +8356,7 @@ const h4 = {
         onRegenerate: A,
         onCopy: V,
         rawData: u1.rawData || {},
-        ...h1
+        ...p1
       };
       return /* @__PURE__ */ t(
         B,
@@ -8539,7 +8539,7 @@ const g4 = ({
   const c = G();
   return /* @__PURE__ */ a("div", { className: "flex items-center justify-end gap-3 p-3", children: [
     /* @__PURE__ */ t("div", { className: "flex items-center", children: i && s && /* @__PURE__ */ t(
-      p1,
+      h1,
       {
         variant: "outline",
         label: c.ai.clarifyingQuestion.skip,
@@ -8548,7 +8548,7 @@ const g4 = ({
       }
     ) }),
     /* @__PURE__ */ t(
-      p1,
+      h1,
       {
         disabled: !e || r,
         variant: "default",
@@ -8806,7 +8806,7 @@ const v4 = ({
     ),
     r && /* @__PURE__ */ a("div", { className: "flex shrink-0 items-center gap-0.5", children: [
       /* @__PURE__ */ t(
-        p1,
+        h1,
         {
           variant: "ghost",
           size: "sm",
@@ -8819,7 +8819,7 @@ const v4 = ({
       ),
       /* @__PURE__ */ t("span", { className: "text-sm font-semibold text-f1-foreground-tertiary", children: r }),
       /* @__PURE__ */ t(
-        p1,
+        h1,
         {
           variant: "ghost",
           size: "sm",
@@ -8832,7 +8832,7 @@ const v4 = ({
       )
     ] }),
     /* @__PURE__ */ t(
-      p1,
+      h1,
       {
         variant: "ghost",
         size: "sm",
@@ -8884,15 +8884,15 @@ const v4 = ({
     J || l();
   }, q = () => {
     J || f();
-  }, X = (h1) => {
-    const C1 = y === "single" && b.includes(h1);
-    d(h1), y === "single" && !T && !C1 && Promise.resolve().then(l);
+  }, X = (p1) => {
+    const C1 = y === "single" && b.includes(p1);
+    d(p1), y === "single" && !T && !C1 && Promise.resolve().then(l);
   }, r1 = T ? o.ai.clarifyingQuestion.submit : o.ai.clarifyingQuestion.next, e1 = A === !0 && !U && !(x && Z), j = () => {
     g(), requestAnimationFrame(() => {
       S.current?.focus();
     });
-  }, o1 = (h1) => {
-    h1.key === "Escape" && (h1.preventDefault(), u());
+  }, o1 = (p1) => {
+    p1.key === "Escape" && (p1.preventDefault(), u());
   }, n1 = n ? 0 : L4 / 2;
   return /* @__PURE__ */ a("div", { className: "flex flex-col", onKeyDown: o1, children: [
     /* @__PURE__ */ t("div", { className: "flex flex-col gap-3 pt-3", children: /* @__PURE__ */ t(R1, { mode: "wait", initial: !1, children: /* @__PURE__ */ a(
@@ -9966,7 +9966,7 @@ ${R}`));
         ), c1.isNeeded = !0;
       }
     return L.includes("mainImage") && (D = D.concat(V4)), D;
-  }, h1 = (L) => {
+  }, p1 = (L) => {
     const R = g.current;
     if (!R || !w.current) return;
     const M = y.current ? (L - y.current) / 1e3 : 0;
@@ -10074,7 +10074,7 @@ ${R}`));
       !1,
       0,
       0
-    ), h1(L), R.drawArrays(R.TRIANGLE_STRIP, 0, 4);
+    ), p1(L), R.drawArrays(R.TRIANGLE_STRIP, 0, 4);
     const M = N.current.iMouse?.value;
     if (N.current.iMouse?.isNeeded && l !== 1 && Array.isArray(M)) {
       const D = M[0] ?? 0, E = M[1] ?? 0;
@@ -10558,7 +10558,7 @@ const sc = ({
             /* @__PURE__ */ t("p", { className: "line-clamp-2 text-base text-f1-foreground-secondary", children: s })
           ] }),
           /* @__PURE__ */ a("div", { className: "flex gap-2", children: [
-            c && /* @__PURE__ */ t(
+            c && (c.variant === "ai" ? /* @__PURE__ */ t(
               Tt,
               {
                 label: c.label,
@@ -10566,9 +10566,18 @@ const sc = ({
                 icon: ls,
                 size: "md"
               }
-            ),
+            ) : /* @__PURE__ */ t(
+              h1,
+              {
+                label: c.label,
+                onClick: c.onClick,
+                icon: c.icon,
+                variant: "outline",
+                size: "md"
+              }
+            )),
             d && /* @__PURE__ */ t(
-              p1,
+              h1,
               {
                 label: d.label,
                 onClick: d.onClick,
@@ -10581,7 +10590,7 @@ const sc = ({
           ] })
         ] }),
         l && /* @__PURE__ */ t("div", { className: "absolute right-2 top-2 z-10", children: /* @__PURE__ */ t(
-          p1,
+          h1,
           {
             variant: "ghost",
             icon: k1,
@@ -11088,7 +11097,7 @@ function m6(e) {
           )
         ] }),
         v && /* @__PURE__ */ t("div", { className: "flex items-center justify-end gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3", children: /* @__PURE__ */ t(
-          p1,
+          h1,
           {
             type: "button",
             label: v.primaryActionLabel,
@@ -11400,7 +11409,7 @@ function L6({ credits: e, trigger: r }) {
             e.upgradePlanUrl && /* @__PURE__ */ a("div", { className: "flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3", children: [
               /* @__PURE__ */ t("span", { children: o.t("ai.credits.needMoreCredits") }),
               /* @__PURE__ */ t(
-                p1,
+                h1,
                 {
                   variant: "outlinePromote",
                   href: e.upgradePlanUrl,
