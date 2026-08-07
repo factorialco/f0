@@ -18532,6 +18532,18 @@ export declare interface UseDataReturn<R extends RecordType> {
     loadMore: () => void;
     totalItems: number | undefined;
     mergedFilters: FiltersState<FiltersDefinition>;
+    /**
+     * Opaque identity of the query whose response produced `data` — filters,
+     * search, sortings and pagination position, as they were when that fetch was
+     * issued. Undefined until the first response commits.
+     *
+     * Compare it across renders to tell "these rows answer a different question"
+     * from "these rows changed". The live filter/search state on the source can't
+     * do that: it moves a render (and a debounce) before the matching rows do, so
+     * there is always a window where it describes a query the rendered rows do
+     * not answer.
+     */
+    committedQuery: string | undefined;
 }
 
 /**
@@ -19550,15 +19562,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
@@ -19569,8 +19572,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -19582,6 +19585,15 @@ declare module "@tiptap/core" {
             setVideoEmbed: (options: {
                 src: string;
             }) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
