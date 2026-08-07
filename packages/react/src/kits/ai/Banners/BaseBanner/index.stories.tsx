@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, within } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { Download, Upsell } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { BaseBanner } from "./index"
 
@@ -12,7 +13,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof BaseBanner>
 
 export default meta
@@ -132,6 +133,91 @@ export const FullWidthText: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
+}
+
+export const Card: Story = {
+  args: {
+    variant: "card",
+    title: "Submit expenses in seconds",
+    subtitle:
+      "Upload receipts. One organizes everything for you. Just review and send.",
+    mediaUrl:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    primaryAction: {
+      label: "Try it out",
+      onClick: fn(),
+      variant: "outline",
+    },
+    secondaryAction: {
+      label: "Not now",
+      onClick: fn(),
+      variant: "ghost",
+    },
+    onClose: fn(),
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[308px]">
+        <Story />
+      </div>
+    ),
+  ],
+  // The flow the card exists for: read it, then take the action.
+  //
+  // Deliberately stops short of clicking Close. `play` runs on mount, so
+  // dismissing here would leave the story — and its autodocs entry — showing
+  // nothing but empty space. Dismissal is covered in the unit tests instead
+  // ("calls onClose and removes itself when dismissed").
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getByText("Submit expenses in seconds")).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Close" })).toBeVisible()
+
+    await userEvent.click(canvas.getByRole("button", { name: "Try it out" }))
+    await expect(args.primaryAction?.onClick).toHaveBeenCalledOnce()
+  },
+}
+
+/**
+ * Single consolidated visual-regression story: every orientation in one
+ * snapshot (Chromatic bills per snapshot). Content is intentionally neutral —
+ * the illustrative copy lives in the individual stories.
+ */
+export const Snapshot: Story = {
+  args: Default.args,
+  parameters: withSnapshot({ layout: "padded" }),
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <BaseBanner
+        title="Boost your productivity"
+        subtitle="Discover new features that will help you work more efficiently"
+        mediaUrl={Default.args.mediaUrl}
+        primaryAction={{ label: "Get Started", onClick: () => {} }}
+        secondaryAction={{ label: "Learn More", onClick: () => {} }}
+        onClose={() => {}}
+      />
+      <div className="w-[308px]">
+        <BaseBanner
+          variant="card"
+          title="Boost your productivity"
+          subtitle="Discover new features that will help you work more efficiently"
+          mediaUrl={Default.args.mediaUrl}
+          primaryAction={{
+            label: "Get Started",
+            onClick: () => {},
+            variant: "outline",
+          }}
+          secondaryAction={{
+            label: "Learn More",
+            onClick: () => {},
+            variant: "ghost",
+          }}
+          onClose={() => {}}
+        />
+      </div>
+    </div>
+  ),
 }
 
 export const WithDataTestId: Story = {
