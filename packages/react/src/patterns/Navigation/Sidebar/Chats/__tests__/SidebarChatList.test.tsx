@@ -1,7 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { Clock, PalmTree, VolumeMuted } from "@/icons/app"
+import { BellOff, Clock, PalmTree } from "@/icons/app"
 import {
   act,
   waitFor,
@@ -229,7 +229,7 @@ describe("SidebarChatList", () => {
                 status: { icon: Clock, label: "Ignored fallback" },
                 statuses: [
                   { icon: PalmTree, label: "On holidays" },
-                  { icon: VolumeMuted, label: "Muted" },
+                  { icon: BellOff, label: "Muted" },
                 ],
               },
             ],

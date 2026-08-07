@@ -5,7 +5,7 @@ import { action } from "storybook/actions"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { Clock, New, PalmTree, People, VolumeMuted } from "@/icons/app"
+import { BellOff, Clock, New, PalmTree, People } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { ScrollArea } from "@/ui/scrollarea"
 
@@ -58,7 +58,7 @@ export const exampleGroups: SidebarChatGroup[] = [
         label: "Alexander Whitmore-Brown",
         avatar: person("Alexander", "Whitmore-Brown", "/avatars/person02.jpg"),
         presence: "online",
-        statuses: [{ icon: VolumeMuted, label: "Muted" }],
+        statuses: [{ icon: BellOff, label: "Muted" }],
       },
       {
         id: "jean-baptiste",
@@ -99,7 +99,7 @@ export const exampleGroups: SidebarChatGroup[] = [
         unreadCount: 1,
         statuses: [
           { icon: PalmTree, label: "On holidays" },
-          { icon: VolumeMuted, label: "Muted" },
+          { icon: BellOff, label: "Muted" },
         ],
       },
     ],
