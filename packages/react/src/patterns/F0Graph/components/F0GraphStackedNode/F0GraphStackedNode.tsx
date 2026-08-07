@@ -77,7 +77,11 @@ const F0GraphStackedNodeBase = forwardRef<
           "bg-f1-background outline-none transition-[border-color,background-color,opacity] duration-200",
           isMarked
             ? "border-f1-border-selected-bold ring-2 ring-f1-background-selected ring-offset-0"
-            : "border-f1-border hover:border-transparent hover:bg-f1-background-hover",
+            : // The node card drops its border on hover, but it is a rounded
+              // pill whose shape survives without one. A flat row does not:
+              // losing the outline reads as the row going transparent against
+              // the canvas. Keep the border, move only the background.
+              "border-f1-border hover:bg-f1-background-hover",
           "focus-visible:ring-2 focus-visible:ring-f1-background-selected focus-visible:ring-offset-0",
           state === "dimmed" && "opacity-40"
         )}
