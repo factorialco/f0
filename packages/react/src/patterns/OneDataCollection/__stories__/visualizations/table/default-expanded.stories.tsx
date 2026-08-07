@@ -128,7 +128,9 @@ export const All: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     // Depth 3 proves the cascade: each level opened because its parent did.
-    await canvas.findByText("Senior")
+    // Both roles carry a "Senior", as levels repeat across roles, so this also
+    // pins that the cascade reached BOTH branches and not just the first.
+    expect(await canvas.findAllByText("Senior")).toHaveLength(2)
   },
 }
 
@@ -151,6 +153,9 @@ export const StopAtRoles: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await canvas.findByText("Backend Engineer")
-    expect(canvas.queryByText("Junior")).toBeNull()
+    // `queryAllBy`, not `queryBy`: "Junior" exists under both roles, so if the
+    // levels ever did render, `queryByText` would throw on the duplicate rather
+    // than report the real failure.
+    expect(canvas.queryAllByText("Junior")).toHaveLength(0)
   },
 }
