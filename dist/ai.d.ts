@@ -3245,9 +3245,10 @@ export declare interface F0AiAnnouncementCardProps extends DataAttributes_2 {
     /** Renders the placeholder in the card's own shape. */
     isLoading?: boolean;
     /**
-     * Rendered into the actions row after the two actions. For consumers that
-     * dispatch their own buttons — CMS-driven content, for instance — and cannot
-     * express them as `AnnouncementAction`.
+     * Rendered into the actions row after the two actions. For consumers whose
+     * buttons are decided at runtime rather than at build time — authored
+     * content, a feature flag, a permission check — and so cannot be expressed
+     * as a `primaryAction`/`secondaryAction` pair.
      */
     children?: React.ReactNode;
 }
