@@ -51,6 +51,8 @@ export declare interface ComponentEntry {
     hasStories: boolean;
     hasUnitTests: boolean;
     hasPlayFunction: boolean;
+    /** Has a Chromatic visual-regression snapshot story (`withSnapshot(...)`). */
+    hasSnapshot: boolean;
     hasMdxDocs: boolean;
     docQuality: DocQuality;
     docSignals: DocSignals;
@@ -298,6 +300,27 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
