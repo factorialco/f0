@@ -5,7 +5,9 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
+import { useDeferredHeavyMount } from "../hooks/useDeferredHeavyMount"
 import { type F0ChatVoiceAttachment } from "../types"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
@@ -26,51 +28,104 @@ const FALLBACK_LEVELS = Array.from(
   (_, i) => 0.3 + 0.25 * Math.abs(Math.sin(i / 2.4))
 )
 
+const waveformCache = new Map<string, number[]>()
+const waveformRequests = new Map<string, Promise<number[]>>()
+let waveformDecodeTail: Promise<void> = Promise.resolve()
+
+const enqueueWaveformDecode = <Result,>(
+  decode: () => Promise<Result>
+): Promise<Result> => {
+  const result = waveformDecodeTail.then(decode, decode)
+  waveformDecodeTail = result.then(
+    () => undefined,
+    () => undefined
+  )
+  return result
+}
+
+const loadVoiceWaveform = (url: string): Promise<number[]> => {
+  const cached = waveformCache.get(url)
+  if (cached) return Promise.resolve(cached)
+
+  const pending = waveformRequests.get(url)
+  if (pending) return pending
+
+  const AudioCtx =
+    typeof window !== "undefined"
+      ? (window.AudioContext ??
+        (window as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext)
+      : undefined
+  if (!AudioCtx) return Promise.resolve(FALLBACK_LEVELS)
+
+  const request = (async () => {
+    const response = await fetch(url)
+    const buffer = await response.arrayBuffer()
+    return enqueueWaveformDecode(async () => {
+      const ctx = new AudioCtx()
+      try {
+        const audio = await ctx.decodeAudioData(buffer)
+        const data = audio.getChannelData(0)
+        const bucket = Math.max(1, Math.floor(data.length / BAR_COUNT))
+        const raw: number[] = []
+
+        for (let i = 0; i < BAR_COUNT; i++) {
+          let sum = 0
+          let samples = 0
+          const start = i * bucket
+          // A visual waveform does not need every PCM sample. Bounding the
+          // work prevents long voice notes from monopolizing the main thread.
+          const stride = Math.max(1, Math.floor(bucket / 256))
+          for (
+            let j = start;
+            j < start + bucket && j < data.length;
+            j += stride
+          ) {
+            sum += data[j] * data[j]
+            samples += 1
+          }
+          raw.push(Math.sqrt(sum / Math.max(samples, 1)))
+        }
+
+        const max = Math.max(...raw, 0.001)
+        return raw.map((value) => Math.max(MIN_LEVEL, value / max))
+      } finally {
+        void ctx.close()
+      }
+    })
+  })()
+    .then((levels) => {
+      waveformCache.set(url, levels)
+      return levels
+    })
+    .catch(() => FALLBACK_LEVELS)
+    .finally(() => waveformRequests.delete(url))
+
+  waveformRequests.set(url, request)
+  return request
+}
+
 /**
  * Decode the audio and reduce it to per-bar RMS levels, normalized to [0, 1] —
  * the WhatsApp-style static waveform. Falls back to a neutral shape when the
  * fetch/decoding fails (CORS, unsupported codec, jsdom).
  */
 const useVoiceWaveform = (url: string): number[] => {
-  const [levels, setLevels] = useState<number[]>(FALLBACK_LEVELS)
+  const [levels, setLevels] = useState<number[]>(
+    () => waveformCache.get(url) ?? FALLBACK_LEVELS
+  )
 
   useEffect(() => {
-    const AudioCtx =
-      typeof window !== "undefined"
-        ? (window.AudioContext ??
-          (window as { webkitAudioContext?: typeof AudioContext })
-            .webkitAudioContext)
-        : undefined
-    if (!AudioCtx) return
+    const cached = waveformCache.get(url)
+    if (cached) {
+      setLevels(cached)
+      return
+    }
 
     let cancelled = false
-    void (async () => {
-      try {
-        const response = await fetch(url)
-        const buffer = await response.arrayBuffer()
-        const ctx = new AudioCtx()
-        const audio = await ctx.decodeAudioData(buffer)
-        void ctx.close()
-
-        const data = audio.getChannelData(0)
-        const bucket = Math.max(1, Math.floor(data.length / BAR_COUNT))
-        const raw: number[] = []
-        for (let i = 0; i < BAR_COUNT; i++) {
-          let sum = 0
-          const start = i * bucket
-          for (let j = start; j < start + bucket && j < data.length; j++) {
-            sum += data[j] * data[j]
-          }
-          raw.push(Math.sqrt(sum / bucket))
-        }
-        const max = Math.max(...raw, 0.001)
-        if (!cancelled) {
-          setLevels(raw.map((v) => Math.max(MIN_LEVEL, v / max)))
-        }
-      } catch {
-        // Keep the fallback shape.
-      }
-    })()
+    void loadVoiceWaveform(url).then((nextLevels) => {
+      if (!cancelled) setLevels(nextLevels)
+    })
     return () => {
       cancelled = true
     }
@@ -87,7 +142,7 @@ const useVoiceWaveform = (url: string): number[] => {
  * border) and follows the bubble's chained corners. Kept as its own component
  * so other surfaces can reuse the same voice-note rendering.
  */
-export const ChatVoiceAttachment = ({
+const ChatVoiceAttachmentContent = ({
   voice,
   isMine = false,
   cornerClass = "rounded-xl",
@@ -266,6 +321,78 @@ export const ChatVoiceAttachment = ({
             />
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+export const ChatVoiceAttachment = ({
+  voice,
+  isMine = false,
+  cornerClass = "rounded-xl",
+  className,
+  deferHeavyContent = false,
+}: {
+  voice: F0ChatVoiceAttachment
+  isMine?: boolean
+  cornerClass?: string
+  className?: string
+  /** Keep audio metadata and waveform decoding out of an active scroll. */
+  deferHeavyContent?: boolean
+}): ReactNode => {
+  const mountPlayer = useDeferredHeavyMount(true, deferHeavyContent)
+
+  if (mountPlayer) {
+    return (
+      <ChatVoiceAttachmentContent
+        voice={voice}
+        isMine={isMine}
+        cornerClass={cornerClass}
+        className={className}
+      />
+    )
+  }
+
+  return (
+    <ChatVoiceAttachmentPlaceholder
+      isMine={isMine}
+      cornerClass={cornerClass}
+      className={className}
+    />
+  )
+}
+
+const ChatVoiceAttachmentPlaceholder = ({
+  isMine,
+  cornerClass,
+  className,
+}: {
+  isMine: boolean
+  cornerClass: string
+  className?: string
+}): ReactNode => {
+  const i18n = useI18n()
+
+  return (
+    <div
+      className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
+    >
+      <div
+        role="group"
+        aria-label={i18n.chat.voiceNote}
+        aria-busy="true"
+        className={cn(
+          "flex w-80 min-w-0 max-w-full items-center border border-solid border-f1-border-secondary p-3",
+          isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
+          cornerClass,
+          className
+        )}
+        data-testid="chat-voice-attachment"
+      >
+        <Skeleton
+          aria-hidden="true"
+          className="h-8 w-full animate-none rounded-sm"
+        />
       </div>
     </div>
   )

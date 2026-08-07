@@ -1,6 +1,5 @@
-import { type ReactNode, memo, useEffect, useState } from "react"
-
 import { motion } from "motion/react"
+import { type ReactNode, memo, useEffect, useState } from "react"
 
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"

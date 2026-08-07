@@ -955,6 +955,36 @@ export const CommunicationsGroupAvatarFallback: Story = {
 }
 
 /**
+ * A direct message can surface several independent states at once. Priya is
+ * online and on vacation, while the conversation is muted and has unread
+ * messages.
+ */
+export const CommunicationsCombinedUserStatuses: Story = {
+  name: "Communications — combined user statuses",
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar initialTab="messages" />}
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
  * The standalone AI assistant: no communications sidebar, the chat docked on the
  * right as a resizable side panel, with the full feature set (credits, file
  * attachments, dictation, entity refs, disclaimer + quick actions footer).
@@ -1757,12 +1787,16 @@ export const CommunicationsVideoAttachments: Story = {
   ),
   play: async ({ canvas, step }) => {
     await step("Render both videos as wide inline players", async () => {
-      const players = await canvas.findAllByRole(
-        "region",
-        { name: /Video player:/ },
-        { timeout: 5_000 }
+      await waitFor(
+        () =>
+          expect(
+            canvas.queryAllByRole("region", { name: /Video player:/ })
+          ).toHaveLength(2),
+        { timeout: 15_000 }
       )
-      await expect(players).toHaveLength(2)
+      const players = canvas.getAllByRole("region", {
+        name: /Video player:/,
+      })
 
       // The transcript keeps its subtree in the a11y tree while it's still
       // `opacity-0` (it fades in once Virtuoso has positioned the entry row),
@@ -2017,7 +2051,11 @@ export const CommunicationsPartialReceipts: Story = {
     })
 
     await step("Keep partial reader identities in message Info", async () => {
-      const message = await canvas.findByText(/And the kickoff deck/)
+      const message = await canvas.findByText(
+        /And the kickoff deck/,
+        {},
+        { timeout: 10_000 }
+      )
       await userEvent.hover(message)
       const actionButtons = await canvas.findAllByRole("button", {
         name: /message actions/i,
@@ -2086,9 +2124,11 @@ export const CommunicationsReceiptsAndReactions: Story = {
     })
 
     await step("Show the people behind a reaction", async () => {
-      const reaction = await canvas.findByRole("button", {
-        name: `${getEmojiLabel("🎉")}: 3`,
-      })
+      const reaction = await canvas.findByRole(
+        "button",
+        { name: `${getEmojiLabel("🎉")}: 3` },
+        { timeout: 10_000 }
+      )
       const addReaction = canvas.getByRole("button", { name: /add reaction/i })
 
       addReaction.focus()
@@ -2127,7 +2167,11 @@ export const CommunicationsReceiptsAndReactions: Story = {
     })
 
     await step("Show static reader identities", async () => {
-      const message = await canvas.findByText(/And the kickoff deck/)
+      const message = await canvas.findByText(
+        /And the kickoff deck/,
+        {},
+        { timeout: 10_000 }
+      )
       await userEvent.hover(message)
       const actionButtons = await canvas.findAllByRole("button", {
         name: /message actions/i,

@@ -6,12 +6,18 @@ import { expect, userEvent, within } from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Chat } from "./F0Chat"
+import { ChatBubble } from "./components/ChatBubble"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
-import { type F0ChatRuntime, type F0ChatUser } from "./types"
+import {
+  f0ChatSenderColors,
+  type F0ChatMessage,
+  type F0ChatRuntime,
+  type F0ChatUser,
+} from "./types"
 
 const me: F0ChatUser = { id: "me", name: "Me" }
 const ana: F0ChatUser = {
@@ -24,6 +30,59 @@ const ana: F0ChatUser = {
 const Frame = ({ children }: { children: ReactNode }): ReactNode => (
   <div style={{ height: 680, display: "flex", width: "100%" }}>{children}</div>
 )
+
+const BubblePalette = (): ReactNode => {
+  const messages = f0ChatSenderColors.map((avatarColor) => {
+    const author: F0ChatUser = {
+      id: `palette-${avatarColor}`,
+      name: avatarColor,
+      avatarColor,
+    }
+    const message: F0ChatMessage = {
+      id: `palette-message-${avatarColor}`,
+      author,
+      body: "Incoming message",
+      createdAt: "2026-01-01T12:00:00.000Z",
+      isMine: false,
+    }
+
+    return { author, message }
+  })
+  const ownMessage: F0ChatMessage = {
+    id: "palette-message-own",
+    author: me,
+    body: "My neutral bubble",
+    createdAt: "2026-01-01T12:00:00.000Z",
+    isMine: true,
+  }
+
+  const palette = (
+    <div className="grid grid-cols-4 gap-2">
+      {messages.map(({ author, message }) => (
+        <ChatBubble
+          key={message.id}
+          message={message}
+          author={author}
+          isMine={false}
+        />
+      ))}
+      <ChatBubble message={ownMessage} isMine />
+    </div>
+  )
+
+  return (
+    <div className="grid w-full max-w-[1440px] grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="rounded-lg bg-f1-background p-4 text-f1-foreground">
+        <h3 className="mb-3 text-base font-medium">Light</h3>
+        {palette}
+      </div>
+      <div className="dark rounded-lg bg-f1-background p-4 text-f1-foreground">
+        <h3 className="mb-3 text-base font-medium">Dark</h3>
+        {palette}
+      </div>
+    </div>
+  )
+}
 
 const dmChannel = {
   id: "dm-ana",
@@ -47,7 +106,13 @@ const bruno: F0ChatUser = {
   id: "bruno",
   name: "Bruno Martínez",
   subtitle: "Engineering Manager",
-  avatar: { type: "person", firstName: "Bruno", lastName: "Martínez" },
+  avatar: {
+    type: "person",
+    firstName: "Bruno",
+    lastName: "Martínez",
+    src: "/avatars/person02.jpg",
+  },
+  avatarColor: "orange",
   profileHref: "/people/bruno",
 }
 const carmen: F0ChatUser = {
@@ -69,8 +134,8 @@ const groupChannel = {
 /**
  * Group conversation with `@`-mentions: type `@` to open the popover (with
  * `@here` pinned on top), pick a member or everyone, and send — the sent chip
- * is highlighted. The two seeded incoming messages demo a mention of you and an
- * `@here`, both rendered with the self-mention emphasis.
+ * uses the same accessible neutral styling. The two seeded incoming messages
+ * demo a mention of you and an `@here`.
  */
 const GroupConversation = (): ReactNode => {
   const runtime = useMockChatRuntime({
@@ -803,6 +868,10 @@ export const Snapshot: Story = {
       >
         <h2 className="text-lg font-medium">Video attachments</h2>
         <VideoConversation />
+      </section>
+      <section className="flex w-fit flex-col gap-2">
+        <h2 className="text-lg font-medium">Sender bubble palette</h2>
+        <BubblePalette />
       </section>
     </div>
   ),

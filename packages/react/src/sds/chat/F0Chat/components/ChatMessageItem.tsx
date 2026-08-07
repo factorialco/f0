@@ -1,6 +1,5 @@
-import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { AnimatePresence, motion } from "motion/react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"

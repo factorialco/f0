@@ -42,6 +42,28 @@ describe("ChatLocationAttachment", () => {
     expect(screen.getByTestId("chat-location-pin")).toBeInTheDocument()
   })
 
+  it("defers mounting MapLibre until scrolling settles", async () => {
+    const { rerender } = render(
+      <ChatLocationAttachment location={LOCATION} deferHeavyContent />
+    )
+
+    expect(screen.queryByTestId("chat-location-map")).not.toBeInTheDocument()
+    expect(screen.getByTestId("chat-location-pin")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Factorial HQ" })).toHaveAttribute(
+      "aria-busy",
+      "true"
+    )
+
+    rerender(
+      <ChatLocationAttachment location={LOCATION} deferHeavyContent={false} />
+    )
+
+    expect(await screen.findByTestId("chat-location-map")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Factorial HQ" })
+    ).not.toHaveAttribute("aria-busy")
+  })
+
   it("is a map-only card: the name is the accessible label, not a footer", () => {
     render(<ChatLocationAttachment location={LOCATION} />)
     expect(screen.queryByText("Factorial HQ")).not.toBeInTheDocument()

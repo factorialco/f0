@@ -1,3 +1,5 @@
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+import { AnimatePresence, motion } from "motion/react"
 import {
   forwardRef,
   type HTMLAttributes,
@@ -9,20 +11,21 @@ import {
   useRef,
   useState,
 } from "react"
-
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
-import { AnimatePresence, motion } from "motion/react"
 import { Virtuoso } from "react-virtuoso"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
+import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollBar } from "@/ui/scrollarea"
 
-import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
-
+import { useAnimationFrameBatch } from "../hooks/useAnimationFrameBatch"
+import {
+  ChatScrollActivityProvider,
+  createChatScrollActivityStore,
+} from "../hooks/useChatScrollActivity"
 import {
   AT_BOTTOM_THRESHOLD_PX,
   useChatVirtuoso,
@@ -41,8 +44,8 @@ import { DateTimeSeparator } from "./DateTimeSeparator"
 const TYPING_EXIT_MS = 250
 
 /** Date of the row at the top of the viewport, for the sticky header. The
- * index comes from a DOM measurement that can lag a commit behind the rows —
- * clamp instead of trusting it. */
+ * index comes from Virtuoso's item measurements, which can lag a commit behind
+ * the rows — clamp instead of trusting it. */
 const dateForRow = (rows: ChatRow[], from: number): string | null => {
   for (let i = Math.max(0, from); i < rows.length; i++) {
     const row = rows[i]
@@ -131,6 +134,18 @@ const ChatVirtuosoList = forwardRef<
  * rendered as Virtuoso's Footer so scrollHeight and end-alignment include it. */
 const ChatBottomGap = (): ReactNode => <div className="h-6" />
 
+const CHAT_VIRTUOSO_COMPONENTS = {
+  Scroller: ChatVirtuosoScroller,
+  List: ChatVirtuosoList,
+  Footer: ChatBottomGap,
+}
+
+const CHAT_VIEWPORT_INCREASE = { top: 200, bottom: 100 }
+const CHAT_OVERSCAN = { main: 200, reverse: 200 }
+
+const chatRowKey = (index: number, row: ChatRow): string =>
+  row?.key ?? `chat-gap-${index}`
+
 /** Scrollable transcript: virtualized separators, messages, the unread divider,
  * a sticky date header, pagination and a jump-to-bottom / unread-count affordance.
  * Virtuoso owns the scroll physics (bottom follow, prepend retention, entry
@@ -160,6 +175,7 @@ export const ChatMessagesContainer = (): ReactNode => {
   // "Seen everything" = the latest messages are visible AND the pointer is over
   // the chat. Only then do we mark as read.
   const [hovering, setHovering] = useState(false)
+  const scrollActivityStore = useMemo(createChatScrollActivityStore, [])
 
   // The "new messages" divider is captured once on entering a conversation and
   // then frozen (Telegram-style): it stays where the unread run began — through
@@ -374,17 +390,27 @@ export const ChatMessagesContainer = (): ReactNode => {
   })
 
   // Scrollbar measure strip (see ChatVirtuosoScroller): mirror Virtuoso's
-  // total list height into it — imperatively, so the frequent height
-  // notifications never re-render the transcript.
+  // total list height into it. Writes are frame-batched so a burst of Virtuoso
+  // measurement corrections only wakes Radix's ResizeObserver once per paint.
   const measureStripRef = useRef<HTMLDivElement>(null)
   const scrollerContext = useMemo(() => ({ measureStripRef }), [])
-  const handleListHeightChanged = useCallback(
+  const scheduleMeasureStripHeight = useAnimationFrameBatch(
     (height: number) => {
       const strip = measureStripRef.current
-      if (strip) strip.style.height = `${height}px`
+      const nextHeight = `${height}px`
+      if (strip && strip.style.height !== nextHeight) {
+        strip.style.height = nextHeight
+      }
+    }
+  )
+  const handleListHeightChanged = useCallback(
+    (height: number) => {
+      scheduleMeasureStripHeight(height)
+      // Bottom retention remains immediate; only the cosmetic Radix thumb
+      // measurement is deferred to the next animation frame.
       handleTotalListHeightChanged(height)
     },
-    [handleTotalListHeightChanged]
+    [handleTotalListHeightChanged, scheduleMeasureStripHeight]
   )
 
   // Jump targeting (reply quotes, search hits). A jump may land on a message
@@ -419,6 +445,23 @@ export const ChatMessagesContainer = (): ReactNode => {
   }
   const animatedIds = animatedIdsRef.current ?? EMPTY_SET
 
+  const renderItem = useCallback(
+    (index: number, row: ChatRow) =>
+      row ? (
+        <ChatMessageRowRenderer
+          row={row}
+          isGroup={isGroup}
+          isFirstRow={index === firstItemIndex}
+          enterAnimation={!reducedMotion}
+          animatedIds={animatedIds}
+          freshIds={freshIdsRef.current}
+          typingLeaving={row.type === "typing" ? typingLeaving : false}
+          typingEntry={typingEntryRef.current}
+        />
+      ) : null,
+    [animatedIds, firstItemIndex, isGroup, reducedMotion, typingLeaving]
+  )
+
   // Sticky date pill: the date of the top-most visible row.
   const stickyDate =
     stickyIndex != null ? dateForRow(displayRows, stickyIndex) : null
@@ -428,149 +471,136 @@ export const ChatMessagesContainer = (): ReactNode => {
   const showButton = scrolledUp || hasMoreNewer
 
   return (
-    <div
-      className="relative min-h-0 flex-1 scrollbar-macos"
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-    >
-      <Virtuoso<ChatRow, ChatScrollerContext>
-        key={listKey}
-        ref={virtuosoRef}
-        scrollerRef={handleScrollerRef}
-        data={displayRows}
-        // `row` CAN transiently be undefined: a mid-list shrink (hard delete)
-        // keeps the ends — and so the firstItemIndex — while the rendered
-        // range still spans the old length for one pass. Self-corrects next
-        // render; don't let it crash the frame.
-        computeItemKey={(index, row) => row?.key ?? `chat-gap-${index}`}
-        itemContent={(index, row) =>
-          row ? (
-            <ChatMessageRowRenderer
-              row={row}
-              isGroup={isGroup}
-              isFirstRow={index === firstItemIndex}
-              enterAnimation={!reducedMotion}
-              animatedIds={animatedIds}
-              freshIds={freshIdsRef.current}
-              typingLeaving={row.type === "typing" ? typingLeaving : false}
-              typingEntry={typingEntryRef.current}
-            />
-          ) : null
-        }
-        firstItemIndex={firstItemIndex}
-        initialTopMostItemIndex={initialLocation}
-        followOutput={followOutput}
-        atBottomThreshold={AT_BOTTOM_THRESHOLD_PX}
-        atBottomStateChange={handleAtBottomChange}
-        atTopStateChange={handleAtTopChange}
-        startReached={handleStartReached}
-        endReached={handleEndReached}
-        itemsRendered={handleItemsRendered}
-        totalListHeightChanged={handleListHeightChanged}
-        increaseViewportBy={{ top: 400, bottom: 200 }}
-        defaultItemHeight={48}
-        context={scrollerContext}
-        components={{
-          Scroller: ChatVirtuosoScroller,
-          List: ChatVirtuosoList,
-          Footer: ChatBottomGap,
-        }}
-        className={cn(
-          // Lands on the ScrollArea Root (see ChatVirtuosoScroller). Normal
-          // flow, not absolute: Radix hardcodes `position: relative` inline.
-          "size-full",
-          // Hidden (opacity keeps layout + the a11y tree) until the entry
-          // positioning has painted, then a short fade — the transcript
-          // appears already in place, zero perceived motion.
-          !reducedMotion && "transition-opacity duration-100",
-          revealed ? "opacity-100" : "opacity-0"
-        )}
-      />
+    <ChatScrollActivityProvider store={scrollActivityStore}>
+      <div
+        className="scrollbar-macos relative min-h-0 flex-1"
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+      >
+        <Virtuoso<ChatRow, ChatScrollerContext>
+          key={listKey}
+          ref={virtuosoRef}
+          scrollerRef={handleScrollerRef}
+          data={displayRows}
+          // `row` CAN transiently be undefined: a mid-list shrink (hard delete)
+          // keeps the ends — and so the firstItemIndex — while the rendered
+          // range still spans the old length for one pass. Self-corrects next
+          // render; don't let it crash the frame.
+          computeItemKey={chatRowKey}
+          itemContent={renderItem}
+          firstItemIndex={firstItemIndex}
+          initialTopMostItemIndex={initialLocation}
+          followOutput={followOutput}
+          atBottomThreshold={AT_BOTTOM_THRESHOLD_PX}
+          atBottomStateChange={handleAtBottomChange}
+          atTopStateChange={handleAtTopChange}
+          startReached={handleStartReached}
+          endReached={handleEndReached}
+          itemsRendered={handleItemsRendered}
+          totalListHeightChanged={handleListHeightChanged}
+          increaseViewportBy={CHAT_VIEWPORT_INCREASE}
+          overscan={CHAT_OVERSCAN}
+          defaultItemHeight={48}
+          isScrolling={scrollActivityStore.setScrolling}
+          context={scrollerContext}
+          components={CHAT_VIRTUOSO_COMPONENTS}
+          className={cn(
+            // Lands on the ScrollArea Root (see ChatVirtuosoScroller). Normal
+            // flow, not absolute: Radix hardcodes `position: relative` inline.
+            "size-full",
+            // Hidden (opacity keeps layout + the a11y tree) until the entry
+            // positioning has painted, then a short fade — the transcript
+            // appears already in place, zero perceived motion.
+            !reducedMotion && "transition-opacity duration-100",
+            revealed ? "opacity-100" : "opacity-0"
+          )}
+        />
 
-      {/* Header shadow: a soft gradient at the top of the transcript whenever
+        {/* Header shadow: a soft gradient at the top of the transcript whenever
           it's scrolled away from the top (same affordance as the sidebar). */}
-      <AnimatePresence>
-        {!atTop && <ScrollShadow position="top" key="chat-header-shadow" />}
-      </AnimatePresence>
+        <AnimatePresence>
+          {!atTop && <ScrollShadow position="top" key="chat-header-shadow" />}
+        </AnimatePresence>
 
-      {/* Sticky date header: pinned date of the top-most visible group. While
+        {/* Sticky date header: pinned date of the top-most visible group. While
           older messages load, a spinner sits beside the date in the same pill.
           Hidden only at the REAL top of the history (nothing older to load) —
           the transcript's own first day separator is in view there and the two
           pills would show the same date twice. Reaching the top mid-pagination
           keeps it: that top is transient and the pill carries the spinner. */}
-      <AnimatePresence>
-        {scrolledUp &&
-          (!atTop || hasMoreOlder || loadingOlder) &&
-          stickyDate && (
-            <motion.div
-              className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-            >
-              <div
-                className="z-50"
-                aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
+        <AnimatePresence>
+          {scrolledUp &&
+            (!atTop || hasMoreOlder || loadingOlder) &&
+            stickyDate && (
+              <motion.div
+                className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
               >
-                {/* The pill (border, background, spinner) is the separator's
+                <div
+                  className="z-50"
+                  aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
+                >
+                  {/* The pill (border, background, spinner) is the separator's
                   own — same look as the in-transcript day rows. */}
-                <DateTimeSeparator
-                  at={stickyDate}
-                  withTime
-                  loading={loadingOlder}
-                />
-              </div>
-            </motion.div>
-          )}
-      </AnimatePresence>
+                  <DateTimeSeparator
+                    at={stickyDate}
+                    withTime
+                    loading={loadingOlder}
+                  />
+                </div>
+              </motion.div>
+            )}
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {showButton && (
-          // Centered via flex (inset-x-0 + justify-center) so the motion-driven
-          // `scale` transform doesn't fight a `-translate-x-1/2`.
-          <motion.div
-            className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.15, ease: EASE_OUT_SWIFT }}
-          >
-            {/* Keyed by the count: each new unread remounts the pill with a
-                subtle scale settle — the signal that the number changed. */}
+        <AnimatePresence>
+          {showButton && (
+            // Centered via flex (inset-x-0 + justify-center) so the motion-driven
+            // `scale` transform doesn't fight a `-translate-x-1/2`.
             <motion.div
-              key={unreadCount}
-              className="pointer-events-auto rounded-md bg-f1-background"
-              initial={
-                reducedMotion || unreadCount === 0 ? false : { scale: 0.95 }
-              }
-              animate={{ scale: 1 }}
+              className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.15, ease: EASE_OUT_SWIFT }}
             >
-              <ButtonInternal
-                onClick={jumpToBottom}
-                variant={"neutral"}
-                icon={ArrowDown}
-                label={
-                  unreadCount > 0
-                    ? i18n.t(
-                        unreadCount === 1
-                          ? "chat.unreadCount.one"
-                          : "chat.unreadCount.other",
-                        { count: unreadCount }
-                      )
-                    : hasMoreNewer
-                      ? i18n.chat.backToLatest
-                      : i18n.chat.scrollToBottom
+              {/* Keyed by the count: each new unread remounts the pill with a
+                subtle scale settle — the signal that the number changed. */}
+              <motion.div
+                key={unreadCount}
+                className="pointer-events-auto rounded-md bg-f1-background"
+                initial={
+                  reducedMotion || unreadCount === 0 ? false : { scale: 0.95 }
                 }
-                hideLabel={unreadCount === 0 && !hasMoreNewer}
-              />
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.15, ease: EASE_OUT_SWIFT }}
+              >
+                <ButtonInternal
+                  onClick={jumpToBottom}
+                  variant={"neutral"}
+                  icon={ArrowDown}
+                  label={
+                    unreadCount > 0
+                      ? i18n.t(
+                          unreadCount === 1
+                            ? "chat.unreadCount.one"
+                            : "chat.unreadCount.other",
+                          { count: unreadCount }
+                        )
+                      : hasMoreNewer
+                        ? i18n.chat.backToLatest
+                        : i18n.chat.scrollToBottom
+                  }
+                  hideLabel={unreadCount === 0 && !hasMoreNewer}
+                />
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+        </AnimatePresence>
+      </div>
+    </ChatScrollActivityProvider>
   )
 }
 

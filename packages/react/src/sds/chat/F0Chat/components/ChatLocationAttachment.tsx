@@ -1,9 +1,10 @@
 import { lazy, type ReactNode, Suspense } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
+import { useDeferredHeavyMount } from "../hooks/useDeferredHeavyMount"
 import { type F0ChatLocationAttachment } from "../types"
 
 // maplibre-gl is heavy — it lives in its own chunk, fetched on first render of
@@ -26,22 +27,28 @@ const mapsUrl = ({ latitude, longitude }: F0ChatLocationAttachment): string =>
 export const ChatLocationAttachment = ({
   location,
   cornerClass = "rounded-xl",
+  deferHeavyContent = false,
 }: {
   location: F0ChatLocationAttachment
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
+  /** Keep MapLibre initialization out of an active transcript scroll. */
+  deferHeavyContent?: boolean
 }): ReactNode => {
   const i18n = useI18n()
+  const mountMap = useDeferredHeavyMount(true, deferHeavyContent)
   return (
     <a
       href={mapsUrl(location)}
       target="_blank"
       rel="noopener noreferrer"
+      aria-busy={!mountMap ? true : undefined}
       aria-label={location.name ?? i18n.chat.location}
       className={cn(
         "flex w-96 min-w-0 max-w-full flex-col overflow-hidden no-underline",
         "border border-solid border-f1-border-secondary bg-f1-background-tertiary",
         "transition-colors hover:bg-f1-background-secondary",
+        focusRing("focus-visible:ring-inset"),
         cornerClass
       )}
       data-testid="chat-location-attachment"
@@ -50,14 +57,20 @@ export const ChatLocationAttachment = ({
         className="pointer-events-none relative w-full"
         style={{ height: MAP_HEIGHT }}
       >
-        <Suspense
-          fallback={<Skeleton className="h-full w-full rounded-none" />}
-        >
-          <LocationMap
-            latitude={location.latitude}
-            longitude={location.longitude}
-          />
-        </Suspense>
+        {mountMap ? (
+          <Suspense
+            fallback={
+              <Skeleton className="h-full w-full rounded-none motion-reduce:animate-none" />
+            }
+          >
+            <LocationMap
+              latitude={location.latitude}
+              longitude={location.longitude}
+            />
+          </Suspense>
+        ) : (
+          <Skeleton className="h-full w-full animate-none rounded-none" />
+        )}
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full drop-shadow-md"
           data-testid="chat-location-pin"

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
 
-import { useChatVirtuoso } from "../useChatVirtuoso"
+import { topVisibleRowIndex, useChatVirtuoso } from "../useChatVirtuoso"
 
 let frameCallbacks: FrameRequestCallback[]
 
@@ -58,13 +58,29 @@ const attachScroller = (
   let scrollHeight = 1000
   let scrollTop = 500
   const clientHeight = 500
+  const metricReads = { scrollHeight: 0, scrollTop: 0, clientHeight: 0 }
 
   Object.defineProperties(scroller, {
-    clientHeight: { configurable: true, get: () => clientHeight },
-    scrollHeight: { configurable: true, get: () => scrollHeight },
+    clientHeight: {
+      configurable: true,
+      get: () => {
+        metricReads.clientHeight += 1
+        return clientHeight
+      },
+    },
+    scrollHeight: {
+      configurable: true,
+      get: () => {
+        metricReads.scrollHeight += 1
+        return scrollHeight
+      },
+    },
     scrollTop: {
       configurable: true,
-      get: () => scrollTop,
+      get: () => {
+        metricReads.scrollTop += 1
+        return scrollTop
+      },
       set: (value: number) => {
         scrollTop = Math.min(
           Math.max(0, value),
@@ -85,10 +101,47 @@ const attachScroller = (
     setScrollHeight: (height: number) => {
       scrollHeight = height
     },
+    getMetricReads: () => ({ ...metricReads }),
   }
 }
 
 describe("useChatVirtuoso wheel takeover", () => {
+  it("derives the top row from Virtuoso measurements with variable heights", () => {
+    const items = [
+      { index: 100, offset: 0, size: 40 },
+      { index: 101, offset: 40, size: 120 },
+      { index: 102, offset: 160, size: 24 },
+    ]
+
+    expect(topVisibleRowIndex(items, 0, 100)).toBe(0)
+    expect(topVisibleRowIndex(items, 40, 100)).toBe(1)
+    expect(topVisibleRowIndex(items, 159, 100)).toBe(1)
+    expect(topVisibleRowIndex(items, 160, 100)).toBe(2)
+    expect(topVisibleRowIndex(items, 184, 100)).toBeNull()
+  })
+
+  it("does not read DOM geometry in the scroll hot path", () => {
+    const { result } = renderVirtuoso()
+    const viewport = attachScroller(result.current.handleScrollerRef)
+    const geometrySpy = vi.spyOn(Element.prototype, "getBoundingClientRect")
+    const selectorSpy = vi.spyOn(Element.prototype, "querySelectorAll")
+    const readsBeforeScroll = viewport.getMetricReads()
+
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+
+    expect(geometrySpy).not.toHaveBeenCalled()
+    expect(selectorSpy).not.toHaveBeenCalled()
+    expect(viewport.getMetricReads()).toEqual({
+      scrollHeight: readsBeforeScroll.scrollHeight + 1,
+      scrollTop: readsBeforeScroll.scrollTop + 1,
+      clientHeight: readsBeforeScroll.clientHeight + 1,
+    })
+    geometrySpy.mockRestore()
+    selectorSpy.mockRestore()
+    act(() => result.current.handleScrollerRef(null))
+  })
+
   it("keeps following paused after the first small upward scroll", () => {
     const { result } = renderVirtuoso()
     const viewport = attachScroller(result.current.handleScrollerRef)
