@@ -3,8 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { addMonths, subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, screen, userEvent, within } from "storybook/test"
 
+import { F0Dialog } from "@/patterns/F0Dialog"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -165,6 +166,52 @@ export const WithDataTestId: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("my-test-date-picker")).toBeInTheDocument()
+  },
+}
+
+export const InsideDialog: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Inside a dialog the month and year dropdowns portal their listbox into the dialog container, outside the calendar's popover. The calendar has to survive that so both stay pickable.",
+      },
+    },
+  },
+  args: {
+    label: "Effective date",
+    placeholder: "Select a date",
+  },
+  render: (args) => (
+    <F0Dialog
+      isOpen
+      title="Add employees"
+      description="Pick when the assignment starts."
+      onClose={fn()}
+      primaryAction={{ label: "Save", onClick: fn() }}
+    >
+      <F0DatePicker {...args} />
+    </F0Dialog>
+  ),
+  play: async ({ step }) => {
+    const dialog = within(await screen.findByRole("dialog"))
+
+    await step("open the calendar", async () => {
+      await userEvent.click(dialog.getByRole("textbox"))
+      await expect(await screen.findByRole("grid")).toBeInTheDocument()
+    })
+
+    await step("open the month dropdown", async () => {
+      await userEvent.click(screen.getByRole("combobox", { name: /month/i }))
+      await expect(screen.getByRole("grid")).toBeInTheDocument()
+      await expect(await screen.findByRole("listbox")).toBeInTheDocument()
+    })
+
+    await step("pick a month without losing the calendar", async () => {
+      const listbox = within(screen.getByRole("listbox"))
+      await userEvent.click(listbox.getByRole("option", { name: "September" }))
+      await expect(screen.getByRole("grid")).toBeInTheDocument()
+    })
   },
 }
 

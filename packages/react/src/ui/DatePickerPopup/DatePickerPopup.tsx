@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
@@ -61,6 +61,31 @@ export interface DatePickerPopupProps {
 
 const PRESET_CUSTOM = "__custom__"
 
+/**
+ * Resolves whether `target` sits in a listbox that one of `owner`'s own triggers
+ * opened, following the `aria-controls` link every select trigger carries.
+ *
+ * The header's month and year pickers are selects, and a select always portals its
+ * listbox out of the calendar — into the surrounding dialog's container, or
+ * `document.body`. Radix therefore reports opening one as an interaction outside
+ * the calendar, which would dismiss it and leave the month and year unpickable.
+ * Ownership has to come from the trigger rather than the listbox itself, because
+ * unrelated selects in the same dialog render the same shape and clicking those
+ * must still dismiss the calendar.
+ */
+const isDropdownOwnedBy = (
+  target: EventTarget | null,
+  owner: Element | null
+) => {
+  if (!(target instanceof Element) || !owner) return false
+  const listbox = target.closest('[role="listbox"]')
+  if (!listbox?.id) return false
+  const trigger = document.querySelector(
+    `[aria-controls="${CSS.escape(listbox.id)}"]`
+  )
+  return trigger !== null && owner.contains(trigger)
+}
+
 export function DatePickerPopup({
   onSelect,
   defaultValue,
@@ -98,6 +123,15 @@ export function DatePickerPopup({
   const portalContainer = shouldUseDialogContainer
     ? dialogContext.portalContainer
     : undefined
+
+  // While a header dropdown mounts, the dialog's focus scope parks focus on its own
+  // content root — an ancestor of this calendar. Radix reports that as focus leaving
+  // the calendar, so the ancestor has to be recognised as part of it too.
+  const contentRef = useRef<HTMLDivElement>(null)
+  const hostsCalendar = (target: EventTarget | null) =>
+    target instanceof Element &&
+    contentRef.current !== null &&
+    target.contains(contentRef.current)
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -260,9 +294,25 @@ export function DatePickerPopup({
     <Popover open={props.open} onOpenChange={props.onOpenChange}>
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent
+        ref={contentRef}
         className="w-full overflow-auto"
         align="start"
         container={portalContainer}
+        onPointerDownOutside={(event) => {
+          // Only this calendar's own dropdowns: a real click anywhere else —
+          // including elsewhere in the dialog — still closes the calendar.
+          if (isDropdownOwnedBy(event.target, contentRef.current)) {
+            event.preventDefault()
+          }
+        }}
+        onFocusOutside={(event) => {
+          if (
+            isDropdownOwnedBy(event.target, contentRef.current) ||
+            hostsCalendar(event.target)
+          ) {
+            event.preventDefault()
+          }
+        }}
       >
         {showPresets ? (
           <PresetList
