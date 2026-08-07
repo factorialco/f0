@@ -5020,7 +5020,7 @@ function EndOfCourseScreen() {
             <>
               <div style={{ marginTop: 32, fontSize: 14, color: "var(--f1-foreground, #0d1424)" }}>{c.stepLabel}</div>
               <div
-                style={{ marginTop: 12, width: 260, textAlign: "left", background: "#fff", border: "1px solid rgba(0,10,30,0.06)", borderRadius: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", padding: "12px 14px" }}
+                style={{ marginTop: 12, width: 360, textAlign: "left", background: "#fff", border: "1px solid rgba(0,10,30,0.06)", borderRadius: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", padding: "12px 14px" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontWeight: 600, fontSize: 13 }}>Knowledge test</span>
@@ -5035,7 +5035,7 @@ function EndOfCourseScreen() {
           )}
 
           {c.note && c.noteTitle && (
-            <div style={{ marginTop: 28, textAlign: "left", width: "100%", alignSelf: "stretch" }}>
+            <div style={{ marginTop: 28, textAlign: "left", width: 360 }}>
               <F0Alert variant="info" title={c.noteTitle} description={c.note} />
             </div>
           )}
