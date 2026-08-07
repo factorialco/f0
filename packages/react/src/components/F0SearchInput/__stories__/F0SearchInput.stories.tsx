@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
+
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0SearchInput } from "../index"
@@ -8,11 +10,14 @@ const meta = {
   component: F0SearchInput,
   title: "Inputs/Search input",
   parameters: {
+    a11y: {
+      test: "error",
+    },
     layout: "centered",
   },
   tags: ["stable", "!autodocs"],
   args: {
-    placeholder: "",
+    placeholder: "Search...",
   },
 
   argTypes: {
@@ -20,12 +25,12 @@ const meta = {
       control: "boolean",
     },
     threshold: {
-      description: "Min number of characteres before call `onChange`",
+      description: "Minimum number of characters before calling `onChange`",
       defaultValue: 0,
     },
     debounceTime: {
       description:
-        "Debouce time in ms. It avoids to make repeated calls when the value changes",
+        "Delay in milliseconds before emitting the latest buffered query",
       defaultValue: 0,
     },
   },
@@ -67,41 +72,69 @@ export const Clearable: Story = {
   args: {
     placeholder: "Search...",
     clearable: true,
+    onChange: fn(),
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const searchbox = canvas.getByRole("searchbox")
+
+    await step("Enter the search query with the keyboard", async () => {
+      await userEvent.tab()
+      await expect(searchbox).toHaveFocus()
+      await userEvent.type(searchbox, "engineering")
+    })
+
+    await step("Clear the query and restore focus", async () => {
+      const clearButton = canvas.getByRole("button", { name: "Clear" })
+      const clearButtonBounds = clearButton.getBoundingClientRect()
+      await expect(clearButtonBounds.width).toBeGreaterThanOrEqual(24)
+      await expect(clearButtonBounds.height).toBeGreaterThanOrEqual(24)
+      await userEvent.tab()
+      await expect(clearButton).toHaveFocus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => {
+        expect(args.onChange).toHaveBeenLastCalledWith("")
+      })
+      await expect(searchbox).toHaveFocus()
+    })
   },
 }
 
 export const WithThreshold: Story = {
+  tags: ["no-sidebar"],
   parameters: {
     docs: {
       description: {
-        story: "Check console to see onChange updates",
+        story: "Only emits queries that meet the minimum character count",
       },
     },
   },
   args: {
     placeholder: "Search...",
     threshold: 3,
-    onChange: (value) => console.log("Change:", value),
+    onChange: fn(),
   },
 }
 
 export const WithDebounce: Story = {
+  tags: ["no-sidebar"],
   parameters: {
     docs: {
       description: {
         story:
-          "Check console to see onChange updates. It will only happens every 3s",
+          "Emits the latest buffered query three seconds after the first change",
       },
     },
   },
   args: {
     placeholder: "Search...",
     debounceTime: 3000,
-    onChange: (value) => console.log("Debounced change:", value),
+    onChange: fn(),
   },
 }
 
 export const Snapshot: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-6 p-4">

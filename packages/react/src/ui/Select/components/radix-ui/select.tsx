@@ -726,10 +726,13 @@ const SelectContentImpl = React.forwardRef<
   // Since this is not dependent on layout, we want to ensure this runs at the same time as
   // other effects across components. Hence why we don't call `focusSelectedItem` inside `position`.
   React.useEffect(() => {
-    if (isPositioned) {
-      focusSelectedItem()
-    }
-  }, [isPositioned, focusSelectedItem])
+    const activeElement = document.activeElement
+    const focusIsAlreadyInsideContent =
+      activeElement instanceof HTMLElement && content?.contains(activeElement)
+
+    if (!isPositioned || focusIsAlreadyInsideContent) return
+    focusSelectedItem()
+  }, [content, isPositioned, focusSelectedItem])
 
   // prevent selecting items on `pointerup` in some cases after opening from `pointerdown`
   // and close on `pointerup` outside.
@@ -922,6 +925,15 @@ const SelectContentImpl = React.forwardRef<
               onKeyDown={composeEventHandlers(
                 contentProps.onKeyDown,
                 (event) => {
+                  const target = event.target
+                  const isInteractiveTarget =
+                    target instanceof HTMLElement &&
+                    target.matches(
+                      "input, textarea, select, button, a[href], [contenteditable='true'], [tabindex]:not([tabindex='-1'])"
+                    )
+
+                  if (isInteractiveTarget) return
+
                   const isModifierKey =
                     event.ctrlKey || event.altKey || event.metaKey
 
