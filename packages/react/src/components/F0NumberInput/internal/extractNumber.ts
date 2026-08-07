@@ -1,3 +1,9 @@
+import {
+  getNumberPattern,
+  getNumberSeparators,
+  stripGroupSeparators,
+} from "./localeNumber"
+
 // eslint-disable-next-line no-useless-escape
 const COMPLETE_NUMBER_FORMAT = /^(-?)([0-9]+)?(?:([\.,])([0-9]+)?)?$/
 
@@ -11,27 +17,36 @@ export interface Options {
    * The maximum number of decimals to allow. Set to 0 to only allow integers.
    */
   maxDecimals?: number
+  /**
+   * When set, parsing follows the locale's conventions: its thousands separator
+   * is accepted and dropped, and the decimal separator is normalised to the
+   * locale's own. Without it both `.` and `,` are read as decimal separators
+   * and echoed back as typed.
+   */
+  locale?: string
 }
 
 /**
  *
  * @param input The text from which to extract a number
  * @returns an object with the formatted number and the value as a number
- *
- * TODO: Make internationalization-friendly to support grouping character
  */
 export function extractNumber(
   input: string,
-  { maxDecimals }: Options
+  { maxDecimals, locale }: Options
 ): ExtractedNumber | null {
-  if (!input || input === "-") {
+  const text = locale ? stripGroupSeparators(input, locale) : input
+
+  if (!text || text === "-") {
     return {
-      formattedValue: input ?? "",
+      formattedValue: text,
       value: null,
     }
   }
 
-  const match = input.match(COMPLETE_NUMBER_FORMAT)
+  const match = text.match(
+    locale ? getNumberPattern(locale) : COMPLETE_NUMBER_FORMAT
+  )
   if (!match) return null
 
   // eslint-disable-next-line prefer-const
@@ -45,10 +60,20 @@ export function extractNumber(
   integers =
     integers?.replace(/^0+(\d)/, (_substring, firstDigit) => firstDigit) ?? ""
 
+  const localeDecimalSeparator = locale
+    ? getNumberSeparators(locale).decimal
+    : undefined
+  // Whichever separator was typed reads back as the locale's own.
+  const decimalSeparator = separator
+    ? (localeDecimalSeparator ?? separator)
+    : ""
+
   const formattedValue = `${sign}${integers}${
-    maxDecimals !== 0 ? `${separator ?? ""}${decimals ?? ""}` : ""
+    maxDecimals !== 0 ? `${decimalSeparator}${decimals ?? ""}` : ""
   }`
-  const valueAsNumber = parseFloat(formattedValue.replace(",", "."))
+  const valueAsNumber = parseFloat(
+    formattedValue.replace(localeDecimalSeparator ?? ",", ".")
+  )
 
   return {
     formattedValue: formattedValue,
