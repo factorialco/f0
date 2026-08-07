@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.11.2](https://github.com/factorialco/f0/compare/f0-react-v6.11.1...f0-react-v6.11.2) (2026-08-07)
+
+
+### Bug Fixes
+
+* **DatePickerPopup:** keep the calendar open while its month and year dropdowns are used ([#5036](https://github.com/factorialco/f0/issues/5036)) ([bdd675d](https://github.com/factorialco/f0/commit/bdd675dde4efcc02b1e18ab9637d37e1e1bd0b57))
+
 ## [6.11.1](https://github.com/factorialco/f0/compare/f0-react-v6.11.0...f0-react-v6.11.1) (2026-08-07)
 
 
