@@ -19,6 +19,7 @@ import {
 } from "./compensation/compTabs"
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "goals-strategy-map",
   title: "Performance",
   description:

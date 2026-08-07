@@ -14,6 +14,7 @@ import { ReviewsTab } from "./reviews/ReviewsTab"
 import { moduleTabs, type ModuleTabId } from "./tabs"
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "performance",
   title: "Performance",
   description:

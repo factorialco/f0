@@ -4,3 +4,4 @@ generated/
 .opencode/
 .claude/
 *.log
+.vercel

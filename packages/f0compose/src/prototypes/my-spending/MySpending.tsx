@@ -31,6 +31,7 @@ import { expensesSubTabs, moduleTabs } from "./tabs"
  *     groups/              ← Groups tab: table, columns, source hook
  */
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "my-spending",
   title: "My expenses",
   description:

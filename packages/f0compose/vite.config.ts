@@ -11,7 +11,9 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,
-    open: true,
+    // Dedicated port for this worktree (quizzes-kt) — isolation from base f0 (5174).
+    port: 5198,
+    strictPort: true,
+    open: false,
   },
 })

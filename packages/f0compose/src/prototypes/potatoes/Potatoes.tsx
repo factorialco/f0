@@ -267,6 +267,7 @@ function computeKpis(rows: Potato[]) {
 }
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "potatoes",
   title: "Potatoes",
   description:

@@ -24,6 +24,7 @@ import { usePoliciesState } from "./usePoliciesState"
  *   /p/policies?view=page&id=X     — page detail / editor
  */
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "policies",
   title: "Policies",
   description:

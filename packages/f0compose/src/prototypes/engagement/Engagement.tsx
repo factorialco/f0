@@ -14,6 +14,7 @@ import { AnswersView } from "./enps/answers/AnswersView"
 import { ConfigurationView } from "./enps/configuration/ConfigurationView"
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "engagement",
   title: "Engagement",
   description:

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quizzes-kt",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@factorialco/f0compose", "exec", "vite", "--port", "5196"],
+      "port": 5196
+    }
+  ]
+}

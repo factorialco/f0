@@ -41,6 +41,7 @@ import {
  * view, not just when the sub-screen is mounted.
  */
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "recruitment",
   title: "Recruitment",
   description:

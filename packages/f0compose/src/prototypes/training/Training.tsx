@@ -28,6 +28,7 @@ import { TrainingsListTab } from "./trainings/TrainingsListTab"
  *   /p/training?tab=trainings&sub=categories — sub-tab
  */
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "training",
   title: "Training",
   description:

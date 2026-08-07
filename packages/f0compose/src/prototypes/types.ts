@@ -30,6 +30,8 @@ export type PrototypeMeta = {
   createdAt: string
   /** Optional author display name. */
   author?: string
+  /** When true, hidden from the catalog grid but still reachable by route/import. */
+  hidden?: boolean
 }
 
 /**

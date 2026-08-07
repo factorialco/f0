@@ -32,6 +32,6 @@ export const prototypeRegistry: Record<string, PrototypeRegistryEntry> =
       .map((mod) => [mod.meta.slug, { component: mod.default, meta: mod.meta }])
   )
 
-export const allPrototypes: PrototypeMeta[] = Object.values(
-  prototypeRegistry
-).map((entry) => entry.meta)
+export const allPrototypes: PrototypeMeta[] = Object.values(prototypeRegistry)
+  .map((entry) => entry.meta)
+  .filter((meta) => !meta.hidden)
