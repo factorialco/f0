@@ -751,6 +751,14 @@ const e = {
       one: "{{count}} unread",
       other: "{{count}} unread"
     },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above"
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below"
+    },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
