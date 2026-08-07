@@ -4955,7 +4955,7 @@ function EndOfCourseScreen() {
   const st = searchParams.get("st") ?? "required"
   const backToCourse = () => setSearchParams({ view: "learner-course", done: "1" })
 
-  const copy: Record<string, { title: string; sub: string; stepLabel?: string; note?: string }> = {
+  const copy: Record<string, { title: string; sub: string; stepLabel?: string; noteTitle?: string; note?: string }> = {
     done: { title: "Congratulations!", sub: "You have successfully completed the course." },
     required: {
       title: "Content complete!",
@@ -4970,12 +4970,14 @@ function EndOfCourseScreen() {
     waiting: {
       title: "Content complete!",
       sub: "You have successfully completed all the content modules.",
-      note: "We're preparing your knowledge test — it will be ready in about a minute. We'll notify you, and you'll also find it in your course content.",
+      noteTitle: "We're preparing your knowledge test",
+      note: "It will be ready in about a minute. We'll notify you, and you'll also find it in your course content.",
     },
     scheduled: {
       title: "Congratulations!",
       sub: "You have successfully completed the course.",
-      note: "Your satisfaction survey opens on 4 Aug. We'll notify you when it's available.",
+      noteTitle: "Your satisfaction survey opens on 4 Aug",
+      note: "We'll notify you when it's available.",
     },
   }
   const c = copy[st] ?? copy.required
@@ -5034,9 +5036,9 @@ function EndOfCourseScreen() {
             </>
           )}
 
-          {c.note && (
-            <div style={{ marginTop: 28, width: 320, padding: "12px 14px", borderRadius: 10, background: "var(--f1-background-secondary, #f5f6f8)", fontSize: 13, color: "var(--f1-foreground-secondary, #6b7280)", lineHeight: 1.5 }}>
-              {c.note}
+          {c.note && c.noteTitle && (
+            <div style={{ marginTop: 28, textAlign: "left" }}>
+              <F0Alert variant="info" title={c.noteTitle} description={c.note} />
             </div>
           )}
 
