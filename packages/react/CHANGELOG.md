@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.10.0](https://github.com/factorialco/f0/compare/f0-react-v6.9.1...f0-react-v6.10.0) (2026-08-07)
+
+
+### Features
+
+* **F0Graph:** fly to node on click with panel-aware centering (+ F0Drawer onWidthChange) ([#4956](https://github.com/factorialco/f0/issues/4956)) ([144f681](https://github.com/factorialco/f0/commit/144f681a6748afdaa3c637e6f9670085cf001262))
+
 ## [6.9.1](https://github.com/factorialco/f0/compare/f0-react-v6.9.0...f0-react-v6.9.1) (2026-08-07)
 
 
