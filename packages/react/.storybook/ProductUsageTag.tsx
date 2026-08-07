@@ -33,13 +33,17 @@ const INTERNAL_SHOWN = 6
  */
 let request: Promise<UsageResult | null> | undefined
 
+/**
+ * Local dev only. This data — product module names, internal prototype titles
+ * — must never reach the public Storybook at f0.factorial.dev, which anyone
+ * outside the company can read. `import.meta.env.DEV` is inlined at build
+ * time, so the static bundle drops the tag and its request entirely rather
+ * than relying on the endpoint 404ing.
+ */
+const ENABLED = import.meta.env.DEV
+
 function fetchUsage(): Promise<UsageResult | null> {
-  // Local dev only. This data — product module names, internal prototype
-  // titles — must never reach the public Storybook at f0.factorial.dev, which
-  // anyone outside the company can read. `import.meta.env.DEV` is inlined at
-  // build time, so the static bundle drops the request entirely rather than
-  // relying on the endpoint 404ing.
-  if (!import.meta.env.DEV) return Promise.resolve(null)
+  if (!ENABLED) return Promise.resolve(null)
 
   request ??= fetch(ENDPOINT)
     .then(async (response) => {
@@ -309,10 +313,36 @@ function UsageDetails({
 export function ProductUsageTag({ names }: { names: string[] }) {
   const result = useUsage()
 
-  // Undefined while in flight, null when there's no endpoint — i.e. the
-  // public static build, where this internal data must not appear at all.
-  if (!result) return null
+  // Before anything renders: the loading state would otherwise flash on the
+  // public build for the frame between mount and the effect resolving to
+  // "unavailable", advertising internal tooling to the outside world.
+  if (!ENABLED) return null
   if (names.length === 0) return null
+
+  // The first docs page of a session pays for the scan (a second or two of
+  // walking three repos). Say so rather than leaving a gap where the tag will
+  // be — an absent tag is indistinguishable from a broken one.
+  if (result === undefined) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="sb-unstyled inline-flex cursor-progress align-middle opacity-60">
+            <F0TagRaw text="Checking usage…" icon={LayersFront} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="start">
+          <span className="sb-unstyled text-base text-f1-foreground-inverse">
+            Scanning the product, F0 and Composer prototypes for usages of this
+            component.
+          </span>
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  // `null` means there's no endpoint to ask — i.e. the public static build,
+  // where this internal data must not appear at all.
+  if (result === null) return null
 
   const { productFiles, internal } = resolveUsage(result, names)
 
