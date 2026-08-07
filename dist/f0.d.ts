@@ -18542,8 +18542,11 @@ export declare interface UseDataReturn<R extends RecordType> {
      * do that: it moves a render (and a debounce) before the matching rows do, so
      * there is always a window where it describes a query the rendered rows do
      * not answer.
+     *
+     * Optional so existing constructors of this interface (mocks, adapters) stay
+     * valid; `useData` itself always returns it.
      */
-    committedQuery: string | undefined;
+    committedQuery?: string;
 }
 
 /**
