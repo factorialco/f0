@@ -4172,6 +4172,13 @@ function LearnerCourseScreen() {
                     }),
                     fields: [
                       {
+                        label: "Required",
+                        render: (evaluation: LearnerEvaluation) =>
+                          evaluation.required && evaluation.status !== "Completed" && evaluation.status !== "Passed"
+                            ? { type: "alertTag" as const, value: { level: "warning" as const, label: "Required" } }
+                            : { type: "text" as const, value: "" },
+                      },
+                      {
                         label: "Status",
                         render: (evaluation: LearnerEvaluation) =>
                           evaluation.opensAt
@@ -6442,6 +6449,7 @@ type LearnerEvaluation = {
   questions: number
   status: "Not started" | "Passed" | "Failed" | "Completed"
   opensAt?: string
+  required?: boolean
 }
 
 type TeamEvaluationRow = {
@@ -6459,15 +6467,15 @@ const OLD_MINIMUM = 50
 const TOTAL_FINISHED = 25
 
 const LEARNER_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started" },
-  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed" },
-  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed" },
+  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started", required: true },
+  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed", required: true },
+  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed", required: true },
   { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed" },
 ]
 
 /** Scheduled (not materialized yet): shown with the date it opens, not actionable. */
 const SCHEDULED_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug" },
+  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug", required: true },
   { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course" },
 ]
 const SCHEDULED_IDS = new Set(["kt-2", "sat-2"])
