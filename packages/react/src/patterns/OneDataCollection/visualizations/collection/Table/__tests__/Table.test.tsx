@@ -378,6 +378,256 @@ describe("TableCollection", () => {
       expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
+    it("applies the highlighted background to the highlighted column's header and cells", async () => {
+      const columnsWithHighlighted = [
+        { label: "name", render: (item: Person) => item.name },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          highlighted: true,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithHighlighted}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailHeader).toHaveAttribute("data-highlighted", "true")
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+
+      const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
+      expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
+
+      const nameCell = screen.getAllByText(testData[0].name)[0].closest("td")
+      expect(nameCell?.className).not.toMatch(/bg-f1-background-secondary/)
+    })
+
+    it("emphasizes every highlighted column", async () => {
+      const columnsWithHighlighted = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          highlighted: true,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          highlighted: true,
+        },
+        { label: "displayName", render: (item: Person) => item.displayName },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithHighlighted}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const displayNameHeader = screen.getByRole("columnheader", {
+        name: "displayName",
+      })
+      expect(displayNameHeader.className).not.toMatch(
+        /bg-f1-background-secondary/
+      )
+    })
+
+    it("highlights the spanning header of the highlighted column's group", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          headerGroupId: "identity",
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+          highlighted: true,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ identity: "Identity", contact: "Contact" }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const contactGroupHeader = screen.getByRole("columnheader", {
+        name: "Contact",
+      })
+      expect(contactGroupHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const identityGroupHeader = screen.getByRole("columnheader", {
+        name: "Identity",
+      })
+      expect(identityGroupHeader.className).not.toMatch(
+        /bg-f1-background-secondary/
+      )
+    })
+
+    it("highlights every column of a highlighted header group", async () => {
+      const groupedColumns = [
+        { label: "name", render: (item: Person) => item.name },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+        },
+        {
+          label: "displayName",
+          render: (item: Person) => item.displayName,
+          headerGroupId: "contact",
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ contact: { label: "Contact", highlighted: true } }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const contactGroupHeader = screen.getByRole("columnheader", {
+        name: "Contact",
+      })
+      expect(contactGroupHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const displayNameHeader = screen.getByRole("columnheader", {
+        name: "displayName",
+      })
+      expect(displayNameHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+
+      const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
+      expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
+    })
+
+    it("combines a highlighted header group with independently highlighted columns", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          highlighted: true,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ contact: { label: "Contact", highlighted: true } }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+    })
+
     it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
       const groupedColumns = [
         {

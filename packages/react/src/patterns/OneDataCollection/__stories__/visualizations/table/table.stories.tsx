@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, waitFor, within } from "storybook/test"
 import { useState, useMemo } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -8,10 +8,10 @@ import {
   CompoundTone,
 } from "@/ui/value-display/types/compound"
 
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { ItemActionsDefinition } from "../../../item-actions"
 import { OneDataCollection } from "../../../index"
+import { ItemActionsDefinition } from "../../../item-actions"
+import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/Table",
@@ -444,7 +444,7 @@ export const TableKpiCompoundValues: Story = {
     docs: {
       description: {
         story:
-          "A KPI-focused table showcasing multi-segment `compound` values with semantic tones and `value / value` formatting.",
+          "A KPI-highlighted table showcasing multi-segment `compound` values with semantic tones and `value / value` formatting.",
       },
     },
   },
@@ -1085,6 +1085,217 @@ export const TableWithCollapsibleHeaderGroupsAndSorting: Story = {
     await userEvent.click(january)
     await waitFor(() => expect(bonusesHeaders()).toHaveLength(2))
     expect(bonusesHeaders()[0]).toHaveAttribute("aria-sort", "ascending")
+  },
+}
+
+export const TableWithHighlightedHeaderGroup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Setting `highlighted` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background — equivalent to setting the `highlighted` column option on each of its columns — and the emphasis survives collapsing the group. Here a full year of sortable, collapsible months starts collapsed except August, the highlighted month — the same shape as a monthly cost overview highlighting the current month.",
+      },
+    },
+  },
+  render: () => {
+    const months = [
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec",
+    ] as const
+    type Month = (typeof months)[number]
+
+    const monthLabels: Record<Month, string> = {
+      jan: "January",
+      feb: "February",
+      mar: "March",
+      apr: "April",
+      may: "May",
+      jun: "June",
+      jul: "July",
+      aug: "August",
+      sep: "September",
+      oct: "October",
+      nov: "November",
+      dec: "December",
+    }
+
+    const highlightedMonth: Month = "aug"
+
+    const monthly = (baseSalaries: number, baseBonuses: number) =>
+      Object.fromEntries(
+        months.map((month, index) => [
+          month,
+          {
+            salaries: baseSalaries + index * 1200,
+            bonuses: baseBonuses + index * 250,
+          },
+        ])
+      ) as Record<Month, { salaries: number; bonuses: number }>
+
+    const records = [
+      { id: 1, team: "Engineering", months: monthly(310400, 24000) },
+      { id: 2, team: "Design", months: monthly(78200, 4000) },
+      { id: 3, team: "Sales", months: monthly(164700, 38900) },
+      { id: 4, team: "Support", months: monthly(96500, 11200) },
+    ]
+
+    const eur = (value: number) => `€${value.toLocaleString("en-US")}`
+    const monthTotal = (item: (typeof records)[number], month: Month) =>
+      item.months[month].salaries + item.months[month].bonuses
+
+    const sortings = {
+      team: { label: "Team" },
+      ...Object.fromEntries(
+        months.flatMap((month) => [
+          [`${month}-salaries`, { label: `${monthLabels[month]} salaries` }],
+          [`${month}-bonuses`, { label: `${monthLabels[month]} bonuses` }],
+          [`${month}-total`, { label: `${monthLabels[month]} total` }],
+        ])
+      ),
+    } as Record<string, { label: string }>
+
+    const source = useDataCollectionSource({
+      sortings,
+      dataAdapter: {
+        fetchData: async ({ sortings }) => {
+          if (!sortings || sortings.length === 0) return { records }
+
+          const [{ field, order }] = sortings
+          const read = (item: (typeof records)[number]): number | string => {
+            if (field === "team") return item.team
+            const [month, metric] = String(field).split("-") as [
+              Month,
+              "salaries" | "bonuses" | "total",
+            ]
+            if (!item.months[month]) return 0
+            return metric === "total"
+              ? monthTotal(item, month)
+              : item.months[month][metric]
+          }
+
+          const sorted = [...records].sort((a, b) => {
+            const left = read(a)
+            const right = read(b)
+            const diff =
+              typeof left === "string" && typeof right === "string"
+                ? left.localeCompare(right)
+                : Number(left) - Number(right)
+            return order === "asc" ? diff : -diff
+          })
+
+          return { records: sorted }
+        },
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: Object.fromEntries(
+                months.map((month) => [
+                  month,
+                  {
+                    label: monthLabels[month],
+                    // Only the total stays visible while collapsed
+                    collapsedColumns: [`${month}-total`],
+                    defaultCollapsed: month !== highlightedMonth,
+                    // Focuses the spanning header and every column in the group
+                    highlighted: month === highlightedMonth,
+                  },
+                ])
+              ),
+              columns: [
+                {
+                  id: "team",
+                  label: "Team",
+                  sorting: "team",
+                  render: (item) => item.team,
+                },
+                ...months.flatMap((month) => [
+                  {
+                    id: `${month}-salaries`,
+                    label: "Salaries",
+                    align: "right" as const,
+                    headerGroupId: month,
+                    sorting: `${month}-salaries`,
+                    render: (item: (typeof records)[number]) =>
+                      eur(item.months[month].salaries),
+                  },
+                  {
+                    id: `${month}-bonuses`,
+                    label: "Bonuses",
+                    align: "right" as const,
+                    headerGroupId: month,
+                    sorting: `${month}-bonuses`,
+                    render: (item: (typeof records)[number]) =>
+                      eur(item.months[month].bonuses),
+                  },
+                  {
+                    id: `${month}-total`,
+                    label: "Total",
+                    align: "right" as const,
+                    headerGroupId: month,
+                    sorting: `${month}-total`,
+                    render: (item: (typeof records)[number]) =>
+                      eur(monthTotal(item, month)),
+                  },
+                ]),
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The highlighted group's spanning header is emphasized.
+    const augustGroup = await canvas.findByRole("button", { name: "August" })
+    expect(augustGroup.closest("th")?.className).toContain(
+      "bg-f1-background-secondary"
+    )
+
+    // Every column of the highlighted group carries the emphasis and the marker:
+    // the group header plus its three expanded columns.
+    const highlightedHeaders = canvasElement.querySelectorAll(
+      "th[data-highlighted]"
+    )
+    expect(highlightedHeaders.length).toBe(4)
+    highlightedHeaders.forEach((header) => {
+      expect(header.className).toContain("bg-f1-background-secondary")
+    })
+
+    // Collapsing the highlighted month keeps its visible total column emphasized.
+    await userEvent.click(augustGroup)
+    await waitFor(() =>
+      expect(augustGroup).toHaveAttribute("aria-expanded", "false")
+    )
+    await waitFor(() => {
+      const collapsedHighlighted = canvasElement.querySelectorAll(
+        "th[data-highlighted]"
+      )
+      // The group header plus the remaining total column.
+      expect(collapsedHighlighted.length).toBe(2)
+      expect(
+        collapsedHighlighted[collapsedHighlighted.length - 1].className
+      ).toContain("bg-f1-background-secondary")
+    })
   },
 }
 
