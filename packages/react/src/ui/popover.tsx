@@ -9,6 +9,8 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 
 const PopoverAnchor = PopoverPrimitive.Anchor
 
+const PopoverArrow = PopoverPrimitive.Arrow
+
 type PopoverContentProps = React.ComponentPropsWithoutRef<
   typeof PopoverPrimitive.Content
 > & {
@@ -43,4 +45,5 @@ const PopoverContent = React.forwardRef<
 )
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
-export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger }
+export { Popover, PopoverAnchor, PopoverArrow, PopoverContent, PopoverTrigger }
+export type { PopoverContentProps }
