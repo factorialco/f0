@@ -34,6 +34,54 @@ const darkNameWhiteMix: Record<F0ChatSenderColor, number> = {
   grass: 10,
 }
 
+const lightBubbleColorMix: Record<F0ChatSenderColor, number> = {
+  viridian: 8,
+  malibu: 11,
+  yellow: 8,
+  purple: 11,
+  lilac: 8,
+  barbie: 8,
+  smoke: 11,
+  army: 11,
+  flubber: 8,
+  indigo: 11,
+  camel: 8,
+  radical: 8,
+  orange: 8,
+  red: 8,
+  grass: 8,
+}
+
+const darkBubbleColorMix: Record<F0ChatSenderColor, number> = {
+  viridian: 11,
+  malibu: 14,
+  yellow: 11,
+  purple: 14,
+  lilac: 11,
+  barbie: 11,
+  smoke: 14,
+  army: 14,
+  flubber: 11,
+  indigo: 14,
+  camel: 11,
+  radical: 11,
+  orange: 11,
+  red: 11,
+  grass: 11,
+}
+
+const bubbleColorMixClass = (
+  color: F0ChatSenderColor,
+  mix: number,
+  dark = false
+): string =>
+  [
+    dark ? "dark:bg-[" : "bg-[",
+    "color-mix(in_oklch,hsl(theme(colors.",
+    color,
+    `.50))_${mix}%,hsl(var(--neutral-0)))]`,
+  ].join("")
+
 describe("f0ChatSenderColors", () => {
   it("exposes the complete sender palette", () => {
     expect(f0ChatSenderColors).toEqual([
@@ -92,16 +140,19 @@ describe("senderBubbleColorClass", () => {
     const sender = user("u1", "Marcus Bennett")
     const nameClass = senderNameColorClass(sender)
     const bubbleClass = senderBubbleColorClass(sender)
-    const nameHue = nameClass.match(/colors\.([a-z]+)\.70/)?.[1]
+    const nameHue = nameClass.match(/colors\.([a-z]+)\.70/)?.[1] as
+      | F0ChatSenderColor
+      | undefined
 
-    expect(nameHue).toBeDefined()
+    if (!nameHue) throw new Error("Expected the sender name hue")
     expect(bubbleClass).toContain(`colors.${nameHue}.50`)
     expect(bubbleClass).toContain(
-      `hsl(theme(colors.${nameHue}.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0)))`
+      bubbleColorMixClass(nameHue, lightBubbleColorMix[nameHue])
     )
     expect(bubbleClass).toContain(
-      `dark:bg-[color-mix(in_srgb,hsl(theme(colors.${nameHue}.50))_8%`
+      bubbleColorMixClass(nameHue, darkBubbleColorMix[nameHue], true)
     )
+    expect(bubbleClass).not.toContain("--neutral-100")
   })
 
   it("matches the avatar colour seed", () => {
@@ -209,12 +260,12 @@ describe("senderBubbleColorClass", () => {
       )
       expect(senderBubbleColorClass(sender)).toContain(`colors.${color}.50`)
       expect(senderBubbleColorClass(sender)).toContain(
-        [
-          "dark:bg-[color-mix(in_srgb,hsl(theme(colors.",
-          color,
-          ".50))_8%",
-        ].join("")
+        bubbleColorMixClass(color, darkBubbleColorMix[color], true)
       )
+      expect(senderBubbleColorClass(sender)).toContain(
+        bubbleColorMixClass(color, lightBubbleColorMix[color])
+      )
+      expect(senderBubbleColorClass(sender)).not.toContain("--neutral-100")
       if (color === "orange" || color === "grass") {
         expect(senderNameColorClass(sender)).toContain("black_6%")
       }

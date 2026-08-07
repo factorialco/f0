@@ -2,10 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useCallback, useEffect, useState } from "react"
 import { action } from "storybook/actions"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { Clock, New, PalmTree, People, VolumeMuted } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { ScrollArea } from "@/ui/scrollarea"
 
 import { SidebarChatList, type SidebarChatEmptyState } from "./SidebarChatList"
 import {
@@ -369,8 +371,88 @@ export const PinnedReordering: Story = {
   ),
 }
 
+const unreadNavigationGroups: SidebarChatGroup[] = [
+  {
+    id: "long-list",
+    title: "Conversations",
+    chats: Array.from({ length: 24 }, (_, index) => {
+      const number = index + 1
+      return {
+        id: `long-chat-${number}`,
+        label: `Chat ${number.toString().padStart(2, "0")}`,
+        unreadCount: [2, 6, 18, 23].includes(number) ? 1 : undefined,
+      }
+    }),
+  },
+]
+
+/**
+ * A constrained sidebar viewport demonstrates the Slack-style controls. Scroll
+ * to the middle to see independent unread counts above and below; either
+ * control centers and focuses the nearest unread row without opening it.
+ */
+export const OffscreenUnreadNavigation: Story = {
+  tags: ["no-sidebar", "sidebar-unread-navigation"],
+  render: () => (
+    <ScrollArea className="h-80 w-72 bg-f1-background-tertiary py-2">
+      <SidebarChatProvider initialGroups={unreadNavigationGroups}>
+        <SidebarChatList emptyState={exampleEmptyState} />
+      </SidebarChatProvider>
+    </ScrollArea>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const middleChat = canvas.getByRole("button", { name: "Chat 12" })
+    await step("Show independent unread controls above and below", async () => {
+      middleChat.scrollIntoView({ block: "center" })
+
+      await waitFor(() => {
+        expect(
+          canvas.getByRole("button", { name: "2 unread chats above" })
+        ).toBeInTheDocument()
+        expect(
+          canvas.getByRole("button", { name: "2 unread chats below" })
+        ).toBeInTheDocument()
+      })
+    })
+
+    await step("Jump to the nearest unread chat above", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: "2 unread chats above" })
+      )
+      await waitFor(() => {
+        expect(canvas.getByRole("button", { name: /Chat 06/ })).toHaveFocus()
+      })
+      await expect(
+        canvas.getByRole("button", { name: /Chat 06/ })
+      ).toHaveAttribute("aria-pressed", "false")
+    })
+
+    await step("Jump to the nearest unread chat below", async () => {
+      middleChat.scrollIntoView({ block: "center" })
+      await waitFor(() => {
+        expect(
+          canvas.getByRole("button", { name: "2 unread chats above" })
+        ).toBeInTheDocument()
+        expect(
+          canvas.getByRole("button", { name: "2 unread chats below" })
+        ).toBeInTheDocument()
+      })
+      await userEvent.click(
+        canvas.getByRole("button", { name: "2 unread chats below" })
+      )
+      await waitFor(() => {
+        expect(canvas.getByRole("button", { name: /Chat 18/ })).toHaveFocus()
+      })
+      await expect(
+        canvas.getByRole("button", { name: /Chat 18/ })
+      ).toHaveAttribute("aria-pressed", "false")
+    })
+  },
+}
+
 export const Snapshot: Story = {
-  tags: ["no-sidebar"],
+  tags: ["no-sidebar", "sidebar-unread-navigation"],
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex w-fit items-start gap-4">
@@ -389,6 +471,32 @@ export const Snapshot: Story = {
       <SidebarChatProvider initialGroups={[]}>
         <SidebarChatList emptyState={exampleEmptyState} loading />
       </SidebarChatProvider>
+      <ScrollArea
+        className="h-80 w-72 bg-f1-background-tertiary py-2"
+        data-testid="snapshot-offscreen-unread"
+      >
+        <SidebarChatProvider initialGroups={unreadNavigationGroups}>
+          <SidebarChatList emptyState={exampleEmptyState} />
+        </SidebarChatProvider>
+      </ScrollArea>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const unreadExample = within(
+      canvas.getByTestId("snapshot-offscreen-unread")
+    )
+    unreadExample
+      .getByRole("button", { name: "Chat 12" })
+      .scrollIntoView({ block: "center" })
+
+    await waitFor(() => {
+      expect(
+        unreadExample.getByRole("button", { name: "2 unread chats above" })
+      ).toBeInTheDocument()
+      expect(
+        unreadExample.getByRole("button", { name: "2 unread chats below" })
+      ).toBeInTheDocument()
+    })
+  },
 }

@@ -134,7 +134,7 @@ export const ChatHeader = ({
           key={status.label}
           icon={status.icon}
           size="sm"
-          color="secondary"
+          color="default"
           aria-label={status.label}
         />
       ))}

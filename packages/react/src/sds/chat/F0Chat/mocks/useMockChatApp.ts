@@ -10,7 +10,7 @@ import {
   useState,
 } from "react"
 
-import { VolumeMuted } from "@/icons/app"
+import { BellOff } from "@/icons/app"
 
 import {
   isUserMessage,
@@ -93,7 +93,7 @@ export const useMockChatStore = (): MockChatAppValue => {
   const [muted, setMuted] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(
       SEEDS.filter((seed) =>
-        seed.statuses?.some((status) => status.icon === VolumeMuted)
+        seed.statuses?.some((status) => status.icon === BellOff)
       ).map((seed) => [seed.id, true])
     )
   )

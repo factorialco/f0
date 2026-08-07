@@ -97,7 +97,7 @@ export const SidebarChatItem = ({
         : null
 
   return (
-    <div className="group/row relative">
+    <div className="group/row relative" data-sidebar-chat-id={chat.id}>
       <button
         type="button"
         onClick={onClick}

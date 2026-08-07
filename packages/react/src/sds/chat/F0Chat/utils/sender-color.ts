@@ -46,39 +46,40 @@ const NAME_COLOR_CLASS: Record<F0ChatSenderColor, string> = {
 }
 
 /**
- * A quiet tint of the same palette colour used by the sender's name. Mixing a
- * small amount into the themed neutral surface keeps bubbles calm in both
- * colour modes without changing the message text colour.
+ * A quiet tint of the same palette colour used by the sender's name. Each hue
+ * is mixed directly into the themed surface in OKLCH, so its perceived tint
+ * remains consistent. Cooler and naturally muted hues use a little more colour
+ * to remain distinct from the neutral bubble used for the current user.
  */
 const BUBBLE_COLOR_CLASS: Record<F0ChatSenderColor, string> = {
   viridian:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.viridian.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.viridian.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.viridian.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.viridian.50))_11%,hsl(var(--neutral-0)))]",
   malibu:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.malibu.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.malibu.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.malibu.50))_11%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.malibu.50))_14%,hsl(var(--neutral-0)))]",
   yellow:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.yellow.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.yellow.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.yellow.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.yellow.50))_11%,hsl(var(--neutral-0)))]",
   purple:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.purple.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.purple.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.purple.50))_11%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.purple.50))_14%,hsl(var(--neutral-0)))]",
   lilac:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.lilac.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.lilac.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.lilac.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.lilac.50))_11%,hsl(var(--neutral-0)))]",
   barbie:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.barbie.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.barbie.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.barbie.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.barbie.50))_11%,hsl(var(--neutral-0)))]",
   smoke:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.smoke.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.smoke.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
-  army: "bg-[color-mix(in_srgb,hsl(theme(colors.army.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.army.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.smoke.50))_11%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.smoke.50))_14%,hsl(var(--neutral-0)))]",
+  army: "bg-[color-mix(in_oklch,hsl(theme(colors.army.50))_11%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.army.50))_14%,hsl(var(--neutral-0)))]",
   flubber:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.flubber.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.flubber.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.flubber.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.flubber.50))_11%,hsl(var(--neutral-0)))]",
   indigo:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.indigo.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.indigo.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.indigo.50))_11%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.indigo.50))_14%,hsl(var(--neutral-0)))]",
   camel:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.camel.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.camel.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.camel.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.camel.50))_11%,hsl(var(--neutral-0)))]",
   radical:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.radical.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.radical.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.radical.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.radical.50))_11%,hsl(var(--neutral-0)))]",
   orange:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.orange.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.orange.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
-  red: "bg-[color-mix(in_srgb,hsl(theme(colors.red.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.red.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.orange.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.orange.50))_11%,hsl(var(--neutral-0)))]",
+  red: "bg-[color-mix(in_oklch,hsl(theme(colors.red.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.red.50))_11%,hsl(var(--neutral-0)))]",
   grass:
-    "bg-[color-mix(in_srgb,hsl(theme(colors.grass.50))_4%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))] dark:bg-[color-mix(in_srgb,hsl(theme(colors.grass.50))_8%,color-mix(in_srgb,hsl(var(--neutral-100))_3%,hsl(var(--neutral-0))))]",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.grass.50))_8%,hsl(var(--neutral-0)))] dark:bg-[color-mix(in_oklch,hsl(theme(colors.grass.50))_11%,hsl(var(--neutral-0)))]",
 }
 
 /** The hash input must match what the avatar uses, so name + dot agree. */

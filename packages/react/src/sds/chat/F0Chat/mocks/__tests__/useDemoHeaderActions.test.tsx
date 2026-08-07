@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { VolumeHigh, VolumeMuted } from "@/icons/app"
-import { renderHook } from "@/testing/test-utils"
+import { Bell, BellOff } from "@/icons/app"
+import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { type F0ChatChannel } from "../../types"
 import { useDemoHeaderActions } from "../useDemoHeaderActions"
@@ -11,11 +11,11 @@ const channel = (muted: boolean): F0ChatChannel => ({
   type: "group",
   title: "Product Team",
   avatar: { type: "emoji", emoji: "🚀" },
-  statuses: muted ? [{ icon: VolumeMuted, label: "Muted" }] : undefined,
+  statuses: muted ? [{ icon: BellOff, label: "Muted" }] : undefined,
 })
 
 describe("useDemoHeaderActions", () => {
-  it("uses VolumeMuted for Mute and VolumeHigh for Unmute", () => {
+  it("uses BellOff for Mute and Bell for Unmute", () => {
     const toggleMute = vi.fn()
     const { result, rerender } = renderHook(
       ({ muted }) =>
@@ -28,12 +28,12 @@ describe("useDemoHeaderActions", () => {
 
     expect(
       result.current.headerActions.find((action) => action.id === "mute")
-    ).toMatchObject({ label: "Mute", icon: VolumeMuted })
+    ).toMatchObject({ label: "Mute", icon: BellOff })
 
     rerender({ muted: true })
 
     expect(
       result.current.headerActions.find((action) => action.id === "mute")
-    ).toMatchObject({ label: "Unmute", icon: VolumeHigh })
+    ).toMatchObject({ label: "Unmute", icon: Bell })
   })
 })

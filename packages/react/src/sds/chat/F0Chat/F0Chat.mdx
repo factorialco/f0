@@ -233,6 +233,8 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
 - WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
 - WHEN a bubble attachment has an inline or document preview → THEN F0 omits the redundant download action from the bubble; download remains available inside the document viewer or video-player controls, while files without a preview and failed previews keep their downloadable file chip.
+- WHEN the transcript is actively scrolling → THEN heavy map, document, video, and voice previews keep stable placeholders instead of initializing work that could interrupt the scroll.
+- WHEN scrolling ends → THEN deferred heavy previews initialize progressively across idle frames while already-mounted previews remain unchanged.
 - WHEN a voice attachment is narrower than its waveform → THEN the bars compress and any residual excess is clipped inside the seek area, preserving the fixed time/speed slot.
 - WHEN the reader wheels toward older messages → THEN F0 pauses bottom following immediately and keeps it paused through asynchronous attachment growth until the reader returns to the true bottom edge, explicitly jumps to the bottom, or sends a new message.
 

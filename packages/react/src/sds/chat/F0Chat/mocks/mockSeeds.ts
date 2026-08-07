@@ -1,5 +1,5 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-import { VolumeMuted } from "@/icons/app"
+import { BellOff } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
@@ -390,7 +390,7 @@ export const SEEDS: Seed[] = [
     title: PRIYA.name,
     avatar: PRIYA.avatar,
     presence: "online",
-    statuses: [{ icon: VolumeMuted, label: "Muted" }],
+    statuses: [{ icon: BellOff, label: "Muted" }],
     participants: [PRIYA],
     unread: 4,
     lines: [

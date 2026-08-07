@@ -62,8 +62,31 @@ describe("ChatBubble sender colour", () => {
     render(<ChatBubble message={message} isMine />)
 
     const bubble = screen.getByText("hello").closest(".rounded-2xl")
-    expect(bubble).toHaveClass("bg-f1-background-tertiary")
+    expect(bubble).toHaveClass("bg-f1-background-secondary")
+    expect(bubble).not.toHaveClass("bg-f1-background-tertiary")
     expect(bubble).not.toHaveClass(senderBubbleColorClass(message.author))
+  })
+
+  it("keeps deleted own messages on the same neutral background", () => {
+    const message = { ...makeMessage("hello"), isMine: true, deleted: true }
+    render(<ChatBubble message={message} isMine />)
+
+    expect(screen.getByText("Message deleted")).toHaveClass(
+      "bg-f1-background-secondary"
+    )
+  })
+
+  it("keeps failed message content at full opacity", () => {
+    const message = {
+      ...makeMessage("hello"),
+      isMine: true,
+      status: "failed" as const,
+    }
+    render(<ChatBubble message={message} isMine />)
+
+    expect(screen.getByText("hello").closest(".rounded-2xl")).not.toHaveClass(
+      "opacity-60"
+    )
   })
 
   it("keeps the matching name and bubble hues in a group message run", () => {

@@ -1787,12 +1787,16 @@ export const CommunicationsVideoAttachments: Story = {
   ),
   play: async ({ canvas, step }) => {
     await step("Render both videos as wide inline players", async () => {
-      const players = await canvas.findAllByRole(
-        "region",
-        { name: /Video player:/ },
+      await waitFor(
+        () =>
+          expect(
+            canvas.queryAllByRole("region", { name: /Video player:/ })
+          ).toHaveLength(2),
         { timeout: 5_000 }
       )
-      await expect(players).toHaveLength(2)
+      const players = canvas.getAllByRole("region", {
+        name: /Video player:/,
+      })
 
       // The transcript keeps its subtree in the a11y tree while it's still
       // `opacity-0` (it fades in once Virtuoso has positioned the entry row),

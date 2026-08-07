@@ -124,7 +124,9 @@ const ChatBubbleImpl = ({
           corners,
           "w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
-          isMine ? "bg-f1-background-tertiary" : "bg-f1-background"
+          isMine
+            ? "bg-f1-background-tertiary"
+            : senderBubbleColorClass(message.author)
         )}
       >
         {i18n.chat.deletedMessage}
@@ -137,16 +139,13 @@ const ChatBubbleImpl = ({
       <div
         className={cn(
           corners,
-          // One property list (tailwind-merge collapses `transition-*`): the
-          // run-corner animation from `corners` plus the dim when a send fails.
-          "transition-[border-radius,opacity] duration-150",
           "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
-          // Incoming bubbles share the author's hue at a much quieter tint.
+          // Incoming bubbles share the author's hue at a quiet tint, while the
+          // current user's bubble remains clearly neutral.
           isMine
             ? "bg-f1-background-tertiary"
-            : senderBubbleColorClass(message.author),
-          message.status === "failed" && "opacity-60"
+            : senderBubbleColorClass(message.author)
         )}
       >
         {message.replyTo && (

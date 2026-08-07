@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
-import { PalmTree, VolumeMuted } from "@/icons/app"
+import { BellOff, PalmTree } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
@@ -206,10 +206,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
       pinned: app.pinned[convId] ?? false,
       // Surface the same states the sidebar shows (e.g. on vacation) in the header.
       statuses: [
-        ...(seed?.statuses?.filter((status) => status.icon !== VolumeMuted) ??
-          []),
+        ...(seed?.statuses?.filter((status) => status.icon !== BellOff) ?? []),
         ...(app.muted[convId]
-          ? [{ icon: VolumeMuted, label: i18n.chat.muted }]
+          ? [{ icon: BellOff, label: i18n.chat.muted }]
           : []),
         ...(seed?.type === "dm" && seed.participants[0]?.vacation
           ? [{ icon: PalmTree, label: "On vacation" }]
@@ -296,7 +295,7 @@ export const useMockChatGroups = (
           ...(dmPerson?.vacation
             ? [{ icon: PalmTree, label: "On vacation" }]
             : []),
-          ...(muted[seed.id] ? [{ icon: VolumeMuted, label: "Muted" }] : []),
+          ...(muted[seed.id] ? [{ icon: BellOff, label: "Muted" }] : []),
         ],
       }
     }

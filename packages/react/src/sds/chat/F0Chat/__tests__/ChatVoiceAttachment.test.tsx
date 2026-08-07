@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { ChatVoiceAttachment } from "../components/ChatVoiceAttachment"
 import { type F0ChatVoiceAttachment } from "../types"
@@ -13,11 +18,68 @@ const VOICE: F0ChatVoiceAttachment = {
   mimeType: "audio/webm",
 }
 
+let originalAudioContext: typeof window.AudioContext
+
 describe("ChatVoiceAttachment", () => {
   beforeEach(() => {
+    originalAudioContext = window.AudioContext
     // The waveform decoder fetches the audio — keep tests offline (it falls
     // back to the neutral bar shape).
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")))
+  })
+
+  afterEach(() => {
+    Object.defineProperty(window, "AudioContext", {
+      configurable: true,
+      value: originalAudioContext,
+    })
+  })
+
+  it("does not initialize audio while transcript scrolling is active", async () => {
+    const decodeAudioData = vi.fn().mockResolvedValue({
+      getChannelData: () => new Float32Array(32),
+    })
+    const close = vi.fn()
+    class AudioContextMock {
+      decodeAudioData = decodeAudioData
+      close = close
+    }
+    const fetchMock = vi.fn().mockResolvedValue({
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+    })
+    Object.defineProperty(window, "AudioContext", {
+      configurable: true,
+      value: AudioContextMock,
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    const deferredVoice = {
+      ...VOICE,
+      url: "https://cdn.example.com/deferred-voice-note.webm",
+    }
+
+    const { rerender } = render(
+      <ChatVoiceAttachment voice={deferredVoice} deferHeavyContent />
+    )
+
+    expect(document.querySelector("audio")).not.toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(screen.getByTestId("chat-voice-attachment")).toHaveAttribute(
+      "aria-busy",
+      "true"
+    )
+    expect(
+      screen.getByRole("group", { name: "Voice note" })
+    ).toBeInTheDocument()
+
+    rerender(
+      <ChatVoiceAttachment voice={deferredVoice} deferHeavyContent={false} />
+    )
+
+    expect(document.querySelector("audio")).toHaveAttribute(
+      "src",
+      deferredVoice.url
+    )
+    await waitFor(() => expect(decodeAudioData).toHaveBeenCalledOnce())
   })
 
   it("renders the audio element and the WhatsApp-style waveform bars", () => {
@@ -27,6 +89,54 @@ describe("ChatVoiceAttachment", () => {
 
     const waveform = screen.getByTestId("chat-voice-waveform")
     expect(waveform.querySelectorAll("span").length).toBe(32)
+  })
+
+  it("serializes waveform decoding across voice notes", async () => {
+    const audioBuffer = {
+      getChannelData: () => new Float32Array(32),
+    }
+    let resolveFirstDecode: ((value: typeof audioBuffer) => void) | undefined
+    const decodeAudioData = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<typeof audioBuffer>((resolve) => {
+            resolveFirstDecode = resolve
+          })
+      )
+      .mockResolvedValue(audioBuffer)
+    class AudioContextMock {
+      decodeAudioData = decodeAudioData
+      close = vi.fn()
+    }
+    Object.defineProperty(window, "AudioContext", {
+      configurable: true,
+      value: AudioContextMock,
+    })
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      })
+    )
+
+    render(
+      <>
+        <ChatVoiceAttachment
+          voice={{ ...VOICE, url: "https://cdn.example.com/serial-first.webm" }}
+        />
+        <ChatVoiceAttachment
+          voice={{
+            ...VOICE,
+            url: "https://cdn.example.com/serial-second.webm",
+          }}
+        />
+      </>
+    )
+
+    await waitFor(() => expect(decodeAudioData).toHaveBeenCalledOnce())
+    resolveFirstDecode?.(audioBuffer)
+    await waitFor(() => expect(decodeAudioData).toHaveBeenCalledTimes(2))
   })
 
   it("defaults to 320px and never exceeds its container", () => {

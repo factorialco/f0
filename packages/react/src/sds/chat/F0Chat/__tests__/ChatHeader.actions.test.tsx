@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { Pencil, VolumeMuted } from "@/icons/app"
+import { BellOff, Pencil } from "@/icons/app"
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
@@ -119,12 +119,12 @@ describe("ChatHeader host actions", () => {
           type: "group",
           title: "Product Team",
           avatar: { type: "emoji", emoji: "🚀" },
-          statuses: [{ icon: VolumeMuted, label: "Muted" }],
+          statuses: [{ icon: BellOff, label: "Muted" }],
         },
       })
     )
 
-    expect(screen.getByLabelText("Muted")).toBeInTheDocument()
+    expect(screen.getByLabelText("Muted")).toHaveClass("text-f1-icon")
   })
 
   it("announces online presence in a direct message", () => {

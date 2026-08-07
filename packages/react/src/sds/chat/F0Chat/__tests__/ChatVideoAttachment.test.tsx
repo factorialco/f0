@@ -8,6 +8,7 @@ import {
   within,
 } from "@/testing/test-utils"
 
+import { ChatVideoAttachment } from "../components/ChatVideoAttachment"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
@@ -125,6 +126,40 @@ const captions = [
 ].join("\n")
 
 describe("ChatVideoAttachment", () => {
+  it("defers mounting the player until scrolling settles", async () => {
+    const file = {
+      kind: "file" as const,
+      url: "https://cdn.example.com/walkthrough.webm",
+      name: "walkthrough.webm",
+      mimeType: "video/webm",
+    }
+    const { rerender } = render(
+      <ChatVideoAttachment
+        file={file}
+        cornerClass="rounded-xl"
+        deferHeavyContent
+      />
+    )
+
+    expect(screen.queryByTestId("chat-video-player")).not.toBeInTheDocument()
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+
+    rerender(
+      <ChatVideoAttachment
+        file={file}
+        cornerClass="rounded-xl"
+        deferHeavyContent={false}
+      />
+    )
+
+    expect(
+      await screen.findByRole("region", {
+        name: "Video player: walkthrough.webm",
+      })
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+  })
+
   it("stacks multiple completed videos as wide inline players", async () => {
     renderChat([
       {

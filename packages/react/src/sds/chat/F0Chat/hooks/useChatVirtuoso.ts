@@ -94,6 +94,25 @@ const FAR_TELEPORT_VIEWPORTS = 1.5
 
 type PendingJump = { kind: "id"; id: string } | { kind: "bottom" } | null
 
+type MeasuredChatItem = Pick<ListItem<ChatRow>, "index" | "offset" | "size">
+
+type ScrollMetrics = {
+  scrollTop: number
+  scrollHeight: number
+  clientHeight: number
+}
+
+/** Finds the first row crossing the viewport's top edge from Virtuoso's own
+ * measurements, avoiding DOM queries and synchronous layout reads on scroll. */
+export const topVisibleRowIndex = (
+  items: MeasuredChatItem[],
+  scrollTop: number,
+  firstItemIndex: number
+): number | null => {
+  const item = items.find(({ offset, size }) => offset + size > scrollTop)
+  return item ? Math.max(0, item.index - firstItemIndex) : null
+}
+
 /**
  * Scroll behavior for the Virtuoso-backed transcript. Virtuoso owns the
  * physics (bottom follow, prepend retention, entry positioning, re-measure
@@ -209,6 +228,8 @@ export function useChatVirtuoso({
   )
   const followPausedRef = useRef(false)
   const wheelBoundaryTimerRef = useRef<number | null>(null)
+  const renderedItemsRef = useRef<ListItem<ChatRow>[]>([])
+  const scrollMetricsRef = useRef<ScrollMetrics | null>(null)
   const keyRef = useRef(listKey)
   if (keyRef.current !== listKey) {
     keyRef.current = listKey
@@ -277,8 +298,8 @@ export function useChatVirtuoso({
 
   // ---- scrolled-up flag + sticky date (native scroll listener: Virtuoso has
   // no onScroll prop, and atBottomStateChange's band is too narrow for the
-  // jump affordance). The sticky index is measured from the rendered items'
-  // DOM rects — exact regardless of the Header spinner's height. ----
+  // jump affordance). The sticky index uses Virtuoso's cached item offsets,
+  // avoiding a query + forced DOM layout on every animation frame. ----
   const measureRafRef = useRef<number | null>(null)
   const measureScrollState = useCallback(() => {
     // The pin gate updates SYNCHRONOUSLY on every scroll event — deferring it
@@ -286,36 +307,37 @@ export function useChatVirtuoso({
     // pre-scroll distance and yanks an escaping reader back to the bottom.
     const sync = scrollerElRef.current
     if (sync) {
+      const metrics = {
+        scrollHeight: sync.scrollHeight,
+        scrollTop: sync.scrollTop,
+        clientHeight: sync.clientHeight,
+      }
+      scrollMetricsRef.current = metrics
       const distanceFromBottom =
-        sync.scrollHeight - sync.scrollTop - sync.clientHeight
+        metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight
       distanceFromBottomRef.current = distanceFromBottom
       if (distanceFromBottom <= BOTTOM_EDGE_EPSILON_PX) resumeFollowing()
     }
     if (measureRafRef.current != null) return
     measureRafRef.current = requestAnimationFrame(() => {
       measureRafRef.current = null
-      const el = scrollerElRef.current
-      if (!el) return
+      const metrics = scrollMetricsRef.current
+      if (!metrics || !scrollerElRef.current) return
       const distanceFromBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight
+        metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight
       distanceFromBottomRef.current = distanceFromBottom
       setScrolledUp(
-        distanceFromBottom > el.clientHeight * SCROLLED_UP_VIEWPORTS
+        distanceFromBottom > metrics.clientHeight * SCROLLED_UP_VIEWPORTS
       )
-      const viewportTop = el.getBoundingClientRect().top
-      let topIndex: number | null = null
-      for (const item of el.querySelectorAll("[data-index]")) {
-        if (item.getBoundingClientRect().bottom > viewportTop) {
-          // firstItemIndex read AT FIRE TIME (the ref): this callback can run
-          // a frame after a prepend commit rewrote every data-index — a
-          // render-captured value would produce a stale (even negative) index.
-          const local =
-            Number(item.getAttribute("data-index")) - firstItemIndexRef.current
-          topIndex = Number.isFinite(local) ? Math.max(0, local) : null
-          break
-        }
-      }
-      setStickyIndex(topIndex)
+      setStickyIndex(
+        topVisibleRowIndex(
+          renderedItemsRef.current,
+          metrics.scrollTop,
+          // Read at fire time: a prepend can update the global base between
+          // scheduling this frame and calculating the local row index.
+          firstItemIndexRef.current
+        )
+      )
     })
   }, [resumeFollowing])
 
@@ -444,11 +466,18 @@ export function useChatVirtuoso({
         prev.removeEventListener("load", handleCaptureLoad, true)
       }
       scrollerElRef.current = el instanceof HTMLElement ? el : null
+      scrollMetricsRef.current = null
       const next = scrollerElRef.current
       observeViewportResize(next)
       if (next) {
+        const metrics = {
+          scrollHeight: next.scrollHeight,
+          scrollTop: next.scrollTop,
+          clientHeight: next.clientHeight,
+        }
+        scrollMetricsRef.current = metrics
         const distanceFromBottom =
-          next.scrollHeight - next.scrollTop - next.clientHeight
+          metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight
         distanceFromBottomRef.current = distanceFromBottom
         if (distanceFromBottom <= BOTTOM_EDGE_EPSILON_PX) resumeFollowing()
 
@@ -538,6 +567,7 @@ export function useChatVirtuoso({
   const revealRafRef = useRef<number | null>(null)
   const handleItemsRendered = useCallback(
     (items: ListItem<ChatRow>[]) => {
+      renderedItemsRef.current = items
       if (
         !revealedRef.current &&
         items.length > 0 &&

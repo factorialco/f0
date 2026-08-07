@@ -2,13 +2,7 @@ import { useState, type ReactNode } from "react"
 
 import { F0TextInput } from "@/components/F0TextInput"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
-import {
-  Pencil,
-  PushPin,
-  PushPinSolid,
-  VolumeHigh,
-  VolumeMuted,
-} from "@/icons/app"
+import { Bell, BellOff, Pencil, PushPin, PushPinSolid } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
@@ -56,13 +50,11 @@ export function useDemoHeaderActions(
       })
     }
     if (toggleMute) {
-      const muted = channel.statuses?.some(
-        (status) => status.icon === VolumeMuted
-      )
+      const muted = channel.statuses?.some((status) => status.icon === BellOff)
       headerActions.push({
         id: "mute",
         label: muted ? i18n.chat.unmute : i18n.chat.mute,
-        icon: muted ? VolumeHigh : VolumeMuted,
+        icon: muted ? Bell : BellOff,
         onClick: () => void toggleMute(),
       })
     }

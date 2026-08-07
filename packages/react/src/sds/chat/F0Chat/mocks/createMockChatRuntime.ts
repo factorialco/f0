@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { VolumeMuted } from "@/icons/app"
+import { BellOff } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
@@ -527,8 +527,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
   const [muted, setMuted] = useState(
-    seed.channel.statuses?.some((status) => status.icon === VolumeMuted) ??
-      false
+    seed.channel.statuses?.some((status) => status.icon === BellOff) ?? false
   )
   const toggleMute = useCallback(() => setMuted((value) => !value), [])
 
@@ -598,9 +597,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
       pinned,
       statuses: [
         ...(seed.channel.statuses?.filter(
-          (status) => status.icon !== VolumeMuted
+          (status) => status.icon !== BellOff
         ) ?? []),
-        ...(muted ? [{ icon: VolumeMuted, label: i18n.chat.muted }] : []),
+        ...(muted ? [{ icon: BellOff, label: i18n.chat.muted }] : []),
       ],
       memberCount,
     },

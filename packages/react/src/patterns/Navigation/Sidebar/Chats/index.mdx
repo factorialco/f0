@@ -238,6 +238,13 @@ Conversation data is supplied through `SidebarChatProvider`. Independent fields 
 - WHEN both `status` and `statuses` are provided → THEN `statuses` takes precedence
 - WHEN `unreadCount` is greater than zero → THEN the row uses stronger text and displays the unread badge
 - WHEN a group is collapsed with unread messages → THEN its heading displays the total unread count
+- WHEN unread conversations are outside the sidebar viewport → THEN directional controls show the number of hidden conversations above and below
+- WHEN an unread conversation is partially visible → THEN it is considered visible and does not contribute to either directional count
+- WHEN the chat list is not contained by a `ScrollArea` → THEN the list remains usable without directional unread controls
+- WHEN a directional unread control is activated → THEN the nearest unread conversation is centered and focused without being opened
+- WHEN reduced motion is requested → THEN a directional unread control jumps immediately instead of scrolling smoothly
+- WHEN an unread group is collapsed → THEN its visible heading represents those conversations; an offscreen heading contributes every unread conversation in the group
+- WHEN search has a value → THEN directional unread controls are hidden until the search is cleared
 - WHEN `loading` is true and there are no known chats → THEN the whole-list skeleton replaces the empty state
 - WHEN an individual chat has `loading: true` → THEN only that row becomes a skeleton
 
@@ -265,6 +272,12 @@ Update conversation state through the provider store so unread counts, selection
 
 <Canvas of={Stories.PinnedReordering} />
 
+**Unread conversations outside the viewport**
+
+When a long chat list has unread conversations outside the visible area, use the directional controls to reveal and focus the nearest unread conversation without changing the active chat.
+
+<Canvas of={Stories.OffscreenUnreadNavigation} />
+
 ## Accessibility
 
 ### Keyboard interaction
@@ -284,7 +297,7 @@ Update conversation state through the provider store so unread counts, selection
         </td>
         <td>
           Moves focus through search, list actions, conversation rows, and
-          available pin controls.
+          available pin and directional unread controls.
         </td>
       </tr>
       <tr>
@@ -302,4 +315,7 @@ Update conversation state through the provider store so unread counts, selection
 - Conversation rows are buttons and expose their selected state through `aria-pressed`
 - Online presence, each status icon, unread counts, and mention badges expose text alternatives
 - Pin and unpin controls use localized action labels
+- Directional unread controls expose localized labels that include their direction and the number of hidden conversations
+- Directional unread navigation respects reduced-motion preferences by replacing smooth scrolling with an immediate jump
+- Activating a directional unread control moves focus to the destination row or collapsed group heading without opening it
 - Loading rows are non-interactive until their identity resolves

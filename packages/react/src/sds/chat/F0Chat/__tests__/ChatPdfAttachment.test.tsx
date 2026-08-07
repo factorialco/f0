@@ -8,7 +8,9 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
+import { ChatDocumentAttachmentCard } from "../components/ChatDocumentAttachmentCard"
 import { F0Chat } from "../F0Chat"
+import { ChatUIProvider } from "../providers/ChatUIProvider"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
 
@@ -152,6 +154,46 @@ const pdfAttachment = {
 } as const
 
 describe("ChatDocumentAttachmentCard (pdf)", () => {
+  it("defers parsing until scrolling settles", async () => {
+    const { rerender } = render(
+      <F0ChatProvider runtime={makeRuntime([pdfAttachment])}>
+        <ChatUIProvider>
+          <ChatDocumentAttachmentCard
+            file={pdfAttachment}
+            kind="pdf"
+            deferHeavyContent
+          />
+        </ChatUIProvider>
+      </F0ChatProvider>
+    )
+
+    expect(screen.queryByTestId("pdf-page-1")).not.toBeInTheDocument()
+    const previewButton = screen.getByRole("button", {
+      name: "Open report.pdf",
+    })
+    expect(previewButton).toBeEnabled()
+    expect(previewButton).toHaveAttribute("aria-busy", "true")
+
+    rerender(
+      <F0ChatProvider runtime={makeRuntime([pdfAttachment])}>
+        <ChatUIProvider>
+          <ChatDocumentAttachmentCard
+            file={pdfAttachment}
+            kind="pdf"
+            deferHeavyContent={false}
+          />
+        </ChatUIProvider>
+      </F0ChatProvider>
+    )
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument()
+    )
+    expect(
+      screen.getByRole("button", { name: "Open report.pdf" })
+    ).not.toHaveAttribute("aria-busy")
+  })
+
   it("renders PDFs as snapshot cards and other files as chips", async () => {
     renderChat([
       pdfAttachment,

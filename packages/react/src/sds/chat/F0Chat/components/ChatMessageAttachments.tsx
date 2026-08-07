@@ -3,7 +3,7 @@ import { type ReactNode } from "react"
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import {
@@ -169,6 +169,7 @@ export const ChatMessageAttachments = ({
               onClick={() => openImagePreview(images, i)}
               className={cn(
                 "flex overflow-hidden transition-opacity hover:opacity-90",
+                focusRing("focus-visible:ring-inset"),
                 singleImage ? imageCorners : "rounded-xl"
               )}
               aria-label={i18n.chat.openImage}
@@ -179,8 +180,8 @@ export const ChatMessageAttachments = ({
                 // Native width/height reserve the box via aspect-ratio BEFORE
                 // the image loads — no late re-measure shifting the transcript
                 // (adapters should populate the dimensions; Stream sends
-                // original_width/height). Without them, min-h keeps the jump
-                // bounded.
+                // original_width/height). Without both, a fixed fallback box
+                // avoids a late Virtuoso height correction.
                 width={singleImage ? image.width : undefined}
                 height={singleImage ? image.height : undefined}
                 className={cn(
@@ -192,7 +193,8 @@ export const ChatMessageAttachments = ({
                     ? cn(
                         imageCorners,
                         "h-auto max-h-60 w-auto max-w-full",
-                        image.width == null && "min-h-28"
+                        (image.width == null || image.height == null) &&
+                          "h-60 w-80"
                       )
                     : "h-28 w-28 rounded-xl"
                 )}
