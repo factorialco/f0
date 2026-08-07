@@ -4715,15 +4715,115 @@ function DiscoverTrainingScreen(_props: Record<string, unknown>) {
   )
 }
 
-function EndOfCourseScreen(_props: Record<string, unknown>) {
+/**
+ * Redirect flow (LMS → Knowledge Test / Survey) — cloned from Jon's Figma
+ * (node 6046-23442, section "LMS"). States via ?st= :
+ *   done      no KT required            → "Congratulations!"
+ *   required  KT required to complete   → "Content complete!" + required step
+ *   optional  KT configured, optional   → "Congratulations!" + optional step
+ *   waiting   NEW (automation latency): survey still being created
+ *   scheduled NEW (automation): survey programmed for a future date
+ */
+function EndOfCourseScreen() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const st = searchParams.get("st") ?? "required"
+  const backToCourse = () => setSearchParams({ view: "learner-course", done: "1" })
+
+  const copy: Record<string, { title: string; sub: string; stepLabel?: string; note?: string }> = {
+    done: { title: "Congratulations!", sub: "You have successfully completed the course." },
+    required: {
+      title: "Content complete!",
+      sub: "You have successfully completed all the content modules.",
+      stepLabel: "Complete the following step to finish the course:",
+    },
+    optional: {
+      title: "Congratulations!",
+      sub: "You have successfully completed the course.",
+      stepLabel: "You can complete this optional step:",
+    },
+    waiting: {
+      title: "Content complete!",
+      sub: "You have successfully completed all the content modules.",
+      note: "We're preparing your knowledge test — it will be ready in about a minute. We'll notify you, and you'll also find it in your course content.",
+    },
+    scheduled: {
+      title: "Congratulations!",
+      sub: "You have successfully completed the course.",
+      note: "Your satisfaction survey opens on 4 Aug. We'll notify you when it's available.",
+    },
+  }
+  const c = copy[st] ?? copy.required
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "var(--f1-background, #ffffff)", display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", flexShrink: 0 }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--f1-foreground-secondary, #6b7280)" }}>
+          Progress
+          <span style={{ width: 18, height: 18, borderRadius: 999, border: "3px solid #00b26e", display: "inline-block" }} />
+          <span style={{ color: "var(--f1-foreground, #0d1424)", fontWeight: 500 }}>100%</span>
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 13, color: "var(--f1-foreground-secondary, #9aa1ac)" }}>
+          4/4
+          <span style={{ color: "rgba(0,10,30,0.15)" }}>|</span>
+          <F0Button label="Exit course" variant="outline" size="sm" onClick={backToCourse} />
+        </span>
+      </div>
+
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          background: "linear-gradient(180deg, rgba(0,178,110,0.10) 0%, rgba(0,178,110,0) 42%)",
+        }}
+      >
+        <div style={{ maxWidth: 420, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <span
+            style={{ width: 72, height: 72, borderRadius: 999, background: "#00b26e", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}
+          >
+            <F0Icon icon={CheckCircle} size="lg" color="inverse" />
+          </span>
+
+          <F0Heading content={c.title} variant="heading" as="h1" />
+          <div style={{ marginTop: 6, color: "var(--f1-foreground-secondary, #6b7280)", fontSize: 14, lineHeight: 1.5 }}>{c.sub}</div>
+
+          {c.stepLabel && (
+            <>
+              <div style={{ marginTop: 32, fontSize: 14, color: "var(--f1-foreground, #0d1424)" }}>{c.stepLabel}</div>
+              <div
+                style={{ marginTop: 12, width: 260, textAlign: "left", background: "#fff", border: "1px solid rgba(0,10,30,0.06)", borderRadius: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", padding: "12px 14px" }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>Knowledge test</span>
+                  <span style={{ fontSize: 13, color: "var(--f1-foreground-secondary, #9aa1ac)" }}>Description</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8, fontSize: 13, color: "var(--f1-foreground-secondary, #6b7280)" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><F0Icon icon={InProgressTask} size="sm" /> 22 min</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><F0Icon icon={Question} size="sm" /> 11 questions</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {c.note && (
+            <div style={{ marginTop: 28, width: 320, padding: "12px 14px", borderRadius: 10, background: "var(--f1-background-secondary, #f5f6f8)", fontSize: 13, color: "var(--f1-foreground-secondary, #6b7280)", lineHeight: 1.5 }}>
+              {c.note}
+            </div>
+          )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 40 }}>
+            <F0Button label="Back to home" icon={ArrowLeft} variant="outline" onClick={backToCourse} />
+            {(st === "required" || st === "optional") && (
+              <F0Button label="Start knowledge test" onClick={() => setSearchParams({ view: "survey-answer", survey: "kt-1" })} />
+            )}
+            {st === "waiting" && <F0Button label="Refresh" onClick={() => {}} />}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -4813,15 +4913,98 @@ function MyCoursesScreen(_props: Record<string, unknown>) {
   )
 }
 
-function NotificationsLayer(_props: Record<string, unknown>) {
+type NotiRow = {
+  id: string
+  icon: typeof Envelope
+  title: string
+  description: string
+  meta: string
+  survey?: string
+}
+
+const NOTI_TODAY: NotiRow[] = [
+  { id: "n-eff", icon: Envelope, title: "New survey for you: Effectiveness survey", description: "Check out the survey details", meta: "Training · 2 hours ago", survey: "eff-1" },
+  { id: "n-pay", icon: DollarBill, title: "Action Required: Overdue payments", description: "One or more payments are overdue. Please address them immediately to avoid any disruptions.", meta: "Treasury · 2 hours ago" },
+]
+
+const NOTI_LAST_WEEK: NotiRow[] = [
+  { id: "n-doc", icon: Files, title: "Test de Verdad LLC has published a new public company document", description: "The document test Factorial.pdf is now available in the Public company documents space", meta: "Documents · July 24th, 2026 at 5:08 PM" },
+  { id: "n-sat", icon: Envelope, title: "New survey for you: Training satisfaction survey", description: "Check out the survey details", meta: "Training · July 24th, 2026 at 5:01 PM", survey: "sat-1" },
+]
+
+/** Clone of the real Notifications panel (bell at the sidebar footer, next to the user). */
+function NotificationsLayer() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const open = searchParams.get("noti") === "1"
+  const isManager = searchParams.get("as") === "manager"
+
+  useEffect(() => {
+    const buttons = Array.from(document.querySelectorAll("button"))
+    const userButton = buttons.find((b) => (b.textContent ?? "").includes("Hellen the HR"))
+    const row = userButton?.closest(".justify-between")
+    const rowButtons = row ? Array.from(row.querySelectorAll("button")) : []
+    const bell = rowButtons[rowButtons.length - 1]
+    if (!bell || bell === userButton) return
+    const onClick = (e: Event) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const params = new URLSearchParams(window.location.search)
+      params.set("noti", "1")
+      setSearchParams(Object.fromEntries(params.entries()))
+    }
+    bell.addEventListener("click", onClick, true)
+    return () => bell.removeEventListener("click", onClick, true)
+  }, [setSearchParams])
+
+  const close = () => {
+    const params = new URLSearchParams(window.location.search)
+    params.delete("noti")
+    setSearchParams(Object.fromEntries(params.entries()))
+  }
+
+  const openSurvey = (survey: string) => setSearchParams({ view: "survey-answer", survey })
+
+  if (!open) return null
+
+  const renderRow = (row: NotiRow) => (
+    <button
+      key={row.id}
+      type="button"
+      onClick={row.survey ? () => openSurvey(row.survey!) : undefined}
+      style={{ ...inputReset, display: "flex", alignItems: "flex-start", gap: 12, padding: "10px 20px", textAlign: "left", cursor: row.survey ? "pointer" : "default", width: "100%" }}
+    >
+      <span style={{ width: 30, height: 30, borderRadius: 999, border: "1px solid rgba(0,10,30,0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
+        <F0Icon icon={row.icon} size="sm" />
+      </span>
+      <span style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+        <span style={{ fontWeight: 600, fontSize: 14 }}>{row.title}</span>
+        <span style={{ fontSize: 14, color: "var(--f1-foreground-secondary, #6b7280)" }}>{row.description}</span>
+        <span style={{ fontSize: 12, color: "var(--f1-foreground-secondary, #9aa1ac)", marginTop: 4 }}>{row.meta}</span>
+      </span>
+    </button>
+  )
+
   return (
-    <StandardLayout>
-      <F0Alert
-        variant="warning"
-        title="This screen was lost to a bad edit"
-        description="Restore the prototype with /rewind to bring it back. The completion settings flow works."
-      />
-    </StandardLayout>
+    <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={close}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{ position: "absolute", top: 12, left: 250, width: 620, maxWidth: "calc(100vw - 270px)", maxHeight: "88vh", overflowY: "auto", background: "var(--f1-background, #ffffff)", borderRadius: 16, border: "1px solid rgba(0,10,30,0.08)", boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
+          <span style={{ fontWeight: 600, fontSize: 16 }}>Notifications</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <button type="button" style={{ ...inputReset, width: "auto", cursor: "pointer", padding: 6 }} title="Settings"><F0Icon icon={Settings} size="sm" /></button>
+            <button type="button" onClick={close} style={{ ...inputReset, width: "auto", cursor: "pointer", padding: 6 }} title="Close"><F0Icon icon={Cross} size="sm" /></button>
+          </span>
+        </div>
+        <div style={{ padding: "2px 20px 6px", fontSize: 13, color: "var(--f1-foreground-secondary, #6b7280)" }}>Today</div>
+        {NOTI_TODAY.filter((row) => (isManager ? true : row.id !== "n-eff")).map(renderRow)}
+        <div style={{ borderTop: "1px solid rgba(0,10,30,0.08)", margin: "8px 0" }} />
+        <div style={{ padding: "2px 20px 6px", fontSize: 13, color: "var(--f1-foreground-secondary, #6b7280)" }}>Last week</div>
+        {NOTI_LAST_WEEK.map(renderRow)}
+        <div style={{ height: 12 }} />
+      </div>
+    </div>
   )
 }
 
@@ -5406,24 +5589,123 @@ type AffectedPerson = { name: string; from: "Passed" | "Failed"; to: "Passed" | 
 type LearnerEvaluation = {
   id: string
   name: string
-  kind: string
+  kind: "Knowledge test" | "Satisfaction"
   minutes: number
   questions: number
-  status: string
+  status: "Not started" | "Passed" | "Failed" | "Completed"
   opensAt?: string
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type TeamEvaluationRow = Record<string, any>
+
+type TeamEvaluationRow = {
+  id: string
+  survey: string
+  course: string
+  participant: string
+  assigned: string
+  status: "Pending" | "Completed"
+}
+
 type AffectedRow = { id: string; kind: "group" | "person"; name: string; why: string; wouldFail: number; change: string }
 
 const OLD_MINIMUM = 50
 const TOTAL_FINISHED = 25
-const LEARNER_EVALUATIONS: LearnerEvaluation[] = []
-const SCHEDULED_EVALUATIONS: LearnerEvaluation[] = []
-const TEAM_EVALUATIONS: TeamEvaluationRow[] = []
-const SCHEDULED_IDS = new Set<string>()
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SURVEY_META: Record<string, any> = {}
+
+const LEARNER_EVALUATIONS: LearnerEvaluation[] = [
+  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started" },
+  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed" },
+  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed" },
+  { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed" },
+]
+
+/** Scheduled (not materialized yet): shown with the date it opens, not actionable. */
+const SCHEDULED_EVALUATIONS: LearnerEvaluation[] = [
+  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug" },
+  { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course" },
+]
+const SCHEDULED_IDS = new Set(["kt-2", "sat-2"])
+
+const TEAM_EVALUATIONS: TeamEvaluationRow[] = [
+  { id: "eff-1", survey: "Effectiveness survey", course: "Fundamentos de la gestión de calidad con ISO 9001", participant: "Laura Martinez", assigned: "21 Jul 2026", status: "Pending" },
+  { id: "eff-2", survey: "Effectiveness survey", course: "Harassment Prevention Training", participant: "Marc Vidal", assigned: "14 Jul 2026", status: "Pending" },
+  { id: "eff-3", survey: "Effectiveness survey", course: "Inclusive Language", participant: "Ana Ruiz", assigned: "2 Jul 2026", status: "Completed" },
+]
+
+const SATISFACTION_QUESTIONS: SurveyFormBuilderElement[] = [
+  {
+    type: "question",
+    question: {
+      id: "sat-q1",
+      title: "How satisfied are you with this course?",
+      type: "select",
+      required: true,
+      options: [
+        { value: "s5", label: "Very satisfied" },
+        { value: "s4", label: "Satisfied" },
+        { value: "s3", label: "Neutral" },
+        { value: "s2", label: "Dissatisfied" },
+      ],
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "sat-q2",
+      title: "The content was clear and useful for my role",
+      type: "select",
+      required: true,
+      options: [
+        { value: "a4", label: "Strongly agree" },
+        { value: "a3", label: "Agree" },
+        { value: "a2", label: "Disagree" },
+        { value: "a1", label: "Strongly disagree" },
+      ],
+    },
+  },
+]
+
+const EFFECTIVENESS_QUESTIONS: SurveyFormBuilderElement[] = [
+  {
+    type: "question",
+    question: {
+      id: "eff-q1",
+      title: "Has the participant applied what they learned on the job?",
+      type: "select",
+      required: true,
+      options: [
+        { value: "e4", label: "Consistently" },
+        { value: "e3", label: "Often" },
+        { value: "e2", label: "Occasionally" },
+        { value: "e1", label: "Not yet" },
+      ],
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "eff-q2",
+      title: "Overall impact of this training on their performance",
+      type: "select",
+      required: true,
+      options: [
+        { value: "i4", label: "High impact" },
+        { value: "i3", label: "Moderate impact" },
+        { value: "i2", label: "Low impact" },
+        { value: "i1", label: "No visible impact" },
+      ],
+    },
+  },
+]
+
+const SURVEY_META: Record<
+  string,
+  { title: string; course: string; elements: SurveyFormBuilderElement[]; backView: "learner-course" | "team-evals"; completed?: boolean }
+> = {
+  "kt-1": { title: "Knowledge check", course: "Fundamentos de la gestión de calidad con ISO 9001", elements: QUIZ_QUESTIONS["m1-2"], backView: "learner-course" },
+  "sat-1": { title: "Satisfaction survey", course: "Fundamentos de la gestión de calidad con ISO 9001", elements: SATISFACTION_QUESTIONS, backView: "learner-course", completed: true },
+  "eff-1": { title: "Effectiveness survey · Laura Martinez", course: "Fundamentos de la gestión de calidad con ISO 9001", elements: EFFECTIVENESS_QUESTIONS, backView: "team-evals" },
+  "eff-2": { title: "Effectiveness survey · Marc Vidal", course: "Harassment Prevention Training", elements: EFFECTIVENESS_QUESTIONS, backView: "team-evals" },
+  "eff-3": { title: "Effectiveness survey · Ana Ruiz", course: "Inclusive Language", elements: EFFECTIVENESS_QUESTIONS, backView: "team-evals", completed: true },
+}
 
 type FinishedPerson = {
   name: string
