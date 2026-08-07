@@ -34005,7 +34005,13 @@ const Lae = MI, II = Ze(
         className: Y(
           "group flex w-full items-center gap-2 rounded-md border border-solid px-3",
           "bg-f1-background outline-none transition-[border-color,background-color,opacity] duration-200",
-          g ? "border-f1-border-selected-bold ring-2 ring-f1-background-selected ring-offset-0" : "border-f1-border hover:border-transparent hover:bg-f1-background-hover",
+          g ? "border-f1-border-selected-bold ring-2 ring-f1-background-selected ring-offset-0" : (
+            // The node card drops its border on hover, but it is a rounded
+            // pill whose shape survives without one. A flat row does not:
+            // losing the outline reads as the row going transparent against
+            // the canvas. Keep the border, move only the background.
+            "border-f1-border hover:bg-f1-background-hover"
+          ),
           "focus-visible:ring-2 focus-visible:ring-f1-background-selected focus-visible:ring-offset-0",
           e === "dimmed" && "opacity-40"
         ),
