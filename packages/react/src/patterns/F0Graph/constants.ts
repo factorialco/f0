@@ -73,3 +73,10 @@ export const LARGE_GRAPH_SNAP_THRESHOLD = 700
 // zoomed-in; capping lower opens the node with surrounding context (parent /
 // siblings / reports visible). The user can still zoom in further afterwards.
 export const INITIAL_FOCUS_MAX_ZOOM = 1
+
+// Zoom applied when a node is clicked. A click is a deliberate "take me to this
+// node", so it lands closer than the initial frame (`INITIAL_FOCUS_MAX_ZOOM`),
+// which deliberately opens wide with surrounding context. Centered on the node
+// alone via `setCenter`, clamped to the graph's `maxZoom` at the call site.
+// Overridable per graph via the `nodeClickZoom` prop.
+export const NODE_CLICK_ZOOM = 1.5
