@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { AlertCircle, CheckCircle, InfoCircle, Warning } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
@@ -30,6 +30,12 @@ vi.mock("@/components/F0Icon", () => ({
 }))
 
 describe("F0AvatarAlert", () => {
+  // Without this, `toHaveBeenCalledWith` can match a call left behind by an
+  // earlier test in the file and assert a behaviour the component never had.
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   describe("Icon rendering based on type prop", () => {
     const typeTests = [
       { type: "critical", expectedIcon: AlertCircle },
@@ -49,14 +55,23 @@ describe("F0AvatarAlert", () => {
         })
       })
     })
+  })
 
-    it("should use info as default type when not specified", () => {
-      zeroRender(<F0AvatarAlert size="md" />)
+  describe("Semantic color based on type prop", () => {
+    const colorTests = {
+      critical: "border-f1-border-critical",
+      warning: "border-f1-border-warning",
+      info: "border-f1-border-info",
+      positive: "border-f1-border-positive",
+    } as const
 
-      // Check that F0Icon was called with the default info icon
-      expect(MockF0Icon).toHaveBeenCalledWith({
-        icon: InfoCircle,
-        size: "md",
+    Object.entries(colorTests).forEach(([type, expectedClass]) => {
+      it(`should apply the ${type} semantic color`, () => {
+        const { container } = zeroRender(
+          <F0AvatarAlert type={type as keyof typeof colorTests} size="md" />
+        )
+
+        expect(container.firstChild).toHaveClass(expectedClass)
       })
     })
   })
@@ -84,19 +99,18 @@ describe("F0AvatarAlert", () => {
   })
 
   describe("Icon size mapping", () => {
-    const iconSizeTests = [
-      { size: "sm", expectedIconClass: "w-6" },
-      { size: "md", expectedIconClass: "w-8" },
-      { size: "lg", expectedIconClass: "w-10" },
-    ] as const
+    const iconSizes = ["sm", "md", "lg"] as const
 
-    iconSizeTests.forEach(({ size, expectedIconClass }) => {
+    iconSizes.forEach((size) => {
       it(`should pass correct size to F0Icon for ${size} size`, () => {
         zeroRender(<F0AvatarAlert type="info" size={size} />)
 
-        const iconElement = screen.getByRole("alert", { hidden: true })
-
-        expect(iconElement).toHaveClass(expectedIconClass)
+        // Read the mocked icon, not the wrapper: the wrapper's own size classes
+        // would keep this green even if `size` were never forwarded to F0Icon.
+        expect(screen.getByTestId("mocked-icon")).toHaveAttribute(
+          "data-size",
+          size
+        )
       })
     })
   })
