@@ -84,9 +84,11 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
   onItemCheckedChange?: (item: R, checked: boolean) => void
-  selectedItems: Map<string | number, R>
+  /** This row's own selected state, so a selection change only alters the prop
+   * of the row that changed. */
+  isSelected?: boolean
+  selectedItems?: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
   checkColumnWidth: number
@@ -130,6 +132,14 @@ const NestedRowContent = <
     | null
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+
+  // Each child gets its own boolean, for the same reason the parent does:
+  // handing down the Map made every sibling's props differ whenever any one of
+  // them changed, so selecting one row re-rendered them all.
+  const isChildSelected = (record: R): boolean => {
+    const childId = props.source.selectable?.(record)
+    return childId !== undefined && !!props.selectedItems?.has(childId)
+  }
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
@@ -313,9 +323,7 @@ const NestedRowContent = <
                 key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
+                isSelected={isChildSelected(childItem)}
                 tableWithChildren={props.tableWithChildren}
                 ref={getChildRef()}
                 nestedRowProps={{
@@ -353,9 +361,7 @@ const NestedRowContent = <
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
+                isSelected={isChildSelected(childItem)}
                 noBorder={leafShouldHideBorder}
                 ref={getChildRef()}
                 nestedRowProps={{
