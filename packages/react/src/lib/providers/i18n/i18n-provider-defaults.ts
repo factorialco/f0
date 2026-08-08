@@ -421,15 +421,6 @@ export const defaultTranslations = {
         status: "Status",
       },
     },
-    credits: {
-      title: "Credits",
-      employeeCredits: "Your credits",
-      creditsLeft: "{{total}} left",
-      monthlyCredits: "Monthly credits",
-      creditsError: "Could not load credits",
-      upgradePlan: "Upgrade",
-      needMoreCredits: "Need more credits?",
-    },
     reportCard: {
       tableLabel: "Table",
       openButton: "Open",

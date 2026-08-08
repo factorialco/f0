@@ -1,7 +1,5 @@
 import type { IconType } from "@/components/F0Icon"
 
-import type { AiChatCredits, AiChatEmployeeCredits } from "../F0AiChat/types"
-
 export interface F0AiChatHeaderAction {
   /** Stable identifier used as the React key. */
   id: string
@@ -52,20 +50,9 @@ export type F0AiChatHeaderProps = {
 
   /**
    * Minimal header: render only header actions plus the expand and close controls
-   * (no title, new chat or credits popover). Use when a sidebar owns the chat
-   * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
+   * (no title or new chat). Use when a sidebar owns the chat navigation.
    */
   compact?: boolean
-
-  /** Credits configuration. When present, renders the credits popover button. */
-  credits?: AiChatCredits
-
-  /**
-   * Employee-level credits configuration. When present, an employee-only
-   * popover is rendered **instead of** the classic one (mutually exclusive
-   * with `credits`). Hosts opt in per-employee.
-   */
-  employeeCredits?: AiChatEmployeeCredits
 
   /**
    * Additional actions rendered immediately before the fullscreen and close

@@ -6,7 +6,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 # AI chat header
 
-Provides consistent conversation navigation, credits, header actions, fullscreen,
+Provides consistent conversation navigation, header actions, fullscreen,
 and close controls for Factorial AI chat surfaces.
 
 ## Anatomy
@@ -161,31 +161,6 @@ and close controls for Factorial AI chat surfaces.
         <td>
           Uses a minimal title and action layout for chats with external
           navigation.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>credits</code>
-        </td>
-        <td>
-          <code>AiChatCredits</code>
-        </td>
-        <td>—</td>
-        <td>—</td>
-        <td>Configures the classic credits and settings popover.</td>
-      </tr>
-      <tr>
-        <td>
-          <code>employeeCredits</code>
-        </td>
-        <td>
-          <code>AiChatEmployeeCredits</code>
-        </td>
-        <td>—</td>
-        <td>—</td>
-        <td>
-          Configures employee credits and takes precedence over{" "}
-          <code>credits</code>.
         </td>
       </tr>
       <tr>
@@ -374,7 +349,6 @@ and close controls for Factorial AI chat surfaces.
 - WHEN <code>historyEnabled</code> is true → THEN the conversation title opens host-owned history.
 - WHEN neither compact nor history mode is active → THEN the header displays the static legacy title.
 - WHEN <code>actions</code> are provided → THEN F0 renders them as icon-only ghost buttons immediately before the fullscreen and close controls.
-- WHEN <code>employeeCredits</code> is provided → THEN it replaces the classic <code>credits</code> popover.
 - WHEN <code>lockVisualizationMode</code> is true → THEN visualization-mode controls are hidden.
 - WHEN the viewport is small → THEN the fullscreen control is hidden.
 
