@@ -79,8 +79,6 @@ test("insertContent inserts at the cursor position once the editor has been focu
   )
   await screen.findByRole("textbox", { name: "Title" })
 
-  // Focusing places the caret at the selection TipTap tracks (document start
-  // for a fresh editor). The insert must land there, not at the end.
   act(() => ref.current?.focus())
   act(() => ref.current?.insertContent("{{variable}}"))
 

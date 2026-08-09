@@ -100,11 +100,6 @@ export type F0RichTextEditorHandle = {
   focus: () => void
   setError: (error: string | null) => void
   setContent: (content: string) => void
-  /**
-   * Inserts content at the current cursor position (restoring the last
-   * selection if the editor lost focus, e.g. to a dropdown). Falls back to
-   * the end of the document when the editor was never focused.
-   */
   insertContent: (content: string) => void
 }
 
@@ -243,9 +238,6 @@ const F0RichTextEditorComponent = forwardRef<
     ]
   )
 
-  // Whether the editor ever held focus: TipTap keeps the last selection after
-  // blur (so inserts can target it), but a never-focused editor's default
-  // selection is the document start — not a position the user ever chose.
   const hasEverBeenFocusedRef = useRef(false)
 
   const editor = useEditor({
@@ -360,8 +352,6 @@ const F0RichTextEditorComponent = forwardRef<
       }
     },
     focus: () => {
-      // Mark it here too: under jsdom (and if the DOM focus is swallowed)
-      // the editor's onFocus event never fires for programmatic focus.
       hasEverBeenFocusedRef.current = true
       editor?.commands.focus()
     },
