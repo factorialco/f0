@@ -3,15 +3,14 @@ import {
   forwardRef,
   type HTMLAttributes,
   type ReactNode,
+  useEffect,
+  useRef,
+  useState,
 } from "react"
+import { type ItemProps, type ListItem } from "react-virtuoso"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import {
-  act,
-  zeroRender as render,
-  screen,
-  waitFor,
-} from "@/testing/test-utils"
+import { act, zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
@@ -19,14 +18,27 @@ import { type F0ChatMessage, type F0ChatRuntime } from "../types"
 import { type ChatRow } from "../utils/grouping"
 
 const virtuosoHarness = vi.hoisted(() => ({
-  setScrolling: undefined as ((scrolling: boolean) => void) | undefined,
   setHeight: undefined as ((height: number) => void) | undefined,
   itemContentCalls: 0,
+  rootClassName: undefined as string | undefined,
+  firstItemIndex: undefined as number | undefined,
+  itemCount: 0,
+  itemsRendered: undefined as
+    | ((items: ListItem<ChatRow>[]) => void)
+    | undefined,
+  viewport: undefined as HTMLDivElement | undefined,
+  revealList: undefined as (() => void) | undefined,
+  increaseViewportBy: undefined as { top: number; bottom: number } | undefined,
+  minOverscanItemCount: undefined as
+    | { top: number; bottom: number }
+    | undefined,
+  skipAnimationFrameInResizeObserver: false,
 }))
 
 type MockScrollerProps = HTMLAttributes<HTMLDivElement> & {
   context: {
     measureStripRef: { current: HTMLDivElement | null }
+    onListVisibilityChange: (visible: boolean) => void
   }
 }
 
@@ -35,6 +47,15 @@ type MockVirtuosoProps = {
   context: MockScrollerProps["context"]
   components?: {
     Scroller?: ComponentType<MockScrollerProps>
+    List?: ComponentType<
+      HTMLAttributes<HTMLDivElement> & {
+        context: MockScrollerProps["context"]
+        "data-testid": string
+      }
+    >
+    Item?: ComponentType<
+      ItemProps<ChatRow> & { context: MockScrollerProps["context"] }
+    >
   }
   computeItemKey?: (index: number, row: ChatRow) => string | number
   itemContent: (
@@ -42,8 +63,14 @@ type MockVirtuosoProps = {
     row: ChatRow,
     context: MockScrollerProps["context"]
   ) => ReactNode
-  isScrolling?: (scrolling: boolean) => void
   totalListHeightChanged?: (height: number) => void
+  itemsRendered?: (items: ListItem<ChatRow>[]) => void
+  firstItemIndex?: number
+  scrollerRef?: (element: HTMLElement | Window | null) => void
+  className?: string
+  increaseViewportBy?: { top: number; bottom: number }
+  minOverscanItemCount?: { top: number; bottom: number }
+  skipAnimationFrameInResizeObserver?: boolean
 }
 
 vi.mock("react-virtuoso", () => ({
@@ -54,26 +81,95 @@ vi.mock("react-virtuoso", () => ({
       components,
       computeItemKey,
       itemContent,
-      isScrolling,
       totalListHeightChanged,
+      itemsRendered,
+      firstItemIndex,
+      scrollerRef,
+      className,
+      increaseViewportBy,
+      minOverscanItemCount,
+      skipAnimationFrameInResizeObserver,
     }: MockVirtuosoProps,
     _ref
   ) {
-    virtuosoHarness.setScrolling = isScrolling
     virtuosoHarness.setHeight = totalListHeightChanged
+    virtuosoHarness.rootClassName = className
+    virtuosoHarness.firstItemIndex = firstItemIndex
+    virtuosoHarness.itemCount = data.length
+    virtuosoHarness.itemsRendered = itemsRendered
+    virtuosoHarness.increaseViewportBy = increaseViewportBy
+    virtuosoHarness.minOverscanItemCount = minOverscanItemCount
+    virtuosoHarness.skipAnimationFrameInResizeObserver = Boolean(
+      skipAnimationFrameInResizeObserver
+    )
+    const [listVisible, setListVisible] = useState(false)
+    virtuosoHarness.revealList = () => setListVisible(true)
 
+    const viewportRef = useRef<HTMLDivElement | null>(null)
+    if (viewportRef.current == null) {
+      const viewport = document.createElement("div")
+      let scrollTop = 0
+      Object.defineProperties(viewport, {
+        clientHeight: { configurable: true, get: () => 500 },
+        scrollHeight: { configurable: true, get: () => 1000 },
+        scrollTop: {
+          configurable: true,
+          get: () => scrollTop,
+          set: (value: number) => {
+            scrollTop = value
+          },
+        },
+      })
+      viewportRef.current = viewport
+    }
+    virtuosoHarness.viewport = viewportRef.current
+    useEffect(() => {
+      scrollerRef?.(viewportRef.current)
+      return () => scrollerRef?.(null)
+    }, [scrollerRef])
+
+    const Item = components?.Item
     const content = data.map((row, index) => {
       virtuosoHarness.itemContentCalls += 1
-      return (
+      const rendered = (
         <div key={computeItemKey?.(index, row) ?? index}>
           {itemContent(index, row, context)}
         </div>
       )
+      return Item ? (
+        <Item
+          key={computeItemKey?.(index, row) ?? index}
+          item={row}
+          context={context}
+          data-index={index}
+          data-item-index={index}
+          data-known-size={48}
+          style={{ overflowAnchor: "none" }}
+        >
+          {rendered}
+        </Item>
+      ) : (
+        rendered
+      )
     })
     const Scroller = components?.Scroller
+    const List = components?.List
+    const list = List ? (
+      <List
+        context={context}
+        data-testid="virtuoso-item-list"
+        style={{ visibility: listVisible ? "visible" : "hidden" }}
+      >
+        {content}
+      </List>
+    ) : (
+      content
+    )
 
     return Scroller ? (
-      <Scroller context={context}>{content}</Scroller>
+      <Scroller context={context} className={className}>
+        {list}
+      </Scroller>
     ) : (
       <div>{content}</div>
     )
@@ -97,14 +193,58 @@ beforeEach(() => {
     }
   )
   vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => {})
+  vi.stubGlobal(
+    "requestIdleCallback",
+    (callback: IdleRequestCallback): number =>
+      window.setTimeout(
+        () =>
+          callback({
+            didTimeout: false,
+            timeRemaining: () => 10,
+          }),
+        0
+      )
+  )
+  vi.stubGlobal("cancelIdleCallback", (handle: number) =>
+    window.clearTimeout(handle)
+  )
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class VisibleIntersectionObserver {
+      private readonly callback: IntersectionObserverCallback
+
+      constructor(callback: IntersectionObserverCallback) {
+        this.callback = callback
+      }
+
+      observe = (target: Element) => {
+        this.callback(
+          [{ target, isIntersecting: true } as IntersectionObserverEntry],
+          this as unknown as IntersectionObserver
+        )
+      }
+
+      unobserve() {}
+      disconnect() {}
+    }
+  )
   Element.prototype.scrollIntoView = vi.fn()
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
-  virtuosoHarness.setScrolling = undefined
   virtuosoHarness.setHeight = undefined
   virtuosoHarness.itemContentCalls = 0
+  virtuosoHarness.rootClassName = undefined
+  virtuosoHarness.firstItemIndex = undefined
+  virtuosoHarness.itemCount = 0
+  virtuosoHarness.itemsRendered = undefined
+  virtuosoHarness.viewport = undefined
+  virtuosoHarness.revealList = undefined
+  virtuosoHarness.increaseViewportBy = undefined
+  virtuosoHarness.minOverscanItemCount = undefined
+  virtuosoHarness.skipAnimationFrameInResizeObserver = false
 })
 
 const now = new Date().toISOString()
@@ -125,10 +265,13 @@ const locationMessage = (id: string, latitude: number): F0ChatMessage => ({
   ],
 })
 
-const makeRuntime = (messages: F0ChatMessage[]): F0ChatRuntime => ({
+const makeRuntime = (
+  messages: F0ChatMessage[],
+  channelId = "c1"
+): F0ChatRuntime => ({
   currentUserId: "me",
   channel: {
-    id: "c1",
+    id: channelId,
     type: "dm",
     title: "Ana",
     avatar: { type: "person", firstName: "Ana", lastName: "García" },
@@ -146,57 +289,127 @@ const makeRuntime = (messages: F0ChatMessage[]): F0ChatRuntime => ({
 })
 
 describe("chat scrolling performance wiring", () => {
-  it("does not re-run itemContent when scroll activity toggles", () => {
-    render(
+  it("configures synchronous resize reporting and premeasurement buffers", () => {
+    const { container } = render(
       <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
         <F0Chat />
       </F0ChatProvider>
     )
-    const callsAfterRender = virtuosoHarness.itemContentCalls
 
-    act(() => virtuosoHarness.setScrolling?.(true))
-    expect(virtuosoHarness.itemContentCalls).toBe(callsAfterRender)
+    expect(virtuosoHarness.increaseViewportBy).toEqual({
+      top: 400,
+      bottom: 200,
+    })
+    expect(virtuosoHarness.minOverscanItemCount).toEqual({
+      top: 4,
+      bottom: 3,
+    })
+    expect(virtuosoHarness.skipAnimationFrameInResizeObserver).toBe(true)
 
-    act(() => virtuosoHarness.setScrolling?.(false))
-    expect(virtuosoHarness.itemContentCalls).toBe(callsAfterRender)
+    const viewport = container.querySelector<HTMLElement>(
+      "[data-radix-scroll-area-viewport]"
+    )
+    const strip = container.querySelector<HTMLElement>(
+      'div.w-0[aria-hidden="true"]'
+    )
+    expect(viewport?.style.overflowAnchor).toBe("none")
+    expect(strip?.style.overflowAnchor).toBe("none")
+    const item = container.querySelector<HTMLElement>(
+      "[data-chat-virtuoso-item]"
+    )
+    expect(item).toHaveClass("flow-root", "min-h-px")
+    expect(item).toHaveAttribute("data-item-index", "0")
+    expect(item).not.toHaveAttribute("context")
+    expect(item?.style.overflowAnchor).toBe("none")
   })
 
-  it("defers only new heavy previews while Virtuoso reports scrolling", async () => {
-    const firstMessage = locationMessage("m1", 41.3894)
-    const { container, rerender } = render(
-      <F0ChatProvider runtime={makeRuntime([firstMessage])}>
+  it("does not add reduced-motion subscriptions per transcript row", () => {
+    const addEventListener = vi.fn()
+    const removeEventListener = vi.fn()
+    const addListener = vi.fn()
+    vi.spyOn(window, "matchMedia").mockReturnValue({
+      matches: false,
+      media: "(prefers-reduced-motion: reduce)",
+      onchange: null,
+      addEventListener,
+      removeEventListener,
+      addListener,
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })
+
+    const { rerender } = render(
+      <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
         <F0Chat />
       </F0ChatProvider>
     )
+    const subscriptionsAfterFirstRow = addListener.mock.calls.length
 
-    expect(await screen.findAllByTestId("chat-location-map")).toHaveLength(1)
-
-    act(() => virtuosoHarness.setScrolling?.(true))
     rerender(
       <F0ChatProvider
-        runtime={makeRuntime([firstMessage, locationMessage("m2", 41.4)])}
+        runtime={makeRuntime([
+          locationMessage("m1", 41.3894),
+          ...Array.from({ length: 20 }, (_, index) =>
+            locationMessage(`extra-${index}`, 41.4 + index)
+          ),
+        ])}
       >
         <F0Chat />
       </F0ChatProvider>
     )
 
-    expect(screen.getAllByTestId("chat-location-attachment")).toHaveLength(2)
-    const mountedMap = screen.getByTestId("chat-location-map")
-    expect(mountedMap).toHaveAttribute("data-latitude", "41.3894")
-    expect(
-      container.querySelector(
-        '[data-testid="chat-location-map"][data-latitude="41.4"]'
-      )
-    ).not.toBeInTheDocument()
-
-    act(() => virtuosoHarness.setScrolling?.(false))
-
-    await waitFor(() =>
-      expect(screen.getAllByTestId("chat-location-map")).toHaveLength(2)
-    )
+    expect(subscriptionsAfterFirstRow).toBeGreaterThan(0)
+    expect(addListener).toHaveBeenCalledTimes(subscriptionsAfterFirstRow)
+    expect(addEventListener).not.toHaveBeenCalled()
   })
 
-  it("writes the latest measure-strip height once per animation frame", () => {
+  it("contains horizontal overflow when F0Chat renders without ApplicationFrame", () => {
+    const { container } = render(
+      <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(container.firstElementChild).toHaveClass("overflow-x-hidden")
+  })
+
+  it("keeps Virtuoso's provisional window hidden until layout is stable", () => {
+    render(
+      <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(virtuosoHarness.rootClassName).toContain("opacity-0")
+
+    act(() => {
+      virtuosoHarness.revealList?.()
+    })
+    act(() => {
+      for (let frame = 0; frame < 10; frame++) {
+        frameCallbacks.shift()?.(frame * 16)
+      }
+    })
+    expect(virtuosoHarness.rootClassName).toContain("opacity-100")
+  })
+
+  it("keeps heavy previews as placeholders before transcript readiness", () => {
+    render(
+      <F0ChatProvider
+        runtime={makeRuntime([
+          locationMessage("m1", 41.3894),
+          locationMessage("m2", 41.4),
+        ])}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(screen.queryByTestId("chat-location-map")).not.toBeInTheDocument()
+    expect(screen.getAllByTestId("skeleton")).toHaveLength(2)
+  })
+
+  it("coalesces a burst of measure-strip corrections before paint", async () => {
     const { container } = render(
       <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
         <F0Chat />
@@ -217,16 +430,11 @@ describe("chat scrolling performance wiring", () => {
       set: heightSetter,
     })
 
-    act(() => {
+    await act(async () => {
       virtuosoHarness.setHeight?.(100)
       virtuosoHarness.setHeight?.(200)
       virtuosoHarness.setHeight?.(300)
-    })
-
-    expect(heightSetter).not.toHaveBeenCalled()
-
-    act(() => {
-      frameCallbacks.splice(0).forEach((callback) => callback(0))
+      await Promise.resolve()
     })
 
     expect(heightSetter).toHaveBeenCalledOnce()

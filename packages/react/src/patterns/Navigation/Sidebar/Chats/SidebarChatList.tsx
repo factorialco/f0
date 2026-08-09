@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -57,7 +57,7 @@ export const SidebarChatList = ({
   const i18n = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const rootRef = useRef<HTMLDivElement>(null)
-  const { portalRoot, above, below, jump } = useOffscreenUnreadChats({
+  const { portalRoots, above, below, jump } = useOffscreenUnreadChats({
     rootRef,
     groups,
     shouldReduceMotion,
@@ -80,36 +80,40 @@ export const SidebarChatList = ({
       { count }
     )
 
-  const panelGroups: SidebarTabPanelGroup[] = groups.map((group) => {
-    const totalUnread = group.chats.reduce(
-      (sum, c) => sum + (c.unreadCount ?? 0),
-      0
-    )
-    return {
-      id: group.id,
-      title: group.title,
-      isOpen: group.isOpen,
-      // Slack-style: when collapsed with unread chats, emphasise the title and
-      // surface the group's total unread count as a badge.
-      highlightWhenCollapsed: totalUnread > 0,
-      collapsedBadge:
-        totalUnread > 0 ? <UnreadBadge count={totalUnread} /> : undefined,
-      items: group.chats.map((chat) => ({
-        id: chat.id,
-        searchText: chat.label,
-        content: (
-          <SidebarChatItem
-            chat={chat}
-            isActive={chat.id === activeChatId}
-            onClick={() => {
-              setActiveChat(chat.id)
-              chat.onClick?.()
-            }}
-          />
-        ),
-      })),
-    }
-  })
+  const panelGroups = useMemo<SidebarTabPanelGroup[]>(
+    () =>
+      groups.map((group) => {
+        const totalUnread = group.chats.reduce(
+          (sum, chat) => sum + (chat.unreadCount ?? 0),
+          0
+        )
+        return {
+          id: group.id,
+          title: group.title,
+          isOpen: group.isOpen,
+          // Slack-style: when collapsed with unread chats, emphasise the title
+          // and surface the group's total unread count as a badge.
+          highlightWhenCollapsed: totalUnread > 0,
+          collapsedBadge:
+            totalUnread > 0 ? <UnreadBadge count={totalUnread} /> : undefined,
+          items: group.chats.map((chat) => ({
+            id: chat.id,
+            searchText: chat.label,
+            content: (
+              <SidebarChatItem
+                chat={chat}
+                isActive={chat.id === activeChatId}
+                onClick={() => {
+                  setActiveChat(chat.id)
+                  chat.onClick?.()
+                }}
+              />
+            ),
+          })),
+        }
+      }),
+    [activeChatId, groups, setActiveChat]
+  )
 
   return (
     <>
@@ -131,43 +135,45 @@ export const SidebarChatList = ({
           }
         />
       </div>
-      {portalRoot &&
+      {portalRoots.above &&
         createPortal(
-          <>
-            {above.count > 0 && (
-              <div className="pointer-events-none absolute inset-x-0 top-2 z-[60] flex justify-center">
-                <div className="bg-f1-background rounded flex">
-                  <ButtonInternal
-                    type="button"
-                    variant="outline"
-                    size="md"
-                    className="pointer-events-auto shadow-md"
-                    icon={ArrowUp}
-                    label={getUnreadLabel(above.count)}
-                    aria-label={getDirectionalLabel("above", above.count)}
-                    onClick={(event) => jump("above", event.currentTarget)}
-                  />
-                </div>
+          above.count > 0 && (
+            <div className="pointer-events-none absolute inset-x-0 top-2 z-[60] flex justify-center">
+              <div className="flex rounded bg-f1-background">
+                <ButtonInternal
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  className="pointer-events-auto shadow-md"
+                  icon={ArrowUp}
+                  label={getUnreadLabel(above.count)}
+                  aria-label={getDirectionalLabel("above", above.count)}
+                  onClick={(event) => jump("above", event.currentTarget)}
+                />
               </div>
-            )}
-            {below.count > 0 && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
-                <div className="bg-f1-background rounded flex">
-                  <ButtonInternal
-                    type="button"
-                    variant="outline"
-                    size="md"
-                    className="pointer-events-auto shadow-md"
-                    icon={ArrowDown}
-                    label={getUnreadLabel(below.count)}
-                    aria-label={getDirectionalLabel("below", below.count)}
-                    onClick={(event) => jump("below", event.currentTarget)}
-                  />
-                </div>
+            </div>
+          ),
+          portalRoots.above
+        )}
+      {portalRoots.below &&
+        createPortal(
+          below.count > 0 && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
+              <div className="flex rounded bg-f1-background">
+                <ButtonInternal
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  className="pointer-events-auto shadow-md"
+                  icon={ArrowDown}
+                  label={getUnreadLabel(below.count)}
+                  aria-label={getDirectionalLabel("below", below.count)}
+                  onClick={(event) => jump("below", event.currentTarget)}
+                />
               </div>
-            )}
-          </>,
-          portalRoot
+            </div>
+          ),
+          portalRoots.below
         )}
     </>
   )

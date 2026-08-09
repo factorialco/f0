@@ -1,14 +1,14 @@
 import { motion } from "motion/react"
 import { memo, type ReactNode, useMemo, useRef } from "react"
 
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
 import {
-  senderBubbleColorClass,
+  messageSurfaceColorClass,
   senderNameColorClass,
 } from "../utils/sender-color"
 import { ChatLinkPreview } from "./ChatLinkPreview"
@@ -63,7 +63,7 @@ const ChatBubbleImpl = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   // Whether the message was ALREADY deleted when this row mounted (history, or
   // a tombstone scrolled back into the window): render it in place. Only a
   // live delete fades the tombstone in.
@@ -124,9 +124,7 @@ const ChatBubbleImpl = ({
           corners,
           "w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
-          isMine
-            ? "bg-f1-background-tertiary"
-            : senderBubbleColorClass(message.author)
+          messageSurfaceColorClass(message.author, isMine)
         )}
       >
         {i18n.chat.deletedMessage}
@@ -143,9 +141,7 @@ const ChatBubbleImpl = ({
           "whitespace-pre-wrap break-words",
           // Incoming bubbles share the author's hue at a quiet tint, while the
           // current user's bubble remains clearly neutral.
-          isMine
-            ? "bg-f1-background-tertiary"
-            : senderBubbleColorClass(message.author)
+          messageSurfaceColorClass(message.author, isMine)
         )}
       >
         {message.replyTo && (

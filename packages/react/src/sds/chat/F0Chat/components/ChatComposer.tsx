@@ -19,7 +19,6 @@ import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
@@ -36,6 +35,7 @@ import {
   useMentions,
 } from "../hooks/useMentions"
 import { useTransientError } from "../hooks/useTransientError"
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
   useChatDrop,
   useChatEdit,
@@ -55,8 +55,8 @@ import {
   microExitTransition,
 } from "../utils/chat-motion"
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
-import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
 import { ChatEditChip } from "./ChatEditChip"
+import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
 import {
   ChatMentionPopover,
   getChatMentionOptionId,
@@ -121,7 +121,7 @@ export const ChatComposer = (): ReactNode => {
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
-  const shouldReduceMotion = useReducedMotion()
+  const { reducedMotion: shouldReduceMotion } = useChatRenderConfig()
 
   const [value, setValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)

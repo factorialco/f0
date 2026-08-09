@@ -985,6 +985,181 @@ export const CommunicationsCombinedUserStatuses: Story = {
 }
 
 /**
+ * Product Team is the most demanding seed for the virtual transcript: it has
+ * a long variable-height history, unread entry positioning, system rows,
+ * replies, mentions and three older pages. Keep it as the regression fixture
+ * for scroll-height synchronization between Virtuoso and the Radix viewport.
+ */
+export const CommunicationsProductTeamScroll: Story = {
+  name: "Communications — Product Team scroll",
+  tags: ["chat-scroll-regression"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-product"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const body = canvasElement.closest("body")!
+
+    await step(
+      "Keep the transcript visible with synchronized height",
+      async () => {
+        const viewport = await waitFor(
+          () => {
+            const candidate = body.querySelector<HTMLElement>(
+              "[data-chat-viewport]"
+            )
+            expect(candidate).not.toBeNull()
+            return candidate!
+          },
+          { timeout: 15_000 }
+        )
+        const strip = viewport.querySelector<HTMLElement>(
+          'div.w-0[aria-hidden="true"]'
+        )
+
+        await expect(viewport).not.toBeNull()
+        await expect(strip).not.toBeNull()
+        await waitFor(() =>
+          expect(viewport.parentElement).toHaveClass("visible", "opacity-100")
+        )
+        await waitFor(() => {
+          expect(Number.parseFloat(strip!.style.height)).toBeGreaterThan(0)
+          expect(
+            Math.abs(
+              viewport.scrollHeight - Number.parseFloat(strip!.style.height)
+            )
+          ).toBeLessThanOrEqual(1)
+        })
+      }
+    )
+  },
+}
+
+/**
+ * The profiling kitchen sink: roughly four hundred initial transcript items,
+ * ten older pages and every supported message, attachment and system-row shape.
+ * Its unread landing window is deliberately text-only; rich previews sit just
+ * above it so cold-start paint and the first media-heavy scroll are separable.
+ */
+export const CommunicationsEverythingStressTest: Story = {
+  name: "Communications — everything stress test",
+  tags: ["chat-scroll-regression", "chat-everything-stress"],
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar initialTab="messages" />}
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Open the complete stress transcript", async () => {
+      const titles = await page.findAllByText("Everything Chat — Stress Test")
+      const visibleTitle = titles.find((title) => title.offsetParent !== null)
+      await expect(visibleTitle).toBeDefined()
+      await userEvent.click(visibleTitle!)
+
+      await waitFor(() => {
+        const visibleTitles = page
+          .getAllByText("Everything Chat — Stress Test")
+          .filter((title) => title.offsetParent !== null)
+        expect(visibleTitles.length).toBeGreaterThan(1)
+      })
+
+      const viewport = await waitFor(
+        () => {
+          const candidate = canvasElement
+            .closest("body")!
+            .querySelector<HTMLElement>("[data-chat-viewport]")
+          expect(candidate).not.toBeNull()
+          return candidate!
+        },
+        { timeout: 15_000 }
+      )
+      const strip = viewport.querySelector<HTMLElement>(
+        'div.w-0[aria-hidden="true"]'
+      )
+
+      await waitFor(() =>
+        expect(viewport.parentElement).toHaveClass("visible", "opacity-100")
+      )
+      await expect(strip).not.toBeNull()
+      await waitFor(() => {
+        expect(Number.parseFloat(strip!.style.height)).toBeGreaterThan(
+          viewport.clientHeight
+        )
+        expect(
+          viewport.querySelectorAll("[data-item-index]").length
+        ).toBeLessThan(80)
+      })
+    })
+
+    await step("Scroll into the serialized rich previews", async () => {
+      const richMessage =
+        "Two videos exercise serialized cold-start initialization"
+      const openTitle = page
+        .getAllByText("Everything Chat — Stress Test")
+        .find((title) => title.closest("header"))!
+      const chatHeader = within(openTitle.closest("header")!)
+      await userEvent.click(chatHeader.getByRole("button", { name: "Options" }))
+      await userEvent.click(page.getByRole("menuitem", { name: "Search" }))
+      await userEvent.type(
+        await page.findByPlaceholderText("Search messages"),
+        "serialized cold-start"
+      )
+
+      await expect(await page.findByText(richMessage)).toBeVisible()
+      const videoCards = page.getAllByTestId("chat-video-attachment")
+      await expect(videoCards).toHaveLength(2)
+      for (const card of videoCards) {
+        await expect(card).toHaveClass(
+          "aspect-video",
+          "w-[36rem]",
+          "max-w-full"
+        )
+      }
+    })
+  },
+}
+
+/**
  * The standalone AI assistant: no communications sidebar, the chat docked on the
  * right as a resizable side panel, with the full feature set (credits, file
  * attachments, dictation, entity refs, disclaimer + quick actions footer).
@@ -1798,12 +1973,8 @@ export const CommunicationsVideoAttachments: Story = {
         name: /Video player:/,
       })
 
-      // The transcript keeps its subtree in the a11y tree while it's still
-      // `opacity-0` (it fades in once Virtuoso has positioned the entry row),
-      // so `findBy*` resolves before anything inside is actually visible. Gate
-      // on the region itself becoming visible — a starved frame budget on CI
-      // otherwise lets the video's `loadeddata` mount the controls first and
-      // every `toBeVisible()` below asserts against a hidden transcript.
+      // The player loads asynchronously; wait for the region before checking
+      // dimensions and controls.
       await waitFor(() => expect(players[0]).toBeVisible())
 
       const widths = players.map(
@@ -1818,6 +1989,17 @@ export const CommunicationsVideoAttachments: Story = {
       const cards = players.map(
         (player) =>
           player.closest<HTMLElement>('[data-testid="chat-video-attachment"]')!
+      )
+      await waitFor(
+        () => {
+          for (const card of cards) {
+            expect(card).not.toHaveAttribute("aria-busy")
+            expect(
+              within(card).getByTestId("chat-video-placeholder")
+            ).toHaveClass("pointer-events-none", "opacity-0")
+          }
+        },
+        { timeout: 15_000 }
       )
       for (const [index, player] of players.entries()) {
         const card = cards[index]

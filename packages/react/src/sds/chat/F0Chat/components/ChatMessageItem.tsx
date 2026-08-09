@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
@@ -41,7 +41,7 @@ export const ChatMessageItem = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   const [actionsOpen, setActionsOpen] = useState(false)
   const { highlightedId } = useChatHighlightedId()
   // Stable slice — the full runtime context changes on every transport event

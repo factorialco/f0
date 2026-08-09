@@ -1,5 +1,5 @@
 import {
-  RefObject,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -7,7 +7,7 @@ import {
   useState,
 } from "react"
 
-import { SidebarChatGroup } from "./types"
+import { type SidebarChatGroup } from "./types"
 
 type Direction = "above" | "below"
 
@@ -29,10 +29,17 @@ type PendingFocus = {
   cleanup: () => void
 }
 
+type PortalRoots = {
+  above: HTMLElement | null
+  below: HTMLElement | null
+}
+
 const EMPTY_DIRECTIONAL_UNREAD: DirectionalUnread = {
   count: 0,
   target: null,
 }
+
+const EMPTY_PORTAL_ROOTS: PortalRoots = { above: null, below: null }
 
 const getDirection = (entry: IntersectionObserverEntry): Direction | null => {
   if (entry.isIntersecting || !entry.rootBounds) return null
@@ -42,25 +49,40 @@ const getDirection = (entry: IntersectionObserverEntry): Direction | null => {
 }
 
 const getDirectionalUnread = (
-  statuses: Map<HTMLElement, TargetStatus>,
-  direction: Direction
-): DirectionalUnread => {
-  const matches = Array.from(statuses.entries()).filter(
-    ([, status]) => status.direction === direction
-  )
+  statuses: Map<HTMLElement, TargetStatus>
+): { above: DirectionalUnread; below: DirectionalUnread } => {
+  let aboveCount = 0
+  let belowCount = 0
+  let aboveTarget: HTMLElement | null = null
+  let belowTarget: HTMLElement | null = null
+  let nearestAboveBottom = Number.NEGATIVE_INFINITY
+  let nearestBelowTop = Number.POSITIVE_INFINITY
 
-  if (matches.length === 0) return EMPTY_DIRECTIONAL_UNREAD
-
-  const target = matches.reduce((nearest, candidate) => {
-    if (direction === "above") {
-      return candidate[1].bottom > nearest[1].bottom ? candidate : nearest
+  for (const [element, status] of statuses) {
+    if (status.direction === "above") {
+      aboveCount += status.count
+      if (status.bottom > nearestAboveBottom) {
+        nearestAboveBottom = status.bottom
+        aboveTarget = element
+      }
+    } else if (status.direction === "below") {
+      belowCount += status.count
+      if (status.top < nearestBelowTop) {
+        nearestBelowTop = status.top
+        belowTarget = element
+      }
     }
-    return candidate[1].top < nearest[1].top ? candidate : nearest
-  })
+  }
 
   return {
-    count: matches.reduce((sum, [, status]) => sum + status.count, 0),
-    target: target[0],
+    above:
+      aboveCount > 0
+        ? { count: aboveCount, target: aboveTarget }
+        : EMPTY_DIRECTIONAL_UNREAD,
+    below:
+      belowCount > 0
+        ? { count: belowCount, target: belowTarget }
+        : EMPTY_DIRECTIONAL_UNREAD,
   }
 }
 
@@ -80,10 +102,16 @@ export const useOffscreenUnreadChats = ({
   groups: SidebarChatGroup[]
   shouldReduceMotion: boolean
 }) => {
-  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null)
-  const [above, setAbove] = useState(EMPTY_DIRECTIONAL_UNREAD)
-  const [below, setBelow] = useState(EMPTY_DIRECTIONAL_UNREAD)
+  const [portalRoots, setPortalRoots] = useState(EMPTY_PORTAL_ROOTS)
+  const [navigation, setNavigation] = useState(() => ({
+    above: EMPTY_DIRECTIONAL_UNREAD,
+    below: EMPTY_DIRECTIONAL_UNREAD,
+  }))
   const pendingFocusRef = useRef<PendingFocus | null>(null)
+  const unreadTargetsRef = useRef({
+    byChatId: new Map<string, number>(),
+    byGroupId: new Map<string, number>(),
+  })
 
   const clearPendingFocus = useCallback(() => {
     const pendingFocus = pendingFocusRef.current
@@ -91,37 +119,39 @@ export const useOffscreenUnreadChats = ({
     pendingFocus?.cleanup()
   }, [])
 
-  const unreadByChatId = useMemo(
-    () =>
-      new Map(
-        groups.flatMap((group) =>
-          group.chats
-            .filter((chat) => !chat.loading && (chat.unreadCount ?? 0) > 0)
-            .map((chat) => [chat.id, 1] as const)
-        )
-      ),
-    [groups]
-  )
+  const { unreadByChatId, unreadByGroupId, unreadTargetSignature } =
+    useMemo(() => {
+      const byChatId = new Map<string, number>()
+      const byGroupId = new Map<string, number>()
+      const signature: string[] = []
 
-  const unreadByGroupId = useMemo(
-    () =>
-      new Map(
-        groups.map(
-          (group) =>
-            [
-              group.id,
-              group.chats.filter((chat) => (chat.unreadCount ?? 0) > 0).length,
-            ] as const
+      for (const group of groups) {
+        const unreadIds: string[] = []
+        for (const chat of group.chats) {
+          if (chat.loading || (chat.unreadCount ?? 0) <= 0) continue
+          byChatId.set(chat.id, 1)
+          unreadIds.push(chat.id)
+        }
+        byGroupId.set(group.id, unreadIds.length)
+        signature.push(
+          `${group.id}:${group.isOpen !== false ? "open" : "closed"}:${unreadIds.join(",")}`
         )
-      ),
-    [groups]
-  )
+      }
 
+      return {
+        unreadByChatId: byChatId,
+        unreadByGroupId: byGroupId,
+        unreadTargetSignature: signature.join("|"),
+      }
+    }, [groups])
+  unreadTargetsRef.current = {
+    byChatId: unreadByChatId,
+    byGroupId: unreadByGroupId,
+  }
   useEffect(() => {
     const root = rootRef.current
     const viewport = root?.closest<HTMLElement>("[data-scroll-container]")
     const scrollArea = viewport?.parentElement ?? null
-    setPortalRoot(scrollArea)
 
     if (
       !root ||
@@ -129,37 +159,87 @@ export const useOffscreenUnreadChats = ({
       !scrollArea ||
       typeof IntersectionObserver === "undefined"
     ) {
-      setAbove(EMPTY_DIRECTIONAL_UNREAD)
-      setBelow(EMPTY_DIRECTIONAL_UNREAD)
+      setPortalRoots(EMPTY_PORTAL_ROOTS)
+      setNavigation({
+        above: EMPTY_DIRECTIONAL_UNREAD,
+        below: EMPTY_DIRECTIONAL_UNREAD,
+      })
       return
     }
 
+    // Keep focus order consistent with the visual placement: the upper
+    // shortcut precedes the viewport in the DOM and the lower one follows it.
+    const abovePortalRoot = root.ownerDocument.createElement("div")
+    const belowPortalRoot = root.ownerDocument.createElement("div")
+    abovePortalRoot.dataset.sidebarUnreadPortal = "above"
+    belowPortalRoot.dataset.sidebarUnreadPortal = "below"
+    abovePortalRoot.style.display = "contents"
+    belowPortalRoot.style.display = "contents"
+    scrollArea.insertBefore(abovePortalRoot, viewport)
+    scrollArea.insertBefore(belowPortalRoot, viewport.nextSibling)
+    setPortalRoots({ above: abovePortalRoot, below: belowPortalRoot })
+
     let intersectionObserver: IntersectionObserver | null = null
     let animationFrame: number | null = null
+    let initialFrame: number | null = null
+    let initialized = false
+    let bindingSignature = ""
+
+    const getBindingSignature = () => {
+      const searching = root.querySelector(
+        "[data-sidebar-tab-panel-searching='true']"
+      )
+      if (searching) return "searching"
+
+      const { byChatId, byGroupId } = unreadTargetsRef.current
+      return Array.from(
+        root.querySelectorAll<HTMLElement>("[data-sidebar-panel-group-id]")
+      )
+        .map((groupElement) => {
+          const groupId = groupElement.dataset.sidebarPanelGroupId ?? ""
+          const collapsed = Boolean(
+            groupElement.querySelector(
+              "[data-sidebar-collapsible-open='false']"
+            )
+          )
+          if (collapsed) {
+            return `${groupId}:closed:${byGroupId.get(groupId) ?? 0}`
+          }
+          const unreadIds = Array.from(
+            groupElement.querySelectorAll<HTMLElement>("[data-sidebar-chat-id]")
+          )
+            .map((chatElement) => chatElement.dataset.sidebarChatId ?? "")
+            .filter((chatId) => byChatId.has(chatId))
+          return `${groupId}:open:${unreadIds.join(",")}`
+        })
+        .join("|")
+    }
 
     const bindTargets = () => {
+      const nextBindingSignature = getBindingSignature()
+      if (intersectionObserver && bindingSignature === nextBindingSignature) {
+        return
+      }
+      bindingSignature = nextBindingSignature
       intersectionObserver?.disconnect()
       const statuses = new Map<HTMLElement, TargetStatus>()
-      setAbove(EMPTY_DIRECTIONAL_UNREAD)
-      setBelow(EMPTY_DIRECTIONAL_UNREAD)
+      setNavigation({
+        above: EMPTY_DIRECTIONAL_UNREAD,
+        below: EMPTY_DIRECTIONAL_UNREAD,
+      })
       if (root.querySelector("[data-sidebar-tab-panel-searching='true']")) {
         return
       }
 
       const updateDirections = () => {
-        const nextAbove = getDirectionalUnread(statuses, "above")
-        const nextBelow = getDirectionalUnread(statuses, "below")
-        setAbove((current) =>
-          current.count === nextAbove.count &&
-          current.target === nextAbove.target
+        const next = getDirectionalUnread(statuses)
+        setNavigation((current) =>
+          current.above.count === next.above.count &&
+          current.above.target === next.above.target &&
+          current.below.count === next.below.count &&
+          current.below.target === next.below.target
             ? current
-            : nextAbove
-        )
-        setBelow((current) =>
-          current.count === nextBelow.count &&
-          current.target === nextBelow.target
-            ? current
-            : nextBelow
+            : next
         )
       }
 
@@ -188,13 +268,12 @@ export const useOffscreenUnreadChats = ({
         { root: viewport, threshold: 0 }
       )
 
+      const { byChatId, byGroupId } = unreadTargetsRef.current
       root
         .querySelectorAll<HTMLElement>("[data-sidebar-panel-group-id]")
         .forEach((groupElement) => {
           const groupId = groupElement.dataset.sidebarPanelGroupId
-          const groupUnreadCount = groupId
-            ? (unreadByGroupId.get(groupId) ?? 0)
-            : 0
+          const groupUnreadCount = groupId ? (byGroupId.get(groupId) ?? 0) : 0
           if (groupUnreadCount === 0) return
 
           const collapsed = groupElement.querySelector(
@@ -215,7 +294,7 @@ export const useOffscreenUnreadChats = ({
             .querySelectorAll<HTMLElement>("[data-sidebar-chat-id]")
             .forEach((chatElement) => {
               const chatId = chatElement.dataset.sidebarChatId
-              if (!chatId || !unreadByChatId.has(chatId)) return
+              if (!chatId || !byChatId.has(chatId)) return
               statuses.set(chatElement, {
                 count: 1,
                 direction: null,
@@ -230,14 +309,22 @@ export const useOffscreenUnreadChats = ({
     }
 
     const scheduleBindTargets = () => {
-      if (animationFrame !== null) cancelAnimationFrame(animationFrame)
+      if (!initialized || animationFrame !== null) return
       animationFrame = requestAnimationFrame(() => {
         animationFrame = null
         bindTargets()
       })
     }
 
-    bindTargets()
+    // Let the sidebar's rows paint before registering its unread observers.
+    // Two frame boundaries guarantee at least one completed browser paint.
+    initialFrame = requestAnimationFrame(() => {
+      initialFrame = requestAnimationFrame(() => {
+        initialFrame = null
+        initialized = true
+        bindTargets()
+      })
+    })
     const mutationObserver = new MutationObserver(scheduleBindTargets)
     mutationObserver.observe(root, {
       attributes: true,
@@ -250,16 +337,22 @@ export const useOffscreenUnreadChats = ({
     })
 
     return () => {
+      abovePortalRoot.remove()
+      belowPortalRoot.remove()
       clearPendingFocus()
       intersectionObserver?.disconnect()
       mutationObserver.disconnect()
       if (animationFrame !== null) cancelAnimationFrame(animationFrame)
+      if (initialFrame !== null) cancelAnimationFrame(initialFrame)
     }
-  }, [clearPendingFocus, rootRef, unreadByChatId, unreadByGroupId])
+  }, [clearPendingFocus, rootRef, unreadTargetSignature])
 
   const jump = useCallback(
     (direction: Direction, origin: HTMLElement) => {
-      const target = direction === "above" ? above.target : below.target
+      const target =
+        direction === "above"
+          ? navigation.above.target
+          : navigation.below.target
       if (!target) return
 
       if (!shouldReduceMotion) {
@@ -309,8 +402,13 @@ export const useOffscreenUnreadChats = ({
       })
       if (shouldReduceMotion) focusUnreadTarget(target)
     },
-    [above.target, below.target, clearPendingFocus, shouldReduceMotion]
+    [clearPendingFocus, navigation, shouldReduceMotion]
   )
 
-  return { portalRoot, above, below, jump }
+  return {
+    portalRoots,
+    above: navigation.above,
+    below: navigation.below,
+    jump,
+  }
 }

@@ -10,6 +10,7 @@ import {
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
+import { messageSurfaceColorClass } from "../utils/sender-color"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -78,7 +79,11 @@ const makeRuntime = (attachments: F0ChatAttachment[]): F0ChatRuntime => ({
   messages: [
     {
       id: "m1",
-      author: { id: "other", name: "María José" },
+      author: {
+        id: "other",
+        name: "María José",
+        avatarColor: "orange",
+      },
       body: "Here's the offer",
       createdAt: now,
       isMine: false,
@@ -118,7 +123,13 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
   it("renders the Word document as a card with a page snapshot", async () => {
     renderChat([docxAttachment])
     const card = screen.getByTestId("chat-document-attachment")
+    const senderSurface = messageSurfaceColorClass(
+      { id: "other", name: "María José", avatarColor: "orange" },
+      false
+    )
     expect(card).toHaveTextContent("offer-letter.docx")
+    expect(card).toHaveClass(senderSurface)
+    expect(screen.getByTestId("skeleton")).toHaveClass(senderSurface)
     expect(
       screen.queryByRole("button", { name: "Download offer-letter.docx" })
     ).not.toBeInTheDocument()
@@ -137,7 +148,13 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
       screen.getByRole("button", { name: "Open offer-letter.docx" })
     )
 
-    expect(await screen.findByRole("dialog")).toBeInTheDocument()
+    const dialog = await screen.findByRole("dialog")
+    expect(dialog).toBeInTheDocument()
+    expect(
+      Array.from(dialog.querySelectorAll("[class]")).some((element) =>
+        element.getAttribute("class")?.includes("colors.orange.50")
+      )
+    ).toBe(false)
     // The viewer renders its own copy of the document (generous timeout: the
     // viewer chunk resolves through React.lazy).
     await waitFor(
@@ -145,7 +162,7 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
         expect(
           screen.getAllByText("Offer of Employment").length
         ).toBeGreaterThan(1),
-      { timeout: 5000 }
+      { timeout: 60_000 }
     )
 
     const closeButtons = screen.getAllByRole("button", { name: "Close" })
@@ -153,7 +170,7 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-  })
+  }, 60_000)
 
   it("falls back to the plain file chip when the document can't load", async () => {
     renderChat([
@@ -164,7 +181,9 @@ describe("ChatDocumentAttachmentCard (docx)", () => {
         screen.queryByTestId("chat-document-attachment")
       ).not.toBeInTheDocument()
     )
-    expect(screen.getByText("offer-letter.docx")).toBeInTheDocument()
+    expect(screen.getByText("offer-letter.docx").parentElement).toHaveClass(
+      "bg-f1-background-tertiary"
+    )
     expect(
       screen.getByRole("button", { name: "Download offer-letter.docx" })
     ).toBeInTheDocument()

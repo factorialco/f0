@@ -661,6 +661,13 @@ const latestObserver = () =>
     MockIntersectionObserver.instances.length - 1
   ]
 
+const waitForInitialObserver = async () => {
+  await waitFor(() => {
+    expect(MockIntersectionObserver.instances.length).toBeGreaterThan(0)
+  })
+  return latestObserver()
+}
+
 const observedChat = (observer: MockIntersectionObserver, id: string) => {
   const target = Array.from(observer.observed).find(
     (element) => (element as HTMLElement).dataset.sidebarChatId === id
@@ -715,12 +722,10 @@ describe("SidebarChatList unread navigation", () => {
 
   it("counts hidden unread chats independently and jumps to the nearest one", async () => {
     renderInScrollViewport()
-    const observer = latestObserver()
-    const getBoundingClientRect = vi.spyOn(
-      HTMLElement.prototype,
-      "getBoundingClientRect"
+    const observer = await waitForInitialObserver()
+    const geometryReads = Array.from(observer.observed).map((target) =>
+      vi.spyOn(target, "getBoundingClientRect")
     )
-    getBoundingClientRect.mockClear()
 
     act(() => {
       observer.emit([
@@ -769,7 +774,9 @@ describe("SidebarChatList unread navigation", () => {
         .getByRole("button", { name: "2 unread chats above" })
         .closest('[data-testid="scroll-area-root"]')
     ).toBe(screen.getByTestId("scroll-area-root"))
-    expect(getBoundingClientRect).not.toHaveBeenCalled()
+    geometryReads.forEach((readGeometry) => {
+      expect(readGeometry).not.toHaveBeenCalled()
+    })
 
     await userEvent.click(
       screen.getByRole("button", { name: "2 unread chats above" })
@@ -829,7 +836,7 @@ describe("SidebarChatList unread navigation", () => {
         ],
       },
     ])
-    const observer = latestObserver()
+    const observer = await waitForInitialObserver()
     const groupTarget = Array.from(observer.observed).find(
       (element) =>
         (element as HTMLElement).dataset.sidebarPanelGroupId === "dms"
@@ -892,7 +899,7 @@ describe("SidebarChatList unread navigation", () => {
         ],
       },
     ])
-    let observer = latestObserver()
+    let observer = await waitForInitialObserver()
     expect(Array.from(observer.observed)).toEqual(
       expect.arrayContaining([
         observedChat(observer, "a"),
@@ -948,7 +955,7 @@ describe("SidebarChatList unread navigation", () => {
     )
   })
 
-  it("waits for unread loading rows to resolve before making them targets", () => {
+  it("waits for unread loading rows to resolve before making them targets", async () => {
     renderInScrollViewport([
       {
         id: "dms",
@@ -959,7 +966,7 @@ describe("SidebarChatList unread navigation", () => {
         ],
       },
     ])
-    const observer = latestObserver()
+    const observer = await waitForInitialObserver()
     expect(
       Array.from(observer.observed).some(
         (element) =>
@@ -971,7 +978,7 @@ describe("SidebarChatList unread navigation", () => {
 
   it("hides the controls while searching and outside a scroll viewport", async () => {
     renderInScrollViewport()
-    const observer = latestObserver()
+    const observer = await waitForInitialObserver()
     act(() => {
       observer.emit([
         {
@@ -1082,7 +1089,7 @@ describe("SidebarChatList unread navigation", () => {
         </div>
       </div>
     )
-    let observer = latestObserver()
+    let observer = await waitForInitialObserver()
     act(() => {
       observer.emit([
         {
@@ -1145,7 +1152,7 @@ describe("SidebarChatList unread navigation", () => {
       dispatchEvent: vi.fn(),
     }))
     renderInScrollViewport()
-    const observer = latestObserver()
+    const observer = await waitForInitialObserver()
     const target = observedChat(observer, "e") as HTMLElement
     act(() => {
       observer.emit([{ target, isIntersecting: false, top: 120, bottom: 140 }])
@@ -1162,7 +1169,7 @@ describe("SidebarChatList unread navigation", () => {
 
   it("does not steal focus after the user interrupts a smooth jump", async () => {
     renderInScrollViewport()
-    const observer = latestObserver()
+    const observer = await waitForInitialObserver()
     const target = observedChat(observer, "e") as HTMLElement
     act(() => {
       observer.emit([{ target, isIntersecting: false, top: 120, bottom: 140 }])

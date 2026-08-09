@@ -8,7 +8,11 @@ import {
   type F0ChatSenderColor,
   type F0ChatUser,
 } from "../../types"
-import { senderBubbleColorClass, senderNameColorClass } from "../sender-color"
+import {
+  messageSurfaceColorClass,
+  senderBubbleColorClass,
+  senderNameColorClass,
+} from "../sender-color"
 
 const user = (
   id: string,
@@ -271,4 +275,27 @@ describe("senderBubbleColorClass", () => {
       }
     }
   )
+})
+
+describe("message surface colour", () => {
+  it.each(f0ChatSenderColors)(
+    "uses the explicit %s hue for incoming message surfaces",
+    (color: F0ChatSenderColor) => {
+      const sender = {
+        ...user(`u-${color}`, `Sender ${color}`),
+        avatarColor: color,
+      }
+
+      const main = messageSurfaceColorClass(sender, false)
+      expect(main).toBe(senderBubbleColorClass(sender))
+    }
+  )
+
+  it("keeps my message surface neutral", () => {
+    const sender = user("me", "Me")
+
+    expect(messageSurfaceColorClass(sender, true)).toBe(
+      "bg-f1-background-tertiary"
+    )
+  })
 })

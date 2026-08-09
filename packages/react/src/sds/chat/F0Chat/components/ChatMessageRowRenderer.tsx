@@ -154,11 +154,7 @@ const ChatMessageRowRendererComponent = ({
     const showFooterGutter = isGroup && !row.message.isMine
     return (
       <div className={cn("flex w-full gap-2", spacing)}>
-        {showFooterGutter && (
-          <span aria-hidden className="invisible shrink-0">
-            {avatarFor(row.message.author)}
-          </span>
-        )}
+        {showFooterGutter && <span aria-hidden className="size-5 shrink-0" />}
         <div className="min-w-0 flex-1">
           <MessageStatus message={row.message} isGroup={isGroup} />
         </div>
@@ -170,12 +166,9 @@ const ChatMessageRowRendererComponent = ({
   const isMine = message.isMine
   const showIdentity = isGroup && !isMine
 
-  // Invisible avatar reserves the gutter so bubbles/reactions/footer stay aligned
-  // even on rows that don't show the avatar.
+  // A CSS spacer reserves the gutter without mounting hidden avatar/image work.
   const spacer = showIdentity ? (
-    <span aria-hidden className="invisible shrink-0">
-      {avatarFor(message.author)}
-    </span>
+    <span aria-hidden className="size-5 shrink-0" />
   ) : undefined
 
   const bubbleGutter = showIdentity ? (

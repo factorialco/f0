@@ -481,22 +481,24 @@ export const Snapshot: Story = {
       </ScrollArea>
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const unreadExample = within(
-      canvas.getByTestId("snapshot-offscreen-unread")
-    )
-    unreadExample
-      .getByRole("button", { name: "Chat 12" })
-      .scrollIntoView({ block: "center" })
+    await step("Show offscreen unread controls", async () => {
+      const unreadExample = within(
+        canvas.getByTestId("snapshot-offscreen-unread")
+      )
+      unreadExample
+        .getByRole("button", { name: "Chat 12" })
+        .scrollIntoView({ block: "center" })
 
-    await waitFor(() => {
-      expect(
-        unreadExample.getByRole("button", { name: "2 unread chats above" })
-      ).toBeInTheDocument()
-      expect(
-        unreadExample.getByRole("button", { name: "2 unread chats below" })
-      ).toBeInTheDocument()
+      await waitFor(() => {
+        expect(
+          unreadExample.getByRole("button", { name: "2 unread chats above" })
+        ).toBeInTheDocument()
+        expect(
+          unreadExample.getByRole("button", { name: "2 unread chats below" })
+        ).toBeInTheDocument()
+      })
     })
   },
 }

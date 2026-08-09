@@ -37,31 +37,12 @@ describe("ChatLocationAttachment", () => {
 
   it("renders the lazy MapLibre map with the teardrop marker", async () => {
     render(<ChatLocationAttachment location={LOCATION} />)
+    const previewRectangle = screen.getByRole("link").firstElementChild
+    expect(previewRectangle).toHaveStyle({ height: "200px" })
     // The map module is lazy-loaded — wait for the chunk to resolve.
     expect(await screen.findByTestId("chat-location-map")).toBeInTheDocument()
+    expect(previewRectangle).toHaveStyle({ height: "200px" })
     expect(screen.getByTestId("chat-location-pin")).toBeInTheDocument()
-  })
-
-  it("defers mounting MapLibre until scrolling settles", async () => {
-    const { rerender } = render(
-      <ChatLocationAttachment location={LOCATION} deferHeavyContent />
-    )
-
-    expect(screen.queryByTestId("chat-location-map")).not.toBeInTheDocument()
-    expect(screen.getByTestId("chat-location-pin")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Factorial HQ" })).toHaveAttribute(
-      "aria-busy",
-      "true"
-    )
-
-    rerender(
-      <ChatLocationAttachment location={LOCATION} deferHeavyContent={false} />
-    )
-
-    expect(await screen.findByTestId("chat-location-map")).toBeInTheDocument()
-    expect(
-      screen.getByRole("link", { name: "Factorial HQ" })
-    ).not.toHaveAttribute("aria-busy")
   })
 
   it("is a map-only card: the name is the accessible label, not a footer", () => {
@@ -87,6 +68,21 @@ describe("ChatLocationAttachment", () => {
     const link = screen.getByRole("link")
     expect(link.className).toContain("rounded-tl-sm")
     expect(link.className).not.toContain("rounded-xl ")
+  })
+
+  it("applies a sender-aware surface to the card and map placeholder", () => {
+    const surfaceClassName = "bg-[color:orange]"
+    render(
+      <ChatLocationAttachment
+        location={LOCATION}
+        surfaceClassName={surfaceClassName}
+      />
+    )
+
+    expect(screen.getByRole("link")).toHaveClass(surfaceClassName)
+    expect(screen.getByTestId("chat-location-map")).not.toHaveClass(
+      surfaceClassName
+    )
   })
 })
 

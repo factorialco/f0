@@ -98,3 +98,10 @@ export const senderNameColorClass = (user: F0ChatUser): string =>
 /** Tailwind background class for an incoming bubble, matching its sender. */
 export const senderBubbleColorClass = (user: F0ChatUser): string =>
   BUBBLE_COLOR_CLASS[senderColor(user)]
+
+/** Background for any top-level surface owned by a message. */
+export const messageSurfaceColorClass = (
+  user: F0ChatUser,
+  isMine: boolean
+): string =>
+  isMine ? "bg-f1-background-tertiary" : senderBubbleColorClass(user)

@@ -30,6 +30,7 @@ import {
   type F0ChatRuntime,
 } from "../types"
 import { formatClock } from "../utils/natural-time"
+import { messageSurfaceColorClass } from "../utils/sender-color"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -374,6 +375,105 @@ describe("F0Chat", () => {
     expect(screen.getByText("edited")).toBeInTheDocument()
   })
 
+  it("colors media attachments but keeps file items neutral", () => {
+    const author = {
+      id: "other",
+      name: "María José",
+      avatarColor: "orange" as const,
+    }
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "coloured-attachments",
+            author,
+            body: "Attachment caption",
+            createdAt: now,
+            isMine: false,
+            attachments: [
+              { kind: "image", url: "blob:img", name: "photo.png" },
+              {
+                kind: "file",
+                url: "https://cdn.example.com/walkthrough.webm",
+                name: "walkthrough.webm",
+                mimeType: "video/webm",
+              },
+              {
+                kind: "location",
+                latitude: 41.3894,
+                longitude: 2.1607,
+                name: "Factorial HQ",
+              },
+              {
+                kind: "voice",
+                url: "https://cdn.example.com/voice-note.webm",
+                durationSeconds: 4,
+                mimeType: "audio/webm",
+              },
+              {
+                kind: "file",
+                url: "blob:file",
+                name: "source-deck.pptx",
+                mimeType: "application/vnd.ms-powerpoint",
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    const surfaceClassName = messageSurfaceColorClass(author, false)
+    expect(screen.getByTestId("chat-image-attachment")).toHaveClass(
+      surfaceClassName
+    )
+    const fileItem = screen.getByText("source-deck.pptx").parentElement
+    expect(fileItem).toHaveClass("bg-f1-background-tertiary")
+    expect(fileItem).not.toHaveClass(surfaceClassName)
+    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+      surfaceClassName
+    )
+    expect(screen.getByTestId("chat-location-attachment")).toHaveClass(
+      surfaceClassName
+    )
+    expect(screen.getByTestId("chat-voice-placeholder")).toHaveClass(
+      surfaceClassName
+    )
+    expect(screen.getByTestId("chat-image-attachment")).toHaveClass(
+      "rounded-bl-sm"
+    )
+    expect(
+      screen.getByText("Attachment caption").closest(".rounded-2xl")
+    ).toHaveClass("rounded-tl-sm")
+  })
+
+  it("keeps my attachment surfaces neutral", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "own-attachment",
+            author: { id: "me", name: "Me" },
+            body: "",
+            createdAt: now,
+            isMine: true,
+            attachments: [
+              {
+                kind: "file",
+                url: "blob:file",
+                name: "source-deck.pptx",
+                mimeType: "application/vnd.ms-powerpoint",
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    expect(screen.getByText("source-deck.pptx").parentElement).toHaveClass(
+      "bg-f1-background-tertiary"
+    )
+  })
+
   it("renders a tombstone for deleted messages (no actions)", () => {
     renderChat(
       makeRuntime({
@@ -663,11 +763,21 @@ describe("F0Chat", () => {
       documentPreview.querySelector('[data-testid="chat-document-attachment"]')
     ).toHaveStyle({ width: "64px" })
     const videoPreview = screen.getByTestId("chat-composer-video-preview")
-    expect(videoPreview).toHaveClass("h-16", "w-28")
-    expect(screen.getByTestId("chat-composer-image-preview")).toHaveClass(
+    expect(videoPreview).toHaveClass(
       "h-16",
-      "w-16"
+      "w-28",
+      "bg-f1-background-secondary"
     )
+    const imagePreview = screen.getByTestId("chat-composer-image-preview")
+    expect(imagePreview).toHaveClass("h-16", "w-16")
+    expect(
+      documentPreview.querySelector('[data-testid="chat-document-attachment"]')
+    ).toHaveClass("bg-f1-background")
+    expect(
+      [imagePreview, videoPreview, documentPreview].some((preview) =>
+        preview.getAttribute("class")?.includes("color-mix(in_oklch")
+      )
+    ).toBe(false)
     await waitFor(() =>
       expect(screen.getByRole("img", { name: /photo\.png/i })).toHaveAttribute(
         "src",
@@ -702,7 +812,7 @@ describe("F0Chat", () => {
       screen.queryByRole("img", { name: /photo\.png/i })
     ).not.toBeInTheDocument()
     await waitFor(() => expect(attachmentStrip).toHaveFocus())
-    expect(document).toBeInTheDocument()
+    expect(screen.getByText("report.pdf")).toBeInTheDocument()
   })
 
   it("removes a local preview without restoring it when upload finishes", async () => {
@@ -930,9 +1040,11 @@ describe("F0Chat", () => {
       target: { files: [oversizedSheet] },
     })
 
-    expect(
-      await screen.findByTestId("chat-composer-file-preview")
-    ).toHaveTextContent("large-report.xlsx")
+    const composerPreview = await screen.findByTestId(
+      "chat-composer-file-preview"
+    )
+    expect(composerPreview).toHaveTextContent("large-report.xlsx")
+    expect(composerPreview).toHaveClass("bg-f1-background-secondary")
     expect(
       screen.queryByTestId("chat-composer-document-preview")
     ).not.toBeInTheDocument()
@@ -1035,12 +1147,15 @@ describe("F0Chat", () => {
     expect(screen.getByText(/no messages yet/i)).toBeInTheDocument()
   })
 
-  it("seeds reader identities on every group message in the application mock", () => {
+  it("seeds reader identity or count data on every group message", () => {
     for (const seed of SEEDS.filter((item) => item.type === "group")) {
       const messages = initialConvState(seed).messages.filter(isUserMessage)
 
       for (const message of messages) {
-        expect(message.readBy?.length).toBeGreaterThan(0)
+        if ((message.readBy?.length ?? 0) === 0) {
+          expect(message.readByCount).toBeGreaterThan(0)
+          continue
+        }
         expect(
           message.readBy?.some((reader) => reader.id === message.author.id)
         ).toBe(false)

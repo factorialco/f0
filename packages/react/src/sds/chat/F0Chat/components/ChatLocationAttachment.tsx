@@ -4,12 +4,13 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import { useDeferredHeavyMount } from "../hooks/useDeferredHeavyMount"
+import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
 import { type F0ChatLocationAttachment } from "../types"
 
 // maplibre-gl is heavy — it lives in its own chunk, fetched on first render of
 // a location attachment (see LocationMap).
-const LocationMap = lazy(() => import("./LocationMap"))
+const loadLocationMap = () => import("./LocationMap")
+const LocationMap = lazy(loadLocationMap)
 
 const MAP_HEIGHT = 200
 
@@ -27,29 +28,30 @@ const mapsUrl = ({ latitude, longitude }: F0ChatLocationAttachment): string =>
 export const ChatLocationAttachment = ({
   location,
   cornerClass = "rounded-xl",
-  deferHeavyContent = false,
+  surfaceClassName,
 }: {
   location: F0ChatLocationAttachment
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
-  /** Keep MapLibre initialization out of an active transcript scroll. */
-  deferHeavyContent?: boolean
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
-  const mountMap = useDeferredHeavyMount(true, deferHeavyContent)
+  const { ref, shouldMount } = useTranscriptHeavyPreview(loadLocationMap)
   return (
     <a
+      ref={ref}
       href={mapsUrl(location)}
       target="_blank"
       rel="noopener noreferrer"
-      aria-busy={!mountMap ? true : undefined}
       aria-label={location.name ?? i18n.chat.location}
       className={cn(
         "flex w-96 min-w-0 max-w-full flex-col overflow-hidden no-underline",
         "border border-solid border-f1-border-secondary bg-f1-background-tertiary",
-        "transition-colors hover:bg-f1-background-secondary",
+        "transition-shadow hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
         focusRing("focus-visible:ring-inset"),
-        cornerClass
+        cornerClass,
+        surfaceClassName
       )}
       data-testid="chat-location-attachment"
     >
@@ -57,19 +59,15 @@ export const ChatLocationAttachment = ({
         className="pointer-events-none relative w-full"
         style={{ height: MAP_HEIGHT }}
       >
-        {mountMap ? (
-          <Suspense
-            fallback={
-              <Skeleton className="h-full w-full rounded-none motion-reduce:animate-none" />
-            }
-          >
+        {shouldMount ? (
+          <Suspense fallback={<MapPlaceholder surface={surfaceClassName} />}>
             <LocationMap
               latitude={location.latitude}
               longitude={location.longitude}
             />
           </Suspense>
         ) : (
-          <Skeleton className="h-full w-full animate-none rounded-none" />
+          <MapPlaceholder surface={surfaceClassName} />
         )}
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full drop-shadow-md"
@@ -89,3 +87,12 @@ export const ChatLocationAttachment = ({
     </a>
   )
 }
+
+const MapPlaceholder = ({ surface }: { surface?: string }): ReactNode => (
+  <Skeleton
+    className={cn(
+      "h-full w-full rounded-none motion-reduce:animate-none",
+      surface
+    )}
+  />
+)

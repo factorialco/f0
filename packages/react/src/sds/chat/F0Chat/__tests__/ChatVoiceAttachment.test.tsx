@@ -35,53 +35,6 @@ describe("ChatVoiceAttachment", () => {
     })
   })
 
-  it("does not initialize audio while transcript scrolling is active", async () => {
-    const decodeAudioData = vi.fn().mockResolvedValue({
-      getChannelData: () => new Float32Array(32),
-    })
-    const close = vi.fn()
-    class AudioContextMock {
-      decodeAudioData = decodeAudioData
-      close = close
-    }
-    const fetchMock = vi.fn().mockResolvedValue({
-      arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-    })
-    Object.defineProperty(window, "AudioContext", {
-      configurable: true,
-      value: AudioContextMock,
-    })
-    vi.stubGlobal("fetch", fetchMock)
-    const deferredVoice = {
-      ...VOICE,
-      url: "https://cdn.example.com/deferred-voice-note.webm",
-    }
-
-    const { rerender } = render(
-      <ChatVoiceAttachment voice={deferredVoice} deferHeavyContent />
-    )
-
-    expect(document.querySelector("audio")).not.toBeInTheDocument()
-    expect(fetchMock).not.toHaveBeenCalled()
-    expect(screen.getByTestId("chat-voice-attachment")).toHaveAttribute(
-      "aria-busy",
-      "true"
-    )
-    expect(
-      screen.getByRole("group", { name: "Voice note" })
-    ).toBeInTheDocument()
-
-    rerender(
-      <ChatVoiceAttachment voice={deferredVoice} deferHeavyContent={false} />
-    )
-
-    expect(document.querySelector("audio")).toHaveAttribute(
-      "src",
-      deferredVoice.url
-    )
-    await waitFor(() => expect(decodeAudioData).toHaveBeenCalledOnce())
-  })
-
   it("renders the audio element and the WhatsApp-style waveform bars", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const audio = document.querySelector("audio")
@@ -234,7 +187,7 @@ describe("ChatVoiceAttachment", () => {
     expect(pill).toHaveTextContent("1x")
   })
 
-  it("matches the bubble surface: mine grey, others bordered white", () => {
+  it("matches the neutral bubble defaults outside a transcript message", () => {
     render(<ChatVoiceAttachment voice={VOICE} isMine />)
     expect(screen.getByTestId("chat-voice-attachment").className).toContain(
       "bg-f1-background-tertiary"
@@ -243,6 +196,20 @@ describe("ChatVoiceAttachment", () => {
     render(<ChatVoiceAttachment voice={VOICE} isMine={false} />)
     const cards = screen.getAllByTestId("chat-voice-attachment")
     expect(cards[1].className).toContain("border-f1-border-secondary")
+  })
+
+  it("applies a sender-aware surface to voice content", () => {
+    const surfaceClassName = "bg-[color:orange]"
+    const content = render(
+      <ChatVoiceAttachment voice={VOICE} surfaceClassName={surfaceClassName} />
+    )
+    expect(screen.getByTestId("chat-voice-attachment")).toHaveClass(
+      surfaceClassName
+    )
+    expect(screen.getByTestId("chat-voice-attachment-shell")).not.toHaveClass(
+      surfaceClassName
+    )
+    content.unmount()
   })
 
   it("applies the bubble's chained-corner classes", () => {

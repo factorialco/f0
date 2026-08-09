@@ -1,9 +1,11 @@
 import { type DragEvent, type ReactNode, useRef, useState } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
+
 import { ChatComposer } from "./components/ChatComposer"
+import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
-import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
 import {
@@ -11,6 +13,7 @@ import {
   ChatEmptyState,
   ChatError,
 } from "./components/ChatStates"
+import { ChatRenderConfigProvider } from "./providers/ChatRenderConfigProvider"
 import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "./types"
@@ -53,7 +56,7 @@ const ChatShell = ({
 
   return (
     <div
-      className="relative flex h-full min-h-0 w-full flex-col"
+      className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
       onDragEnter={(e) => {
         if (!isFileDrag(e)) return
         e.preventDefault()
@@ -104,7 +107,7 @@ const ChatShell = ({
       ) : messages.length > 0 ? (
         // `reconnecting` / `offline` render the transcript exactly like
         // `ready` — per-message states communicate connectivity, no banner.
-        <ChatMessagesContainer />
+        <ChatMessagesContainer key={channel.id} />
       ) : status === "ready" ? (
         <ChatEmptyState />
       ) : (
@@ -126,8 +129,14 @@ const ChatShell = ({
  * the {@link F0ChatRuntime} from a surrounding `F0ChatProvider`. Panel controls
  * (fullscreen / close) are wired by the host so F0Chat stays transport-agnostic.
  */
-export const F0Chat = (props: F0ChatProps): ReactNode => (
-  <ChatUIProvider>
-    <ChatShell {...props} />
-  </ChatUIProvider>
-)
+export const F0Chat = (props: F0ChatProps): ReactNode => {
+  const reducedMotion = useReducedMotion()
+
+  return (
+    <ChatRenderConfigProvider reducedMotion={reducedMotion}>
+      <ChatUIProvider>
+        <ChatShell {...props} />
+      </ChatUIProvider>
+    </ChatRenderConfigProvider>
+  )
+}

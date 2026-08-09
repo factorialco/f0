@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import { useDeferredHeavyMount } from "../hooks/useDeferredHeavyMount"
+import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
 import { type F0ChatVoiceAttachment } from "../types"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
@@ -147,6 +147,7 @@ const ChatVoiceAttachmentContent = ({
   isMine = false,
   cornerClass = "rounded-xl",
   className,
+  surfaceClassName,
 }: {
   voice: F0ChatVoiceAttachment
   /** Picks the bubble-matching background (mine → tertiary, others → base). */
@@ -154,6 +155,8 @@ const ChatVoiceAttachmentContent = ({
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
   className?: string
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -229,97 +232,91 @@ const ChatVoiceAttachmentContent = ({
 
   return (
     <div
-      className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
+      className={cn(
+        // 320px by default, shrinking with the column when it doesn't fit.
+        // The fixed height is also used by the deferred placeholder.
+        "group/voice flex h-[58px] w-80 min-w-0 max-w-full items-center gap-2 p-3",
+        isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
+        cornerClass,
+        className,
+        surfaceClassName
+      )}
+      data-testid="chat-voice-attachment"
     >
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- voice note */}
+      <audio ref={audioRef} src={voice.url} preload="metadata" />
+
+      <div className="shrink-0" data-testid="chat-voice-toggle">
+        <ButtonInternal
+          variant="outline"
+          size="md"
+          hideLabel
+          label={
+            player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
+          }
+          icon={player.isPlaying ? SolidPause : SolidPlay}
+          onClick={handleToggle}
+        />
+      </div>
+
       <div
+        ref={barsRef}
+        onClick={handleSeek}
+        onKeyDown={handleSeekKeyDown}
+        // justify-between spreads the fixed set of bars across whatever width
+        // the card gets, so the waveform stays proportioned at any size.
         className={cn(
-          // 320px by default, shrinking with the column when it doesn't fit.
-          // The waveform below owns any remaining overflow at very small sizes.
-          "group/voice flex w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
-          isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
-          cornerClass,
-          className
+          "flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5 overflow-hidden rounded-sm",
+          focusRing("focus-visible:ring-inset")
         )}
-        data-testid="chat-voice-attachment"
+        role="slider"
+        tabIndex={0}
+        aria-label={i18n.audioPlayer.seek}
+        aria-valuemin={0}
+        aria-valuemax={Math.round(duration)}
+        aria-valuenow={Math.round(player.currentTime)}
+        data-testid="chat-voice-waveform"
       >
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- voice note */}
-        <audio ref={audioRef} src={voice.url} preload="metadata" />
-
-        <div className="shrink-0" data-testid="chat-voice-toggle">
-          <ButtonInternal
-            variant="outline"
-            size="md"
-            hideLabel
-            label={
-              player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
-            }
-            icon={player.isPlaying ? SolidPause : SolidPlay}
-            onClick={handleToggle}
+        {levels.map((level, i) => (
+          <span
+            key={i}
+            className={cn(
+              "w-0.5 min-w-px shrink rounded-full transition-colors",
+              // Played part reads darker, WhatsApp-style.
+              i / levels.length <= progress && progress > 0
+                ? "bg-f1-foreground"
+                : "bg-f1-foreground-tertiary"
+            )}
+            style={{ height: `${Math.round(level * 100)}%` }}
           />
-        </div>
+        ))}
+      </div>
 
-        <div
-          ref={barsRef}
-          onClick={handleSeek}
-          onKeyDown={handleSeekKeyDown}
-          // justify-between spreads the fixed set of bars across whatever width
-          // the card gets, so the waveform stays proportioned at any size.
-          className={cn(
-            "flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5 overflow-hidden rounded-sm",
-            focusRing("focus-visible:ring-inset")
-          )}
-          role="slider"
-          tabIndex={0}
-          aria-label={i18n.audioPlayer.seek}
-          aria-valuemin={0}
-          aria-valuemax={Math.round(duration)}
-          aria-valuenow={Math.round(player.currentTime)}
-          data-testid="chat-voice-waveform"
-        >
-          {levels.map((level, i) => (
-            <span
-              key={i}
-              className={cn(
-                "w-0.5 min-w-px shrink rounded-full transition-colors",
-                // Played part reads darker, WhatsApp-style.
-                i / levels.length <= progress && progress > 0
-                  ? "bg-f1-foreground"
-                  : "bg-f1-foreground-tertiary"
-              )}
-              style={{ height: `${Math.round(level * 100)}%` }}
-            />
-          ))}
-        </div>
-
-        {/* The duration and the speed pill share the trailing slot: hovering the
+      {/* The duration and the speed pill share the trailing slot: hovering the
           card (or tabbing into it) swaps the time for the speed control. Both
           have the same FIXED width so neither the ticking time ("0:04" → "0:12")
           nor the cycling rate ("1x" → "1.5x") resizes the waveform. */}
-        <div
-          className="relative w-12 shrink-0"
-          data-testid="chat-voice-trailing"
+      <div className="relative w-12 shrink-0" data-testid="chat-voice-trailing">
+        <span
+          className="inline-block w-full pr-2 text-end text-base font-medium tabular-nums text-f1-foreground-secondary group-focus-within/voice:invisible group-hover/voice:invisible"
+          data-testid="chat-voice-time"
         >
-          <span
-            className="inline-block w-full pr-2 text-end text-base font-medium tabular-nums text-f1-foreground-secondary group-focus-within/voice:invisible group-hover/voice:invisible"
-            data-testid="chat-voice-time"
-          >
-            {formatTime(
-              player.isPlaying || player.currentTime > 0
-                ? player.currentTime
-                : duration
-            )}
-          </span>
+          {formatTime(
+            player.isPlaying || player.currentTime > 0
+              ? player.currentTime
+              : duration
+          )}
+        </span>
 
-          <div className="pointer-events-none absolute inset-0 flex justify-end opacity-0 transition-opacity group-focus-within/voice:pointer-events-auto group-focus-within/voice:opacity-100 group-hover/voice:pointer-events-auto group-hover/voice:opacity-100 motion-reduce:transition-none">
-            <ButtonInternal
-              variant="ghost"
-              size="sm"
-              label={`${PLAYBACK_RATES[rateIndex]}x`}
-              aria-label={`${i18n.audioPlayer.playbackSpeed}: ${PLAYBACK_RATES[rateIndex]}x`}
-              onClick={handleCycleRate}
-              data-testid="chat-voice-rate"
-            />
-          </div>
+        <div className="pointer-events-none absolute inset-0 flex justify-end opacity-0 transition-opacity group-focus-within/voice:pointer-events-auto group-focus-within/voice:opacity-100 group-hover/voice:pointer-events-auto group-hover/voice:opacity-100 motion-reduce:transition-none">
+          <ButtonInternal
+            variant="ghost"
+            size="sm"
+            label={`${PLAYBACK_RATES[rateIndex]}x`}
+            aria-label={`${i18n.audioPlayer.playbackSpeed}: ${PLAYBACK_RATES[rateIndex]}x`}
+            onClick={handleCycleRate}
+            data-testid="chat-voice-rate"
+          />
         </div>
       </div>
     </div>
@@ -331,69 +328,45 @@ export const ChatVoiceAttachment = ({
   isMine = false,
   cornerClass = "rounded-xl",
   className,
-  deferHeavyContent = false,
+  surfaceClassName,
 }: {
   voice: F0ChatVoiceAttachment
   isMine?: boolean
   cornerClass?: string
   className?: string
-  /** Keep audio metadata and waveform decoding out of an active scroll. */
-  deferHeavyContent?: boolean
-}): ReactNode => {
-  const mountPlayer = useDeferredHeavyMount(true, deferHeavyContent)
-
-  if (mountPlayer) {
-    return (
-      <ChatVoiceAttachmentContent
-        voice={voice}
-        isMine={isMine}
-        cornerClass={cornerClass}
-        className={className}
-      />
-    )
-  }
-
-  return (
-    <ChatVoiceAttachmentPlaceholder
-      isMine={isMine}
-      cornerClass={cornerClass}
-      className={className}
-    />
-  )
-}
-
-const ChatVoiceAttachmentPlaceholder = ({
-  isMine,
-  cornerClass,
-  className,
-}: {
-  isMine: boolean
-  cornerClass: string
-  className?: string
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
+  const { ref, shouldMount } = useTranscriptHeavyPreview()
 
   return (
     <div
+      ref={ref}
+      data-testid="chat-voice-attachment-shell"
       className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
     >
-      <div
-        role="group"
-        aria-label={i18n.chat.voiceNote}
-        aria-busy="true"
-        className={cn(
-          "flex w-80 min-w-0 max-w-full items-center border border-solid border-f1-border-secondary p-3",
-          isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
-          cornerClass,
-          className
-        )}
-        data-testid="chat-voice-attachment"
-      >
-        <Skeleton
-          aria-hidden="true"
-          className="h-8 w-full animate-none rounded-sm"
+      {shouldMount ? (
+        <ChatVoiceAttachmentContent
+          voice={voice}
+          isMine={isMine}
+          cornerClass={cornerClass}
+          className={className}
+          surfaceClassName={surfaceClassName}
         />
-      </div>
+      ) : (
+        <Skeleton
+          role="status"
+          aria-busy={true}
+          aria-label={i18n.audioPlayer.label}
+          className={cn(
+            "h-[58px] w-80 max-w-full animate-none",
+            cornerClass,
+            surfaceClassName
+          )}
+          data-testid="chat-voice-placeholder"
+        />
+      )}
     </div>
   )
 }

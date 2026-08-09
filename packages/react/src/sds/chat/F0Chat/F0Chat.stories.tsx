@@ -1,16 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Chat } from "./F0Chat"
 import { ChatBubble } from "./components/ChatBubble"
+import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
+import { ChatUIProvider } from "./providers/ChatUIProvider"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
 import {
   f0ChatSenderColors,
@@ -25,6 +28,31 @@ const ana: F0ChatUser = {
   name: "Ana Torres",
   subtitle: "Product Designer",
 }
+
+const paletteRuntime: F0ChatRuntime = {
+  currentUserId: "me",
+  channel: {
+    id: "palette",
+    type: "group",
+    title: "Sender surface palette",
+    avatar: { type: "company", name: "Sender surface palette" },
+  },
+  status: "ready",
+  messages: [],
+  typingUsers: [],
+  hasMoreOlder: false,
+  loadingOlder: false,
+  unreadCount: 0,
+  firstUnreadId: null,
+  sendMessage: () => undefined,
+  retryMessage: () => undefined,
+  loadOlder: () => undefined,
+  toggleReaction: () => undefined,
+  deleteMessage: () => undefined,
+  onInputActivity: () => undefined,
+}
+
+const paletteVoiceUrl = "data:audio/wav;base64,UklGRg=="
 
 /** Gives F0Chat a bounded height so its internal `h-full` flex layout resolves. */
 const Frame = ({ children }: { children: ReactNode }): ReactNode => (
@@ -44,6 +72,27 @@ const BubblePalette = (): ReactNode => {
       body: "Incoming message",
       createdAt: "2026-01-01T12:00:00.000Z",
       isMine: false,
+      attachments: [
+        {
+          kind: "voice",
+          url: paletteVoiceUrl,
+          name: `${avatarColor}-voice.wav`,
+          mimeType: "audio/wav",
+          durationSeconds: 12,
+        },
+        {
+          kind: "file",
+          url: `#${avatarColor}`,
+          name: `${avatarColor}.bin`,
+          mimeType: "application/octet-stream",
+        },
+      ],
+      linkPreviews: [
+        {
+          url: `https://example.com/${avatarColor}`,
+          title: "Link preview",
+        },
+      ],
     }
 
     return { author, message }
@@ -54,33 +103,56 @@ const BubblePalette = (): ReactNode => {
     body: "My neutral bubble",
     createdAt: "2026-01-01T12:00:00.000Z",
     isMine: true,
+    attachments: [
+      {
+        kind: "voice",
+        url: paletteVoiceUrl,
+        name: "neutral-voice.wav",
+        mimeType: "audio/wav",
+        durationSeconds: 12,
+      },
+      {
+        kind: "file",
+        url: "#mine",
+        name: "neutral.bin",
+        mimeType: "application/octet-stream",
+      },
+    ],
+    linkPreviews: [
+      { url: "https://example.com/mine", title: "Neutral link preview" },
+    ],
   }
 
   const palette = (
     <div className="grid grid-cols-4 gap-2">
       {messages.map(({ author, message }) => (
-        <ChatBubble
-          key={message.id}
-          message={message}
-          author={author}
-          isMine={false}
-        />
+        <div key={message.id} className="flex flex-col items-start gap-1">
+          <ChatMessageAttachments message={message} isMine={false} />
+          <ChatBubble message={message} author={author} isMine={false} />
+        </div>
       ))}
-      <ChatBubble message={ownMessage} isMine />
+      <div className="flex flex-col items-end gap-1">
+        <ChatMessageAttachments message={ownMessage} isMine />
+        <ChatBubble message={ownMessage} isMine />
+      </div>
     </div>
   )
 
   return (
-    <div className="grid w-full max-w-[1440px] grid-cols-1 gap-4 xl:grid-cols-2">
-      <div className="rounded-lg bg-f1-background p-4 text-f1-foreground">
-        <h3 className="mb-3 text-base font-medium">Light</h3>
-        {palette}
-      </div>
-      <div className="dark rounded-lg bg-f1-background p-4 text-f1-foreground">
-        <h3 className="mb-3 text-base font-medium">Dark</h3>
-        {palette}
-      </div>
-    </div>
+    <F0ChatProvider runtime={paletteRuntime}>
+      <ChatUIProvider>
+        <div className="grid w-full max-w-[1440px] grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="rounded-lg bg-f1-background p-4 text-f1-foreground">
+            <h3 className="mb-3 text-base font-medium">Light</h3>
+            {palette}
+          </div>
+          <div className="dark rounded-lg bg-f1-background p-4 text-f1-foreground">
+            <h3 className="mb-3 text-base font-medium">Dark</h3>
+            {palette}
+          </div>
+        </div>
+      </ChatUIProvider>
+    </F0ChatProvider>
   )
 }
 
@@ -824,6 +896,23 @@ const VideoConversation = (): ReactNode => {
   )
 }
 
+const ColdStartVideoConversation = (): ReactNode => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  if (isOpen) return <VideoConversation />
+
+  return (
+    <div className="flex h-[680px] items-center justify-center">
+      <ButtonInternal
+        variant="neutral"
+        size="md"
+        label="Open cold conversation"
+        onClick={() => setIsOpen(true)}
+      />
+    </div>
+  )
+}
+
 const meta = {
   title: "F0Chat",
   component: F0Chat,
@@ -870,38 +959,66 @@ export const Snapshot: Story = {
         <VideoConversation />
       </section>
       <section className="flex w-fit flex-col gap-2">
-        <h2 className="text-lg font-medium">Sender bubble palette</h2>
+        <h2 className="text-lg font-medium">Sender surface palette</h2>
         <BubblePalette />
       </section>
     </div>
   ),
   parameters: withSnapshot({}),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const defaultChat = within(canvas.getByTestId("snapshot-default-chat"))
-    const composer = defaultChat.getByRole("combobox", {
-      name: /write something here/i,
+    await step("Open emoji autocomplete", async () => {
+      const defaultChat = within(canvas.getByTestId("snapshot-default-chat"))
+      const composer = defaultChat.getByRole("combobox", {
+        name: /write something here/i,
+      })
+      await userEvent.clear(composer)
+      await userEvent.type(composer, ":smil")
+      await expect(
+        defaultChat.getByRole("listbox", { name: "Add emoji" })
+      ).toBeVisible()
     })
-    await userEvent.clear(composer)
-    await userEvent.type(composer, ":smil")
-    await expect(
-      defaultChat.getByRole("listbox", { name: "Add emoji" })
-    ).toBeVisible()
 
-    const compactVoice = within(canvas.getByTestId("snapshot-compact-voice"))
-    await expect(
-      await compactVoice.findByTestId("chat-voice-attachment")
-    ).toBeVisible()
+    await step("Render the compact voice attachment", async () => {
+      const compactVoiceSection = canvas.getByTestId("snapshot-compact-voice")
+      const compactVoice = within(compactVoiceSection)
+      compactVoiceSection.scrollIntoView({ block: "center" })
+      await waitFor(
+        () =>
+          expect(
+            compactVoice.getByTestId("chat-voice-attachment")
+          ).toBeVisible(),
+        { timeout: 15_000 }
+      )
+    })
 
-    const documents = within(canvas.getByTestId("snapshot-documents"))
-    await expect(
-      await documents.findAllByTestId("chat-document-attachment")
-    ).not.toHaveLength(0)
+    await step("Render document snapshots", async () => {
+      const documents = within(canvas.getByTestId("snapshot-documents"))
+      canvas
+        .getByTestId("snapshot-documents")
+        .scrollIntoView({ block: "center" })
+      await expect(
+        await documents.findAllByTestId("chat-document-attachment")
+      ).not.toHaveLength(0)
+    })
 
-    const videos = within(canvas.getByTestId("snapshot-videos"))
-    await expect(
-      await videos.findAllByTestId("chat-video-attachment")
-    ).not.toHaveLength(0)
+    await step("Settle the stable video players", async () => {
+      const videos = within(canvas.getByTestId("snapshot-videos"))
+      canvas.getByTestId("snapshot-videos").scrollIntoView({ block: "center" })
+      const videoCards = await videos.findAllByTestId("chat-video-attachment")
+      await expect(videoCards).not.toHaveLength(0)
+      await waitFor(
+        () => {
+          for (const card of videoCards) {
+            expect(card).not.toHaveAttribute("aria-busy")
+            expect(
+              within(card).getByTestId("chat-video-placeholder")
+            ).toHaveClass("opacity-0")
+          }
+        },
+        { timeout: 15_000 }
+      )
+    })
   },
 }
 
@@ -1018,6 +1135,93 @@ export const WithDocumentAttachments: Story = {
 export const WithVideoAttachments: Story = {
   name: "Video attachments",
   render: () => <VideoConversation />,
+  play: async ({ canvasElement, step }) => {
+    await step(
+      "Show stable video players after media becomes ready",
+      async () => {
+        const canvas = within(canvasElement)
+        const cards = await canvas.findAllByTestId("chat-video-attachment")
+
+        await waitFor(
+          () => {
+            for (const card of cards) {
+              expect(card).not.toHaveAttribute("aria-busy")
+              expect(card).toHaveClass(
+                "aspect-video",
+                "w-[36rem]",
+                "max-w-full"
+              )
+              expect(
+                within(card).getByTestId("chat-video-placeholder")
+              ).toHaveClass("pointer-events-none", "opacity-0")
+            }
+          },
+          { timeout: 15_000 }
+        )
+      }
+    )
+  },
+}
+
+/** First-mount regression: opening the conversation exercises the real
+ * virtualized transcript and the initial video-preview lifecycle together. */
+export const ColdStartVideoAttachments: Story = {
+  name: "Cold-start video attachments",
+  tags: ["chat-scroll-regression"],
+  render: () => <ColdStartVideoConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Open a conversation with video previews", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: "Open cold conversation" })
+      )
+    })
+
+    await step("Reveal the transcript after initial positioning", async () => {
+      const message = await canvas.findByText(
+        "Two cuts from today’s walkthrough",
+        undefined,
+        { timeout: 15_000 }
+      )
+      await waitFor(() => expect(message).toBeVisible(), { timeout: 15_000 })
+    })
+
+    await step("Keep the video cards at their final dimensions", async () => {
+      const cards = await canvas.findAllByTestId("chat-video-attachment")
+      const initialRects = cards.map((card) => card.getBoundingClientRect())
+
+      for (const card of cards) {
+        await expect(card).toHaveClass(
+          "aspect-video",
+          "w-[36rem]",
+          "max-w-full"
+        )
+      }
+
+      await waitFor(
+        () => {
+          for (const card of cards) {
+            expect(card).not.toHaveAttribute("aria-busy")
+            expect(
+              within(card).getByTestId("chat-video-placeholder")
+            ).toHaveClass("opacity-0")
+          }
+        },
+        { timeout: 15_000 }
+      )
+
+      cards.forEach((card, index) => {
+        const finalRect = card.getBoundingClientRect()
+        expect(
+          Math.abs(finalRect.width - initialRects[index].width)
+        ).toBeLessThanOrEqual(1)
+        expect(
+          Math.abs(finalRect.height - initialRects[index].height)
+        ).toBeLessThanOrEqual(1)
+      })
+    })
+  },
 }
 
 /** Resilient sending under a bad connection: instant bubble, delayed sending
