@@ -100,6 +100,12 @@ export type F0RichTextEditorHandle = {
   focus: () => void
   setError: (error: string | null) => void
   setContent: (content: string) => void
+  /**
+   * Inserts content at the current cursor position (restoring the last
+   * selection if the editor lost focus, e.g. to a dropdown). Falls back to
+   * the end of the document when the editor was never focused.
+   */
+  insertContent: (content: string) => void
 }
 
 export interface F0RichTextEditorSkeletonProps {
@@ -237,11 +243,19 @@ const F0RichTextEditorComponent = forwardRef<
     ]
   )
 
+  // Whether the editor ever held focus: TipTap keeps the last selection after
+  // blur (so inserts can target it), but a never-focused editor's default
+  // selection is the document start — not a position the user ever chose.
+  const hasEverBeenFocusedRef = useRef(false)
+
   const editor = useEditor({
     extensions,
     content: initialEditorState?.content || "",
     editable: !disabled,
     onUpdate: onEditorUpdate,
+    onFocus: () => {
+      hasEverBeenFocusedRef.current = true
+    },
     // Give the contenteditable an explicit textbox role and an accessible name;
     // without this the editor is unnamed for screen readers and role+name queries.
     editorProps: {
@@ -345,12 +359,24 @@ const F0RichTextEditorComponent = forwardRef<
         filesConfig.onFiles([])
       }
     },
-    focus: () => editor?.commands.focus(),
+    focus: () => {
+      // Mark it here too: under jsdom (and if the DOM focus is swallowed)
+      // the editor's onFocus event never fires for programmatic focus.
+      hasEverBeenFocusedRef.current = true
+      editor?.commands.focus()
+    },
     setError: (errorMessage: string | null) => {
       enhance.setError(errorMessage)
     },
     setContent: (content: string) => {
       editor?.commands.setContent(content)
+    },
+    insertContent: (content: string) => {
+      editor
+        ?.chain()
+        .focus(hasEverBeenFocusedRef.current ? null : "end")
+        .insertContent(content)
+        .run()
     },
   }))
 
