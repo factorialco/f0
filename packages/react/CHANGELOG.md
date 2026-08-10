@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.12.0](https://github.com/factorialco/f0/compare/f0-react-v6.11.2...f0-react-v6.12.0) (2026-08-10)
+
+
+### Features
+
+* **OneDataCollection:** add highlighted column and header group ([#5008](https://github.com/factorialco/f0/issues/5008)) ([d20a95b](https://github.com/factorialco/f0/commit/d20a95b9a7e68fe067eb279092012b9b6a9b9d5c))
+
 ## [6.11.2](https://github.com/factorialco/f0/compare/f0-react-v6.11.1...f0-react-v6.11.2) (2026-08-07)
 
 
