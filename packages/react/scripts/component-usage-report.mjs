@@ -165,5 +165,13 @@ export function computeUsageReport({ full = false } = {}) {
     total: rows.length,
     rows,
     unused: rows.filter((row) => row.unused),
+    /**
+     * Built, prototyped, not shipped. A different signal from "unused": the
+     * product hasn't adopted it *yet*, and a prototype is usually where
+     * adoption starts — so these are worth watching rather than deprecating.
+     */
+    onlyInPrototypes: rows.filter(
+      (row) => row.productFiles === 0 && row.prototypes.length > 0
+    ),
   }
 }

@@ -28,6 +28,7 @@ interface Report {
   total: number
   rows: Row[]
   unused: Row[]
+  onlyInPrototypes: Row[]
   sources: {
     product:
       | { available: true; scope: string; importingFiles: number }
@@ -136,6 +137,8 @@ export function UnusedComponents() {
         {loading && <em>Rescanning…</em>}
       </p>
 
+      <h2>Used nowhere ({report.unused.length})</h2>
+
       {[...byZone]
         .sort((a, b) => b[1].length - a[1].length)
         .map(([zone, rows]) => (
@@ -169,6 +172,46 @@ export function UnusedComponents() {
             </table>
           </section>
         ))}
+
+      <h2>Only in prototypes ({report.onlyInPrototypes.length})</h2>
+      <p>
+        Built and prototyped, but no product code imports them yet. Unlike the
+        list above these aren&apos;t deprecation candidates — a Composer
+        prototype is usually where adoption starts, so expect them in{" "}
+        <code>factorial</code> or <code>factorial-it</code> next.
+      </p>
+
+      {report.onlyInPrototypes.length === 0 ? (
+        <p>
+          <em>
+            None right now — every component a prototype uses is already in the
+            product.
+          </em>
+        </p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Maturity</th>
+              <th>Prototypes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.onlyInPrototypes
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((row) => (
+                <tr key={row.name}>
+                  <td>
+                    <code>{row.name}</code>
+                  </td>
+                  <td>{row.status}</td>
+                  <td>{row.prototypes.join(", ")}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      )}
 
       <p>
         <small>

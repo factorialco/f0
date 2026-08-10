@@ -24,7 +24,7 @@ const asJson = args.has("--json")
 const showUsed = args.has("--used")
 
 const report = computeUsageReport({ full })
-const { rows, unused, sources } = report
+const { rows, unused, onlyInPrototypes, sources } = report
 
 if (asJson) {
   console.log(
@@ -33,6 +33,7 @@ if (asJson) {
         sources,
         total: report.total,
         unused: showUsed ? undefined : unused,
+        onlyInPrototypes: showUsed ? undefined : onlyInPrototypes,
         components: showUsed ? rows : undefined,
       },
       null,
@@ -108,6 +109,18 @@ for (const [zone, zoneRows] of [...byZone].sort(
   for (const row of zoneRows.sort((a, b) => a.name.localeCompare(b.name))) {
     console.log(`    ${row.name.padEnd(36)} ${dim(row.storyFile ?? "")}`)
   }
+}
+
+// Prototyped but not shipped: worth watching, not deprecating.
+console.log("")
+console.log(
+  bold(`${onlyInPrototypes.length} are used only in Composer prototypes`) +
+    ` ${dim("(no product code imports them yet)")}`
+)
+for (const row of onlyInPrototypes.sort((a, b) =>
+  a.name.localeCompare(b.name)
+)) {
+  console.log(`    ${row.name.padEnd(36)} ${dim(row.prototypes.join(", "))}`)
 }
 
 console.log("")
