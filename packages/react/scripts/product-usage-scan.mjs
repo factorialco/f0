@@ -200,9 +200,14 @@ export function resolveProductRepoRoot(env = process.env) {
 /**
  * Locates a checkout of `factorialco/factorial-it`, or `null`. It ships its
  * own frontend against f0, so its imports count as product usage too.
+ *
+ * Recognised by `.git` rather than a manifest: unlike factorial it has no
+ * root `package.json` (its frontend lives under `frontend/`), and a marker
+ * that isn't there means a perfectly good checkout reads as missing — and
+ * every "Clone" click then fails on the directory it already cloned.
  */
 export function resolveItRepoRoot(env = process.env) {
-  return resolveSiblingRepo("factorial-it", "package.json", env.F0_IT_REPO)
+  return resolveSiblingRepo("factorial-it", ".git", env.F0_IT_REPO)
 }
 
 /** Locates a checkout of `factorialco/factorial-composer`, or `null`. */
@@ -787,6 +792,18 @@ export async function runRepoAction(id, action) {
     if (existing) return finish("done", `Already cloned at ${existing}`)
 
     const target = join(checkoutParent(), id)
+
+    // A directory can be there without the resolver recognising it: an
+    // interrupted clone, or a checkout this scanner doesn't know how to spot.
+    // Either way `git clone` would fail with a fatal nobody can act on.
+    if (existsSync(target)) {
+      return existsSync(join(target, ".git"))
+        ? finish("done", `Already cloned at ${target}`)
+        : finish(
+            "error",
+            `${target} already exists and isn't a checkout — remove it, then clone again`
+          )
+    }
     // Blobless clone: full history for tooling, without paying for every blob
     // ever committed. Still a normal checkout to work in afterwards.
     const result = await runGit([

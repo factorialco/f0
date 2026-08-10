@@ -137,7 +137,9 @@ describe("scanProductUsage", () => {
   })
 
   test("degrades gracefully without a product checkout", () => {
-    const result = scanProductUsage({ repoRoot: null })
+    // Both roots pinned to null: whether this machine happens to have the
+    // repos checked out must not change the result.
+    const result = scanProductUsage({ repoRoot: null, itRepoRoot: null })
 
     expect(result.available).toBe(false)
     if (result.available) throw new Error("expected an unavailable result")

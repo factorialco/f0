@@ -174,6 +174,28 @@ function ProductSection({
   )
 }
 
+/**
+ * Runs one action at a time and reports which one is in flight, so a click
+ * can't be repeated while the work it started is still running.
+ */
+function usePendingAction() {
+  const [pending, setPending] = React.useState<string | null>(null)
+
+  const run = React.useCallback(
+    async (name: string, work: () => Promise<unknown>) => {
+      setPending(name)
+      try {
+        await work()
+      } finally {
+        setPending(null)
+      }
+    },
+    []
+  )
+
+  return { pending, run }
+}
+
 /** A small button styled for the dark tooltip surface. */
 function TooltipButton({
   onClick,
@@ -219,6 +241,8 @@ function MissingRepos({
   missing: ProductUsageData["missing"]
   actions: UsageResult["actions"]
 }) {
+  const { pending, run } = usePendingAction()
+
   if (missing.length === 0) return null
 
   return (
@@ -233,22 +257,27 @@ function MissingRepos({
         ))}{" "}
         — no local checkout.
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className="mt-2 flex flex-col gap-2">
         {missing.map((repo) => {
           const status = actions?.[repo.id]
+          const cloning = pending === repo.id || status?.state === "running"
           return (
             <span key={repo.id} className="flex items-center gap-2">
               <TooltipButton
-                onClick={() => void runRepoAction(repo.id, "clone")}
-                disabled={status?.state === "running"}
+                onClick={() =>
+                  void run(repo.id, () => runRepoAction(repo.id, "clone"))
+                }
+                disabled={cloning}
               >
-                {status?.state === "running"
-                  ? `Cloning ${repo.id}…`
-                  : `Clone ${repo.id}`}
+                {cloning ? `Cloning ${repo.id}…` : `Clone ${repo.id}`}
               </TooltipButton>
-              {status && status.state !== "running" && (
-                <span className="opacity-80">{status.message}</span>
-              )}
+              <span className="opacity-80">
+                {cloning
+                  ? "This takes a few minutes — the tag updates when it lands."
+                  : status && status.state !== "running"
+                    ? status.message
+                    : null}
+              </span>
             </span>
           )
         })}
@@ -267,11 +296,21 @@ function MissingRepos({
 function RefreshActions({
   repos,
   actions,
+  generatedAt,
 }: {
   repos: ProductUsageData["repos"]
   actions: UsageResult["actions"]
+  generatedAt: string
 }) {
-  const pulling = repos.some((repo) => actions?.[repo.id]?.state === "running")
+  const { pending, run } = usePendingAction()
+
+  // Either the button is mid-click, or the server still has git running from
+  // an earlier one (a pull outlives the request that started it).
+  const pullingOnServer = repos.some(
+    (repo) => actions?.[repo.id]?.state === "running"
+  )
+  const busy = pending !== null || pullingOnServer
+
   const results = repos
     .map((repo) => [repo.id, actions?.[repo.id]] as const)
     .filter(([, status]) => status && status.state !== "running")
@@ -280,14 +319,34 @@ function RefreshActions({
     <div className="mt-3 border-0 border-t border-solid border-f1-border-inverse pt-2 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <TooltipButton
-          onClick={() => {
-            for (const repo of repos) void runRepoAction(repo.id, "pull")
-          }}
-          disabled={pulling}
+          disabled={busy}
+          onClick={() =>
+            void run("pull", () =>
+              // Sequential: two gits writing at once, and the second failing
+              // on a lock, helps nobody.
+              repos.reduce(
+                (queue, repo) =>
+                  queue.then(() => runRepoAction(repo.id, "pull")),
+                Promise.resolve()
+              )
+            )
+          }
         >
-          {pulling ? "Pulling…" : "Pull latest"}
+          {pending === "pull" || pullingOnServer ? "Pulling…" : "Pull latest"}
         </TooltipButton>
-        <TooltipButton onClick={() => void rescan()}>Rescan</TooltipButton>
+        <TooltipButton
+          disabled={busy}
+          onClick={() => void run("rescan", rescan)}
+        >
+          {pending === "rescan" ? "Rescanning…" : "Rescan"}
+        </TooltipButton>
+        <span className="opacity-70">
+          {pending === "pull" || pullingOnServer
+            ? `Fetching ${plural(repos.length, "repo")}…`
+            : pending === "rescan"
+              ? "Reading the repos again…"
+              : `Scanned at ${new Date(generatedAt).toLocaleTimeString()}`}
+        </span>
       </div>
       {results.length > 0 && (
         <ul className="m-0 mt-2 list-none space-y-1 p-0 opacity-70">
@@ -372,7 +431,11 @@ function UsageDetails({
         />
       )}
       {product && (
-        <RefreshActions repos={product.repos} actions={result.actions} />
+        <RefreshActions
+          repos={product.repos}
+          actions={result.actions}
+          generatedAt={result.generatedAt}
+        />
       )}
     </div>
   )
@@ -450,11 +513,27 @@ export function ProductUsageTag({
         ? "Only used internally in F0"
         : "Not used in the product"
 
+  // A clone runs for minutes, and the tooltip is only open while you hover.
+  // Put it on the tag itself so starting one doesn't look like nothing
+  // happened.
+  const running = Object.entries(result.actions ?? {}).find(
+    ([, status]) => status.state === "running"
+  )
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="sb-unstyled inline-flex cursor-help align-middle">
-          <F0TagRaw text={label} icon={LayersFront} />
+        <span
+          className={`sb-unstyled inline-flex align-middle ${running ? "cursor-progress" : "cursor-help"}`}
+        >
+          <F0TagRaw
+            text={
+              running
+                ? `${running[1].action === "clone" ? "Cloning" : "Pulling"} ${running[0]}…`
+                : label
+            }
+            icon={LayersFront}
+          />
         </span>
       </TooltipTrigger>
       <TooltipContent
