@@ -13,6 +13,7 @@ import {
   ChatEmptyState,
   ChatError,
 } from "./components/ChatStates"
+import { useComposerOverlayLayout } from "./hooks/useComposerOverlayLayout"
 import { ChatRenderConfigProvider } from "./providers/ChatRenderConfigProvider"
 import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
@@ -47,6 +48,8 @@ const ChatShell = ({
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
+  const canSend = capabilities?.canSend !== false
+  const { shellRef, composerOverlayRef } = useComposerOverlayLayout(canSend)
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
   // entire surface and a drop anywhere attaches to the composer. Stop file-drag
@@ -56,6 +59,7 @@ const ChatShell = ({
 
   return (
     <div
+      ref={shellRef}
       className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
       onDragEnter={(e) => {
         if (!isFileDrag(e)) return
@@ -116,7 +120,15 @@ const ChatShell = ({
         <ChatConnecting />
       )}
       {/* A read-only channel (frozen, announcements…) hides the composer. */}
-      {capabilities?.canSend !== false && <ChatComposer />}
+      {canSend && (
+        <div
+          ref={composerOverlayRef}
+          data-testid="chat-composer-overlay"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
+        >
+          <ChatComposer />
+        </div>
+      )}
       <ChatDropOverlay visible={dragging} />
       <ChatImagePreview />
       <ChatDocumentPreview />

@@ -31,6 +31,7 @@ import {
 } from "../types"
 import { formatClock } from "../utils/natural-time"
 import { messageSurfaceColorClass } from "../utils/sender-color"
+import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -107,6 +108,33 @@ describe("F0Chat", () => {
     expect(screen.getAllByText("María José").length).toBeGreaterThan(0)
     expect(screen.getByText("Hello there")).toBeInTheDocument()
     expect(screen.getByText("Hi back")).toBeInTheDocument()
+  })
+
+  it("floats the composer over the transcript and reserves its measured height", () => {
+    renderChat(makeRuntime())
+
+    const overlay = screen.getByTestId("chat-composer-overlay")
+    expect(overlay).toHaveClass(
+      "absolute",
+      "bottom-0",
+      "z-20",
+      "pointer-events-none"
+    )
+    expect(overlay.firstElementChild).toHaveClass("pointer-events-none")
+    const composer = screen.getByPlaceholderText(/write something here/i)
+    expect(composer).toBeVisible()
+    expect(composer.closest(".pointer-events-auto")).toBeInTheDocument()
+    expect(screen.getByTestId("chat-composer-surface")).toHaveClass(
+      "bg-f1-background/90",
+      "shadow-md",
+      "backdrop-blur-[2px]"
+    )
+    expect(screen.getByTestId("chat-bottom-gap").style.height).toContain(
+      CHAT_COMPOSER_HEIGHT_PROPERTY
+    )
+    expect(
+      screen.getByTestId("chat-message-viewport").style.scrollPaddingBottom
+    ).toContain(CHAT_COMPOSER_HEIGHT_PROPERTY)
   })
 
   it("renders a system item as a centered row with person tags and no delivery footer", () => {

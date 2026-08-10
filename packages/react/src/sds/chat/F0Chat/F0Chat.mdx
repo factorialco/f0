@@ -307,6 +307,8 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the same compact square footprint with a file-type icon.
 - WHEN a pending composer attachment is removed or its upload fails → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
 - WHEN several previews exceed the composer width → THEN F0 keeps them in one focusable horizontal strip instead of growing the composer through the transcript.
+- WHEN the transcript scrolls → THEN the composer remains floating above it with a subtle shadow and translucent backdrop blur, messages pass behind its surface, and a measured footer keeps the final message fully reachable.
+- WHEN the composer changes height because of text, reply or edit context, errors, or attachments → THEN the transcript footer and jump-to-bottom control follow its measured edge without shifting the visible messages.
 - WHEN a completed file has a video MIME type or browser video extension → THEN F0 renders it as an inline F0VideoPlayer with playback and fullscreen controls.
 - WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
 - WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.

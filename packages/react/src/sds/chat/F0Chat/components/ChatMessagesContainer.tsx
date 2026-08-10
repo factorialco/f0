@@ -30,6 +30,7 @@ import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { isUserMessage, LATEST } from "../types"
+import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { type TypingEntryState } from "./ChatTypingBubble"
@@ -86,11 +87,16 @@ const ChatVirtuosoScroller = forwardRef<
         // Virtuoso already retains its own anchor when measured rows change.
         // Native scroll anchoring would apply a second correction when the
         // Radix measure strip grows, which is perceived as a jump.
-        style={{ ...style, overflowAnchor: "none" }}
+        style={{
+          ...style,
+          overflowAnchor: "none",
+          scrollPaddingBottom: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)`,
+        }}
         // Radix wraps children in a `display: table` div — force block so the
         // list lays out full-width (same fix as @/ui/scrollarea).
         className="size-full [&>div]:!block"
         {...props}
+        data-testid="chat-message-viewport"
       >
         {/* Scrollbar measure strip. Radix sizes the thumb only when the
             ResizeObserver on its content wrapper fires — but Virtuoso's inner
@@ -160,7 +166,12 @@ const ChatVirtuosoItem = forwardRef<
 
 /** Breathing room between the last row and the transcript's bottom edge —
  * rendered as Virtuoso's Footer so scrollHeight and end-alignment include it. */
-const ChatBottomGap = (): ReactNode => <div className="h-6" />
+const ChatBottomGap = (): ReactNode => (
+  <div
+    data-testid="chat-bottom-gap"
+    style={{ height: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)` }}
+  />
+)
 
 const CHAT_VIRTUOSO_COMPONENTS = {
   Scroller: ChatVirtuosoScroller,

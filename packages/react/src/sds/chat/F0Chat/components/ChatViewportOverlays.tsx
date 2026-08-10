@@ -6,6 +6,7 @@ import { ArrowDown } from "@/icons/app"
 import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { DateTimeSeparator } from "./DateTimeSeparator"
 
@@ -69,7 +70,9 @@ export const ChatViewportOverlays = ({
       <AnimatePresence>
         {showJumpButton && (
           <motion.div
-            className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center"
+            data-testid="chat-jump-overlay"
+            className="pointer-events-none absolute inset-x-0 flex justify-center"
+            style={{ bottom: `calc(${CHAT_COMPOSER_HEIGHT} + 0.75rem)` }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}

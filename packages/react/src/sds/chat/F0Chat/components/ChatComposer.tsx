@@ -670,10 +670,13 @@ export const ChatComposer = (): ReactNode => {
   const placeholder = i18n.chat.placeholder
 
   return (
-    <div className="shrink-0 p-4 pt-0">
+    <div className="pointer-events-none shrink-0 p-4 pt-0">
       {/* Centered, width-capped to match the message column in fullscreen. */}
-      <div className="mx-auto w-full max-w-content">
-        <div className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background">
+      <div className="pointer-events-auto mx-auto w-full max-w-content">
+        <div
+          data-testid="chat-composer-surface"
+          className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background/95 shadow-md backdrop-blur-[2px]"
+        >
           <ChatEmojiAutocomplete
             isOpen={emojiAutocomplete.isOpen}
             results={emojiAutocomplete.results}
@@ -696,8 +699,8 @@ export const ChatComposer = (): ReactNode => {
           />
           {/* Editing and replying are mutually exclusive — the edit chip takes
               the reply chip's slot while you're editing a message. The chip
-              unfolds/collapses (height + fade); the transcript follows the
-              composer edge continuously via its ResizeObserver re-pin.
+              unfolds/collapses (height + fade); the floating transcript gap
+              follows the composer edge through its shared ResizeObserver.
               popLayout runs a reply→edit swap's exit and enter concurrently. */}
           <AnimatePresence initial={false} mode="popLayout">
             {isEditing && editingMessage ? (
