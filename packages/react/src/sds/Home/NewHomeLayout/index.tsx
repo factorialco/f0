@@ -112,7 +112,8 @@ export interface NewHomeLayoutProps {
   /**
    * How far the page surface reaches past this layout's box, in px — set it to
    * the page's own gutter so the gradient runs to the window's edges instead of
-   * stopping at that padding.
+   * stopping at that padding. The layout's HEIGHT is not its business: that
+   * comes from the box the page gives it.
    */
   bleed?: number
   /**
@@ -312,7 +313,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         style={
           {
             "--home-aside-w": `${railWidth}px`,
-            height: `calc(100svh - ${2 * bleed}px)`,
+            // FILL THE BOX THE PAGE GIVES US, not the window. This used to be
+            // `calc(100svh - 2 * bleed)`, which assumed the layout's box WAS the
+            // viewport minus its own gutter — true only while nothing else is on
+            // the page. Put anything above it (the frame's banner row, a page
+            // header) and the layout still claimed the whole window: it overshot
+            // by exactly that element's height, so the page itself scrolled and
+            // the rail's bottom fell past the window's edge — the very overscroll
+            // the columns' own scrolling exists to avoid.
+            height: "100%",
+            // The guard for a page that hands us NO definite height: `100%` then
+            // resolves to auto, and without a cap the layout would grow with its
+            // content and the columns would never scroll. The window (less our
+            // gutter) is the most it can usefully be.
+            maxHeight: `calc(100svh - ${2 * bleed}px)`,
             // The column template lives HERE rather than in a class: it is the
             // same property Tailwind's `grid-cols-*` sets, so as a utility it
             // lost the specificity contest and the rail silently fell out of its

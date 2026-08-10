@@ -734,14 +734,33 @@ const Home = () => {
   )
 }
 
+/**
+ * The page-level strip the app puts above EVERYTHING — the frame's own `banner`
+ * row, over the sidebar and the content both, exactly where the
+ * "You are seeing X's company view" bar lives in production. Only the height
+ * probe below asks for it (`parameters.frameBanner`).
+ */
+const FrameBanner = () => (
+  <div className="flex h-12 flex-row items-center justify-between gap-4 bg-f1-background-info px-4 text-f1-foreground">
+    <span>You are seeing Factorial&apos;s company view.</span>
+    <span className="flex flex-row items-center gap-1.5 font-medium">
+      Factorial Professionals
+      <F0Icon icon={ExternalLink} size="sm" />
+    </span>
+  </div>
+)
+
 const meta = {
   title: "Home/NewHomeLayout",
   component: NewHomeLayout,
   tags: ["autodocs", "experimental"],
   parameters: { layout: "fullscreen", docsFullWidth: true },
   decorators: [
-    (Story) => (
+    (Story, { parameters }) => (
       <ApplicationFrame
+        // The frame's top row, outside the layout entirely: it takes real height
+        // off the content area, which is what the height probe is testing.
+        banner={parameters.frameBanner ? <FrameBanner /> : undefined}
         sidebar={
           <Sidebar
             header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
@@ -769,6 +788,27 @@ type Story = StoryObj<typeof meta>
  * toggles the per-widget remove chrome.
  */
 export const Default: Story = {
+  render: () => <Home />,
+}
+
+/**
+ * A HEIGHT PROBE, not a layout to copy: the same Home with a 48px banner in the
+ * frame's own top row — the production "company view" strip — above the sidebar
+ * and the content both, entirely outside `NewHomeLayout`.
+ *
+ * That banner takes its 48px off the content area, so the layout has that much
+ * LESS room than in `Default`. Nothing about the page should move: the banner
+ * stays put, the sidebar still ends at the window's bottom edge, and the
+ * layout's two columns absorb the loss by scrolling a little more inside
+ * themselves.
+ *
+ * If instead the layout keeps sizing itself to the WINDOW rather than to the box
+ * it was given, it overshoots by the banner's height, and you can see it: the
+ * page starts scrolling as a whole, and the rail's bottom widget, the
+ * "+ Add widget" placeholder and the bottom gutter fall past the window's edge.
+ */
+export const BannerAboveLayout: Story = {
+  parameters: { frameBanner: true },
   render: () => <Home />,
 }
 
