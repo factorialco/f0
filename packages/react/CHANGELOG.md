@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.16.2](https://github.com/factorialco/f0/compare/f0-react-v6.16.1...f0-react-v6.16.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** keep rail widgets mounted when collapsing ([#5065](https://github.com/factorialco/f0/issues/5065)) ([8ce2349](https://github.com/factorialco/f0/commit/8ce234931e953d004be51c0b904e14d6dc1fa2a6))
+* **storybook:** show internal tag for unexported components ([#5048](https://github.com/factorialco/f0/issues/5048)) ([3675dbf](https://github.com/factorialco/f0/commit/3675dbf902a7f6d681cc8319a7bde77cb681d116))
+
 ## [6.16.1](https://github.com/factorialco/f0/compare/f0-react-v6.16.0...f0-react-v6.16.1) (2026-08-10)
 
 
