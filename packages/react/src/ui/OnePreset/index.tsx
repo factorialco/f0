@@ -54,7 +54,10 @@ const _Preset = ({
       onMouseEnter={hasActions ? () => setShowActions(true) : undefined}
       onMouseLeave={hasActions ? () => setShowActions(false) : undefined}
       className={cn(
-        "group flex cursor-default appearance-none items-center gap-2 rounded px-2.5 py-1.5 font-medium text-f1-foreground outline outline-1 outline-f1-border transition-all",
+        // `min-w-0` lets the pill shrink below its label when the row that
+        // holds it runs out of space, so the label ellipsizes instead of
+        // spilling out of the pill's box.
+        "group flex min-w-0 cursor-default appearance-none items-center gap-2 rounded px-2.5 py-1.5 font-medium text-f1-foreground outline outline-1 outline-f1-border transition-all",
         onClick &&
           "focus-within:ring-2 focus-within:ring-f1-border-selected focus-within:ring-offset-2",
         number && "pr-1.5",
@@ -69,7 +72,7 @@ const _Preset = ({
         checked={selected}
         onChange={() => onClick?.()}
       />
-      <span className="whitespace-nowrap">{label}</span>
+      <span className="min-w-0 truncate">{label}</span>
       {number !== undefined && (
         <Await resolve={number} fallback={<Skeleton className="h-4 w-4" />}>
           {(number) =>
