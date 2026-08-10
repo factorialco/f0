@@ -198,6 +198,7 @@ export function WidgetContainer({
         }
         fullHeight={widget.fullHeight}
         slots={widget.slots}
+        loading={widget.loading}
         slotRenderers={slotRenderers}
         ctx={ctx}
         draggable={drag?.draggable}
@@ -218,6 +219,7 @@ export function WidgetContainer({
               header={{ ...widget.header, link: undefined }}
               fullHeight={widget.fullHeight}
               slots={widget.slots}
+              loading={widget.loading}
               slotRenderers={slotRenderers}
               ctx={ctx}
             />

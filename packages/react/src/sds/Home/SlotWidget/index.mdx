@@ -24,6 +24,80 @@ instead of crashing.
 <Canvas of={SlotWidgetStories.AllSlots} />
 <Controls of={SlotWidgetStories.AllSlots} />
 
+## Loading
+
+`loading` swaps every slot's content for that visualization's **skeleton**,
+keeping the frame, the chrome and the seams — the card fills in rather than
+changing shape when the data lands.
+
+How many placeholder items a slot draws is its own **`expectedItemsCount`**:
+the widget declares its loading height instead of guessing at one. Both slot
+builders take it as a third argument, and it defaults to
+`DEFAULT_EXPECTED_ITEMS_COUNT` (3).
+
+```tsx
+<SlotWidget
+  header={{ title: "Team" }}
+  loading={isLoading}
+  slots={[
+    // The schema is static config, so it is known before the items are —
+    // that's what shapes the placeholder rows.
+    listSlot({ left: "person", descriptionRequired: true }, items, {
+      expectedItemsCount: 4,
+    }),
+    homeSlot("event-list", { events }, { expectedItemsCount: 2 }),
+  ]}
+/>
+```
+
+Each placeholder is drawn from what the slot already knows. A `list`'s schema
+decides whether its rows carry a left glyph (round for a person, square
+otherwise), whether they trail something, and — through the same prescriptive
+sizing the real rows use — whether they are one line or two. `maxVisibleItems`
+caps the placeholder the way it caps the list, and when more items are expected
+than it will show, the "View more" button is placed too.
+
+The widget is marked `aria-busy` while it loads, and the placeholders
+themselves are hidden from assistive tech — there is nothing in them to read.
+
+<Canvas of={SlotWidgetStories.AllLoadingSlots} />
+
+### Defining a widget's loading state
+
+The slots you pass while loading are the **same slots**, minus the data: keep
+each one's static config (a `list`'s schema), leave its items empty, and say
+how many are coming.
+
+```tsx
+const teamWidget = (people: Person[] | undefined): HomeWidgetItem => ({
+  id: "team",
+  header: { title: "Team" },
+  // The widget knows it is waiting; every slot draws its skeleton.
+  loading: people == null,
+  slots: [
+    listSlot({ left: "person", descriptionRequired: true }, people ?? [], {
+      // What the widget will hold — the page size, the API's count, or just
+      // what this widget always shows. It only decides the loading height.
+      expectedItemsCount: 5,
+    }),
+  ],
+})
+```
+
+`loading` lives on `HomeWidgetItem` as well as on `SlotWidget`, so a Home built
+from data gets it for free: `NewHomeLayout` and `WidgetContainer` pass it
+through to each widget they render. That means a rail can load widget by
+widget — each one flips as its own request lands — rather than all at once.
+
+```tsx
+<NewHomeLayout
+  rightWidgets={[teamWidget(people), eventsWidget(events)]}
+  slotRenderers={slotRenderers}
+/>
+```
+
+See `NewHomeLayout`'s **Loading** story for the whole rail in that state.
+
 ## `list` — schema-driven rows
 
 Every row-based slot is a `list`. Its params are a **schema plus items**: the
@@ -213,3 +287,24 @@ visualization, using a plain `{ visualization, params }` literal for the slot.
 A consumer renderer also **overrides** a built-in one for the same key.
 
 <Canvas of={SlotWidgetStories.BespokeAndFallback} />
+
+### A bespoke slot's skeleton
+
+An entry is either the render function on its own or that function **paired
+with its skeleton**, so a visualization's loading state lives beside the thing
+that draws it:
+
+```tsx
+slotRenderers={{
+  "clock-in": {
+    render: (params) => <ClockInTracker {...params} />,
+    skeleton: () => <Skeleton className="h-[52px] w-full rounded-md" />,
+  },
+}}
+```
+
+A visualization with no skeleton of its own — a bespoke renderer passed as a
+bare function, or one nobody registered — still gets a placeholder while
+loading (`expectedItemsCount` plain bars) rather than the dashed notice.
+
+<Canvas of={SlotWidgetStories.BespokeLoadingSlots} />
