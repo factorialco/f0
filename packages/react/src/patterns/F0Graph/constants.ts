@@ -20,11 +20,34 @@ export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
 export const BACKGROUND_DOT_GAP = 32
 
 // ─── Stacked children (`GraphNode.stackChildren`) ──────────────
+// Geometry of a stacked row, derived from two anchors rather than hand-tuned,
+// so the pieces cannot drift apart: the avatar sits the same distance from all
+// four edges, and the title lands on the node card's own text offset — which is
+// what makes a column line up under its parent's title.
+//
+// The row draws a real border; the card does not (its border lives on an
+// absolutely positioned chrome layer, costing no layout). That 1px is why the
+// row's padding is 9 and not the card's 10 — the visible inset matches.
+const STACKED_NODE_BORDER = 1
+/** Avatar box in a stacked row: `md`, one step down from the card's `lg`. */
+export const STACKED_NODE_AVATAR = 32
+/** Inset from the inner edge of the border to the avatar, on all four sides. */
+export const STACKED_NODE_PADDING = 9
+/** Where the node card puts its title: 10 padding + 40 avatar + 8 gap. */
+const CARD_TITLE_OFFSET = 58
+/** Gap that lands the row's title on `CARD_TITLE_OFFSET` too. */
+export const STACKED_NODE_TITLE_GAP =
+  CARD_TITLE_OFFSET -
+  STACKED_NODE_BORDER -
+  STACKED_NODE_PADDING -
+  STACKED_NODE_AVATAR
+
 // Height of one stacked row and the gap between two of them. Shared by the
 // layout engine (which reserves the space) and F0GraphStackedNode (which fills
 // it) — the row must render exactly as tall as the layout believes it is, or
 // the column drifts out of its reserved band.
-export const STACKED_NODE_HEIGHT = 40
+export const STACKED_NODE_HEIGHT =
+  STACKED_NODE_AVATAR + 2 * (STACKED_NODE_PADDING + STACKED_NODE_BORDER)
 export const STACKED_NODE_GAP = 8
 
 // Fraction of the normal `rankSep` lane a stacked column hangs below its

@@ -11,7 +11,12 @@ import { Skeleton } from "@/ui/skeleton"
 
 import type { F0GraphStackedNodeProps } from "./types"
 
-import { STACKED_NODE_HEIGHT } from "../../constants"
+import {
+  STACKED_NODE_AVATAR,
+  STACKED_NODE_HEIGHT,
+  STACKED_NODE_PADDING,
+  STACKED_NODE_TITLE_GAP,
+} from "../../constants"
 
 /**
  * One row of a stacked group — what F0Graph lays out when a parent sets
@@ -80,7 +85,7 @@ const F0GraphStackedNodeBase = forwardRef<
         aria-posinset={posInSet}
         aria-selected={state === "selected"}
         className={cn(
-          "group flex w-full items-center gap-2 rounded-md border border-solid px-2",
+          "group flex w-full items-center rounded-md border border-solid",
           "bg-f1-background outline-none transition-[border-color,background-color,opacity] duration-200",
           isMarked
             ? "border-f1-border-selected-bold ring-2 ring-f1-background-selected ring-offset-0"
@@ -92,19 +97,40 @@ const F0GraphStackedNodeBase = forwardRef<
           "focus-visible:ring-2 focus-visible:ring-f1-background-selected focus-visible:ring-offset-0",
           state === "dimmed" && "opacity-40"
         )}
-        style={{ height }}
+        // Padding and gap are inline rather than utility classes because they
+        // are derived (see constants): the padding equals the avatar's inset on
+        // every side, and the gap is whatever lands the title on the card's own
+        // text offset. A rounded utility step would silently break both.
+        style={{
+          height,
+          paddingLeft: STACKED_NODE_PADDING,
+          paddingRight: STACKED_NODE_PADDING,
+          gap: STACKED_NODE_TITLE_GAP,
+        }}
         onClick={onClick}
         onKeyDown={handleKeyDown}
       >
         {loading ? (
           <>
-            <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+            <Skeleton
+              className="shrink-0 rounded-full"
+              style={{
+                width: STACKED_NODE_AVATAR,
+                height: STACKED_NODE_AVATAR,
+              }}
+            />
             <Skeleton className="h-3 w-24 flex-1 rounded-xs" />
           </>
         ) : (
           <>
             {avatar && (
-              <div className="flex shrink-0 items-center justify-center">
+              <div
+                className="flex shrink-0 items-center justify-center"
+                style={{
+                  width: STACKED_NODE_AVATAR,
+                  height: STACKED_NODE_AVATAR,
+                }}
+              >
                 <F0Avatar size="md" avatar={avatar} />
               </div>
             )}

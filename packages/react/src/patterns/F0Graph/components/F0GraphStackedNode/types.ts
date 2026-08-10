@@ -39,8 +39,10 @@ export interface F0GraphStackedNodeProps {
   loading?: boolean
   /**
    * Row height in px. Must match the graph's `stackedNodeHeight` (both default
-   * to 40) — the layout reserves exactly this much room per row. Only the width
-   * is inherited from the card; a row is deliberately shorter.
+   * to 52) — the layout reserves exactly this much room per row. Only the width
+   * is inherited from the card; a row is deliberately shorter. The default is
+   * the avatar plus equal padding on every side, so changing it without
+   * changing the avatar breaks that symmetry.
    */
   height?: number
 }
