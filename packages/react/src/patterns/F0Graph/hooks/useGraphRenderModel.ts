@@ -52,6 +52,13 @@ const ESTIMATED_TAGS_PER_ROW = 2
 // Gap between the pill and the tag block (`gap-1.5` on the node's column).
 // Added to the measured tag height so the reservation covers the whole stack.
 const TAG_ROW_GAP = 6
+// The lane the layout engine already leaves between a node and its children
+// (`DEFAULT_RANK_SEP`). Tags hang into it rather than extending the node box.
+const NODE_RANK_SEP = 130
+// Line still visible below the tags when a tag block is long enough to need
+// room of its own. Without it a very tall block would butt straight into the
+// next rank.
+const MIN_EDGE_LENGTH = 24
 
 interface UseGraphRenderModelOptions<T> {
   roots: TreeNode<T>[]
@@ -300,11 +307,23 @@ export function useGraphRenderModel<T>({
   const estimatedTagHeight =
     Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW)) *
     TAG_ROW_HEIGHT
-  const reservedTagHeight = !tagsAffectLayout
+  const tagBlockHeight = !tagsAffectLayout
     ? 0
-    : measuredTagRowHeight !== undefined
-      ? measuredTagRowHeight + TAG_ROW_GAP
-      : estimatedTagHeight
+    : (measuredTagRowHeight ?? estimatedTagHeight) + TAG_ROW_GAP
+
+  // Rank pitch is a fixed design constant: a node's children always sit the
+  // same distance below it, tags or no tags. So tags are NOT added to the node
+  // box — they hang into the lane that already exists between a node and its
+  // children, and what changes is how much of that lane is left for the
+  // connecting line. Toggling metadata then never moves a single node.
+  //
+  // The one case that does need room is a tag block long enough to eat the
+  // whole lane: past that the tags would run into the next rank, so reserve
+  // just the overflow, keeping `MIN_EDGE_LENGTH` of line visible.
+  const reservedTagHeight = Math.max(
+    0,
+    tagBlockHeight + MIN_EDGE_LENGTH - NODE_RANK_SEP
+  )
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
 
   const builtInEngine = useLayoutEngine({

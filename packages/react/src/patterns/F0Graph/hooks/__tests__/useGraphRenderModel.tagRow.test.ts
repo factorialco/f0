@@ -27,11 +27,11 @@ const treeNode = (
 })
 
 /**
- * The reserved tag block is not returned directly in a comparable form, so it
- * is read off the layout: the child rank sits `nodeHeight + reservedTagHeight +
- * rankSep` below the parent, and the parent's own box carries the reservation.
+ * Room the tags add to the node's layout box. Tags normally hang into the lane
+ * that already sits between a node and its children, so this is `0` for any
+ * block that fits — the rank pitch must not move when metadata is toggled.
  */
-const parentBoxHeight = (
+const reserved = (
   options: Partial<Parameters<typeof useGraphRenderModel>[0]> = {}
 ) => {
   const child = treeNode("child", "root")
@@ -60,73 +60,56 @@ const parentBoxHeight = (
   return result.current.reservedTagHeight
 }
 
+const withTags = (over: Record<string, unknown> = {}) => ({
+  nodeTagTypes: ["workplace", "reports"],
+  visibleTagTypesSet: new Set(["workplace", "reports"]),
+  ...over,
+})
+
 describe("useGraphRenderModel — tag row reservation", () => {
   it("reserves nothing when no tag columns are declared", () => {
-    expect(parentBoxHeight()).toBe(0)
+    expect(reserved()).toBe(0)
+  })
+
+  it("keeps the rank pitch fixed for a tag block that fits the lane", () => {
+    // The whole point: tags hang into the 130px lane that already exists
+    // between a node and its children, so the node box does not grow and
+    // nothing moves. What shrinks is the connecting line.
+    expect(reserved(withTags({ measuredTagRowHeight: 26 }))).toBe(0)
+    expect(reserved(withTags({ measuredTagRowHeight: 56 }))).toBe(0)
   })
 
   it("collapses when every declared column is toggled off", () => {
-    // The regression: the Data Collection graph hard-codes `reserveTagRow`
-    // whenever a `tags` mapper exists, so "hide all" used to leave the block of
-    // empty canvas the tags had occupied. The visible-count gate has to win.
+    // The Data Collection graph hard-codes `reserveTagRow` whenever a `tags`
+    // mapper exists, so "hide all" used to leave the empty block the tags had
+    // occupied. The visible-count gate has to win over that flag.
     expect(
-      parentBoxHeight({
+      reserved({
         nodeTagTypes: ["workplace", "reports"],
         visibleTagTypesSet: new Set<string>(),
         reserveTagRow: true,
-      })
-    ).toBe(0)
-  })
-
-  it("falls back to the count estimate before any node has measured", () => {
-    expect(
-      parentBoxHeight({
-        nodeTagTypes: ["workplace", "reports"],
-        visibleTagTypesSet: new Set(["workplace", "reports"]),
-      })
-    ).toBeGreaterThan(0)
-  })
-
-  it("prefers a measured height over the count estimate", () => {
-    // Two columns estimate one 36px row. A node whose labels wrap to two rows
-    // reports 56, and that — plus the pill/tags gap — is what gets reserved,
-    // instead of the estimate that would put the next rank inside the node.
-    const measured = parentBoxHeight({
-      nodeTagTypes: ["workplace", "reports"],
-      visibleTagTypesSet: new Set(["workplace", "reports"]),
-      measuredTagRowHeight: 56,
-    })
-    const estimated = parentBoxHeight({
-      nodeTagTypes: ["workplace", "reports"],
-      visibleTagTypesSet: new Set(["workplace", "reports"]),
-    })
-
-    expect(measured).toBeGreaterThan(estimated)
-    expect(measured).toBe(56 + 6)
-  })
-
-  it("shrinks the reservation when the measurement shrinks", () => {
-    const tall = parentBoxHeight({
-      nodeTagTypes: ["workplace"],
-      visibleTagTypesSet: new Set(["workplace"]),
-      measuredTagRowHeight: 56,
-    })
-    const short = parentBoxHeight({
-      nodeTagTypes: ["workplace"],
-      visibleTagTypesSet: new Set(["workplace"]),
-      measuredTagRowHeight: 26,
-    })
-
-    expect(short).toBeLessThan(tall)
-  })
-
-  it("ignores a measurement once the columns are all hidden", () => {
-    expect(
-      parentBoxHeight({
-        nodeTagTypes: ["workplace"],
-        visibleTagTypesSet: new Set<string>(),
         measuredTagRowHeight: 56,
       })
     ).toBe(0)
+  })
+
+  it("grows the box only for a block that would eat the whole lane", () => {
+    // 130 lane, 24px of line kept visible: a block over ~100px has to push the
+    // next rank down, or the tags would run into it.
+    expect(reserved(withTags({ measuredTagRowHeight: 120 }))).toBe(20)
+    expect(reserved(withTags({ measuredTagRowHeight: 200 }))).toBe(100)
+  })
+
+  it("uses the measured height, not the tag count, to decide the overflow", () => {
+    // Two columns estimate a single 36px row. A node whose labels wrap far
+    // enough reports the real height, and only that can tell whether the block
+    // still fits the lane.
+    expect(reserved(withTags())).toBe(0)
+    expect(reserved(withTags({ measuredTagRowHeight: 160 }))).toBe(60)
+  })
+
+  it("releases the extra room when the measurement shrinks again", () => {
+    expect(reserved(withTags({ measuredTagRowHeight: 160 }))).toBeGreaterThan(0)
+    expect(reserved(withTags({ measuredTagRowHeight: 40 }))).toBe(0)
   })
 })
