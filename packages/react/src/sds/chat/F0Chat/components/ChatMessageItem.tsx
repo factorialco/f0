@@ -84,14 +84,14 @@ export const ChatMessageItem = ({
       {hasContent && (
         <div
           className={cn(
-            "flex w-full gap-2",
+            "flex w-full",
             isMine ? "flex-row-reverse items-center" : "items-end"
           )}
         >
           {bubbleGutter}
           <div
             className={cn(
-              "flex min-w-0 items-center gap-1",
+              "flex min-w-0 items-center",
               isMine ? "flex-row-reverse" : "flex-row"
             )}
           >
@@ -101,14 +101,14 @@ export const ChatMessageItem = ({
               className={cn(
                 // Match the bubble's chained corners so the highlight ring and
                 // hover surface follow its exact shape (not a fixed 2xl box).
-                bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun),
+                bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun, true),
                 // Shadow AND radius transition together (single property list —
                 // tailwind-merge would otherwise drop one): the jump-to ring
                 // fades instead of snapping, and a run extending animates the
                 // tail corner. `min-w-0` lets this flex item shrink below its
                 // content's intrinsic width so the reply quote's single line
                 // truncates instead of forcing the bubble wider than the column.
-                "flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
+                "p-1 flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and

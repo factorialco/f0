@@ -25,12 +25,14 @@ import { ReplyQuote } from "./ReplyQuote"
 export const bubbleCornerClass = (
   isMine: boolean,
   isFirstOfRun: boolean,
-  isLastOfRun: boolean
+  isLastOfRun: boolean,
+  isExterior?: boolean
 ): string =>
   cn(
     // The radius transitions because extending a run flips the previous
     // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
-    "rounded-2xl transition-[border-radius] duration-150",
+    isExterior ? "rounded-3xl" : "rounded-2xl",
+    "transition-[border-radius] duration-150",
     !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
     !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
   )

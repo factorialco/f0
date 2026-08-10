@@ -28,10 +28,10 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
  * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding). */
 const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
   if (isFirstRow) return "pt-2"
-  if (row.type === "message") return row.isFirstOfRun ? "pt-4" : "pt-1"
+  if (row.type === "message") return row.isFirstOfRun ? "pt-3" : "pt-0"
   // The status footer hugs its message (MessageStatus brings its own pt-1).
   if (row.type === "footer") return "pt-0"
-  return "pt-4"
+  return "pt-3"
 }
 
 /**
@@ -174,7 +174,7 @@ const ChatMessageRowRendererComponent = ({
   const bubbleGutter = showIdentity ? (
     isLastOfRun ? (
       <ChatUserHoverCard user={message.author}>
-        <span className="shrink-0 cursor-default">
+        <span className="shrink-0 cursor-default pb-1 flex items-end">
           {avatarFor(message.author)}
         </span>
       </ChatUserHoverCard>
