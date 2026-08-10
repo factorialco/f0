@@ -2,7 +2,12 @@ import { describe, expect, test } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
-import { LIST_COMPACT_AFTER, listSlot } from "../slotRenderers"
+import {
+  DEFAULT_EXPECTED_ITEMS_COUNT,
+  LIST_COMPACT_AFTER,
+  listSlot,
+  SLOT_SKELETON_ITEM_TESTID,
+} from "../slotRenderers"
 import { SlotWidget } from "./index"
 
 describe("SlotWidget", () => {
@@ -305,6 +310,131 @@ describe("list slot schema", () => {
     )
 
     expect(screen.getByText("3")).toBeInTheDocument()
+  })
+})
+
+describe("SlotWidget loading", () => {
+  const placeholders = () => screen.queryAllByTestId(SLOT_SKELETON_ITEM_TESTID)
+
+  test("draws each slot's skeleton instead of its content, keeping the frame and the seams", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        header={{ title: "Team" }}
+        loading
+        slots={[
+          { visualization: "indicators", params: { items: [] } },
+          listSlot({ left: "person" }, []),
+        ]}
+      />
+    )
+
+    // The chrome is real while the slots are placeholders.
+    expect(screen.getByText("Team")).toBeInTheDocument()
+    expect(container.querySelectorAll('[role="separator"]')).toHaveLength(1)
+    expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+  })
+
+  test("draws as many placeholder items as the slot expects", () => {
+    zeroRender(
+      <SlotWidget
+        loading
+        slots={[listSlot({ left: "person" }, [], { expectedItemsCount: 5 })]}
+      />
+    )
+
+    expect(placeholders()).toHaveLength(5)
+  })
+
+  test(`a slot that doesn't say expects ${DEFAULT_EXPECTED_ITEMS_COUNT}`, () => {
+    zeroRender(<SlotWidget loading slots={[listSlot({}, [])]} />)
+
+    expect(placeholders()).toHaveLength(DEFAULT_EXPECTED_ITEMS_COUNT)
+  })
+
+  test("a list never places more rows than maxVisibleItems will show", () => {
+    zeroRender(
+      <SlotWidget
+        loading
+        slots={[
+          listSlot({ left: "person", maxVisibleItems: 2 }, [], {
+            expectedItemsCount: 7,
+          }),
+        ]}
+      />
+    )
+
+    expect(placeholders()).toHaveLength(2)
+  })
+
+  test("the list placeholder follows the schema: a left glyph only where one is declared, md for two-line rows", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        loading
+        slots={[
+          listSlot({ left: "person", descriptionRequired: true }, [], {
+            expectedItemsCount: 1,
+          }),
+        ]}
+      />
+    )
+
+    // Two-line rows draw the md glyph, exactly as the loaded rows do.
+    expect(container.querySelector(".size-8")).not.toBeNull()
+
+    rerender(
+      <SlotWidget
+        loading
+        slots={[listSlot({}, [], { expectedItemsCount: 1 })]}
+      />
+    )
+    // No left declared, no glyph.
+    expect(container.querySelector(".size-8")).toBeNull()
+    expect(container.querySelector(".size-6")).toBeNull()
+  })
+
+  test("a bespoke renderer's own skeleton wins, and one without falls back to the generic placeholder", () => {
+    zeroRender(
+      <SlotWidget
+        loading
+        slots={[
+          { visualization: "clock-in", params: {} },
+          { visualization: "carousel", params: {}, expectedItemsCount: 2 },
+        ]}
+        slotRenderers={{
+          "clock-in": {
+            render: () => <span>clock</span>,
+            skeleton: () => <span>clock placeholder</span>,
+          },
+          // A bare function: no skeleton of its own.
+          carousel: () => <span>carousel</span>,
+        }}
+      />
+    )
+
+    expect(screen.getByText("clock placeholder")).toBeInTheDocument()
+    expect(screen.queryByText("clock")).not.toBeInTheDocument()
+    expect(placeholders()).toHaveLength(2)
+  })
+
+  test("an unregistered visualization gets a placeholder, not the dashed notice", () => {
+    zeroRender(
+      <SlotWidget
+        loading
+        slots={[{ visualization: "not-registered", params: {} }]}
+      />
+    )
+
+    expect(screen.queryByText(/No renderer for slot/)).not.toBeInTheDocument()
+    expect(placeholders()).toHaveLength(DEFAULT_EXPECTED_ITEMS_COUNT)
+  })
+
+  test("no placeholders once the widget is not loading", () => {
+    zeroRender(
+      <SlotWidget slots={[listSlot({}, [{ id: "1", title: "Barcelona" }])]} />
+    )
+
+    expect(placeholders()).toHaveLength(0)
+    expect(screen.getByText("Barcelona")).toBeInTheDocument()
   })
 })
 

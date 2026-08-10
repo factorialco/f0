@@ -208,6 +208,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           header={widget.header}
           fullHeight={widget.fullHeight}
           slots={widget.slots}
+          loading={widget.loading}
           slotRenderers={slotRenderers}
           ctx={ctx}
         />

@@ -15,6 +15,7 @@ import { F0Button } from "@/components/F0Button"
 import { type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
+import { Skeleton } from "@/ui/skeleton"
 import {
   CalendarEvent,
   type CalendarEventProps,
@@ -49,7 +50,43 @@ export type SlotRenderer<P = unknown> = (
   params: P,
   ctx: HomeRenderCtx
 ) => ReactNode
-export type SlotRenderers = Record<string, SlotRenderer>
+
+/**
+ * The ctx a SKELETON is drawn with: the render ctx plus how many placeholder
+ * items to draw — the slot's `expectedItemsCount`, already defaulted.
+ */
+export type HomeSkeletonCtx = HomeRenderCtx & { expectedItemsCount: number }
+
+/**
+ * Draws the slot's PLACEHOLDER, before its data lands. It gets the same params
+ * the renderer will get — a loading slot still carries its static config (a
+ * `list`'s schema, say), just no items — so the placeholder can be shaped like
+ * what is coming.
+ */
+export type SlotSkeletonRenderer<P = unknown> = (
+  params: P,
+  ctx: HomeSkeletonCtx
+) => ReactNode
+
+/**
+ * How a visualization is drawn: the render function on its own, or that
+ * function PAIRED with the skeleton to draw while the slot loads.
+ */
+export type SlotRendererEntry<P = unknown> =
+  | SlotRenderer<P>
+  | { render: SlotRenderer<P>; skeleton?: SlotSkeletonRenderer<P> }
+
+export type SlotRenderers = Record<string, SlotRendererEntry>
+
+/** A renderer entry in its full form — a bare function is just its `render`. */
+export const resolveSlotRenderer = (
+  entry: SlotRendererEntry | undefined
+): { render: SlotRenderer; skeleton?: SlotSkeletonRenderer } | undefined =>
+  entry == null
+    ? undefined
+    : typeof entry === "function"
+      ? { render: entry }
+      : entry
 
 /* ------------------------------ list schema ------------------------------ */
 
@@ -167,7 +204,17 @@ export interface EventListParams {
 export interface HomeWidgetSlot {
   visualization: string
   params: unknown
+  /**
+   * How many items this slot expects to hold — the number of PLACEHOLDER items
+   * its skeleton draws while the widget is `loading`, so the loading card is
+   * about as tall as the one that replaces it. Defaults to
+   * {@link DEFAULT_EXPECTED_ITEMS_COUNT}.
+   */
+  expectedItemsCount?: number
 }
+
+/** What a slot carries beyond its params. Taken by both slot builders. */
+export type SlotOptions = Pick<HomeWidgetSlot, "expectedItemsCount">
 
 /** The built-in slot vocabulary: each visualization and its params shape. */
 export interface HomeSlotParamsMap {
@@ -184,8 +231,9 @@ export interface HomeSlotParamsMap {
  */
 export const homeSlot = <V extends keyof HomeSlotParamsMap>(
   visualization: V,
-  params: HomeSlotParamsMap[V]
-): HomeWidgetSlot => ({ visualization, params })
+  params: HomeSlotParamsMap[V],
+  options?: SlotOptions
+): HomeWidgetSlot => ({ visualization, params, ...options })
 
 /**
  * Builds a `list` slot: the schema is declared once, and the items' shape is
@@ -194,8 +242,13 @@ export const homeSlot = <V extends keyof HomeSlotParamsMap>(
  */
 export const listSlot = <const S extends ListSchema>(
   schema: S,
-  items: Array<ListItem<S>>
-): HomeWidgetSlot => ({ visualization: "list", params: { schema, items } })
+  items: Array<ListItem<S>>,
+  options?: SlotOptions
+): HomeWidgetSlot => ({
+  visualization: "list",
+  params: { schema, items },
+  ...options,
+})
 
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
@@ -232,6 +285,11 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    */
   hasUpdates?: boolean
   slots: HomeWidgetSlot[]
+  /**
+   * The widget is waiting on its data: every slot draws its skeleton instead of
+   * its content (see `SlotWidget`'s `loading`).
+   */
+  loading?: boolean
 }
 
 /**
@@ -376,30 +434,203 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   )
 }
 
+/* ------------------------------- skeletons ------------------------------- */
+
+/**
+ * How many placeholder items a slot draws when it doesn't say (its
+ * `expectedItemsCount`). Three: enough to read as a list, short enough that a
+ * widget which turns out to hold one item barely jumps.
+ */
+export const DEFAULT_EXPECTED_ITEMS_COUNT = 3
+
+/**
+ * Marks ONE placeholder item, whatever the visualization draws as an item — a
+ * list row, an event, an indicator. `expectedItemsCount` of these appear.
+ */
+export const SLOT_SKELETON_ITEM_TESTID = "slot-skeleton-item"
+
+/**
+ * Cycled title widths: a column of identical bars reads as a pattern rather
+ * than as items, so the placeholder titles vary the way real ones do.
+ */
+const SKELETON_TITLE_WIDTHS = ["w-1/2", "w-2/3", "w-2/5", "w-3/5"]
+
+const skeletonTitleWidth = (index: number) =>
+  SKELETON_TITLE_WIDTHS[index % SKELETON_TITLE_WIDTHS.length]
+
+/**
+ * One line of placeholder text: a thin bar centred in the 20px LINE BOX a real
+ * line of text occupies. Lines, not bars, are what make a placeholder row as
+ * tall as the row that replaces it — so the card fills in without jumping.
+ */
+const SkeletonLine = ({ className }: { className?: string }) => (
+  <div className="flex h-5 items-center">
+    <Skeleton className={cn("h-3", className)} />
+  </div>
+)
+
+/**
+ * The `list` slot's placeholder, drawn from the SCHEMA alone — which is static
+ * config, so it is known before the items land. It follows the same rules the
+ * real list follows: a left glyph only where the schema declares one (round for
+ * a person, square for everything else), a trailing block only where it
+ * declares a right, and the same prescriptive sizing — two-line rows draw `md`
+ * glyphs, one-line rows `sm`.
+ */
+const ListSlotSkeleton = ({
+  params,
+  ctx,
+}: {
+  params: Partial<ListParams>
+  ctx: HomeSkeletonCtx
+}) => {
+  const schema = params.schema ?? {}
+  // Rows past `maxVisibleItems` fold behind "View more", so the loaded list
+  // never shows more than that — nor should the placeholder.
+  const count = Math.max(
+    0,
+    Math.min(ctx.expectedItemsCount, schema.maxVisibleItems ?? Infinity)
+  )
+  const compact = Boolean(schema.compact) || count > LIST_COMPACT_AFTER
+  const twoLine = Boolean(schema.descriptionRequired) && !compact
+  // More items than the list will show means the loaded list carries the "View
+  // more" button at its bottom — so the placeholder leaves room for it.
+  const overflows = ctx.expectedItemsCount > count
+
+  return (
+    <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
+      {Array.from({ length: count }, (_, index) => (
+        // The row's own geometry (see `HomeListItem`): p-2, gap-3, centered.
+        <div
+          key={index}
+          data-testid={SLOT_SKELETON_ITEM_TESTID}
+          className="flex w-full items-center gap-3 p-2"
+        >
+          {schema.left ? (
+            <Skeleton
+              className={cn(
+                "shrink-0",
+                twoLine ? "size-8" : "size-6",
+                schema.left === "person" ? "rounded-full" : "rounded-sm"
+              )}
+            />
+          ) : null}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <SkeletonLine className={skeletonTitleWidth(index)} />
+            {twoLine ? <SkeletonLine className="w-1/4" /> : null}
+          </div>
+          {schema.right ? (
+            <Skeleton className="h-4 w-10 shrink-0 rounded-sm" />
+          ) : null}
+        </div>
+      ))}
+      {overflows ? (
+        <div className="mt-1 self-start">
+          {/* An `sm` ghost button — what "View more (n)" will be. */}
+          <Skeleton className="h-6 w-24 rounded-sm" />
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/** The `event-list` placeholder: the colour band, two lines, the date avatar. */
+const EventListSlotSkeleton = ({ ctx }: { ctx: HomeSkeletonCtx }) => (
+  <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
+    {Array.from({ length: ctx.expectedItemsCount }, (_, index) => (
+      <div
+        key={index}
+        data-testid={SLOT_SKELETON_ITEM_TESTID}
+        className="flex flex-row items-stretch gap-2.5 rounded-sm p-2"
+      >
+        <Skeleton className="min-h-10 w-1 shrink-0 rounded-2xs" />
+        <div className="flex flex-1 flex-col justify-center">
+          <SkeletonLine className={skeletonTitleWidth(index)} />
+          <SkeletonLine className="w-1/3" />
+        </div>
+        {/* `F0AvatarDate` is a fixed 40px square. */}
+        <Skeleton className="size-10 shrink-0 rounded-md" />
+      </div>
+    ))}
+  </div>
+)
+
+/** The `indicators` placeholder: a big number over its label, per indicator. */
+const IndicatorsSlotSkeleton = ({ ctx }: { ctx: HomeSkeletonCtx }) => (
+  <div className="grid auto-cols-fr grid-flow-col items-end gap-x-3">
+    {Array.from({ length: ctx.expectedItemsCount }, (_, index) => (
+      <div
+        key={index}
+        data-testid={SLOT_SKELETON_ITEM_TESTID}
+        className="flex flex-col gap-1"
+      >
+        {/* The big number's own line box, then the label's. */}
+        <div className="flex h-8 items-center">
+          <Skeleton className="h-6 w-10" />
+        </div>
+        <SkeletonLine className="w-3/4" />
+      </div>
+    ))}
+  </div>
+)
+
+/**
+ * What a slot draws while loading when its visualization brings no skeleton of
+ * its own — an unregistered one, or a bespoke renderer passed as a bare
+ * function. Deliberately shapeless: one bar per expected item.
+ */
+export const defaultSlotSkeleton: SlotSkeletonRenderer = (_params, ctx) => (
+  <div className="flex flex-col gap-2">
+    {Array.from({ length: ctx.expectedItemsCount }, (_, index) => (
+      <div key={index} data-testid={SLOT_SKELETON_ITEM_TESTID}>
+        <Skeleton className={cn("h-6", skeletonTitleWidth(index))} />
+      </div>
+    ))}
+  </div>
+)
+
 /**
  * Built-in renderers for the standard visualizations. `list` covers every
  * row-based slot through its schema; `event-list` and `indicators` spread
  * their params onto the matching f0 content component. Bespoke visualizations
  * (e.g. `clock-in`, `carousel`) are intentionally absent — supply them via
  * `slotRenderers`.
+ *
+ * Each ships its own `skeleton` beside its `render`, so a widget's loading
+ * state is drawn by the same thing that draws its content.
  */
 export const defaultSlotRenderers: SlotRenderers = {
-  list: (params, ctx) => <ListSlot params={params as ListParams} ctx={ctx} />,
+  list: {
+    render: (params, ctx) => (
+      <ListSlot params={params as ListParams} ctx={ctx} />
+    ),
+    skeleton: (params, ctx) => (
+      // Partial: a loading `list` carries its schema but not yet its items.
+      <ListSlotSkeleton
+        params={(params ?? {}) as Partial<ListParams>}
+        ctx={ctx}
+      />
+    ),
+  },
   // The events are rendered here rather than through `CalendarEventList` for one
   // reason: that component's `showAllItems` container has no gap, and its `gap`
   // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
   // DIRECT parent of the event items, which is this container.
-  "event-list": (params, ctx) => {
-    const { events } = params as EventListParams
-    return (
-      <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
-        {events.map((event) => (
-          <CalendarEvent key={event.title} {...event} />
-        ))}
-      </div>
-    )
+  "event-list": {
+    render: (params, ctx) => {
+      const { events } = params as EventListParams
+      return (
+        <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
+          {events.map((event) => (
+            <CalendarEvent key={event.title} {...event} />
+          ))}
+        </div>
+      )
+    },
+    skeleton: (_params, ctx) => <EventListSlotSkeleton ctx={ctx} />,
   },
-  indicators: (params) => (
-    <IndicatorsList {...(params as IndicatorsListProps)} />
-  ),
+  indicators: {
+    render: (params) => <IndicatorsList {...(params as IndicatorsListProps)} />,
+    skeleton: (_params, ctx) => <IndicatorsSlotSkeleton ctx={ctx} />,
+  },
 }

@@ -16,7 +16,13 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Counter } from "@/ui/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/sds/Profile/PrivateBox"
-import { EyeInvisible, EyeVisible, Handle, InfoCircleLine } from "@/icons/app"
+import {
+  ExternalLink,
+  EyeInvisible,
+  EyeVisible,
+  Handle,
+  InfoCircleLine,
+} from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { usePrivacyMode } from "@/lib/privacyMode"
@@ -43,9 +49,16 @@ export interface WidgetProps {
     info?: string
     canBeBlurred?: boolean
     link?: {
+      /**
+       * What following the link DOES, in words — "Go to Communities". The
+       * control is icon-only, so this is the only thing that says where it
+       * goes: it is its tooltip and its accessible name, and it is required
+       * for exactly that reason.
+       */
       title: string
       url?: string
       onClick?: () => void
+      /** Defaults to the external-link glyph. */
       icon?: IconType
     }
     count?: number
@@ -220,12 +233,16 @@ const Container = forwardRef<
                   </DropdownInternal>
                 )}
                 {header.link && (
-                  <CardLink
-                    onClick={handleLinkClick}
-                    href={header.link.url}
-                    title={header.link.title}
-                    icon={header.link.icon}
-                  />
+                  // The glyph alone can't say where it goes, so `title` is
+                  // shown as a tooltip as well as being the accessible name.
+                  <Tooltip label={header.link.title}>
+                    <CardLink
+                      onClick={handleLinkClick}
+                      href={header.link.url}
+                      title={header.link.title}
+                      icon={header.link.icon ?? ExternalLink}
+                    />
+                  </Tooltip>
                 )}
               </div>
             </div>

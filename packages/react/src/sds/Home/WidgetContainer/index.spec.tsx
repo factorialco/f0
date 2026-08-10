@@ -9,7 +9,7 @@ import { WidgetContainer } from "./index"
 const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
   id,
   icon: id === "clock" ? Clock : Calendar,
-  header: { title: id, link: { title: "Open", onClick: () => {} } },
+  header: { title: id, link: { title: `Go to ${id}`, onClick: () => {} } },
   slots: [
     {
       visualization: "indicators",
