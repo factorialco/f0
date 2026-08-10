@@ -33752,8 +33752,8 @@ const Jae = Qr({
     ae(() => {
       if (!G || !u) return;
       const j = () => G(u, {
-        visible: F.current?.getBoundingClientRect().height ?? 0,
-        full: q.current?.getBoundingClientRect().height ?? 0
+        visible: F.current?.offsetHeight ?? 0,
+        full: q.current?.offsetHeight ?? 0
       });
       j();
       const W = new ResizeObserver(j);
