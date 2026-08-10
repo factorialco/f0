@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { LayersFront } from "@/icons/app"
@@ -10,13 +10,12 @@ import type {
   ProductUsageEntry,
   UsageResult,
 } from "../scripts/product-usage-scan.mjs"
-
-/**
- * Served by the Storybook dev server (see scripts/product-usage-scan.mjs).
- * Kept as a literal rather than imported from the scanner so this module never
- * pulls Node built-ins into the browser bundle.
- */
-const ENDPOINT = "/f0-product-usage.json"
+import {
+  ENABLED,
+  rescan,
+  runRepoAction,
+  useProductUsage,
+} from "./useProductUsage.ts"
 
 /** How many modules to list before collapsing the rest into a "+N more". */
 const MODULES_SHOWN = 8
@@ -26,53 +25,6 @@ const PROTOTYPES_SHOWN = 6
 
 /** How many f0 components to name before collapsing the rest. */
 const INTERNAL_SHOWN = 6
-
-/**
- * One fetch per Storybook session, shared by every docs page. Resolves to
- * `null` when the data isn't available, in which case the tag stays hidden.
- */
-let request: Promise<UsageResult | null> | undefined
-
-/**
- * Local dev only. This data — product module names, internal prototype titles
- * — must never reach the public Storybook at f0.factorial.dev, which anyone
- * outside the company can read. `import.meta.env.DEV` is inlined at build
- * time, so the static bundle drops the tag and its request entirely rather
- * than relying on the endpoint 404ing.
- */
-const ENABLED = import.meta.env.DEV
-
-function fetchUsage(): Promise<UsageResult | null> {
-  if (!ENABLED) return Promise.resolve(null)
-
-  request ??= fetch(ENDPOINT)
-    .then(async (response) => {
-      // A static build serves index.html for unknown paths, so a 200 alone
-      // isn't proof the endpoint exists — check what came back.
-      if (!response.ok) return null
-      const contentType = response.headers.get("content-type") ?? ""
-      if (!contentType.includes("application/json")) return null
-      return (await response.json()) as UsageResult
-    })
-    .catch(() => null)
-  return request
-}
-
-function useUsage() {
-  const [result, setResult] = useState<UsageResult | null>()
-
-  useEffect(() => {
-    let active = true
-    void fetchUsage().then((data) => {
-      if (active) setResult(data)
-    })
-    return () => {
-      active = false
-    }
-  }, [])
-
-  return result
-}
 
 /** Sums a component's usage across every name it is exported under. */
 function collectUsage(
@@ -222,26 +174,131 @@ function ProductSection({
   )
 }
 
+/** A small button styled for the dark tooltip surface. */
+function TooltipButton({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void
+  disabled?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    // Colors are inline because Storybook's Tailwind build doesn't scan
+    // `.storybook/`, so one-off utilities here silently fall back to defaults.
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="shrink-0 rounded-md px-2 py-1 text-sm font-medium transition-colors"
+      style={{
+        color: "#fff",
+        backgroundColor: "rgba(255,255,255,0.1)",
+        border: "1px solid rgba(255,255,255,0.25)",
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
 /**
- * Names the product repos that weren't scanned. Without this the count reads
- * as the whole picture when a product surface is simply missing from disk.
+ * Names the product repos that weren't scanned, and offers to clone them.
+ *
+ * Without this the count reads as the whole picture when a product surface is
+ * simply missing from disk. The clone runs on the dev server against a fixed
+ * list of repos — see `KNOWN_REPOS` in the scanner.
  */
-function MissingRepos({ missing }: { missing: ProductUsageData["missing"] }) {
+function MissingRepos({
+  missing,
+  actions,
+}: {
+  missing: ProductUsageData["missing"]
+  actions: UsageResult["actions"]
+}) {
   if (missing.length === 0) return null
 
   return (
-    <p className="m-0 mt-2 text-sm opacity-70">
-      Not counted:{" "}
-      {missing.map((repo, index) => (
-        <span key={repo.id}>
-          {index > 0 && ", "}
-          <code className="font-mono">{repo.id}</code>
-        </span>
-      ))}{" "}
-      — no local checkout. Clone it anywhere usual (next to this repo,{" "}
-      <code className="font-mono">~/code</code>…) and it&apos;s picked up
-      automatically.
-    </p>
+    <div className="mt-2 text-sm opacity-70">
+      <p className="m-0">
+        Not counted:{" "}
+        {missing.map((repo, index) => (
+          <span key={repo.id}>
+            {index > 0 && ", "}
+            <code className="font-mono">{repo.id}</code>
+          </span>
+        ))}{" "}
+        — no local checkout.
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {missing.map((repo) => {
+          const status = actions?.[repo.id]
+          return (
+            <span key={repo.id} className="flex items-center gap-2">
+              <TooltipButton
+                onClick={() => void runRepoAction(repo.id, "clone")}
+                disabled={status?.state === "running"}
+              >
+                {status?.state === "running"
+                  ? `Cloning ${repo.id}…`
+                  : `Clone ${repo.id}`}
+              </TooltipButton>
+              {status && status.state !== "running" && (
+                <span className="opacity-80">{status.message}</span>
+              )}
+            </span>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Fast-forwards the scanned checkouts and rescans, so the numbers reflect
+ * what's on main rather than whatever was last pulled.
+ *
+ * Pull is `--ff-only` and skips any repo with a dirty working tree — this runs
+ * against real checkouts people may be working in.
+ */
+function RefreshActions({
+  repos,
+  actions,
+}: {
+  repos: ProductUsageData["repos"]
+  actions: UsageResult["actions"]
+}) {
+  const pulling = repos.some((repo) => actions?.[repo.id]?.state === "running")
+  const results = repos
+    .map((repo) => [repo.id, actions?.[repo.id]] as const)
+    .filter(([, status]) => status && status.state !== "running")
+
+  return (
+    <div className="mt-3 border-0 border-t border-solid border-f1-border-inverse pt-2 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <TooltipButton
+          onClick={() => {
+            for (const repo of repos) void runRepoAction(repo.id, "pull")
+          }}
+          disabled={pulling}
+        >
+          {pulling ? "Pulling…" : "Pull latest"}
+        </TooltipButton>
+        <TooltipButton onClick={() => void rescan()}>Rescan</TooltipButton>
+      </div>
+      {results.length > 0 && (
+        <ul className="m-0 mt-2 list-none space-y-1 p-0 opacity-70">
+          {results.map(([id, status]) => (
+            <li key={id}>
+              <code className="font-mono">{id}</code>: {status?.message}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
@@ -284,12 +341,19 @@ function UsageDetails({
       {product ? (
         <>
           <ProductSection data={product} names={names} />
-          <MissingRepos missing={product.missing} />
+          <MissingRepos missing={product.missing} actions={result.actions} />
         </>
       ) : (
-        <p className="m-0">
-          No local factorial checkout — product usage unavailable.
-        </p>
+        <>
+          <p className="m-0">
+            No local factorial checkout — whether the product uses this is
+            unknown.
+          </p>
+          <MissingRepos
+            missing={result.product.missing ?? []}
+            actions={result.actions}
+          />
+        </>
       )}
       {internal.length > 0 && (
         <NameList
@@ -306,6 +370,9 @@ function UsageDetails({
           items={prototypes.map((prototype) => prototype.title)}
           limit={PROTOTYPES_SHOWN}
         />
+      )}
+      {product && (
+        <RefreshActions repos={product.repos} actions={result.actions} />
       )}
     </div>
   )
@@ -331,7 +398,7 @@ export function ProductUsageTag({
   /** Folder relative to `src/`, used to look up what it exports. */
   componentPath: string | null
 }) {
-  const result = useUsage()
+  const result = useProductUsage()
 
   // Before anything renders: the loading state would otherwise flash on the
   // public build for the frame between mount and the effect resolving to
@@ -368,14 +435,18 @@ export function ProductUsageTag({
   // folder (`hooks/toast` ships `toasts`), so fold in what the folder exports.
   const lookup = withExportedNames(result, names, componentPath)
 
-  const { productFiles, internal } = resolveUsage(result, lookup)
+  const { product, productFiles, internal } = resolveUsage(result, lookup)
 
-  // "Not used" would be misleading for the building blocks other components
-  // are made of, so say which of the two it is.
-  const label =
-    productFiles > 0
+  // Without a factorial checkout there is no product answer at all — claiming
+  // "not used" would be a confident lie about a component the product may
+  // depend on hundreds of times.
+  const label = !product
+    ? "Where is this used?"
+    : productFiles > 0
       ? "Where is this used in the product?"
-      : internal.length > 0
+      : // "Not used" would be misleading for the building blocks other
+        // components are made of, so say which of the two it is.
+        internal.length > 0
         ? "Only used internally in F0"
         : "Not used in the product"
 

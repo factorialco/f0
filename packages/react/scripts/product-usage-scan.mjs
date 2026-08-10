@@ -35,6 +35,7 @@
  * - .storybook/ProductUsageTag.tsx → fetch(PRODUCT_USAGE_ENDPOINT)
  */
 
+import { execFile } from "node:child_process"
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { dirname, join, resolve, sep } from "node:path"
@@ -47,6 +48,9 @@ const SRC_DIR = resolve(scriptsDir, "../src")
 
 /** The dev-server route serving the scan result. */
 export const PRODUCT_USAGE_ENDPOINT = "/f0-product-usage.json"
+
+/** The dev-server route that clones or fast-forwards a scanned repo. */
+export const REPO_ACTION_ENDPOINT = "/f0-usage-repo-action"
 
 /** Path, relative to the product repo root, that we scan. */
 export const PRODUCT_SCOPE = join("frontend", "src", "modules")
@@ -339,7 +343,10 @@ export function scanProductUsage({
       available: false,
       reason:
         "No factorialco/factorial checkout found. Clone it next to this repo, " +
-        "or point $F0_PRODUCT_REPO at it, then restart Storybook.",
+        "or point $F0_PRODUCT_REPO at it.",
+      // Carried even when nothing could be scanned, so the tag can offer to
+      // clone the repos rather than just naming them.
+      missing,
     }
   }
 
@@ -698,7 +705,116 @@ export function scanUsage() {
     product: scanProductUsage(),
     internal: scanInternalUsage(),
     composer: scanComposerUsage(),
+    // Progress of any clone/pull the tag started, so it can report back.
+    actions: { ...actions },
   }
+}
+
+/**
+ * Repos the docs tag can offer to clone, and where each one is scanned from.
+ *
+ * A fixed map on purpose: the endpoint that runs `git` must never take a URL
+ * or a path from the request, or a page open in the browser could make the dev
+ * server clone anything anywhere.
+ */
+export const KNOWN_REPOS = {
+  factorial: {
+    url: "git@github.com:factorialco/factorial.git",
+    resolve: resolveProductRepoRoot,
+  },
+  "factorial-it": {
+    url: "git@github.com:factorialco/factorial-it.git",
+    resolve: resolveItRepoRoot,
+  },
+  "factorial-composer": {
+    url: "git@github.com:factorialco/factorial-composer.git",
+    resolve: resolveComposerRepoRoot,
+  },
+}
+
+/**
+ * Where a new checkout should land: next to a repo we already found, so it
+ * joins whatever convention this machine already uses. Falls back to `~/code`.
+ */
+function checkoutParent() {
+  for (const { resolve: resolveRoot } of Object.values(KNOWN_REPOS)) {
+    const root = resolveRoot()
+    if (root) return dirname(root)
+  }
+  return join(homedir(), "code")
+}
+
+/**
+ * State of the clone/pull the docs tag kicked off, by repo id. Actions run
+ * detached — a monorepo clone takes minutes, far longer than a request should
+ * hang — and the tag polls this through the usual payload.
+ */
+const actions = Object.create(null)
+
+function runGit(args, options = {}) {
+  return new Promise((resolvePromise) => {
+    execFile("git", args, { maxBuffer: 1024 * 1024, ...options }, (error, stdout, stderr) => {
+      resolvePromise({
+        ok: !error,
+        output: (stdout || "") + (stderr || ""),
+      })
+    })
+  })
+}
+
+/**
+ * Clones a known repo next to the others, or fast-forwards it if it's already
+ * there. Never merges or rebases, and refuses to touch a dirty working tree —
+ * this runs against somebody's real checkout, possibly mid-task.
+ */
+export async function runRepoAction(id, action) {
+  const repo = KNOWN_REPOS[id]
+  if (!repo) return { ok: false, message: `Unknown repo: ${id}` }
+  if (actions[id]?.state === "running") return actions[id]
+
+  actions[id] = { state: "running", action, message: `${action} in progress…` }
+
+  const finish = (state, message) => {
+    actions[id] = { state, action, message }
+    // The next request should see the new checkout, not the cached answer.
+    cache = null
+    return actions[id]
+  }
+
+  const existing = repo.resolve()
+
+  if (action === "clone") {
+    if (existing) return finish("done", `Already cloned at ${existing}`)
+
+    const target = join(checkoutParent(), id)
+    // Blobless clone: full history for tooling, without paying for every blob
+    // ever committed. Still a normal checkout to work in afterwards.
+    const result = await runGit([
+      "clone",
+      "--filter=blob:none",
+      repo.url,
+      target,
+    ])
+    return result.ok
+      ? finish("done", `Cloned into ${target}`)
+      : finish("error", result.output.trim().split("\n").slice(-3).join(" "))
+  }
+
+  if (action === "pull") {
+    if (!existing) return finish("error", "Nothing to pull — not cloned yet")
+
+    const status = await runGit(["-C", existing, "status", "--porcelain"])
+    if (status.output.trim()) {
+      return finish("error", "Working tree is dirty — pull skipped")
+    }
+
+    const result = await runGit(["-C", existing, "pull", "--ff-only"])
+    return result.ok
+      ? finish("done", "Up to date")
+      : finish("error", result.output.trim().split("\n").slice(-2).join(" "))
+  }
+
+  return finish("error", `Unknown action: ${action}`)
 }
 
 /** In-process cache so page views don't each trigger a filesystem walk. */
@@ -740,6 +856,40 @@ export function productUsageVitePlugin() {
         res.setHeader("Content-Type", "application/json; charset=utf-8")
         res.setHeader("Cache-Control", "no-store")
         res.end(body)
+      })
+
+      server.middlewares.use(REPO_ACTION_ENDPOINT, (req, res) => {
+        const json = (status, payload) => {
+          res.statusCode = status
+          res.setHeader("Content-Type", "application/json; charset=utf-8")
+          res.setHeader("Cache-Control", "no-store")
+          res.end(JSON.stringify(payload))
+        }
+
+        // This route runs `git` on the developer's machine, so it has to be
+        // unreachable from anything but the Storybook page itself. A POST from
+        // another site always carries an Origin header; the docs page's own
+        // fetch carries this server's origin (or none at all).
+        const origin = req.headers.origin
+        if (req.method !== "POST") {
+          return json(405, { ok: false, message: "POST only" })
+        }
+        if (origin && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+          return json(403, { ok: false, message: "Cross-origin request refused" })
+        }
+
+        const params = new URLSearchParams((req.url ?? "").split("?")[1] ?? "")
+        const id = params.get("repo") ?? ""
+        const action = params.get("action") ?? ""
+
+        if (!(id in KNOWN_REPOS) || !["clone", "pull"].includes(action)) {
+          return json(400, { ok: false, message: "Unknown repo or action" })
+        }
+
+        // Detached on purpose: a monorepo clone runs for minutes. The tag polls
+        // the usage payload for the outcome.
+        void runRepoAction(id, action)
+        json(202, { ok: true, state: "running", repo: id, action })
       })
     },
   }

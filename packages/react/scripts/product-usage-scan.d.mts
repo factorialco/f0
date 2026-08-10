@@ -4,6 +4,8 @@
 export interface UsageUnavailable {
   available: false
   reason: string
+  /** Repos that could have been scanned, so the tag can offer to clone them. */
+  missing?: Array<{ id: string; env: string }>
 }
 
 /** Per-component usage across the product's feature modules. */
@@ -99,16 +101,37 @@ export interface ComposerUsageData {
 
 export type ComposerUsageResult = ComposerUsageData | UsageUnavailable
 
+/** Progress of a clone or fast-forward the docs tag asked for. */
+export interface RepoActionState {
+  state: "running" | "done" | "error"
+  action: string
+  message: string
+}
+
 /** The endpoint payload: every scan, each with its own availability. */
 export interface UsageResult {
   generatedAt: string
   product: ProductUsageResult
   internal: InternalUsageResult
   composer: ComposerUsageResult
+  /** Repo id → progress of the clone/pull started from the docs tag. */
+  actions: Record<string, RepoActionState>
 }
 
 /** The dev-server route serving the scan result. */
 export const PRODUCT_USAGE_ENDPOINT: string
+
+/** The dev-server route that clones or fast-forwards a scanned repo. */
+export const REPO_ACTION_ENDPOINT: string
+
+/** Repos the docs tag can offer to clone, keyed by id. */
+export const KNOWN_REPOS: Record<string, { url: string }>
+
+/** Clones a known repo, or fast-forwards it when it's already checked out. */
+export function runRepoAction(
+  id: string,
+  action: "clone" | "pull"
+): Promise<RepoActionState | { ok: false; message: string }>
 
 /** Path, relative to the product repo root, that we scan. */
 export const PRODUCT_SCOPE: string

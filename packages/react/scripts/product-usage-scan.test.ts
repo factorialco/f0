@@ -5,12 +5,14 @@ import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vitest"
 
 import {
+  KNOWN_REPOS,
   parseF0Imports,
   resolveComposerRepoRoot,
   resolveProductRepoRoot,
   scanComposerUsage,
   scanInternalUsage,
   scanProductUsage,
+  runRepoAction,
 } from "./product-usage-scan.mjs"
 
 describe("parseF0Imports", () => {
@@ -333,6 +335,34 @@ export const meta: PrototypeMeta = {
     expect(resolveComposerRepoRoot({ F0_COMPOSER_REPO: repoRoot })).toBe(
       repoRoot
     )
+  })
+})
+
+describe("runRepoAction", () => {
+  test("only knows the repos it ships with", () => {
+    // The endpoint takes a repo id from the browser, so the id must never be
+    // able to become an arbitrary path or URL passed to git.
+    expect(Object.keys(KNOWN_REPOS).sort()).toEqual([
+      "factorial",
+      "factorial-composer",
+      "factorial-it",
+    ])
+    for (const repo of Object.values(KNOWN_REPOS)) {
+      expect(repo.url).toMatch(/^git@github\.com:factorialco\//)
+    }
+  })
+
+  test("refuses an unknown repo", async () => {
+    await expect(runRepoAction("../../etc/passwd", "clone")).resolves.toEqual({
+      ok: false,
+      message: "Unknown repo: ../../etc/passwd",
+    })
+  })
+
+  test("refuses an unknown action", async () => {
+    const result = await runRepoAction("factorial", "rm -rf" as "pull")
+
+    expect(result).toMatchObject({ state: "error" })
   })
 })
 
