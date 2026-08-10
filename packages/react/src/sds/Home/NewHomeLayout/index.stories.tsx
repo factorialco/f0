@@ -680,7 +680,7 @@ const meta = {
   title: "Home/NewHomeLayout",
   component: NewHomeLayout,
   tags: ["autodocs", "experimental"],
-  parameters: { layout: "fullscreen" },
+  parameters: { layout: "fullscreen", docsFullWidth: true },
   decorators: [
     (Story) => (
       <ApplicationFrame
