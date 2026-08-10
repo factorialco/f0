@@ -1,0 +1,336 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+
+import * as SlotWidgetStories from "./index.stories"
+
+<Meta of={SlotWidgetStories} />
+
+# SlotWidget
+
+`SlotWidget` draws one Home widget: the `Widget` frame (header, and optionally
+`status` _or_ `alert`, `action`, `summaries`) around an **ordered list of
+slots**, with a dashed divider between consecutive slots.
+
+A slot is data, not JSX:
+
+```tsx
+{ visualization: "list", params: { ... } }
+```
+
+`SlotWidget` looks the `visualization` up in its renderer map — the built-in
+vocabulary below, extended per app through the `slotRenderers` prop — and hands
+it the `params`. A visualization nobody registered renders a dashed fallback
+instead of crashing.
+
+<Canvas of={SlotWidgetStories.AllSlots} />
+<Controls of={SlotWidgetStories.AllSlots} />
+
+## The header link
+
+`header.link` is the widget's way out — an icon-only control in the header's
+top-right, drawn with the **external-link** glyph (pass `icon` to override it).
+Being icon-only, it carries nothing that says where it goes, so its `title` is
+**required** and does that job twice: it is the control's **tooltip** and its
+accessible name.
+
+Write it as the action, naming the destination — the user should know where
+they are about to land before they click:
+
+```tsx
+header={{
+  title: "Communications",
+  link: { title: "Go to Communications", onClick: openCommunications },
+}}
+```
+
+Not `"Open"`, `"View"`, or the destination on its own: with several widgets on
+a Home, a column of identical "Open" tooltips says nothing.
+
+## Loading
+
+`loading` swaps every slot's content for that visualization's **skeleton**,
+keeping the frame, the chrome and the seams — the card fills in rather than
+changing shape when the data lands.
+
+How many placeholder items a slot draws is its own **`expectedItemsCount`**:
+the widget declares its loading height instead of guessing at one. Both slot
+builders take it as a third argument, and it defaults to
+`DEFAULT_EXPECTED_ITEMS_COUNT` (3).
+
+```tsx
+<SlotWidget
+  header={{ title: "Team" }}
+  loading={isLoading}
+  slots={[
+    // The schema is static config, so it is known before the items are —
+    // that's what shapes the placeholder rows.
+    listSlot({ left: "person", descriptionRequired: true }, items, {
+      expectedItemsCount: 4,
+    }),
+    homeSlot("event-list", { events }, { expectedItemsCount: 2 }),
+  ]}
+/>
+```
+
+Each placeholder is drawn from what the slot already knows. A `list`'s schema
+decides whether its rows carry a left glyph (round for a person, square
+otherwise), whether they trail something, and — through the same prescriptive
+sizing the real rows use — whether they are one line or two. `maxVisibleItems`
+caps the placeholder the way it caps the list, and when more items are expected
+than it will show, the "View more" button is placed too.
+
+The widget is marked `aria-busy` while it loads, and the placeholders
+themselves are hidden from assistive tech — there is nothing in them to read.
+
+<Canvas of={SlotWidgetStories.AllLoadingSlots} />
+
+### Defining a widget's loading state
+
+The slots you pass while loading are the **same slots**, minus the data: keep
+each one's static config (a `list`'s schema), leave its items empty, and say
+how many are coming.
+
+```tsx
+const teamWidget = (people: Person[] | undefined): HomeWidgetItem => ({
+  id: "team",
+  header: { title: "Team" },
+  // The widget knows it is waiting; every slot draws its skeleton.
+  loading: people == null,
+  slots: [
+    listSlot({ left: "person", descriptionRequired: true }, people ?? [], {
+      // What the widget will hold — the page size, the API's count, or just
+      // what this widget always shows. It only decides the loading height.
+      expectedItemsCount: 5,
+    }),
+  ],
+})
+```
+
+`loading` lives on `HomeWidgetItem` as well as on `SlotWidget`, so a Home built
+from data gets it for free: `NewHomeLayout` and `WidgetContainer` pass it
+through to each widget they render. That means a rail can load widget by
+widget — each one flips as its own request lands — rather than all at once.
+
+```tsx
+<NewHomeLayout
+  rightWidgets={[teamWidget(people), eventsWidget(events)]}
+  slotRenderers={slotRenderers}
+/>
+```
+
+See `NewHomeLayout`'s **Loading** story for the whole rail in that state.
+
+## `list` — schema-driven rows
+
+Every row-based slot is a `list`. Its params are a **schema plus items**: the
+schema is declared once for the whole slot and describes what every row looks
+like, and the items' shape follows from it — so rows are consistent by
+construction, at the type level. Build them with `listSlot`, which checks the
+items against the schema:
+
+```tsx
+import { listSlot } from "@/sds/Home/slotRenderers"
+
+listSlot(
+  {
+    left: "person", // ← every row's left glyph is a person avatar
+    right: "counter", // ← every row trails a counter
+    subtitleRequired: true, // ← every row carries an inline subtitle
+    clickBehavior: "link", // ← every row is a link, so `href` is required
+  },
+  [
+    {
+      id: "ada",
+      title: "Ada Lovelace",
+      subtitle: "Engineering",
+      avatar: { firstName: "Ada", lastName: "Lovelace" },
+      count: 3,
+      href: "/employees/ada",
+    },
+  ]
+)
+```
+
+### The schema
+
+| Field                 | Values                                                                                                         | Effect on items                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `left`                | any avatar type (`person`, `team`, `company`, `file`, `flag`, `emoji`, `icon`), `module`, `alert` — or omitted | each row supplies that kind's data (`avatar`, `module`, or `alert`)                 |
+| `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`)         |
+| `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                              |
+| `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                 |
+| `clickBehavior`       | `"link"` — or omitted for inert rows                                                                           | every row carries an `href` and renders as a REAL anchor (see Click handling)       |
+| `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom         |
+| `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs |
+
+Rows may also carry `unread` for the accent dot on the left glyph.
+
+### Click handling
+
+Rows do **not** take an `onClick` — there is nothing to capture. A clickable
+row IS a link: the slot declares `clickBehavior: "link"`, every row carries an
+`href`, and the row renders as a real anchor (role `link` — middle-click,
+cmd-click, and copy-address all behave). Where the anchor goes:
+
+- **Relative paths** (`/employees/ada`) and **fragments** (`#section`) open in
+  the **same tab**, routed through the app's `LinkProvider` for client-side
+  navigation.
+- **Other domains** (`https://developer.mozilla.org`) open in a **new tab**
+  (`target="_blank"` with `rel="noreferrer"`), always as a native anchor.
+
+Rows without `clickBehavior` are inert — no hover state.
+
+A clickable row carries **no trailing chevron**: the row itself is the
+affordance (it highlights on hover, focuses, and is a real link), and a column
+of arrows repeating "clickable" on every row is noise in a widget this dense.
+The row's right-hand side belongs to the schema's `right` instead.
+
+### Prescriptive sizing
+
+Glyph sizes are **not configurable** — they follow the schema. Two-line rows
+(a required `description`) draw `md` glyphs; one-line rows draw `sm`.
+
+### View more
+
+With `maxVisibleItems: 6`, a list given more than 6 items shows the first 6 and
+a **"View more (n)"** button at its bottom; clicking it reveals the rest and
+turns the button into **"View less"**.
+
+### Auto-compact
+
+Past `LIST_COMPACT_AFTER` (6) **visible** rows, the list compacts itself: every
+row's second line folds into a tooltip on the row, and — now being one-line —
+the glyphs drop to `sm`. A truncated list therefore stays two-line, and
+compacts only once "View more" expands it past the threshold — the
+second-to-last list in the story above shows the whole pipeline.
+
+A slot can also opt into this presentation at any count with `compact: true` —
+useful when the descriptions are secondary enough to live in tooltips even on
+a short list.
+
+### Recipes
+
+An **inbox** (Communications-style): module glyph, time as the second line, the
+sender trailing, the unread dot:
+
+```tsx
+listSlot(
+  {
+    left: "module",
+    right: "person",
+    descriptionRequired: true,
+    clickBehavior: "link",
+  },
+  [
+    {
+      id: "deploy",
+      title: "Deploy 2026.7.3 is live 🚀",
+      description: "8:47",
+      module: "communities",
+      unread: true,
+      rightAvatar: { firstName: "Leo", lastName: "Costa" },
+      href: "/posts/1",
+    },
+  ]
+)
+```
+
+**Who-is-where** rows: alert glyph, a count line, the people themselves
+trailing:
+
+```tsx
+listSlot(
+  {
+    left: "alert",
+    right: "person-list",
+    descriptionRequired: true,
+    clickBehavior: "link",
+  },
+  [
+    {
+      id: "in",
+      title: "Clocked in",
+      description: "4 people",
+      alert: "positive",
+      avatars: [{ firstName: "Ada", lastName: "Lovelace" }],
+      remainingCount: 3,
+      href: "/attendance",
+    },
+  ]
+)
+```
+
+**Plain text rows**, one inside the app and one leaving it (that one opens in
+a new tab on its own):
+
+```tsx
+listSlot({ clickBehavior: "link" }, [
+  { id: "requests", title: "Review pending requests", href: "/requests" },
+  { id: "help", title: "Help center", href: "https://help.factorial.co" },
+])
+```
+
+## The rest of the vocabulary
+
+These aren't row lists, so they keep their own params — build them with
+`homeSlot`, which checks the params against the visualization the same way.
+
+### `event-list`
+
+Calendar-event rows drawn with f0's `CalendarEvent` (color band + date
+avatars): `title`, `subtitle`, `description`, an `isPending` state, and a
+`fromDate`/`toDate` range or a single day.
+
+```tsx
+homeSlot("event-list", {
+  events: [
+    {
+      title: "Company holiday",
+      subtitle: "2 days off",
+      color: "#10B981",
+      fromDate: new Date(2026, 6, 30),
+      toDate: new Date(2026, 6, 31),
+    },
+  ],
+})
+```
+
+### `indicators`
+
+Big-number KPIs drawn with `IndicatorsList` — the slot's params are that
+component's props.
+
+```tsx
+homeSlot("indicators", {
+  items: [{ label: "On holidays", content: "6" }],
+})
+```
+
+## Bespoke slots
+
+Visualizations only one surface knows (`clock-in`, `carousel`, …) don't ship a
+default renderer — pass theirs through the `slotRenderers` prop, keyed by
+visualization, using a plain `{ visualization, params }` literal for the slot.
+A consumer renderer also **overrides** a built-in one for the same key.
+
+<Canvas of={SlotWidgetStories.BespokeAndFallback} />
+
+### A bespoke slot's skeleton
+
+An entry is either the render function on its own or that function **paired
+with its skeleton**, so a visualization's loading state lives beside the thing
+that draws it:
+
+```tsx
+slotRenderers={{
+  "clock-in": {
+    render: (params) => <ClockInTracker {...params} />,
+    skeleton: () => <Skeleton className="h-[52px] w-full rounded-md" />,
+  },
+}}
+```
+
+A visualization with no skeleton of its own — a bespoke renderer passed as a
+bare function, or one nobody registered — still gets a placeholder while
+loading (`expectedItemsCount` plain bars) rather than the dashed notice.
+
+<Canvas of={SlotWidgetStories.BespokeLoadingSlots} />

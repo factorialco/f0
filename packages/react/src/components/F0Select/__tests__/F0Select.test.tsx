@@ -135,6 +135,76 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
+  it("renders metadata as secondary text next to the label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "es",
+            label: "Spain",
+            metadata: { type: "dialCode", dialCode: "+34" },
+          },
+          {
+            value: "kr",
+            label: "South Korea",
+            metadata: { type: "dialCode", dialCode: "+82" },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    const dialCode = screen.getByText("+34")
+    expect(dialCode.className).toContain("text-f1-foreground-secondary")
+    // Metadata is a row-sibling of the label, not a stacked second line
+    expect(dialCode.parentElement?.className).not.toContain("flex-col")
+    expect(
+      within(dialCode.parentElement as HTMLElement).getByText("Spain")
+    ).toBeInTheDocument()
+    expect(screen.getByText("+82")).toBeInTheDocument()
+  })
+
+  it("warns in dev when a metadata dial code is malformed, once per value", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const user = userEvent.setup()
+    const brokenOptions = [
+      {
+        value: "xx",
+        label: "Broken",
+        metadata: { type: "dialCode", dialCode: "34" } as const,
+      },
+    ]
+    const { rerender } = render(
+      <F0Select
+        {...defaultSelectProps}
+        options={brokenOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('dialCode "34" is not a valid dial code')
+    )
+
+    // Virtualized rows re-render on every scroll-in — the warning must not repeat
+    const warnCalls = warn.mock.calls.length
+    rerender(
+      <F0Select
+        {...defaultSelectProps}
+        options={brokenOptions}
+        onChange={() => {}}
+      />
+    )
+    expect(warn).toHaveBeenCalledTimes(warnCalls)
+    warn.mockRestore()
+  })
+
   it("opens even when Date.now is frozen (MockDate in stories)", async () => {
     // Regression: the open/close debounce used lodash.debounce, which decides
     // its trailing edge by reading Date.now(). Stories that freeze the clock
@@ -753,7 +823,7 @@ describe("Select", () => {
     )
   })
 
-  it("cancels staged changes without closing when cancel button is clicked", async () => {
+  it("closes the dropdown and discards staged changes when cancel is clicked", async () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
@@ -762,7 +832,7 @@ describe("Select", () => {
         {...defaultSelectProps}
         multiple
         options={mockOptions}
-        value={["option1", "option2"]}
+        value={["option1"]}
         onChange={handleChange}
         withApplySelection
       />
@@ -772,47 +842,43 @@ describe("Select", () => {
     await user.click(screen.getByText("Option 2"))
     await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
     expect(handleChange).not.toHaveBeenCalled()
 
-    await user.click(screen.getByText("Option 3"))
+    await openSelect(user)
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.arrayContaining(["option1", "option2", "option3"]),
-      expect.arrayContaining([
-        {
-          id: "option1",
-          name: "Option 1",
-          description: "Description 1",
-        },
-        {
-          id: "option2",
-          name: "Option 2",
-          description: "Description 2",
-        },
-        {
-          id: "option3",
-          name: "Option 3",
-          description: "Description 3",
-        },
-      ]),
-      expect.arrayContaining([
-        expect.objectContaining({
-          label: "Option 1",
-          value: "option1",
-          description: "Description 1",
-        }),
-        expect.objectContaining({
-          label: "Option 2",
-          value: "option2",
-        }),
-        expect.objectContaining({
-          label: "Option 3",
-          value: "option3",
-        }),
-      ])
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={vi.fn()}
+        withApplySelection
+        applySelectionLabel="Add to schedule"
+      />
     )
+
+    await openSelect(user)
+
+    expect(
+      screen.getByRole("button", { name: "Add to schedule" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Apply selection" })
+    ).not.toBeInTheDocument()
   })
 
   describe("asList mode", () => {

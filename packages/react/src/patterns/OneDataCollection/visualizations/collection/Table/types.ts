@@ -88,6 +88,14 @@ export type TableColumnDefinition<
     noHiding?: boolean
 
     /**
+     * Visually highlights the column: its header and cells render with a
+     * subtle gray background, and the spanning header of its group (if any)
+     * is emphasized too. To highlight a whole header group at once, set
+     * `highlighted` on its {@link HeaderGroupDefinition} instead.
+     */
+    highlighted?: boolean
+
+    /**
      * Avoid removing the column by the user. Only relevant when the
      * visualization sets `onRemoveColumn`; the per-row trash affordance in the
      * settings popover is hidden for this column. Mirrors `noHiding`.
@@ -133,6 +141,13 @@ export type HeaderGroupDefinition = {
    * @default false
    */
   defaultCollapsed?: boolean
+
+  /**
+   * Visually highlights the whole group: its spanning header and every column
+   * in it render with the highlighted emphasis. Equivalent to setting
+   * `highlighted` on each of the group's columns.
+   */
+  highlighted?: boolean
 }
 
 export type ReferenceType = "none" | "striped" | "striked"

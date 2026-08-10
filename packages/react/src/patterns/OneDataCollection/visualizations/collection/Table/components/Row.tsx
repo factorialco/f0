@@ -1,3 +1,4 @@
+import { useIsPresent } from "motion/react"
 import { forwardRef, useEffect, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
@@ -225,14 +226,33 @@ const RowComponentInner = <
     nestedRowProps?.hasLoadedChildren === undefined ||
     nestedRowProps?.hasLoadedChildren
 
+  // False from the moment AnimatePresence starts animating this row out —
+  // well before it unmounts. A row leaves the selection registry then, not on
+  // unmount: rows fading out are no longer selectable, so a "select all"
+  // clicked mid-exit must not reach them. `true` outside AnimatePresence.
+  const isPresent = useIsPresent()
+
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
   useEffect(() => {
-    if (id === undefined || !willRenderOwnRow || !registerSelectable) return
+    if (
+      id === undefined ||
+      !willRenderOwnRow ||
+      !registerSelectable ||
+      !isPresent
+    )
+      return
     registerSelectable(id, item)
     return () => unregisterSelectable?.(id)
-  }, [id, item, willRenderOwnRow, registerSelectable, unregisterSelectable])
+  }, [
+    id,
+    item,
+    willRenderOwnRow,
+    registerSelectable,
+    unregisterSelectable,
+    isPresent,
+  ])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
@@ -253,6 +273,7 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         headerGroups={headerGroups}
+        collapsingCellClasses={collapsingCellClasses}
         key={key}
         fromVisualization={fromVisualization}
         registerSelectable={registerSelectable}
@@ -355,6 +376,7 @@ const RowComponentInner = <
             }}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
+            highlighted={!!column.highlighted}
             className={cn(
               cellRenderedClass,
               isLastInGroup && groupBorderClass,

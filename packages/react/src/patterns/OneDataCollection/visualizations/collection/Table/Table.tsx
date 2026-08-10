@@ -187,6 +187,7 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
+    committedQuery,
   } = useDataCollectionData<
     R,
     Filters,
@@ -254,16 +255,10 @@ export const TableCollection = <
     data?.type === "flat"
       ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
       : []
-  // Identity of the current pagination position. When it changes the row set is
-  // swapped by navigation (paging / loading more), not by an insert, so the
-  // flash must be suppressed for that render.
-  const paginationResetKey =
-    paginationInfo?.type === "pages"
-      ? paginationInfo.currentPage
-      : paginationInfo?.type === "infinite-scroll"
-        ? paginationInfo.cursor
-        : undefined
-  const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
+  // Keyed on the query these records answer, not the one the user has
+  // selected: the latter changes a render before its data arrives, and reseeding
+  // the flash baseline there memorises the previous query's rows.
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, committedQuery)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
@@ -485,6 +480,9 @@ export const TableCollection = <
                         align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
+                        highlighted={entry.columnIndices.some(
+                          (columnIndex) => columns[columnIndex].highlighted
+                        )}
                         // The toggle lives on the cell, not on the button, so
                         // the whole header is the hit area. The button keeps
                         // the focus ring and `aria-expanded` and lets its click
@@ -548,6 +546,9 @@ export const TableCollection = <
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}
+                        highlighted={
+                          !!columns[entry.columnIndices[0]].highlighted
+                        }
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
@@ -962,6 +963,7 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          highlighted={!!column.highlighted}
                           className={cn(
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||

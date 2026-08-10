@@ -137,6 +137,13 @@ export function useErrorNavigation({
   formName,
   errors,
 }: UseErrorNavigationOptions): UseErrorNavigationReturn {
+  const focusField = useCallback(
+    (fieldId: string) => {
+      focusFieldByLookup(formName, fieldId, { highlight: true })
+    },
+    [formName]
+  )
+
   // Extract field error keys (excluding root error).
   // Object.keys(errors) order is unstable — RHF may reorder keys when it
   // re-validates a single field on blur (e.g. focusing a text input blurs the
@@ -202,14 +209,14 @@ export function useErrorNavigation({
 
     if (newErrorKey) {
       // Focus the field with the new error and trigger animation
-      focusFieldByLookup(formName, newErrorKey, { highlight: true })
+      focusField(newErrorKey)
 
       // Track the newly focused field
       setCurrentFieldId(newErrorKey)
     }
 
     prevErrorKeysRef.current = currentErrorKeys
-  }, [fieldErrors, formName])
+  }, [fieldErrors, formName, focusField])
 
   // Navigate to a specific error by index (with wrap-around)
   const navigateToError = useCallback(
@@ -224,9 +231,9 @@ export function useErrorNavigation({
       const fieldId = errors[wrappedIndex]
       setCurrentFieldId(fieldId)
 
-      focusFieldByLookup(formName, fieldId, { highlight: true })
+      focusField(fieldId)
     },
-    [formName]
+    [focusField]
   )
 
   const goToPreviousError = useCallback(() => {

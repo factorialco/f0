@@ -115,6 +115,7 @@ const F0SelectComponent = forwardRef(function Select<
     placeholder,
     onChange,
     withApplySelection = false,
+    applySelectionLabel,
     onChangeSelectedOption,
     value,
     options = [],
@@ -819,8 +820,8 @@ const F0SelectComponent = forwardRef(function Select<
   }
 
   const handleCancel = useCallback(() => {
-    restoreCommittedSelection()
-  }, [restoreCommittedSelection])
+    handleChangeOpenLocal(false)
+  }, [handleChangeOpenLocal])
 
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
@@ -1099,6 +1100,7 @@ const F0SelectComponent = forwardRef(function Select<
           <SelectBottomActions
             actions={actions}
             showApplyButton={showApplyButton}
+            applyLabel={applySelectionLabel}
             onApply={handleApply}
             onCancel={handleCancel}
             showCancelButton={hasDeferredApply}

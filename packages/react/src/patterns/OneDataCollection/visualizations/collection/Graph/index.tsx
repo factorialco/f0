@@ -77,6 +77,9 @@ export const GraphCollection = <
   zoomPreset,
   minZoom,
   maxZoom,
+  centerOnNodeClick,
+  nodeClickZoom,
+  viewportInset,
   showControls,
   canvasFooterActions,
   enableNodeWindowing,
@@ -256,6 +259,11 @@ export const GraphCollection = <
           zoomPreset={zoomPreset}
           minZoom={minZoom}
           maxZoom={maxZoom}
+          // Fly-to on click is F0Graph's default; centers + zooms in close on the
+          // clicked node and offsets for the side panel via `viewportInset`.
+          centerOnNodeClick={centerOnNodeClick}
+          nodeClickZoom={nodeClickZoom}
+          viewportInset={viewportInset}
           enableNodeWindowing={enableNodeWindowing}
           nodeWindowPadding={nodeWindowPadding}
           // The hook's own hydration loader (two-phase mode) wins; otherwise
@@ -291,10 +299,12 @@ export const GraphCollection = <
                 actions={nodeActions?.(node.data)}
                 hoverCard
                 onClick={() => {
+                  // Select + fly-to is handled by F0Graph's default
+                  // `centerOnNodeClick` (closer zoom, panel-aware offset), so we
+                  // no longer center imperatively here. `ctx.onClick()` keeps
+                  // keyboard (Enter) selection working, where there's no pointer
+                  // click for F0Graph's own click path to catch.
                   ctx.onClick()
-                  // Center on the node the user actually clicked (never fires on
-                  // an empty-canvas click); re-centers even on a repeat click.
-                  graphRef.current?.focusNode(ctx.nodeId)
                   itemOnClick?.()
                 }}
               />

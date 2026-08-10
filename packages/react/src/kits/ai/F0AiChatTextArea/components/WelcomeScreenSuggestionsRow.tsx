@@ -79,38 +79,47 @@ export const WelcomeScreenSuggestionsRow = ({
         }
       }}
     >
-      <PopoverAnchor asChild>
-        {/* min-h reserves two chip rows (2 × h-8 + gap-2) so a suggestion-set
-            swap that wraps 1↔2 rows cannot shift the layout above it. */}
-        <div
-          ref={rowRef}
-          className="flex min-h-[72px] w-full flex-wrap content-end items-center gap-2"
-        >
-          {/* Plain buttons, NOT `PopoverTrigger`s: Radix registers a single
-              trigger per popover (the last one mounted), whose built-in toggle
-              fires after the button's own onClick and overwrites the group
-              selection — so switching to the last group closed the popover
-              instead. The buttons fully own the toggle/switch semantics. */}
-          {suggestions.map((group, index) => (
-            <ButtonInternal
-              key={`${group.label}-${index}`}
-              variant="outline"
-              label={group.label}
-              icon={group.icon}
-              pressed={activeIdx === index}
-              aria-haspopup="dialog"
-              aria-expanded={activeIdx === index}
-              aria-controls={activeIdx === index ? popoverContentId : undefined}
-              onClick={(event) => {
-                lastTriggerRef.current = event.currentTarget
-                shouldRestoreFocusRef.current = false
-                setActiveIdx((current) => (current === index ? null : index))
-                onItemHover?.(null)
-              }}
-            />
-          ))}
-        </div>
-      </PopoverAnchor>
+      {/* min-h reserves two chip rows (2 × h-8 + gap-2) so a suggestion-set
+          swap that wraps 1↔2 rows cannot shift the layout above it. The
+          reservation lives on this outer box and NOT on the anchor: Radix
+          positions the popover off the anchor's border box, so anchoring the
+          reserved height would float a single-row popover ~40px above the
+          chips it belongs to. */}
+      <div className="flex min-h-[72px] w-full items-end">
+        <PopoverAnchor asChild>
+          <div
+            ref={rowRef}
+            className="flex w-full flex-wrap items-center gap-2"
+          >
+            {/* Plain buttons, NOT `PopoverTrigger`s: Radix registers a single
+                trigger per popover (the last one mounted), whose built-in
+                toggle fires after the button's own onClick and overwrites the
+                group selection — so switching to the last group closed the
+                popover instead. The buttons fully own the toggle/switch
+                semantics. */}
+            {suggestions.map((group, index) => (
+              <ButtonInternal
+                key={`${group.label}-${index}`}
+                variant="outline"
+                label={group.label}
+                icon={group.icon}
+                pressed={activeIdx === index}
+                aria-haspopup="dialog"
+                aria-expanded={activeIdx === index}
+                aria-controls={
+                  activeIdx === index ? popoverContentId : undefined
+                }
+                onClick={(event) => {
+                  lastTriggerRef.current = event.currentTarget
+                  shouldRestoreFocusRef.current = false
+                  setActiveIdx((current) => (current === index ? null : index))
+                  onItemHover?.(null)
+                }}
+              />
+            ))}
+          </div>
+        </PopoverAnchor>
+      </div>
       {activeGroup && (
         <PopoverContent
           side={side}

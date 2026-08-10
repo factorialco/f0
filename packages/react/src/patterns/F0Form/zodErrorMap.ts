@@ -121,6 +121,12 @@ export function createZodErrorMap(i18n: TranslationsType): ZodErrorMap {
           return { message: validation.checkbox.mustBeChecked }
         }
         break
+
+      case ZodIssueCode.custom:
+        if (issue.params?.type === "phone") {
+          return { message: validation.phone.invalid }
+        }
+        break
     }
 
     // Fall back to default message

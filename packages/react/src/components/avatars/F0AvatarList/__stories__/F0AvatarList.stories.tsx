@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import React from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import {
   avatarVariants,
@@ -12,7 +13,6 @@ import {
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarList } from "../F0AvatarList"
 import { avatarListSizes } from "../types"
 
@@ -153,7 +153,7 @@ function getDummyAvatars<
             : never
 }
 
-const meta: Meta<typeof F0AvatarList> = {
+const meta = {
   component: F0AvatarList,
   title: "Avatars/AvatarList",
   tags: ["stable", "!autodocs"],
@@ -164,6 +164,16 @@ const meta: Meta<typeof F0AvatarList> = {
     noTooltip: false,
   },
   parameters: {
+    // Load-bearing: without this key nothing here is gated at all.
+    // `.storybook/preview.tsx:151` sets the global a11y test mode to non-
+    // blocking and `test-runner.ts:262` reads the merged parameters, so its
+    // `?? "error"` fallback never fires. Every story in this file is axe-clean,
+    // including `OverflowPopover`, whose play opens the `+N` popover.
+    //
+    // Do not spell the non-blocking mode out literally anywhere in this file:
+    // `a11yTierOf` (scripts/component-status-build.mjs) greps the file's text,
+    // so the words in a comment would downgrade the component's DoD tier.
+    a11y: { test: "error" },
     docs: {
       description: {
         component: [
@@ -176,7 +186,11 @@ const meta: Meta<typeof F0AvatarList> = {
     layout: "centered",
   },
   argTypes: {
-    ...getBaseAvatarArgTypes(["aria-label", "aria-labelledby"]),
+    // No `getBaseAvatarArgTypes` spread: `aria-label`/`aria-labelledby` are not
+    // part of `F0AvatarListProps` and `F0AvatarList.tsx` never destructures
+    // them, so advertising them as controls was a knob that did nothing — and it
+    // contradicted the Accessibility section, which says the label belongs on an
+    // entry, not on the list.
     size: {
       control: "select",
       options: avatarListSizes,
@@ -196,6 +210,35 @@ type Story = StoryObj<typeof F0AvatarList>
 
 export const Default: Story = {
   args: { max: 3 },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("renders one item per entry, none collapsed", async () => {
+      // What AvatarList decides is how many entries stay visible (`max`/`min`,
+      // F0AvatarList.tsx:69-76) — not what any single avatar looks like. So
+      // count the rendered list items rather than asserting an initials string:
+      // initials come from BaseAvatar's own algorithm and from whichever
+      // fixture entry happens to lack a `src`, neither of which is this
+      // component's contract. Deriving the expected count from `args` keeps
+      // the assertion true if `meta.args` grows.
+      //
+      // `waitFor`, not a bare `getAllByTestId`: OverflowList renders skeleton
+      // placeholders until it has measured the items and flipped
+      // `isInitialized` (ui/OverflowList/index.tsx:180), so the first paint has
+      // zero `overflow-visible-item` nodes. Asserting synchronously here fails
+      // in a real browser even though jsdom happens to be fast enough.
+      // 5s, not the 1s default: measuring is slow on a cold browser (observed
+      // 0 items at 2.5s, 3 at 5s), and this play timed out in CI once already.
+      await waitFor(
+        () =>
+          expect(canvas.getAllByTestId("overflow-visible-item")).toHaveLength(
+            args.avatars.length
+          ),
+        { timeout: 5000 }
+      )
+      // `max` equals the number of avatars, so nothing collapses into `+N`.
+      await expect(canvas.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
+    })
+  },
 }
 
 /**
@@ -260,14 +303,74 @@ export const WithTooltipDescription: Story = {
 }
 
 /**
- * Hovering the `+N` counter opens a popover listing the hidden avatars by name.
- * The popover caps its height and scrolls by default (`tooltipScroll="vertical"`).
+ * The `+N` counter is a disclosure button: hover it, or reach it with Tab and
+ * press Enter, and a popover lists the hidden avatars by name. The card is
+ * capped at the available viewport height and its list scrolls — reachable by
+ * keyboard, because opening from the keyboard moves focus into the card.
  */
 export const OverflowPopover: Story = {
   args: {
     type: "person",
     avatars: getDummyAvatars(15, "person"),
     max: 3,
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const max = args.max as number
+    const collapsedCount = args.avatars.length - max
+
+    await step("caps the visible row at `max`", async () => {
+      // `max` also sets `min` (F0AvatarList.tsx:76), so exactly `max` avatars
+      // stay visible however wide the container is. Same measurement race as
+      // `Default`: wait for `isInitialized` to replace the skeletons.
+      // Same cold-browser measurement race as `Default`; same 5s allowance.
+      await waitFor(
+        () =>
+          expect(canvas.getAllByTestId("overflow-visible-item")).toHaveLength(
+            max
+          ),
+        { timeout: 5000 }
+      )
+    })
+
+    await step("the counter opens from the keyboard alone", async () => {
+      // The regression this pins: the counter used to be a role-less <div>, so
+      // it was not in the tab order at all and the collapsed names were
+      // mouse-only (WCAG 2.1.1). No pointer anywhere in this step. Name it by
+      // pattern, never by the literal "+12".
+      const trigger = canvas.getByRole("button", { name: /^\+\d+$/ })
+      await expect(trigger).toHaveAttribute("aria-expanded", "false")
+
+      trigger.focus()
+      await expect(trigger).toHaveFocus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() =>
+        expect(trigger).toHaveAttribute("aria-expanded", "true")
+      )
+    })
+
+    await step("the counter discloses every collapsed entry", async () => {
+      // The popover is portalled out of the canvas (ui/popover.tsx passes no
+      // `container`), so scope to <body> and pick the open radix content. Then
+      // count rows by the one avatar each row renders
+      // (MaxCounter.tsx) — the number of rows is AvatarList's contract, whereas
+      // a per-name multiplicity would just encode how many distinct people
+      // `getDummyAvatars` cycles.
+      const body = canvasElement.closest("body")!
+      const popover = await waitFor(
+        () => {
+          const el = body.querySelector<HTMLElement>(
+            '[data-radix-popper-content-wrapper] [data-state="open"]'
+          )
+          if (!el) throw new Error("the `+N` popover did not open")
+          return el
+        },
+        { timeout: 3000 }
+      )
+      expect(popover.querySelectorAll('[role="img"]')).toHaveLength(
+        collapsedCount
+      )
+    })
   },
 }
 

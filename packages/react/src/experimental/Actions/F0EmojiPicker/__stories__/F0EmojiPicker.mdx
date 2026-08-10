@@ -298,6 +298,9 @@ Clearable instances add a footer action whenever they have a value.
 - WHEN `clearable={true}` and an emoji is selected → THEN a localized clear
   action is shown; activating it calls `onChange(null)`, closes the popover and
   restores the Reaction fallback in uncontrolled usage.
+- WHEN the available viewport is at most 320 px high → THEN the picker keeps
+  search, category navigation, emoji options and the clear action inside one
+  vertically scrollable popover without remounting or losing focus.
 
 ### Usage examples
 
@@ -316,6 +319,10 @@ Clearable instances add a footer action whenever they have a value.
 **Allow an optional emoji to be removed**
 
 <Canvas of={Stories.Clearable} />
+
+**Keep every action available with high zoom or a short viewport**
+
+<Canvas of={Stories.CompactHeight} />
 
 **Compare default, selected and disabled states**
 

@@ -61,13 +61,27 @@ export const useColumnCollapseAnimation = (
         return
       }
 
+      // Every cell is read before any of them is written to. Starting an
+      // animation pins that cell at zero width, which reflows the table and
+      // leaves every later measurement short — the header and body cells of one
+      // column end up animating towards different widths, so the column comes
+      // apart while it moves.
+      const measurements = cells.map((cell) => {
+        const { paddingLeft, paddingRight } = getComputedStyle(cell)
+
+        return {
+          // The width the table resolved for the column, and the value the open
+          // direction needs.
+          width: cell.getBoundingClientRect().width,
+          paddingLeft,
+          paddingRight,
+        }
+      })
+
       const settled: Array<Promise<unknown>> = []
 
-      cells.forEach((cell) => {
-        // Measured before anything is touched: this is the width the table
-        // resolved for the column, and the value the open direction needs.
-        const width = cell.getBoundingClientRect().width
-        const { paddingLeft, paddingRight } = getComputedStyle(cell)
+      cells.forEach((cell, index) => {
+        const { width, paddingLeft, paddingRight } = measurements[index]
 
         const previousOverflow = cell.style.overflow
         cell.style.overflow = "hidden"
@@ -99,21 +113,29 @@ export const useColumnCollapseAnimation = (
           fill: closing ? "forwards" : "backwards",
         })
 
-        const fade = cell.animate(
-          closing
-            ? [{ opacity: 1 }, { opacity: 0 }]
-            : [{ opacity: 0 }, { opacity: 1 }],
-          closing
-            ? { duration: 80, easing: "ease-out", fill: "forwards" }
-            : {
-                duration: 120,
-                delay: 110,
-                easing: "ease-out",
-                fill: "backwards",
-              }
-        )
+        // Only the cell's contents fade, never the cell itself: a highlighted
+        // column paints its own background on the cell, and fading the whole
+        // cell would show the row's background through it while it moves.
+        Array.from(cell.children).forEach((child) => {
+          if (!(child instanceof HTMLElement)) return
+          animations.push(
+            child.animate(
+              closing
+                ? [{ opacity: 1 }, { opacity: 0 }]
+                : [{ opacity: 0 }, { opacity: 1 }],
+              closing
+                ? { duration: 80, easing: "ease-out", fill: "forwards" }
+                : {
+                    duration: 120,
+                    delay: 110,
+                    easing: "ease-out",
+                    fill: "backwards",
+                  }
+            )
+          )
+        })
 
-        animations.push(size, fade)
+        animations.push(size)
         settled.push(size.finished.catch(() => undefined))
       })
 

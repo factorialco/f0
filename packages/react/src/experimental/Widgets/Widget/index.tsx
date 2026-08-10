@@ -5,10 +5,24 @@ import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
+import {
+  DropdownInternal,
+  DropdownItem,
+} from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { One as OneIcon } from "@/icons/ai"
+import { Ellipsis } from "@/icons/app"
+import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
+import { useI18n } from "@/lib/providers/i18n"
 import { Counter } from "@/ui/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/sds/Profile/PrivateBox"
-import { EyeInvisible, EyeVisible, InfoCircleLine } from "@/icons/app"
+import {
+  ExternalLink,
+  EyeInvisible,
+  EyeVisible,
+  Handle,
+  InfoCircleLine,
+} from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { usePrivacyMode } from "@/lib/privacyMode"
@@ -35,9 +49,16 @@ export interface WidgetProps {
     info?: string
     canBeBlurred?: boolean
     link?: {
+      /**
+       * What following the link DOES, in words — "Go to Communities". The
+       * control is icon-only, so this is the only thing that says where it
+       * goes: it is its tooltip and its accessible name, and it is required
+       * for exactly that reason.
+       */
       title: string
       url?: string
       onClick?: () => void
+      /** Defaults to the external-link glyph. */
       icon?: IconType
     }
     count?: number
@@ -55,6 +76,21 @@ export interface WidgetProps {
     variant: StatusVariant
   }
   fullHeight?: boolean
+  /**
+   * Shows a drag handle to the left of the title. The handle carries
+   * `data-gs-handle`, so a gridstack board picks it up as its handle.
+   */
+  draggable?: boolean
+  onDragStart?: () => void
+  onDragEnd?: () => void
+  /** Lifts the card while it is being dragged. */
+  isDragging?: boolean
+  /** Marks the card as picked out — a selected tile on an editable board. */
+  selected?: boolean
+  /** An "Ask One" AI button in the header. */
+  AIButton?: () => void
+  /** An overflow menu at the header's right, beside `link`. */
+  actions?: DropdownItem[]
 }
 
 const InlineDot = () => (
@@ -65,9 +101,34 @@ const Container = forwardRef<
   HTMLDivElement,
   WidgetProps & { children: ReactNode }
 >(function Container(
-  { header, children, action, summaries, alert, status, fullHeight = false },
+  {
+    header,
+    children,
+    action,
+    summaries,
+    alert,
+    status,
+    fullHeight = false,
+    actions,
+    AIButton,
+    draggable = false,
+    onDragStart,
+    onDragEnd,
+    isDragging = false,
+    selected = false,
+  },
   ref
 ) {
+  useEffect(() => {
+    if (!isDragging || !onDragEnd) return
+    // The pointer can be released anywhere, so the end of a drag is a document
+    // concern rather than this card's.
+    const handleGlobalMouseUp = () => onDragEnd()
+    document.addEventListener("mouseup", handleGlobalMouseUp)
+    return () => document.removeEventListener("mouseup", handleGlobalMouseUp)
+  }, [isDragging, onDragEnd])
+
+  const t = useI18n()
   const { enabled: privacyModeEnabled, toggle: togglePrivacyMode } =
     usePrivacyMode()
 
@@ -98,7 +159,12 @@ const Container = forwardRef<
     <Card
       className={cn(
         fullHeight ? "h-full" : "",
-        "relative flex gap-3 border-f1-border-secondary"
+        "relative flex gap-3 border-f1-border-secondary",
+        draggable && "hover:border-f1-border-hover",
+        selected &&
+          "border-f1-border-selected-bold shadow-[0_0_0_4px_hsl(var(--selected-50)/0.1)]",
+        isDragging &&
+          "cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)]"
       )}
       ref={ref}
     >
@@ -106,6 +172,15 @@ const Container = forwardRef<
         <CardHeader className="-mr-1 -mt-1">
           <div className="flex w-full flex-1 flex-col gap-4">
             <div className="flex flex-1 flex-row flex-nowrap items-center justify-between gap-2">
+              {draggable && (
+                <div
+                  className="-ml-1 flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
+                  onMouseDown={onDragStart}
+                  data-gs-handle="true"
+                >
+                  <F0Icon icon={Handle} size="xs" />
+                </div>
+              )}
               <div className="flex min-h-6 grow flex-row items-center gap-1 truncate">
                 {header.title && (
                   <CardTitle className="truncate">{header.title}</CardTitle>
@@ -138,13 +213,36 @@ const Container = forwardRef<
                 {status && (
                   <F0TagStatus text={status.text} variant={status.variant} />
                 )}
-                {header.link && (
-                  <CardLink
-                    onClick={handleLinkClick}
-                    href={header.link.url}
-                    title={header.link.title}
-                    icon={header.link.icon}
+                {AIButton && (
+                  <AIButtonComponent
+                    size="sm"
+                    label={t.ai.ask}
+                    onClick={AIButton}
+                    icon={OneIcon}
                   />
+                )}
+                {actions && (
+                  <DropdownInternal items={actions} align="end">
+                    <F0Button
+                      icon={Ellipsis}
+                      label="Actions"
+                      variant="ghost"
+                      size="sm"
+                      hideLabel
+                    />
+                  </DropdownInternal>
+                )}
+                {header.link && (
+                  // The glyph alone can't say where it goes, so `title` is
+                  // shown as a tooltip as well as being the accessible name.
+                  <Tooltip label={header.link.title}>
+                    <CardLink
+                      onClick={handleLinkClick}
+                      href={header.link.url}
+                      title={header.link.title}
+                      icon={header.link.icon ?? ExternalLink}
+                    />
+                  </Tooltip>
                 )}
               </div>
             </div>

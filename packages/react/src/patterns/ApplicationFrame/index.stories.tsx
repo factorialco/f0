@@ -539,6 +539,7 @@ const meta = {
   tags: ["autodocs", "experimental"],
   parameters: {
     layout: "fullscreen",
+    docsFullWidth: true,
   },
   args: {
     ai: {
