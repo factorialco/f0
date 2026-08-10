@@ -399,18 +399,33 @@ export function F0GraphView<T = unknown>(
   // across every node, so the tallest report is what has to be reserved. Kept
   // per node so a node shrinking its tags (or leaving the window) releases the
   // room again, rather than the max ratcheting up for the session.
-  const tagHeightsRef = useRef(new Map<string, number>())
+  const tagHeightsRef = useRef(
+    new Map<string, { visible: number; full: number }>()
+  )
   const [measuredTagRowHeight, setMeasuredTagRowHeight] = useState<
     number | undefined
   >(undefined)
-  const reportTagRowHeight = useCallback((id: string, height: number) => {
-    const heights = tagHeightsRef.current
-    if (heights.get(id) === height) return
-    heights.set(id, height)
-    let max = 0
-    for (const h of heights.values()) if (h > max) max = h
-    setMeasuredTagRowHeight(max)
-  }, [])
+  const [visibleTagHeights, setVisibleTagHeights] = useState<
+    ReadonlyMap<string, number>
+  >(new Map())
+  const reportTagRowHeight = useCallback(
+    (id: string, heights: { visible: number; full: number }) => {
+      const store = tagHeightsRef.current
+      const prev = store.get(id)
+      if (prev?.visible === heights.visible && prev?.full === heights.full)
+        return
+      store.set(id, heights)
+      let maxFull = 0
+      const visible = new Map<string, number>()
+      for (const [key, value] of store) {
+        if (value.full > maxFull) maxFull = value.full
+        visible.set(key, value.visible)
+      }
+      setMeasuredTagRowHeight(maxFull)
+      setVisibleTagHeights(visible)
+    },
+    []
+  )
 
   // ── React Flow render model (layout + anchor + rf nodes/edges) ──
   const {
@@ -434,6 +449,7 @@ export function F0GraphView<T = unknown>(
     visibleTagTypesSet,
     reserveTagRow,
     measuredTagRowHeight,
+    visibleTagHeights,
     nodeWidthProp,
     nodeHeightProp,
     layoutEngineProp,

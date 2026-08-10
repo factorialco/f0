@@ -175,15 +175,21 @@ export interface F0GraphRenderConfigContextValue {
    */
   tagRowHeight?: number
   /**
-   * Reports the height a node's rendered tag block actually occupies (`0` when
-   * it renders none). The graph keeps the tallest report and reserves that,
-   * instead of guessing rows from the tag count — the real row count depends on
-   * each node's label widths, which only the DOM knows.
+   * Reports what a node's tag block measures — `visible` for the columns
+   * currently shown, `full` for the whole set (measured off-screen). The layout
+   * reserves the tallest `full`, so the rank pitch is the "all open" one and
+   * never moves as columns are toggled; `visible` places what hangs below the
+   * card, so hiding columns lengthens the connector instead of leaving a gap.
    *
-   * Safe against feedback: the tag block wraps inside a fixed max-width, so the
-   * reservation never changes what is being measured.
+   * Neither can be derived from the tag count: rows come from wrapping inside a
+   * fixed max-width, so they depend on each node's label widths. Safe against
+   * feedback for the same reason — that width does not depend on the
+   * reservation, so measuring never changes what is measured.
    */
-  reportTagRowHeight?: (nodeId: string, height: number) => void
+  reportTagRowHeight?: (
+    nodeId: string,
+    heights: { visible: number; full: number }
+  ) => void
   /**
    * `true` when the graph has more rendered nodes than the snap threshold.
    * F0GraphNode uses this to disable variant transitions (chrome opacity,
