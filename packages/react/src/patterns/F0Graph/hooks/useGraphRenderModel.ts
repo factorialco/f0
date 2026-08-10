@@ -323,15 +323,22 @@ export function useGraphRenderModel<T>({
     tagBlockHeight > 0 ? tagBlockHeight + TAG_BLOCK_MARGIN : 0
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
 
-  // What a given node actually paints right now: the card plus whichever chip
-  // rows survive the current column toggles. The box above is the same for
-  // every node; this is not, and it is what the connector and the expander hang
-  // from — so hiding a column lengthens the line rather than stranding it below
-  // a band of empty canvas.
+  // Where a node's connector and expander hang from: below whichever chip rows
+  // survive the current toggles, plus the same clearance the box reserves. The
+  // box above is identical for every node; this is not, so hiding a column
+  // lengthens the line instead of stranding it under a band of empty canvas.
+  //
+  // The clearance has to be applied here too, not only to the box: reserving it
+  // inside the box sets the rank pitch, but the edge still left from the exact
+  // bottom of the tags and read as touching the last chip.
+  //
+  // Bounded by the box by construction — the visible block is never taller than
+  // the fully-open one it was reserved from — so the anchor lands at the box
+  // bottom at most, never past the next rank.
   const contentHeightOf = (id: string): number => {
     const base = nodeHeightProp ?? 56
     const visible = visibleTagHeights?.get(id) ?? 0
-    return visible > 0 ? base + visible + TAG_ROW_GAP : base
+    return visible > 0 ? base + visible + TAG_ROW_GAP + TAG_BLOCK_MARGIN : base
   }
 
   const builtInEngine = useLayoutEngine({
