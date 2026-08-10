@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -1134,15 +1134,14 @@ export const CommunicationsEverythingStressTest: Story = {
       const chatHeader = within(openTitle.closest("header")!)
       await userEvent.click(chatHeader.getByRole("button", { name: "Options" }))
       await userEvent.click(page.getByRole("menuitem", { name: "Search" }))
-      await userEvent.type(
-        await page.findByPlaceholderText("Search messages"),
-        "serialized cold-start"
-      )
+      fireEvent.change(await chatHeader.findByRole("searchbox"), {
+        target: { value: "serialized cold-start" },
+      })
 
-      await waitFor(() => expect(page.getByText("1/1")).toBeVisible(), {
+      await waitFor(() => expect(chatHeader.getByText("1/1")).toBeVisible(), {
         timeout: 15_000,
       })
-      await userEvent.click(page.getByRole("button", { name: "Next" }))
+      await userEvent.click(chatHeader.getByRole("button", { name: "Next" }))
       await waitFor(() => expect(page.getByText(richMessage)).toBeVisible(), {
         timeout: 15_000,
       })
@@ -1687,12 +1686,23 @@ const ConversationsSidebarInner = ({
   useEffect(() => {
     if (!restoringPanelContentId || restored.current) return
     restored.current = true
+    // An explicit story target is deterministic fixture setup, so it must win
+    // over panel content persisted by a previously visited story.
+    if (autoOpenConvId) {
+      cancelPanelContentRestore()
+      return
+    }
     if (SEED_BY_ID.has(restoringPanelContentId)) {
       onSelect(restoringPanelContentId)
     } else {
       cancelPanelContentRestore()
     }
-  }, [restoringPanelContentId, onSelect, cancelPanelContentRestore])
+  }, [
+    autoOpenConvId,
+    restoringPanelContentId,
+    onSelect,
+    cancelPanelContentRestore,
+  ])
 
   // Groups come from the shared mock store, so unread badges / presence / mute
   // are live and clear as conversations are read.
