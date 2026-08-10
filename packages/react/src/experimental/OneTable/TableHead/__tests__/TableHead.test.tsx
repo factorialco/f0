@@ -176,3 +176,34 @@ describe("TableHead rich header info", () => {
     ).not.toBeInTheDocument()
   })
 })
+
+describe("TableHead and TableCell highlighted", () => {
+  it("emphasizes only the highlighted header and cell, and marks the header for scroll targeting", () => {
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead highlighted>Email</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>John</TableCell>
+            <TableCell highlighted>john@example.com</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    const [plainHead, highlightedHead] = screen.getAllByRole("columnheader")
+    expect(highlightedHead.className).toMatch(/bg-f1-background-secondary/)
+    expect(highlightedHead).toHaveAttribute("data-highlighted", "true")
+    expect(plainHead.className).not.toMatch(/bg-f1-background-secondary/)
+    expect(plainHead).not.toHaveAttribute("data-highlighted")
+
+    const [plainCell, highlightedCell] = screen.getAllByRole("cell")
+    expect(highlightedCell.className).toMatch(/bg-f1-background-secondary/)
+    expect(plainCell.className).not.toMatch(/bg-f1-background-secondary/)
+  })
+})
