@@ -116,6 +116,14 @@ export interface UsageResult {
   composer: ComposerUsageResult
   /** Repo id → progress of the clone/pull started from the docs tag. */
   actions: Record<string, RepoActionState>
+  /**
+   * Repo id → uncommitted work this tool stashed, and the branch it was on.
+   * Separate from `actions` so the note outlives the next click.
+   */
+  stashes: Record<
+    string,
+    { label: string; branch: string | null; at: string }
+  >
 }
 
 /** The dev-server route serving the scan result. */

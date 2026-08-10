@@ -712,6 +712,8 @@ export function scanUsage() {
     composer: scanComposerUsage(),
     // Progress of any clone/pull the tag started, so it can report back.
     actions: { ...actions },
+    // Uncommitted work this tool set aside, kept until Storybook restarts.
+    stashes: { ...stashes },
   }
 }
 
@@ -756,6 +758,21 @@ function checkoutParent() {
  */
 const actions = Object.create(null)
 
+/**
+ * Exact wording the tag matches on to offer the stash-and-pull escape hatch.
+ * Shared so the two sides can't drift apart.
+ */
+export const DIRTY_MESSAGE = "Working tree is dirty — pull skipped"
+
+/**
+ * Work this tool moved aside, by repo id.
+ *
+ * Kept apart from `actions` because that entry is overwritten by whatever runs
+ * next: the note saying where somebody's uncommitted work went must outlive
+ * the next click on "Pull latest".
+ */
+const stashes = Object.create(null)
+
 function runGit(args, options = {}) {
   return new Promise((resolvePromise) => {
     execFile("git", args, { maxBuffer: 1024 * 1024, ...options }, (error, stdout, stderr) => {
@@ -772,7 +789,7 @@ function runGit(args, options = {}) {
  * there. Never merges or rebases, and refuses to touch a dirty working tree —
  * this runs against somebody's real checkout, possibly mid-task.
  */
-export async function runRepoAction(id, action) {
+export async function runRepoAction(id, action, options = {}) {
   const repo = KNOWN_REPOS[id]
   if (!repo) return { ok: false, message: `Unknown repo: ${id}` }
   if (actions[id]?.state === "running") return actions[id]
@@ -786,7 +803,9 @@ export async function runRepoAction(id, action) {
     return actions[id]
   }
 
-  const existing = repo.resolve()
+  // `root` is a test seam only — the HTTP handler passes an id and an action
+  // and nothing else, so a request can never point git at a path.
+  const existing = options.root ?? repo.resolve()
 
   if (action === "clone") {
     if (existing) return finish("done", `Already cloned at ${existing}`)
@@ -817,21 +836,88 @@ export async function runRepoAction(id, action) {
       : finish("error", result.output.trim().split("\n").slice(-3).join(" "))
   }
 
-  if (action === "pull") {
+  if (action === "pull" || action === "stash-pull") {
     if (!existing) return finish("error", "Nothing to pull — not cloned yet")
 
     const status = await runGit(["-C", existing, "status", "--porcelain"])
-    if (status.output.trim()) {
-      return finish("error", "Working tree is dirty — pull skipped")
+    const dirty = Boolean(status.output.trim())
+
+    if (dirty && action === "pull") {
+      return finish("error", DIRTY_MESSAGE)
+    }
+
+    const notes = []
+
+    if (dirty) {
+      // Named and timestamped: whatever this moves aside has to be findable
+      // afterwards, because it's somebody's unfinished work.
+      const label = `f0 usage tag: auto-stash ${new Date().toISOString()}`
+      const stash = await runGit([
+        "-C",
+        existing,
+        "stash",
+        "push",
+        "--include-untracked",
+        "-m",
+        label,
+      ])
+      if (!stash.ok) {
+        return finish("error", `Could not stash: ${lastLines(stash.output, 2)}`)
+      }
+      notes.push("stashed your changes")
+      stashes[id] = { label, branch: null, at: new Date().toISOString() }
+    }
+
+    const branch = (
+      await runGit(["-C", existing, "rev-parse", "--abbrev-ref", "HEAD"])
+    ).output.trim()
+    const target = await defaultBranchOf(existing)
+
+    // Recorded so the note can say which branch to go back to, not just that
+    // something was stashed.
+    if (stashes[id] && !stashes[id].branch) stashes[id].branch = branch
+
+    if (branch && branch !== target) {
+      const checkout = await runGit(["-C", existing, "checkout", target])
+      if (!checkout.ok) {
+        return finish(
+          "error",
+          `Stashed, but could not switch to ${target}: ${lastLines(checkout.output, 2)}`
+        )
+      }
+      notes.push(`switched ${branch} → ${target}`)
     }
 
     const result = await runGit(["-C", existing, "pull", "--ff-only"])
-    return result.ok
-      ? finish("done", "Up to date")
-      : finish("error", result.output.trim().split("\n").slice(-2).join(" "))
+    if (!result.ok) {
+      return finish(
+        "error",
+        [...notes, `pull failed: ${lastLines(result.output, 2)}`].join("; ")
+      )
+    }
+
+    return finish("done", [...notes, "up to date"].join("; "))
   }
 
   return finish("error", `Unknown action: ${action}`)
+}
+
+/** The last `count` lines of git output, for messages that stay readable. */
+function lastLines(output, count) {
+  return output.trim().split("\n").slice(-count).join(" ")
+}
+
+/** The remote's default branch (`origin/HEAD`), falling back to `main`. */
+async function defaultBranchOf(root) {
+  const head = await runGit([
+    "-C",
+    root,
+    "symbolic-ref",
+    "--short",
+    "refs/remotes/origin/HEAD",
+  ])
+  const name = head.output.trim().replace(/^origin\//, "")
+  return head.ok && name ? name : "main"
 }
 
 /** In-process cache so page views don't each trigger a filesystem walk. */
@@ -899,7 +985,10 @@ export function productUsageVitePlugin() {
         const id = params.get("repo") ?? ""
         const action = params.get("action") ?? ""
 
-        if (!(id in KNOWN_REPOS) || !["clone", "pull"].includes(action)) {
+        if (
+          !(id in KNOWN_REPOS) ||
+          !["clone", "pull", "stash-pull"].includes(action)
+        ) {
           return json(400, { ok: false, message: "Unknown repo or action" })
         }
 

@@ -1,10 +1,19 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { execFileSync } from "node:child_process"
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vitest"
 
+import { DIRTY_MESSAGE as TAG_DIRTY_MESSAGE } from "../.storybook/usage-contract.ts"
 import {
+  DIRTY_MESSAGE,
   KNOWN_REPOS,
   parseF0Imports,
   resolveComposerRepoRoot,
@@ -365,6 +374,76 @@ describe("runRepoAction", () => {
     const result = await runRepoAction("factorial", "rm -rf" as "pull")
 
     expect(result).toMatchObject({ state: "error" })
+  })
+
+  test("the tag and the scanner agree on the dirty message", () => {
+    // The tag can't import the scanner (Node built-ins), so it keeps its own
+    // copy — and matches on it to decide whether to offer "Stash & pull".
+    // Drift here silently removes that button.
+    expect(TAG_DIRTY_MESSAGE).toBe(DIRTY_MESSAGE)
+  })
+})
+
+describe("stash-pull", () => {
+  let repoRoot: string
+
+  const git = (args: string[], cwd = repoRoot) =>
+    execFileSync("git", args, { cwd, stdio: "pipe" }).toString()
+
+  beforeAll(() => {
+    // A real repo with an origin, so pull/checkout behave like they do on a
+    // developer's machine rather than against a mock.
+    const base = mkdtempSync(join(tmpdir(), "f0-stash-pull-"))
+    const origin = join(base, "origin")
+    repoRoot = join(base, "clone")
+
+    mkdirSync(origin, { recursive: true })
+    git(["init", "--bare", "--initial-branch=main", origin], base)
+
+    const seed = join(base, "seed")
+    mkdirSync(seed, { recursive: true })
+    git(["init", "--initial-branch=main"], seed)
+    git(["config", "user.email", "test@example.com"], seed)
+    git(["config", "user.name", "Test"], seed)
+    writeFileSync(join(seed, "README.md"), "one\n")
+    git(["add", "."], seed)
+    git(["commit", "-m", "first"], seed)
+    git(["remote", "add", "origin", origin], seed)
+    git(["push", "-u", "origin", "main"], seed)
+
+    git(["clone", origin, repoRoot], base)
+    git(["config", "user.email", "test@example.com"])
+    git(["config", "user.name", "Test"])
+
+    // Somebody mid-task: on a feature branch, with uncommitted work.
+    git(["checkout", "-b", "feature/wip"])
+    writeFileSync(join(repoRoot, "README.md"), "local edit\n")
+
+    // Meanwhile main moved on.
+    writeFileSync(join(seed, "README.md"), "two\n")
+    git(["commit", "-am", "second"], seed)
+    git(["push"], seed)
+  })
+
+  afterAll(() => rmSync(dirname(repoRoot), { recursive: true, force: true }))
+
+  test("stashes, switches to the default branch and fast-forwards", async () => {
+    const result = await runRepoAction("factorial", "stash-pull", {
+      root: repoRoot,
+    })
+
+    expect(result).toMatchObject({ state: "done" })
+    expect(git(["rev-parse", "--abbrev-ref", "HEAD"]).trim()).toBe("main")
+    expect(readFileSync(join(repoRoot, "README.md"), "utf8")).toBe("two\n")
+  })
+
+  test("keeps the stashed work recoverable", () => {
+    // The whole promise of the button: nothing of theirs is lost. Note this
+    // asserts the stash holds their edit, not that `git stash pop` applies
+    // cleanly — once main has moved under the same file, popping conflicts,
+    // and that's ordinary git rather than something to paper over.
+    expect(git(["stash", "list"])).toContain("f0 usage tag: auto-stash")
+    expect(git(["stash", "show", "-p", "stash@{0}"])).toContain("local edit")
   })
 })
 

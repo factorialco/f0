@@ -10,6 +10,7 @@ import type {
   ProductUsageEntry,
   UsageResult,
 } from "../scripts/product-usage-scan.mjs"
+import { DIRTY_MESSAGE } from "./usage-contract.ts"
 import {
   ENABLED,
   rescan,
@@ -25,6 +26,9 @@ const PROTOTYPES_SHOWN = 6
 
 /** How many f0 components to name before collapsing the rest. */
 const INTERNAL_SHOWN = 6
+
+/** Pending-action key for the button that clones every missing repo. */
+const CLONE_ALL = "clone-all"
 
 /** Sums a component's usage across every name it is exported under. */
 function collectUsage(
@@ -180,12 +184,24 @@ function ProductSection({
  */
 function usePendingAction() {
   const [pending, setPending] = React.useState<string | null>(null)
+  const [failure, setFailure] = React.useState<string | null>(null)
 
   const run = React.useCallback(
-    async (name: string, work: () => Promise<unknown>) => {
+    async (
+      name: string,
+      work: () => Promise<{ ok: boolean; message?: string } | void>
+    ) => {
       setPending(name)
+      setFailure(null)
       try {
-        await work()
+        const result = await work()
+        // A request the server refused never reaches the actions payload, so
+        // this is the only place it can be reported.
+        if (result && !result.ok) {
+          setFailure(result.message ?? "Request failed")
+        }
+      } catch {
+        setFailure("Request failed")
       } finally {
         setPending(null)
       }
@@ -193,7 +209,7 @@ function usePendingAction() {
     []
   )
 
-  return { pending, run }
+  return { pending, failure, run }
 }
 
 /** A small button styled for the dark tooltip surface. */
@@ -241,9 +257,25 @@ function MissingRepos({
   missing: ProductUsageData["missing"]
   actions: UsageResult["actions"]
 }) {
-  const { pending, run } = usePendingAction()
+  const { pending, failure, run } = usePendingAction()
 
   if (missing.length === 0) return null
+
+  const label = missing.map((repo) => repo.id).join(" & ")
+  const cloningId = missing.find(
+    (repo) => actions?.[repo.id]?.state === "running"
+  )?.id
+  const cloning = pending === CLONE_ALL || Boolean(cloningId)
+
+  // Sequential: two clones of Factorial-sized repos at once help nobody.
+  const cloneAll = async () => {
+    let outcome: { ok: boolean; message?: string } = { ok: true }
+    for (const repo of missing) {
+      const result = await runRepoAction(repo.id, "clone")
+      if (!result.ok && outcome.ok) outcome = result
+    }
+    return outcome
+  }
 
   return (
     <div className="mt-2 text-sm opacity-70">
@@ -258,26 +290,27 @@ function MissingRepos({
         — no local checkout.
       </p>
       <div className="mt-2 flex flex-col gap-2">
+        <span className="flex items-center gap-2">
+          {/* One button for all of them: nobody wants to click Clone twice and
+              wait through two monorepos in sequence by hand. */}
+          <TooltipButton
+            onClick={() => void run(CLONE_ALL, cloneAll)}
+            disabled={cloning}
+          >
+            {cloning ? `Cloning ${cloningId ?? label}…` : `Clone ${label}`}
+          </TooltipButton>
+          <span className="opacity-80">
+            {cloning
+              ? "This takes a few minutes — the tag updates when it lands."
+              : failure}
+          </span>
+        </span>
         {missing.map((repo) => {
           const status = actions?.[repo.id]
-          const cloning = pending === repo.id || status?.state === "running"
+          if (!status || status.state === "running") return null
           return (
-            <span key={repo.id} className="flex items-center gap-2">
-              <TooltipButton
-                onClick={() =>
-                  void run(repo.id, () => runRepoAction(repo.id, "clone"))
-                }
-                disabled={cloning}
-              >
-                {cloning ? `Cloning ${repo.id}…` : `Clone ${repo.id}`}
-              </TooltipButton>
-              <span className="opacity-80">
-                {cloning
-                  ? "This takes a few minutes — the tag updates when it lands."
-                  : status && status.state !== "running"
-                    ? status.message
-                    : null}
-              </span>
+            <span key={repo.id} className="opacity-80">
+              <code className="font-mono">{repo.id}</code>: {status.message}
             </span>
           )
         })}
@@ -296,58 +329,112 @@ function MissingRepos({
 function RefreshActions({
   repos,
   actions,
+  stashes,
   generatedAt,
+  rescanning,
 }: {
   repos: ProductUsageData["repos"]
   actions: UsageResult["actions"]
+  stashes: UsageResult["stashes"]
   generatedAt: string
+  rescanning: boolean
 }) {
-  const { pending, run } = usePendingAction()
+  const { pending, failure, run } = usePendingAction()
 
-  // Either the button is mid-click, or the server still has git running from
-  // an earlier one (a pull outlives the request that started it).
-  const pullingOnServer = repos.some(
+  // Either a button is mid-click, or the server still has git running from an
+  // earlier one (a pull outlives the request that started it).
+  const runningOnServer = repos.some(
     (repo) => actions?.[repo.id]?.state === "running"
   )
-  const busy = pending !== null || pullingOnServer
+  const busy = pending !== null || runningOnServer || rescanning
+
+  // Repos a plain pull refused to touch. Offering "Pull latest" again would
+  // just reproduce the same refusal, so those get the stash route instead.
+  const blocked = repos.filter(
+    (repo) => actions?.[repo.id]?.message === DIRTY_MESSAGE
+  )
 
   const results = repos
     .map((repo) => [repo.id, actions?.[repo.id]] as const)
     .filter(([, status]) => status && status.state !== "running")
 
+  // Sequential: two gits writing at once, and the second failing on a lock,
+  // helps nobody. The first refusal is what gets reported.
+  const pullAll = async () => {
+    let outcome: { ok: boolean; message?: string } = { ok: true }
+    for (const repo of repos) {
+      const result = await runRepoAction(repo.id, "pull")
+      if (!result.ok && outcome.ok) outcome = result
+    }
+    return outcome
+  }
+
   return (
     <div className="mt-3 border-0 border-t border-solid border-f1-border-inverse pt-2 text-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <TooltipButton
-          disabled={busy}
-          onClick={() =>
-            void run("pull", () =>
-              // Sequential: two gits writing at once, and the second failing
-              // on a lock, helps nobody.
-              repos.reduce(
-                (queue, repo) =>
-                  queue.then(() => runRepoAction(repo.id, "pull")),
-                Promise.resolve()
-              )
-            )
-          }
-        >
-          {pending === "pull" || pullingOnServer ? "Pulling…" : "Pull latest"}
-        </TooltipButton>
+        {blocked.length === 0 && (
+          <TooltipButton
+            disabled={busy}
+            onClick={() => void run("pull", pullAll)}
+          >
+            {pending === "pull" || runningOnServer ? "Pulling…" : "Pull latest"}
+          </TooltipButton>
+        )}
+        {blocked.map((repo) => (
+          <TooltipButton
+            key={repo.id}
+            disabled={busy}
+            onClick={() =>
+              void run(repo.id, () => runRepoAction(repo.id, "stash-pull"))
+            }
+          >
+            {pending === repo.id
+              ? `Stashing ${repo.id}…`
+              : `Stash & pull ${repo.id}`}
+          </TooltipButton>
+        ))}
         <TooltipButton
           disabled={busy}
           onClick={() => void run("rescan", rescan)}
         >
-          {pending === "rescan" ? "Rescanning…" : "Rescan"}
+          Rescan
         </TooltipButton>
         <span className="opacity-70">
-          {pending === "pull" || pullingOnServer
-            ? `Fetching ${plural(repos.length, "repo")}…`
-            : pending === "rescan"
-              ? "Reading the repos again…"
+          {rescanning
+            ? "Rescanning…"
+            : pending !== null || runningOnServer
+              ? "Running git…"
               : `Scanned at ${new Date(generatedAt).toLocaleTimeString()}`}
         </span>
       </div>
+      {blocked.length > 0 && (
+        <p className="m-0 mt-2 opacity-70">
+          Stashing keeps your work — restore it with{" "}
+          <code className="font-mono">git stash pop</code>. It also switches to
+          the default branch before pulling.
+        </p>
+      )}
+      {failure && <p className="m-0 mt-2 opacity-80">{failure}</p>}
+      {Object.entries(stashes ?? {}).map(([id, stash]) => (
+        // Someone's uncommitted work is sitting in a stash because of a click
+        // here. Say where it is, and how to get back to it, until Storybook
+        // restarts.
+        <p key={id} className="m-0 mt-2 opacity-80">
+          Stashed your <code className="font-mono">{id}</code> changes
+          {stash.branch ? (
+            <>
+              {" "}
+              from <code className="font-mono">{stash.branch}</code>
+            </>
+          ) : null}
+          . Restore with{" "}
+          <code className="font-mono">
+            git -C {id} {stash.branch ? `checkout ${stash.branch} && ` : ""}git
+            stash pop
+          </code>
+          .
+        </p>
+      ))}
       {results.length > 0 && (
         <ul className="m-0 mt-2 list-none space-y-1 p-0 opacity-70">
           {results.map(([id, status]) => (
@@ -386,9 +473,11 @@ function resolveUsage(result: UsageResult, names: string[]) {
 function UsageDetails({
   result,
   names,
+  rescanning,
 }: {
   result: UsageResult
   names: string[]
+  rescanning: boolean
 }) {
   const { product, productFiles, prototypes, internal } = resolveUsage(
     result,
@@ -434,7 +523,9 @@ function UsageDetails({
         <RefreshActions
           repos={product.repos}
           actions={result.actions}
+          stashes={result.stashes}
           generatedAt={result.generatedAt}
+          rescanning={rescanning}
         />
       )}
     </div>
@@ -461,7 +552,7 @@ export function ProductUsageTag({
   /** Folder relative to `src/`, used to look up what it exports. */
   componentPath: string | null
 }) {
-  const result = useProductUsage()
+  const { data: result, rescanning } = useProductUsage()
 
   // Before anything renders: the loading state would otherwise flash on the
   // public build for the frame between mount and the effect resolving to
@@ -541,7 +632,7 @@ export function ProductUsageTag({
         align="start"
         className="w-max max-w-[min(90vw,42rem)] overflow-hidden !p-0"
       >
-        <UsageDetails result={result} names={lookup} />
+        <UsageDetails result={result} names={lookup} rescanning={rescanning} />
       </TooltipContent>
     </Tooltip>
   )

@@ -29,11 +29,25 @@ type State = UsageResult | null | undefined
 
 let state: State
 let inFlight: Promise<void> | undefined
-const listeners = new Set<(next: State) => void>()
+let rescanning = false
+const listeners = new Set<() => void>()
+
+function notify() {
+  for (const listener of listeners) listener()
+}
 
 function publish(next: State) {
+  const wasRunning = isRunning(state)
   state = next
-  for (const listener of listeners) listener(next)
+
+  // A clone or pull that just finished changed what's on disk, so the numbers
+  // on screen are stale the moment it lands. Refresh them without making
+  // anyone find the Rescan button.
+  if (wasRunning && !isRunning(next)) {
+    void rescan()
+  }
+
+  notify()
 }
 
 async function load(): Promise<void> {
@@ -73,39 +87,49 @@ function isRunning(value: State) {
 
 /**
  * The usage payload: `undefined` while loading, `null` when unavailable (no
- * endpoint — i.e. the public build), otherwise the scan result.
+ * endpoint — i.e. the public build), otherwise the scan result. `rescanning`
+ * covers both the manual button and the refresh that follows a clone or pull.
  */
 export function useProductUsage() {
-  const [value, setValue] = useState<State>(state)
+  const [, forceRender] = useState(0)
 
   useEffect(() => {
-    listeners.add(setValue)
+    const listener = () => forceRender((n) => n + 1)
+    listeners.add(listener)
     ensureLoaded()
     return () => {
-      listeners.delete(setValue)
+      listeners.delete(listener)
     }
   }, [])
 
   // A clone runs for minutes; keep re-reading so the tag shows the result
   // without anyone having to reload Storybook.
   useEffect(() => {
-    if (!isRunning(value)) return
+    if (!isRunning(state)) return
     const timer = setInterval(() => ensureLoaded(true), POLL_MS)
     return () => clearInterval(timer)
-  }, [value])
+  })
 
-  return value
+  return { data: state, rescanning }
 }
 
 /** Re-runs the scan (bypassing the server's cache) and republishes it. */
 export async function rescan() {
   if (!ENABLED) return
+
+  rescanning = true
+  notify()
   try {
     const response = await fetch(`${ENDPOINT}?refresh=1`)
-    if (response.ok) publish((await response.json()) as UsageResult)
+    if (response.ok) {
+      state = (await response.json()) as UsageResult
+    }
   } catch {
     // Leave the previous data in place — a failed refresh isn't worth blanking
     // the tag for.
+  } finally {
+    rescanning = false
+    notify()
   }
 }
 
@@ -114,15 +138,37 @@ export async function rescan() {
  * there. Returns as soon as the work has started; progress arrives through the
  * usual payload (see `actions`).
  */
-export async function runRepoAction(repo: string, action: "clone" | "pull") {
-  if (!ENABLED) return
+export async function runRepoAction(
+  repo: string,
+  action: "clone" | "pull" | "stash-pull"
+): Promise<{ ok: boolean; message?: string }> {
+  if (!ENABLED) return { ok: false, message: "Disabled outside dev" }
+
+  let outcome: { ok: boolean; message?: string }
   try {
-    await fetch(`${ACTION_ENDPOINT}?repo=${repo}&action=${action}`, {
-      method: "POST",
-    })
-  } catch {
-    // The server reports failures through the payload; a network error here
-    // just means nothing started.
+    const response = await fetch(
+      `${ACTION_ENDPOINT}?repo=${repo}&action=${action}`,
+      { method: "POST" }
+    )
+    // A refusal here (stale dev server that doesn't know this action, wrong
+    // method, cross-origin) is silent otherwise, and silence is exactly what
+    // makes a button feel broken.
+    outcome = response.ok
+      ? { ok: true }
+      : {
+          ok: false,
+          message:
+            (
+              (await response.json().catch(() => null)) as {
+                message?: string
+              } | null
+            )?.message ?? `Request failed (${response.status})`,
+        }
+  } catch (error) {
+    outcome = { ok: false, message: `Could not reach the dev server` }
+    void error
   }
+
   await ensureLoaded(true)
+  return outcome
 }
