@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.16.3](https://github.com/factorialco/f0/compare/f0-react-v6.16.2...f0-react-v6.16.3) (2026-08-10)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** size to its container, not the window ([#5069](https://github.com/factorialco/f0/issues/5069)) ([9b01c74](https://github.com/factorialco/f0/commit/9b01c74007c414570770f030c21e3e25bff0175c))
+
 ## [6.16.2](https://github.com/factorialco/f0/compare/f0-react-v6.16.1...f0-react-v6.16.2) (2026-08-10)
 
 
