@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { Calendar, Clock } from "@/icons/app"
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { useEffect, useState } from "react"
 
-import { type HomeWidgetItem } from "../slotRenderers"
+import { Calendar, Clock } from "@/icons/app"
+import { act, screen, userEvent, zeroRender } from "@/testing/test-utils"
+
+import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
 import { NewHomeLayout } from "./index"
 
 /**
@@ -12,6 +14,18 @@ import { NewHomeLayout } from "./index"
  * ResizeObserver reports back to it.
  */
 let layoutWidth = 1400
+
+/** Every live ResizeObserver callback, so a test can act like the box resized. */
+let resizeCallbacks: Array<() => void> = []
+
+/**
+ * Resizes the layout the way the window does: the new width is what
+ * `clientWidth` reports, and the observers are told to read it again.
+ */
+const resizeLayoutTo = (width: number) => {
+  layoutWidth = width
+  act(() => resizeCallbacks.forEach((notify) => notify()))
+}
 
 const widget = (
   id: string,
@@ -51,15 +65,82 @@ const renderLayout = (width: number, props = {}) => {
   )
 }
 
+/* ------------------- a widget whose render is not free ------------------- */
+
+/** How many times the clock-in tile has been built from scratch. */
+let clockMounts = 0
+
+/**
+ * The rail's clock-in tile as the real one behaves: it has NOTHING to show on
+ * its first frame and only settles once its deferred read lands (a running
+ * total, a fetch, a timer — anything a mount has to start over).
+ *
+ * That makes it the instrument for these tests: a remount both bumps
+ * `clockMounts` and drops the tile back to "clocking in…", so tearing the widget
+ * down and building it again is visible instead of silent.
+ */
+const DeferredClockIn = () => {
+  const [reading, setReading] = useState<string | null>(null)
+  useEffect(() => {
+    clockMounts += 1
+    const settle = setTimeout(() => setReading("08:00"), 0)
+    return () => clearTimeout(settle)
+  }, [])
+  return <span>{reading ?? "clocking in…"}</span>
+}
+
+const DEFERRED_RENDERERS: SlotRenderers = {
+  "clock-in": { render: () => <DeferredClockIn /> },
+}
+
+const DEFERRED_RAIL: HomeWidgetItem[] = [
+  {
+    id: "clock",
+    icon: Clock,
+    locked: true,
+    header: { title: "clock" },
+    slots: [{ visualization: "clock-in", params: {} }],
+  },
+  {
+    id: "events",
+    icon: Calendar,
+    header: { title: "events" },
+    // A label of its own, so a test can ask after THIS widget's body without
+    // matching the header that names it too.
+    slots: [
+      {
+        visualization: "indicators",
+        params: { items: [{ label: "requests", content: "1" }] },
+      },
+    ],
+  },
+]
+
+/** Renders the rail with the deferred tile in it, settled. */
+const renderDeferredRail = async (width: number) => {
+  const result = renderLayout(width, {
+    rightWidgets: DEFERRED_RAIL,
+    slotRenderers: DEFERRED_RENDERERS,
+  })
+  await screen.findByText("08:00")
+  return result
+}
+
 beforeEach(() => {
   Object.defineProperty(HTMLElement.prototype, "clientWidth", {
     configurable: true,
     get: () => layoutWidth,
   })
-  // jsdom has no ResizeObserver; the layout only needs the initial read.
+  resizeCallbacks = []
+  clockMounts = 0
+  // jsdom has no ResizeObserver. This one keeps its callback so a test can fire
+  // it (`resizeLayoutTo`) instead of only serving the initial read.
   vi.stubGlobal(
     "ResizeObserver",
     class {
+      constructor(callback: () => void) {
+        resizeCallbacks.push(callback)
+      }
       observe() {}
       disconnect() {}
     }
@@ -184,6 +265,73 @@ describe("NewHomeLayout", () => {
       const root = container.querySelector(".isolate") as HTMLElement
 
       expect(root.style.gridTemplateColumns).toBe("minmax(0, 1fr)")
+    })
+  })
+
+  /**
+   * ONE render per rail widget, whatever the rail is doing. Collapsing, hovering
+   * a glyph and expanding again are presentation changes — none of them may
+   * restart a widget's render, so a tile that had loaded stays loaded.
+   */
+  describe("the rail's widgets stay mounted", () => {
+    test("collapsing on resize keeps the same render, settled", async () => {
+      await renderDeferredRail(1400)
+      expect(clockMounts).toBe(1)
+
+      resizeLayoutTo(1000)
+
+      // Collapsed — and the tile is still the one that had already settled.
+      expect(screen.getByRole("button", { name: "clock" })).toBeInTheDocument()
+      expect(screen.getByText("08:00")).toBeInTheDocument()
+      expect(clockMounts).toBe(1)
+    })
+
+    test("keeps the collapsed rail out of sight until a glyph is hovered", async () => {
+      await renderDeferredRail(1000)
+
+      expect(screen.getByText("08:00")).not.toBeVisible()
+    })
+
+    test("hovering a glyph floats THAT widget, and only it", async () => {
+      await renderDeferredRail(1000)
+
+      await userEvent.hover(screen.getByRole("button", { name: "clock" }))
+
+      expect(screen.getByText("08:00")).toBeVisible()
+      // The rail's other widget is mounted beside it, not shown.
+      expect(screen.getByText("requests")).not.toBeVisible()
+      expect(clockMounts).toBe(1)
+    })
+
+    test("hovering does not rebuild the widget it floats", async () => {
+      await renderDeferredRail(1000)
+
+      await userEvent.hover(screen.getByRole("button", { name: "clock" }))
+
+      expect(screen.queryByText("clocking in…")).not.toBeInTheDocument()
+      expect(clockMounts).toBe(1)
+    })
+
+    test("expanding again keeps the render it had while collapsed", async () => {
+      await renderDeferredRail(1400)
+      resizeLayoutTo(1000)
+      resizeLayoutTo(1400)
+
+      expect(
+        screen.getByLabelText("Collapse widgets panel")
+      ).toBeInTheDocument()
+      expect(screen.getByText("08:00")).toBeVisible()
+      expect(clockMounts).toBe(1)
+    })
+
+    test("collapsing by hand keeps it mounted too", async () => {
+      await renderDeferredRail(1400)
+
+      await userEvent.click(screen.getByLabelText("Collapse widgets panel"))
+
+      expect(screen.getByLabelText("Expand widgets panel")).toBeInTheDocument()
+      expect(screen.getByText("08:00")).toBeInTheDocument()
+      expect(clockMounts).toBe(1)
     })
   })
 })

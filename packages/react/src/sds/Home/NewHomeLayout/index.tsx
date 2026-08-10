@@ -4,6 +4,7 @@ import {
   forwardRef,
   Fragment,
   ReactNode,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -269,6 +270,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       ? rightWidgets.find((widget) => widget.id === openId)
       : undefined
 
+    // Nothing floats out of an EXPANDED rail, so the hover is dropped as soon as
+    // the rail opens up: kept, it would reopen whatever was last hovered the
+    // moment the layout narrowed again.
+    useEffect(() => {
+      if (!collapsed) setOpenId(null)
+    }, [collapsed])
+
     const cancelLeave = () => {
       if (leaveTimer.current) clearTimeout(leaveTimer.current)
       leaveTimer.current = null
@@ -442,121 +450,149 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             {stackedChildren}
           </WidgetContainer>
         </div>
-        {stacked ? null : hasSide ? (
-          collapsed ? (
-            // The collapsed strip: one avatar per widget, the widget's own
-            // catalog glyph. Hover/click floats the widget over the feed.
-            // NO FADE HERE: the strip is a short column of 40px glyphs, and a
-            // mask over those washes the glyphs themselves out rather than
-            // hinting at content past an edge. The fade belongs to the expanded
-            // rail, where the content is tall cards.
-            // `-m-1 p-1`: the hasUpdates dot pokes 2px past the 40px glyphs,
-            // and the scrollport would clip it — bleed the scrollport out by
-            // 4px (padding puts the glyphs back) so the dot stays inside it.
-            <aside
-              className={cn(
-                "-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1",
-                SCROLLBAR_HIDDEN
-              )}
-              onMouseLeave={scheduleLeave}
-              onMouseEnter={cancelLeave}
-            >
-              {rightWidgets.map((widget) => (
-                <button
-                  key={widget.id}
-                  type="button"
-                  aria-label={widget.header?.title ?? widget.id}
-                  aria-expanded={openId === widget.id}
-                  onMouseEnter={(event) =>
-                    openFromAnchor(widget.id, event.currentTarget)
-                  }
-                  onClick={(event) =>
-                    openId === widget.id
-                      ? setOpenId(null)
-                      : openFromAnchor(widget.id, event.currentTarget)
-                  }
-                  className="rounded-lg"
-                >
-                  {/* Same accent dot HomeListItem uses for unread rows. */}
-                  <span className="relative inline-flex">
-                    {widget.icon ? (
-                      <F0AvatarIcon icon={widget.icon} size="lg" />
-                    ) : (
-                      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
-                        {(widget.header?.title ?? widget.id).charAt(0)}
-                      </span>
-                    )}
-                    {widget.hasUpdates ? (
-                      // Same dot HomeListItem draws for unread rows — the ring
-                      // keeps it legible over any glyph.
-                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
-                    ) : null}
-                  </span>
-                </button>
-              ))}
-              {/* Always offered, not only in edit mode: collapsed, the strip has
+        {stacked || !hasSide || !collapsed ? null : (
+          // The collapsed strip: one avatar per widget, the widget's own
+          // catalog glyph. Hover/click floats the widget over the feed.
+          // NO FADE HERE: the strip is a short column of 40px glyphs, and a
+          // mask over those washes the glyphs themselves out rather than
+          // hinting at content past an edge. The fade belongs to the expanded
+          // rail, where the content is tall cards.
+          // `-m-1 p-1`: the hasUpdates dot pokes 2px past the 40px glyphs,
+          // and the scrollport would clip it — bleed the scrollport out by
+          // 4px (padding puts the glyphs back) so the dot stays inside it.
+          <aside
+            className={cn(
+              "-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1",
+              SCROLLBAR_HIDDEN
+            )}
+            onMouseLeave={scheduleLeave}
+            onMouseEnter={cancelLeave}
+          >
+            {rightWidgets.map((widget) => (
+              <button
+                key={widget.id}
+                type="button"
+                aria-label={widget.header?.title ?? widget.id}
+                aria-expanded={openId === widget.id}
+                onMouseEnter={(event) =>
+                  openFromAnchor(widget.id, event.currentTarget)
+                }
+                onClick={(event) =>
+                  openId === widget.id
+                    ? setOpenId(null)
+                    : openFromAnchor(widget.id, event.currentTarget)
+                }
+                className="rounded-lg"
+              >
+                {/* Same accent dot HomeListItem uses for unread rows. */}
+                <span className="relative inline-flex">
+                  {widget.icon ? (
+                    <F0AvatarIcon icon={widget.icon} size="lg" />
+                  ) : (
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
+                      {(widget.header?.title ?? widget.id).charAt(0)}
+                    </span>
+                  )}
+                  {widget.hasUpdates ? (
+                    // Same dot HomeListItem draws for unread rows — the ring
+                    // keeps it legible over any glyph.
+                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
+                  ) : null}
+                </span>
+              </button>
+            ))}
+            {/* Always offered, not only in edit mode: collapsed, the strip has
                   no edit affordance of its own, and adding a widget is the one
                   thing you would still want from it. */}
-              {canEditSide("right") && onClickAddNewWidget ? (
-                <button
-                  type="button"
-                  aria-label="Add widget"
-                  onClick={() => onClickAddNewWidget("right")}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:text-f1-foreground"
-                >
-                  +
-                </button>
-              ) : null}
-            </aside>
-          ) : (
-            <aside
-              ref={railFade.ref}
-              className={cn("min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
-              style={railFade.style}
-            >
-              <WidgetContainer
-                side="right"
-                widgets={rightWidgets}
-                slotRenderers={slotRenderers}
-                renderWidget={renderWidget}
-                ctx={ctx}
-                editing={isEditing}
-                disableEdition={!canEditSide("right")}
-                onReorder={
-                  onReorderWidgets
-                    ? (ids) => onReorderWidgets("right", ids)
-                    : undefined
-                }
-                onRemoveWidget={onRemoveWidget}
-                onClickAddNewWidget={
-                  onClickAddNewWidget
-                    ? () => onClickAddNewWidget("right")
-                    : undefined
-                }
+            {canEditSide("right") && onClickAddNewWidget ? (
+              <button
+                type="button"
+                aria-label="Add widget"
+                onClick={() => onClickAddNewWidget("right")}
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:text-f1-foreground"
               >
-                {aside}
-              </WidgetContainer>
-            </aside>
-          )
-        ) : null}
-        {/* The floating panel: the SAME widget render the expanded rail makes,
-            at the expanded rail width, level with its avatar. */}
-        {openWidget ? (
-          <div className="pointer-events-none absolute inset-0">
-            <div
-              className="pointer-events-auto absolute rounded-xl bg-f1-background"
-              style={{
-                top: panelTop,
-                right: COLLAPSED_RAIL_WIDTH + 8,
-                width: asideWidth,
-              }}
-              onMouseEnter={cancelLeave}
-              onMouseLeave={scheduleLeave}
+                +
+              </button>
+            ) : null}
+          </aside>
+        )}
+        {/* THE RAIL BODY — one mount, whatever the rail is doing.
+
+            Expanded it is the rail's column. Collapsed it is the FLOATING PANEL:
+            the same element, taken out of the grid and put at the expanded rail
+            width level with the hovered glyph, showing that one widget while the
+            rest stay mounted beside it (`visibleWidgetId`).
+
+            This used to be two trees — a container for the column and a second
+            render of the open widget for the panel — and either one appearing or
+            disappearing tore down every widget in it. Crossing the collapse
+            threshold on a window resize, and every hover of a glyph, therefore
+            built the rail's widgets again from nothing: a tile that had loaded
+            went back to loading, a running clock restarted, an animation
+            replayed. Presentation changes now move ONE render around instead of
+            replacing it. (Stacked is the exception, and cannot be otherwise:
+            below `md` the rail's widgets belong to the main column's flow,
+            interleaved with content this layout doesn't own.) */}
+        {stacked || !hasSide ? null : (
+          <aside
+            ref={railFade.ref}
+            // With nothing hovered there is no panel to see or to read out — but
+            // its widgets stay mounted underneath, which is the whole point.
+            hidden={collapsed && !openWidget}
+            className={cn(
+              "min-h-0 overflow-y-auto",
+              SCROLLBAR_HIDDEN,
+              // Above the feed it floats over, and opaque: the widget behind it
+              // must not read through the card.
+              collapsed && "absolute z-10 rounded-xl bg-f1-background"
+            )}
+            style={
+              collapsed
+                ? {
+                    top: panelTop,
+                    right: COLLAPSED_RAIL_WIDTH + 8,
+                    width: asideWidth,
+                    // The panel grows to its widget, up to what is left below
+                    // its glyph, and scrolls past that.
+                    maxHeight: `calc(100% - ${panelTop}px)`,
+                  }
+                : railFade.style
+            }
+            onMouseEnter={collapsed ? cancelLeave : undefined}
+            onMouseLeave={collapsed ? scheduleLeave : undefined}
+          >
+            <WidgetContainer
+              side="right"
+              widgets={rightWidgets}
+              // Collapsed, this container IS the panel: one widget shown, the
+              // others hidden rather than dropped.
+              visibleWidgetId={collapsed ? openId : undefined}
+              slotRenderers={slotRenderers}
+              renderWidget={renderWidget}
+              ctx={ctx}
+              editing={isEditing}
+              disableEdition={!canEditSide("right")}
+              onReorder={
+                onReorderWidgets
+                  ? (ids) => onReorderWidgets("right", ids)
+                  : undefined
+              }
+              onRemoveWidget={onRemoveWidget}
+              // Not from the panel: collapsed, the strip carries the add
+              // affordance, and a placeholder under a single floating widget
+              // would be an offer in the wrong place.
+              onClickAddNewWidget={
+                onClickAddNewWidget && !collapsed
+                  ? () => onClickAddNewWidget("right")
+                  : undefined
+              }
             >
-              {render(openWidget)}
-            </div>
-          </div>
-        ) : null}
+              {/* The rail's freeform content belongs to the COLUMN, not to one
+                  widget floating out of it. */}
+              {collapsed ? null : aside}
+            </WidgetContainer>
+          </aside>
+        )}
       </div>
     )
   }
