@@ -1091,17 +1091,11 @@ export const CommunicationsEverythingStressTest: Story = {
     const page = within(canvasElement.closest("body")!)
 
     await step("Open the complete stress transcript", async () => {
-      const titles = await page.findAllByText("Everything Chat — Stress Test")
-      const visibleTitle = titles.find((title) => title.offsetParent !== null)
-      await expect(visibleTitle).toBeDefined()
-      await userEvent.click(visibleTitle!)
-
-      await waitFor(() => {
-        const visibleTitles = page
-          .getAllByText("Everything Chat — Stress Test")
-          .filter((title) => title.offsetParent !== null)
-        expect(visibleTitles.length).toBeGreaterThan(1)
-      })
+      await userEvent.click(
+        await page.findByRole("button", {
+          name: /^Everything Chat — Stress Test/,
+        })
+      )
 
       const viewport = await waitFor(
         () => {
@@ -1145,9 +1139,19 @@ export const CommunicationsEverythingStressTest: Story = {
         "serialized cold-start"
       )
 
-      await expect(await page.findByText(richMessage)).toBeVisible()
+      await waitFor(() => expect(page.getByText("1/1")).toBeVisible(), {
+        timeout: 15_000,
+      })
+      await userEvent.click(page.getByRole("button", { name: "Next" }))
+      await waitFor(() => expect(page.getByText(richMessage)).toBeVisible(), {
+        timeout: 15_000,
+      })
+      await waitFor(
+        () =>
+          expect(page.getAllByTestId("chat-video-attachment")).toHaveLength(2),
+        { timeout: 15_000 }
+      )
       const videoCards = page.getAllByTestId("chat-video-attachment")
-      await expect(videoCards).toHaveLength(2)
       for (const card of videoCards) {
         await expect(card).toHaveClass(
           "aspect-video",

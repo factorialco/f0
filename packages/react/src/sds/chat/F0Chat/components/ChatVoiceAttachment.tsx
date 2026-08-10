@@ -235,7 +235,7 @@ const ChatVoiceAttachmentContent = ({
       className={cn(
         // 320px by default, shrinking with the column when it doesn't fit.
         // The fixed height is also used by the deferred placeholder.
-        "group/voice flex h-[58px] w-80 min-w-0 max-w-full items-center gap-2 p-3",
+        "group/voice flex h-[58px] w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
         isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
         cornerClass,
         className,
