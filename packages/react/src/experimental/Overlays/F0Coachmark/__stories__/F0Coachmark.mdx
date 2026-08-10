@@ -1,0 +1,476 @@
+import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Coachmark.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# F0Coachmark
+
+A dismissible panel anchored to an element, used to point out a feature the user has not discovered yet. It carries a title, optional supporting copy and a single call to action. For a passive hint on hover use `Tooltip`; for a message tied to the page rather than to one element use `F0Alert`; for a decision that must be resolved before continuing use `F0Dialog`.
+
+There is no component to render and no `open` prop to track. Coachmarks are opened imperatively, the same way toasts are, and close themselves when the user acknowledges them:
+
+```tsx
+import { coachmarks } from "@factorialco/f0-react/experimental"
+
+coachmarks.open({
+  id: "smart-filters",
+  targetElement: "#filters-button",
+  title: "Filters got smarter",
+  description:
+    "Stack filters on jobs and candidates, then save the combination as a view.",
+  action: { label: "Learn more", onClick: () => openDocs() },
+})
+```
+
+`<F0Provider>` mounts the renderer, so `coachmarks.open` works from anywhere — an effect, an event handler, a module outside React.
+
+## Anatomy
+
+<Canvas of={Stories.Basic} />
+
+## Options
+
+`coachmarks.open(options)` takes either one coachmark or a sequence of `steps`. The two shapes are mutually exclusive.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Option</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>targetElement</code>
+        </td>
+        <td>
+          <code>string | HTMLElement</code>
+        </td>
+        <td>—</td>
+        <td>Yes*</td>
+        <td>
+          What the panel points at: a CSS selector matching exactly one element,
+          or the element itself. With <code>steps</code> it is the fallback for
+          steps that do not name their own.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>title</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>Yes*</td>
+        <td>Headline. Also the accessible name of the panel.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>description</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Supporting copy under the title. Becomes the accessible description
+          when present.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>action</code>
+        </td>
+        <td>
+          <code>{"{ label?: string; onClick?: () => void }"}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          The single call to action, bottom right. Both fields are optional: the
+          coachmark advances or closes on its own, so <code>onClick</code> is
+          for side effects and <code>label</code> for overriding the wording.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>steps</code>
+        </td>
+        <td>
+          <code>
+            {"{ title, description?, action?, targetElement?, …placement }[]"}
+          </code>
+        </td>
+        <td>—</td>
+        <td>Yes*</td>
+        <td>
+          A walkthrough, shown one step at a time. Each step can point at its
+          own element; anything it leaves out falls back to what was passed
+          alongside <code>steps</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>id</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>generated</td>
+        <td>—</td>
+        <td>
+          Stable identity. Opening again with the same id replaces that
+          coachmark instead of queueing a second one — so an effect that runs
+          twice shows one coachmark. Pass it to <code>coachmarks.close</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onDismiss</code>
+        </td>
+        <td>
+          <code>{"() => void"}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Called when the user closes the coachmark before the last step. For
+          tracking and persistence — it cannot keep the panel open.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onComplete</code>
+        </td>
+        <td>
+          <code>{"() => void"}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Called when the user presses the action on the last step. The other
+          half of the same tracking pair.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>arrow</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>true</code>
+        </td>
+        <td>—</td>
+        <td>Renders a triangle pointing at the target.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>side</code>
+        </td>
+        <td>
+          <code>"top" | "right" | "bottom" | "left"</code>
+        </td>
+        <td>
+          <code>"bottom"</code>
+        </td>
+        <td>—</td>
+        <td>
+          Preferred side of the target. Treated as a preference, not a guarantee
+          — see Behavior.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>align</code>
+        </td>
+        <td>
+          <code>"start" | "center" | "end"</code>
+        </td>
+        <td>
+          <code>"center"</code>
+        </td>
+        <td>—</td>
+        <td>Alignment along the target's edge.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>sideOffset</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          <code>8</code> with arrow, <code>4</code> without
+        </td>
+        <td>—</td>
+        <td>
+          Distance in pixels between the target and the panel. The default
+          leaves room for the arrow.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+\* `title` and a `targetElement` are required for a single coachmark. With `steps`, each step brings its own `title` and either its own `targetElement` or the shared one.
+
+`coachmarks.close(id)` removes a coachmark whether it is on screen or still queued, and `coachmarks.closeAll()` clears the lot. Both are for the app's own bookkeeping — the user never needs them, because the panel closes itself.
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+Reach for a coachmark when a feature is already on screen but users are walking past it, and a single sentence plus one action is enough to explain it.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0Coachmark when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Announcing a new or changed feature</td>
+        <td>
+          The change is attached to a specific control the user can see right
+          now
+        </td>
+      </tr>
+      <tr>
+        <td>Surfacing a capability with low discovery</td>
+        <td>
+          The feature already exists but usage data shows people are not finding
+          it
+        </td>
+      </tr>
+      <tr>
+        <td>Pointing at one element among many</td>
+        <td>
+          The message only makes sense next to that element, not at page level
+        </td>
+      </tr>
+      <tr>
+        <td>Walking someone through two or three related controls</td>
+        <td>
+          The steps are short, in a fixed order, and each one is anchored to
+          something visible
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Explaining what a control does on hover</td>
+        <td>
+          <code>Tooltip</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Transient confirmation after an action</td>
+        <td>Toast notification</td>
+      </tr>
+      <tr>
+        <td>Validation or error state on a field</td>
+        <td>The field's own error message</td>
+      </tr>
+      <tr>
+        <td>A message about the page rather than one element</td>
+        <td>
+          <code>F0Alert</code>
+        </td>
+      </tr>
+      <tr>
+        <td>A decision that must be resolved before continuing</td>
+        <td>
+          <code>F0Dialog</code>
+        </td>
+      </tr>
+      <tr>
+        <td>A long tour across pages, with progress remembered</td>
+        <td>
+          A product tour, opening one coachmark per stop as the user gets there
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description: "Show at most one coachmark on a screen.",
+    guidelines: [
+      "Anchor it to the control it describes, so the arrow points somewhere meaningful",
+      "Give it an id and persist the dismissal from onDismiss / onComplete",
+      "Open it at a natural pause, not in the middle of a task",
+    ],
+  }}
+  dont={{
+    description: "Don't stack or interrupt with coachmarks.",
+    guidelines: [
+      "Don't reopen one the user already dismissed — the library does not remember across sessions",
+      "Don't use it on first-run or empty states, where it competes with the primary content",
+      "Don't point it at an element that is scrolled out of view",
+    ],
+  }}
+/>
+
+### Content best practices
+
+- Write the title as a short benefit, not a label. Sentence case, no trailing period.
+- Keep the description to one or two lines. It explains the value, not the mechanics.
+- Leave the action label alone unless it goes somewhere: the defaults (`Next`, `Got it`) are translated and say what the button does.
+- Override it only to name a destination, verb first.
+- State the benefit
+  - **Correct:** "Filters got smarter", "Save views for your team"
+  - **Incorrect:** "Update", "New feature", "Notice"
+- Label a destination concretely
+  - **Correct:** "Learn more", "Try it now", "See how it works"
+  - **Incorrect:** "OK", "Click here"
+
+<DoDonts
+  do={{
+    description:
+      "Lead with the benefit and name the next step. The description explains why it matters in one line.",
+    children: <Canvas of={Stories.DoDontsGoodCopy} sourceState="none" />,
+  }}
+  dont={{
+    description:
+      "Don't use a generic title, a description that says nothing, or an action that gives no hint of what happens.",
+    children: <Canvas of={Stories.DoDontsBadCopy} sourceState="none" />,
+  }}
+/>
+
+### Behavior
+
+- **It closes itself.** The close button and Escape always close it, whether or not `onDismiss` is passed. There is no `open` prop, so there is no state for a consumer to get out of sync. `onDismiss` and `onComplete` are told what happened after the fact — persist the decision there, since nothing is remembered between sessions.
+- **The action ends or advances.** Pressing it runs `action.onClick`, then moves to the next step, or closes on the last one. It never leaves the panel sitting open.
+- **One at a time.** A second `coachmarks.open` queues behind the first and appears once it is closed. Two panels competing for the same attention is worse than a wait.
+- **The target is re-resolved, not resolved once.** A selector is matched against the live DOM, so a coachmark opened during start-up shows as soon as its element mounts, and hides again if the element goes away — instead of pointing at nothing. A coachmark whose target never appears simply never shows; `coachmarks.close(id)` drops it.
+- **`side` is a preference.** The panel flips to the opposite side and shifts along the target when it would overflow the viewport, so the side you pass is not guaranteed.
+- **Outside clicks do not dismiss.** A coachmark stays until it is acknowledged. The page behind stays interactive; the panel is not modal and does not trap focus.
+- **Focus moves to the panel on open,** not to the close button, so a screen reader announces the message and Enter does not immediately discard it. On close, focus returns to whatever had it before.
+- **The target is an anchor, not a trigger.** It is never made clickable and never wrapped — clicking it does whatever it already did.
+
+### Usage examples
+
+**The imperative API**
+
+Open a single coachmark, a walkthrough, or two at once to watch the second one queue. Nothing in this example holds `open` state.
+
+<Canvas of={Stories.Imperative} />
+
+**A walkthrough**
+
+Pass `steps` and the coachmark sequences itself: the indicator counts up, the action reads `Next` until the last step, and `onComplete` fires when the user reaches the end. Each step can point at a different element.
+
+```tsx
+coachmarks.open({
+  steps: [
+    { targetElement: "#filters-button", title: "Start with a filter" },
+    { targetElement: "#save-view", title: "Then save it as a view" },
+  ],
+  onComplete: () => track("filters-tour-finished"),
+  onDismiss: () => track("filters-tour-abandoned"),
+})
+```
+
+<Canvas of={Stories.WithStep} />
+
+The last step ends the walkthrough, so its action says so:
+
+<Canvas of={Stories.LastStep} />
+
+**Without an arrow**
+
+`arrow: false` drops the pointer but keeps the anchored positioning. Use it when the panel sits flush against its target and the pointer adds noise.
+
+<Canvas of={Stories.WithoutArrow} />
+
+**Title and action only**
+
+`description` is optional. Omit it when the title already says everything.
+
+<Canvas of={Stories.WithoutDescription} />
+
+**Near a viewport edge**
+
+The target sits at the bottom of the space with `side: "top"`, so the panel opens above it and stays fully visible. Near a bottom edge this is the side to ask for; if you ask for one there is no room for, the panel flips on its own.
+
+<Canvas of={Stories.CollisionAware} />
+
+## Accessibility
+
+The panel is a non-modal `dialog`, named by `title` and described by `description` when present.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Move between the dismiss button and the action. Focus is not trapped —
+          tabbing past the action leaves the panel
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Activate the focused button</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Close the coachmark, and report it to onDismiss</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- Rendered with `role="dialog"`, `aria-labelledby` pointing at the title and `aria-describedby` at the description. When `description` is omitted, `aria-describedby` is not set rather than pointing at an empty node.
+- Opening moves focus to the panel itself, so the title and description are announced as a unit. The dismiss button is reached by tabbing, which keeps <kbd>Enter</kbd> from discarding the message the moment it appears.
+- Because focus is moved, only open a coachmark in response to something the user did or at a natural pause. One appearing mid-task pulls focus away from what they were doing.
+- Advancing a sequence pulls focus back to the panel, so the new step is announced as a message of its own and a second <kbd>Enter</kbd> cannot fire the next action before it has been read.
+- The close button is icon-only and carries a translated `Close` label for screen readers.
+- The arrow is decorative and conveys no information beyond the anchoring already implied by focus order.
