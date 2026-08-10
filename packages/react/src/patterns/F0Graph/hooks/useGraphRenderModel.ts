@@ -665,12 +665,17 @@ export function useGraphRenderModel<T>({
         // before the DOM is measured (otherwise a freshly windowed-in node's
         // connecting lines drop for that frame). Omitted when windowing is off so
         // React Flow's own viewport culling keeps its original behavior.
-        // The source handle is where the edge leaves from, so it belongs at
-        // this node's painted bottom — seeding it at the shared box height is
-        // what made the line start between the chips and run behind them.
+        //
+        // The height is this node's PAINTED height, not the reserved box. React
+        // Flow stretches the node element to whatever `height` says and pins the
+        // bottom handle to that element's edge — hand it the reservation and the
+        // edge leaves from the bottom of the empty band instead of from under
+        // the chips, which is the blank gap a node with few chips would show.
+        // The reservation stays where it belongs: in the layout, setting the
+        // rank pitch. React Flow never needs to know about it.
         ...(windowingActive
           ? {
-              height: BASE_H,
+              height: contentHeightOf(treeNode.id),
               handles:
                 contentHeightOf(treeNode.id) === BASE_H
                   ? graphNodeHandles
