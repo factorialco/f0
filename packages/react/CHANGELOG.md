@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.14.0](https://github.com/factorialco/f0/compare/f0-react-v6.13.0...f0-react-v6.14.0) (2026-08-10)
+
+
+### Features
+
+* **F0Coachmark:** add experimental component ([#4963](https://github.com/factorialco/f0/issues/4963)) ([2d923ac](https://github.com/factorialco/f0/commit/2d923acf8a749f4c51787fac0c995ef313fd6d62))
+
 ## [6.13.0](https://github.com/factorialco/f0/compare/f0-react-v6.12.0...f0-react-v6.13.0) (2026-08-10)
 
 
