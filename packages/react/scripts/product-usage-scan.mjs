@@ -52,6 +52,9 @@ export const PRODUCT_USAGE_ENDPOINT = "/f0-product-usage.json"
 /** The dev-server route that clones or fast-forwards a scanned repo. */
 export const REPO_ACTION_ENDPOINT = "/f0-usage-repo-action"
 
+/** The dev-server route behind the "Unused components" docs page. */
+export const UNUSED_COMPONENTS_ENDPOINT = "/f0-unused-components.json"
+
 /** Path, relative to the product repo root, that we scan. */
 export const PRODUCT_SCOPE = join("frontend", "src", "modules")
 
@@ -923,6 +926,9 @@ async function defaultBranchOf(root) {
 /** In-process cache so page views don't each trigger a filesystem walk. */
 let cache = null
 
+/** Same, for the heavier report behind the Unused components page. */
+const reportCache = Object.create(null)
+
 function getUsage({ refresh = false } = {}) {
   const now = Date.now()
   if (!refresh && cache && now - cache.at < CACHE_TTL_MS) return cache.data
@@ -959,6 +965,26 @@ export function productUsageVitePlugin() {
         res.setHeader("Content-Type", "application/json; charset=utf-8")
         res.setHeader("Cache-Control", "no-store")
         res.end(body)
+      })
+
+      server.middlewares.use(UNUSED_COMPONENTS_ENDPOINT, async (req, res) => {
+        // Imported lazily: it pulls in the component-status scan, which the
+        // usage endpoint doesn't need.
+        const { computeUsageReport } = await import(
+          "./component-usage-report.mjs"
+        )
+        const full = (req.url ?? "").includes("full=1")
+        const refresh = (req.url ?? "").includes("refresh=1")
+
+        const key = full ? "full" : "scoped"
+        const now = Date.now()
+        if (refresh || !reportCache[key] || now - reportCache[key].at > CACHE_TTL_MS) {
+          reportCache[key] = { at: now, data: computeUsageReport({ full }) }
+        }
+
+        res.setHeader("Content-Type", "application/json; charset=utf-8")
+        res.setHeader("Cache-Control", "no-store")
+        res.end(JSON.stringify(reportCache[key].data))
       })
 
       server.middlewares.use(REPO_ACTION_ENDPOINT, (req, res) => {

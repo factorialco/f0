@@ -179,7 +179,10 @@ const config: StorybookConfig = {
     { directory: "../src/ui/Lane", titlePrefix: "Patterns" },
     // Resources
     { directory: "../src/ui/OneRestrictComponent", titlePrefix: "Resources" },
-    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
+    // ── Local-only pages ────────────────────────────────────────
+    // "Unused components" reports internal product and prototype usage, so it
+    // is kept out of the public Storybook the same way the usage tag is.
+    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : ["./local-docs/*.mdx"]),
   ],
   staticDirs: ["../public", "./static"],
   addons: [
