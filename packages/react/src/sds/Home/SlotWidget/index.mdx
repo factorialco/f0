@@ -24,6 +24,27 @@ instead of crashing.
 <Canvas of={SlotWidgetStories.AllSlots} />
 <Controls of={SlotWidgetStories.AllSlots} />
 
+## The header link
+
+`header.link` is the widget's way out — an icon-only control in the header's
+top-right, drawn with the **external-link** glyph (pass `icon` to override it).
+Being icon-only, it carries nothing that says where it goes, so its `title` is
+**required** and does that job twice: it is the control's **tooltip** and its
+accessible name.
+
+Write it as the action, naming the destination — the user should know where
+they are about to land before they click:
+
+```tsx
+header={{
+  title: "Communications",
+  link: { title: "Go to Communications", onClick: openCommunications },
+}}
+```
+
+Not `"Open"`, `"View"`, or the destination on its own: with several widgets on
+a Home, a column of identical "Open" tooltips says nothing.
+
 ## Loading
 
 `loading` swaps every slot's content for that visualization's **skeleton**,

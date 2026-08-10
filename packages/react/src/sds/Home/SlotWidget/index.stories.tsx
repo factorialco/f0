@@ -284,7 +284,7 @@ export const AllSlots: Story = {
     header: {
       title: "Team",
       count: 7,
-      link: { title: "Open", onClick: () => {} },
+      link: { title: "Go to Team", onClick: () => {} },
     },
     slots: teamSlots,
   },
@@ -325,7 +325,7 @@ export const AllLoadingSlots: Story = {
   args: {
     // No `count` in the header: the frame's chrome is real while the slots are
     // placeholders, so it should only say what is actually known yet.
-    header: { title: "Team", link: { title: "Open", onClick: () => {} } },
+    header: { title: "Team", link: { title: "Go to Team", onClick: () => {} } },
     loading: true,
     slots: teamSlots.map(beforeItemsLand),
   },

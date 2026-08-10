@@ -337,7 +337,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     locked: true,
     header: {
       title: "Clock in",
-      link: { title: "Time tracking", onClick: () => {} },
+      link: { title: "Go to Time tracking", onClick: () => {} },
     },
     slots: [{ visualization: "clock-in", params: {} }],
   },
@@ -348,7 +348,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     hasUpdates: true,
     header: {
       title: "Communications",
-      link: { title: "Open", onClick: () => {} },
+      link: { title: "Go to Communications", onClick: () => {} },
     },
     slots: [
       listSlot(
@@ -369,7 +369,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     header: {
       title: "Events",
       count: 8,
-      link: { title: "Calendar", onClick: () => {} },
+      link: { title: "Go to Calendar", onClick: () => {} },
     },
     slots: [
       homeSlot("event-list", { showAllItems: true, events: RAIL_EVENTS }),
@@ -384,7 +384,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     icon: Globe,
     header: {
       title: "Resources",
-      link: { title: "factorial.co", url: "https://factorial.co" },
+      link: { title: "Go to factorial.co", url: "https://factorial.co" },
     },
     slots: [
       // `compact` keeps the rows one-line even with 3 items — every row's
