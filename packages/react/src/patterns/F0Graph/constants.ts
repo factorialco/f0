@@ -15,6 +15,13 @@ export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
   dot: 0,
 }
 
+// Clearance between a node's last chip row and whatever hangs below it — the
+// outgoing edge and the expander pill. Applied in two places that must agree:
+// F0GraphNode carries it as margin below the tag block (React Flow reads the
+// node's DOM bottom for the source handle), and the render model adds it to the
+// reserved box and to the connector anchor.
+export const TAG_BLOCK_CLEARANCE = 32
+
 // Canvas background dot spacing. Shared with the layout engine so node
 // columns/rows snap onto the dot grid (nodes "squared" with the dots).
 export const BACKGROUND_DOT_GAP = 32

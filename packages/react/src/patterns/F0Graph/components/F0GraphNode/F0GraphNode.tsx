@@ -15,6 +15,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import type { F0GraphNodeProps } from "./types"
 
+import { TAG_BLOCK_CLEARANCE } from "../../constants"
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
@@ -433,6 +434,16 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             }
             ref={tagsRef}
             className="max-w-[256px]"
+            // Clearance below the last chip row, carried by the DOM rather than
+            // only by the layout maths. React Flow puts the source handle at the
+            // node element's bottom edge whenever it measures the node itself
+            // (everything except the windowed path, which is seeded with the
+            // same offset) — so without this the outgoing edge leaves flush with
+            // the chips and reads as running behind them.
+            //
+            // Margin, not padding: `getBoundingClientRect` excludes it, so the
+            // reported block height stays the height of the chips alone.
+            style={{ marginBottom: TAG_BLOCK_CLEARANCE }}
             // Tags are informational: clicking a tag must not select the node.
             // Two paths select a node: the node-level `onClick` (selection, plus
             // any consumer `itemOnClick`) — swallowed here via stopPropagation —

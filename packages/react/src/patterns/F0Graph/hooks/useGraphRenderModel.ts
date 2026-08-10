@@ -27,6 +27,7 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  TAG_BLOCK_CLEARANCE,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
@@ -52,10 +53,6 @@ const ESTIMATED_TAGS_PER_ROW = 2
 // Gap between the pill and the tag block (`gap-1.5` on the node's column).
 // Added to the measured tag height so the reservation covers the whole stack.
 const TAG_ROW_GAP = 6
-// Clearance between the last chip row and whatever hangs below it (the
-// connector, the expander pill). Applied to the fully-open block, so it is the
-// minimum gap in the tightest state a node can reach.
-const TAG_BLOCK_MARGIN = 32
 
 interface UseGraphRenderModelOptions<T> {
   roots: TreeNode<T>[]
@@ -317,10 +314,10 @@ export function useGraphRenderModel<T>({
   // Reserve the "all columns open" block, never the currently visible one. The
   // rank pitch is then the widest case the graph can ever need, so toggling
   // metadata cannot move a single node — what changes is how much of the lane
-  // is left for the connector (see `contentHeightOf`). `TAG_BLOCK_MARGIN` is
+  // is left for the connector (see `contentHeightOf`). `TAG_BLOCK_CLEARANCE` is
   // the clearance kept between the last chip row and the expander pill.
   const reservedTagHeight =
-    tagBlockHeight > 0 ? tagBlockHeight + TAG_BLOCK_MARGIN : 0
+    tagBlockHeight > 0 ? tagBlockHeight + TAG_BLOCK_CLEARANCE : 0
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
 
   // Where a node's connector and expander hang from: below whichever chip rows
@@ -338,7 +335,9 @@ export function useGraphRenderModel<T>({
   const contentHeightOf = (id: string): number => {
     const base = nodeHeightProp ?? 56
     const visible = visibleTagHeights?.get(id) ?? 0
-    return visible > 0 ? base + visible + TAG_ROW_GAP + TAG_BLOCK_MARGIN : base
+    return visible > 0
+      ? base + visible + TAG_ROW_GAP + TAG_BLOCK_CLEARANCE
+      : base
   }
 
   const builtInEngine = useLayoutEngine({
