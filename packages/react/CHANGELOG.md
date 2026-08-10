@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.13.0](https://github.com/factorialco/f0/compare/f0-react-v6.12.0...f0-react-v6.13.0) (2026-08-10)
+
+
+### Features
+
+* **F0RichTextEditor:** add insertContent to the imperative handle ([#5056](https://github.com/factorialco/f0/issues/5056)) ([fe1e85c](https://github.com/factorialco/f0/commit/fe1e85cd94518ef2f547ee19c0da30e181224c0d))
+
 ## [6.12.0](https://github.com/factorialco/f0/compare/f0-react-v6.11.2...f0-react-v6.12.0) (2026-08-10)
 
 
