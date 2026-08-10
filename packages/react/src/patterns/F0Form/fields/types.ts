@@ -163,6 +163,7 @@ export type FieldType =
   | "datetime"
   | "daterange"
   | "period"
+  | "phone"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -197,6 +198,11 @@ export type {
   DateRangeValue,
 } from "./daterange/types"
 export type { F0PeriodConfig, F0PeriodField } from "./period/types"
+export type {
+  F0PhoneConfig,
+  F0PhoneField,
+  F0PhoneInputValue,
+} from "./phone/types"
 export type {
   F0RichTextConfig,
   F0RichTextField,
@@ -241,6 +247,7 @@ import type { F0DurationField } from "./duration/types"
 import type { F0FileField } from "./file/types"
 import type { F0NumberField } from "./number/types"
 import type { F0PeriodField } from "./period/types"
+import type { F0PhoneField } from "./phone/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0SelectField } from "./select/types"
 import type { F0EntitiesListField } from "./entitiesList/types"
@@ -265,6 +272,7 @@ export type F0Field =
   | F0DateTimeField
   | F0DateRangeField
   | F0PeriodField
+  | F0PhoneField
   | F0RichTextField
   | F0FileField
   | F0CardSelectField

@@ -336,6 +336,61 @@ export function LineChartSkeleton({
 }
 
 // ---------------------------------------------------------------------------
+// Scatter
+// ---------------------------------------------------------------------------
+
+interface ScatterChartSkeletonProps {
+  /** Show the legend row below the plot. @default true */
+  showLegend?: boolean
+}
+
+/**
+ * Point positions for the scatter skeleton, in the same 200x80 space as
+ * {@link DOT_POINTS}. Fixed rather than generated so visual snapshots stay
+ * stable, and loosely correlated so the placeholder reads as a scatter plot
+ * rather than noise.
+ */
+const SCATTER_POINTS = [
+  [10, 64],
+  [26, 52],
+  [42, 58],
+  [56, 38],
+  [70, 46],
+  [84, 28],
+  [98, 50],
+  [112, 34],
+  [126, 20],
+  [140, 40],
+  [154, 26],
+  [168, 14],
+  [182, 32],
+  [196, 18],
+] as const
+
+/** Skeleton for scatter chart content area — points with no connecting path. */
+export function ScatterChartSkeleton({
+  showLegend = true,
+}: ScatterChartSkeletonProps = {}) {
+  return (
+    <AxisSkeleton showLegend={showLegend}>
+      <div className="relative h-full w-full">
+        {SCATTER_POINTS.map(([x, y]) => (
+          <Skeleton
+            key={`${x}-${y}`}
+            className="absolute size-2 rounded-full"
+            style={{
+              left: `${(x / 200) * 100}%`,
+              top: `${(y / 80) * 100}%`,
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        ))}
+      </div>
+    </AxisSkeleton>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // FunnelChartSkeleton
 // ---------------------------------------------------------------------------
 

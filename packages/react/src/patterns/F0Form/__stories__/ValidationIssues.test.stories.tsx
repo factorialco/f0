@@ -11,7 +11,7 @@ const meta: Meta = {
   title: "Forms/ValidationIssues",
   component: F0Form,
   tags: ["autodocs", "experimental"],
-  parameters: { a11y: { skipCi: true } },
+  parameters: { a11y: { test: "error" } },
 }
 
 export default meta

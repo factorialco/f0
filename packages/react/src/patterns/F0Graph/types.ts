@@ -90,6 +90,24 @@ export interface ZoomThresholds {
 export type LayoutDirection = "TB" | "LR" | "BT" | "RL"
 
 /**
+ * Region of the canvas (in screen px) covered by external chrome — typically a
+ * side panel / drawer opened over the graph. All fly-to paths shift their target
+ * so the node lands centered in the *free* area instead of behind the panel.
+ *
+ * The consumer measures / knows this (e.g. a fixed-width drawer) and passes it;
+ * F0Graph has no notion of the panel itself. The side is encoded by which key is
+ * set — a right-hand drawer sets `right`, a left-hand one (or RTL layout) sets
+ * `left` — so no separate direction handling is needed. Omitted / `0` on every
+ * side behaves exactly as if there were no inset.
+ */
+export interface ViewportInset {
+  top?: number
+  right?: number
+  bottom?: number
+  left?: number
+}
+
+/**
  * Layout engine interface (abstract — implementations can be swapped).
  *
  * The built-in implementation (`useLayoutEngine`) produces a deterministic

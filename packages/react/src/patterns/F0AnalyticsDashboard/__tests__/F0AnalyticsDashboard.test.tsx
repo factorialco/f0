@@ -211,3 +211,86 @@ describe("F0AnalyticsDashboard report filters", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("F0AnalyticsDashboard — unrenderable chart config", () => {
+  // A host app that maps a wire chart type it has no case for yields
+  // `undefined`. Every type switch here lacks a default, so without a guard
+  // that would throw and take the whole dashboard down with it.
+  it("contains an unknown chart type as one item's error state", async () => {
+    const fetchData = vi.fn().mockResolvedValue({
+      categories: ["A"],
+      series: [{ name: "s", data: [1] }],
+    })
+
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[
+          {
+            id: "broken",
+            title: "Broken widget",
+            type: "chart",
+            // What a host app hands over when its mapper has no case.
+            chart: undefined as never,
+            fetchData,
+          },
+          metricItem(vi.fn().mockResolvedValue({ value: 42 })),
+        ]}
+      />
+    )
+
+    // The bad widget degrades to the shared error state…
+    await waitFor(() =>
+      expect(getVisibleByText("Error loading data")).toBeInTheDocument()
+    )
+    // …and its neighbour still renders.
+    expect(getVisibleByText("Headcount")).toBeInTheDocument()
+  })
+
+  it("does not offer Retry for a condition refetching cannot fix", async () => {
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[
+          {
+            id: "broken",
+            title: "Broken widget",
+            type: "chart",
+            chart: undefined as never,
+            fetchData: vi.fn().mockResolvedValue({}),
+          },
+        ]}
+      />
+    )
+
+    await waitFor(() =>
+      expect(getVisibleByText("Error loading data")).toBeInTheDocument()
+    )
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull()
+  })
+
+  it("states the condition once, not as both title and description", async () => {
+    // The error state has no dedicated string for this condition, so nothing
+    // should land in the description slot — reusing the title there would
+    // render it twice. `getVisibleByText` picks the first match and would
+    // happily pass on that, so assert the count directly instead.
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        items={[
+          {
+            id: "broken",
+            title: "Broken widget",
+            type: "chart",
+            chart: undefined as never,
+            fetchData: vi.fn().mockResolvedValue({}),
+          },
+        ]}
+      />
+    )
+
+    await waitFor(() =>
+      expect(screen.getAllByText("Error loading data")).toHaveLength(1)
+    )
+  })
+})

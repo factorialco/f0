@@ -91,6 +91,22 @@ describe("F0VideoPlayer", () => {
       ).not.toBeInTheDocument()
     })
 
+    it("keeps the player surface and center play control dark in both themes", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+
+      const region = screen.getByRole("region", { name: "Video player" })
+      expect(region).toHaveClass("bg-f1-foreground", "dark:bg-f1-background")
+
+      const playButton = document.querySelector(
+        "[data-video-play-overlay] button"
+      )
+      expect(playButton).toHaveClass(
+        "bg-f1-foreground/70",
+        "dark:bg-f1-background/70"
+      )
+      expect(playButton).not.toHaveClass("opacity-70")
+    })
+
     it("enables autoplay when autoPlay is true", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} autoPlay />)
       expect(getVideo()).toHaveProperty("autoplay", true)
@@ -569,8 +585,51 @@ describe("F0VideoPlayer", () => {
   })
 
   describe("audio description", () => {
+    const CAPS_URL = "https://example.com/captions.vtt"
     const DESC_URL = "https://example.com/descriptions.vtt"
     const DESCRIBED_SRC = "https://example.com/video.described.mp4"
+
+    it("renders an active description cue on a contrasting dark surface", async () => {
+      const captionTrack = Object.assign(new EventTarget(), {
+        kind: "captions" as TextTrackKind,
+        mode: "disabled" as TextTrackMode,
+        cues: { length: 1 } as TextTrackCueList,
+        activeCues: null,
+      })
+      const descriptionTrack = Object.assign(new EventTarget(), {
+        kind: "descriptions" as TextTrackKind,
+        mode: "disabled" as TextTrackMode,
+        cues: { length: 1 } as TextTrackCueList,
+        activeCues: {
+          0: { text: "A butterfly crosses the meadow." },
+          length: 1,
+        } as unknown as TextTrackCueList,
+      })
+      const textTracks = Object.assign(new EventTarget(), {
+        0: captionTrack,
+        1: descriptionTrack,
+        length: 2,
+      })
+      vi.spyOn(HTMLMediaElement.prototype, "textTracks", "get").mockReturnValue(
+        textTracks as unknown as TextTrackList
+      )
+
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ captions: CAPS_URL, descriptions: DESC_URL }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      await user.click(screen.getByRole("button", { name: "Captions" }))
+      fireEvent(descriptionTrack, new Event("cuechange"))
+
+      expect(screen.getByText("A butterfly crosses the meadow.")).toHaveClass(
+        "bg-f1-background/70",
+        "text-f1-foreground"
+      )
+    })
 
     it("offers an AD toggle and renders a descriptions track for a VTT script", async () => {
       const user = userEvent.setup()

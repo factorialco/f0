@@ -12,7 +12,7 @@ export type SidebarIconProps = {
   onClick?: () => void
 }
 
-function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
+export function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
   return (
     <svg
       width="20"

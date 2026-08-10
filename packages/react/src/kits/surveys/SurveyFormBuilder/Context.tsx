@@ -22,6 +22,8 @@ import {
   QuestionType,
   SectionElement,
   SurveyDatasets,
+  SurveyFormBuilderPlaceholders,
+  SurveyFormBuilderLabels,
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
@@ -40,6 +42,8 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  placeholders?: SurveyFormBuilderPlaceholders
+  labels?: SurveyFormBuilderLabels
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -58,6 +62,9 @@ type SurveyFormBuilderProviderProps = {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  placeholders?: SurveyFormBuilderPlaceholders
+  labels?: SurveyFormBuilderLabels
+  skipDefaultSection?: boolean
 }
 
 export function SurveyFormBuilderProvider({
@@ -72,6 +79,9 @@ export function SurveyFormBuilderProvider({
   onFieldBlur,
   useUpload,
   datasets,
+  placeholders,
+  labels,
+  skipDefaultSection,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -402,14 +412,14 @@ export function SurveyFormBuilderProvider({
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      if (isEmpty && !disabled && !answering) {
+      if (isEmpty && !disabled && !answering && !skipDefaultSection) {
         handleAddNewElement({
           type: "section",
         })
       }
       return
     }
-  }, [isEmpty, handleAddNewElement, disabled])
+  }, [isEmpty, handleAddNewElement, disabled, answering, skipDefaultSection])
 
   const isQuestionTypeAllowed = useCallback(
     (questionType: QuestionType) => {
@@ -442,6 +452,8 @@ export function SurveyFormBuilderProvider({
       onFieldBlur,
       useUpload,
       datasets,
+      placeholders,
+      labels,
     }),
     [
       handleQuestionChange,
@@ -461,6 +473,8 @@ export function SurveyFormBuilderProvider({
       onFieldBlur,
       useUpload,
       datasets,
+      placeholders,
+      labels,
     ]
   )
 

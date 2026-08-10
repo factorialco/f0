@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
@@ -17,6 +17,7 @@ import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { getCompareToValue } from "./compareTo"
+import { createCalendarDismissalHandlers } from "./dismissal"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
 import { DatePickerValue, DatePreset } from "./types"
@@ -98,6 +99,12 @@ export function DatePickerPopup({
   const portalContainer = shouldUseDialogContainer
     ? dialogContext.portalContainer
     : undefined
+
+  const contentRef = useRef<HTMLDivElement>(null)
+  const dismissalHandlers = useMemo(
+    () => createCalendarDismissalHandlers(() => contentRef.current),
+    []
+  )
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -260,9 +267,11 @@ export function DatePickerPopup({
     <Popover open={props.open} onOpenChange={props.onOpenChange}>
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent
+        ref={contentRef}
         className="w-full overflow-auto"
         align="start"
         container={portalContainer}
+        {...dismissalHandlers}
       >
         {showPresets ? (
           <PresetList

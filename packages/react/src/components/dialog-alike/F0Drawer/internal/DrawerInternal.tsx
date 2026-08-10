@@ -25,6 +25,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
   setActiveTabId,
   disableContentPadding,
   container,
+  onWidthChange,
 }) => {
   const [localIsOpen, setLocalIsOpen] = useState(isOpen)
 
@@ -80,6 +81,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
       fullHeight
       onOpenChange={setLocalIsOpen}
       container={container}
+      onWidthChange={onWidthChange}
     >
       {_memoizedDialogLayout}
     </DialogWrapper>
