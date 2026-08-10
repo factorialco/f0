@@ -163,6 +163,26 @@ export function extractComponentName(
 }
 
 /**
+ * The component folder a story belongs to, relative to `src/`
+ * (`./src/hooks/toast/__stories__/toast.stories.tsx` → `hooks/toast`).
+ *
+ * Used to look up what that folder actually exports — the docs tag can't read
+ * the filesystem, so the scanner ships an index keyed by this path.
+ */
+export function storyComponentPath(
+  fileName: string | undefined
+): string | null {
+  if (!fileName) return null
+
+  const normalized = fileName.replace(/^\.\//, "").replace(/^src\//, "")
+  const segments = normalized.split("/")
+  const storiesAt = segments.indexOf("__stories__")
+  const dirs = segments.slice(0, storiesAt === -1 ? -1 : storiesAt)
+
+  return dirs.length > 0 ? dirs.join("/") : null
+}
+
+/**
  * Every name this component might be imported under, most authoritative
  * first: the canonical export, then aliases kept for backwards compatibility
  * (e.g. `Input` alongside `F0TextInput`), then the remaining path/title

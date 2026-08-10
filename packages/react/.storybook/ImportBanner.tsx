@@ -16,6 +16,7 @@ import { ProductUsageTag } from "./ProductUsageTag.tsx"
 import {
   extractComponentName,
   resolveImportPath,
+  storyComponentPath,
   usageLookupNames,
 } from "./resolveImportPath.ts"
 
@@ -175,7 +176,10 @@ export function ImportBanner() {
       {/* Shown for internal components too: several of them (Spinner, Select…)
           are re-exported and used by product code, and for the rest "not used"
           is still the answer people came for. */}
-      <ProductUsageTag names={usageLookupNames(fileName, title)} />
+      <ProductUsageTag
+        names={usageLookupNames(fileName, title)}
+        componentPath={storyComponentPath(fileName)}
+      />
     </TooltipProvider>
   )
 

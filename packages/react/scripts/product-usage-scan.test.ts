@@ -383,6 +383,30 @@ describe("scanInternalUsage", () => {
     expect(result.components.useState).toBeUndefined()
   })
 
+  test("indexes what each component folder exports", () => {
+    // The whole point: `hooks/toast` is imported as `toasts`, a name nothing
+    // about its folder or story title reveals.
+    write(
+      "hooks/toast/index.ts",
+      `export * from "./types"
+       export * from "./ToastProvider"`
+    )
+    write(
+      "hooks/toast/ToastProvider.tsx",
+      `export const toasts = {}
+       export const ToastProvider = () => null`
+    )
+
+    const result = scanInternalUsage({ srcDir })
+    if (!result.available) throw new Error(result.reason)
+
+    expect(result.exports["hooks/toast"]).toEqual(
+      expect.arrayContaining(["toasts", "ToastProvider"])
+    )
+    // Lowercase module names behind `export *` are not export names.
+    expect(result.exports["hooks/toast"]).not.toContain("types")
+  })
+
   test("records type-only imports under their exported name", () => {
     const result = scanInternalUsage({ srcDir })
     if (!result.available) throw new Error(result.reason)

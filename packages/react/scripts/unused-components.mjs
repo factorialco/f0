@@ -21,12 +21,12 @@
  *   pnpm unused-components --used        # invert: show where each one IS used
  */
 
-import { readFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { computeComponentStatusData } from "./component-status-build.mjs"
 import {
+  exportedNamesOf,
   scanComposerUsage,
   scanInternalUsage,
   scanProductUsage,
@@ -68,74 +68,6 @@ function componentPathOf(storyFile) {
   const storiesAt = segments.indexOf("__stories__")
   const dirs = segments.slice(0, storiesAt === -1 ? -1 : storiesAt)
   return dirs.length > 0 ? join(SRC_DIR, ...dirs) : null
-}
-
-/**
- * The identifiers a component folder actually exports, read from its public
- * surface (`index.ts(x)` / `exports.ts(x)`) only.
- *
- * Folder names are a poor proxy for import names — `hooks/toast` ships
- * `toasts`, `hooks/datasource` ships `useDataSource` — and without this the
- * component looks dead when the product uses it every day. Deliberately not
- * recursive: internal helper names would collide with unrelated exports and
- * mark genuinely dead components as used.
- */
-function exportedNamesOf(componentPath) {
-  if (!componentPath) return []
-
-  const names = new Set()
-
-  /** Collects the identifiers a single file exports directly. */
-  const collect = (file, followStars) => {
-    let source
-    try {
-      source = readFileSync(file, "utf8")
-    } catch {
-      return
-    }
-
-    for (const match of source.matchAll(
-      /export\s+(?:declare\s+)?(?:const|function|class|type|interface)\s+([A-Za-z0-9_]+)/g
-    )) {
-      names.add(match[1])
-    }
-    for (const match of source.matchAll(/export\s*\{([^}]*)\}/g)) {
-      for (const raw of match[1].split(",")) {
-        const specifier = raw
-          .trim()
-          .replace(/^type\s+/, "")
-          .split(/\s+as\s+/)
-        const exported = (specifier[1] ?? specifier[0])?.trim()
-        if (exported) names.add(exported)
-      }
-    }
-
-    if (!followStars) return
-
-    // `export * from "./ToastProvider"` hides the real export names (`toasts`)
-    // one file away, so follow the star exactly one hop.
-    for (const match of source.matchAll(
-      /export\s+\*\s+from\s*["']\.\/([A-Za-z0-9_/]+)["']/g
-    )) {
-      const target = match[1]
-      names.add(target.split("/").pop())
-      const dir = dirname(file)
-      for (const suffix of [
-        `${target}.ts`,
-        `${target}.tsx`,
-        join(target, "index.ts"),
-        join(target, "index.tsx"),
-      ]) {
-        collect(join(dir, suffix), false)
-      }
-    }
-  }
-
-  for (const barrel of ["index.ts", "index.tsx", "exports.ts", "exports.tsx"]) {
-    collect(join(componentPath, barrel), true)
-  }
-
-  return [...names]
 }
 
 /**

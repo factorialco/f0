@@ -478,6 +478,117 @@ function owningComponent(relativePath) {
 }
 
 /**
+ * The identifiers a component folder exports, read from its public surface
+ * (`index.ts(x)` / `exports.ts(x)`) only.
+ *
+ * Folder and story names are a poor proxy for import names — `hooks/toast`
+ * ships `toasts`, `hooks/datasource` ships `useDataSource` — so without this a
+ * component looks unused when the product imports it every day. Deliberately
+ * shallow: pulling in every internal helper name would collide with unrelated
+ * exports and make dead components look alive.
+ */
+export function exportedNamesOf(componentPath) {
+  if (!componentPath) return []
+
+  const names = new Set()
+
+  const collect = (file, followStars) => {
+    let source
+    try {
+      source = readFileSync(file, "utf8")
+    } catch {
+      return
+    }
+
+    for (const match of source.matchAll(
+      /export\s+(?:declare\s+)?(?:const|function|class|type|interface)\s+([A-Za-z0-9_]+)/g
+    )) {
+      names.add(match[1])
+    }
+    for (const match of source.matchAll(/export\s*\{([^}]*)\}/g)) {
+      for (const raw of match[1].split(",")) {
+        const specifier = raw
+          .trim()
+          .replace(/^type\s+/, "")
+          .split(/\s+as\s+/)
+        const exported = (specifier[1] ?? specifier[0])?.trim()
+        if (exported) names.add(exported)
+      }
+    }
+
+    if (!followStars) return
+
+    // `export * from "./ToastProvider"` hides the real export names (`toasts`)
+    // one file away, so follow the star exactly one hop.
+    for (const match of source.matchAll(
+      /export\s+\*\s+from\s*["']\.\/([A-Za-z0-9_/]+)["']/g
+    )) {
+      const target = match[1]
+      // The file name is only a plausible export name when it's capitalised
+      // (`./F0Toast`); `./types` and `./imperative` are just module names and
+      // would sit in the candidate list as noise.
+      const fileName = target.split("/").pop()
+      if (/^[A-Z]/.test(fileName)) names.add(fileName)
+      const dir = dirname(file)
+      for (const suffix of [
+        `${target}.ts`,
+        `${target}.tsx`,
+        join(target, "index.ts"),
+        join(target, "index.tsx"),
+      ]) {
+        collect(join(dir, suffix), false)
+      }
+    }
+  }
+
+  for (const barrel of BARREL_FILES) {
+    collect(join(componentPath, barrel), true)
+  }
+
+  return [...names]
+}
+
+const BARREL_FILES = ["index.ts", "index.tsx", "exports.ts", "exports.tsx"]
+
+/**
+ * Maps every component folder under `src/` to the names it exports, keyed by
+ * its path relative to `src/` (`hooks/toast` → `["toasts", …]`).
+ *
+ * The docs tag can't read the filesystem, and the export maps it imports at
+ * runtime say nothing about which file a name came from — so the association
+ * has to be built here and shipped with the payload.
+ */
+export function scanComponentExports({ srcDir = SRC_DIR } = {}) {
+  const byPath = Object.create(null)
+
+  const walk = (dir) => {
+    let entries
+    try {
+      entries = readdirSync(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+
+    if (entries.some((entry) => entry.isFile() && BARREL_FILES.includes(entry.name))) {
+      const names = exportedNamesOf(dir)
+      if (names.length > 0) {
+        byPath[dir.slice(srcDir.length + 1).split(sep).join("/")] = names
+      }
+    }
+
+    for (const entry of entries) {
+      if (entry.isDirectory() && !SKIP_DIRS.has(entry.name)) {
+        walk(join(dir, entry.name))
+      }
+    }
+  }
+
+  walk(srcDir)
+
+  return byPath
+}
+
+/**
  * Scans f0's own `src/` for components that import each other.
  *
  * Unlike the other two sources this needs no external checkout — it reads the
@@ -487,6 +598,7 @@ function owningComponent(relativePath) {
 export function scanInternalUsage({ srcDir = SRC_DIR } = {}) {
   /** imported name → Set of component folders importing it. */
   const byComponent = Object.create(null)
+  const exports = scanComponentExports({ srcDir })
 
   walkSourceFiles(srcDir, (path) => {
     const owner = owningComponent(path.slice(srcDir.length + 1))
@@ -511,7 +623,7 @@ export function scanInternalUsage({ srcDir = SRC_DIR } = {}) {
     components[name] = [...owners].sort((a, b) => a.localeCompare(b))
   }
 
-  return { available: true, scope: "src", components }
+  return { available: true, scope: "src", components, exports }
 }
 
 /**

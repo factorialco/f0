@@ -120,6 +120,24 @@ function plural(count: number, noun: string) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`
 }
 
+/**
+ * The lookup names for a component: what the story path and title suggest,
+ * plus everything its folder's barrel exports.
+ *
+ * The second part is what makes `Toast` find `toasts` — a component is used
+ * under the name it exports, which often isn't the name of its folder.
+ */
+function withExportedNames(
+  result: UsageResult,
+  names: string[],
+  componentPath: string | null
+): string[] {
+  if (!componentPath || !result.internal.available) return names
+
+  const exported = result.internal.exports[componentPath] ?? []
+  return [...new Set([...names, ...exported])]
+}
+
 /** The f0 components importing any of the names, deduped and sorted. */
 function collectInternal(
   byComponent: Record<string, string[]>,
@@ -305,7 +323,14 @@ function UsageDetails({
  *
  * @see scripts/product-usage-scan.mjs
  */
-export function ProductUsageTag({ names }: { names: string[] }) {
+export function ProductUsageTag({
+  names,
+  componentPath,
+}: {
+  names: string[]
+  /** Folder relative to `src/`, used to look up what it exports. */
+  componentPath: string | null
+}) {
   const result = useUsage()
 
   // Before anything renders: the loading state would otherwise flash on the
@@ -339,7 +364,11 @@ export function ProductUsageTag({ names }: { names: string[] }) {
   // where this internal data must not appear at all.
   if (result === null) return null
 
-  const { productFiles, internal } = resolveUsage(result, names)
+  // Path/title candidates miss components whose export name differs from their
+  // folder (`hooks/toast` ships `toasts`), so fold in what the folder exports.
+  const lookup = withExportedNames(result, names, componentPath)
+
+  const { productFiles, internal } = resolveUsage(result, lookup)
 
   // "Not used" would be misleading for the building blocks other components
   // are made of, so say which of the two it is.
@@ -362,7 +391,7 @@ export function ProductUsageTag({ names }: { names: string[] }) {
         align="start"
         className="w-max max-w-[min(90vw,42rem)] overflow-hidden !p-0"
       >
-        <UsageDetails result={result} names={names} />
+        <UsageDetails result={result} names={lookup} />
       </TooltipContent>
     </Tooltip>
   )

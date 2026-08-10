@@ -62,6 +62,12 @@ export interface InternalUsageData {
    * component's own internals are excluded.
    */
   components: Record<string, string[]>
+  /**
+   * Component folder (relative to `src/`) → the names its barrel exports.
+   * Lets the docs tag look a component up under the name it actually ships
+   * (`hooks/toast` → `toasts`), which its folder name rarely matches.
+   */
+  exports: Record<string, string[]>
 }
 
 export type InternalUsageResult = InternalUsageData | UsageUnavailable
@@ -139,6 +145,14 @@ export function scanProductUsage(options?: {
   itRepoRoot?: string | null
   full?: boolean
 }): ProductUsageResult
+
+/** The names a component folder's barrel exports. */
+export function exportedNamesOf(componentPath: string | null): string[]
+
+/** Component folder (relative to `src/`) → the names it exports. */
+export function scanComponentExports(options?: {
+  srcDir?: string
+}): Record<string, string[]>
 
 /** Scans f0's own `src/` for components importing each other. */
 export function scanInternalUsage(options?: {
