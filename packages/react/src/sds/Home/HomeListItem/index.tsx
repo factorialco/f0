@@ -8,8 +8,10 @@ import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
 /**
- * The BASE row every Home list draws: a LEFT slot, a text stack, a RIGHT slot,
- * and a chevron when the row goes somewhere.
+ * The BASE row every Home list draws: a LEFT slot, a text stack and a RIGHT
+ * slot. A row that goes somewhere says so by being a link — hover state and
+ * all — not with a trailing chevron: a column of arrows repeating "clickable"
+ * on every row is noise in a widget this dense. `showChevron` opts one in.
  *
  * The left slot is data first — `avatar` takes any of F0Avatar's types (person,
  * team, company, file, flag, emoji, icon), so a slot's params stay serializable —
@@ -34,7 +36,7 @@ export interface HomeListItemProps {
   subtitle?: string
   /** The second line. */
   description?: string
-  /** Trailing slot, before the chevron: a tag, a counter, people. */
+  /** Trailing slot: a tag, a counter, people. */
   right?: ReactNode
   /** An accent dot on the left slot's corner — unseen/pending. */
   unread?: boolean
@@ -45,7 +47,7 @@ export interface HomeListItemProps {
    * tab, hrefs to other domains open in a new one.
    */
   href?: string
-  /** Defaults to whether the row is clickable. */
+  /** A trailing chevron. Off — the row's link affordance is the row itself. */
   showChevron?: boolean
 }
 
@@ -75,7 +77,7 @@ export function HomeListItem({
   right,
   unread = false,
   href,
-  showChevron = href != null,
+  showChevron = false,
 }: HomeListItemProps) {
   const leading =
     left ?? (avatar ? <F0Avatar avatar={avatar} size={avatarSize} /> : null)

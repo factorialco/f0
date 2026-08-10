@@ -156,7 +156,12 @@ cmd-click, and copy-address all behave). Where the anchor goes:
 - **Other domains** (`https://developer.mozilla.org`) open in a **new tab**
   (`target="_blank"` with `rel="noreferrer"`), always as a native anchor.
 
-Rows without `clickBehavior` are inert — no hover state, no chevron.
+Rows without `clickBehavior` are inert — no hover state.
+
+A clickable row carries **no trailing chevron**: the row itself is the
+affordance (it highlights on hover, focuses, and is a real link), and a column
+of arrows repeating "clickable" on every row is noise in a widget this dense.
+The row's right-hand side belongs to the schema's `right` instead.
 
 ### Prescriptive sizing
 
