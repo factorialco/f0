@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.16.0](https://github.com/factorialco/f0/compare/f0-react-v6.15.0...f0-react-v6.16.0) (2026-08-10)
+
+
+### Features
+
+* **F0Select:** Cancel closes dropdown + applySelectionLabel [FCT-56953] ([#4916](https://github.com/factorialco/f0/issues/4916)) ([802ddfc](https://github.com/factorialco/f0/commit/802ddfc4595115d92cc37136fdc28441a4682f2e))
+
 ## [6.15.0](https://github.com/factorialco/f0/compare/f0-react-v6.14.0...f0-react-v6.15.0) (2026-08-10)
 
 
