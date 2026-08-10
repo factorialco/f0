@@ -152,10 +152,16 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
     const reportTagRowHeight = renderCfg?.reportTagRowHeight
     useEffect(() => {
       if (!reportTagRowHeight || !nodeId) return
+      // `offsetHeight`, never `getBoundingClientRect`: nodes live inside React
+      // Flow's viewport, which is CSS-transformed by the current zoom. A rect
+      // reports the SCALED height, so at any zoom but 1 the reported block —
+      // and with it the reserved box and the connector anchor — comes out
+      // multiplied by the zoom factor. `offsetHeight` is layout px, immune to
+      // the transform, which is the number the layout actually works in.
       const report = () =>
         reportTagRowHeight(nodeId, {
-          visible: tagsRef.current?.getBoundingClientRect().height ?? 0,
-          full: fullTagsRef.current?.getBoundingClientRect().height ?? 0,
+          visible: tagsRef.current?.offsetHeight ?? 0,
+          full: fullTagsRef.current?.offsetHeight ?? 0,
         })
       report()
       const observer = new ResizeObserver(report)
