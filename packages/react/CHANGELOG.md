@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.0](https://github.com/factorialco/f0/compare/f0-react-v6.14.0...f0-react-v6.15.0) (2026-08-10)
+
+
+### Features
+
+* **SlotWidget:** add per-slot loading skeletons ([#5058](https://github.com/factorialco/f0/issues/5058)) ([9d17106](https://github.com/factorialco/f0/commit/9d1710640daac61b98cee5d33d7009ed4af2595c))
+
 ## [6.14.0](https://github.com/factorialco/f0/compare/f0-react-v6.13.0...f0-react-v6.14.0) (2026-08-10)
 
 
