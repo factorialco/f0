@@ -3,6 +3,7 @@ export declare const defaultTranslations: {
         readonly selectPlaceholder: "Select";
     };
     readonly countries: {
+        ac: string;
         ad: string;
         ae: string;
         af: string;
@@ -27,14 +28,19 @@ export declare const defaultTranslations: {
         bh: string;
         bi: string;
         bj: string;
+        bl: string;
         bm: string;
+        bn: string;
         bo: string;
+        bq: string;
         br: string;
+        bs: string;
         bt: string;
         bw: string;
         by: string;
         bz: string;
         ca: string;
+        cc: string;
         cd: string;
         cf: string;
         cg: string;
@@ -49,6 +55,7 @@ export declare const defaultTranslations: {
         cu: string;
         cv: string;
         cw: string;
+        cx: string;
         cy: string;
         cz: string;
         de: string;
@@ -60,6 +67,7 @@ export declare const defaultTranslations: {
         ec: string;
         ee: string;
         eg: string;
+        eh: string;
         er: string;
         es: string;
         et: string;
@@ -73,17 +81,20 @@ export declare const defaultTranslations: {
         gb: string;
         gd: string;
         ge: string;
+        gf: string;
         gg: string;
         gh: string;
         gi: string;
         gl: string;
         gm: string;
         gn: string;
+        gp: string;
         gq: string;
         gr: string;
         gt: string;
         gu: string;
         gw: string;
+        gy: string;
         hk: string;
         hn: string;
         hr: string;
@@ -104,6 +115,140 @@ export declare const defaultTranslations: {
         jo: string;
         jp: string;
         ke: string;
+        kg: string;
+        kh: string;
+        ki: string;
+        km: string;
+        kn: string;
+        kp: string;
+        kr: string;
+        kw: string;
+        ky: string;
+        kz: string;
+        la: string;
+        lb: string;
+        lc: string;
+        li: string;
+        lk: string;
+        lr: string;
+        ls: string;
+        lt: string;
+        lu: string;
+        lv: string;
+        ly: string;
+        ma: string;
+        mc: string;
+        md: string;
+        me: string;
+        mf: string;
+        mg: string;
+        mh: string;
+        mk: string;
+        ml: string;
+        mm: string;
+        mn: string;
+        mo: string;
+        mp: string;
+        mq: string;
+        mr: string;
+        ms: string;
+        mt: string;
+        mu: string;
+        mv: string;
+        mw: string;
+        mx: string;
+        my: string;
+        mz: string;
+        na: string;
+        nc: string;
+        ne: string;
+        nf: string;
+        ng: string;
+        ni: string;
+        nl: string;
+        no: string;
+        np: string;
+        nr: string;
+        nu: string;
+        nz: string;
+        om: string;
+        pa: string;
+        pe: string;
+        pf: string;
+        pg: string;
+        ph: string;
+        pk: string;
+        pl: string;
+        pm: string;
+        pn: string;
+        pr: string;
+        ps: string;
+        pt: string;
+        pw: string;
+        py: string;
+        qa: string;
+        re: string;
+        ro: string;
+        rs: string;
+        ru: string;
+        rw: string;
+        sa: string;
+        sb: string;
+        sc: string;
+        sd: string;
+        se: string;
+        sg: string;
+        sh: string;
+        si: string;
+        sj: string;
+        sk: string;
+        sl: string;
+        sm: string;
+        sn: string;
+        so: string;
+        sr: string;
+        ss: string;
+        st: string;
+        sv: string;
+        sx: string;
+        sy: string;
+        sz: string;
+        ta: string;
+        tc: string;
+        td: string;
+        tg: string;
+        th: string;
+        tj: string;
+        tk: string;
+        tl: string;
+        tm: string;
+        tn: string;
+        to: string;
+        tr: string;
+        tt: string;
+        tv: string;
+        tw: string;
+        tz: string;
+        ua: string;
+        ug: string;
+        us: string;
+        uy: string;
+        uz: string;
+        va: string;
+        vc: string;
+        ve: string;
+        vg: string;
+        vi: string;
+        vn: string;
+        vu: string;
+        wf: string;
+        ws: string;
+        xk: string;
+        ye: string;
+        yt: string;
+        za: string;
+        zm: string;
+        zw: string;
     };
     readonly approvals: {
         readonly history: "Approval history";
@@ -199,6 +344,10 @@ export declare const defaultTranslations: {
         readonly attendees: "Attendees";
         readonly join: "Join";
         readonly summary: "Summary";
+    };
+    readonly coachmark: {
+        readonly next: "Next";
+        readonly done: "Got it";
     };
     readonly actions: {
         readonly add: "Add";
@@ -744,6 +893,7 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+        readonly windowedCategories: "Showing {{count}} of {{total}} categories";
         readonly tooltip: {
             readonly ofTotal: "of total";
             readonly total: "total";
@@ -769,6 +919,12 @@ export declare const defaultTranslations: {
         readonly between: "It should be between {{min}} and {{max}}";
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
+    };
+    readonly phoneInput: {
+        readonly country: "Country";
+        readonly countryWithDialCode: "{{country}} {{dialCode}}";
+        readonly searchCountry: "Search country or dial code";
+        readonly noResults: "No country found";
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -983,6 +1139,9 @@ export declare const defaultTranslations: {
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
             };
+            readonly phone: {
+                readonly invalid: "Enter a valid phone number";
+            };
         };
     };
     readonly graph: {
@@ -1117,18 +1276,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
@@ -1150,8 +1297,29 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -1163,15 +1331,6 @@ declare module "@tiptap/core" {
             setVideoEmbed: (options: {
                 src: string;
             }) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
