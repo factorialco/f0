@@ -1,8 +1,16 @@
-import { useId, useRef, useState } from "react"
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { focusRing } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
@@ -13,6 +21,14 @@ import type {
 } from "../../F0AiChat/types"
 
 const MAX_ITEMS_PER_GROUP = 5
+
+// Suggestion-item marquee tuning. The reveal is speed-based, not
+// fixed-duration, so short and long overflows scroll at the same visual pace
+// across a mixed list.
+const SUGGESTION_SCROLL_SPEED = 46 // px/s, constant (linear)
+const SUGGESTION_SCROLL_DELAY = 400 // ms hold before the reveal starts
+const SUGGESTION_TRAILING_GAP = 16 // px — the tail stops short of the trailing edge
+const SUGGESTION_FADE = 16 // px — leading-edge fade width once scrolling
 
 function pickRandomItems(
   list: WelcomeScreenSuggestionItem[],
@@ -154,37 +170,141 @@ export const WelcomeScreenSuggestionsRow = ({
           </div>
           <div className="flex flex-col">
             {pickRandomItems(activeGroup.items).map((item, index) => (
-              <button
+              <SuggestionItem
                 key={index}
-                type="button"
-                onClick={(event) => {
+                item={item}
+                onHover={onItemHover}
+                onSelect={(event) => {
                   onItemClick(item, activeGroup)
                   shouldRestoreFocusRef.current =
                     document.activeElement === event.currentTarget
                   setActiveIdx(null)
                   onItemHover?.(null)
                 }}
-                onMouseEnter={() => onItemHover?.(item)}
-                onMouseLeave={() => onItemHover?.(null)}
-                onFocus={() => onItemHover?.(item)}
-                onBlur={() => onItemHover?.(null)}
-                className={cn(
-                  "group flex items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover focus-visible:bg-f1-background-hover",
-                  focusRing()
-                )}
-              >
-                <span className="min-w-0 flex-1 truncate">{item.title}</span>
-                <span
-                  aria-hidden
-                  className="flex flex-shrink-0 items-center text-f1-foreground-secondary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-                >
-                  <F0Icon icon={ArrowUp} size="sm" />
-                </span>
-              </button>
+              />
             ))}
           </div>
         </PopoverContent>
       )}
     </Popover>
+  )
+}
+
+type SuggestionItemProps = {
+  item: WelcomeScreenSuggestionItem
+  onSelect: (event: MouseEvent<HTMLButtonElement>) => void
+  onHover?: (item: WelcomeScreenSuggestionItem | null) => void
+}
+
+/**
+ * A single suggestion inside the popover. The title is truncated with an
+ * ellipsis; on hover/focus it holds for {@link SUGGESTION_SCROLL_DELAY}ms and
+ * then reveals the hidden tail with a one-way marquee — the label scrolls left
+ * at a constant {@link SUGGESTION_SCROLL_SPEED} until the tail clears (stopping
+ * {@link SUGGESTION_TRAILING_GAP}px short of the edge), with the leading edge
+ * fading as it moves. It does NOT loop and does NOT animate back: on leave it
+ * snaps to the start instantly.
+ *
+ * The reveal is driven imperatively (transform + mask) rather than via CSS
+ * classes because the scroll distance and duration depend on the measured
+ * overflow, which is only known at runtime. Pointer/focus handlers live on the
+ * button (not the label) so the cursor drifting onto the arrow doesn't reset
+ * the reveal mid-scroll.
+ *
+ * Accessibility: honours `prefers-reduced-motion` (static truncation, no
+ * marquee) and treats keyboard focus like hover. The full title is the button's
+ * text content, so it stays available to assistive tech regardless of the
+ * visual truncation.
+ */
+function SuggestionItem({ item, onSelect, onHover }: SuggestionItemProps) {
+  const wrapRef = useRef<HTMLSpanElement>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+  const timerRef = useRef<number | null>(null)
+  const reduceMotion = useReducedMotion()
+
+  const stopScroll = useCallback(() => {
+    if (timerRef.current != null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    const text = textRef.current
+    const wrap = wrapRef.current
+    // Instant return — no animated slide-back.
+    if (text) {
+      text.style.transition = "none"
+      text.style.transform = "translateX(0)"
+      text.style.overflow = ""
+    }
+    if (wrap) {
+      wrap.style.removeProperty("mask-image")
+      wrap.style.removeProperty("-webkit-mask-image")
+    }
+  }, [])
+
+  const startScroll = useCallback(() => {
+    if (reduceMotion) return
+    timerRef.current = window.setTimeout(() => {
+      const text = textRef.current
+      const wrap = wrapRef.current
+      if (!text || !wrap) return
+      const overflow = text.scrollWidth - text.clientWidth
+      if (overflow <= 0) return // fits — nothing hidden to reveal
+      const distance = overflow + SUGGESTION_TRAILING_GAP
+      const duration = (distance / SUGGESTION_SCROLL_SPEED) * 1000
+      // Let the label spill past its own box so translating reveals the tail
+      // (the wrapper still clips), and fade the leading edge as it moves.
+      text.style.overflow = "visible"
+      const fade = `linear-gradient(90deg, transparent 0, #000 ${SUGGESTION_FADE}px)`
+      wrap.style.setProperty("mask-image", fade)
+      wrap.style.setProperty("-webkit-mask-image", fade)
+      text.style.transition = `transform ${duration}ms linear`
+      text.style.transform = `translateX(-${distance}px)`
+    }, SUGGESTION_SCROLL_DELAY)
+  }, [reduceMotion])
+
+  const activate = useCallback(() => {
+    onHover?.(item)
+    startScroll()
+  }, [item, onHover, startScroll])
+
+  const deactivate = useCallback(() => {
+    onHover?.(null)
+    stopScroll()
+  }, [onHover, stopScroll])
+
+  // Clear a pending reveal timer if the item unmounts (e.g. the popover closes)
+  // mid-hold.
+  useEffect(
+    () => () => {
+      if (timerRef.current != null) clearTimeout(timerRef.current)
+    },
+    []
+  )
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      onMouseEnter={activate}
+      onMouseLeave={deactivate}
+      onFocus={activate}
+      onBlur={deactivate}
+      className={cn(
+        "group flex items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover focus-visible:bg-f1-background-hover",
+        focusRing()
+      )}
+    >
+      <span ref={wrapRef} className="min-w-0 flex-1 overflow-hidden">
+        <span ref={textRef} className="block w-full truncate">
+          {item.title}
+        </span>
+      </span>
+      <span
+        aria-hidden
+        className="flex flex-shrink-0 items-center text-f1-foreground-secondary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+      >
+        <F0Icon icon={ArrowUp} size="sm" />
+      </span>
+    </button>
   )
 }
