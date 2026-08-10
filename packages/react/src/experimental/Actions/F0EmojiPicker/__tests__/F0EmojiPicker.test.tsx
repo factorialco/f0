@@ -52,6 +52,27 @@ describe("F0EmojiPicker", () => {
     expect(container.querySelector("img")).not.toBeInTheDocument()
   })
 
+  it("closes with Escape and restores focus to the trigger", async () => {
+    const user = userEvent.setup()
+    render(<F0EmojiPicker label="Choose group emoji" />)
+
+    const trigger = screen.getByRole("button", { name: "Choose group emoji" })
+
+    trigger.focus()
+    await user.keyboard("{Enter}")
+
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByTestId("emoji-picker")).toBeInTheDocument()
+
+    await user.keyboard("{Escape}")
+
+    await waitFor(() =>
+      expect(trigger).toHaveAttribute("aria-expanded", "false")
+    )
+    expect(screen.queryByTestId("emoji-picker")).not.toBeInTheDocument()
+    await waitFor(() => expect(trigger).toHaveFocus())
+  })
+
   it("stores and displays the selected emoji when uncontrolled", async () => {
     const user = userEvent.setup()
     const { container } = render(<F0EmojiPicker label="Choose group emoji" />)

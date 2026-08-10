@@ -29,6 +29,7 @@ export type DurationFieldRenderIf =
 export interface F0DurationConfig {
   units?: DurationUnit[]
   fields?: Partial<Record<DurationUnit, DurationFieldConfig>>
+  allowNegative?: boolean
   readonly?: boolean
   size?: DurationInputSize
 }

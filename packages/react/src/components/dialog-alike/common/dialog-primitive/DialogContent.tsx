@@ -40,6 +40,12 @@ export const DialogContent = forwardRef<
      */
     defaultContainerId?: string
     animation?: DialogAnimation
+    /**
+     * Ref to the inner content box — the actually-sized element (`max-w-*`),
+     * not the full-viewport `fixed inset-0` positioner the forwarded `ref`
+     * lands on. Lets a parent measure the visible panel's width.
+     */
+    contentBoxRef?: (el: HTMLDivElement | null) => void
   }
 >(
   (
@@ -50,12 +56,23 @@ export const DialogContent = forwardRef<
       children,
       container: propContainer,
       defaultContainerId = "content",
+      contentBoxRef,
       ...props
     },
     ref
   ) => {
     const [container, setContainer] = useState<HTMLElement | null>()
-    const contentRef = useRef<HTMLDivElement>(null)
+    // Mutable (not RefObject) because `setContentEl` assigns `.current` directly.
+    const contentRef = useRef<HTMLDivElement | null>(null)
+    // Keep `contentRef` (used by `shake`) and hand the same node to the optional
+    // `contentBoxRef` so a parent can measure the box.
+    const setContentEl = useCallback(
+      (el: HTMLDivElement | null) => {
+        contentRef.current = el
+        contentBoxRef?.(el)
+      },
+      [contentBoxRef]
+    )
 
     // Shake the content when the dialog is opened and clicked outside in modal mode
     const shake = useCallback(() => {
@@ -121,7 +138,7 @@ export const DialogContent = forwardRef<
           }}
         >
           <div
-            ref={contentRef}
+            ref={setContentEl}
             className={cn(
               "relative flex w-[90%] flex-col rounded-xl bg-f1-background shadow-lg pointer-events-auto",
               "group-data-[state=open]/dialog:animate-in group-data-[state=closed]/dialog:animate-out overflow-hidden",
@@ -129,14 +146,26 @@ export const DialogContent = forwardRef<
               className
             )}
             onClick={(e) => {
-              // Only stop propagation so clicks inside the dialog box are not
-              // treated as outside-clicks by the overlay handler above. Do NOT
-              // preventDefault: this handler runs for every click that bubbles
-              // up from the dialog's contents, and preventing the default would
-              // cancel default actions of inner controls — most visibly the
-              // native file picker, which opens via a programmatic
-              // `fileInputRef.click()` that bubbles through here.
-              e.stopPropagation()
+              // Stop propagation so clicks inside the dialog box are not treated as
+              // outside-clicks by the wrapper handler above, and do not reach a
+              // clickable ancestor rendering this dialog — React propagates
+              // synthetic events along the component tree, so a portal does not
+              // isolate them.
+              //
+              // Set React's own propagation flag rather than calling
+              // `e.stopPropagation()`: that forwards to
+              // `nativeEvent.stopPropagation()`, which halts the DOM event at
+              // React's root container. Widgets embedded in a dialog that mount
+              // their own React root need the DOM event to keep going — React 16
+              // delegates every event at `document`, so such a widget otherwise
+              // never observes its own clicks (silently, and with `mousedown` still
+              // flowing, so its hover states look healthy).
+              //
+              // Also never `preventDefault()` here: this runs for every click
+              // bubbling out of the dialog's contents, and it would cancel default
+              // actions of inner controls — most visibly the native file picker,
+              // opened by a programmatic `fileInputRef.click()` that passes through.
+              e.isPropagationStopped = () => true
             }}
           >
             {children}

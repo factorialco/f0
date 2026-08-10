@@ -185,6 +185,26 @@ describe("WelcomeScreenSuggestionsRow", () => {
     expect(item.closest("[data-side]")).toHaveAttribute("data-side", "top")
   })
 
+  // Regression: the row reserved two chip rows' worth of height (min-h) on the
+  // Radix anchor itself. Radix positions off the anchor's border box, so with a
+  // single row of chips the popover floated ~40px above them.
+  it("anchors the popover to the chips, not to the reserved-height box", () => {
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    // The anchor Radix measures is the chips' own wrapper, so it must hug
+    // them; the reserved two-row height belongs to the box outside it.
+    const anchorRow = screen.getByRole("button", {
+      name: /analyze/i,
+    }).parentElement
+    expect(anchorRow?.className).not.toMatch(/min-h-/)
+    expect(anchorRow?.parentElement?.className).toMatch(/min-h-\[72px\]/)
+  })
+
   it("opens the popover below the trigger when side is bottom", async () => {
     const user = userEvent.setup()
     zeroRender(

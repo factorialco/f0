@@ -356,6 +356,7 @@ const RowComponentInner = <
             }}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
+            highlighted={!!column.highlighted}
             className={cn(
               cellRenderedClass,
               isLastInGroup && groupBorderClass,

@@ -38,10 +38,12 @@ import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,
   FIT_VIEW_PADDING_LOOSE,
+  FIT_VIEW_PADDING_TIGHT,
   FOCUS_SETTLE_DELAY_MS,
   INITIAL_FOCUS_MAX_ZOOM,
   LARGE_GRAPH_SNAP_THRESHOLD,
   NODE_CLICK_DISTANCE_SQ,
+  NODE_CLICK_ZOOM,
 } from "../../constants"
 import {
   F0GraphActionsContext,
@@ -162,6 +164,9 @@ export function F0GraphView<T = unknown>(
     onPaneClick: onPaneClickProp,
     focusedNode,
     initialFocusNodeId,
+    centerOnNodeClick = true,
+    nodeClickZoom,
+    viewportInset,
     highlightedNodes: highlightedProp,
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
@@ -323,6 +328,8 @@ export function F0GraphView<T = unknown>(
     handleFitView,
     handleFocusUser,
     centerOnNode,
+    getFitPadding,
+    hasViewportInset,
   } = useGraphViewport({
     defaultZoom,
     zoomPreset,
@@ -333,6 +340,7 @@ export function F0GraphView<T = unknown>(
     nodeWindowingActive: enableNodeWindowing ?? false,
     getContentBounds,
     getNodePosition: getNodePositionStable,
+    viewportInset,
   })
 
   // Windowing only actually drives the render once the first viewport has settled
@@ -504,7 +512,21 @@ export function F0GraphView<T = unknown>(
   useEffect(() => {
     if (didInitialFitRef.current || renderedNodeIds.length === 0) return
     didInitialFitRef.current = true
-    reactFlow.fitView(initialFitViewOptions)
+    // Honor the inset on the first frame too, so an already-open panel never
+    // opens the graph with the focus target behind it. When there's no inset the
+    // options are passed through untouched (identical to before).
+    reactFlow.fitView(
+      hasViewportInset
+        ? {
+            ...initialFitViewOptions,
+            // Base matches React Flow's own default fitView padding (0.1), so
+            // with no inset this stays byte-identical to the untouched call.
+            padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
+          }
+        : initialFitViewOptions
+    )
+    // Guarded by `didInitialFitRef` so it runs once; `hasViewportInset` /
+    // `getFitPadding` are read fresh at that point and intentionally omitted.
   }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
 
   // ── Fly to the consumer-controlled focused node ──
@@ -531,10 +553,74 @@ export function F0GraphView<T = unknown>(
     reactFlow.fitView({
       nodes: framed ?? [{ id }],
       duration: 300,
-      padding: FIT_VIEW_PADDING_LOOSE,
+      padding: getFitPadding(FIT_VIEW_PADDING_LOOSE),
       maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom),
     })
   }
+
+  // ── Fly to a clicked node ──
+  // Unlike `flyToFocusedRef` (which frames the node with its children at a capped
+  // zoom for context), a click is a deliberate "take me here", so it centers on
+  // the node alone and lands closer (`nodeClickZoom` / `NODE_CLICK_ZOOM`, clamped
+  // to `maxZoom`) regardless of the current zoom. Read via a ref so `handleNodeClick`
+  // stays stable and always sees the latest props. `centerOnNode` uses the node's
+  // layout position, so it works even for a node windowed out of the store and
+  // applies the `viewportInset` offset; the id-based fit is an unreachable
+  // fallback (a just-clicked node always has a position).
+  const flyToNodeClickRef = useRef<(id: string) => void>(() => {})
+  flyToNodeClickRef.current = (id: string) => {
+    const zoom = Math.min(nodeClickZoom ?? NODE_CLICK_ZOOM, maxZoom)
+    if (centerOnNode(id, 300, zoom)) return
+    reactFlow.fitView({
+      nodes: [{ id }],
+      duration: 300,
+      padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
+      maxZoom: zoom,
+    })
+  }
+
+  // Click handler shared by both selection paths: select the node, then (unless
+  // opted out) fly to it. Kept out of `selectNode` itself so keyboard navigation
+  // — which also calls `selectNode` — never moves the camera.
+  //
+  // The fly is deferred by the same settle delay the `focusedNode` path uses,
+  // because the consumer's side panel usually opens *as a result of* this click:
+  // its `viewportInset` only reaches us on a later render, so flying synchronously
+  // would read an empty inset and center on the full canvas — the very case the
+  // inset exists for — and the panel would then open over the node.
+  const nodeClickFlyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  useEffect(
+    () => () => {
+      if (nodeClickFlyTimerRef.current) {
+        clearTimeout(nodeClickFlyTimerRef.current)
+      }
+    },
+    []
+  )
+
+  const handleNodeClick = useCallback(
+    (id: string) => {
+      selectNode(id)
+      // Fly only for real data nodes. The canvas pointer-up also fires for the
+      // expander/collapser pseudo-nodes (their `.react-flow__node` wrappers carry
+      // `expander-`/`collapser-` ids, absent from `nodeMap`); flying to one would
+      // chase the toggle's position as it shifts on expand/collapse. Gating on
+      // `nodeMap` leaves the toggle itself untouched.
+      if (!centerOnNodeClick || !nodeMap.has(id)) return
+      // A second click supersedes a still-pending fly rather than queueing both.
+      if (nodeClickFlyTimerRef.current) {
+        clearTimeout(nodeClickFlyTimerRef.current)
+      }
+      nodeClickFlyTimerRef.current = setTimeout(
+        () => flyToNodeClickRef.current(id),
+        FOCUS_SETTLE_DELAY_MS
+      )
+    },
+    [selectNode, centerOnNodeClick, nodeMap]
+  )
+
   useEffect(() => {
     if (!focusedNode) return
     // Fires only when `focusedNode` transitions to a new value (entry,
@@ -675,7 +761,10 @@ export function F0GraphView<T = unknown>(
                           target?.closest<HTMLElement>(".react-flow__node")
                         if (!nodeEl) return
                         const id = nodeEl.getAttribute("data-id")
-                        if (id) selectNode(id)
+                        // select + fly-to (the fly is opt-out via
+                        // `centerOnNodeClick`). This is the click-only path;
+                        // keyboard selection goes through `selectNode` directly.
+                        if (id) handleNodeClick(id)
                       }}
                       className="h-full w-full"
                     >

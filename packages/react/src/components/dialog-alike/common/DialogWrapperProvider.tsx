@@ -1,19 +1,11 @@
-import { createContext, ReactNode, useContext } from "react"
+import { type ReactNode, useContext } from "react"
+
+import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
+import type { F0DialogContextType } from "@/patterns/F0Dialog/internal-types"
 
 import { DialogAlikePosition as Position } from "./types"
 
-export type DialogWrapperContextType = {
-  open: boolean
-  onClose: () => void
-  shownBottomSheet: boolean
-  position: Position
-  /**
-   * The dialog's content container element.
-   * Use this as the `portalContainer` prop for components like F0Select
-   * to ensure dropdowns render inside the dialog.
-   */
-  portalContainer: HTMLDivElement | null
-}
+export type DialogWrapperContextType = F0DialogContextType
 
 /**
  * The props for the F0DialogProvider component.
@@ -27,13 +19,9 @@ export type DialogWrapperProviderProps = {
   portalContainer: HTMLDivElement | null
 }
 
-export const DialogWrapperContext = createContext<DialogWrapperContextType>({
-  open: false,
-  onClose: () => {},
-  position: "center",
-  shownBottomSheet: false,
-  portalContainer: null,
-})
+// Dialog-alike components are being migrated to the stable dialog pattern.
+// Sharing its context keeps nested overlays in the same portal and focus scope.
+export const DialogWrapperContext = F0DialogContext
 
 export const DialogWrapperProvider = ({
   isOpen,

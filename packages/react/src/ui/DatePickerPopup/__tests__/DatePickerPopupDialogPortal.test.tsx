@@ -1,7 +1,8 @@
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { DialogWrapperProvider } from "@/components/dialog-alike/common/DialogWrapperProvider"
 import { DialogPosition, F0DialogContext } from "@/patterns/F0Dialog"
 import { zeroRender as render } from "@/testing/test-utils"
 
@@ -11,9 +12,17 @@ import { DatePickerPopup } from "../DatePickerPopup"
 // into the dialog's container. If the calendar itself stays in `document.body` it
 // sits after that container in document order and, at the shared z-index, paints
 // over the dropdowns it owns — leaving the year unpickable (FCT-59810).
-const renderInDialog = (position: DialogPosition) => {
+const portalContainers = new Set<HTMLDivElement>()
+
+const createPortalContainer = () => {
   const portalContainer = document.createElement("div")
   document.body.appendChild(portalContainer)
+  portalContainers.add(portalContainer)
+  return portalContainer
+}
+
+const renderInDialog = (position: DialogPosition) => {
+  const portalContainer = createPortalContainer()
 
   render(
     <F0DialogContext.Provider
@@ -35,6 +44,11 @@ const renderInDialog = (position: DialogPosition) => {
 }
 
 describe("DatePickerPopup portal container", () => {
+  afterEach(() => {
+    portalContainers.forEach((container) => container.remove())
+    portalContainers.clear()
+  })
+
   it.each(["center", "fullscreen"] as const)(
     "renders the calendar inside the dialog container for %s dialogs",
     async (position) => {
@@ -70,5 +84,36 @@ describe("DatePickerPopup portal container", () => {
     await user.click(screen.getByRole("button", { name: "Trigger" }))
 
     expect(screen.getByRole("dialog").closest("body")).toBe(document.body)
+  })
+
+  it("keeps dialog-alike calendar controls in one interactive portal", async () => {
+    const user = userEvent.setup()
+    const portalContainer = createPortalContainer()
+
+    render(
+      <DialogWrapperProvider
+        isOpen
+        onClose={vi.fn()}
+        position="center"
+        portalContainer={portalContainer}
+      >
+        <DatePickerPopup onSelect={vi.fn()} asChild>
+          <button>Trigger</button>
+        </DatePickerPopup>
+      </DialogWrapperProvider>
+    )
+
+    await user.click(screen.getByRole("button", { name: "Trigger" }))
+
+    expect(portalContainer).toContainElement(screen.getByRole("dialog"))
+
+    const yearSelector = screen.getByRole("combobox", { name: "Select year" })
+    yearSelector.focus()
+    await user.keyboard("{Enter}")
+
+    const yearList = await screen.findByRole("listbox")
+    expect(portalContainer).toContainElement(yearList)
+    expect(yearSelector).toHaveAttribute("aria-expanded", "true")
+    expect(portalContainer).toContainElement(document.activeElement)
   })
 })

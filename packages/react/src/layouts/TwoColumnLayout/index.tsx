@@ -9,6 +9,12 @@ export interface TwoColumnLayoutProps {
   sideContent: ReactNode
   mainColumnPosition?: "left" | "right"
   sticky?: boolean
+  /**
+   * Which column stacks on top when the layout collapses to one column
+   * (below `md`). Defaults to `"side"` (the historical behavior). Use `"main"`
+   * to keep the main content first on narrow viewports.
+   */
+  responsiveStackOrder?: "side" | "main"
 }
 
 const _TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
@@ -18,6 +24,7 @@ const _TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
       sideContent,
       mainColumnPosition = "left",
       sticky = false,
+      responsiveStackOrder = "side",
     },
     ref
   ) {
@@ -33,7 +40,8 @@ const _TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
         >
           <main
             className={cn(
-              "sm:min-h-xs order-2 h-fit border-0 py-5 sm:flex-1 sm:border-solid md:order-2 px-page",
+              "sm:min-h-xs h-fit border-0 py-5 sm:flex-1 sm:border-solid md:order-2 px-page",
+              responsiveStackOrder === "main" ? "order-1" : "order-2",
               sticky
                 ? "md:h-full md:max-h-full md:overflow-y-auto"
                 : "min-h-full",
@@ -48,7 +56,7 @@ const _TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
           <Aside
             sticky={sticky}
             className={cn(
-              "order-1",
+              responsiveStackOrder === "main" ? "order-2" : "order-1",
               mainColumnPosition === "right" ? "md:order-1" : "md:order-3"
             )}
           >

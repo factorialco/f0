@@ -1,0 +1,562 @@
+import {
+  Children,
+  type CSSProperties,
+  forwardRef,
+  Fragment,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
+
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { F0Button } from "@/components/F0Button"
+import Menu from "@/icons/app/Menu"
+import { Check, Pencil } from "@/icons/app"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
+import { Action } from "@/ui/Action"
+import { cn } from "@/lib/utils"
+
+import { SlotWidget } from "../SlotWidget"
+import { useScrollFade } from "../useScrollFade"
+import { WidgetContainer, type WidgetContainerSide } from "../WidgetContainer"
+import {
+  type HomeRenderCtx,
+  type HomeWidgetItem,
+  type SlotRenderers,
+} from "../slotRenderers"
+
+/**
+ * The DaytimePage gradient wash, by period — the same stops and the same 8%
+ * opacity, so Home and the daytime header read as one surface.
+ */
+const GRADIENTS = {
+  morning:
+    "bg-gradient-to-bl from-[#E51943] from-20% via-[#F97316] via-35% to-transparent to-50%",
+  afternoon:
+    "bg-gradient-to-bl from-[#5596F6] from-20% via-[#10B881] via-35% to-transparent to-50%",
+  evening:
+    "bg-gradient-to-bl from-[#3739A8] from-20% via-[#CB6687] via-35% to-transparent to-50%",
+} as const
+export type HomePeriod = keyof typeof GRADIENTS
+
+const GradientWash = ({
+  period,
+  className,
+}: {
+  period: HomePeriod
+  className?: string
+}) => (
+  <div
+    aria-hidden
+    className={cn(
+      "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
+      GRADIENTS[period],
+      className
+    )}
+  />
+)
+
+/** Collapsed-rail geometry (mirrors the prototype's railMode). */
+const COLLAPSED_RAIL_WIDTH = 40
+
+/**
+ * The columns scroll without showing a bar — the scroll-aware fades already
+ * hint at overflowed content, so a bar is just noise on the gradient.
+ */
+const SCROLLBAR_HIDDEN = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+const COLUMN_GAP_PX = 16
+/** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
+const TWO_COLUMN_MIN_PX = 768
+const PANEL_LEAVE_MS = 150
+
+export interface NewHomeLayoutProps {
+  /** Freeform main-column content on top (greeting, shortcut cards, ranked feed…). */
+  children?: ReactNode
+  /** Main column: widget slots stacked below `children`. */
+  leftWidgets?: HomeWidgetItem[]
+  /** Side rail: spec-conforming widgets. */
+  rightWidgets?: HomeWidgetItem[]
+  /** Freeform side-rail content, rendered above `rightWidgets` (expanded rail only). */
+  aside?: ReactNode
+  /** Per-visualization renderers, MERGED OVER the kit's `defaultSlotRenderers`. */
+  slotRenderers?: SlotRenderers
+  /** Full override of how a whole widget is drawn. Defaults to `SlotWidget`. */
+  renderWidget?: (widget: HomeWidgetItem, ctx: HomeRenderCtx) => ReactNode
+  /**
+   * Edit mode. Omit it and the layout owns the state itself, toggled by its own
+   * edit button; pass it to drive edit mode from outside.
+   */
+  editing?: boolean
+  /** Called when the layout's edit button is pressed. */
+  onEditingChange?: (editing: boolean) => void
+  /**
+   * Which containers a user may actually edit. In edit mode only these show
+   * remove controls and the add placeholder; the others stay put. Both by default.
+   */
+  editableWidgetContainers?: WidgetContainerSide[]
+  /** Called with a widget id when its remove control is clicked (edit mode only). */
+  onRemoveWidget?: (id: string) => void
+  /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+  onClickAddNewWidget?: (side: WidgetContainerSide) => void
+  /** Called with a side and its widget ids in their new order after a drag. */
+  onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
+  /** The daytime gradient period for the page surface. */
+  period?: HomePeriod
+  /** Fixed px width of the side rail. */
+  asideWidth?: number
+  /** Max px width of the (centered) main-column content. */
+  mainWidth?: number
+  /**
+   * How far the page surface reaches past this layout's box, in px — set it to
+   * the page's own gutter so the gradient runs to the window's edges instead of
+   * stopping at that padding.
+   */
+  bleed?: number
+  /**
+   * When the layout stacks (below `md` there is no rail), how many leading
+   * blocks of `children` come before the pinned widgets folded in from it.
+   * Defaults to 2 — a greeting and the shortcuts under it.
+   */
+  stackedPinsAfter?: number
+  ctx?: HomeRenderCtx
+  className?: string
+}
+
+/**
+ * NewHomeLayout — the shell for the redesigned Home, modelled on the custom-home
+ * prototype's Feed page.
+ *
+ * A growing MAIN column (content capped to a centered `mainWidth`) next to a
+ * FIXED-width side rail, separated only by a gap — no divider. The WHOLE page
+ * sits on one full-bleed DaytimePage gradient (`period`): neither column paints
+ * a background, so the wash runs under both and across the gap, out to the
+ * window's edges. Below `md` everything stacks into one column, main first.
+ *
+ * WHEN THE LAYOUT IS TOO NARROW for both columns at full width (but still two
+ * columns), the rail COLLAPSES: one `lg` avatar per widget carrying that
+ * widget's own catalog `icon`. Hovering (or clicking) an avatar floats the SAME
+ * widget render out over the feed at the rail's expanded width — one render,
+ * two states, exactly like the prototype.
+ */
+export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
+  function NewHomeLayout(
+    {
+      children,
+      leftWidgets = [],
+      rightWidgets = [],
+      aside,
+      slotRenderers,
+      renderWidget,
+      editing,
+      onEditingChange,
+      editableWidgetContainers = ["main", "right"],
+      onRemoveWidget,
+      onClickAddNewWidget,
+      onReorderWidgets,
+      period = "morning",
+      asideWidth = 396,
+      mainWidth = 800,
+      bleed = 24,
+      stackedPinsAfter = 2,
+      ctx = {},
+      className,
+    },
+    ref
+  ) {
+    const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+    const rootRef = useRef<HTMLDivElement | null>(null)
+    const [rootWidth, setRootWidth] = useState(0)
+    // Hover state of the collapsed strip: which widget floats, and where.
+    const [openId, setOpenId] = useState<string | null>(null)
+    const [panelTop, setPanelTop] = useState(0)
+    const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    // The rail collapses when the grid can't give both columns their width —
+    // measured (clientWidth is a layout metric), not media-queried, because
+    // what decides it is the room THIS layout has.
+    useLayoutEffect(() => {
+      const el = rootRef.current
+      if (!el) return
+      const read = () => setRootWidth(el.clientWidth)
+      read()
+      if (typeof ResizeObserver !== "function") return
+      const observer = new ResizeObserver(read)
+      observer.observe(el)
+      return () => observer.disconnect()
+    }, [])
+
+    // Uncontrolled by default: the layout's own edit button drives it. Passing
+    // `editing` hands control to the caller.
+    const [editingState, setEditingState] = useState(false)
+    const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
+    const isEditing = editing ?? editingState
+    const toggleEditing = () => {
+      const next = !isEditing
+      if (editing === undefined) setEditingState(next)
+      onEditingChange?.(next)
+    }
+    const canEditSide = (side: WidgetContainerSide) =>
+      editableWidgetContainers.includes(side)
+
+    const render = (widget: HomeWidgetItem) => {
+      const node = renderWidget ? (
+        renderWidget(widget, ctx)
+      ) : (
+        <SlotWidget
+          header={widget.header}
+          fullHeight={widget.fullHeight}
+          slots={widget.slots}
+          slotRenderers={slotRenderers}
+          ctx={ctx}
+        />
+      )
+      return node
+    }
+
+    // EACH COLUMN SCROLLS ITSELF: the grid is bounded to the viewport minus the
+    // gutter it sits in, and each column takes its own overflow inside it. Both
+    // fade at an end only while content is really hidden past it (see
+    // `useScrollFade`), so nothing is masked before you scroll or once you have
+    // reached the end.
+    const mainFade = useScrollFade()
+    const railFade = useScrollFade()
+
+    const hasSide =
+      aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
+    // Two reasons the rail collapses, and they don't compete: there ISN'T ROOM
+    // for both columns, or you ASKED for the space. Narrowness always wins —
+    // expanding by hand can't conjure room the layout doesn't have — so the
+    // manual choice only decides while both would fit.
+    const autoCollapsed =
+      rootWidth > 0 && rootWidth < mainWidth + COLUMN_GAP_PX + asideWidth
+    const collapsed =
+      hasSide &&
+      rightWidgets.length > 0 &&
+      (autoCollapsed || (manualCollapsed ?? false))
+    const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
+
+    // STACKED (below `md`): there is no rail at all, not even the strip — the
+    // window is too narrow to spend 40px on a column. The rail's widgets fold
+    // into the main column instead: the PINNED ones near the top, where a
+    // mandatory widget belongs, and the rest at the very bottom.
+    const stacked = rootWidth > 0 && rootWidth < TWO_COLUMN_MIN_PX
+    const loosePins = {
+      pinned: stacked ? rightWidgets.filter((widget) => widget.locked) : [],
+      rest: stacked ? rightWidgets.filter((widget) => !widget.locked) : [],
+    }
+    // The pins go BETWEEN blocks of `children` — after `stackedPinsAfter` of
+    // them — because "just under the shortcuts" is a place inside content this
+    // layout doesn't own. Splitting the children is the only way to reach it.
+    const stackedChildren = !stacked
+      ? children
+      : (() => {
+          const blocks = Children.toArray(children)
+          return (
+            <>
+              {blocks.slice(0, stackedPinsAfter)}
+              {loosePins.pinned.map((widget) => (
+                <Fragment key={widget.id}>{render(widget)}</Fragment>
+              ))}
+              {blocks.slice(stackedPinsAfter)}
+            </>
+          )
+        })()
+
+    const openWidget = collapsed
+      ? rightWidgets.find((widget) => widget.id === openId)
+      : undefined
+
+    const cancelLeave = () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      leaveTimer.current = null
+    }
+    const scheduleLeave = () => {
+      cancelLeave()
+      leaveTimer.current = setTimeout(() => setOpenId(null), PANEL_LEAVE_MS)
+    }
+    const openFromAnchor = (id: string, anchor: HTMLElement) => {
+      cancelLeave()
+      const root = rootRef.current
+      if (root) {
+        const top =
+          anchor.getBoundingClientRect().top - root.getBoundingClientRect().top
+        setPanelTop(Math.max(0, top))
+      }
+      setOpenId(id)
+    }
+
+    return (
+      <div
+        ref={(node) => {
+          rootRef.current = node
+          if (typeof ref === "function") ref(node)
+          else if (ref) ref.current = node
+        }}
+        className={cn(
+          // `isolate` so the surface layer's -z-10 stays INSIDE this layout
+          // instead of escaping behind an ancestor's background.
+          "relative isolate grid grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
+          className
+        )}
+        style={
+          {
+            "--home-aside-w": `${railWidth}px`,
+            height: `calc(100svh - ${2 * bleed}px)`,
+            // The column template lives HERE rather than in a class: it is the
+            // same property Tailwind's `grid-cols-*` sets, so as a utility it
+            // lost the specificity contest and the rail silently fell out of its
+            // column. A COLLAPSED rail is a column at any width — a 40px strip
+            // always fits; an expanded one waits until there is room for both.
+            // `!stacked` first: stacked renders no rail at all, so reserving its
+            // column would leave an empty strip down the side.
+            gridTemplateColumns:
+              hasSide &&
+              !stacked &&
+              (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
+                ? `minmax(0, 1fr) ${railWidth}px`
+                : "minmax(0, 1fr)",
+          } as CSSProperties
+        }
+      >
+        {/* ONE full-bleed surface for the WHOLE page, under BOTH columns: the
+            gradient reaches `bleed` past every edge, so it runs to the window
+            instead of stopping at the page's own padding. Neither column paints
+            a background of its own — the gradient shows through beneath them,
+            including across the grid's gap. */}
+        {/* `-z-10`: as a positioned element with auto z-index this OPAQUE layer
+            painted over every non-positioned descendant — the collapsed strip's
+            buttons were in place, opacity 1, and invisible under the page
+            surface. A negative z-index puts the background where a background
+            belongs: under everything in this (isolated) layout. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page"
+          style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
+        >
+          <GradientWash period={period} />
+        </div>
+        {/* The edit toggle sits in its OWN grid row spanning both columns, so it
+            takes real layout space instead of floating over the widgets below.
+            Entering edit mode is what makes `editableWidgetContainers` take
+            effect (remove controls + the add placeholder appear in the
+            containers it lists). */}
+        <div className="col-span-full flex flex-row items-center justify-between">
+          {/* The main-menu trigger, on the same terms as `DaytimePage`: shown
+              only when the sidebar isn't already there to be seen. */}
+          {isSmallScreen || sidebarState === "hidden" ? (
+            <F0Button
+              variant="ghost"
+              onClick={() => toggleSidebar()}
+              label="Open main menu"
+              icon={Menu}
+              hideLabel
+            />
+          ) : (
+            <span />
+          )}
+          <div className="flex flex-row items-center gap-2">
+            {/* Not while the rail is collapsed: arranging widgets you cannot see
+                is not an offer worth making. In edit mode the button becomes the
+                primary action — a check to confirm — rather than staying the
+                pencil that got you here. */}
+            {collapsed ? null : (
+              <F0Button
+                variant={isEditing ? "default" : "ghost"}
+                size="md"
+                hideLabel
+                icon={isEditing ? Check : Pencil}
+                label={isEditing ? "Done editing" : "Edit Home"}
+                onClick={toggleEditing}
+              />
+            )}
+            {/* Collapsing the rail by hand — but only while that is a real
+                choice. Once the layout is too narrow for both columns the rail
+                is collapsed regardless, so a toggle there would be a control
+                that does nothing. */}
+            {hasSide && rightWidgets.length > 0 && !autoCollapsed ? (
+              <Action
+                variant="ghost"
+                size="md"
+                compact
+                onClick={() => setManualCollapsed(!collapsed)}
+                title={
+                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
+                }
+                aria-label={
+                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
+                }
+              >
+                {/* The sidebar's own collapse glyph, so collapsing the rail and
+                    collapsing the sidebar read as the same gesture. */}
+                <SidebarIconSvg isExpanded={!collapsed} />
+              </Action>
+            ) : null}
+          </div>
+        </div>
+        {/* Main column: its own scroll region, no mask — a reading column should
+            not have the text you are reading dimmed at the edges.
+
+            It BLEEDS through the page gutter: a negative vertical margin grows
+            its box by the gutter at each end while an equal padding puts the
+            content back on the line it was on. So the column's clip edge is the
+            window's edge rather than the padding line — content scrolls off the
+            screen instead of being cut short inside the page. */}
+        <div
+          ref={mainFade.ref}
+          className={cn("relative min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
+          style={{
+            marginTop: -bleed,
+            marginBottom: -bleed,
+            paddingTop: bleed,
+            paddingBottom: bleed,
+            ...mainFade.style,
+          }}
+        >
+          <WidgetContainer
+            side="main"
+            className="relative mx-auto w-full"
+            style={{ maxWidth: `${mainWidth}px` }}
+            widgets={
+              stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets
+            }
+            slotRenderers={slotRenderers}
+            renderWidget={renderWidget}
+            ctx={ctx}
+            editing={isEditing}
+            disableEdition={!canEditSide("main")}
+            onReorder={
+              onReorderWidgets
+                ? (ids) => onReorderWidgets("main", ids)
+                : undefined
+            }
+            onRemoveWidget={onRemoveWidget}
+            onClickAddNewWidget={
+              onClickAddNewWidget
+                ? () => onClickAddNewWidget("main")
+                : undefined
+            }
+          >
+            {stackedChildren}
+          </WidgetContainer>
+        </div>
+        {stacked ? null : hasSide ? (
+          collapsed ? (
+            // The collapsed strip: one avatar per widget, the widget's own
+            // catalog glyph. Hover/click floats the widget over the feed.
+            // NO FADE HERE: the strip is a short column of 40px glyphs, and a
+            // mask over those washes the glyphs themselves out rather than
+            // hinting at content past an edge. The fade belongs to the expanded
+            // rail, where the content is tall cards.
+            // `-m-1 p-1`: the hasUpdates dot pokes 2px past the 40px glyphs,
+            // and the scrollport would clip it — bleed the scrollport out by
+            // 4px (padding puts the glyphs back) so the dot stays inside it.
+            <aside
+              className={cn(
+                "-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1",
+                SCROLLBAR_HIDDEN
+              )}
+              onMouseLeave={scheduleLeave}
+              onMouseEnter={cancelLeave}
+            >
+              {rightWidgets.map((widget) => (
+                <button
+                  key={widget.id}
+                  type="button"
+                  aria-label={widget.header?.title ?? widget.id}
+                  aria-expanded={openId === widget.id}
+                  onMouseEnter={(event) =>
+                    openFromAnchor(widget.id, event.currentTarget)
+                  }
+                  onClick={(event) =>
+                    openId === widget.id
+                      ? setOpenId(null)
+                      : openFromAnchor(widget.id, event.currentTarget)
+                  }
+                  className="rounded-lg"
+                >
+                  {/* Same accent dot HomeListItem uses for unread rows. */}
+                  <span className="relative inline-flex">
+                    {widget.icon ? (
+                      <F0AvatarIcon icon={widget.icon} size="lg" />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
+                        {(widget.header?.title ?? widget.id).charAt(0)}
+                      </span>
+                    )}
+                    {widget.hasUpdates ? (
+                      // Same dot HomeListItem draws for unread rows — the ring
+                      // keeps it legible over any glyph.
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
+                    ) : null}
+                  </span>
+                </button>
+              ))}
+              {/* Always offered, not only in edit mode: collapsed, the strip has
+                  no edit affordance of its own, and adding a widget is the one
+                  thing you would still want from it. */}
+              {canEditSide("right") && onClickAddNewWidget ? (
+                <button
+                  type="button"
+                  aria-label="Add widget"
+                  onClick={() => onClickAddNewWidget("right")}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:text-f1-foreground"
+                >
+                  +
+                </button>
+              ) : null}
+            </aside>
+          ) : (
+            <aside
+              ref={railFade.ref}
+              className={cn("min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
+              style={railFade.style}
+            >
+              <WidgetContainer
+                side="right"
+                widgets={rightWidgets}
+                slotRenderers={slotRenderers}
+                renderWidget={renderWidget}
+                ctx={ctx}
+                editing={isEditing}
+                disableEdition={!canEditSide("right")}
+                onReorder={
+                  onReorderWidgets
+                    ? (ids) => onReorderWidgets("right", ids)
+                    : undefined
+                }
+                onRemoveWidget={onRemoveWidget}
+                onClickAddNewWidget={
+                  onClickAddNewWidget
+                    ? () => onClickAddNewWidget("right")
+                    : undefined
+                }
+              >
+                {aside}
+              </WidgetContainer>
+            </aside>
+          )
+        ) : null}
+        {/* The floating panel: the SAME widget render the expanded rail makes,
+            at the expanded rail width, level with its avatar. */}
+        {openWidget ? (
+          <div className="pointer-events-none absolute inset-0">
+            <div
+              className="pointer-events-auto absolute rounded-xl bg-f1-background"
+              style={{
+                top: panelTop,
+                right: COLLAPSED_RAIL_WIDTH + 8,
+                width: asideWidth,
+              }}
+              onMouseEnter={cancelLeave}
+              onMouseLeave={scheduleLeave}
+            >
+              {render(openWidget)}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+)

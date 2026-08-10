@@ -15,6 +15,8 @@ export type {
   FormCanvasContent,
   DataDownloadCanvasContent,
   DataDownloadDataset,
+  AutofillTimesheetCanvasContent,
+  AutofillTimesheetShift,
   DashboardCanvasActions,
   DashboardMetadata,
   ChatDashboardConfig,

@@ -25,14 +25,12 @@
     "Graph/F0GraphEdge",
     "Graph/F0GraphNode",
     "Heading",
-    "Icon",
     "Image",
     "Inputs/Duration input",
     "Inputs/Number input",
     "Inputs/Search input",
     "Inputs/Text area input",
     "Inputs/Text input",
-    "Primitives/F0InputField",
-    "Resource header"
+    "Primitives/F0InputField"
   ]
 }
