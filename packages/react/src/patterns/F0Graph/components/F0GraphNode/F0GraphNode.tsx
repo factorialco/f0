@@ -134,6 +134,28 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0
 
+    // Measure the tag block and report it so the graph can reserve exactly the
+    // room it takes. The number of rows depends on each node's label widths, so
+    // counting tags cannot predict it — a two-tag node wraps to two rows when
+    // its labels are long, and the layout would then place the next rank inside
+    // this node, leaving the outgoing edge crossing the tags.
+    const tagsRef = useRef<HTMLDivElement | null>(null)
+    const reportTagRowHeight = renderCfg?.reportTagRowHeight
+    useEffect(() => {
+      if (!reportTagRowHeight || !nodeId) return
+      const el = tagsRef.current
+      if (!el) {
+        reportTagRowHeight(nodeId, 0)
+        return
+      }
+      const report = () =>
+        reportTagRowHeight(nodeId, el.getBoundingClientRect().height)
+      report()
+      const observer = new ResizeObserver(report)
+      observer.observe(el)
+      return () => observer.disconnect()
+    }, [reportTagRowHeight, nodeId, tagsVisible, filteredTags])
+
     // The hover card only makes sense in the compacted modes, where part of the
     // node's info is not on screen. In detail everything is already visible, so
     // there's nothing to reveal. Only the non-hidden tags (`filteredTags`,
@@ -402,6 +424,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 ? { duration: 0 }
                 : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
             }
+            ref={tagsRef}
             className="max-w-[256px]"
             // Tags are informational: clicking a tag must not select the node.
             // Two paths select a node: the node-level `onClick` (selection, plus

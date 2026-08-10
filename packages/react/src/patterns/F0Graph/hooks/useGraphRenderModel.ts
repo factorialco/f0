@@ -49,6 +49,9 @@ import { useViewportGeometry } from "./useViewportGeometry"
 // (and the next rank) below the metadata instead of overlapping it.
 const TAG_ROW_HEIGHT = 36
 const ESTIMATED_TAGS_PER_ROW = 2
+// Gap between the pill and the tag block (`gap-1.5` on the node's column).
+// Added to the measured tag height so the reservation covers the whole stack.
+const TAG_ROW_GAP = 6
 
 interface UseGraphRenderModelOptions<T> {
   roots: TreeNode<T>[]
@@ -69,6 +72,11 @@ interface UseGraphRenderModelOptions<T> {
   nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   visibleTagTypesSet: Set<F0GraphNodeTagColumn>
   reserveTagRow?: boolean
+  /**
+   * Tallest tag block reported by the rendered nodes, in px. Replaces the
+   * count-based estimate once the first measurement lands.
+   */
+  measuredTagRowHeight?: number
   nodeWidthProp?: number
   nodeHeightProp?: number
   layoutEngineProp?: LayoutEngine
@@ -124,6 +132,7 @@ export function useGraphRenderModel<T>({
   nodeTagTypes,
   visibleTagTypesSet,
   reserveTagRow,
+  measuredTagRowHeight,
   nodeWidthProp,
   nodeHeightProp,
   layoutEngineProp,
@@ -272,15 +281,30 @@ export function useGraphRenderModel<T>({
   // when `reserveTagRow` is explicitly set (e.g. tags rendered via
   // `renderNode` without using the popover). Inflating the box otherwise
   // would push the source handle and the expander below the pill.
-  const tagsAffectLayout =
-    reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : false)
-  // Same-type tags collapse to a single pill, so the visible tag-type count is
-  // a good proxy for how many pills (and therefore rows) are rendered.
+  //
+  // A consumer that hard-codes `reserveTagRow` (as the Data Collection graph
+  // does whenever a `tags` mapper exists) must still collapse when every column
+  // is toggled off — otherwise hiding them all leaves the block of empty canvas
+  // the tags used to occupy. So the visible-count gate wins whenever the toggle
+  // UI exists; `reserveTagRow` only decides the case with no columns declared.
+  const tagsAffectLayout = nodeTagTypes
+    ? visibleTagTypesSet.size > 0
+    : (reserveTagRow ?? false)
+  // How much room the tags take is a DOM question, not an arithmetic one: rows
+  // come from wrapping, which depends on each node's label widths. The nodes
+  // measure themselves and report (see `reportTagRowHeight`); the tallest wins,
+  // since one layout height is shared by every node. Until the first report
+  // lands, fall back to the old count-based estimate so the first paint is not
+  // visibly wrong.
   const visibleTagCount = nodeTagTypes ? visibleTagTypesSet.size : 1
-  const tagRowCount = tagsAffectLayout
-    ? Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW))
-    : 0
-  const reservedTagHeight = tagRowCount * TAG_ROW_HEIGHT
+  const estimatedTagHeight =
+    Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW)) *
+    TAG_ROW_HEIGHT
+  const reservedTagHeight = !tagsAffectLayout
+    ? 0
+    : measuredTagRowHeight !== undefined
+      ? measuredTagRowHeight + TAG_ROW_GAP
+      : estimatedTagHeight
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
 
   const builtInEngine = useLayoutEngine({
