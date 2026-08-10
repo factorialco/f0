@@ -454,6 +454,9 @@ export const ChatComposer = (): ReactNode => {
   const removeAttachment = useCallback(
     (id: string) => {
       const item = attachments.find((attachment) => attachment.id === id)
+      const hasRemainingAttachments = attachments.some(
+        (attachment) => attachment.id !== id
+      )
       if (item?.status === "uploading") {
         releaseLocalPreview(item.attachment.url)
       }
@@ -461,8 +464,7 @@ export const ChatComposer = (): ReactNode => {
         prev.filter((attachment) => attachment.id !== id)
       )
       requestAnimationFrame(() => {
-        const strip = attachmentStripRef.current
-        if (strip) strip.focus()
+        if (hasRemainingAttachments) attachmentStripRef.current?.focus()
         else textareaRef.current?.focus()
       })
     },

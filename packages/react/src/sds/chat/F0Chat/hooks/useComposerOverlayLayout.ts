@@ -2,6 +2,10 @@ import { useLayoutEffect, useRef } from "react"
 
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
 
+const isResizeObserverSizeList = (
+  value: ResizeObserverSize | readonly ResizeObserverSize[]
+): value is readonly ResizeObserverSize[] => Array.isArray(value)
+
 /**
  * Keeps transcript spacing in sync with the floating composer without routing
  * its changing height through React or re-rendering Virtuoso.
@@ -40,10 +44,15 @@ export const useComposerOverlayLayout = (enabled: boolean) => {
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0]
-      const borderBoxSize = entry?.borderBoxSize
-      const size = Array.isArray(borderBoxSize)
-        ? borderBoxSize[0]
-        : (borderBoxSize as ResizeObserverSize | undefined)
+      const borderBoxSize:
+        | ResizeObserverSize
+        | readonly ResizeObserverSize[]
+        | undefined = entry?.borderBoxSize
+      const size = borderBoxSize
+        ? isResizeObserverSizeList(borderBoxSize)
+          ? borderBoxSize[0]
+          : borderBoxSize
+        : undefined
 
       publishHeight(size?.blockSize ?? composer.getBoundingClientRect().height)
     })

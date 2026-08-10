@@ -364,7 +364,7 @@ playback-speed slot can overflow.
 
 ### Keyboard interaction
 
-The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is also focusable, supports horizontal keyboard scrolling, and receives focus after removing an attachment. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is focusable and supports horizontal keyboard scrolling. After removing an attachment, focus stays on the strip when previews remain; removing the final preview returns focus to the composer textarea. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
 
 ### Screen reader behavior
 

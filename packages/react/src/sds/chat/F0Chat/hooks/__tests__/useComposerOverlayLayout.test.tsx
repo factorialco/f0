@@ -65,6 +65,65 @@ describe("useComposerOverlayLayout", () => {
     ).toBe("128px")
   })
 
+  it("supports a legacy single border-box size", () => {
+    render(<ComposerLayoutHarness enabled />)
+
+    act(() => {
+      resizeCallback?.(
+        [
+          {
+            borderBoxSize: { blockSize: 111.2, inlineSize: 480 },
+          } as unknown as ResizeObserverEntry,
+        ],
+        {} as ResizeObserver
+      )
+    })
+
+    expect(
+      screen
+        .getByTestId("shell")
+        .style.getPropertyValue(CHAT_COMPOSER_HEIGHT_PROPERTY)
+    ).toBe("112px")
+  })
+
+  it("measures the composer when the observer entry has no border-box size", () => {
+    const getBoundingClientRect = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        bottom: 80,
+        height: 80,
+        left: 0,
+        right: 480,
+        top: 0,
+        width: 480,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      })
+    render(<ComposerLayoutHarness enabled />)
+    getBoundingClientRect.mockReturnValue({
+      bottom: 143.2,
+      height: 143.2,
+      left: 0,
+      right: 480,
+      top: 0,
+      width: 480,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      resizeCallback?.([{} as ResizeObserverEntry], {} as ResizeObserver)
+    })
+
+    expect(
+      screen
+        .getByTestId("shell")
+        .style.getPropertyValue(CHAT_COMPOSER_HEIGHT_PROPERTY)
+    ).toBe("144px")
+  })
+
   it("removes the reserved composer height when sending is disabled", () => {
     const { rerender } = render(<ComposerLayoutHarness enabled />)
 
