@@ -80,26 +80,17 @@ export function resolveImportPath(fileName: string | undefined): string | null {
 }
 
 /**
- * Extracts the component export name from a story file path.
+ * Gathers the names a story file might correspond to, most reliable first:
+ * the impl filename, the story directory, the index-story directory, and the
+ * last segment of the Storybook title.
  *
- * Strategy:
- *   1. Gather candidate names from the file path (impl filename, story
- *      directory, index-story directory) and the Storybook title.
- *   2. First pass — prefer F0-prefixed exports: if any candidate has a
- *      matching `F0${name}` export, return that. This guarantees that when
- *      a component is renamed (e.g. `Input` -> `F0TextInput`) and the old
- *      name is kept as a `@deprecated` alias, the docs surface the new
- *      canonical name.
- *   3. Second pass — fall back to the raw candidate if it is itself an
- *      export (covers components that don't use the F0 prefix, like
- *      `F0Form` field renderers).
- *   4. If nothing matches, return the first candidate as-is.
+ * Callers resolve these against the package's export maps — a candidate that
+ * isn't an export is simply a miss, not an error.
  */
-export function extractComponentName(
+export function componentNameCandidates(
   fileName: string | undefined,
   title: string | undefined
-): string | null {
-  // Gather candidate names from path patterns and title
+): string[] {
   const candidates: string[] = []
 
   if (fileName) {
@@ -125,6 +116,31 @@ export function extractComponentName(
     if (last) candidates.push(last)
   }
 
+  return [...new Set(candidates)]
+}
+
+/**
+ * Extracts the component export name from a story file path.
+ *
+ * Strategy:
+ *   1. Gather candidate names from the file path (impl filename, story
+ *      directory, index-story directory) and the Storybook title.
+ *   2. First pass — prefer F0-prefixed exports: if any candidate has a
+ *      matching `F0${name}` export, return that. This guarantees that when
+ *      a component is renamed (e.g. `Input` -> `F0TextInput`) and the old
+ *      name is kept as a `@deprecated` alias, the docs surface the new
+ *      canonical name.
+ *   3. Second pass — fall back to the raw candidate if it is itself an
+ *      export (covers components that don't use the F0 prefix, like
+ *      `F0Form` field renderers).
+ *   4. If nothing matches, return the first candidate as-is.
+ */
+export function extractComponentName(
+  fileName: string | undefined,
+  title: string | undefined
+): string | null {
+  const candidates = componentNameCandidates(fileName, title)
+
   const exports = {
     ...mainExports,
     ...experimentalExports,
@@ -144,4 +160,63 @@ export function extractComponentName(
 
   // Fallback: return the first candidate as-is
   return candidates[0] ?? null
+}
+
+/**
+ * The component folder a story belongs to, relative to `src/`
+ * (`./src/hooks/toast/__stories__/toast.stories.tsx` → `hooks/toast`).
+ *
+ * Used to look up what that folder actually exports — the docs tag can't read
+ * the filesystem, so the scanner ships an index keyed by this path.
+ */
+export function storyComponentPath(
+  fileName: string | undefined
+): string | null {
+  if (!fileName) return null
+
+  const normalized = fileName.replace(/^\.\//, "").replace(/^src\//, "")
+  const segments = normalized.split("/")
+  const storiesAt = segments.indexOf("__stories__")
+  const dirs = segments.slice(0, storiesAt === -1 ? -1 : storiesAt)
+
+  return dirs.length > 0 ? dirs.join("/") : null
+}
+
+/**
+ * Every name this component might be imported under, most authoritative
+ * first: the canonical export, then aliases kept for backwards compatibility
+ * (e.g. `Input` alongside `F0TextInput`), then the remaining path/title
+ * candidates.
+ *
+ * Used to look the component up in consumer code. Names that aren't public
+ * exports are kept on purpose: a component missing from the public barrels
+ * (like `AIButton`) simply has no usage to find, and saying "not used" is more
+ * useful than showing nothing. They can't produce a false positive either — a
+ * name only shows up in a consumer scan if that consumer imported it from the
+ * package, which means it is exported after all.
+ */
+export function usageLookupNames(
+  fileName: string | undefined,
+  title: string | undefined
+): string[] {
+  const exports = {
+    ...mainExports,
+    ...experimentalExports,
+  } as Record<string, unknown>
+
+  const candidates = componentNameCandidates(fileName, title)
+  const names: string[] = []
+
+  const canonical = extractComponentName(fileName, title)
+  if (canonical) names.push(canonical)
+
+  for (const candidate of candidates) {
+    if (candidate in exports && !names.includes(candidate))
+      names.push(candidate)
+  }
+  for (const candidate of candidates) {
+    if (!names.includes(candidate)) names.push(candidate)
+  }
+
+  return names
 }
