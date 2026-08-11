@@ -259,7 +259,11 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
     const vizPresets = viz?.presets
 
     if (vizPresets) {
-      return vizPresets
+      return vizPresets.map((preset) =>
+        preset.visualization === undefined
+          ? { ...preset, visualization: currentVisualization }
+          : preset
+      )
     }
 
     const effectiveFilterKeys = effectiveFilters
