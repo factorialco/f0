@@ -99,6 +99,9 @@ export const GENIE_GLYPH_ENTER_SCALE = 1.18
 export const GENIE_GLYPH_EXIT_SCALE = 1.3
 /** A glyph whose widget is floating, held slightly forward. */
 export const GENIE_GLYPH_OPEN_SCALE = 1.06
+/** …and the pointer's own feedback on it, under the open state. */
+export const GENIE_GLYPH_HOVER_SCALE = 1.08
+export const GENIE_GLYPH_TAP_SCALE = 0.94
 
 /** Coming OUT: physical, with the faintest settle (ζ ≈ 0.82 — no visible bounce). */
 export const genieOpenTransition: Transition = {

@@ -11,14 +11,7 @@ import {
   useState,
 } from "react"
 
-import {
-  animate,
-  AnimatePresence,
-  motion,
-  type Transition,
-  useMotionValue,
-  useTransform,
-} from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
@@ -33,27 +26,22 @@ import { cn } from "@/lib/utils"
 import {
   entranceDelay,
   entranceTransition,
-  GENIE_CLOSE_MS,
-  GENIE_GLYPH_DELAY_MS,
   GENIE_GLYPH_ENTER_SCALE,
   GENIE_GLYPH_EXIT_SCALE,
+  GENIE_GLYPH_HOVER_SCALE,
   GENIE_GLYPH_OPEN_SCALE,
+  GENIE_GLYPH_TAP_SCALE,
   GENIE_ORIGIN,
-  GENIE_RETRACT_MS,
   GENIE_RETRACTED_OFFSET_PX,
   GENIE_RETRACTED_SCALE,
   genieCloseTransition,
-  geniePanelGlideTransition,
-  genieOpenTransition,
   glyphTransition,
   HomeEntrance,
-  INSTANT_TRANSITION,
-  railWidthTransition,
   RIGHT_AREA_DELAY_MS,
-  useDelayedTrue,
   withReducedMotion,
 } from "../home-motion"
 import { SlotWidget } from "../SlotWidget"
+import { useRailMotion } from "./useRailMotion"
 import { useScrollFade } from "../useScrollFade"
 import { WidgetContainer, type WidgetContainerSide } from "../WidgetContainer"
 import {
@@ -97,6 +85,78 @@ const GradientWash = ({
 const COLLAPSED_RAIL_WIDTH = 40
 
 /**
+ * One widget as the collapsed strip shows it: its own catalog glyph, standing in
+ * for the whole card.
+ *
+ * It ARRIVES FROM LARGER THAN LIFE — the card that just shrank into it — and
+ * leaves the other way, blooming back out into the card it becomes. While its
+ * widget is floating it holds itself slightly forward, so the glyph and the panel
+ * read as one object rather than a button and a popover.
+ */
+const CollapsedGlyph = ({
+  widget,
+  order,
+  open,
+  delayMs,
+  onOpen,
+  onClose,
+}: {
+  widget: HomeWidgetItem
+  /** Place in the strip's stagger. */
+  order: number
+  open: boolean
+  /** When this strip's first glyph starts arriving. */
+  delayMs: number
+  onOpen: (id: string, anchor: HTMLElement) => void
+  onClose: () => void
+}) => {
+  const reducedMotion = useReducedMotion()
+
+  return (
+    <motion.button
+      type="button"
+      aria-label={widget.header?.title ?? widget.id}
+      aria-expanded={open}
+      onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+      onClick={(event) =>
+        open ? onClose() : onOpen(widget.id, event.currentTarget)
+      }
+      className="rounded-lg"
+      initial={{
+        opacity: 0,
+        scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
+      }}
+      animate={{ opacity: 1, scale: open ? GENIE_GLYPH_OPEN_SCALE : 1 }}
+      exit={{ opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE }}
+      whileHover={
+        reducedMotion ? undefined : { scale: GENIE_GLYPH_HOVER_SCALE }
+      }
+      whileTap={reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE }}
+      transition={withReducedMotion(
+        { ...glyphTransition, delay: entranceDelay(order, delayMs) },
+        reducedMotion
+      )}
+    >
+      {/* Same accent dot HomeListItem uses for unread rows. */}
+      <span className="relative inline-flex">
+        {widget.icon ? (
+          <F0AvatarIcon icon={widget.icon} size="lg" />
+        ) : (
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
+            {(widget.header?.title ?? widget.id).charAt(0)}
+          </span>
+        )}
+        {widget.hasUpdates ? (
+          // Same dot HomeListItem draws for unread rows — the ring keeps it
+          // legible over any glyph.
+          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
+        ) : null}
+      </span>
+    </motion.button>
+  )
+}
+
+/**
  * The columns scroll without showing a bar — the scroll-aware fades already
  * hint at overflowed content, so a bar is just noise on the gradient.
  */
@@ -105,6 +165,8 @@ const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
+/** How far the floating panel clears the strip it comes out of. */
+const PANEL_GAP_PX = 8
 
 export interface NewHomeLayoutProps {
   /** Freeform main-column content on top (greeting, shortcut cards, ranked feed…). */
@@ -236,18 +298,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [hasMeasured, setHasMeasured] = useState(false)
     if (rootWidth > 0 && !hasMeasured) setHasMeasured(true)
 
-    // THE FIRST PAINT IS NOT A GESTURE. The first render cannot know how wide the
-    // box is — measuring needs the DOM — so `collapsed` always resolves one render
-    // late, and animating that resolution would play a collapse the rail never
-    // left: every narrow first load would open with the cards retracting into a
-    // strip they were never out of. Collapse stays instant until the layout has
-    // been on screen once; from there, a change is something that happened.
-    const [settled, setSettled] = useState(false)
-    useEffect(() => {
-      if (rootWidth > 0) setSettled(true)
-    }, [rootWidth])
-    const animateCollapse = settled && !reducedMotion
-
     // Uncontrolled by default: the layout's own edit button drives it. Passing
     // `editing` hands control to the caller.
     const [editingState, setEditingState] = useState(false)
@@ -298,40 +348,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       rightWidgets.length > 0 &&
       (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
-    // NOTHING ON THE RIGHT UNTIL THE BOX HAS BEEN MEASURED. Which presentation
-    // the rail is in — column, strip, or nothing at all — is decided entirely by
-    // the width, and the first render does not have it yet. Drawn before then, the
-    // rail's first committed state is a GUESS that the very next render (the
-    // layout effect's, still before paint) corrects — and motion cannot tell that
-    // correction apart from a collapse the user asked for, so it animates it: the
-    // page would open by playing a collapse the rail was never out of. Mounting
-    // one render later, the rail's first state is already the right one and
-    // `initial={false}` puts it there outright.
-    //
-    // One render later, NOT one paint later — the measurement lands in a layout
-    // effect, so nothing has been drawn in between.
+    // NOTHING ON THE RIGHT UNTIL THE BOX HAS BEEN MEASURED. Which presentation the
+    // rail is in — column, strip, or nothing at all — is decided entirely by the
+    // width, so drawn before there is one its first state is a guess the next
+    // render corrects, and motion animates corrections (see `useRailMotion`).
+    // Waiting costs nothing visible: the measurement lands in a layout effect, so
+    // this is one render later, not one paint later.
     const sideReady = hasSide && hasMeasured
-
-    // THE RAIL'S COLUMN, animated so the space the main column gets back arrives
-    // over the same beat the cards retract over. A collapse that snapped the grid
-    // while the cards animated would read as a jump with an animation next to it.
-    //
-    // Driven as a MOTION VALUE rather than through `animate`, and committed from a
-    // LAYOUT effect, because the first resolution must not animate and gating a
-    // `transition` prop on that is not reliable: the unmeasured render and the
-    // measured one land in the same batch, so motion starts one animation and
-    // reads the later render's transition — the page would open by playing a
-    // collapse the rail was never out of. `jump` cannot be batched away.
-    const railWidthValue = useMotionValue(railWidth)
-    const railWidthPx = useTransform(railWidthValue, (width) => `${width}px`)
-    useLayoutEffect(() => {
-      if (!animateCollapse) {
-        railWidthValue.jump(railWidth)
-        return
-      }
-      const controls = animate(railWidthValue, railWidth, railWidthTransition)
-      return () => controls.stop()
-    }, [railWidth, animateCollapse, railWidthValue])
 
     // STACKED (below `md`): there is no rail at all, not even the strip — the
     // window is too narrow to spend 40px on a column. The rail's widgets fold
@@ -383,51 +406,51 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       if (!collapsed) setOpenId(null)
     }, [collapsed])
 
-    // THE GENIE. Collapsing has to look like the cards going INTO the glyphs, so
-    // the rail's PRESENTATION lags the decision by exactly the retract: the grid
-    // column starts narrowing and the strip starts arriving the moment
-    // `collapsed` flips, while the rail body spends `GENIE_RETRACT_MS` shrinking
-    // toward the strip's corner before it becomes the floating panel.
-    //
-    // Hovering a glyph mid-retract skips the rest of it — what you asked for is
-    // the panel, and finishing an animation you interrupted is not an answer.
-    const retracted = useDelayedTrue(
+    // How the rail moves, and the one number the grid template reads. The genie
+    // lives in there; the geometry it moves through stays here.
+    const rail = useRailMotion({
       collapsed,
-      animateCollapse ? GENIE_RETRACT_MS : 0
-    )
-    const railMode: "column" | "retracting" | "panel" = !collapsed
-      ? "column"
-      : retracted || openWidget
-        ? "panel"
-        : "retracting"
-    const railInPanel = railMode === "panel"
-    // Out = the rail is showing something: the whole column, or one widget
-    // floating out of a glyph. Everything else is retracted into the strip.
-    const railOut = railMode === "column" || openWidget != null
-    // `hidden` is `display: none`, which would cut the retract-into-the-glyph
-    // short, so it arrives only once that has played out. Closed already at mount
-    // is not a change, so it is not delayed (`useDelayedTrue`).
-    const panelHidden = useDelayedTrue(
-      openWidget == null,
-      reducedMotion ? 0 : GENIE_CLOSE_MS
-    )
-    // Gated on `animateCollapse` for the same reason the grid column is: until
-    // the box has been measured once the rail's state is being RESOLVED rather
-    // than changed, and resolving is not a gesture to animate.
-    const railTransition: Transition = !animateCollapse
-      ? INSTANT_TRANSITION
-      : {
-          ...(railOut ? genieOpenTransition : genieCloseTransition),
-          // Between two glyphs the panel glides; on the way out of one it must
-          // not travel at all (see `openFromAnchor`).
-          y: panelGlide ? geniePanelGlideTransition : INSTANT_TRANSITION,
+      open: openWidget != null,
+      glide: panelGlide,
+      drawn: sideReady,
+      width: railWidth,
+    })
+    const railInPanel = rail.mode === "panel"
+
+    /**
+     * WHERE the rail body sits, in each of its presentations. `transformOrigin` is
+     * the constant: the strip's corner is what every genie scale on this element is
+     * taken from, whichever presentation it is in.
+     */
+    const railStyle: CSSProperties = railInPanel
+      ? {
+          transformOrigin: GENIE_ORIGIN,
+          // `top` is fixed and the offset to the hovered glyph is a TRANSFORM
+          // (`y`), so moving between glyphs composites instead of relaying the
+          // panel out on every frame.
+          top: 0,
+          right: COLLAPSED_RAIL_WIDTH + PANEL_GAP_PX,
+          width: asideWidth,
+          // The panel grows to its widget, up to what is left below its glyph,
+          // and scrolls past that.
+          maxHeight: `calc(100% - ${panelTop}px)`,
+          pointerEvents: openWidget ? undefined : "none",
         }
-    // Collapsing puts the glyphs in as the cards finish retracting — they overlap
-    // on purpose. On the FIRST paint there is no retract to follow, so they are
-    // simply the right area arriving after the main one.
-    const glyphDelayMs = animateCollapse
-      ? GENIE_GLYPH_DELAY_MS
-      : RIGHT_AREA_DELAY_MS
+      : {
+          transformOrigin: GENIE_ORIGIN,
+          // Placed, not flowed: mid-collapse the strip is in this same cell, and
+          // auto-placement would push one of them onto a row of its own.
+          gridColumn: 2,
+          gridRow: 2,
+          // Mid-retract the column is already on its way down to the strip's
+          // width, so the cards keep the width they had and hang off the cell's
+          // left edge while they shrink into it — squeezed narrow on the way out,
+          // the rail reads as crushed rather than stowed.
+          ...(rail.mode === "retracting"
+            ? { width: asideWidth, justifySelf: "end", pointerEvents: "none" }
+            : null),
+          ...railFade.style,
+        }
 
     const cancelLeave = () => {
       if (leaveTimer.current) clearTimeout(leaveTimer.current)
@@ -471,7 +494,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // The rail's column, as a motion value the grid template reads: the
             // template is a keyword list and cannot be interpolated, so the one
             // number in it is animated on its own.
-            "--home-aside-w": railWidthPx,
+            "--home-aside-w": rail.widthPx,
             // FILL THE BOX THE PAGE GIVES US, not the window. This used to be
             // `calc(100svh - 2 * bleed)`, which assumed the layout's box WAS the
             // viewport minus its own gutter — true only while nothing else is on
@@ -674,69 +697,22 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={withReducedMotion(
-                { duration: GENIE_CLOSE_MS / 1000, ease: "easeIn" },
+                genieCloseTransition,
                 reducedMotion
               )}
               onMouseLeave={scheduleLeave}
               onMouseEnter={cancelLeave}
             >
               {rightWidgets.map((widget, order) => (
-                <motion.button
+                <CollapsedGlyph
                   key={widget.id}
-                  type="button"
-                  aria-label={widget.header?.title ?? widget.id}
-                  aria-expanded={openId === widget.id}
-                  onMouseEnter={(event) =>
-                    openFromAnchor(widget.id, event.currentTarget)
-                  }
-                  onClick={(event) =>
-                    openId === widget.id
-                      ? setOpenId(null)
-                      : openFromAnchor(widget.id, event.currentTarget)
-                  }
-                  className="rounded-lg"
-                  // A glyph arrives from LARGER than life — the card that just
-                  // shrank into it — and leaves the other way, blooming back out
-                  // into the card. Held slightly forward while its widget floats,
-                  // so the glyph and the panel read as one object.
-                  initial={{
-                    opacity: 0,
-                    scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    scale: openId === widget.id ? GENIE_GLYPH_OPEN_SCALE : 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE,
-                  }}
-                  whileHover={reducedMotion ? undefined : { scale: 1.08 }}
-                  whileTap={reducedMotion ? undefined : { scale: 0.94 }}
-                  transition={withReducedMotion(
-                    {
-                      ...glyphTransition,
-                      delay: entranceDelay(order, glyphDelayMs),
-                    },
-                    reducedMotion
-                  )}
-                >
-                  {/* Same accent dot HomeListItem uses for unread rows. */}
-                  <span className="relative inline-flex">
-                    {widget.icon ? (
-                      <F0AvatarIcon icon={widget.icon} size="lg" />
-                    ) : (
-                      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
-                        {(widget.header?.title ?? widget.id).charAt(0)}
-                      </span>
-                    )}
-                    {widget.hasUpdates ? (
-                      // Same dot HomeListItem draws for unread rows — the ring
-                      // keeps it legible over any glyph.
-                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
-                    ) : null}
-                  </span>
-                </motion.button>
+                  widget={widget}
+                  order={order}
+                  open={openId === widget.id}
+                  delayMs={rail.glyphDelayMs}
+                  onOpen={openFromAnchor}
+                  onClose={() => setOpenId(null)}
+                />
               ))}
               {/* Always offered, not only in edit mode: collapsed, the strip has
                     no edit affordance of its own, and adding a widget is the one
@@ -752,7 +728,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   exit={{ opacity: 0 }}
                   transition={entranceTransition(
                     rightWidgets.length,
-                    glyphDelayMs,
+                    rail.glyphDelayMs,
                     reducedMotion
                   )}
                 >
@@ -787,7 +763,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // waits for the retract, because `display: none` cannot be animated
             // out of: applied on the frame the rail collapses, it would delete the
             // cards instead of letting them go into the glyphs.
-            hidden={railInPanel && panelHidden}
+            hidden={railInPanel && rail.panelHidden}
             className={cn(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
@@ -796,60 +772,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               railInPanel && "absolute z-10 rounded-xl bg-f1-background",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
-              railMode === "retracting" && "relative z-10"
+              rail.mode === "retracting" && "relative z-10"
             )}
-            style={
-              railInPanel
-                ? {
-                    // The strip is at this corner, so this is where the widget
-                    // comes out of and goes back into. Every genie scale on this
-                    // element is taken from here.
-                    transformOrigin: GENIE_ORIGIN,
-                    // `top` is fixed and the offset to the hovered glyph is a
-                    // TRANSFORM (`y`), so moving between glyphs composites
-                    // instead of relaying out the panel on every frame.
-                    top: 0,
-                    right: COLLAPSED_RAIL_WIDTH + 8,
-                    width: asideWidth,
-                    // The panel grows to its widget, up to what is left below
-                    // its glyph, and scrolls past that.
-                    maxHeight: `calc(100% - ${panelTop}px)`,
-                    pointerEvents: openWidget ? undefined : "none",
-                  }
-                : {
-                    transformOrigin: GENIE_ORIGIN,
-                    gridColumn: 2,
-                    gridRow: 2,
-                    // Mid-retract the column is already on its way down to the
-                    // strip's 40px, so the cards keep the width they had and hang
-                    // off the cell's left edge while they shrink into it —
-                    // otherwise they would be squeezed narrow on the way out,
-                    // which reads as the rail being crushed rather than stowed.
-                    ...(railMode === "retracting"
-                      ? {
-                          width: asideWidth,
-                          justifySelf: "end" as const,
-                          pointerEvents: "none" as const,
-                        }
-                      : null),
-                    ...railFade.style,
-                  }
-            }
+            style={railStyle}
             // No mount animation of its own: the rail ARRIVES through its
             // widgets' stagger (`entrance` below), and a fade of the whole column
             // on top of that would be the same arrival animated twice.
             initial={false}
             animate={{
-              opacity: railOut ? 1 : 0,
-              scale: railOut ? 1 : GENIE_RETRACTED_SCALE,
+              opacity: rail.out ? 1 : 0,
+              scale: rail.out ? 1 : GENIE_RETRACTED_SCALE,
               // Toward the strip while it shrinks, so it converges on the glyph
               // rather than just fading where it stood.
-              x: railOut ? 0 : GENIE_RETRACTED_OFFSET_PX,
+              x: rail.out ? 0 : GENIE_RETRACTED_OFFSET_PX,
               // Only the panel is offset from its own box; in the grid it sits
               // where the grid put it.
               y: railInPanel ? panelTop : 0,
             }}
-            transition={railTransition}
+            transition={rail.transition}
             onMouseEnter={collapsed ? cancelLeave : undefined}
             onMouseLeave={collapsed ? scheduleLeave : undefined}
           >

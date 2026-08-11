@@ -313,16 +313,14 @@ export function WidgetContainer({
     )
   }
 
+  const arrival = entrance === false ? null : entrance
   /**
    * The arrival is a ONE-SHOT: once the page has landed, a card that mounts is
    * not arriving, it is just there. Edit mode is why this matters — the sortable
    * branch is a different tree, so toggling the pencil remounts every card, and
    * without this the whole column would fade back in each time.
    */
-  const arrived = useElapsed(
-    arrivalWindowMs(entrance === false ? 0 : entrance.delayMs)
-  )
-  const arriving = entrance !== false && !arrived
+  const arrived = useElapsed(arrivalWindowMs(arrival?.delayMs))
 
   /**
    * Wraps one block in its arrival. With `entrance` off it hands the block back
@@ -330,17 +328,17 @@ export function WidgetContainer({
    * because that box is the flex item the widget itself would have been.
    */
   const enter = (order: number, node: ReactNode, fullHeight?: boolean) =>
-    entrance === false ? (
-      node
-    ) : (
+    arrival ? (
       <HomeEntrance
-        order={(entrance.order ?? 0) + order}
-        delayMs={entrance.delayMs ?? 0}
-        arriving={arriving}
+        order={(arrival.order ?? 0) + order}
+        delayMs={arrival.delayMs}
+        arriving={!arrived}
         fullHeight={fullHeight}
       >
         {node}
       </HomeEntrance>
+    ) : (
+      node
     )
 
   return (
