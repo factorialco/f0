@@ -11,6 +11,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -72,7 +73,7 @@ import { mockDatasets } from "@/kits/surveys/__stories__/mocks"
 import {
   EMPTY_SURVEY_TEMPLATE,
   EMPTY_SURVEY_TEMPLATE_ID,
-  galleryListVisualization,
+  galleryCardVisualization,
   listVisualization,
   makeTemplatesDataAdapter,
   resourceFilters,
@@ -344,11 +345,12 @@ function TemplatesCollection({
    */
   fillHeight?: boolean
   /**
-   * List visualization to render. Defaults to the full `listVisualization`
-   * (with the Category property) for the browse tab; the AI Canvas gallery
-   * passes the category-less `galleryListVisualization` instead.
+   * Visualization to render. Defaults to the full `listVisualization` (with the
+   * Category property) for the browse tab; the AI Canvas gallery passes the
+   * category-less `galleryCardVisualization` instead, so this accepts either
+   * shape.
    */
-  visualization?: typeof listVisualization
+  visualization?: typeof listVisualization | typeof galleryCardVisualization
   /**
    * Template list to show instead of the flow's full set — the "guidedType"
    * gallery passes the picked type's templates. Defaults to
@@ -443,6 +445,114 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
     </div>
   ),
   overflowHidden: true,
+}
+
+// ---------------------------------------------------------------------------
+// Fullscreen templates gallery
+// ---------------------------------------------------------------------------
+
+/**
+ * The templates gallery takes the WHOLE frame in the welcome-screen ("cards")
+ * and guided-entry ("guidedEntry") flows: choosing templates is its own step,
+ * not something you do beside a conversation. It opens as a `fullscreen` canvas,
+ * which spans the frame and covers the chat — the conversation underneath keeps
+ * its state, so stepping back lands exactly where the user left it.
+ *
+ * The "guidedType" flow (Training) is deliberately excluded: its type-scoped
+ * gallery is part of a running conversation and stays docked beside the chat.
+ *
+ * Closing the gallery steps BACK to whatever opened it rather than dismissing
+ * the canvas — the fullscreen welcome screen, or the guided-entry panel that
+ * launched it. That step is recorded here when the gallery opens, because the
+ * same gallery is reachable from several places within one flow (the "Templates"
+ * welcome card, the "Use a Template" entry action, and a template preview's
+ * "Back to templates"), each with a different step behind it.
+ */
+type TemplatesReturn = {
+  /** Reads the pending step-back action, if any. */
+  get: () => (() => void) | null
+  /** Records the step-back action; `null` means "just return to the chat". */
+  set: (action: (() => void) | null) => void
+}
+
+const TemplatesReturnContext = createContext<TemplatesReturn | null>(null)
+
+function TemplatesReturnProvider({ children }: { children: ReactNode }) {
+  // A ref, not state: nothing renders from this, and the openers write it in
+  // the same tick they open the canvas.
+  const actionRef = useRef<(() => void) | null>(null)
+  const value = useMemo<TemplatesReturn>(
+    () => ({
+      get: () => actionRef.current,
+      set: (action) => {
+        actionRef.current = action
+      },
+    }),
+    []
+  )
+  return (
+    <TemplatesReturnContext.Provider value={value}>
+      {children}
+    </TemplatesReturnContext.Provider>
+  )
+}
+
+function useTemplatesReturn(): TemplatesReturn {
+  const ctx = useContext(TemplatesReturnContext)
+  if (!ctx) {
+    throw new Error(
+      "useTemplatesReturn must be used inside <TemplatesReturnProvider>"
+    )
+  }
+  return ctx
+}
+
+/**
+ * Opens the templates gallery on the canvas, fullscreen (no chat) in every flow
+ * but "guidedType".
+ *
+ * `onBack` records what Close should step back to: pass a function to run on
+ * close, `null` to just return to the chat (the welcome screen), or omit it to
+ * keep whatever the current templates session already recorded — which is what
+ * a preview's "Back to templates" wants, since it re-enters a gallery the user
+ * has already been through.
+ */
+function useOpenTemplatesCanvas() {
+  const { openCanvas } = useAiChat()
+  const { config } = useFlowConfig()
+  const templatesReturn = useTemplatesReturn()
+
+  return useCallback(
+    (content: TemplatesCanvasContent, onBack?: (() => void) | null) => {
+      if (onBack !== undefined) templatesReturn.set(onBack)
+      openCanvas(
+        toCanvasContent({
+          ...content,
+          fullscreen: config.entryMode !== "guidedType",
+        })
+      )
+    },
+    [openCanvas, config.entryMode, templatesReturn]
+  )
+}
+
+/**
+ * Closes the fullscreen templates gallery back to the step that opened it.
+ * Switching out of "canvas" mode drops the canvas content, and "fullscreen"
+ * brings the chat back full width — the surface all of these flows were on
+ * before the gallery took over — after which the recorded step-back action (if
+ * any) restores that step's own state, e.g. reopening the guided-entry panel.
+ */
+function useCloseTemplatesCanvas() {
+  const { setVisualizationMode } = useAiChat()
+  const templatesReturn = useTemplatesReturn()
+
+  return useCallback(() => {
+    setVisualizationMode("fullscreen")
+    const stepBack = templatesReturn.get()
+    templatesReturn.set(null)
+    stepBack?.()
+  }, [setVisualizationMode, templatesReturn])
 }
 
 // Story-local survey canvas. Like `templatesCanvasEntity`, the "survey" type is
@@ -1329,6 +1439,7 @@ function TemplatePreviewAlert() {
  */
 function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   const { openCanvas } = useAiChat()
+  const openTemplates = useOpenTemplatesCanvas()
   const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
   const { armProposal, armNoCredits } = useProposalFlow()
@@ -1337,18 +1448,18 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   // Both the "Back to templates" arrow and the Close ✕ return to the template
   // selection screen this preview was opened from — the type-scoped gallery for
   // the "guidedType" flow, the flow-wide gallery otherwise. Closing a preview
-  // steps back to the list, never out of creation.
+  // steps back to the list, never out of creation. The gallery reopens
+  // fullscreen in every flow but "guidedType" (see `useOpenTemplatesCanvas`),
+  // keeping whatever step-back the current session already recorded.
   const backToTemplates = () =>
-    openCanvas(
-      toCanvasContent(
-        content.guidedTypeId && config.entryMode === "guidedType"
-          ? {
-              type: "templates",
-              title: guidedTemplatesTitle(config, content.guidedTypeId),
-              guidedTypeId: content.guidedTypeId,
-            }
-          : TEMPLATES_CANVAS_CONTENT
-      )
+    openTemplates(
+      content.guidedTypeId && config.entryMode === "guidedType"
+        ? {
+            type: "templates",
+            title: guidedTemplatesTitle(config, content.guidedTypeId),
+            guidedTypeId: content.guidedTypeId,
+          }
+        : TEMPLATES_CANVAS_CONTENT
     )
 
   const useThisTemplate = () => {
@@ -2037,7 +2148,7 @@ function TemplatesCanvasBody() {
       onSelect={openPreview}
       onEmpty={startBlankSurvey}
       fillHeight={false}
-      visualization={galleryListVisualization}
+      visualization={galleryCardVisualization}
     />
   )
 }
@@ -2078,7 +2189,7 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
       onSelect={openPreview}
       onEmpty={() => openEmptySurvey(guidedTypeId)}
       fillHeight={false}
-      visualization={galleryListVisualization}
+      visualization={galleryCardVisualization}
     />
   )
 }
@@ -2105,22 +2216,24 @@ function TemplatesCanvasHeader({
 }: {
   content: TemplatesCanvasContent
 }) {
-  const { setVisualizationMode } = useAiChat()
-  const { config, noCredits } = useFlowConfig()
+  const { config } = useFlowConfig()
   const confirmLeave = useConfirmLeaveCreation()
+  const closeTemplates = useCloseTemplatesCanvas()
   const openEmptySurvey = useOpenEmptySurvey()
   const startBlankSurvey = useStartBlankSurvey()
   const { guidedTypeId } = content
 
-  // The plain "cards" flow has a welcome screen to fall back to, so Close just
-  // collapses the canvas. The guided flows and the no-credits flows have no
-  // fallback, so closing abandons creation — confirm first (then leave).
+  // The fullscreen gallery is a step of its own, so Close steps BACK to
+  // whatever opened it (the welcome screen, or the guided-entry panel) — see
+  // `useCloseTemplatesCanvas`. Only the "guidedType" flow (Training), whose
+  // type-scoped gallery is docked mid-conversation and has no step to fall back
+  // to, treats Close as abandoning creation and confirms first.
   const handleClose = () => {
-    if (config.entryMode !== "cards" || noCredits) {
+    if (config.entryMode === "guidedType") {
       confirmLeave()
       return
     }
-    setVisualizationMode("fullscreen")
+    closeTemplates()
   }
 
   // Every flow's templates header carries the same "Start with a Blank Survey"
@@ -2197,6 +2310,7 @@ function ComposerPlaceholderRegistrar() {
 function SurveyWelcomeCardsRegistrar() {
   const { config } = useFlowConfig()
   const { openCanvas, setWelcomeScreenCards } = useAiChat()
+  const openTemplates = useOpenTemplatesCanvas()
   const startBlankSurvey = useStartBlankSurvey()
 
   // Narrow to the "cards" config once; every hook above/below still runs
@@ -2259,11 +2373,13 @@ function SurveyWelcomeCardsRegistrar() {
         break
       }
       case "templates": {
-        // Browse-only: open the templates list in the canvas WITHOUT posting a
-        // chat message, so the chat stays on the welcome screen. Closing the
-        // list without choosing a template (see `TemplatesCanvasHeader`) then
-        // returns to the fullscreen welcome screen with the welcome cards intact.
-        openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
+        // Browse-only: open the templates list fullscreen (the chat hides while
+        // it is up) WITHOUT posting a chat message, so the chat is still on the
+        // welcome screen underneath. Closing the list without choosing a
+        // template (see `TemplatesCanvasHeader`) then returns to that fullscreen
+        // welcome screen with the welcome cards intact — `null`, since the
+        // welcome screen needs nothing restored beyond the chat itself.
+        openTemplates(TEMPLATES_CANVAS_CONTENT, null)
         break
       }
       case cardsConfig.presetCard.id: {
@@ -2386,6 +2502,8 @@ function FlowContent({
   const { armNoCredits } = useProposalFlow()
   const startBlankSurvey = useStartBlankSurvey()
   const leaveGuidedFlow = useLeaveGuidedFlow()
+  const openTemplates = useOpenTemplatesCanvas()
+  const templatesReturn = useTemplatesReturn()
 
   // Typed "Create" flow ("cards" entry — Engagement): the same three
   // clarifying questions as the Empty survey card, walked as a single
@@ -2578,11 +2696,14 @@ function FlowContent({
         return
       }
       if (optionId === TEMPLATES_OPTION_ID) {
-        // Browse: open the full templates gallery in the canvas. With no
+        // Browse: open the full templates gallery fullscreen — the chat hides
+        // while it is up, and its Close steps back to this panel. With no
         // credits, the composer stays live while browsing, so arm the
         // out-of-credits reply — otherwise a typed message falls through to a
         // simulated AI answer (see `armNoCredits` / the mock's default reply).
-        openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
+        openTemplates(TEMPLATES_CANVAS_CONTENT, () =>
+          openGuidedEntryPanel(question)
+        )
         if (noCredits) armNoCredits()
         return
       }
@@ -2591,6 +2712,10 @@ function FlowContent({
       const templateId = optionId.slice("template:".length)
       const template = config.templates.find((t) => t.id === templateId)
       if (!template) return
+      // The preview's "Back to templates" enters the gallery without going
+      // through this panel, so record the way back now — closing that gallery
+      // then lands on this panel rather than on a bare chat.
+      templatesReturn.set(() => openGuidedEntryPanel(question))
       openCanvas(
         toCanvasContent({
           type: "survey",
@@ -2934,17 +3059,21 @@ function CreationWithAIFlow({
     <MockAiChatRuntimeProvider>
       <FlowConfigProvider flowId={flowId} noCredits={noCredits}>
         <SurveyStoreProvider>
-          <ApplicationFrame
-            ai={ai}
-            sidebar={<Sidebar {...SidebarStories.default.args} />}
-          >
-            <ComposerPlaceholderRegistrar />
-            {/* Feeds the survey welcome cards into the chat via
-                `welcomeScreenCards`; renders nothing itself. "cards" entry
-                flow (Engagement) only — "guidedType" (Training) has none. */}
-            {config.entryMode === "cards" && <SurveyWelcomeCardsRegistrar />}
-            <FlowContent phase={phase} setPhase={setPhase} />
-          </ApplicationFrame>
+          {/* Outside the frame: the canvas headers that consume this render
+              inside `ApplicationFrame`, as siblings of its children. */}
+          <TemplatesReturnProvider>
+            <ApplicationFrame
+              ai={ai}
+              sidebar={<Sidebar {...SidebarStories.default.args} />}
+            >
+              <ComposerPlaceholderRegistrar />
+              {/* Feeds the survey welcome cards into the chat via
+                  `welcomeScreenCards`; renders nothing itself. "cards" entry
+                  flow (Engagement) only — "guidedType" (Training) has none. */}
+              {config.entryMode === "cards" && <SurveyWelcomeCardsRegistrar />}
+              <FlowContent phase={phase} setPhase={setPhase} />
+            </ApplicationFrame>
+          </TemplatesReturnProvider>
         </SurveyStoreProvider>
       </FlowConfigProvider>
     </MockAiChatRuntimeProvider>
