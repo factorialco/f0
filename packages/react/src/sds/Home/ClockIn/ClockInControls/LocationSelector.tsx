@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 
 import type { IconType } from "@/components/F0Icon"
+import { Pin } from "@/icons/app"
 
 import { TreeSelector, type TreeSelectorItem } from "./TreeSelector"
 
@@ -59,8 +60,9 @@ export const toLocationTree = (
  * isn't required, the "label + selection" hover tooltip, and the group headings a
  * two- or three-level list needs.
  *
- * No field icon of its own: each location brings one, and `F0Select` shows the
- * selected option's icon on the trigger.
+ * The trigger shows the selected location's own glyph, and a pin until there is
+ * one — through the field's icon slot, the same one the project picker uses, so
+ * the two sit at the same offset beside each other.
  */
 export function LocationSelector({
   locations,
@@ -80,6 +82,9 @@ export function LocationSelector({
       onChange={onChangeLocationId}
       label={label}
       searchPlaceholder={searchPlaceholder}
+      // Stands in until a location is picked; after that the location's own glyph
+      // takes the slot.
+      fieldIcon={Pin}
       required={required}
       disabled={disabled}
     />

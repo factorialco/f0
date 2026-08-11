@@ -102,7 +102,10 @@ export interface TreeSelectorProps {
   label: string
   /** Placeholder for the search box. Falls back to F0Select's own wording. */
   searchPlaceholder?: string
-  /** A fixed glyph for the field, when the items don't carry their own. */
+  /**
+   * The field's glyph while nothing is selected — and for good, when the items
+   * carry no icons of their own (projects). A selected leaf's own icon wins.
+   */
   fieldIcon?: IconType
   /** When false the picker offers a clear affordance. */
   required?: boolean
@@ -142,6 +145,21 @@ export function TreeSelector({
     () => items.some((item) => !!item.children?.length),
     [items]
   )
+
+  /**
+   * The trigger's glyph, ALWAYS through the field's own icon slot — the selected
+   * leaf's icon when there is one, the fallback otherwise.
+   *
+   * Not through the selected option's icon, which is the other way `F0Select` can
+   * show one: that renders inside the value area (`px-3`) while a field icon is
+   * absolutely placed at `left-2`, so two pickers side by side sat 4px apart —
+   * and worse, the icon would jump those 4px the moment you picked something.
+   * Options therefore carry no icon here at all; one slot, one position.
+   */
+  const selectedLeaf = value
+    ? leaves.find((leaf) => leaf.id === value)
+    : undefined
+  const triggerIcon = selectedLeaf?.icon ?? fieldIcon
 
   // A definition, not a `useDataSource` result: `F0Select` builds the source
   // itself. Memoized because its identity is what would otherwise refetch.
@@ -192,7 +210,7 @@ export function TreeSelector({
     label,
     hideLabel: true,
     placeholder: label,
-    icon: fieldIcon,
+    icon: triggerIcon,
     size: "sm" as const,
     showSearchBox: true,
     searchBoxPlaceholder: searchPlaceholder,
@@ -224,7 +242,6 @@ export function TreeSelector({
       mapOptions={(leaf) => ({
         value: leaf.id,
         label: leaf.name,
-        icon: leaf.icon,
         // The row is read under its group heading, so it stays short. The TRIGGER
         // has no heading above it — there, the leaf carries its whole path.
         selectedLabel: leaf.path,
@@ -236,7 +253,6 @@ export function TreeSelector({
       options={leaves.map((leaf) => ({
         value: leaf.id,
         label: leaf.name,
-        icon: leaf.icon,
       }))}
     />
   )
