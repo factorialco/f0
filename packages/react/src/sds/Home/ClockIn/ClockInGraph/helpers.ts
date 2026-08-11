@@ -78,6 +78,11 @@ export const normalizeData = ({
 
         accumulatedOvertimeSeconds -= totalEntryOvertimeSeconds
 
+        // When and what this stretch was travels with every piece it is cut
+        // into: an overtime slice is still the same stretch of the day, so it
+        // answers a hover with the same range and label.
+        const context = { from: entry.from, to: entry.to, label: entry.label }
+
         if (entry.variant === "clocked-in" && overtimeOnly) {
           return [
             ...acc,
@@ -86,9 +91,7 @@ export const normalizeData = ({
                 totalEntryOvertimeSeconds / totalSecondsWithRemainingTime +
                 value,
               color: CLOCK_IN_COLORS.overtime,
-              // The entry's own context travels with every piece it is cut
-              // into: an overtime slice is still the same stretch of the day.
-              label: entry.label,
+              ...context,
             },
           ]
         }
@@ -98,12 +101,12 @@ export const normalizeData = ({
           {
             value: totalEntryOvertimeSeconds / totalSecondsWithRemainingTime,
             color: CLOCK_IN_COLORS.overtime,
-            label: entry.label,
+            ...context,
           },
           {
             value,
             color: CLOCK_IN_COLORS[entry.variant],
-            label: entry.label,
+            ...context,
           },
         ]
       }, [] as ClockInSegment[])

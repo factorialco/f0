@@ -18,10 +18,13 @@ export interface ClockInGraphProps {
     to: Date
     variant: ClockInStatus
     /**
-     * What this stretch of the day WAS, beyond its state — which break, which
-     * task. The `horizontal-bar` geometry surfaces it on hover, which is the only
-     * place a past stretch gets named once you've moved on from it. The ring has
-     * nowhere to put it and ignores it.
+     * EXTRA context for this stretch of the day, beyond its state — which break,
+     * which task.
+     *
+     * The `horizontal-bar` geometry already tells you when a stretch ran when you
+     * hover it; this is appended to that range after a `•`, so pass only what the
+     * range doesn't already say. The ring has nowhere to put either and ignores
+     * them.
      */
     label?: string
   }[]

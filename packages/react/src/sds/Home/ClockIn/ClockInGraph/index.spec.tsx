@@ -52,14 +52,17 @@ describe("ClockInGraph", () => {
       expect(container.textContent).toBe("")
     })
 
-    it("is hidden from assistive tech, since its numbers are text elsewhere", () => {
+    it("is hidden from assistive tech on an empty day, whose totals are text elsewhere", () => {
       const { container } = render(
         <ClockInGraph
           variant="horizontal-bar"
-          data={data}
-          trackedMinutes={60}
+          data={[]}
+          trackedMinutes={0}
+          remainingMinutes={8 * 60}
         />
       )
+      // Nothing has run, so the rail has nothing of its own to say. With entries
+      // it does — each one answers a hover with its time range.
       expect(container.firstElementChild).toHaveAttribute("aria-hidden")
     })
 
@@ -85,8 +88,11 @@ describe("ClockInGraph", () => {
         />
       )
 
-      // The labelled segment is in the a11y tree; the unlabelled ones aren't.
-      expect(screen.getByLabelText("Lunch break")).toBeInTheDocument()
+      // Every stretch carries its range; the labelled one appends to it.
+      expect(screen.getByLabelText("09:00 – 12:00")).toBeInTheDocument()
+      expect(
+        screen.getByLabelText("12:00 – 13:00 • Lunch break")
+      ).toBeInTheDocument()
       // And with something worth announcing, the rail is no longer hidden.
       expect(container.firstElementChild).not.toHaveAttribute("aria-hidden")
     })

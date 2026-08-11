@@ -90,9 +90,9 @@ const BREAK_DAY: ClockInControlsProps["data"] = [
     from: new Date("2024-03-20T12:00:00"),
     to: new Date("2024-03-20T12:34:00"),
     variant: "break",
-    // `label` names this stretch on the bar: hover its segment and it says which
-    // break it was. Put whatever the tile should reveal there, times included.
-    label: "Lunch break · 12:00–12:34",
+    // Hovering a segment always gives its time range; `label` is what gets added
+    // after it — so this reads "12:00 – 12:34 • Lunch break".
+    label: "Lunch break",
   },
 ]
 
@@ -101,19 +101,19 @@ const OVERTIME_DAY: ClockInControlsProps["data"] = [
     from: new Date("2024-03-20T09:02:00"),
     to: new Date("2024-03-20T12:00:00"),
     variant: "clocked-in",
-    label: "Morning · Design system",
+    label: "Design system",
   },
   {
     from: new Date("2024-03-20T12:00:00"),
     to: new Date("2024-03-20T12:45:00"),
     variant: "break",
-    label: "Lunch break · 12:00–12:45",
+    label: "Lunch break",
   },
   {
     from: new Date("2024-03-20T12:45:00"),
     to: new Date("2024-03-20T18:17:00"),
     variant: "clocked-in",
-    label: "Afternoon · Onboarding revamp",
+    label: "Onboarding revamp",
   },
 ]
 

@@ -1,15 +1,41 @@
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
+import { formatTime24Hours } from "@/lib/date"
 import { cn } from "@/lib/utils"
+
+/** What separates the parts of a segment's tooltip. */
+const DETAIL_SEPARATOR = " • "
 
 /** One stretch of the day, ready to draw: its share, its colour, what it was. */
 export type ClockInSegment = {
   value: number
   color: string
   /**
+   * When this stretch ran. Present on every segment cut from a clock-in entry,
+   * absent on the neutral remainder — which is the rest of the day, not a stretch
+   * of it, and so has nothing to say on hover.
+   */
+  from?: Date
+  to?: Date
+  /**
    * The entry's own `label`, when it carried one — which break this was, which
-   * task. Carried through `normalizeData` so a geometry can surface it.
+   * task. Appended to the time range rather than replacing it.
    */
   label?: string
+}
+
+/**
+ * A segment's hover text: its TIME RANGE always, and whatever the entry added
+ * after it.
+ *
+ * The range is the minimum worth saying about a stretch of the day and it needs
+ * nothing from the consumer, so every real segment gets a tooltip — `label` only
+ * adds to it.
+ */
+export const segmentTooltip = (segment: ClockInSegment): string | undefined => {
+  if (!segment.from || !segment.to) return undefined
+
+  const range = `${formatTime24Hours(segment.from)} – ${formatTime24Hours(segment.to)}`
+  return [range, segment.label].filter(Boolean).join(DETAIL_SEPARATOR)
 }
 
 /**
@@ -26,22 +52,24 @@ export type ClockInSegment = {
  * total in, so in this geometry the numbers belong to the layout around it (see
  * `ClockInControls`' own `horizontal-bar` variant).
  *
- * A segment that carries a `label` becomes hoverable and says what it was — the
- * only place a PAST stretch of the day is named ("Lunch break", once you're back
- * at work). Those segments are in the accessibility tree as labelled images, and
- * the rail as a whole is `aria-hidden` only while none of them is: with no labels
- * every number it encodes is already text in the rows around it, so announcing it
- * would just repeat them.
+ * Every stretch of the day is HOVERABLE and says when it ran — the only place a
+ * past stretch is accounted for once you've moved on from it — plus whatever its
+ * entry labelled it. Those segments are in the accessibility tree as labelled
+ * images; the rail as a whole is `aria-hidden` only when nothing in it has
+ * anything to say (an empty day), since the totals it encodes are already text in
+ * the rows around it.
  */
 export function HorizontalBar({ segments }: { segments: ClockInSegment[] }) {
-  const hasLabels = segments.some((segment) => !!segment.label)
+  const tooltips = segments.map(segmentTooltip)
 
   return (
     <div
-      aria-hidden={hasLabels ? undefined : true}
+      aria-hidden={tooltips.some(Boolean) ? undefined : true}
       className="flex h-1.5 w-full flex-row items-stretch gap-0.5"
     >
       {segments.map((segment, index) => {
+        const tooltip = tooltips[index]
+
         // The segments are a positional series with no identity of their own —
         // `normalizeData` returns shares and colours, not the entries. The bar
         // itself stays the flex item either way: `TooltipInternal` renders its
@@ -60,7 +88,7 @@ export function HorizontalBar({ segments }: { segments: ClockInSegment[] }) {
               // Both are free of layout: a pseudo-element hit-tests as its host,
               // and `scaleY` doesn't touch the row's height — the tile's
               // placeholder is measured against that.
-              segment.label &&
+              tooltip &&
                 "relative origin-center after:absolute after:-inset-x-px after:-inset-y-2 after:content-[''] motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:hover:scale-y-150"
             )}
             style={{
@@ -69,15 +97,15 @@ export function HorizontalBar({ segments }: { segments: ClockInSegment[] }) {
               flex: `${segment.value} 1 0%`,
               backgroundColor: segment.color,
             }}
-            role={segment.label ? "img" : undefined}
-            aria-label={segment.label}
+            role={tooltip ? "img" : undefined}
+            aria-label={tooltip}
           />
         )
 
-        return segment.label ? (
+        return tooltip ? (
           // Quicker than the default: a 6px rail is a deliberate hover, and a
           // 700ms wait on a target that thin reads as nothing happening.
-          <TooltipInternal key={index} label={segment.label} delay={200}>
+          <TooltipInternal key={index} label={tooltip} delay={200}>
             {bar}
           </TooltipInternal>
         ) : (
