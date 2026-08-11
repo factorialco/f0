@@ -32303,6 +32303,12 @@ function Sae({
     W,
     u,
     L,
+    // The seeded node height and the expander/collapser offsets are all derived
+    // from `contentHeightOf`, which reads this map. Leaving it out froze them at
+    // whatever the first render measured: toggling a column re-measured the
+    // chips and updated the map, but the nodes kept their old height, so the
+    // connector never grew back or shrank.
+    f,
     y,
     _,
     v?.collapseChildren
