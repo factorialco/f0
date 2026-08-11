@@ -3,8 +3,8 @@ import { cX as iy, cW as sy, d7 as ly, cT as cy, cU as dy, cL as uy, cM as fy, c
 import { jsx as n, jsxs as h, Fragment as ze } from "react/jsx-runtime";
 import ne, { forwardRef as _e, useRef as O, useTransition as Pu, useState as D, useLayoutEffect as yn, useId as Pn, useContext as At, createContext as pt, useEffect as X, useCallback as U, useMemo as fe, Fragment as St, isValidElement as Fu, cloneElement as ks, Suspense as zr, lazy as ln, createElement as cr, memo as Ss, Children as Jo } from "react";
 import { d as S, T as Mu, a as Ou, b as Du, f as Xe, c as Bu, u as _u } from "./tooltip-Cik7KBQT.js";
-import { C as $u, P as Hu, c as Ar, n as ju, E as Wu, a as Qo, b as Kn, M as Uu, p as Vu, e as Gu, R as Da, f as Ts, u as Ku, g as qu, h as Yu, i as Xu, j as Ju, k as Qu, O as Rs, W as nn, A as Zu, B as ef, L as tf, l as nf, V as rf, m as of, o as af, q as sf, S as lf, r as cf, s as df, t as uf, v as ff, D as mf, w as hf, x as pf, y as gf, z as bf, F as vf, G as Ba } from "./CoachmarkProvider-BU4SnUDg.js";
-import { aj as _y, ak as $y, Q as Hy, T as jy, K as Wy, a3 as Uy, U as Vy, av as Gy, $ as Ky, au as qy, a2 as Yy, N as Xy, ah as Jy, ax as Qy, aw as Zy, a9 as ew, a4 as tw, aA as nw, J as rw, ae as ow, ab as aw, a6 as iw, aC as sw, a7 as lw, af as cw, ag as dw, X as uw, ay as fw, az as mw, a8 as hw, ai as pw, ar as gw, at as bw, Y as vw, aE as xw, _ as yw, a0 as ww, ac as Nw, aB as Cw, ad as Iw, aa as kw, aD as Sw, Z as Tw, a1 as Rw, H as Ew, I as Lw, an as zw, ao as Aw, al as Pw, as as Fw, a5 as Mw, ap as Ow, am as Dw, aq as Bw } from "./CoachmarkProvider-BU4SnUDg.js";
+import { C as $u, P as Hu, c as Ar, n as ju, E as Wu, a as Qo, b as Kn, M as Uu, p as Vu, e as Gu, R as Da, f as Ts, u as Ku, g as qu, h as Yu, i as Xu, j as Ju, k as Qu, O as Rs, W as nn, A as Zu, B as ef, L as tf, l as nf, V as rf, m as of, o as af, q as sf, S as lf, r as cf, s as df, t as uf, v as ff, D as mf, w as hf, x as pf, y as gf, z as bf, F as vf, G as Ba } from "./CoachmarkProvider-B0V1i0en.js";
+import { aj as _y, ak as $y, Q as Hy, T as jy, K as Wy, a3 as Uy, U as Vy, av as Gy, $ as Ky, au as qy, a2 as Yy, N as Xy, ah as Jy, ax as Qy, aw as Zy, a9 as ew, a4 as tw, aA as nw, J as rw, ae as ow, ab as aw, a6 as iw, aC as sw, a7 as lw, af as cw, ag as dw, X as uw, ay as fw, az as mw, a8 as hw, ai as pw, ar as gw, at as bw, Y as vw, aE as xw, _ as yw, a0 as ww, ac as Nw, aB as Cw, ad as Iw, aa as kw, aD as Sw, Z as Tw, a1 as Rw, H as Ew, I as Lw, an as zw, ao as Aw, al as Pw, as as Fw, a5 as Mw, ap as Ow, am as Dw, aq as Bw } from "./CoachmarkProvider-B0V1i0en.js";
 import xf from "react-dom";
 const yf = Rc("Search", [
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
@@ -7958,7 +7958,7 @@ const Il = () => Vt(gl, "useChatJump"), Ep = () => Vt(bl, "useChatHighlightedId"
 }, Dr = (e, t) => {
   const r = document.createElement("a");
   r.href = e, r.download = t, r.rel = "noreferrer", r.click();
-}, Pp = ln(() => import("./ChatPdfThumbnail-k4KLs1aM.js")), Fp = ln(() => import("./ChatSheetThumbnail-BvnxT-4A.js")), Mp = ln(() => import("./ChatDocxThumbnail-DzNPNFya.js")), Op = ln(() => import("./ChatTextThumbnail-yVt_iYi7.js")), Dp = 288, Bp = 160, _p = (e) => {
+}, Pp = ln(() => import("./ChatPdfThumbnail-fgryxoxk.js")), Fp = ln(() => import("./ChatSheetThumbnail-BvnxT-4A.js")), Mp = ln(() => import("./ChatDocxThumbnail-DzNPNFya.js")), Op = ln(() => import("./ChatTextThumbnail-yVt_iYi7.js")), Dp = 288, Bp = 160, _p = (e) => {
   const [t, r] = D(!1);
   return X(() => {
     const o = e.current;
@@ -10001,7 +10001,7 @@ const rg = {
     ] })
   ] }) });
 }, pg = ln(
-  () => import("./index-CQIRAotn.js").then((e) => e.i).then((e) => ({
+  () => import("./index-om4T5vQF.js").then((e) => e.i).then((e) => ({
     default: e.F0PdfViewer
   }))
 ), gg = () => {
