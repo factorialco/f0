@@ -24,6 +24,11 @@ export type ApprovalStepProps = {
   approvalsRequired?: number
   status: Status
   approvers: Approver[]
+  /**
+   * Date when the step was resolved (approved or rejected), already formatted
+   * for display. The consumer owns the locale/format.
+   */
+  approvalDate?: string
 }
 
 const statusTagVariants: Record<Status, "neutral" | "positive" | "critical"> = {
@@ -75,6 +80,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
   approvalsRequired = 1,
   status,
   approvers,
+  approvalDate,
 }) => {
   const translations = useI18n()
 
@@ -119,6 +125,9 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
       <div className="w-full">
         <F0AvatarList avatars={avatars} layout="fill" type="person" size="md" />
       </div>
+      {approvalDate && (
+        <p className="text-sm text-f1-foreground-secondary">{approvalDate}</p>
+      )}
     </div>
   )
 }

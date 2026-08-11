@@ -131,6 +131,7 @@ export const MultipleApprovals: Story = {
         approvalsRequired: 2,
         status: "approved",
         approvers: mockApprovers,
+        approvalDate: "Jan 15, 2026",
       },
       {
         title: "HR Approval",
@@ -150,6 +151,7 @@ export const RejectedApproval: Story = {
         approvalsRequired: 1,
         status: "rejected",
         approvers: mockApprovers,
+        approvalDate: "Jan 15, 2026",
       },
     ],
   },
