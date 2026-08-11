@@ -13,12 +13,18 @@ import { HorizontalBar, segmentTooltip } from "./HorizontalBar"
 vi.mock("@/experimental/Overlays/Tooltip", () => ({
   TooltipInternal: ({
     label,
+    instant,
     children,
   }: {
     label?: string
+    instant?: boolean
     children: React.ReactNode
   }) => (
-    <div data-testid="segment-tooltip" data-label={label}>
+    <div
+      data-testid="segment-tooltip"
+      data-label={label}
+      data-instant={String(!!instant)}
+    >
       {children}
     </div>
   ),
@@ -52,6 +58,25 @@ describe("HorizontalBar", () => {
       // …with `label` appended after a bullet.
       "12:00 – 12:34 (34min) • Lunch break",
     ])
+  })
+
+  it("asks for a tooltip that can't take the pointer, so hovering can't loop", () => {
+    render(
+      <HorizontalBar
+        segments={[
+          { value: 1, color: "green", from: at("09:00"), to: at("12:00") },
+        ]}
+      />
+    )
+
+    // `instant` gives the content `pointer-events-none` and turns off hoverable
+    // content. Without it the tooltip lands inside the segment's hit area, covers
+    // the cursor, and the trigger's own pointer-leave closes it — then it reopens,
+    // and flickers for as long as you hover.
+    expect(screen.getByTestId("segment-tooltip")).toHaveAttribute(
+      "data-instant",
+      "true"
+    )
   })
 
   it("says a duration the way people do", () => {

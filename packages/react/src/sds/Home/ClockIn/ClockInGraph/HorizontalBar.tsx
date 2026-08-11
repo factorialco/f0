@@ -129,9 +129,22 @@ export function HorizontalBar({ segments }: { segments: ClockInSegment[] }) {
         )
 
         return tooltip ? (
-          // Quicker than the default: a 6px rail is a deliberate hover, and a
-          // 700ms wait on a target that thin reads as nothing happening.
-          <TooltipInternal key={index} label={tooltip} delay={200}>
+          /**
+           * `instant` is what stops the tooltip FLICKERING here, and only
+           * secondarily what makes it quick.
+           *
+           * The content sits 4px off the segment — inside the 8px hit area above
+           * it — so it lands under the pointer. Hoverable content then fights the
+           * trigger's own `onPointerLeave`: the tooltip covers the cursor, the
+           * trigger reports a leave and closes, the cursor is over the segment
+           * again, and it reopens, forever. `instant` gives the content
+           * `pointer-events-none` and disables hoverable content, so it can
+           * overlap without ever taking the pointer.
+           *
+           * Its 100ms delay is a bonus: a 6px rail is a deliberate hover, and the
+           * default 700ms wait on a target that thin reads as nothing happening.
+           */
+          <TooltipInternal key={index} label={tooltip} instant>
             {bar}
           </TooltipInternal>
         ) : (
