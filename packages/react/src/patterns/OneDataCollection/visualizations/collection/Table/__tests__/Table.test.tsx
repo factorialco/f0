@@ -378,6 +378,10 @@ describe("TableCollection", () => {
       expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
+    // The header paints the tint as a gradient image, the cell as a bg color;
+    // both carry the same token, so the assertion targets that.
+    const HIGHLIGHT_BG_CLASS = "hsl(var(--neutral-2))"
+
     it("applies the highlighted background to the highlighted column's header and cells", async () => {
       const columnsWithHighlighted = [
         { label: "name", render: (item: Person) => item.name },
@@ -411,17 +415,17 @@ describe("TableCollection", () => {
       })
 
       const emailHeader = screen.getByRole("columnheader", { name: "email" })
-      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
       expect(emailHeader).toHaveAttribute("data-highlighted", "true")
 
       const nameHeader = screen.getByRole("columnheader", { name: "name" })
-      expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+      expect(nameHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
 
       const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
-      expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailCell?.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const nameCell = screen.getAllByText(testData[0].name)[0].closest("td")
-      expect(nameCell?.className).not.toMatch(/bg-f1-background-secondary/)
+      expect(nameCell?.className).not.toMatch(HIGHLIGHT_BG_CLASS)
     })
 
     it("emphasizes every highlighted column", async () => {
@@ -462,17 +466,15 @@ describe("TableCollection", () => {
       })
 
       const nameHeader = screen.getByRole("columnheader", { name: "name" })
-      expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(nameHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const emailHeader = screen.getByRole("columnheader", { name: "email" })
-      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const displayNameHeader = screen.getByRole("columnheader", {
         name: "displayName",
       })
-      expect(displayNameHeader.className).not.toMatch(
-        /bg-f1-background-secondary/
-      )
+      expect(displayNameHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
     })
 
     it("highlights the spanning header of the highlighted column's group", async () => {
@@ -516,14 +518,12 @@ describe("TableCollection", () => {
       const contactGroupHeader = screen.getByRole("columnheader", {
         name: "Contact",
       })
-      expect(contactGroupHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(contactGroupHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const identityGroupHeader = screen.getByRole("columnheader", {
         name: "Identity",
       })
-      expect(identityGroupHeader.className).not.toMatch(
-        /bg-f1-background-secondary/
-      )
+      expect(identityGroupHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
     })
 
     it("highlights every column of a highlighted header group", async () => {
@@ -567,21 +567,21 @@ describe("TableCollection", () => {
       const contactGroupHeader = screen.getByRole("columnheader", {
         name: "Contact",
       })
-      expect(contactGroupHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(contactGroupHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const emailHeader = screen.getByRole("columnheader", { name: "email" })
-      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const displayNameHeader = screen.getByRole("columnheader", {
         name: "displayName",
       })
-      expect(displayNameHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(displayNameHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const nameHeader = screen.getByRole("columnheader", { name: "name" })
-      expect(nameHeader.className).not.toMatch(/bg-f1-background-secondary/)
+      expect(nameHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
 
       const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
-      expect(emailCell?.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailCell?.className).toMatch(HIGHLIGHT_BG_CLASS)
     })
 
     it("combines a highlighted header group with independently highlighted columns", async () => {
@@ -622,10 +622,10 @@ describe("TableCollection", () => {
       })
 
       const nameHeader = screen.getByRole("columnheader", { name: "name" })
-      expect(nameHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(nameHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
 
       const emailHeader = screen.getByRole("columnheader", { name: "email" })
-      expect(emailHeader.className).toMatch(/bg-f1-background-secondary/)
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
     })
 
     it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {

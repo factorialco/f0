@@ -196,14 +196,17 @@ describe("TableHead and TableCell highlighted", () => {
       </OneTable>
     )
 
+    // The header paints the tint as a gradient image, the cell as a bg color;
+    // both carry the same token, so the assertion targets that.
+    const highlightClass = "hsl(var(--neutral-2))"
     const [plainHead, highlightedHead] = screen.getAllByRole("columnheader")
-    expect(highlightedHead.className).toMatch(/bg-f1-background-secondary/)
+    expect(highlightedHead.className).toContain(highlightClass)
     expect(highlightedHead).toHaveAttribute("data-highlighted", "true")
-    expect(plainHead.className).not.toMatch(/bg-f1-background-secondary/)
+    expect(plainHead.className).not.toContain(highlightClass)
     expect(plainHead).not.toHaveAttribute("data-highlighted")
 
     const [plainCell, highlightedCell] = screen.getAllByRole("cell")
-    expect(highlightedCell.className).toMatch(/bg-f1-background-secondary/)
-    expect(plainCell.className).not.toMatch(/bg-f1-background-secondary/)
+    expect(highlightedCell.className).toContain(highlightClass)
+    expect(plainCell.className).not.toContain(highlightClass)
   })
 })
