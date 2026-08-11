@@ -5,7 +5,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { F0Button } from "@/components/F0Button"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
@@ -20,15 +19,17 @@ import {
   ExternalLink,
   File,
   Globe,
+  Home as HomeIcon,
   PalmTree,
   Person,
   Receipt,
-  SolidPlay,
   Target,
 } from "@/icons/app"
 
-import { Skeleton } from "@/ui/skeleton"
-
+import {
+  ClockInControls,
+  type ClockInProject,
+} from "../ClockIn/ClockInControls"
 import { SlotWidget } from "../SlotWidget"
 import {
   homeSlot,
@@ -217,42 +218,136 @@ const mainColumnBlocks = () => [
 
 /* ================================ side rail ================================ */
 
+const CLOCK_IN_LABELS = {
+  clockedOut: "Clocked out",
+  clockedIn: "Clocked in",
+  onBreak: "On a break",
+  clockIn: "Clock in",
+  clockOut: "Clock out",
+  break: "Take a break",
+  resume: "Resume",
+  remainingTime: "Remaining time",
+  overtime: "Overtime",
+  selectLocation: "Select location",
+  selectProject: "Select project",
+  searchProject: "Search projects",
+  paid: "Paid",
+  unpaid: "Unpaid",
+}
+
+const CLOCK_IN_LOCATIONS = [
+  { id: "remote", name: "Remote", icon: HomeIcon },
+  { id: "office", name: "Office", icon: Building },
+]
+
 /**
- * The prototype's Clock in tile body, verbatim composition: state + running
- * total on one heading line, the day as a progress bar, started/left below it,
- * and the location selector + brand clock-in control on the last line. This is
- * the BESPOKE `clock-in` slot's renderer — the `Widget` frame + header come
- * from `SlotWidget`, like every other widget.
+ * A real-sized book of work: 10 projects, 50 selectable subprojects. Past the
+ * picker's 20-per-page window, so in the rail the project dropdown really pages
+ * as you scroll and its search box has something to narrow.
  */
-const ClockInBody = () => (
-  <div className="flex flex-col gap-2">
-    <div className="flex items-end justify-between">
-      <span className="text-xl font-semibold text-f1-foreground">
-        Clocked out
-      </span>
-      <span className="text-xl font-semibold tabular-nums text-f1-foreground">
-        0:00
-      </span>
-    </div>
-    <div className="h-1.5 rounded-full bg-f1-background-secondary" />
-    <div className="flex justify-between text-base text-f1-foreground-secondary">
-      <span>15:54</span>
-      <span>8h 00m left</span>
-    </div>
-    <div className="flex items-center justify-between pt-1">
-      <F0ButtonDropdown
-        mode="dropdown"
-        trigger="Remote"
-        items={[
-          { label: "Remote", value: "remote" },
-          { label: "Office", value: "office" },
-        ]}
-        onClick={() => {}}
-      />
-      <F0Button label="Clock in" icon={SolidPlay} onClick={() => {}} />
-    </div>
-  </div>
-)
+const CLOCK_IN_PROJECTS: ClockInProject[] = [
+  {
+    name: "Design system",
+    parts: ["Components", "Tokens", "Documentation", "Icons", "Audits"],
+  },
+  {
+    name: "Onboarding revamp",
+    parts: ["Research", "Flows", "Copy", "Analytics", "Rollout"],
+  },
+  {
+    name: "Payroll engine",
+    parts: [
+      "Calculations",
+      "Filings",
+      "Reconciliation",
+      "Reporting",
+      "Migrations",
+    ],
+  },
+  {
+    name: "Mobile app",
+    parts: ["iOS", "Android", "Release train", "Crash triage", "Notifications"],
+  },
+  {
+    name: "Recruitment",
+    parts: ["Job board", "Pipelines", "Scorecards", "Referrals", "Offers"],
+  },
+  {
+    name: "Data platform",
+    parts: [
+      "Ingestion",
+      "Warehouse",
+      "Dashboards",
+      "Governance",
+      "Experiments",
+    ],
+  },
+  {
+    name: "Billing",
+    parts: ["Invoicing", "Dunning", "Taxes", "Plans", "Refunds"],
+  },
+  {
+    name: "Customer support",
+    parts: ["Inbox", "Macros", "Escalations", "Knowledge base", "Reporting"],
+  },
+  {
+    name: "Security",
+    parts: [
+      "Access reviews",
+      "Pen tests",
+      "Incident drills",
+      "Compliance",
+      "Training",
+    ],
+  },
+  {
+    name: "Internal tooling",
+    parts: ["Admin", "Feature flags", "Runbooks", "Alerting", "Cost control"],
+  },
+].map(({ name, parts }) => ({
+  id: name.toLowerCase().replace(/ /g, "-"),
+  name,
+  subprojects: parts.map((part) => ({
+    id: `${name}-${part}`.toLowerCase().replace(/ /g, "-"),
+    name: part,
+  })),
+}))
+
+/**
+ * The rail's Clock in tile: F0's own `ClockInControls` in its `horizontal-bar`
+ * variant — state + running total on one heading line, the day as a horizontal
+ * bar, started/left below it, and the location selector + clock-in control on
+ * the last line. This is the BESPOKE `clock-in` slot's renderer; the `Widget`
+ * frame + header come from `SlotWidget`, like every other widget.
+ *
+ * ONE component covers both the content and the placeholder: `loading` draws the
+ * tile's own skeleton, shaped like this variant, so the slot's `skeleton` is
+ * this same render rather than a hand-built stand-in that has to be kept in
+ * step with it.
+ */
+const ClockInTile = ({ loading }: { loading?: boolean }) => {
+  const [locationId, setLocationId] = useState("remote")
+  const [projectId, setProjectId] = useState<string | undefined>()
+
+  return (
+    <ClockInControls
+      variant="horizontal-bar"
+      loading={loading}
+      labels={CLOCK_IN_LABELS}
+      data={[]}
+      trackedMinutes={0}
+      remainingMinutes={8 * 60}
+      locations={CLOCK_IN_LOCATIONS}
+      locationId={locationId}
+      onChangeLocationId={setLocationId}
+      projects={CLOCK_IN_PROJECTS}
+      projectId={projectId}
+      onChangeProjectId={setProjectId}
+      onClockIn={() => {}}
+      onClockOut={() => {}}
+    />
+  )
+}
 
 const COMMS = [
   {
@@ -425,37 +520,16 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
 ]
 
 /**
- * The `clock-in` tile's PLACEHOLDER: the same four lines the real tile has —
- * state + total, the day's bar, started/left, then the two controls.
- */
-const ClockInSkeleton = () => (
-  <div className="flex flex-col gap-2">
-    <div className="flex items-end justify-between">
-      <Skeleton className="h-6 w-28" />
-      <Skeleton className="h-6 w-12" />
-    </div>
-    <Skeleton className="h-1.5 rounded-full" />
-    <div className="flex justify-between">
-      <Skeleton className="h-5 w-12" />
-      <Skeleton className="h-5 w-20" />
-    </div>
-    <div className="flex items-center justify-between pt-1">
-      <Skeleton className="h-8 w-24 rounded-md" />
-      <Skeleton className="h-8 w-24 rounded-md" />
-    </div>
-  </div>
-)
-
-/**
  * The bespoke slot renderers this Home supplies — only `clock-in` here; every
  * other slot the rail and the feed use is a kit default. It declares its own
  * `skeleton` beside its `render`, so the tile has a placeholder shaped like
- * itself while the rail loads.
+ * itself while the rail loads — and both are the SAME component, told whether
+ * its data has landed (`ClockInControls`' `loading`).
  */
 const SLOT_RENDERERS: SlotRenderers = {
   "clock-in": {
-    render: () => <ClockInBody />,
-    skeleton: () => <ClockInSkeleton />,
+    render: () => <ClockInTile />,
+    skeleton: () => <ClockInTile loading />,
   },
 }
 
@@ -821,7 +895,8 @@ export const BannerAboveLayout: Story = {
  * How many placeholder items a slot draws is its own `expectedItemsCount`
  * (Communications expects 5 rows, Events 4), which is what keeps the loading
  * rail as tall as the loaded one. `clock-in` is bespoke, so its renderer brings
- * its own skeleton — see `SLOT_RENDERERS` above.
+ * its own skeleton — `ClockInControls` with `loading`, which draws a placeholder
+ * shaped like its `horizontal-bar` variant. See `SLOT_RENDERERS` above.
  *
  * The main column is freeform content rather than widgets, so it isn't part of
  * this: only what the layout renders as widgets has a loading state.
