@@ -1345,6 +1345,11 @@ const F0SelectComponent = forwardRef(function Select<
                   }
                   allSelected={selectedState.allSelected}
                   selection={getDisplayItemsForSelection}
+                  // The field's own icon already occupies the trigger's glyph
+                  // slot, and the two are drawn in different places — showing
+                  // both put two icons 4px apart on one trigger. Options keep
+                  // their icons for the rows regardless.
+                  hideItemIcon={!!icon}
                 />
               )}
             </button>

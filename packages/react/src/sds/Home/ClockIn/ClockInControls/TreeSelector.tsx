@@ -153,8 +153,11 @@ export function TreeSelector({
    * Not through the selected option's icon, which is the other way `F0Select` can
    * show one: that renders inside the value area (`px-3`) while a field icon is
    * absolutely placed at `left-2`, so two pickers side by side sat 4px apart —
-   * and worse, the icon would jump those 4px the moment you picked something.
-   * Options therefore carry no icon here at all; one slot, one position.
+   * and worse, the icon jumped those 4px the moment you picked something.
+   *
+   * Options still carry their icons, for the ROWS. `F0Select` leaves the selected
+   * option's icon out of the trigger whenever the field has one of its own, so
+   * only this slot ever draws there.
    */
   const selectedLeaf = value
     ? leaves.find((leaf) => leaf.id === value)
@@ -242,6 +245,7 @@ export function TreeSelector({
       mapOptions={(leaf) => ({
         value: leaf.id,
         label: leaf.name,
+        icon: leaf.icon,
         // The row is read under its group heading, so it stays short. The TRIGGER
         // has no heading above it — there, the leaf carries its whole path.
         selectedLabel: leaf.path,
@@ -253,6 +257,7 @@ export function TreeSelector({
       options={leaves.map((leaf) => ({
         value: leaf.id,
         label: leaf.name,
+        icon: leaf.icon,
       }))}
     />
   )

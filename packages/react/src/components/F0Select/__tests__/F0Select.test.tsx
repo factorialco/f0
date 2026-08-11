@@ -909,6 +909,34 @@ describe("Select", () => {
       expect(screen.getByText("Tokens")).toBeInTheDocument()
     })
 
+    it("draws ONE glyph on the trigger when the field and the option both have an icon", async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <F0Select
+          {...defaultSelectProps}
+          icon={Search}
+          value="option1"
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      // The field's icon owns the trigger's glyph slot; the selected option's is
+      // left out, because the two are drawn in different places and would sit 4px
+      // apart. `mockOptions[0]` carries an icon of its own.
+      const trigger = screen.getByRole("combobox")
+      expect(trigger.querySelectorAll("svg")).toHaveLength(0)
+      expect(container.querySelectorAll("svg").length).toBeGreaterThan(0)
+
+      // …while the ROW keeps its icon. Scoped to the list: the trigger shows the
+      // same label, so an unscoped query finds both.
+      await openSelect(user)
+      const row = within(screen.getByRole("listbox"))
+        .getByText("Option 1")
+        .closest("[role='option']")
+      expect(row?.querySelectorAll("svg").length).toBeGreaterThan(0)
+    })
+
     describe("hover tooltip", () => {
       /**
        * The trigger is WIRED as a tooltip trigger: Radix marks its (asChild)

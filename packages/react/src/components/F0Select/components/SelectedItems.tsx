@@ -16,6 +16,15 @@ type SelectValueProps = {
   totalSelectedCount?: number
   /** Whether all items are selected */
   allSelected?: boolean | "indeterminate"
+  /**
+   * Whether to leave the selected item's icon out.
+   *
+   * Set when the FIELD already carries an `icon`: the two are drawn in different
+   * places — the field's is absolutely placed at `left-2`, this one sits inside
+   * the value area's `px-3` — so showing both puts two glyphs 4px apart on one
+   * trigger. Options keep their icons for the rows either way.
+   */
+  hideItemIcon?: boolean
 }
 
 function SelectedCount({ count }: { count: number }) {
@@ -64,7 +73,7 @@ function MultiSelectDisplay({
  */
 export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
   function SelectValue(
-    { selection, multiple, totalSelectedCount, allSelected },
+    { selection, multiple, totalSelectedCount, allSelected, hideItemIcon },
     ref
   ) {
     const i18n = useI18n()
@@ -139,7 +148,7 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
             <F0Avatar avatar={selectedItem.avatar} size="xs" />
           </div>
         )}
-        {selectedItem.icon && (
+        {selectedItem.icon && !hideItemIcon && (
           <div className="h-5 shrink-0 text-f1-icon">
             <F0Icon icon={selectedItem.icon} />
           </div>
