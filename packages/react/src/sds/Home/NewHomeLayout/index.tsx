@@ -83,6 +83,11 @@ const GradientWash = ({
 
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
+/**
+ * The gap between the strip's glyphs — `gap-2` on the strip below, and the number
+ * a stowing widget needs to know where its own glyph is. Keep the two in step.
+ */
+const GLYPH_GAP_PX = 8
 
 /**
  * One widget as the collapsed strip shows it: its own catalog glyph, standing in
@@ -798,11 +803,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // on top of that would be the same arrival animated twice.
             initial={false}
             animate={{
-              opacity: rail.out ? 1 : 0,
-              scale: rail.out ? 1 : GENIE_RETRACTED_SCALE,
+              opacity: rail.bodyOut ? 1 : 0,
+              scale: rail.bodyOut ? 1 : GENIE_RETRACTED_SCALE,
               // Toward the strip while it shrinks, so it converges on the glyph
               // rather than just fading where it stood.
-              x: rail.out ? 0 : GENIE_RETRACTED_OFFSET_PX,
+              x: rail.bodyOut ? 0 : GENIE_RETRACTED_OFFSET_PX,
               // Only the panel is offset from its own box; in the grid it sits
               // where the grid put it.
               y: railInPanel ? panelTop : 0,
@@ -814,9 +819,21 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             <WidgetContainer
               side="right"
               widgets={rightWidgets}
-              // Collapsed, this container IS the panel: one widget shown, the
-              // others hidden rather than dropped.
-              visibleWidgetId={collapsed ? openId : undefined}
+              // Only ONCE THE STRIP HAS THEM. This used to key off `collapsed`,
+              // which hid every card on the very frame the collapse began — so the
+              // cards were `display: none` before they had moved a pixel, and the
+              // retract animated an empty box while they simply blinked out. The
+              // panel's one-widget filter belongs to the panel; while the rail is
+              // still retracting the column is still a column, and its cards have a
+              // journey to make (`stow`).
+              visibleWidgetId={railInPanel ? openId : undefined}
+              // The strip they are going into: glyphs a fixed pitch apart, and how
+              // small a card has to get to be one of them.
+              stow={{
+                stowed: collapsed,
+                pitch: COLLAPSED_RAIL_WIDTH + GLYPH_GAP_PX,
+                scale: COLLAPSED_RAIL_WIDTH / asideWidth,
+              }}
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
               ctx={ctx}

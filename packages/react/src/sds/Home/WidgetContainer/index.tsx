@@ -20,9 +20,10 @@ import { Cross, LockLocked } from "@/icons/app"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 
-import { arrivalWindowMs, HomeEntrance, useElapsed } from "../home-motion"
+import { arrivalWindowMs, useElapsed } from "../home-motion"
 import { SlotWidget } from "../SlotWidget"
 import { SortableWidget } from "./SortableWidget"
+import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 import {
   type HomeRenderCtx,
   type HomeWidgetChrome,
@@ -157,6 +158,16 @@ export interface WidgetContainerProps {
    * no wrapper of any kind around them.
    */
   entrance?: false | { order?: number; delayMs?: number }
+  /**
+   * THE STOW: where this column's widgets go when the rail collapses. Each card
+   * scales down onto its own glyph and fades, and grows back out of it when the
+   * rail opens, so a card and its glyph read as one object rather than two
+   * representations that replace each other. See `WidgetMotion`.
+   *
+   * `pitch` and `scale` describe the strip the widgets are going into — only
+   * `NewHomeLayout` knows those, which is why they come in from outside.
+   */
+  stow?: Omit<WidgetStow, "stowed" | "instant"> & { stowed: boolean }
   /** Tooltip on a locked widget's lock icon. */
   lockedLabel?: string
   ctx?: HomeRenderCtx
@@ -191,6 +202,7 @@ export function WidgetContainer({
   onReorder,
   visibleWidgetId,
   entrance = {},
+  stow,
   lockedLabel = "This widget is mandatory in your company.",
   ctx = {},
   className,
@@ -323,28 +335,55 @@ export function WidgetContainer({
   const arrived = useElapsed(arrivalWindowMs(arrival?.delayMs))
 
   /**
-   * Wraps one block in its arrival. With `entrance` off it hands the block back
-   * untouched — an entrance that is not happening must not leave a box behind,
-   * because that box is the flex item the widget itself would have been.
+   * The stow as it applies to ONE widget. The widget the panel is currently
+   * floating is the exception: it is the only one at full size while the rail is
+   * collapsed, and it must simply BE there — the panel animates its own arrival
+   * out of the glyph, and a card growing inside a panel that is already growing is
+   * the same gesture played twice.
    */
-  const enter = (order: number, node: ReactNode, fullHeight?: boolean) =>
-    arrival ? (
-      <HomeEntrance
-        order={(arrival.order ?? 0) + order}
-        delayMs={arrival.delayMs}
-        arriving={!arrived}
-        fullHeight={fullHeight}
+  const stowOf = (widget: HomeWidgetItem): WidgetStow | undefined =>
+    stow && {
+      ...stow,
+      stowed: stow.stowed && widget.id !== visibleWidgetId,
+      instant: stow.stowed,
+    }
+
+  /**
+   * Wraps one widget in everything it does that isn't its content. With no
+   * arrival and no stow it hands the widget back untouched — a wrapper that has
+   * nothing to do must not leave a box behind, because that box is the flex item
+   * the widget itself would have been.
+   */
+  const enter = (order: number, node: ReactNode, widget?: HomeWidgetItem) => {
+    const widgetStow = widget ? stowOf(widget) : undefined
+    if (!arrival && !widgetStow) return node
+    return (
+      <WidgetMotion
+        arrival={
+          arrival
+            ? {
+                order: (arrival.order ?? 0) + order,
+                delayMs: arrival.delayMs ?? 0,
+                arriving: !arrived,
+              }
+            : undefined
+        }
+        stow={widgetStow}
+        fullHeight={widget?.fullHeight}
       >
         {node}
-      </HomeEntrance>
-    ) : (
-      node
+      </WidgetMotion>
     )
+  }
 
   return (
     <div
       className={cn(
-        "flex flex-col [&_*]:shadow-none",
+        // `relative` so this column is what a widget's `offsetTop` is measured
+        // from: the stow maps a widget onto its glyph by that offset, and an
+        // unpositioned column would hand the job to whatever ancestor happened to
+        // be positioned instead (see `WidgetMotion`).
+        "relative flex flex-col [&_*]:shadow-none",
         // The main column's freeform content wants more air than the rail's
         // stack of cards.
         side === "main" ? "gap-6" : "gap-4",
@@ -383,9 +422,7 @@ export function WidgetContainer({
                         around it: dnd-kit measures the element it holds the ref
                         to, and a transformed ancestor would offset every rect it
                         reads while a drag is in flight. */}
-                    {(state) =>
-                      enter(order, render(widget, state), widget.fullHeight)
-                    }
+                    {(state) => enter(order, render(widget, state), widget)}
                   </SortableWidget>
                 </WidgetSlot>
               ))}
@@ -413,7 +450,7 @@ export function WidgetContainer({
       ) : (
         widgets.map((widget, order) => (
           <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
-            {enter(order, render(widget), widget.fullHeight)}
+            {enter(order, render(widget), widget)}
           </WidgetSlot>
         ))
       )}

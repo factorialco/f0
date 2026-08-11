@@ -34,8 +34,15 @@ export type RailMode =
 
 export interface RailMotion {
   mode: RailMode
-  /** The rail is showing something — the column, or one floating widget. */
-  out: boolean
+  /**
+   * Whether the rail BODY should be at full size and opacity.
+   *
+   * Only the floating panel is ever anything else. Collapsing is not the body's
+   * animation to play: its cards go into their own glyphs one by one (see
+   * `WidgetMotion`'s stow), and a block that also shrank would be the same
+   * gesture happening twice at two scales.
+   */
+  bodyOut: boolean
   /** `display: none`, which arrives only once the retract has played out. */
   panelHidden: boolean
   transition: Transition
@@ -112,7 +119,8 @@ export const useRailMotion = ({
     : retracted || open
       ? "panel"
       : "retracting"
-  const out = mode === "column" || open
+  const inPanel = mode === "panel"
+  const bodyOut = !inPanel || open
 
   /**
    * THE COLUMN, animated so the space the main column gets back arrives over the
@@ -140,19 +148,23 @@ export const useRailMotion = ({
 
   return {
     mode,
-    out,
+    bodyOut,
     widthPx,
     // `display: none` cannot be animated out of: applied on the frame the panel
     // closes it would delete the widget instead of letting it go into the glyph.
     panelHidden: useDelayedTrue(!open, reducedMotion ? 0 : GENIE_CLOSE_MS),
-    transition: !animated
-      ? INSTANT_TRANSITION
-      : {
-          ...(out ? genieOpenTransition : genieCloseTransition),
-          // Between two glyphs the panel glides; on the way out of one it must
-          // not travel at all.
-          y: glide ? geniePanelGlideTransition : INSTANT_TRANSITION,
-        },
+    // ONLY THE PANEL ANIMATES. In the column and mid-retract the body snaps to
+    // full size, because the cards are the ones moving — animated, it would fade
+    // the whole block in on top of every card growing out of its glyph.
+    transition:
+      !animated || !inPanel
+        ? INSTANT_TRANSITION
+        : {
+            ...(open ? genieOpenTransition : genieCloseTransition),
+            // Between two glyphs the panel glides; on the way out of one it must
+            // not travel at all.
+            y: glide ? geniePanelGlideTransition : INSTANT_TRANSITION,
+          },
     // Collapsing puts the glyphs in as the cards finish retracting — they overlap
     // on purpose. On the first paint there is no retract to follow, so they are
     // simply the right area arriving after the main one.

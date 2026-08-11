@@ -134,6 +134,22 @@ export const geniePanelGlideTransition: Transition = {
   mass: 0.8,
 }
 /**
+ * A widget going INTO its glyph. It ACCELERATES away — a card being stowed should
+ * leave, not be set down — and it has to be gone by the time the strip owns it
+ * (`GENIE_RETRACT_MS`), because that is when the column stops drawing it at all.
+ */
+export const stowInTransition: Transition = {
+  duration: GENIE_RETRACT_MS / 1000,
+  ease: "easeIn",
+}
+/**
+ * …and coming back OUT of it. The same spring the floating panel uses, so a
+ * widget growing out of a glyph and a widget springing out of a glyph are visibly
+ * the same gesture at two sizes.
+ */
+export const stowOutTransition: Transition = genieOpenTransition
+
+/**
  * The rail's grid column, collapsing from its full width to the strip. The one
  * animated LAYOUT value on the page: the main column has to give the space back
  * over the same beat the cards retract over, or the collapse reads as a jump

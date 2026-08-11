@@ -3,7 +3,13 @@ import { beforeEach, describe, expect, test, vi } from "vitest"
 import { useEffect, useState } from "react"
 
 import { Calendar, Clock } from "@/icons/app"
-import { act, screen, userEvent, zeroRender } from "@/testing/test-utils"
+import {
+  act,
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender,
+} from "@/testing/test-utils"
 
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
 import { NewHomeLayout } from "./index"
@@ -332,6 +338,27 @@ describe("NewHomeLayout", () => {
       expect(screen.getByLabelText("Expand widgets panel")).toBeInTheDocument()
       expect(screen.getByText("08:00")).toBeInTheDocument()
       expect(clockMounts).toBe(1)
+    })
+
+    /**
+     * The cards have a JOURNEY TO MAKE when the rail collapses: each one scales
+     * down onto its own glyph (`WidgetMotion`'s stow). The panel's one-widget
+     * filter therefore has to wait for the retract to finish — applied on the frame
+     * the collapse begins, as it once was, every card is `display: none` before it
+     * has moved a pixel and the whole animation plays on an empty box.
+     */
+    test("keeps the cards drawn while they retract into the strip", async () => {
+      await renderDeferredRail(1400)
+
+      await userEvent.click(screen.getByLabelText("Collapse widgets panel"))
+
+      // Still in the column's flow, on its way into the glyph.
+      expect(screen.getByText("08:00").closest("[hidden]")).toBeNull()
+
+      // …and handed over to the strip once it has got there.
+      await waitFor(() =>
+        expect(screen.getByText("08:00").closest("[hidden]")).not.toBeNull()
+      )
     })
 
     /**
