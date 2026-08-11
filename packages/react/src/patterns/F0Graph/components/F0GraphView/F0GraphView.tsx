@@ -395,47 +395,25 @@ export function F0GraphView<T = unknown>(
   )
 
   // ── Measured tag block ──
-  // Nodes report what their tags occupy: `full` (every column shown) drives the
-  // reservation, `visible` places what hangs below each card.
+  // Each node reports what its tag block currently occupies, which places what
+  // hangs below THAT card (its connector and expander).
   //
-  // The reservation only ever GROWS. It sets the rank pitch, and every rank in
-  // the graph has to sit on one fixed line — so it cannot depend on which nodes
-  // happen to be rendered. With windowing it otherwise does: panning swaps the
-  // rendered set, a taller node leaves it, the max drops, and the entire layout
-  // slides under the user. Worse, that shift changes which nodes are windowed,
-  // so the two feed each other.
-  //
-  // Ratcheting up is the price. It converges after the tallest node has been
-  // seen once and never oscillates, which is what "each generation on its own
-  // line" needs. It resets when the graph is remounted for a new dataset.
-  const tagHeightsRef = useRef(
-    new Map<string, { visible: number; full: number }>()
-  )
-  const maxFullRef = useRef(0)
-  const [measuredTagRowHeight, setMeasuredTagRowHeight] = useState<
-    number | undefined
-  >(undefined)
+  // Nothing here feeds the rank pitch. That is deliberate: these reports only
+  // ever cover the nodes React Flow has rendered, and with windowing plus lazy
+  // hydration that is a moving slice of the graph. A maximum taken across them
+  // would climb every time a pan revealed a taller node, shifting every rank —
+  // and the shift changes which nodes are windowed, so the two feed each other.
+  // The reservation is counted from the declared tag columns instead.
+  const tagHeightsRef = useRef(new Map<string, number>())
   const [visibleTagHeights, setVisibleTagHeights] = useState<
     ReadonlyMap<string, number>
   >(new Map())
-  const reportTagRowHeight = useCallback(
-    (id: string, heights: { visible: number; full: number }) => {
-      const store = tagHeightsRef.current
-      const prev = store.get(id)
-      if (prev?.visible === heights.visible && prev?.full === heights.full)
-        return
-      store.set(id, heights)
-
-      if (heights.full > maxFullRef.current) {
-        maxFullRef.current = heights.full
-        setMeasuredTagRowHeight(heights.full)
-      }
-      const visible = new Map<string, number>()
-      for (const [key, value] of store) visible.set(key, value.visible)
-      setVisibleTagHeights(visible)
-    },
-    []
-  )
+  const reportTagRowHeight = useCallback((id: string, height: number) => {
+    const store = tagHeightsRef.current
+    if (store.get(id) === height) return
+    store.set(id, height)
+    setVisibleTagHeights(new Map(store))
+  }, [])
 
   // ── React Flow render model (layout + anchor + rf nodes/edges) ──
   const {
@@ -456,9 +434,7 @@ export function F0GraphView<T = unknown>(
     resolvedEdgesProp,
     stableRenderNode,
     nodeTagTypes,
-    visibleTagTypesSet,
     reserveTagRow,
-    measuredTagRowHeight,
     visibleTagHeights,
     nodeWidthProp,
     nodeHeightProp,

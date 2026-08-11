@@ -135,40 +135,32 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0
 
-    // Two measurements, for two different jobs.
+    // Reports how tall this node's tag block is RIGHT NOW. Everything hanging
+    // below the card — the outgoing edge, the expander — anchors to it, so
+    // hiding columns lengthens the connector instead of leaving a blank band.
     //
-    // `full` is what the block would take with EVERY column shown. The layout
-    // reserves that, so the rank pitch is the "all open" one and stays put
-    // whatever the user toggles — nodes never shuffle. It cannot be computed:
-    // rows come from wrapping inside a fixed max-width, so they depend on this
-    // node's label widths. Hence the hidden mirror further down, which renders
-    // the unfiltered set for no reason other than to be measured.
-    //
-    // `visible` is what is on screen right now. Everything hanging below the
-    // card — the outgoing edge, the expander — anchors to that, so hiding
-    // columns lengthens the connector instead of leaving a blank band.
+    // Strictly a per-node number. The rank pitch is NOT derived from it: with
+    // windowing and lazy hydration only a slice of the graph is ever measured,
+    // so any cross-node maximum taken from these reports would keep rising as
+    // the user pans and drag the whole layout with it. The reservation is
+    // counted from the declared columns instead (see `useGraphRenderModel`).
     const tagsRef = useRef<HTMLDivElement | null>(null)
-    const fullTagsRef = useRef<HTMLDivElement | null>(null)
     const reportTagRowHeight = renderCfg?.reportTagRowHeight
     useEffect(() => {
       if (!reportTagRowHeight || !nodeId) return
       // `offsetHeight`, never `getBoundingClientRect`: nodes live inside React
       // Flow's viewport, which is CSS-transformed by the current zoom. A rect
       // reports the SCALED height, so at any zoom but 1 the reported block —
-      // and with it the reserved box and the connector anchor — comes out
-      // multiplied by the zoom factor. `offsetHeight` is layout px, immune to
-      // the transform, which is the number the layout actually works in.
+      // and with it the connector anchor — comes out multiplied by the zoom
+      // factor. `offsetHeight` is layout px, immune to the transform, which is
+      // the number the layout actually works in.
       const report = () =>
-        reportTagRowHeight(nodeId, {
-          visible: tagsRef.current?.offsetHeight ?? 0,
-          full: fullTagsRef.current?.offsetHeight ?? 0,
-        })
+        reportTagRowHeight(nodeId, tagsRef.current?.offsetHeight ?? 0)
       report()
       const observer = new ResizeObserver(report)
       if (tagsRef.current) observer.observe(tagsRef.current)
-      if (fullTagsRef.current) observer.observe(fullTagsRef.current)
       return () => observer.disconnect()
-    }, [reportTagRowHeight, nodeId, tagsVisible, filteredTags, tags])
+    }, [reportTagRowHeight, nodeId, tagsVisible, filteredTags])
 
     // The hover card only makes sense in the compacted modes, where part of the
     // node's info is not on screen. In detail everything is already visible, so
@@ -462,25 +454,6 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           >
             <F0GraphNodeTags tags={filteredTags!} />
           </motion.div>
-        )}
-
-        {/* Hidden mirror of the UNFILTERED tag set, rendered only to be
-            measured (see the two-measurement note above). The layout reserves
-            the "all columns open" height so toggling metadata never moves a
-            node, and that height is unknowable without laying the full set out
-            at the real width — wrapping depends on the label text.
-
-            Taken out of flow and left unpainted, so it costs a layout pass and
-            nothing else: no paint, no hit-testing, and `aria-hidden` keeps the
-            duplicate labels out of the accessibility tree. */}
-        {isDetail && reportTagRowHeight && tags && tags.length > 0 && (
-          <div
-            aria-hidden
-            className="pointer-events-none invisible absolute max-w-[256px]"
-            ref={fullTagsRef}
-          >
-            <F0GraphNodeTags tags={tags} />
-          </div>
         )}
       </div>
     )

@@ -71,13 +71,7 @@ interface UseGraphRenderModelOptions<T> {
     ctx: F0GraphNodeRenderContext
   ) => ReactNode
   nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
-  visibleTagTypesSet: Set<F0GraphNodeTagColumn>
   reserveTagRow?: boolean
-  /**
-   * Tallest "all columns open" tag block reported by the rendered nodes, in px.
-   * Drives the reservation, so the rank pitch never moves as columns toggle.
-   */
-  measuredTagRowHeight?: number
   /** Per-node height of the tag block CURRENTLY on screen, in px. */
   visibleTagHeights?: ReadonlyMap<string, number>
   nodeWidthProp?: number
@@ -133,9 +127,7 @@ export function useGraphRenderModel<T>({
   resolvedEdgesProp,
   stableRenderNode,
   nodeTagTypes,
-  visibleTagTypesSet,
   reserveTagRow,
-  measuredTagRowHeight,
   visibleTagHeights,
   nodeWidthProp,
   nodeHeightProp,
@@ -280,36 +272,37 @@ export function useGraphRenderModel<T>({
   // ── Layout edges: include expander edges so the engine sees the full graph ──
   const layoutEdges = useMemo(() => visibleEdges, [visibleEdges])
 
-  // The tag row only contributes to layout when the consumer opts into the
-  // popover (`nodeTagTypes`) and at least one type is currently visible, or
-  // when `reserveTagRow` is explicitly set (e.g. tags rendered via
-  // `renderNode` without using the popover). Inflating the box otherwise
-  // would push the source handle and the expander below the pill.
+  // The tag row only contributes to layout when the consumer declares columns
+  // (`nodeTagTypes`), or when `reserveTagRow` is explicitly set (e.g. tags
+  // rendered via `renderNode` without using the popover). Inflating the box
+  // otherwise would push the source handle and the expander below the pill.
   //
-  // A consumer that hard-codes `reserveTagRow` (as the Data Collection graph
-  // does whenever a `tags` mapper exists) must still collapse when every column
-  // is toggled off — otherwise hiding them all leaves the block of empty canvas
-  // the tags used to occupy. So the visible-count gate wins whenever the toggle
-  // UI exists; `reserveTagRow` only decides the case with no columns declared.
-  // Declaring tag columns is what reserves the room — not how many are visible
-  // right now. The box is sized for the fully-open block so the rank pitch is
-  // constant and toggling metadata cannot move a node; the currently hidden
-  // rows simply become connector length (see `contentHeightOf`).
+  // Declaring the columns is what reserves the room — not how many happen to be
+  // visible right now. The box is sized for the fully-open block so the rank
+  // pitch is constant and toggling metadata cannot move a node; the currently
+  // hidden rows simply become connector length (see `contentHeightOf`).
   const tagsAffectLayout =
     nodeTagTypes && nodeTagTypes.length > 0 ? true : (reserveTagRow ?? false)
-  // How much room the tags take is a DOM question, not an arithmetic one: rows
-  // come from wrapping, which depends on each node's label widths. The nodes
-  // measure themselves and report (see `reportTagRowHeight`); the tallest wins,
-  // since one layout height is shared by every node. Until the first report
-  // lands, fall back to the old count-based estimate so the first paint is not
-  // visibly wrong.
-  const visibleTagCount = nodeTagTypes ? visibleTagTypesSet.size : 1
-  const estimatedTagHeight =
-    Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW)) *
-    TAG_ROW_HEIGHT
+  // The reservation is arithmetic — derived from how many tag columns the
+  // consumer DECLARED — and deliberately never measured from the DOM.
+  //
+  // Measuring the tallest rendered node looks correct and is not: a graph with
+  // node windowing only ever renders a slice, and a graph with lazy hydration
+  // only knows a node's labels once it has been fetched. The true tallest node
+  // is therefore undiscoverable at first paint, and every pan that reveals a
+  // taller one raises the reservation, which changes the rank pitch, which
+  // slides every generation off its line. Ratcheting the max only converts that
+  // oscillation into a one-way creep; it does not make the pitch fixed.
+  //
+  // Counting declared columns is knowable before a single node renders, so the
+  // pitch is final on frame one and identical for every viewport, hydration
+  // state and toggle combination.
+  const declaredTagCount = nodeTagTypes ? nodeTagTypes.length : 1
   const tagBlockHeight = !tagsAffectLayout
     ? 0
-    : (measuredTagRowHeight ?? estimatedTagHeight) + TAG_ROW_GAP
+    : Math.max(1, Math.ceil(declaredTagCount / ESTIMATED_TAGS_PER_ROW)) *
+        TAG_ROW_HEIGHT +
+      TAG_ROW_GAP
 
   // Reserve the "all columns open" block, never the currently visible one. The
   // rank pitch is then the widest case the graph can ever need, so toggling
@@ -329,15 +322,20 @@ export function useGraphRenderModel<T>({
   // inside the box sets the rank pitch, but the edge still left from the exact
   // bottom of the tags and read as touching the last chip.
   //
-  // Bounded by the box by construction — the visible block is never taller than
-  // the fully-open one it was reserved from — so the anchor lands at the box
-  // bottom at most, never past the next rank.
+  // Clamped to the box: the reservation is an estimate of how the chips wrap,
+  // so a node whose labels wrap onto an extra row would otherwise anchor its
+  // connector past the next rank. Clamping keeps the invariant that a node
+  // never grows beyond its lane — that node's last chip row sits closer to the
+  // connector than the clearance would like, which is a cosmetic cost paid by
+  // the outlier instead of a layout shift paid by every node.
   const contentHeightOf = (id: string): number => {
     const base = nodeHeightProp ?? 56
     const visible = visibleTagHeights?.get(id) ?? 0
-    return visible > 0
-      ? base + visible + TAG_ROW_GAP + TAG_BLOCK_CLEARANCE
-      : base
+    if (visible <= 0) return base
+    return Math.min(
+      base + visible + TAG_ROW_GAP + TAG_BLOCK_CLEARANCE,
+      effectiveNodeHeight
+    )
   }
 
   const builtInEngine = useLayoutEngine({
