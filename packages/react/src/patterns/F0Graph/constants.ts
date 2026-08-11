@@ -22,6 +22,15 @@ export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
 // reserved box and to the connector anchor.
 export const TAG_BLOCK_CLEARANCE = 32
 
+// Where a connector makes its horizontal run, measured UP from the target rank.
+// Fixed rather than the midpoint between the two nodes, so every bus in a rank
+// lands in the same band no matter how tall each parent is — a parent showing
+// three chip rows would otherwise push its own bus down and break the grid.
+export const EDGE_BUS_OFFSET = 48
+// Vertical stem kept below the source before the run turns, so a short
+// connector does not corner straight out of the node it just left.
+export const EDGE_MIN_STEM = 16
+
 // Canvas background dot spacing. Shared with the layout engine so node
 // columns/rows snap onto the dot grid (nodes "squared" with the dots).
 export const BACKGROUND_DOT_GAP = 32
