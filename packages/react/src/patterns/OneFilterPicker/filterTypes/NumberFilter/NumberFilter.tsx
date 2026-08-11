@@ -44,6 +44,19 @@ export type NumberFilterComponentProps = FilterTypeComponentProps<
   isCompactMode?: boolean
 }
 
+// The initial mode comes from the first entry in `modes` (defaulting to
+// "single"). Seeding the matching empty value lets a filter locked to
+// `modes: ["range"]` render both range inputs from the start. An empty range is
+// `isEmpty`, so it still adds no chip and applies no constraint.
+const emptyValueForMode = (mode: "single" | "range"): NumberFilterValue =>
+  mode === "range"
+    ? {
+        mode: "range",
+        from: { value: undefined, closed: true },
+        to: { value: undefined, closed: true },
+      }
+    : { mode: "single", value: undefined }
+
 /**
  * A number filter component that provides number input.
  */
@@ -69,14 +82,11 @@ export function NumberFilter({
     options.modes === undefined || options.modes?.length > 1
 
   const [localValue, setLocalValue] = useState<NumberFilterValue>(
-    value ?? {
-      mode: "single",
-      value: undefined,
-    }
+    value ?? emptyValueForMode(options.mode)
   )
 
   useDeepCompareEffect(() => {
-    setLocalValue(value)
+    setLocalValue(value ?? emptyValueForMode(options.mode))
   }, [value])
 
   const handleModeChange = (checked: boolean) => {
