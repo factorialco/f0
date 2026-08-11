@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.18.0](https://github.com/factorialco/f0/compare/f0-react-v6.17.0...f0-react-v6.18.0) (2026-08-11)
+
+
+### Features
+
+* **ClockInControls:** add horizontal-bar variant ([#5074](https://github.com/factorialco/f0/issues/5074)) ([11855e7](https://github.com/factorialco/f0/commit/11855e778458f306f8a97e94cd094de452ee4769))
+
 ## [6.17.0](https://github.com/factorialco/f0/compare/f0-react-v6.16.4...f0-react-v6.17.0) (2026-08-11)
 
 
