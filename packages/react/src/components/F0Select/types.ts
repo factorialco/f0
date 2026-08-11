@@ -94,19 +94,10 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
 export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
   T,
   R
-> &
+> & // Single select not clearable
   (
-  /**
-   * Single select, then multiple.
-   *
-   * `clearable` is a plain boolean on the single-select member. It used to be two
-   * members here — `clearable?: false` and `clearable: true` — that were
-   * otherwise IDENTICAL, so a computed `clearable={!required}` matched neither
-   * and every such call site had to cast. Nothing else about single select
-   * changes with it, so there was nothing for a second member to say.
-   */
-  | {
-        clearable?: boolean
+    | {
+        clearable?: false
         multiple?: false
         value?: T
         defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
@@ -116,6 +107,19 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
           option?: F0SelectItemObject<T, ResolvedRecordType<R>>
         ) => void
         /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
+        onSelectItems?: never
+      }
+    // Single select clearable
+    | {
+        clearable: true
+        multiple?: false
+        value?: T
+        defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
+        onChange?: (
+          value: T,
+          originalItem?: ResolvedRecordType<R> | undefined,
+          option?: F0SelectItemObject<T, ResolvedRecordType<R>>
+        ) => void
         onSelectItems?: never
       }
     // Multiple select

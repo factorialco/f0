@@ -196,7 +196,14 @@ export function TreeSelector({
     size: "sm" as const,
     showSearchBox: true,
     searchBoxPlaceholder: searchPlaceholder,
-    clearable: !required,
+    // `F0Select` splits `clearable` across two union members (`?: false` and
+    // `: true`), so a computed boolean matches neither and the call site needs a
+    // literal. Asserted here on purpose: collapsing that public type would have
+    // rippled through every export built on select props — `SelectProps`,
+    // `BreadcrumbSelect`, `Breadcrumbs`, `PageHeader` — and widening a shared
+    // type to spare one line here is the wrong trade. Only truthiness is read
+    // downstream, so the runtime value is exactly what it says it is.
+    clearable: !required as true,
     value,
     onChange,
     // Clearing goes through `onChangeSelectedOption`, not `onChange` — the empty
