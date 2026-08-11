@@ -97,7 +97,7 @@ export const ChatTypingBubble = ({
     <motion.div
       role="status"
       aria-label={label}
-      className={cn("flex w-full items-end gap-2", spacingClass)}
+      className={cn("flex w-full items-end gap-0.5", spacingClass)}
       initial={reducedMotion || !entryFresh ? false : { opacity: 0 }}
       animate={leaving ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.14, ease: EASE_OUT_SWIFT }}

@@ -69,11 +69,11 @@ export const ChatMessageAttachments = ({
     voices.length > 0 ||
     captionBelow ||
     !isLastOfRun
-  const imageCorners = bubbleCornerClass(
+  const imageCorners = bubbleCornerClass({
     isMine,
     isFirstOfRun,
-    locations.length === 0 && !belowImages
-  )
+    isLastOfRun: locations.length === 0 && !belowImages,
+  })
   const belowVideos =
     locations.length > 0 ||
     voices.length > 0 ||
@@ -81,47 +81,50 @@ export const ChatMessageAttachments = ({
     captionBelow ||
     !isLastOfRun
   const videoCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun && images.length === 0 && index === 0,
-      index === videoFiles.length - 1 && !belowVideos
-    )
+      isFirstOfRun: isFirstOfRun && images.length === 0 && index === 0,
+      isLastOfRun: index === videoFiles.length - 1 && !belowVideos,
+    })
   const belowLocations =
     voices.length > 0 || nonVideoFileCount > 0 || captionBelow || !isLastOfRun
   const locationCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun &&
+      isFirstOfRun:
+        isFirstOfRun &&
         images.length === 0 &&
         videoFiles.length === 0 &&
         index === 0,
-      index === locations.length - 1 && !belowLocations
-    )
+      isLastOfRun: index === locations.length - 1 && !belowLocations,
+    })
   // Voice notes stack after the locations, before the files/caption.
   const belowVoices = nonVideoFileCount > 0 || captionBelow || !isLastOfRun
   const voiceCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun &&
+      isFirstOfRun:
+        isFirstOfRun &&
         images.length === 0 &&
         videoFiles.length === 0 &&
         locations.length === 0 &&
         index === 0,
-      index === voices.length - 1 && !belowVoices
-    )
+      isLastOfRun: index === voices.length - 1 && !belowVoices,
+    })
   // Document cards stack after the voices, before the plain files/caption.
   const belowDocuments = plainFiles.length > 0 || captionBelow || !isLastOfRun
   const documentCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun &&
+      isFirstOfRun:
+        isFirstOfRun &&
         images.length === 0 &&
         videoFiles.length === 0 &&
         locations.length === 0 &&
         voices.length === 0 &&
         index === 0,
-      index === documentFiles.length - 1 && !belowDocuments
-    )
+      isLastOfRun: index === documentFiles.length - 1 && !belowDocuments,
+    })
 
   return (
     <div

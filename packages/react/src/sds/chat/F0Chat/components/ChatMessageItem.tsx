@@ -91,7 +91,7 @@ export const ChatMessageItem = ({
           {bubbleGutter}
           <div
             className={cn(
-              "flex min-w-0 items-center",
+              "flex min-w-0 items-center gap-0.5",
               isMine ? "flex-row-reverse" : "flex-row"
             )}
           >
@@ -101,14 +101,19 @@ export const ChatMessageItem = ({
               className={cn(
                 // Match the bubble's chained corners so the highlight ring and
                 // hover surface follow its exact shape (not a fixed 2xl box).
-                bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun, true),
+                bubbleCornerClass({
+                  isMine,
+                  isFirstOfRun,
+                  isLastOfRun,
+                  layer: "outer",
+                }),
                 // Shadow AND radius transition together (single property list —
                 // tailwind-merge would otherwise drop one): the jump-to ring
                 // fades instead of snapping, and a run extending animates the
                 // tail corner. `min-w-0` lets this flex item shrink below its
                 // content's intrinsic width so the reply quote's single line
                 // truncates instead of forcing the bubble wider than the column.
-                "p-1 flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
+                "p-0.5 flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200 motion-reduce:transition-none",
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and
@@ -116,7 +121,7 @@ export const ChatMessageItem = ({
                 highlighted &&
                   "ring-1 ring-f1-special-ring ring-offset-2 ring-offset-f1-background",
                 !message.deleted &&
-                  "group-hover:bg-f1-background-hover focus-within:bg-f1-background-hover",
+                  "group-hover:bg-f1-background-secondary focus-within:bg-f1-background-secondary",
                 actionsOpen && "bg-f1-background-hover"
               )}
             >

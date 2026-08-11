@@ -15,6 +15,30 @@ import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
 
+type BubbleCornerLayer = "inner" | "outer"
+
+interface BubbleCornerOptions {
+  isMine: boolean
+  isFirstOfRun: boolean
+  isLastOfRun: boolean
+  layer?: BubbleCornerLayer
+}
+
+const bubbleCornerClasses = {
+  inner: {
+    base: "rounded-2xl",
+    left: ["rounded-tl-sm", "rounded-bl-sm"],
+    right: ["rounded-tr-sm", "rounded-br-sm"],
+  },
+  outer: {
+    // The interaction surface wraps the bubble with 2px of padding. Adding
+    // those 2px to both inner radii (20px/8px) keeps the curves concentric.
+    base: "rounded-[22px]",
+    left: ["rounded-tl-[10px]", "rounded-bl-[10px]"],
+    right: ["rounded-tr-[10px]", "rounded-br-[10px]"],
+  },
+} as const
+
 /**
  * Border-radius classes for a chat bubble given its position in a same-author
  * run: on the tail side, a corner tucks in only when it abuts another bubble
@@ -22,20 +46,24 @@ import { ReplyQuote } from "./ReplyQuote"
  * Exported so the highlight ring / hover surface in `ChatMessageItem` can follow
  * the exact same shape as the bubble it wraps.
  */
-export const bubbleCornerClass = (
-  isMine: boolean,
-  isFirstOfRun: boolean,
-  isLastOfRun: boolean,
-  isExterior?: boolean
-): string =>
-  cn(
+export const bubbleCornerClass = ({
+  isMine,
+  isFirstOfRun,
+  isLastOfRun,
+  layer = "inner",
+}: BubbleCornerOptions): string => {
+  const profile = bubbleCornerClasses[layer]
+  const [topTailCorner, bottomTailCorner] = profile[isMine ? "right" : "left"]
+
+  return cn(
     // The radius transitions because extending a run flips the previous
     // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
-    isExterior ? "rounded-3xl" : "rounded-2xl",
-    "transition-[border-radius] duration-150",
-    !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
-    !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
+    profile.base,
+    "transition-[border-radius] duration-150 motion-reduce:transition-none",
+    !isFirstOfRun && topTailCorner,
+    !isLastOfRun && bottomTailCorner
   )
+}
 
 /** A single message bubble. In groups the sender's name is the first line
  * (hover-carded); a reply quote, when present, is nested above the body.
@@ -110,7 +138,11 @@ const ChatBubbleImpl = ({
     [message.body, mentionTokens, message.linkPreviews]
   )
 
-  const corners = bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun)
+  const corners = bubbleCornerClass({
+    isMine,
+    isFirstOfRun,
+    isLastOfRun,
+  })
 
   if (message.deleted) {
     // The branch switch remounts this root, so `initial` applies on a live

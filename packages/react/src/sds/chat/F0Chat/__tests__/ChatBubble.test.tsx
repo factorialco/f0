@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { ChatBubble } from "../components/ChatBubble"
+import { bubbleCornerClass, ChatBubble } from "../components/ChatBubble"
 import { type F0ChatMessage } from "../types"
 import {
   senderBubbleColorClass,
@@ -112,6 +112,37 @@ describe("ChatBubble sender colour", () => {
 })
 
 describe("ChatBubble chained corners", () => {
+  it("keeps the outer interaction surface concentric with either tail side", () => {
+    expect(
+      bubbleCornerClass({
+        isMine: false,
+        isFirstOfRun: false,
+        isLastOfRun: false,
+        layer: "outer",
+      }).split(" ")
+    ).toEqual(
+      expect.arrayContaining([
+        "rounded-[22px]",
+        "rounded-tl-[10px]",
+        "rounded-bl-[10px]",
+      ])
+    )
+    expect(
+      bubbleCornerClass({
+        isMine: true,
+        isFirstOfRun: false,
+        isLastOfRun: false,
+        layer: "outer",
+      }).split(" ")
+    ).toEqual(
+      expect.arrayContaining([
+        "rounded-[22px]",
+        "rounded-tr-[10px]",
+        "rounded-br-[10px]",
+      ])
+    )
+  })
+
   it("keeps all corners rounded for a lone message (others, left)", () => {
     const { container } = render(
       <ChatBubble message={makeMessage("hi")} isMine={false} />
