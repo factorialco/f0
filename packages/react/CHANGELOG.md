@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.17.0](https://github.com/factorialco/f0/compare/f0-react-v6.16.4...f0-react-v6.17.0) (2026-08-11)
+
+
+### Features
+
+* **chat:** improve identity, navigation and scroll ([#4985](https://github.com/factorialco/f0/issues/4985)) ([bbe7b9f](https://github.com/factorialco/f0/commit/bbe7b9f9c8fb44a9df403282bc8adaabbf9928ac))
+
 ## [6.16.4](https://github.com/factorialco/f0/compare/f0-react-v6.16.3...f0-react-v6.16.4) (2026-08-11)
 
 
