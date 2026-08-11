@@ -6,6 +6,7 @@ import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { cn } from "@/lib/utils"
 
 import { ClockInGraph, ClockInGraphProps } from "../ClockInGraph"
 import { getLabels } from "../ClockInGraph/helpers"
@@ -35,6 +36,27 @@ interface BreakType {
  * state machine and use the same controls — only their arrangement differs.
  */
 export type ClockInControlsVariant = "default" | "horizontal-bar"
+
+/**
+ * Drops a picker's field FILL so whatever the tile sits on shows through; its
+ * border still draws the field.
+ *
+ * This tile lives on a Home widget card, and that card is TRANSLUCENT
+ * (`bg-f1-background-inverse-secondary`, 5% white over the page in dark, 60% in
+ * light) while an F0 field paints an opaque `bg-f1-background` — the page's own
+ * colour. Two opaque fields on a see-through card read as darker (or whiter)
+ * rectangles than the card itself, which is why this widget looked like it had a
+ * different background from its neighbours. Nothing else in the rail puts an
+ * opaque surface inside a card.
+ *
+ * AD HOC on purpose, and it shows: it hooks the field wrapper by `data-testid`,
+ * because `F0Select`'s `className` goes to the dropdown rather than the trigger,
+ * so there is no honest handle for this yet. The general fix is a surface-only
+ * variant on `F0InputField` (bordered, no fill) exposed through `F0Select`, which
+ * every field-inside-a-widget would want — a Foundations change, not this PR's.
+ */
+const FIELD_WITHOUT_FILL =
+  "[&_[data-testid=input-field-wrapper]]:bg-transparent"
 
 /** Everything both variants take, on the same terms. */
 interface ClockInControlsBaseProps {
@@ -479,11 +501,24 @@ export function ClockInControls({
   // rather than widening its box.
   const showLocation = canShowLocation && !!locationControl
   const showProject = canShowProject && !!projectControl
+  // The fill is dropped only while a picker is live: once the day is open they
+  // are disabled, and that greyed fill is the only cue saying so.
   const locationSlot = showLocation ? (
-    <div className="flex min-w-0 flex-1 flex-row">{locationControl}</div>
+    <div
+      className={cn(
+        "flex min-w-0 flex-1 flex-row",
+        canSelectLocation && FIELD_WITHOUT_FILL
+      )}
+    >
+      {locationControl}
+    </div>
   ) : null
   const projectSlot = showProject ? (
-    <div className="min-w-0 flex-1">{projectControl}</div>
+    <div
+      className={cn("min-w-0 flex-1", canSelectProject && FIELD_WITHOUT_FILL)}
+    >
+      {projectControl}
+    </div>
   ) : null
 
   // WHICH PICKER SHARES THE ACTIONS' LINE. One picker always does — that line is
