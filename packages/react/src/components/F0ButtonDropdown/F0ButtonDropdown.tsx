@@ -163,7 +163,8 @@ const SplitMode = ({
           aria-label={selectedItem.label}
           prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
           className="rounded-r-none after:rounded-r-none disabled:opacity-100"
-          tooltip={tooltip}
+          // Same as dropdown mode: what this control is, then what is chosen.
+          tooltip={{ label: tooltip, description: selectedItem.label }}
           appendOutside={
             <DropdownInternal
               items={dropdownItems}
@@ -215,6 +216,7 @@ const SplitMode = ({
 const DropdownMode = ({
   onClick,
   trigger,
+  value,
   items: rawItems,
   size,
   variant,
@@ -224,6 +226,7 @@ const DropdownMode = ({
 }: {
   onClick: (value: string, item: ButtonDropdownItem<string>) => void
   trigger?: string
+  value?: string
   items:
     | ButtonDropdownItem<string>[]
     | ButtonDropdownGroup<string>[]
@@ -245,7 +248,26 @@ const DropdownMode = ({
     return items.flatMap((item) => item.items)
   }, [items])
 
-  const triggerLabel = trigger || flattenedItems[0]?.label
+  // What `value` names, if anything — the trigger then shows that item, exactly
+  // as split mode's main button does.
+  const selectedItem = useMemo(
+    () => flattenedItems.find((item) => item.value === value),
+    [value, flattenedItems]
+  )
+
+  const triggerLabel =
+    trigger || selectedItem?.label || flattenedItems[0]?.label
+
+  /**
+   * On hover: which control this is, then what is chosen in it — the same
+   * two-line shape `F0Select`'s trigger tooltip has (`tooltip` bold on top, the
+   * selection under it). Either half alone is fine: with nothing selected the
+   * tooltip stays what the consumer passed, and without a `tooltip` the selection
+   * speaks for itself.
+   */
+  const triggerTooltip = selectedItem
+    ? { label: tooltip, description: selectedItem.label }
+    : tooltip
 
   const dropdownItems = useMemo(
     () =>
@@ -288,11 +310,12 @@ const DropdownMode = ({
         loading={loading}
         data-testid="button-dropdown-trigger"
         aria-label={triggerLabel}
+        prepend={selectedItem?.icon && <F0Icon icon={selectedItem.icon} />}
         append={
           <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
         }
         pressed={isOpen && !disabled}
-        tooltip={tooltip}
+        tooltip={triggerTooltip}
       >
         {triggerLabel}
       </Action>
@@ -308,6 +331,7 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
       <DropdownMode
         onClick={props.onClick}
         trigger={"trigger" in props ? props.trigger : undefined}
+        value={"value" in props ? props.value : undefined}
         items={props.items}
         size={props.size}
         variant={props.variant}

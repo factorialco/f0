@@ -94,10 +94,19 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
 export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
   T,
   R
-> & // Single select not clearable
+> &
   (
-    | {
-        clearable?: false
+  /**
+   * Single select, then multiple.
+   *
+   * `clearable` is a plain boolean on the single-select member. It used to be two
+   * members here — `clearable?: false` and `clearable: true` — that were
+   * otherwise IDENTICAL, so a computed `clearable={!required}` matched neither
+   * and every such call site had to cast. Nothing else about single select
+   * changes with it, so there was nothing for a second member to say.
+   */
+  | {
+        clearable?: boolean
         multiple?: false
         value?: T
         defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
@@ -107,19 +116,6 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
           option?: F0SelectItemObject<T, ResolvedRecordType<R>>
         ) => void
         /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
-        onSelectItems?: never
-      }
-    // Single select clearable
-    | {
-        clearable: true
-        multiple?: false
-        value?: T
-        defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
-        onChange?: (
-          value: T,
-          originalItem?: ResolvedRecordType<R> | undefined,
-          option?: F0SelectItemObject<T, ResolvedRecordType<R>>
-        ) => void
         onSelectItems?: never
       }
     // Multiple select
@@ -218,6 +214,15 @@ export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
   value: T
   label: string
+  /**
+   * What the TRIGGER shows once this item is selected, when that has to differ
+   * from the row's own `label`. The row is read in the context the list gives it
+   * — under a group header, beside its siblings — and the trigger has none of
+   * that, so a label that is clear in the list can be ambiguous on its own
+   * ("Tokens", once the "Design system" header is gone). Give the trigger the
+   * full path there and leave the row short. Defaults to `label`.
+   */
+  selectedLabel?: string
   description?: string
   /** Short token shown next to the label (e.g. a dial code) */
   metadata?: F0SelectItemMetadata

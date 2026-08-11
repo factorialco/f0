@@ -1,8 +1,15 @@
 import { Cell, Pie, PieChart } from "recharts"
 
 import { getLabels, normalizeData } from "./helpers"
+import { HorizontalBar } from "./HorizontalBar"
 
 export type ClockInStatus = "clocked-in" | "break" | "clocked-out"
+
+/**
+ * The geometry the day is drawn in. Same segments, same colours, same
+ * `normalizeData` either way — only the shape differs.
+ */
+export type ClockInGraphVariant = "ring" | "horizontal-bar"
 
 export interface ClockInGraphProps {
   trackedMinutes?: number
@@ -10,8 +17,23 @@ export interface ClockInGraphProps {
     from: Date
     to: Date
     variant: ClockInStatus
+    /**
+     * What this stretch of the day WAS, beyond its state — which break, which
+     * task. The `horizontal-bar` geometry surfaces it on hover, which is the only
+     * place a past stretch gets named once you've moved on from it. The ring has
+     * nowhere to put it and ignores it.
+     */
+    label?: string
   }[]
   remainingMinutes?: number
+  /**
+   * - `ring` — the 160px dial, with the running total and the day's two ends
+   *   inside it.
+   * - `horizontal-bar` — the same day as a full-width 6px rail, and nothing
+   *   else: a line that thin has nowhere to put the numbers, so in this variant
+   *   the layout around it carries them (see `ClockInControls`).
+   */
+  variant?: ClockInGraphVariant
 }
 
 export const CLOCK_IN_COLORS = {
@@ -26,12 +48,17 @@ export function ClockInGraph({
   data = [],
   trackedMinutes = 0,
   remainingMinutes,
+  variant = "ring",
 }: ClockInGraphProps) {
   const normalizedData = normalizeData({
     data,
     trackedMinutes,
     remainingMinutes,
   })
+
+  if (variant === "horizontal-bar") {
+    return <HorizontalBar segments={normalizedData} />
+  }
 
   const { primaryLabel, secondaryLabel, time } = getLabels({
     data,

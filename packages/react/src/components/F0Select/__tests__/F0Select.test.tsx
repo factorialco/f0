@@ -881,6 +881,77 @@ describe("Select", () => {
     ).not.toBeInTheDocument()
   })
 
+  describe("selected item's display", () => {
+    it("shows `selectedLabel` on the trigger while the row keeps its `label`", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          value="option1"
+          options={[
+            {
+              value: "option1",
+              label: "Tokens",
+              selectedLabel: "Tokens — Design system",
+            },
+            { value: "option2", label: "Components" },
+          ]}
+          onChange={() => {}}
+        />
+      )
+
+      // The trigger has no group header or siblings to read "Tokens" against.
+      expect(screen.getByText("Tokens — Design system")).toBeInTheDocument()
+
+      await openSelect(user)
+
+      // The row does, so it stays short.
+      expect(screen.getByText("Tokens")).toBeInTheDocument()
+    })
+
+    describe("hover tooltip", () => {
+      /**
+       * The trigger is WIRED as a tooltip trigger: Radix marks its (asChild)
+       * trigger with `data-state`, and renders the content lazily — so this is
+       * what "there is a tooltip here" looks like before anyone hovers. Opening
+       * it for real needs Radix's 700ms timer, which deadlocks `user.hover`
+       * under fake timers and does not resolve under real ones in jsdom; what the
+       * tooltip SAYS is asserted in `F0Select.triggerTooltip.test.tsx`, against a
+       * stubbed tooltip.
+       */
+      const tooltipWrapper = () =>
+        screen.getByRole("combobox").closest("div[data-state]")
+
+      it("is wired on the trigger when an item is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            value="option1"
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
+      })
+
+      it("is not wired at all when nothing is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        // Nothing selected, nothing to explain.
+        expect(tooltipWrapper()).toBeNull()
+      })
+    })
+  })
+
   describe("asList mode", () => {
     it("preserves selection after searching and clicking an item", async () => {
       const handleChange = vi.fn()

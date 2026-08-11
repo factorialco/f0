@@ -36,7 +36,7 @@ function MultiSelectDisplay({
   selection: F0SelectItemObject<string>[]
   totalSelectedCount: number
 }) {
-  const labels = selection.map((item) => item.label)
+  const labels = selection.map((item) => item.selectedLabel ?? item.label)
   const { allFit, containerRef } = useLabelsOverflow(labels)
 
   if (!allFit) {
@@ -145,7 +145,9 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
           </div>
         )}
         <OneEllipsis tag="span" className="text-left text-f1-foreground">
-          {selectedItem.label}
+          {/* `selectedLabel` when the item carries one: out here there is no
+              group header or sibling to read the row's short label against. */}
+          {selectedItem.selectedLabel ?? selectedItem.label}
         </OneEllipsis>
       </div>
     )
