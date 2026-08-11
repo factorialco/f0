@@ -15,6 +15,16 @@ export type CanvasContentBase = {
   title: string
   description?: string
   toolCallId?: string
+  /**
+   * Render this content as a fullscreen canvas: it fills the frame and covers
+   * the docked chat instead of hugging a seam beside it. For content that is a
+   * step of its own rather than something you work through while talking —
+   * picking a template, say. The chat is only hidden, never closed, so the
+   * conversation is exactly where it was when the canvas is dismissed.
+   *
+   * Defaults to the docked split.
+   */
+  fullscreen?: boolean
 }
 
 /**
