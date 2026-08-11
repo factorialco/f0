@@ -20,6 +20,7 @@ import { Cross, LockLocked } from "@/icons/app"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 
+import { arrivalWindowMs, HomeEntrance, useElapsed } from "../home-motion"
 import { SlotWidget } from "../SlotWidget"
 import { SortableWidget } from "./SortableWidget"
 import {
@@ -145,6 +146,17 @@ export interface WidgetContainerProps {
    * out over the feed from this same container rather than mounting a copy.
    */
   visibleWidgetId?: string | null
+  /**
+   * How this column's widgets ARRIVE: each one fades and rises into place, in
+   * order, one beat after the last (`home-motion`).
+   *
+   * `order` is where the first widget sits in the page's SHARED stagger, so a
+   * column that has freeform content above it can hand over the rhythm instead
+   * of restarting it; `delayMs` holds the whole column back (what makes the side
+   * rail land after the main column). `false` mounts the widgets outright, with
+   * no wrapper of any kind around them.
+   */
+  entrance?: false | { order?: number; delayMs?: number }
   /** Tooltip on a locked widget's lock icon. */
   lockedLabel?: string
   ctx?: HomeRenderCtx
@@ -178,6 +190,7 @@ export function WidgetContainer({
   onClickAddNewWidget,
   onReorder,
   visibleWidgetId,
+  entrance = {},
   lockedLabel = "This widget is mandatory in your company.",
   ctx = {},
   className,
@@ -300,6 +313,36 @@ export function WidgetContainer({
     )
   }
 
+  /**
+   * The arrival is a ONE-SHOT: once the page has landed, a card that mounts is
+   * not arriving, it is just there. Edit mode is why this matters — the sortable
+   * branch is a different tree, so toggling the pencil remounts every card, and
+   * without this the whole column would fade back in each time.
+   */
+  const arrived = useElapsed(
+    arrivalWindowMs(entrance === false ? 0 : entrance.delayMs)
+  )
+  const arriving = entrance !== false && !arrived
+
+  /**
+   * Wraps one block in its arrival. With `entrance` off it hands the block back
+   * untouched — an entrance that is not happening must not leave a box behind,
+   * because that box is the flex item the widget itself would have been.
+   */
+  const enter = (order: number, node: ReactNode, fullHeight?: boolean) =>
+    entrance === false ? (
+      node
+    ) : (
+      <HomeEntrance
+        order={(entrance.order ?? 0) + order}
+        delayMs={entrance.delayMs ?? 0}
+        arriving={arriving}
+        fullHeight={fullHeight}
+      >
+        {node}
+      </HomeEntrance>
+    )
+
   return (
     <div
       className={cn(
@@ -335,10 +378,16 @@ export function WidgetContainer({
                 side === "main" ? "gap-6" : "gap-4"
               )}
             >
-              {widgets.map((widget) => (
+              {widgets.map((widget, order) => (
                 <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
                   <SortableWidget id={widget.id} disabled={widget.locked}>
-                    {(state) => render(widget, state)}
+                    {/* The arrival wrapper sits INSIDE the sortable rather than
+                        around it: dnd-kit measures the element it holds the ref
+                        to, and a transformed ancestor would offset every rect it
+                        reads while a drag is in flight. */}
+                    {(state) =>
+                      enter(order, render(widget, state), widget.fullHeight)
+                    }
                   </SortableWidget>
                 </WidgetSlot>
               ))}
@@ -364,18 +413,21 @@ export function WidgetContainer({
           </DragOverlay>
         </DndContext>
       ) : (
-        widgets.map((widget) => (
+        widgets.map((widget, order) => (
           <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
-            {render(widget)}
+            {enter(order, render(widget), widget.fullHeight)}
           </WidgetSlot>
         ))
       )}
       {/* NOT edit-gated: adding is always on offer — edit mode is for
           arranging and removing what's already there. `disableEdition`
           columns still never offer it. */}
-      {!disableEdition && onClickAddNewWidget ? (
-        <AddWidgetPlaceholder onClick={onClickAddNewWidget} />
-      ) : null}
+      {!disableEdition && onClickAddNewWidget
+        ? enter(
+            widgets.length,
+            <AddWidgetPlaceholder onClick={onClickAddNewWidget} />
+          )
+        : null}
     </div>
   )
 }

@@ -333,5 +333,21 @@ describe("NewHomeLayout", () => {
       expect(screen.getByText("08:00")).toBeInTheDocument()
       expect(clockMounts).toBe(1)
     })
+
+    /**
+     * A HIDDEN container reports `clientWidth` 0 — the same thing the layout sees
+     * before it has measured anything. It must not read that as "no rail yet":
+     * the rail would be dropped and every widget in it built again when the
+     * container came back.
+     */
+    test("a container that reports no width keeps them mounted", async () => {
+      await renderDeferredRail(1400)
+
+      resizeLayoutTo(0)
+      resizeLayoutTo(1400)
+
+      expect(screen.getByText("08:00")).toBeVisible()
+      expect(clockMounts).toBe(1)
+    })
   })
 })
