@@ -153,10 +153,12 @@ describe("failed message", () => {
   // The indicator's label is "Not sent · <send time>".
   const notSent = /^Not sent · /
 
-  it("shows the critical indicator without hover and dims the bubble", () => {
+  it("shows the critical indicator without hover and keeps the bubble legible", () => {
     renderChat(makeRuntime({ messages: [mine("failed")] }))
     expect(screen.getByRole("button", { name: notSent })).toBeInTheDocument()
-    expect(screen.getByText("My message").closest(".opacity-60")).not.toBeNull()
+    expect(
+      screen.getByText("My message").closest(".rounded-2xl")
+    ).not.toHaveClass("opacity-60")
   })
 
   it("labels the indicator with the send time", () => {
@@ -214,9 +216,9 @@ describe("failed message", () => {
     expect(screen.queryByText(/^Sent/)).not.toBeInTheDocument()
   })
 
-  it("dims the bubble and surfaces the alert on a LIVE sending→failed flip", () => {
-    // The flip drives the animated transition (bubble dim + alert pop) — this
-    // asserts the end state; motion resolves instantly under skipAnimations.
+  it("keeps the bubble legible and surfaces the alert on a LIVE sending→failed flip", () => {
+    // The flip drives the animated alert transition while the bubble remains
+    // fully legible; motion resolves instantly under skipAnimations.
     const { rerender } = renderChat(
       makeRuntime({ messages: [mine("sending")] })
     )
@@ -227,7 +229,9 @@ describe("failed message", () => {
       </F0ChatProvider>
     )
     expect(screen.getByRole("button", { name: notSent })).toBeInTheDocument()
-    expect(screen.getByText("My message").closest(".opacity-60")).not.toBeNull()
+    expect(
+      screen.getByText("My message").closest(".rounded-2xl")
+    ).not.toHaveClass("opacity-60")
   })
 })
 

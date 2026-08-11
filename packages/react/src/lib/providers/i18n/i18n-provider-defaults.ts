@@ -533,6 +533,7 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
@@ -658,6 +659,14 @@ export const defaultTranslations = {
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread",
+    },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above",
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below",
     },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",

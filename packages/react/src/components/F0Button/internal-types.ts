@@ -21,6 +21,8 @@ export type ButtonInternalProps = Pick<
   | "fontSize"
 > &
   DataAttributes & {
+    /** Native button behavior. */
+    type?: ButtonType
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
