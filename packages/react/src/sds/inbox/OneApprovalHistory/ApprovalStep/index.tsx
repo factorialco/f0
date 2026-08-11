@@ -24,10 +24,6 @@ export type ApprovalStepProps = {
   approvalsRequired?: number
   status: Status
   approvers: Approver[]
-  /**
-   * Date when the step was resolved (approved or rejected), already formatted
-   * for display. The consumer owns the locale/format.
-   */
   approvalDate?: string
 }
 
