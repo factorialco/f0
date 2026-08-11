@@ -84,36 +84,44 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     critical && "text-f1-foreground-critical"
   )
 
-  // The tooltip only makes sense while disabled (it explains why the action is
-  // unavailable). `TooltipWrapper` is a no-op when the tooltip is undefined and
-  // re-enables pointer events on its trigger, so hover fires even though a
-  // disabled item sets `pointer-events: none`.
-  return (
-    <TooltipWrapper tooltip={disabled ? disabledTooltip : undefined}>
-      <DropdownMenuItem
-        asChild
-        className={cn(itemClass, "cursor-pointer")}
-        disabled={disabled}
-      >
-        {href ? (
-          <Link
-            href={href}
-            className={cn(
-              itemClass,
-              "text-f1-foreground no-underline hover:cursor-pointer"
-            )}
-            {...props}
-          >
-            <DropdownItemContent item={item} />
-          </Link>
-        ) : (
-          <div {...props} className={itemClass}>
-            <DropdownItemContent item={item} />
-          </div>
-        )}
-      </DropdownMenuItem>
-    </TooltipWrapper>
+  const menuItem = (
+    <DropdownMenuItem
+      asChild
+      className={cn(itemClass, "cursor-pointer")}
+      disabled={disabled}
+    >
+      {href ? (
+        <Link
+          href={href}
+          className={cn(
+            itemClass,
+            "text-f1-foreground no-underline hover:cursor-pointer"
+          )}
+          {...props}
+        >
+          <DropdownItemContent item={item} />
+        </Link>
+      ) : (
+        <div {...props} className={itemClass}>
+          <DropdownItemContent item={item} />
+        </div>
+      )}
+    </DropdownMenuItem>
   )
+
+  // A disabled item sets `pointer-events: none`, so it emits NO hover events —
+  // the tooltip must hang off a wrapper span that keeps pointer events and that
+  // the hover passes THROUGH to (same approach as F0FormEditableTable). Only a
+  // disabled item with a tooltip gets the wrapper; every other item renders bare.
+  if (disabled && disabledTooltip) {
+    return (
+      <TooltipWrapper tooltip={disabledTooltip}>
+        <span className="block w-full cursor-not-allowed">{menuItem}</span>
+      </TooltipWrapper>
+    )
+  }
+
+  return menuItem
 }
 
 function renderDropdownItem(
