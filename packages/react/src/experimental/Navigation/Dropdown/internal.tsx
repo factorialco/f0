@@ -8,6 +8,7 @@ import { DataAttributes } from "@/global.types"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
+import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -36,6 +37,13 @@ export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   critical?: boolean
   avatar?: AvatarVariant
   disabled?: boolean
+  /**
+   * Tooltip shown on hover while the item is `disabled` — use it to explain why
+   * the action is unavailable. Ignored when the item is not disabled. The
+   * tooltip trigger re-enables pointer events, so it works despite the disabled
+   * item's `pointer-events: none`.
+   */
+  disabledTooltip?: string
 }
 
 export type DropdownInternalProps = {
@@ -64,6 +72,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     icon: _icon,
     avatar: _avatar,
     description: _description,
+    disabledTooltip,
     href,
     critical,
     disabled,
@@ -75,29 +84,35 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     critical && "text-f1-foreground-critical"
   )
 
+  // The tooltip only makes sense while disabled (it explains why the action is
+  // unavailable). `TooltipWrapper` is a no-op when the tooltip is undefined and
+  // re-enables pointer events on its trigger, so hover fires even though a
+  // disabled item sets `pointer-events: none`.
   return (
-    <DropdownMenuItem
-      asChild
-      className={cn(itemClass, "cursor-pointer")}
-      disabled={disabled}
-    >
-      {href ? (
-        <Link
-          href={href}
-          className={cn(
-            itemClass,
-            "text-f1-foreground no-underline hover:cursor-pointer"
-          )}
-          {...props}
-        >
-          <DropdownItemContent item={item} />
-        </Link>
-      ) : (
-        <div {...props} className={itemClass}>
-          <DropdownItemContent item={item} />
-        </div>
-      )}
-    </DropdownMenuItem>
+    <TooltipWrapper tooltip={disabled ? disabledTooltip : undefined}>
+      <DropdownMenuItem
+        asChild
+        className={cn(itemClass, "cursor-pointer")}
+        disabled={disabled}
+      >
+        {href ? (
+          <Link
+            href={href}
+            className={cn(
+              itemClass,
+              "text-f1-foreground no-underline hover:cursor-pointer"
+            )}
+            {...props}
+          >
+            <DropdownItemContent item={item} />
+          </Link>
+        ) : (
+          <div {...props} className={itemClass}>
+            <DropdownItemContent item={item} />
+          </div>
+        )}
+      </DropdownMenuItem>
+    </TooltipWrapper>
   )
 }
 
