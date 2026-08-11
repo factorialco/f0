@@ -395,13 +395,23 @@ export function F0GraphView<T = unknown>(
   )
 
   // ── Measured tag block ──
-  // Nodes report what their tags actually occupy; the layout shares one height
-  // across every node, so the tallest report is what has to be reserved. Kept
-  // per node so a node shrinking its tags (or leaving the window) releases the
-  // room again, rather than the max ratcheting up for the session.
+  // Nodes report what their tags occupy: `full` (every column shown) drives the
+  // reservation, `visible` places what hangs below each card.
+  //
+  // The reservation only ever GROWS. It sets the rank pitch, and every rank in
+  // the graph has to sit on one fixed line — so it cannot depend on which nodes
+  // happen to be rendered. With windowing it otherwise does: panning swaps the
+  // rendered set, a taller node leaves it, the max drops, and the entire layout
+  // slides under the user. Worse, that shift changes which nodes are windowed,
+  // so the two feed each other.
+  //
+  // Ratcheting up is the price. It converges after the tallest node has been
+  // seen once and never oscillates, which is what "each generation on its own
+  // line" needs. It resets when the graph is remounted for a new dataset.
   const tagHeightsRef = useRef(
     new Map<string, { visible: number; full: number }>()
   )
+  const maxFullRef = useRef(0)
   const [measuredTagRowHeight, setMeasuredTagRowHeight] = useState<
     number | undefined
   >(undefined)
@@ -415,13 +425,13 @@ export function F0GraphView<T = unknown>(
       if (prev?.visible === heights.visible && prev?.full === heights.full)
         return
       store.set(id, heights)
-      let maxFull = 0
-      const visible = new Map<string, number>()
-      for (const [key, value] of store) {
-        if (value.full > maxFull) maxFull = value.full
-        visible.set(key, value.visible)
+
+      if (heights.full > maxFullRef.current) {
+        maxFullRef.current = heights.full
+        setMeasuredTagRowHeight(heights.full)
       }
-      setMeasuredTagRowHeight(maxFull)
+      const visible = new Map<string, number>()
+      for (const [key, value] of store) visible.set(key, value.visible)
       setVisibleTagHeights(visible)
     },
     []
