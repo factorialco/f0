@@ -483,6 +483,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           // transform.
           width: asideWidth,
           justifySelf: "end",
+          // IT BLEEDS THROUGH THE GUTTER, exactly as the main column does: the
+          // negative margin grows its box by the gutter at each end while an equal
+          // padding puts the content back on the line it was on. Two things come
+          // out of that, and the second is why it is here.
+          //
+          // Its clip edge becomes the window's edge, so cards scroll off the
+          // screen instead of stopping short inside the page. And its scroll fade
+          // — which is drawn from the BORDER BOX — lands in the gutter rather than
+          // over the first card, putting it on the same line as the main column's.
+          // Without it the two columns faded at different heights, and the rail
+          // dimmed content that was not going anywhere.
+          //
+          // Only in the column. The floating panel is positioned from `top`, and a
+          // margin there would take it off its glyph.
+          marginTop: -bleed,
+          marginBottom: -bleed,
+          paddingTop: bleed,
+          paddingBottom: bleed,
           ...(rail.mode === "retracting" ? { pointerEvents: "none" } : null),
           ...railFade.style,
         }
