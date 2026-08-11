@@ -328,6 +328,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
             replyTo: replyTo
               ? { id: replyTo.id, author: replyTo.author, body: replyTo.body }
               : undefined,
+            forwardedFrom: input.forwardedFrom,
           },
         ]
       })

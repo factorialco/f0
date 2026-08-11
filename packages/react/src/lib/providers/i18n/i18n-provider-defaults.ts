@@ -592,6 +592,16 @@ export const defaultTranslations = {
     mentionEveryoneDescription: "Notify everyone in this group",
     reply: "Reply",
     react: "Add reaction",
+    // Forwarding a message to another conversation. `forwarded` labels the
+    // non-interactive tag on the forwarded copy (no jump-to-source, unlike a
+    // reply quote — the destination's members may not belong to the origin
+    // conversation).
+    forward: "Forward",
+    forwardTo: "Forward to…",
+    forwarded: "Forwarded",
+    forwardSearchPlaceholder: "Search conversations",
+    forwardNoResults: "No conversations found",
+    forwardConfirm: "Forward",
     download: "Download",
     downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",

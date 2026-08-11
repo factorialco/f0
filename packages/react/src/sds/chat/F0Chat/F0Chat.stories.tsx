@@ -67,6 +67,68 @@ const groupChannel = {
 }
 
 /**
+ * A DM carrying a forwarded message: the non-interactive "Forwarded" tag (no
+ * jump-to-source, unlike a reply quote) plus the original author, above the
+ * body — the destination's members may not belong to the origin conversation.
+ */
+const ForwardedConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 4,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "forwarded-1",
+        author: me,
+        body: "El deck de Q3 ya está listo, revisad la sección de pricing antes del viernes 🙏",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        status: "read",
+        forwardedFrom: {
+          id: "orig-1",
+          author: anaG,
+          body: "El deck de Q3 ya está listo, revisad la sección de pricing antes del viernes 🙏",
+          channelTitle: "Product Team",
+        },
+      },
+      {
+        // Attachment-only (no caption): renders no bubble, so the "Forwarded"
+        // marker must sit above the whole message to still show.
+        id: "forwarded-file",
+        author: me,
+        body: "",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        status: "read",
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-pdf-viewer-sample.pdf",
+            name: "quarterly-report.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+        forwardedFrom: {
+          id: "orig-2",
+          author: anaG,
+          body: "",
+          channelTitle: "Product Team",
+        },
+      },
+    ],
+  })
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+/**
  * Group conversation with `@`-mentions: type `@` to open the popover (with
  * `@here` pinned on top), pick a member or everyone, and send — the sent chip
  * is highlighted. The two seeded incoming messages demo a mention of you and an
@@ -925,6 +987,14 @@ export const EmojiAutocomplete: Story = {
 export const Group: Story = {
   name: "Group with mentions",
   render: () => <GroupConversation />,
+}
+
+/** A forwarded message: rendered verbatim (body, attachments, mentions) like
+ * any normal bubble, topped by a thin non-interactive "Forwarded" marker
+ * (Slack/WhatsApp-style, mirroring the "edited" marker) — reenviar a otra
+ * conversación from the "Forward" message action. */
+export const Forwarded: Story = {
+  render: () => <ForwardedConversation />,
 }
 
 /** Membership events as centered system rows (added / left / removed) with

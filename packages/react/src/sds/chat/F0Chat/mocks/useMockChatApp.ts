@@ -165,6 +165,7 @@ export const useMockChatStore = (): MockChatAppValue => {
                 attachments: replyTo.attachments,
               }
             : undefined,
+          forwardedFrom: input.forwardedFrom,
         }
         return { ...s, messages: [...s.messages, message], lastReadId: id }
       })
