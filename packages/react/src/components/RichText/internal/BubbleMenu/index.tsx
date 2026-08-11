@@ -8,6 +8,8 @@ import { EnhanceActivator } from "../Enhance/EnhanceActivator"
 import type { UseEnhanceReturn } from "../Enhance/useEnhance"
 import { Toolbar, ToolbarDivider } from "../Toolbar"
 
+export { TableBubbleMenu } from "./TableBubbleMenu"
+
 const POPPER_OPTIONS = {
   modifiers: [
     {

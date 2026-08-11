@@ -21,7 +21,10 @@ import {
 import { F0Alert } from "@/components/F0Alert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { EditorBubbleMenu } from "@/components/RichText/internal"
+import {
+  EditorBubbleMenu,
+  TableBubbleMenu,
+} from "@/components/RichText/internal"
 import { useEnhance } from "@/components/RichText/internal/Enhance"
 import { Handle, Plus } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
@@ -436,15 +439,18 @@ const F0NotesTextEditorComponent = forwardRef<
         </div>
       </ScrollArea>
       {!readonly && (
-        <EditorBubbleMenu
-          editorId={editorId}
-          editor={editor}
-          disableButtons={enhance.disableButtons}
-          isToolbarOpen={false}
-          isFullscreen={false}
-          plainHtmlMode={false}
-          enhance={enhance}
-        />
+        <>
+          <EditorBubbleMenu
+            editorId={editorId}
+            editor={editor}
+            disableButtons={enhance.disableButtons}
+            isToolbarOpen={false}
+            isFullscreen={false}
+            plainHtmlMode={false}
+            enhance={enhance}
+          />
+          <TableBubbleMenu editor={editor} editorId={editorId} />
+        </>
       )}
     </div>
   )
