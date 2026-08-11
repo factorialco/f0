@@ -442,13 +442,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           // auto-placement would push one of them onto a row of its own.
           gridColumn: 2,
           gridRow: 2,
-          // Mid-retract the column is already on its way down to the strip's
-          // width, so the cards keep the width they had and hang off the cell's
-          // left edge while they shrink into it — squeezed narrow on the way out,
-          // the rail reads as crushed rather than stowed.
-          ...(rail.mode === "retracting"
-            ? { width: asideWidth, justifySelf: "end", pointerEvents: "none" }
-            : null),
+          // THE CARDS ARE NEVER SIZED BY THE GESTURE. Their column spends the
+          // collapse somewhere between the strip's width and the rail's, and a
+          // rail that took that width would re-lay-out every card on every frame:
+          // the headings and the list rows would re-wrap their way through the
+          // whole animation, which is the one thing that makes a transition look
+          // broken rather than fast.
+          //
+          // So the rail is pinned to the width it ENDS at and anchored to the
+          // cell's right edge, which does not move. The cards are laid out once,
+          // at their final width, and everything you see them do after that is a
+          // transform.
+          width: asideWidth,
+          justifySelf: "end",
+          ...(rail.mode === "retracting" ? { pointerEvents: "none" } : null),
           ...railFade.style,
         }
 
