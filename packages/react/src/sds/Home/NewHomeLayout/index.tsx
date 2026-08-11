@@ -697,9 +697,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 "-m-1 flex min-h-0 flex-col items-start gap-2 overflow-y-auto p-1",
                 SCROLLBAR_HIDDEN
               )}
-              // Placed, not flowed — it shares this cell with the retracting rail
-              // body for a moment (see the main column).
-              style={{ gridColumn: 2, gridRow: 2 }}
+              style={{
+                // Placed, not flowed — it shares this cell with the retracting
+                // rail body for a moment (see the main column).
+                gridColumn: 2,
+                gridRow: 2,
+                // Pinned for the same reason the rail body is: stretched to a cell
+                // that is mid-flight between the rail's width and the strip's, the
+                // glyphs would ride that width and slide the best part of 400px
+                // sideways over the gesture. Sized to their own content against
+                // the cell's right edge, they arrive where they stay — which is
+                // what lets the cards look like they are going INTO them.
+                width: "fit-content",
+                justifySelf: "end",
+              }}
               initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
