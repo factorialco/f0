@@ -88,10 +88,10 @@ describe("ClockInGraph", () => {
         />
       )
 
-      // Every stretch carries its range; the labelled one appends to it.
-      expect(screen.getByLabelText("09:00 – 12:00")).toBeInTheDocument()
+      // Every stretch carries its range and duration; the labelled one appends.
+      expect(screen.getByLabelText("09:00 – 12:00 (3h)")).toBeInTheDocument()
       expect(
-        screen.getByLabelText("12:00 – 13:00 • Lunch break")
+        screen.getByLabelText("12:00 – 13:00 (1h) • Lunch break")
       ).toBeInTheDocument()
       // And with something worth announcing, the rail is no longer hidden.
       expect(container.firstElementChild).not.toHaveAttribute("aria-hidden")

@@ -21,10 +21,10 @@ export interface ClockInGraphProps {
      * EXTRA context for this stretch of the day, beyond its state — which break,
      * which task.
      *
-     * The `horizontal-bar` geometry already tells you when a stretch ran when you
-     * hover it; this is appended to that range after a `•`, so pass only what the
-     * range doesn't already say. The ring has nowhere to put either and ignores
-     * them.
+     * The `horizontal-bar` geometry already tells you when a stretch ran and how
+     * long it lasted when you hover it; this is appended after a `•`, so pass only
+     * what that doesn't already say. The ring has nowhere to put either and
+     * ignores them.
      */
     label?: string
   }[]

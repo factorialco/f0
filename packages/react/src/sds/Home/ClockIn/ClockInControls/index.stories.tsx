@@ -90,8 +90,9 @@ const BREAK_DAY: ClockInControlsProps["data"] = [
     from: new Date("2024-03-20T12:00:00"),
     to: new Date("2024-03-20T12:34:00"),
     variant: "break",
-    // Hovering a segment always gives its time range; `label` is what gets added
-    // after it — so this reads "12:00 – 12:34 • Lunch break".
+    // Hovering a segment always gives its range and duration; `label` is what
+    // gets added after that — so this reads
+    // "12:00 – 12:34 (34min) • Lunch break".
     label: "Lunch break",
   },
 ]

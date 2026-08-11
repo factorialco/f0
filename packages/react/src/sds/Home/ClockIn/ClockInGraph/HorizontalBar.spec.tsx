@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { screen, zeroRender as render } from "@/testing/test-utils"
 
-import { HorizontalBar } from "./HorizontalBar"
+import { HorizontalBar, segmentTooltip } from "./HorizontalBar"
 
 /**
  * The tooltip, STUBBED — its real content sits behind Radix's open timer and a
@@ -47,11 +47,22 @@ describe("HorizontalBar", () => {
 
     const tooltips = screen.getAllByTestId("segment-tooltip")
     expect(tooltips.map((t) => t.getAttribute("data-label"))).toEqual([
-      // The range alone is the minimum, and needs nothing from the consumer…
-      "09:02 – 12:00",
+      // Range and duration are the minimum, and need nothing from the consumer…
+      "09:02 – 12:00 (2h 58min)",
       // …with `label` appended after a bullet.
-      "12:00 – 12:34 • Lunch break",
+      "12:00 – 12:34 (34min) • Lunch break",
     ])
+  })
+
+  it("says a duration the way people do", () => {
+    const durationOf = (from: string, to: string) =>
+      segmentTooltip({ value: 1, color: "green", from: at(from), to: at(to) })
+
+    // Under an hour: minutes alone.
+    expect(durationOf("12:00", "12:32")).toContain("(32min)")
+    // Over: hours first, and no zero minutes to read past on the hour.
+    expect(durationOf("09:00", "11:34")).toContain("(2h 34min)")
+    expect(durationOf("09:00", "11:00")).toContain("(2h)")
   })
 
   it("wraps nothing when there is no day yet, and hides the empty rail", () => {

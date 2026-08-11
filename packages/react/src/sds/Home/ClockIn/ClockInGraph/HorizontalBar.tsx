@@ -24,17 +24,38 @@ export type ClockInSegment = {
 }
 
 /**
- * A segment's hover text: its TIME RANGE always, and whatever the entry added
- * after it.
+ * How long a stretch lasted, read the way people say it: "2h 34min", "32min",
+ * "2h" on the hour — hours only once there is one, and no zero minutes to read
+ * past.
  *
- * The range is the minimum worth saying about a stretch of the day and it needs
- * nothing from the consumer, so every real segment gets a tooltip — `label` only
- * adds to it.
+ * The units are literals, like the 24-hour clock `formatTime24Hours` already
+ * imposes on this family. Both would need to move to `labels` together the day
+ * this has to speak another language.
+ */
+const formatDuration = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+
+  if (!hours) return `${rest}min`
+  return rest ? `${hours}h ${rest}min` : `${hours}h`
+}
+
+/**
+ * A segment's hover text: WHEN it ran and HOW LONG it lasted, then whatever the
+ * entry added after that.
+ *
+ * The range and its duration are the minimum worth saying about a stretch of the
+ * day and they need nothing from the consumer, so every real segment gets a
+ * tooltip — `label` only adds to it.
  */
 export const segmentTooltip = (segment: ClockInSegment): string | undefined => {
   if (!segment.from || !segment.to) return undefined
 
-  const range = `${formatTime24Hours(segment.from)} – ${formatTime24Hours(segment.to)}`
+  const minutes = Math.round(
+    (segment.to.getTime() - segment.from.getTime()) / 60_000
+  )
+  const range = `${formatTime24Hours(segment.from)} – ${formatTime24Hours(segment.to)} (${formatDuration(minutes)})`
+
   return [range, segment.label].filter(Boolean).join(DETAIL_SEPARATOR)
 }
 
@@ -80,16 +101,21 @@ export function HorizontalBar({ segments }: { segments: ClockInSegment[] }) {
             className={cn(
               "min-w-0 rounded-full",
               // Only a segment with something to say behaves like a target: an
-              // INVISIBLE hit area, because a 6px rail is nothing to aim at
-              // (`::after` reaches 8px above and below — the gap the rail already
-              // has to its neighbouring rows, so it steals no hover from them —
-              // and 1px into each side gap, which is what makes a thin overtime
-              // tail hittable), and a subtle grow on hover so it reads as one.
-              // Both are free of layout: a pseudo-element hit-tests as its host,
-              // and `scaleY` doesn't touch the row's height — the tile's
-              // placeholder is measured against that.
+              // INVISIBLE hit area, because a 6px rail is nothing to aim at, and
+              // a subtle grow on hover so it reads as one.
+              //
+              // The area grows VERTICALLY only — 8px each way, into the gap the
+              // rail already has to its neighbouring rows, so it steals no hover
+              // from them and turns a 6px target into a 22px one. It deliberately
+              // does not reach sideways: 1px past the last segment was 1px of
+              // horizontal overflow on the whole tile, which is how a rail earns
+              // a stray scrollbar.
+              //
+              // Neither costs layout: a pseudo-element hit-tests as its host, and
+              // `scaleY` doesn't touch the row's height — the tile's placeholder
+              // is measured against that.
               tooltip &&
-                "relative origin-center after:absolute after:-inset-x-px after:-inset-y-2 after:content-[''] motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:hover:scale-y-150"
+                "relative origin-center after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:hover:scale-y-150"
             )}
             style={{
               // `flex-basis: 0` so the share is decided by `value` alone rather
