@@ -60,7 +60,7 @@ describe("HomeListItem", () => {
     expect(screen.getByText("trailing")).toBeInTheDocument()
   })
 
-  test("is a REAL link with a chevron when it has an href, inert otherwise", () => {
+  test("is a REAL link when it has an href, inert otherwise", () => {
     const { rerender } = zeroRender(<HomeListItem title="row" href="/x" />)
 
     expect(screen.getByRole("link", { name: "row" })).toHaveAttribute(
@@ -70,6 +70,18 @@ describe("HomeListItem", () => {
 
     rerender(<HomeListItem title="row" />)
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
+  })
+
+  test("draws no trailing chevron, even as a link, unless asked for one", () => {
+    // No avatar, no right slot: the chevron would be the row's only glyph.
+    const { container, rerender } = zeroRender(
+      <HomeListItem title="row" href="/x" />
+    )
+
+    expect(container.querySelector("svg")).toBeNull()
+
+    rerender(<HomeListItem title="row" href="/x" showChevron />)
+    expect(container.querySelector("svg")).not.toBeNull()
   })
 
   test("relative and # hrefs stay in this tab; other domains open a new one", () => {

@@ -31,6 +31,7 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
  */
 type F0SelectBaseProps<T extends string, R = unknown> = {
   withApplySelection?: boolean
+  applySelectionLabel?: string
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean

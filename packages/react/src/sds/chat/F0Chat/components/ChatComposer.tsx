@@ -19,7 +19,6 @@ import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
@@ -36,6 +35,7 @@ import {
   useMentions,
 } from "../hooks/useMentions"
 import { useTransientError } from "../hooks/useTransientError"
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
   useChatDrop,
   useChatEdit,
@@ -55,8 +55,8 @@ import {
   microExitTransition,
 } from "../utils/chat-motion"
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
-import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
 import { ChatEditChip } from "./ChatEditChip"
+import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
 import {
   ChatMentionPopover,
   getChatMentionOptionId,
@@ -121,7 +121,7 @@ export const ChatComposer = (): ReactNode => {
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
-  const shouldReduceMotion = useReducedMotion()
+  const { reducedMotion: shouldReduceMotion } = useChatRenderConfig()
 
   const [value, setValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
@@ -454,6 +454,9 @@ export const ChatComposer = (): ReactNode => {
   const removeAttachment = useCallback(
     (id: string) => {
       const item = attachments.find((attachment) => attachment.id === id)
+      const hasRemainingAttachments = attachments.some(
+        (attachment) => attachment.id !== id
+      )
       if (item?.status === "uploading") {
         releaseLocalPreview(item.attachment.url)
       }
@@ -461,8 +464,7 @@ export const ChatComposer = (): ReactNode => {
         prev.filter((attachment) => attachment.id !== id)
       )
       requestAnimationFrame(() => {
-        const strip = attachmentStripRef.current
-        if (strip) strip.focus()
+        if (hasRemainingAttachments) attachmentStripRef.current?.focus()
         else textareaRef.current?.focus()
       })
     },
@@ -670,10 +672,13 @@ export const ChatComposer = (): ReactNode => {
   const placeholder = i18n.chat.placeholder
 
   return (
-    <div className="shrink-0 p-4 pt-0">
+    <div className="pointer-events-none shrink-0 p-4 pt-0">
       {/* Centered, width-capped to match the message column in fullscreen. */}
-      <div className="mx-auto w-full max-w-content">
-        <div className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background">
+      <div className="pointer-events-auto mx-auto w-full max-w-content">
+        <div
+          data-testid="chat-composer-surface"
+          className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background/95 shadow-md backdrop-blur-[2px]"
+        >
           <ChatEmojiAutocomplete
             isOpen={emojiAutocomplete.isOpen}
             results={emojiAutocomplete.results}
@@ -696,8 +701,8 @@ export const ChatComposer = (): ReactNode => {
           />
           {/* Editing and replying are mutually exclusive — the edit chip takes
               the reply chip's slot while you're editing a message. The chip
-              unfolds/collapses (height + fade); the transcript follows the
-              composer edge continuously via its ResizeObserver re-pin.
+              unfolds/collapses (height + fade); the floating transcript gap
+              follows the composer edge through its shared ResizeObserver.
               popLayout runs a reply→edit swap's exit and enter concurrently. */}
           <AnimatePresence initial={false} mode="popLayout">
             {isEditing && editingMessage ? (

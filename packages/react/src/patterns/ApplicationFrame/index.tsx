@@ -274,7 +274,7 @@ function ApplicationFrameContent({
         duration: shouldReduceMotion ? 0 : 0.2,
       }}
     >
-      <div className="scrollbar-macos grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)]">
+      <div className="scrollbar-macos grid h-screen w-full max-w-full grid-cols-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
         <div className="col-[1/-1]">{banner}</div>
         <LayoutGroup id="ai-chat-group">
           <div className="relative isolate flex h-full">
@@ -344,7 +344,7 @@ function ApplicationFrameContent({
                   "relative z-10 flex h-full max-w-full flex-1 xs:py-1",
                   isInFullscreenTransition
                     ? "overflow-hidden"
-                    : "overflow-auto",
+                    : "overflow-x-hidden overflow-y-auto",
                   !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
                   // Left seam so the content never sticks to the viewport edge:
                   // none when the sidebar is active (it provides the gap) or when
@@ -366,7 +366,7 @@ function ApplicationFrameContent({
                     "flex max-w-full flex-1",
                     isInFullscreenTransition
                       ? "overflow-hidden"
-                      : "overflow-auto"
+                      : "overflow-x-hidden overflow-y-auto"
                   )}
                   layout="position"
                 >

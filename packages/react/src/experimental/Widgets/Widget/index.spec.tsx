@@ -3,7 +3,7 @@ import { Fragment } from "react"
 import { expect, test } from "vitest"
 
 /* eslint-disable no-constant-binary-expression */
-import { zeroRender } from "@/testing/test-utils"
+import { userEvent, zeroRender } from "@/testing/test-utils"
 
 import { Widget } from "./index"
 
@@ -39,4 +39,25 @@ test("there is one separator between each valid element", async () => {
 
   const separators = screen.queryAllByRole("separator")
   expect(separators).toHaveLength(2)
+})
+
+test("the header link names itself: its title is the accessible name AND the tooltip", async () => {
+  zeroRender(
+    <Widget
+      header={{
+        title: "Communications",
+        link: { title: "Go to Communications", onClick: () => {} },
+      }}
+    >
+      <p>body</p>
+    </Widget>
+  )
+
+  // Icon-only, so the title is all a screen reader has to go on.
+  const link = screen.getByRole("button", { name: "Go to Communications" })
+
+  await userEvent.hover(link)
+  expect(
+    await screen.findByRole("tooltip", { name: /Go to Communications/ })
+  ).toBeInTheDocument()
 })

@@ -15,7 +15,7 @@ describe("renderBodyWithMentions", () => {
     expect(screen.getByText("hello there")).toBeInTheDocument()
   })
 
-  it("renders an other-person mention as an info chip", () => {
+  it("renders an other-person mention with accessible neutral emphasis", () => {
     const tokens: MentionToken[] = [
       {
         name: "Ana",
@@ -27,16 +27,16 @@ describe("renderBodyWithMentions", () => {
     zeroRender(<div>{renderBodyWithMentions("hi @Ana!", tokens)}</div>)
     const chip = screen.getByText("@Ana")
     expect(chip).toBeInTheDocument()
-    expect(chip.className).toContain("bg-f1-background-info")
+    expect(chip.className).toContain("text-f1-foreground-secondary")
   })
 
-  it("renders a self / everyone mention as a warning chip", () => {
+  it("renders a self / everyone mention with accessible neutral emphasis", () => {
     const tokens: MentionToken[] = [
       { name: "here", isSelf: false, isEveryone: true },
     ]
     zeroRender(<div>{renderBodyWithMentions("ping @here", tokens)}</div>)
     const chip = screen.getByText("@here")
-    expect(chip.className).toContain("bg-f1-background-warning")
+    expect(chip.className).toContain("text-f1-foreground-secondary")
   })
 
   it("prefers the longest matching name when mentions overlap", () => {

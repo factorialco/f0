@@ -58,22 +58,19 @@ export const SidebarCollapsibleSection = ({
   }
 
   return (
-    <div>
+    <div data-sidebar-collapsible-open={isOpen}>
       <Collapsible open={isOpen}>
         <div className="group relative flex items-center">
-          <div
+          <button
+            type="button"
             className={cn(
               "group relative flex w-full select-none items-center gap-1 rounded p-1.5 pr-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
               focusRing("focus-visible:ring-inset"),
               isRoot && "hidden"
             )}
             onClick={handleClick}
+            aria-expanded={isOpen}
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                handleClick()
-              }
-            }}
           >
             <span
               className={cn(
@@ -95,9 +92,9 @@ export const SidebarCollapsibleSection = ({
             {!isOpen && collapsedBadge && (
               <span className="ml-auto">{collapsedBadge}</span>
             )}
-          </div>
+          </button>
         </div>
-        <CollapsibleContent forceMount className="flex flex-col gap-1 mt-0.5">
+        <CollapsibleContent forceMount className="mt-0.5 flex flex-col gap-1">
           <motion.div
             initial={false}
             animate={{

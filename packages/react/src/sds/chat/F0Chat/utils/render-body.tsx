@@ -4,8 +4,8 @@ import { parse } from "twemoji-parser"
 import { F0Link } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
 
-import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
+import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
 import { sanitizeDisplayText } from "./sanitize-text"
 
 /** URLs in a body render as clickable links (matches the mobile bubble). */
@@ -167,10 +167,7 @@ export const renderBodyWithMentions = (
     const chip = (
       <span
         className={cn(
-          "rounded-xs px-0.5 font-medium",
-          token.isSelf || token.isEveryone
-            ? "bg-f1-background-warning text-f1-foreground-warning"
-            : "cursor-default bg-f1-background-info text-f1-foreground-info"
+          "rounded-xs font-medium text-f1-foreground-secondary hover:text-f1-foreground"
         )}
       >
         {body.slice(range.start, range.end)}

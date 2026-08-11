@@ -1,5 +1,55 @@
 # Changelog
 
+## [6.17.0](https://github.com/factorialco/f0/compare/f0-react-v6.16.4...f0-react-v6.17.0) (2026-08-11)
+
+
+### Features
+
+* **chat:** improve identity, navigation and scroll ([#4985](https://github.com/factorialco/f0/issues/4985)) ([bbe7b9f](https://github.com/factorialco/f0/commit/bbe7b9f9c8fb44a9df403282bc8adaabbf9928ac))
+
+## [6.16.4](https://github.com/factorialco/f0/compare/f0-react-v6.16.3...f0-react-v6.16.4) (2026-08-11)
+
+
+### Bug Fixes
+
+* **FiltersPresets:** stop preset pill overlapping overflow indicator ([#5070](https://github.com/factorialco/f0/issues/5070)) ([ee298f4](https://github.com/factorialco/f0/commit/ee298f42e30b32641c87fafae1f5f13d9a844a71))
+
+## [6.16.3](https://github.com/factorialco/f0/compare/f0-react-v6.16.2...f0-react-v6.16.3) (2026-08-10)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** size to its container, not the window ([#5069](https://github.com/factorialco/f0/issues/5069)) ([9b01c74](https://github.com/factorialco/f0/commit/9b01c74007c414570770f030c21e3e25bff0175c))
+
+## [6.16.2](https://github.com/factorialco/f0/compare/f0-react-v6.16.1...f0-react-v6.16.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** keep rail widgets mounted when collapsing ([#5065](https://github.com/factorialco/f0/issues/5065)) ([8ce2349](https://github.com/factorialco/f0/commit/8ce234931e953d004be51c0b904e14d6dc1fa2a6))
+* **storybook:** show internal tag for unexported components ([#5048](https://github.com/factorialco/f0/issues/5048)) ([3675dbf](https://github.com/factorialco/f0/commit/3675dbf902a7f6d681cc8319a7bde77cb681d116))
+
+## [6.16.1](https://github.com/factorialco/f0/compare/f0-react-v6.16.0...f0-react-v6.16.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* **Table:** only flash rows that were actually inserted ([#5025](https://github.com/factorialco/f0/issues/5025)) ([ca08427](https://github.com/factorialco/f0/commit/ca084272c63fd5598824578f89af5b71dc346a9b))
+
+## [6.16.0](https://github.com/factorialco/f0/compare/f0-react-v6.15.0...f0-react-v6.16.0) (2026-08-10)
+
+
+### Features
+
+* **F0Select:** Cancel closes dropdown + applySelectionLabel [FCT-56953] ([#4916](https://github.com/factorialco/f0/issues/4916)) ([802ddfc](https://github.com/factorialco/f0/commit/802ddfc4595115d92cc37136fdc28441a4682f2e))
+
+## [6.15.0](https://github.com/factorialco/f0/compare/f0-react-v6.14.0...f0-react-v6.15.0) (2026-08-10)
+
+
+### Features
+
+* **SlotWidget:** add per-slot loading skeletons ([#5058](https://github.com/factorialco/f0/issues/5058)) ([9d17106](https://github.com/factorialco/f0/commit/9d1710640daac61b98cee5d33d7009ed4af2595c))
+
 ## [6.14.0](https://github.com/factorialco/f0/compare/f0-react-v6.13.0...f0-react-v6.14.0) (2026-08-10)
 
 

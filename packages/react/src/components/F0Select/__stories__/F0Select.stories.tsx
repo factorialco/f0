@@ -183,6 +183,11 @@ const meta: Meta = {
       description:
         "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
     },
+    applySelectionLabel: {
+      description:
+        'Custom label for the apply button in the apply-selection footer. Defaults to the translated "Apply selection". Only has an effect when `withApplySelection` is enabled.',
+      control: "text",
+    },
     actions: {
       description:
         "<p>List of action buttons that will be displayed at the bottom of the select dropdown. Each action should have a label, onClick handler, optional icon, and variant.</p>" +
@@ -1130,6 +1135,31 @@ export const MultipleWithApply: Story = {
       description: `${item.jobTitle} · ${item.departmentName}`,
     }),
     withApplySelection: true,
+  },
+}
+
+/**
+ * Apply-selection footer with a custom apply-button label. Consumers pass an
+ * already-translated string; the default is "Apply selection". Clicking Cancel
+ * closes the dropdown and discards the staged selection.
+ */
+export const MultipleWithApplyCustomLabel: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["2", "5"],
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    withApplySelection: true,
+    applySelectionLabel: "Add to schedule",
   },
 }
 

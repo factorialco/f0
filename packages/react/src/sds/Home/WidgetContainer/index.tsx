@@ -1,4 +1,4 @@
-import { type CSSProperties, Fragment, ReactNode, useState } from "react"
+import { type CSSProperties, ReactNode, useState } from "react"
 
 import {
   closestCenter,
@@ -69,6 +69,34 @@ const widgetChrome = (widget: HomeWidgetItem) =>
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
 
+/**
+ * One widget's place in the column, and the only thing that decides whether it
+ * is SHOWN — never whether it exists.
+ *
+ * Shown, `display: contents` leaves no box behind, so the widget is the flex
+ * item it would have been without this wrapper: the column's gap, its own
+ * `fullHeight` and every child selector land on the card exactly as before.
+ * Hidden, plain `hidden` takes it out of sight AND out of the a11y tree — while
+ * its render stays MOUNTED.
+ *
+ * It wraps every widget whether or not anything is being hidden: a wrapper that
+ * came and went with the filtering would change the tree's shape, and changing
+ * shape is what unmounts a render.
+ */
+const WidgetSlot = ({
+  hidden,
+  children,
+}: {
+  hidden: boolean
+  children: ReactNode
+}) => (
+  // No `display` of its own while hidden: `hidden` only means `display: none`
+  // for as long as nothing else sets one.
+  <div hidden={hidden} style={{ display: hidden ? undefined : "contents" }}>
+    {children}
+  </div>
+)
+
 const AddWidgetPlaceholder = ({ onClick }: { onClick: () => void }) => (
   <button
     type="button"
@@ -107,6 +135,16 @@ export interface WidgetContainerProps {
    * it and the column is not draggable, even in edit mode.
    */
   onReorder?: (ids: string[]) => void
+  /**
+   * Shows ONE of the column's widgets and hides the rest — hides, not drops:
+   * every widget stays mounted, so what it had loaded, timed or animated
+   * survives. `undefined` (the default) shows them all; `null` shows none.
+   *
+   * For a container that is sometimes a whole column and sometimes a single
+   * floating widget — `NewHomeLayout`'s collapsed rail, which hovers one widget
+   * out over the feed from this same container rather than mounting a copy.
+   */
+  visibleWidgetId?: string | null
   /** Tooltip on a locked widget's lock icon. */
   lockedLabel?: string
   ctx?: HomeRenderCtx
@@ -139,12 +177,15 @@ export function WidgetContainer({
   onRemoveWidget,
   onClickAddNewWidget,
   onReorder,
+  visibleWidgetId,
   lockedLabel = "This widget is mandatory in your company.",
   ctx = {},
   className,
   style,
 }: WidgetContainerProps) {
   const canEdit = editing && !disableEdition
+  const isHidden = (widget: HomeWidgetItem) =>
+    visibleWidgetId !== undefined && widget.id !== visibleWidgetId
   const canDrag = canEdit && onReorder != null && widgets.length > 1
   // The widget being dragged: its in-list card hides while a clone rides the
   // pointer in the DragOverlay (see below).
@@ -198,6 +239,7 @@ export function WidgetContainer({
         }
         fullHeight={widget.fullHeight}
         slots={widget.slots}
+        loading={widget.loading}
         slotRenderers={slotRenderers}
         ctx={ctx}
         draggable={drag?.draggable}
@@ -218,6 +260,7 @@ export function WidgetContainer({
               header={{ ...widget.header, link: undefined }}
               fullHeight={widget.fullHeight}
               slots={widget.slots}
+              loading={widget.loading}
               slotRenderers={slotRenderers}
               ctx={ctx}
             />
@@ -293,13 +336,11 @@ export function WidgetContainer({
               )}
             >
               {widgets.map((widget) => (
-                <SortableWidget
-                  key={widget.id}
-                  id={widget.id}
-                  disabled={widget.locked}
-                >
-                  {(state) => render(widget, state)}
-                </SortableWidget>
+                <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
+                  <SortableWidget id={widget.id} disabled={widget.locked}>
+                    {(state) => render(widget, state)}
+                  </SortableWidget>
+                </WidgetSlot>
               ))}
             </div>
           </SortableContext>
@@ -324,7 +365,9 @@ export function WidgetContainer({
         </DndContext>
       ) : (
         widgets.map((widget) => (
-          <Fragment key={widget.id}>{render(widget)}</Fragment>
+          <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
+            {render(widget)}
+          </WidgetSlot>
         ))
       )}
       {/* NOT edit-gated: adding is always on offer — edit mode is for

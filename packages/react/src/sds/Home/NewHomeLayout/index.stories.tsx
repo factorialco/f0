@@ -27,8 +27,15 @@ import {
   Target,
 } from "@/icons/app"
 
+import { Skeleton } from "@/ui/skeleton"
+
 import { SlotWidget } from "../SlotWidget"
-import { homeSlot, type HomeWidgetItem, listSlot } from "../slotRenderers"
+import {
+  homeSlot,
+  type HomeWidgetItem,
+  listSlot,
+  type SlotRenderers,
+} from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog } from "../WidgetCatalog"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
@@ -330,7 +337,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     locked: true,
     header: {
       title: "Clock in",
-      link: { title: "Time tracking", onClick: () => {} },
+      link: { title: "Go to Time tracking", onClick: () => {} },
     },
     slots: [{ visualization: "clock-in", params: {} }],
   },
@@ -341,7 +348,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     hasUpdates: true,
     header: {
       title: "Communications",
-      link: { title: "Open", onClick: () => {} },
+      link: { title: "Go to Communications", onClick: () => {} },
     },
     slots: [
       listSlot(
@@ -362,7 +369,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     header: {
       title: "Events",
       count: 8,
-      link: { title: "Calendar", onClick: () => {} },
+      link: { title: "Go to Calendar", onClick: () => {} },
     },
     slots: [
       homeSlot("event-list", { showAllItems: true, events: RAIL_EVENTS }),
@@ -377,7 +384,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     icon: Globe,
     header: {
       title: "Resources",
-      link: { title: "factorial.co", url: "https://factorial.co" },
+      link: { title: "Go to factorial.co", url: "https://factorial.co" },
     },
     slots: [
       // `compact` keeps the rows one-line even with 3 items — every row's
@@ -418,10 +425,61 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
 ]
 
 /**
- * The bespoke slot renderers this Home supplies — only `clock-in` here; every
- * other slot the rail and the feed use is a kit default.
+ * The `clock-in` tile's PLACEHOLDER: the same four lines the real tile has —
+ * state + total, the day's bar, started/left, then the two controls.
  */
-const SLOT_RENDERERS = { "clock-in": () => <ClockInBody /> }
+const ClockInSkeleton = () => (
+  <div className="flex flex-col gap-2">
+    <div className="flex items-end justify-between">
+      <Skeleton className="h-6 w-28" />
+      <Skeleton className="h-6 w-12" />
+    </div>
+    <Skeleton className="h-1.5 rounded-full" />
+    <div className="flex justify-between">
+      <Skeleton className="h-5 w-12" />
+      <Skeleton className="h-5 w-20" />
+    </div>
+    <div className="flex items-center justify-between pt-1">
+      <Skeleton className="h-8 w-24 rounded-md" />
+      <Skeleton className="h-8 w-24 rounded-md" />
+    </div>
+  </div>
+)
+
+/**
+ * The bespoke slot renderers this Home supplies — only `clock-in` here; every
+ * other slot the rail and the feed use is a kit default. It declares its own
+ * `skeleton` beside its `render`, so the tile has a placeholder shaped like
+ * itself while the rail loads.
+ */
+const SLOT_RENDERERS: SlotRenderers = {
+  "clock-in": {
+    render: () => <ClockInBody />,
+    skeleton: () => <ClockInSkeleton />,
+  },
+}
+
+/**
+ * The rail's widgets BEFORE their data lands: same widgets, same slots (a
+ * `list` keeps its schema — that's what shapes its placeholder rows), no items,
+ * and each slot declaring how many are coming so the loading rail stands as
+ * tall as the loaded one.
+ */
+const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
+  ...widget,
+  loading: true,
+  slots: widget.slots.map((slot) => {
+    const params = slot.params as { items?: unknown[]; events?: unknown[] }
+    const items = params.items ?? params.events
+    return {
+      ...slot,
+      expectedItemsCount: items?.length,
+      params: params.events
+        ? { ...params, events: [] }
+        : { ...params, items: [] },
+    }
+  }),
+}))
 
 /* ============================ add-widget catalog ============================ */
 
@@ -676,14 +734,33 @@ const Home = () => {
   )
 }
 
+/**
+ * The page-level strip the app puts above EVERYTHING — the frame's own `banner`
+ * row, over the sidebar and the content both, exactly where the
+ * "You are seeing X's company view" bar lives in production. Only the height
+ * probe below asks for it (`parameters.frameBanner`).
+ */
+const FrameBanner = () => (
+  <div className="flex h-12 flex-row items-center justify-between gap-4 bg-f1-background-info px-4 text-f1-foreground">
+    <span>You are seeing Factorial&apos;s company view.</span>
+    <span className="flex flex-row items-center gap-1.5 font-medium">
+      Factorial Professionals
+      <F0Icon icon={ExternalLink} size="sm" />
+    </span>
+  </div>
+)
+
 const meta = {
   title: "Home/NewHomeLayout",
   component: NewHomeLayout,
   tags: ["autodocs", "experimental"],
-  parameters: { layout: "fullscreen" },
+  parameters: { layout: "fullscreen", docsFullWidth: true },
   decorators: [
-    (Story) => (
+    (Story, { parameters }) => (
       <ApplicationFrame
+        // The frame's top row, outside the layout entirely: it takes real height
+        // off the content area, which is what the height probe is testing.
+        banner={parameters.frameBanner ? <FrameBanner /> : undefined}
         sidebar={
           <Sidebar
             header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
@@ -712,4 +789,52 @@ type Story = StoryObj<typeof meta>
  */
 export const Default: Story = {
   render: () => <Home />,
+}
+
+/**
+ * A HEIGHT PROBE, not a layout to copy: the same Home with a 48px banner in the
+ * frame's own top row — the production "company view" strip — above the sidebar
+ * and the content both, entirely outside `NewHomeLayout`.
+ *
+ * That banner takes its 48px off the content area, so the layout has that much
+ * LESS room than in `Default`. Nothing about the page should move: the banner
+ * stays put, the sidebar still ends at the window's bottom edge, and the
+ * layout's two columns absorb the loss by scrolling a little more inside
+ * themselves.
+ *
+ * If instead the layout keeps sizing itself to the WINDOW rather than to the box
+ * it was given, it overshoots by the banner's height, and you can see it: the
+ * page starts scrolling as a whole, and the rail's bottom widget, the
+ * "+ Add widget" placeholder and the bottom gutter fall past the window's edge.
+ */
+export const BannerAboveLayout: Story = {
+  parameters: { frameBanner: true },
+  render: () => <Home />,
+}
+
+/**
+ * The same Home while the rail waits on its data. A widget declares
+ * `loading: true` and every one of its slots draws that visualization's
+ * SKELETON instead of its content — the frame, the header and the seams stay,
+ * so the card fills in rather than changing shape.
+ *
+ * How many placeholder items a slot draws is its own `expectedItemsCount`
+ * (Communications expects 5 rows, Events 4), which is what keeps the loading
+ * rail as tall as the loaded one. `clock-in` is bespoke, so its renderer brings
+ * its own skeleton — see `SLOT_RENDERERS` above.
+ *
+ * The main column is freeform content rather than widgets, so it isn't part of
+ * this: only what the layout renders as widgets has a loading state.
+ */
+export const Loading: Story = {
+  render: () => (
+    <div className="h-full w-full p-6">
+      <NewHomeLayout
+        rightWidgets={LOADING_RIGHT_WIDGETS}
+        slotRenderers={SLOT_RENDERERS}
+      >
+        {mainColumnBlocks()}
+      </NewHomeLayout>
+    </div>
+  ),
 }

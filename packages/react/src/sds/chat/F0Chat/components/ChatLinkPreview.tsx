@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import { type F0ChatLinkPreview } from "../types"
 import { FadeInImage } from "./FadeInImage"
@@ -29,7 +29,9 @@ const cardClass = (
 ) =>
   cn(
     "flex w-full flex-col overflow-hidden rounded-xl text-left no-underline",
-    "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",
+    "bg-f1-background-secondary",
+    "transition-shadow hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    focusRing("focus-visible:ring-inset"),
     !isFirstCard && "rounded-t-sm",
     !isLastCard && "rounded-b-sm",
     isFirstCard && !isFirstOfRun && (isMine ? "rounded-tr-xs" : "rounded-tl-xs")
@@ -58,7 +60,7 @@ const PreviewTexts = ({
         {preview.description}
       </span>
     )}
-    <OneEllipsis className="text-sm text-f1-foreground-tertiary">
+    <OneEllipsis className="text-sm text-f1-foreground">
       {hostOf(preview.url)}
     </OneEllipsis>
   </div>
