@@ -16,12 +16,14 @@ import {
 } from "@dnd-kit/sortable"
 
 import { F0Icon } from "@/components/F0Icon"
-import { Cross, LockLocked } from "@/icons/app"
+import { Cross, LockLocked, Plus } from "@/icons/app"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 
+import { arrivalWindowMs, useElapsed } from "../home-motion"
 import { SlotWidget } from "../SlotWidget"
 import { SortableWidget } from "./SortableWidget"
+import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 import {
   type HomeRenderCtx,
   type HomeWidgetChrome,
@@ -97,14 +99,33 @@ const WidgetSlot = ({
   </div>
 )
 
-const AddWidgetPlaceholder = ({ onClick }: { onClick: () => void }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="flex items-center justify-center gap-1 rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:text-f1-foreground"
-  >
-    <span aria-hidden>+</span> Add widget
-  </button>
+/**
+ * The offer at the foot of a column. A GLYPH, not a sentence: it sits under a
+ * stack of cards that are all content, and a labelled button competes with them
+ * for the eye every time you look down the column. The label is still there, on
+ * hover and to a screen reader — it is just not taking up the room.
+ *
+ * `w-full` because a `<button>` shrinks to fit even as a flex box: it used to be a
+ * direct flex item of the column and got stretched for free, and it no longer is
+ * (its arrival wrapper is in between).
+ */
+const AddWidgetPlaceholder = ({
+  onClick,
+  label,
+}: {
+  onClick: () => void
+  label: string
+}) => (
+  <Tooltip label={label}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex w-full items-center justify-center rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
+    >
+      <F0Icon size="md" icon={Plus} />
+    </button>
+  </Tooltip>
 )
 
 export interface WidgetContainerProps {
@@ -145,8 +166,31 @@ export interface WidgetContainerProps {
    * out over the feed from this same container rather than mounting a copy.
    */
   visibleWidgetId?: string | null
+  /**
+   * How this column's widgets ARRIVE: each one fades and rises into place, in
+   * order, one beat after the last (`home-motion`).
+   *
+   * `order` is where the first widget sits in the page's SHARED stagger, so a
+   * column that has freeform content above it can hand over the rhythm instead
+   * of restarting it; `delayMs` holds the whole column back (what makes the side
+   * rail land after the main column). `false` mounts the widgets outright, with
+   * no wrapper of any kind around them.
+   */
+  entrance?: false | { order?: number; delayMs?: number }
+  /**
+   * THE STOW: where this column's widgets go when the rail collapses. Each card
+   * scales down onto its own glyph and fades, and grows back out of it when the
+   * rail opens, so a card and its glyph read as one object rather than two
+   * representations that replace each other. See `WidgetMotion`.
+   *
+   * `pitch` and `scale` describe the strip the widgets are going into — only
+   * `NewHomeLayout` knows those, which is why they come in from outside.
+   */
+  stow?: Omit<WidgetStow, "stowed" | "instant"> & { stowed: boolean }
   /** Tooltip on a locked widget's lock icon. */
   lockedLabel?: string
+  /** Tooltip and accessible name for the add placeholder, which shows no text. */
+  addWidgetLabel?: string
   ctx?: HomeRenderCtx
   className?: string
   style?: CSSProperties
@@ -178,7 +222,10 @@ export function WidgetContainer({
   onClickAddNewWidget,
   onReorder,
   visibleWidgetId,
+  entrance = {},
+  stow,
   lockedLabel = "This widget is mandatory in your company.",
+  addWidgetLabel = "Add widget",
   ctx = {},
   className,
   style,
@@ -300,10 +347,65 @@ export function WidgetContainer({
     )
   }
 
+  const arrival = entrance === false ? null : entrance
+  /**
+   * The arrival is a ONE-SHOT: once the page has landed, a card that mounts is
+   * not arriving, it is just there. Edit mode is why this matters — the sortable
+   * branch is a different tree, so toggling the pencil remounts every card, and
+   * without this the whole column would fade back in each time.
+   */
+  const arrived = useElapsed(arrivalWindowMs(arrival?.delayMs))
+
+  /**
+   * The stow as it applies to ONE widget. The widget the panel is currently
+   * floating is the exception: it is the only one at full size while the rail is
+   * collapsed, and it must simply BE there — the panel animates its own arrival
+   * out of the glyph, and a card growing inside a panel that is already growing is
+   * the same gesture played twice.
+   */
+  const stowOf = (widget: HomeWidgetItem): WidgetStow | undefined =>
+    stow && {
+      ...stow,
+      stowed: stow.stowed && widget.id !== visibleWidgetId,
+      instant: stow.stowed,
+    }
+
+  /**
+   * Wraps one widget in everything it does that isn't its content. With no
+   * arrival and no stow it hands the widget back untouched — a wrapper that has
+   * nothing to do must not leave a box behind, because that box is the flex item
+   * the widget itself would have been.
+   */
+  const enter = (order: number, node: ReactNode, widget?: HomeWidgetItem) => {
+    const widgetStow = widget ? stowOf(widget) : undefined
+    if (!arrival && !widgetStow) return node
+    return (
+      <WidgetMotion
+        arrival={
+          arrival
+            ? {
+                order: (arrival.order ?? 0) + order,
+                delayMs: arrival.delayMs ?? 0,
+                arriving: !arrived,
+              }
+            : undefined
+        }
+        stow={widgetStow}
+        fullHeight={widget?.fullHeight}
+      >
+        {node}
+      </WidgetMotion>
+    )
+  }
+
   return (
     <div
       className={cn(
-        "flex flex-col [&_*]:shadow-none",
+        // `relative` so this column is what a widget's `offsetTop` is measured
+        // from: the stow maps a widget onto its glyph by that offset, and an
+        // unpositioned column would hand the job to whatever ancestor happened to
+        // be positioned instead (see `WidgetMotion`).
+        "relative flex flex-col [&_*]:shadow-none",
         // The main column's freeform content wants more air than the rail's
         // stack of cards.
         side === "main" ? "gap-6" : "gap-4",
@@ -335,10 +437,14 @@ export function WidgetContainer({
                 side === "main" ? "gap-6" : "gap-4"
               )}
             >
-              {widgets.map((widget) => (
+              {widgets.map((widget, order) => (
                 <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
                   <SortableWidget id={widget.id} disabled={widget.locked}>
-                    {(state) => render(widget, state)}
+                    {/* The arrival wrapper sits INSIDE the sortable rather than
+                        around it: dnd-kit measures the element it holds the ref
+                        to, and a transformed ancestor would offset every rect it
+                        reads while a drag is in flight. */}
+                    {(state) => enter(order, render(widget, state), widget)}
                   </SortableWidget>
                 </WidgetSlot>
               ))}
@@ -364,18 +470,24 @@ export function WidgetContainer({
           </DragOverlay>
         </DndContext>
       ) : (
-        widgets.map((widget) => (
+        widgets.map((widget, order) => (
           <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
-            {render(widget)}
+            {enter(order, render(widget), widget)}
           </WidgetSlot>
         ))
       )}
       {/* NOT edit-gated: adding is always on offer — edit mode is for
           arranging and removing what's already there. `disableEdition`
           columns still never offer it. */}
-      {!disableEdition && onClickAddNewWidget ? (
-        <AddWidgetPlaceholder onClick={onClickAddNewWidget} />
-      ) : null}
+      {!disableEdition && onClickAddNewWidget
+        ? enter(
+            widgets.length,
+            <AddWidgetPlaceholder
+              onClick={onClickAddNewWidget}
+              label={addWidgetLabel}
+            />
+          )
+        : null}
     </div>
   )
 }
