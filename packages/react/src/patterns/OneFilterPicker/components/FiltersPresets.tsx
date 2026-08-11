@@ -311,6 +311,10 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
       renderDropdownItem={renderDropdownItem}
       className="min-w-0 flex-1"
       min={1}
+      // Preset pills can ellipsize: with `min={1}` a pill wider than the space
+      // left by the overflow indicator stays in the row, so let it truncate
+      // rather than paint over the indicator.
+      fluidItems
     />
   )
 }

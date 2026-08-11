@@ -78,6 +78,37 @@ describe("OverflowList", () => {
     expect(screen.queryByText("skeleton-0")).not.toBeInTheDocument()
   })
 
+  it("only lets the visible items shrink when they are fluid", () => {
+    const rows: RowItem[] = [{ preset: { label: "First" } }]
+    const { rerender } = zeroRender(
+      <OverflowList
+        items={rows}
+        renderListItem={renderRow}
+        renderDropdownItem={renderRow}
+      />
+    )
+
+    // Fixed-size items keep their min-content floor: they have nothing to give.
+    expect(
+      screen.getByTestId("overflow-visible-container").className
+    ).not.toContain("[&>*]:min-w-0")
+
+    // Fluid items take the shrink pressure instead, so an item that `min` keeps
+    // visible without enough room truncates inside its own box rather than
+    // overflowing it and painting over the overflow indicator.
+    rerender(
+      <OverflowList
+        items={rows}
+        renderListItem={renderRow}
+        renderDropdownItem={renderRow}
+        fluidItems
+      />
+    )
+    expect(
+      screen.getByTestId("overflow-visible-container").className
+    ).toContain("[&>*]:min-w-0")
+  })
+
   it("renders nothing when items becomes empty", () => {
     const rows: RowItem[] = [{ preset: { label: "First" } }]
     const { rerender } = zeroRender(
