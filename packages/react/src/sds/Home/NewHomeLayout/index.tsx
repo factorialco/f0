@@ -423,6 +423,21 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const railInPanel = rail.mode === "panel"
 
     /**
+     * The widget the panel is showing — or the one it is still putting back.
+     *
+     * The panel takes `GENIE_CLOSE_MS` to go into its glyph, and dropping its
+     * widget on the frame the hover ends leaves an EMPTY card to do that
+     * animation: the content vanishes at once and a bare rounded box shrinks away
+     * after it. So the widget stays the panel's until the panel has actually gone
+     * (`panelHidden`), which is also what keeps it from snapping to its stowed
+     * size halfway through the fade.
+     */
+    const closingId = useRef<string | null>(null)
+    if (openId) closingId.current = openId
+    const panelWidgetId =
+      openId ?? (rail.panelHidden ? null : closingId.current)
+
+    /**
      * WHERE the rail body sits, in each of its presentations. `transformOrigin` is
      * the constant: the strip's corner is what every genie scale on this element is
      * taken from, whichever presentation it is in.
@@ -826,7 +841,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // panel's one-widget filter belongs to the panel; while the rail is
               // still retracting the column is still a column, and its cards have a
               // journey to make (`stow`).
-              visibleWidgetId={railInPanel ? openId : undefined}
+              visibleWidgetId={railInPanel ? panelWidgetId : undefined}
               // The strip they are going into: glyphs a fixed pitch apart, and how
               // small a card has to get to be one of them.
               stow={{
