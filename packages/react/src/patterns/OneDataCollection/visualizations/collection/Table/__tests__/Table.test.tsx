@@ -298,6 +298,125 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("boldRootRows", () => {
+    type NestedPerson = Person & { children?: NestedPerson[] }
+
+    const parent: NestedPerson = {
+      id: 1,
+      name: "Parent Row",
+      email: "parent@example.com",
+      displayName: "Parent Row",
+      children: [
+        {
+          id: 2,
+          name: "Leaf Row",
+          email: "leaf@example.com",
+          displayName: "Leaf Row",
+        },
+      ],
+    }
+
+    const createNestedSource = () =>
+      ({
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+        itemsWithChildren: (item: NestedPerson) => !!item.children?.length,
+        fetchChildren: ({ item }: { item: NestedPerson }) => ({
+          records: item.children ?? [],
+        }),
+        dataAdapter: {
+          paginationType: "pages",
+          fetchData: async () => ({
+            records: [parent],
+            type: "pages",
+            total: 1,
+            perPage: 20,
+            currentPage: 1,
+            pagesCount: 1,
+          }),
+        },
+      }) as unknown as DataCollectionSource<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+
+    // Child rows (depth > 0) staying regular is covered by the
+    // TableWithBoldRootRows story play test: expanding a nested row here
+    // triggers a pre-existing jsdom-only render loop in useData when a later
+    // test renders a failing fetch (see useData.ts subscription error path).
+    it("bolds root rows", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource()}
+          boldRootRows
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent Row")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent Row").closest("tr")
+      expect(parentRow?.className).toMatch(/font-semibold/)
+    })
+
+    it("keeps every row regular when the option is off", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent Row")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent Row").closest("tr")
+      expect(parentRow?.className).not.toMatch(/font-semibold/)
+    })
+  })
+
   describe("features", () => {
     it("renders custom column formatting", async () => {
       const columnsWithCustomRender = [
