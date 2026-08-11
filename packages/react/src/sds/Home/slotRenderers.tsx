@@ -359,7 +359,11 @@ const listRight = (
       <F0AvatarList
         type={right.slice(0, -"-list".length) as F0AvatarListProps["type"]}
         size="sm"
-        layout="compact"
+        // Explicit, because it is the prop that actually produces the compact
+        // strip this slot documents. The deprecated `layout="compact"` that
+        // used to sit here was inert, so the strip was really sized by the
+        // rail's width — which in a narrow rail collapsed it to a bare `+N`.
+        max={3}
         avatars={row.avatars as never}
         remainingCount={row.remainingCount}
       />
