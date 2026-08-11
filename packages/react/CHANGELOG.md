@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.16.4](https://github.com/factorialco/f0/compare/f0-react-v6.16.3...f0-react-v6.16.4) (2026-08-11)
+
+
+### Bug Fixes
+
+* **FiltersPresets:** stop preset pill overlapping overflow indicator ([#5070](https://github.com/factorialco/f0/issues/5070)) ([ee298f4](https://github.com/factorialco/f0/commit/ee298f42e30b32641c87fafae1f5f13d9a844a71))
+
 ## [6.16.3](https://github.com/factorialco/f0/compare/f0-react-v6.16.2...f0-react-v6.16.3) (2026-08-10)
 
 
