@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/sortable"
 
 import { F0Icon } from "@/components/F0Icon"
-import { Cross, LockLocked } from "@/icons/app"
+import { Cross, LockLocked, Plus } from "@/icons/app"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 
@@ -99,14 +99,33 @@ const WidgetSlot = ({
   </div>
 )
 
-const AddWidgetPlaceholder = ({ onClick }: { onClick: () => void }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="flex items-center justify-center gap-1 rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:text-f1-foreground"
-  >
-    <span aria-hidden>+</span> Add widget
-  </button>
+/**
+ * The offer at the foot of a column. A GLYPH, not a sentence: it sits under a
+ * stack of cards that are all content, and a labelled button competes with them
+ * for the eye every time you look down the column. The label is still there, on
+ * hover and to a screen reader — it is just not taking up the room.
+ *
+ * `w-full` because a `<button>` shrinks to fit even as a flex box: it used to be a
+ * direct flex item of the column and got stretched for free, and it no longer is
+ * (its arrival wrapper is in between).
+ */
+const AddWidgetPlaceholder = ({
+  onClick,
+  label,
+}: {
+  onClick: () => void
+  label: string
+}) => (
+  <Tooltip label={label}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex w-full items-center justify-center rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
+    >
+      <F0Icon size="md" icon={Plus} />
+    </button>
+  </Tooltip>
 )
 
 export interface WidgetContainerProps {
@@ -170,6 +189,8 @@ export interface WidgetContainerProps {
   stow?: Omit<WidgetStow, "stowed" | "instant"> & { stowed: boolean }
   /** Tooltip on a locked widget's lock icon. */
   lockedLabel?: string
+  /** Tooltip and accessible name for the add placeholder, which shows no text. */
+  addWidgetLabel?: string
   ctx?: HomeRenderCtx
   className?: string
   style?: CSSProperties
@@ -204,6 +225,7 @@ export function WidgetContainer({
   entrance = {},
   stow,
   lockedLabel = "This widget is mandatory in your company.",
+  addWidgetLabel = "Add widget",
   ctx = {},
   className,
   style,
@@ -460,7 +482,10 @@ export function WidgetContainer({
       {!disableEdition && onClickAddNewWidget
         ? enter(
             widgets.length,
-            <AddWidgetPlaceholder onClick={onClickAddNewWidget} />
+            <AddWidgetPlaceholder
+              onClick={onClickAddNewWidget}
+              label={addWidgetLabel}
+            />
           )
         : null}
     </div>

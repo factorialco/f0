@@ -15,8 +15,10 @@ import { AnimatePresence, motion } from "motion/react"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
+import { F0Icon } from "@/components/F0Icon"
 import Menu from "@/icons/app/Menu"
-import { Check, Pencil } from "@/icons/app"
+import { Check, Pencil, Plus } from "@/icons/app"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
 import { Action } from "@/ui/Action"
@@ -172,6 +174,12 @@ const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
 const PANEL_GAP_PX = 8
+/**
+ * Names the add control in both places it appears — the strip's glyph here and the
+ * column's placeholder in `WidgetContainer`, which shares the default. Neither
+ * shows it: it is a tooltip and an accessible name.
+ */
+const ADD_WIDGET_LABEL = "Add widget"
 
 export interface NewHomeLayoutProps {
   /** Freeform main-column content on top (greeting, shortcut cards, ranked feed…). */
@@ -756,22 +764,26 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                     no edit affordance of its own, and adding a widget is the one
                     thing you would still want from it. */}
               {canEditSide("right") && onClickAddNewWidget ? (
-                <motion.button
-                  type="button"
-                  aria-label="Add widget"
-                  onClick={() => onClickAddNewWidget("right")}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:text-f1-foreground"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={entranceTransition(
-                    rightWidgets.length,
-                    rail.glyphDelayMs,
-                    reducedMotion
-                  )}
-                >
-                  +
-                </motion.button>
+                // The same control the column's placeholder is — a dashed box
+                // around one glyph, named only on hover — at the strip's size.
+                <Tooltip label={ADD_WIDGET_LABEL}>
+                  <motion.button
+                    type="button"
+                    aria-label={ADD_WIDGET_LABEL}
+                    onClick={() => onClickAddNewWidget("right")}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={entranceTransition(
+                      rightWidgets.length,
+                      rail.glyphDelayMs,
+                      reducedMotion
+                    )}
+                  >
+                    <F0Icon size="md" icon={Plus} />
+                  </motion.button>
+                </Tooltip>
               ) : null}
             </motion.aside>
           )}

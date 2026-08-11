@@ -8,6 +8,7 @@ import {
   screen,
   userEvent,
   waitFor,
+  within,
   zeroRender,
 } from "@/testing/test-utils"
 
@@ -213,10 +214,15 @@ describe("NewHomeLayout", () => {
     })
 
     test("hides the edit button, and still offers to add", () => {
-      renderLayout(1000)
+      const { container } = renderLayout(1000)
 
       expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
-      expect(screen.getByLabelText("Add widget")).toBeInTheDocument()
+      // Scoped to the STRIP: the main column offers to add too, and both controls
+      // are named the same thing because they are the same offer in two places.
+      const strip = container.querySelector("aside.-m-1") as HTMLElement
+      expect(
+        within(strip).getByRole("button", { name: "Add widget" })
+      ).toBeInTheDocument()
     })
 
     test("badges the glyph of a widget with updates, and only that one", () => {

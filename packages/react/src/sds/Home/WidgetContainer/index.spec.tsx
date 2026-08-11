@@ -32,7 +32,9 @@ describe("WidgetContainer", () => {
     )
 
     expect(screen.queryAllByLabelText("Remove widget")).toHaveLength(0)
-    expect(screen.getByText(/Add widget/)).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Add widget" })
+    ).toBeInTheDocument()
   })
 
   test("edit mode gives every widget a remove control", () => {
@@ -46,7 +48,9 @@ describe("WidgetContainer", () => {
     )
 
     expect(screen.getAllByLabelText("Remove widget")).toHaveLength(2)
-    expect(screen.getByText(/Add widget/)).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Add widget" })
+    ).toBeInTheDocument()
   })
 
   test("disableEdition opts the column out of everything, adding included", () => {
@@ -61,7 +65,9 @@ describe("WidgetContainer", () => {
     )
 
     expect(screen.queryAllByLabelText("Remove widget")).toHaveLength(0)
-    expect(screen.queryByText(/Add widget/)).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Add widget" })
+    ).not.toBeInTheDocument()
   })
 
   test("reports the widget a remove control belongs to", async () => {
