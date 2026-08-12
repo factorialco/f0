@@ -4169,7 +4169,14 @@ function LearnerCourseScreen() {
                     itemDefinition: (evaluation: LearnerEvaluation) => ({
                       title: evaluation.name,
                       description: [`${evaluation.minutes} mins · ${evaluation.questions} questions`],
-                      avatar: { type: "icon" as const, icon: evaluation.kind === "Knowledge test" ? Question : Envelope },
+                      avatar: {
+                        type: "icon" as const,
+                        icon: SCHEDULED_IDS.has(evaluation.id)
+                          ? LockLocked
+                          : evaluation.kind === "Knowledge test"
+                            ? Question
+                            : Envelope,
+                      },
                     }),
                     fields: [
                       {
@@ -4971,7 +4978,7 @@ function EndOfCourseScreen() {
       title: "Content complete!",
       sub: "You have successfully completed all the content modules.",
       noteTitle: "We're preparing your knowledge test",
-      note: "It will be ready in about a minute. We'll notify you, and you'll also find it in your course content.",
+      note: "It will be ready in about a minute. Refresh this page or come back later — we'll also notify you.",
     },
     scheduled: {
       title: "Congratulations!",
