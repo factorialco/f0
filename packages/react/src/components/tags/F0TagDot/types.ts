@@ -14,6 +14,10 @@ export const tagDotColors = [
   "flubber",
   "indigo",
   "camel",
+  "radical",
+  "orange",
+  "red",
+  "grass",
 ] as const satisfies BaseColor[]
 
 export type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>
