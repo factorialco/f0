@@ -40,6 +40,10 @@ export function F0CanvasPanel({
   side = "right",
 }: F0CanvasPanelProps): ReactNode {
   const isLeft = side === "left"
+  // `fullscreen` content covers the chat instead of docking beside it, so
+  // there is no seam to face: both edges meet the frame and are finished the
+  // same way (rounded, bordered, inset) rather than one being left open.
+  const isFullscreen = content?.fullscreen === true
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -115,10 +119,13 @@ export function F0CanvasPanel({
             className={cn(
               "flex h-full flex-col bg-f1-special-page p-0 md:py-1 border border-solid border-f1-border-secondary",
               // Seam faces the chat: chat-right -> canvas opens on its right;
-              // chat-left -> canvas opens on its left (mirrored).
-              isLeft
-                ? "md:rounded-r-lg md:pr-1 border-l-0"
-                : "md:rounded-l-lg md:pl-1 border-r-0"
+              // chat-left -> canvas opens on its left (mirrored). Fullscreen
+              // has no chat beside it, so neither edge is a seam.
+              isFullscreen
+                ? "md:rounded-lg md:px-1"
+                : isLeft
+                  ? "md:rounded-r-lg md:pr-1 border-l-0"
+                  : "md:rounded-l-lg md:pl-1 border-r-0"
             )}
           >
             <motion.div
