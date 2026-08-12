@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.22.1](https://github.com/factorialco/f0/compare/f0-react-v6.22.0...f0-react-v6.22.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **F0Select:** one scrollport for a grouped list, and no jump on expand ([#5093](https://github.com/factorialco/f0/issues/5093)) ([a190e21](https://github.com/factorialco/f0/commit/a190e21c310ddd809c653efd44bf35f93d66fbf7))
+
 ## [6.22.0](https://github.com/factorialco/f0/compare/f0-react-v6.21.2...f0-react-v6.22.0) (2026-08-12)
 
 
