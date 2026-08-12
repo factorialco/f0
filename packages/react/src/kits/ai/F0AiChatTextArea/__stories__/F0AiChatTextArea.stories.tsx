@@ -179,6 +179,41 @@ const WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
   },
 ]
 
+// Deliberately long titles so each item overflows the popover width and gets
+// truncated — the case the hover marquee exists for.
+const LONG_WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title:
+          "Break down all the leave taken and the overtime worked across every single department in the company during April",
+        prompt:
+          "Give me a breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+      },
+      {
+        title:
+          "Show the current gross salary of every active employee across all offices, sorted from the highest to the lowest",
+        prompt:
+          "List the current gross salary of every active employee, sorted from highest to lowest.",
+      },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title:
+          "Draft a detailed Senior Backend Engineer job description focused on large-scale distributed systems and reliability",
+        prompt:
+          "Draft a job description for a Senior Backend Engineer focused on distributed systems.",
+      },
+    ],
+  },
+]
+
 const noop = () => {}
 
 const buildClarifyingState = (
@@ -487,6 +522,35 @@ export const WithWelcomeSuggestions: Story = {
           name: "April leave and overtime summary",
         })
       ).not.toBeInTheDocument()
+    })
+  },
+}
+
+// Long suggestion titles are truncated with an ellipsis; hovering (or focusing)
+// an item holds briefly and then reveals the hidden tail with a one-way marquee
+// — the label scrolls left just far enough to show the end, fading the leading
+// edge, and snaps back instantly on leave. Honours `prefers-reduced-motion`.
+export const WithLongWelcomeSuggestions: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenSuggestions: LONG_WELCOME_SUGGESTIONS,
+    disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+    const longTitle = LONG_WELCOME_SUGGESTIONS[0].items[0].title
+
+    await step("Open a group and hover a truncated item", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Analyze" }))
+
+      const item = await page.findByRole("button", { name: longTitle })
+      // The full title is the accessible name even though it renders truncated.
+      await expect(item).toBeInTheDocument()
+
+      // Hovering starts the marquee reveal (visible in the browser; nothing to
+      // assert on the transform here, which would be timing-dependent).
+      await userEvent.hover(item)
     })
   },
 }

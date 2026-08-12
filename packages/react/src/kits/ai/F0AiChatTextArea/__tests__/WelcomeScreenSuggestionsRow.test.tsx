@@ -1,10 +1,23 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
 import { type WelcomeScreenSuggestion } from "../../F0AiChat/types"
 import { WelcomeScreenSuggestionsRow } from "../components/WelcomeScreenSuggestionsRow"
+
+/** Drive `useReducedMotion()` — the setup default reports no query matching. */
+const setReducedMotion = (matches: boolean) =>
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: matches && query.includes("prefers-reduced-motion"),
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
 
 const groups: WelcomeScreenSuggestion[] = [
   {
@@ -344,5 +357,120 @@ describe("WelcomeScreenSuggestionsRow", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     expect(trigger).toHaveAttribute("aria-expanded", "false")
     expect(outsideTarget).toHaveFocus()
+  })
+
+  // The item title is truncated with an ellipsis and, on hover/focus, reveals
+  // its hidden tail with a one-way marquee. jsdom has no layout engine, so the
+  // overflow that gates the marquee (`scrollWidth > clientWidth`) is mocked.
+  describe("marquee reveal on truncated items", () => {
+    const LONG_TITLE =
+      "A very long suggestion title that overflows its container and is truncated"
+    const longGroups: WelcomeScreenSuggestion[] = [
+      { icon: Search, label: "Find", items: [{ title: LONG_TITLE }] },
+    ]
+
+    afterEach(() => {
+      // Restore the setup default (motion allowed) for the rest of the suite.
+      setReducedMotion(false)
+    })
+
+    /**
+     * Open the group and return the user, the item button and its inner label
+     * span. jsdom has no layout, so the overflow that gates the marquee is
+     * mocked: `overflows: true` makes the label wider than its wrapper.
+     */
+    const openItem = async ({ overflows = true } = {}) => {
+      const user = userEvent.setup()
+      zeroRender(
+        <WelcomeScreenSuggestionsRow
+          suggestions={longGroups}
+          onItemClick={() => {}}
+        />
+      )
+      await user.click(screen.getByRole("button", { name: /find/i }))
+      const item = await screen.findByRole("button", { name: LONG_TITLE })
+      // getByText resolves to the innermost element holding the text — the
+      // label span whose transform the marquee drives.
+      const label = screen.getByText(LONG_TITLE)
+      Object.defineProperty(label, "scrollWidth", {
+        configurable: true,
+        value: overflows ? 400 : 100,
+      })
+      Object.defineProperty(label, "clientWidth", {
+        configurable: true,
+        value: 100,
+      })
+      return { user, item, label }
+    }
+
+    it("keeps the full title as the item's accessible name", async () => {
+      const user = userEvent.setup()
+      zeroRender(
+        <WelcomeScreenSuggestionsRow
+          suggestions={longGroups}
+          onItemClick={() => {}}
+        />
+      )
+
+      await user.click(screen.getByRole("button", { name: /find/i }))
+
+      // Visual truncation is CSS-only; assistive tech still gets the whole thing.
+      expect(
+        await screen.findByRole("button", { name: LONG_TITLE })
+      ).toBeInTheDocument()
+    })
+
+    it("reveals the hidden tail with a transform on hover and snaps back on leave", async () => {
+      const { user, item, label } = await openItem()
+
+      expect(label.style.transform).toBe("")
+
+      await user.hover(item)
+      // Scrolled left to reveal the tail (distance = overflow + trailing gap),
+      // after the hold delay elapses.
+      await waitFor(
+        () => expect(label.style.transform).toMatch(/^translateX\(-\d/),
+        { timeout: 2000 }
+      )
+
+      await user.unhover(item)
+      // Instant return — no animated slide-back.
+      expect(label.style.transform).toBe("translateX(0)")
+    })
+
+    it("reveals on keyboard focus and clears on blur", async () => {
+      const { item, label } = await openItem()
+
+      item.focus()
+      await waitFor(
+        () => expect(label.style.transform).toMatch(/^translateX\(-\d/),
+        { timeout: 2000 }
+      )
+
+      item.blur()
+      expect(label.style.transform).toBe("translateX(0)")
+    })
+
+    it("does not start the marquee when the title fits", async () => {
+      const { user, item, label } = await openItem({ overflows: false })
+
+      await user.hover(item)
+      // Wait past the hold delay; a title that fits has no hidden tail to reveal.
+      await new Promise((resolve) => setTimeout(resolve, 600))
+
+      expect(label.style.transform).toBe("")
+      expect(label.parentElement?.style.maskImage).toBe("")
+    })
+
+    it("does not animate when the user prefers reduced motion", async () => {
+      setReducedMotion(true)
+      const { user, item, label } = await openItem()
+
+      await user.hover(item)
+      // Wait past the hold delay; the marquee must never start.
+      await new Promise((resolve) => setTimeout(resolve, 600))
+
+      expect(label.style.transform).toBe("")
+    })
   })
 })
