@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.22.0](https://github.com/factorialco/f0/compare/f0-react-v6.21.2...f0-react-v6.22.0) (2026-08-12)
+
+
+### Features
+
+* **OneDataCollection:** support disabled item actions with tooltip ([#5077](https://github.com/factorialco/f0/issues/5077)) ([f6e6f67](https://github.com/factorialco/f0/commit/f6e6f67da9c2b20979bb5e768ca2e81d0dcdded9))
+
 ## [6.21.2](https://github.com/factorialco/f0/compare/f0-react-v6.21.1...f0-react-v6.21.2) (2026-08-12)
 
 
