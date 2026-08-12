@@ -1,0 +1,661 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import * as FieldStories from "./F0Select.stories"
+import * as InlineStories from "./F0Select.inline.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="Select/Overview" />
+
+# Select
+
+Selects one or more values from static options or a data source. Use the
+standard field variant in forms and the inline variant for compact, editable
+values embedded in desktop rows.
+
+## Anatomy
+
+<Canvas of={FieldStories.Default} />
+
+<Controls of={FieldStories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th colSpan={5} className="pt-4 text-left">
+          Presentation and data
+        </th>
+      </tr>
+      <tr>
+        <td><code>variant</code></td>
+        <td><code>"field" | "inline"</code></td>
+        <td><code>"field"</code></td>
+        <td>—</td>
+        <td>Chooses the standard form-field or compact row presentation.</td>
+      </tr>
+      <tr>
+        <td><code>label</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Visible field label, or the accessible name for an inline select.</td>
+      </tr>
+      <tr>
+        <td><code>options</code></td>
+        <td><code>F0SelectItemProps&lt;T&gt;[]</code></td>
+        <td><code>[]</code></td>
+        <td>Without <code>source</code></td>
+        <td>Static items and separators. Mutually exclusive with <code>source</code>.</td>
+      </tr>
+      <tr>
+        <td><code>source</code></td>
+        <td><code>DataSourceDefinition</code></td>
+        <td>—</td>
+        <td>Without <code>options</code></td>
+        <td>Data source for remote, filtered, grouped, or paginated options.</td>
+      </tr>
+      <tr>
+        <td><code>mapOptions</code></td>
+        <td><code>(item: R) =&gt; F0SelectItemProps&lt;T, R&gt;</code></td>
+        <td>—</td>
+        <td>With <code>source</code></td>
+        <td>Maps each data-source record to an option.</td>
+      </tr>
+      <tr>
+        <td><code>searchFn</code></td>
+        <td><code>(option, search?) =&gt; boolean | undefined</code></td>
+        <td>Label matching</td>
+        <td>—</td>
+        <td>Overrides filtering for static options.</td>
+      </tr>
+      <tr>
+        <td><code>size</code></td>
+        <td><code>"sm" | "md"</code></td>
+        <td><code>"sm"</code></td>
+        <td>—</td>
+        <td>Controls trigger density. Inline heights are 28px and 32px.</td>
+      </tr>
+      <tr>
+        <td><code>placeholder</code></td>
+        <td><code>string</code></td>
+        <td>Empty</td>
+        <td>—</td>
+        <td>Secondary text shown when no value is selected.</td>
+      </tr>
+      <tr>
+        <td><code>disabled</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>
+          Prevents opening and selection, with a muted foreground and tertiary
+          background to make the inactive state visible.
+        </td>
+      </tr>
+      <tr>
+        <td><code>dataTestId</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds a test identifier when test-id rendering is enabled.</td>
+      </tr>
+
+      <tr>
+        <th colSpan={5} className="pt-4 text-left">
+          Selection
+        </th>
+      </tr>
+      <tr>
+        <td><code>value</code></td>
+        <td><code>T | T[]</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Controlled value. Arrays apply only when <code>multiple</code> is true.</td>
+      </tr>
+      <tr>
+        <td><code>defaultItem</code></td>
+        <td><code>F0SelectItemObject&lt;T, R&gt; | F0SelectItemObject&lt;T, R&gt;[]</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Initial item data used before an option is available from the data set.</td>
+      </tr>
+      <tr>
+        <td><code>onChange</code></td>
+        <td><code>(value, originalItem, option) =&gt; void</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Reports the selected value and its mapped records. The array signature applies to multiple selection.</td>
+      </tr>
+      <tr>
+        <td><code>onChangeSelectedOption</code></td>
+        <td><code>(option, checked) =&gt; void</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Reports each option check-state change.</td>
+      </tr>
+      <tr>
+        <td><code>multiple</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Enables multiple selection in the field variant. Not available inline.</td>
+      </tr>
+      <tr>
+        <td><code>clearable</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Adds clearing behavior to the field variant. Inline is always non-clearable.</td>
+      </tr>
+      <tr>
+        <td><code>onSelectItems</code></td>
+        <td><code>OnSelectItemsCallback</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Reports advanced multiple-selection state, including select-all exclusions.</td>
+      </tr>
+      <tr>
+        <td><code>disableSelectAll</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Hides select-all behavior for multiple field selects.</td>
+      </tr>
+      <tr>
+        <td><code>withApplySelection</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Stages multiple field selections until Apply is pressed.</td>
+      </tr>
+      <tr>
+        <td><code>applySelectionLabel</code></td>
+        <td><code>string</code></td>
+        <td>Translated Apply label</td>
+        <td>—</td>
+        <td>Overrides the apply action label.</td>
+      </tr>
+      <tr>
+        <td><code>preserveSelectionOnDatasetChange</code></td>
+        <td><code>boolean</code></td>
+        <td><code>true</code></td>
+        <td>—</td>
+        <td>Keeps manual selections when search, filters, or sorting change.</td>
+      </tr>
+
+      <tr>
+        <th colSpan={5} className="pt-4 text-left">
+          Popup
+        </th>
+      </tr>
+      <tr>
+        <td><code>open</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Sets the initial popup state.</td>
+      </tr>
+      <tr>
+        <td><code>onOpenChange</code></td>
+        <td><code>(open: boolean) =&gt; void</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Reports popup state changes.</td>
+      </tr>
+      <tr>
+        <td><code>showSearchBox</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Shows a search input above the options.</td>
+      </tr>
+      <tr>
+        <td><code>searchBoxPlaceholder</code></td>
+        <td><code>string</code></td>
+        <td>Translated search label</td>
+        <td>—</td>
+        <td>Overrides the search input placeholder.</td>
+      </tr>
+      <tr>
+        <td><code>searchValue</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Controls the current search query.</td>
+      </tr>
+      <tr>
+        <td><code>onSearchChange</code></td>
+        <td><code>(value: string) =&gt; void</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Reports search-query changes.</td>
+      </tr>
+      <tr>
+        <td><code>onFiltersChange</code></td>
+        <td><code>(filters: FiltersState) =&gt; void</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Reports filter changes from a data source with filter definitions.</td>
+      </tr>
+      <tr>
+        <td><code>searchEmptyMessage</code></td>
+        <td><code>string</code></td>
+        <td>Translated no-results message</td>
+        <td>—</td>
+        <td>Overrides the empty search result text.</td>
+      </tr>
+      <tr>
+        <td><code>actions</code></td>
+        <td><code>Action[]</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds footer actions. Use a critical action for destructive choices such as removing access.</td>
+      </tr>
+      <tr>
+        <td><code>onCreate</code></td>
+        <td><code>(value: string) =&gt; Promise&lt;void&gt; | void</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds a create action for a non-empty search with no result.</td>
+      </tr>
+      <tr>
+        <td><code>portalContainer</code></td>
+        <td><code>HTMLElement | null</code></td>
+        <td>Document or dialog container</td>
+        <td>—</td>
+        <td>Overrides where popup content is portalled.</td>
+      </tr>
+      <tr>
+        <td><code>fitContentWidth</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code> field; <code>true</code> inline</td>
+        <td>—</td>
+        <td>Sizes the popup to its content instead of the standard 20rem minimum.</td>
+      </tr>
+
+      <tr>
+        <th colSpan={5} className="pt-4 text-left">
+          Field-only presentation
+        </th>
+      </tr>
+      <tr>
+        <td><code>asList</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Renders the option surface as a static list without a trigger.</td>
+      </tr>
+      <tr>
+        <td><code>showPreview</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Shows the multiple-selection preview beside the option list.</td>
+      </tr>
+      <tr>
+        <td><code>children</code></td>
+        <td><code>ReactNode</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Replaces the standard field trigger with a custom trigger.</td>
+      </tr>
+      <tr>
+        <td><code>className</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Applies only to the field branch. Prefer layout from the parent.</td>
+      </tr>
+      <tr>
+        <td><code>required</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Marks the visible field label as required.</td>
+      </tr>
+      <tr>
+        <td><code>loading</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Shows field and popup loading feedback.</td>
+      </tr>
+      <tr>
+        <td><code>hideLabel</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>—</td>
+        <td>Visually hides the field label while keeping its accessible name.</td>
+      </tr>
+      <tr>
+        <td><code>labelIcon</code></td>
+        <td><code>IconType</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds an icon beside the visible field label.</td>
+      </tr>
+      <tr>
+        <td><code>icon</code></td>
+        <td><code>IconType</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds a leading icon to the field trigger.</td>
+      </tr>
+      <tr>
+        <td><code>name</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Sets the underlying field name.</td>
+      </tr>
+      <tr>
+        <td><code>error</code></td>
+        <td><code>string | boolean</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Displays the legacy error state and message.</td>
+      </tr>
+      <tr>
+        <td><code>status</code></td>
+        <td><code>InputFieldStatus</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Displays error, warning, or informational field feedback.</td>
+      </tr>
+      <tr>
+        <td><code>hint</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>—</td>
+        <td>Displays supporting field text.</td>
+      </tr>
+    </tbody>
+
+  </table>
+</Unstyled>
+
+### Variants
+
+<Canvas of={InlineStories.Variants} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Variant</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>field</code> (default)
+        </td>
+        <td>
+          Forms, settings, and standalone inputs that need visible labels,
+          validation, clearing, or multiple selection.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>inline</code>
+        </td>
+        <td>
+          Compact desktop rows that edit one role, status, or access level
+          without clearing.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Inline sizes
+
+<Canvas of={InlineStories.Sizes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sm</code> (default)
+        </td>
+        <td>28px trigger with 12px left and 4px right padding.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code>
+        </td>
+        <td>32px trigger with 12px left and 8px right padding.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0Select when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Form or settings value</td>
+        <td>
+          A visible label, validation state, clearing, or multiple selection is
+          needed; use <code>variant="field"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>Editable value in a dense desktop row</td>
+        <td>
+          One short role, status, or access level changes in place; use{" "}
+          <code>variant="inline"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>Large or remote option set</td>
+        <td>
+          A data source supplies pagination, grouping, sorting, or filters.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          Multiple selection, clearing, validation, or apply/preview behavior
+          inside a row
+        </td>
+        <td>
+          The <code>field</code> F0Select variant in a form or dialog
+        </td>
+      </tr>
+      <tr>
+        <td>A list of commands rather than mutually exclusive values</td>
+        <td>
+          <code>F0ButtonDropdown</code>
+        </td>
+      </tr>
+      <tr>
+        <td>A value is read-only</td>
+        <td>Plain text or an appropriate F0 tag component</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Use inline selects for repeated, compact single-value controls in desktop rows.",
+  }}
+  dont={{
+    description:
+      "Don't remove field chrome from standalone form controls or controls that need validation.",
+  }}
+/>
+
+### Content best practices
+
+- Keep option labels short and parallel
+  - **Correct:** "Owner", "Editor", "Viewer"
+  - **Incorrect:** "This person can only view the policy"
+- Use descriptions for extra capability detail rather than lengthening the label
+- Name footer actions with an explicit verb and object
+  - **Correct:** "Remove access"
+  - **Incorrect:** "Remove"
+
+<DoDonts
+  do={{
+    description:
+      "Use short labels and place capability details in descriptions.",
+    guidelines: ["Owner — Can manage access", "Editor — Can view and edit"],
+    children: (
+      <Canvas of={InlineStories.ConciseRoleLabels} sourceState="none" />
+    ),
+  }}
+  dont={{
+    description: "Don't encode the full explanation in each option label.",
+    guidelines: [
+      "Can manage access and change every role",
+      "Can view and edit this policy",
+    ],
+    children: (
+      <Canvas of={InlineStories.VerboseRoleLabels} sourceState="none" />
+    ),
+  }}
+/>
+
+### Behavior
+
+- WHEN <code>variant="inline"</code> → THEN the required <code>label</code> becomes the trigger's accessible name and is not rendered visually.
+- WHEN <code>variant="inline"</code> → THEN selection is single and non-clearable, custom triggers and field-only state props are unavailable, and the popup fits its content by default.
+- WHEN <code>fitContentWidth=false</code> is explicit → THEN the standard 20rem popup minimum overrides the inline default.
+- WHEN an option has a <code>description</code> → THEN its popup row is 64px high; otherwise it remains 32px high.
+- WHEN <code>actions</code> are provided → THEN the existing action footer renders below the option list.
+- WHEN the inline popup closes → THEN focus returns to its trigger.
+- <code>T</code> is the string value type and <code>R</code> is the original
+  record type, defaulting to <code>unknown</code>. A literal union such as
+  <code>"owner" | "editor" | "viewer"</code> keeps <code>value</code>, option
+  values, and <code>onChange</code> aligned. Single selection calls
+  <code>
+    onChange(value: T, originalItem?: R, option?: F0SelectItemObject&lt;T,
+    R&gt;)
+  </code>
+  . Multiple selection calls
+  <code>
+    onChange(value: T[], originalItems: R[], options: F0SelectItemObject&lt;T,
+    R&gt;[])
+  </code>
+  .
+
+### Usage examples
+
+**Access level in a row**
+
+Use the compact variant when every row exposes the same editable access-level value.
+
+<Canvas of={InlineStories.ViewerSelected} />
+
+**Searchable static options**
+
+Add search when a field option set is too long to scan efficiently.
+
+<Canvas of={FieldStories.WithSearchBox} />
+
+**Paginated data source**
+
+Use a data source when options load remotely or require pagination.
+
+<Canvas of={FieldStories.WithDataSourcePaginated} />
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Moves focus to or away from the closed trigger.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Opens the popup or selects the focused option.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Arrow up</kbd> / <kbd>Arrow down</kbd>
+        </td>
+        <td>Moves focus between enabled options.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Home</kbd> / <kbd>End</kbd>
+        </td>
+        <td>Moves focus to the first or last enabled option.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Closes the popup and restores focus to the inline trigger.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The trigger exposes <code>role="combobox"</code>, <code>aria-expanded</code>, and <code>aria-controls</code>; popup options are announced within a listbox.
+- Inline <code>label</code> text is applied as <code>aria-label</code>. Make it specific to the controlled value and, in repeated rows, to the subject—for example "Access level for Jane Doe".
+- The inline chevron is decorative and hidden from the accessibility tree.
+- Disabled triggers use the native <code>disabled</code> state.
