@@ -1,11 +1,4 @@
 import {
-  type CSSProperties,
-  type PointerEvent,
-  ReactNode,
-  useState,
-} from "react"
-
-import {
   closestCenter,
   DndContext,
   type DragEndEvent,
@@ -20,31 +13,40 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
+import {
+  type CSSProperties,
+  type PointerEvent,
+  ReactNode,
+  useRef,
+  useState,
+} from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { Delete, Ellipsis, InfoCircleLine, Plus, Sliders } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import {
   DropdownInternal,
   type DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { toasts } from "@/hooks/toast"
+import { Delete, Ellipsis, InfoCircleLine, Plus, Sliders } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { arrivalWindowMs, useElapsed } from "../home-motion"
-import { SlotWidget } from "../SlotWidget"
-import { SortableWidget } from "./SortableWidget"
-import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
-import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import {
   resolveWidgetHeader,
+  widgetTitle,
   type HomeRenderCtx,
   type HomeWidgetChrome,
   type HomeWidgetItem,
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
+import { SlotWidget } from "../SlotWidget"
+import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
+import { SortableWidget } from "./SortableWidget"
+import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 
 /**
  * WHAT CANNOT START A DRAG. The whole card is the drag surface — there is no
@@ -333,6 +335,43 @@ export function WidgetContainer({
   // Which widget is showing its back. One at a time: two cards mid-turn in the
   // same column is a fairground, not an explanation.
   const [flippedId, setFlippedId] = useState<string | null>(null)
+  const columnRef = useRef<HTMLDivElement>(null)
+  /**
+   * The LOCKED widget the POINTER was over when a drop happened, if any — the
+   * reason that drop is about to be refused.
+   *
+   * Hit-tested against the DOM rather than taken from dnd-kit: a locked widget is
+   * not a droppable (that is what keeps other widgets from displacing it), so
+   * dnd-kit never reports it as `over`, and without this the refusal would have no
+   * name to give.
+   *
+   * THE POINTER, not the dragged card's box. A tall widget cannot put its middle
+   * over a card near the top of the column — it would have to hang off the top of
+   * the window to manage it — so testing the card missed exactly the gesture people
+   * make: pick up a big widget, carry it up to the pinned one, let go. The pointer
+   * is where the intent is.
+   */
+  const lockedUnderPointer = ({ activatorEvent, delta }: DragEndEvent) => {
+    const start = activatorEvent as Partial<
+      Pick<globalThis.PointerEvent, "clientX" | "clientY">
+    >
+    if (start.clientX == null || start.clientY == null) return undefined
+    const x = start.clientX + delta.x
+    const y = start.clientY + delta.y
+    return widgets.find((widget) => {
+      if (!widget.locked) return false
+      const box = columnRef.current
+        ?.querySelector(`[data-widget-id="${widget.id}"]`)
+        ?.getBoundingClientRect()
+      return (
+        !!box &&
+        x >= box.left &&
+        x <= box.right &&
+        y >= box.top &&
+        y <= box.bottom
+      )
+    })
+  }
   /**
    * ONE MENU PER WIDGET, in the order it reads:
    *
@@ -377,7 +416,21 @@ export function WidgetContainer({
     }
     return items
   }
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    // A DROP ON A LOCKED WIDGET is refused, and says so. Silence was the old
+    // behaviour and it read as a bug: the card sprang back with no reason given.
+    const blocking = lockedUnderPointer(event)
+    if (blocking) {
+      toasts.open({
+        variant: "warning",
+        title: t.widgets.cannotMoveHere.replace(
+          "{{title}}",
+          widgetTitle(blocking)
+        ),
+      })
+      return
+    }
     if (!over || active.id === over.id) return
     const ids = widgets.map((widget) => widget.id)
     const from = ids.indexOf(String(active.id))
@@ -506,6 +559,7 @@ export function WidgetContainer({
 
   return (
     <div
+      ref={columnRef}
       className={cn(
         // `relative` so this column is what a widget's `offsetTop` is measured
         // from: the stow maps a widget onto its glyph by that offset, and an

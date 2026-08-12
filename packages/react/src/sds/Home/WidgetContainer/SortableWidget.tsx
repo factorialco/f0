@@ -1,7 +1,6 @@
-import { type CSSProperties, ReactNode } from "react"
-
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { type CSSProperties, ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -54,6 +53,11 @@ export const SortableWidget = ({
     <div
       ref={setNodeRef}
       style={style}
+      // Which widget's box this is. A LOCKED widget is not a dnd-kit droppable —
+      // that is what stops it being displaced — so dnd-kit never reports it as
+      // the thing you are over, and the column has to hit-test the dragged card
+      // against these boxes itself to say why a drop there won't happen.
+      data-widget-id={id}
       className={cn(
         !disabled && "cursor-grab active:cursor-grabbing",
         // The overlay clone is the visible card while this one is dragged;

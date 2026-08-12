@@ -1,8 +1,6 @@
-import { ReactNode } from "react"
-
-import { useMediaQuery } from "usehooks-ts"
-
 import { breakpoints } from "@factorialco/f0-core"
+import { ReactNode } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
 
@@ -107,27 +105,29 @@ export function WidgetPreviewPane({
   previewWidth = 396,
 }: WidgetPreviewPaneProps) {
   return (
-    // TOP-ALIGNED, not centred. The dialog is fullscreen at most sizes, so the
-    // stage is tall: a card floating in the middle of it reads as lost, and the
-    // eye has to hunt for it after scanning the list on the left. Sitting near
-    // the top, with generous air above, it is where you look first.
-    <div className="flex min-w-0 flex-1 flex-col items-center gap-6 overflow-y-auto rounded-lg bg-f1-background-secondary px-6 pb-6 pt-10">
-      <div
-        // The key is what makes this a NEW element, and a new element is what
-        // replays the animation — a class alone would only play once.
-        key={previewKey}
-        className={cn("w-full", WIDGET_ARRIVAL_CLASS)}
-        style={{ maxWidth: `${previewWidth}px` }}
-      >
-        {children}
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto rounded-lg bg-f1-background-secondary p-6">
+      {/* CENTRED VERTICALLY, by `my-auto` rather than the pane's `justify-center`:
+          the pane scrolls, and a centred flex line whose content outgrows it has
+          its top cut off with no way to scroll back up to it. Auto margins centre
+          the same way while there is room and collapse when there isn't. */}
+      <div className="my-auto flex w-full flex-col items-center gap-6">
+        <div
+          // The key is what makes this a NEW element, and a new element is what
+          // replays the animation — a class alone would only play once.
+          key={previewKey}
+          className={cn("w-full", WIDGET_ARRIVAL_CLASS)}
+          style={{ maxWidth: `${previewWidth}px` }}
+        >
+          {children}
+        </div>
+        {info ? (
+          // Not inside the card: this is about the widget, so it sits under it,
+          // in the pane — the same words the card's own info side would show.
+          <p className="m-0 max-w-96 text-center text-f1-foreground-secondary">
+            {info}
+          </p>
+        ) : null}
       </div>
-      {info ? (
-        // Not inside the card: this is about the widget, so it sits under it, in
-        // the pane — the same words the card's own info side would show.
-        <p className="m-0 max-w-96 text-center text-f1-foreground-secondary">
-          {info}
-        </p>
-      ) : null}
     </div>
   )
 }

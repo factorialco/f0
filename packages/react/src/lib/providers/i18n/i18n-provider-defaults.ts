@@ -971,6 +971,8 @@ export const defaultTranslations = {
     addWidget: "Add widget",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {
     toolbar: "Document toolbar",
