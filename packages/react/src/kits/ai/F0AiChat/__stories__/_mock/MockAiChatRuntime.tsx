@@ -666,18 +666,26 @@ export const MockAiChatRuntimeProvider = ({
     // rest of this state, so going back and changing an answer re-derives the
     // steps that follow. Selected ids are enough for the derivation — a custom
     // answer carries no option id, and `buildAnswers` handles it separately.
+    //
+    // Each step's stored ids are filtered against the options it just resolved
+    // to before being carried forward. Going back and changing an answer can
+    // re-derive a later step into a different list, stranding a selection it no
+    // longer offers; a stale id would otherwise keep Submit enabled while
+    // nothing is highlighted, resolve to an option that isn't there, and (in a
+    // chain of three or more) derive everything after it from an answer the
+    // user can no longer see selected.
     const steps: ResolvedClarifyingStep[] = []
-    const previousAnswerIds: string[][] = []
+    const selectedIdsByStep: string[][] = []
     clarifyingConfig.steps.forEach((step, i) => {
-      steps.push({
-        ...step,
-        options:
-          typeof step.options === "function"
-            ? step.options([...previousAnswerIds])
-            : step.options,
-      })
-      previousAnswerIds.push(
-        getClarifyingInteraction(clarifyingInteractions, i).selectedIds
+      const options =
+        typeof step.options === "function"
+          ? step.options([...selectedIdsByStep])
+          : step.options
+      steps.push({ ...step, options })
+      selectedIdsByStep.push(
+        getClarifyingInteraction(clarifyingInteractions, i).selectedIds.filter(
+          (id) => options.some((option) => option.id === id)
+        )
       )
     })
     const stepIndex = clarifyingStepIndex
@@ -689,16 +697,9 @@ export const MockAiChatRuntimeProvider = ({
       clarifyingInteractions,
       stepIndex
     )
-    // Drop selections that the current options no longer contain: going back
-    // and changing an earlier answer can re-derive this step into a different
-    // list, and a leftover id would keep Submit enabled while nothing is
-    // highlighted — then resolve to an option that isn't there.
-    const validSelectedIds = storedInteraction.selectedIds.filter((id) =>
-      step.options.some((option) => option.id === id)
-    )
     const interaction: ClarifyingInteraction = {
       ...storedInteraction,
-      selectedIds: validSelectedIds,
+      selectedIds: selectedIdsByStep[stepIndex] ?? [],
     }
 
     const updateInteraction = (patch: Partial<ClarifyingInteraction>) =>
@@ -715,14 +716,15 @@ export const MockAiChatRuntimeProvider = ({
     const buildAnswers = (): { labels: string[][]; ids: string[][] } => {
       const perStep = steps.map((s, i) => {
         const inter = getClarifyingInteraction(clarifyingInteractions, i)
-        const selected = s.options.filter((o) =>
-          inter.selectedIds.includes(o.id)
-        )
+        // Same sanitized ids the panel rendered as selected, so what the user
+        // saw highlighted is exactly what gets resolved.
+        const validIds = selectedIdsByStep[i] ?? []
+        const selected = s.options.filter((o) => validIds.includes(o.id))
         const labels = selected.map((o) => o.label)
         const ids = selected.map((o) => o.id)
         const isSingle = (s.selectionMode ?? "single") === "single"
         const includeCustom = isSingle
-          ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
+          ? validIds.length === 0 && inter.customText.trim().length > 0
           : inter.isCustomActive && inter.customText.trim().length > 0
         if (includeCustom) {
           labels.push(inter.customText.trim())
