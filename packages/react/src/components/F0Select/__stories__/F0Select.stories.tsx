@@ -1413,6 +1413,50 @@ export const WithCustomTrigger: Story = {
   ),
 }
 
+export const CustomTriggerFillsContainerHeight: Story = {
+  args: {
+    label: "Choose a color",
+    onChange: fn(),
+    value: "red",
+    options: [
+      { value: "red", label: "Red" },
+      { value: "green", label: "Green" },
+    ],
+  },
+  render: ({ value, options, onChange, ...args }) => (
+    <div className="flex h-10 items-center" data-testid="fixed-height-field">
+      <div className="h-full shrink-0">
+        <F0Select
+          label="Choose a color"
+          value={value}
+          options={options}
+          onChange={onChange}
+          {...args}
+        >
+          <span className="flex h-full items-center px-2">Red</span>
+        </F0Select>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    /*
+     * A custom trigger sizes its content against the consumer's container, so
+     * every wrapper F0Select renders in between has to pass that height
+     * through. Asserted in real pixels because a wrapper that swallows the
+     * height still renders a perfectly valid DOM, with a 1px tolerance for
+     * subpixel layout under display scaling.
+     */
+    const trigger = canvas.getByRole("combobox")
+    const field = canvas.getByTestId("fixed-height-field")
+    const drift = Math.abs(
+      trigger.getBoundingClientRect().height -
+        field.getBoundingClientRect().height
+    )
+    await expect(drift).toBeLessThanOrEqual(1)
+  },
+}
+
 export const WithOnCreate: Story = {
   args: {
     label: "Select Employee",

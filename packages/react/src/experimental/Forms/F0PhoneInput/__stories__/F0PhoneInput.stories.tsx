@@ -60,6 +60,16 @@ export const Prefilled: Story = {
     const input = canvas.getByRole("textbox")
     await expect(input).toHaveValue("674 89 79 45")
     await expect(canvas.getByText("+34")).toBeInTheDocument()
+    // The country trigger spans the field, so flag, dial code and number share
+    // a baseline — it collapses whenever F0Select stops passing height through.
+    // Compared with a 1px tolerance: layout is subpixel under display scaling
+    // while clientHeight is rounded, and the collapse this guards is ~10px
+    const trigger = canvas.getByTestId("phone-input-country-trigger")
+    const field = canvas.getByTestId("input-field-wrapper")
+    const drift = Math.abs(
+      trigger.getBoundingClientRect().height - field.clientHeight
+    )
+    await expect(drift).toBeLessThanOrEqual(1)
   },
 }
 
