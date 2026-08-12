@@ -1,10 +1,19 @@
-import { Fragment } from "react"
+import { CSSProperties, Fragment, useRef } from "react"
+import { useResizeObserver } from "usehooks-ts"
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
+import {
+  Collapse,
+  collapseProgress,
+  fade,
+  isScrollLinked,
+  lerp,
+  px,
+} from "@/experimental/Information/Headers/BaseHeader/collapse"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
 import {
   Metadata,
@@ -22,6 +31,7 @@ import {
   DropdownItem,
   MobileDropdown,
 } from "@/experimental/Navigation/Dropdown"
+import { useHeaderCollapse } from "@/lib/providers/headerCollapse"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -60,6 +70,17 @@ interface BaseHeaderProps {
   }
   metadata?: MetadataProps["items"]
   metadataRowGap?: MetadataProps["rowGap"]
+  /**
+   * Renders the header condensed: the metadata closes away, the avatar drops two
+   * sizes, and the name and role each step down a size.
+   *
+   * For a header with no scrolling page around it, such as one in a dialog.
+   * Inside `Page` the header already condenses as the reader scrolls, and this
+   * is not how that is controlled: passing `false` does not switch it off, and
+   * there is deliberately no way to do so. Every resource page in the product
+   * condenses over the same distance, and nothing here can change that.
+   */
+  collapsed?: boolean
   /** Renders a 1px bottom border at the very bottom of the header. */
   showBottomBorder?: boolean
   /** When set, renders a close button in the header actions that calls this on click. */
@@ -80,6 +101,7 @@ export function BaseHeader({
   status,
   metadata = [],
   metadataRowGap = "none",
+  collapsed,
   showBottomBorder = false,
   onClose,
 }: BaseHeaderProps) {
@@ -127,10 +149,91 @@ export function BaseHeader({
     return `${actionKey}-${index}`
   }
 
+  /*
+   * How far to condense. A container that owns both the header's position and
+   * the page's scrolling provides this, which today means `Navigation/Page`.
+   *
+   * `collapsed` can only ever add to it. Reading `false` as an override would
+   * hand every page an opt-out, and the reason the number arrives by context
+   * rather than as a prop is that no page should be able to condense
+   * differently from any other.
+   */
+  const scrollProgress = useHeaderCollapse()
+  const collapse: Collapse = collapsed === true ? true : scrollProgress
+  const progress = collapseProgress(collapse)
+
+  /*
+   * Following a scroll, there is no transition at all. Every size below is a
+   * function of `progress`, so one scroll event sets all of them in the same
+   * commit and they land on the same frame by construction. Easing them was
+   * worse than the uneven scroll it was meant to smooth: `transform` animates on
+   * the compositor while `font-size`, `width` and `height` animate on the main
+   * thread, so the avatar's scale and the box holding it drifted apart under
+   * load and the avatar rode out over the title.
+   *
+   * Switched by the prop there is no gesture to keep up with and nothing to stay
+   * in step with frame by frame, so that case tweens.
+   */
+  const tween = isScrollLinked(collapse)
+    ? undefined
+    : "transition-[font-size,line-height,gap,padding,opacity,width,height,transform] duration-150 ease-out motion-reduce:transition-none"
+
+  const identityRef = useRef<HTMLDivElement>(null)
+  const { height: identityHeight } = useResizeObserver({ ref: identityRef })
+  const metadataRef = useRef<HTMLDivElement>(null)
+  const { height: metadataHeight } = useResizeObserver({ ref: metadataRef })
+
+  const avatarSize = lerp(56, 32, progress)
+  /*
+   * Condensed, the name and the role read as one line of identity and the avatar
+   * reads as the bullet on it, so it centres on the pair rather than hanging from
+   * the top of the name. Open it hangs from the top, which is where a 56px avatar
+   * belongs against a 22px title.
+   *
+   * The identity column's height is measured because CSS cannot express this
+   * offset on its own: a percentage `top` resolves against the containing block,
+   * which is the whole row and not the column, and comes to nothing when that
+   * height is content-driven. The measurement is a frame behind while the text
+   * sizes are changing, but the height it tracks moves a few pixels across the
+   * entire gesture, so the lag is invisible.
+   */
+  const avatarOffset =
+    Math.max(0, ((identityHeight ?? 0) - avatarSize) / 2) * progress
+
+  /*
+   * Whether anything is actually condensed yet.
+   *
+   * Nothing below is expressed inline until this is true, and at rest the header
+   * renders the same classes it always did. That is not tidiness, it is the only
+   * way the promise holds that a hundred existing call sites are untouched:
+   *
+   *   - The type classes carry more than a size. `text-2xl` and `text-lg` also set
+   *     `letter-spacing`, and they size in rem so the header follows the root font
+   *     size. An inline `fontSize` in px silently drops both.
+   *   - Inline styles outrank the cascade. `F0Dialog` and the drawers cancel this
+   *     header's padding with `[&_.resource-header]:p-0`, which beats a class and
+   *     loses to an inline style, so an unconditional inline padding would put it
+   *     back.
+   *   - `xl` is not 56px for every avatar variant, so an explicit box is only safe
+   *     once we are the ones deciding the size.
+   *   - A `transform`, even `scale(1)`, makes an element a stacking context and a
+   *     containing block for absolutely positioned descendants.
+   */
+  const condensing = progress > 0
+
   return (
     <div
+      style={
+        condensing ? { paddingBottom: px(lerp(20, 12, progress)) } : undefined
+      }
       className={cn(
-        "resource-header px-page flex flex-col gap-3 pb-5 pt-3",
+        "resource-header px-page flex flex-col pt-3",
+        // While condensing, the 12px between the identity row and the metadata
+        // moves onto the metadata row as padding so it can close along with the
+        // row instead of leaving a hole behind. At rest it stays a `gap` here,
+        // which is exactly what shipped.
+        !condensing && "gap-3 pb-5",
+        tween,
         // `border-0` zeroes all sides first so this renders bottom-only even in apps that
         // don't load the Tailwind preflight border reset (otherwise `border-solid` would
         // light up all four sides at the CSS-initial `medium` width).
@@ -151,27 +254,86 @@ export function BaseHeader({
           )}
         >
           {avatar && (
-            <div className="flex items-start">
-              <F0Avatar
-                avatar={{
-                  ...(avatar.type === "generic"
-                    ? { ...avatar, type: "company" }
-                    : avatar),
-                }}
-                size="xl"
-              />
+            // Rendered at `xl` and scaled down to `md`'s 32px rather than swapped
+            // between sizes: a size step is a class change, which can only jump
+            // or tween, and both of those lag the scroll. The box shrinks with
+            // the scale, so the layout follows.
+            <div
+              style={
+                condensing
+                  ? ({
+                      width: px(avatarSize),
+                      height: px(avatarSize),
+                      "--avatar-offset": px(avatarOffset),
+                    } as CSSProperties)
+                  : undefined
+              }
+              // The centring only lands from `md` up, where the avatar and the
+              // identity sit side by side. Stacked below that the avatar is above
+              // the text and there is nothing to centre against.
+              className={cn(
+                "flex items-start",
+                condensing && "shrink-0 md:translate-y-[var(--avatar-offset)]",
+                tween
+              )}
+            >
+              <div
+                style={
+                  condensing
+                    ? {
+                        transform: `scale(${lerp(1, 32 / 56, progress)})`,
+                        transformOrigin: "top left",
+                      }
+                    : undefined
+                }
+                className={tween}
+              >
+                <F0Avatar
+                  avatar={{
+                    ...(avatar.type === "generic"
+                      ? { ...avatar, type: "company" }
+                      : avatar),
+                  }}
+                  size="xl"
+                />
+              </div>
             </div>
           )}
-          <div className="flex flex-col gap-1">
+          <div
+            ref={identityRef}
+            // Condensed, the name and the role read as one line of identity, so
+            // the gap between them closes.
+            style={condensing ? { gap: px(lerp(4, 0, progress)) } : undefined}
+            className={cn("flex flex-col", !condensing && "gap-1", tween)}
+          >
             <span
+              // From the large heading type down to the heading type. Inline only
+              // while condensing, so at rest `text-2xl` keeps its letter-spacing
+              // and its rem sizing.
+              style={
+                condensing
+                  ? {
+                      fontSize: px(lerp(22, 16, progress)),
+                      lineHeight: px(lerp(28, 24, progress)),
+                    }
+                  : undefined
+              }
               className={cn(
-                "text-2xl font-semibold",
+                "font-semibold",
+                !condensing && "text-2xl",
+                tween,
                 deactivated ? "text-f1-foreground/[0.61]" : "text-f1-foreground"
               )}
             >
               {title}
             </span>
-            {description && <Description description={description} />}
+            {description && (
+              <Description
+                description={description}
+                progress={condensing ? progress : undefined}
+                tween={tween}
+              />
+            )}
           </div>
         </div>
 
@@ -343,8 +505,40 @@ export function BaseHeader({
         </div>
       </div>
       {allMetadata.length > 0 && (
-        <div className="hidden flex-wrap items-center gap-x-3 gap-y-1 md:block">
-          <Metadata items={allMetadata} rowGap={metadataRowGap} />
+        <div
+          style={
+            condensing
+              ? {
+                  // The 12px that was the header's own `gap` at rest, now closing
+                  // along with the row it belongs to.
+                  paddingTop: px(lerp(12, 0, progress)),
+                  opacity: fade(progress),
+                  // The measured height is the content's; the applied height
+                  // includes the padding above it, so the padding is added back
+                  // in or the row jumps by 12px and slices its own text on the
+                  // first pixel of scroll. Left unset until something has been
+                  // measured, since treating "not measured yet" as zero would
+                  // close the row for a frame.
+                  ...(metadataHeight !== undefined
+                    ? {
+                        boxSizing: "border-box" as const,
+                        height: px(lerp(metadataHeight + 12, 0, progress)),
+                        overflow: "hidden",
+                      }
+                    : {}),
+                }
+              : undefined
+          }
+          className={cn(
+            "hidden flex-wrap items-center gap-x-3 gap-y-1 md:block",
+            tween
+          )}
+        >
+          {/* Measured here rather than on the row above, whose height is the one
+              being animated. */}
+          <div ref={metadataRef}>
+            <Metadata items={allMetadata} rowGap={metadataRowGap} />
+          </div>
         </div>
       )}
     </div>
