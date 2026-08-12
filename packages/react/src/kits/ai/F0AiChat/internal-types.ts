@@ -115,6 +115,19 @@ export type AiChatProviderReturnValue = {
    */
   resetChatWidth: () => void
   /**
+   * True while the user is dragging the chat's resize handle. Broadcast here
+   * because everything laid out against the chat's edge has to follow the drag
+   * 1:1 — a width that eases while the pointer moves leaves the seam trailing
+   * behind the cursor. Consumers use it to drop their transition to
+   * `{ duration: 0 }`.
+   *
+   * The window that renders the handle keeps its own local drag state and
+   * mirrors it here; it does not read this back as the gate for its listener,
+   * since a split layout has two windows and only one of them is being dragged.
+   */
+  isResizing: boolean
+  setIsResizing: React.Dispatch<React.SetStateAction<boolean>>
+  /**
    * The current visualization mode of the chat
    */
   visualizationMode: VisualizationMode

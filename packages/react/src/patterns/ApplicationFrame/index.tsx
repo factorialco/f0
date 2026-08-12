@@ -193,6 +193,7 @@ function ApplicationFrameContent({
     panelContent,
     panelContentSide,
     restoringPanelContentId,
+    isResizing,
   } = useAiChat()
   const isAiChatFullscreen = visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
@@ -203,6 +204,13 @@ function ApplicationFrameContent({
   // the frame and covers the chat (the canvas layer sits above it), so the
   // panel keeps its state and its conversation while it is out of view.
   const reservedCanvasInset = canvasContent?.fullscreen ? 0 : reservedChatWidth
+  // Dragging the resize handle moves the chat's edge instantly (the chat
+  // window drops its own transition while `isResizing`), so the canvas must
+  // too — easing here would leave the seam trailing the cursor for 300ms on
+  // every frame of the drag, opening a gap over the main content.
+  const canvasInsetTransition = isResizing
+    ? { duration: 0 }
+    : CONTENT_TRANSITION
   // Hosts can dock the whole panel left for a chat-first experience (e.g.
   // communications); the default is right, so the standard layout is unchanged.
   const isPanelLeft = panelSide === "left"
@@ -411,7 +419,7 @@ function ApplicationFrameContent({
                         ? { left: reservedCanvasInset, right: 0 }
                         : { left: 0, right: reservedCanvasInset }
                   }
-                  transition={CONTENT_TRANSITION}
+                  transition={canvasInsetTransition}
                 >
                   <F0CanvasPanel
                     content={canvasContent}

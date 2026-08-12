@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest"
 
 import type { CanvasContent } from "@/kits/ai/canvas/types"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import {
+  fireEvent,
   zeroRender as render,
   screen,
   userEvent,
@@ -30,8 +32,11 @@ const noteEntity = {
   renderContent: () => <div>NOTE BODY</div>,
 }
 
+// Wide enough to be unmistakable against DEFAULT_CHAT_WIDTH (360).
+const RESIZED_CHAT_WIDTH = 500
+
 const Probe = () => {
-  const { openCanvas } = useAiChat()
+  const { openCanvas, setChatWidth, isResizing } = useAiChat()
   return (
     <div>
       <button type="button" onClick={() => openCanvas(DOCKED_NOTE)}>
@@ -40,16 +45,24 @@ const Probe = () => {
       <button type="button" onClick={() => openCanvas(FULLSCREEN_NOTE)}>
         open-fullscreen
       </button>
+      <button type="button" onClick={() => setChatWidth(RESIZED_CHAT_WIDTH)}>
+        widen-chat
+      </button>
+      <span>resizing:{String(isResizing)}</span>
     </div>
   )
 }
 
-const renderFrame = (side?: "left" | "right") =>
+const renderFrame = (
+  side?: "left" | "right",
+  { resizable }: { resizable?: boolean } = {}
+) =>
   render(
     <ApplicationFrame
       ai={{
         enabled: true,
         ...(side ? { side } : {}),
+        ...(resizable ? { resizable } : {}),
         chatMessages: <div>AI CHAT</div>,
         canvasEntities: { note: noteEntity },
       }}
@@ -70,15 +83,14 @@ const canvasContainer = (): HTMLElement => {
   return element
 }
 
-// The inset animates in, so an assertion has to wait for a settled value: an
+// The inset animates, so an assertion has to wait for a settled value: an
 // unwritten edge reads as "" and an in-flight one as some fraction of the
-// target. Waiting on "> 0" (or on an explicit "0px") covers both.
+// target. Assert the exact px so a wrong-but-nonzero inset can't pass.
+const waitForEdge = (edge: "left" | "right", px: number) =>
+  waitFor(() => expect(canvasContainer().style[edge]).toBe(`${px}px`))
+
 const waitForReservedEdge = (edge: "left" | "right") =>
-  waitFor(() => {
-    const value = canvasContainer().style[edge]
-    expect(value).not.toBe("")
-    expect(Number.parseFloat(value)).toBeGreaterThan(0)
-  })
+  waitForEdge(edge, DEFAULT_CHAT_WIDTH)
 
 const waitForFlushEdge = (edge: "left" | "right") =>
   waitFor(() => expect(canvasContainer().style[edge]).toBe("0px"))
@@ -131,5 +143,54 @@ describe("ApplicationFrame canvas inset", () => {
 
     await waitForFlushEdge("left")
     await waitForFlushEdge("right")
+  })
+
+  it("animates the inset away when open content becomes fullscreen", async () => {
+    renderFrame()
+    await userEvent.click(screen.getByText("open-docked"))
+    await waitForReservedEdge("right")
+
+    // The canvas stays mounted across this swap (content is non-null
+    // throughout), so this is the one path that actually animates rather than
+    // mounting at its target — motion seeds `initial` from `animate` on mount.
+    await userEvent.click(screen.getByText("open-fullscreen"))
+    await waitForFlushEdge("right")
+
+    // ...and back, so a one-way write can't pass.
+    await userEvent.click(screen.getByText("open-docked"))
+    await waitForReservedEdge("right")
+  })
+
+  it("tracks the chat width while resizable", async () => {
+    renderFrame(undefined, { resizable: true })
+    await userEvent.click(screen.getByText("open-docked"))
+    await waitForReservedEdge("right")
+
+    await userEvent.click(screen.getByText("widen-chat"))
+    await waitForEdge("right", RESIZED_CHAT_WIDTH)
+  })
+
+  it("broadcasts the handle drag so the frame can track it 1:1", async () => {
+    // The canvas inset drops its transition while the handle is being dragged
+    // (the chat's own width is already instant then), so the drag has to reach
+    // AiChatStateProvider — with it local to ChatWindow the frame cannot see
+    // it, and the canvas edge eases 300ms behind the cursor on every frame.
+    renderFrame(undefined, { resizable: true })
+    // The handle only exists once the panel is open and docked (not fullscreen).
+    await userEvent.click(screen.getByText("open-docked"))
+    await waitForReservedEdge("right")
+    expect(screen.getByText("resizing:false")).toBeInTheDocument()
+
+    const handle = await waitFor(() => {
+      const node = document.querySelector<HTMLElement>(".cursor-ew-resize")
+      if (!node) throw new Error("resize handle not found")
+      return node
+    })
+
+    fireEvent.mouseDown(handle, { clientX: 800 })
+    expect(screen.getByText("resizing:true")).toBeInTheDocument()
+
+    fireEvent.mouseUp(document)
+    expect(screen.getByText("resizing:false")).toBeInTheDocument()
   })
 })
