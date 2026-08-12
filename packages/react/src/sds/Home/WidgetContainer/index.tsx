@@ -337,39 +337,56 @@ export function WidgetContainer({
   const [flippedId, setFlippedId] = useState<string | null>(null)
   const columnRef = useRef<HTMLDivElement>(null)
   /**
-   * The LOCKED widget the POINTER was over when a drop happened, if any — the
-   * reason that drop is about to be refused.
+   * The LOCKED widget a drop was aiming at, if any — the reason it is about to be
+   * refused.
    *
    * Hit-tested against the DOM rather than taken from dnd-kit: a locked widget is
    * not a droppable (that is what keeps other widgets from displacing it), so
    * dnd-kit never reports it as `over`, and without this the refusal would have no
    * name to give.
    *
-   * THE POINTER, not the dragged card's box. A tall widget cannot put its middle
-   * over a card near the top of the column — it would have to hang off the top of
-   * the window to manage it — so testing the card missed exactly the gesture people
-   * make: pick up a big widget, carry it up to the pinned one, let go. The pointer
-   * is where the intent is.
+   * "AIMING AT IT" is the card covering more than half of it — the dragged card's
+   * box straddling the locked card's midline. That is the geometry of taking a
+   * slot, and unlike the two obvious tests it does not depend on where the card
+   * happened to be grabbed:
+   *
+   * - The dragged card's own MIDDLE is unreachable for a tall widget over a card
+   *   near the top of the column: it would have to hang off the top of the window.
+   * - The POINTER misses the ordinary gesture. Grab a 414px card 250px down, carry
+   *   it up until it visibly sits in the first slot, and the pointer is still 30px
+   *   BELOW the pinned card — the grab offset went with it.
+   *
+   * The pointer is still worth asking about, for the opposite grab: held near its
+   * bottom edge, the card can cover the locked one while hanging off the top of the
+   * viewport, and then the pointer is the only thing left inside it.
    */
-  const lockedUnderPointer = ({ activatorEvent, delta }: DragEndEvent) => {
+  const lockedTargetOf = ({ activatorEvent, delta, active }: DragEndEvent) => {
+    const dragged = active.rect.current.translated
     const start = activatorEvent as Partial<
       Pick<globalThis.PointerEvent, "clientX" | "clientY">
     >
-    if (start.clientX == null || start.clientY == null) return undefined
-    const x = start.clientX + delta.x
-    const y = start.clientY + delta.y
+    const x = start.clientX == null ? null : start.clientX + delta.x
+    const y = start.clientY == null ? null : start.clientY + delta.y
+
     return widgets.find((widget) => {
       if (!widget.locked) return false
       const box = columnRef.current
         ?.querySelector(`[data-widget-id="${widget.id}"]`)
         ?.getBoundingClientRect()
-      return (
-        !!box &&
+      if (!box) return false
+
+      const midline = box.top + box.height / 2
+      const covered =
+        !!dragged && dragged.top <= midline && dragged.bottom >= midline
+      const pointedAt =
+        x != null &&
+        y != null &&
         x >= box.left &&
         x <= box.right &&
         y >= box.top &&
         y <= box.bottom
-      )
+
+      return covered || pointedAt
     })
   }
   /**
@@ -420,7 +437,7 @@ export function WidgetContainer({
     const { active, over } = event
     // A DROP ON A LOCKED WIDGET is refused, and says so. Silence was the old
     // behaviour and it read as a bug: the card sprang back with no reason given.
-    const blocking = lockedUnderPointer(event)
+    const blocking = lockedTargetOf(event)
     if (blocking) {
       toasts.open({
         variant: "warning",
