@@ -4,7 +4,7 @@ import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronRight } from "@/icons/app"
-import { Link } from "@/lib/linkHandler"
+import { isExternalHref, Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
 /**
@@ -43,28 +43,13 @@ export interface HomeListItemProps {
   /**
    * Renders the row as a REAL link — an anchor with this href (role `link`,
    * middle-click, copy address), routed through the app's `LinkProvider`.
-   * The row's ONLY click behavior: relative and `#` hrefs open in the same
-   * tab, hrefs to other domains open in a new one.
+   * The row's ONLY click behavior: only an href to ANOTHER HOST opens a new tab
+   * (see `isExternalHref`) — a path, a `#fragment` and this host under any
+   * scheme all stay in this tab, where the app's router takes them.
    */
   href?: string
   /** A trailing chevron. Off — the row's link affordance is the row itself. */
   showChevron?: boolean
-}
-
-/**
- * Whether an href leaves the current domain — those rows open in a new tab.
- * Relative paths and `#` fragments resolve against the current origin, so
- * they stay in this one.
- */
-const isExternal = (href: string) => {
-  if (typeof window === "undefined") return false
-  try {
-    return (
-      new URL(href, window.location.origin).origin !== window.location.origin
-    )
-  } catch {
-    return false
-  }
 }
 
 export function HomeListItem({
@@ -128,7 +113,7 @@ export function HomeListItem({
     <Link
       href={href}
       className={cn(className, "no-underline")}
-      {...(isExternal(href) ? { target: "_blank", rel: "noreferrer" } : {})}
+      {...(isExternalHref(href) ? { target: "_blank", rel: "noreferrer" } : {})}
     >
       {content}
     </Link>

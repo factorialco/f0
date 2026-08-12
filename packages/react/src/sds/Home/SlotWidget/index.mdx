@@ -24,26 +24,83 @@ instead of crashing.
 <Canvas of={SlotWidgetStories.AllSlots} />
 <Controls of={SlotWidgetStories.AllSlots} />
 
-## The header link
+## The way out IS the title
 
-`header.link` is the widget's way out — an icon-only control in the header's
-top-right, drawn with the **external-link** glyph (pass `icon` to override it).
-Being icon-only, it carries nothing that says where it goes, so its `title` is
-**required** and does that job twice: it is the control's **tooltip** and its
-accessible name.
-
-Write it as the action, naming the destination — the user should know where
-they are about to land before they click:
+`header.link` makes the widget's **title itself** the link: the title with a
+chevron after it, in one ghost-button-shaped target that lights up on hover.
+Nothing is added to the header's top-right (that belongs to the **overflow
+menu**) and nothing to the footer (that belongs to `action`, the widget's own
+call to action) — the name of the widget is the way into it.
 
 ```tsx
 header={{
   title: "Communications",
-  link: { title: "Go to Communications", onClick: openCommunications },
+  link: { title: "Go to Communications", url: "/communications" },
 }}
 ```
 
-Not `"Open"`, `"View"`, or the destination on its own: with several widgets on
-a Home, a column of identical "Open" tooltips says nothing.
+`title` is **required** and names the DESTINATION: the visible text is the
+widget's title, so this is what a screen reader announces instead. Write it as
+the action — not `"Open"` or `"View"`, which say nothing when several widgets
+have one.
+
+Prefer a **`url`**: it makes a real anchor, so the link can be middle-clicked,
+copied and opened in a new tab, and it goes through the app's `LinkProvider`.
+Use `onClick` only for a destination the app opens itself (a dialog, a panel) —
+that can only be a button. **Only another HOST opens a new tab**: a path, a
+`#fragment` and this host under any scheme all stay in this tab (see
+`isExternalHref`).
+
+## The info side
+
+`header.info` is not a tooltip beside the title — it is the widget's **other
+side**. The widget's three-dots menu offers **"What this info means?"** (copy
+from the f0 provider, `t.widgets.whatThisMeans`) and the card **turns over**:
+half a turn with a small jump, the title still in place, the sentence centered,
+and a **"Got it"** button to turn back.
+
+That is room enough to explain a widget in a sentence, which a tooltip cramped
+beside the title never was. Both widget dialogs show the same sentence under
+their preview, so it is also what you read when you are about to add or
+configure the widget.
+
+## Configurable widgets: params
+
+A widget can declare `paramsSchema` — **an F0Form schema** — and the params it is
+currently set to. That is all it takes for its menu to offer **"Edit params"** and
+for `WidgetUpdateDialog` to draw the fields:
+
+```tsx
+paramsSchema: z.object({
+  period: f0FormField(z.enum(["week", "month"]), { label: "Period", options: [...] }),
+  teams: f0FormField(z.array(z.string()).min(1), {
+    label: "Teams",
+    source: teamsDataSource,          // a DATASOURCE, searchable
+    mapOptions: (team) => ({ value: team.id, label: team.name }),
+    multiple: true,                   // single selection: drop `multiple`
+  }),
+  maxEvents: f0FormField(z.number().min(1).max(8), { label: "Events to show" }),
+  since: f0FormField(z.date().optional(), { label: "Only after" }),
+  digestAt: f0FormField(z.date().optional(), { label: "Digest at", fieldType: "datetime" }),
+}),
+params: { period: "week", teams: ["design"], maxEvents: 4 },
+```
+
+Because it is F0Form's own vocabulary, `z.date()` gets a date picker, `z.enum()`
+a select, and a datasource-backed field a searchable one. **Required is just
+zod**: a field that isn't `.optional()` cannot be left empty, and the dialog
+won't save until it is filled.
+
+`title` and `info` may be **functions of the params** (`fromParams` types them
+against the schema), so the card names what it is currently showing:
+
+```tsx
+title: fromParams(EVENTS_PARAMS, (p) => `Events · ${teamNames(p.teams)}`)
+```
+
+What the params CAN'T do by themselves is rebuild the widget's slots — only the
+app knows where that data comes from. Persist what `onChangeWidgetParams` hands
+you, pass it back as the widget's `params`, and rebuild the slots from it.
 
 ## Loading
 

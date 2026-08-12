@@ -5,6 +5,8 @@ import { IconType } from "@/components/F0Icon"
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
+import { WidgetPreviewPane } from "../WidgetPreview"
+
 /** One entry in the widget catalog dialog. */
 export interface WidgetCatalogItem {
   id: string
@@ -15,6 +17,12 @@ export interface WidgetCatalogItem {
    * `SlotWidget`), so the preview can't drift from what gets added.
    */
   preview: ReactNode
+  /**
+   * What this widget is telling you — the widget's own `header.info`, shown under
+   * the preview. Deciding whether to add a widget is exactly the moment that
+   * sentence is worth reading, so the picker says it without being asked.
+   */
+  info?: string
 }
 
 export interface WidgetCatalogProps {
@@ -108,15 +116,16 @@ export function WidgetCatalog({
             ) : null}
           </div>
         </div>
-        {/* The preview: the real widget, centered on the page grey, at the
-            width the target column will really give it. */}
-        <div className="flex min-w-0 flex-1 items-center justify-center rounded-lg bg-f1-background-secondary p-6">
-          {selected ? (
-            <div className="w-full" style={{ maxWidth: `${previewWidth}px` }}>
-              {selected.preview}
-            </div>
-          ) : null}
-        </div>
+        {/* The preview: the real widget, centered on the page grey, at the width
+            the target column will really give it — and it JUMPS in as you move
+            down the list, so each row you land on announces its widget. */}
+        <WidgetPreviewPane
+          previewKey={selected?.id}
+          info={selected?.info}
+          previewWidth={previewWidth}
+        >
+          {selected?.preview}
+        </WidgetPreviewPane>
       </div>
     </F0Dialog>
   )

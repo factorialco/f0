@@ -1,6 +1,10 @@
 import { useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { z } from "zod"
+
+import { createDataSourceDefinition } from "@/hooks/datasource"
+import { f0FormField } from "@/patterns/F0Form"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0OneIcon } from "@/kits/ai/F0OneIcon"
@@ -32,10 +36,13 @@ import {
 } from "../ClockIn/ClockInControls"
 import { SlotWidget } from "../SlotWidget"
 import {
+  fromParams,
   homeSlot,
   type HomeWidgetItem,
   listSlot,
+  resolveWidgetHeader,
   type SlotRenderers,
+  widgetTitle,
 } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog } from "../WidgetCatalog"
@@ -419,6 +426,133 @@ const RAIL_EVENTS = [
   },
 ]
 
+/* ===================== what makes a widget CONFIGURABLE ===================== */
+
+/** What the teams field's datasource serves. */
+type Team = { id: string; name: string; people: number }
+
+const TEAMS: Team[] = [
+  { id: "design", name: "Design", people: 8 },
+  { id: "engineering", name: "Engineering", people: 42 },
+  { id: "people", name: "People", people: 6 },
+  { id: "sales", name: "Sales", people: 17 },
+  { id: "support", name: "Support", people: 11 },
+]
+
+/**
+ * A DATASOURCE, not a list of options: the field searches it, so the widget can
+ * be pointed at things nobody could enumerate at build time (every team in the
+ * company). The same definition any F0Form select takes.
+ */
+const teamsSource = createDataSourceDefinition<Team>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      const needle = search?.toLowerCase()
+      return {
+        records: needle
+          ? TEAMS.filter((team) => team.name.toLowerCase().includes(needle))
+          : TEAMS,
+      }
+    },
+  },
+})
+
+/**
+ * The EVENTS widget's params, as a plain F0Form schema — params belong on the
+ * widgets a Home already has, not on a widget invented to carry them.
+ *
+ * Every field type the dialog can draw is here: an enum (select), a
+ * datasource-backed MULTI select, a number, a date and a datetime. REQUIRED vs
+ * OPTIONAL is just zod: `period`, `teams` and `maxEvents` must be set — the
+ * dialog won't save without them — while `since` and `digestAt` are `.optional()`
+ * and can be left alone.
+ */
+const EVENTS_PARAMS = z.object({
+  period: f0FormField(z.enum(["week", "month", "quarter"]), {
+    label: "Period",
+    options: [
+      { value: "week", label: "This week" },
+      { value: "month", label: "This month" },
+      { value: "quarter", label: "This quarter" },
+    ],
+  }),
+  teams: f0FormField(z.array(z.string()).min(1), {
+    label: "Teams",
+    placeholder: "Pick at least one team",
+    showSearchBox: true,
+    multiple: true,
+    source: teamsSource,
+    mapOptions: (team: Team) => ({
+      value: team.id,
+      label: team.name,
+      description: `${team.people} people`,
+    }),
+  }),
+  maxEvents: f0FormField(z.number().min(1).max(8), {
+    label: "Events to show",
+  }),
+  since: f0FormField(z.date().optional(), {
+    label: "Only after",
+  }),
+  digestAt: f0FormField(z.date().optional(), {
+    label: "Send me a digest at",
+    fieldType: "datetime",
+  }),
+})
+
+type EventsParams = z.infer<typeof EVENTS_PARAMS>
+
+const PERIOD_LABEL: Record<string, string> = {
+  week: "this week",
+  month: "this month",
+  quarter: "this quarter",
+}
+
+const teamNames = (ids: string[] = []) =>
+  ids.map((id) => TEAMS.find((team) => team.id === id)?.name ?? id).join(", ")
+
+/**
+ * The Events widget, BUILT FROM ITS PARAMS. Its `title` and `info` are functions
+ * of them — the card names the teams it is showing, and its info side explains
+ * what the list covers — while the slot's events are cut to `maxEvents` HERE, in
+ * the app, which is the only place that knows where events come from.
+ */
+const eventsWidget = (params: EventsParams): HomeWidgetItem => {
+  const shown = RAIL_EVENTS.slice(0, params.maxEvents)
+  return {
+    id: "events",
+    icon: Calendar,
+    paramsSchema: EVENTS_PARAMS,
+    params,
+    header: {
+      title: fromParams(EVENTS_PARAMS, (p) =>
+        p.teams?.length ? `Events · ${teamNames(p.teams)}` : "Events"
+      ),
+      info: fromParams(
+        EVENTS_PARAMS,
+        (p) =>
+          `The next ${p.maxEvents ?? 0} events ${PERIOD_LABEL[p.period ?? "week"]} for ${teamNames(p.teams) || "no team"}${
+            p.since ? `, from ${p.since.toLocaleDateString()} on` : ""
+          }.`
+      ),
+      count: shown.length,
+      // A `#` destination — a fragment on the page the app is already on. It
+      // must NOT open a new tab (see `isExternalHref`).
+      link: { title: "Go to Calendar", url: "/calendar#core.events" },
+    },
+    slots: [homeSlot("event-list", { showAllItems: true, events: shown })],
+  }
+}
+
+/** The Events widget as a Home the user already set up would have it. */
+const EVENTS_DEFAULTS: EventsParams = {
+  period: "week",
+  teams: ["design", "engineering"],
+  maxEvents: 4,
+  since: undefined,
+  digestAt: undefined,
+}
+
 /**
  * The rail as DATA — HomeWidgetItems with their catalog `icon`, so the layout
  * can collapse them to an avatar strip when it runs out of width. The bespoke
@@ -428,11 +562,14 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   {
     id: "clock-in",
     icon: Clock,
-    // Pinned: you always want the clock, so edit mode leaves it alone.
+    // Pinned: you always want the clock, so it can't be dragged or removed.
     locked: true,
+    // A `url`, not an `onClick`: the footer control is then a REAL link — an
+    // anchor you can middle-click and copy — and this one stays in the tab
+    // (same host), which is what every in-app destination should do.
     header: {
       title: "Clock in",
-      link: { title: "Go to Time tracking", onClick: () => {} },
+      link: { title: "Go to Time tracking", url: "/time-tracking" },
     },
     slots: [{ visualization: "clock-in", params: {} }],
   },
@@ -443,7 +580,7 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     hasUpdates: true,
     header: {
       title: "Communications",
-      link: { title: "Go to Communications", onClick: () => {} },
+      link: { title: "Go to Communications", url: "/communications" },
     },
     slots: [
       listSlot(
@@ -458,22 +595,13 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       ),
     ],
   },
-  {
-    id: "events",
-    icon: Calendar,
-    header: {
-      title: "Events",
-      count: 8,
-      link: { title: "Go to Calendar", onClick: () => {} },
-    },
-    slots: [
-      homeSlot("event-list", { showAllItems: true, events: RAIL_EVENTS }),
-    ],
-  },
-  // External navigation, both flavors: the header's link carries a real `url`
-  // (an anchor, opened by the browser), and every row's `href` is an outside
-  // website — link rows render as REAL anchors (via the app's LinkProvider),
-  // so external URLs just work.
+  // The CONFIGURABLE one: it declares a `paramsSchema`, so its three-dots menu
+  // carries "Edit params" — and its title, its info and the events it lists all
+  // follow what you set there.
+  eventsWidget(EVENTS_DEFAULTS),
+  // ANOTHER HOST, both flavors: the widget's link and every row's `href` point
+  // off this site. These are the only links that open a new tab — the widgets
+  // above navigate in place, fragment and all.
   {
     id: "resources",
     icon: Globe,
@@ -564,11 +692,16 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
 const CATALOG = [
   ...RIGHT_WIDGETS.map((widget) => ({
     id: widget.id,
-    title: widget.header?.title ?? widget.id,
+    // `widgetTitle` rather than the header's own: a configurable widget's title
+    // can be a function of its params, and a catalog row needs the text.
+    title: widgetTitle(widget),
+    // The same sentence the widget's info side shows, under the preview.
+    info: resolveWidgetHeader(widget.header, widget.params)?.info,
     icon: widget.icon!,
     preview: (
       <SlotWidget
         header={widget.header}
+        params={widget.params}
         slots={widget.slots}
         slotRenderers={SLOT_RENDERERS}
       />
@@ -779,14 +912,37 @@ const CATALOG = [
 const Home = () => {
   const [open, setOpen] = useState(false)
   const [side, setSide] = useState<WidgetContainerSide>("main")
+  // The configurable widget's params live with the app, next to the rail's
+  // order: both are things the user set and the app persists.
+  const [eventsParams, setEventsParams] = useState(EVENTS_DEFAULTS)
   const [rail, setRail] = useState(RIGHT_WIDGETS)
+  // The widget is REBUILT from its params — that is the app's half of the deal:
+  // the layout resolves what the params merely say (title, info), while the
+  // slots' data can only come from here.
+  const railWidgets = rail.map((widget) =>
+    widget.id === "events" ? eventsWidget(eventsParams) : widget
+  )
   return (
     <div className="h-full w-full p-6">
       <NewHomeLayout
-        rightWidgets={rail}
+        rightWidgets={railWidgets}
         slotRenderers={SLOT_RENDERERS}
         editableWidgetContainers={["right"]}
         onRemoveWidget={(id) => setRail((w) => w.filter((x) => x.id !== id))}
+        onChangeWidgetParams={(id, params) => {
+          if (id === "events") setEventsParams(params as EventsParams)
+        }}
+        // The preview rebuilds the widget the same way the rail does, so the
+        // dialog shows the events the params will really produce — not just the
+        // title following along.
+        renderWidgetPreview={(widget, params) =>
+          widget.id === "events" ? (
+            <SlotWidget
+              {...eventsWidget(params as EventsParams)}
+              slotRenderers={SLOT_RENDERERS}
+            />
+          ) : null
+        }
         onReorderWidgets={(_, ids) =>
           setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
         }
@@ -858,8 +1014,13 @@ type Story = StoryObj<typeof meta>
  * "Needs you" / "One working for you" feed) next to a fixed 396px rail (Clock in,
  * Communications, Events — every widget wrapped in the f0 `Widget` frame), no
  * divider between columns. Both columns end in "+ Add widget"
- * (`onClickAddNewWidget`), which opens the `WidgetCatalog` dialog; "Edit Home"
- * toggles the per-widget remove chrome.
+ * (`onClickAddNewWidget`), which opens the `WidgetCatalog` dialog.
+ *
+ * THERE IS NO EDIT MODE. A widget is removed from the three-dots menu in its own
+ * header and moved by dragging the card itself (no handle glyph — the grab
+ * cursor is the affordance), at any time; the clock is `locked`, so it offers
+ * neither. Each widget's way out sits in its FOOTER as a named button ("Go to
+ * Calendar"), since the header's top-right is the menu's.
  */
 export const Default: Story = {
   render: () => <Home />,

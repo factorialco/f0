@@ -45,6 +45,37 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   disabled?: boolean
 }
 
+/**
+ * Whether an href LEAVES THIS APP — the only thing that should ever decide
+ * `target="_blank"`. Everything else belongs in the current tab, where the app's
+ * own router (`LinkProvider`'s `component`) can take the navigation.
+ *
+ * Three things are NOT external, and each of them used to be:
+ *
+ * - A bare `#fragment`. It does not leave the DOCUMENT, let alone the site.
+ * - The SAME HOST under a different scheme. `http://app.example.com/x` while you
+ *   sit on `https://app.example.com` is the app you are already in; comparing
+ *   ORIGINS (scheme included) called it another site and tore the SPA down to
+ *   open a new tab. Hosts are what "same domain" means.
+ * - A non-web scheme (`mailto:`, `tel:`, `sms:`). The OS handles those; a tab
+ *   would open only to close itself again.
+ *
+ * Anything unparseable is treated as internal: a new tab is the more disruptive
+ * guess, so it is not the one to make when in doubt.
+ */
+export const isExternalHref = (href?: string): boolean => {
+  if (!href || href.startsWith("#")) return false
+  if (typeof window === "undefined") return false
+  try {
+    const url = new URL(href, window.location.href)
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false
+    // `host`, not `hostname`: a different port is a different app.
+    return url.host !== window.location.host
+  } catch {
+    return false
+  }
+}
+
 function stripTrailingSlash(path: string) {
   return path.endsWith("/") ? path.slice(0, -1) : path
 }

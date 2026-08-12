@@ -20,7 +20,13 @@ const WIDGETS: HomeWidgetItem[] = [
   {
     id: "events",
     icon: Calendar,
-    header: { title: "Events", count: 2 },
+    // The way out of a widget: declared as `header.link`, drawn as a button in
+    // the card's FOOTER (see `SlotWidget`).
+    header: {
+      title: "Events",
+      count: 2,
+      link: { title: "Go to Calendar", onClick: () => {} },
+    },
     slots: [
       listSlot({ clickBehavior: "link" }, [
         { id: "1", title: "Design sync", href: "/calendar/1" },
@@ -53,31 +59,33 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * View mode: the widgets and the add placeholder — adding is ALWAYS on offer;
- * edit mode is only for arranging what's already there.
+ * There is NO EDIT MODE. Every widget is draggable by its whole card (no handle
+ * glyph) and carries "Remove widget" in the three-dots menu at its header's
+ * top-right, and the column ends in the add placeholder — arranging a Home is
+ * something you just do.
  */
 export const Default: Story = {}
 
 /**
- * Edit mode: the movable widgets gain a remove control and become draggable.
- * A `locked` widget (the first here) stays inert — no drag, no remove.
+ * A `locked` widget (the first here) is inert: it can't be dragged, nothing can
+ * displace it, and it offers no menu at all — being mandatory, removing it is
+ * not a choice the user has.
  */
-export const Editing: Story = {
+export const WithLockedWidget: Story = {
   args: {
-    editing: true,
     widgets: [{ ...WIDGETS[0], locked: true }, WIDGETS[1]],
   },
 }
 
 /**
- * `disableEdition` opts a column out entirely: no remove controls, no
- * dragging, and not even the add placeholder.
+ * `disableEdition` opts a column out entirely: no remove menus, no dragging,
+ * and not even the add placeholder.
  */
 export const EditingDisabled: Story = {
-  args: { editing: true, disableEdition: true },
+  args: { disableEdition: true },
 }
 
 /** The rail variant — a tighter gap between its widgets than the main column. */
 export const RightSide: Story = {
-  args: { side: "right", editing: true },
+  args: { side: "right" },
 }

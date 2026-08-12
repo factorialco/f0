@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils"
 
 /** What the sortable state hands to the widget being rendered. */
 export interface SortableWidgetState {
-  /** Show the widget's own drag handle. False for a locked widget. */
-  draggable: boolean
   isDragging: boolean
 }
 
@@ -20,13 +18,11 @@ export interface SortableWidgetProps {
 }
 
 /**
- * One draggable widget in an editable column. It contributes no drag chrome of
- * its own: the f0 `Widget` already draws a handle beside its title when
- * `draggable`, so this reports the sortable state through its render callback
- * and lets the design system own the affordance.
- *
- * dnd-kit's listeners sit on a wrapper rather than on the handle itself — the
- * handle lives inside `Widget`, so the events reach it by bubbling.
+ * One draggable widget in an editable column. THE WHOLE CARD IS THE HANDLE and
+ * there is no handle glyph: dragging is always available (no edit mode to enter
+ * first), so a permanent grip icon on every widget would be chrome the user
+ * never asked for. The grab cursor is the affordance; `WidgetContainer`'s sensor
+ * is what keeps a press on a row or a button from becoming a drag.
  *
  * The card the pointer carries is NOT this one: while dragging, this in-list
  * card turns invisible (still holding its slot for the shuffle) and a clone
@@ -74,7 +70,7 @@ export const SortableWidget = ({
       // pointer-only drag surface.
       {...(disabled ? {} : listeners)}
     >
-      {children({ draggable: !disabled, isDragging })}
+      {children({ isDragging })}
     </div>
   )
 }

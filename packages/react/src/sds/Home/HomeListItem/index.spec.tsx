@@ -84,12 +84,22 @@ describe("HomeListItem", () => {
     expect(container.querySelector("svg")).not.toBeNull()
   })
 
-  test("relative and # hrefs stay in this tab; other domains open a new one", () => {
+  test("only another HOST opens a new tab — this one never does", () => {
     const { rerender } = zeroRender(<HomeListItem title="row" href="/inside" />)
 
     expect(screen.getByRole("link")).not.toHaveAttribute("target")
 
     rerender(<HomeListItem title="row" href="#section" />)
+    expect(screen.getByRole("link")).not.toHaveAttribute("target")
+
+    // The app's own host, absolute and with a fragment — including under the
+    // OTHER scheme, which used to read as a different site and open a new tab.
+    rerender(
+      <HomeListItem
+        title="row"
+        href={`https://${window.location.host}/calendar#core.events`}
+      />
+    )
     expect(screen.getByRole("link")).not.toHaveAttribute("target")
 
     rerender(<HomeListItem title="row" href="https://developer.mozilla.org" />)

@@ -167,13 +167,23 @@ describe("NewHomeLayout", () => {
       ).not.toBeInTheDocument()
     })
 
-    test("offers the collapse toggle and the edit button", () => {
+    test("offers the collapse toggle, and no edit toggle at all", () => {
       renderLayout(1400)
 
       expect(
         screen.getByLabelText("Collapse widgets panel")
       ).toBeInTheDocument()
-      expect(screen.getByLabelText("Edit Home")).toBeInTheDocument()
+      expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
+    })
+
+    /**
+     * Arranging is always available, so the chrome for it is on the widgets
+     * themselves: the unlocked one carries a menu, the pinned one carries none.
+     */
+    test("gives an unlocked widget its own menu, with no mode to enter", () => {
+      renderLayout(1400, { onRemoveWidget: () => {} })
+
+      expect(screen.getAllByRole("button", { name: "Actions" })).toHaveLength(1)
     })
 
     test("collapsing by hand swaps the rail for its glyph strip", async () => {
@@ -184,14 +194,6 @@ describe("NewHomeLayout", () => {
       expect(screen.getByLabelText("Expand widgets panel")).toBeInTheDocument()
       // Collapsed, each widget is a button rather than a card.
       expect(screen.getByRole("button", { name: "clock" })).toBeInTheDocument()
-    })
-
-    test("the edit button turns into a confirm while editing", async () => {
-      renderLayout(1400)
-
-      await userEvent.click(screen.getByLabelText("Edit Home"))
-
-      expect(screen.getByLabelText("Done editing")).toBeInTheDocument()
     })
   })
 
@@ -213,10 +215,9 @@ describe("NewHomeLayout", () => {
       ).not.toBeInTheDocument()
     })
 
-    test("hides the edit button, and still offers to add", () => {
+    test("still offers to add — the strip's one arranging affordance", () => {
       const { container } = renderLayout(1000)
 
-      expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
       // Scoped to the STRIP: the main column offers to add too, and both controls
       // are named the same thing because they are the same offer in two places.
       const strip = container.querySelector("aside.-m-1") as HTMLElement

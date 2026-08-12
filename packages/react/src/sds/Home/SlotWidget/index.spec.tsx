@@ -1,6 +1,6 @@
-import { describe, expect, test } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
 import {
   DEFAULT_EXPECTED_ITEMS_COUNT,
@@ -486,5 +486,177 @@ describe("SlotWidget chrome", () => {
     expect(screen.getByText("Gross")).toBeInTheDocument()
     expect(screen.getByText("3,200")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Sign now" })).toBeInTheDocument()
+  })
+
+  /**
+   * The way out of a widget is a NAMED BUTTON under its content, not an icon in
+   * the header's top-right — that corner is the overflow menu's now.
+   */
+  describe("the header's link", () => {
+    test("makes the TITLE the way out", async () => {
+      const onClick = vi.fn()
+      zeroRender(
+        <SlotWidget
+          header={{
+            title: "Events",
+            link: { title: "Go to Calendar", onClick },
+          }}
+          slots={slots}
+        />
+      )
+
+      const link = screen.getByRole("button", { name: "Go to Calendar" })
+      // The visible text is the widget's name; the accessible name is where it
+      // goes. Nothing is added to the footer for it.
+      expect(link).toHaveTextContent("Events")
+
+      await userEvent.click(link)
+      expect(onClick).toHaveBeenCalled()
+    })
+
+    test("is a real anchor when it carries a url", () => {
+      zeroRender(
+        <SlotWidget
+          header={{
+            title: "Resources",
+            link: { title: "Go to factorial.co", url: "https://factorial.co" },
+          }}
+          slots={slots}
+        />
+      )
+
+      expect(
+        screen.getByRole("link", { name: "Go to factorial.co" })
+      ).toHaveAttribute("href", "https://factorial.co")
+    })
+
+    test("opens another HOST in a new tab, and this one in place", () => {
+      const { rerender } = zeroRender(
+        <SlotWidget
+          header={{
+            title: "Resources",
+            link: { title: "Go out", url: "https://factorial.co" },
+          }}
+          slots={slots}
+        />
+      )
+
+      expect(screen.getByRole("link", { name: "Go out" })).toHaveAttribute(
+        "target",
+        "_blank"
+      )
+
+      // A fragment on this app — the case that used to open a new tab.
+      rerender(
+        <SlotWidget
+          header={{
+            title: "Events",
+            link: { title: "Go to Calendar", url: "/calendar#core.events" },
+          }}
+          slots={slots}
+        />
+      )
+
+      expect(
+        screen.getByRole("link", { name: "Go to Calendar" })
+      ).not.toHaveAttribute("target")
+    })
+
+    test("leaves the FOOTER to the widget's own call to action", () => {
+      zeroRender(
+        <SlotWidget
+          header={{
+            title: "Documents",
+            link: { title: "Go to Documents", onClick: () => {} },
+          }}
+          action={{ label: "Sign now", onClick: () => {} }}
+          slots={slots}
+        />
+      )
+
+      // Two separate things: the CTA in the footer, the way out as the title.
+      expect(
+        screen.getByRole("button", { name: "Sign now" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Go to Documents" })
+      ).toHaveTextContent("Documents")
+    })
+  })
+
+  /**
+   * `header.info` is the widget's OTHER SIDE: the card turns over to it, keeping
+   * its title, and one small button turns it back.
+   */
+  describe("the info side", () => {
+    const withInfo = {
+      title: "Hours",
+      info: "Hours logged this week against a 38h weekly target.",
+    }
+
+    test("is out of reach until the card is turned", () => {
+      zeroRender(<SlotWidget header={withInfo} slots={slots} />)
+
+      // The face EXISTS — it is the card's other side, and it is what gives the
+      // turn something to turn to — but it is hidden from the a11y tree and from
+      // the pointer while it faces away. (`backface-visibility` is what hides it
+      // visually, and jsdom computes no 3D, so this is the assertion that means
+      // anything here.)
+      expect(
+        screen.queryByRole("button", { name: "Got it" })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByText(withInfo.info).closest("[aria-hidden]")
+      ).toHaveAttribute("aria-hidden", "true")
+    })
+
+    test("keeps the title, centers the info and offers a way back", async () => {
+      const onFlipBack = vi.fn()
+      zeroRender(
+        <SlotWidget
+          header={withInfo}
+          slots={slots}
+          flipped
+          onFlipBack={onFlipBack}
+        />
+      )
+
+      // The title is on BOTH faces — twice in the tree, once per side.
+      expect(screen.getAllByText("Hours")).toHaveLength(2)
+      expect(screen.getByText(withInfo.info)).toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole("button", { name: "Got it" }))
+      expect(onFlipBack).toHaveBeenCalled()
+    })
+
+    test("a widget with no info has no other side to turn to", () => {
+      const { container } = zeroRender(
+        <SlotWidget header={{ title: "Events" }} slots={slots} />
+      )
+
+      expect(container.querySelector("[data-turning]")).toBeNull()
+      expect(
+        screen.queryByRole("button", { name: "Got it" })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  test("puts its actions in the header's overflow menu", async () => {
+    const onClick = vi.fn()
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Events" }}
+        actions={[{ label: "Remove widget", onClick }]}
+        slots={slots}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Actions" }))
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Remove widget" })
+    )
+
+    // The dropdown defers its items' onClick past its own close animation.
+    await waitFor(() => expect(onClick).toHaveBeenCalled())
   })
 })

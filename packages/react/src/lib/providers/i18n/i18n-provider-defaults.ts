@@ -959,6 +959,17 @@ export const defaultTranslations = {
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
   },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+  },
   pdfViewer: {
     toolbar: "Document toolbar",
     previousPage: "Previous page",
