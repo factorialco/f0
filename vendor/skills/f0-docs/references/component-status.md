@@ -4,7 +4,7 @@ This file tracks which components in `packages/react/src/components/` have MDX d
 
 Use this as a prioritization guide when deciding what to document next.
 
-**Last reviewed: 2026-04-08** — Update this date whenever you add or improve an MDX file.
+**Last reviewed: 2026-07-31** — Update this date whenever you add or improve an MDX file.
 
 ---
 
@@ -129,6 +129,7 @@ This file uses the shared documentation quality scale from `documentation-qualit
 | Component            | MDX File | Quality  | Notes        |
 | -------------------- | -------- | -------- | ------------ |
 | `Navigation/Sidebar` | None     | **None** | Flat stories |
+| `Navigation/Sidebar/ChatList` | `patterns/Navigation/Sidebar/Chats/index.mdx` | **Good** | Includes combined conversation statuses |
 
 ---
 
