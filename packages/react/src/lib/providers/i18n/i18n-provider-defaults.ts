@@ -959,6 +959,21 @@ export const defaultTranslations = {
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
   },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
+  },
   pdfViewer: {
     toolbar: "Document toolbar",
     previousPage: "Previous page",

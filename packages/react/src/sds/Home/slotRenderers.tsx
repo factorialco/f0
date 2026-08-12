@@ -1,5 +1,7 @@
 import { ReactNode, useState } from "react"
 
+import { type z } from "zod"
+
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
@@ -26,6 +28,7 @@ import {
 } from "@/experimental/Widgets/Content/IndicatorsList"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { WidgetProps } from "@/experimental/Widgets/Widget"
+import { type F0FormSchema } from "@/patterns/F0Form"
 
 import { HomeListItem } from "./HomeListItem"
 
@@ -128,7 +131,8 @@ export interface ListSchema {
    * `"link"` rows each carry an `href` and render as REAL anchors (role
    * `link`, routed through the app's `LinkProvider`) — never an onClick;
    * that's the only click behavior rows have. Omit for inert rows.
-   * Same-tab for relative and `#` hrefs, `target="_blank"` for other domains.
+   * Same-tab for paths, `#` fragments and this host under any scheme;
+   * `target="_blank"` only for ANOTHER host (see `isExternalHref`).
    */
   clickBehavior?: "link"
   /**
@@ -263,10 +267,149 @@ export type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> &
     | { status?: WidgetProps["status"]; alert?: never }
   )
 
+/* ---------------------------- configurable widgets ---------------------------- */
+
+/**
+ * What a user has CONFIGURED about a widget — the values of the fields its
+ * `paramsSchema` declares, keyed by field name. Dates arrive as `Date`s, a
+ * multi-select as an array: whatever the schema's zod types say.
+ */
+export type WidgetParams = Record<string, unknown>
+
+/**
+ * A widget's params SCHEMA: an F0Form schema, so the fields are declared once —
+ * in zod, with their f0 field config — and F0Form draws and validates them.
+ *
+ * That buys the whole vocabulary rather than a bespoke one: `z.string()`,
+ * `z.number()`, `z.date()` (`fieldType: "datetime"` for a time as well),
+ * `z.enum()`, and a select fed by a DATASOURCE (`source` + `mapOptions`, with
+ * `multiple` for many) — `z.array()` for the multi-select's value. A field is
+ * REQUIRED unless its zod type is `.optional()`, so "the user must set this"
+ * needs nothing new either.
+ *
+ * ```tsx
+ * paramsSchema: z.object({
+ *   since: f0FormField(z.date(), { label: "Since" }),
+ *   team: f0FormField(z.array(z.string()), {
+ *     label: "Teams",
+ *     source: teamsDataSource,
+ *     mapOptions: (team) => ({ value: team.id, label: team.name }),
+ *     multiple: true,
+ *   }),
+ * })
+ * ```
+ */
+export type WidgetParamsSchema = F0FormSchema
+
+/**
+ * A widget property that may be COMPUTED FROM ITS PARAMS instead of fixed — the
+ * title that says which team it is showing, the info that explains the period
+ * you picked. It gets the params the widget has now (`{}` when it has none), so
+ * the same function serves a widget before and after it is configured.
+ */
+export type FromWidgetParams<T> = T | ((params: WidgetParams) => T)
+
+/**
+ * A params-driven value, TYPED against the widget's own schema — how to write a
+ * `title` or an `info` that reads its params without casting at every access:
+ *
+ * ```tsx
+ * title: fromParams(HOURS_PARAMS, (p) => `Hours · ${p.period ?? "this week"}`)
+ * ```
+ *
+ * The params arrive `Partial`, and that is not a formality: a widget exists
+ * before it is configured (the moment it is added, or while its dialog is open
+ * on an incomplete form), so every field has to be treated as possibly unset.
+ * The schema argument is there only to carry the type.
+ */
+export const fromParams =
+  <S extends WidgetParamsSchema, T>(
+    _schema: S,
+    compute: (params: Partial<z.infer<S>>) => T
+  ) =>
+  (params: WidgetParams): T =>
+    compute(params as Partial<z.infer<S>>)
+
+/**
+ * A Home widget's header. The frame's, except that the two things a user reads
+ * to know WHAT they are looking at may follow the params they set.
+ */
+export type HomeWidgetHeader = Omit<
+  NonNullable<WidgetProps["header"]>,
+  "title" | "info"
+> & {
+  title?: FromWidgetParams<string>
+  /**
+   * The `i` beside the title: hovering it explains the widget. Takes the params
+   * too, so it can say what the numbers actually cover.
+   */
+  info?: FromWidgetParams<string>
+}
+
+/** Resolves a header's params-driven parts against the params in hand. */
+export const resolveWidgetHeader = (
+  header: HomeWidgetHeader | undefined,
+  params: WidgetParams = {}
+): WidgetProps["header"] => {
+  if (!header) return undefined
+  const { title, info, ...rest } = header
+  const from = <T,>(value: FromWidgetParams<T> | undefined) =>
+    typeof value === "function"
+      ? (value as (params: WidgetParams) => T)(params)
+      : value
+  return { ...rest, title: from(title), info: from(info) }
+}
+
+/**
+ * A widget's title as TEXT — resolved against its own params, and falling back
+ * to its id so there is always something to name it by (an aria-label on the
+ * collapsed rail's glyph, a row in the catalog).
+ */
+export const widgetTitle = (widget: {
+  id: string
+  header?: HomeWidgetHeader
+  params?: WidgetParams
+}): string =>
+  resolveWidgetHeader(widget.header, widget.params)?.title ?? widget.id
+
+/**
+ * Whether every REQUIRED param of a schema is set — what "this widget can't be
+ * shown until you configure it" comes down to. Use it to send a freshly added
+ * widget straight into its params dialog.
+ */
+export const widgetParamsAreComplete = (
+  schema: WidgetParamsSchema | undefined,
+  params: WidgetParams | undefined
+): boolean => (schema ? schema.safeParse(params ?? {}).success : true)
+
 /** A widget as handed to the layout: header + an ordered list of slots. */
 export type HomeWidgetItem = HomeWidgetChrome & {
   id: string
-  header?: WidgetProps["header"]
+  header?: HomeWidgetHeader
+  /**
+   * THIS WIDGET'S OWN menu items — "Mark all as read", "Export as CSV", whatever
+   * it can do that no other widget can. They go in the widget's three-dots menu,
+   * FIRST: the column adds what every widget carries (what its info means, its
+   * params, removing it) after them, and removing it sits behind a separator.
+   *
+   * Ordinary `DropdownItem`s, so they take an `icon`, a `description`, `critical`
+   * for a destructive one, `disabled`, or a `type: "separator"` of your own to
+   * group them. A `locked` widget still shows them.
+   */
+  actions?: WidgetProps["actions"]
+  /**
+   * The widget is CONFIGURABLE: these are the params the user may set, as an
+   * F0Form schema. Declaring it — together with the layout's
+   * `onChangeWidgetParams` — is what puts "Edit params" in the widget's menu.
+   */
+  paramsSchema?: WidgetParamsSchema
+  /**
+   * The params it is configured with right now. They drive whatever the widget
+   * derives from them (its `title`, its `info`) and are the dialog's starting
+   * point; rebuilding the SLOTS for new params is the app's own job, since only
+   * it knows where their data comes from.
+   */
+  params?: WidgetParams
   fullHeight?: boolean
   /**
    * The widget's catalog glyph — shown for it in the collapsed rail and in the
@@ -274,9 +417,9 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    */
   icon?: IconType
   /**
-   * PINNED: the widget stays put. In edit mode it shows no remove control and
-   * does not wiggle (nor drag, once dragging lands) — for widgets a user must
-   * always have, like Clock in.
+   * PINNED: the widget stays put. It offers no "Remove widget" in its menu, it
+   * cannot be dragged, and no other widget can displace it — for widgets a user
+   * must always have, like Clock in.
    */
   locked?: boolean
   /**
@@ -420,8 +563,11 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       })}
       {overflows ? (
         <div className="mt-1 self-start">
+          {/* `neutral`, the same button a widget's own call to action is (the
+              frame's `action`): "View more" is something you press, and a ghost
+              button under a dense list of rows reads as another row. */}
           <F0Button
-            variant="ghost"
+            variant="neutral"
             size="sm"
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
@@ -526,7 +672,7 @@ const ListSlotSkeleton = ({
       ))}
       {overflows ? (
         <div className="mt-1 self-start">
-          {/* An `sm` ghost button — what "View more (n)" will be. */}
+          {/* An `sm` neutral button — what "View more (n)" will be. */}
           <Skeleton className="h-6 w-24 rounded-sm" />
         </div>
       ) : null}

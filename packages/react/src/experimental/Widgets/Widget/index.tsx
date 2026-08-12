@@ -17,13 +17,14 @@ import { Counter } from "@/ui/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/sds/Profile/PrivateBox"
 import {
-  ExternalLink,
+  ChevronRight,
   EyeInvisible,
   EyeVisible,
   Handle,
   InfoCircleLine,
 } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
+import { isExternalHref, Link } from "@/lib/linkHandler"
 import { experimentalComponent } from "@/lib/experimental"
 import { usePrivacyMode } from "@/lib/privacyMode"
 import { withSkeleton } from "@/lib/skeleton"
@@ -34,7 +35,6 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardLink,
   CardSubtitle,
   CardTitle,
 } from "@/ui/Card"
@@ -48,22 +48,37 @@ export interface WidgetProps {
     comment?: string
     info?: string
     canBeBlurred?: boolean
+    /**
+     * The way out of the widget: it makes the TITLE ITSELF the link — the title
+     * with a chevron after it, one ghost-button-shaped target that lights up on
+     * hover. Nothing sits in the header's top-right (that is the overflow menu's)
+     * and nothing sits in the footer (that is `action`'s): the name of the widget
+     * IS the way into it.
+     */
     link?: {
       /**
-       * What following the link DOES, in words — "Go to Communities". The
-       * control is icon-only, so this is the only thing that says where it
-       * goes: it is its tooltip and its accessible name, and it is required
-       * for exactly that reason.
+       * What following it DOES, in words — "Go to Communities". The visible text
+       * is the widget's title, so this is what a screen reader announces
+       * instead: it names the DESTINATION, which a title alone cannot.
        */
       title: string
       url?: string
       onClick?: () => void
-      /** Defaults to the external-link glyph. */
+      /** Defaults to the chevron. */
       icon?: IconType
     }
     count?: number
   }
+  /** The card's footer button — its call to action. `neutral`/`sm` by default. */
   action?: F0ButtonProps
+  /**
+   * Extra classes for the FOOTER row that `action` draws in. For content that
+   * BLEEDS past the card's content box and wants the footer brought onto its
+   * line — Home's row-based slots bleed 8px, which eats the gap above the footer
+   * and offsets it from the rows (see `SlotWidget`). Spacing only; `F0Button`
+   * takes no className of its own, so this is the seam for it.
+   */
+  footerClassName?: string
   summaries?: Array<{
     label: string
     value: string | number
@@ -97,6 +112,80 @@ const InlineDot = () => (
   <div className="min-h-[0.15rem] min-w-[0.15rem] rounded-full bg-f1-foreground-secondary" />
 )
 
+/**
+ * The TITLE AS A LINK: title text plus a chevron, in one target that behaves like
+ * a ghost button — a tint on hover, a ring on focus. The negative margin with the
+ * matching padding is what keeps the title on the same line it sits on when it is
+ * NOT a link, so the header doesn't shift between the two.
+ */
+const TITLE_LINK_CLASS = cn(
+  "-mx-1.5 inline-flex min-w-0 items-center gap-1 rounded-sm px-1.5 py-0.5",
+  "border-none bg-transparent text-left no-underline",
+  // The COLOUR lives here, on the link, for two reasons: an anchor otherwise
+  // falls back to the browser's blue, and `F0Icon` paints itself from
+  // `currentColor` — so the chevron is the title's colour by inheritance rather
+  // than by being told twice.
+  "text-f1-foreground",
+  "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover",
+  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
+)
+
+/**
+ * The widget's title, linked or not. Linked, it is a real anchor when it has a
+ * `url` (so it can be opened in a new tab, copied, middle-clicked — and only
+ * ANOTHER HOST opens a tab by itself) and a button when all it has is an
+ * `onClick`.
+ */
+const WidgetTitle = ({
+  title,
+  link,
+}: {
+  title: string
+  link?: NonNullable<WidgetProps["header"]>["link"]
+}) => {
+  if (!link) return <CardTitle className="truncate">{title}</CardTitle>
+
+  const content = (
+    <>
+      <CardTitle className="truncate">{title}</CardTitle>
+      {/* No colour of its own: `currentColor` makes it exactly the title's, and
+          the two read as ONE label rather than a label beside a control. */}
+      <F0Icon size="sm" icon={link.icon ?? ChevronRight} />
+    </>
+  )
+
+  // `aria-label` names the DESTINATION while the visible text stays the title.
+  // The title is contained in it ("Communications" in "Go to Communications"),
+  // which is what WCAG's label-in-name asks for.
+  const control = link.url ? (
+    <Link
+      href={link.url}
+      onClick={link.onClick}
+      aria-label={link.title}
+      className={TITLE_LINK_CLASS}
+      {...(isExternalHref(link.url)
+        ? { target: "_blank" as const, rel: "noreferrer" }
+        : {})}
+    >
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={link.onClick}
+      aria-label={link.title}
+      className={TITLE_LINK_CLASS}
+    >
+      {content}
+    </button>
+  )
+
+  // The tooltip says WHERE, above the title: the visible text is the widget's
+  // name, which tells you what you are looking at but not what clicking it does.
+  // Same words as the accessible name, so both audiences get the destination.
+  return <Tooltip label={link.title}>{control}</Tooltip>
+}
+
 const Container = forwardRef<
   HTMLDivElement,
   WidgetProps & { children: ReactNode }
@@ -105,6 +194,7 @@ const Container = forwardRef<
     header,
     children,
     action,
+    footerClassName,
     summaries,
     alert,
     status,
@@ -151,10 +241,6 @@ const Container = forwardRef<
     )
   }
 
-  const handleLinkClick = () => {
-    header?.link?.onClick?.()
-  }
-
   return (
     <Card
       className={cn(
@@ -181,9 +267,13 @@ const Container = forwardRef<
                   <F0Icon icon={Handle} size="xs" />
                 </div>
               )}
-              <div className="flex min-h-6 grow flex-row items-center gap-1 truncate">
+              {/* `min-w-0` rather than `truncate`: the ellipsis belongs to the
+                  TITLE, which carries its own (see `WidgetTitle`), and an
+                  `overflow: hidden` here clipped the linked title's hover
+                  background where it bleeds past the content box. */}
+              <div className="flex min-h-6 min-w-0 grow flex-row items-center gap-1">
                 {header.title && (
-                  <CardTitle className="truncate">{header.title}</CardTitle>
+                  <WidgetTitle title={header.title} link={header.link} />
                 )}
                 {header.subtitle && (
                   <div className="flex flex-row items-center gap-1">
@@ -232,18 +322,8 @@ const Container = forwardRef<
                     />
                   </DropdownInternal>
                 )}
-                {header.link && (
-                  // The glyph alone can't say where it goes, so `title` is
-                  // shown as a tooltip as well as being the accessible name.
-                  <Tooltip label={header.link.title}>
-                    <CardLink
-                      onClick={handleLinkClick}
-                      href={header.link.url}
-                      title={header.link.title}
-                      icon={header.link.icon ?? ExternalLink}
-                    />
-                  </Tooltip>
-                )}
+                {/* No link here: it is the TITLE (see `WidgetTitle`). This
+                    corner belongs to the overflow menu. */}
               </div>
             </div>
             {header.comment && (
@@ -305,7 +385,7 @@ const Container = forwardRef<
           })}
       </CardContent>
       {action && (
-        <CardFooter>
+        <CardFooter className={cn(footerClassName)}>
           <F0Button variant="neutral" size="sm" {...action} />
         </CardFooter>
       )}

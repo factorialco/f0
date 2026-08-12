@@ -17,12 +17,14 @@ import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import Menu from "@/icons/app/Menu"
-import { Check, Pencil, Plus } from "@/icons/app"
+// No `Pencil`/`Check`: there is no edit mode to toggle any more.
+import { Plus } from "@/icons/app"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
 import { Action } from "@/ui/Action"
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import {
@@ -47,9 +49,11 @@ import { useRailMotion } from "./useRailMotion"
 import { useScrollFade } from "../useScrollFade"
 import { WidgetContainer, type WidgetContainerSide } from "../WidgetContainer"
 import {
+  widgetTitle,
   type HomeRenderCtx,
   type HomeWidgetItem,
   type SlotRenderers,
+  type WidgetParams,
 } from "../slotRenderers"
 
 /**
@@ -122,7 +126,9 @@ const CollapsedGlyph = ({
   return (
     <motion.button
       type="button"
-      aria-label={widget.header?.title ?? widget.id}
+      // `widgetTitle`, not the header's own: a configurable widget's title can be
+      // a function of its params, and an aria-label needs the text.
+      aria-label={widgetTitle(widget)}
       aria-expanded={open}
       onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
       onClick={(event) =>
@@ -150,7 +156,7 @@ const CollapsedGlyph = ({
           <F0AvatarIcon icon={widget.icon} size="lg" />
         ) : (
           <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-solid border-f1-border-secondary bg-f1-background font-medium text-f1-foreground-secondary">
-            {(widget.header?.title ?? widget.id).charAt(0)}
+            {widgetTitle(widget).charAt(0)}
           </span>
         )}
         {widget.hasUpdates ? (
@@ -174,12 +180,10 @@ const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
 const PANEL_GAP_PX = 8
-/**
- * Names the add control in both places it appears — the strip's glyph here and the
- * column's placeholder in `WidgetContainer`, which shares the default. Neither
- * shows it: it is a tooltip and an accessible name.
- */
-const ADD_WIDGET_LABEL = "Add widget"
+// The add control's name comes from the PROVIDER (`t.widgets.addWidget`) — it is
+// the same offer in the strip's glyph here and in the column's placeholder
+// (`WidgetContainer`), and neither shows it: it is a tooltip and an accessible
+// name.
 
 export interface NewHomeLayoutProps {
   /** Freeform main-column content on top (greeting, shortcut cards, ranked feed…). */
@@ -195,19 +199,33 @@ export interface NewHomeLayoutProps {
   /** Full override of how a whole widget is drawn. Defaults to `SlotWidget`. */
   renderWidget?: (widget: HomeWidgetItem, ctx: HomeRenderCtx) => ReactNode
   /**
-   * Edit mode. Omit it and the layout owns the state itself, toggled by its own
-   * edit button; pass it to drive edit mode from outside.
-   */
-  editing?: boolean
-  /** Called when the layout's edit button is pressed. */
-  onEditingChange?: (editing: boolean) => void
-  /**
-   * Which containers a user may actually edit. In edit mode only these show
-   * remove controls and the add placeholder; the others stay put. Both by default.
+   * Which containers a user may arrange. Only these offer "Remove widget",
+   * dragging and the add placeholder; the others stay put. Both by default.
    */
   editableWidgetContainers?: WidgetContainerSide[]
-  /** Called with a widget id when its remove control is clicked (edit mode only). */
+  /**
+   * Called with a widget id when its "Remove widget" menu item is used — the
+   * three-dots menu in the widget's own header.
+   */
   onRemoveWidget?: (id: string) => void
+  /**
+   * Called with a widget id and its new params when its "Edit params" dialog is
+   * saved. Providing it is what offers that item, in the same menu, for every
+   * widget that declares a `paramsSchema`. PERSIST what it hands you and pass it
+   * back as the widget's `params` — rebuilding the widget's slots for the new
+   * params is the app's own job, since only it knows where their data comes from.
+   */
+  onChangeWidgetParams?: (id: string, params: WidgetParams) => void
+  /**
+   * Draws a widget for params being tried out in that dialog, before they are
+   * saved. Defaults to the widget with those params swapped in — which is
+   * already live for everything they derive (title, info); supply this to
+   * rebuild its slots as well.
+   */
+  renderWidgetPreview?: (
+    widget: HomeWidgetItem,
+    params: WidgetParams
+  ) => ReactNode
   /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
@@ -260,10 +278,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       aside,
       slotRenderers,
       renderWidget,
-      editing,
-      onEditingChange,
       editableWidgetContainers = ["main", "right"],
       onRemoveWidget,
+      onChangeWidgetParams,
+      renderWidgetPreview,
       onClickAddNewWidget,
       onReorderWidgets,
       period = "morning",
@@ -276,6 +294,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     },
     ref
   ) {
+    const t = useI18n()
     const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
     const reducedMotion = useReducedMotion()
     const rootRef = useRef<HTMLDivElement | null>(null)
@@ -311,16 +330,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [hasMeasured, setHasMeasured] = useState(false)
     if (rootWidth > 0 && !hasMeasured) setHasMeasured(true)
 
-    // Uncontrolled by default: the layout's own edit button drives it. Passing
-    // `editing` hands control to the caller.
-    const [editingState, setEditingState] = useState(false)
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
-    const isEditing = editing ?? editingState
-    const toggleEditing = () => {
-      const next = !isEditing
-      if (editing === undefined) setEditingState(next)
-      onEditingChange?.(next)
-    }
     const canEditSide = (side: WidgetContainerSide) =>
       editableWidgetContainers.includes(side)
 
@@ -330,6 +340,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       ) : (
         <SlotWidget
           header={widget.header}
+          params={widget.params}
           fullHeight={widget.fullHeight}
           slots={widget.slots}
           loading={widget.loading}
@@ -599,13 +610,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         >
           <GradientWash period={period} />
         </div>
-        {/* The edit toggle sits in its OWN grid row spanning both columns, so it
-            takes real layout space instead of floating over the widgets below.
-            Entering edit mode is what makes `editableWidgetContainers` take
-            effect (remove controls + the add placeholder appear in the
-            containers it lists). */}
-        {/* Chrome, not content: it arrives on the main column's first beat rather
-            than waiting its turn behind it. */}
+        {/* The page's own controls sit in their OWN grid row spanning both
+            columns, so they take real layout space instead of floating over the
+            widgets below. There is NO EDIT TOGGLE: a widget is removed from its
+            own three-dots menu and moved by dragging it, at any time, so there
+            is no mode to switch into (`editableWidgetContainers` decides which
+            columns offer that at all).
+
+            Chrome, not content: it arrives on the main column's first beat
+            rather than waiting its turn behind it. */}
         <HomeEntrance
           order={0}
           className="col-span-full flex flex-row items-center justify-between"
@@ -624,20 +637,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             <span />
           )}
           <div className="flex flex-row items-center gap-2">
-            {/* Not while the rail is collapsed: arranging widgets you cannot see
-                is not an offer worth making. In edit mode the button becomes the
-                primary action — a check to confirm — rather than staying the
-                pencil that got you here. */}
-            {collapsed ? null : (
-              <F0Button
-                variant={isEditing ? "default" : "ghost"}
-                size="md"
-                hideLabel
-                icon={isEditing ? Check : Pencil}
-                label={isEditing ? "Done editing" : "Edit Home"}
-                onClick={toggleEditing}
-              />
-            )}
             {/* Collapsing the rail by hand — but only while that is a real
                 choice. Once the layout is too narrow for both columns the rail
                 is collapsed regardless, so a toggle there would be a control
@@ -698,7 +697,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             slotRenderers={slotRenderers}
             renderWidget={renderWidget}
             ctx={ctx}
-            editing={isEditing}
             disableEdition={!canEditSide("main")}
             onReorder={
               onReorderWidgets
@@ -706,6 +704,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 : undefined
             }
             onRemoveWidget={onRemoveWidget}
+            onChangeWidgetParams={onChangeWidgetParams}
+            renderWidgetPreview={renderWidgetPreview}
+            paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
               onClickAddNewWidget
                 ? () => onClickAddNewWidget("main")
@@ -784,10 +785,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               {canEditSide("right") && onClickAddNewWidget ? (
                 // The same control the column's placeholder is — a dashed box
                 // around one glyph, named only on hover — at the strip's size.
-                <Tooltip label={ADD_WIDGET_LABEL}>
+                <Tooltip label={t.widgets.addWidget}>
                   <motion.button
                     type="button"
-                    aria-label={ADD_WIDGET_LABEL}
+                    aria-label={t.widgets.addWidget}
                     onClick={() => onClickAddNewWidget("right")}
                     className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
                     initial={{ opacity: 0 }}
@@ -805,7 +806,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </motion.aside>
           )}
-        </AnimatePresence>
+        </AnimatePresence>{" "}
         {/* THE RAIL BODY — one mount, whatever the rail is doing.
 
             Expanded it is the rail's column. Collapsed it is the FLOATING PANEL:
@@ -882,7 +883,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
               ctx={ctx}
-              editing={isEditing}
+              // NOT gated on `collapsed`: whether the column is arrangeable
+              // decides its tree's SHAPE (a draggable column is wrapped in a
+              // DndContext), and a shape that changed when the rail collapsed
+              // would rebuild every widget in it — the one thing this rail
+              // exists to avoid.
               disableEdition={!canEditSide("right")}
               onReorder={
                 onReorderWidgets
@@ -890,6 +895,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   : undefined
               }
               onRemoveWidget={onRemoveWidget}
+              onChangeWidgetParams={onChangeWidgetParams}
+              renderWidgetPreview={renderWidgetPreview}
+              paramsPreviewWidth={asideWidth}
               // Not from the panel: collapsed, the strip carries the add
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.

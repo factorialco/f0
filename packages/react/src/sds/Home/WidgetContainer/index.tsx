@@ -1,11 +1,10 @@
-import { type CSSProperties, ReactNode, useState } from "react"
-
 import {
   closestCenter,
   DndContext,
   type DragEndEvent,
   DragOverlay,
   PointerSensor,
+  type PointerSensorOptions,
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
@@ -14,33 +13,85 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
+import {
+  type CSSProperties,
+  type PointerEvent,
+  ReactNode,
+  useRef,
+  useState,
+} from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { Cross, LockLocked, Plus } from "@/icons/app"
+import {
+  DropdownInternal,
+  type DropdownItem,
+} from "@/experimental/Navigation/Dropdown/internal"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { toasts } from "@/hooks/toast"
+import { Delete, Ellipsis, InfoCircleLine, Plus, Sliders } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { arrivalWindowMs, useElapsed } from "../home-motion"
-import { SlotWidget } from "../SlotWidget"
-import { SortableWidget } from "./SortableWidget"
-import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 import {
+  resolveWidgetHeader,
+  widgetTitle,
   type HomeRenderCtx,
   type HomeWidgetChrome,
   type HomeWidgetItem,
   type SlotRenderers,
+  type WidgetParams,
 } from "../slotRenderers"
+import { SlotWidget } from "../SlotWidget"
+import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
+import { SortableWidget } from "./SortableWidget"
+import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 
 /**
- * The interaction the header arrow has (copied from `CardLink`), so a control
- * standing in its place feels identical on hover and focus.
+ * WHAT CANNOT START A DRAG. The whole card is the drag surface — there is no
+ * handle to grab — so a pointer-down that lands on something you can operate
+ * must stay a click: dnd-kit's own PointerSensor has no such guard, and with
+ * dragging always on (rather than only inside an edit mode) every row link, tag
+ * and control in a widget would otherwise be 4px of travel away from becoming a
+ * drag.
  */
-const CARD_LINK_CLASS = cn(
-  "group inline-flex aspect-square h-6 items-center justify-center gap-1",
-  "rounded-sm border border-solid border-transparent bg-transparent",
-  "whitespace-nowrap px-0 text-base font-medium text-f1-foreground",
-  "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1"
-)
+const INTERACTIVE = [
+  "a",
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "label",
+  "[role='button']",
+  "[role='link']",
+  "[role='menuitem']",
+  "[role='switch']",
+  "[role='checkbox']",
+  "[role='tab']",
+  "[contenteditable='true']",
+].join(",")
+
+class WidgetDragSensor extends PointerSensor {
+  static activators = [
+    {
+      eventName: "onPointerDown" as const,
+      handler: (
+        { nativeEvent: event }: PointerEvent<Element>,
+        { onActivation }: PointerSensorOptions
+      ) => {
+        // The base sensor's own two conditions, kept as they are — a secondary
+        // pointer or any button but the left one is not a drag.
+        if (!event.isPrimary || event.button !== 0) return false
+        const target = event.target
+        if (target instanceof Element && target.closest(INTERACTIVE))
+          return false
+        onActivation?.({ event })
+        return true
+      },
+    },
+  ]
+}
 
 /**
  * The drop settle, matching SurveyFormBuilder's: that builder reorders with
@@ -139,21 +190,22 @@ export interface WidgetContainerProps {
   slotRenderers?: SlotRenderers
   /** Full override of how a whole widget is drawn. Defaults to `SlotWidget`. */
   renderWidget?: (widget: HomeWidgetItem, ctx: HomeRenderCtx) => ReactNode
-  /** Whether the Home is currently in edit mode. */
-  editing?: boolean
   /**
-   * Opts this container OUT of editing entirely: even in edit mode it shows no
-   * remove controls and no add placeholder. For a column whose contents are
-   * fixed (a curated feed, say) rather than user-arranged.
+   * Opts this container OUT of arranging entirely: no remove item in any
+   * widget's menu, no dragging, no add placeholder. For a column whose contents
+   * are fixed (a curated feed, say) rather than user-arranged.
    */
   disableEdition?: boolean
-  /** Called with a widget id when its remove control is clicked. */
+  /**
+   * Called with a widget id when its "Remove widget" menu item is used. Omit it
+   * and no widget offers removal.
+   */
   onRemoveWidget?: (id: string) => void
   /** Called when the add placeholder is clicked. The container knows its side. */
   onClickAddNewWidget?: () => void
   /**
    * Called with the column's widget ids in their new order after a drag. Omit
-   * it and the column is not draggable, even in edit mode.
+   * it and the column is not draggable.
    */
   onReorder?: (ids: string[]) => void
   /**
@@ -187,10 +239,38 @@ export interface WidgetContainerProps {
    * `NewHomeLayout` knows those, which is why they come in from outside.
    */
   stow?: Omit<WidgetStow, "stowed" | "instant"> & { stowed: boolean }
-  /** Tooltip on a locked widget's lock icon. */
-  lockedLabel?: string
-  /** Tooltip and accessible name for the add placeholder, which shows no text. */
+  /**
+   * Tooltip and accessible name for the add placeholder, which shows no text.
+   * Defaults to the provider's `t.widgets.addWidget`.
+   */
   addWidgetLabel?: string
+  /**
+   * Called with a widget id and its NEW params when its params dialog is saved.
+   * Providing it is what puts "Edit params" in the menu of every widget that
+   * declares a `paramsSchema` — locked widgets included, since being mandatory
+   * says nothing about being configurable.
+   */
+  onChangeWidgetParams?: (id: string, params: WidgetParams) => void
+  /**
+   * Draws a widget for params the user is trying out in that dialog, before they
+   * are saved. Defaults to the widget as it is with those params swapped in —
+   * enough for everything the params DERIVE (its title, its info); supply this
+   * to rebuild its slots too, which only the app can do.
+   */
+  renderWidgetPreview?: (
+    widget: HomeWidgetItem,
+    params: WidgetParams
+  ) => ReactNode
+  /** Content width the params dialog previews a widget at. */
+  paramsPreviewWidth?: number
+  /**
+   * The copy of the remove item in a widget's menu. Defaults to the PROVIDER's
+   * (`t.widgets.removeWidget`) — override it only for a column that means
+   * something more specific by removing.
+   */
+  removeLabel?: string
+  /** The copy of the params item. Defaults to `t.widgets.editParams`. */
+  editParamsLabel?: string
   ctx?: HomeRenderCtx
   className?: string
   style?: CSSProperties
@@ -198,13 +278,14 @@ export interface WidgetContainerProps {
 
 /**
  * WidgetContainer — one column of Home widgets, and the only thing that knows
- * how a column is edited.
+ * how a column is arranged.
  *
  * It renders its `children` (freeform content) followed by each widget through
- * `SlotWidget`, ending in an "Add widget" placeholder — adding is ALWAYS on
- * offer. EDIT MODE (`editing`) is for arranging what's already there: every
- * widget gains a remove control and becomes draggable. `disableEdition` opts
- * a column out of all of it, placeholder included.
+ * `SlotWidget`, ending in an "Add widget" placeholder. THERE IS NO EDIT MODE:
+ * every widget is draggable (the whole card, no handle) and carries "Remove
+ * widget" in its own overflow menu, so rearranging a Home is something you just
+ * do rather than something you switch into. `disableEdition` opts a column out
+ * of all of it, placeholder included.
  *
  * `NewHomeLayout` uses one of these per side; nothing about the column's own
  * width or background lives here (that's the layout's job), so the same
@@ -216,7 +297,6 @@ export function WidgetContainer({
   children,
   slotRenderers,
   renderWidget,
-  editing = false,
   disableEdition = false,
   onRemoveWidget,
   onClickAddNewWidget,
@@ -224,25 +304,150 @@ export function WidgetContainer({
   visibleWidgetId,
   entrance = {},
   stow,
-  lockedLabel = "This widget is mandatory in your company.",
-  addWidgetLabel = "Add widget",
+  addWidgetLabel,
+  onChangeWidgetParams,
+  renderWidgetPreview,
+  paramsPreviewWidth,
+  removeLabel,
+  editParamsLabel,
   ctx = {},
   className,
   style,
 }: WidgetContainerProps) {
-  const canEdit = editing && !disableEdition
+  const t = useI18n()
+  const canEdit = !disableEdition
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
   const canDrag = canEdit && onReorder != null && widgets.length > 1
   // The widget being dragged: its in-list card hides while a clone rides the
   // pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
-  // A small activation distance so a click on a widget's own control still
-  // reads as a click rather than the start of a drag.
+  // A small activation distance so a press on a widget still reads as a press
+  // rather than the start of a drag — the sensor itself already refuses to
+  // start one from anything operable inside the card.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
+    useSensor(WidgetDragSensor, { activationConstraint: { distance: 4 } })
   )
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  // Which widget's params are being edited, if any — the dialog is the column's
+  // (one at a time), not one mounted per card.
+  const [editingParamsId, setEditingParamsId] = useState<string | null>(null)
+  const editingParams = widgets.find((w) => w.id === editingParamsId)
+  // Which widget is showing its back. One at a time: two cards mid-turn in the
+  // same column is a fairground, not an explanation.
+  const [flippedId, setFlippedId] = useState<string | null>(null)
+  const columnRef = useRef<HTMLDivElement>(null)
+  /**
+   * The LOCKED widget a drop was aiming at, if any — the reason it is about to be
+   * refused.
+   *
+   * Hit-tested against the DOM rather than taken from dnd-kit: a locked widget is
+   * not a droppable (that is what keeps other widgets from displacing it), so
+   * dnd-kit never reports it as `over`, and without this the refusal would have no
+   * name to give.
+   *
+   * "AIMING AT IT" is the card covering more than half of it — the dragged card's
+   * box straddling the locked card's midline. That is the geometry of taking a
+   * slot, and unlike the two obvious tests it does not depend on where the card
+   * happened to be grabbed:
+   *
+   * - The dragged card's own MIDDLE is unreachable for a tall widget over a card
+   *   near the top of the column: it would have to hang off the top of the window.
+   * - The POINTER misses the ordinary gesture. Grab a 414px card 250px down, carry
+   *   it up until it visibly sits in the first slot, and the pointer is still 30px
+   *   BELOW the pinned card — the grab offset went with it.
+   *
+   * The pointer is still worth asking about, for the opposite grab: held near its
+   * bottom edge, the card can cover the locked one while hanging off the top of the
+   * viewport, and then the pointer is the only thing left inside it.
+   */
+  const lockedTargetOf = ({ activatorEvent, delta, active }: DragEndEvent) => {
+    const dragged = active.rect.current.translated
+    const start = activatorEvent as Partial<
+      Pick<globalThis.PointerEvent, "clientX" | "clientY">
+    >
+    const x = start.clientX == null ? null : start.clientX + delta.x
+    const y = start.clientY == null ? null : start.clientY + delta.y
+
+    return widgets.find((widget) => {
+      if (!widget.locked) return false
+      const box = columnRef.current
+        ?.querySelector(`[data-widget-id="${widget.id}"]`)
+        ?.getBoundingClientRect()
+      if (!box) return false
+
+      const midline = box.top + box.height / 2
+      const covered =
+        !!dragged && dragged.top <= midline && dragged.bottom >= midline
+      const pointedAt =
+        x != null &&
+        y != null &&
+        x >= box.left &&
+        x <= box.right &&
+        y >= box.top &&
+        y <= box.bottom
+
+      return covered || pointedAt
+    })
+  }
+  /**
+   * ONE MENU PER WIDGET, in the order it reads:
+   *
+   * 1. THE WIDGET'S OWN `actions` — what this particular widget does ("Mark all
+   *    as read", "Export"). They come first because they are the reason a user
+   *    opens the menu; the rest is chrome every widget has.
+   * 2. What it is telling you (`header.info`), and what it can be configured into.
+   * 3. Removing it, behind a separator, because it is the one that cannot be
+   *    undone.
+   *
+   * A LOCKED widget can still act and still be configured — mandatory says
+   * nothing about fixed — it just isn't offered removal. A widget offered nothing
+   * at all gets no menu, rather than an empty one.
+   */
+  const menuItems = (widget: HomeWidgetItem): DropdownItem[] => {
+    const items: DropdownItem[] = [...(widget.actions ?? [])]
+    // What the widget is telling you, if it says. Its copy is the PROVIDER's
+    // (`t.widgets.whatThisMeans`), not this column's: the question a user asks of
+    // a widget is the same question in every product that ships one.
+    if (resolveWidgetHeader(widget.header, widget.params)?.info)
+      items.push({
+        label: t.widgets.whatThisMeans,
+        icon: InfoCircleLine,
+        onClick: () => setFlippedId(widget.id),
+      })
+    if (widget.paramsSchema && onChangeWidgetParams)
+      items.push({
+        label: editParamsLabel ?? t.widgets.editParams,
+        icon: Sliders,
+        onClick: () => setEditingParamsId(widget.id),
+      })
+    if (canEdit && !widget.locked && onRemoveWidget) {
+      // A separator only when there is something to separate it FROM — a menu
+      // that opens on a rule reads as if an item failed to render.
+      if (items.length > 0) items.push({ type: "separator" })
+      items.push({
+        label: removeLabel ?? t.widgets.removeWidget,
+        icon: Delete,
+        critical: true,
+        onClick: () => onRemoveWidget(widget.id),
+      })
+    }
+    return items
+  }
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    // A DROP ON A LOCKED WIDGET is refused, and says so. Silence was the old
+    // behaviour and it read as a bug: the card sprang back with no reason given.
+    const blocking = lockedTargetOf(event)
+    if (blocking) {
+      toasts.open({
+        variant: "warning",
+        title: t.widgets.cannotMoveHere.replace(
+          "{{title}}",
+          widgetTitle(blocking)
+        ),
+      })
+      return
+    }
     if (!over || active.id === over.id) return
     const ids = widgets.map((widget) => widget.id)
     const from = ids.indexOf(String(active.id))
@@ -272,77 +477,48 @@ export function WidgetContainer({
 
   const render = (
     widget: HomeWidgetItem,
-    drag?: { draggable: boolean; isDragging: boolean }
+    drag?: { isDragging: boolean },
+    /** Params to draw it with instead of its own — the params dialog's preview. */
+    params: WidgetParams | undefined = widget.params
   ) => {
-    const node = renderWidget ? (
-      renderWidget(widget, ctx)
-    ) : (
-      <SlotWidget
-        {...widgetChrome(widget)}
-        header={
-          // In edit mode the remove control takes the arrow's place, so the
-          // link is dropped rather than sitting under it.
-          canEdit ? { ...widget.header, link: undefined } : widget.header
-        }
-        fullHeight={widget.fullHeight}
-        slots={widget.slots}
-        loading={widget.loading}
-        slotRenderers={slotRenderers}
-        ctx={ctx}
-        draggable={drag?.draggable}
-        isDragging={drag?.isDragging}
-      />
-    )
-    if (!canEdit) return node
-    // A locked widget can't be removed. In edit mode it swaps its header arrow
-    // for a lock, in that same spot, so it reads as deliberately fixed.
-    if (widget.locked)
+    const items = menuItems(widget)
+    // The default render puts the menu where the frame keeps its own overflow
+    // menu — the header's top-right — rather than laying a control over the card.
+    if (!renderWidget)
       return (
-        <div className="relative">
-          {renderWidget ? (
-            renderWidget(widget, ctx)
-          ) : (
-            <SlotWidget
-              {...widgetChrome(widget)}
-              header={{ ...widget.header, link: undefined }}
-              fullHeight={widget.fullHeight}
-              slots={widget.slots}
-              loading={widget.loading}
-              slotRenderers={slotRenderers}
-              ctx={ctx}
-            />
-          )}
-          <span
-            className="absolute right-4 top-4 z-10"
-            // `img` because a bare span may not carry aria-label
-            // (axe: aria-prohibited-attr) — this names the lock glyph.
-            role="img"
-            aria-label={lockedLabel}
-          >
-            <Tooltip label={lockedLabel}>
-              <F0Icon
-                size="md"
-                icon={LockLocked}
-                className="text-f1-icon-bold"
-              />
-            </Tooltip>
-          </span>
-        </div>
+        <SlotWidget
+          {...widgetChrome(widget)}
+          header={widget.header}
+          params={params}
+          fullHeight={widget.fullHeight}
+          slots={widget.slots}
+          loading={widget.loading}
+          slotRenderers={slotRenderers}
+          ctx={ctx}
+          actions={items.length > 0 ? items : undefined}
+          flipped={flippedId === widget.id}
+          onFlipBack={() => setFlippedId(null)}
+          isDragging={drag?.isDragging}
+        />
       )
+    const node = renderWidget(widget, ctx)
+    if (items.length === 0) return node
+    // A CUSTOM render has no header for the menu to live in, so the column puts
+    // one over the card, in the same corner the frame would have drawn it.
     return (
       <div className="relative">
         {node}
-        {/* The same control the header's arrow is — a bare button around an
-            `sm` F0Icon in `text-f1-icon-bold` (see `CardLink`) — sitting exactly
-            where that arrow sits, so removing reads as replacing it. */}
-        <button
-          type="button"
-          aria-label="Remove widget"
-          onClick={() => onRemoveWidget?.(widget.id)}
-          className={cn("absolute right-4 top-4 z-10", CARD_LINK_CLASS)}
-        >
-          <F0Icon size="sm" icon={Cross} className="text-f1-icon-bold" />
-        </button>
+        <div className="absolute right-3 top-3 z-10">
+          <DropdownInternal items={items} align="end">
+            <F0Button
+              icon={Ellipsis}
+              label="Actions"
+              variant="ghost"
+              size="sm"
+              hideLabel
+            />
+          </DropdownInternal>
+        </div>
       </div>
     )
   }
@@ -400,6 +576,7 @@ export function WidgetContainer({
 
   return (
     <div
+      ref={columnRef}
       className={cn(
         // `relative` so this column is what a widget's `offsetTop` is measured
         // from: the stow maps a widget onto its glyph by that offset, and an
@@ -429,8 +606,8 @@ export function WidgetContainer({
             items={widgets.map((widget) => widget.id)}
             strategy={verticalListSortingStrategy}
           >
-            {/* The same gap the static list uses, so entering edit mode doesn't
-                reflow the column. */}
+            {/* The same gap the static list uses, so a column that becomes
+                draggable (a second widget lands in it) doesn't reflow. */}
             <div
               className={cn(
                 "flex flex-col",
@@ -463,7 +640,7 @@ export function WidgetContainer({
                 // Solid backdrop: Card's own background is translucent, and the
                 // clone rides over whatever the column shows beneath it.
                 <div className="cursor-grabbing rounded-xl bg-f1-background [&_*]:shadow-none">
-                  {render(active, { draggable: true, isDragging: true })}
+                  {render(active, { isDragging: true })}
                 </div>
               ) : null
             })()}
@@ -476,18 +653,42 @@ export function WidgetContainer({
           </WidgetSlot>
         ))
       )}
-      {/* NOT edit-gated: adding is always on offer — edit mode is for
-          arranging and removing what's already there. `disableEdition`
-          columns still never offer it. */}
+      {/* Adding, like removing and reordering, is always on offer.
+          `disableEdition` columns never offer any of it. */}
       {!disableEdition && onClickAddNewWidget
         ? enter(
             widgets.length,
             <AddWidgetPlaceholder
               onClick={onClickAddNewWidget}
-              label={addWidgetLabel}
+              label={addWidgetLabel ?? t.widgets.addWidget}
             />
           )
         : null}
+      {/* "Edit params". ONE dialog for the column, keyed by the widget it is
+          editing so switching widgets starts a fresh form rather than carrying
+          the last one's values into it. */}
+      {editingParams?.paramsSchema && onChangeWidgetParams ? (
+        <WidgetUpdateDialog
+          key={editingParams.id}
+          isOpen
+          onClose={() => setEditingParamsId(null)}
+          schema={editingParams.paramsSchema}
+          params={editingParams.params}
+          // The widget's own info, under the preview and rewritten as the fields
+          // change — the same sentence its info side would show.
+          info={editingParams.header?.info}
+          previewWidth={paramsPreviewWidth}
+          // The preview is the WIDGET, drawn with the params being tried out —
+          // so whatever they derive (its title, its info) is what you watch
+          // change. Its slots can only follow if the app rebuilds them.
+          renderPreview={(params) =>
+            renderWidgetPreview
+              ? renderWidgetPreview(editingParams, params)
+              : render(editingParams, undefined, params)
+          }
+          onSave={(params) => onChangeWidgetParams(editingParams.id, params)}
+        />
+      ) : null}
     </div>
   )
 }

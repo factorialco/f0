@@ -4,7 +4,7 @@ import { Calendar, Clock, File, PalmTree, Receipt, Target } from "@/icons/app"
 
 import { homeSlot, listSlot } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
-import { WidgetCatalog } from "./index"
+import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
 
 /**
  * Beyond its header and slots, a widget may carry the `Widget` frame's own
@@ -121,6 +121,33 @@ const CATALOG = [
   },
 ]
 
+/**
+ * THE DOMAINS, each headed by its module glyph. Labels are the app's own words —
+ * f0's `modules` registry carries icons, not names.
+ */
+const GROUPS: WidgetCatalogGroup[] = [
+  { id: "time", label: "Time & attendance", module: "time-tracking" },
+  { id: "money", label: "Payroll", module: "compensations" },
+  { id: "performance", label: "Performance", module: "goals" },
+  { id: "docs", label: "Documents", module: "documents" },
+]
+
+/** Which domain each widget sits in. `events` has none on purpose: it lands in
+ * the unheaded run after the groups. */
+const DOMAIN: Record<string, string> = {
+  "clock-in": "time",
+  "time-off": "time",
+  payroll: "money",
+  goals: "performance",
+  documents: "docs",
+}
+
+const GROUPED_CATALOG = CATALOG.map((item) => ({
+  ...item,
+  group: DOMAIN[item.id],
+  recommended: item.id === "clock-in" || item.id === "payroll",
+}))
+
 const meta = {
   title: "Home/WidgetCatalog",
   component: WidgetCatalog,
@@ -129,7 +156,8 @@ const meta = {
     isOpen: true,
     onClose: () => {},
     onAdd: () => {},
-    widgets: CATALOG,
+    widgets: GROUPED_CATALOG,
+    groups: GROUPS,
     previewWidth: 396,
   },
 } satisfies Meta<typeof WidgetCatalog>
@@ -139,7 +167,19 @@ type Story = StoryObj<typeof meta>
 
 /**
  * The "Add widget" picker: searchable icon + title rows on the left, a LIVE
- * preview of the selected widget on the right at the target column's width,
- * and the Add widget CTA in the footer.
+ * preview of the selected widget on the right at the target column's width, and
+ * the Add widget CTA in the footer.
+ *
+ * The rows are organised BY DOMAIN, each group headed by its module glyph, with
+ * what this Home recommends lifted to the top. A widget in no domain (`events`
+ * here) follows the groups without a heading of its own.
  */
 export const Default: Story = {}
+
+/**
+ * Both are optional: with no `groups` and nothing `recommended`, the picker is the
+ * flat list it has always been.
+ */
+export const Flat: Story = {
+  args: { widgets: CATALOG, groups: undefined },
+}
