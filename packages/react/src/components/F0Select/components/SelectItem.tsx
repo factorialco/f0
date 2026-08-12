@@ -1,10 +1,11 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { cn } from "@/lib/utils"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 
 import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
@@ -32,14 +33,20 @@ const metadataText = (metadata: F0SelectItemMetadata): string => {
 
 export const SelectItem = <T extends string, R>({
   item,
+  compact = false,
 }: {
   item: F0SelectItemObject<T, R>
+  compact?: boolean
 }) => {
   const isStatusTag =
     item.tag && typeof item.tag !== "string" && item.tag.type === "status"
 
   return (
-    <SelectItemPrimitive value={String(item.value)} disabled={item.disabled}>
+    <SelectItemPrimitive
+      value={String(item.value)}
+      disabled={item.disabled}
+      compact={compact}
+    >
       <div
         className={`flex w-full gap-1.5 ${item.description ? "items-start" : "items-center"}`}
       >
@@ -56,7 +63,7 @@ export const SelectItem = <T extends string, R>({
         {!isStatusTag && (
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex min-w-0 items-baseline gap-1.5">
-              <OneEllipsis lines={2} className="font-medium">
+              <OneEllipsis lines={compact ? 1 : 2} className="font-medium">
                 {item.label}
               </OneEllipsis>
               {item.metadata && (
@@ -66,7 +73,13 @@ export const SelectItem = <T extends string, R>({
               )}
             </div>
             {item.description && (
-              <OneEllipsis lines={2} className="text-f1-foreground-secondary">
+              <OneEllipsis
+                lines={compact ? 1 : 2}
+                className={cn(
+                  "text-f1-foreground-secondary",
+                  compact && "text-sm"
+                )}
+              >
                 {item.description}
               </OneEllipsis>
             )}

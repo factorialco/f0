@@ -1,5 +1,5 @@
-import { useDeepCompareEffect } from "@reactuses/core"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { cva } from "cva"
 import { isEqual } from "lodash"
 import {
@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useId,
+  type KeyboardEvent,
   useMemo,
   useRef,
   useState,
@@ -56,7 +57,10 @@ import type {
 
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
-import { SelectBottomActions } from "./components/SelectBottomActions"
+import {
+  type Action,
+  SelectBottomActions,
+} from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
 import { SelectionPreview } from "./components/SelectionPreview"
 import { SelectItem } from "./components/SelectItem"
@@ -240,16 +244,10 @@ const F0SelectComponent = forwardRef(function Select<
 
   const [openLocal, setOpenLocal] = useState(open)
   const inlineTriggerRef = useRef<HTMLButtonElement>(null)
+  const inlineActionsRef = useRef<HTMLDivElement>(null)
+  const pendingInlineActionRef = useRef<(() => void) | null>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
-  const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
-
-  useEffect(() => {
-    if (variant === "inline" && previousOpenRef.current && !openLocal) {
-      inlineTriggerRef.current?.focus({ preventScroll: true })
-    }
-    previousOpenRef.current = openLocal
-  }, [openLocal, variant])
 
   const defaultItems = useMemo(
     () =>
@@ -1008,13 +1006,19 @@ const F0SelectComponent = forwardRef(function Select<
               ),
             }
           : {
-              height: mappedOption.description ? 64 : 32,
+              height:
+                variant === "inline" && mappedOption.description
+                  ? 48
+                  : mappedOption.description
+                    ? 64
+                    : 32,
               key: `item-${mappedOption.value}`,
               type: "item",
               item: (
                 <SelectItem
                   key={String(mappedOption.value)}
                   item={mappedOption}
+                  compact={variant === "inline"}
                 />
               ),
               // Convert to string to ensure consistent comparison with selectedItemsValues
@@ -1023,7 +1027,7 @@ const F0SelectComponent = forwardRef(function Select<
             }
       })
     },
-    [optionMapper]
+    [optionMapper, variant]
   )
 
   const items: VirtualItem[] = useMemo(() => {
@@ -1152,10 +1156,91 @@ const F0SelectComponent = forwardRef(function Select<
       </div>
     ) : undefined
 
+  const handleInlineContentKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (variant !== "inline" || !actions?.length || event.key !== "Tab") {
+      return
+    }
+
+    const actionButtons = Array.from(
+      inlineActionsRef.current?.querySelectorAll<HTMLButtonElement>(
+        "button:not(:disabled)"
+      ) ?? []
+    )
+
+    const target = event.target as HTMLElement
+    const currentAction = target.closest("button")
+    const currentOption = target.closest('[role="option"]')
+
+    if (!currentAction && !currentOption) {
+      return
+    }
+
+    event.preventDefault()
+
+    if (!actionButtons.length) {
+      handleChangeOpenLocal(false)
+      return
+    }
+
+    const actionIndex = currentAction
+      ? actionButtons.indexOf(currentAction as HTMLButtonElement)
+      : -1
+
+    if (actionIndex === -1) {
+      if (event.shiftKey) {
+        handleChangeOpenLocal(false)
+      } else {
+        actionButtons[0]?.focus()
+      }
+      return
+    }
+
+    const nextActionIndex = actionIndex + (event.shiftKey ? -1 : 1)
+    const nextAction = actionButtons[nextActionIndex]
+
+    if (nextAction) {
+      nextAction.focus()
+      return
+    }
+
+    if (event.shiftKey) {
+      const enabledOptions = Array.from(
+        event.currentTarget.querySelectorAll<HTMLElement>(
+          '[role="option"]:not([data-disabled])'
+        )
+      )
+      const selectedOption = event.currentTarget.querySelector<HTMLElement>(
+        '[role="option"][data-state="checked"]:not([data-disabled])'
+      )
+      ;(selectedOption ?? enabledOptions.at(-1))?.focus()
+      return
+    }
+
+    handleChangeOpenLocal(false)
+  }
+
+  const handleInlineCloseAutoFocus = () => {
+    if (variant !== "inline") return
+
+    inlineTriggerRef.current?.focus({ preventScroll: true })
+
+    const pendingAction = pendingInlineActionRef.current
+    pendingInlineActionRef.current = null
+    pendingAction?.()
+  }
+
+  const handleInlineAction = (action: Action) => {
+    pendingInlineActionRef.current = action.onClick
+    handleChangeOpenLocal(false)
+  }
+
   const selectContent = (
     <SelectContent
       items={items}
       fitContentWidth={effectiveFitContentWidth}
+      className={variant === "inline" ? "rounded-lg shadow-lg" : undefined}
+      onKeyDown={handleInlineContentKeyDown}
+      onCloseAutoFocus={handleInlineCloseAutoFocus}
       taller={!!source?.filters}
       emptyMessage={
         searchEmptyMessage ??
@@ -1168,6 +1253,9 @@ const F0SelectComponent = forwardRef(function Select<
         !isFiltersOpen ? (
           <SelectBottomActions
             actions={actions}
+            presentation={variant === "inline" ? "menu" : "buttons"}
+            actionsRef={variant === "inline" ? inlineActionsRef : undefined}
+            onAction={variant === "inline" ? handleInlineAction : undefined}
             showApplyButton={showApplyButton}
             applyLabel={applySelectionLabel}
             onApply={handleApply}

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
-import { Placeholder } from "@/icons/app"
+import { Delete, Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import {
@@ -103,6 +103,7 @@ function OpenInlineRoleSelect(props: InlineRoleSelectProps) {
 
 const removeAccessAction = {
   label: "Remove access",
+  icon: Delete,
   variant: "critical" as const,
   onClick: fn(),
 }
@@ -118,7 +119,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Use the inline F0Select variant for compact single-value controls embedded in desktop rows, such as roles, statuses, and access levels. It is borderless, non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label is exposed as the accessible name and is not rendered visually. The popup keeps the standard F0Select density and behavior.",
+          "Use the inline F0Select variant for compact single-value controls embedded in desktop rows, such as roles, statuses, and access levels. It is borderless, non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label is exposed as the accessible name and is not rendered visually. Its content-sized popup uses compact options and menu-style action rows while preserving the existing F0Select behavior.",
       },
     },
   },
@@ -228,6 +229,52 @@ export const ViewerSelected: Story = {
   },
 }
 
+export const ActionKeyboardNavigation: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    value: "viewer",
+    actions: [
+      {
+        label: "Remove access",
+        icon: Delete,
+        variant: "critical",
+        onClick: fn(),
+      },
+    ],
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const page = within(canvasElement.closest("body")!)
+    const trigger = canvas.getByRole("combobox", { name: "Access level" })
+
+    await step("Open and move focus to the action row", async () => {
+      trigger.focus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => {
+        expect(page.getByRole("option", { name: /Viewer/ })).toHaveFocus()
+      })
+
+      await userEvent.keyboard("{Tab}")
+      await expect(
+        page.getByRole("button", { name: "Remove access" })
+      ).toHaveFocus()
+    })
+
+    await step("Activate the action and restore trigger focus", async () => {
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => {
+        expect(args.actions?.[0]?.onClick).toHaveBeenCalledOnce()
+      })
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+      })
+      await waitFor(() => {
+        expect(trigger).toHaveFocus()
+      })
+    })
+  },
+}
+
 export const EmptyPlaceholder: Story = {}
 
 export const Disabled: Story = {
@@ -287,8 +334,9 @@ export const Open: Story = {
   args: {
     value: "viewer",
   },
-  // The shared Radix popup currently aria-hides its focusable trigger while
-  // open. Keep axe running and surface that existing popup debt as non-blocking.
+  // The shared popup currently aria-hides its focusable trigger and places its
+  // footer inside the listbox root. Keep axe running and surface that existing
+  // aria-hidden-focus / aria-required-children debt as non-blocking.
   parameters: {
     a11y: { test: "todo" },
   },
@@ -419,6 +467,13 @@ export const Snapshot: Story = {
           </div>
         </div>
         <OpenInlineRoleSelect value="viewer" actions={[removeAccessAction]} />
+        <div className="dark rounded-md bg-f1-background p-4">
+          <OpenInlineRoleSelect
+            value="viewer"
+            label="Dark mode access level"
+            actions={[removeAccessAction]}
+          />
+        </div>
       </section>
     </div>
   ),

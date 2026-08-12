@@ -257,7 +257,7 @@ values embedded in desktop rows.
         <td><code>Action[]</code></td>
         <td>—</td>
         <td>—</td>
-        <td>Adds footer actions. Use a critical action for destructive choices such as removing access.</td>
+        <td>Adds footer actions. Field selects render buttons; inline selects render compact menu rows with optional icons. Use a critical action for destructive choices such as removing access.</td>
       </tr>
       <tr>
         <td><code>onCreate</code></td>
@@ -387,7 +387,7 @@ values embedded in desktop rows.
 <Canvas of={InlineStories.Variants} />
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Variant</th>
@@ -410,7 +410,8 @@ values embedded in desktop rows.
         </td>
         <td>
           Compact desktop rows that edit one role, status, or access level
-          without clearing.
+          without clearing. The popup uses compact option rows and menu-style
+          actions while preserving the standard selection behavior.
         </td>
       </tr>
     </tbody>
@@ -422,7 +423,7 @@ values embedded in desktop rows.
 <Canvas of={InlineStories.Sizes} />
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Size</th>
@@ -453,7 +454,7 @@ values embedded in desktop rows.
 **When to use**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -488,7 +489,7 @@ values embedded in desktop rows.
 **When not to use**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -568,8 +569,11 @@ values embedded in desktop rows.
 - WHEN <code>variant="inline"</code> → THEN the required <code>label</code> becomes the trigger's accessible name and is not rendered visually.
 - WHEN <code>variant="inline"</code> → THEN selection is single and non-clearable, custom triggers and field-only state props are unavailable, and the popup fits its content by default.
 - WHEN <code>fitContentWidth=false</code> is explicit → THEN the standard 20rem popup minimum overrides the inline default.
-- WHEN an option has a <code>description</code> → THEN its popup row is 64px high; otherwise it remains 32px high.
-- WHEN <code>actions</code> are provided → THEN the existing action footer renders below the option list.
+- WHEN a field option has a <code>description</code> → THEN its popup row is 64px high; inline described options use 48px rows. Options without descriptions remain 32px in both variants.
+- WHEN an inline option is selected → THEN a compact check marks it without a persistent selected background; hover and keyboard-focus feedback remain visible.
+- WHEN <code>actions</code> are provided → THEN field selects render the existing button footer and inline selects render native buttons styled as compact menu rows below one separator.
+- WHEN an inline action has an <code>icon</code> → THEN the icon uses the existing small icon-avatar treatment. <code>variant="critical"</code> applies critical text styling, and <code>disabled</code> keeps the native action inactive.
+- WHEN an inline action is activated → THEN the popup requests closure before its <code>onClick</code> callback runs.
 - WHEN the inline popup closes → THEN focus returns to its trigger.
 - <code>T</code> is the string value type and <code>R</code> is the original
   record type, defaulting to <code>unknown</code>. A literal union such as
@@ -611,7 +615,7 @@ Use a data source when options load remotely or require pagination.
 ### Keyboard interaction
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Key</th>
@@ -623,13 +627,23 @@ Use a data source when options load remotely or require pagination.
         <td>
           <kbd>Tab</kbd>
         </td>
-        <td>Moves focus to or away from the closed trigger.</td>
+        <td>
+          Moves focus to or away from the closed trigger. In an open inline
+          select with actions, <kbd>Tab</kbd> moves from the focused option
+          through each enabled action row, then closes and restores trigger
+          focus. <kbd>Shift</kbd>+<kbd>Tab</kbd> from the first action returns
+          to the selected or last enabled option; from an option it closes the
+          popup.
+        </td>
       </tr>
       <tr>
         <td>
           <kbd>Enter</kbd> / <kbd>Space</kbd>
         </td>
-        <td>Opens the popup or selects the focused option.</td>
+        <td>
+          Opens the popup, selects the focused option, or activates a focused
+          action row.
+        </td>
       </tr>
       <tr>
         <td>
@@ -657,5 +671,6 @@ Use a data source when options load remotely or require pagination.
 
 - The trigger exposes <code>role="combobox"</code>, <code>aria-expanded</code>, and <code>aria-controls</code>; popup options are announced within a listbox.
 - Inline <code>label</code> text is applied as <code>aria-label</code>. Make it specific to the controlled value and, in repeated rows, to the subject—for example "Access level for Jane Doe".
+- Inline action rows remain native buttons even though they use compact menu styling. Their visible labels provide their accessible names.
 - The inline chevron is decorative and hidden from the accessibility tree.
 - Disabled triggers use the native <code>disabled</code> state.
