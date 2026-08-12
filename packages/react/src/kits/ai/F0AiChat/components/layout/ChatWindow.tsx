@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
+import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
 import { DropOverlay } from "../../../F0AiChatTextArea"
@@ -51,6 +52,7 @@ export const SidebarWindow = ({
     panelSide,
   } = useAiChat()
   const isCanvasMode = visualizationMode === "canvas"
+  const reducedMotion = useReducedMotion()
   // Hosts dock the whole panel left for a chat-first experience (communications);
   // the default is right. The AI chat follows the panel side too.
   const isLeft = (side ?? panelSide) === "left"
@@ -125,11 +127,12 @@ export const SidebarWindow = ({
   )
 
   const wrapperTransition = useMemo(() => {
-    if (isResizing) return { duration: 0 }
+    if (isResizing || reducedMotion) return { duration: 0 }
     if (shouldPlayEntranceAnimation)
       return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-  }, [isResizing, shouldPlayEntranceAnimation])
+  }, [isResizing, reducedMotion, shouldPlayEntranceAnimation])
+  const closedClipPath = isLeft ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)"
 
   return (
     <AnimatePresence>
@@ -145,23 +148,30 @@ export const SidebarWindow = ({
             fullscreen ? "md:pr-1" : isLeft ? "mr-auto" : "ml-auto md:pr-1"
           )}
           initial={
-            shouldPlayEntranceAnimation && !prevOpenRef.current
-              ? { opacity: 0, width: 0 }
+            !reducedMotion &&
+            shouldPlayEntranceAnimation &&
+            !prevOpenRef.current
+              ? { opacity: 0, clipPath: closedClipPath }
               : false
           }
           animate={{
             opacity: 1,
-            width: "100%",
+            clipPath: "inset(0 0 0 0)",
           }}
           exit={
-            exitStyle === "hold"
-              ? // Swap: stay put while the main content slides over (300ms),
-                // then a blink of fade right before unmounting.
-                { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
-              : { opacity: 0, width: 0 }
+            reducedMotion
+              ? { opacity: 0, transition: { duration: 0 } }
+              : exitStyle === "hold"
+                ? // Swap: stay put while the main content slides over (300ms),
+                  // then a blink of fade right before unmounting.
+                  { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
+                : { opacity: 0, clipPath: closedClipPath }
           }
           transition={wrapperTransition}
-          style={{ transformOrigin: isLeft ? "left center" : "right center" }}
+          style={{
+            width: "100%",
+            transformOrigin: isLeft ? "left center" : "right center",
+          }}
           onAnimationComplete={() => {
             if (shouldPlayEntranceAnimation) {
               setShouldPlayEntranceAnimation(false)
@@ -201,19 +211,9 @@ export const SidebarWindow = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <motion.div
-              className="relative flex h-full w-full flex-col overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{
-                duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
-                ease: "easeOut",
-                delay: shouldPlayEntranceAnimation ? 0.2 : 0,
-              }}
-            >
+            <div className="relative flex h-full w-full flex-col overflow-hidden">
               {children}
-            </motion.div>
+            </div>
             {canDrop && (
               <DropOverlay
                 visible={fileDragOver}

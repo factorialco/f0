@@ -53,6 +53,8 @@ import type {
 } from "./types"
 
 import { Arrow } from "./components/Arrow"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
+
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
@@ -115,6 +117,7 @@ const F0SelectComponent = forwardRef(function Select<
     placeholder,
     onChange,
     withApplySelection = false,
+    applySelectionLabel,
     onChangeSelectedOption,
     value,
     options = [],
@@ -819,8 +822,8 @@ const F0SelectComponent = forwardRef(function Select<
   }
 
   const handleCancel = useCallback(() => {
-    restoreCommittedSelection()
-  }, [restoreCommittedSelection])
+    handleChangeOpenLocal(false)
+  }, [handleChangeOpenLocal])
 
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
@@ -1099,6 +1102,7 @@ const F0SelectComponent = forwardRef(function Select<
           <SelectBottomActions
             actions={actions}
             showApplyButton={showApplyButton}
+            applyLabel={applySelectionLabel}
             onApply={handleApply}
             onCancel={handleCancel}
             showCancelButton={hasDeferredApply}
@@ -1163,6 +1167,51 @@ const F0SelectComponent = forwardRef(function Select<
     />
   )
 
+  /**
+   * The trigger's hover tooltip: WHAT IS SELECTED, spelled out.
+   *
+   * The field is a single line that truncates, and with `hideLabel` it doesn't
+   * even say which field it is — so on hover it says both: the selection as its
+   * own line, and the field's label above it ONLY when that label isn't already
+   * rendered beside the field (repeating what is on screen is noise). Multiple
+   * selection lists what is chosen, which is what the trigger's "N selected"
+   * cannot.
+   *
+   * Nothing selected, nothing to explain: no tooltip at all.
+   */
+  const selectedTooltipText = getDisplayItemsForSelection
+    .map((item) => item.selectedLabel ?? item.label)
+    .filter(Boolean)
+    .join(", ")
+
+  const withTriggerTooltip = (trigger: React.ReactNode) => {
+    /**
+     * The tooltip needs ONE DOM element to hang its handlers on, and the real
+     * trigger is Radix's own `asChild` target inside — wrapping that would strip
+     * its props. So the box is always here, tooltip or not: when it came and went
+     * with the selection, the field's width came and went with it too — clearing
+     * a select dropped the box and the field contracted to its content.
+     *
+     * NOT a flex box either: as a flex container it made the field a flex item
+     * with the default `min-width: auto`, and the field then neither shrank (it
+     * overflowed a narrow column) nor stretched (it left a gap inside it). A plain
+     * full-width block passes the width straight through, which is all this
+     * wrapper is for.
+     */
+    const box = <div className="w-full min-w-0">{trigger}</div>
+
+    return selectedTooltipText ? (
+      <TooltipInternal
+        label={hideLabel ? label : undefined}
+        description={selectedTooltipText}
+      >
+        {box}
+      </TooltipInternal>
+    ) : (
+      box
+    )
+  }
+
   if (asList) {
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
@@ -1205,107 +1254,115 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }
 
-  return (
-    <DataTestIdWrapper dataTestId={dataTestId}>
-      <SelectPrimitive {...selectPrimitiveProps}>
-        <SelectTrigger ref={ref} asChild>
-          {children ? (
-            <div
+  const triggerWithContent = (
+    <SelectPrimitive {...selectPrimitiveProps}>
+      <SelectTrigger ref={ref} asChild>
+        {children ? (
+          <div
+            className="flex w-full items-center justify-between"
+            aria-label={label || placeholder}
+          >
+            {children}
+          </div>
+        ) : (
+          <F0InputField
+            label={label}
+            error={error}
+            required={required}
+            status={status}
+            hint={hint}
+            icon={icon}
+            labelIcon={labelIcon}
+            hideLabel={hideLabel}
+            value={
+              multiple
+                ? // For multiple: use count of selected items
+                  Math.max(
+                    localValue.length,
+                    selectionMeta.selectedItemsCount
+                  ).toString()
+                : // For single: use the selected value directly
+                  (localValue[0] ?? undefined)
+            }
+            isEmpty={(value) =>
+              multiple ? !value || +(value ?? 0) === 0 : !value
+            }
+            onClear={() => {
+              hasUserInteracted.current = true
+              clearSelection()
+              // Clear the cache when clearing selection
+              selectedItemsCache.current.clear()
+              // Call with undefined to indicate no item is selected
+              ;(
+                onChangeSelectedOption as (
+                  option: undefined,
+                  checked: boolean
+                ) => void
+              )?.(undefined, false)
+            }}
+            placeholder={placeholder || ""}
+            disabled={disabled}
+            clearable={clearable}
+            size={effectiveSize}
+            loadingIndicator={{
+              asOverlay: true,
+              offset: 34,
+            }}
+            loading={isInitialLoading || loading || isLoading}
+            name={name}
+            onClickContent={() => {
+              handleChangeOpenLocal(!openLocal)
+            }}
+            append={
+              <Arrow
+                open={openLocal}
+                disabled={disabled}
+                size={effectiveSize}
+              />
+            }
+          >
+            <button
               className="flex w-full items-center justify-between"
               aria-label={label || placeholder}
+              onClick={(e) => {
+                e.preventDefault()
+              }}
             >
-              {children}
-            </div>
-          ) : (
-            <F0InputField
-              label={label}
-              error={error}
-              required={required}
-              status={status}
-              hint={hint}
-              icon={icon}
-              labelIcon={labelIcon}
-              hideLabel={hideLabel}
-              value={
-                multiple
-                  ? // For multiple: use count of selected items
-                    Math.max(
-                      localValue.length,
-                      selectionMeta.selectedItemsCount
-                    ).toString()
-                  : // For single: use the selected value directly
-                    (localValue[0] ?? undefined)
-              }
-              isEmpty={(value) =>
-                multiple ? !value || +(value ?? 0) === 0 : !value
-              }
-              onClear={() => {
-                hasUserInteracted.current = true
-                clearSelection()
-                // Clear the cache when clearing selection
-                selectedItemsCache.current.clear()
-                // Call with undefined to indicate no item is selected
-                ;(
-                  onChangeSelectedOption as (
-                    option: undefined,
-                    checked: boolean
-                  ) => void
-                )?.(undefined, false)
-              }}
-              placeholder={placeholder || ""}
-              disabled={disabled}
-              clearable={clearable}
-              size={effectiveSize}
-              loadingIndicator={{
-                asOverlay: true,
-                offset: 34,
-              }}
-              loading={isInitialLoading || loading || isLoading}
-              name={name}
-              onClickContent={() => {
-                handleChangeOpenLocal(!openLocal)
-              }}
-              append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={effectiveSize}
+              {(multiple
+                ? localValue.length > 0 || selectionMeta.selectedItemsCount > 0
+                : !!localValue[0]) && (
+                <SelectedItems
+                  multiple={multiple}
+                  totalSelectedCount={
+                    multiple
+                      ? Math.max(
+                          localValue.length,
+                          selectionMeta.selectedItemsCount
+                        )
+                      : localValue[0]
+                        ? 1
+                        : 0
+                  }
+                  allSelected={selectedState.allSelected}
+                  selection={getDisplayItemsForSelection}
+                  // The field's own icon already occupies the trigger's glyph
+                  // slot, and the two are drawn in different places — showing
+                  // both put two icons 4px apart on one trigger. Options keep
+                  // their icons for the rows regardless.
+                  hideItemIcon={!!icon}
                 />
-              }
-            >
-              <button
-                className="flex w-full items-center justify-between"
-                aria-label={label || placeholder}
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
-              >
-                {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
-                  : !!localValue[0]) && (
-                  <SelectedItems
-                    multiple={multiple}
-                    totalSelectedCount={
-                      multiple
-                        ? Math.max(
-                            localValue.length,
-                            selectionMeta.selectedItemsCount
-                          )
-                        : localValue[0]
-                          ? 1
-                          : 0
-                    }
-                    allSelected={selectedState.allSelected}
-                    selection={getDisplayItemsForSelection}
-                  />
-                )}
-              </button>
-            </F0InputField>
-          )}
-        </SelectTrigger>
-        {openLocal && selectContent}
-      </SelectPrimitive>
+              )}
+            </button>
+          </F0InputField>
+        )}
+      </SelectTrigger>
+      {openLocal && selectContent}
+    </SelectPrimitive>
+  )
+
+  return (
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      {withTriggerTooltip(triggerWithContent)}
     </DataTestIdWrapper>
   )
 })

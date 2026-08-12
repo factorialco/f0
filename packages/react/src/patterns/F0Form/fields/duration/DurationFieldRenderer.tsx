@@ -46,6 +46,7 @@ export function DurationFieldRenderer({
       onBlur={formField.onBlur}
       units={field.units}
       fields={field.fields}
+      allowNegative={field.allowNegative}
       status={resolvedStatus}
       disabled={field.disabled}
       readonly={field.readonly}

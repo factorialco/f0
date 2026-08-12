@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { ChatBubble } from "../components/ChatBubble"
+import { bubbleCornerClass, ChatBubble } from "../components/ChatBubble"
 import { type F0ChatMessage } from "../types"
+import {
+  senderBubbleColorClass,
+  senderNameColorClass,
+} from "../utils/sender-color"
 
 const now = new Date().toISOString()
 
@@ -43,7 +47,102 @@ describe("ChatBubble emoji rendering", () => {
   })
 })
 
+describe("ChatBubble sender colour", () => {
+  it("tints an incoming bubble with its author's palette colour", () => {
+    const message = makeMessage("hello")
+    render(<ChatBubble message={message} isMine={false} />)
+
+    expect(screen.getByText("hello").closest(".rounded-2xl")).toHaveClass(
+      senderBubbleColorClass(message.author)
+    )
+  })
+
+  it("keeps the neutral background for my own messages", () => {
+    const message = { ...makeMessage("hello"), isMine: true }
+    render(<ChatBubble message={message} isMine />)
+
+    const bubble = screen.getByText("hello").closest(".rounded-2xl")
+    expect(bubble).toHaveClass("bg-f1-background-tertiary")
+    expect(bubble).not.toHaveClass("bg-f1-background-secondary")
+    expect(bubble).not.toHaveClass(senderBubbleColorClass(message.author))
+  })
+
+  it("keeps deleted own messages on the same neutral background", () => {
+    const message = { ...makeMessage("hello"), isMine: true, deleted: true }
+    render(<ChatBubble message={message} isMine />)
+
+    const bubble = screen.getByText("Message deleted")
+    expect(bubble).toHaveClass("bg-f1-background-tertiary")
+    expect(bubble).not.toHaveClass("bg-f1-background-secondary")
+  })
+
+  it("keeps failed message content at full opacity", () => {
+    const message = {
+      ...makeMessage("hello"),
+      isMine: true,
+      status: "failed" as const,
+    }
+    render(<ChatBubble message={message} isMine />)
+
+    expect(screen.getByText("hello").closest(".rounded-2xl")).not.toHaveClass(
+      "opacity-60"
+    )
+  })
+
+  it("keeps the matching name and bubble hues in a group message run", () => {
+    const message = makeMessage("hello team")
+    render(
+      <ChatBubble
+        message={message}
+        isMine={false}
+        author={message.author}
+        isFirstOfRun
+        isLastOfRun={false}
+      />
+    )
+
+    expect(screen.getByText(message.author.name)).toHaveClass(
+      senderNameColorClass(message.author)
+    )
+    expect(screen.getByText("hello team").closest(".rounded-2xl")).toHaveClass(
+      senderBubbleColorClass(message.author),
+      "rounded-bl-sm"
+    )
+  })
+})
+
 describe("ChatBubble chained corners", () => {
+  it("keeps the outer interaction surface concentric with either tail side", () => {
+    expect(
+      bubbleCornerClass({
+        isMine: false,
+        isFirstOfRun: false,
+        isLastOfRun: false,
+        layer: "outer",
+      }).split(" ")
+    ).toEqual(
+      expect.arrayContaining([
+        "rounded-[22px]",
+        "rounded-tl-[10px]",
+        "rounded-bl-[10px]",
+      ])
+    )
+    expect(
+      bubbleCornerClass({
+        isMine: true,
+        isFirstOfRun: false,
+        isLastOfRun: false,
+        layer: "outer",
+      }).split(" ")
+    ).toEqual(
+      expect.arrayContaining([
+        "rounded-[22px]",
+        "rounded-tr-[10px]",
+        "rounded-br-[10px]",
+      ])
+    )
+  })
+
   it("keeps all corners rounded for a lone message (others, left)", () => {
     const { container } = render(
       <ChatBubble message={makeMessage("hi")} isMine={false} />
@@ -156,7 +255,9 @@ describe("ChatBubble edited marker", () => {
         isMine
       />
     )
-    expect(screen.getByText("edited")).toBeInTheDocument()
+    expect(screen.getByText("edited")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
   })
 
   it("does not show 'edited' on an unedited message", () => {

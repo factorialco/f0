@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 
 import type { MeetingState } from "../types"
 import {
@@ -11,7 +12,6 @@ import {
   getMinutesSinceStart,
   getMinutesUntilStart,
   pluralize,
-  resolveLocale,
   shouldShowCountdown,
 } from "../utils"
 
@@ -40,10 +40,9 @@ export const useMeetingLabels = ({
   presentCount?: number
 }) => {
   const { meetingCard } = useI18n()
+  const locale = useDateFnsLocale()
 
   return useMemo(() => {
-    const locale = resolveLocale()
-
     const dayLabels: Record<string, string | undefined> = {
       today: meetingCard.today,
       yesterday: meetingCard.yesterday,
@@ -100,6 +99,7 @@ export const useMeetingLabels = ({
       attendeesLabel,
     }
   }, [
+    locale,
     meetingCard,
     state,
     startsAt,

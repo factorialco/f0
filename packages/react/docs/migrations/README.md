@@ -5,7 +5,7 @@ One guide per breaking change to something already in use — a stable component
 - **Naming:** `f0-<old>-to-<new>.md` (e.g. `f0-oldinput-to-textinput.md`).
 - **Template:** copy [`TEMPLATE.md`](./TEMPLATE.md) and fill every section. Model the mapping on the shipped example, `factorial-migrations/references/f0-forms-mapping.md`.
 - **Link it** from the `@migration` JSDoc tag on the deprecated export, so the IDE warning points here.
-- **Execution:** this guide is the *plan*; migrating usages across a product is done with the [`factorial-migrations`](https://github.com/factorialco/factorial-skills) skill (discovery → grouping → parallel subagents), which loads `factorial-f0` for conventions.
+- **Execution:** this guide is the _plan_; migrating usages across a product is done with the [`factorial-migrations`](https://github.com/factorialco/factorial-skills) skill (discovery → grouping → parallel subagents), which loads `factorial-f0` for conventions.
 
 When a guide is required, who reviews it, and how consumers are notified: see **"Changing something already in use"** in the [Release & Versioning](../development/release-and-versioning.mdx) doc.
 

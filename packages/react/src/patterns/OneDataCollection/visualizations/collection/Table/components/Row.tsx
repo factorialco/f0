@@ -1,3 +1,4 @@
+import { useIsPresent } from "motion/react"
 import { forwardRef, useEffect, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
@@ -26,12 +27,14 @@ import { Checkbox } from "@/ui/checkbox"
 
 import type {
   CellRendererProps,
+  ColId,
   ReferenceType,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { getColumnId } from "../hooks/useColums"
 import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
@@ -80,6 +83,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  /** Marker class for each animating column's cells, keyed by column id. */
+  collapsingCellClasses?: ReadonlyMap<ColId, string>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
@@ -155,6 +160,7 @@ const RowComponentInner = <
     rowWrapper,
     fromVisualization,
     headerGroups,
+    collapsingCellClasses,
     registerSelectable,
     unregisterSelectable,
   }: RowProps<
@@ -220,14 +226,33 @@ const RowComponentInner = <
     nestedRowProps?.hasLoadedChildren === undefined ||
     nestedRowProps?.hasLoadedChildren
 
+  // False from the moment AnimatePresence starts animating this row out —
+  // well before it unmounts. A row leaves the selection registry then, not on
+  // unmount: rows fading out are no longer selectable, so a "select all"
+  // clicked mid-exit must not reach them. `true` outside AnimatePresence.
+  const isPresent = useIsPresent()
+
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
   useEffect(() => {
-    if (id === undefined || !willRenderOwnRow || !registerSelectable) return
+    if (
+      id === undefined ||
+      !willRenderOwnRow ||
+      !registerSelectable ||
+      !isPresent
+    )
+      return
     registerSelectable(id, item)
     return () => unregisterSelectable?.(id)
-  }, [id, item, willRenderOwnRow, registerSelectable, unregisterSelectable])
+  }, [
+    id,
+    item,
+    willRenderOwnRow,
+    registerSelectable,
+    unregisterSelectable,
+    isPresent,
+  ])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
@@ -248,6 +273,7 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         headerGroups={headerGroups}
+        collapsingCellClasses={collapsingCellClasses}
         key={key}
         fromVisualization={fromVisualization}
         registerSelectable={registerSelectable}
@@ -350,7 +376,12 @@ const RowComponentInner = <
             }}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
-            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
+            highlighted={!!column.highlighted}
+            className={cn(
+              cellRenderedClass,
+              isLastInGroup && groupBorderClass,
+              collapsingCellClasses?.get(getColumnId(column))
+            )}
           >
             {CellRenderer ? (
               <CellRenderer

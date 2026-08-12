@@ -100,6 +100,10 @@ export const defaultTranslations = {
     join: "Join",
     summary: "Summary",
   },
+  coachmark: {
+    next: "Next",
+    done: "Got it",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -529,6 +533,7 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
@@ -655,6 +660,14 @@ export const defaultTranslations = {
       one: "{{count}} unread",
       other: "{{count}} unread",
     },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above",
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below",
+    },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
@@ -671,6 +684,15 @@ export const defaultTranslations = {
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters",
+    },
+    windowedCategories: "Showing {{count}} of {{total}} categories",
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}",
     },
   },
   progressSeries: {
@@ -689,6 +711,12 @@ export const defaultTranslations = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
+  },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found",
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -909,6 +937,9 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+      phone: {
+        invalid: "Enter a valid phone number",
+      },
     },
   },
   graph: {
@@ -927,6 +958,21 @@ export const defaultTranslations = {
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {
     toolbar: "Document toolbar",

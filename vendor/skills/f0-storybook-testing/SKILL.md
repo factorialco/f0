@@ -52,17 +52,10 @@ parameters: {
   }
 }
 
-// Custom axe rules for this story
-parameters: {
-  a11y: {
-    config: {
-      rules: [{ id: "color-contrast", enabled: false }]
-    }
-  }
-}
 ```
 
 - The contract: `test: "error"` = enforced (default), `test: "todo"` = known debt to fix, `test: "warning"` = intentional. axe always runs.
+- **Never disable an axe rule** (`a11y: { config: { rules: [{ id, enabled: false }] } }`) — blocked by `a11yRuleSuppression.test.ts`. It leaves no trace at all: no CI failure, no job-summary line, no PR comment, nothing in the addon panel. Use `test: "todo"` to defer, or an element-scoped opt-out like `data-a11y-color-contrast-ignore` when a single node genuinely doesn't apply. Enabling/reconfiguring a rule is fine.
 
 ## Commands
 

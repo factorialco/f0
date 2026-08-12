@@ -60,6 +60,8 @@ export const ReplyQuote = ({
           <img
             src={thumbnailUrl}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="ml-2.5 h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
         )}

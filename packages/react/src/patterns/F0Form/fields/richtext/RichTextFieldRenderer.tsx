@@ -16,6 +16,37 @@ interface RichTextFieldRendererProps {
   loading?: boolean
 }
 
+function haveEqualMentionIds(
+  currentMentionIds: string[] | undefined,
+  nextMentionIds: string[] | undefined
+) {
+  const current = currentMentionIds ?? []
+  const next = nextMentionIds ?? []
+
+  return (
+    current.length === next.length &&
+    current.every((mentionId, index) => mentionId === next[index])
+  )
+}
+
+function areEquivalentRichTextValues(
+  currentValue: RichTextValue | string | undefined,
+  nextValue: RichTextValue
+) {
+  const currentContent =
+    typeof currentValue === "string"
+      ? currentValue
+      : (currentValue?.value ?? "")
+
+  return (
+    currentContent === (nextValue.value ?? "") &&
+    haveEqualMentionIds(
+      typeof currentValue === "string" ? undefined : currentValue?.mentionIds,
+      nextValue.mentionIds
+    )
+  )
+}
+
 /**
  * Renders a rich text editor field
  */
@@ -26,8 +57,12 @@ export function RichTextFieldRenderer({
   loading,
 }: RichTextFieldRendererProps) {
   const { ref: formRef, ...formFieldRest } = formField
+  const rawValue = formField.value as RichTextValue | string | undefined
   const editorRef = useRef<RichTextEditorHandle>(null)
   const lastInternalContentRef = useRef<string>("")
+  const lastAcceptedValueRef = useRef<RichTextValue | string | undefined>(
+    rawValue
+  )
 
   // Compose react-hook-form's ref (used for shouldFocusError) with our own
   const composedRef = useCallback(
@@ -45,9 +80,12 @@ export function RichTextFieldRenderer({
 
   // fillForm sets a plain string while the editor's onChange produces a
   // RichTextValue object. Normalise both shapes into a content string.
-  const rawValue = formField.value as RichTextValue | string | undefined
   const currentContent =
     typeof rawValue === "string" ? rawValue : (rawValue?.value ?? "")
+
+  useEffect(() => {
+    lastAcceptedValueRef.current = rawValue
+  }, [rawValue])
 
   // Sync external value changes (e.g. from fillForm) into the TipTap editor.
   // The editor only reads initialEditorState on mount, so programmatic updates
@@ -76,10 +114,19 @@ export function RichTextFieldRenderer({
       }}
       onChange={(result) => {
         lastInternalContentRef.current = result.value ?? ""
-        formField.onChange({
+        const nextValue = {
           value: result.value,
           mentionIds: result.mentionIds,
-        } satisfies RichTextValue)
+        } satisfies RichTextValue
+        const previousValue = lastAcceptedValueRef.current
+
+        lastAcceptedValueRef.current = nextValue
+
+        if (areEquivalentRichTextValues(previousValue, nextValue)) {
+          return
+        }
+
+        formField.onChange(nextValue)
       }}
     />
   )

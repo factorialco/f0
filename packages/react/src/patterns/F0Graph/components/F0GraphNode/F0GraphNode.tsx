@@ -230,7 +230,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               state !== "selected" &&
                 state !== "highlighted" &&
                 !isDot &&
-                "group-hover/pill:border-transparent group-hover/pill:bg-f1-background-hover",
+                "group-hover/pill:bg-f1-background-hover",
               (state === "selected" || state === "highlighted") &&
                 "border-f1-border-selected-bold"
             )}
@@ -403,11 +403,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
             }
             className="max-w-[256px]"
-            // Tags are informational: clicking a tag must not select/center the
-            // node. Two paths select a node: the node-level `onClick` (centering
-            // + itemOnClick) — swallowed here via stopPropagation — and the
-            // canvas `onPointerUp` handler, which fires on pointerup regardless
-            // of this click handler. `data-no-node-select` tells that handler to
+            // Tags are informational: clicking a tag must not select the node.
+            // Two paths select a node: the node-level `onClick` (selection, plus
+            // any consumer `itemOnClick`) — swallowed here via stopPropagation —
+            // and the canvas `onPointerUp` handler, which selects and (by
+            // default) flies to the node, and fires on pointerup regardless of
+            // this click handler. `data-no-node-select` tells that handler to
             // skip selection when the pointer went down on a tag.
             data-no-node-select
             onClick={(e) => e.stopPropagation()}

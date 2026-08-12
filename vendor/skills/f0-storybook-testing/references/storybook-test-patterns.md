@@ -138,18 +138,23 @@ parameters: {
     test: "warning"
   }
 }
-
-// Disable a specific rule for this story
-parameters: {
-  a11y: {
-    config: {
-      rules: [{ id: "color-contrast", enabled: false }]
-    }
-  }
-}
 ```
 
 The contract: `test: "error"` = enforced (the default), `test: "todo"` = known debt to fix, `test: "warning"` = intentional/accepted.
+
+### Never disable an axe rule
+
+`a11y: { config: { rules: [{ id: "...", enabled: false }] } }` is **not allowed** and is blocked by `src/lib/storybook-utils/a11yRuleSuppression.test.ts`.
+
+It is worse than skipping. A disabled rule leaves **no trace anywhere**: no CI failure, no job-summary line, no entry in `a11y-violations.jsonl` (so no PR comment), and nothing in the Storybook a11y panel. `skipCi` at least appears in an allowlist you can count.
+
+Use instead:
+
+- **Deferring a known violation** → `a11y: { test: "todo" }`. axe still runs and still reports; it just doesn't block.
+- **Intentional / accepted** → `a11y: { test: "warning" }`.
+- **One element genuinely not applicable** → an element-scoped opt-out, so only that node is exempt rather than the whole story. `data-a11y-color-contrast-ignore` is the existing example — `.storybook/preview.tsx` narrows the `color-contrast` rule with `selector: "*:not([data-a11y-color-contrast-ignore])"`, and `BaseAvatar.tsx` uses it on the avatar surface.
+
+*Enabling* or reconfiguring a rule is fine — the gate only rejects disabling.
 
 ### withSkipA11y() (deprecated) vs withSnapshot()
 

@@ -8,6 +8,7 @@ import {
   within,
 } from "@/testing/test-utils"
 
+import { ChatVideoAttachment } from "../components/ChatVideoAttachment"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
@@ -71,6 +72,24 @@ vi.mock("@/components/F0VideoPlayer", () => ({
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn()
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      private readonly callback: IntersectionObserverCallback
+      constructor(callback: IntersectionObserverCallback) {
+        this.callback = callback
+      }
+      observe(target: Element) {
+        this.callback(
+          [{ isIntersecting: true, target } as IntersectionObserverEntry],
+          this as unknown as IntersectionObserver
+        )
+      }
+      unobserve() {}
+      disconnect() {}
+      takeRecords = () => []
+    }
+  )
 })
 
 const now = new Date().toISOString()
@@ -125,6 +144,109 @@ const captions = [
 ].join("\n")
 
 describe("ChatVideoAttachment", () => {
+  it("mounts the player immediately behind the stable placeholder", async () => {
+    const file = {
+      kind: "file" as const,
+      url: "https://cdn.example.com/walkthrough.webm",
+      name: "walkthrough.webm",
+      mimeType: "video/webm",
+    }
+    render(<ChatVideoAttachment file={file} cornerClass="rounded-xl" />)
+
+    expect(await screen.findByTestId("chat-video-player")).toBeInTheDocument()
+    expect(
+      screen.getByRole("region", {
+        name: "Video player: walkthrough.webm",
+      })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("status")).toHaveAccessibleName(
+      "Loading video: walkthrough.webm"
+    )
+    expect(screen.getByTestId("chat-video-attachment")).toHaveAttribute(
+      "aria-busy",
+      "true"
+    )
+    expect(screen.getByTestId("chat-video-placeholder")).toHaveClass(
+      "pointer-events-none"
+    )
+
+    fireEvent.loadedData(screen.getByTestId("mock-video-media"))
+
+    expect(
+      screen.getByRole("region", {
+        name: "Video player: walkthrough.webm",
+      })
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(screen.getByTestId("chat-video-attachment")).not.toHaveAttribute(
+      "aria-busy"
+    )
+    expect(screen.getByTestId("chat-video-placeholder")).toHaveClass(
+      "opacity-0"
+    )
+  })
+
+  it("keeps the same poster visible until the mounted player has media data", async () => {
+    const file = {
+      kind: "file" as const,
+      url: "https://cdn.example.com/walkthrough.webm",
+      name: "walkthrough.webm",
+      mimeType: "video/webm",
+      thumbnailUrl: "https://cdn.example.com/poster.webp",
+    }
+    const { container } = render(
+      <ChatVideoAttachment file={file} cornerClass="rounded-xl" />
+    )
+
+    const card = screen.getByTestId("chat-video-attachment")
+    expect(card).toHaveClass("w-[36rem]", "max-w-full", "aspect-video")
+    expect(card).not.toHaveClass("w-full")
+    const poster = container.querySelector<HTMLImageElement>(
+      'img[src="https://cdn.example.com/poster.webp"]'
+    )
+    expect(poster).toBeInTheDocument()
+    fireEvent.load(poster!)
+    expect(poster).toHaveClass("opacity-100")
+    expect(await screen.findByTestId("chat-video-player")).toBeInTheDocument()
+    expect(screen.getByTestId("chat-video-attachment")).toBe(card)
+    const mountedPoster = container.querySelector<HTMLImageElement>(
+      'img[src="https://cdn.example.com/poster.webp"]'
+    )
+    expect(mountedPoster).toBe(poster)
+    expect(mountedPoster).toBeInTheDocument()
+    expect(mountedPoster).toHaveClass("opacity-100")
+    expect(screen.getByTestId("chat-video-placeholder")).not.toHaveClass(
+      "opacity-0"
+    )
+
+    fireEvent.loadedData(screen.getByTestId("mock-video-media"))
+
+    expect(screen.getByTestId("chat-video-placeholder")).toHaveClass(
+      "opacity-0"
+    )
+  })
+
+  it("applies a sender-aware surface to the shell and empty placeholder", () => {
+    const surfaceClassName = "bg-[color:orange]"
+    render(
+      <ChatVideoAttachment
+        file={{
+          kind: "file",
+          url: "https://cdn.example.com/walkthrough.webm",
+          name: "walkthrough.webm",
+          mimeType: "video/webm",
+        }}
+        cornerClass="rounded-xl"
+        surfaceClassName={surfaceClassName}
+      />
+    )
+
+    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+      surfaceClassName
+    )
+    expect(screen.getByTestId("skeleton")).toHaveClass(surfaceClassName)
+  })
+
   it("stacks multiple completed videos as wide inline players", async () => {
     renderChat([
       {
@@ -151,10 +273,14 @@ describe("ChatVideoAttachment", () => {
       },
     ])
 
-    const players = await screen.findAllByRole("region", {
+    await waitFor(() =>
+      expect(
+        screen.getAllByRole("region", { name: /Video player:/ })
+      ).toHaveLength(2)
+    )
+    const players = screen.getAllByRole("region", {
       name: /Video player:/,
     })
-    expect(players).toHaveLength(2)
     expect(players[0]).toHaveAttribute(
       "data-src",
       "https://cdn.example.com/walkthrough.webm"
@@ -170,7 +296,7 @@ describe("ChatVideoAttachment", () => {
     const videoCards = screen.getAllByTestId("chat-video-attachment")
     expect(videoCards).toHaveLength(2)
     for (const card of videoCards) {
-      expect(card).toHaveClass("w-full", "max-w-xl", "aspect-video")
+      expect(card).toHaveClass("w-[36rem]", "max-w-full", "aspect-video")
     }
 
     expect(screen.getByText("source-deck.pptx")).toBeInTheDocument()
@@ -254,6 +380,33 @@ describe("ChatVideoAttachment", () => {
     expect(
       screen.getByRole("button", { name: "Download unsupported.avi" })
     ).toBeInTheDocument()
+  })
+
+  it("keeps the failed-media file item neutral", async () => {
+    const surfaceClassName = "bg-[color:orange]"
+    render(
+      <ChatVideoAttachment
+        file={{
+          kind: "file",
+          url: "https://cdn.example.com/broken.mp4",
+          name: "broken.mp4",
+          mimeType: "video/mp4",
+        }}
+        cornerClass="rounded-xl"
+        surfaceClassName={surfaceClassName}
+      />
+    )
+
+    fireEvent.error(await screen.findByTestId("mock-video-media"))
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("chat-video-attachment")
+      ).not.toBeInTheDocument()
+    )
+    const fileItem = screen.getByText("broken.mp4").parentElement
+    expect(fileItem).toHaveClass("bg-f1-background-tertiary")
+    expect(fileItem).not.toHaveClass(surfaceClassName)
   })
 
   it("keeps the player when only its captions fail", async () => {

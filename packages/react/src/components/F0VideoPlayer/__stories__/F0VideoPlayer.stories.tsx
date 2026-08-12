@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { ReactNode, useEffect, useRef } from "react"
 import { fn } from "storybook/test"
 
@@ -23,7 +24,7 @@ function Frame({ children }: { children: ReactNode }) {
 }
 
 const meta = {
-  title: "Components/F0VideoPlayer",
+  title: "VideoPlayer",
   component: F0VideoPlayer,
   tags: ["experimental", "!autodocs"],
   parameters: {

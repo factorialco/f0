@@ -46,9 +46,20 @@ export const DEFAULT_VISIBLE_DATA_DEBOUNCE_MS = 200
 // windowed-id computation. Without quantization the O(N) intersection would run
 // on every pointer-move frame during a pan; snapping recomputes the window only
 // when the camera crosses a cell boundary, trading a little over-inclusion for a
-// stable, throttled recompute. Kept well below DEFAULT_NODE_WINDOW_PADDING so a
-// snap can never expose an un-materialized node.
-export const NODE_WINDOW_QUANTIZE_STEP = 200
+// stable, throttled recompute.
+//
+// This is the throttle on the whole render path, not just the intersection:
+// instrumentation on a ~500-node chart showed F0GraphView's render count tracking
+// cell crossings at a fixed ~2:1 ratio, with nothing else driving it. At 200 the
+// crossings ran at ~26/s during a pan. Doubling the step halves them.
+//
+// Raising it is safe by construction — the rect is snapped OUTWARD (floor/ceil),
+// so the materialized region always covers the viewport plus the padding, and a
+// larger step only widens it. The cost is over-inclusion: the region grows by up
+// to one step per side, so more nodes are materialized (and mounted) between
+// recomputes. That is the trade being made here — fewer, slightly larger
+// recomputes — and it is why this is measured rather than maximized.
+export const NODE_WINDOW_QUANTIZE_STEP = 400
 
 // Above this rendered-node count we skip variant transitions on every node
 // (chrome opacity, avatar transform, text reveal). Animating thousands of
@@ -62,3 +73,10 @@ export const LARGE_GRAPH_SNAP_THRESHOLD = 700
 // zoomed-in; capping lower opens the node with surrounding context (parent /
 // siblings / reports visible). The user can still zoom in further afterwards.
 export const INITIAL_FOCUS_MAX_ZOOM = 1
+
+// Zoom applied when a node is clicked. A click is a deliberate "take me to this
+// node", so it lands closer than the initial frame (`INITIAL_FOCUS_MAX_ZOOM`),
+// which deliberately opens wide with surrounding context. Centered on the node
+// alone via `setCenter`, clamped to the graph's `maxZoom` at the call site.
+// Overridable per graph via the `nodeClickZoom` prop.
+export const NODE_CLICK_ZOOM = 1.5

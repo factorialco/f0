@@ -62,7 +62,8 @@ const meta: Meta = {
       description: {
         component:
           "<p>Renders an select input field with a list of options to choose from.</p>" +
-          "<p>The list is virtualized so can handle large amount of items</p>",
+          "<p>The list is virtualized so can handle large amount of items</p>" +
+          "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
   },
@@ -181,6 +182,11 @@ const meta: Meta = {
     withApplySelection: {
       description:
         "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
+    },
+    applySelectionLabel: {
+      description:
+        'Custom label for the apply button in the apply-selection footer. Defaults to the translated "Apply selection". Only has an effect when `withApplySelection` is enabled.',
+      control: "text",
     },
     actions: {
       description:
@@ -335,6 +341,41 @@ export const Default: Story = {
     label: "Select a theme",
     value: undefined,
     placeholder: undefined,
+  },
+}
+
+export const WithMetadata: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`metadata` renders a short token next to the option label, in secondary color, without affecting the single-line row height — unlike `description`, which renders as a stacked second line. " +
+          "It is a strictly typed union: each variant carries semantics the component can validate (e.g. `dialCode` warns in development unless the value matches `+` followed by 1–4 digits), so option data stays structured instead of being folded into the label string. " +
+          "New variants (e.g. currency or locale codes) should be added to `F0SelectItemMetadata` as concrete use cases appear.",
+      },
+    },
+  },
+  args: {
+    label: "Select a country",
+    value: undefined,
+    placeholder: undefined,
+    options: [
+      {
+        value: "es",
+        label: "Spain",
+        metadata: { type: "dialCode", dialCode: "+34" },
+      },
+      {
+        value: "de",
+        label: "Germany",
+        metadata: { type: "dialCode", dialCode: "+49" },
+      },
+      {
+        value: "kr",
+        label: "South Korea",
+        metadata: { type: "dialCode", dialCode: "+82" },
+      },
+    ],
   },
 }
 
@@ -1094,6 +1135,31 @@ export const MultipleWithApply: Story = {
       description: `${item.jobTitle} · ${item.departmentName}`,
     }),
     withApplySelection: true,
+  },
+}
+
+/**
+ * Apply-selection footer with a custom apply-button label. Consumers pass an
+ * already-translated string; the default is "Apply selection". Clicking Cancel
+ * closes the dropdown and discards the staged selection.
+ */
+export const MultipleWithApplyCustomLabel: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["2", "5"],
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    withApplySelection: true,
+    applySelectionLabel: "Add to schedule",
   },
 }
 

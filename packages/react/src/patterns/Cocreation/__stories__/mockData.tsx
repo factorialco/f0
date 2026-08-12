@@ -1,6 +1,9 @@
-// Mock data for the "Walkthrough" co-creation story — the collection
-// records, filters, sortings, data adapter, and visualization backing the
-// Surveys tab. Pure data; consumed by FlowContent's OneDataCollection source.
+// Mock data for the "Walkthrough" cocreation story — the collection
+// records, filters, sortings, data adapters, and visualizations shared by
+// every flow (Engagement Surveys, Training Surveys, ...). Pure data;
+// consumed by FlowContent's OneDataCollection source and by `flow-configs.ts`,
+// which assigns the flow-specific records (`ENGAGEMENT_*` / `TRAINING_*`) to
+// each `FlowConfig`.
 
 import { File, Marketplace } from "@/icons/app"
 
@@ -45,7 +48,8 @@ export const resourceSortings = {
   status: { label: "Status" },
 } as const
 
-export const MOCK_RESOURCES: Resource[] = [
+// Collection rows for the Engagement Surveys flow.
+export const ENGAGEMENT_RESOURCES: Resource[] = [
   {
     id: "1",
     name: "Engineering onboarding plan",
@@ -72,9 +76,38 @@ export const MOCK_RESOURCES: Resource[] = [
   },
 ]
 
-export const filledDataAdapter = {
-  fetchData: () => Promise.resolve({ records: MOCK_RESOURCES }),
-}
+// Collection rows for the Training Surveys flow.
+export const TRAINING_RESOURCES: Resource[] = [
+  {
+    id: "1",
+    name: "New hire compliance training",
+    owner: "Alicia Keys",
+    status: "Complete",
+  },
+  {
+    id: "2",
+    name: "Manager coaching certification",
+    owner: "Marta Soler",
+    status: "Draft",
+  },
+  {
+    id: "3",
+    name: "Security awareness refresher",
+    owner: "Dani Moreno",
+    status: "Needs details",
+  },
+  {
+    id: "4",
+    name: "Product training Q1 rollout",
+    owner: "Nora Park",
+    status: "Draft",
+  },
+]
+
+/** Data adapter factory for the Collection phase table — one per flow's rows. */
+export const makeResourcesDataAdapter = (resources: Resource[]) => ({
+  fetchData: () => Promise.resolve({ records: resources }),
+})
 
 export const tableVisualization = {
   type: "table" as const,
@@ -90,6 +123,8 @@ export const tableVisualization = {
 // ---------------------------------------------------------------------------
 // Templates tab — a browse view backed by a card visualization. Pure mock
 // data: survey templates a user can start from, surfaced as metadata cards.
+// Each flow supplies its own template set + category filters so "Templates"
+// only ever shows resources relevant to that flow's domain.
 // ---------------------------------------------------------------------------
 
 export type Template = {
@@ -100,7 +135,21 @@ export type Template = {
   questions: number
 }
 
-export const MOCK_TEMPLATES: Template[] = [
+// Sentinel id for the synthetic "Empty Survey" entry prepended to a templates
+// gallery. Not a real template — selecting it starts a blank survey/form
+// instead of previewing. Shared by the guided-type gallery and the
+// "cards"/"guidedEntry" gallery so both render the same first row.
+export const EMPTY_SURVEY_TEMPLATE_ID = "empty-survey"
+
+export const EMPTY_SURVEY_TEMPLATE: Template = {
+  id: EMPTY_SURVEY_TEMPLATE_ID,
+  name: "Empty Survey",
+  category: "",
+  description: "Start from scratch",
+  questions: 0,
+}
+
+export const ENGAGEMENT_TEMPLATES: Template[] = [
   {
     id: "t1",
     name: "Employee engagement survey",
@@ -150,24 +199,89 @@ export const MOCK_TEMPLATES: Template[] = [
   },
 ]
 
-export const templatesDataAdapter = {
-  fetchData: () => Promise.resolve({ records: MOCK_TEMPLATES }),
-}
+export const ENGAGEMENT_TEMPLATE_CATEGORIES = [
+  { value: "Engagement", label: "Engagement" },
+  { value: "Lifecycle", label: "Lifecycle" },
+  { value: "Management", label: "Management" },
+  { value: "Wellbeing", label: "Wellbeing" },
+]
 
-export const templateFilters = {
+// Training's templates are organized by the same 3 types the guided creation
+// flow asks about up front (Satisfaction / Effectiveness / Knowledge Test), so
+// the plain browse tab and the AI canvas's type-scoped template list share one
+// taxonomy and one dataset.
+export const TRAINING_TEMPLATES: Template[] = [
+  {
+    id: "tt1",
+    name: "Course satisfaction survey",
+    category: "Satisfaction",
+    description:
+      "A short pulse check on how participants felt about the course overall.",
+    questions: 4,
+  },
+  {
+    id: "tt2",
+    name: "Instructor & materials satisfaction",
+    category: "Satisfaction",
+    description:
+      "Focused on satisfaction with the instructor, pacing, and materials.",
+    questions: 4,
+  },
+  {
+    id: "tt3",
+    name: "Training effectiveness review",
+    category: "Effectiveness",
+    description:
+      "Checks whether the course met its goals and improved performance.",
+    questions: 5,
+  },
+  {
+    id: "tt4",
+    name: "Manager-observed effectiveness",
+    category: "Effectiveness",
+    description:
+      "Gathers a manager's read on how training changed on-the-job performance.",
+    questions: 5,
+  },
+  {
+    id: "tt5",
+    name: "Course knowledge test",
+    category: "Knowledge Test",
+    description:
+      "A short graded quiz checking comprehension of the course material.",
+    questions: 5,
+  },
+  {
+    id: "tt6",
+    name: "Certification knowledge test",
+    category: "Knowledge Test",
+    description:
+      "A longer graded assessment used to certify course completion.",
+    questions: 8,
+  },
+]
+
+export const TRAINING_TEMPLATE_CATEGORIES = [
+  { value: "Satisfaction", label: "Satisfaction" },
+  { value: "Effectiveness", label: "Effectiveness" },
+  { value: "Knowledge Test", label: "Knowledge Test" },
+]
+
+/** Data adapter factory for the Templates browse view — one per flow's list. */
+export const makeTemplatesDataAdapter = (templates: Template[]) => ({
+  fetchData: () => Promise.resolve({ records: templates }),
+})
+
+/** Category filter factory for the Templates browse view — one per flow. */
+export const makeTemplateFilters = (
+  categories: { value: string; label: string }[]
+) => ({
   category: {
     type: "in" as const,
     label: "Category",
-    options: {
-      options: [
-        { value: "Engagement", label: "Engagement" },
-        { value: "Lifecycle", label: "Lifecycle" },
-        { value: "Management", label: "Management" },
-        { value: "Wellbeing", label: "Wellbeing" },
-      ],
-    },
+    options: { options: categories },
   },
-}
+})
 
 export const templateSortings = {
   name: { label: "Name" },
@@ -191,5 +305,47 @@ export const cardVisualization = {
         render: (item: Template) => `${item.questions} questions`,
       },
     ],
+  },
+}
+
+// Shared field definitions for the template list visualizations. The synthetic
+// "Empty Survey" row has no category/questions — hide both so it reads as a
+// plain "start from scratch" entry (it only ever appears in the AI Canvas
+// gallery, never the inert browse tab).
+const templateCategoryField = {
+  label: "Category",
+  hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
+  render: (item: Template) => item.category,
+}
+
+const templateQuestionsField = {
+  label: "Questions",
+  hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
+  render: (item: Template) => `${item.questions} questions`,
+  sorting: "questions" as const,
+}
+
+const templateItemDefinition = (item: Template) => ({
+  title: item.name,
+  description: [item.description],
+})
+
+export const listVisualization = {
+  type: "list" as const,
+  options: {
+    itemDefinition: templateItemDefinition,
+    fields: [templateCategoryField, templateQuestionsField],
+  },
+}
+
+// List visualization for the AI Canvas template galleries (both the "cards" and
+// "guidedType" flows): same as `listVisualization` minus the Category property —
+// the gallery's title already frames the scope, so repeating the type per row
+// is redundant.
+export const galleryListVisualization = {
+  type: "list" as const,
+  options: {
+    itemDefinition: templateItemDefinition,
+    fields: [templateQuestionsField],
   },
 }

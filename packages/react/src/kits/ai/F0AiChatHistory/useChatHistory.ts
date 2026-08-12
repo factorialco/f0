@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
+import type { IconType } from "@/components/F0Icon"
+
 import {
   readFromLocalStorage,
   writeToLocalStorage,
@@ -10,6 +12,13 @@ export type ChatThread = {
   title: string
   createdAt: string
   updatedAt: string
+  /** Rendered before the title (e.g. a chart icon for Analytics chats). */
+  icon?: IconType
+  /**
+   * Secondary label at the row's end, revealed on hover/focus like the date
+   * (e.g. "Analytics" for mode-bound chats).
+   */
+  trailingLabel?: string
 }
 
 type UseChatHistoryReturn = {

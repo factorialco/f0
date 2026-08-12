@@ -227,6 +227,11 @@ export type EditableTableColumnDefinition<
    *
    * Return `undefined` to hide the hint.
    *
+   * For `display-only` / `disabled` cells, the hint icon renders on the
+   * right by default. Pass `hintPosition: "left"` to override this for a
+   * specific column (e.g. when the hint always sits next to the value it
+   * annotates, regardless of the cell's editable state).
+   *
    * @example
    * cellHint: (item) => {
    *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
@@ -239,6 +244,7 @@ export type EditableTableColumnDefinition<
         icon: IconType
         message: string
         iconColor?: F0IconProps["color"]
+        hintPosition?: "left" | "right"
       }
     | undefined
 }

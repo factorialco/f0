@@ -1,26 +1,19 @@
 "use client"
 
-import {
-  lazy,
-  type ReactNode,
-  type RefObject,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
+import { lazy, type ReactNode, Suspense, useState } from "react"
 
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
 import { type IconType } from "@/components/F0Icon"
 import { Download } from "@/icons/app"
-import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
+import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { type ChatDocumentKind } from "../utils/attachments"
@@ -29,32 +22,24 @@ import { triggerDownload } from "../utils/download"
 // Every snapshot renderer is heavy in its own way (pdf.js, SheetJS,
 // docx-preview) — each lives in its own chunk, fetched the first time a card
 // of that kind scrolls into view.
-const ChatPdfThumbnail = lazy(() => import("./ChatPdfThumbnail"))
-const ChatSheetThumbnail = lazy(() => import("./ChatSheetThumbnail"))
-const ChatDocxThumbnail = lazy(() => import("./ChatDocxThumbnail"))
-const ChatTextThumbnail = lazy(() => import("./ChatTextThumbnail"))
+const loadPdfThumbnail = () => import("./ChatPdfThumbnail")
+const loadSheetThumbnail = () => import("./ChatSheetThumbnail")
+const loadDocxThumbnail = () => import("./ChatDocxThumbnail")
+const loadTextThumbnail = () => import("./ChatTextThumbnail")
+const ChatPdfThumbnail = lazy(loadPdfThumbnail)
+const ChatSheetThumbnail = lazy(loadSheetThumbnail)
+const ChatDocxThumbnail = lazy(loadDocxThumbnail)
+const ChatTextThumbnail = lazy(loadTextThumbnail)
+
+const DOCUMENT_LOADERS: Record<ChatDocumentKind, () => Promise<unknown>> = {
+  pdf: loadPdfThumbnail,
+  sheet: loadSheetThumbnail,
+  docx: loadDocxThumbnail,
+  text: loadTextThumbnail,
+}
 
 const CARD_WIDTH = 288
 const THUMB_HEIGHT = 160
-
-/** Render-on-view gate: a long transcript can hold many documents, so the
- * parser chunk + snapshot render only happen once a card nears the viewport. */
-const useInViewport = (ref: RefObject<HTMLElement | null>): boolean => {
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const element = ref.current
-    if (!element || inView) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) setInView(true)
-      },
-      { rootMargin: "200px" }
-    )
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [ref, inView])
-  return inView
-}
 
 /**
  * Document card with a type badge and name over a cropped snapshot of the
@@ -70,6 +55,7 @@ export const ChatDocumentAttachmentCard = ({
   action,
   previewDisabled = false,
   compact = false,
+  surfaceClassName,
 }: {
   file: F0ChatFileAttachment
   kind: ChatDocumentKind
@@ -85,14 +71,15 @@ export const ChatDocumentAttachmentCard = ({
   previewDisabled?: boolean
   /** Render as a square thumbnail in compact surfaces such as the composer. */
   compact?: boolean
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   const { openDocumentPreview } = useChatDocumentPreview()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const inView = useInViewport(containerRef)
   const [failed, setFailed] = useState(false)
   const [rendered, setRendered] = useState(false)
+  const { ref, shouldMount } = useTranscriptHeavyPreview(DOCUMENT_LOADERS[kind])
   const fallbackAction = action ?? {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
@@ -107,7 +94,8 @@ export const ChatDocumentAttachmentCard = ({
         <div
           className={cn(
             "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
-            cornerClass
+            cornerClass,
+            surfaceClassName
           )}
           data-testid="chat-document-attachment"
         >
@@ -141,11 +129,12 @@ export const ChatDocumentAttachmentCard = ({
 
   return (
     <div
-      ref={containerRef}
+      ref={ref}
       className={cn(
         "group/attachment relative flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
         compact && "box-border h-16 w-16",
-        cornerClass
+        cornerClass,
+        surfaceClassName
       )}
       style={{ width: cardWidth }}
       data-testid="chat-document-attachment"
@@ -175,18 +164,26 @@ export const ChatDocumentAttachmentCard = ({
         type="button"
         onClick={() => openDocumentPreview(file)}
         disabled={previewDisabled}
+        aria-busy={!rendered ? true : undefined}
         aria-label={i18n.t("chat.openNamedDocument", { name: file.name })}
         className={cn(
           "relative block w-full overflow-hidden border-0 border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity enabled:hover:opacity-90",
           !compact && "border-t",
-          focusRing("focus-visible:ring-inset")
+          focusRing("focus-visible:ring-inset"),
+          surfaceClassName
         )}
         style={{ height: thumbHeight }}
       >
         {/* Skeleton lives UNDER the snapshot; the rendered content fades in
             over it (no hard swap) once the renderer paints. */}
-        <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
-        {inView && (
+        <Skeleton
+          className={cn(
+            "absolute inset-0 h-full w-full rounded-none motion-reduce:animate-none",
+            !shouldMount && "animate-none",
+            surfaceClassName
+          )}
+        />
+        {shouldMount && (
           <div
             className={cn(
               "relative",

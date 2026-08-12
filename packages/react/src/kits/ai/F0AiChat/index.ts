@@ -23,6 +23,7 @@ export type {
   CreditsUsage,
   DashboardCanvasContent,
   DataDownloadCanvasContent,
+  AutofillTimesheetCanvasContent,
   F0AIMessage,
   F0AiChatWelcomeCard,
   F0Message,

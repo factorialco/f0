@@ -36,16 +36,6 @@ const meta = {
           .join(""),
       },
     },
-    a11y: {
-      config: {
-        rules: [
-          {
-            id: "color-contrast",
-            enabled: false,
-          },
-        ],
-      },
-    },
   },
 } satisfies Meta<typeof F0AvatarIcon>
 

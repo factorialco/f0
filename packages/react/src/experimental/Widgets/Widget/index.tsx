@@ -5,11 +5,26 @@ import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
+import {
+  DropdownInternal,
+  DropdownItem,
+} from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { One as OneIcon } from "@/icons/ai"
+import { Ellipsis } from "@/icons/app"
+import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
+import { useI18n } from "@/lib/providers/i18n"
 import { Counter } from "@/ui/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/sds/Profile/PrivateBox"
-import { EyeInvisible, EyeVisible, InfoCircleLine } from "@/icons/app"
+import {
+  ChevronRight,
+  EyeInvisible,
+  EyeVisible,
+  Handle,
+  InfoCircleLine,
+} from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
+import { isExternalHref, Link } from "@/lib/linkHandler"
 import { experimentalComponent } from "@/lib/experimental"
 import { usePrivacyMode } from "@/lib/privacyMode"
 import { withSkeleton } from "@/lib/skeleton"
@@ -20,7 +35,6 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardLink,
   CardSubtitle,
   CardTitle,
 } from "@/ui/Card"
@@ -34,15 +48,37 @@ export interface WidgetProps {
     comment?: string
     info?: string
     canBeBlurred?: boolean
+    /**
+     * The way out of the widget: it makes the TITLE ITSELF the link — the title
+     * with a chevron after it, one ghost-button-shaped target that lights up on
+     * hover. Nothing sits in the header's top-right (that is the overflow menu's)
+     * and nothing sits in the footer (that is `action`'s): the name of the widget
+     * IS the way into it.
+     */
     link?: {
+      /**
+       * What following it DOES, in words — "Go to Communities". The visible text
+       * is the widget's title, so this is what a screen reader announces
+       * instead: it names the DESTINATION, which a title alone cannot.
+       */
       title: string
       url?: string
       onClick?: () => void
+      /** Defaults to the chevron. */
       icon?: IconType
     }
     count?: number
   }
+  /** The card's footer button — its call to action. `neutral`/`sm` by default. */
   action?: F0ButtonProps
+  /**
+   * Extra classes for the FOOTER row that `action` draws in. For content that
+   * BLEEDS past the card's content box and wants the footer brought onto its
+   * line — Home's row-based slots bleed 8px, which eats the gap above the footer
+   * and offsets it from the rows (see `SlotWidget`). Spacing only; `F0Button`
+   * takes no className of its own, so this is the seam for it.
+   */
+  footerClassName?: string
   summaries?: Array<{
     label: string
     value: string | number
@@ -55,19 +91,134 @@ export interface WidgetProps {
     variant: StatusVariant
   }
   fullHeight?: boolean
+  /**
+   * Shows a drag handle to the left of the title. The handle carries
+   * `data-gs-handle`, so a gridstack board picks it up as its handle.
+   */
+  draggable?: boolean
+  onDragStart?: () => void
+  onDragEnd?: () => void
+  /** Lifts the card while it is being dragged. */
+  isDragging?: boolean
+  /** Marks the card as picked out — a selected tile on an editable board. */
+  selected?: boolean
+  /** An "Ask One" AI button in the header. */
+  AIButton?: () => void
+  /** An overflow menu at the header's right, beside `link`. */
+  actions?: DropdownItem[]
 }
 
 const InlineDot = () => (
   <div className="min-h-[0.15rem] min-w-[0.15rem] rounded-full bg-f1-foreground-secondary" />
 )
 
+/**
+ * The TITLE AS A LINK: title text plus a chevron, in one target that behaves like
+ * a ghost button — a tint on hover, a ring on focus. The negative margin with the
+ * matching padding is what keeps the title on the same line it sits on when it is
+ * NOT a link, so the header doesn't shift between the two.
+ */
+const TITLE_LINK_CLASS = cn(
+  "-mx-1.5 inline-flex min-w-0 items-center gap-1 rounded-sm px-1.5 py-0.5",
+  "border-none bg-transparent text-left no-underline",
+  // The COLOUR lives here, on the link, for two reasons: an anchor otherwise
+  // falls back to the browser's blue, and `F0Icon` paints itself from
+  // `currentColor` — so the chevron is the title's colour by inheritance rather
+  // than by being told twice.
+  "text-f1-foreground",
+  "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover",
+  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
+)
+
+/**
+ * The widget's title, linked or not. Linked, it is a real anchor when it has a
+ * `url` (so it can be opened in a new tab, copied, middle-clicked — and only
+ * ANOTHER HOST opens a tab by itself) and a button when all it has is an
+ * `onClick`.
+ */
+const WidgetTitle = ({
+  title,
+  link,
+}: {
+  title: string
+  link?: NonNullable<WidgetProps["header"]>["link"]
+}) => {
+  if (!link) return <CardTitle className="truncate">{title}</CardTitle>
+
+  const content = (
+    <>
+      <CardTitle className="truncate">{title}</CardTitle>
+      {/* No colour of its own: `currentColor` makes it exactly the title's, and
+          the two read as ONE label rather than a label beside a control. */}
+      <F0Icon size="sm" icon={link.icon ?? ChevronRight} />
+    </>
+  )
+
+  // `aria-label` names the DESTINATION while the visible text stays the title.
+  // The title is contained in it ("Communications" in "Go to Communications"),
+  // which is what WCAG's label-in-name asks for.
+  const control = link.url ? (
+    <Link
+      href={link.url}
+      onClick={link.onClick}
+      aria-label={link.title}
+      className={TITLE_LINK_CLASS}
+      {...(isExternalHref(link.url)
+        ? { target: "_blank" as const, rel: "noreferrer" }
+        : {})}
+    >
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={link.onClick}
+      aria-label={link.title}
+      className={TITLE_LINK_CLASS}
+    >
+      {content}
+    </button>
+  )
+
+  // The tooltip says WHERE, above the title: the visible text is the widget's
+  // name, which tells you what you are looking at but not what clicking it does.
+  // Same words as the accessible name, so both audiences get the destination.
+  return <Tooltip label={link.title}>{control}</Tooltip>
+}
+
 const Container = forwardRef<
   HTMLDivElement,
   WidgetProps & { children: ReactNode }
 >(function Container(
-  { header, children, action, summaries, alert, status, fullHeight = false },
+  {
+    header,
+    children,
+    action,
+    footerClassName,
+    summaries,
+    alert,
+    status,
+    fullHeight = false,
+    actions,
+    AIButton,
+    draggable = false,
+    onDragStart,
+    onDragEnd,
+    isDragging = false,
+    selected = false,
+  },
   ref
 ) {
+  useEffect(() => {
+    if (!isDragging || !onDragEnd) return
+    // The pointer can be released anywhere, so the end of a drag is a document
+    // concern rather than this card's.
+    const handleGlobalMouseUp = () => onDragEnd()
+    document.addEventListener("mouseup", handleGlobalMouseUp)
+    return () => document.removeEventListener("mouseup", handleGlobalMouseUp)
+  }, [isDragging, onDragEnd])
+
+  const t = useI18n()
   const { enabled: privacyModeEnabled, toggle: togglePrivacyMode } =
     usePrivacyMode()
 
@@ -90,15 +241,16 @@ const Container = forwardRef<
     )
   }
 
-  const handleLinkClick = () => {
-    header?.link?.onClick?.()
-  }
-
   return (
     <Card
       className={cn(
         fullHeight ? "h-full" : "",
-        "relative flex gap-3 border-f1-border-secondary"
+        "relative flex gap-3 border-f1-border-secondary",
+        draggable && "hover:border-f1-border-hover",
+        selected &&
+          "border-f1-border-selected-bold shadow-[0_0_0_4px_hsl(var(--selected-50)/0.1)]",
+        isDragging &&
+          "cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)]"
       )}
       ref={ref}
     >
@@ -106,9 +258,22 @@ const Container = forwardRef<
         <CardHeader className="-mr-1 -mt-1">
           <div className="flex w-full flex-1 flex-col gap-4">
             <div className="flex flex-1 flex-row flex-nowrap items-center justify-between gap-2">
-              <div className="flex min-h-6 grow flex-row items-center gap-1 truncate">
+              {draggable && (
+                <div
+                  className="-ml-1 flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
+                  onMouseDown={onDragStart}
+                  data-gs-handle="true"
+                >
+                  <F0Icon icon={Handle} size="xs" />
+                </div>
+              )}
+              {/* `min-w-0` rather than `truncate`: the ellipsis belongs to the
+                  TITLE, which carries its own (see `WidgetTitle`), and an
+                  `overflow: hidden` here clipped the linked title's hover
+                  background where it bleeds past the content box. */}
+              <div className="flex min-h-6 min-w-0 grow flex-row items-center gap-1">
                 {header.title && (
-                  <CardTitle className="truncate">{header.title}</CardTitle>
+                  <WidgetTitle title={header.title} link={header.link} />
                 )}
                 {header.subtitle && (
                   <div className="flex flex-row items-center gap-1">
@@ -138,14 +303,27 @@ const Container = forwardRef<
                 {status && (
                   <F0TagStatus text={status.text} variant={status.variant} />
                 )}
-                {header.link && (
-                  <CardLink
-                    onClick={handleLinkClick}
-                    href={header.link.url}
-                    title={header.link.title}
-                    icon={header.link.icon}
+                {AIButton && (
+                  <AIButtonComponent
+                    size="sm"
+                    label={t.ai.ask}
+                    onClick={AIButton}
+                    icon={OneIcon}
                   />
                 )}
+                {actions && (
+                  <DropdownInternal items={actions} align="end">
+                    <F0Button
+                      icon={Ellipsis}
+                      label="Actions"
+                      variant="ghost"
+                      size="sm"
+                      hideLabel
+                    />
+                  </DropdownInternal>
+                )}
+                {/* No link here: it is the TITLE (see `WidgetTitle`). This
+                    corner belongs to the overflow menu. */}
               </div>
             </div>
             {header.comment && (
@@ -207,7 +385,7 @@ const Container = forwardRef<
           })}
       </CardContent>
       {action && (
-        <CardFooter>
+        <CardFooter className={cn(footerClassName)}>
           <F0Button variant="neutral" size="sm" {...action} />
         </CardFooter>
       )}

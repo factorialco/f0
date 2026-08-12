@@ -1,7 +1,5 @@
 import { ComponentProps } from "react"
 
-import { experimentalComponent } from "@/lib/experimental"
-
 import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 
 type BaseHeaderProps = ComponentProps<typeof BaseHeader>
@@ -22,7 +20,11 @@ type Props = {} & Pick<
   | "onClose"
 >
 
-const _ResourceHeader = ({
+/**
+ * Header for a resource detail page: avatar, title, description, status,
+ * metadata and its primary, secondary and overflow actions.
+ */
+export const ResourceHeader = ({
   avatar,
   title,
   description,
@@ -55,11 +57,3 @@ const _ResourceHeader = ({
 }
 
 export type ResourceHeaderProps = Props
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const ResourceHeader = experimentalComponent(
-  "ResourceHeader",
-  _ResourceHeader
-)

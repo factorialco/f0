@@ -30,6 +30,7 @@ export const MockConnectedChatHeader = ({
     fetchThreads,
     deleteThread,
     loadThread,
+    runBeforeClose,
   } = useMockAiChatRuntime()
   const {
     historyEnabled,
@@ -50,7 +51,11 @@ export const MockConnectedChatHeader = ({
   )
   const hasMessages = filteredMessages.length > 0
 
-  const handleClose = useCallback(() => {
+  const handleClose = useCallback(async () => {
+    // Let a registered guard veto the close BEFORE any docking animation runs,
+    // so e.g. a "Leave creation?" confirmation can gate it (see `setBeforeClose`).
+    const proceed = await runBeforeClose()
+    if (!proceed) return
     if (fullscreen) {
       setVisualizationMode("sidepanel")
       setTimeout(() => setOpen(false), 200)
@@ -58,7 +63,7 @@ export const MockConnectedChatHeader = ({
       setOpen(false)
     }
     tracking?.onClose?.()
-  }, [fullscreen, setVisualizationMode, setOpen, tracking])
+  }, [fullscreen, setVisualizationMode, setOpen, tracking, runBeforeClose])
 
   const handleToggleVisualizationMode = useCallback(() => {
     setVisualizationMode((prev) =>

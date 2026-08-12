@@ -8,13 +8,24 @@ import { F0EmojiPicker } from "../index"
 
 vi.mock("@/lib/EmojiPicker", () => ({
   EmojiPicker: ({
+    className,
     locale,
+    navPosition,
     onEmojiSelect,
+    searchPosition,
   }: {
+    className?: string
     locale?: string
+    navPosition?: string
     onEmojiSelect?: (emoji: { native: string }) => void
+    searchPosition?: string
   }) => (
-    <>
+    <div
+      className={className}
+      data-nav-position={navPosition}
+      data-search-position={searchPosition}
+      data-testid="emoji-picker"
+    >
       <button
         type="button"
         data-locale={locale}
@@ -25,7 +36,7 @@ vi.mock("@/lib/EmojiPicker", () => ({
       <button type="button" onClick={() => onEmojiSelect?.({ native: "👨‍👩‍👧‍👦" })}>
         Select family
       </button>
-    </>
+    </div>
   ),
 }))
 
@@ -36,9 +47,30 @@ describe("F0EmojiPicker", () => {
     const trigger = screen.getByRole("button", { name: "Choose group emoji" })
 
     expect(trigger).toHaveAttribute("type", "button")
-    expect(trigger).toHaveAttribute("title", "Choose group emoji")
+    expect(trigger).toHaveAttribute("aria-label", "Choose group emoji")
     expect(container.querySelector("svg")).toBeInTheDocument()
     expect(container.querySelector("img")).not.toBeInTheDocument()
+  })
+
+  it("closes with Escape and restores focus to the trigger", async () => {
+    const user = userEvent.setup()
+    render(<F0EmojiPicker label="Choose group emoji" />)
+
+    const trigger = screen.getByRole("button", { name: "Choose group emoji" })
+
+    trigger.focus()
+    await user.keyboard("{Enter}")
+
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByTestId("emoji-picker")).toBeInTheDocument()
+
+    await user.keyboard("{Escape}")
+
+    await waitFor(() =>
+      expect(trigger).toHaveAttribute("aria-expanded", "false")
+    )
+    expect(screen.queryByTestId("emoji-picker")).not.toBeInTheDocument()
+    await waitFor(() => expect(trigger).toHaveFocus())
   })
 
   it("stores and displays the selected emoji when uncontrolled", async () => {
@@ -196,6 +228,15 @@ describe("F0EmojiPicker", () => {
     expect(
       screen.queryByRole("button", { name: "Clear" })
     ).not.toBeInTheDocument()
+    expect(screen.getByTestId("emoji-picker")).toHaveClass(
+      "border",
+      "border-solid",
+      "border-f1-border-secondary"
+    )
+    expect(screen.getByTestId("emoji-picker")).not.toHaveClass(
+      "rounded-b-none",
+      "border-b-0"
+    )
 
     unmount()
     render(<F0EmojiPicker label="Choose group emoji" clearable />)
@@ -204,12 +245,62 @@ describe("F0EmojiPicker", () => {
     expect(
       screen.queryByRole("button", { name: "Clear" })
     ).not.toBeInTheDocument()
+    expect(screen.getByTestId("emoji-picker")).not.toHaveClass(
+      "rounded-b-none",
+      "border-b-0"
+    )
+  })
+
+  it("joins the picker border to the clear action footer", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0EmojiPicker label="Choose group emoji" defaultValue="💬" clearable />
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: "Choose group emoji: 💬" })
+    )
+
+    expect(screen.getByTestId("emoji-picker")).toHaveClass(
+      "rounded-b-none",
+      "border-b-0"
+    )
+    expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument()
+  })
+
+  it("preserves search and category navigation in short viewports", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0EmojiPicker label="Choose group emoji" defaultValue="💬" clearable />
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: "Choose group emoji: 💬" })
+    )
+
+    expect(screen.getByTestId("emoji-picker")).toHaveAttribute(
+      "data-nav-position",
+      "top"
+    )
+    expect(screen.getByTestId("emoji-picker")).toHaveAttribute(
+      "data-search-position",
+      "top"
+    )
+    const clearFooter = screen
+      .getByRole("button", { name: "Clear" })
+      .closest("div.rounded-b-md")
+
+    expect(clearFooter).toHaveClass(
+      "border-f1-border-secondary",
+      "[@media(max-height:320px)]:px-1",
+      "[@media(max-height:320px)]:py-0"
+    )
   })
 
   it.each([
-    ["sm", "size-6"],
-    ["md", "size-8"],
-    ["lg", "size-10"],
+    ["sm", "[&_.main]:h-6"],
+    ["md", "[&_.main]:h-8"],
+    ["lg", "[&_.main]:h-10"],
   ] as const)(
     "renders the %s trigger size in both states",
     (size, className) => {
@@ -219,7 +310,6 @@ describe("F0EmojiPicker", () => {
 
       expect(
         screen.getByRole("button", { name: "Choose group emoji" })
-          .firstElementChild
       ).toHaveClass(className)
 
       rerender(
@@ -228,7 +318,6 @@ describe("F0EmojiPicker", () => {
 
       expect(
         screen.getByRole("button", { name: "Choose group emoji: 🎉" })
-          .firstElementChild
       ).toHaveClass(className)
     }
   )

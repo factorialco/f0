@@ -27,13 +27,15 @@ export const TextQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: TextQuestionProps) => {
-  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering, placeholders } =
+    useSurveyFormBuilderContext()
 
   const disabled = useQuestionDisabled(baseQuestionComponentProps)
 
   const { t } = useI18n()
 
-  const placeholder = t("surveyFormBuilder.answer.textPlaceholder")
+  const placeholder =
+    placeholders?.answer ?? t("surveyFormBuilder.answer.textPlaceholder")
 
   const field: F0Field = useMemo(
     () =>
