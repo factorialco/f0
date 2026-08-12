@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import { FC, useMemo } from "react"
 
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
@@ -9,6 +10,7 @@ import {
   Question as QuestionIcon,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 
 type Status = "waiting" | "pending" | "approved" | "rejected"
 
@@ -24,7 +26,7 @@ export type ApprovalStepProps = {
   approvalsRequired?: number
   status: Status
   approvers: Approver[]
-  approvalDate?: string
+  approvalDate?: Date
 }
 
 const statusTagVariants: Record<Status, "neutral" | "positive" | "critical"> = {
@@ -79,6 +81,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
   approvalDate,
 }) => {
   const translations = useI18n()
+  const locale = useDateFnsLocale()
 
   const displayApprovalsRequired =
     approvalsRequired === 1
@@ -122,7 +125,9 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
         <F0AvatarList avatars={avatars} layout="fill" type="person" size="md" />
       </div>
       {approvalDate && (
-        <p className="text-sm text-f1-foreground-secondary">{approvalDate}</p>
+        <p className="text-sm text-f1-foreground-secondary">
+          {format(approvalDate, "PP", { locale })}
+        </p>
       )}
     </div>
   )
