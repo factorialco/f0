@@ -112,7 +112,9 @@ import type { F0AiChatWelcomeCard } from "@/kits/ai/F0AiChat"
  *   2. Chat       — F0AiChat animates in so the user can describe what they
  *      want (full width via the "Create" button, side panel via the One switch).
  *   3. Split      — the chat docks as the right side panel and the resource
- *      (a document/preview canvas) fills the center.
+ *      canvas fills the center. Choosing what to start from (the template
+ *      gallery and a template preview) comes BEFORE this: those take the whole
+ *      frame and cover the chat, which returns once a resource exists.
  *
  * `phase` is the single source of truth; the chat's open/visualization state is
  * derived from it (and kept in sync when the user toggles the One switch).
@@ -2281,10 +2283,12 @@ function ComposerPlaceholderRegistrar() {
 /**
  * Registers the survey entry-point cards shown below the composer on the
  * fullscreen welcome screen, via the chat's data-driven `welcomeScreenCards`
- * prop. Each card opens the AI Canvas (docks beside the chat): "Empty survey"
- * opens a blank survey + kicks off a scripted guided conversation; "Templates"
- * opens the templates card collection. Renders nothing — it only feeds card
- * data into the provider so `F0AiChatTextArea` owns the layout.
+ * prop. Each card opens the AI Canvas: "Empty survey" creates the blank survey,
+ * so it docks beside the chat and kicks off a scripted guided conversation;
+ * "Templates" and the two template cards are still SELECTION, so they take the
+ * full width and cover the chat until something is created (see
+ * `makeTemplatePreviewContent` / `useOpenTemplatesCanvas`). Renders nothing — it
+ * only feeds card data into the provider so `F0AiChatTextArea` owns the layout.
  *
  * "cards"-entry-flow only (Engagement) — mounted conditionally by
  * `CreationWithAIFlow`. The "guidedType" flow (Training) has no welcome
