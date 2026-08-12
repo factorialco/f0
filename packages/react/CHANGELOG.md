@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.21.2](https://github.com/factorialco/f0/compare/f0-react-v6.21.1...f0-react-v6.21.2) (2026-08-12)
+
+
+### Bug Fixes
+
+* **OneTable:** match column highlight color to design ([#5082](https://github.com/factorialco/f0/issues/5082)) ([ff78365](https://github.com/factorialco/f0/commit/ff783654e7e882d6de9b970e9d0af7dc1dcab684))
+
 ## [6.21.1](https://github.com/factorialco/f0/compare/f0-react-v6.21.0...f0-react-v6.21.1) (2026-08-12)
 
 
