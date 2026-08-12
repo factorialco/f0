@@ -47,6 +47,10 @@ const meta: Meta<typeof ResourceHeader> = {
       description:
         "Expandable menu containing additional operations and advanced options",
     },
+    collapsed: {
+      description:
+        "Condenses the header to its identity: metadata collapses away, the avatar drops two sizes, the name steps down to the heading type. Driven by scroll position on a resource page",
+    },
   },
 }
 
@@ -663,6 +667,19 @@ export const DeactivatedEmployee: Story = {
 
 type ResourceHeaderProps = ComponentProps<typeof ResourceHeader>
 
+/**
+ * The condensed state, which `F0ResourcePage` switches to once its content has
+ * been scrolled: the metadata collapses away, the avatar drops two sizes and the
+ * name steps down from the large heading type to the heading type. Everything
+ * stays in the DOM, so it animates back on the way up.
+ */
+export const Collapsed: Story = {
+  args: {
+    ...(PersonHeader.args as ResourceHeaderProps),
+    collapsed: true,
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["!dev"],
   parameters: withSnapshot({}),
@@ -680,6 +697,7 @@ export const Snapshot: Story = {
           {...(WithSecondaryDropdownAction.args as ResourceHeaderProps)}
         />
         <ResourceHeader {...(PersonHeader.args as ResourceHeaderProps)} />
+        <ResourceHeader {...(Collapsed.args as ResourceHeaderProps)} />
         <ResourceHeader
           {...(DeactivatedEmployee.args as ResourceHeaderProps)}
         />

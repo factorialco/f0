@@ -130,6 +130,25 @@ Designed to display information about a team.
 
 <Canvas of={ResourceHeaderStories.WithHistory} />
 
+## Collapsed
+
+- Set `collapsed` and the header condenses to its identity: the metadata fades
+  out and collapses away, the avatar drops two sizes (`xl` to `md`), the name
+  steps down from the large heading type to the heading type, the role steps
+  down to f0's 14px, the gap between the two closes, and the space below
+  tightens from 20px to 12px
+- The role, the status and the whole action row stay, so nothing a person came
+  to do moves or disappears
+- Everything stays in the DOM at zero height, so it animates back rather than
+  popping in, and it is hidden from screen readers while closed
+- Driving it is the page's job, not the header's: `F0ResourcePage` passes a
+  number between 0 and 1 taken from scroll position, so the sizes follow the
+  gesture rather than running an animation of their own. `true` is the same as 1
+  and tweens instead, for a header simply shown condensed. In a dialog or a
+  drawer, leave it alone
+
+<Canvas of={ResourceHeaderStories.Collapsed} />
+
 ## Layout
 
 - Elements are arranged to prioritize information hierarchy and visual clarity,
