@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.23.1](https://github.com/factorialco/f0/compare/f0-react-v6.23.0...f0-react-v6.23.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **F0AvatarList:** deprecate layout, correct max docs ([#5073](https://github.com/factorialco/f0/issues/5073)) ([a5d9da5](https://github.com/factorialco/f0/commit/a5d9da5fb177609f5524071e630a000d53336377))
+
 ## [6.23.0](https://github.com/factorialco/f0/compare/f0-react-v6.22.1...f0-react-v6.23.0) (2026-08-12)
 
 
