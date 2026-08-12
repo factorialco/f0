@@ -16,7 +16,7 @@ Composes the body of a page about one resource (a person, a team, a workplace, a
 
 <Controls of={F0ResourcePageStories.Default} />
 
-Top to bottom: `alert` sits above everything because it must be read first; the resource header carries the avatar, name, status, description and the action row; `tabs` and then `secondaryTabs` appear only when the page is split into parts, like Overview and People on a team; `children` renders beside `aside`. There is deliberately no type label in the header, because the breadcrumb, the avatar and the page's own shape already say what this is.
+Top to bottom: `alert` sits above everything because it must be read first; the resource header carries the avatar, name, status, description and the action row; `tabs` appear only when the page is split into parts, like Overview and People on a team; `children` renders beside `aside`. There is deliberately no type label in the header, because the breadcrumb, the avatar and the page's own shape already say what this is.
 
 ## Guidelines
 
@@ -51,10 +51,11 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
         </td>
       </tr>
       <tr>
-        <td>Something is worth glancing at beside the content</td>
+        <td>The overview is long enough that people need to jump around it</td>
         <td>
-          Pass <code>aside</code> for the rail: counts, completeness, shortcuts
-          into the full content
+          Pass the sections as <code>aside</code> and the page builds the rail:
+          a table of contents over them, with no title of its own, that follows
+          the scroll
         </td>
       </tr>
     </tbody>
@@ -108,8 +109,9 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
     description: "Lead with what the resource is",
     guidelines: [
       "Put the thing the page is about in the main column: a workplace shows the address and calendar, a role shows its levels and salary bands, a team shows its people",
-      "Use the rail for what is worth glancing at, and link each item to the full content",
-      "Keep the rail short: if everything is surfaced, nothing is",
+      "Build the overview out of Resource sections, one per group of fields, each with its own Edit action",
+      "Put a table of contents in the rail, one entry per section, so a long overview stays navigable",
+      "Let the rail's entries name the sections exactly, so scanning the list and scanning the page agree",
     ],
   }}
   dont={{
@@ -131,16 +133,39 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 ### Behavior
 
 - **The order is fixed** and owned by the component, so it cannot drift page by page.
-- **The header's bottom border follows the tabs.** With either tab strip present the header drops its border, because the strip already separates the header from the content. Set `showBottomBorder` yourself to override.
+- **The header stays at the top** while the content scrolls under it, so the resource you are working on is always named. The tab strip is deliberately not sticky: inside the sticky box it would inherit the header's height tween, lagging behind the scroll and sitting over the content for as long as the tween ran.
+- **The header condenses as the content scrolls.** Over the first 96px the metadata fades and collapses away, the avatar drops two sizes, the name and the role each step down a size, the gap between them closes and the space down to whatever follows tightens from 20px to 12px; scrolling back up walks all of it in reverse. It is tied to the scroll position rather than tweened over time, so nothing under the header lags behind it, and every size is a function of that one number, so they all land together on the same frame. It is scroll _position_, not direction: the header is as condensed as the page is scrolled.
+- **The header's bottom border follows the tabs.** With a tab strip present the header drops its border, because the strip already separates the header from the content. Set `showBottomBorder` yourself to override.
 - **The action row reads history, overflow, secondary, primary on desktop**, with the primary action rightmost. On mobile the actions stack by priority instead, primary first, and the history button sits above close.
-- **`aside` decides the column count.** With a rail the body is two columns and the rail collapses above the content on narrow viewports; without one the content takes the full width rather than leaving an empty column.
-- **`stickyAside`** keeps the main column scrolling under a pinned rail. Note that `TwoColumnLayout` applies the sticky treatment to the main column today, so the rail itself does not yet pin.
+- **`aside` decides the column count.** With a rail the body is two columns and the rail collapses above the content on narrow viewports; without one the content takes the full width rather than leaving an empty column. There is no rule drawn between the columns: the rail is navigation, not a panel bolted to the page.
+- **The page owns the rail, not the caller.** `aside` takes the sections, and the page renders the table of contents over them. Marking the section being read and scrolling to a picked one both need the scrollport and the live height of the chrome, and only the page has those, so a caller passing its own rendered list could never do either.
+- **The rail follows the scroll.** The active entry is the last section whose top has passed under the chrome, which is the heading you would look up to from wherever you are. Each entry's id is the `id` of a section in `children`, and picking one scrolls that section to just under the chrome rather than under it.
+- **The rail pins itself under the chrome** and scrolls inside the height that is left, so a long table of contents never makes the page taller. Its offset is measured, since the chrome shrinks as the header condenses.
+- **The columns are composed by this component**, not by `TwoColumnLayout`: that layout wraps the pair in its own scrollport, which a sticky rail has nothing to stick to.
 
 ### Usage examples
 
 **Mounted inside `Page`** is how the component is actually used: the app page header supplies the breadcrumbs, and this fills the body below it.
 
 <Canvas of={F0ResourcePageStories.InsidePage} />
+
+**A details-led resource** stacks `F0ResourceSection`s in the main column, one per group of fields, each with its own ghost Edit action. That is how an overview is composed: sections, in the order the reader needs them, separated by space alone. Reach for this shape whenever the resource's own attributes are the subject, as in the Default story at the top of this page. Three more, mirroring the product's own pages:
+
+**A team** answers "who is in it" first: the leads as a row of compact cards, then the members table as a `collection` section, with the team's own fields further down.
+
+<Canvas of={F0ResourcePageStories.Team} />
+
+**A workplace** is the one resource where placement becomes the content: its Details lead with a map and an address, because everything else about a workplace follows from where it is. The two empty fields are deliberate; surfacing those gaps is part of the page's job.
+
+<Canvas of={F0ResourcePageStories.Workplace} />
+
+**A role** leads with its specification. Its people section reads the opposite way to a team's: nobody is put into a role from here, so who reflects it is a consequence of contracts, shown but not edited.
+
+<Canvas of={F0ResourcePageStories.Role} />
+
+**Scrolling condenses the header.** Scroll this one: the header stays at the top and shrinks to its identity on the way down, growing back when you return to the top. It needs `Page` around it, because `Page` owns the scrolling body the header listens to.
+
+<Canvas of={F0ResourcePageStories.CollapsingHeader} />
 
 **Without a rail**, the content takes the full width.
 
@@ -150,10 +175,6 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 
 <Canvas of={F0ResourcePageStories.WithTabs} />
 
-**With sub-tabs**, a second strip appears under the first when the open tab splits further, like Active and Archived inside People.
-
-<Canvas of={F0ResourcePageStories.WithSecondaryTabs} />
-
 **With a notice**, `alert` renders above the header so it is read before anything else.
 
 <Canvas of={F0ResourcePageStories.WithAlert} />
@@ -162,7 +183,7 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 
 <Canvas of={F0ResourcePageStories.HistoryOpensActivity} />
 
-**A sparse resource** is the common real case. The rail keeps showing what is missing instead of hiding it, because hidden gaps never get filled.
+**A sparse resource** is the common real case. The section keeps showing what is missing instead of hiding it, because hidden gaps never get filled: every empty field stays on the page as `--`.
 
 <Canvas of={F0ResourcePageStories.Sparse} />
 
@@ -171,4 +192,6 @@ Top to bottom: `alert` sits above everything because it must be read first; the 
 - **The rail is announced as a complementary region**, so screen reader users can jump to it or skip past it. On desktop it comes after the main column in the reading order.
 - **The resource name is not a heading.** `ResourceHeader` renders the title as a styled `span`, so a resource page currently has no `h1` and its heading outline starts at the `h2` of the first section. Raised with Foundations; it needs a change in `BaseHeader` because it affects every header in the product.
 - **The history button is icon-only on desktop.** It keeps its accessible name through `F0Button`'s `hideLabel` handling (an `aria-label`, a visually hidden label and a tooltip), and it is labelled outright in the mobile stack.
-- **Each tab strip is announced as a navigation region.** `Tabs` currently swaps the two names, so a page with both strips announces the main one as secondary and vice versa. Raised separately.
+- **The tab strip is announced as a navigation region**, so screen reader users can reach the page's parts directly.
+- **The condensed metadata is hidden from assistive tech**, not merely made 0px tall: while closed the rows carry `aria-hidden`, so they are skipped rather than read out as invisible text.
+- **The condensing respects reduced motion.** With `prefers-reduced-motion` the header still condenses, it just changes without the tween.
