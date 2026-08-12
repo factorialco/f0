@@ -82,7 +82,9 @@ each flow — the survey example fills all four:
           <strong>Templates</strong>
         </td>
         <td>
-          Opens the templates canvas to browse and preview pre-made surveys.
+          Opens the template gallery full width — no chat beside it — to browse
+          and preview pre-made surveys. Closing it steps back to this welcome
+          screen.
         </td>
       </tr>
       <tr>
@@ -141,7 +143,8 @@ other: instead of a full-width welcome screen, the flow posts an opening line on
 and immediately asks **one** clarifying question. There is no blank canvas of choices — the
 conversation is already moving.
 
-The single question takes one of two shapes:
+The opening question takes one of two shapes — either the flow's only question, or the first of
+two:
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -162,8 +165,9 @@ The single question takes one of two shapes:
           Knowledge Test.
         </td>
         <td>
-          A template gallery scoped to the chosen type, with "Empty Survey"
-          first.
+          A <em>second</em> question — the same entry actions as the shape
+          below, scoped to the chosen type: its most-used templates, plus Empty
+          Survey and Use a Template.
         </td>
       </tr>
       <tr>
@@ -188,13 +192,18 @@ blank canvas. See
 [When to use Welcome Screen vs Guided Chat](?path=/docs/patterns-ai-cocreation-guidelines--documentation)
 for the decision.
 
+Both shapes end at the same place: **Use a Template** opens the gallery full width, "Empty Survey"
+opens a blank resource, and a named template opens its preview. In the Triage shape everything on
+that second question is scoped to the type just picked, so the gallery it opens is that type's
+("Satisfaction Survey Templates") rather than the whole list.
+
 Because Guided Chat has no welcome screen to fall back to, backing out **before** a survey is picked
-is treated as leaving creation and warns first ("Leave creation?") — whether the user dismisses the
-opening clarifying panel, closes the template gallery, or closes the chat panel itself while a survey
-is still being chosen. **Keep creating** leaves the flow where it was; **Leave** closes the chat and
-notes that nothing was created. Closing a template preview is a step back to the gallery it was
-opened from, not an exit, so it doesn't warn. In the entry-actions shape, picking "Empty Survey" runs
-the same clarifying → draft-confirmation chain described above.
+is treated as leaving creation and warns first ("Leave creation?") — whether the user dismisses a
+clarifying panel or closes the chat panel itself while a survey is still being chosen. **Keep
+creating** leaves the flow where it was; **Leave** closes the chat and notes that nothing was
+created. Closing the gallery, or a template preview, is a step back to whatever opened it rather
+than an exit, so neither warns. In the entry-actions shape, picking "Empty Survey" runs the same
+clarifying → draft-confirmation chain described above.
 
 ### Split
 

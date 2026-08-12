@@ -23,6 +23,14 @@ The user opens and closes the canvas from the resource's in-chat card; they are 
 away to reach it. Keeping creation in the canvas is what lets the AI and the user stay in one
 shared context from intent to finished resource.
 
+**Picking a template is the exception, and it takes the full width.** Choosing what to start from
+is a step of its own, not something the user works through while talking, so the template gallery
+opens as a **full-width canvas with no chat beside it** — the conversation is covered, never
+closed, so nothing is lost. Its Close is a **step back**, returning to whatever opened it: the
+welcome screen, or the entry-action question that offered "Use a Template". Everything after the
+resource exists goes back to the docked Split above, where the conversation earns its place beside
+the draft.
+
 See it in the interactive mock — the Walkthrough lists every flow, each opening full screen in
 its own canvas:
 
@@ -92,14 +100,18 @@ actually abandon the work.
 
 A **Guided Chat** flow has one extra case. Because it has no welcome screen to fall back to, backing
 out **before** a survey has been picked would abandon the creation with nothing to return to — so it
-warns first ("Leave creation?"). This covers **dismissing the opening clarifying panel**, **closing
-the template gallery**, and **closing the chat panel itself** while a survey is still being chosen
-(the one place the "collapsing the chat is friction-free" rule above yields — here there is nothing
-preserved to reopen). **Keep creating** leaves the flow exactly where it was; **Leave** closes the
-chat and notes that nothing was created. A template preview is a sub-view of the gallery, so its own
-Close steps back to the gallery list rather than out of creation — it doesn't warn. On a Welcome
-Screen flow the same actions simply drop back to the welcome screen, so they don't warn — match the
-warning to whether backing out actually strands the user.
+warns first ("Leave creation?"). This covers **dismissing the opening clarifying panel** and
+**closing the chat panel itself** while a survey is still being chosen (the one place the
+"collapsing the chat is friction-free" rule above yields — here there is nothing preserved to
+reopen). **Keep creating** leaves the flow exactly where it was; **Leave** closes the chat and notes
+that nothing was created.
+
+Backing out of the **template gallery** never warns, in any flow: its Close is a step back to the
+question or welcome screen that opened it, so the user lands one step up rather than outside
+creation. A template preview behaves the same, stepping back to the gallery it was opened from. On a
+Welcome Screen flow, dismissing the panels likewise drops back to the welcome screen. Match the
+warning to whether backing out actually strands the user — where there is a step to return to, step
+back instead of asking.
 
 <DoDonts
   do={{
