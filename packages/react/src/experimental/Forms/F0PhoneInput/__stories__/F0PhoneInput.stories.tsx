@@ -74,6 +74,18 @@ export const LegacyFullNumber: Story = {
   },
 }
 
+export const LegacyPrefixlessNumber: Story = {
+  args: {
+    defaultValue: { prefix: undefined, number: "650090492" },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Prefix-less national numbers stay visible next to the country-less globe
+    await expect(canvas.getByRole("textbox")).toHaveValue("650090492")
+    await expect(canvas.queryByText(/^\+\d/)).not.toBeInTheDocument()
+  },
+}
+
 export const PinnedCountries: Story = {
   args: {
     pinnedCountries: ["es", "gb", "us", "fr", "de", "it", "pt"],

@@ -143,6 +143,14 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       [value, fallbackCountry]
     )
 
+    // A national number with no dial code and no defaultCountry has no E.164
+    // form — pass the raw digits through so the legacy value stays visible
+    const rawNumber = useMemo(() => {
+      if (e164) return undefined
+      const raw = value?.number?.trim()
+      return raw && !raw.startsWith("+") ? raw : undefined
+    }, [e164, value])
+
     const [country, setCountry] = useState<PhoneCountry | undefined>(
       () => countryForValue(value) ?? fallbackCountry
     )
@@ -229,7 +237,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
     }
 
     const noEdit = disabled || readonly
-    const showClear = clearable && !noEdit && !!e164
+    const showClear = clearable && !noEdit && !!(e164 ?? rawNumber)
 
     return (
       <div
@@ -263,7 +271,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
         >
           <RPNInput
             className="flex h-full min-w-0 flex-1 items-center"
-            value={e164 ?? undefined}
+            value={(e164 ?? rawNumber ?? undefined) as Value | undefined}
             onChange={handleChange}
             onCountryChange={handleCountryChange}
             defaultCountry={country ?? fallbackCountry}

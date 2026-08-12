@@ -252,6 +252,67 @@ describe("F0PhoneInput", () => {
     expect(getInput().value).toBe("07400 123456")
   })
 
+  it("prefills a prefix-less national number as raw digits with no country", () => {
+    render(
+      <F0PhoneInput
+        label="Phone"
+        value={{ prefix: undefined, number: "650090492" }}
+      />
+    )
+
+    expect(getInput().value).toBe("650090492")
+    const trigger = getCountryTrigger()
+    expect(within(trigger).queryByText(/^\+\d/)).not.toBeInTheDocument()
+  })
+
+  it("adopts the raw digits as the national number when a country is picked", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(
+      <F0PhoneInput
+        label="Phone"
+        defaultValue={{ prefix: undefined, number: "650090492" }}
+        onChange={onChange}
+      />
+    )
+
+    await openCountrySelect(user)
+    await user.type(screen.getByRole("searchbox"), "Spain")
+    await user.click(await screen.findByRole("option", { name: /Spain/ }))
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith(
+        { prefix: "+34", number: "650090492" },
+        expect.objectContaining({
+          country: "es",
+          e164: "+34650090492",
+          isValid: true,
+        })
+      )
+    )
+    await waitFor(() => expect(getInput().value).toBe("650 09 04 92"))
+  })
+
+  it("shows the clear button for a prefix-less raw value", async () => {
+    const onChange = vi.fn()
+    render(
+      <F0PhoneInput
+        label="Phone"
+        clearable
+        defaultValue={{ prefix: undefined, number: "650090492" }}
+        onChange={onChange}
+      />
+    )
+
+    await userEvent.click(screen.getByTestId("clear-button"))
+
+    expect(onChange).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ e164: undefined, isValid: false })
+    )
+    expect(getInput().value).toBe("")
+  })
+
   it("changes the country from the selector and keeps the number", async () => {
     const user = userEvent.setup()
     const onCountryChange = vi.fn()

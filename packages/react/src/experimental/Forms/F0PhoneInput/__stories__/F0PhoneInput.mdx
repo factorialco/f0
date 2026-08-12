@@ -103,9 +103,10 @@ Incoming values are normalized, so legacy data renders correctly:
           <code>{'{ prefix: undefined, number: "674897945" }'}</code>
         </td>
         <td>
-          Needs <code>defaultCountry</code> to be representable; otherwise the
-          field renders empty and the stored value is preserved until the user
-          edits
+          Parsed as national for <code>defaultCountry</code> when set; otherwise
+          the country is unknown, so the raw digits stay visible next to the
+          globe and picking a country adopts them as that country&apos;s
+          national number
         </td>
       </tr>
       <tr>
@@ -135,6 +136,8 @@ Incoming values are normalized, so legacy data renders correctly:
 <Canvas of={Stories.Prefilled} />
 
 <Canvas of={Stories.LegacyFullNumber} />
+
+<Canvas of={Stories.LegacyPrefixlessNumber} />
 
 ### Pinned countries
 
