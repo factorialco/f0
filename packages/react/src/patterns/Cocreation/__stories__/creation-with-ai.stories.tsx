@@ -1423,10 +1423,11 @@ function TemplatePreviewAlert() {
  * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits,
  * both stepping back to the gallery this preview was opened from (never out of
  * creation): "Back to templates" (left) and "Close" (right) both re-open the
- * template selection screen — the type-scoped gallery for the "guidedType"
- * flow, the flow-wide gallery otherwise. Leaving creation from a preview instead
- * happens by closing the chat panel itself, which the guided/no-credits flows
- * gate with the "Leave creation?" warning (see `FlowContent`'s `setBeforeClose`).
+ * template selection screen, fullscreen — the type-scoped gallery for the
+ * "guidedType" flow, the flow-wide gallery otherwise. Leaving creation from a
+ * preview instead happens by closing the chat panel itself, which the
+ * guided/no-credits flows gate with the "Leave creation?" warning (see
+ * `FlowContent`'s `setBeforeClose`).
  * The framework `onClose` is intentionally ignored in favour of these. "Use this template"
  * swaps in the editable resource view (mode "edit"), carrying the template's
  * name and description so its `ResourceHeader` is populated. Defined as a
@@ -1444,8 +1445,8 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   // selection screen this preview was opened from — the type-scoped gallery for
   // the "guidedType" flow, the flow-wide gallery otherwise. Closing a preview
   // steps back to the list, never out of creation. The gallery reopens
-  // fullscreen in every flow but "guidedType" (see `useOpenTemplatesCanvas`),
-  // keeping whatever step-back the current session already recorded.
+  // fullscreen (see `useOpenTemplatesCanvas`), keeping whatever step-back the
+  // current templates session already recorded.
   const backToTemplates = () =>
     openTemplates(
       content.guidedTypeId && config.entryMode === "guidedType"
@@ -2192,19 +2193,16 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
 /**
  * Header for the templates browse canvas. Defined as a component (like
  * `SurveyCanvasHeader`) so it can read context and run a custom close instead of
- * the framework `onClose`. For the "cards" entry flow (Engagement), closing
- * the templates list returns to the FIRST step of cocreation — the fullscreen
- * welcome screen (suggestions + welcome cards). For "guidedType" (Training),
- * there's no welcome screen to return to and no template has been picked yet,
- * so closing would abandon the creation flow — it's gated behind a
- * leave-creation confirmation, and once confirmed closes the chat back to the
- * starting collection page (see `useLeaveGuidedFlow`).
+ * the framework `onClose`.
  *
- * For the "cards" flow, switching to "fullscreen" both closes the canvas (the
- * provider drops canvas content on any canvas → non-canvas transition) and
- * reopens the chat full width. We force fullscreen rather than letting
- * `closeCanvas` restore the pre-canvas mode, since templates may be opened from
- * a side-panel welcome screen and the first step is always the fullscreen chat.
+ * The gallery is fullscreen in every flow, so Close is always a step BACK to
+ * whatever opened it rather than an exit: the "cards" flow's welcome screen
+ * (suggestions + welcome cards), or the entry-action question that offered "Use
+ * a Template" — scoped to the triaged type in the "guidedType" flow. No flow
+ * raises "Leave creation?" from here; that gate lives on the chat's own ✕ and on
+ * the clarifying panels' Cancel. See `useCloseTemplatesCanvas` for the mechanics
+ * (and why it forces "fullscreen" rather than letting `closeCanvas` restore the
+ * pre-canvas mode).
  */
 function TemplatesCanvasHeader({
   content,
