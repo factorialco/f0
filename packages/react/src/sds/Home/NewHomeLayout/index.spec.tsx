@@ -3,7 +3,14 @@ import { beforeEach, describe, expect, test, vi } from "vitest"
 import { useEffect, useState } from "react"
 
 import { Calendar, Clock } from "@/icons/app"
-import { act, screen, userEvent, zeroRender } from "@/testing/test-utils"
+import {
+  act,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+  zeroRender,
+} from "@/testing/test-utils"
 
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
 import { NewHomeLayout } from "./index"
@@ -207,10 +214,15 @@ describe("NewHomeLayout", () => {
     })
 
     test("hides the edit button, and still offers to add", () => {
-      renderLayout(1000)
+      const { container } = renderLayout(1000)
 
       expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
-      expect(screen.getByLabelText("Add widget")).toBeInTheDocument()
+      // Scoped to the STRIP: the main column offers to add too, and both controls
+      // are named the same thing because they are the same offer in two places.
+      const strip = container.querySelector("aside.-m-1") as HTMLElement
+      expect(
+        within(strip).getByRole("button", { name: "Add widget" })
+      ).toBeInTheDocument()
     })
 
     test("badges the glyph of a widget with updates, and only that one", () => {
@@ -331,6 +343,43 @@ describe("NewHomeLayout", () => {
 
       expect(screen.getByLabelText("Expand widgets panel")).toBeInTheDocument()
       expect(screen.getByText("08:00")).toBeInTheDocument()
+      expect(clockMounts).toBe(1)
+    })
+
+    /**
+     * The cards have a JOURNEY TO MAKE when the rail collapses: each one scales
+     * down onto its own glyph (`WidgetMotion`'s stow). The panel's one-widget
+     * filter therefore has to wait for the retract to finish — applied on the frame
+     * the collapse begins, as it once was, every card is `display: none` before it
+     * has moved a pixel and the whole animation plays on an empty box.
+     */
+    test("keeps the cards drawn while they retract into the strip", async () => {
+      await renderDeferredRail(1400)
+
+      await userEvent.click(screen.getByLabelText("Collapse widgets panel"))
+
+      // Still in the column's flow, on its way into the glyph.
+      expect(screen.getByText("08:00").closest("[hidden]")).toBeNull()
+
+      // …and handed over to the strip once it has got there.
+      await waitFor(() =>
+        expect(screen.getByText("08:00").closest("[hidden]")).not.toBeNull()
+      )
+    })
+
+    /**
+     * A HIDDEN container reports `clientWidth` 0 — the same thing the layout sees
+     * before it has measured anything. It must not read that as "no rail yet":
+     * the rail would be dropped and every widget in it built again when the
+     * container came back.
+     */
+    test("a container that reports no width keeps them mounted", async () => {
+      await renderDeferredRail(1400)
+
+      resizeLayoutTo(0)
+      resizeLayoutTo(1400)
+
+      expect(screen.getByText("08:00")).toBeVisible()
       expect(clockMounts).toBe(1)
     })
   })

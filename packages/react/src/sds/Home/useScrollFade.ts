@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react"
+import { type CSSProperties, useEffect, useMemo, useState } from "react"
 
 /** How far an overflowing end is faded out, in px. */
 export const SCROLL_FADE_PX = 24
@@ -14,11 +14,21 @@ export const SCROLL_FADE_PX = 24
  * there, so a column that fits is not masked at all.
  */
 export function useScrollFade(fade: number = SCROLL_FADE_PX) {
-  const ref = useRef<HTMLDivElement | null>(null)
+  /**
+   * A CALLBACK ref held in state, not a `useRef`: the region does not always
+   * exist on the first render. A layout that has to measure itself before it
+   * knows whether to draw its scroll region at all mounts that region a render
+   * late, and an effect that read a plain ref once on mount found nothing there,
+   * attached no listeners, and — with nothing to depend on — never looked again.
+   * The whole column then scrolled unmasked forever.
+   *
+   * Keeping the node in state re-runs the effect when it arrives, and again if it
+   * is ever replaced.
+   */
+  const [el, setEl] = useState<HTMLElement | null>(null)
   const [ends, setEnds] = useState({ top: false, bottom: false })
 
   useEffect(() => {
-    const el = ref.current
     if (!el) return
 
     const read = () => {
@@ -45,7 +55,7 @@ export function useScrollFade(fade: number = SCROLL_FADE_PX) {
       el.removeEventListener("scroll", read)
       observer?.disconnect()
     }
-  }, [])
+  }, [el])
 
   const style = useMemo<CSSProperties>(() => {
     if (!ends.top && !ends.bottom) return {}
@@ -57,5 +67,5 @@ export function useScrollFade(fade: number = SCROLL_FADE_PX) {
     return { maskImage: mask, WebkitMaskImage: mask }
   }, [ends, fade])
 
-  return { ref, style }
+  return { ref: setEl, style }
 }
