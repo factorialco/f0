@@ -522,3 +522,16 @@ Lo que se retira y por qué: `You changed what it takes to complete this course`
 ## Required tag de vuelta (7-ago)
 
 - Decisión de Jon 7-ago: "yo creo que dejaría el tag de required por ahora". Se repone el render del 29-jul 10:03 (alertTag warning "Required", oculto cuando la evaluación ya está cumplida), extendido a los estados nuevos: oculto también en Passed (el intent original era esconderlo al cumplirse, entonces solo existía "Completed"). required: true en todos los KTs (la config es por training, todos o ninguno — Álvaro 31-jul).
+
+## Evaluaciones no disponibles: candado (12-ago, design review con Lama y Álvaro)
+
+Decisión de la reunión: una evaluación programada y aún no disponible **no puede parecer clicable**. Se pidió estado locked/disabled o al menos otro hover.
+
+Verificado en el catálogo antes de decidir (por eso el candado y no otra cosa):
+- `ItemDefinition` de la lista del data collection es solo `{title, description?, avatar?}` — **no existe `disabled` por item**.
+- El hover está hardcodeado en `OneDataCollection/visualizations/collection/List/components/Row.tsx:100-103` (`hover:md:bg-f1-background-hover` fijo en el className, sin condición ni prop) → **no se puede quitar ni cambiar desde fuera**. Con `itemUrl` a `undefined` la fila deja de navegar pero se sigue iluminando.
+- Lo único libre por item es el `avatar`.
+
+Por tanto, lo máximo con el catálogo actual: **candado (`LockLocked`) en el avatar** + chip con la fecha de apertura + `itemUrl` undefined. Que el hover siga es limitación conocida del componente, no un descuido: queda como petición a F0 (con el fichero y la línea para argumentarla).
+
+Copy del estado `waiting` del redirect: añade que puede refrescar o volver, porque no hay auto-refresh y el job tarda 1-2 min (Álvaro: "somehow they need to know that they should refresh or come back again").
