@@ -23,13 +23,18 @@ The user opens and closes the canvas from the resource's in-chat card; they are 
 away to reach it. Keeping creation in the canvas is what lets the AI and the user stay in one
 shared context from intent to finished resource.
 
-**Picking a template is the exception, and it takes the full width.** Choosing what to start from
-is a step of its own, not something the user works through while talking, so the template gallery
-opens as a **full-width canvas with no chat beside it** — the conversation is covered, never
-closed, so nothing is lost. Its Close is a **step back**, returning to whatever opened it: the
-welcome screen, or the entry-action question that offered "Use a Template". Everything after the
-resource exists goes back to the docked Split above, where the conversation earns its place beside
-the draft.
+**Choosing what to start from is the exception, and it takes the full width.** Selection is a step
+of its own, not something the user works through while talking, so both the template gallery **and
+the preview of a template** open as a **full-width canvas with no chat beside it** — the
+conversation is covered, never closed, so nothing is lost. Close is a **step back**: the preview
+returns to the gallery, the gallery to whatever opened it (the welcome screen, or the entry-action
+question that offered "Use a Template").
+
+**The chat comes back when the resource does.** It stays covered for the whole selection — browsing,
+previewing — and returns the moment something actually exists: "Use this template", an empty survey,
+or a draft accepted from the clarifying questions. All of those open an **edit** canvas, which
+reserves the chat's width again and docks it alongside, back in the Split above. Nothing to talk
+about, no conversation on screen.
 
 See it in the interactive mock — the Walkthrough lists every flow, each opening full screen in
 its own canvas:

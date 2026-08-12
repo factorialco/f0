@@ -37,10 +37,23 @@ import { pickRandomResponse, pickRandomThinkingSteps } from "./mockPhrases"
 /** A single step within a (possibly multi-step) clarifying flow. */
 export type ClarifyingStep = {
   question: string
-  options: ClarifyingOption[]
+  /**
+   * The options to offer. Pass a function instead of a list for a step whose
+   * choices depend on an earlier answer: it receives the option ids picked in
+   * every step BEFORE this one, in order, and is re-read as those change (so
+   * going back and picking differently re-derives what follows).
+   */
+  options:
+    | ClarifyingOption[]
+    | ((previousAnswerIdsByStep: string[][]) => ClarifyingOption[])
   selectionMode?: ClarifyingSelectionMode
   optional?: boolean
   allowCustomAnswer?: boolean
+}
+
+/** A `ClarifyingStep` with its options resolved to a concrete list. */
+type ResolvedClarifyingStep = Omit<ClarifyingStep, "options"> & {
+  options: ClarifyingOption[]
 }
 
 /**
@@ -648,16 +661,45 @@ export const MockAiChatRuntimeProvider = ({
   // one, fires `onConfirm` with the picked labels + ids for every step in order.
   const clarifyingQuestion: ClarifyingQuestionState | null = (() => {
     if (!clarifyingConfig) return null
-    const steps = clarifyingConfig.steps
+    // Resolve the steps in order so a step deriving its options from an earlier
+    // answer sees the ids picked before it. Rebuilt every render alongside the
+    // rest of this state, so going back and changing an answer re-derives the
+    // steps that follow. Selected ids are enough for the derivation — a custom
+    // answer carries no option id, and `buildAnswers` handles it separately.
+    const steps: ResolvedClarifyingStep[] = []
+    const previousAnswerIds: string[][] = []
+    clarifyingConfig.steps.forEach((step, i) => {
+      steps.push({
+        ...step,
+        options:
+          typeof step.options === "function"
+            ? step.options([...previousAnswerIds])
+            : step.options,
+      })
+      previousAnswerIds.push(
+        getClarifyingInteraction(clarifyingInteractions, i).selectedIds
+      )
+    })
     const stepIndex = clarifyingStepIndex
     const step = steps[stepIndex]
     if (!step) return null
 
     const mode = step.selectionMode ?? "single"
-    const interaction = getClarifyingInteraction(
+    const storedInteraction = getClarifyingInteraction(
       clarifyingInteractions,
       stepIndex
     )
+    // Drop selections that the current options no longer contain: going back
+    // and changing an earlier answer can re-derive this step into a different
+    // list, and a leftover id would keep Submit enabled while nothing is
+    // highlighted — then resolve to an option that isn't there.
+    const validSelectedIds = storedInteraction.selectedIds.filter((id) =>
+      step.options.some((option) => option.id === id)
+    )
+    const interaction: ClarifyingInteraction = {
+      ...storedInteraction,
+      selectedIds: validSelectedIds,
+    }
 
     const updateInteraction = (patch: Partial<ClarifyingInteraction>) =>
       setClarifyingInteractions((prev) => ({

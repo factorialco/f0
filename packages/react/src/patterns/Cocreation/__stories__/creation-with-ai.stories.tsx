@@ -606,6 +606,26 @@ const asSurveyCanvasContent = (
 ): SurveyCanvasContent | null =>
   content as unknown as SurveyCanvasContent | null
 
+/**
+ * Content for a template PREVIEW — the read-only look at a template before
+ * committing to it.
+ *
+ * Previewing is still selection: no survey exists yet, so it takes the whole
+ * frame like the gallery it was opened from, and the chat stays covered. The
+ * conversation only appears once something is actually created — "Use this
+ * template" on this preview's header, an Empty Survey, or the drafting
+ * clarifying questions — all of which open an "edit" canvas, which reserves the
+ * chat's width again and docks it alongside.
+ */
+const makeTemplatePreviewContent = (
+  content: Omit<SurveyCanvasContent, "type" | "mode" | "fullscreen">
+): SurveyCanvasContent => ({
+  ...content,
+  type: "survey",
+  mode: "preview",
+  fullscreen: true,
+})
+
 // Default name for a blank "start from scratch" survey, shown until the guided
 // flow resolves a real name.
 const UNTITLED_SURVEY_NAME = "Untitled survey"
@@ -2108,13 +2128,13 @@ function TemplatesCanvasBody() {
   const startBlankSurvey = useStartBlankSurvey()
   const openPreview = (item: Template) =>
     openCanvas(
-      toCanvasContent({
-        type: "survey",
-        title: item.name,
-        mode: "preview",
-        templateName: item.name,
-        description: item.description,
-      })
+      toCanvasContent(
+        makeTemplatePreviewContent({
+          title: item.name,
+          templateName: item.name,
+          description: item.description,
+        })
+      )
     )
   return (
     <TemplatesCollection
@@ -2146,14 +2166,14 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
 
   const openPreview = (item: Template) =>
     openCanvas(
-      toCanvasContent({
-        type: "survey",
-        title: item.name,
-        mode: "preview",
-        templateName: item.name,
-        description: item.description,
-        guidedTypeId,
-      })
+      toCanvasContent(
+        makeTemplatePreviewContent({
+          title: item.name,
+          templateName: item.name,
+          description: item.description,
+          guidedTypeId,
+        })
+      )
     )
 
   return (
@@ -2355,14 +2375,14 @@ function SurveyWelcomeCardsRegistrar() {
         // intro copy instead of the flow's generic sample set.
         const { presetCard } = cardsConfig
         openCanvas(
-          toCanvasContent({
-            type: "survey",
-            title: presetCard.title,
-            mode: "preview",
-            templateName: presetCard.title,
-            description: presetCard.description,
-            presetCardId: presetCard.id,
-          })
+          toCanvasContent(
+            makeTemplatePreviewContent({
+              title: presetCard.title,
+              templateName: presetCard.title,
+              description: presetCard.description,
+              presetCardId: presetCard.id,
+            })
+          )
         )
         break
       }
@@ -2374,13 +2394,13 @@ function SurveyWelcomeCardsRegistrar() {
         // `useThisTemplate` takes its non-preset "cards" branch).
         const { placeholderCard } = cardsConfig
         openCanvas(
-          toCanvasContent({
-            type: "survey",
-            title: placeholderCard.title,
-            mode: "preview",
-            templateName: placeholderCard.title,
-            description: placeholderCard.description,
-          })
+          toCanvasContent(
+            makeTemplatePreviewContent({
+              title: placeholderCard.title,
+              templateName: placeholderCard.title,
+              description: placeholderCard.description,
+            })
+          )
         )
         break
       }
@@ -2543,58 +2563,65 @@ function FlowContent({
       return leave
     })
 
-  // Opens the "guidedType" clarifying panel — the core of the flow. The full
-  // type descriptions are posted as assistant text by `startGuidedTypeFlow`
-  // first (options only render a short label), so reopening this on "Keep
-  // creating" doesn't repeat them. Once a type is picked, a SECOND step asks how
-  // to start — the same entry actions the "guidedEntry" flow opens with (Empty
-  // Survey / Use a Template / the most-used templates), scoped to the picked
-  // type (see `openGuidedEntryPanel`). No survey is created by either step.
-  // Dismissing the panel asks to confirm leaving creation.
+  // Opens the "guidedType" clarifying panel — the core of the flow. Two
+  // questions walked CONSECUTIVELY in one panel ("1 of 2" / "2 of 2", with a
+  // back arrow): the resource type, then how to start. The second depends on the
+  // first — its entry actions are scoped to the type picked in step one — so its
+  // options are derived from that answer rather than fixed, and going back to
+  // change the type re-derives them.
+  //
+  // The full type descriptions are posted as assistant text by
+  // `startGuidedTypeFlow` first (options only render a short label), so
+  // reopening this on "Keep creating" doesn't repeat them. No survey is created
+  // by either step. Dismissing the panel asks to confirm leaving creation.
   const openGuidedTypeClarifying = () => {
     if (config.entryMode !== "guidedType") return
+    // The type question is this flow's `guidedQuestion`, so the entry actions
+    // borrow the "guidedEntry" flow's wording — one source of truth for that
+    // copy, as the no-credits redirect does.
+    const steps: ClarifyingStep[] = [
+      {
+        question: config.guidedQuestion,
+        options: config.guidedTypes.map((t) => ({ id: t.id, label: t.label })),
+        selectionMode: "single",
+      },
+      {
+        question: GUIDED_ENTRY_QUESTION,
+        options: (previousAnswerIdsByStep) =>
+          guidedEntryOptions(previousAnswerIdsByStep[0]?.[0]),
+        selectionMode: "single",
+      },
+    ]
+
     startClarifying({
-      steps: [
-        {
-          question: config.guidedQuestion,
-          options: config.guidedTypes.map((t) => ({
-            id: t.id,
-            label: t.label,
-          })),
-          selectionMode: "single",
-        },
-      ],
+      steps,
       onConfirm: (answersByStep, answerIdsByStep) => {
-        // Answered — hand the composer back (the guided intro is over). It is
-        // visible through the beats between this step and the next panel, the
-        // same as between the entry panel and its canvas action.
+        // Answered — hand the composer back (the guided intro is over).
         setComposerHidden(false)
-        // Route on the option ID (labels are display copy); the label is only
-        // echoed back into the transcript. The panel can't confirm without a
+        // Route on the option IDs (labels are display copy; they're only echoed
+        // back into the transcript). The panel can't confirm a step without a
         // selection, so a missing id would be a wiring bug — bail loudly
-        // (nothing happens) rather than silently picking a type.
-        const type = config.guidedTypes.find(
-          (t) => t.id === answerIdsByStep[0]?.[0]
-        )
+        // (nothing happens) rather than silently picking for the user.
+        const typeId = answerIdsByStep[0]?.[0]
+        const type = config.guidedTypes.find((t) => t.id === typeId)
         if (!type) return
-        const label = answersByStep[0]?.[0] ?? type.label
-        // Play the steps one at a time so the user can follow each action
-        // instead of everything landing at once: echo their answer and think
-        // (composer disabled), then reply and open the second step.
-        sendMessageWithThinkingOnly(
-          `**${config.guidedQuestion}**\\\n${label}`,
-          () => {
-            appendMessages([
-              {
-                role: "assistant",
-                content: "Great — how would you like to start?",
-              },
-            ])
-            // The type question is this flow's `guidedQuestion`, so the entry
-            // actions borrow the "guidedEntry" flow's wording — one source of
-            // truth for that copy, as the no-credits redirect does.
-            openGuidedEntryPanel(GUIDED_ENTRY_QUESTION, type.id)
-          }
+        const picked = guidedEntryOptions(type.id).find(
+          (o) => o.id === answerIdsByStep[1]?.[0]
+        )
+        if (!picked) return
+        // Both answers echo as one bubble — question in bold, answer beneath —
+        // the same shape the type → audience → length chain uses.
+        runEntryPick(
+          picked.id,
+          [
+            `**${steps[0].question}**\\\n${answersByStep[0]?.[0] ?? type.label}`,
+            `**${steps[1].question}**\\\n${answersByStep[1]?.[0] ?? picked.label}`,
+          ],
+          // Stepping back from the gallery returns to the entry question alone,
+          // scoped to the type already chosen — not to the type question, which
+          // the user has answered.
+          () => openGuidedEntryPanel(GUIDED_ENTRY_QUESTION, type.id),
+          type.id
         )
       },
       // Dismissed — confirm leaving creation; "Keep creating" keeps the panel.
@@ -2630,80 +2657,91 @@ function FlowContent({
     })
   }
 
-  // Opens the guided-entry clarifying panel: entry ACTIONS as options — Empty
-  // Survey, Use a Template, and the (up to) three most-used templates — and runs
-  // the picked action through its "echo answer → think → reply → think → act"
-  // beats. `templates` is a base `FlowConfig` field, so this works for any entry
-  // mode; the calling `question` varies. Reused by the guidedEntry "Create"
-  // intro (`startGuidedEntryFlow`) and the cards no-credits redirect.
-  const openGuidedEntryPanel = (question: string, guidedTypeId?: string) => {
-    // Scoped by the "guidedType" flow's triage answer: everything this panel
-    // offers stays inside the type the user just picked. The other flows have no
-    // type to scope by and offer the flow's whole list.
-    const scopedTemplates =
-      guidedTypeId && config.entryMode === "guidedType"
-        ? templatesForGuidedType(config, guidedTypeId)
-        : config.templates
-    // "Most used" isn't tracked in the mock, so take the first few templates.
-    const topTemplates = scopedTemplates.slice(0, 3)
-    // The templates gallery this panel browses into: the type-scoped one when
-    // triaged, the flow-wide one otherwise.
-    const galleryContent: TemplatesCanvasContent =
-      guidedTypeId && config.entryMode === "guidedType"
-        ? {
-            type: "templates",
-            title: guidedTemplatesTitle(config, guidedTypeId),
-            guidedTypeId,
-          }
-        : TEMPLATES_CANVAS_CONTENT
-    // Reopening THIS panel — the step Close (and a preview's "Back to
-    // templates") returns to. Carries the type so the scope survives the trip.
-    const reopenPanel = () => openGuidedEntryPanel(question, guidedTypeId)
-    const EMPTY_OPTION_ID = "empty-survey"
-    const TEMPLATES_OPTION_ID = "use-template"
-    const options: ClarifyingOption[] = [
-      { id: EMPTY_OPTION_ID, label: "Empty Survey" },
-      { id: TEMPLATES_OPTION_ID, label: "Use a Template" },
-      ...topTemplates.map((t) => ({ id: `template:${t.id}`, label: t.name })),
-    ]
+  // ── Entry actions ─────────────────────────────────────────────────────────
+  // The options and the actions behind them, shared by the two shapes that ask
+  // for them: the "guidedEntry" flow's single question, and the second step of
+  // the "guidedType" flow's triage panel. Everything takes the triaged type (if
+  // any) so a scoped ask stays inside that type end to end.
 
-    // Runs the picked entry action after its "reply + think" beat.
-    const runGuidedEntryAction = (optionId: string) => {
-      if (optionId === EMPTY_OPTION_ID) {
-        // Blank survey. When triaged, seed the picked type's locked question
-        // (`useOpenEmptySurvey`) — the same blank form the type-scoped gallery's
-        // "Empty Survey" entry creates. Otherwise open a plain blank survey and
-        // walk the drafting conversation — or, with no credits, invite a typed
-        // request met by an out-of-credits reply. Shared with the "cards" flow's
-        // Empty survey card and the templates-header CTA.
-        if (guidedTypeId) openEmptySurvey(guidedTypeId)
-        else startBlankSurvey()
-        return
-      }
-      if (optionId === TEMPLATES_OPTION_ID) {
-        // Browse: open the templates gallery fullscreen — the chat is covered
-        // while it is up, and its Close steps back to this panel. With no
-        // credits, the composer stays live while browsing, so arm the
-        // out-of-credits reply — otherwise a typed message falls through to a
-        // simulated AI answer (see `armNoCredits` / the mock's default reply).
-        openTemplates(galleryContent, reopenPanel)
-        if (noCredits) armNoCredits()
-        return
-      }
-      // A specific template: open it in the read-only preview framing (the
-      // "Use this template" / "Edit Template" actions live on its header).
-      const templateId = optionId.slice("template:".length)
-      const template = scopedTemplates.find((t) => t.id === templateId)
-      if (!template) return
-      // The preview's "Back to templates" enters the gallery without going
-      // through this panel, so record the way back now — closing that gallery
-      // then lands on this panel rather than on a bare chat.
-      templatesReturn.set(reopenPanel)
-      openCanvas(
-        toCanvasContent({
-          type: "survey",
+  const EMPTY_OPTION_ID = "empty-survey"
+  const TEMPLATES_OPTION_ID = "use-template"
+
+  // Templates offered for a scope: the triaged type's, or the flow's whole list.
+  const entryTemplates = (guidedTypeId?: string) =>
+    guidedTypeId && config.entryMode === "guidedType"
+      ? templatesForGuidedType(config, guidedTypeId)
+      : config.templates
+
+  // Entry ACTIONS as clarifying options — Empty Survey, Use a Template, and the
+  // (up to) three most-used templates. "Most used" isn't tracked in the mock, so
+  // take the first few.
+  const guidedEntryOptions = (guidedTypeId?: string): ClarifyingOption[] => [
+    { id: EMPTY_OPTION_ID, label: "Empty Survey" },
+    { id: TEMPLATES_OPTION_ID, label: "Use a Template" },
+    ...entryTemplates(guidedTypeId)
+      .slice(0, 3)
+      .map((t) => ({ id: `template:${t.id}`, label: t.name })),
+  ]
+
+  // The templates gallery an entry action browses into: the type-scoped one when
+  // triaged, the flow-wide one otherwise.
+  const entryGalleryContent = (guidedTypeId?: string): TemplatesCanvasContent =>
+    guidedTypeId && config.entryMode === "guidedType"
+      ? {
+          type: "templates",
+          title: guidedTemplatesTitle(config, guidedTypeId),
+          guidedTypeId,
+        }
+      : TEMPLATES_CANVAS_CONTENT
+
+  /**
+   * Runs the picked entry action after its "reply + think" beat.
+   *
+   * `reopenPanel` is what the fullscreen gallery's Close (and a template
+   * preview's "Back to templates") steps back to — the entry question, asked
+   * again with the same scope.
+   */
+  const runGuidedEntryAction = (
+    optionId: string,
+    reopenPanel: () => void,
+    guidedTypeId?: string
+  ) => {
+    if (optionId === EMPTY_OPTION_ID) {
+      // Blank survey. When triaged, seed the picked type's locked question
+      // (`useOpenEmptySurvey`) — the same blank form the type-scoped gallery's
+      // "Empty Survey" entry creates. Otherwise open a plain blank survey and
+      // walk the drafting conversation — or, with no credits, invite a typed
+      // request met by an out-of-credits reply. Shared with the "cards" flow's
+      // Empty survey card and the templates-header CTA.
+      if (guidedTypeId) openEmptySurvey(guidedTypeId)
+      else startBlankSurvey()
+      return
+    }
+    if (optionId === TEMPLATES_OPTION_ID) {
+      // Browse: open the templates gallery fullscreen — the chat is covered
+      // while it is up, and its Close steps back to the entry question. With no
+      // credits, the composer stays live while browsing, so arm the
+      // out-of-credits reply — otherwise a typed message falls through to a
+      // simulated AI answer (see `armNoCredits` / the mock's default reply).
+      openTemplates(entryGalleryContent(guidedTypeId), reopenPanel)
+      if (noCredits) armNoCredits()
+      return
+    }
+    // A specific template: open it in the read-only preview framing (the
+    // "Use this template" / "Edit Template" actions live on its header).
+    const templateId = optionId.slice("template:".length)
+    const template = entryTemplates(guidedTypeId).find(
+      (t) => t.id === templateId
+    )
+    if (!template) return
+    // The preview's "Back to templates" enters the gallery without going
+    // through the entry question, so record the way back now — closing that
+    // gallery then lands on the question rather than on a bare chat.
+    templatesReturn.set(reopenPanel)
+    openCanvas(
+      toCanvasContent(
+        makeTemplatePreviewContent({
           title: template.name,
-          mode: "preview",
           templateName: template.name,
           description: template.description,
           // Carried when triaged so "Use this template" seeds that type's
@@ -2711,20 +2749,50 @@ function FlowContent({
           ...(guidedTypeId ? { guidedTypeId } : {}),
         })
       )
-      // As above: keep the no-credits reply armed while previewing so typing
-      // never triggers a fake AI reply. `useThisTemplate` re-arms it once the
-      // template is actually used.
-      if (noCredits) armNoCredits()
-    }
+    )
+    // As above: keep the no-credits reply armed while previewing so typing
+    // never triggers a fake AI reply. `useThisTemplate` re-arms it once the
+    // template is actually used.
+    if (noCredits) armNoCredits()
+  }
 
-    // Copy for the assistant reply that precedes each action's canvas beat.
-    const replyForOption = (optionId: string): string => {
-      if (optionId === EMPTY_OPTION_ID)
-        return "Let's start with a blank survey."
-      if (optionId === TEMPLATES_OPTION_ID)
-        return "Sure — here are the templates to choose from."
-      return "Great — opening that template for you."
-    }
+  // Copy for the assistant reply that precedes each action's canvas beat.
+  const replyForOption = (optionId: string): string => {
+    if (optionId === EMPTY_OPTION_ID) return "Let's start with a blank survey."
+    if (optionId === TEMPLATES_OPTION_ID)
+      return "Sure — here are the templates to choose from."
+    return "Great — opening that template for you."
+  }
+
+  /**
+   * The beats every answered entry question plays: echo the picked answers into
+   * the transcript, reply, think, then run the action. `answerBlocks` is the
+   * echo — one "**question**\\\nanswer" block per step, so the triage shape
+   * echoes both of its questions in a single bubble.
+   */
+  const runEntryPick = (
+    optionId: string,
+    answerBlocks: string[],
+    reopenPanel: () => void,
+    guidedTypeId?: string
+  ) => {
+    sendMessageWithThinkingOnly(answerBlocks.join("\n\n"), () => {
+      appendMessages([{ role: "assistant", content: replyForOption(optionId) }])
+      showThinking(() =>
+        runGuidedEntryAction(optionId, reopenPanel, guidedTypeId)
+      )
+    })
+  }
+
+  // Opens the guided-entry clarifying panel: one question, the entry ACTIONS as
+  // its options. Reused by the guidedEntry "Create" intro
+  // (`startGuidedEntryFlow`), the cards no-credits redirect, and — scoped to a
+  // type — as the step the triage flow's gallery Close returns to.
+  const openGuidedEntryPanel = (question: string, guidedTypeId?: string) => {
+    const options = guidedEntryOptions(guidedTypeId)
+    // Reopening THIS panel — the step Close (and a preview's "Back to
+    // templates") returns to. Carries the type so the scope survives the trip.
+    const reopenPanel = () => openGuidedEntryPanel(question, guidedTypeId)
 
     startClarifying({
       steps: [
@@ -2743,12 +2811,12 @@ function FlowContent({
         const picked = options.find((o) => o.id === answerIdsByStep[0]?.[0])
         if (!picked) return
         const label = answersByStep[0]?.[0] ?? picked.label
-        sendMessageWithThinkingOnly(`**${question}**\\\n${label}`, () => {
-          appendMessages([
-            { role: "assistant", content: replyForOption(picked.id) },
-          ])
-          showThinking(() => runGuidedEntryAction(picked.id))
-        })
+        runEntryPick(
+          picked.id,
+          [`**${question}**\\\n${label}`],
+          reopenPanel,
+          guidedTypeId
+        )
       },
       // Dismissed — confirm leaving creation; "Keep creating" keeps the panel.
       onCancel: confirmExitOrStay,
@@ -3221,12 +3289,12 @@ export const GuidedEntryEmptySurveyClosesWithoutGate: Story = {
   },
 }
 
-// The "guidedType" flow's two steps: triaging the type no longer opens a gallery
-// on its own — it hands off to the SAME entry actions the "guidedEntry" flow
-// opens with, scoped to the picked type. "Use a Template" then opens the gallery
-// fullscreen, and its Close steps back to that second panel instead of
-// abandoning creation. Hidden from the sidebar — it exists for
-// `pnpm test-storybook`, not for browsing.
+// The "guidedType" flow's two consecutive steps: triaging the type no longer
+// opens a gallery on its own — the SAME panel advances to the entry actions the
+// "guidedEntry" flow opens with, with its options derived from the type just
+// picked. "Use a Template" then opens the gallery fullscreen, and its Close
+// steps back to that entry question instead of abandoning creation. Hidden from
+// the sidebar — it exists for `pnpm test-storybook`, not for browsing.
 export const GuidedTypeEntryActionsStep: Story = {
   name: "Guided Chat · Triage entry actions (test)",
   tags: ["no-sidebar"],
@@ -3245,11 +3313,12 @@ export const GuidedTypeEntryActionsStep: Story = {
     })
 
     await step(
-      "Picking a type opens the entry actions, type-scoped",
+      "The same panel advances to the entry actions, type-scoped",
       async () => {
         await userEvent.click(page.getByRole("radio", { name: "Satisfaction" }))
-        await userEvent.click(page.getByRole("button", { name: "Submit" }))
-        // The second step — the entry actions, not a gallery.
+        // "Next", not "Submit": step one of two in a single panel.
+        await userEvent.click(page.getByRole("button", { name: "Next" }))
+        // Step two of the SAME panel — no message beat in between.
         await page.findByRole("radio", { name: "Use a Template" }, BEAT)
         expect(
           page.getByRole("radio", { name: "Empty Survey" })
@@ -3264,6 +3333,32 @@ export const GuidedTypeEntryActionsStep: Story = {
         ).not.toBeInTheDocument()
       }
     )
+
+    await step("Going back re-derives the actions for a new type", async () => {
+      // Step two depends on step one, so changing the type must change what it
+      // offers — the point of deriving the options instead of fixing them.
+      await userEvent.click(page.getByRole("button", { name: "Back" }))
+      await userEvent.click(
+        await page.findByRole("radio", { name: "Knowledge Test" }, BEAT)
+      )
+      await userEvent.click(page.getByRole("button", { name: "Next" }))
+      await page.findByRole("radio", { name: "Course knowledge test" }, BEAT)
+      expect(
+        page.queryByRole("radio", { name: "Course satisfaction survey" })
+      ).not.toBeInTheDocument()
+
+      // Back to Satisfaction for the rest of the walk.
+      await userEvent.click(page.getByRole("button", { name: "Back" }))
+      await userEvent.click(
+        await page.findByRole("radio", { name: "Satisfaction" }, BEAT)
+      )
+      await userEvent.click(page.getByRole("button", { name: "Next" }))
+      await page.findByRole(
+        "radio",
+        { name: "Course satisfaction survey" },
+        BEAT
+      )
+    })
 
     await step("Use a Template opens the gallery fullscreen", async () => {
       await userEvent.click(page.getByRole("radio", { name: "Use a Template" }))
