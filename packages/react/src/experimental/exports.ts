@@ -31,6 +31,10 @@ export * from "./Forms/exports"
 export * from "./Information/exports"
 export * from "./Lists/DetailsItem"
 export * from "./Lists/DetailsItemsList"
+// Not a moved component: F0ResourceSection is new and lives in patterns/, next to
+// SectionHeader which it composes. Exported here because this barrel feeds the
+// experimental entrypoint.
+export * from "../patterns/F0ResourceSection"
 export * from "./Lists/OnePersonListItem"
 export * from "./Navigation/exports"
 export * from "./F0FormEditableTable"

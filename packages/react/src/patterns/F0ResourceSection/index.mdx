@@ -1,0 +1,190 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as F0ResourceSectionStories from "./index.stories"
+
+<Meta of={F0ResourceSectionStories} />
+
+# Resource section
+
+One section of the overview on a `Resource page`. The overview is built by stacking sections, each holding one kind of content under an optional heading with its own action:
+
+- **`details`** holds label and value pairs, the resource's own attributes: an employee's work information, a workplace's address, a legal entity's tax details.
+- **`cards`** holds a grid of things the reader can open, like the teams a person belongs to. Each card is an `F0Card`, the same card the data collection's card view renders, so a team looks the same here as it does anywhere else.
+
+More variants will follow, so a page composed of sections today keeps working when they arrive.
+
+For editing many fields at once use `F0Form`; for a single dense list of rows with borders use `DetailsItemsList` with `tableView`.
+
+## Anatomy
+
+<Canvas of={F0ResourceSectionStories.Details} />
+
+<Controls of={F0ResourceSectionStories.Details} />
+
+The header is a `SectionHeader`, so it takes a title, an optional description and an optional action on the right. Below it the fields arrange into two columns, dropping to one at the same breakpoint where the resource header stops being a row and stacks its actions: one column and a stacked header are the same narrow layout. Each field shows its label in secondary text above its value.
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use Resource section when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Reading a record's fields</td>
+        <td>
+          People come to look at the values, and edit them somewhere else, like
+          a form or a side panel
+        </td>
+      </tr>
+      <tr>
+        <td>The section is a set of things to open, not fields to read</td>
+        <td>
+          Pass <code>variant="cards"</code>, like the teams a person belongs to
+          or the workplaces a legal entity covers
+        </td>
+      </tr>
+      <tr>
+        <td>A record has several groups of fields</td>
+        <td>
+          Use one section per group, each with its own heading, like Work
+          information and Personal on an employee
+        </td>
+      </tr>
+      <tr>
+        <td>Fields belong to a group that can be edited as a whole</td>
+        <td>
+          Put the action in the header, so Edit clearly applies to that group
+          and not to the whole page
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>People are filling the fields in, not reading them</td>
+        <td>
+          <code>F0Form</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          A dense list of rows separated by lines, like an invoice summary
+        </td>
+        <td>
+          <code>DetailsItemsList</code> with <code>tableView</code>
+        </td>
+      </tr>
+      <tr>
+        <td>A heading with content that is not label and value pairs</td>
+        <td>
+          <code>SectionHeader</code> on its own, above your content
+        </td>
+      </tr>
+      <tr>
+        <td>Many records compared side by side</td>
+        <td>
+          <code>OneDataCollection</code> with a table
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  stacked
+  do={{
+    description: "Group fields the way people think about them",
+    guidelines: [
+      "Give each section a heading that names the group, like Work information",
+      "Keep an empty field visible with its placeholder, so the gap is obvious and someone can fill it",
+      "Put the action in the header when it applies to the whole group",
+    ],
+  }}
+  dont={{
+    description: "Use it as a layout for anything in two columns",
+    guidelines: [
+      "Do not hide fields that have no value: the reader cannot fill a gap they cannot see",
+      "Do not put an Edit action on a section whose fields are edited individually",
+      "Do not mix unrelated fields into one section to save vertical space",
+    ],
+  }}
+/>
+
+### Content best practices
+
+- **Labels name the field, not the action.** "Personal email", not "Enter personal email".
+- **Keep labels short enough to sit on one line** in a narrow column.
+- **Leave values alone when they are empty.** The placeholder handles it; do not write "None" or "N/A" into the value.
+
+### Behavior
+
+- **Items are children**, so a field that only sometimes applies is a plain conditional. There is no list to build up beforehand.
+- **Sections divide themselves.** Every section but the first in a stack puts 64px of space above itself, and the headings are rule enough: no line is drawn. The space is half margin, half padding, so a jump from the page's rail, which aligns to the section's edge, still leaves 32px of air above the heading. **Stack sections with no gap of your own**: a container gap adds to this and pulls each heading away from its own fields.
+- **The header action is ghost**, so an Edit that belongs to one section does not read as loudly as the page's own actions. Pass `variant` on the action to override it.
+- **An empty value shows a placeholder**, `--` by default, and the item stays on the page. Pass `placeholder` to change the text.
+- **Two columns by default**, dropping to one at the breakpoint where the resource header stacks its actions. Pass `columns={1}` for narrow places like a side rail.
+- **The cards variant lays out its own grid**, three across on a wide page, two at medium and one when narrow. `columns` does not apply to it.
+- **A header with no description stays tight** to the items: the description renders nothing when omitted.
+- **Values can do more than sit there.** Anything `DetailsItem` supports works, including values that copy to the clipboard or link somewhere.
+
+### Usage examples
+
+**Two columns with a header and an action** is the common case, and matches the employee profile.
+
+<Canvas of={F0ResourceSectionStories.Details} />
+
+**A title with no description** keeps the heading close to the items.
+
+<Canvas of={F0ResourceSectionStories.TitleOnly} />
+
+**One column** fits a side rail or any narrow container.
+
+<Canvas of={F0ResourceSectionStories.SingleColumn} />
+
+**Without a header**, when the section sits under a heading of its own.
+
+<Canvas of={F0ResourceSectionStories.WithoutHeader} />
+
+**Values other than text**: people, teams, tags, and values that copy or link on click.
+
+<Canvas of={F0ResourceSectionStories.ValueTypes} />
+
+**Composed from conditions**, showing a field only when it applies.
+
+<Canvas of={F0ResourceSectionStories.Composed} />
+
+**The cards variant** trades the field grid for a grid of cards, three across on a wide page and one on a narrow one. Use it when each thing is somewhere to go rather than something to read, and keep the description to the one fact that makes the card worth opening.
+
+<Canvas of={F0ResourceSectionStories.Cards} />
+
+## Accessibility
+
+- **The heading is a real `h2`**, from `SectionHeader`, so the section appears in the page's heading outline and screen reader users can jump to it.
+- **Labels are read before their values**, because each item puts the label first in the reading order.
+- **Empty fields are announced**, since the placeholder is real text rather than a blank space. A reader hears the field exists and has no value.
+- **The header action is a button** with its label as its accessible name, and it is reachable from the keyboard in the same order it appears.

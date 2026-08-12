@@ -16,7 +16,7 @@ type Props = {
   /**  Complementary action specific to the section */
   action?: Pick<F0ButtonProps, "label" | "onClick"> & {
     icon?: IconType
-    variant?: "default" | "outline"
+    variant?: "default" | "outline" | "ghost"
   }
 
   /** Optional link to related documentation (Help center or other link) */
