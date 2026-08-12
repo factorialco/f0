@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.21.0](https://github.com/factorialco/f0/compare/f0-react-v6.20.0...f0-react-v6.21.0) (2026-08-12)
+
+
+### Features
+
+* **OneApprovalHistory:** add approval date to steps ([#5084](https://github.com/factorialco/f0/issues/5084)) ([ce2a84d](https://github.com/factorialco/f0/commit/ce2a84d0c0e56a225819ccf83b479c50c80f86b5))
+
 ## [6.20.0](https://github.com/factorialco/f0/compare/f0-react-v6.19.0...f0-react-v6.20.0) (2026-08-12)
 
 
