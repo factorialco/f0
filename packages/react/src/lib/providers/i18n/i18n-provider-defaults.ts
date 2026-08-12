@@ -969,6 +969,8 @@ export const defaultTranslations = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
   },
   pdfViewer: {
     toolbar: "Document toolbar",

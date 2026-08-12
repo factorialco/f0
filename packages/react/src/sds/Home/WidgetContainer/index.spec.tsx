@@ -196,6 +196,58 @@ describe("WidgetContainer", () => {
       ).toBeInTheDocument()
     })
 
+    test("a widget's OWN actions lead its menu, above the chrome", async () => {
+      const onExport = vi.fn()
+      zeroRender(
+        <WidgetContainer
+          widgets={[
+            widget("events", {
+              header: { title: "events", info: "What these events are." },
+              actions: [{ label: "Export as CSV", onClick: onExport }],
+            }),
+          ]}
+          onRemoveWidget={() => {}}
+        />
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "Actions" }))
+
+      // The widget's own item first, then what every widget carries, and the
+      // destructive one last.
+      expect(
+        screen.getAllByRole("menuitem").map((i) => i.textContent?.trim())
+      ).toEqual(["Export as CSV", "What this info means?", "Remove widget"])
+
+      await userEvent.click(
+        screen.getByRole("menuitem", { name: "Export as CSV" })
+      )
+      await waitFor(() => expect(onExport).toHaveBeenCalled())
+    })
+
+    test("its actions show even where the column forbids arranging", async () => {
+      zeroRender(
+        <WidgetContainer
+          widgets={[
+            widget("events", {
+              actions: [{ label: "Mark all as read", onClick: () => {} }],
+            }),
+          ]}
+          disableEdition
+          onRemoveWidget={() => {}}
+        />
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "Actions" }))
+
+      // What the widget DOES is not arranging chrome — only removal is.
+      expect(
+        screen.getByRole("menuitem", { name: "Mark all as read" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("menuitem", { name: "Remove widget" })
+      ).not.toBeInTheDocument()
+    })
+
     test("a LOCKED widget can still be configured, just not removed", async () => {
       const schema = z.object({
         limit: f0FormField(z.number(), { label: "Limit" }),

@@ -7,40 +7,43 @@ import { breakpoints } from "@factorialco/f0-core"
 import { cn } from "@/lib/utils"
 
 /**
- * WHEN A CENTERED DIALOG IS WORTH IT. The widget dialogs are two columns — a list
- * or a form beside the widget itself — and a centered `xl` box has to fit both at
- * their real widths (a 320px column, a 396px preview) with air around them and
- * still leave the page visible behind. That takes a LARGE EXTERNAL DISPLAY.
- *
- * Everything smaller goes FULLSCREEN, laptops included: on a MacBook Pro the
- * centered box eats most of the screen anyway, so it pays the cost of a modal
- * without the benefit — you see a sliver of page around it and get less room for
- * the two halves. Below this the dialog takes the screen and the columns stack.
- *
- * ONE NUMBER, ONE PLACE: change it here and both dialogs follow.
- */
-const CENTERED_DIALOG_QUERY = "(min-width: 1800px) and (min-height: 900px)"
-
-/**
  * How the widget dialogs lay themselves out — one decision taken once, because
  * both of them make it: `WidgetCatalog` (pick a widget) and `WidgetUpdateDialog`
  * (configure one) are the same offer at different moments, and a dialog that
  * behaved differently between them would say they were different things.
+ *
+ * FULLSCREEN, unless the display is genuinely big. These dialogs are two columns —
+ * a list or a form beside the widget itself — and a centered `xl` box has to fit
+ * both at their real widths (a 320px column, a 396px preview) with air around them
+ * AND still leave enough page around the edges to be worth being a modal. On a
+ * laptop, and on an ordinary 1080p monitor, it manages that only by taking most of
+ * the screen anyway: the cost of a modal without the benefit. So those go
+ * fullscreen, and only a large display gets the centered box.
+ *
+ * The number is deliberately past a 1920-wide monitor and every laptop, so what
+ * qualifies is a 2560-class display. It is the ONE knob here; change it and both
+ * dialogs follow.
  */
+const CENTERED_DIALOG_QUERY = "(min-width: 2200px) and (min-height: 900px)"
+
 export const useWidgetDialogLayout = () => {
   const roomForCentered = useMediaQuery(CENTERED_DIALOG_QUERY, {
     initializeWithValue: true,
     defaultValue: false,
   })
-  // Stacking is for the genuinely narrow: a fullscreen dialog on a laptop still
-  // has room for two columns, and stacking there would waste it.
+  // Stacking IS a size question: two columns need the width for two columns.
   const stacked = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,
     defaultValue: false,
   })
   return {
-    /** Hand straight to `F0Dialog`. */
+    /** Hand straight to `F0Dialog`, with `width` below. */
     position: roomForCentered ? ("center" as const) : ("fullscreen" as const),
+    /**
+     * What the centered box is capped to. Fullscreen neutralises it (F0Dialog has
+     * a compound variant for exactly that), so it is passed unconditionally.
+     */
+    width: "xl" as const,
     /** The body's own classes: one column on a narrow screen, two otherwise. */
     bodyClassName: cn(
       "flex h-full min-h-96 gap-4",
@@ -104,7 +107,11 @@ export function WidgetPreviewPane({
   previewWidth = 396,
 }: WidgetPreviewPaneProps) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg bg-f1-background-secondary p-6">
+    // TOP-ALIGNED, not centred. The dialog is fullscreen at most sizes, so the
+    // stage is tall: a card floating in the middle of it reads as lost, and the
+    // eye has to hunt for it after scanning the list on the left. Sitting near
+    // the top, with generous air above, it is where you look first.
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-6 overflow-y-auto rounded-lg bg-f1-background-secondary px-6 pb-6 pt-10">
       <div
         // The key is what makes this a NEW element, and a new element is what
         // replays the animation — a class alone would only play once.

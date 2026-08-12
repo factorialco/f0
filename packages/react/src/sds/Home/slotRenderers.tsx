@@ -387,6 +387,17 @@ export type HomeWidgetItem = HomeWidgetChrome & {
   id: string
   header?: HomeWidgetHeader
   /**
+   * THIS WIDGET'S OWN menu items — "Mark all as read", "Export as CSV", whatever
+   * it can do that no other widget can. They go in the widget's three-dots menu,
+   * FIRST: the column adds what every widget carries (what its info means, its
+   * params, removing it) after them, and removing it sits behind a separator.
+   *
+   * Ordinary `DropdownItem`s, so they take an `icon`, a `description`, `critical`
+   * for a destructive one, `disabled`, or a `type: "separator"` of your own to
+   * group them. A `locked` widget still shows them.
+   */
+  actions?: WidgetProps["actions"]
+  /**
    * The widget is CONFIGURABLE: these are the params the user may set, as an
    * F0Form schema. Declaring it — together with the layout's
    * `onChangeWidgetParams` — is what puts "Edit params" in the widget's menu.
@@ -552,8 +563,11 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       })}
       {overflows ? (
         <div className="mt-1 self-start">
+          {/* `neutral`, the same button a widget's own call to action is (the
+              frame's `action`): "View more" is something you press, and a ghost
+              button under a dense list of rows reads as another row. */}
           <F0Button
-            variant="ghost"
+            variant="neutral"
             size="sm"
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
@@ -658,7 +672,7 @@ const ListSlotSkeleton = ({
       ))}
       {overflows ? (
         <div className="mt-1 self-start">
-          {/* An `sm` ghost button — what "View more (n)" will be. */}
+          {/* An `sm` neutral button — what "View more (n)" will be. */}
           <Skeleton className="h-6 w-24 rounded-sm" />
         </div>
       ) : null}

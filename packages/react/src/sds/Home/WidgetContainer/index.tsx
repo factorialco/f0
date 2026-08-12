@@ -334,15 +334,21 @@ export function WidgetContainer({
   // same column is a fairground, not an explanation.
   const [flippedId, setFlippedId] = useState<string | null>(null)
   /**
-   * A widget's own menu items, in the order they read: what it can be CHANGED
-   * into first, then the destructive one.
+   * ONE MENU PER WIDGET, in the order it reads:
    *
-   * A LOCKED widget can still be configured — mandatory says nothing about
-   * fixed — it just isn't offered removal. A widget offered neither gets no
-   * menu at all, rather than an empty one.
+   * 1. THE WIDGET'S OWN `actions` — what this particular widget does ("Mark all
+   *    as read", "Export"). They come first because they are the reason a user
+   *    opens the menu; the rest is chrome every widget has.
+   * 2. What it is telling you (`header.info`), and what it can be configured into.
+   * 3. Removing it, behind a separator, because it is the one that cannot be
+   *    undone.
+   *
+   * A LOCKED widget can still act and still be configured — mandatory says
+   * nothing about fixed — it just isn't offered removal. A widget offered nothing
+   * at all gets no menu, rather than an empty one.
    */
   const menuItems = (widget: HomeWidgetItem): DropdownItem[] => {
-    const items: DropdownItem[] = []
+    const items: DropdownItem[] = [...(widget.actions ?? [])]
     // What the widget is telling you, if it says. Its copy is the PROVIDER's
     // (`t.widgets.whatThisMeans`), not this column's: the question a user asks of
     // a widget is the same question in every product that ships one.
@@ -358,13 +364,17 @@ export function WidgetContainer({
         icon: Sliders,
         onClick: () => setEditingParamsId(widget.id),
       })
-    if (canEdit && !widget.locked && onRemoveWidget)
+    if (canEdit && !widget.locked && onRemoveWidget) {
+      // A separator only when there is something to separate it FROM — a menu
+      // that opens on a rule reads as if an item failed to render.
+      if (items.length > 0) items.push({ type: "separator" })
       items.push({
         label: removeLabel ?? t.widgets.removeWidget,
         icon: Delete,
         critical: true,
         onClick: () => onRemoveWidget(widget.id),
       })
+    }
     return items
   }
   const handleDragEnd = ({ active, over }: DragEndEvent) => {

@@ -16,6 +16,7 @@ import { One } from "@/icons/ai"
 import {
   Building,
   Calendar,
+  Check,
   ChevronRight,
   Clock,
   Comment,
@@ -27,6 +28,7 @@ import {
   PalmTree,
   Person,
   Receipt,
+  Settings,
   Target,
 } from "@/icons/app"
 
@@ -45,7 +47,7 @@ import {
   widgetTitle,
 } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
-import { WidgetCatalog } from "../WidgetCatalog"
+import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
@@ -160,7 +162,7 @@ const FeedSection = ({
     {viewMore ? (
       <div className="flex justify-end pt-1">
         <F0Button
-          variant="outline"
+          variant="neutral"
           size="sm"
           label={`View more (${viewMore})`}
           onClick={() => {}}
@@ -582,6 +584,12 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       title: "Communications",
       link: { title: "Go to Communications", url: "/communications" },
     },
+    // THIS WIDGET'S OWN actions: they lead its three-dots menu, above the items
+    // every widget carries (and above "Remove widget", behind its separator).
+    actions: [
+      { label: "Mark all as read", icon: Check, onClick: () => {} },
+      { label: "Notification settings", icon: Settings, onClick: () => {} },
+    ],
     slots: [
       listSlot(
         { left: "module", descriptionRequired: true, clickBehavior: "link" },
@@ -689,7 +697,7 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
  * The catalog the picker offers. Every preview is the REAL widget — the same
  * `SlotWidget` render the rail makes — so what you preview is what gets added.
  */
-const CATALOG = [
+const CATALOG_ITEMS = [
   ...RIGHT_WIDGETS.map((widget) => ({
     id: widget.id,
     // `widgetTitle` rather than the header's own: a configurable widget's title
@@ -909,6 +917,45 @@ const CATALOG = [
   },
 ]
 
+/**
+ * THE PICKER’S DOMAINS, in the order it shows them, each headed by its module’s
+ * glyph. The labels are the app’s words: f0’s `modules` registry carries icons,
+ * not names.
+ */
+const CATALOG_GROUPS: WidgetCatalogGroup[] = [
+  { id: "time", label: "Time & attendance", module: "time-tracking" },
+  { id: "comms", label: "Communication", module: "communities" },
+  { id: "calendar", label: "Calendar", module: "calendar" },
+  { id: "performance", label: "Performance", module: "goals" },
+  { id: "org", label: "Organization", module: "employees" },
+  { id: "docs", label: "Documents", module: "documents" },
+]
+
+/** Which domain each widget belongs to. `resources` deliberately has none — it
+ * lands in the unheaded run after the groups, which is what a widget that fits
+ * no domain should do. */
+const CATALOG_DOMAIN: Record<string, string> = {
+  "clock-in": "time",
+  "time-off": "time",
+  communications: "comms",
+  events: "calendar",
+  goals: "performance",
+  tasks: "performance",
+  team: "org",
+  people: "org",
+  offices: "org",
+  documents: "docs",
+}
+
+/** What this Home suggests first. Optional: drop it and the section is gone. */
+const RECOMMENDED_IDS = new Set(["clock-in", "events"])
+
+const CATALOG = CATALOG_ITEMS.map((item) => ({
+  ...item,
+  group: CATALOG_DOMAIN[item.id],
+  recommended: RECOMMENDED_IDS.has(item.id),
+}))
+
 const Home = () => {
   const [open, setOpen] = useState(false)
   const [side, setSide] = useState<WidgetContainerSide>("main")
@@ -957,6 +1004,7 @@ const Home = () => {
         isOpen={open}
         onClose={() => setOpen(false)}
         widgets={CATALOG}
+        groups={CATALOG_GROUPS}
         onAdd={() => setOpen(false)}
         previewWidth={side === "right" ? 396 : 768}
       />

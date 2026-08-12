@@ -87,7 +87,8 @@ export function WidgetUpdateDialog({
   saveLabel = "Save",
 }: WidgetUpdateDialogProps) {
   const t = useI18n()
-  const { position, bodyClassName, asideClassName } = useWidgetDialogLayout()
+  const { position, width, bodyClassName, asideClassName } =
+    useWidgetDialogLayout()
   const { formRef, getValues, trigger } = useF0Form()
   // What the PREVIEW is drawn from: the last values that validated, starting
   // from the widget's own. Never the raw form state — a half-typed number is not
@@ -105,10 +106,11 @@ export function WidgetUpdateDialog({
       isOpen={isOpen}
       onClose={onClose}
       title={title ?? t.widgets.editParamsTitle}
-      // Fullscreen on a narrow screen: the fields and the preview stack there,
-      // and neither is usable inside a centered box (see `useWidgetDialogLayout`).
+      // Fullscreen unless the display is big enough for a centered box to be
+      // worth it — the fields and the preview want the room
+      // (`useWidgetDialogLayout`).
       position={position}
-      width="xl"
+      width={width}
       primaryAction={{
         label: saveLabel,
         // Validation before saving is the FORM's, not ours: `trigger` surfaces

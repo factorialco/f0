@@ -51,6 +51,23 @@ that can only be a button. **Only another HOST opens a new tab**: a path, a
 `#fragment` and this host under any scheme all stay in this tab (see
 `isExternalHref`).
 
+## The widget's own actions
+
+A widget declares what only it can do as `actions` — ordinary `DropdownItem`s —
+and they lead its **three-dots menu**:
+
+```tsx
+actions: [
+  { label: "Mark all as read", icon: Check, onClick: markAllRead },
+  { label: "Notification settings", icon: Settings, onClick: openSettings },
+],
+```
+
+The column adds what every widget carries **after** them — "What this info
+means?", "Edit params" — and "Remove widget" last, behind a separator, because it
+is the one that cannot be undone. A `locked` widget still shows its actions: being
+mandatory says nothing about what it can do.
+
 ## The info side
 
 `header.info` is not a tooltip beside the title — it is the widget's **other
