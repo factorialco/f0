@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.23.0](https://github.com/factorialco/f0/compare/f0-react-v6.22.1...f0-react-v6.23.0) (2026-08-12)
+
+
+### Features
+
+* **NewHomeLayout:** configurable widgets, and no edit mode to enter first ([#5090](https://github.com/factorialco/f0/issues/5090)) ([796c479](https://github.com/factorialco/f0/commit/796c479fa97f289c5bca308367715806357d712d))
+
 ## [6.22.1](https://github.com/factorialco/f0/compare/f0-react-v6.22.0...f0-react-v6.22.1) (2026-08-12)
 
 
