@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.21.1](https://github.com/factorialco/f0/compare/f0-react-v6.21.0...f0-react-v6.21.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **icons:** remove stale shapes from Multitask icon ([#5088](https://github.com/factorialco/f0/issues/5088)) ([1b99daa](https://github.com/factorialco/f0/commit/1b99daaf7f2b7f01ae43a3823b884fa52a7d6849))
+
 ## [6.21.0](https://github.com/factorialco/f0/compare/f0-react-v6.20.0...f0-react-v6.21.0) (2026-08-12)
 
 
