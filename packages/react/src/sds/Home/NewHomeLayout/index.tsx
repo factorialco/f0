@@ -806,7 +806,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               ) : null}
             </motion.aside>
           )}
-        </AnimatePresence>        {/* THE RAIL BODY — one mount, whatever the rail is doing.
+        </AnimatePresence>{" "}
+        {/* THE RAIL BODY — one mount, whatever the rail is doing.
 
             Expanded it is the rail's column. Collapsed it is the FLOATING PANEL:
             the same element, taken out of the grid and put at the expanded rail

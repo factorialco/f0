@@ -3,9 +3,10 @@ import { ReactNode, useState } from "react"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { IconType } from "@/components/F0Icon"
 import { F0SearchInput } from "@/components/F0SearchInput"
+import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
-import { WidgetPreviewPane } from "../WidgetPreview"
+import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 
 /** One entry in the widget catalog dialog. */
 export interface WidgetCatalogItem {
@@ -59,6 +60,7 @@ export function WidgetCatalog({
   previewWidth = 396,
   title = "Add widget",
 }: WidgetCatalogProps) {
+  const { position, bodyClassName, asideClassName } = useWidgetDialogLayout()
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
@@ -75,6 +77,9 @@ export function WidgetCatalog({
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      // Fullscreen on a narrow screen — a two-column picker cannot live in a
+      // centered box there (see `useWidgetDialogLayout`).
+      position={position}
       width="xl"
       primaryAction={{
         label: "Add widget",
@@ -82,9 +87,9 @@ export function WidgetCatalog({
         onClick: () => selected && onAdd(selected.id),
       }}
     >
-      <div className="flex h-full min-h-96 gap-4">
+      <div className={bodyClassName}>
         {/* The picker: a search field leading the widget rows. */}
-        <div className="flex w-80 shrink-0 flex-col gap-2">
+        <div className={cn("flex flex-col gap-2", asideClassName)}>
           <F0SearchInput
             value={query}
             onChange={setQuery}

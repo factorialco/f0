@@ -1,6 +1,59 @@
 import { ReactNode } from "react"
 
+import { useMediaQuery } from "usehooks-ts"
+
+import { breakpoints } from "@factorialco/f0-core"
+
 import { cn } from "@/lib/utils"
+
+/**
+ * WHEN A CENTERED DIALOG IS WORTH IT. The widget dialogs are two columns — a list
+ * or a form beside the widget itself — and a centered `xl` box has to fit both at
+ * their real widths (a 320px column, a 396px preview) with air around them and
+ * still leave the page visible behind. That takes a LARGE EXTERNAL DISPLAY.
+ *
+ * Everything smaller goes FULLSCREEN, laptops included: on a MacBook Pro the
+ * centered box eats most of the screen anyway, so it pays the cost of a modal
+ * without the benefit — you see a sliver of page around it and get less room for
+ * the two halves. Below this the dialog takes the screen and the columns stack.
+ *
+ * ONE NUMBER, ONE PLACE: change it here and both dialogs follow.
+ */
+const CENTERED_DIALOG_QUERY = "(min-width: 1800px) and (min-height: 900px)"
+
+/**
+ * How the widget dialogs lay themselves out — one decision taken once, because
+ * both of them make it: `WidgetCatalog` (pick a widget) and `WidgetUpdateDialog`
+ * (configure one) are the same offer at different moments, and a dialog that
+ * behaved differently between them would say they were different things.
+ */
+export const useWidgetDialogLayout = () => {
+  const roomForCentered = useMediaQuery(CENTERED_DIALOG_QUERY, {
+    initializeWithValue: true,
+    defaultValue: false,
+  })
+  // Stacking is for the genuinely narrow: a fullscreen dialog on a laptop still
+  // has room for two columns, and stacking there would waste it.
+  const stacked = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+    defaultValue: false,
+  })
+  return {
+    /** Hand straight to `F0Dialog`. */
+    position: roomForCentered ? ("center" as const) : ("fullscreen" as const),
+    /** The body's own classes: one column on a narrow screen, two otherwise. */
+    bodyClassName: cn(
+      "flex h-full min-h-96 gap-4",
+      stacked ? "flex-col" : "flex-row"
+    ),
+    /**
+     * The left column's: it gives up its fixed width when stacked, and the
+     * preview keeps its own height rather than being squeezed by it.
+     */
+    asideClassName: stacked ? "w-full shrink-0" : "w-80 shrink-0",
+    stacked,
+  }
+}
 
 /**
  * THE ARRIVAL. A preview lands with a small zoom-and-fade rather than appearing —

@@ -1,10 +1,11 @@
 import { ReactNode, useEffect, useState } from "react"
 
+import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
 
-import { WidgetPreviewPane } from "../WidgetPreview"
+import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 import {
   type FromWidgetParams,
   type WidgetParams,
@@ -86,6 +87,7 @@ export function WidgetUpdateDialog({
   saveLabel = "Save",
 }: WidgetUpdateDialogProps) {
   const t = useI18n()
+  const { position, bodyClassName, asideClassName } = useWidgetDialogLayout()
   const { formRef, getValues, trigger } = useF0Form()
   // What the PREVIEW is drawn from: the last values that validated, starting
   // from the widget's own. Never the raw form state — a half-typed number is not
@@ -103,6 +105,9 @@ export function WidgetUpdateDialog({
       isOpen={isOpen}
       onClose={onClose}
       title={title ?? t.widgets.editParamsTitle}
+      // Fullscreen on a narrow screen: the fields and the preview stack there,
+      // and neither is usable inside a centered box (see `useWidgetDialogLayout`).
+      position={position}
       width="xl"
       primaryAction={{
         label: saveLabel,
@@ -116,8 +121,8 @@ export function WidgetUpdateDialog({
         },
       }}
     >
-      <div className="flex h-full min-h-96 gap-4">
-        <div className="w-80 shrink-0 overflow-y-auto">
+      <div className={bodyClassName}>
+        <div className={cn("overflow-y-auto", asideClassName)}>
           <F0Form
             formRef={formRef}
             name="widget-params"
