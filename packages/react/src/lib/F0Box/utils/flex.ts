@@ -1,6 +1,7 @@
 import type {
   AlignItemsToken,
   FlexDirectionToken,
+  FlexToken,
   FlexWrapToken,
   GapToken,
   JustifyContentToken,
@@ -50,6 +51,13 @@ export const flexVariants = {
     wrap: "flex-wrap",
     "wrap-reverse": "flex-wrap-reverse",
   } satisfies Record<FlexWrapToken, string>,
+
+  flex: {
+    "1": "flex-1",
+    auto: "flex-auto",
+    initial: "flex-initial",
+    none: "flex-none",
+  } satisfies Record<FlexToken, string>,
 
   grow: {
     true: "grow",
