@@ -1072,6 +1072,7 @@ describe("BarChart — item tooltip", () => {
     render(
       <F0DataChart
         type="bar"
+        stacked
         categories={["A", "B"]}
         series={[
           { name: "S1", data: [30, 10] },
@@ -1088,6 +1089,33 @@ describe("BarChart — item tooltip", () => {
     expect(html).toContain("30.0%")
     expect(html).toContain("of total")
     expect(html).toContain((100).toLocaleString())
+  })
+
+  // Side-by-side bars are independent measures, not parts of a whole: summing
+  // three average salaries produces a number that is not an average of
+  // anything, and a share of that sum makes the bars look like slices of a pie.
+  it("omits share and total on a grouped chart, however many series", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["Barcelona"]}
+        series={[
+          { name: "Not specified", data: [104000] },
+          { name: "Male", data: [45700] },
+          { name: "Female", data: [49500] },
+        ]}
+      />
+    )
+    const html = getTooltipFormatter()?.({
+      name: "Barcelona",
+      seriesName: "Not specified",
+      value: 104000,
+      dataIndex: 0,
+    })
+    expect(html).toContain((104000).toLocaleString())
+    expect(html).not.toContain("of total")
+    expect(html).not.toContain("52.2%")
+    expect(html).not.toContain((199200).toLocaleString())
   })
 
   it("hides share of total for single-series charts", () => {
