@@ -60,12 +60,12 @@ describe("F0CanvasPanel seam", () => {
     expect(backdrop().className).toContain("md:pr-1")
   })
 
-  it("finishes both edges for fullscreen content", () => {
-    renderPanel({ type: "note", title: "NOTE CANVAS", fullscreen: true })
+  it("finishes both edges when the canvas covers the chat", () => {
+    renderPanel({ type: "note", title: "NOTE CANVAS", coversChat: true })
 
-    // Fullscreen covers the chat, so neither edge is a seam: both meet the
-    // frame and get the same rounding, border and inset. A one-sided treatment
-    // here reads as a card jammed against the viewport edge.
+    // Covering the chat leaves neither edge a seam: both meet the frame and get
+    // the same rounding, border and inset. A one-sided treatment here reads as
+    // a card jammed against the viewport edge.
     const className = backdrop().className
     expect(className).toContain("md:rounded-lg")
     expect(className).toContain("md:px-1")
@@ -73,9 +73,9 @@ describe("F0CanvasPanel seam", () => {
     expect(className).not.toContain("border-l-0")
   })
 
-  it("finishes both edges for fullscreen content docked left too", () => {
+  it("finishes both edges for a covering canvas docked left too", () => {
     renderPanel(
-      { type: "note", title: "NOTE CANVAS", fullscreen: true },
+      { type: "note", title: "NOTE CANVAS", coversChat: true },
       "left"
     )
 

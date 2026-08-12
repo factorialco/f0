@@ -200,10 +200,12 @@ function ApplicationFrameContent({
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
   // The canvas hugs the seam with the docked chat, so it reserves the chat's
-  // width on that edge. Content marked `fullscreen` reserves nothing: it spans
+  // width on that edge. Content marked `coversChat` reserves nothing: it spans
   // the frame and covers the chat (the canvas layer sits above it), so the
-  // panel keeps its state and its conversation while it is out of view.
-  const reservedCanvasInset = canvasContent?.fullscreen ? 0 : reservedChatWidth
+  // panel keeps its state and its conversation while it is out of view. Note
+  // this is unrelated to `visualizationMode: "fullscreen"`, which is the chat
+  // spanning the frame with no canvas at all.
+  const reservedCanvasInset = canvasContent?.coversChat ? 0 : reservedChatWidth
   // Dragging the resize handle moves the chat's edge instantly (the chat
   // window drops its own transition while `isResizing`), so the canvas must
   // too — easing here would leave the seam trailing the cursor for 300ms on

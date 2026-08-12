@@ -20,10 +20,10 @@ const asContent = (content: Record<string, unknown>) =>
   content as unknown as CanvasContent
 
 const DOCKED_NOTE = asContent({ type: "note", title: "NOTE CANVAS" })
-const FULLSCREEN_NOTE = asContent({
+const COVERING_NOTE = asContent({
   type: "note",
   title: "NOTE CANVAS",
-  fullscreen: true,
+  coversChat: true,
 })
 
 const noteEntity = {
@@ -42,8 +42,8 @@ const Probe = () => {
       <button type="button" onClick={() => openCanvas(DOCKED_NOTE)}>
         open-docked
       </button>
-      <button type="button" onClick={() => openCanvas(FULLSCREEN_NOTE)}>
-        open-fullscreen
+      <button type="button" onClick={() => openCanvas(COVERING_NOTE)}>
+        open-covering
       </button>
       <button type="button" onClick={() => setChatWidth(RESIZED_CHAT_WIDTH)}>
         widen-chat
@@ -110,16 +110,16 @@ describe("ApplicationFrame canvas inset", () => {
     await waitForReservedEdge("right")
   })
 
-  it("reserves nothing for fullscreen canvas content", async () => {
+  it("reserves nothing for canvas content that covers the chat", async () => {
     renderFrame()
-    await userEvent.click(screen.getByText("open-fullscreen"))
+    await userEvent.click(screen.getByText("open-covering"))
 
     await waitForFlushEdge("right")
   })
 
-  it("keeps the chat mounted underneath a fullscreen canvas", async () => {
+  it("keeps the chat mounted underneath a covering canvas", async () => {
     renderFrame()
-    await userEvent.click(screen.getByText("open-fullscreen"))
+    await userEvent.click(screen.getByText("open-covering"))
     await waitForFlushEdge("right")
 
     // Covered, not closed: the conversation keeps its state, so dismissing the
@@ -137,15 +137,15 @@ describe("ApplicationFrame canvas inset", () => {
     await waitForFlushEdge("right")
   })
 
-  it("clears the mirrored inset for fullscreen content too", async () => {
+  it("clears the mirrored inset for covering content too", async () => {
     renderFrame("left")
-    await userEvent.click(screen.getByText("open-fullscreen"))
+    await userEvent.click(screen.getByText("open-covering"))
 
     await waitForFlushEdge("left")
     await waitForFlushEdge("right")
   })
 
-  it("animates the inset away when open content becomes fullscreen", async () => {
+  it("animates the inset away when open content starts covering the chat", async () => {
     renderFrame()
     await userEvent.click(screen.getByText("open-docked"))
     await waitForReservedEdge("right")
@@ -153,7 +153,7 @@ describe("ApplicationFrame canvas inset", () => {
     // The canvas stays mounted across this swap (content is non-null
     // throughout), so this is the one path that actually animates rather than
     // mounting at its target — motion seeds `initial` from `animate` on mount.
-    await userEvent.click(screen.getByText("open-fullscreen"))
+    await userEvent.click(screen.getByText("open-covering"))
     await waitForFlushEdge("right")
 
     // ...and back, so a one-way write can't pass.
@@ -176,7 +176,8 @@ describe("ApplicationFrame canvas inset", () => {
     // AiChatStateProvider — with it local to ChatWindow the frame cannot see
     // it, and the canvas edge eases 300ms behind the cursor on every frame.
     renderFrame(undefined, { resizable: true })
-    // The handle only exists once the panel is open and docked (not fullscreen).
+    // The handle only exists once the panel is open and docked (not fullscreen
+    // chat).
     await userEvent.click(screen.getByText("open-docked"))
     await waitForReservedEdge("right")
     expect(screen.getByText("resizing:false")).toBeInTheDocument()

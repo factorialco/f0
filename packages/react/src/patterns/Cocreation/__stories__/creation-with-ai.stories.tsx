@@ -450,18 +450,18 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
 }
 
 // ---------------------------------------------------------------------------
-// Fullscreen templates gallery
+// Full-width templates gallery
 // ---------------------------------------------------------------------------
 
 /**
  * The templates gallery takes the WHOLE frame in every flow: choosing templates
  * is its own step, not something you do beside a conversation. It opens as a
- * `fullscreen` canvas, which spans the frame and covers the chat — the
+ * `coversChat` canvas, which spans the frame and covers the chat — the
  * conversation underneath keeps its state, so stepping back lands exactly where
  * the user left it.
  *
  * Closing the gallery steps BACK to whatever opened it rather than dismissing
- * the canvas — the fullscreen welcome screen, or the entry-action panel that
+ * the canvas — the full-width welcome screen, or the entry-action panel that
  * launched it. That step is recorded here when the gallery opens, because the
  * same gallery is reachable from several places within one flow (the "Templates"
  * welcome card, the "Use a Template" entry action, and a template preview's
@@ -507,7 +507,8 @@ function useTemplatesReturn(): TemplatesReturn {
 }
 
 /**
- * Opens the templates gallery on the canvas, fullscreen (no chat).
+ * Opens the templates gallery on the canvas, spanning the frame with the chat
+ * covered (`coversChat`).
  *
  * `onBack` records what Close should step back to: pass a function to run on
  * close, `null` to just return to the chat (the welcome screen), or omit it to
@@ -522,18 +523,19 @@ function useOpenTemplatesCanvas() {
   return useCallback(
     (content: TemplatesCanvasContent, onBack?: (() => void) | null) => {
       if (onBack !== undefined) templatesReturn.set(onBack)
-      openCanvas(toCanvasContent({ ...content, fullscreen: true }))
+      openCanvas(toCanvasContent({ ...content, coversChat: true }))
     },
     [openCanvas, templatesReturn]
   )
 }
 
 /**
- * Closes the fullscreen templates gallery back to the step that opened it.
- * Switching out of "canvas" mode drops the canvas content, and "fullscreen"
- * brings the chat back full width — the surface all of these flows were on
- * before the gallery took over — after which the recorded step-back action (if
- * any) restores that step's own state, e.g. reopening the guided-entry panel.
+ * Closes the full-width templates gallery back to the step that opened it.
+ * Switching out of "canvas" mode drops the canvas content, and the chat's own
+ * "fullscreen" mode brings it back full width — the surface all of these flows
+ * were on before the gallery took over — after which the recorded step-back
+ * action (if any) restores that step's own state, e.g. reopening the
+ * guided-entry panel.
  */
 function useCloseTemplatesCanvas() {
   const { setVisualizationMode } = useAiChat()
@@ -620,12 +622,12 @@ const asSurveyCanvasContent = (
  * chat's width again and docks it alongside.
  */
 const makeTemplatePreviewContent = (
-  content: Omit<SurveyCanvasContent, "type" | "mode" | "fullscreen">
+  content: Omit<SurveyCanvasContent, "type" | "mode" | "coversChat">
 ): SurveyCanvasContent => ({
   ...content,
   type: "survey",
   mode: "preview",
-  fullscreen: true,
+  coversChat: true,
 })
 
 // Default name for a blank "start from scratch" survey, shown until the guided
@@ -1423,7 +1425,7 @@ function TemplatePreviewAlert() {
  * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits,
  * both stepping back to the gallery this preview was opened from (never out of
  * creation): "Back to templates" (left) and "Close" (right) both re-open the
- * template selection screen, fullscreen — the type-scoped gallery for the
+ * template selection screen, full width — the type-scoped gallery for the
  * "guidedType" flow, the flow-wide gallery otherwise. Leaving creation from a
  * preview instead happens by closing the chat panel itself, which the
  * guided/no-credits flows gate with the "Leave creation?" warning (see
@@ -1444,8 +1446,8 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   // Both the "Back to templates" arrow and the Close ✕ return to the template
   // selection screen this preview was opened from — the type-scoped gallery for
   // the "guidedType" flow, the flow-wide gallery otherwise. Closing a preview
-  // steps back to the list, never out of creation. The gallery reopens
-  // fullscreen (see `useOpenTemplatesCanvas`), keeping whatever step-back the
+  // steps back to the list, never out of creation. The gallery reopens full
+  // width (see `useOpenTemplatesCanvas`), keeping whatever step-back the
   // current templates session already recorded.
   const backToTemplates = () =>
     openTemplates(
@@ -2195,7 +2197,7 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
  * `SurveyCanvasHeader`) so it can read context and run a custom close instead of
  * the framework `onClose`.
  *
- * The gallery is fullscreen in every flow, so Close is always a step BACK to
+ * The gallery is full width in every flow, so Close is always a step BACK to
  * whatever opened it rather than an exit: the "cards" flow's welcome screen
  * (suggestions + welcome cards), or the entry-action question that offered "Use
  * a Template" — scoped to the triaged type in the "guidedType" flow. No flow
@@ -2214,7 +2216,7 @@ function TemplatesCanvasHeader({
   const startBlankSurvey = useStartBlankSurvey()
   const { guidedTypeId } = content
 
-  // The fullscreen gallery is a step of its own, so Close steps BACK to whatever
+  // The full-width gallery is a step of its own, so Close steps BACK to whatever
   // opened it — the welcome screen, or the entry-action panel — in every flow
   // (see `useCloseTemplatesCanvas`). Leaving creation altogether lives on the
   // chat's own ✕ and on the clarifying panels' Cancel, not here.
@@ -2359,7 +2361,7 @@ function SurveyWelcomeCardsRegistrar() {
         break
       }
       case "templates": {
-        // Browse-only: open the templates list fullscreen (the chat hides while
+        // Browse-only: open the templates list full width (the chat hides while
         // it is up) WITHOUT posting a chat message, so the chat is still on the
         // welcome screen underneath. Closing the list without choosing a
         // template (see `TemplatesCanvasHeader`) then returns to that fullscreen
@@ -2699,7 +2701,7 @@ function FlowContent({
   /**
    * Runs the picked entry action after its "reply + think" beat.
    *
-   * `reopenPanel` is what the fullscreen gallery's Close (and a template
+   * `reopenPanel` is what the full-width gallery's Close (and a template
    * preview's "Back to templates") steps back to — the entry question, asked
    * again with the same scope.
    */
@@ -2720,7 +2722,7 @@ function FlowContent({
       return
     }
     if (optionId === TEMPLATES_OPTION_ID) {
-      // Browse: open the templates gallery fullscreen — the chat is covered
+      // Browse: open the templates gallery full width — the chat is covered
       // while it is up, and its Close steps back to the entry question. With no
       // credits, the composer stays live while browsing, so arm the
       // out-of-credits reply — otherwise a typed message falls through to a
@@ -3294,7 +3296,7 @@ export const GuidedEntryEmptySurveyClosesWithoutGate: Story = {
 // The "guidedType" flow's two consecutive steps: triaging the type no longer
 // opens a gallery on its own — the SAME panel advances to the entry actions the
 // "guidedEntry" flow opens with, with its options derived from the type just
-// picked. "Use a Template" then opens the gallery fullscreen, and its Close
+// picked. "Use a Template" then opens the gallery full width, and its Close
 // steps back to that entry question instead of abandoning creation. Hidden from
 // the sidebar — it exists for `pnpm test-storybook`, not for browsing.
 export const GuidedTypeEntryActionsStep: Story = {
@@ -3362,7 +3364,7 @@ export const GuidedTypeEntryActionsStep: Story = {
       )
     })
 
-    await step("Use a Template opens the gallery fullscreen", async () => {
+    await step("Use a Template opens the gallery full width", async () => {
       await userEvent.click(page.getByRole("radio", { name: "Use a Template" }))
       await userEvent.click(page.getByRole("button", { name: "Submit" }))
       // The type-scoped gallery, and the entry panel is gone behind it.
