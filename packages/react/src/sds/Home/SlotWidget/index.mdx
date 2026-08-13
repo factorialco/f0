@@ -24,6 +24,36 @@ instead of crashing.
 <Canvas of={SlotWidgetStories.AllSlots} />
 <Controls of={SlotWidgetStories.AllSlots} />
 
+## A wider card speaks up
+
+The same widget sits in the Home's 396px rail and in the main column beside it,
+and at the second width a 14px title over 32px glyphs reads as a footnote pinned
+to a large surface. Past **480px** everything the card sizes for itself steps up
+one:
+
+|                                 | Rail (≤480px) | Wide        |
+| ------------------------------- | ------------- | ----------- |
+| Widget title                    | `text-base`   | `text-lg`   |
+| Footer button (`action`)        | `sm`          | `md`        |
+| A `list` row's leading glyph    | `sm` / `md`   | `md` / `lg` |
+| A `list` row's trailing face(s) | `sm`          | `md`        |
+
+The leading glyph keeps two steps because a row's own shape still decides
+between them — two-line rows carry the larger one (see **Prescriptive sizing**).
+The trailing faces stay a step behind the leading glyph: they are **who** a row
+is about, which is secondary to what it is, and matching the two turns the row
+into two competing anchors.
+
+There is nothing to configure. The card measures itself — `clientWidth`, so a
+`transform: scale()` on an ancestor (a zoom-to-fit preview, a dragged card's
+lift) never changes its type scale — and a widget dragged from the rail into the
+column grows on the way. A widget that asks for a particular `action.size` still
+gets it.
+
+Slots learn the card's width from **context**, not a prop: a widget's content is
+built before the frame renders, but it is drawn inside it. A bespoke renderer
+can ask the same question with `useWidgetIsWide()`.
+
 ## The way out IS the title
 
 `header.link` makes the widget's **title itself** the link: the title with a
@@ -230,13 +260,131 @@ listSlot(
 | --------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `left`                | any avatar type (`person`, `team`, `company`, `file`, `flag`, `emoji`, `icon`), `module`, `alert` — or omitted | each row supplies that kind's data (`avatar`, `module`, or `alert`)                 |
 | `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`)         |
+| `rightOptional`       | `true`                                                                                                         | the `right` data is allowed but not demanded — rows without it trail nothing        |
 | `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                              |
 | `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                 |
+| `descriptionOptional` | `true`                                                                                                         | a second line is allowed but not demanded — some rows are two-line, some one        |
 | `clickBehavior`       | `"link"` — or omitted for inert rows                                                                           | every row carries an `href` and renders as a REAL anchor (see Click handling)       |
 | `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom         |
 | `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs |
 
-Rows may also carry `unread` for the accent dot on the left glyph.
+Rows may also carry `unread` for the accent dot on the left glyph, and
+`actions` for what can be done to that row (see **Row actions**).
+
+### Even rows, and rows that aren't
+
+The schema's default is **evenness**: declaring `right: "person"` means every
+row supplies a `rightAvatar`, and `descriptionRequired` means every row supplies
+a second line. That is what makes a list read as a list rather than a pile.
+
+A **feed** is the exception, and the two `…Optional` flags are how you say so.
+`rightOptional` and `descriptionOptional` keep the schema's type checking — the
+data still has to be the kind that was declared — while letting rows go without:
+
+```tsx
+listSlot(
+  {
+    left: "icon",
+    right: "person",
+    rightOptional: true, // ← only some rows came from a person
+    descriptionOptional: true, // ← only some rows have a second line
+    clickBehavior: "link",
+  },
+  [
+    {
+      id: "welcome",
+      title: "Welcome to the August cohort 🎉",
+      description: "9:12 · Marie Curie",
+      avatar: { icon: Envelope, color: "lilac" },
+      rightAvatar: { firstName: "Marie", lastName: "Curie" },
+      href: "/inbox/1",
+    },
+    // No second line, nobody behind it — and it still typechecks.
+    {
+      id: "leave",
+      title: "You have 5 days of leave expiring next month",
+      avatar: { icon: PalmTree, color: "army" },
+      href: "/time-off",
+    },
+  ]
+)
+```
+
+A list that allows a second line is still a **two-line list**: the glyphs stay
+`md` throughout, so the column of them lines up down the card whatever each
+row's height turns out to be. It also does **not auto-compact** past
+`LIST_COMPACT_AFTER` — see **Auto-compact** below.
+
+### Tinted icon glyphs
+
+`left: "icon"` rows take an optional `color` from f0's named palette —
+`viridian`, `malibu`, `yellow`, `purple`, `lilac`, `barbie`, `smoke`, `army`,
+`flubber`, `indigo`, `camel` (exported as `listIconColors`):
+
+```tsx
+avatar: { icon: Clock, color: "purple" }
+```
+
+The tile is the hue at a tenth of its strength and the icon is the hue itself,
+so a column of them stays legible. Colour here says **which kind of thing** the
+row is, not how urgent it is — a feed can give every category its own without
+any of them reading as an alarm. For "this is urgent", the left kind is `alert`.
+
+Without a `color` the row draws the neutral `F0AvatarIcon`, unchanged. Only the
+icon glyph takes one: every other left kind carries its own identity already (a
+face, a flag, a module's brand).
+
+#### A colour of your own
+
+`color` also takes a **hex** — `#RGB` or `#RRGGBB`:
+
+```tsx
+avatar: { icon: Calendar, color: event.color } // "#4F46E5"
+```
+
+**Prefer a palette name.** Those eleven hues were picked to sit beside each
+other in one column and to hold up in both themes, which is the whole job here:
+a feed's glyphs are read as a _set_, and a colour chosen per row without seeing
+the others is how a card ends up with two greens that mean different things.
+
+The hex is for the case the palette genuinely can't serve — a colour that is
+already **data**: a calendar's own colour, a module's brand, a category the user
+picked. It draws exactly like a palette hue (a tenth of it as the tile, the hue
+itself as the icon), so the two are the same glyph. A hex that can't be parsed
+falls back to the plain, untinted glyph rather than painting the tile black.
+
+### Row actions
+
+What can be **done** to a row — snooze it, dismiss it, clock out — goes in that
+row's `actions`. They are per **row**, not per schema, because unlike everything
+else about a row this genuinely varies: a feed mixes items you can dismiss with
+items there is nothing to dismiss about.
+
+```tsx
+actions: [
+  { label: "Clock out", icon: Clock, showLabel: true, onClick: clockOut },
+  { label: "Dismiss", icon: Cross, onClick: dismiss },
+]
+```
+
+They are **icon-only by default** — a row is a dense line of text and a strip of
+labelled buttons beside it would outweigh what the row is about — so `label` is
+the accessible name and the tooltip rather than visible text. Write it as what
+the action **does**: "Clock out", "Dismiss", never "OK".
+
+A row's **primary** action can say what it is with `showLabel`, and usually
+should when the glyph alone would be a guess (a clock is "clock out" and also
+"snooze"). An action with **no `icon`** is text-only and always shows its label.
+Keep it to one named action per row, leading, with the rest as glyphs — and to
+two actions in total: the strip covers the row's right-hand side while it shows.
+
+They appear on hover, and on **focus**: they stay in the DOM while hidden, so
+Tab reaches them and reaching them is what reveals the strip. The buttons sit
+**outside** the row's anchor, so pressing one never follows a link row — and a
+row with actions highlights on hover even when it is inert, because something
+does happen there.
+
+<Canvas of={SlotWidgetStories.NeedsYou} />
 
 ### Click handling
 
@@ -260,8 +408,17 @@ The row's right-hand side belongs to the schema's `right` instead.
 
 ### Prescriptive sizing
 
-Glyph sizes are **not configurable** — they follow the schema. Two-line rows
-(a required `description`) draw `md` glyphs; one-line rows draw `sm`.
+Glyph sizes are **not configurable** — they follow the schema and the card. Two
+things decide, and a row can argue with neither:
+
+- its **shape** — two-line rows (a `description` required or allowed) draw the
+  larger step, one-line rows the smaller, so the glyph is about as tall as the
+  text beside it either way;
+- the **card's width** — both steps move up one past 480px (see **A wider card
+  speaks up**).
+
+So a two-line row is `md` in the rail and `lg` in the main column; a one-line row
+is `sm` and `md`. Compacted rows are one-line by definition and take that step.
 
 ### View more
 
@@ -280,6 +437,11 @@ second-to-last list in the story above shows the whole pipeline.
 A slot can also opt into this presentation at any count with `compact: true` —
 useful when the descriptions are secondary enough to live in tooltips even on
 a short list.
+
+A `descriptionOptional` list is **exempt**: auto-compacting was written to tame
+a long column of uniformly two-line rows, and a mixed list is not that column —
+most of its rows are already one line, and folding away the few that aren't
+would hide the only thing telling them apart. `compact: true` still forces it.
 
 ### Recipes
 
@@ -342,6 +504,44 @@ listSlot({ clickBehavior: "link" }, [
   { id: "help", title: "Help center", href: "https://help.factorial.co" },
 ])
 ```
+
+## Items coming and going
+
+A widget's items change under the user while they are reading them — a row is
+dismissed, a request lands, a poll brings a shorter list. An item that vanishes
+between two blinks leaves them wondering which one they just lost, so every
+slot animates its own churn:
+
+- the item **fades**, and
+- its own **height closes on a spring**.
+
+Closing the item's height rather than just fading it is what keeps everything
+standing on it moving continuously: the rows below, the widget's footer button,
+and the card's own bottom edge. A row that only faded gave its space back in one
+frame, and the footer snapped up by a row's height while the fade was still
+settling.
+
+That is the one place in Home's motion vocabulary where a height is animated,
+and it costs an `overflow: hidden` per item — which is why a row's focus ring is
+an **inset** ring. Under `prefers-reduced-motion` nothing moves at all.
+
+There is nothing to turn on: `list` and `event-list` do it already. A **bespoke**
+renderer opts in with the same two wrappers, and the only requirement is a
+**stable key per item** — a positional key would animate every row below a
+removal as though it had been replaced:
+
+```tsx
+import { HomeSlotItem, HomeSlotItems } from "@/sds/Home/slotRenderers"
+;<HomeSlotItems>
+  {tasks.map((task) => (
+    <HomeSlotItem key={task.id}>
+      <AgentTaskRow task={task} />
+    </HomeSlotItem>
+  ))}
+</HomeSlotItems>
+```
+
+<Canvas of={SlotWidgetStories.ItemChurn} />
 
 ## The rest of the vocabulary
 

@@ -1,5 +1,6 @@
-import { describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 
+import { Clock, Cross } from "@/icons/app"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
 import {
@@ -310,6 +311,287 @@ describe("list slot schema", () => {
     )
 
     expect(screen.getByText("3")).toBeInTheDocument()
+  })
+
+  test("descriptionOptional lets some rows carry a second line and others not — and the list stays two-line", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "person", descriptionOptional: true }, [
+            {
+              id: "1",
+              title: "Ada",
+              description: "Due Today",
+              avatar: { firstName: "Ada", lastName: "Lovelace" },
+            },
+            {
+              id: "2",
+              title: "Alan",
+              avatar: { firstName: "Alan", lastName: "Turing" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    expect(screen.getByText("Due Today")).toBeInTheDocument()
+    // The glyphs stay md for BOTH rows, so the column of them lines up even
+    // though only one row is two lines tall.
+    expect(container.querySelectorAll(".size-8")).toHaveLength(2)
+    expect(container.querySelector(".size-6")).toBeNull()
+  })
+
+  test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
+    const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
+      id: String(i),
+      title: `Person ${i}`,
+      // Only the first row has one, which is the point of `descriptionOptional`.
+      ...(i === 0 ? { description: "Due Today" } : {}),
+      avatar: { firstName: `Person ${i}`, lastName: "Doe" },
+    }))
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[listSlot({ left: "person", descriptionOptional: true }, many)]}
+      />
+    )
+
+    expect(screen.getByText("Due Today")).toBeInTheDocument()
+    expect(container.querySelector(".size-8")).not.toBeNull()
+
+    // `compact: true` still forces it.
+    const { container: forced } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", descriptionOptional: true, compact: true },
+            many
+          ),
+        ]}
+      />
+    )
+    expect(forced.querySelector(".size-8")).toBeNull()
+  })
+
+  test("a row's actions are its own: named buttons that act on that row alone", async () => {
+    const dismissFirst = vi.fn()
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ clickBehavior: "link" }, [
+            {
+              id: "1",
+              title: "You never clocked out",
+              href: "/attendance",
+              actions: [
+                { label: "Dismiss this", icon: Cross, onClick: dismissFirst },
+              ],
+            },
+            // The next row offers none — actions are per row, not per schema.
+            { id: "2", title: "Sign your contract", href: "/documents/1" },
+          ]),
+        ]}
+      />
+    )
+
+    expect(screen.getAllByRole("button", { name: /Dismiss/ })).toHaveLength(1)
+
+    await userEvent.click(screen.getByRole("button", { name: "Dismiss this" }))
+    expect(dismissFirst).toHaveBeenCalledTimes(1)
+  })
+
+  describe("glyphs follow the card they landed in", () => {
+    const withCardWidth = (width: number) => {
+      vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(
+        function (this: HTMLElement) {
+          return this.getAttribute("role") === "article" ? width : 0
+        }
+      )
+    }
+
+    afterEach(() => vi.restoreAllMocks())
+
+    const twoLineList = (
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", right: "person", descriptionRequired: true },
+            [
+              {
+                id: "1",
+                title: "Ada",
+                description: "Out until Friday",
+                avatar: { firstName: "Ada", lastName: "Lovelace" },
+                rightAvatar: { firstName: "Alan", lastName: "Turing" },
+              },
+            ]
+          ),
+        ]}
+      />
+    )
+
+    test("in the rail the leading glyph is md and the trailing face sm", () => {
+      withCardWidth(396)
+      const { container } = zeroRender(twoLineList)
+
+      expect(container.querySelector(".size-8")).not.toBeNull()
+      expect(container.querySelector(".size-10")).toBeNull()
+    })
+
+    test("past 480px both step up — the leading glyph to lg, the face to md", () => {
+      withCardWidth(600)
+      const { container } = zeroRender(twoLineList)
+
+      // The leading glyph is now lg (40px) and the trailing face md (32px),
+      // so the row keeps its two anchors a step apart.
+      expect(container.querySelector(".size-10")).not.toBeNull()
+      expect(container.querySelector(".size-8")).not.toBeNull()
+      expect(container.querySelector(".size-6")).toBeNull()
+    })
+
+    test("the placeholder draws the size the real glyph will be, so the card doesn't resize when data lands", () => {
+      withCardWidth(600)
+      const { container } = zeroRender(
+        <SlotWidget
+          loading
+          slots={[
+            listSlot({ left: "person", descriptionRequired: true }, [], {
+              expectedItemsCount: 2,
+            }),
+          ]}
+        />
+      )
+
+      expect(container.querySelectorAll(".size-10")).toHaveLength(2)
+    })
+  })
+
+  describe("items coming and going", () => {
+    const rows = (names: string[]) =>
+      names.map((name) => ({
+        id: name,
+        title: name,
+        avatar: { firstName: name, lastName: "Doe" },
+      }))
+
+    const listOf = (names: string[]) => (
+      <SlotWidget slots={[listSlot({ left: "person" }, rows(names))]} />
+    )
+
+    test("a row that goes away leaves — it is not stranded by its own exit animation", async () => {
+      const { rerender } = zeroRender(listOf(["Ada", "Alan", "Grace"]))
+
+      expect(screen.getByText("Alan")).toBeInTheDocument()
+
+      rerender(listOf(["Ada", "Grace"]))
+
+      // It animates out rather than vanishing, so it is still there for a beat.
+      // What matters is that it is GONE afterwards: an `AnimatePresence` whose
+      // exit never completes keeps a removed row in the DOM forever.
+      await waitFor(() =>
+        expect(screen.queryByText("Alan")).not.toBeInTheDocument()
+      )
+      expect(screen.getByText("Ada")).toBeInTheDocument()
+      expect(screen.getByText("Grace")).toBeInTheDocument()
+    })
+
+    test("a row that arrives is drawn", async () => {
+      const { rerender } = zeroRender(listOf(["Ada"]))
+
+      rerender(listOf(["Ada", "Grace"]))
+
+      await waitFor(() => expect(screen.getByText("Grace")).toBeInTheDocument())
+    })
+  })
+
+  test("an icon row's color tints its glyph; without one it draws the plain avatar", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Clocked out", avatar: { icon: Clock } },
+          ]),
+        ]}
+      />
+    )
+
+    // The neutral F0AvatarIcon: a bordered white tile.
+    expect(
+      container.querySelector(".border-f1-border-secondary")
+    ).not.toBeNull()
+    expect(container.querySelector("[class*='colors.purple']")).toBeNull()
+
+    rerender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            {
+              id: "1",
+              title: "Clocked out",
+              avatar: { icon: Clock, color: "purple" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    expect(container.querySelector("[class*='colors.purple']")).not.toBeNull()
+  })
+
+  test("a hex tints the glyph too — as channels on a variable, so both themes still apply", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            {
+              id: "1",
+              title: "Design sync",
+              avatar: { icon: Clock, color: "#4F46E5" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    const glyph = container.querySelector<HTMLElement>(
+      "[class*='--list-icon-tint']"
+    )
+    // The colour rides in on the variable while the classes stay literal —
+    // that is what keeps the `dark:` step working for a runtime value.
+    expect(glyph?.style.getPropertyValue("--list-icon-tint")).toBe("79 70 229")
+  })
+
+  test("a three-digit hex expands, and an unusable one falls back to the plain glyph", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Row", avatar: { icon: Clock, color: "#0af" } },
+          ]),
+        ]}
+      />
+    )
+
+    expect(
+      container
+        .querySelector<HTMLElement>("[class*='--list-icon-tint']")
+        ?.style.getPropertyValue("--list-icon-tint")
+    ).toBe("0 170 255")
+
+    rerender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Row", avatar: { icon: Clock, color: "#nope" } },
+          ]),
+        ]}
+      />
+    )
+
+    // No tile painted black, no crash: the neutral bordered F0AvatarIcon.
+    expect(container.querySelector("[class*='--list-icon-tint']")).toBeNull()
+    expect(
+      container.querySelector(".border-f1-border-secondary")
+    ).not.toBeNull()
   })
 })
 
