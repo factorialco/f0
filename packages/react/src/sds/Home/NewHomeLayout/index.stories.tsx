@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
@@ -1121,4 +1121,102 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* ============================== virtualization ============================== */
+
+/**
+ * `count` widgets, cycling the rail's real ones so every card is a card with data
+ * in it, each numbered so you can see where in the column you are. The clock is
+ * left out: it is `locked`, and a hundred pinned widgets is not a column anyone
+ * is arranging.
+ */
+const manyWidgets = (count: number): HomeWidgetItem[] => {
+  const source = RIGHT_WIDGETS.filter((widget) => !widget.locked)
+  return Array.from({ length: count }, (_, index) => {
+    const widget = source[index % source.length]
+    return {
+      ...widget,
+      id: `${widget.id}-${index}`,
+      header: {
+        ...resolveWidgetHeader(widget.header, widget.params),
+        title: `${index + 1}. ${widgetTitle(widget)}`,
+      },
+      // One configurable widget per column is the point; a hundred dialogs is
+      // not.
+      paramsSchema: undefined,
+      params: undefined,
+    } as HomeWidgetItem
+  })
+}
+
+/**
+ * HOW MANY WIDGET CARDS ARE IN THE DOM right now, watched rather than counted
+ * once: it is the number the story exists to show, and scrolling is what changes
+ * it.
+ */
+const MountedCount = ({ of }: { of: number }) => {
+  const [mounted, setMounted] = useState(0)
+  const [root, setRoot] = useState<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const page = root?.ownerDocument.body
+    if (!page) return
+    const read = () =>
+      setMounted(page.querySelectorAll("[data-widget-id]").length)
+    read()
+    const observer = new MutationObserver(read)
+    observer.observe(page, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [root])
+
+  return (
+    <div
+      ref={setRoot}
+      className="pointer-events-none fixed bottom-4 right-4 z-50 rounded-lg bg-f1-background-inverse px-3 py-2 font-medium text-f1-foreground-inverse"
+    >
+      {mounted} of {of} widgets in the DOM
+    </div>
+  )
+}
+
+/**
+ * A HOME WITH MORE WIDGETS THAN A SCREEN — 60 in the main column, 40 in the rail
+ * — with both sides VIRTUALIZED (`virtualizedWidgetContainers`). Only the cards
+ * you can see are in the DOM: the badge in the corner counts them, and scrolling
+ * either column keeps the number where it is while the widget numbers climb.
+ *
+ * Everything else about the column is unchanged. The full height is held open, so
+ * both scrollbars describe all 100 widgets; dragging still reorders (only the
+ * cards in view get out of the way as you go); and the rail still collapses into
+ * its strip, which is where virtualization stands aside — a floating panel is one
+ * card in a box of its own, not a column.
+ *
+ * Off by default, and worth leaving off for a Home of a dozen widgets: a widget
+ * that scrolls out is UNMOUNTED, and what it had loaded, timed or animated starts
+ * again when it comes back.
+ */
+export const ManyWidgets: Story = {
+  render: () => {
+    const left = manyWidgets(60)
+    const right = manyWidgets(40)
+    return (
+      <div className="h-full w-full p-6">
+        <NewHomeLayout
+          leftWidgets={left}
+          rightWidgets={right}
+          slotRenderers={SLOT_RENDERERS}
+          virtualizedWidgetContainers={["main", "right"]}
+          onRemoveWidget={() => {}}
+          onReorderWidgets={() => {}}
+        >
+          {/* The main column's freeform content, above the widgets and scrolling
+              in the same box — which is what the placed cards have to be offset
+              past. */}
+          {mainColumnBlocks()}
+        </NewHomeLayout>
+        <MountedCount of={left.length + right.length} />
+      </div>
+    )
+  },
 }

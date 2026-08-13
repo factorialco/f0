@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { z } from "zod"
 
 import { Calendar, Clock } from "@/icons/app"
@@ -22,6 +22,73 @@ const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
 })
 
 const WIDGETS = [widget("clock"), widget("events")]
+
+/** A column of `count` widgets, named `widget-0`… in order. */
+const manyWidgets = (count: number) =>
+  Array.from({ length: count }, (_, index) => widget(`widget-${index}`))
+
+/**
+ * A scroll region around a column, the way a page gives it one — the box its
+ * widgets are on screen OF, and what a virtualized column looks for. The
+ * overflow is INLINE rather than a class: jsdom has no stylesheet, so a
+ * `overflow-y-auto` class is invisible to `getComputedStyle`.
+ */
+const Scroller = ({ children }: { children: React.ReactNode }) => (
+  <div style={{ overflowY: "auto", height: 400 }}>{children}</div>
+)
+
+/**
+ * Which widgets are in the DOM, by id — read off the boxes a draggable column
+ * marks every widget's card with.
+ */
+const mountedIds = (container: HTMLElement) =>
+  [...container.querySelectorAll("[data-widget-id]")].map((el) =>
+    el.getAttribute("data-widget-id")
+  )
+
+/**
+ * GIVES JSDOM A LAYOUT, which is the one thing virtualization cannot do without:
+ * every box measures 0 there, and a column with no viewport has nothing on screen
+ * to keep. A placed card (`data-index`) is `card` tall and everything else —
+ * including the scroll region — is `viewport`.
+ *
+ * Both metrics, because the two measurements are taken differently: the scroll
+ * region is read from `offsetHeight` and a card from its client rect.
+ */
+const mockLayout = ({ viewport, card }: { viewport: number; card: number }) => {
+  const heightOf = (el: HTMLElement) =>
+    el.hasAttribute("data-index") ? card : viewport
+
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+    function (this: HTMLElement) {
+      const height = heightOf(this)
+      // Spelled out rather than a `DOMRect`: jsdom keeps a rect's fields on the
+      // prototype, so a spread one arrives with none of them and every offset
+      // taken from it comes out NaN.
+      return {
+        top: 0,
+        left: 0,
+        right: 400,
+        bottom: height,
+        width: 400,
+        height,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      } as DOMRect
+    }
+  )
+  vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(
+    function (this: HTMLElement) {
+      return heightOf(this)
+    }
+  )
+  vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(400)
+}
+
+/** The box that holds a virtualized column's cards, found through one of them. */
+const listOf = (container: HTMLElement) =>
+  container.querySelector("[data-index]")?.parentElement
 
 /** Opens the menu of the widget at `index` and returns its remove item. */
 const openMenu = async (index: number) => {
@@ -332,6 +399,137 @@ describe("WidgetContainer", () => {
       // The f0 `Widget`'s handle marks itself for gridstack; nothing here asks
       // for it.
       expect(container.querySelectorAll("[data-gs-handle]")).toHaveLength(0)
+    })
+  })
+
+  describe("virtualization", () => {
+    beforeEach(() => mockLayout({ viewport: 400, card: 200 }))
+    afterEach(() => vi.restoreAllMocks())
+
+    test("mounts only the widgets in view, not the hundred behind them", () => {
+      const widgets = manyWidgets(100)
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer
+            widgets={widgets}
+            virtualized={{ estimateHeight: 200 }}
+            onReorder={() => {}}
+          />
+        </Scroller>
+      )
+
+      const mounted = mountedIds(container)
+      // A handful, from the top: the column is scrolled to 0, so the window is
+      // the two cards a 400px viewport holds and the overscan past them.
+      expect(mounted.length).toBeGreaterThan(0)
+      expect(mounted.length).toBeLessThan(widgets.length)
+      expect(mounted[0]).toBe("widget-0")
+      expect(mounted).not.toContain("widget-99")
+      expect(screen.queryByText("widget-99")).not.toBeInTheDocument()
+    })
+
+    test("holds the space of the widgets it did not mount", () => {
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer
+            widgets={manyWidgets(100)}
+            virtualized={{ estimateHeight: 200 }}
+            onReorder={() => {}}
+          />
+        </Scroller>
+      )
+
+      // 100 cards of 200px, 24px apart — the whole column, so the scrollbar
+      // describes all of it and not the four cards that are mounted.
+      expect(listOf(container)?.style.height).toBe(`${100 * 200 + 99 * 24}px`)
+    })
+
+    test("places each mounted card where its absent neighbours would have", () => {
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer
+            widgets={manyWidgets(100)}
+            virtualized={{ estimateHeight: 200 }}
+            onReorder={() => {}}
+          />
+        </Scroller>
+      )
+
+      const tops = [
+        ...container.querySelectorAll<HTMLElement>("[data-index]"),
+      ].map((el) => el.style.top)
+      // 200px cards, 24px apart, from the top of the list.
+      expect(tops.slice(0, 3)).toEqual(["0px", "224px", "448px"])
+    })
+
+    test("mounts them all below the threshold — a short column gains nothing", () => {
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer
+            widgets={manyWidgets(4)}
+            virtualized={{ threshold: 5 }}
+            onReorder={() => {}}
+          />
+        </Scroller>
+      )
+
+      expect(mountedIds(container)).toHaveLength(4)
+    })
+
+    test("mounts them all with no scroll region to be clipped to", () => {
+      const { container } = zeroRender(
+        <WidgetContainer
+          widgets={manyWidgets(100)}
+          virtualized
+          onReorder={() => {}}
+        />
+      )
+
+      expect(mountedIds(container)).toHaveLength(100)
+    })
+
+    test("mounts ONLY the widget a panel floats — it is all there is to see", () => {
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer
+            widgets={manyWidgets(100)}
+            virtualized
+            // The floating panel's filter. Unvirtualized this hides the other 99
+            // and keeps them mounted; virtualized, they are already unmounted the
+            // moment they scroll away, so there is nothing to preserve by keeping
+            // them.
+            visibleWidgetId="widget-80"
+            onReorder={() => {}}
+          />
+        </Scroller>
+      )
+
+      expect(mountedIds(container)).toEqual(["widget-80"])
+      expect(screen.getAllByText("widget-80").length).toBeGreaterThan(0)
+    })
+
+    test("an unvirtualized container still keeps every widget mounted for it", () => {
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer
+            widgets={manyWidgets(100)}
+            visibleWidgetId="widget-80"
+            onReorder={() => {}}
+          />
+        </Scroller>
+      )
+
+      expect(mountedIds(container)).toHaveLength(100)
+    })
+
+    test("is off by default — nothing changes for a column that did not ask", () => {
+      const { container } = zeroRender(
+        <Scroller>
+          <WidgetContainer widgets={manyWidgets(100)} onReorder={() => {}} />
+        </Scroller>
+      )
+
+      expect(mountedIds(container)).toHaveLength(100)
     })
   })
 })
