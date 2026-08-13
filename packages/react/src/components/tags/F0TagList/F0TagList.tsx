@@ -21,6 +21,11 @@ export const F0TagList = <T extends TagType>({
       items={tagVariants}
       max={max}
       min={1}
+      // Tags render their label through OneEllipsis (BaseTag), so a visible tag
+      // that does not fit should truncate — surfacing OneEllipsis' hover tooltip
+      // with the full text — instead of overflowing and painting over the "+N"
+      // counter. `min={1}` can force such a tag, so opt into fluid shrinking.
+      fluidItems
       renderListItem={(tag) => <Tag tag={tag} />}
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}
