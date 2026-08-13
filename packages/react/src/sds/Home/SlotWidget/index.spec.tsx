@@ -536,6 +536,63 @@ describe("list slot schema", () => {
 
     expect(container.querySelector("[class*='colors.purple']")).not.toBeNull()
   })
+
+  test("a hex tints the glyph too — as channels on a variable, so both themes still apply", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            {
+              id: "1",
+              title: "Design sync",
+              avatar: { icon: Clock, color: "#4F46E5" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    const glyph = container.querySelector<HTMLElement>(
+      "[class*='--list-icon-tint']"
+    )
+    // The colour rides in on the variable while the classes stay literal —
+    // that is what keeps the `dark:` step working for a runtime value.
+    expect(glyph?.style.getPropertyValue("--list-icon-tint")).toBe("79 70 229")
+  })
+
+  test("a three-digit hex expands, and an unusable one falls back to the plain glyph", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Row", avatar: { icon: Clock, color: "#0af" } },
+          ]),
+        ]}
+      />
+    )
+
+    expect(
+      container
+        .querySelector<HTMLElement>("[class*='--list-icon-tint']")
+        ?.style.getPropertyValue("--list-icon-tint")
+    ).toBe("0 170 255")
+
+    rerender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Row", avatar: { icon: Clock, color: "#nope" } },
+          ]),
+        ]}
+      />
+    )
+
+    // No tile painted black, no crash: the neutral bordered F0AvatarIcon.
+    expect(container.querySelector("[class*='--list-icon-tint']")).toBeNull()
+    expect(
+      container.querySelector(".border-f1-border-secondary")
+    ).not.toBeNull()
+  })
 })
 
 describe("SlotWidget loading", () => {

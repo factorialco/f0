@@ -154,8 +154,13 @@ test("an icon row may be tinted, and only with a colour from the palette", () =>
     { id: 1, title: "Row", avatar: { icon: PalmTree, color: "purple" } },
   ])
 
+  // A hex of its own, for a colour that is already data.
   listSlot({ left: "icon" }, [
-    // @ts-expect-error "octarine" is not one of the palette's colours
+    { id: 1, title: "Row", avatar: { icon: PalmTree, color: "#4F46E5" } },
+  ])
+
+  listSlot({ left: "icon" }, [
+    // @ts-expect-error a bare name is neither a palette colour nor a hex
     { id: 1, title: "Row", avatar: { icon: PalmTree, color: "octarine" } },
   ])
   listSlot({ left: "person" }, [

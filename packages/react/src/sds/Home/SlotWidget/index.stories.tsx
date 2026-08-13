@@ -450,7 +450,10 @@ export const NeedsYou: Story = {
             id: "policy",
             title:
               "Ask a policy question and I'll answer it or raise it with HR",
-            avatar: { icon: Sparkles, color: "indigo" },
+            // A HEX rather than a palette name — what a row whose colour is
+            // already data uses (a calendar's own colour, a module's brand).
+            // It draws exactly like the named ones beside it.
+            avatar: { icon: Sparkles, color: "#4F46E5" },
             href: "/assistant",
           },
           {

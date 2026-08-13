@@ -334,6 +334,25 @@ Without a `color` the row draws the neutral `F0AvatarIcon`, unchanged. Only the
 icon glyph takes one: every other left kind carries its own identity already (a
 face, a flag, a module's brand).
 
+#### A colour of your own
+
+`color` also takes a **hex** — `#RGB` or `#RRGGBB`:
+
+```tsx
+avatar: { icon: Calendar, color: event.color } // "#4F46E5"
+```
+
+**Prefer a palette name.** Those eleven hues were picked to sit beside each
+other in one column and to hold up in both themes, which is the whole job here:
+a feed's glyphs are read as a _set_, and a colour chosen per row without seeing
+the others is how a card ends up with two greens that mean different things.
+
+The hex is for the case the palette genuinely can't serve — a colour that is
+already **data**: a calendar's own colour, a module's brand, a category the user
+picked. It draws exactly like a palette hue (a tenth of it as the tile, the hue
+itself as the icon), so the two are the same glyph. A hex that can't be parsed
+falls back to the plain, untinted glyph rather than painting the tile black.
+
 ### Row actions
 
 What can be **done** to a row — snooze it, dismiss it, clock out — goes in that

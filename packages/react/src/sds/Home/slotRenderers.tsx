@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react"
+import { type CSSProperties, ReactNode, useState } from "react"
 
 import { type z } from "zod"
 
@@ -138,7 +138,24 @@ export const listIconColors = [
   "camel",
 ] as const
 
-export type ListIconColor = (typeof listIconColors)[number]
+export type ListIconPaletteColor = (typeof listIconColors)[number]
+
+/**
+ * A row's glyph tint: one of {@link listIconColors}, or a HEX of your own.
+ *
+ * Prefer a palette name. Those eleven hues were picked to sit beside each other
+ * in one column and to hold up in both themes, which is the whole job here — a
+ * feed's glyphs are read as a SET, and a colour chosen per row without seeing
+ * the others is how a card ends up with two greens that mean different things.
+ *
+ * The hex is for the case the palette genuinely cannot serve: a colour that is
+ * already data — a calendar's own colour, a module's brand, a category a user
+ * picked themselves. It is treated exactly like a palette hue (a tenth of it as
+ * the tile, the hue itself as the icon), so a bespoke colour and a named one
+ * still draw the same glyph. `#RGB` and `#RRGGBB` both parse; anything else
+ * falls back to the plain, untinted glyph rather than drawing nothing.
+ */
+export type ListIconColor = ListIconPaletteColor | `#${string}`
 
 /**
  * The tinted glyph, one literal class string per colour: Tailwind reads source
@@ -149,7 +166,7 @@ export type ListIconColor = (typeof listIconColors)[number]
  * carry the colour, the tiles only suggest it. Dark mode needs the tile
  * stronger to register against the card at all, hence the second value.
  */
-const LIST_ICON_TINT: Record<ListIconColor, string> = {
+const LIST_ICON_TINT: Record<ListIconPaletteColor, string> = {
   viridian:
     "bg-[hsl(theme(colors.viridian.50)_/_0.1)] text-[hsl(theme(colors.viridian.50))] dark:bg-[hsl(theme(colors.viridian.50)_/_0.24)]",
   malibu:
@@ -173,6 +190,53 @@ const LIST_ICON_TINT: Record<ListIconColor, string> = {
     "bg-[hsl(theme(colors.camel.50)_/_0.1)] text-[hsl(theme(colors.camel.50))] dark:bg-[hsl(theme(colors.camel.50)_/_0.24)]",
 }
 
+/**
+ * A hex as the `r g b` channels those `rgb(… / …)` classes take — `#4F46E5` →
+ * `"79 70 229"`. `#RGB` expands the way CSS expands it; anything else is
+ * `undefined`, which is what makes an unusable colour fall back to the plain
+ * glyph instead of painting the tile black.
+ */
+const hexChannels = (hex: string): string | undefined => {
+  const digits = hex.slice(1)
+  const full =
+    digits.length === 3
+      ? digits
+          .split("")
+          .map((digit) => digit + digit)
+          .join("")
+      : digits
+  if (!/^[0-9a-f]{6}$/i.test(full)) return undefined
+  const value = parseInt(full, 16)
+  return `${(value >> 16) & 255} ${(value >> 8) & 255} ${value & 255}`
+}
+
+/**
+ * The custom-hex tint. The COLOUR comes in as a CSS variable and the classes
+ * stay literal, which is what keeps the two theme steps working: an inline
+ * style cannot carry a `dark:` variant, and a Tailwind class cannot carry a
+ * value that is only known at runtime. The variable is the seam between them.
+ */
+const LIST_ICON_TINT_CUSTOM = cn(
+  "bg-[rgb(var(--list-icon-tint)_/_0.1)] text-[rgb(var(--list-icon-tint))]",
+  "dark:bg-[rgb(var(--list-icon-tint)_/_0.24)]"
+)
+
+/** How a glyph paints itself: a palette class, or the variable + its classes. */
+const listIconTint = (
+  color: ListIconColor
+): { className: string; style?: CSSProperties } | undefined => {
+  if (!color.startsWith("#"))
+    return { className: LIST_ICON_TINT[color as ListIconPaletteColor] }
+
+  const channels = hexChannels(color)
+  return channels
+    ? {
+        className: LIST_ICON_TINT_CUSTOM,
+        style: { "--list-icon-tint": channels } as CSSProperties,
+      }
+    : undefined
+}
+
 /** Every glyph size a `list` row draws at — see {@link listGlyphSize}. */
 type ListGlyphSize = "sm" | "md" | "lg"
 
@@ -191,19 +255,20 @@ const LIST_ICON_SIZE = {
  */
 const ListIconGlyph = ({
   icon,
-  color,
+  tint,
   size,
 }: {
   icon: IconType
-  color: ListIconColor
+  tint: NonNullable<ReturnType<typeof listIconTint>>
   size: ListGlyphSize
 }) => (
   <div
     className={cn(
       "flex aspect-square items-center justify-center",
       LIST_ICON_SIZE[size],
-      LIST_ICON_TINT[color]
+      tint.className
     )}
+    style={tint.style}
   >
     {/* No `color`: F0Icon defaults to `currentColor`, which the tile's own
         `text-` class has already set to the hue. */}
@@ -650,17 +715,17 @@ const listLeft = (
   if (left === "alert" && row.alert)
     return { left: <F0AvatarAlert type={row.alert} size={avatarSize} /> }
   // A TINTED icon is the Home kit's own glyph, so it goes in as a node. An icon
-  // row without a `color` falls through to the plain `F0AvatarIcon` below.
-  if (left === "icon" && row.avatar?.icon && row.avatar.color)
-    return {
-      left: (
-        <ListIconGlyph
-          icon={row.avatar.icon}
-          color={row.avatar.color}
-          size={avatarSize}
-        />
-      ),
-    }
+  // row without a `color` — or with one that cannot be parsed — falls through to
+  // the plain `F0AvatarIcon` below.
+  if (left === "icon" && row.avatar?.icon && row.avatar.color) {
+    const tint = listIconTint(row.avatar.color)
+    if (tint)
+      return {
+        left: (
+          <ListIconGlyph icon={row.avatar.icon} tint={tint} size={avatarSize} />
+        ),
+      }
+  }
   if (left && row.avatar)
     return {
       avatar: { type: left, ...row.avatar } as AvatarVariant,
