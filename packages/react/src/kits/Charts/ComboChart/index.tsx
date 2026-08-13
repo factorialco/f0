@@ -5,6 +5,8 @@ import {
   ComposedChart,
   LabelList,
   Line,
+  Rectangle,
+  RectangleProps,
   Scatter,
   XAxis,
   YAxis,
@@ -77,6 +79,42 @@ const createScatter = (categoryKey: string) => {
 
   ScatterShape.displayName = `Scatter-${categoryKey}`
   return ScatterShape
+}
+
+type StackedBarShapeProps = RectangleProps & {
+  payload?: Record<string, unknown>
+}
+
+/**
+ * Rounds only the outer corners of a stacked bar: the top of the outermost
+ * positive segment and the bottom of the outermost negative one. Middle
+ * segments stay square so the stack reads as one continuous bar.
+ */
+const createStackedBarShape = (category: string, categories: string[]) => {
+  const StackedBarShape = (props: unknown) => {
+    const { payload, ...rest } = props as StackedBarShapeProps
+    const valueOf = (key: string) => {
+      const value = payload?.[key]
+      return typeof value === "number" ? value : 0
+    }
+
+    const value = valueOf(category)
+    const outermost = [...categories]
+      .reverse()
+      .find((key) => (value < 0 ? valueOf(key) < 0 : valueOf(key) > 0))
+    const isOutermost = value !== 0 && outermost === category
+
+    const radius: [number, number, number, number] = !isOutermost
+      ? [0, 0, 0, 0]
+      : value < 0
+        ? [0, 0, 4, 4]
+        : [4, 4, 0, 0]
+
+    return <Rectangle {...rest} radius={radius} />
+  }
+
+  StackedBarShape.displayName = `StackedBar-${category}`
+  return StackedBarShape
 }
 
 type ChartDataPoint<K extends ChartConfig> = {
@@ -341,7 +379,15 @@ const _ComboChart = <K extends ChartConfig>(
                 ? getColor(dataConfig[category].color)
                 : getCategoricalColor(index)
             }
-            radius={bar?.type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
+            radius={4}
+            shape={
+              bar?.type === "stacked" || bar?.type === "stacked-by-sign"
+                ? createStackedBarShape(
+                    String(category),
+                    barCategories.map(String)
+                  )
+                : undefined
+            }
             maxBarSize={32}
           >
             {label && (
