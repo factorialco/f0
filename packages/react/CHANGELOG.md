@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.25.0](https://github.com/factorialco/f0/compare/f0-react-v6.24.0...f0-react-v6.25.0) (2026-08-13)
+
+
+### Features
+
+* **SlotWidget:** feed visualization, row actions and width-aware sizing ([#5108](https://github.com/factorialco/f0/issues/5108)) ([d3ffe1f](https://github.com/factorialco/f0/commit/d3ffe1f4136e843184d3b47759d1e1e07c9e28a5))
+
 ## [6.24.0](https://github.com/factorialco/f0/compare/f0-react-v6.23.2...f0-react-v6.24.0) (2026-08-13)
 
 
