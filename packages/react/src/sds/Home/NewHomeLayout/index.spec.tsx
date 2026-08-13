@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { useEffect, useState } from "react"
 
 import { Calendar, Clock } from "@/icons/app"
 import {
   act,
+  fireEvent,
   screen,
   userEvent,
   waitFor,
@@ -149,6 +150,7 @@ beforeEach(() => {
         resizeCallbacks.push(callback)
       }
       observe() {}
+      unobserve() {}
       disconnect() {}
     }
   )
@@ -382,6 +384,121 @@ describe("NewHomeLayout", () => {
 
       expect(screen.getByText("08:00")).toBeVisible()
       expect(clockMounts).toBe(1)
+    })
+  })
+
+  /**
+   * The COLLAPSED STRIP is a scroll region like the two columns, so it says when
+   * there are glyphs past an end — and, like them, only while there really are.
+   */
+  describe("the collapsed strip's fade", () => {
+    const METRICS = ["scrollHeight", "clientHeight"] as const
+
+    /** A strip with more glyphs than fit: 2000px of them in a 500px column. */
+    const overflowing = () => {
+      const heights = { scrollHeight: 2000, clientHeight: 500 }
+      for (const prop of METRICS)
+        Object.defineProperty(HTMLElement.prototype, prop, {
+          configurable: true,
+          get: () => heights[prop],
+        })
+    }
+
+    // Back to jsdom's own (on `Element`, which HTMLElement inherits from), so the
+    // test below sees a strip that fits.
+    afterEach(() => {
+      for (const prop of METRICS) delete HTMLElement.prototype[prop]
+    })
+
+    test("masks the bottom while glyphs are cut off there, and the top once scrolled", () => {
+      overflowing()
+      const { container } = renderLayout(1000, {
+        rightWidgets: Array.from({ length: 40 }, (_, i) => widget(`w-${i}`)),
+      })
+      const strip = container.querySelector("aside.-m-1") as HTMLElement
+
+      // At the top there is nothing above to hint at — only the bottom fades.
+      expect(strip.style.maskImage).toContain(
+        "black 0, black calc(100% - 24px)"
+      )
+      expect(strip.style.maskImage).toContain("transparent 100%")
+
+      strip.scrollTop = 300
+      fireEvent.scroll(strip)
+
+      expect(strip.style.maskImage).toContain("transparent 0, black 24px")
+    })
+
+    test("leaves a strip that fits unmasked", () => {
+      const { container } = renderLayout(1000)
+      const strip = container.querySelector("aside.-m-1") as HTMLElement
+
+      expect(strip.style.maskImage).toBe("")
+    })
+  })
+
+  /**
+   * A column that can hold more widgets than a screen keeps only the ones you can
+   * see. The layout's part is small — which sides do it, and what each of them is
+   * on screen OF (its own scroll region) — and the column's own tests cover the
+   * rest.
+   */
+  describe("virtualizing a column", () => {
+    const MANY = Array.from({ length: 100 }, (_, index) =>
+      widget(`left-${index}`)
+    )
+
+    /**
+     * The heights jsdom has none of. A widget's card is 200px and every other box
+     * — the scroll region among them — is 400, read through both metrics because
+     * the scroll region is measured by `offsetHeight` and a card by its rect.
+     */
+    const mockHeights = () => {
+      const heightOf = (el: HTMLElement) =>
+        el.hasAttribute("data-index") ? 200 : 400
+      vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(
+        function (this: HTMLElement) {
+          return heightOf(this)
+        }
+      )
+      vi.spyOn(
+        HTMLElement.prototype,
+        "getBoundingClientRect"
+      ).mockImplementation(function (this: HTMLElement) {
+        const height = heightOf(this)
+        return {
+          top: 0,
+          left: 0,
+          right: 400,
+          bottom: height,
+          width: 400,
+          height,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect
+      })
+    }
+
+    afterEach(() => vi.restoreAllMocks())
+
+    test("mounts only the main column's on-screen widgets", () => {
+      mockHeights()
+      renderLayout(1400, {
+        leftWidgets: MANY,
+        virtualizedWidgetContainers: ["main"],
+        virtualization: { estimateHeight: 200 },
+      })
+
+      expect(screen.getAllByText("left-0").length).toBeGreaterThan(0)
+      expect(screen.queryByText("left-99")).not.toBeInTheDocument()
+    })
+
+    test("mounts them all for a side that did not ask", () => {
+      mockHeights()
+      renderLayout(1400, { leftWidgets: MANY })
+
+      expect(screen.getAllByText("left-99").length).toBeGreaterThan(0)
     })
   })
 })

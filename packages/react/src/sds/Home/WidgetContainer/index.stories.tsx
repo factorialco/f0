@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Calendar, Clock } from "@/icons/app"
 
-import { type HomeWidgetItem, listSlot } from "../slotRenderers"
+import { type HomeWidgetItem, listSlot, widgetTitle } from "../slotRenderers"
 import { WidgetContainer } from "./index"
 
 const WIDGETS: HomeWidgetItem[] = [
@@ -88,4 +88,43 @@ export const EditingDisabled: Story = {
 /** The rail variant — a tighter gap between its widgets than the main column. */
 export const RightSide: Story = {
   args: { side: "right" },
+}
+
+/**
+ * A COLUMN LONGER THAN ITS SCROLL REGION, `virtualized`: 50 widgets, of which
+ * only the handful in view (plus the overscan) is in the DOM. Inspect the column
+ * while you scroll it — the cards ahead and behind are not hidden, they are not
+ * there, and the box they sit in holds the height of all 50 so the scrollbar
+ * still describes the whole column.
+ *
+ * The scroll region is the column's nearest scrollable ancestor, which here is
+ * the decorator's own box; `NewHomeLayout` hands its columns theirs.
+ *
+ * `estimateHeight` is what an unmounted card is assumed to be worth, and these
+ * are small ones — left at the 280px default the column would claim nearly twice
+ * its real height and the scrollbar would shrink under your thumb as the cards
+ * you scroll past get measured. Aim it at the cards you actually have.
+ */
+export const Virtualized: Story = {
+  args: {
+    widgets: Array.from({ length: 50 }, (_, index) => {
+      const source = WIDGETS[index % WIDGETS.length]!
+      return {
+        ...source,
+        id: `widget-${index}`,
+        header: {
+          ...source.header,
+          title: `${index + 1}. ${widgetTitle(source)}`,
+        },
+      }
+    }),
+    virtualized: { estimateHeight: 150 },
+  },
+  decorators: [
+    (Story) => (
+      <div className="h-[480px] max-w-96 overflow-y-auto p-4">
+        <Story />
+      </div>
+    ),
+  ],
 }

@@ -6,8 +6,11 @@
 export * from "../../../sds/Home/NewHomeLayout"
 export * from "../../../sds/Home/slotRenderers"
 export * from "../../../sds/Home/WidgetCatalog"
-// Named by NewHomeLayoutProps (`editableWidgetContainers`, the add callback),
-// so the type is public even though the component is not.
-export type { WidgetContainerSide } from "../../../sds/Home/WidgetContainer"
+// Named by NewHomeLayoutProps (`editableWidgetContainers`, the add callback,
+// `virtualization`), so the types are public even though the component is not.
+export type {
+  WidgetContainerSide,
+  WidgetVirtualization,
+} from "../../../sds/Home/WidgetContainer"
 export * from "./Dashboard"
 export * from "./WidgetStrip"
