@@ -160,3 +160,66 @@ describe("PieChart — tooltip", () => {
     expect(html).not.toContain("NaN")
   })
 })
+
+// A slice is a segment like a bar is: the count says how many entities the
+// share was computed over.
+describe("PieChart — segment context", () => {
+  const context = [{ name: "Active headcount", data: [1204, 380, 1] }]
+
+  it("adds a row naming what the slice counts", () => {
+    render(<F0DataChart {...pieProps} context={context} />)
+
+    const html = hover({ name: "Engineering", value: 45, dataIndex: 0 })
+    expect(html).toContain("1,204")
+    expect(html).toContain("Active headcount")
+  })
+
+  it("reads the entry for the hovered slice", () => {
+    render(<F0DataChart {...pieProps} context={context} />)
+
+    const html = hover({ name: "Design", value: 18, dataIndex: 1 })
+    expect(html).toContain("380")
+    expect(html).not.toContain("1,204")
+  })
+
+  it("lets a formatter inflect the label to agree with the count", () => {
+    render(
+      <F0DataChart
+        {...pieProps}
+        context={context}
+        contextLabelFormatter={(count) => (count === 1 ? "person" : "people")}
+      />
+    )
+
+    expect(hover({ name: "Product", value: 22, dataIndex: 2 })).toContain(
+      "person"
+    )
+    expect(hover({ name: "Engineering", value: 45, dataIndex: 0 })).toContain(
+      "people"
+    )
+  })
+
+  // The value formatter carries the plotted measure's unit, which a headcount
+  // is not measured in.
+  it("formats the count as a plain integer, never in the measure's unit", () => {
+    render(
+      <F0DataChart
+        {...pieProps}
+        context={context}
+        valueFormatter={(v) => `${v} FTE`}
+      />
+    )
+
+    const html = hover({ name: "Engineering", value: 45, dataIndex: 0 })
+    expect(html).toContain("45 FTE")
+    expect(html).toContain("1,204")
+    expect(html).not.toContain("1,204 FTE")
+  })
+
+  it("renders the usual tooltip when no context is given", () => {
+    render(<F0DataChart {...pieProps} />)
+
+    const html = hover({ name: "Engineering", value: 45, dataIndex: 0 })
+    expect(html).not.toContain("headcount")
+  })
+})

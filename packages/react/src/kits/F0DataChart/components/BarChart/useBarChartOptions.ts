@@ -10,6 +10,8 @@ import type {
   F0DataChartBarSeries,
 } from "../../types"
 
+import type { ValueTooltipRow } from "../../utils/options"
+
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,
@@ -846,6 +848,8 @@ export function useBarChartOptions(
   {
     categories,
     series,
+    context,
+    contextLabelFormatter,
     orientation = "vertical",
     stacked = false,
     showLegend = true,
@@ -1189,6 +1193,32 @@ export function useBarChartOptions(
           })
     }
 
+    // How many entities the hovered bar covers. Counts are formatted as plain
+    // integers rather than through `formatTooltipValue`: that formatter carries
+    // the plotted measure's unit, and a headcount shown as "€1,204.00" is a
+    // different quantity, not a differently styled one.
+    //
+    // Resolved by series NAME, because a target ghost series shifts the indices
+    // ECharts reports; `context` is indexed against the props `series` array.
+    // A single entry serves every series — the population of a category does
+    // not change with the measure plotted against it.
+    const contextRow = (
+      seriesName: string,
+      dataIndex: number
+    ): ValueTooltipRow | undefined => {
+      if (!context?.length) return undefined
+
+      const entry = context[series.findIndex((s) => s.name === seriesName)]
+      const resolved = entry ?? context[0]
+      const count = resolved?.data[dataIndex]
+      if (count === undefined || !Number.isFinite(count)) return undefined
+
+      return {
+        value: count.toLocaleString(),
+        label: contextLabelFormatter?.(count) ?? resolved.name,
+      }
+    }
+
     // Bar charts use an item-triggered tooltip about the hovered bar or
     // segment (pairing with the stacked series highlight) instead of the axis
     // tooltip listing every series: value large, then — on a stack of several
@@ -1264,6 +1294,7 @@ export function useBarChartOptions(
                   value: formatTooltipValue(target),
                   label: i18n.dataChart.tooltip.target,
                 },
+                contextRow(seriesName, dataIndex),
               ],
             },
             theme
@@ -1350,6 +1381,8 @@ export function useBarChartOptions(
   }, [
     categories,
     series,
+    context,
+    contextLabelFormatter,
     orientation,
     stacked,
     showLegend,
