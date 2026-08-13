@@ -91,6 +91,15 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       // Initial check
       findAndSetEllipsisState()
 
+      // Re-check after the next layout. When this text lives in a flex row that
+      // an ancestor width-constrains only on a later pass (e.g. an OverflowList
+      // inside a table cell), the element can mount at its natural width and
+      // shrink afterwards — a transition the ResizeObserver below sometimes
+      // misses, leaving `hasEllipsis` (and thus the tooltip) stale-false while
+      // the text is visibly clipped. A post-layout re-measure catches it.
+      const raf = requestAnimationFrame(() => findAndSetEllipsisState())
+      const timeout = setTimeout(() => findAndSetEllipsisState(), 100)
+
       // Set up resize observer
       const resizeObserver = new ResizeObserver(() => {
         findAndSetEllipsisState()
@@ -99,6 +108,8 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       resizeObserver.observe(element)
 
       return () => {
+        cancelAnimationFrame(raf)
+        clearTimeout(timeout)
         resizeObserver.disconnect()
       }
     }, [ref, onHasEllipsisChange, lines, disabled])
