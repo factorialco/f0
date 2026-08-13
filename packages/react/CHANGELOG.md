@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.27.2](https://github.com/factorialco/f0/compare/f0-react-v6.27.1...f0-react-v6.27.2) (2026-08-13)
+
+
+### Bug Fixes
+
+* **SlotWidget:** view-more button steps up with the card ([#5117](https://github.com/factorialco/f0/issues/5117)) ([47fb31e](https://github.com/factorialco/f0/commit/47fb31e16dbaa980fd803e7ab542ac031fb84593))
+
 ## [6.27.1](https://github.com/factorialco/f0/compare/f0-react-v6.27.0...f0-react-v6.27.1) (2026-08-13)
 
 
