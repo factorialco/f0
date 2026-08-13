@@ -19,6 +19,14 @@ const ScrollArea = forwardRef<
     onScrollTop?: () => void
     onScrollBottom?: () => void
     /**
+     * Whether the viewport is keyboard-focusable. Keep enabled for standalone
+     * scroll regions (WCAG 2.1.1); disable when a parent widget (e.g. a Select
+     * listbox) owns keyboard scrolling, where a focusable generic container
+     * violates the listbox's allowed-children contract (WCAG 1.3.1).
+     * @default true
+     */
+    focusableViewport?: boolean
+    /**
      * The margin to add to the scroll area when the user is at the top or bottom of the scroll area.
      * @default 0
      */
@@ -34,6 +42,7 @@ const ScrollArea = forwardRef<
       onScrollTop,
       onScrollBottom,
       scrollMargin = 0,
+      focusableViewport = true,
       ...props
     },
     ref
@@ -77,7 +86,7 @@ const ScrollArea = forwardRef<
         <ScrollAreaPrimitive.Viewport
           ref={localViewportRef}
           className="size-full snap-none rounded-[inherit] [&>div]:!block"
-          tabIndex={0}
+          tabIndex={focusableViewport ? 0 : undefined}
           data-scroll-container
         >
           {children}
