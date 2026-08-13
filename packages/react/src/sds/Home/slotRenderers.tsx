@@ -859,10 +859,15 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
         <div className="mt-1 self-start">
           {/* `neutral`, the same button a widget's own call to action is (the
               frame's `action`): "View more" is something you press, and a ghost
-              button under a dense list of rows reads as another row. */}
+              button under a dense list of rows reads as another row. Past the
+              width threshold it takes the SAME step every card-sized control
+              takes (`WIDE_WIDGET_PX`) — `md`, and `outline` rather than
+              `neutral`, exactly like the frame's footer button — so a wide
+              card doesn't grow its rows and its footer around a button still
+              drawn at rail size. */}
           <F0Button
-            variant="neutral"
-            size="sm"
+            variant={isWide ? "outline" : "neutral"}
+            size={isWide ? "md" : "sm"}
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
             }
