@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.27.0](https://github.com/factorialco/f0/compare/f0-react-v6.26.0...f0-react-v6.27.0) (2026-08-13)
+
+
+### Features
+
+* **F0Map:** add map pattern built on MapLibre ([#4752](https://github.com/factorialco/f0/issues/4752)) ([e3df5fb](https://github.com/factorialco/f0/commit/e3df5fb780eb0059c3e04e097074f9e17edd5c1e))
+
 ## [6.26.0](https://github.com/factorialco/f0/compare/f0-react-v6.25.0...f0-react-v6.26.0) (2026-08-13)
 
 
