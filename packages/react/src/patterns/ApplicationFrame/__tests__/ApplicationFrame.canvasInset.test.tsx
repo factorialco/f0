@@ -171,13 +171,14 @@ describe("ApplicationFrame canvas inset", () => {
   })
 
   it("broadcasts the handle drag so the frame can track it 1:1", async () => {
-    // The canvas inset drops its transition while the handle is being dragged
-    // (the chat's own width is already instant then), so the drag has to reach
-    // AiChatStateProvider — with it local to ChatWindow the frame cannot see
-    // it, and the canvas edge eases 300ms behind the cursor on every frame.
+    // The canvas inset drops its transition while the handle is dragged, so the
+    // drag has to reach the provider: with it local to ChatWindow the frame
+    // cannot see it, and the canvas edge eases 300ms behind the cursor on every
+    // frame. NOTE this asserts the wiring, not the timing — `test-utils` sets
+    // `MotionGlobalConfig.skipAnimations = true`, so no unit test in this repo
+    // can observe a transition duration.
     renderFrame(undefined, { resizable: true })
-    // The handle only exists once the panel is open and docked (not fullscreen
-    // chat).
+    // The handle only exists once the panel is open and docked.
     await userEvent.click(screen.getByText("open-docked"))
     await waitForReservedEdge("right")
     expect(screen.getByText("resizing:false")).toBeInTheDocument()

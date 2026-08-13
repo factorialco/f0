@@ -114,17 +114,17 @@ export const SidebarWindow = ({
   const fullscreen = visualizationMode === "fullscreen"
   // Stays LOCAL: it gates this handle's document mousemove listener and its
   // active style, and a split layout renders two windows — a shared gate would
-  // have the idle handle grab the pointer too and apply a second delta from
-  // its own stale start position.
+  // have the idle handle grab the pointer too and apply a second delta from its
+  // own stale start position.
   const [isDragging, setIsDragging] = useState(false)
-  // ...but the drag is mirrored into shared state, because the canvas panel is
-  // laid out against this window's edge and has to follow it 1:1 (see
-  // ApplicationFrame's canvas inset). Cleared on unmount too, so a window torn
-  // down mid-drag doesn't strand the flag.
+  // ...but the drag is mirrored outward, because the canvas panel is laid out
+  // against this window's edge and has to follow it 1:1 (see ApplicationFrame's
+  // canvas inset). Cleared on unmount too, so a window torn down mid-drag
+  // doesn't strand the flag.
   useEffect(() => {
     if (!isDragging) return
-    setIsResizing(true)
-    return () => setIsResizing(false)
+    setIsResizing?.(true)
+    return () => setIsResizing?.(false)
   }, [isDragging, setIsResizing])
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,

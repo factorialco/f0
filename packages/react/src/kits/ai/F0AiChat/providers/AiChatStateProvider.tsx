@@ -436,7 +436,6 @@ const FALSE_KEYS = new Set<ProviderKey>([
   "historyEnabled",
   "resizable",
   "isClarifying",
-  "isResizing",
 ])
 
 const NULL_KEYS = new Set<ProviderKey>([

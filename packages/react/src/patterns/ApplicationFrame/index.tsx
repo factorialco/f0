@@ -31,6 +31,11 @@ import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
+// Module-level so the reference is stable across renders. Motion cancels an
+// in-flight animation when it sees a different `transition` and does not
+// restart it, so handing it a fresh object literal each render is a way to
+// strand an animation part-way.
+const INSTANT_TRANSITION = { duration: 0 }
 
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
@@ -205,14 +210,8 @@ function ApplicationFrameContent({
   // panel keeps its state and its conversation while it is out of view. Note
   // this is unrelated to `visualizationMode: "fullscreen"`, which is the chat
   // spanning the frame with no canvas at all.
-  const reservedCanvasInset = canvasContent?.coversChat ? 0 : reservedChatWidth
-  // Dragging the resize handle moves the chat's edge instantly (the chat
-  // window drops its own transition while `isResizing`), so the canvas must
-  // too — easing here would leave the seam trailing the cursor for 300ms on
-  // every frame of the drag, opening a gap over the main content.
-  const canvasInsetTransition = isResizing
-    ? { duration: 0 }
-    : CONTENT_TRANSITION
+  const coversChat = canvasContent?.coversChat === true
+  const reservedCanvasInset = coversChat ? 0 : reservedChatWidth
   // Hosts can dock the whole panel left for a chat-first experience (e.g.
   // communications); the default is right, so the standard layout is unchanged.
   const isPanelLeft = panelSide === "left"
@@ -255,6 +254,21 @@ function ApplicationFrameContent({
       return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
     return { duration: 0 }
   }, [isEnteringFullscreen, isExitingFullscreen])
+
+  // Instant while the resize handle is being dragged, eased otherwise.
+  //
+  // The flag flips only on drag start / drag end, which is what makes this
+  // safe. Motion CANCELS an in-flight animation when `transition` changes and
+  // does not restart it (the target is unchanged), stranding the canvas
+  // mid-travel — verified in the browser: the canvas froze part-way across the
+  // chat and stayed there. Keying off the drag never swaps the transition while
+  // an animation is running: a drag holds `{ duration: 0 }` for its whole
+  // duration, and a `coversChat` flip holds the eased curve for its whole
+  // animation. Keying off "is `coversChat` changing" is what does not work — it
+  // swaps the transition one render after starting the animation.
+  const canvasInsetTransition = isResizing
+    ? INSTANT_TRANSITION
+    : CONTENT_TRANSITION
 
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,
