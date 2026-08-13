@@ -1091,9 +1091,10 @@ describe("BarChart — item tooltip", () => {
     expect(html).toContain((100).toLocaleString())
   })
 
-  // Side-by-side bars are independent measures, not parts of a whole: summing
-  // three average salaries produces a number that is not an average of
-  // anything, and a share of that sum makes the bars look like slices of a pie.
+  // Nothing tells the component whether a grouped measure is additive, so it
+  // never totals a group. Here it shouldn't: summing three average salaries
+  // produces a number that is not an average of anything, and a share of that
+  // sum makes the bars look like slices of a pie.
   it("omits share and total on a grouped chart, however many series", () => {
     render(
       <F0DataChart
