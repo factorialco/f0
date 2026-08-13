@@ -204,8 +204,33 @@ describe("buildChartProps — segment context", () => {
     expect(props.contextLabelFormatter).toBe(formatter)
   })
 
+  // A pie's slices ARE the categories the counts were aligned to, and
+  // `pieToTabular` emits the context column either way — so without this the
+  // table kept a count column the tooltip had lost.
+  it("reaches a pie transformed from another type", () => {
+    expect(propsFor({ type: "pie" }).context).toEqual([
+      { name: "Active headcount", data: [1204, 380] },
+    ])
+  })
+
+  it("carries the label formatter to a pie as well", () => {
+    const formatter = (count: number) => `${count} people`
+    const props = propsFor({ type: "pie", contextLabelFormatter: formatter })
+
+    expect(props.contextLabelFormatter).toBe(formatter)
+  })
+
   // Its slices are not the categories the counts were aligned to.
   it("does not hand counts to a type that cannot place them", () => {
     expect(propsFor({ type: "funnel" }).context).toBeUndefined()
+  })
+
+  // The formatter travels with the counts. A funnel has no such prop, so
+  // passing it along would be handing a type a prop it does not accept.
+  it("does not hand the label formatter to a type that gets no counts", () => {
+    const formatter = (count: number) => `${count} people`
+    const props = propsFor({ type: "funnel", contextLabelFormatter: formatter })
+
+    expect(props.contextLabelFormatter).toBeUndefined()
   })
 })

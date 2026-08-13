@@ -219,15 +219,25 @@ export function buildChartProps(
   // A line item reaches this path on every render, not just after a user
   // transform: `detectDataShape` reports any array-series data as "bar", so a
   // line's shape never equals its target type.
-  if (
-    "contextLabelFormatter" in item.chart &&
-    item.chart.contextLabelFormatter
-  ) {
-    shared.contextLabelFormatter = item.chart.contextLabelFormatter
-  }
+  //
+  // Bar, line and pie are the types that render a context row, matching the
+  // native path. Pie belongs here because `pieToTabular` emits the context
+  // column regardless: without it, transforming a bar into a pie left the
+  // table showing a count column the tooltip had lost. Slices come from the
+  // same categories the counts were aligned to, so the indices still line up.
+  //
+  // The formatter travels with the counts rather than in `shared`, which every
+  // branch spreads — a funnel or a gauge has no `contextLabelFormatter` prop.
   const contextForTarget =
-    data.context && (targetType === "bar" || targetType === "line")
-      ? { context: data.context }
+    data.context &&
+    (targetType === "bar" || targetType === "line" || targetType === "pie")
+      ? {
+          context: data.context,
+          ...("contextLabelFormatter" in item.chart &&
+          item.chart.contextLabelFormatter
+            ? { contextLabelFormatter: item.chart.contextLabelFormatter }
+            : {}),
+        }
       : {}
   // Only bar targets inherit the source config's `showLabels`. Other types keep
   // their own default, so transforming a pie (labels on by default) into a line
@@ -278,6 +288,7 @@ export function buildChartProps(
       return {
         ...config,
         ...shared,
+        ...contextForTarget,
         series: adapted.series,
       } as F0DataChartProps
     case "radar":

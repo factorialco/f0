@@ -1208,10 +1208,16 @@ export function useBarChartOptions(
     ): ValueTooltipRow | undefined => {
       if (!context?.length) return undefined
 
+      // Falling back to the first entry is only right for the single-entry
+      // case above, where one count genuinely describes every series. With
+      // several entries an unmatched series has no count of its own, and
+      // entry 0's would be a plausible wrong number rather than a visible gap.
       const entry = context[series.findIndex((s) => s.name === seriesName)]
-      const resolved = entry ?? context[0]
+      const resolved = entry ?? (context.length === 1 ? context[0] : undefined)
       const count = resolved?.data[dataIndex]
-      if (count === undefined || !Number.isFinite(count)) return undefined
+      if (!resolved || count === undefined || !Number.isFinite(count)) {
+        return undefined
+      }
 
       return {
         value: count.toLocaleString(),

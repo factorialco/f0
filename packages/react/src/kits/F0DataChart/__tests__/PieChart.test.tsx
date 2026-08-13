@@ -216,6 +216,16 @@ describe("PieChart — segment context", () => {
     expect(html).not.toContain("1,204 FTE")
   })
 
+  // Defaulting the index to 0 would report the first slice's count for every
+  // slice — the same number beside three different values, and no way to tell.
+  it("omits the row when the hovered slice cannot be identified", () => {
+    render(<F0DataChart {...pieProps} context={context} />)
+
+    const html = hover({ name: "Design", value: 18 })
+    expect(html).not.toContain("Active headcount")
+    expect(html).not.toContain("1,204")
+  })
+
   it("renders the usual tooltip when no context is given", () => {
     render(<F0DataChart {...pieProps} />)
 

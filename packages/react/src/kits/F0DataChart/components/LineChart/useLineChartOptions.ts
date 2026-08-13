@@ -214,10 +214,16 @@ export function useLineChartOptions(
     ): ValueTooltipRow | undefined => {
       if (!context?.length) return undefined
 
-      const entry =
-        context[series.findIndex((s) => s.name === seriesName)] ?? context[0]
+      // One entry serves every series — a category's population does not
+      // change with the measure plotted against it. That fallback is only
+      // right for the single-entry case: with several, an unmatched series has
+      // no count of its own, and entry 0's would be a plausible wrong number.
+      const matched = context[series.findIndex((s) => s.name === seriesName)]
+      const entry = matched ?? (context.length === 1 ? context[0] : undefined)
       const count = entry?.data[dataIndex]
-      if (count === undefined || !Number.isFinite(count)) return undefined
+      if (!entry || count === undefined || !Number.isFinite(count)) {
+        return undefined
+      }
 
       return {
         value: count.toLocaleString(),
@@ -276,7 +282,10 @@ export function useLineChartOptions(
       // to marks the reader can hover individually.
       const sharedContext =
         context?.length === 1 && points[0]
-          ? contextRow(String(points[0].seriesName ?? ""), points[0].dataIndex ?? 0)
+          ? contextRow(
+              String(points[0].seriesName ?? ""),
+              points[0].dataIndex ?? 0
+            )
           : undefined
 
       return renderValueTooltip(

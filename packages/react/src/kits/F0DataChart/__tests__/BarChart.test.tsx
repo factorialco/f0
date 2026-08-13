@@ -1400,6 +1400,36 @@ describe("BarChart — item tooltip", () => {
       expect(html).not.toContain("612")
     })
 
+    // With one entry it stands for every series. With several, a series that
+    // matches none has no count of its own — reporting the first entry's would
+    // be a plausible wrong number rather than a visible gap.
+    it("omits the row for an unmatched series when entries are per-series", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          categories={["Engineering"]}
+          series={[
+            { name: "Female", data: [48900] },
+            { name: "Male", data: [55100] },
+            { name: "Not specified", data: [51000] },
+          ]}
+          context={[
+            { name: "Active headcount", data: [612] },
+            { name: "Active headcount", data: [592] },
+          ]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Not specified",
+        value: 51000,
+        dataIndex: 0,
+      })
+      expect(html).not.toContain("Active headcount")
+      expect(html).not.toContain("612")
+    })
+
     it("omits the row when the entry has no count for that bar", () => {
       render(
         <F0DataChart

@@ -183,8 +183,12 @@ export function usePieChartOptions(
           // A pie has one series, so a single context entry covers every
           // slice. Counts stay plain integers: `formatTooltipValue` carries
           // the plotted measure's unit, and a headcount is not in euros.
+          // No `?? 0` on the index: without one there is no way to tell which
+          // slice is hovered, and defaulting would report slice 0's count for
+          // every one of them.
           const entry = context?.[0]
-          const count = entry?.data[p.dataIndex ?? 0]
+          const count =
+            p.dataIndex === undefined ? undefined : entry?.data[p.dataIndex]
           const hasCount = count !== undefined && Number.isFinite(count)
           return renderValueTooltip(
             {
