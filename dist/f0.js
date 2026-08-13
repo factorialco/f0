@@ -9632,7 +9632,7 @@ function xW(r, e, t, n, i, a, o, s, l) {
   for (var d = 0; d < a; d += Math.PI / 2)
     d > i && (qf[0] = Pg(d) * t + r, qf[1] = kg(d) * n + e, u(s, qf, s), c(l, qf, l));
 }
-var lt = {
+var ut = {
   M: 1,
   L: 2,
   C: 3,
@@ -9672,10 +9672,10 @@ var pi = (function() {
   }, r.prototype.reset = function() {
     this._saveData && (this._len = 0), this._pathSegLen && (this._pathSegLen = null, this._pathLen = 0), this._version++;
   }, r.prototype.moveTo = function(e, t) {
-    return this._drawPendingPt(), this.addData(lt.M, e, t), this._ctx && this._ctx.moveTo(e, t), this._x0 = e, this._y0 = t, this._xi = e, this._yi = t, this;
+    return this._drawPendingPt(), this.addData(ut.M, e, t), this._ctx && this._ctx.moveTo(e, t), this._x0 = e, this._y0 = t, this._xi = e, this._yi = t, this;
   }, r.prototype.lineTo = function(e, t) {
     var n = wi(e - this._xi), i = wi(t - this._yi), a = n > this._ux || i > this._uy;
-    if (this.addData(lt.L, e, t), this._ctx && a && this._ctx.lineTo(e, t), a)
+    if (this.addData(ut.L, e, t), this._ctx && a && this._ctx.lineTo(e, t), a)
       this._xi = e, this._yi = t, this._pendingPtDist = 0;
     else {
       var o = n * n + i * i;
@@ -9683,19 +9683,19 @@ var pi = (function() {
     }
     return this;
   }, r.prototype.bezierCurveTo = function(e, t, n, i, a, o) {
-    return this._drawPendingPt(), this.addData(lt.C, e, t, n, i, a, o), this._ctx && this._ctx.bezierCurveTo(e, t, n, i, a, o), this._xi = a, this._yi = o, this;
+    return this._drawPendingPt(), this.addData(ut.C, e, t, n, i, a, o), this._ctx && this._ctx.bezierCurveTo(e, t, n, i, a, o), this._xi = a, this._yi = o, this;
   }, r.prototype.quadraticCurveTo = function(e, t, n, i) {
-    return this._drawPendingPt(), this.addData(lt.Q, e, t, n, i), this._ctx && this._ctx.quadraticCurveTo(e, t, n, i), this._xi = n, this._yi = i, this;
+    return this._drawPendingPt(), this.addData(ut.Q, e, t, n, i), this._ctx && this._ctx.quadraticCurveTo(e, t, n, i), this._xi = n, this._yi = i, this;
   }, r.prototype.arc = function(e, t, n, i, a, o) {
     this._drawPendingPt(), _u[0] = i, _u[1] = a, Ap(_u, o), i = _u[0], a = _u[1];
     var s = a - i;
-    return this.addData(lt.A, e, t, n, n, i, s, 0, o ? 0 : 1), this._ctx && this._ctx.arc(e, t, n, i, a, o), this._xi = lo(a) * n + e, this._yi = uo(a) * n + t, this;
+    return this.addData(ut.A, e, t, n, n, i, s, 0, o ? 0 : 1), this._ctx && this._ctx.arc(e, t, n, i, a, o), this._xi = lo(a) * n + e, this._yi = uo(a) * n + t, this;
   }, r.prototype.arcTo = function(e, t, n, i, a) {
     return this._drawPendingPt(), this._ctx && this._ctx.arcTo(e, t, n, i, a), this;
   }, r.prototype.rect = function(e, t, n, i) {
-    return this._drawPendingPt(), this._ctx && this._ctx.rect(e, t, n, i), this.addData(lt.R, e, t, n, i), this;
+    return this._drawPendingPt(), this._ctx && this._ctx.rect(e, t, n, i), this.addData(ut.R, e, t, n, i), this;
   }, r.prototype.closePath = function() {
-    this._drawPendingPt(), this.addData(lt.Z);
+    this._drawPendingPt(), this.addData(ut.Z);
     var e = this._ctx, t = this._x0, n = this._y0;
     return e && e.closePath(), this._xi = t, this._yi = n, this;
   }, r.prototype.fill = function(e) {
@@ -9753,30 +9753,30 @@ var pi = (function() {
     for (o = 0; o < this._len; ) {
       var s = e[o++], l = o === 1;
       switch (l && (t = e[o], n = e[o + 1], i = t, a = n), s) {
-        case lt.M:
+        case ut.M:
           t = i = e[o++], n = a = e[o++], Fn[0] = i, Fn[1] = a, Gn[0] = i, Gn[1] = a;
           break;
-        case lt.L:
+        case ut.L:
           VS(t, n, e[o], e[o + 1], Fn, Gn), t = e[o++], n = e[o++];
           break;
-        case lt.C:
+        case ut.C:
           _W(t, n, e[o++], e[o++], e[o++], e[o++], e[o], e[o + 1], Fn, Gn), t = e[o++], n = e[o++];
           break;
-        case lt.Q:
+        case ut.Q:
           bW(t, n, e[o++], e[o++], e[o], e[o + 1], Fn, Gn), t = e[o++], n = e[o++];
           break;
-        case lt.A:
+        case ut.A:
           var u = e[o++], c = e[o++], f = e[o++], h = e[o++], d = e[o++], v = e[o++] + d;
           o += 1;
           var p = !e[o++];
           l && (i = lo(d) * f + u, a = uo(d) * h + c), xW(u, c, f, h, d, v, p, Fn, Gn), t = lo(v) * f + u, n = uo(v) * h + c;
           break;
-        case lt.R:
+        case ut.R:
           i = t = e[o++], a = n = e[o++];
           var g = e[o++], m = e[o++];
           VS(i, a, i + g, a + m, Fn, Gn);
           break;
-        case lt.Z:
+        case ut.Z:
           t = i, n = a;
           break;
       }
@@ -9791,35 +9791,35 @@ var pi = (function() {
       v && (a = e[h], o = e[h + 1], s = a, l = o);
       var p = -1;
       switch (d) {
-        case lt.M:
+        case ut.M:
           a = s = e[h++], o = l = e[h++];
           break;
-        case lt.L: {
+        case ut.L: {
           var g = e[h++], m = e[h++], y = g - a, _ = m - o;
           (wi(y) > n || wi(_) > i || h === t - 1) && (p = Math.sqrt(y * y + _ * _), a = g, o = m);
           break;
         }
-        case lt.C: {
+        case ut.C: {
           var b = e[h++], S = e[h++], g = e[h++], m = e[h++], x = e[h++], C = e[h++];
           p = BH(a, o, b, S, g, m, x, C, 10), a = x, o = C;
           break;
         }
-        case lt.Q: {
+        case ut.Q: {
           var b = e[h++], S = e[h++], g = e[h++], m = e[h++];
           p = VH(a, o, b, S, g, m, 10), a = g, o = m;
           break;
         }
-        case lt.A:
+        case ut.A:
           var T = e[h++], D = e[h++], A = e[h++], M = e[h++], I = e[h++], E = e[h++], N = E + I;
           h += 1, v && (s = lo(I) * A + T, l = uo(I) * M + D), p = Og(A, M) * Rg(da, Math.abs(E)), a = lo(N) * A + T, o = uo(N) * M + D;
           break;
-        case lt.R: {
+        case ut.R: {
           s = a = e[h++], l = o = e[h++];
           var P = e[h++], k = e[h++];
           p = P * 2 + k * 2;
           break;
         }
-        case lt.Z: {
+        case ut.Z: {
           var y = s - a, _ = l - o;
           p = Math.sqrt(y * y + _ * _), a = s, o = l;
           break;
@@ -9833,11 +9833,11 @@ var pi = (function() {
     if (!(d && (this._pathSegLen || this._calculateLength(), v = this._pathSegLen, p = this._pathLen, y = t * p, !y)))
       e: for (var x = 0; x < o; ) {
         var C = n[x++], T = x === 1;
-        switch (T && (u = n[x], c = n[x + 1], s = u, l = c), C !== lt.L && _ > 0 && (e.lineTo(b, S), _ = 0), C) {
-          case lt.M:
+        switch (T && (u = n[x], c = n[x + 1], s = u, l = c), C !== ut.L && _ > 0 && (e.lineTo(b, S), _ = 0), C) {
+          case ut.M:
             s = u = n[x++], l = c = n[x++], e.moveTo(u, c);
             break;
-          case lt.L: {
+          case ut.L: {
             f = n[x++], h = n[x++];
             var D = wi(f - u), A = wi(h - c);
             if (D > i || A > a) {
@@ -9857,7 +9857,7 @@ var pi = (function() {
             }
             break;
           }
-          case lt.C: {
+          case ut.C: {
             var N = n[x++], P = n[x++], k = n[x++], R = n[x++], O = n[x++], V = n[x++];
             if (d) {
               var M = v[m++];
@@ -9871,7 +9871,7 @@ var pi = (function() {
             e.bezierCurveTo(N, P, k, R, O, V), u = O, c = V;
             break;
           }
-          case lt.Q: {
+          case ut.Q: {
             var N = n[x++], P = n[x++], k = n[x++], R = n[x++];
             if (d) {
               var M = v[m++];
@@ -9885,7 +9885,7 @@ var pi = (function() {
             e.quadraticCurveTo(N, P, k, R), u = k, c = R;
             break;
           }
-          case lt.A:
+          case ut.A:
             var z = n[x++], F = n[x++], H = n[x++], G = n[x++], $ = n[x++], Q = n[x++], oe = n[x++], me = !n[x++], J = H > G ? H : G, X = wi(H - G) > 1e-3, se = $ + Q, K = !1;
             if (d) {
               var M = v[m++];
@@ -9895,7 +9895,7 @@ var pi = (function() {
               break e;
             T && (s = lo($) * H + z, l = uo($) * G + F), u = lo(se) * H + z, c = uo(se) * G + F;
             break;
-          case lt.R:
+          case ut.R:
             s = u = n[x], l = c = n[x + 1], f = n[x++], h = n[x++];
             var re = n[x++], ce = n[x++];
             if (d) {
@@ -9909,7 +9909,7 @@ var pi = (function() {
             }
             e.rect(f, h, re, ce);
             break;
-          case lt.Z:
+          case ut.Z:
             if (d) {
               var M = v[m++];
               if (g + M > y) {
@@ -9927,7 +9927,7 @@ var pi = (function() {
     return e.data = t.slice ? t.slice() : Array.prototype.slice.call(t), e._len = this._len, e;
   }, r.prototype.canSave = function() {
     return !!this._saveData;
-  }, r.CMD = lt, r.initDefaultProps = (function() {
+  }, r.CMD = ut, r.initDefaultProps = (function() {
     var e = r.prototype;
     e._saveData = !0, e._ux = 0, e._uy = 0, e._pendingPtDist = 0, e._version = 0;
   })(), r;
@@ -12141,13 +12141,13 @@ function jt(r, e, t, n) {
   var l = i ? r : r.getTextContent();
   if (a) {
     i || (l || (l = new Ze(), r.setTextContent(l)), r.stateProxy && (l.stateProxy = r.stateProxy));
-    var u = G0(t, e), c = e.normal, f = !!c.getShallow("show"), h = ut(c, n && n.normal, t, !1, !i);
+    var u = G0(t, e), c = e.normal, f = !!c.getShallow("show"), h = ct(c, n && n.normal, t, !1, !i);
     h.text = u.normal, i || r.setTextConfig(Qd(c, t, !1));
     for (var o = 0; o < Tr.length; o++) {
       var d = Tr[o], s = e[d];
       if (s) {
         var v = l.ensureState(d), p = !!ve(s.getShallow("show"), f);
-        if (p !== f && (v.ignore = !p), v.style = ut(s, n && n[d], t, !0, !i), v.style.text = u[d], !i) {
+        if (p !== f && (v.ignore = !p), v.style = ct(s, n && n[d], t, !0, !i), v.style.text = u[d], !i) {
           var g = r.ensureState(d);
           g.textConfig = Qd(s, t, !0);
         }
@@ -12170,7 +12170,7 @@ function Ut(r, e) {
   }
   return t;
 }
-function ut(r, e, t, n, i) {
+function ct(r, e, t, n, i) {
   var a = {};
   return F4(a, r, t, n, i), e && Y(a, e), a;
 }
@@ -15889,7 +15889,7 @@ var oa = Ve();
 function ah(r, e) {
   return r.getName(e) || r.getId(e);
 }
-var dd = "__universalTransitionEnabled", ct = (
+var dd = "__universalTransitionEnabled", ft = (
   /** @class */
   (function(r) {
     W(e, r);
@@ -16067,9 +16067,9 @@ var dd = "__universalTransitionEnabled", ct = (
     })(), e;
   })(Ge)
 );
-Bt(ct, Fp);
-Bt(ct, zx);
-r2(ct, Ge);
+Bt(ft, Fp);
+Bt(ft, zx);
+r2(ft, Ge);
 function XC(r) {
   var e = r.name;
   lx(r) || (r.name = N$(r) || e);
@@ -18220,7 +18220,7 @@ var bo, am, uh, Ci, ch, om, sm, Os, Bs, mT, yT, lm, _T, fh, bT, hP, Kr, xT, zs, 
           var C = b && b.get(x.id) != null;
           if (!C)
             if (aC(d))
-              if (x instanceof ct)
+              if (x instanceof ft)
                 d.type === $o && !d.notBlur && !x.get(["emphasis", "disabled"]) && KW(x, d, f._api);
               else {
                 var T = yx(x.mainType, x.componentIndex, d.name, f._api), D = T.focusSelf, A = T.dispatchers;
@@ -18228,7 +18228,7 @@ var bo, am, uh, Ci, ch, om, sm, Os, Bs, mT, yT, lm, _T, fh, bT, hP, Kr, xT, zs, 
                   d.type === $o ? Wi(M) : Ui(M);
                 });
               }
-            else B0(d) && x instanceof ct && (e4(x, d, f._api), nC(x), Kr(f));
+            else B0(d) && x instanceof ft && (e4(x, d, f._api), nC(x), Kr(f));
         }, f), g && g.eachComponent(y, function(x) {
           var C = b && b.get(x.id) != null;
           C || S(f[v === "series" ? "_chartsMap" : "_componentsMap"][x.__viewId]);
@@ -18760,7 +18760,7 @@ var CT = [], a6 = {
   PRIORITY: X8,
   ComponentModel: Ge,
   ComponentView: vt,
-  SeriesModel: ct,
+  SeriesModel: ft,
   ChartView: ot,
   // TODO Use ComponentModel and SeriesModel instead of Constructor
   registerComponentModel: function(r) {
@@ -18770,7 +18770,7 @@ var CT = [], a6 = {
     vt.registerClass(r);
   },
   registerSeriesModel: function(r) {
-    ct.registerClass(r);
+    ft.registerClass(r);
   },
   registerChartView: function(r) {
     ot.registerClass(r);
@@ -22091,8 +22091,8 @@ function $p(r, e, t, n) {
           var Ye = De.keyframes, Qe = De.propName;
           if (se && (Qe = se(Qe)), Qe)
             for (var Oe = 0; Oe < Ye.length; Oe++) {
-              var Re = Ye[Oe], tt = Math.round(Re.time / re * 100) + "%", ft = $T(Re.easing), mt = Re.rawValue;
-              (ie(mt) || qe(mt)) && (X[tt] = X[tt] || {}, X[tt][Qe] = Re.rawValue, ft && (X[tt][T] = ft));
+              var Re = Ye[Oe], tt = Math.round(Re.time / re * 100) + "%", lt = $T(Re.easing), mt = Re.rawValue;
+              (ie(mt) || qe(mt)) && (X[tt] = X[tt] || {}, X[tt][Qe] = Re.rawValue, lt && (X[tt][T] = lt));
             }
         }
       }
@@ -23146,7 +23146,7 @@ var b7 = (
       },
       triggerLineEvent: !1
     }, e;
-  })(ct)
+  })(ft)
 );
 function Bl(r, e) {
   var t = r.mapDimensionsAll("defaultedLabel"), n = t.length;
@@ -24376,9 +24376,9 @@ var Zc = (
       progressiveChunkMode: "mod",
       defaultBarGap: "10%"
     }, e;
-  })(ct)
+  })(ft)
 );
-ct.registerClass(Zc);
+ft.registerClass(Zc);
 var F7 = (
   /** @class */
   (function(r) {
@@ -25255,8 +25255,8 @@ function aX(r) {
       } else if (Oe === "tangential" && E !== "outside" && E !== "outer") {
         var tt = Math.atan2(H, G);
         tt < 0 && (tt = Ye * 2 + tt);
-        var ft = G > 0;
-        ft && (tt = Ye + tt), Qe = tt - Ye;
+        var lt = G > 0;
+        lt && (tt = Ye + tt), Qe = tt - Ye;
       }
       if (a = !!Qe, D.x = $, D.y = Q, D.rotation = Qe, D.setStyle({
         verticalAlign: "middle"
@@ -25607,7 +25607,7 @@ var fu = (
       animationDurationUpdate: 500,
       animationEasing: "cubicInOut"
     }, e;
-  })(ct)
+  })(ft)
 );
 vU({
   fullType: IR.type,
@@ -25683,7 +25683,7 @@ var fX = (
       }
       // progressive: null
     }, e;
-  })(ct)
+  })(ft)
 ), kR = 4, hX = (
   /** @class */
   /* @__PURE__ */ (function() {
@@ -26540,7 +26540,7 @@ var wr = (
         y: m.y,
         rotation: S.rotation,
         silent: wr.isLabelSilent(n),
-        style: ut(d, {
+        style: ct(d, {
           text: c,
           font: C,
           overflow: "truncate",
@@ -26729,7 +26729,7 @@ function zX(r, e, t, n, i, a) {
       // --- transform props end ---
       silent: wr.isLabelSilent(i),
       z2: V,
-      style: ut(A, {
+      style: ct(A, {
         text: T,
         align: S === 0 ? N : S === f.length - 1 ? P : E,
         verticalAlign: S === 0 ? R : S === f.length - 1 ? O : k,
@@ -27871,7 +27871,7 @@ var m9 = (
       symbolSize: 8
       // symbolRotate: null
     }, e;
-  })(ct)
+  })(ft)
 ), ku = OR.value;
 function Dh(r, e) {
   return Ce({
@@ -29587,7 +29587,7 @@ var rq = (
       },
       nameProperty: "name"
     }, e;
-  })(ct)
+  })(ft)
 );
 function iq(r, e) {
   var t = {};
@@ -30827,7 +30827,7 @@ var Pq = (
       animationDuration: 700,
       animationDurationUpdate: 500
     }, e;
-  })(ct)
+  })(ft)
 );
 function Rq(r, e, t) {
   for (var n = [r], i = [], a; a = n.pop(); )
@@ -31148,7 +31148,7 @@ var Hq = (
       //     visibleMin, itemStyle, visualDimension, label
       // }
     }, e;
-  })(ct)
+  })(ft)
 );
 function mO(r) {
   var e = 0;
@@ -31215,7 +31215,7 @@ var Uq = 8, dA = 8, Rm = 5, $q = (
             lineJoin: "bevel"
           }),
           textContent: new Ze({
-            style: ut(o, {
+            style: ct(o, {
               text: _
             })
           }),
@@ -31225,7 +31225,7 @@ var Uq = 8, dA = 8, Rm = 5, $q = (
           z2: eu * 1e4,
           onclick: Ne(l, m)
         });
-        b.disableLabelAnimation = !0, b.getTextContent().ensureState("emphasis").style = ut(s, {
+        b.disableLabelAnimation = !0, b.getTextContent().ensureState("emphasis").style = ct(s, {
           text: _
         }), b.ensureState("emphasis").style = v, pt(b, a.get("focus"), a.get("blurScope"), a.get("disabled")), this.group.add(b), Xq(b, e, m), u += y + dA;
       }
@@ -31691,10 +31691,10 @@ function eZ(r, e, t, n, i, a, o, s, l, u) {
       K && (J.setTextConfig({
         layoutRect: K
       }), Ye.disableLabelLayout = !0), Ye.beforeUpdate = function() {
-        var tt = Math.max((K ? K.width : J.shape.width) - Oe[1] - Oe[3], 0), ft = Math.max((K ? K.height : J.shape.height) - Oe[0] - Oe[2], 0);
-        (Qe.width !== tt || Qe.height !== ft) && Ye.setStyle({
+        var tt = Math.max((K ? K.width : J.shape.width) - Oe[1] - Oe[3], 0), lt = Math.max((K ? K.height : J.shape.height) - Oe[0] - Oe[2], 0);
+        (Qe.width !== tt || Qe.height !== lt) && Ye.setStyle({
           width: tt,
-          height: ft
+          height: lt
         });
       }, Qe.truncateMinChar = 2, Qe.lineOverflow = "truncate", $(Qe, K, c);
       var Re = Ye.getState("emphasis");
@@ -33651,7 +33651,7 @@ var WZ = (
         }
       }
     }, e;
-  })(ct)
+  })(ft)
 );
 function UZ(r) {
   r.registerChartView(GZ), r.registerSeriesModel(WZ), r.registerProcessor(CZ), r.registerVisual(TZ), r.registerVisual(DZ), r.registerLayout(NZ), r.registerLayout(r.PRIORITY.VISUAL.POST_CHART_LAYOUT, kZ), r.registerLayout(RZ), r.registerCoordinateSystem("graphView", {
@@ -33948,7 +33948,7 @@ var YZ = Math.PI / 180, XZ = (
         }
       }
     }, e;
-  })(ct)
+  })(ft)
 ), Zm = Math.PI / 180;
 function ZZ(r, e) {
   r.eachSeriesByType("chord", function(t) {
@@ -34161,7 +34161,7 @@ var tj = (
         if (_.get("show")) {
           var R = _.get("distance") + E, V = Nh(Nt(k / b * (g - p) + p), _.get("formatter")), z = a(k / b), F = N * (v - x - R) + h, H = P * (v - x - R) + d, G = _.get("rotate"), $ = 0;
           G === "radial" ? ($ = -T + 2 * Math.PI, $ > Math.PI / 2 && ($ += Math.PI)) : G === "tangential" ? $ = -T - Math.PI / 2 : qe(G) && ($ = G * Math.PI / 180), $ === 0 ? f.add(new Ze({
-            style: ut(_, {
+            style: ct(_, {
               text: V,
               x: F,
               y: H,
@@ -34172,7 +34172,7 @@ var tj = (
             }),
             silent: !0
           })) : f.add(new Ze({
-            style: ut(_, {
+            style: ct(_, {
               text: V,
               x: F,
               y: H,
@@ -34314,7 +34314,7 @@ var tj = (
           var C = x.get("offsetCenter"), T = o.cx + ne(C[0], o.r), D = o.cy + ne(C[1], o.r), A = d[m];
           A.attr({
             z2: g ? 0 : 2,
-            style: ut(x, {
+            style: ct(x, {
               x: T,
               y: D,
               text: l.getName(m),
@@ -34330,7 +34330,7 @@ var tj = (
           var I = M.get("offsetCenter"), E = o.cx + ne(I[0], o.r), N = o.cy + ne(I[1], o.r), P = ne(M.get("width"), o.r), k = ne(M.get("height"), o.r), R = t.get(["progress", "show"]) ? l.getItemVisual(m, "style").fill : S, A = v[m], O = M.get("formatter");
           A.attr({
             z2: g ? 0 : 2,
-            style: ut(M, {
+            style: ct(M, {
               x: E,
               y: N,
               text: Nh(_, O),
@@ -34489,7 +34489,7 @@ var tj = (
         valueAnimation: !1
       }
     }, e;
-  })(ct)
+  })(ft)
 );
 function nj(r) {
   r.registerChartView(tj), r.registerSeriesModel(rj);
@@ -34662,7 +34662,7 @@ var ij = ["itemStyle", "opacity"], aj = (
         }
       }
     }, e;
-  })(ct)
+  })(ft)
 );
 function lj(r, e) {
   for (var t = r.mapDimension("value"), n = r.mapArray(t, function(l) {
@@ -34892,7 +34892,7 @@ var gj = (
       smooth: !1,
       animationEasing: "linear"
     }, e;
-  })(ct)
+  })(ft)
 );
 function mj(r) {
   var e = r.ecModel.getComponent("parallel", r.get("parallelIndex"));
@@ -36208,7 +36208,7 @@ var uK = (
       animationEasing: "linear",
       animationDuration: 1e3
     }, e;
-  })(ct)
+  })(ft)
 );
 function cK(r, e) {
   r.eachSeriesByType("sankey", function(t) {
@@ -36621,7 +36621,7 @@ var JO = (
       },
       animationDuration: 800
     }, e;
-  })(ct)
+  })(ft)
 );
 Bt(eB, JO, !0);
 var EK = (
@@ -37086,7 +37086,7 @@ var rB = (
       animationEasing: "linear",
       animationDuration: 300
     }, e;
-  })(ct)
+  })(ft)
 );
 Bt(rB, JO, !0);
 function QK(r) {
@@ -37330,7 +37330,7 @@ var rQ = (
       //     opacity: 1
       // }
     }, e;
-  })(ct)
+  })(ft)
 );
 function aQ(r) {
   r.registerChartView(nQ), r.registerSeriesModel(iQ), r.registerLayout(Ef("effectScatter"));
@@ -37857,7 +37857,7 @@ var dQ = (
         opacity: 0.5
       }
     }, e;
-  })(ct)
+  })(ft)
 );
 function kh(r) {
   return r instanceof Array || (r = [r, r]), r;
@@ -38107,7 +38107,7 @@ var bQ = (
         }
       }
     }, e;
-  })(ct)
+  })(ft)
 );
 function wQ(r) {
   r.registerChartView(bQ), r.registerSeriesModel(xQ);
@@ -38658,7 +38658,7 @@ var sy = 2, OQ = (
         }
       }
     }, e;
-  })(ct)
+  })(ft)
 );
 function BQ(r, e) {
   r.eachSeriesByType("themeRiver", function(t) {
@@ -38767,7 +38767,7 @@ var FQ = 2, GQ = 4, lM = (
       var n = this, i = this.node.getModel(), a = i.getModel("label"), o = this.node.getLayout(), s = o.endAngle - o.startAngle, l = (o.startAngle + o.endAngle) / 2, u = Math.cos(l), c = Math.sin(l), f = this, h = f.getTextContent(), d = this.node.dataIndex, v = a.get("minAngle") / 180 * Math.PI, p = a.get("show") && !(v != null && Math.abs(s) < v);
       h.ignore = !p, L(Oc, function(m) {
         var y = m === "normal" ? i.getModel("label") : i.getModel([m, "label"]), _ = m === "normal", b = _ ? h : h.ensureState(m), S = t.getFormattedLabel(d, m);
-        _ && (S = S || n.node.name), b.style = ut(y, {}, null, m !== "normal", !0), S && (b.style.text = S);
+        _ && (S = S || n.node.name), b.style = ct(y, {}, null, m !== "normal", !0), S && (b.style.text = S);
         var x = y.get("show");
         x != null && !_ && (b.ignore = !x);
         var C = g(y, "position"), T = _ ? f : f.states[m], D = T.style.fill;
@@ -39018,7 +39018,7 @@ var UQ = (
        */
       sort: "desc"
     }, e;
-  })(ct)
+  })(ft)
 );
 function hB(r) {
   var e = 0;
@@ -39189,7 +39189,7 @@ var fM = {
       // Geo coordinate system
       // geoIndex: 0,
     }, e;
-  })(ct)
+  })(ft)
 );
 function QQ(r, e) {
   return e = e || [0, 0], j(["x", "y"], function(t, n) {
@@ -39908,14 +39908,14 @@ function xM(r, e, t, n) {
     O != null && (z.fill = O), V != null && (z.opacity = V);
     var F = {
       inheritColor: ie(O) ? O : U.color.neutral99
-    }, H = b(k, Ta), G = ut(H, null, F, !1, !0);
+    }, H = b(k, Ta), G = ct(H, null, F, !1, !0);
     G.text = H.getShallow("show") ? ve(r.getFormattedLabel(k, Ta), Bl(e, k)) : null;
     var $ = Qd(H, F, !1);
     return A(P, z), z = vM(z, G, $), P && D(z, P), z.legacy = !0, z;
   }
   function T(P, k) {
     process.env.NODE_ENV !== "production" && gM("api.styleEmphasis", "Please write literal style directly instead."), k == null && (k = c);
-    var R = _(k, Bi).getItemStyle(), O = b(k, Bi), V = ut(O, null, null, !0, !0);
+    var R = _(k, Bi).getItemStyle(), O = b(k, Bi), V = ct(O, null, null, !0, !0);
     V.text = O.getShallow("show") ? br(r.getFormattedLabel(k, Bi), r.getFormattedLabel(k, Ta), Bl(e, k)) : null;
     var z = Qd(O, null, !0);
     return A(P, R), R = vM(R, V, z), P && D(R, P), R.legacy = !0, R;
@@ -40288,7 +40288,7 @@ function TB(r, e, t, n, i) {
     // shape: {x: 0, y: 0, width: width, height: height, r: labelModel.get('borderRadius')},
     x: f[0],
     y: f[1],
-    style: ut(s, {
+    style: ct(s, {
       text: o,
       font: u,
       fill: s.getTextColor(),
@@ -41227,7 +41227,7 @@ var fee = (
       }
       var x = new Ze({
         silent: wr.isLabelSilent(e),
-        style: ut(d, {
+        style: ct(d, {
           x: g[0],
           y: g[1],
           fill: d.getTextColor() || e.get(["axisLine", "lineStyle", "color"]),
@@ -42048,7 +42048,7 @@ var Oee = (
           nameMap: v
         }, m = this._formatterLabel(p, g), y = new Ze({
           z2: 30,
-          style: ut(o, {
+          style: ct(o, {
             text: m
           }),
           silent: o.get("silent")
@@ -42084,7 +42084,7 @@ var Oee = (
             nameMap: S
           }, C = this._formatterLabel(b, x), T = new Ze({
             z2: 30,
-            style: Y(ut(o, {
+            style: Y(ct(o, {
               text: C
             }), this._monthTextPositionControl(m, v, i, u, l)),
             silent: p
@@ -42118,7 +42118,7 @@ var Oee = (
           b = Math.abs((m + h) % 7);
           var S = new Ze({
             z2: 30,
-            style: Y(ut(s, {
+            style: Y(ct(s, {
               text: c[b]
             }), this._weekTextPositionControl(_, a, u, f, p)),
             silent: g
@@ -46097,7 +46097,7 @@ var Rre = (
     return e.prototype.render = function(t, n, i) {
       if (this.group.removeAll(), !!t.get("show")) {
         var a = this.group, o = t.getModel("textStyle"), s = t.getModel("subtextStyle"), l = t.get("textAlign"), u = ve(t.get("textBaseline"), t.get("textVerticalAlign")), c = new Ze({
-          style: ut(o, {
+          style: ct(o, {
             text: t.get("text"),
             fill: o.getTextColor()
           }, {
@@ -46105,7 +46105,7 @@ var Rre = (
           }),
           z2: 10
         }), f = c.getBoundingRect(), h = t.get("subtext"), d = new Ze({
-          style: ut(s, {
+          style: ct(s, {
             text: h,
             fill: s.getTextColor(),
             y: f.height + t.get("itemGap"),
@@ -46523,13 +46523,13 @@ var zre = (
             rotation: t.labelRotation - t.rotation,
             onclick: ae(o._changeTimeline, o, f),
             silent: !1,
-            style: ut(d, {
+            style: ct(d, {
               text: c.formattedLabel,
               align: t.labelAlign,
               verticalAlign: t.labelBaseline
             })
           });
-          m.ensureState("emphasis").style = ut(v), m.ensureState("progress").style = ut(p), n.add(m), Yo(m), VE(m).dataIndex = f, o._tickLabels.push(m);
+          m.ensureState("emphasis").style = ct(v), m.ensureState("progress").style = ct(p), n.add(m), Yo(m), VE(m).dataIndex = f, o._tickLabels.push(m);
         });
       }
     }, e.prototype._renderControl = function(t, n, i, a) {
@@ -47791,7 +47791,7 @@ var vne = function(r, e) {
       ie(A) && A ? M = A.replace("{name}", n ?? "") : ye(A) && (M = A(n));
       var I = g ? x.getTextColor() : a.get("inactiveColor");
       S.add(new Ze({
-        style: ut(x, {
+        style: ct(x, {
           text: M,
           x: T,
           y: p / 2,
@@ -48693,7 +48693,7 @@ var kne = (
         t.add(a[_] = new Ze({
           silent: !0,
           invisible: !M,
-          style: ut(D, {
+          style: ct(D, {
             x: 0,
             y: 0,
             text: "",
@@ -49309,7 +49309,7 @@ var Xn = Je, Zne = L, aL = Math.min, Ny = Math.max, jne = 12, Kne = 6, Qne = (
         a = a != null ? a + "" : "";
         var o = this.visualMapModel, s = o.get("textGap"), l = o.itemSize, u = this._shapes.mainGroup, c = this._applyTransform([l[0] / 2, i === 0 ? -s : l[1] + s], u), f = this._applyTransform(i === 0 ? "bottom" : "top", u), h = this._orient, d = this.visualMapModel.textStyleModel;
         this.group.add(new Ze({
-          style: ut(d, {
+          style: ct(d, {
             x: c[0],
             y: c[1],
             verticalAlign: d.get("verticalAlign") || (h === "horizontal" ? "middle" : f),
@@ -49353,7 +49353,7 @@ var Xn = Je, Zne = L, aL = Math.min, Ny = Math.max, jne = 12, Kne = 6, Qne = (
           Gi(m.event);
         },
         ondragend: u,
-        style: ut(d, {
+        style: ct(d, {
           x: 0,
           y: 0,
           text: ""
@@ -49391,7 +49391,7 @@ var Xn = Je, Zne = L, aL = Math.min, Ny = Math.max, jne = 12, Kne = 6, Qne = (
       var f = this.visualMapModel.textStyleModel, h = new Ze({
         silent: !0,
         invisible: !0,
-        style: ut(f, {
+        style: ct(f, {
           x: 0,
           y: 0,
           text: ""
@@ -49951,7 +49951,7 @@ var sie = (
         if (this._createItemSymbol(v, p, [0, 0, s[0], s[1]], f), c) {
           var g = this.visualMapModel.getValueState(p), m = a.get("align") || o;
           v.add(new Ze({
-            style: ut(a, {
+            style: ct(a, {
               x: m === "right" ? -i : s[0] + i,
               y: s[1] / 2,
               text: d.text,
@@ -49988,7 +49988,7 @@ var sie = (
       if (n) {
         var s = new _e(), l = this.visualMapModel.textStyleModel;
         s.add(new Ze({
-          style: ut(l, {
+          style: ct(l, {
             x: a ? o === "right" ? i[0] : 0 : i[0] / 2,
             y: i[1] / 2,
             verticalAlign: "middle",
@@ -53113,7 +53113,7 @@ function doe(r, {
     );
     let oe;
     if (c && u) {
-      const Oe = `700 ${P}px ${C.textStyle.fontFamily}`, Re = e.map((ft, mt) => {
+      const Oe = `700 ${P}px ${C.textStyle.fontFamily}`, Re = e.map((lt, mt) => {
         let yt = 0;
         for (const sr of t) {
           const Or = sr.data[mt];
@@ -53123,11 +53123,11 @@ function doe(r, {
         }
         return yt;
       }), tt = Re.length ? Math.max(...Re) : 0;
-      oe = (ft) => {
-        const yt = 2 * (f ?? (o ? Wae : Uae)), sr = ft.rect, Or = ft.labelRect, Zr = Or.height <= sr.height - yt;
+      oe = (lt) => {
+        const yt = 2 * (f ?? (o ? Wae : Uae)), sr = lt.rect, Or = lt.labelRect, Zr = Or.height <= sr.height - yt;
         let bi;
         if (E) {
-          const Za = (h ? tt : Re[ft.dataIndex ?? 0] ?? 0) <= sr.width - yt;
+          const Za = (h ? tt : Re[lt.dataIndex ?? 0] ?? 0) <= sr.width - yt;
           bi = o ? Za && Zr : Za;
         } else o ? bi = Or.width <= sr.width - yt && Zr : bi = (h ? tt + $ae <= R : Or.x + Or.width <= D) && Zr;
         return bi ? {} : { fontSize: 0 };
@@ -53203,8 +53203,8 @@ function doe(r, {
       containerWidth: D,
       containerHeight: A
     }), Ye = t.slice(0, Ry).map((Oe) => {
-      const Re = Oe.data.slice(0, RL).map((ft, mt) => {
-        const yt = Vi(ft), sr = K ? K(yt) : String(yt), Or = Xv(ft), Zr = Or === void 0 ? "" : `, target ${K ? K(Or) : String(Or)}`;
+      const Re = Oe.data.slice(0, RL).map((lt, mt) => {
+        const yt = Vi(lt), sr = K ? K(yt) : String(yt), Or = Xv(lt), Zr = Or === void 0 ? "" : `, target ${K ? K(Or) : String(Or)}`;
         return `${e[mt] ?? mt + 1}: ${sr}${Zr}`;
       }).join("; "), tt = Math.max(
         0,
@@ -53224,11 +53224,11 @@ function doe(r, {
     });
     const Qe = (Oe, Re) => {
       if (!n?.length) return;
-      const ft = n[t.findIndex((yt) => yt.name === Oe)] ?? n[0], mt = ft?.data[Re];
-      if (!(mt === void 0 || !Number.isFinite(mt)))
+      const lt = n[t.findIndex((yt) => yt.name === Oe)] ?? (n.length === 1 ? n[0] : void 0), mt = lt?.data[Re];
+      if (!(!lt || mt === void 0 || !Number.isFinite(mt)))
         return {
           value: mt.toLocaleString(),
-          label: i?.(mt) ?? ft.name
+          label: i?.(mt) ?? lt.name
         };
     };
     if (b?.tooltip === void 0 && (De.tooltip = ws({
@@ -53236,7 +53236,7 @@ function doe(r, {
       formatter: (Oe) => {
         const Re = Oe, tt = String(Re.seriesName ?? "");
         if (tt.endsWith(" (target)")) return "";
-        const ft = Number(Re.value), mt = Re.dataIndex ?? 0, yt = se.get(tt)?.[mt], sr = N.map((xi) => {
+        const lt = Number(Re.value), mt = Re.dataIndex ?? 0, yt = se.get(tt)?.[mt], sr = N.map((xi) => {
           const Za = xi.data[mt];
           return Za === void 0 ? 0 : Vi(Za) || 0;
         }), Or = sr.some((xi) => xi > 0) && sr.some((xi) => xi < 0), Zr = sr.reduce((xi, Za) => xi + Za, 0), bi = o && N.length > 1 && !Or;
@@ -53245,12 +53245,12 @@ function doe(r, {
             marker: Re.marker,
             title: tt,
             subtitle: String(Re.name ?? ""),
-            value: re(ft),
+            value: re(lt),
             rows: [
               bi && Zr !== 0 && {
                 // Same sign on both sides, so the ratio is positive even
                 // when the whole category is negative.
-                value: `${(ft / Zr * 100).toFixed(1)}%`,
+                value: `${(lt / Zr * 100).toFixed(1)}%`,
                 label: T.dataChart.tooltip.ofTotal
               },
               bi && {
@@ -53991,11 +53991,11 @@ function koe(r, {
       f
     ), E = (P, k) => {
       if (!n?.length) return;
-      const R = n[t.findIndex((V) => V.name === P)] ?? n[0], O = R?.data[k];
-      if (!(O === void 0 || !Number.isFinite(O)))
+      const O = n[t.findIndex((z) => z.name === P)] ?? (n.length === 1 ? n[0] : void 0), V = O?.data[k];
+      if (!(!O || V === void 0 || !Number.isFinite(V)))
         return {
-          value: O.toLocaleString(),
-          label: i?.(O) ?? R.name
+          value: V.toLocaleString(),
+          label: i?.(V) ?? O.name
         };
     };
     return xz({
@@ -54033,7 +54033,10 @@ function koe(r, {
             g
           );
         }
-        const V = n?.length === 1 && k[0] ? E(String(k[0].seriesName ?? ""), k[0].dataIndex ?? 0) : void 0;
+        const V = n?.length === 1 && k[0] ? E(
+          String(k[0].seriesName ?? ""),
+          k[0].dataIndex ?? 0
+        ) : void 0;
         return Zi(
           {
             title: O,
@@ -54175,7 +54178,7 @@ function Ooe(r, {
       tooltip: ws({
         theme: h,
         formatter: (E) => {
-          const N = E, P = Number(N.value ?? 0), k = p.reduce((z, F) => z + F.value, 0), R = t?.[0], O = R?.data[N.dataIndex ?? 0], V = O !== void 0 && Number.isFinite(O);
+          const N = E, P = Number(N.value ?? 0), k = p.reduce((z, F) => z + F.value, 0), R = t?.[0], O = N.dataIndex === void 0 ? void 0 : R?.data[N.dataIndex], V = O !== void 0 && Number.isFinite(O);
           return Zi(
             {
               marker: N.marker,
@@ -57450,7 +57453,7 @@ function ale({
                 errorTriggerMode: x,
                 sectionForms: E,
                 onErrorStateChange: (tt) => {
-                  P((ft) => ft[ce] === tt ? ft : { ...ft, [ce]: tt });
+                  P((lt) => lt[ce] === tt ? lt : { ...lt, [ce]: tt });
                 },
                 renderCustomField: p,
                 isLoading: r.isLoading
@@ -62533,18 +62536,18 @@ function Uue({
           ...M.current,
           ...Re
         }, E.goToNext(), { success: !0 };
-      const tt = k ? { ...M.current, ...Re } : Re, ft = {};
+      const tt = k ? { ...M.current, ...Re } : Re, lt = {};
       for (const [yt, sr] of Object.entries(tt))
-        ft[yt] = sr === void 0 ? null : sr;
+        lt[yt] = sr === void 0 ? null : sr;
       if (k) {
         E.setProgress(100);
         const [yt] = await Promise.all([
-          e(ft),
+          e(lt),
           new Promise((sr) => setTimeout(sr, 1e3))
         ]);
         return yt.success ? (me(yt.message ? 1e3 : 0), { success: !0, message: yt.message }) : (E.setProgress(null), { success: !1, errors: yt.errors });
       }
-      const mt = await e(ft);
+      const mt = await e(lt);
       return mt.success ? (me(mt.message ? 1e3 : 0), { success: !0, message: mt.message }) : { success: !1, errors: mt.errors };
     },
     [
@@ -64615,8 +64618,11 @@ function zce(r, e, t, n) {
   if (i === a && i === r.chart.type)
     return Vce(r, e);
   const o = Cb(e), s = Tb(o, i), l = bce(i), u = {};
-  "valueFormatter" in r.chart && r.chart.valueFormatter && (u.valueFormatter = r.chart.valueFormatter), "tooltipValueFormatter" in r.chart && r.chart.tooltipValueFormatter && (u.tooltipValueFormatter = r.chart.tooltipValueFormatter), "showLegend" in r.chart && (u.showLegend = r.chart.showLegend), "contextLabelFormatter" in r.chart && r.chart.contextLabelFormatter && (u.contextLabelFormatter = r.chart.contextLabelFormatter);
-  const c = e.context && (i === "bar" || i === "line") ? { context: e.context } : {};
+  "valueFormatter" in r.chart && r.chart.valueFormatter && (u.valueFormatter = r.chart.valueFormatter), "tooltipValueFormatter" in r.chart && r.chart.tooltipValueFormatter && (u.tooltipValueFormatter = r.chart.tooltipValueFormatter), "showLegend" in r.chart && (u.showLegend = r.chart.showLegend);
+  const c = e.context && (i === "bar" || i === "line" || i === "pie") ? {
+    context: e.context,
+    ..."contextLabelFormatter" in r.chart && r.chart.contextLabelFormatter ? { contextLabelFormatter: r.chart.contextLabelFormatter } : {}
+  } : {};
   switch (i === "bar" && "showLabels" in r.chart && r.chart.showLabels !== void 0 && (u.showLabels = r.chart.showLabels), i) {
     case "bar": {
       const f = ("orientation" in r.chart ? r.chart.orientation : void 0) ?? l.orientation;
@@ -64647,6 +64653,7 @@ function zce(r, e, t, n) {
       return {
         ...l,
         ...u,
+        ...c,
         series: s.series
       };
     case "radar":
