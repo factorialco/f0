@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.23.2](https://github.com/factorialco/f0/compare/f0-react-v6.23.1...f0-react-v6.23.2) (2026-08-13)
+
+
+### Bug Fixes
+
+* **Page:** draw the page frame above content so flush children can't cover it ([#5044](https://github.com/factorialco/f0/issues/5044)) ([ff3926f](https://github.com/factorialco/f0/commit/ff3926fe0450c3c8e901ac414cfbd52f10bc46d7))
+
 ## [6.23.1](https://github.com/factorialco/f0/compare/f0-react-v6.23.0...f0-react-v6.23.1) (2026-08-12)
 
 
