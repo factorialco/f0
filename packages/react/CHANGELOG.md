@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.24.0](https://github.com/factorialco/f0/compare/f0-react-v6.23.2...f0-react-v6.24.0) (2026-08-13)
+
+
+### Features
+
+* **F0AiChatTextArea:** add inside placement for welcome suggestions ([#5106](https://github.com/factorialco/f0/issues/5106)) ([0ff6219](https://github.com/factorialco/f0/commit/0ff6219ec2691c3b362f57380bd34d849f025bcc))
+
 ## [6.23.2](https://github.com/factorialco/f0/compare/f0-react-v6.23.1...f0-react-v6.23.2) (2026-08-13)
 
 
