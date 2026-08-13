@@ -1,14 +1,17 @@
-import { ForwardedRef } from "react"
+import { ForwardedRef, useState } from "react"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
+import { cn, focusRing } from "@/lib/utils"
+import { Tooltip, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
 
 import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
+import {
+  buildCategoryBarSegments,
+  CATEGORY_BAR_TOOLTIP_DELAY_MS,
+  CategoryBarTooltipContent,
+  formatCategoryBarPercentage,
+  toCategoryBarTooltipItems,
+} from "./CategoryBarTooltipContent"
 
 export interface CategoryBarProps {
   data: {
@@ -25,62 +28,58 @@ const _CategoryBarChart = (
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const total = data.reduce((sum, category) => sum + category.value, 0)
+  const [activeKey, setActiveKey] = useState<string | undefined>(undefined)
+
+  const segments = buildCategoryBarSegments(data, total, (category, index) =>
+    category.color ? getColor(category.color) : getCategoricalColor(index)
+  )
+
+  const tooltipItems = toCategoryBarTooltipItems(segments, total)
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={CATEGORY_BAR_TOOLTIP_DELAY_MS}>
       <div className="w-full" ref={ref}>
-        <div className="flex h-2 gap-1 overflow-hidden">
-          {data.map((category, index) => {
-            const percentage = (category.value / total) * 100
-            const color = category.color
-              ? getColor(category.color)
-              : getCategoricalColor(index)
-
-            const formatPercentage = (value: number): string => {
-              const percentage = (value / total) * 100
-              return percentage % 1 === 0
-                ? percentage.toFixed(0)
-                : percentage.toFixed(1)
-            }
-
-            if (percentage === 0) {
-              return null
-            }
-
-            return (
-              <Tooltip key={category.name}>
-                <TooltipTrigger
-                  className="h-full cursor-default overflow-hidden rounded-2xs"
-                  style={{ width: `${percentage}%` }}
-                  title={category.name}
-                  asChild
-                >
-                  <div
-                    className="h-full w-full"
-                    style={{ backgroundColor: color }}
-                    role="img"
-                    title={category.name}
-                    tabIndex={0}
-                  />
-                </TooltipTrigger>
-                {!hideTooltip && (
-                  <TooltipContent className="flex items-center gap-1 text-sm">
-                    <div
-                      className="h-2.5 w-2.5 shrink-0 translate-y-px rounded-full"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="pl-0.5 pr-2 text-f1-foreground-inverse-secondary dark:text-f1-foreground-secondary">
-                      {category.name}
-                    </span>
-                    <span className="font-mono font-medium tabular-nums text-f1-foreground-inverse dark:text-f1-foreground">
-                      {category.value} ({formatPercentage(category.value)}%)
-                    </span>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            )
-          })}
-        </div>
+        <Tooltip>
+          {/* `role="group"`, not `img`: an img subtree is presentational, which
+              would prune the per-segment labels. */}
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                "pointer-events-auto flex h-2 w-full cursor-default gap-1 overflow-hidden",
+                focusRing()
+              )}
+              onMouseLeave={() => setActiveKey(undefined)}
+              onMouseOver={(event) => {
+                if (event.target === event.currentTarget) {
+                  setActiveKey(undefined)
+                }
+              }}
+              role="group"
+              aria-label="Category bar chart"
+              tabIndex={segments.length > 0 ? 0 : undefined}
+            >
+              {segments.map((segment) => (
+                <div
+                  key={segment.key}
+                  className="pointer-events-auto h-full overflow-hidden rounded-2xs"
+                  style={{
+                    width: `${segment.percentage}%`,
+                    backgroundColor: segment.color,
+                  }}
+                  role="img"
+                  aria-label={`${segment.name}: ${segment.value} (${formatCategoryBarPercentage(segment.value, total)}%)`}
+                  onMouseEnter={() => setActiveKey(segment.key)}
+                />
+              ))}
+            </div>
+          </TooltipTrigger>
+          {!hideTooltip && tooltipItems.length > 0 && (
+            <CategoryBarTooltipContent
+              items={tooltipItems}
+              activeKey={activeKey}
+            />
+          )}
+        </Tooltip>
       </div>
       {legend && (
         <div
