@@ -7,6 +7,7 @@ import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
+import { usePointClick } from "../../utils/usePointClick"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
 import { useLegendSelection } from "../../utils/useLegendSelection"
 import {
@@ -28,6 +29,7 @@ export const BarChart = (props: F0DataChartBarProps) => {
   > | null>(null)
   const options = useBarChartOptions(ref, props, size, legendSelection)
   const chartRef = useEChartsInstance(ref, options)
+  usePointClick(chartRef, props.onPointClick)
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
   useLegendInteraction(chartRef)
