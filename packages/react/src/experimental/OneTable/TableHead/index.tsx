@@ -15,6 +15,10 @@ import { useTable } from "../utils/TableContext"
  * Structured help copy for a column header. The same shape every other
  * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
  * the column label when the header's children are a string.
+ *
+ * A table-specific name for a shape that is no longer table-specific: the
+ * canonical export is `InfoHintContent`, and this stays as an alias so
+ * existing imports keep working.
  */
 export type TableHeaderInfo = InfoHintContent
 

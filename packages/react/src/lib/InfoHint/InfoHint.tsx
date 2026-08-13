@@ -3,6 +3,7 @@ import { useState } from "react"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircleLine } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
@@ -19,8 +20,10 @@ export type InfoHintContent = {
     onClick: () => void
   }
   /**
-   * Accessible name for the icon trigger. Defaults to `label` on the host,
-   * which is normally the thing being described (the column or widget name).
+   * Accessible name for the icon trigger. Falls back to `label` on the host
+   * and then to a generic "More information", so the trigger is never named
+   * after the thing it describes alone — a name identical to the heading
+   * beside it says nothing about what the control does.
    */
   label?: string
 }
@@ -35,6 +38,7 @@ function StructuredHint({
   label?: string
 }) {
   const [open, setOpen] = useState(false)
+  const { forms } = useI18n()
 
   // HoverCard (not Tooltip): the content is hover-revealed but may contain a
   // link action, while the plain string path remains a non-interactive Tooltip.
@@ -52,7 +56,10 @@ function StructuredHint({
             "flex h-5 w-5 items-center justify-center rounded-xs text-f1-foreground-secondary",
             focusRing()
           )}
-          aria-label={info.label ?? label}
+          // A trigger named after the heading it sits beside ("Headcount by
+          // team, button") announces a duplicate and never says what it does.
+          // Hosts that have a better name pass one; the rest get the generic.
+          aria-label={info.label ?? label ?? forms.moreInformation}
         >
           <F0Icon icon={icon} size="sm" />
         </button>

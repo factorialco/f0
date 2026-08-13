@@ -153,14 +153,17 @@ export function DashboardItem({
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex shrink-0 flex-col p-4">
           {/* The help copy survives the failure: a reader looking at an error
-              is exactly the one asking what the widget was meant to show. */}
-          <div className="flex min-w-0 items-center gap-1">
+              is exactly the one asking what the widget was meant to show.
+              `items-start`, not `items-center`: this heading doesn't truncate,
+              so a long title wraps and centring would float the ⓘ against the
+              middle of the block instead of its first line. */}
+          <div className="flex min-w-0 items-start gap-1">
             <h3 className="text-base font-medium text-f1-foreground">
               {title}
             </h3>
             {info && (
               <div className="flex shrink-0 items-center text-f1-foreground-secondary">
-                <InfoHint info={info} label={title} />
+                <InfoHint info={info} />
               </div>
             )}
           </div>
@@ -221,7 +224,7 @@ export function DashboardItem({
             </OneEllipsis>
             {info && (
               <div className="flex shrink-0 items-center text-f1-foreground-secondary">
-                <InfoHint info={info} label={title} />
+                <InfoHint info={info} />
               </div>
             )}
           </div>

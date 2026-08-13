@@ -16,6 +16,11 @@ import type {
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
 
+// Re-exported under its own name: the same shape types a table column header
+// and a widget header, and a host typing a widget's `info` shouldn't have to
+// reach for the table's `TableHeaderInfo` alias to do it.
+export type { InfoHintContent }
+
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
 // ---------------------------------------------------------------------------
