@@ -98,6 +98,16 @@ type ChartTypeConfig<K extends ChartConfig> = {
   axisPosition?: "left" | "right"
 }
 
+type BarChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
+  /**
+   * How multiple bar categories are laid out: side by side ("simple", the
+   * default), stacked into a single bar ("stacked"), or stacked with negative
+   * values hanging below the zero line ("stacked-by-sign"). Mirrors BarChart's
+   * `type` prop.
+   */
+  type?: "simple" | "stacked" | "stacked-by-sign"
+}
+
 type LineChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
   dot?: boolean
   lineType?: "natural" | "linear"
@@ -108,7 +118,7 @@ export type ComboChartProps<K extends ChartConfig = ChartConfig> =
     label?: boolean
     legend?: boolean
     showValueUnderLabel?: boolean
-    bar?: ChartTypeConfig<K>
+    bar?: BarChartTypeConfig<K>
     line?: LineChartTypeConfig<K>
     scatter?: ChartTypeConfig<K>
     onClick?: (data: ChartDataPoint<K>) => void
@@ -186,7 +196,7 @@ const _ComboChart = <K extends ChartConfig>(
           top: label ? 24 : 0,
           bottom: showValueUnderLabel ? 24 : 12,
         }}
-        stackOffset={undefined}
+        stackOffset={bar?.type === "stacked-by-sign" ? "sign" : undefined}
         onClick={(data) => {
           if (!onClick || !data.activeLabel || !data.activePayload) {
             return
@@ -321,12 +331,17 @@ const _ComboChart = <K extends ChartConfig>(
             key={`bar-${String(category)}`}
             isAnimationActive={false}
             dataKey={String(category)}
+            stackId={
+              bar?.type === "stacked" || bar?.type === "stacked-by-sign"
+                ? "stack"
+                : undefined
+            }
             fill={
               dataConfig[category].color
                 ? getColor(dataConfig[category].color)
                 : getCategoricalColor(index)
             }
-            radius={4}
+            radius={bar?.type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
             maxBarSize={32}
           >
             {label && (
@@ -352,6 +367,7 @@ const _ComboChart = <K extends ChartConfig>(
                 : getCategoricalColor(barCategories.length + index)
             }
             strokeWidth={2}
+            strokeDasharray={dataConfig[category].dashed ? "4 4" : undefined}
             dot={line?.dot ?? false}
             isAnimationActive={false}
             yAxisId={line?.axisPosition === "right" ? "right" : undefined}
