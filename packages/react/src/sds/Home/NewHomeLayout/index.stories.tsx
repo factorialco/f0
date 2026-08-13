@@ -41,6 +41,7 @@ import {
   homeSlot,
   type HomeWidgetItem,
   listSlot,
+  resolveWidgetHeader,
   type SlotRenderers,
   widgetTitle,
 } from "../slotRenderers"
