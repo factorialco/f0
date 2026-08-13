@@ -463,6 +463,42 @@ describe("list slot schema", () => {
 
       expect(container.querySelectorAll(".size-10")).toHaveLength(2)
     })
+
+    const truncatedList = (
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", descriptionRequired: true, maxVisibleItems: 2 },
+            Array.from({ length: 5 }, (_, i) => ({
+              id: String(i),
+              title: `Person ${i}`,
+              description: `Detail ${i}`,
+              avatar: { firstName: "Ada", lastName: "Lovelace" },
+            }))
+          ),
+        ]}
+      />
+    )
+
+    test("in the rail View more keeps its ghost size", () => {
+      withCardWidth(396)
+      zeroRender(truncatedList)
+
+      // The chosen size lands on the button's INNER box — the same assertion
+      // the frame's footer-button spec makes.
+      expect(
+        screen.getByRole("button", { name: "View more (3)" }).className
+      ).toContain("[&_.main]:h-6")
+    })
+
+    test("past 480px View more steps up with the card — md, like the footer button", () => {
+      withCardWidth(600)
+      zeroRender(truncatedList)
+
+      expect(
+        screen.getByRole("button", { name: "View more (3)" }).className
+      ).toContain("[&_.main]:h-8")
+    })
   })
 
   describe("items coming and going", () => {
