@@ -354,6 +354,20 @@ function fetchSatisfactionScores(
         ],
       },
     ],
+    // An average of 4.2 says nothing about how many people it averages over —
+    // four responses or four hundred. The count rides alongside the series so
+    // the tooltip, the table view and the exports can all say which.
+    context: [
+      {
+        name: "Active headcount",
+        data: [
+          Math.round(145 * dm.Engineering),
+          Math.round(89 * dm.Product),
+          Math.round(67 * dm.Design),
+          Math.round(42 * dm.Marketing),
+        ],
+      },
+    ],
   }))
 }
 
@@ -926,6 +940,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     chart: {
       type: "bar",
       orientation: "horizontal",
+      contextLabelFormatter: (count) => (count === 1 ? "person" : "people"),
     },
     fetchData: fetchSatisfactionScores,
   },

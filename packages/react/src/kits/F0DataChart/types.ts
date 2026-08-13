@@ -59,6 +59,43 @@ export type F0DataChartBarDataPoint =
     }
 
 /**
+ * A count of the entities behind each segment of a chart — the population a
+ * value was computed over, carried alongside the plotted marks rather than as
+ * one of them.
+ */
+export interface F0DataChartSegmentContext {
+  /** What is being counted, e.g. "Active headcount". Labels the tooltip row. */
+  name: string
+  /** One count per segment, positionally aligned with the plotted data. */
+  data: number[]
+}
+
+/**
+ * Segment counts, shared by the chart types whose marks each stand for a group
+ * of entities: bar, line and pie.
+ */
+interface F0DataChartContextProps {
+  /**
+   * How many entities each mark covers, shown as a tooltip row beneath the
+   * value. The value alone never says it: an average salary of €52,400 reads
+   * very differently over 12 people than over 1,200.
+   *
+   * Never drawn — only the plotted series produces marks — so these counts
+   * cannot be mistaken for data of their own. Entries mirror the series by
+   * index; pass a single entry when one count covers every series (the
+   * population of a category does not change with the measure plotted against
+   * it) and one per series when a split gives each cell its own.
+   */
+  context?: F0DataChartSegmentContext[]
+  /**
+   * Name what a context count refers to, given the count itself — so the label
+   * can agree with it in number ("1 person" against "256 people"). Falls back
+   * to {@link F0DataChartSegmentContext.name}, which cannot inflect.
+   */
+  contextLabelFormatter?: (count: number) => string
+}
+
+/**
  * A series of bars to render in the chart.
  */
 export interface F0DataChartBarSeries {
@@ -136,7 +173,8 @@ interface F0DataChartBaseProps extends F0DataChartCommonProps {
 /**
  * Bar chart variant props.
  */
-export interface F0DataChartBarProps extends F0DataChartBaseProps {
+export interface F0DataChartBarProps
+  extends F0DataChartBaseProps, F0DataChartContextProps {
   /** Chart type */
   type: "bar"
   /** One or more data series to render as bars */
@@ -232,7 +270,8 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
 /**
  * Line chart variant props.
  */
-export interface F0DataChartLineProps extends F0DataChartBaseProps {
+export interface F0DataChartLineProps
+  extends F0DataChartBaseProps, F0DataChartContextProps {
   /** Chart type */
   type: "line"
   /** One or more data series to render as lines */
@@ -370,7 +409,8 @@ export interface F0DataChartPieSeries {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartPieProps extends F0DataChartCommonProps {
+export interface F0DataChartPieProps
+  extends F0DataChartCommonProps, F0DataChartContextProps {
   /** Chart type */
   type: "pie"
   /** The pie series to render */

@@ -215,6 +215,20 @@ export function buildChartProps(
   if ("showLegend" in item.chart) {
     shared.showLegend = item.chart.showLegend
   }
+  // Segment counts survive a transform between the types that render them.
+  // A line item reaches this path on every render, not just after a user
+  // transform: `detectDataShape` reports any array-series data as "bar", so a
+  // line's shape never equals its target type.
+  if (
+    "contextLabelFormatter" in item.chart &&
+    item.chart.contextLabelFormatter
+  ) {
+    shared.contextLabelFormatter = item.chart.contextLabelFormatter
+  }
+  const contextForTarget =
+    data.context && (targetType === "bar" || targetType === "line")
+      ? { context: data.context }
+      : {}
   // Only bar targets inherit the source config's `showLabels`. Other types keep
   // their own default, so transforming a pie (labels on by default) into a line
   // doesn't drag labels along. `undefined` is not an explicit value — letting it
@@ -241,6 +255,7 @@ export function buildChartProps(
         ...config,
         ...shared,
         ...(orientation ? { orientation } : {}),
+        ...contextForTarget,
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
@@ -249,6 +264,7 @@ export function buildChartProps(
       return {
         ...config,
         ...shared,
+        ...contextForTarget,
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
@@ -320,7 +336,11 @@ function buildNativeChartProps(
       return { ...chart, series: funnelSeries } as F0DataChartProps
     }
     case "pie":
-      return { ...chart, series: data.series } as F0DataChartProps
+      return {
+        ...chart,
+        series: data.series,
+        ...(data.context ? { context: data.context } : {}),
+      } as F0DataChartProps
     case "radar":
       return {
         ...chart,
@@ -362,6 +382,7 @@ function buildNativeChartProps(
         ...(chart.type === "bar"
           ? { showLabels: chart.showLabels ?? true }
           : {}),
+        ...(data.context ? { context: data.context } : {}),
         categories,
         series,
       } as F0DataChartProps

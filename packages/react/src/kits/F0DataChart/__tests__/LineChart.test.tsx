@@ -206,3 +206,92 @@ describe("LineChart — tooltip value formatting", () => {
     expect(hoverFirstPoint()).toContain("107,505 €")
   })
 })
+
+// The count of entities behind a plotted point — how many people an average
+// was taken over, which the value alone never says.
+describe("LineChart — segment context", () => {
+  const trend = {
+    categories: ["Jan", "Feb"],
+    series: [{ name: "Average absence days", data: [3.2, 4.1] }],
+  }
+
+  const hover = (dataIndex: number, seriesName = "Average absence days") =>
+    getLatestOption().tooltip?.formatter?.([
+      { axisValue: "Jan", seriesName, value: 3.2, dataIndex },
+    ])
+
+  it("adds a row naming what it counts", () => {
+    render(
+      <F0DataChart
+        type="line"
+        {...trend}
+        context={[{ name: "Active headcount", data: [1204, 380] }]}
+      />
+    )
+
+    const html = hover(0)
+    expect(html).toContain("1,204")
+    expect(html).toContain("Active headcount")
+  })
+
+  it("lets a formatter inflect the label to agree with the count", () => {
+    render(
+      <F0DataChart
+        type="line"
+        {...trend}
+        context={[{ name: "Active headcount", data: [256, 1] }]}
+        contextLabelFormatter={(count) => (count === 1 ? "person" : "people")}
+      />
+    )
+
+    expect(hover(0)).toContain("people")
+    expect(hover(1)).toContain("person")
+  })
+
+  // The value formatter carries the plotted measure's unit; a headcount is not
+  // measured in it.
+  it("formats the count as a plain integer, never in the measure's unit", () => {
+    render(
+      <F0DataChart
+        type="line"
+        {...trend}
+        valueFormatter={(v) => `${v} days`}
+        context={[{ name: "Active headcount", data: [1204, 380] }]}
+      />
+    )
+
+    const html = hover(0)
+    expect(html).toContain("1,204")
+    expect(html).not.toContain("1,204 days")
+  })
+
+  // A multi-series card already lists every series; per-series counts would
+  // double its length, so only a single shared entry earns a row there.
+  it("adds one shared row to a multi-series card", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan"]}
+        series={[
+          { name: "Engineering", data: [3.2] },
+          { name: "Sales", data: [2.1] },
+        ]}
+        context={[{ name: "Active headcount", data: [1204] }]}
+      />
+    )
+
+    const html = getLatestOption().tooltip?.formatter?.([
+      { axisValue: "Jan", seriesName: "Engineering", value: 3.2, dataIndex: 0 },
+      { axisValue: "Jan", seriesName: "Sales", value: 2.1, dataIndex: 0 },
+    ])
+    expect(html).toContain("Engineering")
+    expect(html).toContain("Sales")
+    expect(html).toContain("1,204")
+  })
+
+  it("renders the usual tooltip when no context is given", () => {
+    render(<F0DataChart type="line" {...trend} />)
+
+    expect(hover(0)).not.toContain("headcount")
+  })
+})

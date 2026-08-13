@@ -64,6 +64,11 @@ export function chartDataToTabular(
   }
 }
 
+/** Row key for a context column, so a data-provided label can never claim it. */
+function contextKey(index: number): string {
+  return `context_${index}`
+}
+
 function barLineToTabular(data: DashboardChartData): TabularResult {
   const categories = data.categories ?? []
   const rawSeries = data.series
@@ -71,7 +76,7 @@ function barLineToTabular(data: DashboardChartData): TabularResult {
     | F0DataChartBarSeries[]
     | F0DataChartLineSeries[]
   const seriesNames = series.map((s: { name: string }) => s.name)
-  const columns = ["Category", ...seriesNames]
+  const context = data.context ?? []
 
   const rows = categories.map((cat, i) => {
     const row: Record<string, unknown> = { Category: cat }
@@ -80,10 +85,34 @@ function barLineToTabular(data: DashboardChartData): TabularResult {
         (s as { name: string; data: unknown[] }).data[i]
       )
     }
+    context.forEach((entry, entryIndex) => {
+      row[contextKey(entryIndex)] = entry.data[i] ?? null
+    })
     return row
   })
 
-  return { columns, rows }
+  if (context.length === 0) {
+    return { columns: ["Category", ...seriesNames], rows }
+  }
+
+  // Several entries mean one count per series, so each header has to say which
+  // series it counts — every entry carries the same measure name. A single
+  // entry counts the category itself and needs no qualifier.
+  const contextColumns = context.map((entry, entryIndex) => {
+    const seriesName = seriesNames[entryIndex]
+    return context.length > 1 && seriesName
+      ? `${entry.name} (${seriesName})`
+      : entry.name
+  })
+
+  return {
+    columns: [...["Category", ...seriesNames], ...contextColumns],
+    keys: [
+      ...["Category", ...seriesNames],
+      ...context.map((_, entryIndex) => contextKey(entryIndex)),
+    ],
+    rows,
+  }
 }
 
 function funnelToTabular(data: DashboardChartData): TabularResult {
@@ -114,13 +143,23 @@ function funnelToTabular(data: DashboardChartData): TabularResult {
 
 function pieToTabular(data: DashboardChartData): TabularResult {
   const series = data.series as F0DataChartPieSeries
+  // A pie has one series, so at most one context entry describes every slice.
+  const context = data.context?.[0]
   const rows = (series?.data ?? []).map(
-    (d: { name: string; value: number }) => ({
+    (d: { name: string; value: number }, index: number) => ({
       Name: d.name,
       Value: d.value,
+      ...(context ? { [contextKey(0)]: context.data[index] ?? null } : {}),
     })
   )
-  return { columns: ["Name", "Value"], rows }
+
+  if (!context) return { columns: ["Name", "Value"], rows }
+
+  return {
+    columns: ["Name", "Value", context.name],
+    keys: ["Name", "Value", contextKey(0)],
+    rows,
+  }
 }
 
 function radarToTabular(data: DashboardChartData): TabularResult {
