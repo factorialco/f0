@@ -245,10 +245,22 @@ export interface NewHomeLayoutProps {
    */
   onChangeWidgetParams?: (id: string, params: WidgetParams) => void
   /**
-   * Draws a widget for params being tried out in that dialog, before they are
-   * saved. Defaults to the widget with those params swapped in — which is
-   * already live for everything they derive (title, info); supply this to
-   * rebuild its slots as well.
+   * REBUILDS a widget for params being tried out in that dialog, before they are
+   * saved — the same widget with slots that follow the new params, which only
+   * the app can produce. It hands back DATA, and f0 draws it through the same
+   * `SlotWidget` the column uses, so the preview cannot drift from the card.
+   *
+   * Without it the preview is the widget with those params swapped in — already
+   * live for everything they derive (title, info), just not for its slots.
+   */
+  rebuildWidget?: (
+    widget: HomeWidgetItem,
+    params: WidgetParams
+  ) => HomeWidgetItem
+  /**
+   * @deprecated Use `rebuildWidget`. A preview the app renders has to reproduce
+   * `SlotWidget` by hand and drifts from the column the moment either side
+   * changes. Ignored when `rebuildWidget` is given.
    */
   renderWidgetPreview?: (
     widget: HomeWidgetItem,
@@ -311,6 +323,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       virtualization,
       onRemoveWidget,
       onChangeWidgetParams,
+      rebuildWidget,
       renderWidgetPreview,
       onClickAddNewWidget,
       onReorderWidgets,
@@ -757,6 +770,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             }
             onRemoveWidget={onRemoveWidget}
             onChangeWidgetParams={onChangeWidgetParams}
+            rebuildWidget={rebuildWidget}
             renderWidgetPreview={renderWidgetPreview}
             paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
@@ -961,6 +975,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               }
               onRemoveWidget={onRemoveWidget}
               onChangeWidgetParams={onChangeWidgetParams}
+              rebuildWidget={rebuildWidget}
               renderWidgetPreview={renderWidgetPreview}
               paramsPreviewWidth={asideWidth}
               // Not from the panel: collapsed, the strip carries the add
