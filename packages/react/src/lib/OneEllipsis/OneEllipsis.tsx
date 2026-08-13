@@ -224,7 +224,17 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
     return hasEllipsis && !noTooltip ? (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{Text}</TooltipTrigger>
+          {/*
+           * `pointer-events-auto` on the trigger, not just via the wrapper's own
+           * ellipsis state: wrapping in the tooltip remounts the text, resetting
+           * that internal state, so inside a `pointer-events-none` container (e.g.
+           * a table cell) the trigger could end up unhoverable and the tooltip
+           * unreachable. Driving it from the rendered-tooltip branch keeps it
+           * reliably interactive whenever a tooltip exists.
+           */}
+          <TooltipTrigger asChild className="pointer-events-auto">
+            {Text}
+          </TooltipTrigger>
           <TooltipContent className="max-w-xl">{plainText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
