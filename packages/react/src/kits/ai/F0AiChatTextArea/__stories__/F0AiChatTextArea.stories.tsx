@@ -259,6 +259,7 @@ type WrapperProps = {
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  welcomeScreenSuggestionsPlacement?: "above" | "inside"
   welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
@@ -278,6 +279,7 @@ const Wrapper = ({
   disclaimer,
   footer,
   welcomeScreenSuggestions,
+  welcomeScreenSuggestionsPlacement,
   welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
@@ -345,6 +347,7 @@ const Wrapper = ({
         disclaimer={disclaimer}
         footer={footer}
         welcomeScreenSuggestions={welcomeScreenSuggestions}
+        welcomeScreenSuggestionsPlacement={welcomeScreenSuggestionsPlacement}
         onSuggestionClick={(item) => {
           // Suggestions always send a prompt (item.prompt, falling back to its
           // title) — unlike cards, the host doesn't branch on behavior.
@@ -522,6 +525,65 @@ export const WithWelcomeSuggestions: Story = {
           name: "April leave and overtime summary",
         })
       ).not.toBeInTheDocument()
+    })
+  },
+}
+
+// `welcomeScreenSuggestionsPlacement: "inside"` — the suggestions move INTO the
+// field, at its foot, and the send button moves onto the textarea's own line.
+// With no attachments, dictation or `toolbarStart` the composer is exactly two
+// bands (text + send, then the chips), which is the home-page "ask" bar shape.
+// Note there is no `fullscreen`: this placement doesn't need the welcome screen's
+// vertical room, because it isn't claiming any space above the field.
+export const WithWelcomeSuggestionsInside: Story = {
+  args: {
+    isWelcomeScreen: true,
+    welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
+    welcomeScreenSuggestionsPlacement: "inside",
+    placeholders: ROTATING_PLACEHOLDERS,
+    disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("The chips sit inside the field, above its bottom edge", () => {
+      const textarea = canvasElement.querySelector(
+        'textarea[name="one-ai-input"]'
+      )!
+      const trigger = page.getByRole("button", { name: "Analyze" })
+      const form = textarea.closest("form")!
+
+      // Inside the form → enclosed by the field's border and focus highlight.
+      expect(form.contains(trigger)).toBe(true)
+      // …and after the textarea, so it reads as the field's foot.
+      expect(
+        textarea.compareDocumentPosition(trigger) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy()
+    })
+
+    await step("Send trails the text instead of sitting in its own row", () => {
+      const textarea = canvasElement.querySelector(
+        'textarea[name="one-ai-input"]'
+      )!
+      // The text band: TextareaField's grid, then the row that holds it.
+      const textBand = textarea.parentElement!.parentElement!
+      const send = page.getByRole("button", { name: /send/i })
+      const trigger = page.getByRole("button", { name: "Analyze" })
+
+      expect(textBand.contains(send)).toBe(true)
+      // …and the chips are their own band under it, not in this one.
+      expect(textBand.contains(trigger)).toBe(false)
+    })
+
+    await step("Picking a group opens its panel", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Analyze" }))
+      await expect(
+        page.getByRole("dialog", { name: "Analyze" })
+      ).toBeInTheDocument()
+      await expect(
+        page.getByRole("button", { name: "April leave and overtime summary" })
+      ).toBeInTheDocument()
     })
   },
 }
