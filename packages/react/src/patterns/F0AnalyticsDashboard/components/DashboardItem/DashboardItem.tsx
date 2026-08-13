@@ -17,6 +17,7 @@ import {
   Minimize,
   InfoCircleLine,
 } from "@/icons/app"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -35,6 +36,12 @@ import {
 interface DashboardItemProps {
   title: string
   description?: string
+  /**
+   * Help copy for what this widget measures, revealed by an ⓘ icon beside the
+   * title. See `DashboardItemBase.info` for how it differs from `description`
+   * and `explanation`.
+   */
+  info?: string | InfoHintContent
   isLoading: boolean
   error?: Error
   onRetry?: () => void
@@ -95,6 +102,7 @@ interface DashboardItemProps {
 export function DashboardItem({
   title,
   description,
+  info,
   isLoading,
   error,
   onRetry,
@@ -144,7 +152,18 @@ export function DashboardItem({
     return (
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex shrink-0 flex-col p-4">
-          <h3 className="text-base font-medium text-f1-foreground">{title}</h3>
+          {/* The help copy survives the failure: a reader looking at an error
+              is exactly the one asking what the widget was meant to show. */}
+          <div className="flex min-w-0 items-center gap-1">
+            <h3 className="text-base font-medium text-f1-foreground">
+              {title}
+            </h3>
+            {info && (
+              <div className="flex shrink-0 items-center text-f1-foreground-secondary">
+                <InfoHint info={info} label={title} />
+              </div>
+            )}
+          </div>
           {description && (
             <p className="text-base text-f1-foreground-secondary">
               {description}
@@ -191,12 +210,21 @@ export function DashboardItem({
     >
       <div className="flex items-start px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-col">
-          <OneEllipsis
-            tag="h3"
-            className="text-base font-semibold text-f1-foreground"
-          >
-            {title}
-          </OneEllipsis>
+          {/* The icon never shrinks, so a long title truncates around it rather
+              than squeezing it out of the row. */}
+          <div className="flex min-w-0 items-center gap-1">
+            <OneEllipsis
+              tag="h3"
+              className="text-base font-semibold text-f1-foreground"
+            >
+              {title}
+            </OneEllipsis>
+            {info && (
+              <div className="flex shrink-0 items-center text-f1-foreground-secondary">
+                <InfoHint info={info} label={title} />
+              </div>
+            )}
+          </div>
           {(description || descriptionAction) && (
             // Baseline-aligned row so the link sits on the description's own
             // line; the text keeps its own truncation, the link never shrinks.

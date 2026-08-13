@@ -168,3 +168,95 @@ describe("DashboardItem — description action", () => {
     expect(screen.queryByText("·")).not.toBeInTheDocument()
   })
 })
+
+describe("DashboardItem — header info", () => {
+  const info = {
+    title: "Active headcount",
+    description: "Distinct active employees in the selected snapshot.",
+  }
+
+  it("renders no info trigger when info is omitted", () => {
+    render(
+      <DashboardItem title="Headcount by team" isLoading={false}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(
+      screen.queryByRole("button", { name: "Headcount by team" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("names the info trigger after the widget title", () => {
+    render(
+      <DashboardItem title="Headcount by team" info={info} isLoading={false}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Headcount by team" })
+    ).toBeInTheDocument()
+  })
+
+  it("reveals the member title and description on hover", async () => {
+    const user = userEvent.setup()
+    render(
+      <DashboardItem title="Headcount by team" info={info} isLoading={false}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await user.hover(screen.getByRole("button", { name: "Headcount by team" }))
+
+    expect(
+      await screen.findByText("Active headcount", {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText(info.description, {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+  })
+
+  it("calls the link action from the hover card", async () => {
+    const onClick = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <DashboardItem
+        title="Headcount by team"
+        info={{ ...info, link: { label: "Learn more", onClick } }}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await user.hover(screen.getByRole("button", { name: "Headcount by team" }))
+    await user.click(
+      await screen.findByRole(
+        "button",
+        { name: "Learn more" },
+        { timeout: 2000 }
+      )
+    )
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps the info trigger in the error state", () => {
+    render(
+      <DashboardItem
+        title="Headcount by team"
+        info={info}
+        error={new Error("Failed to load")}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    // The data failed, but what the widget was meant to measure did not change.
+    expect(
+      screen.getByRole("button", { name: "Headcount by team" })
+    ).toBeInTheDocument()
+  })
+})

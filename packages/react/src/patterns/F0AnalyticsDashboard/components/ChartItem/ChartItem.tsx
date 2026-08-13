@@ -672,6 +672,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     <DashboardItem
       title={item.title}
       description={windowedDescription ?? item.description}
+      info={item.info}
       {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
       isLoading={isLoading}
