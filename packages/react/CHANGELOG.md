@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.27.1](https://github.com/factorialco/f0/compare/f0-react-v6.27.0...f0-react-v6.27.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* **CategoryBarChart:** show every segment in a single hover tooltip ([#5109](https://github.com/factorialco/f0/issues/5109)) ([0a88a88](https://github.com/factorialco/f0/commit/0a88a888ffa1b49980e247a93691a2692b66ea9e))
+
 ## [6.27.0](https://github.com/factorialco/f0/compare/f0-react-v6.26.0...f0-react-v6.27.0) (2026-08-13)
 
 
