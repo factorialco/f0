@@ -623,8 +623,14 @@ export const F0AiChatTextArea = ({
                   {/* THE SUGGESTIONS BAND, inside the field. `px-3` is the
                       field's own inset — the chips line up with the text above
                       them and nothing indents them further, which is the point
-                      of putting them in here. `pb-3` closes the box; the 12px
-                      above them comes from the text band's own bottom slack.
+                      of putting them in here. `pb-3` closes the box.
+
+                      `pt-1` ON TOP OF the text band's own 12px bottom slack, for
+                      16px between the two bands — which is v2's `gap-4` between
+                      the same two rows, arrived at from the other direction.
+                      12px alone read as cramped against the chips (Saul,
+                      2026-08-13): they are 32px tall against a 20px line, so the
+                      gap has to clear the taller thing to look like a gap.
 
                       Clicks are STOPPED here rather than bubbling to the form,
                       whose onClick focuses the textarea — the same guard
@@ -633,7 +639,7 @@ export const F0AiChatTextArea = ({
                       Escape-restores-focus handling. */}
                   {suggestionsRow && suggestionsInside && (
                     <div
-                      className="px-3 pb-3"
+                      className="px-3 pb-3 pt-1"
                       onClick={(event) => event.stopPropagation()}
                     >
                       {suggestionsRow}
