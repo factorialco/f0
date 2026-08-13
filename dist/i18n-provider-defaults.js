@@ -1,4 +1,5 @@
 const e = {
+  ac: "Ascension Island",
   ad: "Andorra",
   ae: "United Arab Emirates",
   af: "Afghanistan",
@@ -23,14 +24,19 @@ const e = {
   bh: "Bahrain",
   bi: "Burundi",
   bj: "Benin",
+  bl: "St. Barthélemy",
   bm: "Bermuda",
+  bn: "Brunei",
   bo: "Bolivia",
+  bq: "Caribbean Netherlands",
   br: "Brazil",
+  bs: "Bahamas",
   bt: "Bhutan",
   bw: "Botswana",
   by: "Belarus",
   bz: "Belize",
   ca: "Canada",
+  cc: "Cocos (Keeling) Islands",
   cd: "Democratic Republic of the Congo",
   cf: "Central African Republic",
   cg: "Republic of the Congo",
@@ -45,6 +51,7 @@ const e = {
   cu: "Cuba",
   cv: "Cape Verde",
   cw: "Curaçao",
+  cx: "Christmas Island",
   cy: "Cyprus",
   cz: "Czech Republic",
   de: "Germany",
@@ -56,6 +63,7 @@ const e = {
   ec: "Ecuador",
   ee: "Estonia",
   eg: "Egypt",
+  eh: "Western Sahara",
   er: "Eritrea",
   es: "Spain",
   et: "Ethiopia",
@@ -69,17 +77,20 @@ const e = {
   gb: "United Kingdom",
   gd: "Grenada",
   ge: "Georgia",
+  gf: "French Guiana",
   gg: "Guernsey",
   gh: "Ghana",
   gi: "Gibraltar",
   gl: "Greenland",
   gm: "Gambia",
   gn: "Guinea",
+  gp: "Guadeloupe",
   gq: "Equatorial Guinea",
   gr: "Greece",
   gt: "Guatemala",
   gu: "Guam",
   gw: "Guinea-Bissau",
+  gy: "Guyana",
   hk: "Hong Kong",
   hn: "Honduras",
   hr: "Croatia",
@@ -99,8 +110,142 @@ const e = {
   jm: "Jamaica",
   jo: "Jordan",
   jp: "Japan",
-  ke: "Kenya"
-}, t = {
+  ke: "Kenya",
+  kg: "Kyrgyzstan",
+  kh: "Cambodia",
+  ki: "Kiribati",
+  km: "Comoros",
+  kn: "St. Kitts & Nevis",
+  kp: "North Korea",
+  kr: "South Korea",
+  kw: "Kuwait",
+  ky: "Cayman Islands",
+  kz: "Kazakhstan",
+  la: "Laos",
+  lb: "Lebanon",
+  lc: "St. Lucia",
+  li: "Liechtenstein",
+  lk: "Sri Lanka",
+  lr: "Liberia",
+  ls: "Lesotho",
+  lt: "Lithuania",
+  lu: "Luxembourg",
+  lv: "Latvia",
+  ly: "Libya",
+  ma: "Morocco",
+  mc: "Monaco",
+  md: "Moldova",
+  me: "Montenegro",
+  mf: "St. Martin",
+  mg: "Madagascar",
+  mh: "Marshall Islands",
+  mk: "North Macedonia",
+  ml: "Mali",
+  mm: "Myanmar (Burma)",
+  mn: "Mongolia",
+  mo: "Macao SAR China",
+  mp: "Northern Mariana Islands",
+  mq: "Martinique",
+  mr: "Mauritania",
+  ms: "Montserrat",
+  mt: "Malta",
+  mu: "Mauritius",
+  mv: "Maldives",
+  mw: "Malawi",
+  mx: "Mexico",
+  my: "Malaysia",
+  mz: "Mozambique",
+  na: "Namibia",
+  nc: "New Caledonia",
+  ne: "Niger",
+  nf: "Norfolk Island",
+  ng: "Nigeria",
+  ni: "Nicaragua",
+  nl: "Netherlands",
+  no: "Norway",
+  np: "Nepal",
+  nr: "Nauru",
+  nu: "Niue",
+  nz: "New Zealand",
+  om: "Oman",
+  pa: "Panama",
+  pe: "Peru",
+  pf: "French Polynesia",
+  pg: "Papua New Guinea",
+  ph: "Philippines",
+  pk: "Pakistan",
+  pl: "Poland",
+  pm: "St. Pierre & Miquelon",
+  pn: "Pitcairn Islands",
+  pr: "Puerto Rico",
+  ps: "Palestinian Territories",
+  pt: "Portugal",
+  pw: "Palau",
+  py: "Paraguay",
+  qa: "Qatar",
+  re: "Réunion",
+  ro: "Romania",
+  rs: "Serbia",
+  ru: "Russia",
+  rw: "Rwanda",
+  sa: "Saudi Arabia",
+  sb: "Solomon Islands",
+  sc: "Seychelles",
+  sd: "Sudan",
+  se: "Sweden",
+  sg: "Singapore",
+  sh: "St. Helena",
+  si: "Slovenia",
+  sj: "Svalbard & Jan Mayen",
+  sk: "Slovakia",
+  sl: "Sierra Leone",
+  sm: "San Marino",
+  sn: "Senegal",
+  so: "Somalia",
+  sr: "Suriname",
+  ss: "South Sudan",
+  st: "São Tomé & Príncipe",
+  sv: "El Salvador",
+  sx: "Sint Maarten",
+  sy: "Syria",
+  sz: "Eswatini",
+  ta: "Tristan da Cunha",
+  tc: "Turks & Caicos Islands",
+  td: "Chad",
+  tg: "Togo",
+  th: "Thailand",
+  tj: "Tajikistan",
+  tk: "Tokelau",
+  tl: "Timor-Leste",
+  tm: "Turkmenistan",
+  tn: "Tunisia",
+  to: "Tonga",
+  tr: "Türkiye",
+  tt: "Trinidad & Tobago",
+  tv: "Tuvalu",
+  tw: "Taiwan",
+  tz: "Tanzania",
+  ua: "Ukraine",
+  ug: "Uganda",
+  us: "United States",
+  uy: "Uruguay",
+  uz: "Uzbekistan",
+  va: "Vatican City",
+  vc: "St. Vincent & Grenadines",
+  ve: "Venezuela",
+  vg: "British Virgin Islands",
+  vi: "U.S. Virgin Islands",
+  vn: "Vietnam",
+  vu: "Vanuatu",
+  wf: "Wallis & Futuna",
+  ws: "Samoa",
+  xk: "Kosovo",
+  ye: "Yemen",
+  yt: "Mayotte",
+  za: "South Africa",
+  zm: "Zambia",
+  zw: "Zimbabwe"
+}, a = {
   common: {
     selectPlaceholder: "Select"
   },
@@ -199,6 +344,10 @@ const e = {
     attendees: "Attendees",
     join: "Join",
     summary: "Summary"
+  },
+  coachmark: {
+    next: "Next",
+    done: "Got it"
   },
   actions: {
     add: "Add",
@@ -625,6 +774,7 @@ const e = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
@@ -750,6 +900,14 @@ const e = {
       one: "{{count}} unread",
       other: "{{count}} unread"
     },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above"
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below"
+    },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
@@ -766,6 +924,15 @@ const e = {
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters"
+    },
+    windowedCategories: "Showing {{count}} of {{total}} categories",
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}"
     }
   },
   progressSeries: {
@@ -784,6 +951,12 @@ const e = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}"
+  },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found"
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -997,6 +1170,9 @@ const e = {
       },
       checkbox: {
         mustBeChecked: "This option must be selected"
+      },
+      phone: {
+        invalid: "Enter a valid phone number"
       }
     }
   },
@@ -1011,11 +1187,45 @@ const e = {
       navigation: "Graph navigation"
     }
   },
+  map: {
+    region: "Map",
+    navigation: "Map navigation",
+    listLabel: "Locations",
+    location: "location",
+    locations: "locations",
+    unnamedLocation: "Location",
+    cluster: "Cluster of {{count}} locations",
+    skipToList: "Skip to location list",
+    loadError: "Couldn't load the map.",
+    retry: "Retry",
+    currentLocation: "Your location",
+    controls: {
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fit: "Fit to markers",
+      locate: "My location"
+    }
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}"
+  },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked."
   },
   pdfViewer: {
     toolbar: "Document toolbar",
@@ -1061,5 +1271,5 @@ const e = {
   }
 };
 export {
-  t as defaultTranslations
+  a as defaultTranslations
 };
