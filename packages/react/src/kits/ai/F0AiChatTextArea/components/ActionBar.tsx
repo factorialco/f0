@@ -1,18 +1,12 @@
 import { type ReactNode, type RefObject } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import {
-  ArrowUp,
-  Check,
-  Cross,
-  Microphone,
-  Paperclip,
-  SolidStop,
-} from "@/icons/app"
+import { Check, Cross, Microphone, Paperclip } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { type RecorderStatus } from "../useAudioRecorder"
 import { RecordingWaveform } from "./RecordingWaveform"
+import { SubmitButton } from "./SubmitButton"
 
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
@@ -32,6 +26,18 @@ interface ActionBarProps {
   onStartRecording?: () => void
   onStopRecording?: () => void
   onCancelRecording?: () => void
+  /**
+   * Whether this row owns the send / stop button. False in the `inside`
+   * suggestions layout, where the button sits on the textarea's own line and
+   * this row is left with the attachment, host and dictation controls.
+   *
+   * Only the idle row honours it — the recording row's cancel · confirm pair is
+   * not the submit button and must never be dropped, or a recording would have
+   * no way to end.
+   *
+   * @default true
+   */
+  showSubmit?: boolean
 }
 
 export const ActionBar = ({
@@ -51,6 +57,7 @@ export const ActionBar = ({
   onStartRecording,
   onStopRecording,
   onCancelRecording,
+  showSubmit = true,
 }: ActionBarProps) => {
   const translation = useI18n()
 
@@ -144,24 +151,12 @@ export const ActionBar = ({
             loading={recordingStatus === "transcribing"}
           />
         )}
-        {recordingStatus !== "transcribing" && inProgress ? (
-          <ButtonInternal
-            type="submit"
-            variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
-            icon={SolidStop}
-            hideLabel
-          />
-        ) : (
-          <ButtonInternal
-            type="submit"
-            // Stays enabled while an attachment uploads so the click queues the
-            // send (fired once the upload finishes) instead of being a no-op.
-            disabled={!hasDataToSend || isPreSending}
-            variant={"default"}
-            label={translation.ai.sendMessage}
-            icon={ArrowUp}
-            hideLabel
+        {showSubmit && (
+          <SubmitButton
+            inProgress={inProgress}
+            hasDataToSend={hasDataToSend}
+            isPreSending={isPreSending}
+            recordingStatus={recordingStatus}
           />
         )}
       </div>

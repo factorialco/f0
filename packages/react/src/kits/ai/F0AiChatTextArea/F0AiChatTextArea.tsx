@@ -10,11 +10,13 @@ import { cn } from "@/lib/utils"
 
 import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import { F0OneIcon } from "../F0OneIcon"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
 import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
 import { MentionPopover } from "./components/MentionPopover"
 import { PendingQuoteChip } from "./components/PendingQuoteChip"
+import { SubmitButton } from "./components/SubmitButton"
 import { TextareaField } from "./components/TextareaField"
 import { WelcomeScreenCardsRow } from "./components/WelcomeScreenCardsRow"
 import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
@@ -83,6 +85,7 @@ export const F0AiChatTextArea = ({
   fullscreen = false,
   welcomeScreenSuggestions,
   onSuggestionClick,
+  welcomeScreenSuggestionsPlacement = "above",
   welcomeScreenCards,
   ref,
 }: F0AiChatTextAreaProps) => {
@@ -329,9 +332,11 @@ export const F0AiChatTextArea = ({
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
-  // Welcome suggestions row. On the welcome screen it always sits above the
-  // textarea (both sidepanel and fullscreen); the popover opens upward so it
-  // doesn't cover the composer.
+  // Welcome suggestions row. `above` (the default) stands it over the composer
+  // in both sidepanel and fullscreen, popover opening upward so it doesn't cover
+  // the field. `inside` moves it into the field's foot — see the prop's doc for
+  // what that does to the send button.
+  const suggestionsInside = welcomeScreenSuggestionsPlacement === "inside"
   const showSuggestions =
     isWelcomeScreen &&
     !!welcomeScreenSuggestions &&
@@ -343,9 +348,33 @@ export const F0AiChatTextArea = ({
       suggestions={welcomeScreenSuggestions}
       onItemClick={handleSuggestionClick}
       onItemHover={setHoveredSuggestion}
-      side="top"
+      // Inside the field the empty space is BELOW it, not above: opening upward
+      // would cover the text the reader is about to type. Radix still flips on a
+      // collision, so a field pinned to the bottom of a sidepanel is safe.
+      side={suggestionsInside ? "bottom" : "top"}
+      reserveTwoRows={!suggestionsInside}
     />
   ) : null
+
+  // THE BAR SHAPE the `inside` placement implies: One's mark leading the field
+  // and the send button trailing the text, so the suggestions can have the band
+  // below them to themselves. Named apart from `suggestionsInside` because this
+  // is about the composer's own layout and it does NOT switch off with the
+  // welcome screen — a bar that put send back in the action row on the first
+  // message would change shape under the reader mid-conversation.
+  const inlineComposerBar = suggestionsInside
+
+  // Which controls the action row would still have to itself once the bar takes
+  // the send button away. With none of them the row is 24px of padding around
+  // nothing, so it isn't rendered at all and the field is just its two bands.
+  // `canRecord` covers the recording state too — the waveform's cancel · confirm
+  // pair lives in this row, and it can only be reached when recording is on.
+  const actionRowHasControls = !!onUploadFiles || !!toolbarStart || canRecord
+  const showActionRow = !inlineComposerBar || actionRowHasControls
+  // While recording, the row below owns the whole gesture (waveform + cancel ·
+  // confirm). A send button beside the text would be a second, live way out of a
+  // recording that the row is already handling.
+  const showInlineSubmit = inlineComposerBar && !isRecording
 
   // Welcome cards sit below the composer on the fullscreen welcome screen
   // (same gate the footer slot uses). Each card carries its own `onClick`;
@@ -380,7 +409,7 @@ export const F0AiChatTextArea = ({
       {...(fullscreen ? composerReveal : {})}
     >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {suggestionsRow && <div>{suggestionsRow}</div>}
+        {suggestionsRow && !suggestionsInside && <div>{suggestionsRow}</div>}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <motion.form
             aria-busy={inProgress}
@@ -519,43 +548,119 @@ export const F0AiChatTextArea = ({
                     removeLabel={translation.ai.removeFile}
                   />
 
-                  <TextareaField
-                    textareaRef={textareaRef}
-                    highlightRef={highlightRef}
-                    inputValue={inputValue}
-                    onInputChange={(value, cursorPos) => {
-                      setInputValue(value)
-                      setCursorPosition(cursorPos)
-                    }}
-                    onKeyDown={handleKeyDown}
-                    onCursorUpdate={updateCursorPosition}
-                    onScroll={syncHighlightScroll}
-                    highlightSegments={highlightSegments}
-                    hasOverlay={hasOverlay}
-                    multiplePlaceholders={multiplePlaceholders}
-                    placeholders={effectivePlaceholders}
-                    resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
-                    inProgress={inProgress}
-                  />
+                  {/* THE TEXT BAND. A flex row only in the `inside` layout,
+                      where One's mark leads the text and the send button trails
+                      it. `items-end` is what keeps the button on the LAST line
+                      as the textarea grows, instead of floating beside the
+                      middle of the text.
 
-                  <ActionBar
-                    onUploadFiles={onUploadFiles}
-                    toolbarStart={toolbarStart}
-                    isAtMaxFiles={isAtMaxFiles}
-                    maxFiles={maxFiles}
-                    acceptValue={acceptValue}
-                    fileInputRef={fileInputRef}
-                    handleFileSelect={handleFileSelect}
-                    inProgress={inProgress}
-                    hasDataToSend={hasDataToSend}
-                    isPreSending={isPreSending || pendingSubmit}
-                    canRecord={canRecord}
-                    recordingStatus={recorder.status}
-                    recordingStream={recorder.stream}
-                    onStartRecording={handleStartRecording}
-                    onStopRecording={recorder.stop}
-                    onCancelRecording={handleCancelRecording}
-                  />
+                      `TextareaField` is `flex-1` already and its own layers
+                      carry the field's 12px inset (top and bottom), so this row
+                      adds no vertical padding of its own — the two things beside
+                      the text align against that inset. */}
+                  <div
+                    className={cn(inlineComposerBar && "flex items-end pr-3")}
+                  >
+                    {/* ONE'S MARK, leading the field. `pl-3` is the field's own
+                        left inset; the 12px gap to the text after it is
+                        `TextareaField`'s own `px-3`, so the mark and the text
+                        sit on the same grid as everything else in the box.
+
+                        `self-center` overrides the row's `items-end`: the mark
+                        belongs on the text's optical line, and bottom-aligning a
+                        22px mark against the row left it sitting low. It costs
+                        nothing once the field has grown, since the text cell is
+                        then the tallest thing in the row.
+
+                        Spins while a response streams — F0OneIcon's own
+                        affordance for exactly this, and the only moving part the
+                        composer has to say the AI is working. */}
+                    {inlineComposerBar && (
+                      <div className="flex shrink-0 self-center pl-3">
+                        <F0OneIcon size="sm" spin={inProgress} />
+                      </div>
+                    )}
+                    <TextareaField
+                      textareaRef={textareaRef}
+                      highlightRef={highlightRef}
+                      inputValue={inputValue}
+                      onInputChange={(value, cursorPos) => {
+                        setInputValue(value)
+                        setCursorPosition(cursorPos)
+                      }}
+                      onKeyDown={handleKeyDown}
+                      onCursorUpdate={updateCursorPosition}
+                      onScroll={syncHighlightScroll}
+                      highlightSegments={highlightSegments}
+                      hasOverlay={hasOverlay}
+                      multiplePlaceholders={multiplePlaceholders}
+                      placeholders={effectivePlaceholders}
+                      resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
+                      inProgress={inProgress}
+                    />
+                    {/* `pb-[10px]`, not `pb-3`, and the number is derived rather
+                        than eyeballed: the field's inset is 12px and a 24px
+                        button overhangs a 20px line by 2px at each end, so
+                        bottom-aligning it 10px above the text cell's floor lands
+                        its centre exactly on the line's centre. `pb-3` would sit
+                        it 2px low on one line — and, because the button is
+                        taller than the line, visibly high against the top
+                        border. Grown past one line the same 10px keeps it on the
+                        last line. */}
+                    {showInlineSubmit && (
+                      <div className="shrink-0 pb-[10px] pl-2">
+                        <SubmitButton
+                          inProgress={inProgress}
+                          hasDataToSend={hasDataToSend}
+                          isPreSending={isPreSending || pendingSubmit}
+                          recordingStatus={recorder.status}
+                          size="sm"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* THE SUGGESTIONS BAND, inside the field. `px-3` is the
+                      field's own inset — the chips line up with the text above
+                      them and nothing indents them further, which is the point
+                      of putting them in here. `pb-3` closes the box; the 12px
+                      above them comes from the text band's own bottom slack.
+
+                      Clicks are STOPPED here rather than bubbling to the form,
+                      whose onClick focuses the textarea — the same guard
+                      `toolbarStart` takes. Without it, pressing a chip would pull
+                      focus off the trigger and break the popover's own
+                      Escape-restores-focus handling. */}
+                  {suggestionsRow && suggestionsInside && (
+                    <div
+                      className="px-3 pb-3"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {suggestionsRow}
+                    </div>
+                  )}
+
+                  {showActionRow && (
+                    <ActionBar
+                      onUploadFiles={onUploadFiles}
+                      toolbarStart={toolbarStart}
+                      isAtMaxFiles={isAtMaxFiles}
+                      maxFiles={maxFiles}
+                      acceptValue={acceptValue}
+                      fileInputRef={fileInputRef}
+                      handleFileSelect={handleFileSelect}
+                      inProgress={inProgress}
+                      hasDataToSend={hasDataToSend}
+                      isPreSending={isPreSending || pendingSubmit}
+                      canRecord={canRecord}
+                      recordingStatus={recorder.status}
+                      recordingStream={recorder.stream}
+                      onStartRecording={handleStartRecording}
+                      onStopRecording={recorder.stop}
+                      onCancelRecording={handleCancelRecording}
+                      showSubmit={!inlineComposerBar}
+                    />
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
