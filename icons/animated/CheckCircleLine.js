@@ -30,7 +30,7 @@ const circleVariants = {
     },
 };
 const CheckCircleLineAnimated = React.forwardRef(({ animate = "normal", ...props }, ref) => {
-    return (_jsxs("svg", { ref: ref, viewBox: "0 0 24 24", fill: "none", xmlns: "http://www.w3.org/2000/svg", strokeWidth: "1.3", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", ...props, children: [_jsx(motion.circle, { cx: "12", cy: "12", r: "8", initial: "normal", variants: circleVariants, transition: circleTransition, animate: animate, vectorEffect: "non-scaling-stroke" }), _jsx(motion.path, { d: "M9.00003 12L11.4 14.4L15 9.6", initial: "normal", variants: checkVariants, transition: checkTransition, animate: animate, vectorEffect: "non-scaling-stroke" })] }));
+    return (_jsxs("svg", { ref: ref, viewBox: "0 0 24 24", fill: "none", xmlns: "http://www.w3.org/2000/svg", strokeWidth: "1.3", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", ...props, children: [_jsx(motion.circle, { cx: "12", cy: "12", r: "8", initial: "normal", variants: circleVariants, transition: circleTransition, animate: animate }), _jsx(motion.path, { d: "M9.00003 12L11.4 14.4L15 9.6", initial: "normal", variants: checkVariants, transition: checkTransition, animate: animate })] }));
 });
 CheckCircleLineAnimated.displayName = "CheckCircleLineAnimated";
 export default CheckCircleLineAnimated;
