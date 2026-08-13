@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.26.0](https://github.com/factorialco/f0/compare/f0-react-v6.25.0...f0-react-v6.26.0) (2026-08-13)
+
+
+### Features
+
+* **NewHomeLayout:** virtualize a column's widgets ([#5110](https://github.com/factorialco/f0/issues/5110)) ([774ee8e](https://github.com/factorialco/f0/commit/774ee8e4dc504b94825ddc5a649d727d7e032518))
+
 ## [6.25.0](https://github.com/factorialco/f0/compare/f0-react-v6.24.0...f0-react-v6.25.0) (2026-08-13)
 
 
