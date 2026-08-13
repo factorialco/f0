@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils"
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 /**
- * Replicates OneTable's TableCell mechanics: the content wrapper is
- * `pointer-events-none` and a stretched link (`pointer-events-auto`) captures
- * the row-navigation click, which the wrapper forwards via `onClick`. The chart
- * segments re-enable pointer events so the tooltip still opens on hover/focus
- * while a click still navigates the row.
+ * Mirrors OneTable's TableCell wrapper chain (`experimental/OneTable/TableCell`),
+ * `h-full` included - without it the mock under-reports the real hover area.
  */
 function ClickableTableCell({
   children,
@@ -21,12 +18,14 @@ function ClickableTableCell({
 }) {
   const linkRef = useRef<HTMLAnchorElement>(null)
   return (
-    <div className={cn("relative", className)}>
-      <div
-        className="pointer-events-none relative z-[1]"
-        onClick={() => linkRef.current?.click()}
-      >
-        {children}
+    <div className={cn("relative h-full", className)}>
+      <div className="pointer-events-none h-full items-start">
+        <div
+          className="relative z-[1] h-full"
+          onClick={() => linkRef.current?.click()}
+        >
+          {children}
+        </div>
       </div>
       <a
         ref={linkRef}
@@ -81,7 +80,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with a tooltip on hover/focus. Mirrors the standalone CategoryBarChart kit but sized for table cells.\n\n- **Tooltip**: shown by default per segment (color dot + name + value/percentage). Set `hideTooltip: true` on the value to suppress it.\n- **Loading**: set `loading: true` to render a skeleton with the same height/width as the loaded bar until the data is there, instead of flashing the empty dash.\n- **Clickable cells**: inside OneDataCollection the cell sits in a `pointer-events-none` wrapper with a stretched navigation link. The bar segments re-enable pointer events so the tooltip still opens, while a click on the cell navigates the row.",
+          "Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with a tooltip on hover/focus. Mirrors the standalone CategoryBarChart kit but sized for table cells.\n\n- **Tooltip**: one tooltip for the whole cell, listing *every* segment (color dot + name + value/percentage), so a single hover anywhere in the cell — bar, gaps, or the empty space above and below it — reveals the full legend instead of forcing the reader to hover each segment. Hovering a specific segment drills down to it: that row is highlighted and the rest are dimmed. Set `hideTooltip: true` on the value to suppress it.\n- **Loading**: set `loading: true` to render a skeleton with the same height/width as the loaded bar until the data is there, instead of flashing the empty dash.\n- **Clickable cells**: inside OneDataCollection the cell sits in a `pointer-events-none` wrapper with a stretched navigation link. The bar segments re-enable pointer events so the tooltip still opens, while a click on the cell navigates the row.",
       },
     },
   },
@@ -271,10 +270,10 @@ const value = {
               key={row.team}
               className="border-0 border-b border-solid border-f1-border-secondary hover:bg-f1-background-hover"
             >
-              <td className="py-3 pr-4 align-middle text-f1-foreground">
+              <td className="h-full py-3 pr-4 align-top text-f1-foreground">
                 {wrap(row.team)}
               </td>
-              <td className="w-1/2 py-3 align-middle">
+              <td className="h-full w-1/2 py-3 align-top">
                 {wrap(
                   <Cell
                     item={mockItem}
