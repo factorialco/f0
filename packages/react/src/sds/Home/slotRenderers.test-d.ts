@@ -122,6 +122,68 @@ test("clickBehavior: link is the ONLY click behavior — href, never onClick", (
   ])
 })
 
+test("the OPTIONAL flags let a feed mix rows the schema would otherwise even out", () => {
+  // Some rows two-line, some one — and some trailing a face, some nothing.
+  listSlot(
+    { right: "person", rightOptional: true, descriptionOptional: true },
+    [
+      { id: 1, title: "with both", description: "Due Today", rightAvatar: ada },
+      { id: 2, title: "with neither" },
+    ]
+  )
+
+  listSlot({ right: "counter", rightOptional: true }, [
+    { id: 1, title: "x", count: 3 },
+    { id: 2, title: "y" },
+  ])
+
+  // Optional means allowed, not unchecked: the data still has to be the kind
+  // the schema declared.
+  listSlot({ right: "person", rightOptional: true }, [
+    // @ts-expect-error a person slot still rejects a count
+    { id: 1, title: "x", count: 3 },
+  ])
+  listSlot({ descriptionOptional: true }, [
+    // @ts-expect-error a subtitle is still not allowed unless declared
+    { id: 1, title: "x", subtitle: "y" },
+  ])
+})
+
+test("an icon row may be tinted, and only with a colour from the palette", () => {
+  listSlot({ left: "icon" }, [
+    { id: 1, title: "Row", avatar: { icon: PalmTree, color: "purple" } },
+  ])
+
+  listSlot({ left: "icon" }, [
+    // @ts-expect-error "octarine" is not one of the palette's colours
+    { id: 1, title: "Row", avatar: { icon: PalmTree, color: "octarine" } },
+  ])
+  listSlot({ left: "person" }, [
+    // @ts-expect-error only the icon glyph takes a colour
+    { id: 1, title: "x", avatar: { ...ada, color: "purple" } },
+  ])
+})
+
+test("a row's actions are its own — no schema flag gates them", () => {
+  listSlot({}, [
+    {
+      id: 1,
+      title: "x",
+      actions: [{ label: "Dismiss", icon: PalmTree, onClick: () => {} }],
+    },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    {
+      id: 1,
+      title: "x",
+      // @ts-expect-error an action names what it does — the label is required
+      actions: [{ icon: PalmTree, onClick: () => {} }],
+    },
+  ])
+})
+
 test("the schema only speaks the declared kinds", () => {
   // @ts-expect-error not a left kind
   listSlot({ left: "banana" }, [])

@@ -1,6 +1,18 @@
+import { useState } from "react"
+
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Comment, PalmTree } from "@/icons/app"
+import {
+  Clock,
+  Comment,
+  Cross,
+  Envelope,
+  FileSigned,
+  PalmTree,
+  PersonPlus,
+  Receipt,
+  Sparkles,
+} from "@/icons/app"
 import { Skeleton } from "@/ui/skeleton"
 
 import {
@@ -16,8 +28,15 @@ const meta = {
   component: SlotWidget,
   tags: ["autodocs", "experimental"],
   decorators: [
-    (Story) => (
-      <div className="max-w-96">
+    // The rail's width by default (24rem ≈ the Home's 396px aside), because
+    // that is where most of these widgets live. A story that wants the main
+    // column's width says so with `parameters.widgetWidth` — see `NeedsYouWide`.
+    (Story, context) => (
+      <div
+        style={{
+          maxWidth: (context.parameters.widgetWidth as string) ?? "24rem",
+        }}
+      >
         <Story />
       </div>
     ),
@@ -328,6 +347,258 @@ export const AllLoadingSlots: Story = {
     header: { title: "Team", link: { title: "Go to Team", onClick: () => {} } },
     loading: true,
     slots: teamSlots.map(beforeItemsLand),
+  },
+}
+
+/**
+ * A FEED — the densest thing a `list` draws, and the one every part of the
+ * schema was built for. One slot, one schema, seven rows that do not look alike:
+ *
+ * - **`left: "icon"` with a `color` per row** — the tinted glyph says which
+ *   KIND of thing the row is at a glance, without any of them reading as an
+ *   alert (that's what `left: "alert"` is for).
+ * - **`descriptionOptional`** — only some rows have a second line ("Due Today",
+ *   the sender and the time). The glyphs stay `md` throughout, so the column of
+ *   them lines up down the card whatever each row's height turns out to be.
+ * - **`right: "person"`** — the rows that came from someone show who; the rest
+ *   trail nothing.
+ * - **row `actions`** — hover the first row (or Tab into the list): what you can
+ *   DO to a row appears over its right-hand side, behind a fade. Per row, not
+ *   per schema: the two AI prompts near the bottom offer nothing to act on. The
+ *   first row and the contract row lead with a NAMED action ("Clock out",
+ *   "Sign") and keep "Dismiss" as a glyph — a strip of labelled buttons would
+ *   outweigh the row it belongs to.
+ * - **`unread`** — the accent dot on the unopened message.
+ *
+ * The widget is 384px here, the width of the Home's rail. Widen the story and
+ * the frame's title and footer button step up a size with it.
+ */
+export const NeedsYou: Story = {
+  args: {
+    header: { title: "Needs you", count: 7 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          right: "person",
+          rightOptional: true,
+          descriptionOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "clock-out",
+            title: "You clocked in but never clocked out yesterday",
+            avatar: { icon: Clock, color: "purple" },
+            href: "/attendance",
+            // The row's PRIMARY action says what it is — a clock glyph alone
+            // would be a guess between "clock out" and "snooze" — and the one
+            // beside it stays a glyph.
+            actions: [
+              {
+                label: "Clock out",
+                icon: Clock,
+                showLabel: true,
+                onClick: () => {},
+              },
+              { label: "Dismiss", icon: Cross, onClick: () => {} },
+            ],
+          },
+          {
+            id: "anniversary",
+            title: "Ada Lovelace's 3rd work anniversary",
+            description: "Due Today",
+            avatar: { icon: PersonPlus, color: "barbie" },
+            rightAvatar: { firstName: "Ada", lastName: "Lovelace" },
+            href: "/employees/ada",
+            // A MENU rather than one thing: "later" is a question, not an
+            // answer. The strip stays up while the menu is, because reaching
+            // the menu means leaving the row.
+            actions: [
+              {
+                label: "Remind me later",
+                icon: Clock,
+                items: [
+                  { type: "label", text: "Remind me" },
+                  { label: "Later Today", onClick: () => {} },
+                  { label: "Tomorrow", onClick: () => {} },
+                  { label: "Next Monday", onClick: () => {} },
+                ],
+              },
+              { label: "Dismiss", icon: Cross, onClick: () => {} },
+            ],
+          },
+          {
+            id: "welcome",
+            title: "Welcome to the August onboarding cohort 🎉",
+            description: "9:12 · Marie Curie",
+            avatar: { icon: Envelope, color: "lilac" },
+            unread: true,
+            rightAvatar: { firstName: "Marie", lastName: "Curie" },
+            href: "/inbox/1",
+          },
+          // No actions and nobody behind them: the two things the assistant
+          // offers to do for you, which there is nothing to dismiss about.
+          {
+            id: "expense",
+            title: "Snap a receipt and I'll file the expense",
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses/new",
+          },
+          {
+            id: "policy",
+            title:
+              "Ask a policy question and I'll answer it or raise it with HR",
+            avatar: { icon: Sparkles, color: "indigo" },
+            href: "/assistant",
+          },
+          {
+            id: "contract",
+            title: "Sign your Q3 contract addendum",
+            description: "Due Today",
+            avatar: { icon: FileSigned, color: "malibu" },
+            href: "/documents/1",
+            // A text-only action: no glyph reads as "sign".
+            actions: [
+              { label: "Sign", showLabel: true, onClick: () => {} },
+              { label: "Dismiss", icon: Cross, onClick: () => {} },
+            ],
+          },
+          {
+            id: "leave",
+            title: "You have 5 days of leave expiring next month",
+            avatar: { icon: PalmTree, color: "army" },
+            href: "/time-off",
+            actions: [{ label: "Dismiss", icon: Cross, onClick: () => {} }],
+          },
+        ]
+      ),
+    ],
+  },
+}
+
+/**
+ * THE SAME WIDGET, given the main column's width instead of the rail's.
+ *
+ * Nothing about the slot changed — this is `NeedsYou`'s args in a wider box.
+ * Past 480px everything the card sizes for itself steps up one: the **title**,
+ * the **footer button**, each row's **leading glyph** (`md` → `lg`) and its
+ * **trailing faces** (`sm` → `md`). The faces stay a step behind the glyph — who
+ * a row is about is secondary to what it is.
+ *
+ * The TEXT doesn't grow: that is the content's scale, not the card's, and a feed
+ * whose copy resized with its container would just be a different feed at every
+ * width.
+ *
+ * Drag the story's boundary across 480px and it changes live — the card
+ * measures itself, so a widget moved from the rail into the column grows on
+ * the way.
+ */
+export const NeedsYouWide: Story = {
+  args: NeedsYou.args,
+  parameters: { widgetWidth: "40rem" },
+}
+
+/** The pool `ItemChurn` adds from, cycled so the button never runs out. */
+const CHURN_ITEMS = [
+  { title: "You never clocked out yesterday", icon: Clock, color: "purple" },
+  {
+    title: "Sign your Q3 contract addendum",
+    icon: FileSigned,
+    color: "malibu",
+  },
+  {
+    title: "Snap a receipt and I'll file it",
+    icon: Receipt,
+    color: "viridian",
+  },
+  { title: "5 days of leave expire next month", icon: PalmTree, color: "army" },
+  { title: "Welcome to the August cohort 🎉", icon: Envelope, color: "lilac" },
+] as const
+
+/**
+ * ITEMS COMING AND GOING — the playground for it. Three ways to change the list,
+ * so every direction is one click away:
+ *
+ * - **"Add an item"** in the footer appends one,
+ * - the widget's **⋯ menu** adds one at the TOP or removes the last,
+ * - and each row's **✕** (hover it) removes that row.
+ *
+ * A widget's items change under the user while they are reading them, so a row
+ * that vanished between two blinks would leave them wondering which one they
+ * just lost. The leaving row fades, and its own height closes on a spring — so
+ * the rows below it, the footer button and the card's bottom edge all move
+ * CONTINUOUSLY rather than snapping to the new size in one frame.
+ *
+ * The same wrapper does it for every slot type (`event-list` too, and any
+ * bespoke renderer that reaches for `HomeSlotItems`), and it does nothing at
+ * all under `prefers-reduced-motion`.
+ */
+export const ItemChurn: Story = {
+  // `render` owns the widget, but the story still has to satisfy
+  // `SlotWidget`'s required props. These args are unused.
+  args: { slots: [] },
+  render: function ItemChurnStory() {
+    // Rows by IDENTITY, not by index: the id is what tells the animation which
+    // row is which between two renders, and reusing one would make an added row
+    // read as an edit of whatever used to sit in that position.
+    const [rows, setRows] = useState(() =>
+      CHURN_ITEMS.slice(0, 3).map((item, index) => ({ ...item, id: index }))
+    )
+    const [nextId, setNextId] = useState(3)
+
+    const addRow = (atTop: boolean) => {
+      const item = CHURN_ITEMS[nextId % CHURN_ITEMS.length]
+      const row = { ...item, id: nextId }
+      setNextId((id) => id + 1)
+      setRows((current) => (atTop ? [row, ...current] : [...current, row]))
+    }
+
+    return (
+      <SlotWidget
+        header={{ title: "Needs you", count: rows.length }}
+        // The two moves a row cannot offer you: adding one, and adding it
+        // somewhere other than the end — which is the case that shows the rows
+        // below it gliding DOWN rather than the list redrawing.
+        actions={[
+          {
+            label: "Add at the top",
+            icon: Sparkles,
+            onClick: () => addRow(true),
+          },
+          {
+            label: "Remove the last",
+            icon: Cross,
+            onClick: () => setRows((current) => current.slice(0, -1)),
+          },
+        ]}
+        action={{ label: "Add an item", onClick: () => addRow(false) }}
+        slots={[
+          listSlot(
+            { left: "icon", clickBehavior: "link" },
+            rows.map((row) => ({
+              id: row.id,
+              title: row.title,
+              avatar: { icon: row.icon, color: row.color },
+              href: `/${row.id}`,
+              // Removing THE ONE YOU POINTED AT is the case worth watching: the
+              // rows under it are the ones that have to close the gap.
+              actions: [
+                {
+                  label: "Dismiss",
+                  icon: Cross,
+                  onClick: () =>
+                    setRows((current) =>
+                      current.filter((r) => r.id !== row.id)
+                    ),
+                },
+              ],
+            }))
+          ),
+        ]}
+      />
+    )
   },
 }
 

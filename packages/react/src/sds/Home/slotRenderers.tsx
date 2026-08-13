@@ -14,7 +14,7 @@ import {
 } from "@/components/avatars/F0AvatarModule"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
-import { type IconType } from "@/components/F0Icon"
+import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
@@ -27,10 +27,25 @@ import {
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { WidgetProps } from "@/experimental/Widgets/Widget"
+import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
 import { type F0FormSchema } from "@/patterns/F0Form"
 
-import { HomeListItem } from "./HomeListItem"
+import { HomeListItem, type HomeListItemAction } from "./HomeListItem"
+import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
+
+/**
+ * The item-churn animation, re-exported so a BESPOKE renderer draws its items
+ * the way the built-in ones do: wrap the items in `HomeSlotItems` and each one
+ * in a `HomeSlotItem` keyed by its stable id. An item added or removed then
+ * fades while its height closes, so the card resizes continuously instead of
+ * jumping.
+ *
+ * `useIsBulkChange` is the other half of it: feed its answer to each item's
+ * `animated` so a render that REPLACES the list — "View more" revealing thirty
+ * rows, a filter clearing — draws the new list at once instead of animating
+ * every row of it.
+ */
+export { HomeSlotItem, HomeSlotItems, useIsBulkChange }
 
 /**
  * The Home kit's slot vocabulary and how each slot is drawn. `SlotWidget`
@@ -103,6 +118,100 @@ type AvatarData<T extends AvatarVariant["type"]> = Omit<
 export type ListLeftKind = AvatarVariant["type"] | "module" | "alert"
 
 /**
+ * The tint a row's ICON glyph can carry. f0's NAMED palette — the same hues
+ * `ui/Avatar` colours initials with — deliberately, rather than the semantic
+ * families (`critical`, `warning`, `positive`): a colour here says which KIND
+ * of thing the row is, so a feed can give every category its own without any of
+ * them reading as an alert. For "this is urgent", the left kind is `alert`.
+ */
+export const listIconColors = [
+  "viridian",
+  "malibu",
+  "yellow",
+  "purple",
+  "lilac",
+  "barbie",
+  "smoke",
+  "army",
+  "flubber",
+  "indigo",
+  "camel",
+] as const
+
+export type ListIconColor = (typeof listIconColors)[number]
+
+/**
+ * The tinted glyph, one literal class string per colour: Tailwind reads source
+ * text, so a class built from a variable never reaches the stylesheet.
+ *
+ * The tile is the hue at a TENTH of its strength and the icon is the hue
+ * itself, which is what keeps a row of them legible side by side — the icons
+ * carry the colour, the tiles only suggest it. Dark mode needs the tile
+ * stronger to register against the card at all, hence the second value.
+ */
+const LIST_ICON_TINT: Record<ListIconColor, string> = {
+  viridian:
+    "bg-[hsl(theme(colors.viridian.50)_/_0.1)] text-[hsl(theme(colors.viridian.50))] dark:bg-[hsl(theme(colors.viridian.50)_/_0.24)]",
+  malibu:
+    "bg-[hsl(theme(colors.malibu.50)_/_0.1)] text-[hsl(theme(colors.malibu.50))] dark:bg-[hsl(theme(colors.malibu.50)_/_0.24)]",
+  yellow:
+    "bg-[hsl(theme(colors.yellow.50)_/_0.1)] text-[hsl(theme(colors.yellow.50))] dark:bg-[hsl(theme(colors.yellow.50)_/_0.24)]",
+  purple:
+    "bg-[hsl(theme(colors.purple.50)_/_0.1)] text-[hsl(theme(colors.purple.50))] dark:bg-[hsl(theme(colors.purple.50)_/_0.24)]",
+  lilac:
+    "bg-[hsl(theme(colors.lilac.50)_/_0.1)] text-[hsl(theme(colors.lilac.50))] dark:bg-[hsl(theme(colors.lilac.50)_/_0.24)]",
+  barbie:
+    "bg-[hsl(theme(colors.barbie.50)_/_0.1)] text-[hsl(theme(colors.barbie.50))] dark:bg-[hsl(theme(colors.barbie.50)_/_0.24)]",
+  smoke:
+    "bg-[hsl(theme(colors.smoke.50)_/_0.1)] text-[hsl(theme(colors.smoke.50))] dark:bg-[hsl(theme(colors.smoke.50)_/_0.24)]",
+  army: "bg-[hsl(theme(colors.army.50)_/_0.1)] text-[hsl(theme(colors.army.50))] dark:bg-[hsl(theme(colors.army.50)_/_0.24)]",
+  flubber:
+    "bg-[hsl(theme(colors.flubber.50)_/_0.1)] text-[hsl(theme(colors.flubber.50))] dark:bg-[hsl(theme(colors.flubber.50)_/_0.24)]",
+  indigo:
+    "bg-[hsl(theme(colors.indigo.50)_/_0.1)] text-[hsl(theme(colors.indigo.50))] dark:bg-[hsl(theme(colors.indigo.50)_/_0.24)]",
+  camel:
+    "bg-[hsl(theme(colors.camel.50)_/_0.1)] text-[hsl(theme(colors.camel.50))] dark:bg-[hsl(theme(colors.camel.50)_/_0.24)]",
+}
+
+/** Every glyph size a `list` row draws at — see {@link listGlyphSize}. */
+type ListGlyphSize = "sm" | "md" | "lg"
+
+/** The same box `F0AvatarIcon` draws, so a tinted row lines up with a plain one. */
+const LIST_ICON_SIZE = {
+  sm: "size-6 rounded-sm",
+  md: "size-8 rounded",
+  lg: "size-10 rounded-md",
+} satisfies Record<ListGlyphSize, string>
+
+/**
+ * A `list` row's icon glyph WITH A TINT — the Home kit's own, because
+ * `F0AvatarIcon` is deliberately neutral (a white tile with a border) and
+ * colouring it is a Home decision, not a design-system one. Without a `color`
+ * a row draws the plain `F0AvatarIcon` instead; this is the same box either way.
+ */
+const ListIconGlyph = ({
+  icon,
+  color,
+  size,
+}: {
+  icon: IconType
+  color: ListIconColor
+  size: ListGlyphSize
+}) => (
+  <div
+    className={cn(
+      "flex aspect-square items-center justify-center",
+      LIST_ICON_SIZE[size],
+      LIST_ICON_TINT[color]
+    )}
+  >
+    {/* No `color`: F0Icon defaults to `currentColor`, which the tile's own
+        `text-` class has already set to the hue. */}
+    <F0Icon icon={icon} size={size} />
+  </div>
+)
+
+/**
  * What every row draws on its RIGHT: a counter, one avatar (e.g. the sender),
  * or a compact strip of avatars with an optional `remainingCount`.
  */
@@ -123,10 +232,29 @@ export interface ListSchema {
   left?: ListLeftKind
   /** The one right treatment every row draws. Omit for none. */
   right?: ListRightKind
+  /**
+   * The `right` treatment is ALLOWED but not demanded: rows that carry its data
+   * draw it and the rest trail nothing — a feed where only some items came from
+   * a person. Without this every row must supply it, which is what keeps an
+   * ordinary list even.
+   */
+  rightOptional?: boolean
   /** Every row carries an inline subtitle (on the title's line, after a dot). */
   subtitleRequired?: boolean
   /** Every row carries a second line — this is what makes rows two-line. */
   descriptionRequired?: boolean
+  /**
+   * A second line is ALLOWED but not demanded: some rows carry a `description`
+   * and others don't — a feed where only a few items have a due date or a
+   * sender. The list is still a two-line list (the glyphs stay `md`, so the
+   * column of them lines up); the rows without one are simply shorter.
+   *
+   * `descriptionRequired` wins when both are set: demanding it already allows it.
+   *
+   * Such a list does NOT auto-compact past {@link LIST_COMPACT_AFTER} rows —
+   * see {@link listCompacts}. `compact: true` still forces it.
+   */
+  descriptionOptional?: boolean
   /**
    * `"link"` rows each carry an `href` and render as REAL anchors (role
    * `link`, routed through the app's `LinkProvider`) — never an onClick;
@@ -153,16 +281,25 @@ type ListLeftData<L> = L extends "module"
   ? { module: ModuleId }
   : L extends "alert"
     ? { alert: AlertType }
-    : L extends AvatarVariant["type"]
-      ? { avatar: AvatarData<L> }
-      : object
+    : // The icon glyph takes a `color` no other left kind does — the rest carry
+      // their own identity (a face, a flag, a module's brand), an icon does not.
+      L extends "icon"
+      ? { avatar: AvatarData<"icon"> & { color?: ListIconColor } }
+      : L extends AvatarVariant["type"]
+        ? { avatar: AvatarData<L> }
+        : object
 
-type ListRightData<R> = R extends "counter"
-  ? { count: number }
+/** The row data a schema field demands, or merely allows under `rightOptional`. */
+type Demanded<T, Optional> = Optional extends true ? Partial<T> : T
+
+type ListRightData<R, Optional> = R extends "counter"
+  ? Demanded<{ count: number }, Optional>
   : R extends `${infer T extends F0AvatarListProps["type"]}-list`
-    ? { avatars: Array<AvatarData<T>>; remainingCount?: number }
+    ? Demanded<{ avatars: Array<AvatarData<T>> }, Optional> & {
+        remainingCount?: number
+      }
     : R extends AvatarVariant["type"]
-      ? { rightAvatar: AvatarData<R> }
+      ? Demanded<{ rightAvatar: AvatarData<R> }, Optional>
       : object
 
 type ListClickData<C> = C extends "link" ? { href: string } : object
@@ -174,16 +311,32 @@ type ListTextData<S extends ListSchema> = {
   : { subtitle?: never }) &
   (S["descriptionRequired"] extends true
     ? { description: string }
-    : { description?: never })
+    : S["descriptionOptional"] extends true
+      ? { description?: string }
+      : { description?: never })
+
+/**
+ * One HOVER ACTION on a `list` row: an icon button over the row's right edge
+ * that acts on that row alone — "Clock out", "Dismiss". Per ROW rather than per
+ * schema, because unlike everything else about a row what you can do to it is
+ * genuinely its own: a feed mixes items you can dismiss with items you can't.
+ */
+export type ListRowAction = HomeListItemAction
 
 /** One row of a `list` slot — its shape FOLLOWS from the slot's schema. */
 export type ListItem<S extends ListSchema = ListSchema> = {
   id: string | number
   /** An accent dot on the left glyph — unseen/pending. */
   unread?: boolean
+  /**
+   * What can be DONE to this row, revealed on hover (and on focus, so they are
+   * reachable by keyboard) behind a fade over whatever the row trails. Keep it
+   * to two: the strip covers the row's right-hand side while it shows.
+   */
+  actions?: ListRowAction[]
 } & ListTextData<S> &
   ListLeftData<S["left"]> &
-  ListRightData<S["right"]> &
+  ListRightData<S["right"], S["rightOptional"]> &
   ListClickData<S["clickBehavior"]>
 
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
@@ -197,6 +350,20 @@ export interface ListParams<S extends ListSchema = ListSchema> {
  * a tooltip on the row, and the glyphs drop to `sm`.
  */
 export const LIST_COMPACT_AFTER = 6
+
+/**
+ * Whether a list draws itself compact: asked for, or long enough to have earned
+ * it.
+ *
+ * Auto-compacting tames a long column of UNIFORMLY two-line rows — that is the
+ * wall it was written for. A list whose second line is OPTIONAL is not that
+ * column (most of its rows are already one line, and folding the few that
+ * aren't would hide the only thing distinguishing them), so it compacts only
+ * when the schema asks it to.
+ */
+const listCompacts = (schema: ListSchema, visibleRows: number): boolean =>
+  Boolean(schema.compact) ||
+  (!schema.descriptionOptional && visibleRows > LIST_COMPACT_AFTER)
 
 /** `event-list` params: f0 calendar-event rows (color band + date avatars). */
 export interface EventListParams {
@@ -461,7 +628,7 @@ type ListRow = {
   subtitle?: string
   description?: string
   unread?: boolean
-  avatar?: object
+  avatar?: object & { icon?: IconType; color?: ListIconColor }
   module?: ModuleId
   alert?: AlertType
   count?: number
@@ -469,18 +636,31 @@ type ListRow = {
   avatars?: AvatarData<F0AvatarListProps["type"]>[]
   remainingCount?: number
   href?: string
+  actions?: ListRowAction[]
 }
 
 /** The left props a row gets from its schema's `left` kind. */
 const listLeft = (
   left: ListLeftKind | undefined,
   row: ListRow,
-  avatarSize: AvatarSize & ("sm" | "md")
+  avatarSize: AvatarSize & ListGlyphSize
 ) => {
   if (left === "module" && row.module)
     return { left: <F0AvatarModule module={row.module} size={avatarSize} /> }
   if (left === "alert" && row.alert)
     return { left: <F0AvatarAlert type={row.alert} size={avatarSize} /> }
+  // A TINTED icon is the Home kit's own glyph, so it goes in as a node. An icon
+  // row without a `color` falls through to the plain `F0AvatarIcon` below.
+  if (left === "icon" && row.avatar?.icon && row.avatar.color)
+    return {
+      left: (
+        <ListIconGlyph
+          icon={row.avatar.icon}
+          color={row.avatar.color}
+          size={avatarSize}
+        />
+      ),
+    }
   if (left && row.avatar)
     return {
       avatar: { type: left, ...row.avatar } as AvatarVariant,
@@ -489,10 +669,16 @@ const listLeft = (
   return {}
 }
 
-/** The right node a row gets from its schema's `right` kind. */
+/**
+ * The right node a row gets from its schema's `right` kind. The faces are sized
+ * from the same step as the left glyph but one down: they are WHO a row is
+ * about, which is secondary to what it is, and a strip of them matching the
+ * leading glyph turns the row into two competing anchors.
+ */
 const listRight = (
   right: ListRightKind | undefined,
-  row: ListRow
+  row: ListRow,
+  avatarSize: "sm" | "md"
 ): ReactNode => {
   if (!right) return undefined
   if (right === "counter")
@@ -501,7 +687,7 @@ const listRight = (
     return row.avatars && row.avatars.length > 0 ? (
       <F0AvatarList
         type={right.slice(0, -"-list".length) as F0AvatarListProps["type"]}
-        size="sm"
+        size={avatarSize}
         // Explicit, because it is the prop that actually produces the compact
         // strip this slot documents. The deprecated `layout="compact"` that
         // used to sit here was inert, so the strip was really sized by the
@@ -514,10 +700,26 @@ const listRight = (
   return row.rightAvatar ? (
     <F0Avatar
       avatar={{ type: right, ...row.rightAvatar } as AvatarVariant}
-      size="sm"
+      size={avatarSize}
     />
   ) : undefined
 }
+
+/**
+ * How big a row's LEADING glyph draws. Prescriptive, from two things the row
+ * cannot argue with:
+ *
+ * - its own SHAPE — two-line rows carry a bigger glyph than one-line ones, so
+ *   the glyph is about as tall as the text beside it either way;
+ * - the CARD's width — in the Home's 396px rail a 40px tile beside a truncated
+ *   title is the loudest thing in the widget, and in the main column the same
+ *   row at rail size reads as a list that forgot to grow. Past the frame's wide
+ *   threshold every step moves up one (see `useWidgetIsWide`).
+ *
+ * Compact rows are one-line by definition, so they take the one-line step.
+ */
+const listGlyphSize = (twoLine: boolean, isWide: boolean): ListGlyphSize =>
+  isWide ? (twoLine ? "lg" : "md") : twoLine ? "md" : "sm"
 
 /**
  * The `list` slot's body. A component rather than a plain render function
@@ -532,39 +734,62 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const { schema, items } = params
   const allRows = items as ListRow[]
   const [expanded, setExpanded] = useState(false)
+  // ASKED, not measured: the slot is built before the frame renders but drawn
+  // inside it, so the card it landed in is the one thing it can only learn from
+  // context. `false` for a list rendered outside a `Widget`.
+  const isWide = useWidgetIsWide()
 
   const max = schema.maxVisibleItems
   const overflows = max != null && allRows.length > max
   const rows = overflows && !expanded ? allRows.slice(0, max) : allRows
+  // "View more" can reveal thirty rows at once, and thirty of them animating in
+  // is a shove rather than a change — past a few, the list is simply new.
+  const isBulkChange = useIsBulkChange(rows.length)
 
-  const compact = Boolean(schema.compact) || rows.length > LIST_COMPACT_AFTER
-  const twoLine = Boolean(schema.descriptionRequired) && !compact
-  const avatarSize = twoLine ? "md" : "sm"
+  const compact = listCompacts(schema, rows.length)
+  // A list that ALLOWS a second line is a two-line list even where a given row
+  // has none: the glyphs keep the two-line step so the column of them lines up
+  // down the card.
+  const twoLine =
+    (Boolean(schema.descriptionRequired) ||
+      Boolean(schema.descriptionOptional)) &&
+    !compact
+  const avatarSize = listGlyphSize(twoLine, isWide)
+  const rightAvatarSize = isWide ? "md" : "sm"
 
   return (
     <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-      {rows.map(({ href, description, ...row }) => {
-        const node = (
-          <HomeListItem
-            title={row.title}
-            subtitle={row.subtitle}
-            description={compact ? undefined : description}
-            unread={row.unread}
-            {...listLeft(schema.left, row, avatarSize)}
-            right={listRight(schema.right, row)}
-            href={schema.clickBehavior === "link" ? href : undefined}
-          />
-        )
-        return compact && description ? (
-          // The hidden second line surfaces on hover. The span is the
-          // tooltip's trigger — HomeListItem doesn't forward trigger props.
-          <Tooltip key={row.id} label={description}>
-            <span className="block">{node}</span>
-          </Tooltip>
-        ) : (
-          <div key={row.id}>{node}</div>
-        )
-      })}
+      {/* Keyed by the row's OWN id, so a row that goes away is the one that
+          animates out and the rest close the gap. */}
+      <HomeSlotItems>
+        {rows.map(({ href, description, ...row }) => {
+          const node = (
+            <HomeListItem
+              title={row.title}
+              subtitle={row.subtitle}
+              description={compact ? undefined : description}
+              unread={row.unread}
+              {...listLeft(schema.left, row, avatarSize)}
+              right={listRight(schema.right, row, rightAvatarSize)}
+              actions={row.actions}
+              href={schema.clickBehavior === "link" ? href : undefined}
+            />
+          )
+          return (
+            <HomeSlotItem key={row.id} animated={!isBulkChange}>
+              {compact && description ? (
+                // The hidden second line surfaces on hover. The span is the
+                // tooltip's trigger — HomeListItem doesn't forward trigger props.
+                <Tooltip label={description}>
+                  <span className="block">{node}</span>
+                </Tooltip>
+              ) : (
+                node
+              )}
+            </HomeSlotItem>
+          )
+        })}
+      </HomeSlotItems>
       {overflows ? (
         <div className="mt-1 self-start">
           {/* `neutral`, the same button a widget's own call to action is (the
@@ -580,6 +805,41 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
           />
         </div>
       ) : null}
+    </div>
+  )
+}
+
+/**
+ * The `event-list` slot's body. A component rather than a plain render function
+ * for the same reason `ListSlot` is one: the churn animation asks whether this
+ * render is a bulk replacement, and that is a hook.
+ *
+ * The events are drawn here rather than through `CalendarEventList` for one
+ * reason: that component's `showAllItems` container has no gap, and its `gap`
+ * prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
+ * DIRECT parent of the event items, which is this container.
+ */
+function EventListSlot({
+  params,
+  ctx,
+}: {
+  params: EventListParams
+  ctx: HomeRenderCtx
+}) {
+  const { events } = params
+  const isBulkChange = useIsBulkChange(events.length)
+
+  return (
+    <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
+      {/* The same churn the `list` rows get — an event dropping off the widget
+          should read as one leaving, not as a redraw. */}
+      <HomeSlotItems>
+        {events.map((event) => (
+          <HomeSlotItem key={event.title} animated={!isBulkChange}>
+            <CalendarEvent {...event} />
+          </HomeSlotItem>
+        ))}
+      </HomeSlotItems>
     </div>
   )
 }
@@ -604,6 +864,13 @@ export const SLOT_SKELETON_ITEM_TESTID = "slot-skeleton-item"
  * than as items, so the placeholder titles vary the way real ones do.
  */
 const SKELETON_TITLE_WIDTHS = ["w-1/2", "w-2/3", "w-2/5", "w-3/5"]
+
+/** A placeholder glyph's box per step — the rounding is the schema's business. */
+const SKELETON_GLYPH_SIZE = {
+  sm: "size-6",
+  md: "size-8",
+  lg: "size-10",
+} satisfies Record<ListGlyphSize, string>
 
 const skeletonTitleWidth = (index: number) =>
   SKELETON_TITLE_WIDTHS[index % SKELETON_TITLE_WIDTHS.length]
@@ -635,14 +902,23 @@ const ListSlotSkeleton = ({
   ctx: HomeSkeletonCtx
 }) => {
   const schema = params.schema ?? {}
+  const isWide = useWidgetIsWide()
   // Rows past `maxVisibleItems` fold behind "View more", so the loaded list
   // never shows more than that — nor should the placeholder.
   const count = Math.max(
     0,
     Math.min(ctx.expectedItemsCount, schema.maxVisibleItems ?? Infinity)
   )
-  const compact = Boolean(schema.compact) || count > LIST_COMPACT_AFTER
-  const twoLine = Boolean(schema.descriptionRequired) && !compact
+  const compact = listCompacts(schema, count)
+  // Same rule the real list follows, so the glyphs are the size they will be.
+  const twoLine =
+    (Boolean(schema.descriptionRequired) ||
+      Boolean(schema.descriptionOptional)) &&
+    !compact
+  // The SECOND LINE, though, is only drawn where every row is going to have
+  // one: with `descriptionOptional` some rows won't, and a placeholder that
+  // promises a line each would leave the card taller than what replaces it.
+  const twoLinePlaceholder = Boolean(schema.descriptionRequired) && !compact
   // More items than the list will show means the loaded list carries the "View
   // more" button at its bottom — so the placeholder leaves room for it.
   const overflows = ctx.expectedItemsCount > count
@@ -660,14 +936,15 @@ const ListSlotSkeleton = ({
             <Skeleton
               className={cn(
                 "shrink-0",
-                twoLine ? "size-8" : "size-6",
+                // The size the real glyph will be — same rule, same card.
+                SKELETON_GLYPH_SIZE[listGlyphSize(twoLine, isWide)],
                 schema.left === "person" ? "rounded-full" : "rounded-sm"
               )}
             />
           ) : null}
           <div className="flex min-w-0 flex-1 flex-col">
             <SkeletonLine className={skeletonTitleWidth(index)} />
-            {twoLine ? <SkeletonLine className="w-1/4" /> : null}
+            {twoLinePlaceholder ? <SkeletonLine className="w-1/4" /> : null}
           </div>
           {schema.right ? (
             <Skeleton className="h-4 w-10 shrink-0 rounded-sm" />
@@ -767,16 +1044,9 @@ export const defaultSlotRenderers: SlotRenderers = {
   // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
   // DIRECT parent of the event items, which is this container.
   "event-list": {
-    render: (params, ctx) => {
-      const { events } = params as EventListParams
-      return (
-        <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
-          {events.map((event) => (
-            <CalendarEvent key={event.title} {...event} />
-          ))}
-        </div>
-      )
-    },
+    render: (params, ctx) => (
+      <EventListSlot params={params as EventListParams} ctx={ctx} />
+    ),
     skeleton: (_params, ctx) => <EventListSlotSkeleton ctx={ctx} />,
   },
   indicators: {
