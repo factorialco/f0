@@ -1414,6 +1414,8 @@ export const WithCustomTrigger: Story = {
 }
 
 export const CustomTriggerFillsContainerHeight: Story = {
+  // A regression guard, not documentation
+  tags: ["!dev"],
   args: {
     label: "Choose a color",
     onChange: fn(),
@@ -1443,16 +1445,16 @@ export const CustomTriggerFillsContainerHeight: Story = {
     /*
      * A custom trigger sizes its content against the consumer's container, so
      * every wrapper F0Select renders in between has to pass that height
-     * through. Asserted in real pixels because a wrapper that swallows the
-     * height still renders a perfectly valid DOM, with a 1px tolerance for
-     * subpixel layout under display scaling.
+     * through — a wrapper that swallows it still renders a valid DOM, so this
+     * has to be real pixels. 1px tolerance for subpixel display scaling.
      */
     const trigger = canvas.getByRole("combobox")
-    const field = canvas.getByTestId("fixed-height-field")
-    const drift = Math.abs(
-      trigger.getBoundingClientRect().height -
-        field.getBoundingClientRect().height
-    )
+    const fieldHeight = canvas
+      .getByTestId("fixed-height-field")
+      .getBoundingClientRect().height
+    // Without layout (0 vs 0) the comparison below would pass vacuously
+    await expect(fieldHeight).toBeGreaterThan(0)
+    const drift = Math.abs(trigger.getBoundingClientRect().height - fieldHeight)
     await expect(drift).toBeLessThanOrEqual(1)
   },
 }

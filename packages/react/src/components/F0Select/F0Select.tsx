@@ -1203,7 +1203,7 @@ const F0SelectComponent = forwardRef(function Select<
      * and this box must pass that height through like it passes the width.
      */
     const box = (
-      <div className={cn("w-full min-w-0", children && "h-full")}>
+      <div className={cn("w-full min-w-0", !!children && "h-full")}>
         {trigger}
       </div>
     )

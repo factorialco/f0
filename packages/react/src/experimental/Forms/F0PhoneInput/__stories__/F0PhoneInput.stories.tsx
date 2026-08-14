@@ -41,6 +41,31 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
+/**
+ * The country trigger spans the field, so flag, dial code and number share a
+ * baseline — it collapses whenever F0Select stops passing the height through.
+ * Measured against the field's content box, which is what the trigger's
+ * `h-full` resolves against: `clientHeight` on its own would silently fold in
+ * any padding the field grows later and fail an alignment that is still right.
+ * 1px tolerance because layout is subpixel under display scaling while the
+ * content box is rounded, and the collapse this guards is ~10px.
+ */
+const expectCountryTriggerSpansField = async (
+  canvas: ReturnType<typeof within>
+) => {
+  const trigger = canvas.getByTestId("phone-input-country-trigger")
+  const field = canvas.getByTestId("input-field-wrapper")
+  const { paddingTop, paddingBottom } = getComputedStyle(field)
+  const fieldHeight =
+    field.clientHeight -
+    (parseFloat(paddingTop) || 0) -
+    (parseFloat(paddingBottom) || 0)
+  // Without layout (0 vs 0) the comparison below would pass vacuously
+  await expect(fieldHeight).toBeGreaterThan(0)
+  const drift = Math.abs(trigger.getBoundingClientRect().height - fieldHeight)
+  await expect(drift).toBeLessThanOrEqual(1)
+}
+
 export const NoDefaultCountry: Story = {
   args: {
     defaultCountry: undefined,
@@ -48,6 +73,8 @@ export const NoDefaultCountry: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.queryByText(/^\+\d/)).not.toBeInTheDocument()
+    // Nothing selected: F0Select renders the trigger box without its tooltip
+    await expectCountryTriggerSpansField(canvas)
   },
 }
 
@@ -60,16 +87,7 @@ export const Prefilled: Story = {
     const input = canvas.getByRole("textbox")
     await expect(input).toHaveValue("674 89 79 45")
     await expect(canvas.getByText("+34")).toBeInTheDocument()
-    // The country trigger spans the field, so flag, dial code and number share
-    // a baseline — it collapses whenever F0Select stops passing height through.
-    // Compared with a 1px tolerance: layout is subpixel under display scaling
-    // while clientHeight is rounded, and the collapse this guards is ~10px
-    const trigger = canvas.getByTestId("phone-input-country-trigger")
-    const field = canvas.getByTestId("input-field-wrapper")
-    const drift = Math.abs(
-      trigger.getBoundingClientRect().height - field.clientHeight
-    )
-    await expect(drift).toBeLessThanOrEqual(1)
+    await expectCountryTriggerSpansField(canvas)
   },
 }
 
