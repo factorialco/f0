@@ -121,6 +121,10 @@ const config: StorybookConfig = {
 
     // ── Resources · hooks, utilities, examples ───────────────────
     { directory: "../src/lib/F0Box", titlePrefix: "Components" }, // layout primitive → Components
+    {
+      directory: "../src/lib/InfoHint",
+      titlePrefix: "Components/Primitives",
+    }, // shared ⓘ chrome behind table headers and widget titles → Primitives
     { directory: "../src/lib/Await", titlePrefix: "Resources" },
     { directory: "../src/lib/F0GridStack", titlePrefix: "Resources" },
     { directory: "../src/lib/OneEllipsis", titlePrefix: "Resources" },
