@@ -47,7 +47,11 @@ import {
 import { SlotWidget } from "../SlotWidget"
 import { useRailMotion } from "./useRailMotion"
 import { useScrollFade } from "../useScrollFade"
-import { WidgetContainer, type WidgetContainerSide } from "../WidgetContainer"
+import {
+  WidgetContainer,
+  type WidgetContainerSide,
+  type WidgetVirtualization,
+} from "../WidgetContainer"
 import {
   widgetTitle,
   type HomeRenderCtx,
@@ -204,6 +208,30 @@ export interface NewHomeLayoutProps {
    */
   editableWidgetContainers?: WidgetContainerSide[]
   /**
+   * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
+   * default: for a Home of a dozen widgets, mounting them all is what keeps a
+   * card's data, clock and animation alive across everything this layout does to
+   * it, and virtualizing would trade that away for nothing.
+   *
+   * Name a side once its widgets can outnumber a screen — a hundred cards is a
+   * hundred fetches and a hundred charts, and all but the three in view are work
+   * nobody asked for. Below `virtualization.threshold` widgets (12 by default) the
+   * column still renders them all, so naming a side here is a CEILING rather than
+   * a switch. What it costs is on `WidgetVirtualization`; in short, a widget that
+   * scrolls out is unmounted and comes back new, and only the cards in view get
+   * out of a dragged one's way.
+   *
+   * STACKED (below `md`) the rail's widgets belong to the main column, so "main"
+   * is what virtualizes them there.
+   */
+  virtualizedWidgetContainers?: WidgetContainerSide[]
+  /**
+   * Tuning for the above — the height a card is guessed at before it is measured,
+   * how many are kept past each edge, and the count it starts at. The scroll
+   * region is this layout's own, per side, and is not yours to set.
+   */
+  virtualization?: Omit<WidgetVirtualization, "scrollElement">
+  /**
    * Called with a widget id when its "Remove widget" menu item is used — the
    * three-dots menu in the widget's own header.
    */
@@ -279,6 +307,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       slotRenderers,
       renderWidget,
       editableWidgetContainers = ["main", "right"],
+      virtualizedWidgetContainers = [],
+      virtualization,
       onRemoveWidget,
       onChangeWidgetParams,
       renderWidgetPreview,
@@ -358,6 +388,27 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // reached the end.
     const mainFade = useScrollFade()
     const railFade = useScrollFade()
+    // The COLLAPSED strip is a third scroll region — a tall enough one, once the
+    // rail holds more widgets than a screen of 40px glyphs.
+    const stripFade = useScrollFade()
+
+    /**
+     * WHAT A COLUMN IS ON SCREEN OF, for the sides that virtualize: its own
+     * scroll region, which is the box the fades are already watching. Handed over
+     * rather than left to be walked for, because this layout knows the answer —
+     * and the rail's is not the ancestor a walk would find while the rail is a
+     * floating panel.
+     */
+    const virtualizationFor = (
+      side: WidgetContainerSide
+    ): WidgetVirtualization | false =>
+      virtualizedWidgetContainers.includes(side)
+        ? {
+            ...virtualization,
+            scrollElement:
+              side === "main" ? mainFade.element : railFade.element,
+          }
+        : false
 
     const hasSide =
       aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
@@ -697,6 +748,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             slotRenderers={slotRenderers}
             renderWidget={renderWidget}
             ctx={ctx}
+            virtualized={virtualizationFor("main")}
             disableEdition={!canEditSide("main")}
             onReorder={
               onReorderWidgets
@@ -727,15 +779,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           {stacked || !sideReady || !collapsed ? null : (
             // The collapsed strip: one avatar per widget, the widget's own
             // catalog glyph. Hover/click floats the widget over the feed.
-            // NO FADE HERE: the strip is a short column of 40px glyphs, and a
-            // mask over those washes the glyphs themselves out rather than
-            // hinting at content past an edge. The fade belongs to the expanded
-            // rail, where the content is tall cards.
+            // IT FADES AT AN OVERFLOWING END, like both columns: a strip of
+            // enough widgets scrolls, and cut off at the edge with nothing to
+            // say so, the glyph you can half-see reads as the last one. The
+            // fade is scroll-aware (`useScrollFade`), so a strip that fits —
+            // which is most of them — is not masked at all, and the washing-out
+            // a static mask over 40px glyphs would be never happens.
             // `-m-1 p-1`: the hasUpdates dot pokes 2px past the 40px glyphs,
             // and the scrollport would clip it — bleed the scrollport out by
             // 4px (padding puts the glyphs back) so the dot stays inside it.
+            // The bleed is where the fade starts, too, so it opens on the gap
+            // above the first glyph rather than on the glyph itself.
             <motion.aside
               key="collapsed-strip"
+              ref={stripFade.ref}
               className={cn(
                 // `items-start` so a glyph is 40px wide whatever the column is
                 // doing: the strip lives in the rail's column, and that column
@@ -757,6 +814,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 // what lets the cards look like they are going INTO them.
                 width: "fit-content",
                 justifySelf: "end",
+                ...stripFade.style,
               }}
               initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
@@ -883,6 +941,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
               ctx={ctx}
+              // The rail virtualizes only while it is a COLUMN — as a floating
+              // panel it is one card in a box of its own, and the container reads
+              // that off `visibleWidgetId` by itself, mounting only the card the
+              // panel shows. The setting stays put through the change: it decides
+              // how the widgets are drawn, and a prop that came and went would be
+              // one more thing moving mid-gesture.
+              virtualized={virtualizationFor("right")}
               // NOT gated on `collapsed`: whether the column is arrangeable
               // decides its tree's SHAPE (a draggable column is wrapped in a
               // DndContext), and a shape that changed when the rail collapsed

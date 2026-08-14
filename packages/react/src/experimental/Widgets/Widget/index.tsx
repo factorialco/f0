@@ -1,5 +1,12 @@
+import { useComposedRefs } from "@radix-ui/react-compose-refs"
 import { cva, type VariantProps } from "cva"
-import React, { forwardRef, ReactNode, useEffect } from "react"
+import React, {
+  forwardRef,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 
 import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -113,6 +120,65 @@ const InlineDot = () => (
 )
 
 /**
+ * A WIDER CARD SPEAKS UP. The same widget sits in a Home's 396px rail and in
+ * the main column beside it, and at the second width a 14px title over small
+ * glyphs reads as a footnote pinned to a large surface. Past this width the
+ * frame grows its title and its footer button, and its CONTENT grows its glyphs
+ * (see {@link useWidgetIsWide}).
+ *
+ * 480px, so the rail (396px) stays exactly as it is and only a card that has
+ * genuinely more room grows.
+ */
+const WIDE_WIDGET_PX = 480
+
+/**
+ * MEASURED, not asked for with a CSS container query, because two of the things
+ * that react to it are PROPS rather than classes — `F0Button`'s size, an
+ * avatar's — and one source of truth for "wide" beats a media query and a
+ * measurement that can disagree by a frame. It starts `false`, so the first
+ * paint is the card as it has always been and a wide one grows into it.
+ *
+ * `clientWidth`, NOT `getBoundingClientRect().width`: a bounding rect is
+ * multiplied by any `transform: scale()` an ancestor applies (a zoom-to-fit
+ * preview frame, a dragged card's lift), so a card would change its own type
+ * scale while it was being scaled. `clientWidth` is the layout metric and
+ * ignores transforms.
+ */
+const useIsWide = (ref: React.RefObject<HTMLElement | null>) => {
+  const [isWide, setIsWide] = useState(false)
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element || typeof ResizeObserver === "undefined") return
+
+    const measure = () => setIsWide(element.clientWidth >= WIDE_WIDGET_PX)
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [ref])
+
+  return isWide
+}
+
+/**
+ * Whether the surrounding widget is WIDE, for content that has to size itself to
+ * the card it landed in — Home's list rows step their glyphs up a size here (see
+ * `slotRenderers`).
+ *
+ * A CONTEXT rather than a prop or a second measurement, because a widget's
+ * content is handed to the frame as `children`: it is built before the frame
+ * renders and cannot be told, but it renders INSIDE it and can therefore ask.
+ * One observer on the card answers for everything in it.
+ *
+ * `false` outside a `Widget`, so a row rendered on its own is the narrow one.
+ */
+const WidgetIsWideContext = React.createContext(false)
+
+export const useWidgetIsWide = () => React.useContext(WidgetIsWideContext)
+
+/**
  * The TITLE AS A LINK: title text plus a chevron, in one target that behaves like
  * a ghost button — a tint on hover, a ring on focus. The negative margin with the
  * matching padding is what keeps the title on the same line it sits on when it is
@@ -139,15 +205,28 @@ const TITLE_LINK_CLASS = cn(
 const WidgetTitle = ({
   title,
   link,
+  isWide,
 }: {
   title: string
   link?: NonNullable<WidgetProps["header"]>["link"]
+  /** The card has room: the title steps up a size (see {@link WIDE_WIDGET_PX}). */
+  isWide?: boolean
 }) => {
-  if (!link) return <CardTitle className="truncate">{title}</CardTitle>
+  // `text-lg` IS the design's wide title, token for token: 1rem on a 1.5rem line
+  // box at -0.01em (f0's `fontSize.lg`), `font-semibold` for its 600 — the one
+  // thing `CardTitle`'s own `font-medium` doesn't already give. Its `m-0`,
+  // `text-left` and `hsl(var(--neutral-100))` are the h3's computed values here
+  // and `text-f1-foreground` respectively, so nothing needs to say them twice.
+  //
+  // 24px is also the `min-h-6` the header row already reserves, so growing the
+  // title never moves anything beside it.
+  const titleClass = cn("truncate", isWide && "text-lg font-semibold")
+
+  if (!link) return <CardTitle className={titleClass}>{title}</CardTitle>
 
   const content = (
     <>
-      <CardTitle className="truncate">{title}</CardTitle>
+      <CardTitle className={titleClass}>{title}</CardTitle>
       {/* No colour of its own: `currentColor` makes it exactly the title's, and
           the two read as ONE label rather than a label beside a control. */}
       <F0Icon size="sm" icon={link.icon ?? ChevronRight} />
@@ -209,6 +288,11 @@ const Container = forwardRef<
   },
   ref
 ) {
+  // The card measures ITSELF, so the ref is both the caller's and ours.
+  const cardRef = useRef<HTMLDivElement>(null)
+  const composedRef = useComposedRefs(ref, cardRef)
+  const isWide = useIsWide(cardRef)
+
   useEffect(() => {
     if (!isDragging || !onDragEnd) return
     // The pointer can be released anywhere, so the end of a drag is a document
@@ -242,154 +326,173 @@ const Container = forwardRef<
   }
 
   return (
-    <Card
-      className={cn(
-        fullHeight ? "h-full" : "",
-        "relative flex gap-3 border-f1-border-secondary",
-        draggable && "hover:border-f1-border-hover",
-        selected &&
-          "border-f1-border-selected-bold shadow-[0_0_0_4px_hsl(var(--selected-50)/0.1)]",
-        isDragging &&
-          "cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)]"
-      )}
-      ref={ref}
-    >
-      {header && (
-        <CardHeader className="-mr-1 -mt-1">
-          <div className="flex w-full flex-1 flex-col gap-4">
-            <div className="flex flex-1 flex-row flex-nowrap items-center justify-between gap-2">
-              {draggable && (
-                <div
-                  className="-ml-1 flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
-                  onMouseDown={onDragStart}
-                  data-gs-handle="true"
-                >
-                  <F0Icon icon={Handle} size="xs" />
-                </div>
-              )}
-              {/* `min-w-0` rather than `truncate`: the ellipsis belongs to the
+    <WidgetIsWideContext.Provider value={isWide}>
+      <Card
+        className={cn(
+          fullHeight ? "h-full" : "",
+          "relative flex gap-3 border-f1-border-secondary",
+          draggable && "hover:border-f1-border-hover",
+          selected &&
+            "border-f1-border-selected-bold shadow-[0_0_0_4px_hsl(var(--selected-50)/0.1)]",
+          isDragging &&
+            "cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)]"
+        )}
+        ref={composedRef}
+      >
+        {header && (
+          <CardHeader className="-mr-1 -mt-1">
+            <div className="flex w-full flex-1 flex-col gap-4">
+              <div className="flex flex-1 flex-row flex-nowrap items-center justify-between gap-2">
+                {draggable && (
+                  <div
+                    className="-ml-1 flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
+                    onMouseDown={onDragStart}
+                    data-gs-handle="true"
+                  >
+                    <F0Icon icon={Handle} size="xs" />
+                  </div>
+                )}
+                {/* `min-w-0` rather than `truncate`: the ellipsis belongs to the
                   TITLE, which carries its own (see `WidgetTitle`), and an
                   `overflow: hidden` here clipped the linked title's hover
                   background where it bleeds past the content box. */}
-              <div className="flex min-h-6 min-w-0 grow flex-row items-center gap-1">
-                {header.title && (
-                  <WidgetTitle title={header.title} link={header.link} />
-                )}
-                {header.subtitle && (
-                  <div className="flex flex-row items-center gap-1">
-                    <InlineDot />
-                    <CardSubtitle className="truncate">
-                      {header.subtitle}
-                    </CardSubtitle>
-                  </div>
-                )}
-                {header.info && (
-                  <Tooltip label={header.info}>
-                    <F0Icon
-                      icon={InfoCircleLine}
-                      size="sm"
-                      className="text-f1-foreground-secondary"
+                <div className="flex min-h-6 min-w-0 grow flex-row items-center gap-1">
+                  {header.title && (
+                    <WidgetTitle
+                      title={header.title}
+                      link={header.link}
+                      isWide={isWide}
                     />
-                  </Tooltip>
-                )}
-                {header.count && (
-                  <div className="ml-0.5">
-                    <Counter value={header.count} />
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-row items-center gap-3">
-                {alert && <F0TagAlert text={alert} level="critical" />}
-                {status && (
-                  <F0TagStatus text={status.text} variant={status.variant} />
-                )}
-                {AIButton && (
-                  <AIButtonComponent
-                    size="sm"
-                    label={t.ai.ask}
-                    onClick={AIButton}
-                    icon={OneIcon}
-                  />
-                )}
-                {actions && (
-                  <DropdownInternal items={actions} align="end">
-                    <F0Button
-                      icon={Ellipsis}
-                      label="Actions"
-                      variant="ghost"
+                  )}
+                  {header.subtitle && (
+                    <div className="flex flex-row items-center gap-1">
+                      <InlineDot />
+                      <CardSubtitle className="truncate">
+                        {header.subtitle}
+                      </CardSubtitle>
+                    </div>
+                  )}
+                  {header.info && (
+                    <Tooltip label={header.info}>
+                      <F0Icon
+                        icon={InfoCircleLine}
+                        size="sm"
+                        className="text-f1-foreground-secondary"
+                      />
+                    </Tooltip>
+                  )}
+                  {header.count && (
+                    <div className="ml-0.5">
+                      <Counter value={header.count} />
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-row items-center gap-3">
+                  {alert && <F0TagAlert text={alert} level="critical" />}
+                  {status && (
+                    <F0TagStatus text={status.text} variant={status.variant} />
+                  )}
+                  {AIButton && (
+                    <AIButtonComponent
                       size="sm"
-                      hideLabel
+                      label={t.ai.ask}
+                      onClick={AIButton}
+                      icon={OneIcon}
                     />
-                  </DropdownInternal>
-                )}
-                {/* No link here: it is the TITLE (see `WidgetTitle`). This
+                  )}
+                  {actions && (
+                    <DropdownInternal items={actions} align="end">
+                      <F0Button
+                        icon={Ellipsis}
+                        label="Actions"
+                        variant="ghost"
+                        size="sm"
+                        hideLabel
+                      />
+                    </DropdownInternal>
+                  )}
+                  {/* No link here: it is the TITLE (see `WidgetTitle`). This
                     corner belongs to the overflow menu. */}
+                </div>
               </div>
+              {header.comment && (
+                <div className="flex flex-row items-center gap-3 overflow-visible">
+                  <PrivateBox>
+                    <CardComment>{header.comment}</CardComment>
+                  </PrivateBox>
+                  {!!header.canBeBlurred && (
+                    <span>
+                      <F0Button
+                        icon={privacyModeEnabled ? EyeInvisible : EyeVisible}
+                        hideLabel
+                        label="hide/show"
+                        variant="outline"
+                        onClick={togglePrivacyMode}
+                        size="sm"
+                      />
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            {header.comment && (
-              <div className="flex flex-row items-center gap-3 overflow-visible">
-                <PrivateBox>
-                  <CardComment>{header.comment}</CardComment>
-                </PrivateBox>
-                {!!header.canBeBlurred && (
-                  <span>
-                    <F0Button
-                      icon={privacyModeEnabled ? EyeInvisible : EyeVisible}
-                      hideLabel
-                      label="hide/show"
-                      variant="outline"
-                      onClick={togglePrivacyMode}
-                      size="sm"
-                    />
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </CardHeader>
-      )}
-      <CardContent className="flex h-full flex-col gap-4">
-        {summaries && (
-          <div className="flex flex-row">
-            {summaries.map((summary, index) => (
-              <div key={index} className="grow">
-                <div className="mb-0.5 text-sm text-f1-foreground-secondary">
-                  {summary.label}
-                </div>
-                <div className="flex flex-row items-end gap-0.5 text-2xl font-semibold">
-                  {!!summary.prefixUnit && (
-                    <div className="text-lg font-medium">
-                      {summary.prefixUnit}
-                    </div>
-                  )}
-                  {summary.value}
-                  {!!summary.postfixUnit && (
-                    <div className="text-lg font-medium">
-                      {summary.postfixUnit}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          </CardHeader>
         )}
-        {React.Children.toArray(children)
-          .filter(isRealNode)
-          .map((child, index) => {
-            return (
-              <React.Fragment key={index}>
-                {index > 0 && <Separator bare />}
-                {child}
-              </React.Fragment>
-            )
-          })}
-      </CardContent>
-      {action && (
-        <CardFooter className={cn(footerClassName)}>
-          <F0Button variant="neutral" size="sm" {...action} />
-        </CardFooter>
-      )}
-    </Card>
+        <CardContent className="flex h-full flex-col gap-4">
+          {summaries && (
+            <div className="flex flex-row">
+              {summaries.map((summary, index) => (
+                <div key={index} className="grow">
+                  <div className="mb-0.5 text-sm text-f1-foreground-secondary">
+                    {summary.label}
+                  </div>
+                  <div className="flex flex-row items-end gap-0.5 text-2xl font-semibold">
+                    {!!summary.prefixUnit && (
+                      <div className="text-lg font-medium">
+                        {summary.prefixUnit}
+                      </div>
+                    )}
+                    {summary.value}
+                    {!!summary.postfixUnit && (
+                      <div className="text-lg font-medium">
+                        {summary.postfixUnit}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {React.Children.toArray(children)
+            .filter(isRealNode)
+            .map((child, index) => {
+              return (
+                <React.Fragment key={index}>
+                  {index > 0 && <Separator bare />}
+                  {child}
+                </React.Fragment>
+              )
+            })}
+        </CardContent>
+        {action && (
+          <CardFooter className={cn(footerClassName)}>
+            {/* Both are DEFAULTS, not decisions: `action` is spread after them,
+              so a widget that asks for a particular variant or size still gets
+              it.
+
+              `outline` only once the card is WIDE. In the rail the footer button
+              sits directly under a dense stack of rows, and a bordered rectangle
+              across the card there reads as one more row; the filled `neutral`
+              reads as a control. With the room a wide card has, that fill
+              becomes the heaviest thing on the card and the border is enough. */}
+            <F0Button
+              variant={isWide ? "outline" : "neutral"}
+              size={isWide ? "md" : "sm"}
+              {...action}
+            />
+          </CardFooter>
+        )}
+      </Card>
+    </WidgetIsWideContext.Provider>
   )
 })
 

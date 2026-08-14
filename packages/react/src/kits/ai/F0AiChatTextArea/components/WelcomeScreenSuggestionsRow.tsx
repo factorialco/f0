@@ -62,6 +62,19 @@ export type WelcomeScreenSuggestionsRowProps = {
    * the row below the textarea.
    */
   side?: "top" | "bottom"
+  /**
+   * Reserve height for two chip rows so a suggestion-set swap that wraps 1↔2
+   * rows cannot shift the layout above the row.
+   *
+   * True for the row standing above the composer, where the reservation is
+   * free — it sits in the empty space the welcome screen already has. False
+   * when the row is rendered INSIDE the field: there the reservation is not
+   * free, it is 72px of permanent dead height inside a bordered box, and the
+   * field grows and shrinks with its own text anyway.
+   *
+   * @default true
+   */
+  reserveTwoRows?: boolean
 }
 
 /**
@@ -74,6 +87,7 @@ export const WelcomeScreenSuggestionsRow = ({
   onItemClick,
   onItemHover,
   side = "top",
+  reserveTwoRows = true,
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const rowRef = useRef<HTMLDivElement>(null)
@@ -100,8 +114,14 @@ export const WelcomeScreenSuggestionsRow = ({
           reservation lives on this outer box and NOT on the anchor: Radix
           positions the popover off the anchor's border box, so anchoring the
           reserved height would float a single-row popover ~40px above the
-          chips it belongs to. */}
-      <div className="flex min-h-[72px] w-full items-end">
+          chips it belongs to. See `reserveTwoRows` for why the inside
+          placement opts out. */}
+      <div
+        className={cn(
+          "flex w-full items-end",
+          reserveTwoRows && "min-h-[72px]"
+        )}
+      >
         <PopoverAnchor asChild>
           <div
             ref={rowRef}

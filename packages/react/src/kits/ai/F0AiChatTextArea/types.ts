@@ -148,6 +148,40 @@ export type F0AiChatTextAreaProps = {
   ) => void
 
   /**
+   * Where the welcome suggestions row sits relative to the composer.
+   *
+   * - `"above"` (the default) — its own block over the field, the arrangement
+   *   every consumer has had: the row stands on the page, the field below it is
+   *   a plain composer, and its popover opens upward into the welcome screen's
+   *   empty space.
+   *
+   * - `"inside"` — the row moves INTO the field, at its foot, so the field's own
+   *   border and AI focus highlight enclose it and the composer reads as a
+   *   single bar about two lines tall. Its popover opens downward, because up is
+   *   now the text you are about to type.
+   *
+   * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. It also moves the
+   * send button onto the textarea's own line (at `sm`, centred on the text) and
+   * puts One's mark in front of the text. Neither is a feature bolted onto this
+   * prop — they are what make the placement possible and legible. The action row
+   * is full-width, so a chips row plus an action row inside one field is three
+   * stacked bands and the "single bar" is gone; with send trailing the text there
+   * are two, text then suggestions. The attachment, host (`toolbarStart`) and
+   * dictation controls keep their own row when the host enables them; with none
+   * of them the field is just the two bands.
+   *
+   * THE INLINE SEND FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
+   * themselves are welcome-screen-only as they always were, but a composer that
+   * put send back in the action row the moment the first message landed would
+   * change shape under the reader mid-conversation. `"inside"` therefore keeps
+   * the two-band bar for the whole thread; after the welcome screen it is simply
+   * a bar with no chips in it.
+   *
+   * @default "above"
+   */
+  welcomeScreenSuggestionsPlacement?: "above" | "inside"
+
+  /**
    * Cards rendered as a grid below the composer on the fullscreen welcome
    * screen. Each card carries its own `onClick`; the host decides the behavior.
    *

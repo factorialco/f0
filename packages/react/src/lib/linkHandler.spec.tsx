@@ -187,6 +187,26 @@ describe("isExternalHref", () => {
     expect(isExternalHref(`https://${host()}/calendar#core.events`)).toBe(false)
   })
 
+  test("THIS hostname on another PORT is still this app", () => {
+    // The regression, as reported from the frontend: the app is served through
+    // a dev server on a port (`app.local.factorial.dev:8080`) while the links it
+    // renders carry none, so comparing `host` — which includes the port — sent
+    // every internal link to a new tab and tore the SPA down to get there.
+    const { hostname } = window.location
+
+    expect(
+      isExternalHref(
+        `https://${hostname}/dashboard#core.dashboardCompanyLinksEdit`
+      )
+    ).toBe(false)
+    expect(
+      isExternalHref(
+        `https://${hostname}:8080/dashboard#core.dashboardCompanyLinksEdit`
+      )
+    ).toBe(false)
+    expect(isExternalHref(`http://${hostname}:1234/dashboard`)).toBe(false)
+  })
+
   test("another host is external, fragment or not", () => {
     expect(isExternalHref("https://factorial.co")).toBe(true)
     expect(isExternalHref("https://help.factorial.co/article#top")).toBe(true)

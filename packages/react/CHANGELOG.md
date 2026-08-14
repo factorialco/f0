@@ -1,5 +1,61 @@
 # Changelog
 
+## [6.27.3](https://github.com/factorialco/f0/compare/f0-react-v6.27.2...f0-react-v6.27.3) (2026-08-14)
+
+
+### Bug Fixes
+
+* **F0DataChart:** stop totalling grouped bar tooltips ([#5097](https://github.com/factorialco/f0/issues/5097)) ([d4e725a](https://github.com/factorialco/f0/commit/d4e725a6db895eee0c4b3cb6d36757d334dcfd12))
+
+## [6.27.2](https://github.com/factorialco/f0/compare/f0-react-v6.27.1...f0-react-v6.27.2) (2026-08-13)
+
+
+### Bug Fixes
+
+* **SlotWidget:** view-more button steps up with the card ([#5117](https://github.com/factorialco/f0/issues/5117)) ([47fb31e](https://github.com/factorialco/f0/commit/47fb31e16dbaa980fd803e7ab542ac031fb84593))
+
+## [6.27.1](https://github.com/factorialco/f0/compare/f0-react-v6.27.0...f0-react-v6.27.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* **CategoryBarChart:** show every segment in a single hover tooltip ([#5109](https://github.com/factorialco/f0/issues/5109)) ([0a88a88](https://github.com/factorialco/f0/commit/0a88a888ffa1b49980e247a93691a2692b66ea9e))
+
+## [6.27.0](https://github.com/factorialco/f0/compare/f0-react-v6.26.0...f0-react-v6.27.0) (2026-08-13)
+
+
+### Features
+
+* **F0Map:** add map pattern built on MapLibre ([#4752](https://github.com/factorialco/f0/issues/4752)) ([e3df5fb](https://github.com/factorialco/f0/commit/e3df5fb780eb0059c3e04e097074f9e17edd5c1e))
+
+## [6.26.0](https://github.com/factorialco/f0/compare/f0-react-v6.25.0...f0-react-v6.26.0) (2026-08-13)
+
+
+### Features
+
+* **NewHomeLayout:** virtualize a column's widgets ([#5110](https://github.com/factorialco/f0/issues/5110)) ([774ee8e](https://github.com/factorialco/f0/commit/774ee8e4dc504b94825ddc5a649d727d7e032518))
+
+## [6.25.0](https://github.com/factorialco/f0/compare/f0-react-v6.24.0...f0-react-v6.25.0) (2026-08-13)
+
+
+### Features
+
+* **SlotWidget:** feed visualization, row actions and width-aware sizing ([#5108](https://github.com/factorialco/f0/issues/5108)) ([d3ffe1f](https://github.com/factorialco/f0/commit/d3ffe1f4136e843184d3b47759d1e1e07c9e28a5))
+
+## [6.24.0](https://github.com/factorialco/f0/compare/f0-react-v6.23.2...f0-react-v6.24.0) (2026-08-13)
+
+
+### Features
+
+* **F0AiChatTextArea:** add inside placement for welcome suggestions ([#5106](https://github.com/factorialco/f0/issues/5106)) ([0ff6219](https://github.com/factorialco/f0/commit/0ff6219ec2691c3b362f57380bd34d849f025bcc))
+
+## [6.23.2](https://github.com/factorialco/f0/compare/f0-react-v6.23.1...f0-react-v6.23.2) (2026-08-13)
+
+
+### Bug Fixes
+
+* **Page:** draw the page frame above content so flush children can't cover it ([#5044](https://github.com/factorialco/f0/issues/5044)) ([ff3926f](https://github.com/factorialco/f0/commit/ff3926fe0450c3c8e901ac414cfbd52f10bc46d7))
+
 ## [6.23.1](https://github.com/factorialco/f0/compare/f0-react-v6.23.0...f0-react-v6.23.1) (2026-08-12)
 
 

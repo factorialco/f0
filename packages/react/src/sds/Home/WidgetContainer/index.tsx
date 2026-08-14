@@ -46,7 +46,14 @@ import {
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { SortableWidget } from "./SortableWidget"
+import {
+  useWidgetVirtualizer,
+  type WidgetPlacement,
+  type WidgetVirtualization,
+} from "./useWidgetVirtualizer"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
+
+export type { WidgetVirtualization } from "./useWidgetVirtualizer"
 
 /**
  * WHAT CANNOT START A DRAG. The whole card is the drag surface — there is no
@@ -123,6 +130,14 @@ const widgetChrome = (widget: HomeWidgetItem) =>
 export type WidgetContainerSide = "main" | "right"
 
 /**
+ * The gap between a column's widgets, per side — the same numbers as the `gap-6`
+ * / `gap-4` classes below, which is why they are here rather than only there: a
+ * VIRTUALIZED column places its cards itself, so it needs the gap as a number.
+ * Keep the two in step.
+ */
+const GAP_PX: Record<WidgetContainerSide, number> = { main: 24, right: 16 }
+
+/**
  * One widget's place in the column, and the only thing that decides whether it
  * is SHOWN — never whether it exists.
  *
@@ -132,20 +147,54 @@ export type WidgetContainerSide = "main" | "right"
  * Hidden, plain `hidden` takes it out of sight AND out of the a11y tree — while
  * its render stays MOUNTED.
  *
- * It wraps every widget whether or not anything is being hidden: a wrapper that
- * came and went with the filtering would change the tree's shape, and changing
- * shape is what unmounts a render.
+ * VIRTUALIZED it is a real box instead, PLACED where the widget belongs in a
+ * column whose other cards are not mounted (`placement`), and the box the
+ * virtualizer measures this widget by. `display: contents` is not an option
+ * there: a card with no box of its own cannot be positioned, and cannot be
+ * measured either.
+ *
+ * It wraps every widget whether or not anything is being hidden or placed: a
+ * wrapper that came and went with the filtering would change the tree's shape,
+ * and changing shape is what unmounts a render.
  */
 const WidgetSlot = ({
   hidden,
+  placement,
+  measureRef,
   children,
 }: {
   hidden: boolean
+  /** Where this widget goes in a virtualized column, if it is one. */
+  placement?: WidgetPlacement
+  measureRef?: (node: HTMLElement | null) => void
   children: ReactNode
 }) => (
-  // No `display` of its own while hidden: `hidden` only means `display: none`
-  // for as long as nothing else sets one.
-  <div hidden={hidden} style={{ display: hidden ? undefined : "contents" }}>
+  <div
+    // Only the placed box is measured — an unplaced one is `display: contents`
+    // and has no size to report.
+    ref={placement ? measureRef : undefined}
+    // Which widget this box is, for the virtualizer to file its measurement
+    // under. Its own attribute, not ours: `indexAttribute` defaults to this.
+    data-index={placement?.index}
+    hidden={hidden}
+    style={
+      placement
+        ? {
+            // PLACED, NOT FLOWED, because its neighbours are not there to flow
+            // after: the list is one box as tall as the whole column would be,
+            // and each mounted card sits at the offset its absent neighbours
+            // would have pushed it to. The gap between them is the
+            // virtualizer's — a flex gap does not reach a positioned child.
+            position: "absolute",
+            top: placement.start,
+            left: 0,
+            width: "100%",
+          }
+        : // No `display` of its own while hidden: `hidden` only means
+          // `display: none` for as long as nothing else sets one.
+          { display: hidden ? undefined : "contents" }
+    }
+  >
     {children}
   </div>
 )
@@ -230,6 +279,19 @@ export interface WidgetContainerProps {
    */
   entrance?: false | { order?: number; delayMs?: number }
   /**
+   * KEEPS ONLY THE WIDGETS YOU CAN SEE IN THE DOM. `true` for the defaults, or an
+   * object to tune them; omitted (the default), every widget is mounted.
+   *
+   * For a column that can hold more widgets than fit on a screen — a hundred
+   * cards, each with its own data and its own chart, is a hundred fetches and a
+   * DOM the browser pays for on every frame. What it costs, and why it is not the
+   * default, is on `WidgetVirtualization`.
+   *
+   * Choose it ONCE for the life of the column: turning it on or off swaps how
+   * every card is laid out, which is a jump if anyone is looking.
+   */
+  virtualized?: boolean | WidgetVirtualization
+  /**
    * THE STOW: where this column's widgets go when the rail collapses. Each card
    * scales down onto its own glyph and fades, and grows back out of it when the
    * rail opens, so a card and its glyph read as one object rather than two
@@ -303,6 +365,7 @@ export function WidgetContainer({
   onReorder,
   visibleWidgetId,
   entrance = {},
+  virtualized = false,
   stow,
   addWidgetLabel,
   onChangeWidgetParams,
@@ -336,6 +399,36 @@ export function WidgetContainer({
   // same column is a fairground, not an explanation.
   const [flippedId, setFlippedId] = useState<string | null>(null)
   const columnRef = useRef<HTMLDivElement>(null)
+  /**
+   * WHICH WIDGETS ARE WORTH HAVING IN THE DOM — every one of them unless this
+   * column is virtualized. See `useWidgetVirtualizer`.
+   */
+  const virtual = useWidgetVirtualizer({
+    config: virtualized === true ? {} : virtualized,
+    count: widgets.length,
+    gap: GAP_PX[side],
+    // The card UNDER THE POINTER stays mounted for the whole gesture whatever the
+    // column scrolls past: dnd-kit holds the node it is dragging, and taking that
+    // out from under it mid-drag ends the drag rather than the drop.
+    pinned: activeId ? [widgets.findIndex((w) => w.id === activeId)] : [],
+    // A CONTAINER SHOWING ONE WIDGET IS NOT A COLUMN. `visibleWidgetId` is the
+    // floating panel, a box around a single card, so there is no viewport for the
+    // rest to be on screen of and nothing to place them against — the one widget
+    // it shows simply flows (see `panelOnly`).
+    paused: visibleWidgetId !== undefined,
+  })
+  /**
+   * PANEL MODE, IN A VIRTUALIZED COLUMN: the widget the panel floats is the only
+   * one there is to see, so it is the only one MOUNTED.
+   *
+   * An unvirtualized container keeps the rest mounted and merely hides them, which
+   * is what makes the collapsed rail lossless — hover a glyph and the card that
+   * comes out is the one that was already there, still loaded, still counting. A
+   * virtualized column has given that up by definition (scroll a card away and it
+   * unmounts), so keeping forty hidden cards in the DOM for a panel that shows one
+   * would be the cost of the guarantee without the guarantee.
+   */
+  const panelOnly = virtualized !== false && visibleWidgetId !== undefined
   /**
    * The LOCKED widget a drop was aiming at, if any — the reason it is about to be
    * refused.
@@ -574,6 +667,75 @@ export function WidgetContainer({
     )
   }
 
+  /**
+   * ONE WIDGET, wherever the column is drawing it. Both branches below render
+   * this, so becoming draggable (a second widget lands in the column) changes what
+   * is AROUND the widgets and not the widgets themselves.
+   */
+  const slot = (
+    widget: HomeWidgetItem,
+    order: number,
+    placement?: WidgetPlacement
+  ) => (
+    <WidgetSlot
+      key={widget.id}
+      hidden={isHidden(widget)}
+      placement={placement}
+      measureRef={virtual.measureRef}
+    >
+      {canDrag ? (
+        <SortableWidget id={widget.id} disabled={widget.locked}>
+          {/* The arrival wrapper sits INSIDE the sortable rather than around it:
+              dnd-kit measures the element it holds the ref to, and a transformed
+              ancestor would offset every rect it reads while a drag is in
+              flight. */}
+          {(state) => enter(order, render(widget, state), widget)}
+        </SortableWidget>
+      ) : (
+        enter(order, render(widget), widget)
+      )}
+    </WidgetSlot>
+  )
+
+  /**
+   * THE WIDGETS. Virtualized, the ones the window asks for, each placed where its
+   * unmounted neighbours would have put it, in a box as tall as the whole column;
+   * otherwise all of them, in flow.
+   *
+   * The element is THE SAME either way, down to its classes — which is what lets a
+   * container stop virtualizing (the panel opening) without remounting a card.
+   * Its own `gap` is inert while the cards are placed, and does the spacing while
+   * they are not.
+   */
+  const list = (
+    <div
+      ref={virtual.listRef}
+      className={cn("flex flex-col", side === "main" ? "gap-6" : "gap-4")}
+      style={
+        virtual.window
+          ? {
+              // THE HEIGHT OF THE COLUMN THAT WOULD BE, so the scrollbar
+              // describes all the widgets rather than the three that are
+              // mounted — and `relative` so the placed cards are placed from
+              // this box's top rather than the column's.
+              position: "relative",
+              height: virtual.window.totalSize,
+            }
+          : undefined
+      }
+    >
+      {virtual.window
+        ? virtual.window.placements.map((placement) =>
+            slot(widgets[placement.index], placement.index, placement)
+          )
+        : widgets.flatMap((widget, order) =>
+            panelOnly && widget.id !== visibleWidgetId
+              ? []
+              : [slot(widget, order)]
+          )}
+    </div>
+  )
+
   return (
     <div
       ref={columnRef}
@@ -602,30 +764,16 @@ export function WidgetContainer({
             handleDragEnd(event)
           }}
         >
+          {/* EVERY WIDGET'S ID, mounted or not: the order a drop commits is the
+              column's own, and a sortable that only knew about the cards in view
+              would reorder the slice instead of the list. dnd-kit takes the
+              missing ones in its stride — it has no rect for a card that isn't
+              there, so it moves the ones that are. */}
           <SortableContext
             items={widgets.map((widget) => widget.id)}
             strategy={verticalListSortingStrategy}
           >
-            {/* The same gap the static list uses, so a column that becomes
-                draggable (a second widget lands in it) doesn't reflow. */}
-            <div
-              className={cn(
-                "flex flex-col",
-                side === "main" ? "gap-6" : "gap-4"
-              )}
-            >
-              {widgets.map((widget, order) => (
-                <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
-                  <SortableWidget id={widget.id} disabled={widget.locked}>
-                    {/* The arrival wrapper sits INSIDE the sortable rather than
-                        around it: dnd-kit measures the element it holds the ref
-                        to, and a transformed ancestor would offset every rect it
-                        reads while a drag is in flight. */}
-                    {(state) => enter(order, render(widget, state), widget)}
-                  </SortableWidget>
-                </WidgetSlot>
-              ))}
-            </div>
+            {list}
           </SortableContext>
           {/* The card that follows the pointer is a CLONE in an overlay — the
               in-list card hides meanwhile (SortableWidget). On release the
@@ -647,11 +795,7 @@ export function WidgetContainer({
           </DragOverlay>
         </DndContext>
       ) : (
-        widgets.map((widget, order) => (
-          <WidgetSlot key={widget.id} hidden={isHidden(widget)}>
-            {enter(order, render(widget), widget)}
-          </WidgetSlot>
-        ))
+        list
       )}
       {/* Adding, like removing and reordering, is always on offer.
           `disableEdition` columns never offer any of it. */}

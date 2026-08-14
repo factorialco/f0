@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "6.23.1",
+  "version": "6.27.3",
   "private": false,
   "files": [
     "assets",
@@ -64,6 +64,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@factorialco/f0-core": "workspace:*",
+    "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@radix-ui/number": "^1.1.1",
     "@radix-ui/primitive": "^1.1.2",
     "@radix-ui/react-collection": "^1.1.7",
