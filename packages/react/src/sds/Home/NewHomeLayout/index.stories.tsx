@@ -1,17 +1,24 @@
-import { useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { z } from "zod"
 
+import { createDataSourceDefinition } from "@/hooks/datasource"
+import { f0FormField } from "@/patterns/F0Form"
+
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Card } from "@/components/F0Card"
+import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
   Building,
   Calendar,
+  ChartVerticalBars,
+  Check,
   ChevronRight,
   Clock,
   Comment,
@@ -21,24 +28,32 @@ import {
   Globe,
   Home as HomeIcon,
   PalmTree,
+  Pencil,
   Person,
   Receipt,
+  Search,
+  Settings,
   Target,
 } from "@/icons/app"
+import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
+import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
+import { F0Box } from "@/lib/F0Box"
 
 import {
   ClockInControls,
   type ClockInProject,
 } from "../ClockIn/ClockInControls"
-import { SlotWidget } from "../SlotWidget"
 import {
+  fromParams,
   homeSlot,
   type HomeWidgetItem,
   listSlot,
+  resolveWidgetHeader,
   type SlotRenderers,
+  widgetTitle,
 } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
-import { WidgetCatalog } from "../WidgetCatalog"
+import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
@@ -52,30 +67,200 @@ import { NewHomeLayout } from "./index"
 
 /* =============================== main column =============================== */
 
+/* --------------------------------- greeting -------------------------------- */
+
+/** `xl` avatars — 56px, which is what the notch below is cut for. */
+const GREETING_AVATAR_PX = 56
+/** How far the person's avatar rides over the company's. */
+const GREETING_AVATAR_OVERLAP_PX = 10
 /**
- * The Ask-AI greeting: the One mark, the gradient welcome phrase, the muted
- * question. The gradient stops are F0's own welcome-phrase literals.
+ * The notch cut out of the leading avatar for the one overlapping it: a circle
+ * centred on that avatar (its own centre, less the overlap) with 2px of air
+ * around it, so the two read as a cluster rather than as one card on another.
+ *
+ * A MASK rather than a ring on the top avatar: the gap has to show whatever the
+ * greeting is sitting on — here the page's own gradient — and a ring can only
+ * paint a colour.
+ */
+const GREETING_NOTCH = {
+  x: GREETING_AVATAR_PX - GREETING_AVATAR_OVERLAP_PX + GREETING_AVATAR_PX / 2,
+  y: GREETING_AVATAR_PX / 2,
+  r: GREETING_AVATAR_PX / 2 + 2,
+}
+
+/**
+ * WHOSE HOME THIS IS: the company, and the person reading it, overlapped.
+ *
+ * Two `F0Avatar`s rather than an `F0AvatarList`, which is the component for a
+ * cluster and would own both the overlap and the notch: it stops at `md` (32px),
+ * and it takes ONE avatar `type` for the whole row — this pair is a company
+ * square under a round person, at 56px. Give the list an `xl` size and per-item
+ * types and this becomes one `F0AvatarList`.
+ */
+const GreetingAvatars = () => (
+  <F0Box display="flex" flexDirection="row" alignItems="center">
+    <div
+      className="flex"
+      style={{
+        maskImage: `radial-gradient(circle at ${GREETING_NOTCH.x}px ${GREETING_NOTCH.y}px, transparent ${GREETING_NOTCH.r}px, #000 ${GREETING_NOTCH.r + 0.5}px)`,
+      }}
+    >
+      <F0Avatar size="xl" avatar={{ type: "company", name: "Factorial" }} />
+    </div>
+    <div className="flex" style={{ marginLeft: -GREETING_AVATAR_OVERLAP_PX }}>
+      <F0Avatar
+        size="xl"
+        avatar={{
+          type: "person",
+          firstName: "Hellen",
+          lastName: "the HR",
+          src: "https://i.pravatar.cc/120?img=45",
+        }}
+      />
+    </div>
+  </F0Box>
+)
+
+/**
+ * The Ask-AI greeting: the company/person cluster over the welcome phrase.
+ *
+ * TWO HEADINGS, not one, in a wrapping row: each sentence wraps as a unit, so a
+ * narrow column breaks between them rather than mid-question. `F0Text` cannot
+ * carry this type — its variants stop at body copy — so the phrase is
+ * `F0Heading`'s `heading-large` (22px/600), which is exactly the design's.
  */
 const Greeting = () => (
-  <div className="flex flex-col items-center gap-3 py-2">
-    <F0OneIcon size="lg" />
-    <p className="m-0 text-2xl font-semibold">
-      <span
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, #E55619, #E51943, #A1ADE5)",
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-        }}
-      >
-        Good Morning, Hellen.
-      </span>{" "}
-      <span className="text-f1-foreground-secondary">
-        What can I do for you?
-      </span>
-    </p>
-  </div>
+  <F0Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    gap="md"
+    paddingBottom="2xl"
+  >
+    <GreetingAvatars />
+    <F0Box
+      display="flex"
+      flexDirection="row"
+      flexWrap="wrap"
+      alignItems="center"
+      justifyContent="center"
+      gap="xs"
+    >
+      <F0Heading
+        variant="heading-large"
+        align="center"
+        content="Good Morning, Hellen."
+      />
+      <F0Heading
+        variant="heading-large"
+        as="h2"
+        align="center"
+        content="What can I do for you?"
+      />
+    </F0Box>
+  </F0Box>
+)
+
+/* --------------------------------- composer -------------------------------- */
+
+const HOME_PLACEHOLDERS = [
+  "Ask for time off, an expense, a payslip…",
+  "Who's out of office this week?",
+  "Draft my self-review from these bullet points…",
+  "What's left of my leave this year?",
+]
+
+/**
+ * The starter prompts, INSIDE the field (`welcomeScreenSuggestionsPlacement`):
+ * on Home the composer is the page's own hero, so the suggestions belong in its
+ * foot rather than standing above it as they do in the chat panel.
+ */
+const HOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title: "My hours this month",
+        prompt:
+          "Summarize the hours I have clocked this month against my contract, and flag any day that is missing a clock-out.",
+      },
+      {
+        title: "Team leave next month",
+        prompt: "Show who in my team is on leave next month, week by week.",
+      },
+    ],
+  },
+  {
+    icon: Search,
+    label: "Find",
+    items: [
+      {
+        title: "Who's out of office this week?",
+        prompt:
+          "List everyone on time-off or sick leave between today and the end of the week.",
+      },
+      { title: "My last payslip", prompt: "Open my most recent payslip." },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title: "Request time off",
+        prompt: "Request time off for the last week of August.",
+      },
+      {
+        title: "Draft my self-review",
+        prompt:
+          "Turn these bullet points into review-ready text for my self-review.",
+      },
+    ],
+  },
+]
+
+/**
+ * Home's composer: the chat's own field, with `padding="none"` so the gutter is
+ * the greeting's rather than the chat panel's, and its suggestions in the
+ * field's foot.
+ *
+ * `isWelcomeScreen` is what Home always is — there is no conversation here; a
+ * submitted prompt is what opens the chat, which in a story is a logged payload.
+ * The `xs` inset is the field's focus glow, which the main column would otherwise
+ * clip against its own scrollport.
+ */
+const HomeComposer = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <F0Box padding="xs">
+      <F0AiChatTextArea
+        ref={ref}
+        padding="none"
+        isWelcomeScreen
+        placeholders={HOME_PLACEHOLDERS}
+        welcomeScreenSuggestions={HOME_SUGGESTIONS}
+        welcomeScreenSuggestionsPlacement="inside"
+        onSuggestionClick={(item) =>
+          console.log("suggestion", item.prompt ?? item.title)
+        }
+        onSubmit={(payload) => console.log("submit", payload)}
+      />
+    </F0Box>
+  )
+}
+
+/**
+ * The greeting and the composer as ONE block of the main column: the composer is
+ * the greeting's other half (it owns no gutter of its own), and the column's
+ * stagger should bring them in together. It also keeps the block count where the
+ * layout's `stackedPinsAfter` default expects it — greeting, then shortcuts.
+ */
+const HomeHero = () => (
+  <F0Box display="flex" flexDirection="column">
+    <Greeting />
+    <HomeComposer />
+  </F0Box>
 )
 
 const SHORTCUTS: Array<{ icon: IconType; title: string }> = [
@@ -153,7 +338,7 @@ const FeedSection = ({
     {viewMore ? (
       <div className="flex justify-end pt-1">
         <F0Button
-          variant="outline"
+          variant="neutral"
           size="sm"
           label={`View more (${viewMore})`}
           onClick={() => {}}
@@ -166,7 +351,7 @@ const FeedSection = ({
 // An ARRAY, not a fragment: the layout inserts pinned widgets BETWEEN these
 // blocks when it stacks, and `Children.toArray` only sees seams in an array.
 const mainColumnBlocks = () => [
-  <Greeting key="greeting" />,
+  <HomeHero key="hero" />,
   <ShortcutCards key="shortcuts" />,
   <FeedSection
     key="needs-you"
@@ -419,6 +604,133 @@ const RAIL_EVENTS = [
   },
 ]
 
+/* ===================== what makes a widget CONFIGURABLE ===================== */
+
+/** What the teams field's datasource serves. */
+type Team = { id: string; name: string; people: number }
+
+const TEAMS: Team[] = [
+  { id: "design", name: "Design", people: 8 },
+  { id: "engineering", name: "Engineering", people: 42 },
+  { id: "people", name: "People", people: 6 },
+  { id: "sales", name: "Sales", people: 17 },
+  { id: "support", name: "Support", people: 11 },
+]
+
+/**
+ * A DATASOURCE, not a list of options: the field searches it, so the widget can
+ * be pointed at things nobody could enumerate at build time (every team in the
+ * company). The same definition any F0Form select takes.
+ */
+const teamsSource = createDataSourceDefinition<Team>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      const needle = search?.toLowerCase()
+      return {
+        records: needle
+          ? TEAMS.filter((team) => team.name.toLowerCase().includes(needle))
+          : TEAMS,
+      }
+    },
+  },
+})
+
+/**
+ * The EVENTS widget's params, as a plain F0Form schema — params belong on the
+ * widgets a Home already has, not on a widget invented to carry them.
+ *
+ * Every field type the dialog can draw is here: an enum (select), a
+ * datasource-backed MULTI select, a number, a date and a datetime. REQUIRED vs
+ * OPTIONAL is just zod: `period`, `teams` and `maxEvents` must be set — the
+ * dialog won't save without them — while `since` and `digestAt` are `.optional()`
+ * and can be left alone.
+ */
+const EVENTS_PARAMS = z.object({
+  period: f0FormField(z.enum(["week", "month", "quarter"]), {
+    label: "Period",
+    options: [
+      { value: "week", label: "This week" },
+      { value: "month", label: "This month" },
+      { value: "quarter", label: "This quarter" },
+    ],
+  }),
+  teams: f0FormField(z.array(z.string()).min(1), {
+    label: "Teams",
+    placeholder: "Pick at least one team",
+    showSearchBox: true,
+    multiple: true,
+    source: teamsSource,
+    mapOptions: (team: Team) => ({
+      value: team.id,
+      label: team.name,
+      description: `${team.people} people`,
+    }),
+  }),
+  maxEvents: f0FormField(z.number().min(1).max(8), {
+    label: "Events to show",
+  }),
+  since: f0FormField(z.date().optional(), {
+    label: "Only after",
+  }),
+  digestAt: f0FormField(z.date().optional(), {
+    label: "Send me a digest at",
+    fieldType: "datetime",
+  }),
+})
+
+type EventsParams = z.infer<typeof EVENTS_PARAMS>
+
+const PERIOD_LABEL: Record<string, string> = {
+  week: "this week",
+  month: "this month",
+  quarter: "this quarter",
+}
+
+const teamNames = (ids: string[] = []) =>
+  ids.map((id) => TEAMS.find((team) => team.id === id)?.name ?? id).join(", ")
+
+/**
+ * The Events widget, BUILT FROM ITS PARAMS. Its `title` and `info` are functions
+ * of them — the card names the teams it is showing, and its info side explains
+ * what the list covers — while the slot's events are cut to `maxEvents` HERE, in
+ * the app, which is the only place that knows where events come from.
+ */
+const eventsWidget = (params: EventsParams): HomeWidgetItem => {
+  const shown = RAIL_EVENTS.slice(0, params.maxEvents)
+  return {
+    id: "events",
+    icon: Calendar,
+    paramsSchema: EVENTS_PARAMS,
+    params,
+    header: {
+      title: fromParams(EVENTS_PARAMS, (p) =>
+        p.teams?.length ? `Events · ${teamNames(p.teams)}` : "Events"
+      ),
+      info: fromParams(
+        EVENTS_PARAMS,
+        (p) =>
+          `The next ${p.maxEvents ?? 0} events ${PERIOD_LABEL[p.period ?? "week"]} for ${teamNames(p.teams) || "no team"}${
+            p.since ? `, from ${p.since.toLocaleDateString()} on` : ""
+          }.`
+      ),
+      count: shown.length,
+      // A `#` destination — a fragment on the page the app is already on. It
+      // must NOT open a new tab (see `isExternalHref`).
+      link: { title: "Go to Calendar", url: "/calendar#core.events" },
+    },
+    slots: [homeSlot("event-list", { showAllItems: true, events: shown })],
+  }
+}
+
+/** The Events widget as a Home the user already set up would have it. */
+const EVENTS_DEFAULTS: EventsParams = {
+  period: "week",
+  teams: ["design", "engineering"],
+  maxEvents: 4,
+  since: undefined,
+  digestAt: undefined,
+}
+
 /**
  * The rail as DATA — HomeWidgetItems with their catalog `icon`, so the layout
  * can collapse them to an avatar strip when it runs out of width. The bespoke
@@ -428,11 +740,14 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   {
     id: "clock-in",
     icon: Clock,
-    // Pinned: you always want the clock, so edit mode leaves it alone.
+    // Pinned: you always want the clock, so it can't be dragged or removed.
     locked: true,
+    // A `url`, not an `onClick`: the footer control is then a REAL link — an
+    // anchor you can middle-click and copy — and this one stays in the tab
+    // (same host), which is what every in-app destination should do.
     header: {
       title: "Clock in",
-      link: { title: "Go to Time tracking", onClick: () => {} },
+      link: { title: "Go to Time tracking", url: "/time-tracking" },
     },
     slots: [{ visualization: "clock-in", params: {} }],
   },
@@ -443,8 +758,14 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
     hasUpdates: true,
     header: {
       title: "Communications",
-      link: { title: "Go to Communications", onClick: () => {} },
+      link: { title: "Go to Communications", url: "/communications" },
     },
+    // THIS WIDGET'S OWN actions: they lead its three-dots menu, above the items
+    // every widget carries (and above "Remove widget", behind its separator).
+    actions: [
+      { label: "Mark all as read", icon: Check, onClick: () => {} },
+      { label: "Notification settings", icon: Settings, onClick: () => {} },
+    ],
     slots: [
       listSlot(
         { left: "module", descriptionRequired: true, clickBehavior: "link" },
@@ -458,22 +779,13 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
       ),
     ],
   },
-  {
-    id: "events",
-    icon: Calendar,
-    header: {
-      title: "Events",
-      count: 8,
-      link: { title: "Go to Calendar", onClick: () => {} },
-    },
-    slots: [
-      homeSlot("event-list", { showAllItems: true, events: RAIL_EVENTS }),
-    ],
-  },
-  // External navigation, both flavors: the header's link carries a real `url`
-  // (an anchor, opened by the browser), and every row's `href` is an outside
-  // website — link rows render as REAL anchors (via the app's LinkProvider),
-  // so external URLs just work.
+  // The CONFIGURABLE one: it declares a `paramsSchema`, so its three-dots menu
+  // carries "Edit params" — and its title, its info and the events it lists all
+  // follow what you set there.
+  eventsWidget(EVENTS_DEFAULTS),
+  // ANOTHER HOST, both flavors: the widget's link and every row's `href` point
+  // off this site. These are the only links that open a new tab — the widgets
+  // above navigate in place, fragment and all.
   {
     id: "resources",
     icon: Globe,
@@ -558,70 +870,65 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
 /* ============================ add-widget catalog ============================ */
 
 /**
- * The catalog the picker offers. Every preview is the REAL widget — the same
- * `SlotWidget` render the rail makes — so what you preview is what gets added.
+ * The catalog the picker offers. Every preview is the WIDGET ITSELF, handed over
+ * as data — the picker draws it through the same `SlotWidget` the rail uses, so
+ * what you preview is what gets added, down to the spacing.
  */
-const CATALOG = [
+const CATALOG_ITEMS = [
   ...RIGHT_WIDGETS.map((widget) => ({
     id: widget.id,
-    title: widget.header?.title ?? widget.id,
+    // `widgetTitle` rather than the header's own: a configurable widget's title
+    // can be a function of its params, and a catalog row needs the text.
+    title: widgetTitle(widget),
     icon: widget.icon!,
-    preview: (
-      <SlotWidget
-        header={widget.header}
-        slots={widget.slots}
-        slotRenderers={SLOT_RENDERERS}
-      />
-    ),
+    // The rail's own widget, unchanged. Its `info` comes with it.
+    preview: widget,
   })),
   {
     id: "time-off",
     title: "Time off",
     icon: PalmTree,
-    preview: (
-      <SlotWidget
-        header={{ title: "Time off" }}
-        slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "Days left", content: "12" }] },
-          },
-        ]}
-      />
-    ),
+    preview: {
+      id: "time-off",
+      header: { title: "Time off" },
+      slots: [
+        {
+          visualization: "indicators",
+          params: { items: [{ label: "Days left", content: "12" }] },
+        },
+      ],
+    },
   },
   {
     id: "tasks",
     title: "Tasks",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Tasks", count: 3 }}
-        slots={[
-          listSlot({ clickBehavior: "link" }, [
-            { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
-            { id: "2", title: "Review expense report", href: "/tasks/2" },
-            { id: "3", title: "Approve time off", href: "/tasks/3" },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "tasks",
+      header: { title: "Tasks", count: 3 },
+      slots: [
+        listSlot({ clickBehavior: "link" }, [
+          { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
+          { id: "2", title: "Review expense report", href: "/tasks/2" },
+          { id: "3", title: "Approve time off", href: "/tasks/3" },
+        ]),
+      ],
+    },
   },
   {
     id: "goals",
     title: "Goals",
     icon: Target,
-    preview: (
-      <SlotWidget
-        header={{ title: "Goals" }}
-        slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "On track", content: "4/5" }] },
-          },
-        ]}
-      />
-    ),
+    preview: {
+      id: "goals",
+      header: { title: "Goals" },
+      slots: [
+        {
+          visualization: "indicators",
+          params: { items: [{ label: "On track", content: "4/5" }] },
+        },
+      ],
+    },
   },
   // The schema showcase: each of these leans on a different `list` schema —
   // what you preview here is exactly what the slot vocabulary can say.
@@ -629,164 +936,218 @@ const CATALOG = [
     id: "team",
     title: "Team",
     icon: Person,
-    preview: (
-      <SlotWidget
-        header={{ title: "Team", count: 6 }}
-        slots={[
-          // Alert left + the people themselves trailing: two-line rows (md).
-          listSlot(
+    preview: {
+      id: "team",
+      header: { title: "Team", count: 6 },
+      slots: [
+        // Alert left + the people themselves trailing: two-line rows (md).
+        listSlot(
+          {
+            left: "alert",
+            right: "person-list",
+            descriptionRequired: true,
+            clickBehavior: "link",
+          },
+          [
             {
-              left: "alert",
-              right: "person-list",
-              descriptionRequired: true,
-              clickBehavior: "link",
+              id: "in",
+              title: "Clocked in",
+              description: "4 people",
+              alert: "positive",
+              avatars: [
+                { firstName: "Ada", lastName: "Lovelace" },
+                { firstName: "Alan", lastName: "Turing" },
+              ],
+              remainingCount: 2,
+              href: "/attendance",
             },
-            [
-              {
-                id: "in",
-                title: "Clocked in",
-                description: "4 people",
-                alert: "positive",
-                avatars: [
-                  { firstName: "Ada", lastName: "Lovelace" },
-                  { firstName: "Alan", lastName: "Turing" },
-                ],
-                remainingCount: 2,
-                href: "/attendance",
-              },
-              {
-                id: "away",
-                title: "Away",
-                description: "2 people",
-                alert: "warning",
-                avatars: [{ firstName: "Grace", lastName: "Hopper" }],
-                href: "/attendance/away",
-              },
-            ]
-          ),
-        ]}
-      />
-    ),
+            {
+              id: "away",
+              title: "Away",
+              description: "2 people",
+              alert: "warning",
+              avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+              href: "/attendance/away",
+            },
+          ]
+        ),
+      ],
+    },
   },
   {
     id: "people",
     title: "People",
     icon: Person,
-    preview: (
-      <SlotWidget
-        header={{ title: "New joiners", count: 7 }}
-        slots={[
-          // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
-          listSlot(
-            {
-              left: "person",
-              subtitleRequired: true,
-              clickBehavior: "link",
-              maxVisibleItems: 3,
+    preview: {
+      id: "people",
+      header: { title: "New joiners", count: 7 },
+      slots: [
+        // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
+        listSlot(
+          {
+            left: "person",
+            subtitleRequired: true,
+            clickBehavior: "link",
+            maxVisibleItems: 3,
+          },
+          [
+            "Ada Lovelace",
+            "Alan Turing",
+            "Grace Hopper",
+            "Katherine Johnson",
+            "Margaret Hamilton",
+            "Annie Easley",
+            "Mary Jackson",
+          ].map((name, index) => ({
+            id: String(index),
+            title: name,
+            subtitle: "Engineering",
+            avatar: {
+              firstName: name.split(" ")[0],
+              lastName: name.split(" ")[1],
             },
-            [
-              "Ada Lovelace",
-              "Alan Turing",
-              "Grace Hopper",
-              "Katherine Johnson",
-              "Margaret Hamilton",
-              "Annie Easley",
-              "Mary Jackson",
-            ].map((name, index) => ({
-              id: String(index),
-              title: name,
-              subtitle: "Engineering",
-              avatar: {
-                firstName: name.split(" ")[0],
-                lastName: name.split(" ")[1],
-              },
-              href: `/employees/${index}`,
-            }))
-          ),
-        ]}
-      />
-    ),
+            href: `/employees/${index}`,
+          }))
+        ),
+      ],
+    },
   },
   {
     id: "documents",
     title: "Documents",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Documents" }}
-        alert="2 documents need signing"
-        action={{ label: "Sign now", onClick: () => {} }}
-        slots={[
-          // File avatars, two-line rows (md).
-          listSlot(
-            { left: "file", descriptionRequired: true, clickBehavior: "link" },
-            [
-              {
-                id: "1",
-                title: "Q3 addendum.pdf",
-                description: "Needs your signature",
-                avatar: {
-                  file: { name: "q3-addendum.pdf", type: "application/pdf" },
-                },
-                href: "/documents/1",
+    preview: {
+      id: "documents",
+      header: { title: "Documents" },
+      alert: "2 documents need signing",
+      action: { label: "Sign now", onClick: () => {} },
+      slots: [
+        // File avatars, two-line rows (md).
+        listSlot(
+          { left: "file", descriptionRequired: true, clickBehavior: "link" },
+          [
+            {
+              id: "1",
+              title: "Q3 addendum.pdf",
+              description: "Needs your signature",
+              avatar: {
+                file: { name: "q3-addendum.pdf", type: "application/pdf" },
               },
-              {
-                id: "2",
-                title: "Remote policy.pdf",
-                description: "Needs your signature",
-                avatar: {
-                  file: { name: "remote-policy.pdf", type: "application/pdf" },
-                },
-                href: "/documents/2",
+              href: "/documents/1",
+            },
+            {
+              id: "2",
+              title: "Remote policy.pdf",
+              description: "Needs your signature",
+              avatar: {
+                file: { name: "remote-policy.pdf", type: "application/pdf" },
               },
-            ]
-          ),
-        ]}
-      />
-    ),
+              href: "/documents/2",
+            },
+          ]
+        ),
+      ],
+    },
   },
   {
     id: "offices",
     title: "Offices",
     icon: Building,
-    preview: (
-      <SlotWidget
-        header={{ title: "Offices" }}
-        slots={[
-          // Flag left + counter right: one-line rows (sm).
-          listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
-            {
-              id: "es",
-              title: "Spain",
-              avatar: { flag: "es" },
-              count: 24,
-              href: "/offices/es",
-            },
-            {
-              id: "pt",
-              title: "Portugal",
-              avatar: { flag: "pt" },
-              count: 9,
-              href: "/offices/pt",
-            },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "offices",
+      header: { title: "Offices" },
+      slots: [
+        // Flag left + counter right: one-line rows (sm).
+        listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
+          {
+            id: "es",
+            title: "Spain",
+            avatar: { flag: "es" },
+            count: 24,
+            href: "/offices/es",
+          },
+          {
+            id: "pt",
+            title: "Portugal",
+            avatar: { flag: "pt" },
+            count: 9,
+            href: "/offices/pt",
+          },
+        ]),
+      ],
+    },
   },
 ]
+
+/**
+ * THE PICKER’S DOMAINS, in the order it shows them, each headed by its module’s
+ * glyph. The labels are the app’s words: f0’s `modules` registry carries icons,
+ * not names.
+ */
+const CATALOG_GROUPS: WidgetCatalogGroup[] = [
+  { id: "time", label: "Time & attendance", module: "time-tracking" },
+  { id: "comms", label: "Communication", module: "communities" },
+  { id: "calendar", label: "Calendar", module: "calendar" },
+  { id: "performance", label: "Performance", module: "goals" },
+  { id: "org", label: "Organization", module: "employees" },
+  { id: "docs", label: "Documents", module: "documents" },
+]
+
+/** Which domain each widget belongs to. `resources` deliberately has none — it
+ * lands in the unheaded run after the groups, which is what a widget that fits
+ * no domain should do. */
+const CATALOG_DOMAIN: Record<string, string> = {
+  "clock-in": "time",
+  "time-off": "time",
+  communications: "comms",
+  events: "calendar",
+  goals: "performance",
+  tasks: "performance",
+  team: "org",
+  people: "org",
+  offices: "org",
+  documents: "docs",
+}
+
+/** What this Home suggests first. Optional: drop it and the section is gone. */
+const RECOMMENDED_IDS = new Set(["clock-in", "events"])
+
+const CATALOG = CATALOG_ITEMS.map((item) => ({
+  ...item,
+  group: CATALOG_DOMAIN[item.id],
+  recommended: RECOMMENDED_IDS.has(item.id),
+}))
 
 const Home = () => {
   const [open, setOpen] = useState(false)
   const [side, setSide] = useState<WidgetContainerSide>("main")
+  // The configurable widget's params live with the app, next to the rail's
+  // order: both are things the user set and the app persists.
+  const [eventsParams, setEventsParams] = useState(EVENTS_DEFAULTS)
   const [rail, setRail] = useState(RIGHT_WIDGETS)
+  // The widget is REBUILT from its params — that is the app's half of the deal:
+  // the layout resolves what the params merely say (title, info), while the
+  // slots' data can only come from here.
+  const railWidgets = rail.map((widget) =>
+    widget.id === "events" ? eventsWidget(eventsParams) : widget
+  )
   return (
     <div className="h-full w-full p-6">
       <NewHomeLayout
-        rightWidgets={rail}
+        rightWidgets={railWidgets}
         slotRenderers={SLOT_RENDERERS}
         editableWidgetContainers={["right"]}
         onRemoveWidget={(id) => setRail((w) => w.filter((x) => x.id !== id))}
+        onChangeWidgetParams={(id, params) => {
+          if (id === "events") setEventsParams(params as EventsParams)
+        }}
+        // The preview rebuilds the widget the same way the rail does, so the
+        // dialog shows the events the params will really produce — not just the
+        // title following along. It hands back the WIDGET; the layout draws it
+        // through the same `SlotWidget` the rail uses.
+        rebuildWidget={(widget, params) =>
+          widget.id === "events" ? eventsWidget(params as EventsParams) : widget
+        }
         onReorderWidgets={(_, ids) =>
           setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
         }
@@ -801,8 +1162,12 @@ const Home = () => {
         isOpen={open}
         onClose={() => setOpen(false)}
         widgets={CATALOG}
+        groups={CATALOG_GROUPS}
         onAdd={() => setOpen(false)}
         previewWidth={side === "right" ? 396 : 768}
+        // The same map the layout gets — a preview drawn without it would show
+        // "No renderer for slot …" for every bespoke visualization.
+        slotRenderers={SLOT_RENDERERS}
       />
     </div>
   )
@@ -858,8 +1223,13 @@ type Story = StoryObj<typeof meta>
  * "Needs you" / "One working for you" feed) next to a fixed 396px rail (Clock in,
  * Communications, Events — every widget wrapped in the f0 `Widget` frame), no
  * divider between columns. Both columns end in "+ Add widget"
- * (`onClickAddNewWidget`), which opens the `WidgetCatalog` dialog; "Edit Home"
- * toggles the per-widget remove chrome.
+ * (`onClickAddNewWidget`), which opens the `WidgetCatalog` dialog.
+ *
+ * THERE IS NO EDIT MODE. A widget is removed from the three-dots menu in its own
+ * header and moved by dragging the card itself (no handle glyph — the grab
+ * cursor is the affordance), at any time; the clock is `locked`, so it offers
+ * neither. Each widget's way out sits in its FOOTER as a named button ("Go to
+ * Calendar"), since the header's top-right is the menu's.
  */
 export const Default: Story = {
   render: () => <Home />,
@@ -912,4 +1282,102 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* ============================== virtualization ============================== */
+
+/**
+ * `count` widgets, cycling the rail's real ones so every card is a card with data
+ * in it, each numbered so you can see where in the column you are. The clock is
+ * left out: it is `locked`, and a hundred pinned widgets is not a column anyone
+ * is arranging.
+ */
+const manyWidgets = (count: number): HomeWidgetItem[] => {
+  const source = RIGHT_WIDGETS.filter((widget) => !widget.locked)
+  return Array.from({ length: count }, (_, index) => {
+    const widget = source[index % source.length]
+    return {
+      ...widget,
+      id: `${widget.id}-${index}`,
+      header: {
+        ...resolveWidgetHeader(widget.header, widget.params),
+        title: `${index + 1}. ${widgetTitle(widget)}`,
+      },
+      // One configurable widget per column is the point; a hundred dialogs is
+      // not.
+      paramsSchema: undefined,
+      params: undefined,
+    } as HomeWidgetItem
+  })
+}
+
+/**
+ * HOW MANY WIDGET CARDS ARE IN THE DOM right now, watched rather than counted
+ * once: it is the number the story exists to show, and scrolling is what changes
+ * it.
+ */
+const MountedCount = ({ of }: { of: number }) => {
+  const [mounted, setMounted] = useState(0)
+  const [root, setRoot] = useState<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const page = root?.ownerDocument.body
+    if (!page) return
+    const read = () =>
+      setMounted(page.querySelectorAll("[data-widget-id]").length)
+    read()
+    const observer = new MutationObserver(read)
+    observer.observe(page, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [root])
+
+  return (
+    <div
+      ref={setRoot}
+      className="pointer-events-none fixed bottom-4 right-4 z-50 rounded-lg bg-f1-background-inverse px-3 py-2 font-medium text-f1-foreground-inverse"
+    >
+      {mounted} of {of} widgets in the DOM
+    </div>
+  )
+}
+
+/**
+ * A HOME WITH MORE WIDGETS THAN A SCREEN — 60 in the main column, 40 in the rail
+ * — with both sides VIRTUALIZED (`virtualizedWidgetContainers`). Only the cards
+ * you can see are in the DOM: the badge in the corner counts them, and scrolling
+ * either column keeps the number where it is while the widget numbers climb.
+ *
+ * Everything else about the column is unchanged. The full height is held open, so
+ * both scrollbars describe all 100 widgets; dragging still reorders (only the
+ * cards in view get out of the way as you go); and the rail still collapses into
+ * its strip, which is where virtualization stands aside — a floating panel is one
+ * card in a box of its own, not a column.
+ *
+ * Off by default, and worth leaving off for a Home of a dozen widgets: a widget
+ * that scrolls out is UNMOUNTED, and what it had loaded, timed or animated starts
+ * again when it comes back.
+ */
+export const ManyWidgets: Story = {
+  render: () => {
+    const left = manyWidgets(60)
+    const right = manyWidgets(40)
+    return (
+      <div className="h-full w-full p-6">
+        <NewHomeLayout
+          leftWidgets={left}
+          rightWidgets={right}
+          slotRenderers={SLOT_RENDERERS}
+          virtualizedWidgetContainers={["main", "right"]}
+          onRemoveWidget={() => {}}
+          onReorderWidgets={() => {}}
+        >
+          {/* The main column's freeform content, above the widgets and scrolling
+              in the same box — which is what the placed cards have to be offset
+              past. */}
+          {mainColumnBlocks()}
+        </NewHomeLayout>
+        <MountedCount of={left.length + right.length} />
+      </div>
+    )
+  },
 }

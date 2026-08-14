@@ -1,6 +1,6 @@
-import { type ReactNode, useEffect, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 
-import { motion, type Transition } from "motion/react"
+import { AnimatePresence, motion, type Transition } from "motion/react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
@@ -20,9 +20,10 @@ import { cn } from "@/lib/utils"
  * Expanding reverses it: the glyphs bloom outward as the cards grow back in.
  *
  * Every value here is a TRANSFORM or an OPACITY, so the whole gesture is
- * composited: nothing in this file animates a width, a height or an offset. (The
- * one exception is the rail's grid column, which is the layout itself changing
- * shape — see `railWidthTransition`.)
+ * composited: nothing in this file animates a width, a height or an offset. Two
+ * exceptions, both of them the LAYOUT ITSELF changing shape rather than
+ * something moving through it — the rail's grid column (`railWidthTransition`)
+ * and an item's height as it joins or leaves a slot (`HomeSlotItem`).
  */
 
 /** Fast start, soft landing, NO overshoot (Material "emphasized decelerate"). */
@@ -249,6 +250,169 @@ export interface HomeEntranceProps {
   fullHeight?: boolean
   className?: string
   children: ReactNode
+}
+
+/* ------------------------------ item churn ------------------------------ */
+
+/**
+ * ONE ITEM COMING OR GOING — a row dismissed, a request that just landed.
+ *
+ * A widget's items change under the user while they are reading them, and an
+ * item that vanishes between two blinks leaves them wondering which one they
+ * just lost. The gesture is deliberately small: this is a list correcting
+ * itself, not the page announcing something.
+ *
+ * THE ITEM'S HEIGHT IS ANIMATED, and it is the exception this file's rule names
+ * (see the header): everything else here is a transform or an opacity.
+ *
+ * It has to be. A row that only faded and then vanished gave its space back in
+ * ONE FRAME, and everything under it — the rest of the list, the widget's footer
+ * button, the card's own bottom edge — snapped up by a row's height while the
+ * fade was still settling. Sliding the neighbours with `layout` fixes the rows
+ * and nothing else: the footer is not in the list, so it still jumped. Closing
+ * the row's own height is the only version where the CARD shrinks continuously,
+ * and everything standing on it follows for free.
+ *
+ * The cost is `overflow: hidden` on every item, which would clip a focus ring
+ * drawn outside its element — which is why `HomeListItem`'s is an INSET ring.
+ */
+export const ITEM_ENTER_MS = 220
+export const ITEM_EXIT_MS = 140
+/** How far an arriving item rises — half the page's, because it is one row. */
+export const ITEM_RISE_PX = 5
+
+/** Coming IN: the page's own ease, at a row's pace. */
+export const itemEnterTransition: Transition = {
+  duration: ITEM_ENTER_MS / 1000,
+  ease: HOME_EASE,
+}
+/** Going OUT: quicker, and accelerating — a row that leaves should be gone. */
+export const itemExitTransition: Transition = {
+  duration: ITEM_EXIT_MS / 1000,
+  ease: "easeIn",
+}
+/**
+ * The row's own height opening and closing. A spring, because this is the
+ * movement the eye actually follows — everything below it, the footer button and
+ * the card's bottom edge included, rides on it — and a spring is what makes that
+ * read as the card SETTLING rather than as a box being resized.
+ *
+ * No bounce (ζ ≈ 0.87): a card that overshot its new height would draw more
+ * attention to the gap than to the row that left it.
+ */
+export const itemSizeTransition: Transition = {
+  type: "spring",
+  stiffness: 520,
+  damping: 40,
+  mass: 0.8,
+}
+
+/**
+ * Past this many items changing at once, the churn animation is NOT what is
+ * happening — the list is being replaced.
+ *
+ * "View more" revealing thirty rows, a filter clearing, a widget's params
+ * swapping its whole contents: animating each of those individually is thirty
+ * springs on thirty heights (expensive) resolving into one shove of the card
+ * (unreadable). The gesture says "this one item changed", so it is only ever
+ * spent on a change small enough for that to be true; a bigger one is simply
+ * the new list.
+ */
+export const ITEM_CHURN_BULK_AFTER = 4
+
+/**
+ * Whether the item count changed by more than {@link ITEM_CHURN_BULK_AFTER}
+ * since the last render — i.e. whether THIS render is a bulk replacement rather
+ * than an item coming or going. Feed it to {@link HomeSlotItem}'s `animated`.
+ */
+export const useIsBulkChange = (
+  count: number,
+  threshold = ITEM_CHURN_BULK_AFTER
+): boolean => {
+  const previous = useRef(count)
+  // Read during render, committed after it: the answer has to be available to
+  // the same render that draws the new items, which an effect cannot do.
+  const isBulk = Math.abs(count - previous.current) > threshold
+
+  useEffect(() => {
+    previous.current = count
+  })
+
+  return isBulk
+}
+
+/**
+ * The list an item's arrival and departure is animated in. Wrap the items of
+ * ANY slot in it — `list` rows, `event-list` events, a bespoke renderer's own —
+ * and give each {@link HomeSlotItem} the item's stable id as its key.
+ *
+ * `initial={false}`: the items already there when the widget mounts have not
+ * arrived, they simply are. The widget's own entrance (`HomeEntrance`) is what
+ * brings the whole card in; without this every list would replay a row-by-row
+ * arrival inside it.
+ */
+export const HomeSlotItems = ({ children }: { children: ReactNode }) => (
+  <AnimatePresence initial={false}>{children}</AnimatePresence>
+)
+
+export interface HomeSlotItemProps {
+  className?: string
+  /**
+   * `false` puts the item straight where it belongs, with no enter or exit —
+   * for a render that is replacing the list rather than changing one item of it
+   * (see {@link useIsBulkChange}).
+   */
+  animated?: boolean
+  children: ReactNode
+}
+
+/**
+ * One item inside a {@link HomeSlotItems}. MUST carry the item's stable id as
+ * its `key` — that key is the only thing telling the list which items are the
+ * same ones between two renders, and a positional key would animate every row
+ * below a removal as though it had been replaced.
+ */
+export const HomeSlotItem = ({
+  className,
+  animated = true,
+  children,
+}: HomeSlotItemProps) => {
+  const reducedMotion = useReducedMotion()
+  // One switch for both reasons the gesture is skipped: the user asked for no
+  // motion, or this render is a new list rather than a changed one.
+  const still = reducedMotion || !animated
+
+  // `height: auto` is a real target for motion — it measures the item and
+  // animates to that number — but the row must be clipped while the number is
+  // wrong for its content, hence `overflow: hidden` throughout.
+  //
+  // The EXIT still has to be declared even when nothing animates: it is what
+  // `AnimatePresence` waits on, and an item with no exit at all is removed
+  // without one. At zero duration that is exactly the instant removal wanted.
+  return (
+    <motion.div
+      className={className}
+      style={{ overflow: "hidden" }}
+      initial={still ? false : { opacity: 0, height: 0, y: ITEM_RISE_PX }}
+      animate={{ opacity: 1, height: "auto", y: 0 }}
+      exit={{
+        opacity: 0,
+        height: 0,
+        transition: {
+          ...withReducedMotion(itemExitTransition, still),
+          // The fade is quick and the closing is a spring, so the row is
+          // already invisible while its space is still being given back.
+          height: withReducedMotion(itemSizeTransition, still),
+        },
+      }}
+      transition={{
+        ...withReducedMotion(itemEnterTransition, still),
+        height: withReducedMotion(itemSizeTransition, still),
+      }}
+    >
+      {children}
+    </motion.div>
+  )
 }
 
 /**

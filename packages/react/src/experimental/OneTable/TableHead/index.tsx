@@ -324,7 +324,11 @@ export function TableHead({
           (isScrolled || isScrolledRight) &&
           "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
         isSticky && "sticky",
-        highlighted && "bg-f1-background-secondary",
+        // The tint is a background-image over the opaque header background,
+        // not a bg-color swap: an alpha bg-color would let the `thead::before`
+        // top rule bleed through and double up with the one painted on top.
+        highlighted &&
+          "bg-[linear-gradient(hsl(var(--neutral-2)),hsl(var(--neutral-2)))]",
         hidden && "after:hidden",
         handleCellClick && "cursor-pointer",
         className

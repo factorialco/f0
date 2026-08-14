@@ -91,6 +91,15 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       // Initial check
       findAndSetEllipsisState()
 
+      // Re-check after the next layout. When this text lives in a flex row that
+      // an ancestor width-constrains only on a later pass (e.g. an OverflowList
+      // inside a table cell), the element can mount at its natural width and
+      // shrink afterwards — a transition the ResizeObserver below sometimes
+      // misses, leaving `hasEllipsis` (and thus the tooltip) stale-false while
+      // the text is visibly clipped. A post-layout re-measure catches it.
+      const raf = requestAnimationFrame(() => findAndSetEllipsisState())
+      const timeout = setTimeout(() => findAndSetEllipsisState(), 100)
+
       // Set up resize observer
       const resizeObserver = new ResizeObserver(() => {
         findAndSetEllipsisState()
@@ -99,6 +108,8 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       resizeObserver.observe(element)
 
       return () => {
+        cancelAnimationFrame(raf)
+        clearTimeout(timeout)
         resizeObserver.disconnect()
       }
     }, [ref, onHasEllipsisChange, lines, disabled])
@@ -213,7 +224,17 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
     return hasEllipsis && !noTooltip ? (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{Text}</TooltipTrigger>
+          {/*
+           * `pointer-events-auto` on the trigger, not just via the wrapper's own
+           * ellipsis state: wrapping in the tooltip remounts the text, resetting
+           * that internal state, so inside a `pointer-events-none` container (e.g.
+           * a table cell) the trigger could end up unhoverable and the tooltip
+           * unreachable. Driving it from the rendered-tooltip branch keeps it
+           * reliably interactive whenever a tooltip exists.
+           */}
+          <TooltipTrigger asChild className="pointer-events-auto">
+            {Text}
+          </TooltipTrigger>
           <TooltipContent className="max-w-xl">{plainText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>

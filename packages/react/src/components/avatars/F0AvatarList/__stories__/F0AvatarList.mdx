@@ -26,9 +26,10 @@ members of a project or the attendees of an event.
 ### Anatomy
 
 The list renders each entity through the matching `F0Avatar*` component, stacks
-them with a slight overlap, and — when there are more than `max` — collapses the
-extras into a `+N` counter. Every avatar carries a tooltip with its name, and
-can show a secondary line (`tooltipDescription`) such as an email or role.
+them with a slight overlap, and — when more entries arrive than there is room
+for, or than `max` allows — collapses the extras into a `+N` counter. Every
+avatar carries a tooltip with its name, and can show a secondary line
+(`tooltipDescription`) such as an email or role.
 
 <Canvas of={ListStories.Default} />
 
@@ -46,10 +47,21 @@ for each entry.
 
 #### Overflow
 
-Use `max` to cap how many avatars are visible; the rest collapse into a `+N`
-counter. `remainingCount` adds to that number rather than replacing it — the
-counter renders `remainingCount` plus whatever `max` collapsed
-(`F0AvatarList.tsx:134`), so it is for entities that are not in `avatars` at all.
+Use `max` to fix how many avatars are visible; the rest collapse into a `+N`
+counter. It is an exact count, not a cap: `max` is also passed as the list's
+`min`, so a `max={3}` cluster still renders three avatars in a container too
+narrow to fit them, rather than degrading to `1 avatar + "+N"`.
+
+`max` has no numeric default. Omit it and the visible count is container-driven
+instead — the row measures the space it has and shows as many avatars as fit.
+That is the right choice when the cluster sits somewhere elastic; pass a `max`
+when you need a predictable footprint, such as a narrow column or rail. (The
+deprecated `layout` prop was meant to be this switch, but was never implemented
+and never had an effect — `max` is the switch.)
+
+`remainingCount` adds to the `+N` number rather than replacing it — the counter
+renders `remainingCount` plus whatever `max` collapsed (`F0AvatarList.tsx:155`),
+so it is for entities that are not in `avatars` at all.
 
 <Canvas of={ListStories.WithRemainingCount} />
 

@@ -1266,10 +1266,9 @@ export const TableWithHighlightedHeaderGroup: Story = {
     const canvas = within(canvasElement)
 
     // The highlighted group's spanning header is emphasized.
+    const highlightClass = "hsl(var(--neutral-2))"
     const augustGroup = await canvas.findByRole("button", { name: "August" })
-    expect(augustGroup.closest("th")?.className).toContain(
-      "bg-f1-background-secondary"
-    )
+    expect(augustGroup.closest("th")?.className).toContain(highlightClass)
 
     // Every column of the highlighted group carries the emphasis and the marker:
     // the group header plus its three expanded columns.
@@ -1278,7 +1277,7 @@ export const TableWithHighlightedHeaderGroup: Story = {
     )
     expect(highlightedHeaders.length).toBe(4)
     highlightedHeaders.forEach((header) => {
-      expect(header.className).toContain("bg-f1-background-secondary")
+      expect(header.className).toContain(highlightClass)
     })
 
     // Collapsing the highlighted month keeps its visible total column emphasized.
@@ -1294,7 +1293,7 @@ export const TableWithHighlightedHeaderGroup: Story = {
       expect(collapsedHighlighted.length).toBe(2)
       expect(
         collapsedHighlighted[collapsedHighlighted.length - 1].className
-      ).toContain("bg-f1-background-secondary")
+      ).toContain(highlightClass)
     })
   },
 }
