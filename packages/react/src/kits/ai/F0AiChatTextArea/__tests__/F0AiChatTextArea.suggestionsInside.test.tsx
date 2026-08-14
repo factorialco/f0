@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { ChartVerticalBars } from "@/icons/app"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { userEvent, zeroRender as render, screen } from "@/testing/test-utils"
 
 import { type WelcomeScreenSuggestion } from "../../F0AiChat/types"
 
@@ -133,6 +133,32 @@ describe("F0AiChatTextArea welcomeScreenSuggestionsPlacement='inside'", () => {
     // The send button did NOT come back with it.
     expect(screen.getAllByRole("button", { name: /send/i })).toHaveLength(1)
     expect(textarea().parentElement?.contains(sendButton())).toBe(true)
+  })
+
+  it("opens the group popover on click without submitting the form", async () => {
+    // Inside the form a chip's implicit `type="submit"` submits it, and the
+    // submit handler's textarea refocus reads to Radix as an outside
+    // interaction — closing the popover in the same click that opened it.
+    const user = userEvent.setup()
+    render(
+      <F0AiChatTextArea
+        onSubmit={() => {}}
+        isWelcomeScreen
+        welcomeScreenSuggestions={suggestions}
+        welcomeScreenSuggestionsPlacement="inside"
+        onSuggestionClick={() => {}}
+      />
+    )
+
+    const form = textarea().closest("form")!
+    const onFormSubmit = vi.fn()
+    form.addEventListener("submit", onFormSubmit)
+
+    await user.click(trigger())
+
+    expect(onFormSubmit).not.toHaveBeenCalled()
+    expect(trigger()).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByText("April leave summary")).toBeInTheDocument()
   })
 
   it("keeps the send button inline once the welcome screen is gone", () => {
