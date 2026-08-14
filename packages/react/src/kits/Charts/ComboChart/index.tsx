@@ -403,23 +403,27 @@ const _ComboChart = <K extends ChartConfig>(
           </Bar>
         ))}
 
-        {lineCategories.map((category, index) => (
-          <Line
-            key={`line-${String(category)}`}
-            type={line?.lineType ?? "natural"}
-            dataKey={String(category)}
-            stroke={
-              dataConfig[category].color
-                ? getColor(dataConfig[category].color)
-                : getCategoricalColor(barCategories.length + index)
-            }
-            strokeWidth={2}
-            strokeDasharray={dataConfig[category].dashed ? "4 4" : undefined}
-            dot={line?.dot ?? false}
-            isAnimationActive={false}
-            yAxisId={line?.axisPosition === "right" ? "right" : undefined}
-          />
-        ))}
+        {lineCategories.map((category, index) => {
+          const stroke = dataConfig[category].color
+            ? getColor(dataConfig[category].color)
+            : getCategoricalColor(barCategories.length + index)
+
+          return (
+            <Line
+              key={`line-${String(category)}`}
+              type={line?.lineType ?? "natural"}
+              dataKey={String(category)}
+              stroke={stroke}
+              strokeWidth={2}
+              strokeDasharray={dataConfig[category].dashed ? "4 4" : undefined}
+              // Solid dots in the series color; the default hollow white ones
+              // read as gaps over a dashed stroke.
+              dot={line?.dot ? { fill: stroke, stroke, r: 3 } : false}
+              isAnimationActive={false}
+              yAxisId={line?.axisPosition === "right" ? "right" : undefined}
+            />
+          )
+        })}
 
         {scatterCategories.map((category, index) => (
           <Scatter
