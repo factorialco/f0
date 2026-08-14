@@ -46,6 +46,17 @@ export interface F0DataChartPointClick {
   category: string
   /** Raw, unformatted value. Consumers apply their own formatting. */
   value: number
+  /**
+   * Every number the mark carries, in series order: `[42]` for a bar or a
+   * slice, `[x, y]` for a scatter point, `[xIndex, yIndex, value]` for a
+   * heatmap cell.
+   *
+   * {@link value} is the last entry, which is the measure for every type
+   * except scatter — there both entries are measures, and quoting only the
+   * last one drops half the point. Read this when the chart type has more
+   * than one number to say.
+   */
+  values: number[]
   /** Index of the clicked mark within its series. */
   dataIndex: number
   /** Index of the series the mark belongs to. */
@@ -53,7 +64,8 @@ export interface F0DataChartPointClick {
   /**
    * Where the click landed, in viewport coordinates — enough to anchor a
    * floating element without the consumer having to reach for the chart's own
-   * geometry. Both are 0 if the event carried no position.
+   * geometry. Taken from the touch on a touch device, where the event itself
+   * carries no coordinates. Both are 0 if neither did.
    */
   clientX: number
   clientY: number

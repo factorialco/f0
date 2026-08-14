@@ -44,17 +44,28 @@ export function usePointClick(
         dataIndex?: number
         name?: string
         value?: unknown
-        // ECharts wraps the native event; `event.event` is the DOM original.
-        event?: { event?: { clientX?: number; clientY?: number } }
+        // ECharts wraps the native event; `event.event` is the DOM original,
+        // which is a TouchEvent on touch — where the position lives on the
+        // touch, not on the event.
+        event?: {
+          event?: {
+            clientX?: number
+            clientY?: number
+            changedTouches?: ArrayLike<{ clientX: number; clientY: number }>
+          }
+        }
       }
 
       // Axis labels, legend entries and the like also raise `click`; only marks
       // belonging to a series carry a value worth quoting.
       if (p.componentType !== "series") return
 
-      // Bars and lines give a bare number; scatter and some stacked shapes give
-      // a tuple whose last entry is the measure.
-      const raw = Array.isArray(p.value) ? p.value[p.value.length - 1] : p.value
+      // Bars and lines give a bare number; a scatter point gives `[x, y]` and a
+      // heatmap cell `[xIndex, yIndex, value]`. The measure is the last entry —
+      // but a scatter point *is* both numbers, so the whole tuple is reported
+      // alongside it rather than discarded here.
+      const list = Array.isArray(p.value) ? p.value : [p.value]
+      const raw = list[list.length - 1]
       // `Number(null)` is 0 and `Number("")` is 0, so a gap in the data would
       // otherwise be reported as a real zero.
       if (raw === null || raw === undefined || raw === "") return
@@ -62,6 +73,7 @@ export function usePointClick(
       if (!Number.isFinite(value)) return
 
       const native = p.event?.event
+      const touch = native?.changedTouches?.[0]
 
       // `hideTip` is safe to fire even with no tooltip showing.
       chart.dispatchAction({ type: "hideTip" })
@@ -70,10 +82,11 @@ export function usePointClick(
         seriesName: String(p.seriesName ?? ""),
         category: String(p.name ?? ""),
         value,
+        values: list.map(Number),
         dataIndex: p.dataIndex ?? 0,
         seriesIndex: p.seriesIndex ?? 0,
-        clientX: native?.clientX ?? 0,
-        clientY: native?.clientY ?? 0,
+        clientX: touch?.clientX ?? native?.clientX ?? 0,
+        clientY: touch?.clientY ?? native?.clientY ?? 0,
       })
     }
 

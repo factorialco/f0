@@ -69,6 +69,7 @@ describe("usePointClick", () => {
       seriesName: "Male",
       category: "Barcelona office",
       value: 18,
+      values: [18],
       dataIndex: 0,
       seriesIndex: 1,
       clientX: 420,
@@ -76,22 +77,41 @@ describe("usePointClick", () => {
     })
   })
 
-  it("takes the measure from the last entry of a tuple value (scatter)", () => {
+  it("keeps both measures of a scatter point, not just the last", () => {
     const stub = makeChartStub()
     const onPointClick = vi.fn()
     render(<Harness chart={stub.instance} onPointClick={onPointClick} />)
 
     fire(stub, {
       componentType: "series",
-      seriesName: "Salary vs tenure",
+      seriesName: "Engineering",
       seriesIndex: 0,
       dataIndex: 4,
-      name: "",
-      value: [3, 52000],
+      name: "Roser Nogué",
+      value: [128000, 0.6],
+    })
+
+    // A scatter point *is* the relationship between its two measures, so
+    // reporting only `value` would quote the tenure and drop the salary.
+    expect(onPointClick).toHaveBeenCalledWith(
+      expect.objectContaining({ value: 0.6, values: [128000, 0.6] })
+    )
+  })
+
+  it("keeps the whole tuple of a heatmap cell", () => {
+    const stub = makeChartStub()
+    const onPointClick = vi.fn()
+    render(<Harness chart={stub.instance} onPointClick={onPointClick} />)
+
+    // `[xIndex, yIndex, value]` — here the last entry really is the measure.
+    fire(stub, {
+      componentType: "series",
+      seriesName: "Office activity",
+      value: [2, 4, 37],
     })
 
     expect(onPointClick).toHaveBeenCalledWith(
-      expect.objectContaining({ value: 52000, category: "" })
+      expect.objectContaining({ value: 37, values: [2, 4, 37] })
     )
   })
 
@@ -113,6 +133,25 @@ describe("usePointClick", () => {
     fire(stub, { componentType: "series", seriesName: "Male", value: null })
 
     expect(stub.dispatched).toEqual([])
+  })
+
+  it("takes the position from the touch on a touch device", () => {
+    const stub = makeChartStub()
+    const onPointClick = vi.fn()
+    render(<Harness chart={stub.instance} onPointClick={onPointClick} />)
+
+    // A TouchEvent has no `clientX` of its own — it lives on the touch. Without
+    // reading it the popover would anchor to the viewport corner.
+    fire(stub, {
+      componentType: "series",
+      seriesName: "Male",
+      value: 18,
+      event: { event: { changedTouches: [{ clientX: 120, clientY: 340 }] } },
+    })
+
+    expect(onPointClick).toHaveBeenCalledWith(
+      expect.objectContaining({ clientX: 120, clientY: 340 })
+    )
   })
 
   it("falls back to 0,0 when the event carries no position", () => {
