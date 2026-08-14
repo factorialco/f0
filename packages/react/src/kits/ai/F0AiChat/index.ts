@@ -9,7 +9,6 @@ export {
 
 // Types
 export type {
-  AiChatCredits,
   AiChatCreditWarning,
   AiChatMode,
   AiChatFileAttachmentConfig,
@@ -20,7 +19,6 @@ export type {
   CanvasContent,
   ExpenseProfile,
   CanvasContentBase,
-  CreditsUsage,
   DashboardCanvasContent,
   DataDownloadCanvasContent,
   AutofillTimesheetCanvasContent,

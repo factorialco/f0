@@ -34,15 +34,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const noopFetchUsage = async () => ({ used: 230, total: 500 })
-
-const SAMPLE_CREDITS = {
-  fetchUsage: noopFetchUsage,
-  companyName: "Acme Corp",
-  planName: "Enterprise",
-  upgradePlanUrl: "https://example.com/upgrade",
-}
-
 export const Legacy: Story = {
   args: {
     historyEnabled: false,
@@ -74,16 +65,6 @@ export const WithHistoryNewConversation: Story = {
   args: {
     historyEnabled: true,
     currentThreadTitle: null,
-    onClose: () => console.log("close"),
-    onOpenHistory: () => console.log("open history"),
-  },
-}
-
-export const WithCredits: Story = {
-  args: {
-    historyEnabled: true,
-    currentThreadTitle: "Discussing perf reviews",
-    credits: SAMPLE_CREDITS,
     onClose: () => console.log("close"),
     onOpenHistory: () => console.log("open history"),
   },
@@ -183,9 +164,6 @@ export const Snapshot: Story = {
       </div>
       <div className="rounded-md border border-solid border-f1-border">
         <F0AiChatHeader {...WithHistoryNewConversation.args} />
-      </div>
-      <div className="rounded-md border border-solid border-f1-border">
-        <F0AiChatHeader {...WithCredits.args} />
       </div>
       <div className="rounded-md border border-solid border-f1-border">
         <F0AiChatHeader {...WithHeaderAction.args} />

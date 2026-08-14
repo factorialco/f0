@@ -1,6 +1,5 @@
 import { breakpoints } from "@factorialco/f0-core"
 import { motion } from "motion/react"
-import { type ReactNode } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -18,44 +17,9 @@ import { Action } from "@/ui/Action"
 
 import type { F0AiChatHeaderProps } from "./types"
 
-import { CreditsPopover } from "./components/CreditsPopover"
-import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
-
-/**
- * Picks the right credits popover to render based on which prop the host
- * provided. `employeeCredits` (employee-only) takes precedence; otherwise
- * falls back to the classic `credits` popover. Renders nothing when neither
- * is set.
- */
-const CreditsPopoverPicker = ({
-  credits,
-  employeeCredits,
-  trigger,
-}: Pick<F0AiChatHeaderProps, "credits" | "employeeCredits"> & {
-  /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
-  trigger?: ReactNode
-}) => {
-  if (employeeCredits)
-    return (
-      <EmployeeCreditsPopover
-        employeeCredits={employeeCredits}
-        trigger={trigger}
-      />
-    )
-  if (credits) return <CreditsPopover credits={credits} trigger={trigger} />
-  return null
-}
-
-/**
- * The AI chat credits / settings popover button, on its own. Use it to surface
- * the popover outside the chat header — e.g. from a sidebar that already owns
- * the chat navigation (history, new chat), leaving the header minimal.
- */
-export const F0AiChatCreditsButton = CreditsPopoverPicker
-
 /**
  * Headless chat header. Renders a top bar with title (or thread selector),
- * credits popover, fullscreen toggle and close button. Has two visual
+ * fullscreen toggle and close button. Has two visual
  * variants:
  * - with-history: title acts as a thread selector (clickable) — the host
  *   wires `onOpenHistory` to mount its own history dialog.
@@ -75,8 +39,6 @@ export const F0AiChatHeader = ({
   onNewChat,
   onOpenHistory,
   hasMessages = false,
-  credits,
-  employeeCredits,
   compact = false,
   actions,
 }: F0AiChatHeaderProps) => {
@@ -121,9 +83,9 @@ export const F0AiChatHeader = ({
   ))
 
   // Compact: the chat is hosted next to a sidebar that owns navigation (history,
-  // new chat) and the credits/settings popover, so the header keeps only the
-  // conversation title (plain text — the thread title, or "New chat") plus the
-  // header actions, expand + close controls.
+  // new chat), so the header keeps only the conversation title (plain text —
+  // the thread title, or "New chat") plus the header actions, expand + close
+  // controls.
   if (compact) {
     return (
       <header
@@ -185,10 +147,6 @@ export const F0AiChatHeader = ({
             ease: "easeOut",
           }}
         >
-          <CreditsPopoverPicker
-            credits={credits}
-            employeeCredits={employeeCredits}
-          />
           {actionButtons}
           {expandButton}
           {closeButton}
@@ -220,10 +178,6 @@ export const F0AiChatHeader = ({
             onClick={onNewChat}
           />
         )}
-        <CreditsPopoverPicker
-          credits={credits}
-          employeeCredits={employeeCredits}
-        />
         {actionButtons}
         {expandButton}
         {closeButton}
