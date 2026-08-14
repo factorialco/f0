@@ -413,6 +413,106 @@ describe("DashboardGrid", () => {
       chat.remove()
     })
 
+    describe("announcing the drag", () => {
+      const listen = () => {
+        const started: (string | undefined)[] = []
+        let ended = 0
+        const onStart = (e: Event) =>
+          started.push((e as CustomEvent<{ title?: string }>).detail?.title)
+        const onEnd = () => {
+          ended += 1
+        }
+        window.addEventListener("f0:widget-drag-start", onStart)
+        window.addEventListener("f0:widget-drag-end", onEnd)
+        return {
+          started,
+          endCount: () => ended,
+          stop: () => {
+            window.removeEventListener("f0:widget-drag-start", onStart)
+            window.removeEventListener("f0:widget-drag-end", onEnd)
+          },
+        }
+      }
+
+      const grabFirstGrip = (container: HTMLElement) => {
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+        fireEvent.pointerDown(grip, { button: 0 })
+      }
+
+      it("stays quiet for a widget with no title", () => {
+        const items = makeCollectionItems(480).map((item) => ({
+          ...item,
+          title: "",
+        }))
+        const { container } = render(
+          <DashboardGrid items={items} filters={{}} editMode />
+        )
+        const events = listen()
+
+        try {
+          grabFirstGrip(container)
+          // The title is the quote. Announcing an empty one invites a drop
+          // that could only do nothing.
+          expect(events.started).toEqual([])
+        } finally {
+          events.stop()
+        }
+      })
+
+      it("retracts the invitation when the pointer is cancelled", () => {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+          />
+        )
+        const events = listen()
+
+        try {
+          grabFirstGrip(container)
+          expect(events.started).toEqual(["Expenses"])
+
+          // No `pointerup` follows a cancel, so without handling it the chat
+          // would keep a full-panel drop overlay up for good.
+          fireEvent(
+            document,
+            new MouseEvent("pointercancel", { bubbles: true })
+          )
+
+          expect(events.endCount()).toBe(1)
+          // A cancelled gesture is not a drop: the order must not change.
+          expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+        } finally {
+          events.stop()
+        }
+      })
+
+      it("retracts the invitation when the grid unmounts mid-drag", () => {
+        const { container, unmount } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+          />
+        )
+        const events = listen()
+
+        try {
+          grabFirstGrip(container)
+          unmount()
+
+          // Otherwise the announcement outlives the grid that made it.
+          expect(events.endCount()).toBe(1)
+        } finally {
+          events.stop()
+        }
+      })
+    })
+
     it("renders no grip when not in edit mode", () => {
       const { container } = render(
         <DashboardGrid items={makeCollectionItems(480)} filters={{}} />

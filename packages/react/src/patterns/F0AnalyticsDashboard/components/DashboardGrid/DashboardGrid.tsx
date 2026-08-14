@@ -237,6 +237,10 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   const dropTargetRef = useRef<typeof dropTarget>(null)
   dropTargetRef.current = dropTarget
   const ghostRef = useRef<HTMLDivElement | null>(null)
+  /** The AI chat's drop zone, looked up once per drag rather than per move. */
+  const chatDropZoneRef = useRef<Element | null>(null)
+  /** Teardown for the drag in flight, so an unmount can retract it. */
+  const endDragRef = useRef<(() => void) | null>(null)
 
   const commitDrop = useCallback(
     (draggedId: string, target: NonNullable<typeof dropTarget>) => {
@@ -292,7 +296,11 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // that band, so without this the grid would paint a drop indicator
       // behind the chat's overlay and commit a reorder on release. Returning
       // null also makes `up`'s `if (draggedId && target)` skip `commitDrop`.
-      const chatEl = document.querySelector("[data-ai-chat-dropzone]")
+      //
+      // Found once when the drag starts, not on every move — this runs per
+      // `pointermove`. The rect is still read live, since the panel can be
+      // resized mid-drag.
+      const chatEl = chatDropZoneRef.current
       if (chatEl) {
         const c = chatEl.getBoundingClientRect()
         if (
@@ -367,16 +375,23 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       dropTargetRef.current = null
       setDragId(id)
       setDropTarget(null)
+      chatDropZoneRef.current = document.querySelector(
+        "[data-ai-chat-dropzone]"
+      )
 
       // Announce the drag so other drop targets can invite it immediately,
       // rather than waiting for the cursor to reach them. The AI chat listens
       // for this to offer "discuss this widget" from the first moment of the
       // gesture. Fired on `window` so the listener needs no shared ancestor.
-      window.dispatchEvent(
-        new CustomEvent(WIDGET_DRAG_START, {
-          detail: { title: itemMapRef.current.get(id)?.title ?? "" },
-        })
-      )
+      //
+      // Nothing to announce without a title: the title *is* the quote, so the
+      // chat would invite a drop that could only do nothing.
+      const title = itemMapRef.current.get(id)?.title ?? ""
+      if (title) {
+        window.dispatchEvent(
+          new CustomEvent(WIDGET_DRAG_START, { detail: { title } })
+        )
+      }
 
       const move = (ev: PointerEvent) => {
         const ghost = ghostRef.current
@@ -389,23 +404,48 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           setDropTarget(next)
         }
       }
-      const up = () => {
+
+      /**
+       * The single way out of a drag, whatever ends it.
+       *
+       * `commit` is false for the paths that aren't a deliberate release: a
+       * cancelled pointer (touch scroll takeover, the browser interrupting)
+       * and this grid unmounting mid-gesture. Both used to leave the listeners
+       * attached and, worse, never announce the end — so the chat kept its
+       * full-panel drop invitation up, and the next ordinary click inside it
+       * quoted a widget nobody was dragging.
+       */
+      const endDrag = (commit: boolean) => {
         document.removeEventListener("pointermove", move)
         document.removeEventListener("pointerup", up)
+        document.removeEventListener("pointercancel", cancel)
+        endDragRef.current = null
+
         const draggedId = dragIdRef.current
         const target = dropTargetRef.current
-        if (draggedId && target) commitDrop(draggedId, target)
+        if (commit && draggedId && target) commitDrop(draggedId, target)
         dragIdRef.current = null
         dropTargetRef.current = null
+        chatDropZoneRef.current = null
         setDragId(null)
         setDropTarget(null)
         window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
       }
+      const up = () => endDrag(true)
+      const cancel = () => endDrag(false)
+
+      endDragRef.current = () => endDrag(false)
       document.addEventListener("pointermove", move)
       document.addEventListener("pointerup", up)
+      document.addEventListener("pointercancel", cancel)
     },
     [commitDrop, resolveDropTarget]
   )
+
+  // A drag in flight when this unmounts (navigating away, switching
+  // dashboards) has to be retracted too, or the announcement outlives the grid
+  // that made it.
+  useEffect(() => () => endDragRef.current?.(), [])
 
   // ─── Row resize ─────────────────────────────────────────────
   const startResize = useCallback(
