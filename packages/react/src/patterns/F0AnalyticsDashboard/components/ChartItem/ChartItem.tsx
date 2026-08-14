@@ -505,6 +505,14 @@ export function ChartItem<Filters extends FiltersDefinition>({
     setOpen: setAiChatOpen,
   } = useAiChat()
 
+  // An item can arrive with a chart config this build cannot render — most
+  // plausibly when a host app maps a wire type it has no case for and yields
+  // `undefined`. Every path below switches on `chart.type` without a default,
+  // so rendering it would throw and take the whole dashboard with it. Detect
+  // it once and degrade to this item's own error state.
+  const unrenderableChart = !isRenderableChart(item.chart)
+  const safeChart = unrenderableChart ? FALLBACK_CHART_CONFIG : item.chart
+
   /**
    * The mark the user last clicked, held until they either choose the action or
    * dismiss it. Clicking a chart offers to quote rather than quoting outright —
@@ -527,7 +535,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
       return
     }
 
-    const chart = item.chart
+    // `safeChart`, not `item.chart`: the same guarded config the rest of the
+    // component uses. `"x" in undefined` throws, and an item can arrive
+    // without a renderable chart.
+    const chart = safeChart
     // Format through the chart's own formatter so the quoted number reads
     // exactly as the tooltip did — a raw value can differ wildly from what was
     // on screen (currency, compact notation, percentages).
@@ -546,7 +557,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     // Without this the quote would land in a panel the user cannot see.
     setAiChatOpen(true)
     setPickedPoint(null)
-  }, [item, onAskAi, pickedPoint, setPendingQuote, setAiChatOpen])
+  }, [item, safeChart, onAskAi, pickedPoint, setPendingQuote, setAiChatOpen])
 
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -559,14 +570,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
     () => buildChartTypeOptions(translations),
     [translations]
   )
-
-  // An item can arrive with a chart config this build cannot render — most
-  // plausibly when a host app maps a wire type it has no case for and yields
-  // `undefined`. Every path below switches on `chart.type` without a default,
-  // so rendering it would throw and take the whole dashboard with it. Detect
-  // it once and degrade to this item's own error state.
-  const unrenderableChart = !isRenderableChart(item.chart)
-  const safeChart = unrenderableChart ? FALLBACK_CHART_CONFIG : item.chart
 
   const downloadActions = useChartDownloadActions({
     chartContainerRef,
