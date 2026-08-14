@@ -87,6 +87,7 @@ export const F0AiChatTextArea = ({
   onSuggestionClick,
   welcomeScreenSuggestionsPlacement = "above",
   welcomeScreenCards,
+  padding = "default",
   ref,
 }: F0AiChatTextAreaProps) => {
   const translation = useI18n()
@@ -403,7 +404,10 @@ export const F0AiChatTextArea = ({
     <motion.div
       ref={ref}
       className={cn(
-        "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
+        "flex flex-col items-center gap-2",
+        // The chat window's gutter. `padding="none"` hands it to the host —
+        // see the prop's doc for what the host takes on with it.
+        padding === "default" && "px-4 pb-3 pt-2",
         isFullscreenWelcome && "min-h-0 flex-1 justify-start -mt-20"
       )}
       {...(fullscreen ? composerReveal : {})}
