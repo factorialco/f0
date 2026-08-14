@@ -80,6 +80,11 @@ interface F0DataChartCommonProps {
   /**
    * Called when the user clicks a single mark (bar segment, slice, point).
    * Omit to leave clicks inert, which is the default for every chart.
+   *
+   * Line charts accept a click anywhere in the plot area and answer with the
+   * nearest point, since a line is too thin to hit — the same allowance their
+   * axis-triggered tooltip already makes. What arrives here is identical
+   * either way.
    */
   onPointClick?: (point: F0DataChartPointClick) => void
 }

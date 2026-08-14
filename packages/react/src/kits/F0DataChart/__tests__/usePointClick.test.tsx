@@ -34,20 +34,73 @@ function makeChartStub() {
   }
 }
 
+/**
+ * Stand-in for a line chart, which resolves clicks itself instead of being
+ * handed a mark: the grid spans x 40–440 and y 20–220, categories sit every
+ * 100px from x=40, and the value axis runs 0 at the bottom to 100 at the top.
+ */
+function makeLineChartStub(option: {
+  series?: { name?: string; data?: unknown[] }[]
+  xAxis?: { data?: unknown[] }[]
+  legend?: { selected?: Record<string, boolean> }[]
+}) {
+  const zrHandlers: ((ev: unknown) => void)[] = []
+  const dispatched: { type: string }[] = []
+  let disposed = false
+  return {
+    zrHandlers,
+    dispatched,
+    dispose: () => {
+      disposed = true
+    },
+    instance: {
+      getZr: () => ({
+        on: (_event: string, fn: (ev: unknown) => void) => {
+          zrHandlers.push(fn)
+        },
+        off: (_event: string, fn: (ev: unknown) => void) => {
+          const i = zrHandlers.indexOf(fn)
+          if (i >= 0) zrHandlers.splice(i, 1)
+        },
+      }),
+      containPixel: (_finder: string, [x, y]: [number, number]) =>
+        x >= 40 && x <= 440 && y >= 20 && y <= 220,
+      convertFromPixel: (_finder: unknown, [x, y]: [number, number]) => [
+        (x - 40) / 100,
+        (220 - y) / 2,
+      ],
+      getOption: () => option,
+      isDisposed: () => disposed,
+      dispatchAction: (action: { type: string }) => {
+        dispatched.push(action)
+      },
+    } as unknown as echarts.ECharts,
+  }
+}
+
 const Harness = ({
   chart,
   onPointClick,
+  hitArea,
 }: {
   chart: echarts.ECharts
   onPointClick?: (point: F0DataChartPointClick) => void
+  hitArea?: "mark" | "plot"
 }) => {
   const ref = useRef<echarts.ECharts | null>(chart)
-  usePointClick(ref, onPointClick)
+  usePointClick(ref, onPointClick, hitArea)
   return null
 }
 
 const fire = (stub: ReturnType<typeof makeChartStub>, params: unknown) =>
   stub.handlers["click"]?.forEach((h) => h(params))
+
+const clickPlot = (
+  stub: ReturnType<typeof makeLineChartStub>,
+  offsetX: number,
+  offsetY: number,
+  event?: unknown
+) => stub.zrHandlers.forEach((h) => h({ offsetX, offsetY, event }))
 
 describe("usePointClick", () => {
   it("reports the clicked mark, normalised", () => {
@@ -249,5 +302,170 @@ describe("usePointClick", () => {
     // nothing. Only the absence of a throw is meaningful here.
     stub.dispose()
     expect(() => unmount()).not.toThrow()
+  })
+})
+
+describe("usePointClick — plot hit area (line charts)", () => {
+  const lineOption = {
+    xAxis: [{ data: ["Jan", "Feb", "Mar", "Apr", "May"] }],
+    series: [
+      { name: "Headcount", data: [10, 30, 50, 70, 90] },
+      { name: "Attrition", data: [5, 8, null, 12, 15] },
+    ],
+  }
+
+  const renderLine = (
+    stub: ReturnType<typeof makeLineChartStub>,
+    onPointClick = vi.fn()
+  ) => {
+    render(
+      <Harness
+        chart={stub.instance}
+        onPointClick={onPointClick}
+        hitArea="plot"
+      />
+    )
+    return onPointClick
+  }
+
+  it("answers a click that misses the line entirely", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    // x=140 is "Feb"; y=164 reads as 28 on the value axis — well off the line
+    // at 30, which is the whole point: a line is too thin to ask for a hit.
+    clickPlot(stub, 140, 164)
+
+    expect(onPointClick).toHaveBeenCalledWith({
+      seriesName: "Headcount",
+      category: "Feb",
+      value: 30,
+      values: [30],
+      dataIndex: 1,
+      seriesIndex: 0,
+      clientX: 0,
+      clientY: 0,
+    })
+  })
+
+  it("picks the series the click was aimed at, not the first one", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    // Same category, but low — nearer Attrition (8) than Headcount (30).
+    clickPlot(stub, 140, 208)
+
+    expect(onPointClick).toHaveBeenCalledWith(
+      expect.objectContaining({ seriesName: "Attrition", value: 8 })
+    )
+  })
+
+  it("skips a series with a gap at that category", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    // "Mar" is null for Attrition. Aiming low there must not quote the gap as
+    // a zero — the only answer left is Headcount.
+    clickPlot(stub, 240, 208)
+
+    expect(onPointClick).toHaveBeenCalledWith(
+      expect.objectContaining({ seriesName: "Headcount", value: 50 })
+    )
+  })
+
+  it("ignores a series the legend has switched off", () => {
+    const stub = makeLineChartStub({
+      ...lineOption,
+      legend: [{ selected: { Headcount: false, Attrition: true } }],
+    })
+    const onPointClick = renderLine(stub)
+
+    // Aimed at where Headcount would be, but it isn't on screen.
+    clickPlot(stub, 140, 164)
+
+    expect(onPointClick).toHaveBeenCalledWith(
+      expect.objectContaining({ seriesName: "Attrition" })
+    )
+  })
+
+  it("rounds to the nearest category", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    clickPlot(stub, 189, 100) // 1.49 → Feb
+    clickPlot(stub, 191, 100) // 1.51 → Mar
+
+    expect(onPointClick.mock.calls.map(([p]) => p.category)).toEqual([
+      "Feb",
+      "Mar",
+    ])
+  })
+
+  it("ignores clicks outside the plot area", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    clickPlot(stub, 10, 100) // left of the grid, over the axis labels
+    clickPlot(stub, 200, 260) // below the grid, over the legend
+
+    expect(onPointClick).not.toHaveBeenCalled()
+  })
+
+  it("stays quiet when no series has a value at that category", () => {
+    const stub = makeLineChartStub({
+      xAxis: [{ data: ["Jan"] }],
+      series: [{ name: "Headcount", data: [null] }],
+    })
+    const onPointClick = renderLine(stub)
+
+    clickPlot(stub, 40, 100)
+
+    expect(onPointClick).not.toHaveBeenCalled()
+  })
+
+  it("carries the click position, from the touch when there is one", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    clickPlot(stub, 140, 164, { clientX: 500, clientY: 300 })
+    clickPlot(stub, 140, 164, {
+      changedTouches: [{ clientX: 120, clientY: 340 }],
+    })
+
+    expect(
+      onPointClick.mock.calls.map(([p]) => [p.clientX, p.clientY])
+    ).toEqual([
+      [500, 300],
+      [120, 340],
+    ])
+  })
+
+  it("dismisses the hover tooltip on a pick, and only on a pick", () => {
+    const stub = makeLineChartStub(lineOption)
+    renderLine(stub)
+
+    clickPlot(stub, 10, 100) // outside the plot — no pick
+    expect(stub.dispatched).toEqual([])
+
+    clickPlot(stub, 140, 164)
+    expect(stub.dispatched).toEqual([{ type: "hideTip" }])
+  })
+
+  it("detaches on unmount", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = vi.fn()
+    const { unmount } = render(
+      <Harness
+        chart={stub.instance}
+        onPointClick={onPointClick}
+        hitArea="plot"
+      />
+    )
+
+    unmount()
+
+    expect(stub.zrHandlers).toHaveLength(0)
+    clickPlot(stub, 140, 164)
+    expect(onPointClick).not.toHaveBeenCalled()
   })
 })

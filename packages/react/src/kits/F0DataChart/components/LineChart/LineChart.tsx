@@ -17,7 +17,10 @@ export const LineChart = (props: F0DataChartLineProps) => {
   const size = resolveChartSize(width)
   const options = useLineChartOptions(ref, props, size)
   const chartRef = useEChartsInstance(ref, options)
-  usePointClick(chartRef, props.onPointClick)
+  // "plot", not "mark": a line is a few pixels wide, so requiring a hit on the
+  // line itself makes the action unusable. Same reason the tooltip here is
+  // axis-triggered — the whole column is one target.
+  usePointClick(chartRef, props.onPointClick, "plot")
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
   useLegendInteraction(chartRef)
