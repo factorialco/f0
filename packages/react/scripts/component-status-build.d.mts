@@ -11,6 +11,9 @@ export const VIRTUAL_ID: string
 /** Scan `srcDir` (defaults to this package's `src/`) and build the dataset. */
 export function computeComponentStatusData(srcDir?: string): ComponentStatusData
 
+/** Naming convention: component folder is "F0" + uppercase letter. */
+export function isF0Named(storyFile: string): boolean
+
 /** Whether an entry meets the mechanically-checkable stable bar. Accepts any
  * object carrying the DoD facts (the fields the bar actually reads), so
  * lightweight views like the check scripts' StatusEntry qualify. */
@@ -24,6 +27,7 @@ export function meetsStableBar(
     | "hasMdxDocs"
     | "docQuality"
     | "a11yTier"
+    | "storyFile"
   >
 ): boolean
 

@@ -139,6 +139,24 @@ describe("checkNewComponents", () => {
     ])
   })
 
+  it("fails a new component whose folder is not F0-named", () => {
+    const result = checkNewComponents(
+      [
+        entry({
+          storyFile: "components/Widget/__stories__/Widget.stories.tsx",
+        }),
+      ],
+      signals({
+        addedFiles: [
+          "packages/react/src/components/Widget/__stories__/Widget.stories.tsx",
+        ],
+      })
+    )
+
+    expect(result.failing).toHaveLength(1)
+    expect(result.failing[0].missing).toEqual(['"F0" name prefix'])
+  })
+
   it("holds new components to the full bar regardless of their maturity tag", () => {
     const result = checkNewComponents(
       [entry({ apiStatus: "experimental", docQuality: "acceptable" })],

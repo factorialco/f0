@@ -34,6 +34,7 @@ import consola from "consola"
 
 import {
   computeComponentStatusData,
+  isF0Named,
   meetsStableBar,
 } from "../scripts/component-status-build.mjs"
 import type {
@@ -75,6 +76,7 @@ interface DebtFile {
  */
 export function unmetRequirements(c: StatusEntry): string[] {
   const missing: string[] = []
+  if (!isF0Named(c.storyFile)) missing.push('"F0" name prefix')
   if (!c.hasStories) missing.push("stories")
   if (!c.hasUnitTests) missing.push("unit tests")
   if (!c.hasPlayFunction) missing.push("play function")
