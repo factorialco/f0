@@ -33,11 +33,43 @@ export interface F0DataChartEmptyStateProps {
 }
 
 /**
+ * The single mark a click landed on — one bar segment, one slice, one point.
+ *
+ * Note this is narrower than what an axis-triggered tooltip displays: hovering
+ * a category reveals every series at it, while a click can only ever identify
+ * the one mark under the cursor.
+ */
+export interface F0DataChartPointClick {
+  /** Series the mark belongs to, as shown in the legend ("Male"). */
+  seriesName: string
+  /** Category the mark sits at ("Barcelona office"). Empty for chart types with no category axis. */
+  category: string
+  /** Raw, unformatted value. Consumers apply their own formatting. */
+  value: number
+  /** Index of the clicked mark within its series. */
+  dataIndex: number
+  /** Index of the series the mark belongs to. */
+  seriesIndex: number
+  /**
+   * Where the click landed, in viewport coordinates — enough to anchor a
+   * floating element without the consumer having to reach for the chart's own
+   * geometry. Both are 0 if the event carried no position.
+   */
+  clientX: number
+  clientY: number
+}
+
+/**
  * Props shared by every `F0DataChart` variant.
  */
 interface F0DataChartCommonProps {
   /** Customize or opt out of the empty state shown when data is empty. */
   emptyState?: F0DataChartEmptyStateProps
+  /**
+   * Called when the user clicks a single mark (bar segment, slice, point).
+   * Omit to leave clicks inert, which is the default for every chart.
+   */
+  onPointClick?: (point: F0DataChartPointClick) => void
 }
 
 // ---------------------------------------------------------------------------

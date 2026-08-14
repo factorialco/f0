@@ -19,6 +19,7 @@ export type {
   F0DataChartPieDataPoint,
   F0DataChartPieProps,
   F0DataChartPieSeries,
+  F0DataChartPointClick,
   F0DataChartProps,
   F0DataChartRadarIndicator,
   F0DataChartRadarProps,
