@@ -36,7 +36,6 @@ import {
   ClockInControls,
   type ClockInProject,
 } from "../ClockIn/ClockInControls"
-import { SlotWidget } from "../SlotWidget"
 import {
   fromParams,
   homeSlot,
@@ -694,8 +693,9 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
 /* ============================ add-widget catalog ============================ */
 
 /**
- * The catalog the picker offers. Every preview is the REAL widget — the same
- * `SlotWidget` render the rail makes — so what you preview is what gets added.
+ * The catalog the picker offers. Every preview is the WIDGET ITSELF, handed over
+ * as data — the picker draws it through the same `SlotWidget` the rail uses, so
+ * what you preview is what gets added, down to the spacing.
  */
 const CATALOG_ITEMS = [
   ...RIGHT_WIDGETS.map((widget) => ({
@@ -703,66 +703,55 @@ const CATALOG_ITEMS = [
     // `widgetTitle` rather than the header's own: a configurable widget's title
     // can be a function of its params, and a catalog row needs the text.
     title: widgetTitle(widget),
-    // The same sentence the widget's info side shows, under the preview.
-    info: resolveWidgetHeader(widget.header, widget.params)?.info,
     icon: widget.icon!,
-    preview: (
-      <SlotWidget
-        header={widget.header}
-        params={widget.params}
-        slots={widget.slots}
-        slotRenderers={SLOT_RENDERERS}
-      />
-    ),
+    // The rail's own widget, unchanged. Its `info` comes with it.
+    preview: widget,
   })),
   {
     id: "time-off",
     title: "Time off",
     icon: PalmTree,
-    preview: (
-      <SlotWidget
-        header={{ title: "Time off" }}
-        slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "Days left", content: "12" }] },
-          },
-        ]}
-      />
-    ),
+    preview: {
+      id: "time-off",
+      header: { title: "Time off" },
+      slots: [
+        {
+          visualization: "indicators",
+          params: { items: [{ label: "Days left", content: "12" }] },
+        },
+      ],
+    },
   },
   {
     id: "tasks",
     title: "Tasks",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Tasks", count: 3 }}
-        slots={[
-          listSlot({ clickBehavior: "link" }, [
-            { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
-            { id: "2", title: "Review expense report", href: "/tasks/2" },
-            { id: "3", title: "Approve time off", href: "/tasks/3" },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "tasks",
+      header: { title: "Tasks", count: 3 },
+      slots: [
+        listSlot({ clickBehavior: "link" }, [
+          { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
+          { id: "2", title: "Review expense report", href: "/tasks/2" },
+          { id: "3", title: "Approve time off", href: "/tasks/3" },
+        ]),
+      ],
+    },
   },
   {
     id: "goals",
     title: "Goals",
     icon: Target,
-    preview: (
-      <SlotWidget
-        header={{ title: "Goals" }}
-        slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "On track", content: "4/5" }] },
-          },
-        ]}
-      />
-    ),
+    preview: {
+      id: "goals",
+      header: { title: "Goals" },
+      slots: [
+        {
+          visualization: "indicators",
+          params: { items: [{ label: "On track", content: "4/5" }] },
+        },
+      ],
+    },
   },
   // The schema showcase: each of these leans on a different `list` schema —
   // what you preview here is exactly what the slot vocabulary can say.
@@ -770,150 +759,146 @@ const CATALOG_ITEMS = [
     id: "team",
     title: "Team",
     icon: Person,
-    preview: (
-      <SlotWidget
-        header={{ title: "Team", count: 6 }}
-        slots={[
-          // Alert left + the people themselves trailing: two-line rows (md).
-          listSlot(
+    preview: {
+      id: "team",
+      header: { title: "Team", count: 6 },
+      slots: [
+        // Alert left + the people themselves trailing: two-line rows (md).
+        listSlot(
+          {
+            left: "alert",
+            right: "person-list",
+            descriptionRequired: true,
+            clickBehavior: "link",
+          },
+          [
             {
-              left: "alert",
-              right: "person-list",
-              descriptionRequired: true,
-              clickBehavior: "link",
+              id: "in",
+              title: "Clocked in",
+              description: "4 people",
+              alert: "positive",
+              avatars: [
+                { firstName: "Ada", lastName: "Lovelace" },
+                { firstName: "Alan", lastName: "Turing" },
+              ],
+              remainingCount: 2,
+              href: "/attendance",
             },
-            [
-              {
-                id: "in",
-                title: "Clocked in",
-                description: "4 people",
-                alert: "positive",
-                avatars: [
-                  { firstName: "Ada", lastName: "Lovelace" },
-                  { firstName: "Alan", lastName: "Turing" },
-                ],
-                remainingCount: 2,
-                href: "/attendance",
-              },
-              {
-                id: "away",
-                title: "Away",
-                description: "2 people",
-                alert: "warning",
-                avatars: [{ firstName: "Grace", lastName: "Hopper" }],
-                href: "/attendance/away",
-              },
-            ]
-          ),
-        ]}
-      />
-    ),
+            {
+              id: "away",
+              title: "Away",
+              description: "2 people",
+              alert: "warning",
+              avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+              href: "/attendance/away",
+            },
+          ]
+        ),
+      ],
+    },
   },
   {
     id: "people",
     title: "People",
     icon: Person,
-    preview: (
-      <SlotWidget
-        header={{ title: "New joiners", count: 7 }}
-        slots={[
-          // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
-          listSlot(
-            {
-              left: "person",
-              subtitleRequired: true,
-              clickBehavior: "link",
-              maxVisibleItems: 3,
+    preview: {
+      id: "people",
+      header: { title: "New joiners", count: 7 },
+      slots: [
+        // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
+        listSlot(
+          {
+            left: "person",
+            subtitleRequired: true,
+            clickBehavior: "link",
+            maxVisibleItems: 3,
+          },
+          [
+            "Ada Lovelace",
+            "Alan Turing",
+            "Grace Hopper",
+            "Katherine Johnson",
+            "Margaret Hamilton",
+            "Annie Easley",
+            "Mary Jackson",
+          ].map((name, index) => ({
+            id: String(index),
+            title: name,
+            subtitle: "Engineering",
+            avatar: {
+              firstName: name.split(" ")[0],
+              lastName: name.split(" ")[1],
             },
-            [
-              "Ada Lovelace",
-              "Alan Turing",
-              "Grace Hopper",
-              "Katherine Johnson",
-              "Margaret Hamilton",
-              "Annie Easley",
-              "Mary Jackson",
-            ].map((name, index) => ({
-              id: String(index),
-              title: name,
-              subtitle: "Engineering",
-              avatar: {
-                firstName: name.split(" ")[0],
-                lastName: name.split(" ")[1],
-              },
-              href: `/employees/${index}`,
-            }))
-          ),
-        ]}
-      />
-    ),
+            href: `/employees/${index}`,
+          }))
+        ),
+      ],
+    },
   },
   {
     id: "documents",
     title: "Documents",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Documents" }}
-        alert="2 documents need signing"
-        action={{ label: "Sign now", onClick: () => {} }}
-        slots={[
-          // File avatars, two-line rows (md).
-          listSlot(
-            { left: "file", descriptionRequired: true, clickBehavior: "link" },
-            [
-              {
-                id: "1",
-                title: "Q3 addendum.pdf",
-                description: "Needs your signature",
-                avatar: {
-                  file: { name: "q3-addendum.pdf", type: "application/pdf" },
-                },
-                href: "/documents/1",
+    preview: {
+      id: "documents",
+      header: { title: "Documents" },
+      alert: "2 documents need signing",
+      action: { label: "Sign now", onClick: () => {} },
+      slots: [
+        // File avatars, two-line rows (md).
+        listSlot(
+          { left: "file", descriptionRequired: true, clickBehavior: "link" },
+          [
+            {
+              id: "1",
+              title: "Q3 addendum.pdf",
+              description: "Needs your signature",
+              avatar: {
+                file: { name: "q3-addendum.pdf", type: "application/pdf" },
               },
-              {
-                id: "2",
-                title: "Remote policy.pdf",
-                description: "Needs your signature",
-                avatar: {
-                  file: { name: "remote-policy.pdf", type: "application/pdf" },
-                },
-                href: "/documents/2",
+              href: "/documents/1",
+            },
+            {
+              id: "2",
+              title: "Remote policy.pdf",
+              description: "Needs your signature",
+              avatar: {
+                file: { name: "remote-policy.pdf", type: "application/pdf" },
               },
-            ]
-          ),
-        ]}
-      />
-    ),
+              href: "/documents/2",
+            },
+          ]
+        ),
+      ],
+    },
   },
   {
     id: "offices",
     title: "Offices",
     icon: Building,
-    preview: (
-      <SlotWidget
-        header={{ title: "Offices" }}
-        slots={[
-          // Flag left + counter right: one-line rows (sm).
-          listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
-            {
-              id: "es",
-              title: "Spain",
-              avatar: { flag: "es" },
-              count: 24,
-              href: "/offices/es",
-            },
-            {
-              id: "pt",
-              title: "Portugal",
-              avatar: { flag: "pt" },
-              count: 9,
-              href: "/offices/pt",
-            },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "offices",
+      header: { title: "Offices" },
+      slots: [
+        // Flag left + counter right: one-line rows (sm).
+        listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
+          {
+            id: "es",
+            title: "Spain",
+            avatar: { flag: "es" },
+            count: 24,
+            href: "/offices/es",
+          },
+          {
+            id: "pt",
+            title: "Portugal",
+            avatar: { flag: "pt" },
+            count: 9,
+            href: "/offices/pt",
+          },
+        ]),
+      ],
+    },
   },
 ]
 
@@ -981,14 +966,10 @@ const Home = () => {
         }}
         // The preview rebuilds the widget the same way the rail does, so the
         // dialog shows the events the params will really produce — not just the
-        // title following along.
-        renderWidgetPreview={(widget, params) =>
-          widget.id === "events" ? (
-            <SlotWidget
-              {...eventsWidget(params as EventsParams)}
-              slotRenderers={SLOT_RENDERERS}
-            />
-          ) : null
+        // title following along. It hands back the WIDGET; the layout draws it
+        // through the same `SlotWidget` the rail uses.
+        rebuildWidget={(widget, params) =>
+          widget.id === "events" ? eventsWidget(params as EventsParams) : widget
         }
         onReorderWidgets={(_, ids) =>
           setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
@@ -1007,6 +988,9 @@ const Home = () => {
         groups={CATALOG_GROUPS}
         onAdd={() => setOpen(false)}
         previewWidth={side === "right" ? 396 : 768}
+        // The same map the layout gets — a preview drawn without it would show
+        // "No renderer for slot …" for every bespoke visualization.
+        slotRenderers={SLOT_RENDERERS}
       />
     </div>
   )

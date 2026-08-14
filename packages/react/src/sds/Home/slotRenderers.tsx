@@ -668,6 +668,29 @@ export type HomeWidgetItem = HomeWidgetChrome & {
 }
 
 /**
+ * The `Widget` chrome an item carries, ready to spread onto `SlotWidget`.
+ *
+ * `alert` and `status` are mutually exclusive on the frame, and which one an
+ * item means is decided by whether it declares an `alert` at all — so the two
+ * are never handed over together.
+ *
+ * Public because drawing a `HomeWidgetItem` yourself is public (`SlotWidget`),
+ * and this is the one part of that spread with a rule in it.
+ */
+export const widgetChrome = (widget: HomeWidgetItem): HomeWidgetChrome =>
+  ("alert" in widget && widget.alert !== undefined
+    ? {
+        action: widget.action,
+        summaries: widget.summaries,
+        alert: widget.alert,
+      }
+    : {
+        action: widget.action,
+        summaries: widget.summaries,
+        status: "status" in widget ? widget.status : undefined,
+      }) as HomeWidgetChrome
+
+/**
  * Row-based slots cancel their rows' own padding so the rows sit flush with the
  * widget's content box — every list-like slot carries this. `indicators`
  * doesn't: it isn't rows and has no padding to cancel.
@@ -884,10 +907,11 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
  * for the same reason `ListSlot` is one: the churn animation asks whether this
  * render is a bulk replacement, and that is a hook.
  *
- * The events are drawn here rather than through `CalendarEventList` for one
- * reason: that component's `showAllItems` container has no gap, and its `gap`
- * prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
- * DIRECT parent of the event items, which is this container.
+ * The events are drawn here rather than through `CalendarEventList` because the
+ * churn needs its own wrapper AROUND each event (`HomeSlotItem`), and that
+ * component owns the space between its items — there is nowhere to put one.
+ * `EVENT_LIST_GAP` therefore sits on this container, the direct parent of the
+ * event items, and matches that component's own 8px default.
  */
 function EventListSlot({
   params,
@@ -1109,10 +1133,9 @@ export const defaultSlotRenderers: SlotRenderers = {
       />
     ),
   },
-  // The events are rendered here rather than through `CalendarEventList` for one
-  // reason: that component's `showAllItems` container has no gap, and its `gap`
-  // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
-  // DIRECT parent of the event items, which is this container.
+  // The events are rendered here rather than through `CalendarEventList`
+  // because each one is wrapped for the CHURN (see `EventListSlot`), which asks
+  // for a per-item wrapper that component has no way to put in.
   "event-list": {
     render: (params, ctx) => (
       <EventListSlot params={params as EventListParams} ctx={ctx} />

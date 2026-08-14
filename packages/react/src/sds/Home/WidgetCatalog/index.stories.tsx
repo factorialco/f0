@@ -4,7 +4,11 @@ import { Calendar, Clock, File, PalmTree, Receipt, Target } from "@/icons/app"
 
 import { homeSlot, listSlot } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
-import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
+import {
+  WidgetCatalog,
+  type WidgetCatalogGroup,
+  type WidgetCatalogItem,
+} from "./index"
 
 /**
  * Beyond its header and slots, a widget may carry the `Widget` frame's own
@@ -16,95 +20,113 @@ const CHROME_CATALOG = [
     id: "payroll",
     title: "Payroll",
     icon: Receipt,
-    preview: (
-      <SlotWidget
-        header={{
-          title: "Payroll",
-          subtitle: "June",
-          count: 3,
-          info: "Gross, before deductions.",
-        }}
-        status={{ text: "Approved", variant: "positive" }}
-        summaries={[
-          { label: "Gross", value: "3,200", postfixUnit: "€" },
-          { label: "Net", value: "2,480", postfixUnit: "€" },
-        ]}
-        slots={[
-          listSlot({ clickBehavior: "link" }, [
-            { id: "1", title: "June payslip", href: "/payroll/june" },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "payroll",
+      header: {
+        title: "Payroll",
+        subtitle: "June",
+        count: 3,
+        info: "Gross, before deductions.",
+      },
+      status: { text: "Approved", variant: "positive" as const },
+      summaries: [
+        { label: "Gross", value: "3,200", postfixUnit: "€" },
+        { label: "Net", value: "2,480", postfixUnit: "€" },
+      ],
+      slots: [
+        listSlot({ clickBehavior: "link" }, [
+          { id: "1", title: "June payslip", href: "/payroll/june" },
+        ]),
+      ],
+    },
   },
   {
     id: "documents",
     title: "Documents",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Documents" }}
-        alert="2 documents need signing"
-        action={{ label: "Sign now", onClick: () => {} }}
-        slots={[
-          listSlot({ clickBehavior: "link" }, [
-            { id: "1", title: "Q3 addendum", href: "/docs/1" },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "documents",
+      header: { title: "Documents" },
+      alert: "2 documents need signing",
+      action: { label: "Sign now", onClick: () => {} },
+      slots: [
+        listSlot({ clickBehavior: "link" }, [
+          { id: "1", title: "Q3 addendum", href: "/docs/1" },
+        ]),
+      ],
+    },
   },
 ]
 
-const CATALOG = [
+const CATALOG: WidgetCatalogItem[] = [
   ...CHROME_CATALOG,
   {
     id: "time-off",
     title: "Time off",
     icon: PalmTree,
-    preview: (
-      <SlotWidget
-        header={{ title: "Time off" }}
-        slots={[
-          homeSlot("indicators", {
-            items: [{ label: "Days left", content: "12" }],
-          }),
-        ]}
-      />
-    ),
+    preview: {
+      id: "time-off",
+      header: { title: "Time off" },
+      slots: [
+        homeSlot("indicators", {
+          items: [{ label: "Days left", content: "12" }],
+        }),
+      ],
+    },
   },
   {
     id: "events",
     title: "Events",
     icon: Calendar,
-    preview: (
-      <SlotWidget
-        header={{ title: "Events", count: 2 }}
-        slots={[
-          listSlot({ clickBehavior: "link" }, [
-            { id: "1", title: "Design sync", href: "/calendar/1" },
-            { id: "2", title: "All hands", href: "/calendar/2" },
-          ]),
-        ]}
-      />
-    ),
+    // AN `event-list`, deliberately: its rows are the ones whose 8px
+    // `EVENT_LIST_GAP` an approximated preview used to drop. Handed over as
+    // data, the picker draws it through the same `SlotWidget` the rail does, so
+    // this preview and the card on the page are one render.
+    preview: {
+      id: "events",
+      header: { title: "Events", count: 2, info: "The next events this week." },
+      slots: [
+        homeSlot("event-list", {
+          showAllItems: true,
+          events: [
+            {
+              title: "Design sync",
+              description: "Weekly, 30 min",
+              color: "#5596F6",
+              isPending: false,
+              fromDate: new Date("2026-07-24T09:30:00"),
+            },
+            {
+              title: "All hands",
+              description: "Q3 roadmap update",
+              color: "#10B881",
+              isPending: false,
+              fromDate: new Date("2026-07-30T16:00:00"),
+            },
+          ],
+        }),
+      ],
+    },
   },
   {
     id: "goals",
     title: "Goals",
     icon: Target,
-    preview: (
-      <SlotWidget
-        header={{ title: "Goals" }}
-        slots={[
-          homeSlot("indicators", {
-            items: [{ label: "On track", content: "4/5" }],
-          }),
-        ]}
-      />
-    ),
+    preview: {
+      id: "goals",
+      header: { title: "Goals" },
+      slots: [
+        homeSlot("indicators", {
+          items: [{ label: "On track", content: "4/5" }],
+        }),
+      ],
+    },
   },
   {
+    // The ESCAPE HATCH, kept in the catalog so it stays exercised: a `ReactNode`
+    // preview, for a widget the app draws its own way (`renderWidget`). Every
+    // other entry here hands over the widget itself, which is the form that
+    // cannot drift.
     id: "clock-in",
     title: "Clock in",
     icon: Clock,

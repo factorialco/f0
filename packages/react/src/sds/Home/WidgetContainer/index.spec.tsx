@@ -5,7 +5,7 @@ import { Calendar, Clock } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
-import { type HomeWidgetItem } from "../slotRenderers"
+import { type HomeWidgetItem, type WidgetParams } from "../slotRenderers"
 import { WidgetContainer } from "./index"
 
 const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
@@ -341,6 +341,74 @@ describe("WidgetContainer", () => {
       expect(
         screen.queryByRole("menuitem", { name: "Remove widget" })
       ).not.toBeInTheDocument()
+    })
+
+    describe("the params dialog's preview", () => {
+      const schema = z.object({
+        limit: f0FormField(z.number(), { label: "Limit" }),
+      })
+      const configurable = widget("clock", {
+        paramsSchema: schema,
+        params: { limit: 3 },
+      })
+      /** Slots the plain widget never has, so a preview can be told apart. */
+      const rebuilt = (_: HomeWidgetItem, params: WidgetParams) => ({
+        ...configurable,
+        slots: [
+          {
+            visualization: "indicators",
+            params: {
+              items: [{ label: "Showing", content: `${params.limit} rows` }],
+            },
+          },
+        ],
+      })
+      const openParams = async () => {
+        await userEvent.click(screen.getByRole("button", { name: "Actions" }))
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "Edit params" })
+        )
+      }
+
+      test("is the widget the app REBUILDS, drawn by the column itself", async () => {
+        zeroRender(
+          <WidgetContainer
+            widgets={[configurable]}
+            onChangeWidgetParams={() => {}}
+            rebuildWidget={rebuilt}
+          />
+        )
+
+        // Nothing rebuilt while the dialog is shut.
+        expect(screen.queryByText("Showing")).not.toBeInTheDocument()
+
+        await openParams()
+
+        // The slots follow the params — and they are drawn through the same
+        // `SlotWidget` the column uses, so the preview cannot drift from it.
+        await waitFor(() =>
+          expect(screen.getByText("Showing")).toBeInTheDocument()
+        )
+        expect(screen.getByText("3 rows")).toBeInTheDocument()
+      })
+
+      test("prefers rebuildWidget over the deprecated render function", async () => {
+        zeroRender(
+          <WidgetContainer
+            widgets={[configurable]}
+            onChangeWidgetParams={() => {}}
+            rebuildWidget={rebuilt}
+            renderWidgetPreview={() => <p>hand-rendered</p>}
+          />
+        )
+
+        await openParams()
+
+        await waitFor(() =>
+          expect(screen.getByText("Showing")).toBeInTheDocument()
+        )
+        expect(screen.queryByText("hand-rendered")).not.toBeInTheDocument()
+      })
     })
   })
 
