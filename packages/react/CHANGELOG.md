@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.31.2](https://github.com/factorialco/f0/compare/f0-react-v6.31.1...f0-react-v6.31.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** keep inside-suggestions popover open on click ([#5135](https://github.com/factorialco/f0/issues/5135)) ([85f1ddc](https://github.com/factorialco/f0/commit/85f1ddcfbab4be9bf4cdbefa2844272c421a5d8e))
+
 ## [6.31.1](https://github.com/factorialco/f0/compare/f0-react-v6.31.0...f0-react-v6.31.1) (2026-08-14)
 
 
