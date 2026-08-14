@@ -36,23 +36,28 @@ import {
   computeComponentStatusData,
   meetsStableBar,
 } from "../scripts/component-status-build.mjs"
+import type {
+  A11yTier,
+  ApiStatus,
+  DocQuality,
+} from "../src/component-status/component-status"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DEBT_FILE = resolve(PKG_DIR, ".scripts/stable-dod-debt.json")
 
 const DOC_TIER_ORDER = ["none", "stub", "acceptable", "good", "gold"]
 
-interface StatusEntry {
+export interface StatusEntry {
   name: string
   zone: string
-  apiStatus: string
+  apiStatus: ApiStatus
   hasStories: boolean
   hasUnitTests: boolean
   hasPlayFunction: boolean
   hasSnapshot: boolean
   hasMdxDocs: boolean
-  docQuality: string
-  a11yTier: string
+  docQuality: DocQuality
+  a11yTier: A11yTier
   storyFile: string
 }
 
@@ -65,9 +70,10 @@ interface DebtFile {
 
 /**
  * Diagnostics only — the verdict is `meetsStableBar`. Kept in the same order as
- * STABLE_REQUIREMENTS in src/component-status/component-status.ts.
+ * STABLE_REQUIREMENTS in src/component-status/component-status.ts. Also used by
+ * check-new-component-dod.ts to explain what a new component is missing.
  */
-function unmetRequirements(c: StatusEntry): string[] {
+export function unmetRequirements(c: StatusEntry): string[] {
   const missing: string[] = []
   if (!c.hasStories) missing.push("stories")
   if (!c.hasUnitTests) missing.push("unit tests")
