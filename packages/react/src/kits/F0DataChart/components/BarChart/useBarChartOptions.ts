@@ -1191,7 +1191,7 @@ export function useBarChartOptions(
 
     // Bar charts use an item-triggered tooltip about the hovered bar or
     // segment (pairing with the stacked series highlight) instead of the axis
-    // tooltip listing every series: value large, then — with several
+    // tooltip listing every series: value large, then — on a stack of several
     // same-signed series — the hovered value's share of the category total,
     // that total, and the target when there is one.
     //
@@ -1214,22 +1214,39 @@ export function useBarChartOptions(
           const value = Number(p.value)
           const dataIndex = p.dataIndex ?? 0
           const target = targetMap.get(seriesName)?.[dataIndex]
-          // Share-of-total context only means something with several series
+          // Only a stack has a total this component can be sure of: its
+          // segments are parts of the very bar being hovered. Grouped bars
+          // sometimes add up to something real — male and female headcount
+          // side by side sums to the category's headcount — but just as often
+          // they don't: headcount, open positions and turnovers share an axis
+          // and nothing else, and three average salaries summed are not an
+          // average of anything. Layout is the only signal available here, so
+          // the guard gives up a right total on the additive groups to stop
+          // inventing one on the rest.
+          //
+          // Even stacked, the share only means something with several series
           // pushing the same way: a single-series bar is always 100% of its own
           // category, and a category mixing gains with losses has no "total"
           // the parts add up to — 24 hires against a net of 19 would read as
           // 126.3%, and near-cancellation makes that ratio arbitrarily large.
           // Signed categories therefore show the value alone.
-          const categoryValues = visibleSeries.map((s) => {
-            // A series can be shorter than `categories`.
-            const point = s.data[dataIndex]
-            return point === undefined ? 0 : getValue(point) || 0
-          })
+          //
+          // Gated before the sum rather than after it: neither row can render
+          // on a grouped chart, so neither the map nor the reduce is worth
+          // running on every hover.
+          const stackHasTotal = stacked && visibleSeries.length > 1
+          const categoryValues = stackHasTotal
+            ? visibleSeries.map((s) => {
+                // A series can be shorter than `categories`.
+                const point = s.data[dataIndex]
+                return point === undefined ? 0 : getValue(point) || 0
+              })
+            : []
           const hasMixedSigns =
             categoryValues.some((v) => v > 0) &&
             categoryValues.some((v) => v < 0)
           const total = categoryValues.reduce((sum, v) => sum + v, 0)
-          const showTotal = visibleSeries.length > 1 && !hasMixedSigns
+          const showTotal = stackHasTotal && !hasMixedSigns
 
           // No "from previous" row here: bar categories are not necessarily a
           // sequence (locations, departments), so comparing a bar with the one
