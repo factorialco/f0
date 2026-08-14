@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.32.0](https://github.com/factorialco/f0/compare/f0-react-v6.31.2...f0-react-v6.32.0) (2026-08-14)
+
+
+### Features
+
+* **l10n:** honor a 12h/24h hourCycle in the time field ([#5120](https://github.com/factorialco/f0/issues/5120)) ([6b0332b](https://github.com/factorialco/f0/commit/6b0332b93235fd22b0d4a3a1b15defad6fb6ebec))
+
 ## [6.31.2](https://github.com/factorialco/f0/compare/f0-react-v6.31.1...f0-react-v6.31.2) (2026-08-14)
 
 
