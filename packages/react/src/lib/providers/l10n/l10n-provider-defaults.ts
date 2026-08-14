@@ -7,7 +7,4 @@ export const defaults: L10nContextValue = {
   date: {
     weekStartsOn: WeekStartDay.Monday,
   },
-  time: {
-    hourCycle: "24h",
-  },
 }

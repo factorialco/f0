@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
-import { WeekStartDay } from "@/components/OneCalendar/types"
-import { L10nProvider } from "@/lib/providers/l10n"
-import type { HourCycle } from "@/lib/providers/l10n"
+import { UserPlatformProvider } from "@/lib/providers/user-platafform"
+import type { HourCycle } from "@/lib/providers/user-platafform"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import { f0FormField, F0Form } from "../index"
 
 /**
- * Demonstrates `l10n.time.hourCycle`: the F0 time field renders/parses in the
- * selected hour cycle. Toggle **hourCycle** in the Controls panel:
- * - `24h` → native time input (HH:mm)
+ * Demonstrates the global `hourCycle` user setting (set via `F0Provider`): the
+ * F0 time field renders/parses in the selected hour cycle. Toggle **hourCycle**
+ * in the Controls panel:
+ * - `24h` → text input formatted as HH:mm
  * - `12h` → text input formatted with AM/PM (hh:mm a)
  */
 const meta: Meta<{ hourCycle: HourCycle }> = {
@@ -23,15 +23,9 @@ const meta: Meta<{ hourCycle: HourCycle }> = {
   },
   args: { hourCycle: "24h" },
   render: ({ hourCycle }) => (
-    <L10nProvider
-      l10n={{
-        locale: "en",
-        date: { weekStartsOn: WeekStartDay.Monday },
-        time: { hourCycle },
-      }}
-    >
+    <UserPlatformProvider hourCycle={hourCycle}>
       <TimeForm />
-    </L10nProvider>
+    </UserPlatformProvider>
   ),
 }
 

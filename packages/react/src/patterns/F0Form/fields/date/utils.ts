@@ -3,7 +3,7 @@
  */
 import { format, isValid, parse } from "date-fns"
 
-import type { HourCycle } from "@/lib/providers/l10n/types"
+import type { HourCycle } from "@/lib/providers/user-platafform/types"
 
 /**
  * Extracts time string (HH:mm) from a Date

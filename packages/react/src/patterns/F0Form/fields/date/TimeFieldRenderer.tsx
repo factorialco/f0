@@ -5,8 +5,8 @@ import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import { F0TextInput } from "@/components/F0TextInput"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
-import { useL10n } from "@/lib/providers/l10n"
-import type { HourCycle } from "@/lib/providers/l10n/types"
+import { useHourCycle } from "@/lib/providers/user-platafform"
+import type { HourCycle } from "@/lib/providers/user-platafform/types"
 
 import type { ResolvedTimeField } from "./types"
 
@@ -29,18 +29,18 @@ export interface TimeFieldRendererProps {
 /**
  * Renders a time input field.
  *
- * When `l10n.time.hourCycle` is provided, the field is rendered/parsed in that
- * hour cycle (12h with AM/PM or 24h) so apps can honor a user's preference
- * instead of the browser locale. Otherwise it falls back to the native HTML
- * time input (unchanged default behavior).
+ * When the app sets a global `hourCycle` (via `F0Provider`), the field is
+ * rendered/parsed in that hour cycle (12h with AM/PM or 24h) so apps can honor
+ * a user's preference instead of the browser locale. Otherwise it falls back to
+ * the native HTML time input (unchanged default behavior).
  *
  * The value is stored as a Date object in both modes.
  */
 export function TimeFieldRenderer(props: TimeFieldRendererProps) {
-  const { time } = useL10n()
+  const hourCycle = useHourCycle()
 
-  if (time?.hourCycle) {
-    return <FormattedTimeFieldRenderer {...props} hourCycle={time.hourCycle} />
+  if (hourCycle) {
+    return <FormattedTimeFieldRenderer {...props} hourCycle={hourCycle} />
   }
 
   return <NativeTimeFieldRenderer {...props} />
