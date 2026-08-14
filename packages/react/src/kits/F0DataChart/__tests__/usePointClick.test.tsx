@@ -123,6 +123,8 @@ describe("usePointClick", () => {
       category: "Barcelona office",
       value: 18,
       values: [18],
+      // A mark is one series, so the list holds exactly it.
+      series: [{ name: "Male", seriesIndex: 1, value: 18 }],
       dataIndex: 0,
       seriesIndex: 1,
       clientX: 420,
@@ -341,11 +343,49 @@ describe("usePointClick — plot hit area (line charts)", () => {
       category: "Feb",
       value: 30,
       values: [30],
+      series: [
+        { name: "Headcount", seriesIndex: 0, value: 30 },
+        { name: "Attrition", seriesIndex: 1, value: 8 },
+      ],
       dataIndex: 1,
       seriesIndex: 0,
       clientX: 0,
       clientY: 0,
     })
+  })
+
+  it("reports every series at the category, in configured order", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    // The tooltip here is axis-triggered: hovering "Feb" lists both series.
+    // A click covers the same column, so it answers with the same rows —
+    // wherever in the column it landed.
+    clickPlot(stub, 140, 30)
+    clickPlot(stub, 140, 210)
+
+    const columns = onPointClick.mock.calls.map(([p]) => p.series)
+    expect(columns[0]).toEqual(columns[1])
+    expect(columns[0]).toEqual([
+      { name: "Headcount", seriesIndex: 0, value: 30 },
+      { name: "Attrition", seriesIndex: 1, value: 8 },
+    ])
+  })
+
+  it("still names the nearest series as the headline", () => {
+    const stub = makeLineChartStub(lineOption)
+    const onPointClick = renderLine(stub)
+
+    // Same column, opposite ends: the list is identical, the headline is not.
+    clickPlot(stub, 140, 30) // high — near Headcount
+    clickPlot(stub, 140, 210) // low — near Attrition
+
+    expect(
+      onPointClick.mock.calls.map(([p]) => [p.seriesName, p.value])
+    ).toEqual([
+      ["Headcount", 30],
+      ["Attrition", 8],
+    ])
   })
 
   it("picks the series the click was aimed at, not the first one", () => {
@@ -365,11 +405,16 @@ describe("usePointClick — plot hit area (line charts)", () => {
     const onPointClick = renderLine(stub)
 
     // "Mar" is null for Attrition. Aiming low there must not quote the gap as
-    // a zero — the only answer left is Headcount.
+    // a zero — and the gap must not appear as a row either, since the tooltip
+    // doesn't show one.
     clickPlot(stub, 240, 208)
 
     expect(onPointClick).toHaveBeenCalledWith(
-      expect.objectContaining({ seriesName: "Headcount", value: 50 })
+      expect.objectContaining({
+        seriesName: "Headcount",
+        value: 50,
+        series: [{ name: "Headcount", seriesIndex: 0, value: 50 }],
+      })
     )
   })
 
@@ -380,11 +425,15 @@ describe("usePointClick — plot hit area (line charts)", () => {
     })
     const onPointClick = renderLine(stub)
 
-    // Aimed at where Headcount would be, but it isn't on screen.
+    // Aimed at where Headcount would be, but it isn't on screen — so it is
+    // neither the headline nor a row.
     clickPlot(stub, 140, 164)
 
     expect(onPointClick).toHaveBeenCalledWith(
-      expect.objectContaining({ seriesName: "Attrition" })
+      expect.objectContaining({
+        seriesName: "Attrition",
+        series: [{ name: "Attrition", seriesIndex: 1, value: 8 }],
+      })
     )
   })
 

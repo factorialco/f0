@@ -1,7 +1,10 @@
 import type * as echarts from "echarts"
 import { type RefObject, useEffect, useRef } from "react"
 
-import type { F0DataChartPointClick } from "../types"
+import type {
+  F0DataChartPointClick,
+  F0DataChartPointClickSeries,
+} from "../types"
 
 /**
  * Where a click has to land to count as a pick.
@@ -38,28 +41,30 @@ function positionOf(native: NativePosition) {
 type PlotSeries = { name?: string; data?: unknown[] }
 
 /**
- * The series whose value at `dataIndex` sits closest to `yValue` — the line the
- * user was aiming at when they clicked in the plot area.
+ * Every series that has a value at `dataIndex`, in configured order — the same
+ * rows the axis tooltip shows — plus the one nearest `yValue`, which is the
+ * line the user was aiming at.
  *
- * Skips gaps and anything the legend has switched off, so a click never quotes
- * a series that isn't on screen. Null when no series has a value here.
+ * Skips gaps and anything the legend has switched off, so a click never
+ * reports a series that isn't on screen. Null when the whole category is
+ * empty.
  */
-function pickNearestSeries(
+function resolveColumn(
   series: PlotSeries[],
   dataIndex: number,
   yValue: number,
   selected?: Record<string, boolean>
-): { seriesIndex: number; seriesName: string; value: number } | null {
-  let best: {
-    seriesIndex: number
-    seriesName: string
-    value: number
-    distance: number
-  } | null = null
+): {
+  series: F0DataChartPointClickSeries[]
+  nearest: F0DataChartPointClickSeries
+} | null {
+  const entries: F0DataChartPointClickSeries[] = []
+  let nearest: F0DataChartPointClickSeries | null = null
+  let nearestDistance = Infinity
 
   series.forEach((entry, seriesIndex) => {
-    const seriesName = String(entry.name ?? "")
-    if (selected?.[seriesName] === false) return
+    const name = String(entry.name ?? "")
+    if (selected?.[name] === false) return
 
     const point = entry.data?.[dataIndex]
     // A series that styles one of its points sends `{ value }` instead of a
@@ -73,15 +78,17 @@ function pickNearestSeries(
     const value = Number(raw)
     if (!Number.isFinite(value)) return
 
+    const resolved = { name, seriesIndex, value }
+    entries.push(resolved)
+
     const distance = Math.abs(value - yValue)
-    if (!best || distance < best.distance) {
-      best = { seriesIndex, seriesName, value, distance }
+    if (distance < nearestDistance) {
+      nearestDistance = distance
+      nearest = resolved
     }
   })
 
-  if (!best) return null
-  const { seriesIndex, seriesName, value } = best
-  return { seriesIndex, seriesName, value }
+  return nearest ? { series: entries, nearest } : null
 }
 
 /**
@@ -93,15 +100,15 @@ function pickNearestSeries(
  * level rather than needing a variant per chart.
  *
  * With `hitArea: "plot"` it instead listens at the canvas level and resolves
- * the click itself: nearest category on the x axis, nearest series by value.
- * A line is a few pixels wide, so asking the user to hit one is asking them to
- * miss; the axis tooltip already treats the whole column as one target and this
- * makes clicking agree with it. What gets reported is unchanged — one series,
- * one value — so consumers can't tell the two paths apart.
+ * the click itself: nearest category on the x axis, then every series that has
+ * a value there. A line is a few pixels wide, so asking the user to hit one is
+ * asking them to miss; the axis tooltip already treats the whole column as one
+ * target, and this makes clicking agree with it — the click answers with the
+ * same rows the hover did.
  *
- * Deliberately narrower than the hover tooltip: an axis-triggered tooltip shows
- * every series at a category, but a click can only answer with the one the
- * user was pointing at.
+ * `seriesName` and `value` still name a single series: the one nearest the
+ * click, so anything that wants a headline has one. `series` carries the whole
+ * column beside it.
  *
  * Dismisses the hover tooltip on a successful pick: the click is answered by
  * something anchored at the same spot, and leaving the tooltip up would stack
@@ -167,24 +174,25 @@ export function usePointClick(
           Math.max(categories.length - 1, 0)
         )
 
-        const nearest = pickNearestSeries(
+        const column = resolveColumn(
           option.series ?? [],
           dataIndex,
           yValue,
           option.legend?.[0]?.selected
         )
-        if (!nearest) return
+        if (!column) return
 
         // `hideTip` is safe to fire even with no tooltip showing.
         chart.dispatchAction({ type: "hideTip" })
 
         handler({
-          seriesName: nearest.seriesName,
+          seriesName: column.nearest.name,
           category: String(categories[dataIndex] ?? ""),
-          value: nearest.value,
-          values: [nearest.value],
+          value: column.nearest.value,
+          values: [column.nearest.value],
+          series: column.series,
           dataIndex,
-          seriesIndex: nearest.seriesIndex,
+          seriesIndex: column.nearest.seriesIndex,
           ...positionOf(e.event),
         })
       }
@@ -236,13 +244,19 @@ export function usePointClick(
       // `hideTip` is safe to fire even with no tooltip showing.
       chart.dispatchAction({ type: "hideTip" })
 
+      const seriesName = String(p.seriesName ?? "")
+      const seriesIndex = p.seriesIndex ?? 0
+
       handler({
-        seriesName: String(p.seriesName ?? ""),
+        seriesName,
         category: String(p.name ?? ""),
         value,
         values: list.map(Number),
+        // A mark identifies exactly one series, so the list has one entry.
+        // Only a line click resolves a whole column.
+        series: [{ name: seriesName, seriesIndex, value }],
         dataIndex: p.dataIndex ?? 0,
-        seriesIndex: p.seriesIndex ?? 0,
+        seriesIndex,
         ...positionOf(p.event?.event),
       })
     }

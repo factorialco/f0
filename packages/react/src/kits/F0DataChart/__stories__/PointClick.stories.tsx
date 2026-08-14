@@ -47,6 +47,10 @@ const Readout = ({ point }: { point: F0DataChartPointClick | null }) => {
       <Row label="category" value={point.category || "(empty)"} />
       <Row label="value" value={String(point.value)} />
       <Row label="values" value={`[${point.values.join(", ")}]`} />
+      <Row
+        label="series"
+        value={point.series.map((s) => `${s.name}: ${s.value}`).join("  ·  ")}
+      />
       <Row label="dataIndex" value={String(point.dataIndex)} />
       <Row label="seriesIndex" value={String(point.seriesIndex)} />
       <Row
@@ -159,22 +163,27 @@ export const OnAMark: Story = {
 }
 
 /**
- * Lines get a wider hit area: anywhere inside the plot area counts, and the
- * click resolves to the nearest point — nearest category horizontally, then
- * the series nearest to the cursor vertically.
+ * Lines get a wider hit area: anywhere inside the plot area counts. The click
+ * resolves to the nearest category horizontally and answers with **every**
+ * series there — the same rows the tooltip shows on hover, in `series`.
  *
  * A line is a few pixels wide, so requiring a hit on it asks the user to miss.
  * The tooltip here already made that concession (it is axis-triggered rather
- * than item-triggered), and clicking now agrees with it.
+ * than item-triggered), and clicking now agrees with it on both counts: same
+ * target, same answer.
  *
- * Worth trying: click well above every line, and then hide a series from the
- * legend and click where it used to be — a hidden series is never the answer.
+ * `seriesName` and `value` still name one series — the one nearest the cursor
+ * vertically — so anything that wants a headline has one.
+ *
+ * Worth trying: click high and then low in the same column. `series` doesn't
+ * change, the headline does. Then hide a series from the legend and click
+ * where it used to be — a hidden series is neither, and nor is a gap.
  */
 export const AnywhereInAPlotArea: Story = {
   render: () => (
     <ClickDemo
       chart={REVENUE}
-      hint="Click anywhere in the plot area — you do not have to hit a line. The nearest point answers."
+      hint="Click anywhere in the plot area — you do not have to hit a line. The whole column answers."
     />
   ),
 }

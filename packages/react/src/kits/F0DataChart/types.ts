@@ -32,12 +32,24 @@ export interface F0DataChartEmptyStateProps {
   disabled?: boolean
 }
 
+/** One series' value at the category a click resolved to. */
+export interface F0DataChartPointClickSeries {
+  /** Series name, as shown in the legend ("Male"). */
+  name: string
+  /** Index of the series in the chart's own series list. */
+  seriesIndex: number
+  /** Raw, unformatted value at this category. */
+  value: number
+}
+
 /**
- * The single mark a click landed on — one bar segment, one slice, one point.
+ * What a click resolved to — one bar segment, one slice, one point, or (for a
+ * line, where the click can land anywhere in the plot area) a whole category.
  *
- * Note this is narrower than what an axis-triggered tooltip displays: hovering
- * a category reveals every series at it, while a click can only ever identify
- * the one mark under the cursor.
+ * The top-level fields always name a single series, so a consumer that wants
+ * one number has one. {@link F0DataChartPointClick.series} carries everything
+ * the click resolved, which for a line is every series at that category — the
+ * same rows its tooltip shows.
  */
 export interface F0DataChartPointClick {
   /** Series the mark belongs to, as shown in the legend ("Male"). */
@@ -57,6 +69,16 @@ export interface F0DataChartPointClick {
    * than one number to say.
    */
   values: number[]
+  /**
+   * Every series the click resolved, in the order they are configured.
+   *
+   * A line chart accepts a click anywhere in its plot area, so this is the
+   * whole category — one entry per series that has a value there and is
+   * switched on in the legend, exactly the rows its axis tooltip shows.
+   * Everywhere else a click identifies one mark and this holds that one entry,
+   * matching {@link seriesName} and {@link value}.
+   */
+  series: F0DataChartPointClickSeries[]
   /** Index of the clicked mark within its series. */
   dataIndex: number
   /** Index of the series the mark belongs to. */
@@ -81,10 +103,10 @@ interface F0DataChartCommonProps {
    * Called when the user clicks a single mark (bar segment, slice, point).
    * Omit to leave clicks inert, which is the default for every chart.
    *
-   * Line charts accept a click anywhere in the plot area and answer with the
-   * nearest point, since a line is too thin to hit — the same allowance their
-   * axis-triggered tooltip already makes. What arrives here is identical
-   * either way.
+   * Line charts accept a click anywhere in the plot area, since a line is too
+   * thin to hit — the same allowance their axis-triggered tooltip already
+   * makes — and answer with the whole category in
+   * {@link F0DataChartPointClick.series}, matching what the tooltip showed.
    */
   onPointClick?: (point: F0DataChartPointClick) => void
 }
