@@ -7,6 +7,11 @@
  * snapshot story, MDX docs at the "good" tier, and axe enforced (the same bar
  * as STABLE_REQUIREMENTS in src/component-status/component-status.ts).
  *
+ * The maturity tag is deliberately NOT part of this gate: new components ship
+ * as experimental, and adding the `stable` tag stays a manual Foundations
+ * promotion decision (guarded by check-stable-dod.ts). Only the mechanical
+ * facts are required here.
+ *
  * Unlike the stable ratchet (check-stable-dod.ts), which tolerates
  * pre-existing debt, new components cannot add debt: there is no debt list
  * here. A component counts as NEW when either signal fires:
