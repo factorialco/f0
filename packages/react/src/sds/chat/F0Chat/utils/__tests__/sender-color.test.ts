@@ -291,11 +291,11 @@ describe("message surface colour", () => {
     }
   )
 
-  it("keeps my message surface neutral", () => {
+  it("keeps my message surface neutral, softened in dark mode", () => {
     const sender = user("me", "Me")
 
     expect(messageSurfaceColorClass(sender, true)).toBe(
-      "bg-f1-background-tertiary"
+      "bg-f1-background-tertiary dark:bg-f1-background-secondary"
     )
   })
 })
