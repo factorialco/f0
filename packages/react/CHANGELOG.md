@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.30.0](https://github.com/factorialco/f0/compare/f0-react-v6.29.1...f0-react-v6.30.0) (2026-08-14)
+
+
+### Features
+
+* **NewHomeLayout:** cap the main column to max-w-content ([#5130](https://github.com/factorialco/f0/issues/5130)) ([d23feff](https://github.com/factorialco/f0/commit/d23feff51062c2db379009fa2268399e9a1b5ca3))
+
 ## [6.29.1](https://github.com/factorialco/f0/compare/f0-react-v6.29.0...f0-react-v6.29.1) (2026-08-14)
 
 
