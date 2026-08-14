@@ -8,6 +8,7 @@ import type {
 
 import { F0Icon } from "@/components/F0Icon"
 import Handle from "@/icons/app/Handle"
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -286,6 +287,23 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // over a chart canvas or a full-width row all the same.
   const resolveDropTarget = useCallback(
     (clientX: number, clientY: number): typeof dropTarget => {
+      // The AI chat panel is a drop target of its own (drop a widget to quote
+      // it in the composer). Rows are matched on Y alone, and the chat shares
+      // that band, so without this the grid would paint a drop indicator
+      // behind the chat's overlay and commit a reorder on release. Returning
+      // null also makes `up`'s `if (draggedId && target)` skip `commitDrop`.
+      const chatEl = document.querySelector("[data-ai-chat-dropzone]")
+      if (chatEl) {
+        const c = chatEl.getBoundingClientRect()
+        if (
+          clientX >= c.left &&
+          clientX <= c.right &&
+          clientY >= c.top &&
+          clientY <= c.bottom
+        )
+          return null
+      }
+
       const rowEls = containerRef.current
         ? Array.from(
             containerRef.current.querySelectorAll<HTMLElement>(
@@ -350,6 +368,16 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       setDragId(id)
       setDropTarget(null)
 
+      // Announce the drag so other drop targets can invite it immediately,
+      // rather than waiting for the cursor to reach them. The AI chat listens
+      // for this to offer "discuss this widget" from the first moment of the
+      // gesture. Fired on `window` so the listener needs no shared ancestor.
+      window.dispatchEvent(
+        new CustomEvent(WIDGET_DRAG_START, {
+          detail: { title: itemMapRef.current.get(id)?.title ?? "" },
+        })
+      )
+
       const move = (ev: PointerEvent) => {
         const ghost = ghostRef.current
         if (ghost) {
@@ -371,6 +399,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         dropTargetRef.current = null
         setDragId(null)
         setDropTarget(null)
+        window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
       }
       document.addEventListener("pointermove", move)
       document.addEventListener("pointerup", up)

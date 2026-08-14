@@ -1,15 +1,26 @@
 import { F0Icon } from "@/components/F0Icon/F0Icon"
-import { Upload } from "@/icons/app"
+import { Messages, Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 interface DropOverlayProps {
   visible: boolean
-  onFilesDropped: (files: File[]) => void
+  /**
+   * Handles a native file drop. Omit for `mode="discuss"`, where the drag is a
+   * pointer gesture and carries no `dataTransfer`.
+   */
+  onFilesDropped?: (files: File[]) => void
+  /** Which drop the overlay is inviting. */
+  mode?: "files" | "discuss"
 }
 
-export const DropOverlay = ({ visible, onFilesDropped }: DropOverlayProps) => {
+export const DropOverlay = ({
+  visible,
+  onFilesDropped,
+  mode = "files",
+}: DropOverlayProps) => {
   const translation = useI18n()
+  const isDiscuss = mode === "discuss"
 
   return (
     <div
@@ -31,15 +42,18 @@ export const DropOverlay = ({ visible, onFilesDropped }: DropOverlayProps) => {
       }}
       onDrop={(e) => {
         e.preventDefault()
+        if (!onFilesDropped) return
         const files = Array.from(e.dataTransfer.files)
         if (files.length > 0) {
           onFilesDropped(files)
         }
       }}
     >
-      <F0Icon icon={Upload} size="lg" color="bold" />
+      <F0Icon icon={isDiscuss ? Messages : Upload} size="lg" color="bold" />
       <p className="text-base font-normal text-f1-foreground">
-        {translation.ai.dropFilesHere}
+        {isDiscuss
+          ? translation.ai.dropWidgetToDiscuss
+          : translation.ai.dropFilesHere}
       </p>
     </div>
   )

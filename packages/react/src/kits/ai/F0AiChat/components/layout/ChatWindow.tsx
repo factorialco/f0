@@ -5,7 +5,10 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
+import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
+
 import { useReducedMotion } from "@/lib/a11y"
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import { cn } from "@/lib/utils"
 
 import { DropOverlay } from "../../../F0AiChatTextArea"
@@ -48,6 +51,7 @@ export const SidebarWindow = ({
     fileDragOver,
     setFileDragOver,
     processDroppedFiles,
+    setPendingQuote,
     activeGame,
     closeGame,
     panelSide,
@@ -111,6 +115,52 @@ export const SidebarWindow = ({
     },
     [setFileDragOver]
   )
+
+  // ─── Dashboard widget drag → quote ──────────────────────────
+  // A widget drag is a plain pointer gesture, not native HTML5 drag-and-drop,
+  // so it fires no `dragenter` and the file handlers above never see it. The
+  // grid announces the gesture on `window` instead, which lets the invitation
+  // appear the moment the drag starts rather than when the cursor finally
+  // arrives — the user can see where the widget can go before aiming for it.
+  //
+  // The ref — not the state — is what the release reads, so a release that
+  // lands in the same React batch as the state update still sees the title
+  // instead of a stale `null`. The state exists to drive the overlay's render.
+  const dragQuoteRef = useRef<string | null>(null)
+  const [dragQuote, setDragQuote] = useState<string | null>(null)
+
+  const setDragQuoteBoth = useCallback((title: string | null) => {
+    dragQuoteRef.current = title
+    setDragQuote(title)
+  }, [])
+
+  useEffect(() => {
+    const onStart = (e: Event) => {
+      // Same freeze as the file drop: a clarifying flow owns the panel.
+      if (isClarifying) return
+      const detail = (e as CustomEvent<WidgetDragStartDetail>).detail
+      setDragQuoteBoth(detail?.title ?? "")
+    }
+    const onEnd = () => setDragQuoteBoth(null)
+
+    window.addEventListener(WIDGET_DRAG_START, onStart)
+    window.addEventListener(WIDGET_DRAG_END, onEnd)
+    return () => {
+      window.removeEventListener(WIDGET_DRAG_START, onStart)
+      window.removeEventListener(WIDGET_DRAG_END, onEnd)
+    }
+  }, [isClarifying, setDragQuoteBoth])
+
+  // Releasing over the chat quotes the widget. This is a handler on the card,
+  // so a release anywhere else simply never reaches it — the grid's own
+  // `pointerup` clears the invitation via WIDGET_DRAG_END.
+  const handlePointerUp = useCallback(() => {
+    const title = dragQuoteRef.current
+    if (title === null) return
+    setDragQuoteBoth(null)
+    if (title) setPendingQuote({ text: title })
+  }, [setDragQuoteBoth, setPendingQuote])
+
   const fullscreen = visualizationMode === "fullscreen"
   // Stays LOCAL: it gates this handle's document mousemove listener and its
   // active style, and a split layout renders two windows — a shared gate would
@@ -220,22 +270,34 @@ export const SidebarWindow = ({
                   : "xs:rounded-r-xl"
                 : "xs:rounded-xl"
             )}
+            // Marks this card as a drop target for pointer-driven drags
+            // elsewhere in the app (the dashboard grid hit-tests for it to
+            // suppress its own reorder while the cursor is over the chat).
+            data-ai-chat-dropzone=""
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onPointerUp={handlePointerUp}
           >
             <div className="relative flex h-full w-full flex-col overflow-hidden">
               {children}
             </div>
-            {canDrop && (
+            {/* `canDrop` gates only the file drop — quoting a dragged widget
+                needs no upload handler, so it renders on its own. */}
+            {(canDrop || dragQuote !== null) && (
               <DropOverlay
-                visible={fileDragOver}
-                onFilesDropped={(files) => {
-                  dragCounterRef.current = 0
-                  setFileDragOver(false)
-                  processDroppedFiles(files)
-                }}
+                visible={(canDrop && fileDragOver) || dragQuote !== null}
+                mode={dragQuote !== null ? "discuss" : "files"}
+                onFilesDropped={
+                  canDrop
+                    ? (files) => {
+                        dragCounterRef.current = 0
+                        setFileDragOver(false)
+                        processDroppedFiles(files)
+                      }
+                    : undefined
+                }
               />
             )}
             {activeGame === "pong" && <F0AiPong onClose={closeGame} />}

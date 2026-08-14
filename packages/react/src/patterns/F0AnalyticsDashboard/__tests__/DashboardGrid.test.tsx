@@ -370,6 +370,49 @@ describe("DashboardGrid", () => {
       expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
     })
 
+    it("does not reorder when the gesture ends over the AI chat drop zone", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+
+      // Stand in for the chat panel. jsdom reports every rect as 0, so the
+      // zone has to report a real one for the containment check to mean
+      // anything — that zeroed default is also why the reorder test above is
+      // unaffected by this guard.
+      const chat = document.createElement("div")
+      chat.setAttribute("data-ai-chat-dropzone", "")
+      chat.getBoundingClientRect = () =>
+        ({ left: 400, right: 800, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(chat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      fireEvent.pointerDown(grip, { button: 0 })
+      fireEvent(
+        document,
+        new MouseEvent("pointermove", {
+          clientX: 500,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+      fireEvent(
+        document,
+        new MouseEvent("pointerup", {
+          clientX: 500,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+      chat.remove()
+    })
+
     it("renders no grip when not in edit mode", () => {
       const { container } = render(
         <DashboardGrid items={makeCollectionItems(480)} filters={{}} />

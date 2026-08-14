@@ -494,6 +494,7 @@ export const defaultTranslations = {
       "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    dropWidgetToDiscuss: "Drop here to discuss with One",
     reply: "Reply",
     removeQuote: "Remove quote",
     clarifyingQuestion: {
