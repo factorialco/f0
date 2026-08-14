@@ -1187,11 +1187,45 @@ const e = {
       navigation: "Graph navigation"
     }
   },
+  map: {
+    region: "Map",
+    navigation: "Map navigation",
+    listLabel: "Locations",
+    location: "location",
+    locations: "locations",
+    unnamedLocation: "Location",
+    cluster: "Cluster of {{count}} locations",
+    skipToList: "Skip to location list",
+    loadError: "Couldn't load the map.",
+    retry: "Retry",
+    currentLocation: "Your location",
+    controls: {
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fit: "Fit to markers",
+      locate: "My location"
+    }
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}"
+  },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked."
   },
   pdfViewer: {
     toolbar: "Document toolbar",

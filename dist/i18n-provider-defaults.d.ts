@@ -1164,11 +1164,45 @@ export declare const defaultTranslations: {
             readonly navigation: "Graph navigation";
         };
     };
+    readonly map: {
+        readonly region: "Map";
+        readonly navigation: "Map navigation";
+        readonly listLabel: "Locations";
+        readonly location: "location";
+        readonly locations: "locations";
+        readonly unnamedLocation: "Location";
+        readonly cluster: "Cluster of {{count}} locations";
+        readonly skipToList: "Skip to location list";
+        readonly loadError: "Couldn't load the map.";
+        readonly retry: "Retry";
+        readonly currentLocation: "Your location";
+        readonly controls: {
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly fit: "Fit to markers";
+            readonly locate: "My location";
+        };
+    };
     readonly wizard: {
         readonly previous: "Previous";
         readonly next: "Continue";
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
+    };
+    readonly widgets: {
+        /** Turns a widget over to read what it is telling you (Home's `info`). */
+        readonly whatThisMeans: "What this info means?";
+        /** The button on that other side, which turns it back. */
+        readonly gotIt: "Got it";
+        /** The widget menu's own items, and the dialogs they open. */
+        readonly editParams: "Edit params";
+        readonly editParamsTitle: "Edit widget params";
+        readonly removeWidget: "Remove widget";
+        readonly addWidget: "Add widget";
+        /** Heads the widgets a Home suggests, at the top of the picker. */
+        readonly recommended: "Recommended";
+        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+        readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
         readonly toolbar: "Document toolbar";

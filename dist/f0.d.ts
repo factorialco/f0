@@ -312,8 +312,13 @@ declare interface ActionCommonProps {
     onMouseLeave?: React.MouseEventHandler<HTMLElement>;
 }
 
-declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
+declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "disabled" | "disabledTooltip"> & {
     onClick: () => void;
+    /**
+     * `false` REMOVES the action from the menu (see `filterItemActions`). To
+     * instead keep it VISIBLE but greyed-out and non-interactive, leave
+     * `enabled` unset and use `disabled` (+ `disabledTooltip` to explain why).
+     */
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
     hideLabel?: boolean;
@@ -5699,11 +5704,45 @@ export declare const defaultTranslations: {
             readonly navigation: "Graph navigation";
         };
     };
+    readonly map: {
+        readonly region: "Map";
+        readonly navigation: "Map navigation";
+        readonly listLabel: "Locations";
+        readonly location: "location";
+        readonly locations: "locations";
+        readonly unnamedLocation: "Location";
+        readonly cluster: "Cluster of {{count}} locations";
+        readonly skipToList: "Skip to location list";
+        readonly loadError: "Couldn't load the map.";
+        readonly retry: "Retry";
+        readonly currentLocation: "Your location";
+        readonly controls: {
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly fit: "Fit to markers";
+            readonly locate: "My location";
+        };
+    };
     readonly wizard: {
         readonly previous: "Previous";
         readonly next: "Continue";
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
+    };
+    readonly widgets: {
+        /** Turns a widget over to read what it is telling you (Home's `info`). */
+        readonly whatThisMeans: "What this info means?";
+        /** The button on that other side, which turns it back. */
+        readonly gotIt: "Got it";
+        /** The widget menu's own items, and the dialogs they open. */
+        readonly editParams: "Edit params";
+        readonly editParamsTitle: "Edit widget params";
+        readonly removeWidget: "Remove widget";
+        readonly addWidget: "Add widget";
+        /** Heads the widgets a Home suggests, at the top of the picker. */
+        readonly recommended: "Recommended";
+        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+        readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
         readonly toolbar: "Document toolbar";
@@ -6094,6 +6133,13 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     critical?: boolean;
     avatar?: AvatarVariant;
     disabled?: boolean;
+    /**
+     * Tooltip shown on hover while the item is `disabled` — use it to explain why
+     * the action is unavailable. Ignored when the item is not disabled. The
+     * tooltip trigger re-enables pointer events, so it works despite the disabled
+     * item's `pointer-events: none`.
+     */
+    disabledTooltip?: string;
 };
 
 declare type DropdownItemSeparator = {
@@ -6812,7 +6858,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -6900,6 +6946,39 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
+     * Where the welcome suggestions row sits relative to the composer.
+     *
+     * - `"above"` (the default) — its own block over the field, the arrangement
+     *   every consumer has had: the row stands on the page, the field below it is
+     *   a plain composer, and its popover opens upward into the welcome screen's
+     *   empty space.
+     *
+     * - `"inside"` — the row moves INTO the field, at its foot, so the field's own
+     *   border and AI focus highlight enclose it and the composer reads as a
+     *   single bar about two lines tall. Its popover opens downward, because up is
+     *   now the text you are about to type.
+     *
+     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. It also moves the
+     * send button onto the textarea's own line (at `sm`, centred on the text) and
+     * puts One's mark in front of the text. Neither is a feature bolted onto this
+     * prop — they are what make the placement possible and legible. The action row
+     * is full-width, so a chips row plus an action row inside one field is three
+     * stacked bands and the "single bar" is gone; with send trailing the text there
+     * are two, text then suggestions. The attachment, host (`toolbarStart`) and
+     * dictation controls keep their own row when the host enables them; with none
+     * of them the field is just the two bands.
+     *
+     * THE INLINE SEND FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
+     * themselves are welcome-screen-only as they always were, but a composer that
+     * put send back in the action row the moment the first message landed would
+     * change shape under the reader mid-conversation. `"inside"` therefore keeps
+     * the two-band bar for the whole thread; after the welcome screen it is simply
+     * a bar with no chips in it.
+     *
+     * @default "above"
+     */
+    welcomeScreenSuggestionsPlacement?: "above" | "inside";
+    /**
      * Cards rendered as a grid below the composer on the fullscreen welcome
      * screen. Each card carries its own `onClick`; the host decides the behavior.
      *
@@ -6908,6 +6987,25 @@ export declare type F0AiChatTextAreaProps = {
      * dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
+     * The composer's own inset against whatever contains it.
+     *
+     * - `"default"` — the gutter the chat layouts expect (16px sides, 8px top,
+     *   12px bottom). It is what keeps the field off the chat window's edges and
+     *   leaves room for the focus glow, which bleeds a few pixels outside the
+     *   field's border box.
+     *
+     * - `"none"` — no inset, for hosts that place the composer inside a container
+     *   that already owns the spacing (a landing/home hero, a card). The host then
+     *   owns BOTH sides of that bargain: give the composer some room of your own,
+     *   and don't clip overflow around it, or the focus glow gets cut at the edge.
+     *
+     * Only the outer inset changes; the gap between the composer and the blocks
+     * below it (suggestions, cards, footer, disclaimer) is unaffected.
+     *
+     * @default "default"
+     */
+    padding?: "default" | "none";
     /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
@@ -7165,6 +7263,9 @@ export declare type F0AiMessagesContainerProps = {
     initialMessageCaption?: string;
     /** Smaller secondary line below the welcome phrase. */
     initialMessageSubtitle?: string;
+    /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+     *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+    initialMessageCta?: WelcomeScreenCta;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -7738,7 +7839,7 @@ export declare type F0AvatarIconProps = {
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
 export declare const F0AvatarList: WithDataTestIdReturnType_4<    {
-({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll, }: F0AvatarListProps_2): JSX_2.Element;
+({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll, layout, }: F0AvatarListProps_2): JSX_2.Element;
 displayName: string;
 }>;
 
@@ -7763,8 +7864,16 @@ export declare type F0AvatarListProps = {
      */
     noTooltip?: boolean;
     /**
-     * The maximum number of avatars to display.
-     * @default 3
+     * The exact number of avatars to keep visible; the rest collapse into the
+     * `+N` counter. Not a soft cap — a provided `max` is forwarded as
+     * `OverflowList`'s `min` as well, so exactly this many avatars render even in
+     * a container too narrow to fit them (see `F0AvatarList.tsx`).
+     *
+     * There is no numeric default. Left unset, the visible count is
+     * container-driven: `OverflowList` measures the available width and shows as
+     * many avatars as fit, collapsing the remainder into the counter. So passing
+     * a number opts into a fixed footprint, and omitting it opts into filling
+     * the row.
      */
     max?: number;
     /**
@@ -7772,10 +7881,17 @@ export declare type F0AvatarListProps = {
      */
     remainingCount?: number;
     /**
-     * The layout of the avatar list.
-     * - "fill" - Avatars will expand to fill the available width, with overflow items shown in a counter
-     * - "compact" - Avatars will be stacked tightly together up to the max limit, with remaining shown in counter
-     * @default "compact"
+     * @deprecated Never implemented — `F0AvatarList` has always ignored this
+     * prop — and not needed, because `max` already selects between the two
+     * layouts it described. Omit `max` for what this called `"fill"`:
+     * `OverflowList` measures the row and shows as many avatars as fit. Pass a
+     * `max` for `"compact"`: it doubles as `min`, so exactly that many stay
+     * visible. A separate switch could only contradict `max` — `layout="fill"`
+     * with `max={3}` has no coherent meaning — which is why this is going rather
+     * than getting an implementation.
+     * @removeIn 7.0.0
+     * @migration Remove the prop. If you were passing `layout="compact"` to cap
+     * the row, add `max={n}`: `"compact"` never capped anything.
      */
     layout?: "fill" | "compact";
     /**
@@ -19554,6 +19670,17 @@ export declare const WeekStartDay: {
 };
 
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
+
+/**
+ * Optional call-to-action rendered as a pill above the welcome phrase (e.g. a
+ * "How to use One" shortcut). The host owns `onClick`; f0 owns the pill styling
+ * so it stays consistent with the rest of the welcome screen.
+ */
+export declare type WelcomeScreenCta = {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+};
 
 /**
  * A welcome-screen group rendered as an outline button in the welcome row.
