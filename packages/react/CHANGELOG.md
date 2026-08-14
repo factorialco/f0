@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.31.1](https://github.com/factorialco/f0/compare/f0-react-v6.31.0...f0-react-v6.31.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **F0Select:** let custom triggers fill the container height ([#5100](https://github.com/factorialco/f0/issues/5100)) ([d5422bf](https://github.com/factorialco/f0/commit/d5422bf07a564ba28d89c42a2bc241056bf98d2c))
+
 ## [6.31.0](https://github.com/factorialco/f0/compare/f0-react-v6.30.0...f0-react-v6.31.0) (2026-08-14)
 
 
