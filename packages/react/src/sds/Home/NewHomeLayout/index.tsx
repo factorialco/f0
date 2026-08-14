@@ -94,6 +94,15 @@ const GradientWash = ({
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
 /**
+ * `max-w-content` in px — the reading column every F0 surface shares (the chat's
+ * own composer and message list are capped by the same token). The layout needs
+ * the NUMBER, not the class: the same width decides when the rail can no longer
+ * have its column (`autoCollapsed`) and how wide a params preview is drawn, and
+ * neither is a place a utility class can be read from. Keep it in step with
+ * `maxWidth.content` in `packages/react/tailwind.config.ts`.
+ */
+const CONTENT_WIDTH = 712
+/**
  * The gap between the strip's glyphs — `gap-2` on the strip below, and the number
  * a stowing widget needs to know where its own glyph is. Keep the two in step.
  */
@@ -274,7 +283,11 @@ export interface NewHomeLayoutProps {
   period?: HomePeriod
   /** Fixed px width of the side rail. */
   asideWidth?: number
-  /** Max px width of the (centered) main-column content. */
+  /**
+   * Max px width of the (centered) main-column content. Defaults to
+   * `max-w-content` (712px), so a composer or a message list in the main column
+   * lines up with the same reading column the chat uses.
+   */
   mainWidth?: number
   /**
    * How far the page surface reaches past this layout's box, in px — set it to
@@ -329,7 +342,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       onReorderWidgets,
       period = "morning",
       asideWidth = 396,
-      mainWidth = 800,
+      mainWidth = CONTENT_WIDTH,
       bleed = 24,
       stackedPinsAfter = 2,
       ctx = {},
@@ -754,6 +767,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           <WidgetContainer
             side="main"
             className="relative mx-auto w-full"
+            // `mainWidth` rather than the `max-w-content` utility, at the same
+            // 712px by default: the cap is a prop, and a class cannot take one.
             style={{ maxWidth: `${mainWidth}px` }}
             widgets={
               stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets

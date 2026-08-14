@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
@@ -6,16 +6,18 @@ import { z } from "zod"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { f0FormField } from "@/patterns/F0Form"
 
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Card } from "@/components/F0Card"
+import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
   Building,
   Calendar,
+  ChartVerticalBars,
   Check,
   ChevronRight,
   Clock,
@@ -26,11 +28,16 @@ import {
   Globe,
   Home as HomeIcon,
   PalmTree,
+  Pencil,
   Person,
   Receipt,
+  Search,
   Settings,
   Target,
 } from "@/icons/app"
+import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
+import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
+import { F0Box } from "@/lib/F0Box"
 
 import {
   ClockInControls,
@@ -60,30 +67,200 @@ import { NewHomeLayout } from "./index"
 
 /* =============================== main column =============================== */
 
+/* --------------------------------- greeting -------------------------------- */
+
+/** `xl` avatars — 56px, which is what the notch below is cut for. */
+const GREETING_AVATAR_PX = 56
+/** How far the person's avatar rides over the company's. */
+const GREETING_AVATAR_OVERLAP_PX = 10
 /**
- * The Ask-AI greeting: the One mark, the gradient welcome phrase, the muted
- * question. The gradient stops are F0's own welcome-phrase literals.
+ * The notch cut out of the leading avatar for the one overlapping it: a circle
+ * centred on that avatar (its own centre, less the overlap) with 2px of air
+ * around it, so the two read as a cluster rather than as one card on another.
+ *
+ * A MASK rather than a ring on the top avatar: the gap has to show whatever the
+ * greeting is sitting on — here the page's own gradient — and a ring can only
+ * paint a colour.
+ */
+const GREETING_NOTCH = {
+  x: GREETING_AVATAR_PX - GREETING_AVATAR_OVERLAP_PX + GREETING_AVATAR_PX / 2,
+  y: GREETING_AVATAR_PX / 2,
+  r: GREETING_AVATAR_PX / 2 + 2,
+}
+
+/**
+ * WHOSE HOME THIS IS: the company, and the person reading it, overlapped.
+ *
+ * Two `F0Avatar`s rather than an `F0AvatarList`, which is the component for a
+ * cluster and would own both the overlap and the notch: it stops at `md` (32px),
+ * and it takes ONE avatar `type` for the whole row — this pair is a company
+ * square under a round person, at 56px. Give the list an `xl` size and per-item
+ * types and this becomes one `F0AvatarList`.
+ */
+const GreetingAvatars = () => (
+  <F0Box display="flex" flexDirection="row" alignItems="center">
+    <div
+      className="flex"
+      style={{
+        maskImage: `radial-gradient(circle at ${GREETING_NOTCH.x}px ${GREETING_NOTCH.y}px, transparent ${GREETING_NOTCH.r}px, #000 ${GREETING_NOTCH.r + 0.5}px)`,
+      }}
+    >
+      <F0Avatar size="xl" avatar={{ type: "company", name: "Factorial" }} />
+    </div>
+    <div className="flex" style={{ marginLeft: -GREETING_AVATAR_OVERLAP_PX }}>
+      <F0Avatar
+        size="xl"
+        avatar={{
+          type: "person",
+          firstName: "Hellen",
+          lastName: "the HR",
+          src: "https://i.pravatar.cc/120?img=45",
+        }}
+      />
+    </div>
+  </F0Box>
+)
+
+/**
+ * The Ask-AI greeting: the company/person cluster over the welcome phrase.
+ *
+ * TWO HEADINGS, not one, in a wrapping row: each sentence wraps as a unit, so a
+ * narrow column breaks between them rather than mid-question. `F0Text` cannot
+ * carry this type — its variants stop at body copy — so the phrase is
+ * `F0Heading`'s `heading-large` (22px/600), which is exactly the design's.
  */
 const Greeting = () => (
-  <div className="flex flex-col items-center gap-3 py-2">
-    <F0OneIcon size="lg" />
-    <p className="m-0 text-2xl font-semibold">
-      <span
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, #E55619, #E51943, #A1ADE5)",
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-        }}
-      >
-        Good Morning, Hellen.
-      </span>{" "}
-      <span className="text-f1-foreground-secondary">
-        What can I do for you?
-      </span>
-    </p>
-  </div>
+  <F0Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    gap="md"
+    paddingBottom="2xl"
+  >
+    <GreetingAvatars />
+    <F0Box
+      display="flex"
+      flexDirection="row"
+      flexWrap="wrap"
+      alignItems="center"
+      justifyContent="center"
+      gap="xs"
+    >
+      <F0Heading
+        variant="heading-large"
+        align="center"
+        content="Good Morning, Hellen."
+      />
+      <F0Heading
+        variant="heading-large"
+        as="h2"
+        align="center"
+        content="What can I do for you?"
+      />
+    </F0Box>
+  </F0Box>
+)
+
+/* --------------------------------- composer -------------------------------- */
+
+const HOME_PLACEHOLDERS = [
+  "Ask for time off, an expense, a payslip…",
+  "Who's out of office this week?",
+  "Draft my self-review from these bullet points…",
+  "What's left of my leave this year?",
+]
+
+/**
+ * The starter prompts, INSIDE the field (`welcomeScreenSuggestionsPlacement`):
+ * on Home the composer is the page's own hero, so the suggestions belong in its
+ * foot rather than standing above it as they do in the chat panel.
+ */
+const HOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title: "My hours this month",
+        prompt:
+          "Summarize the hours I have clocked this month against my contract, and flag any day that is missing a clock-out.",
+      },
+      {
+        title: "Team leave next month",
+        prompt: "Show who in my team is on leave next month, week by week.",
+      },
+    ],
+  },
+  {
+    icon: Search,
+    label: "Find",
+    items: [
+      {
+        title: "Who's out of office this week?",
+        prompt:
+          "List everyone on time-off or sick leave between today and the end of the week.",
+      },
+      { title: "My last payslip", prompt: "Open my most recent payslip." },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title: "Request time off",
+        prompt: "Request time off for the last week of August.",
+      },
+      {
+        title: "Draft my self-review",
+        prompt:
+          "Turn these bullet points into review-ready text for my self-review.",
+      },
+    ],
+  },
+]
+
+/**
+ * Home's composer: the chat's own field, with `padding="none"` so the gutter is
+ * the greeting's rather than the chat panel's, and its suggestions in the
+ * field's foot.
+ *
+ * `isWelcomeScreen` is what Home always is — there is no conversation here; a
+ * submitted prompt is what opens the chat, which in a story is a logged payload.
+ * The `xs` inset is the field's focus glow, which the main column would otherwise
+ * clip against its own scrollport.
+ */
+const HomeComposer = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <F0Box padding="xs">
+      <F0AiChatTextArea
+        ref={ref}
+        padding="none"
+        isWelcomeScreen
+        placeholders={HOME_PLACEHOLDERS}
+        welcomeScreenSuggestions={HOME_SUGGESTIONS}
+        welcomeScreenSuggestionsPlacement="inside"
+        onSuggestionClick={(item) =>
+          console.log("suggestion", item.prompt ?? item.title)
+        }
+        onSubmit={(payload) => console.log("submit", payload)}
+      />
+    </F0Box>
+  )
+}
+
+/**
+ * The greeting and the composer as ONE block of the main column: the composer is
+ * the greeting's other half (it owns no gutter of its own), and the column's
+ * stagger should bring them in together. It also keeps the block count where the
+ * layout's `stackedPinsAfter` default expects it — greeting, then shortcuts.
+ */
+const HomeHero = () => (
+  <F0Box display="flex" flexDirection="column">
+    <Greeting />
+    <HomeComposer />
+  </F0Box>
 )
 
 const SHORTCUTS: Array<{ icon: IconType; title: string }> = [
@@ -174,7 +351,7 @@ const FeedSection = ({
 // An ARRAY, not a fragment: the layout inserts pinned widgets BETWEEN these
 // blocks when it stacks, and `Children.toArray` only sees seams in an array.
 const mainColumnBlocks = () => [
-  <Greeting key="greeting" />,
+  <HomeHero key="hero" />,
   <ShortcutCards key="shortcuts" />,
   <FeedSection
     key="needs-you"
