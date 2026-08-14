@@ -2,10 +2,11 @@ import { Reorder, useDragControls } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { useI18n } from "@/lib/providers/i18n"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { Delete, Handle, LockLocked } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
+import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 
 import { SortAndHideListItem } from "./types"
@@ -47,7 +48,7 @@ const Item = ({
         >
           {item.sortable ? (
             <F0Icon icon={Handle} size="xs" />
-          ) : (
+          ) : item.disabledReason ? null : (
             <F0Icon icon={LockLocked} size="sm" />
           )}
         </div>
@@ -73,20 +74,31 @@ const Item = ({
           />
         </div>
       )}
-      {allowHiding && (
-        <Switch
-          checked={item.visible}
-          onCheckedChange={(checked) => {
-            onChangeVisibility({
-              ...item,
-              visible: checked,
-            })
-          }}
-          title={item.label}
-          hideLabel
-          disabled={!item.canHide}
-        />
-      )}
+      {allowHiding &&
+        (item.disabledReason ? (
+          // Locked by the caller (e.g. no permission): forced OFF + disabled,
+          // with the reason in a tooltip. The switch is wrapped in a span so the
+          // tooltip still triggers on hover — a disabled control fires no pointer
+          // events of its own (same idiom as the disabled Dropdown menu item).
+          <TooltipWrapper tooltip={item.disabledReason}>
+            <span className="inline-flex cursor-not-allowed">
+              <Switch checked={false} title={item.label} hideLabel disabled />
+            </span>
+          </TooltipWrapper>
+        ) : (
+          <Switch
+            checked={item.visible}
+            onCheckedChange={(checked) => {
+              onChangeVisibility({
+                ...item,
+                visible: checked,
+              })
+            }}
+            title={item.label}
+            hideLabel
+            disabled={!item.canHide}
+          />
+        ))}
     </div>
   )
 
