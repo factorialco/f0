@@ -16,7 +16,6 @@ import { f0FormField, F0Form } from "../index"
  */
 const meta: Meta<{ hourCycle: HourCycle }> = {
   title: "Forms/TimeField hourCycle",
-  component: F0Form,
   tags: ["experimental"],
   argTypes: {
     hourCycle: { control: "radio", options: ["24h", "12h"] },
