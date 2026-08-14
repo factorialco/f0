@@ -40,6 +40,7 @@ import type {
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,
+  F0AnalyticsDashboardAskAiTarget,
 } from "../../types"
 
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
@@ -475,7 +476,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   actions?: DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
-  onAskAi?: (item: { id: string; title: string }) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   onTransformChart?: (
     itemId: string,
     newType: string,
@@ -516,6 +517,16 @@ export function ChartItem<Filters extends FiltersDefinition>({
 
   const handleAskAboutPoint = useCallback(() => {
     if (!pickedPoint) return
+
+    if (onAskAi) {
+      // The host answers this the same way it answers the ⋯ menu, with the
+      // mark attached. It gets the raw point rather than the sentence built
+      // below: it owns the phrasing, and it has the formatters too.
+      onAskAi({ id: item.id, title: item.title, point: pickedPoint })
+      setPickedPoint(null)
+      return
+    }
+
     const chart = item.chart
     // Format through the chart's own formatter so the quoted number reads
     // exactly as the tooltip did — a raw value can differ wildly from what was
@@ -535,7 +546,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     // Without this the quote would land in a panel the user cannot see.
     setAiChatOpen(true)
     setPickedPoint(null)
-  }, [item, pickedPoint, setPendingQuote, setAiChatOpen])
+  }, [item, onAskAi, pickedPoint, setPendingQuote, setAiChatOpen])
 
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -751,7 +762,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
             <F0DataChart
               {...chartProps}
-              onPointClick={aiEnabled ? setPickedPoint : undefined}
+              // Something has to be able to answer the click: the host, or
+              // failing that a mounted chat.
+              onPointClick={aiEnabled || onAskAi ? setPickedPoint : undefined}
               // Windowing rows is only offered where the reader can get them
               // back: this widget puts the count and a "show all" link in its
               // description. Without an expand handler there is nowhere for that

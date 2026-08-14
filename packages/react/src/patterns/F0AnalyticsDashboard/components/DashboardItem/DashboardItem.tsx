@@ -1,5 +1,7 @@
 import { useRef, useState, type ReactNode } from "react"
 
+import type { F0AnalyticsDashboardAskAiTarget } from "../../types"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -61,7 +63,7 @@ interface DashboardItemProps {
    * touching the chat and the host answers instead — and the entry no longer
    * needs a chat to be mounted at all.
    */
-  onAskAi?: (item: { id: string; title: string }) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
   /** Chart type transform options — rendered as a toggle group in the dropdown */

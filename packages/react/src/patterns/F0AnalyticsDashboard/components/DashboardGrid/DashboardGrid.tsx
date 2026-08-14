@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import type {
   DashboardItem as DashboardItemType,
   DashboardItemLayout,
+  F0AnalyticsDashboardAskAiTarget,
 } from "../../types"
 
 import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
@@ -61,7 +62,7 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
     orientation?: "vertical" | "horizontal"
   ) => void
   /** Overrides the built-in "Ask One" action on a widget. See `F0AnalyticsDashboardProps.onAskAi`. */
-  onAskAi?: (item: { id: string; title: string }) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   /**
    * Notifies the parent when the grid enters/exits a "fill height" mode —
    * triggered by click-to-fullscreen on a multi-item dashboard. The parent
@@ -997,7 +998,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
-  onAskAi?: (item: { id: string; title: string }) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }) {

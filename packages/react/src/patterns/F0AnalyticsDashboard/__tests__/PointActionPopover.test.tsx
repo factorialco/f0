@@ -75,6 +75,43 @@ describe("PointActionPopover", () => {
     expect(onDismiss).not.toHaveBeenCalled()
   })
 
+  it("dismisses when a scroll container moves the mark", () => {
+    const onDismiss = vi.fn()
+    render(
+      <PointActionPopover
+        anchor={anchor}
+        onAsk={vi.fn()}
+        onDismiss={onDismiss}
+      />
+    )
+
+    // Not the window — the dashboard scrolls inside its own containers, and
+    // `scroll` doesn't bubble, so only a capture-phase listener sees this.
+    const scroller = document.createElement("div")
+    document.body.appendChild(scroller)
+    try {
+      fireEvent.scroll(scroller)
+      expect(onDismiss).toHaveBeenCalledTimes(1)
+    } finally {
+      scroller.remove()
+    }
+  })
+
+  it("dismisses on resize, which moves every mark at once", () => {
+    const onDismiss = vi.fn()
+    render(
+      <PointActionPopover
+        anchor={anchor}
+        onAsk={vi.fn()}
+        onDismiss={onDismiss}
+      />
+    )
+
+    fireEvent.resize(window)
+
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
+
   it("portals out of the widget so the card cannot clip it", () => {
     const { container } = render(
       <PointActionPopover anchor={anchor} onAsk={vi.fn()} onDismiss={vi.fn()} />

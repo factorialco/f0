@@ -88,9 +88,20 @@ export function PointActionPopover({
 
     document.addEventListener("keydown", onKeyDown)
     document.addEventListener("pointerdown", onPointerDown, true)
+    // Anchored to a viewport position taken at click time, so anything that
+    // moves the mark underneath leaves this pointing at nothing. Dismiss
+    // rather than re-measure: the mark may have scrolled out of the widget
+    // entirely, and a popover that follows it out would be worse than one
+    // that goes away. Capture, because the dashboard scrolls inside its own
+    // containers and `scroll` doesn't bubble.
+    const onViewportChange = () => onDismiss()
+    window.addEventListener("scroll", onViewportChange, true)
+    window.addEventListener("resize", onViewportChange)
     return () => {
       document.removeEventListener("keydown", onKeyDown)
       document.removeEventListener("pointerdown", onPointerDown, true)
+      window.removeEventListener("scroll", onViewportChange, true)
+      window.removeEventListener("resize", onViewportChange)
     }
   }, [anchor, onDismiss])
 
