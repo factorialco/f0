@@ -1,9 +1,12 @@
-import { useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
-import type { F0DataChartProps } from "@/kits/F0DataChart"
+import type {
+  F0DataChartPointClick,
+  F0DataChartProps,
+} from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -28,6 +31,7 @@ import {
   RadarChartSkeleton,
   ScatterChartSkeleton,
 } from "@/kits/F0DataChart"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
@@ -50,6 +54,7 @@ import {
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { PointActionPopover } from "./PointActionPopover"
 
 // ---------------------------------------------------------------------------
 // Chart type option registry
@@ -493,6 +498,44 @@ export function ChartItem<Filters extends FiltersDefinition>({
 }: ChartItemProps<Filters>) {
   const translations = useI18n()
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
+  const {
+    enabled: aiEnabled,
+    setPendingQuote,
+    setOpen: setAiChatOpen,
+  } = useAiChat()
+
+  /**
+   * The mark the user last clicked, held until they either choose the action or
+   * dismiss it. Clicking a chart offers to quote rather than quoting outright —
+   * charts get clicked while reading, and hijacking every click to open the
+   * chat would make exploring one hostile.
+   */
+  const [pickedPoint, setPickedPoint] = useState<F0DataChartPointClick | null>(
+    null
+  )
+
+  const handleAskAboutPoint = useCallback(() => {
+    if (!pickedPoint) return
+    const chart = item.chart
+    // Format through the chart's own formatter so the quoted number reads
+    // exactly as the tooltip did — a raw value can differ wildly from what was
+    // on screen (currency, compact notation, percentages).
+    const format =
+      ("tooltipValueFormatter" in chart && chart.tooltipValueFormatter) ||
+      ("valueFormatter" in chart && chart.valueFormatter) ||
+      null
+    const value = format ? format(pickedPoint.value) : String(pickedPoint.value)
+    const heading = pickedPoint.category
+      ? `${item.title} — ${pickedPoint.category}`
+      : item.title
+
+    setPendingQuote({
+      text: `${heading}\n${pickedPoint.seriesName}: ${value}`,
+    })
+    // Without this the quote would land in a panel the user cannot see.
+    setAiChatOpen(true)
+    setPickedPoint(null)
+  }, [item, pickedPoint, setPendingQuote, setAiChatOpen])
 
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -708,6 +751,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
             <F0DataChart
               {...chartProps}
+              onPointClick={aiEnabled ? setPickedPoint : undefined}
               // Windowing rows is only offered where the reader can get them
               // back: this widget puts the count and a "show all" link in its
               // description. Without an expand handler there is nowhere for that
@@ -725,6 +769,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
               // horizontal bar chart drops its row window and draws every
               // category at a fixed row height, growing the widget.
               {...(fitContent ? { showAllCategories: true } : {})}
+            />
+            <PointActionPopover
+              anchor={pickedPoint}
+              onAsk={handleAskAboutPoint}
+              onDismiss={() => setPickedPoint(null)}
             />
           </div>
         )
