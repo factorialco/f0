@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.27.3](https://github.com/factorialco/f0/compare/f0-react-v6.27.2...f0-react-v6.27.3) (2026-08-14)
+
+
+### Bug Fixes
+
+* **F0DataChart:** stop totalling grouped bar tooltips ([#5097](https://github.com/factorialco/f0/issues/5097)) ([d4e725a](https://github.com/factorialco/f0/commit/d4e725a6db895eee0c4b3cb6d36757d334dcfd12))
+
 ## [6.27.2](https://github.com/factorialco/f0/compare/f0-react-v6.27.1...f0-react-v6.27.2) (2026-08-13)
 
 
