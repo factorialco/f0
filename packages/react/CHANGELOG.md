@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.31.0](https://github.com/factorialco/f0/compare/f0-react-v6.30.0...f0-react-v6.31.0) (2026-08-14)
+
+
+### Features
+
+* **F0AiMessagesContainer:** add initialMessageCta welcome CTA ([#5080](https://github.com/factorialco/f0/issues/5080)) ([0201364](https://github.com/factorialco/f0/commit/02013649ccfa6140fe5165f87704e52c5a7d7825))
+
 ## [6.30.0](https://github.com/factorialco/f0/compare/f0-react-v6.29.1...f0-react-v6.30.0) (2026-08-14)
 
 
