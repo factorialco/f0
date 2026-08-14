@@ -681,6 +681,39 @@ describe("Presets - Chip Visibility", () => {
   })
 })
 
+describe("Leading actions slot", () => {
+  it("renders leading actions before the filters button", () => {
+    render(
+      <OneFilterPicker
+        filters={definition}
+        value={{}}
+        onChange={() => {}}
+        leadingActions={<button type="button">Search</button>}
+      />
+    )
+
+    const leading = screen.getByRole("button", { name: "Search" })
+    const filtersButton = screen.getByRole("button", { name: /filters/i })
+
+    expect(
+      leading.compareDocumentPosition(filtersButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("renders leading actions when there are no filters", () => {
+    render(
+      <OneFilterPicker
+        value={{}}
+        onChange={() => {}}
+        leadingActions={<button type="button">Search</button>}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument()
+  })
+})
+
 // Type safety tests
 describe("Filters Type Safety", () => {
   it.skip("should enforce type safety in props", () => {

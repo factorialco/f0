@@ -41,10 +41,21 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
+  /**
+   * When true the input rests as an icon button and only expands once clicked.
+   * Reserved for rows too narrow to carry a permanent input; by default the
+   * input is always expanded.
+   */
+  collapsible?: boolean
 }
 
 // Trigger the next page when the user scrolls within this many px of the bottom.
 const LOAD_MORE_SCROLL_MARGIN = 56
+
+// Width of the input once open (or while it holds a query) and of the resting
+// icon-only button.
+const EXPANDED_WIDTH = 180
+const COLLAPSED_WIDTH = 32
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
@@ -64,6 +75,7 @@ export const Search = ({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
+  collapsible = false,
 }: SearchProps) => {
   const [open, setOpen] = useState(false)
   const [showResults, setShowResults] = useState(false)
@@ -74,10 +86,14 @@ export const Search = ({
   const activeItemRef = useRef<HTMLButtonElement>(null)
   const i18n = useI18n()
 
+  // The input shows permanently unless the row asked for the collapsible
+  // variant, in which case `open` drives it as before.
+  const isOpen = !collapsible || open
+
   // Render every loaded row; growth is bounded by paginated loading, not a cap.
   const resultItems = results ?? []
   const resultsVisible =
-    open && showResults && Boolean(value) && resultItems.length > 0
+    isOpen && showResults && Boolean(value) && resultItems.length > 0
 
   const handleResultsScroll = (e: React.UIEvent<HTMLUListElement>) => {
     if (!hasMore || loadingMore || !onLoadMore) return
@@ -118,10 +134,18 @@ export const Search = ({
     setActiveIndex(-1)
   }
 
-  useOnClickOutside(ref, () => {
-    if (open) setOpen(false)
-    setShowResults(false)
-  })
+  // On "mouseup", not the hook's default "mousedown": collapsing on mousedown
+  // shrinks the search by ~150px mid-click, which slides the filters button and
+  // the preset chips out from under the cursor before it is released, so their
+  // click never completes and the preset the user aimed at is dropped.
+  useOnClickOutside(
+    ref,
+    () => {
+      if (open) setOpen(false)
+      setShowResults(false)
+    },
+    "mouseup"
+  )
 
   const handleOpen = () => {
     if (!open) {
@@ -133,7 +157,9 @@ export const Search = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!open) {
+    // Only the resting icon button lands here while closed; a permanently
+    // expanded input must never swallow Enter or space as "open me".
+    if (!isOpen) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault()
         handleOpen()
@@ -180,14 +206,19 @@ export const Search = ({
       >
         <AnimatePresence>
           <motion.div
-            layout
             ref={ref}
-            className={cn(
-              "relative flex h-8 w-fit min-w-8 max-w-[180px] items-center justify-center",
-              (open || value) && "w-[180px]"
-            )}
+            className="relative flex h-8 items-center justify-center"
+            // The real width is animated rather than layout-animated on a
+            // class change: a layout animation resizes the box instantly and
+            // only interpolates the visuals, so the neighbouring filters
+            // button would snap to its new position while the search is still
+            // visibly collapsing.
+            initial={false}
+            animate={{
+              width: isOpen || value ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
+            }}
           >
-            {open ? (
+            {isOpen ? (
               <motion.div
                 layout
                 layoutId="search-container"
@@ -225,26 +256,35 @@ export const Search = ({
                     exit={{ opacity: 0 }}
                     onKeyDown={handleKeyDown}
                   />
-                  <motion.div
-                    tabIndex={0}
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full",
-                      focusRing()
-                    )}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleClear()
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
+                  {/* In the collapsible variant the cross also closes an empty
+                      input, so it stays; a permanent input only offers it as a
+                      way to clear an actual query. */}
+                  {(collapsible || value) && (
+                    <motion.div
+                      tabIndex={0}
+                      className={cn(
+                        "flex h-5 w-5 items-center justify-center rounded-full",
+                        focusRing()
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation()
                         handleClear()
-                      }
-                    }}
-                    role="button"
-                    aria-label={i18n.actions.clear}
-                  >
-                    <F0Icon icon={CrossedCircle} size="md" color="secondary" />
-                  </motion.div>
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          handleClear()
+                        }
+                      }}
+                      role="button"
+                      aria-label={i18n.actions.clear}
+                    >
+                      <F0Icon
+                        icon={CrossedCircle}
+                        size="md"
+                        color="secondary"
+                      />
+                    </motion.div>
+                  )}
                 </motion.div>
               </motion.div>
             ) : (
@@ -312,7 +352,9 @@ export const Search = ({
             )}
             {resultsVisible ? (
               <ul
-                className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
+                // Left-anchored: the search sits at the start of the controls
+                // row, so a right-anchored panel would hang off to the left.
+                className="absolute left-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
                 onScroll={handleResultsScroll}
               >
                 {resultItems.map((result, index) => (
