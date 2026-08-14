@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.29.1](https://github.com/factorialco/f0/compare/f0-react-v6.29.0...f0-react-v6.29.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **F0TagList:** truncate over-wide visible tags instead of overflowing the +N ([#5101](https://github.com/factorialco/f0/issues/5101)) ([f16be3a](https://github.com/factorialco/f0/commit/f16be3a620bcac54000cf70328bb786683efa298))
+
 ## [6.29.0](https://github.com/factorialco/f0/compare/f0-react-v6.28.0...f0-react-v6.29.0) (2026-08-14)
 
 
