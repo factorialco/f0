@@ -136,6 +136,12 @@ export const WelcomeScreenSuggestionsRow = ({
             {suggestions.map((group, index) => (
               <ButtonInternal
                 key={`${group.label}-${index}`}
+                // The `inside` placement mounts this row within the composer's
+                // <form>, where a button's implicit `type="submit"` submits it —
+                // and the submit handler refocuses the textarea, which Radix
+                // takes as an outside interaction and closes the popover the
+                // same click just opened.
+                type="button"
                 variant="outline"
                 label={group.label}
                 icon={group.icon}
