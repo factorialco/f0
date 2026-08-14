@@ -104,11 +104,12 @@ const createStackedBarShape = (category: string, categories: string[]) => {
       .find((key) => (value < 0 ? valueOf(key) < 0 : valueOf(key) > 0))
     const isOutermost = value !== 0 && outermost === category
 
-    const radius: [number, number, number, number] = !isOutermost
-      ? [0, 0, 0, 0]
-      : value < 0
-        ? [0, 0, 4, 4]
-        : [4, 4, 0, 0]
+    // Segments below zero come in with a negative height and Rectangle mirrors
+    // the path for them, so the first two radius slots land on the bar tip on
+    // both sides of the axis.
+    const radius: [number, number, number, number] = isOutermost
+      ? [4, 4, 0, 0]
+      : [0, 0, 0, 0]
 
     return <Rectangle {...rest} radius={radius} />
   }
