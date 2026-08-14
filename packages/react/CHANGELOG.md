@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.29.0](https://github.com/factorialco/f0/compare/f0-react-v6.28.0...f0-react-v6.29.0) (2026-08-14)
+
+
+### Features
+
+* **SlotWidget:** export it and draw previews from data ([#5116](https://github.com/factorialco/f0/issues/5116)) ([cd3cede](https://github.com/factorialco/f0/commit/cd3cedeb3a8eb6d9c414b35e989abd13224667ca))
+
 ## [6.28.0](https://github.com/factorialco/f0/compare/f0-react-v6.27.3...f0-react-v6.28.0) (2026-08-14)
 
 
