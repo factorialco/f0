@@ -18,6 +18,8 @@ import {
   InfoCircleLine,
 } from "@/icons/app"
 import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
+import { One as OneIcon } from "@/icons/ai"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -130,6 +132,11 @@ export function DashboardItem({
    */
   const [isExplanationView, setIsExplanationView] = useState(false)
   const translations = useI18n()
+  const {
+    enabled: aiEnabled,
+    setPendingQuote,
+    setOpen: setAiChatOpen,
+  } = useAiChat()
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
@@ -146,7 +153,13 @@ export function DashboardItem({
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
   const hasFullscreen = !!onFullscreenChange
-  const showMenu = hasDownloads || hasDelete || hasChartTypes || hasExplanation
+  // Keyboard-reachable twin of dragging the widget onto the chat. Gated on the
+  // chat actually being available: with no provider mounted `useAiChat()`
+  // returns an inert context whose setters are no-ops, so offering the action
+  // would do nothing.
+  const hasAskOne = aiEnabled && title.trim().length > 0
+  const showMenu =
+    hasAskOne || hasDownloads || hasDelete || hasChartTypes || hasExplanation
 
   if (error) {
     return (
@@ -352,6 +365,28 @@ export function DashboardItem({
                             <F0Icon icon={InfoCircleLine} />
                             <span className="flex-1">
                               {translations.ai.dashboardItem.dataExplanation}
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    )}
+
+                    {hasAskOne && (
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            // Fullscreen covers the chat, so step out of it
+                            // before handing the widget over — same reason the
+                            // delete action does.
+                            if (isFullscreen) onFullscreenChange?.(false)
+                            setPendingQuote({ text: title })
+                            setAiChatOpen(true)
+                          }}
+                        >
+                          <div className="flex w-full flex-row items-center gap-2">
+                            <F0Icon icon={OneIcon} />
+                            <span className="flex-1">
+                              {translations.ai.dashboardItem.askOne}
                             </span>
                           </div>
                         </DropdownMenuItem>

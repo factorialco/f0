@@ -453,6 +453,13 @@ export const defaultTranslations = {
       exporting: "Exporting…",
     },
     dashboardItem: {
+      /**
+       * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+       * override it — factorial renders it as plain "Ask" for the widget and
+       * insight-card buttons). This menu entry needs the product name spelled
+       * out, so it owns its own key.
+       */
+      askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",

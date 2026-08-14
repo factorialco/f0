@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
 
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
 describe("DashboardItem", () => {
@@ -166,6 +171,59 @@ describe("DashboardItem — description action", () => {
       screen.getByRole("button", { name: "Show less" })
     ).toBeInTheDocument()
     expect(screen.queryByText("·")).not.toBeInTheDocument()
+  })
+
+  describe("Ask One", () => {
+    const QuoteProbe = () => {
+      const { pendingQuote, open } = useAiChat()
+      return (
+        <span
+          data-testid="probe"
+          data-quote={pendingQuote?.text ?? ""}
+          data-open={String(open)}
+        />
+      )
+    }
+
+    const openMenu = async () =>
+      userEvent.click(screen.getByLabelText("Other actions"))
+
+    it("offers the action and hands the widget to the chat", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem title="Headcount by workplace" isLoading={false}>
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      const probe = screen.getByTestId("probe")
+      expect(probe).toHaveAttribute("data-quote", "Headcount by workplace")
+      // Opens the chat too — otherwise the quote lands somewhere unseen.
+      expect(probe).toHaveAttribute("data-open", "true")
+    })
+
+    it("is absent without a chat provider, where the setters are inert", async () => {
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          isLoading={false}
+          actions={[{ label: "CSV", onClick: vi.fn() }]}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      await openMenu()
+
+      expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
+      // The rest of the menu is untouched.
+      expect(screen.getByText("Download")).toBeInTheDocument()
+    })
   })
 })
 
