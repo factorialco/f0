@@ -21,6 +21,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   actions?: DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  onAskAi?: (item: { id: string; title: string }) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -39,6 +40,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   actions,
   editMode,
   handleDelete,
+  onAskAi,
   isFullscreen,
   onFullscreenChange,
 }: CollectionItemProps<Filters>) {
@@ -125,6 +127,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       actions={allActions}
       editMode={editMode}
       handleDelete={handleDelete}
+      onAskAi={onAskAi}
       itemId={item.id}
       isFullscreen={isFullscreen}
       onFullscreenChange={onFullscreenChange}

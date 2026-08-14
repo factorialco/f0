@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
 
 import {
@@ -174,6 +174,11 @@ describe("DashboardItem — description action", () => {
   })
 
   describe("Ask One", () => {
+    // The chat's open state is persisted, so without this a test inherits
+    // whatever the previous one left behind — and "did the click open it?"
+    // stops meaning anything.
+    beforeEach(() => localStorage.clear())
+
     const QuoteProbe = () => {
       const { pendingQuote, open } = useAiChat()
       return (
@@ -223,6 +228,55 @@ describe("DashboardItem — description action", () => {
       expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
       // The rest of the menu is untouched.
       expect(screen.getByText("Download")).toBeInTheDocument()
+    })
+
+    it("hands the widget to the host instead, when it takes the action", async () => {
+      const onAskAi = vi.fn()
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            itemId="headcount"
+            isLoading={false}
+            onAskAi={onAskAi}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+      })
+      // The chat is left alone entirely — the host may not even be sending the
+      // widget there, so quoting into it would be a second, unasked-for action.
+      const probe = screen.getByTestId("probe")
+      expect(probe).toHaveAttribute("data-quote", "")
+      expect(probe).toHaveAttribute("data-open", "false")
+    })
+
+    it("offers the action with no chat mounted, once the host answers it", async () => {
+      const onAskAi = vi.fn()
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          itemId="headcount"
+          isLoading={false}
+          onAskAi={onAskAi}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(onAskAi).toHaveBeenCalledTimes(1)
     })
   })
 })

@@ -56,6 +56,12 @@ interface DashboardItemProps {
   editMode?: boolean
   /** Called when the user clicks the delete action */
   handleDelete?: (itemId: string) => void
+  /**
+   * Overrides the built-in "Ask One" action. Given it, this component stops
+   * touching the chat and the host answers instead — and the entry no longer
+   * needs a chat to be mounted at all.
+   */
+  onAskAi?: (item: { id: string; title: string }) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
   /** Chart type transform options — rendered as a toggle group in the dropdown */
@@ -113,6 +119,7 @@ export function DashboardItem({
   actions = [],
   editMode,
   handleDelete,
+  onAskAi,
   itemId,
   chartTypeOptions,
   explanation,
@@ -153,11 +160,11 @@ export function DashboardItem({
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
   const hasFullscreen = !!onFullscreenChange
-  // Keyboard-reachable twin of dragging the widget onto the chat. Gated on the
-  // chat actually being available: with no provider mounted `useAiChat()`
-  // returns an inert context whose setters are no-ops, so offering the action
-  // would do nothing.
-  const hasAskOne = aiEnabled && title.trim().length > 0
+  // Keyboard-reachable twin of dragging the widget onto the chat. Gated on
+  // something being able to answer it: a host handler, or failing that a
+  // mounted chat — with no provider `useAiChat()` returns an inert context
+  // whose setters are no-ops, so offering the action would do nothing.
+  const hasAskOne = (!!onAskAi || aiEnabled) && title.trim().length > 0
   const showMenu =
     hasAskOne || hasDownloads || hasDelete || hasChartTypes || hasExplanation
 
@@ -375,6 +382,13 @@ export function DashboardItem({
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => {
+                            if (onAskAi) {
+                              // The host answers this one. Nothing else here
+                              // applies: it may not open the chat at all, so
+                              // leaving fullscreen would be a guess.
+                              onAskAi({ id: itemId ?? "", title })
+                              return
+                            }
                             // Fullscreen covers the chat, so step out of it
                             // before handing the widget over — same reason the
                             // delete action does.

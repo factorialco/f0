@@ -60,6 +60,8 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  /** Overrides the built-in "Ask One" action on a widget. See `F0AnalyticsDashboardProps.onAskAi`. */
+  onAskAi?: (item: { id: string; title: string }) => void
   /**
    * Notifies the parent when the grid enters/exits a "fill height" mode —
    * triggered by click-to-fullscreen on a multi-item dashboard. The parent
@@ -86,6 +88,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   onLayoutChange,
   resetKey,
   onTransformChart,
+  onAskAi,
   onFullscreenChange,
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -444,6 +447,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           editMode={editMode}
           onDelete={handleDelete}
           onTransformChart={onTransformChart}
+          onAskAi={onAskAi}
           isFullscreen
         />
       </div>
@@ -482,6 +486,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             editMode={editMode}
             onDelete={handleDelete}
             onTransformChart={onTransformChart}
+            onAskAi={onAskAi}
             isFullscreen
             onFullscreenChange={(fs) =>
               setFullscreenItemId(fs ? fullscreenItemId : null)
@@ -568,6 +573,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                       editMode={editMode}
                       onDelete={handleDelete}
                       onTransformChart={onTransformChart}
+                      onAskAi={onAskAi}
                       onFullscreenChange={(fs) =>
                         setFullscreenItemId(fs ? id : null)
                       }
@@ -977,6 +983,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   editMode,
   onDelete,
   onTransformChart,
+  onAskAi,
   isFullscreen,
   onFullscreenChange,
 }: {
@@ -990,6 +997,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  onAskAi?: (item: { id: string; title: string }) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }) {
@@ -1002,6 +1010,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           actions={actions}
           editMode={editMode}
           handleDelete={onDelete}
+          onAskAi={onAskAi}
           onTransformChart={onTransformChart}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
@@ -1015,6 +1024,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           actions={actions}
           editMode={editMode}
           handleDelete={onDelete}
+          onAskAi={onAskAi}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
         />
@@ -1027,6 +1037,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           actions={actions}
           editMode={editMode}
           handleDelete={onDelete}
+          onAskAi={onAskAi}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
         />
