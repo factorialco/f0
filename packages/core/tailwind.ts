@@ -27,10 +27,7 @@ export const baseConfig: Omit<Config, "content"> = {
     },
     colors: baseColors,
     fontFamily: {
-      // "Inter Fallback" is Arial with Inter's metrics (see the @font-face in
-      // f0-react's assets/fonts/style.css): text wraps identically before and
-      // after the webfont swap, so layout doesn't reflow when Inter lands.
-      sans: ["Inter", "Inter Fallback", "sans-serif"],
+      sans: ["Inter", "sans-serif"],
     },
     fontWeight,
     fontSize: Object.fromEntries(

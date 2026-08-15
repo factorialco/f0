@@ -54,7 +54,9 @@
 
 /* Arial adjusted to Inter's metrics (same overrides next/font computes), so
    text laid out before the webfont arrives wraps at the same points and the
-   swap does not reflow already-measured content. */
+   swap does not reflow already-measured content. Not part of the global
+   `font-sans` token — applied only where measured layout must survive the
+   swap (the chat shell rule in src/styles.css). */
 @font-face {
   font-family: "Inter Fallback";
   font-style: normal;
