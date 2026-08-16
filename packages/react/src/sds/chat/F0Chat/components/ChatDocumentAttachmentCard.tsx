@@ -7,7 +7,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
 import { type IconType } from "@/components/F0Icon"
 import { Download } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -18,6 +17,7 @@ import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { type ChatDocumentKind } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
+import { ClampText } from "./ClampText"
 
 // Every snapshot renderer is heavy in its own way (pdf.js, SheetJS,
 // docx-preview) — each lives in its own chunk, fetched the first time a card
@@ -145,9 +145,9 @@ export const ChatDocumentAttachmentCard = ({
             file={{ name: file.name, type: file.mimeType ?? "" }}
             size="md"
           />
-          <OneEllipsis className="grow text-sm font-medium text-f1-foreground">
+          <ClampText className="grow text-sm font-medium text-f1-foreground">
             {file.name}
-          </OneEllipsis>
+          </ClampText>
           {action && (
             <ButtonInternal
               variant="ghost"

@@ -137,6 +137,22 @@ export const shouldRepinOnGrowth = ({
 }): boolean => atBottom && count === prevCount && height > prevHeight
 
 /**
+ * How close to the top (in viewport-heights of remaining scroll) the previous
+ * page starts loading. Generous on purpose: the prepend must land and be
+ * measured while its rows are still far above the viewport — waiting for
+ * `startReached` (scrollTop 0) re-measures ~20 estimated rows right at the
+ * anchor, which is visible as a jump on the first pass through a conversation.
+ */
+export const PREFETCH_OLDER_VIEWPORTS = 3
+
+/** Whether the scroll position is close enough to the top to prefetch the
+ * previous page of history. */
+export const shouldPrefetchOlder = (
+  metrics: { scrollTop: number; clientHeight: number },
+  viewports: number = PREFETCH_OLDER_VIEWPORTS
+): boolean => metrics.scrollTop <= metrics.clientHeight * viewports
+
+/**
  * followOutput decision for the at-bottom case (scrolled up → never follow;
  * an OWN message sent while scrolled up is handled imperatively instead).
  * Virtuoso's native smooth scroll retries after re-measure until it reaches
