@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
   ComponentProps,
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -84,6 +86,7 @@ import {
   F0Chat,
   F0ChatProvider,
   isUserMessage,
+  type F0ChatHeaderAction,
   type F0ChatRuntime,
 } from "@/sds/chat/F0Chat"
 import { MessageStatus } from "@/sds/chat/F0Chat/components/MessageStatus"
@@ -93,12 +96,14 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
-import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { ME as CHAT_ME, SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
+import { seedFromAttendees } from "@/sds/meetings/F0Meeting/mocks/mockSeeds"
+import { useMockMeetingRuntime } from "@/sds/meetings/F0Meeting/mocks/useMockMeetingRuntime"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { Action } from "@/ui/Action"
 
-import { ApplicationFrame } from "./index"
+import { ApplicationFrame, type ApplicationFrameProps } from "./index"
 
 /**
  * Mock people database for @mention search and entity resolution in Storybook.
@@ -813,40 +818,48 @@ export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
-        <ApplicationFrame
-          // Transitional communications layout: conversations dock LEFT
-          // (panelContentSide) while the AI chat keeps its classic right-side
-          // panel, full header and history, toggled from the page header's One
-          // switch. Opening one swaps the other out — only the main content
-          // moves, uncovering the incoming panel in place.
-          ai={{
-            ...withMockChatSlots(args.ai),
-            panelContentSide: "left",
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              withOneTab={false}
-              // State parity across reloads, like the panel content restore.
-              tabsPersistKey="communications-demo"
-            />
-          }
-        >
-          {/* Real-world main content: the home "daytime" page. The One switch
+        <WithHuddle>
+          {(meeting) => (
+            <ApplicationFrame
+              // Transitional communications layout: conversations dock LEFT
+              // (panelContentSide) while the AI chat keeps its classic right-side
+              // panel, full header and history, toggled from the page header's One
+              // switch. Opening one swaps the other out — only the main content
+              // moves, uncovering the incoming panel in place.
+              ai={{
+                ...withMockChatSlots(args.ai),
+                panelContentSide: "left",
+              }}
+              aiPromotion={args.aiPromotion}
+              // Open a conversation and hit the camera icon in its header: the
+              // huddle starts with everyone from that chat already in the room,
+              // floating over the app so you can keep working.
+              meeting={meeting}
+              sidebar={
+                <ConversationsSidebar
+                  withOneTab={false}
+                  // State parity across reloads, like the panel content restore.
+                  tabsPersistKey="communications-demo"
+                />
+              }
+            >
+              {/* Real-world main content: the home "daytime" page. The One switch
               stays visible — it's how the AI chat opens (the sidebar only has
               Home + Chat tabs here). */}
-          <DaytimePage
-            period="morning"
-            header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
-            }}
-          >
-            <HomeLayout {...HomeLayoutStories.Default.args} />
-          </DaytimePage>
-        </ApplicationFrame>
+              <DaytimePage
+                period="morning"
+                header={{
+                  employeeFirstName: "Jordan",
+                  employeeLastName: "Avery",
+                  title: "Good morning, Jordan!",
+                  employeeAvatar: "/avatars/person05.jpg",
+                }}
+              >
+                <HomeLayout {...HomeLayoutStories.Default.args} />
+              </DaytimePage>
+            </ApplicationFrame>
+          )}
+        </WithHuddle>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
@@ -1253,6 +1266,95 @@ export const WithAiAssistant: Story = {
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
  * fullscreen/close to the panel via `useAiChat()`.
  */
+/**
+ * Lets the chat panel — which is mounted deep inside the frame — start a call
+ * on the frame itself. A real host would do the same thing with its own state:
+ * the huddle belongs to the app, not to the conversation that launched it.
+ */
+const HuddleContext = createContext<{
+  activeConvId: string | null
+  start: (convId: string) => void
+}>({ activeConvId: null, start: () => {} })
+
+const useHuddle = () => useContext(HuddleContext)
+
+/**
+ * Owns the call for the whole app shell. `runtime` is always built (hooks
+ * cannot be conditional) but only handed to the frame while a huddle is
+ * running, which is exactly the shape a real host ends up with.
+ */
+const WithHuddle = ({
+  children,
+}: {
+  children: (meeting: ApplicationFrameProps["meeting"]) => React.ReactNode
+}) => {
+  const [activeConvId, setActiveConvId] = useState<string | null>(null)
+  // Each start is a NEW call, even in the same conversation. The surface
+  // remembers a mode per room so a reload keeps the call where you put it —
+  // without this, hanging up and calling again would reopen in the panel you
+  // left it in rather than at `defaultMode`.
+  const [callCount, setCallCount] = useState(0)
+
+  const seed = useMemo(() => {
+    const conversation = activeConvId ? SEED_BY_ID.get(activeConvId) : undefined
+    return seedFromAttendees({
+      roomId: `huddle:${activeConvId ?? "idle"}:${callCount}`,
+      title: conversation ? `Huddle · ${conversation.title}` : "Huddle",
+      me: { id: CHAT_ME.id, name: CHAT_ME.name, avatar: CHAT_ME.avatar },
+      attendees: (conversation?.participants ?? []).map((participant) => ({
+        id: participant.id,
+        name: participant.name,
+        avatar: participant.avatar,
+      })),
+      // Everyone is already in the room when you arrive: some with moving
+      // footage, some with the camera off, some muted. A grid of identical
+      // placeholders tells you nothing about how the real thing will feel.
+      videoSource: "clip",
+      clipUrls: ["/Big_Buck_Bunny_alt.webm"],
+      // Silence the mock while nothing is running, so an idle shell has no
+      // audio engine and no turn-taking timers behind it.
+      audio: activeConvId !== null,
+    })
+  }, [activeConvId, callCount])
+
+  const { runtime } = useMockMeetingRuntime(seed, {
+    // Hanging up ends the call: the host drops the runtime and the surface
+    // goes with it. Leaving it mounted on a "call ended" screen is the bug
+    // every video product ships once.
+    onLeave: () => setActiveConvId(null),
+  })
+
+  const value = useMemo(
+    () => ({
+      activeConvId,
+      start: (convId: string) => {
+        setCallCount((count) => count + 1)
+        setActiveConvId(convId)
+      },
+    }),
+    [activeConvId]
+  )
+
+  return (
+    <HuddleContext.Provider value={value}>
+      {children({
+        runtime: activeConvId ? runtime : null,
+        defaultMode: "fullscreen",
+        actions: [
+          {
+            id: "chat",
+            label: "Open conversation",
+            icon: Icons.Comment,
+            group: "collab",
+            priority: 55,
+            onClick: () => {},
+          },
+        ],
+      })}
+    </HuddleContext.Provider>
+  )
+}
+
 const MockChatPanel = ({
   convId,
   receiptPreview,
@@ -1297,6 +1399,22 @@ const MockChatPanel = ({
     seed?.myRole,
     { members: seed?.participants }
   )
+  // Starting a call is just another host header action — F0Chat needs no
+  // knowledge of meetings for a huddle to exist.
+  const huddle = useHuddle()
+  const actionsWithHuddle = useMemo<F0ChatHeaderAction[]>(
+    () => [
+      ...headerActions,
+      {
+        id: "huddle",
+        label: "Start huddle",
+        icon: Icons.VideoRecorder,
+        placement: "inline",
+        onClick: () => huddle.start(convId),
+      },
+    ],
+    [headerActions, huddle, convId]
+  )
   const {
     visualizationMode,
     setVisualizationMode,
@@ -1316,7 +1434,7 @@ const MockChatPanel = ({
           clearPanelContent()
           setOpen(false)
         }}
-        headerActions={headerActions}
+        headerActions={actionsWithHuddle}
       />
       {/* The Edit action's dialog is the HOST's — rendered outside F0Chat. */}
       {editDialog}

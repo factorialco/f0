@@ -27,6 +27,9 @@ import { HostedPanelWindow } from "@/kits/ai/F0AiChat/components/layout/HostedPa
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
+import { F0Meeting } from "@/sds/meetings/F0Meeting"
+import { useMeetingSurfaceOptional } from "@/sds/meetings/F0Meeting/providers/MeetingSurfaceProvider"
+import { type F0MeetingProviderProps } from "@/sds/meetings/F0Meeting/types"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
@@ -35,6 +38,15 @@ const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
   aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
+  /**
+   * Live meeting. The frame owns the one place a call can render; the host owns
+   * the runtime. `runtime: null` (or omitting the prop) means no meeting.
+   *
+   * Unlike the chat, the surface does not live inside the frame's stacking
+   * context — it portals to `document.body`, because a floating window cannot
+   * work under a transformed, overflow-hidden ancestor. See `F0MeetingSurface`.
+   */
+  meeting?: Omit<F0MeetingProviderProps, "children">
   banner?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
@@ -46,17 +58,22 @@ function _ApplicationFrame({
   banner,
   ai,
   aiPromotion,
+  meeting,
 }: ApplicationFrameProps) {
   return (
     <FrameProvider>
-      <ApplicationFrameWithProvider
-        ai={ai}
-        aiPromotion={aiPromotion}
-        sidebar={sidebar}
-        banner={banner}
-      >
-        {children}
-      </ApplicationFrameWithProvider>
+      {/* Above the AI provider: switching the call between fullscreen and a
+          floating window must not re-render the chat. */}
+      <F0Meeting {...meeting} runtime={meeting?.runtime ?? null}>
+        <ApplicationFrameWithProvider
+          ai={ai}
+          aiPromotion={aiPromotion}
+          sidebar={sidebar}
+          banner={banner}
+        >
+          {children}
+        </ApplicationFrameWithProvider>
+      </F0Meeting>
     </FrameProvider>
   )
 }
@@ -170,6 +187,13 @@ function useAutoCloseSidebar(
  *   z-20  Sidebar backdrop / Chat (fullscreen)
  *   z-30  Sidebar (unlocked/floating)
  *   z-0   Chat (normal)
+ *
+ * The meeting surface is NOT in here: it portals to `document.body`, so it
+ * competes with the other body-level portals instead. That band is
+ *   z-40  Meeting (floating window / minimized pill)
+ *   z-45  Meeting (fullscreen)
+ * which is reserved for meetings and deliberately sits below Radix dialogs
+ * (z-50) so a modal can still cover a call, and below toasts (z-[100]).
  */
 function ApplicationFrameContent({
   ai,
@@ -250,10 +274,88 @@ function ApplicationFrameContent({
     initializeWithValue: true,
   })
 
-  // A left-docked panel sits beside the navigation (not over it), so the chat
-  // list stays usable — don't float / auto-close the sidebar in that case.
-  // Keyed on the side of the *visible* content: in split mode a left-docked
+  // The meeting reserves width the same way the chat does, but from its own
+  // provider: its window lives in a portal on `document.body`, so the only way
+  // it can push content instead of covering it is for the frame to make room.
+  const meeting = useMeetingSurfaceOptional()
+  const isMeetingPanel = meeting?.effectiveMode === "panel"
+  const meetingWidth = isMeetingPanel ? (meeting?.panelWidth ?? 0) : 0
+
+  // Publish the content region so the call's panel lands between the
+  // navigation and the content instead of on top of the sidebar. The window is
+  // `fixed` and lives in a portal, so it has no other way to know where
+  // "inside the frame" is. Padding lives inside this box, so animating it does
+  // not move the border box and this cannot feed back on itself.
+  const mainAreaRef = useRef<HTMLDivElement>(null)
+  const setMeetingFrameRect = meeting?.setFrameRect
+  useEffect(() => {
+    const element = mainAreaRef.current
+    if (!element || !setMeetingFrameRect) return
+
+    let frame = 0
+    const publish = (): void => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const bounds = element.getBoundingClientRect()
+        setMeetingFrameRect({
+          x: bounds.left,
+          y: bounds.top,
+          width: bounds.width,
+          height: bounds.height,
+        })
+      })
+    }
+
+    publish()
+    const observer = new ResizeObserver(publish)
+    observer.observe(element)
+    window.addEventListener("resize", publish)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener("resize", publish)
+      setMeetingFrameRect(null)
+    }
+  }, [setMeetingFrameRect])
+
+  // The call's side panel and the chat's compete for the same slot, and they
+  // may never share it. One effect owns the whole rule, because two would fire
+  // on the same state and undo each other — opening a chat would trip the
+  // branch that closes it.
+  //
+  // Who yields is decided by WHO JUST ARRIVED, which is the user's most recent
+  // explicit act. When neither just changed (a restored mode, a first render)
+  // the call keeps the slot and the chat is cleared out of it.
+  const { setOpen: setAiChatOpen, clearPanelContent: clearAiPanelContent } =
+    useAiChat()
+  const setMeetingMode = meeting?.setMode
+  const wasContested = useRef({ chat: isAiChatOpen, panel: isMeetingPanel })
+
+  useEffect(() => {
+    const previous = wasContested.current
+    wasContested.current = { chat: isAiChatOpen, panel: isMeetingPanel }
+    if (!isMeetingPanel || !isAiChatOpen) return
+
+    if (!previous.chat) {
+      // The chat just opened: the call steps aside rather than swallowing it.
+      setMeetingMode?.("floating")
+      return
+    }
+    clearAiPanelContent()
+    setAiChatOpen(false)
+  }, [
+    isMeetingPanel,
+    isAiChatOpen,
+    setMeetingMode,
+    clearAiPanelContent,
+    setAiChatOpen,
+  ])
+
+  // A left panel sits beside the navigation (not over it), so the chat list
+  // stays usable — don't float / auto-close the sidebar in that case. Keyed on
+  // the side of the *visible* content: in split mode a left-docked
   // conversation coexists with the sidebar while the right AI chat floats it.
+  // The call is always on the left, so it never feeds this.
   const floatsOverSidebar = isAiChatOpen && !isActiveLeft
 
   useEffect(() => {
@@ -316,20 +418,25 @@ function ApplicationFrameContent({
 
             {/* Main area */}
             <motion.div
+              ref={mainAreaRef}
               className="relative min-w-0 flex-1"
               // Both paddings animate together, so swapping the visible side
               // (split mode) slides the main content from one edge to the
               // other — covering the outgoing window and uncovering the
               // incoming one, which stay put underneath (z-0 vs z-10).
               animate={{
-                paddingRight:
-                  isAiChatOpen && !isSmallViewport && !isActiveLeft
+                paddingRight: isSmallViewport
+                  ? 0
+                  : isAiChatOpen && !isActiveLeft
                     ? reservedChatWidth
                     : 0,
-                paddingLeft:
-                  isAiChatOpen && !isSmallViewport && isActiveLeft
-                    ? reservedChatWidth
-                    : 0,
+                paddingLeft: isSmallViewport
+                  ? 0
+                  : isMeetingPanel
+                    ? meetingWidth
+                    : isAiChatOpen && isActiveLeft
+                      ? reservedChatWidth
+                      : 0,
               }}
               transition={{
                 paddingRight: CONTENT_TRANSITION,
