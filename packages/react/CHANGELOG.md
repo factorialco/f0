@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.32.1](https://github.com/factorialco/f0/compare/f0-react-v6.32.0...f0-react-v6.32.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **F0Chat:** remove first-load scroll jank in the transcript ([#5139](https://github.com/factorialco/f0/issues/5139)) ([9ca3343](https://github.com/factorialco/f0/commit/9ca3343034e511d01a39162a660a913f5c70084b))
+
 ## [6.32.0](https://github.com/factorialco/f0/compare/f0-react-v6.31.2...f0-react-v6.32.0) (2026-08-14)
 
 

@@ -124,6 +124,66 @@ describe("useTranscriptReadiness", () => {
     expect(result.current.ready).toBe(true)
   })
 
+  it("holds the reveal until the webfont settles (bounded by the cap)", async () => {
+    vi.resetModules()
+    let resolveFonts: () => void = () => {}
+    const fontsReady = new Promise<void>((resolve) => {
+      resolveFonts = resolve
+    })
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: { ready: fontsReady, status: "loading" },
+    })
+    const { useTranscriptReadiness: useReadiness } =
+      await import("../useTranscriptReadiness")
+
+    const { result } = renderHook(() => useReadiness("list-1"))
+    act(() => {
+      result.current.setViewport(document.createElement("div"))
+      result.current.setListVisible(true)
+    })
+    act(paint)
+    act(paint)
+    // Two stable frames passed, but the swap is still pending.
+    expect(result.current.ready).toBe(false)
+
+    await act(async () => {
+      resolveFonts()
+      await fontsReady
+    })
+    act(paint)
+    act(paint)
+    expect(result.current.ready).toBe(true)
+
+    Reflect.deleteProperty(document, "fonts")
+  })
+
+  it("gives up on a slow webfont after the settle cap", async () => {
+    vi.resetModules()
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: { ready: new Promise<void>(() => {}), status: "loading" },
+    })
+    const { useTranscriptReadiness: useReadiness } =
+      await import("../useTranscriptReadiness")
+
+    const { result } = renderHook(() => useReadiness("list-1"))
+    act(() => {
+      result.current.setViewport(document.createElement("div"))
+      result.current.setListVisible(true)
+    })
+    act(paint)
+    act(paint)
+    expect(result.current.ready).toBe(false)
+
+    act(() => vi.advanceTimersByTime(300))
+    act(paint)
+    act(paint)
+    expect(result.current.ready).toBe(true)
+
+    Reflect.deleteProperty(document, "fonts")
+  })
+
   it("becomes provisional again immediately when the Virtuoso list key changes", () => {
     const { result, rerender } = renderHook(
       ({ listKey }) => useTranscriptReadiness(listKey),

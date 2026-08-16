@@ -1,6 +1,15 @@
 import { AnimatePresence, motion } from "motion/react"
-import { type ReactNode, useEffect, useRef, useState } from "react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +23,10 @@ import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
 import { SendingClock } from "./ChatMessageStatusIcon"
+
+/** See armActionsSoon: long enough for a click burst on the placeholder to
+ * finish, well under the pointer travel time from row edge to the ellipsis. */
+const ARM_ACTIONS_ON_HOVER_MS = 150
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -43,6 +56,48 @@ export const ChatMessageItem = ({
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
   const [actionsOpen, setActionsOpen] = useState(false)
+  // The actions popover (Radix Popover + tooltip provider + timers) mounts
+  // on first interaction intent, not with the row: with the transcript's
+  // overscan, mounting it eagerly multiplies that cost by every rendered row
+  // during the first scroll pass. Until then a visually identical plain
+  // trigger holds its place (same component minus tooltip/popover), so hover
+  // reveal and keyboard tab order don't change. Failed messages skip the
+  // deferral — their trigger is always visible.
+  const [actionsArmed, setActionsArmed] = useState(false)
+  const actionsWrapperRef = useRef<HTMLDivElement>(null)
+  const restoreActionsFocusRef = useRef(false)
+  const armTimerRef = useRef<number | null>(null)
+  const armActions = useCallback(() => {
+    // Arming while the placeholder holds focus swaps the focused node — hand
+    // focus over so tabbing never lands in a void.
+    if (actionsWrapperRef.current?.contains(document.activeElement)) {
+      restoreActionsFocusRef.current = true
+    }
+    setActionsArmed(true)
+  }, [])
+  // Hover arming waits out any in-flight click: a click's event burst
+  // (pointer, focus, click) must finish on the placeholder node — swapping it
+  // mid-burst would swallow the click (the detached node no longer bubbles to
+  // the React root). A click faster than this is handled by the placeholder
+  // itself; a hover slower than this reaches an already-real trigger.
+  const armActionsSoon = useCallback(() => {
+    if (armTimerRef.current != null) return
+    armTimerRef.current = window.setTimeout(() => {
+      armTimerRef.current = null
+      armActions()
+    }, ARM_ACTIONS_ON_HOVER_MS)
+  }, [armActions])
+  useEffect(
+    () => () => {
+      if (armTimerRef.current != null) window.clearTimeout(armTimerRef.current)
+    },
+    []
+  )
+  useLayoutEffect(() => {
+    if (!restoreActionsFocusRef.current) return
+    restoreActionsFocusRef.current = false
+    actionsWrapperRef.current?.querySelector("button")?.focus()
+  }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
@@ -77,6 +132,7 @@ export const ChatMessageItem = ({
         "group flex flex-col",
         isMine ? "items-end" : "items-start"
       )}
+      onPointerEnter={actionsArmed ? undefined : armActionsSoon}
     >
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
@@ -172,6 +228,7 @@ export const ChatMessageItem = ({
                 (same popover, reduced to Retry / Delete). */}
             {!message.deleted && message.status !== "sending" && (
               <div
+                ref={actionsWrapperRef}
                 className={cn(
                   message.status === "failed"
                     ? "opacity-100"
@@ -199,12 +256,29 @@ export const ChatMessageItem = ({
                       onOpenChange={setActionsOpen}
                     />
                   </motion.div>
-                ) : (
+                ) : actionsArmed ? (
                   <ChatMessageActions
                     message={message}
                     isMine={isMine}
                     open={actionsOpen}
                     onOpenChange={setActionsOpen}
+                  />
+                ) : (
+                  // Same trigger the popover renders, minus the popover and
+                  // tooltip machinery — indistinguishable until interaction.
+                  // Activating it (click, tap, Enter) arms AND opens, so the
+                  // very first interaction behaves exactly like the real one.
+                  <ButtonInternal
+                    variant="outline"
+                    hideLabel
+                    noAutoTooltip
+                    label={i18n.chat.moreActions}
+                    icon={Ellipsis}
+                    pressed={false}
+                    onClick={() => {
+                      armActions()
+                      setActionsOpen(true)
+                    }}
                   />
                 )}
               </div>

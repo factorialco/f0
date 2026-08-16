@@ -16,6 +16,7 @@ import {
   followDecision,
   nextFirstItemIndex,
   PREPEND_OFFSET,
+  shouldPrefetchOlder,
   shouldRepinOnGrowth,
   type WindowEnds,
   windowEnds,
@@ -142,6 +143,9 @@ export function useChatVirtuoso({
   const pendingRef = useRef<PendingJump>(null)
   // Own message appended while scrolled up → glide home (consumed post-commit).
   const ownGlideRef = useRef(false)
+  // One older-page request in flight at a time — cleared when its window lands
+  // (below) or when the host reports the attempt finished (loadingOlder edge).
+  const olderRequestedRef = useRef(false)
 
   if (windowRef.current === null) {
     windowRef.current = windowEnds(messages)
@@ -149,6 +153,7 @@ export function useChatVirtuoso({
     const nextEnds = windowEnds(messages)
     const change = classifyWindowChange(windowRef.current, nextEnds)
     if (change !== "none") {
+      olderRequestedRef.current = false
       firstItemIndexRef.current = nextFirstItemIndex(
         firstItemIndexRef.current,
         change,
@@ -277,9 +282,25 @@ export function useChatVirtuoso({
     currentAtBottom && !currentFollowPaused && !hasMoreNewer ? follow : false
 
   // ---- pagination edges ----
-  const handleStartReached = useCallback(() => {
-    if (hasMoreOlder && !loadingOlder) loadOlder()
-  }, [hasMoreOlder, loadingOlder, loadOlder])
+  // Latest pagination inputs, readable from the stable rAF callback below.
+  const olderPagingRef = useRef({ hasMoreOlder, loadingOlder, loadOlder })
+  olderPagingRef.current = { hasMoreOlder, loadingOlder, loadOlder }
+
+  const requestOlder = useCallback(() => {
+    const paging = olderPagingRef.current
+    if (olderRequestedRef.current) return
+    if (!paging.hasMoreOlder || paging.loadingOlder) return
+    olderRequestedRef.current = true
+    paging.loadOlder()
+  }, [])
+
+  // Unstick the latch when the host reports the attempt finished without a
+  // window change (a failed/empty page must not kill pagination for good).
+  useEffect(() => {
+    if (!loadingOlder) olderRequestedRef.current = false
+  }, [loadingOlder])
+
+  const handleStartReached = requestOlder
 
   const handleEndReached = useCallback(() => {
     if (hasMoreNewer && !loadingNewer) loadNewer?.()
@@ -302,6 +323,10 @@ export function useChatVirtuoso({
       setScrolledUp(
         distanceFromBottom > metrics.clientHeight * SCROLLED_UP_VIEWPORTS
       )
+      // Prefetch the previous page while still viewports away from the top:
+      // the prepend lands and gets measured far above the viewport instead of
+      // right at the anchor (startReached below stays as the safety net).
+      if (shouldPrefetchOlder(metrics)) requestOlder()
       setStickyIndex(
         topVisibleRowIndex(
           renderedItemsRef.current,
@@ -312,7 +337,7 @@ export function useChatVirtuoso({
         )
       )
     })
-  }, [])
+  }, [requestOlder])
 
   const measureScrollState = useCallback(() => {
     const element = scrollerElRef.current
