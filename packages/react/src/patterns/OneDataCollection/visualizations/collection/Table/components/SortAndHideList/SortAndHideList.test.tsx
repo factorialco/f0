@@ -25,6 +25,41 @@ const items: SortAndHideListItem[] = [
   },
 ]
 
+const rowContents = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll("li")).map(
+    (row) => row.firstElementChild
+  )
+
+describe("SortAndHideList edge padding", () => {
+  it("pads only the first and last rows", () => {
+    const { container } = render(
+      <SortAndHideList items={items} allowSorting allowHiding />
+    )
+
+    const [first, middle, last] = rowContents(container)
+
+    expect(first).toHaveClass("pt-1")
+    expect(first).not.toHaveClass("pb-1")
+
+    expect(middle).not.toHaveClass("pt-1")
+    expect(middle).not.toHaveClass("pb-1")
+
+    expect(last).toHaveClass("pb-1")
+    expect(last).not.toHaveClass("pt-1")
+  })
+
+  it("pads both edges of a single row, which is first and last at once", () => {
+    const { container } = render(
+      <SortAndHideList items={[items[0]!]} allowSorting allowHiding />
+    )
+
+    const [only] = rowContents(container)
+
+    expect(only).toHaveClass("pt-1")
+    expect(only).toHaveClass("pb-1")
+  })
+})
+
 describe("SortAndHideList remove affordance", () => {
   it("renders a remove button for each removable item and calls onRemove with it", async () => {
     const onRemove = vi.fn()
