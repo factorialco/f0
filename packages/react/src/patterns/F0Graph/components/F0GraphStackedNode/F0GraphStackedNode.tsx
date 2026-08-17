@@ -140,10 +140,10 @@ const F0GraphStackedNodeBase = forwardRef<
           </>
         )}
         {trailing && (
-          // Trailing controls are their own affordance: clicking a checkbox must
-          // not also select and fly to the node. Two paths would select it — the
-          // row's `onClick`, stopped here, and the canvas `pointerup` handler,
-          // which fires regardless and reads `data-no-node-select`.
+          // Trailing controls are their own affordance: clicking a small action
+          // must not also select and fly to the node. Two paths would select it
+          // — the row's `onClick`, stopped here, and the canvas `pointerup`
+          // handler, which fires regardless and reads `data-no-node-select`.
           <div
             className="flex shrink-0 items-center"
             data-no-node-select

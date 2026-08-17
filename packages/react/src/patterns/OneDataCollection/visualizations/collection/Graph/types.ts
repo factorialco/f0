@@ -79,9 +79,12 @@ export type GraphVisualizationOptions<
    */
   stackChildren?: (record: R) => boolean
   /**
-   * Trailing content for a stacked row — a checkbox, a count, a small icon
-   * button. Rendered at the row's trailing edge; clicks inside it do not select
-   * the node. Ignored for records that are not rendered as stacked rows.
+   * Trailing content for a stacked row — a count or a small icon button.
+   * Rendered at the row's trailing edge; clicks inside it do not select the
+   * node. Ignored for records that are not rendered as stacked rows.
+   *
+   * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+   * would promise a behaviour the graph does not have.
    */
   stackedTrailing?: (record: R) => ReactNode
   /**

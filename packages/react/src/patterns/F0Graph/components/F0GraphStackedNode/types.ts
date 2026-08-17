@@ -31,8 +31,11 @@ export interface F0GraphStackedNodeProps {
   /** The row's label. */
   title?: ReactNode
   /**
-   * Content pinned to the trailing edge of the row — a checkbox, a count, a
-   * small icon button. Clicks inside it do not select the node.
+   * Content pinned to the trailing edge of the row — a count or a small icon
+   * button. Clicks inside it do not select the node.
+   *
+   * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+   * would promise a behaviour the graph does not have.
    */
   trailing?: ReactNode
   /** Show a skeleton placeholder instead of the title. */

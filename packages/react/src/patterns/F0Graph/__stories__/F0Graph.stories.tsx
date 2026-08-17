@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { DeferredNodesPayload, GraphNode } from "../types"
@@ -1369,17 +1368,6 @@ const CATALOG_NODES: GraphNode<CatalogNode>[] = [
 ]
 
 const StackedChildrenDemo = () => {
-  const [checked, setChecked] = useState<ReadonlySet<string>>(new Set())
-
-  const toggle = useCallback((id: string) => {
-    setChecked((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }, [])
-
   return (
     <F0Graph<CatalogNode>
       nodes={CATALOG_NODES}
@@ -1391,14 +1379,6 @@ const StackedChildrenDemo = () => {
             {...ctx}
             avatar={{ type: "team", name: node.data.name }}
             title={node.data.name}
-            trailing={
-              <F0Checkbox
-                title={node.data.name}
-                hideLabel
-                checked={checked.has(node.id)}
-                onCheckedChange={() => toggle(node.id)}
-              />
-            }
           />
         ) : (
           <F0GraphNode

@@ -149,7 +149,7 @@ const nodes = [
 
 renderNode={(node, ctx) =>
   ctx.stacked ? (
-    <F0GraphStackedNode {...ctx} title={node.data.name} trailing={<F0Checkbox … />} />
+    <F0GraphStackedNode {...ctx} title={node.data.name} />
   ) : (
     <F0GraphNode {...ctx} avatar={…} title={node.data.name} />
   )
