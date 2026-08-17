@@ -6837,7 +6837,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -6966,6 +6966,25 @@ export declare type F0AiChatTextAreaProps = {
      * dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
+     * The composer's own inset against whatever contains it.
+     *
+     * - `"default"` — the gutter the chat layouts expect (16px sides, 8px top,
+     *   12px bottom). It is what keeps the field off the chat window's edges and
+     *   leaves room for the focus glow, which bleeds a few pixels outside the
+     *   field's border box.
+     *
+     * - `"none"` — no inset, for hosts that place the composer inside a container
+     *   that already owns the spacing (a landing/home hero, a card). The host then
+     *   owns BOTH sides of that bargain: give the composer some room of your own,
+     *   and don't clip overflow around it, or the focus glow gets cut at the edge.
+     *
+     * Only the outer inset changes; the gap between the composer and the blocks
+     * below it (suggestions, cards, footer, disclaimer) is unaffected.
+     *
+     * @default "default"
+     */
+    padding?: "default" | "none";
     /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
@@ -7223,6 +7242,9 @@ export declare type F0AiMessagesContainerProps = {
     initialMessageCaption?: string;
     /** Smaller secondary line below the welcome phrase. */
     initialMessageSubtitle?: string;
+    /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+     *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+    initialMessageCta?: WelcomeScreenCta;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -11765,6 +11787,13 @@ export declare const F0Provider: React.FC<{
     layout?: Omit<ComponentProps<typeof LayoutProvider>, "children">;
     i18n: Omit<I18nProviderProps, "children">;
     l10n: Omit<L10nProviderProps, "children">;
+    /**
+     * Global user preference for how times are displayed and edited (12h/24h).
+     * When set, F0 time fields render/parse in this hour cycle so the app can
+     * honor the user's preference instead of the browser locale. When omitted,
+     * time fields use the native browser-locale input.
+     */
+    hourCycle?: HourCycle;
     isDev?: boolean;
     showExperimentalWarnings?: boolean;
     dataCollectionStorageHandler?: DataCollectionStorageHandler;
@@ -14061,6 +14090,9 @@ export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComp
 widgets?: ReactNode[];
 children?: ReactNode;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
+/** How times are displayed and edited: 12-hour (AM/PM) or 24-hour. */
+declare type HourCycle = "12h" | "24h";
 
 export declare interface HourDistributionCellValue {
     dataPoints: HourDistributionDataPoint[];
@@ -19580,6 +19612,17 @@ export declare const WeekStartDay: {
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
 /**
+ * Optional call-to-action rendered as a pill above the welcome phrase (e.g. a
+ * "How to use One" shortcut). The host owns `onClick`; f0 owns the pill styling
+ * so it stays consistent with the rest of the welcome screen.
+ */
+export declare type WelcomeScreenCta = {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+};
+
+/**
  * A welcome-screen group rendered as an outline button in the welcome row.
  * Clicking the group opens a popover listing its `items`. The number of groups
  * is not capped yet (unlike welcome cards, which top out at 4).
@@ -19760,16 +19803,6 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -19785,6 +19818,16 @@ declare module "@tiptap/core" {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

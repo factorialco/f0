@@ -62,6 +62,14 @@ export declare interface ComponentEntry {
 }
 
 /**
+ * The component's code name — the leaf of its folder, given its story file
+ * path (a story in `__stories__/` maps to the parent folder). Story titles
+ * legitimately drop the F0 prefix ("Checkbox" ↔ `F0Checkbox/`), so naming is
+ * checked against the folder, which matches the exported symbol.
+ */
+export declare function componentFolderName(storyFile: string): string;
+
+/**
  * The maturity status badge, sized to sit inline next to a component title. On
  * hover/focus it reveals the full maturity summary and Definition-of-Done
  * checklist in a tooltip — the same information the `ComponentStability` panel
@@ -167,6 +175,9 @@ export declare interface DocSignals {
  * exported so it can be unit-tested and reused over arbitrary datasets.
  */
 export declare function evaluateComponentStatus(entry: ComponentEntry): ComponentStatus;
+
+/** Component naming convention: "F0" followed by an uppercase letter. */
+export declare const F0_NAME_PATTERN: RegExp;
 
 /**
  * Evaluate every tracked component.
@@ -285,16 +296,6 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -310,6 +311,16 @@ declare module "@tiptap/core" {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
