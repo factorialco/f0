@@ -94,6 +94,8 @@ export type RowProps<
   nestedRowProps?: NestedRowProps
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => "none" | "striped" | "striked"
+  /** In a table with nested rows, renders root rows (depth 0) in bold. */
+  boldRootRows?: boolean
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */

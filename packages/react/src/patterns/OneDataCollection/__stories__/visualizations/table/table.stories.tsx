@@ -1298,6 +1298,104 @@ export const TableWithHighlightedHeaderGroup: Story = {
   },
 }
 
+export const TableWithBoldRootRows: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Setting `boldRootRows` on a table with nested rows renders the cell text of the root rows (depth 0) in bold, so aggregate rows stand out from their children — the shape of a headcount or cost breakdown where the top level totals its reporting lines.",
+      },
+    },
+  },
+  render: () => {
+    type CostRow = {
+      id: number
+      name: string
+      headcount: number
+      cost: number
+      children?: CostRow[]
+    }
+
+    const records: CostRow[] = [
+      {
+        id: 1,
+        name: "EoP Headcount",
+        headcount: 1334,
+        cost: 3724800,
+        children: [
+          { id: 11, name: "Bernat Farrero", headcount: 720, cost: 2010200 },
+          { id: 12, name: "Jordi Romero", headcount: 334, cost: 1714600 },
+        ],
+      },
+      {
+        id: 2,
+        name: "Fixed agreement costs",
+        headcount: 410,
+        cost: 1120400,
+        children: [
+          { id: 21, name: "Operations", headcount: 210, cost: 640300 },
+          { id: 22, name: "Support & Admin", headcount: 200, cost: 480100 },
+        ],
+      },
+    ]
+
+    const eur = (value: number) => `€${value.toLocaleString("en-US")}`
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+      itemsWithChildren: (item: CostRow) => !!item.children?.length,
+      fetchChildren: async ({ item }: { item: CostRow }) => ({
+        records: item.children ?? [],
+      }),
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              boldRootRows: true,
+              columns: [
+                { label: "Reporting line", render: (item) => item.name },
+                {
+                  label: "Headcount",
+                  align: "right",
+                  render: (item) => item.headcount.toLocaleString("en-US"),
+                },
+                {
+                  label: "Cost",
+                  align: "right",
+                  render: (item) => eur(item.cost),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Root rows carry the bold emphasis.
+    const rootCell = await canvas.findByText("EoP Headcount")
+    expect(rootCell.closest("tr")?.className).toContain("font-semibold")
+
+    // Expanding a root row reveals children without the emphasis. The chevron
+    // svg itself is pointer-events-none; its wrapping div takes the click.
+    const chevron = canvasElement.querySelector(".lucide-chevron-right")
+    expect(chevron).not.toBeNull()
+    await userEvent.click(chevron!.parentElement as Element)
+
+    const childCell = await canvas.findByText("Bernat Farrero")
+    expect(childCell.closest("tr")?.className).not.toContain("font-semibold")
+  },
+}
+
 export const StrikedRowsVisualization: Story = {
   render: () => {
     const records = [

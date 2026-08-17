@@ -110,6 +110,7 @@ export const TableCollection = <
   allowColumnHiding,
   allowColumnReordering,
   referenceRowType,
+  boldRootRows,
   headerGroups: headerGroupsOption,
   onHeaderGroupCollapsedChange,
   bordered,
@@ -878,6 +879,7 @@ export const TableCollection = <
                       checkColumnWidth={checkColumnWidth}
                       tableWithChildren={tableWithChildren}
                       referenceRowType={referenceRowType}
+                      boldRootRows={boldRootRows}
                       rowWrapper={RowWrapper}
                       cellRenderer={cellRenderer}
                       fromVisualization={fromVisualization}

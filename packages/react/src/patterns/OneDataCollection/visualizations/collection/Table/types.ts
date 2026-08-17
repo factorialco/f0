@@ -201,6 +201,14 @@ export type TableVisualizationOptions<
 
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
+
+  /**
+   * In a table with nested rows, renders the cell text of the root rows
+   * (depth 0) in bold so aggregate rows stand out from their children.
+   * Cells that fix their own weight (tags, deltas) keep it.
+   * @default false
+   */
+  boldRootRows?: boolean
   /**
    * Header group configuration. Keys are the `headerGroupId` values used in
    * column definitions. Pass a string for a plain spanning label, or a
