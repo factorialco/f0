@@ -85,7 +85,7 @@ describe("F0Select trigger tooltip content", () => {
     expect(screen.getByTestId("tooltip-description")).toHaveTextContent("Flows")
   })
 
-  it("wires no tooltip when nothing is selected", () => {
+  it("has nothing to say when nothing is selected", () => {
     render(
       <F0Select
         label="Select project"
@@ -95,6 +95,8 @@ describe("F0Select trigger tooltip content", () => {
       />
     )
 
-    expect(screen.queryByTestId("tooltip-description")).not.toBeInTheDocument()
+    // The tooltip stays mounted so the trigger below it survives the first
+    // selection — see F0Select.triggerIdentity.test.tsx. Empty opens nothing.
+    expect(screen.getByTestId("tooltip-description")).toHaveTextContent("")
   })
 })
