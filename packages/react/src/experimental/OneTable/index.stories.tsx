@@ -8,8 +8,9 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { OnePagination } from "@/ui/OnePagination"
 import { Delete, Ellipsis, Pencil } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OnePagination } from "@/ui/OnePagination"
 
 import {
   OneTable,
@@ -890,4 +891,42 @@ export const WithOnClick: Story = {
       </OneTable>
     )
   },
+}
+
+const LONG_MESSAGE =
+  'birthday_on: ["must be after 1900 and before today"], email: ["is invalid"], first_name: ["can\'t be blank"]'
+
+/**
+ * A `fill` column takes the table's leftover width instead of the width its own
+ * text asks for, so it follows the viewport: resize the preview and the message
+ * column grows and shrinks with it, ellipsizing on a single line at whatever the
+ * column's real edge is. The columns beside it keep sizing to their content.
+ *
+ * Give the same column `width="auto"` instead and its nowrap text sets the
+ * column's floor, which pushes the table wider than its container and makes it
+ * scroll sideways rather than truncate.
+ */
+export const FillColumnWidth: Story = {
+  render: () => (
+    <OneTable>
+      <TableHeader>
+        <TableRow>
+          <TableHead width="fill">Message</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Email</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sampleData.slice(0, 3).map((row) => (
+          <TableRow key={row.id}>
+            <TableCell width="fill">
+              <OneEllipsis>{LONG_MESSAGE}</OneEllipsis>
+            </TableCell>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>{row.email}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </OneTable>
+  ),
 }

@@ -20,6 +20,8 @@ import {
 
 interface NestedCellProps {
   width?: number | "auto"
+  /** The column takes the table's leftover width. See `getColSizing`. */
+  fills?: boolean
   linkRef: React.RefObject<HTMLAnchorElement>
   firstCell: boolean
   nestedRowProps?: NestedRowProps & {
@@ -32,6 +34,7 @@ interface NestedCellProps {
 
 export const NestedCell = ({
   width,
+  fills,
   linkRef,
   firstCell,
   nestedRowProps,
@@ -70,6 +73,7 @@ export const NestedCell = ({
     <div
       className={cn(
         width !== "auto" && "overflow-hidden",
+        fills && "w-0 min-w-full overflow-hidden",
         "relative z-[1] h-full",
         firstCellWithChildren && "flex items-center gap-2"
       )}

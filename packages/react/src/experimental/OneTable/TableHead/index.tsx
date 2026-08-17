@@ -9,7 +9,7 @@ import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
 import { OneEllipsis } from "../../../lib/OneEllipsis"
 import { cn, focusRing } from "../../../lib/utils"
-import { getColWidth } from "../utils/colWidth"
+import { getColSizing } from "../utils/colWidth"
 import { ColumnWidth } from "../utils/sizes"
 import { useTable } from "../utils/TableContext"
 
@@ -312,8 +312,7 @@ export function TableHead({
     </>
   )
 
-  const colWidth = getColWidth(width)
-  const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
+  const colSizing = getColSizing(width, minWidth)
 
   return (
     <TableHeadRoot
@@ -339,9 +338,7 @@ export function TableHead({
       colSpan={colSpan}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{
-        width: colWidth,
-        maxWidth: colWidth,
-        minWidth: colMinWidth,
+        ...colSizing,
         left: stickyLeft,
         right: stickyRight,
       }}

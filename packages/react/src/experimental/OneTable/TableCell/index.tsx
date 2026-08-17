@@ -11,7 +11,7 @@ import { TableCell as TableCellRoot } from "@/ui/table"
 import { Link } from "../../../lib/linkHandler"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
-import { getColWidth } from "../utils/colWidth"
+import { getColSizing, isFillWidth } from "../utils/colWidth"
 import { useTable } from "../utils/TableContext"
 import { NestedCell } from "./NestedCell"
 import { TreeConnector } from "./TreeConnector"
@@ -134,8 +134,8 @@ export function TableCell({
   const stickyLeft = sticky?.left
   const stickyRight = sticky?.right
 
-  const colWidth = getColWidth(width)
-  const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
+  const colSizing = getColSizing(width, minWidth)
+  const fills = isFillWidth(width)
 
   const linkRef = useRef<HTMLAnchorElement>(null)
   const depth = nestedRowProps?.depth ?? 0
@@ -171,9 +171,7 @@ export function TableCell({
       )}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{
-        width: colWidth,
-        maxWidth: colWidth,
-        minWidth: colMinWidth,
+        ...colSizing,
         left: stickyLeft,
         right: stickyRight,
       }}
@@ -235,6 +233,7 @@ export function TableCell({
                 linkRef={linkRef}
                 firstCell={firstCell}
                 nestedRowProps={nestedRowProps}
+                fills={fills}
               >
                 {children}
               </NestedCell>
@@ -242,6 +241,9 @@ export function TableCell({
               <div
                 className={cn(
                   width !== "auto" && "overflow-hidden",
+                  // Zero intrinsic width, stretched back at layout time: this is
+                  // what keeps a `fill` column's floor off its own text.
+                  fills && "w-0 min-w-full",
                   "relative z-[1] h-full"
                 )}
                 style={{
