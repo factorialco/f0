@@ -56,6 +56,15 @@ export type GraphVisualizationOptions<
   /** Tag columns that are always visible and cannot be hidden in the settings. */
   pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
+   * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+   * still listed in the settings but with its toggle forced OFF and disabled,
+   * and the given (already-translated) text shown in a tooltip. Unlike
+   * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+   * icon — the disabled switch + tooltip is the affordance. The caller should
+   * also omit these columns' tags from `tags(record)`.
+   */
+  lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>
+  /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
    */
