@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.34.0](https://github.com/factorialco/f0/compare/f0-react-v6.33.0...f0-react-v6.34.0) (2026-08-17)
+
+
+### Features
+
+* **ComboChart:** support stacked bars and dashed line series ([#5113](https://github.com/factorialco/f0/issues/5113)) ([226f349](https://github.com/factorialco/f0/commit/226f3497714d640320b18e176b8fcd1ef3f7f107))
+
 ## [6.33.0](https://github.com/factorialco/f0/compare/f0-react-v6.32.1...f0-react-v6.33.0) (2026-08-17)
 
 
