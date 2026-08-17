@@ -1,6 +1,6 @@
 import { ComponentProps, ComponentType, ReactNode } from "react"
 
-import { TableHead } from "@/experimental/OneTable"
+import { ColumnWidth, TableHead } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -35,14 +35,14 @@ export type WithOptionalSorting<
   /**
    * The width of the column. If not provided, the width will be "auto"
    */
-  width?: number
+  width?: ColumnWidth
 
   /**
-   * Optional minimum width for the column in pixels. When provided, overrides
-   * the minWidth derived from `width`. Useful for columns with no fixed
-   * `width` that should not shrink below a given size.
+   * Optional minimum width for the column. When provided, overrides the
+   * minWidth derived from `width`. Useful for columns with no fixed `width`
+   * that should not shrink below a given size.
    */
-  minWidth?: number
+  minWidth?: ColumnWidth
 }
 
 export type ColId = string
