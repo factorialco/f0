@@ -18,7 +18,13 @@ import type {
 } from "../components/F0GraphNode"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
-import { STACKED_RANK_SEP_RATIO } from "../constants"
+import { STACKED_NODE_WIDTH_INSET, STACKED_RANK_SEP_RATIO } from "../constants"
+
+/**
+ * Horizontal inset of a node's visible box inside the layout box the engine
+ * reserved for it, so adjacent nodes never touch.
+ */
+const NODE_BOX_INSET = 20
 
 function handlePositions(direction: LayoutDirection): {
   source: Position
@@ -208,12 +214,16 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
       >
         <div
           className="pointer-events-auto"
-          // A card is content-sized inside the inset layout box; a stacked row
-          // fills that same inset width instead, so the column's rows line up
-          // flush with the edges of the parent card above them.
+          // A card is content-sized inside the inset layout box. A stacked row
+          // is width-driven instead: it fills that same inset box, less
+          // STACKED_NODE_WIDTH_INSET so the column sits narrower than the card
+          // above it. The wrapper centres it, so the narrowing comes off both
+          // edges and the column stays on the parent's axis.
           style={{
-            width: stacked ? "100%" : undefined,
-            maxWidth: "calc(100% - 20px)",
+            width: stacked
+              ? `calc(100% - ${NODE_BOX_INSET + STACKED_NODE_WIDTH_INSET}px)`
+              : undefined,
+            maxWidth: `calc(100% - ${NODE_BOX_INSET}px)`,
           }}
         >
           {renderNode(graphNode, ctx)}

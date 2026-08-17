@@ -34,9 +34,10 @@ interface F0GraphNodeStackedRowProps {
  * One row of a stacked column — what [[F0GraphNode]] renders when the graph
  * passes `stacked`, because this node's parent set `stackChildren`.
  *
- * It mirrors the card's anatomy (full width, leading avatar, same title type
- * scale per zoom) so a column reads as a continuation of the parent above it,
- * but it is a strip: fixed height, no subtitle, no tags, no expand affordance.
+ * It mirrors the card's anatomy (leading avatar, same title type scale per zoom)
+ * so a column reads as a continuation of the parent above it, but it is a strip:
+ * fixed height, indented a little narrower than the card, no subtitle, no tags,
+ * no expand affordance.
  */
 export const F0GraphNodeStackedRow = ({
   shellProps,

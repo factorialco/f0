@@ -38,6 +38,16 @@ export const STACKED_NODE_AVATAR = 32
 export const STACKED_NODE_PADDING = 5
 /** Step from the avatar to the title. The same 8px the card puts there. */
 export const STACKED_NODE_TITLE_GAP = 8
+/**
+ * How much narrower a stacked row is than the card above it, split across both
+ * edges. A column is subordinate to its parent, so it reads better indented
+ * from the card's own silhouette than running flush with it.
+ *
+ * Width only — the reserved band is unaffected, since the layout engine gives a
+ * stacked parent no cross-axis cost at all (its column lives inside the
+ * parent's own lane).
+ */
+export const STACKED_NODE_WIDTH_INSET = 24
 
 // Height of one stacked row and the gap between two of them. Shared by the
 // layout engine (which reserves the space) and F0GraphNode's stacked row (which

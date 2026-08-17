@@ -130,10 +130,10 @@ export interface F0GraphNodeProps {
    * without branching.
    *
    * A row keeps the pill's semantics (selection, focus, ARIA, keyboard) and its
-   * title type scale per `variant`, but not its geometry: it fills the parent
-   * card's width, stands at a fixed height the layout has reserved for it, and
-   * drops `subtitle` / `tags` / `actions` / `hoverCard`, which have nowhere to
-   * go in a strip.
+   * title type scale per `variant`, but not its geometry: it sits a little
+   * narrower than the parent card and centred on it, stands at a fixed height
+   * the layout has reserved for it, and drops `subtitle` / `tags` / `actions` /
+   * `hoverCard`, which have nowhere to go in a strip.
    */
   stacked?: boolean
   /**
