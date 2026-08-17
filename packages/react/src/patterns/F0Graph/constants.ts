@@ -20,27 +20,24 @@ export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
 export const BACKGROUND_DOT_GAP = 32
 
 // ─── Stacked children (`GraphNode.stackChildren`) ──────────────
-// Geometry of a stacked row, derived from two anchors rather than hand-tuned,
-// so the pieces cannot drift apart: the avatar sits the same distance from all
-// four edges, and the title lands on the node card's own text offset — which is
-// what makes a column line up under its parent's title.
+// Geometry of a stacked row. The avatar sits the same distance from all four
+// edges, so the inset is one number rather than a set that can drift apart.
+//
+// The row is deliberately tighter than the card rather than aligned to it: the
+// title sits one 8px step off the avatar (the card's own gap) instead of being
+// pushed out to the card's 58px text offset. A column reads as a list belonging
+// to the parent, so its text hugging the avatar is what makes it a list; lining
+// up with the parent's title made each row read as another card.
 //
 // The row draws a real border; the card does not (its border lives on an
-// absolutely positioned chrome layer, costing no layout). That 1px is why the
-// row's padding is 9 and not the card's 10 — the visible inset matches.
+// absolutely positioned chrome layer, costing no layout).
 const STACKED_NODE_BORDER = 1
 /** Avatar box in a stacked row: `md`, one step down from the card's `lg`. */
 export const STACKED_NODE_AVATAR = 32
 /** Inset from the inner edge of the border to the avatar, on all four sides. */
-export const STACKED_NODE_PADDING = 9
-/** Where the node card puts its title: 10 padding + 40 avatar + 8 gap. */
-const CARD_TITLE_OFFSET = 58
-/** Gap that lands the row's title on `CARD_TITLE_OFFSET` too. */
-export const STACKED_NODE_TITLE_GAP =
-  CARD_TITLE_OFFSET -
-  STACKED_NODE_BORDER -
-  STACKED_NODE_PADDING -
-  STACKED_NODE_AVATAR
+export const STACKED_NODE_PADDING = 5
+/** Step from the avatar to the title. The same 8px the card puts there. */
+export const STACKED_NODE_TITLE_GAP = 8
 
 // Height of one stacked row and the gap between two of them. Shared by the
 // layout engine (which reserves the space) and F0GraphNode's stacked row (which
