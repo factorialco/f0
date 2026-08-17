@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.32.2](https://github.com/factorialco/f0/compare/f0-react-v6.32.1...f0-react-v6.32.2) (2026-08-17)
+
+
+### Bug Fixes
+
+* **SortAndHideList:** add edge padding to first/last toggle rows ([#4767](https://github.com/factorialco/f0/issues/4767)) ([0cdc657](https://github.com/factorialco/f0/commit/0cdc657ff982e0f17a8eed8708e0cc57e23d2c14))
+
 ## [6.32.1](https://github.com/factorialco/f0/compare/f0-react-v6.32.0...f0-react-v6.32.1) (2026-08-16)
 
 
