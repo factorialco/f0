@@ -681,6 +681,21 @@ export const defaultTranslations = {
     funnel: "Funnel",
     pieChart: "Pie",
     table: "Table",
+    comboAxis: {
+      primaryMeasure: "Primary measure",
+      secondaryMeasure: "Secondary measure",
+      target: "Target",
+    },
+    comboAria: {
+      primaryAxis: "Left axis, bars: {{axis}}",
+      secondaryAxis: "Right axis, lines: {{axis}}",
+      singleLineAxis: "Left axis, lines: {{axis}}",
+      target: "target {{value}}",
+      oneMoreValue: "1 more value",
+      moreValues: "{{count}} more values",
+      oneMoreSeries: "1 more series",
+      moreSeries: "{{count}} more series",
+    },
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters",

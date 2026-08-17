@@ -1,6 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as BarStories from "./Bar.stories"
 import * as LineStories from "./Line.stories"
+import * as ComboStories from "./Combo.stories"
 import * as FunnelStories from "./Funnel.stories"
 import * as PieStories from "./Pie.stories"
 import * as RadarStories from "./Radar.stories"
@@ -22,16 +23,17 @@ import { F0DataChart } from "@factorialco/f0-react"
 
 ## Quick Reference
 
-| Type      | Best for                             | Key props                                                  |
-| --------- | ------------------------------------ | ---------------------------------------------------------- |
-| `bar`     | Comparing categories or time periods | `series`, `categories`, `orientation`, `stacked`           |
-| `line`    | Trends over time                     | `series`, `categories`, `lineType`, `showArea`, `showDots` |
-| `funnel`  | Conversion pipelines, hiring stages  | `series`, `sort`, `orient`, `showConversion`, `colorScale` |
-| `pie`     | Part-of-whole distributions          | `series`, `innerRadius`, `showPercentage`                  |
-| `radar`   | Multi-dimensional comparisons        | `series`, `indicators`, `showArea`                         |
-| `gauge`   | Single KPI / progress indicator      | `value`, `min`, `max`, `name`                              |
-| `heatmap` | Density across two dimensions        | `data`, `xCategories`, `yCategories`, `showLabels`         |
-| `scatter` | Relationship between two measures    | `series`, `pointSize`, `scaleAxes`, `xAxisName`            |
+| Type      | Best for                               | Key props                                                           |
+| --------- | -------------------------------------- | ------------------------------------------------------------------- |
+| `bar`     | Comparing categories or time periods   | `series`, `categories`, `orientation`, `stacked`                    |
+| `line`    | Trends over time                       | `series`, `categories`, `lineType`, `showArea`, `showDots`          |
+| `combo`   | A measure against one on another scale | `barSeries`, `lineSeries`, `primaryAxisLabel`, `secondaryAxisLabel` |
+| `funnel`  | Conversion pipelines, hiring stages    | `series`, `sort`, `orient`, `showConversion`, `colorScale`          |
+| `pie`     | Part-of-whole distributions            | `series`, `innerRadius`, `showPercentage`                           |
+| `radar`   | Multi-dimensional comparisons          | `series`, `indicators`, `showArea`                                  |
+| `gauge`   | Single KPI / progress indicator        | `value`, `min`, `max`, `name`                                       |
+| `heatmap` | Density across two dimensions          | `data`, `xCategories`, `yCategories`, `showLabels`                  |
+| `scatter` | Relationship between two measures      | `series`, `pointSize`, `scaleAxes`, `xAxisName`                     |
 
 All variants share an optional `emptyState` prop — see [Empty states](#empty-states).
 
@@ -160,11 +162,114 @@ Use `dashed: true` on a series to render a target / projection line.
 
 <Canvas of={LineStories.WithDots} />
 
+### Value labels without dots
+
+`showLabels` and `showDots` are independent. Labels use `valueFormatter`; when dots are off, invisible zero-size symbols anchor the label without adding point markers.
+
+<Canvas of={LineStories.WithValueLabels} />
+
 ### Responsive Snapshot
 
 The same chart rendered in every breakpoint (small / medium / large) and every series count (low / normal / large) — mirrors the AI Analytics Figma matrix.
 
 <Canvas of={LineStories.ResponsiveSnapshotMatrix} />
+
+---
+
+## Combo Chart
+
+Bars on a primary (left) value axis, lines on a secondary (right) one, over a shared category axis. Reach for it when you need to read a measure against a measure on a different scale or unit — headcount against turnover rate, absence days against absence rate, worked against expected hours. On one axis, a 0–5% rate next to 0–142 headcount bars is a flat line along the bottom.
+
+<Canvas of={ComboStories.HeadcountAndTurnoverRate} />
+<Controls of={ComboStories.HeadcountAndTurnoverRate} />
+
+Bars and lines are separate props rather than one tagged `series` array: "bars left, lines right" is structural. `primaryAxisLabel` and `secondaryAxisLabel` are required; they title the axes and qualify legend/table columns so ownership remains explicit even when names repeat.
+
+For a steady-state chart, declare both `barSeries` and `lineSeries`. The one-axis behavior below exists only for transient partial loading; use a standalone bar or line chart when one side is permanently empty.
+
+### API contract
+
+- `type="combo"`, `categories`, `barSeries`, `lineSeries`, `primaryAxisLabel`, and `secondaryAxisLabel` are required.
+- `stacked`, `showDots`, and `showLabels` default to `false`; `showLegend` and `showGrid` default to `true`.
+- `lineType` defaults to `"linear"`, and `valueAxisSplitNumber` defaults to `2`.
+- `valueFormatter` owns the primary axis. `secondaryValueFormatter` owns the secondary axis and falls back to `valueFormatter`. `tooltipValueFormatter` can make primary tooltip values more precise without changing the axis.
+- Common `F0DataChart` props such as `categoryFormatter`, `emptyState`, and `echartsOptions` work unchanged. Combo deliberately omits `orientation` and `showArea` because those presentations are ambiguous with a second value scale.
+
+### Two units, two formatters
+
+`valueFormatter` formats the primary axis, `secondaryValueFormatter` the secondary — including their tooltip rows, each with the formatter of the axis it belongs to. Set both whenever the axes carry different units, which is the reason to pick a combo in the first place.
+
+<Canvas of={ComboStories.AbsenceDaysAndRate} />
+
+### One shared unit
+
+When both measures share a unit, omit `secondaryValueFormatter` and the secondary axis inherits `valueFormatter`.
+
+<Canvas of={ComboStories.WorkedAgainstExpectedHours} />
+
+### Tick alignment
+
+Both value axes are pinned to explicit `min`/`max`/`interval` so they divide into the same number of intervals — every right-hand label lands on a grid line the left axis drew. `splitNumber` alone cannot do this: ECharts treats it as a hint and overrides it for nicer rounding, which leaves the two scales on different interval counts.
+
+Use `valueAxisSplitNumber` to choose the shared interval count; it defaults to `2`. The computed bounds remain explicit so ECharts cannot independently override either axis.
+
+<Canvas of={ComboStories.FourValueAxisIntervals} />
+
+Zero alignment is applied only when _both_ axes carry negative values. Forcing a shared split onto an axis whose quantity cannot go negative would print impossible ticks (a turnover rate of −5%) and spend half its height on empty range, so when only one axis has negatives the two zero lines legitimately differ.
+
+<Canvas of={ComboStories.NegativeValues} />
+
+### Stacked bars with a rate line
+
+<Canvas of={ComboStories.StackedBarsWithRateLine} />
+
+### A rate against its target
+
+<Canvas of={ComboStories.TwoRateLines} />
+
+### Smooth line with dots
+
+<Canvas of={ComboStories.SmoothLineWithDots} />
+
+### Value labels
+
+`showLabels` labels bars and lines independently from `showDots`; line labels use `secondaryValueFormatter` while the point symbols remain hidden unless dots are requested.
+
+<Canvas of={ComboStories.WithValueLabels} />
+
+### Bar targets
+
+Targets on primary-axis bars contribute to the scale and appear in the tooltip without becoming separate legend entries.
+
+<Canvas of={ComboStories.BarsWithTargets} />
+
+### Partial data
+
+When only one measure has arrived, the chart renders rather than showing an empty state, so a combo whose measures resolve at different times doesn't flash. Until both measures arrive it renders one real value axis, using the available measure's formatter, rather than inventing a 0–2 scale for the missing side. The empty state appears only when neither axis has a single point.
+
+<Canvas of={ComboStories.OnlyBars} />
+<Canvas of={ComboStories.OnlyLines} />
+
+### Responsive breakpoints
+
+Same matrix as bar and line: at `sm` both value axes and the legend drop, at `md` the value axes return, at `lg` the category axis joins them.
+
+<Canvas of={ComboStories.BreakpointSmall} />
+<Canvas of={ComboStories.BreakpointMedium} />
+<Canvas of={ComboStories.BreakpointLarge} />
+
+Long localized axis titles truncate rather than colliding in a medium tile.
+Hover a truncated title to reveal its full text.
+
+<Canvas of={ComboStories.LongLocalizedAxisLabels} />
+
+### Visual regression matrix
+
+Every distinct combo behavior above is rendered in light and dark themes in one Chromatic snapshot. Use the focused stories for controls and the matrix for a side-by-side release review.
+
+<Canvas of={ComboStories.Snapshot} />
+
+There is deliberately no `orientation` (a dual-axis chart reads top-down; a horizontal one would need its second axis on top) and no `showArea` (a fill on the secondary scale reads as if it belonged to the bars).
 
 ---
 
@@ -355,14 +460,21 @@ Loading placeholders that match each chart type's visual structure. Import them 
 ```tsx
 import {
   BarChartSkeleton,
+  ComboChartSkeleton,
   LineChartSkeleton,
   FunnelChartSkeleton,
 } from "@factorialco/f0-react"
 ```
 
 <Canvas of={SkeletonsStories.Bar} />
+<Canvas of={SkeletonsStories.Combo} />
+<Canvas of={SkeletonsStories.ComboStacked} />
 <Canvas of={SkeletonsStories.Line} />
 <Canvas of={SkeletonsStories.Funnel} />
+
+The combo skeleton snapshot renders default and stacked loading states in both light and dark themes.
+
+<Canvas of={SkeletonsStories.Snapshot} />
 
 ---
 

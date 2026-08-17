@@ -9,6 +9,7 @@ import type {
   F0DataChartLineSeries,
   F0DataChartLineType,
 } from "../../types"
+import type { ChartResponsiveSize } from "../../utils/responsive"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
@@ -17,7 +18,6 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
-import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 
@@ -71,15 +71,18 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
 
 /**
  * Build a single ECharts line series entry from an F0DataChartLineSeries.
+ *
+ * Exported for the combo chart, whose lines are these lines.
  */
-function buildSeriesEntry(
+export function buildSeriesEntry(
   series: F0DataChartLineSeries,
   index: number,
   globalLineType: F0DataChartLineType,
   globalShowArea: boolean,
   showDots: boolean,
   showLabels: boolean,
-  labelColor: string
+  labelColor: string,
+  valueFormatter?: (value: number) => string
 ): echarts.LineSeriesOption {
   const color = resolveColor(series, index)
   const lineType = series.lineType ?? globalLineType
@@ -100,14 +103,19 @@ function buildSeriesEntry(
       type: series.dashed ? "dashed" : "solid",
     },
     areaStyle: showArea ? buildAreaStyle(color) : undefined,
-    showSymbol: showDots,
+    // ECharts attaches line labels to symbols. Keep a zero-sized symbol when
+    // labels are requested so labels do not silently depend on visible dots.
+    showSymbol: showDots || showLabels,
     symbol: "circle",
-    symbolSize: 6,
+    symbolSize: showDots ? 6 : 0,
     label: {
       show: showLabels,
       position: "top",
       color: labelColor,
       fontWeight: "bold",
+      formatter: valueFormatter
+        ? (params) => valueFormatter(Number(params.value))
+        : undefined,
     },
     emphasis: {
       itemStyle: {
@@ -117,6 +125,33 @@ function buildSeriesEntry(
       },
     },
   }
+}
+
+export function estimateEdgeLabelPadding(
+  series: readonly F0DataChartLineSeries[],
+  formatter: ((value: number) => string) | undefined,
+  fontSize: number,
+  containerWidth: number
+): number {
+  let maxCharacters = 0
+  for (const currentSeries of series) {
+    const edgePoints = [currentSeries.data[0], currentSeries.data.at(-1)]
+    for (const point of edgePoints) {
+      if (point === undefined) continue
+      const value = getValue(point)
+      const label = formatter ? formatter(value) : String(value)
+      maxCharacters = Math.max(maxCharacters, label.length)
+    }
+  }
+
+  // Approximate the rendered half-width without a canvas read, which keeps the
+  // option builder deterministic in SSR/jsdom. Cap it so a pathological
+  // formatter cannot consume most of a narrow chart.
+  const estimatedHalfWidth = Math.ceil((maxCharacters * fontSize * 0.6) / 2)
+  return Math.max(
+    4,
+    Math.min(Math.floor(containerWidth * 0.2), estimatedHalfWidth + 4)
+  )
 }
 
 /** Discrete responsive size for the line chart */
@@ -189,11 +224,20 @@ export function useLineChartOptions(
         effectiveShowArea,
         showDots,
         showLabels,
-        theme.colors.foregroundSecondary
+        theme.colors.foregroundSecondary,
+        valueFormatter
       )
     )
 
     const legendData = series.map((s) => s.name)
+    const seriesLabelEdgePadding = showLabels
+      ? estimateEdgeLabelPadding(
+          series,
+          valueFormatter,
+          theme.textStyle.fontSize,
+          containerWidth
+        )
+      : undefined
 
     const formatTooltipValue = tooltipValueFormat(
       tooltipValueFormatter,
@@ -274,6 +318,7 @@ export function useLineChartOptions(
       containerWidth,
       containerHeight,
       boundaryGap: false,
+      seriesLabelEdgePadding,
     })
   }, [
     categories,

@@ -1,13 +1,17 @@
+import { createElement, type ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { act, zeroRenderHook } from "@/testing/test-utils"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
 
-import { useDashboardExport } from "../hooks/useDashboardExport"
+import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
+import { act, zeroRenderHook } from "@/testing/test-utils"
+
 import type { DashboardItem } from "../types"
+
+import { useDashboardExport } from "../hooks/useDashboardExport"
 import * as downloadHelpers from "../utils/downloadHelpers"
 
 const filtersDefinition = {
@@ -26,13 +30,20 @@ const activeFilters: TestFilters = {
   department: ["engineering"],
 }
 
-async function runExport(items: DashboardItem<typeof filtersDefinition>[]) {
-  const { result } = zeroRenderHook(() =>
-    useDashboardExport({
-      items,
-      filters: activeFilters,
-      filename: "test-dashboard",
-    })
+async function runExport(
+  items: DashboardItem<typeof filtersDefinition>[],
+  translations = defaultTranslations
+) {
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(I18nProvider, { translations }, children)
+  const { result } = zeroRenderHook(
+    () =>
+      useDashboardExport({
+        items,
+        filters: activeFilters,
+        filename: "test-dashboard",
+      }),
+    { wrapper }
   )
 
   await act(async () => {
@@ -143,5 +154,96 @@ describe("useDashboardExport", () => {
 
     expect(filteredCreateSource).toHaveBeenCalledWith(activeFilters)
     expect(unfilteredCreateSource).toHaveBeenCalledWith({})
+  })
+
+  it("preserves combo export keys in multi-sheet workbooks", async () => {
+    await runExport([
+      {
+        id: "combo-chart",
+        title: "Revenue",
+        type: "chart",
+        chart: {
+          type: "combo",
+          primaryAxisLabel: "Amount",
+          secondaryAxisLabel: "Percent",
+        },
+        fetchData: vi.fn().mockResolvedValue({
+          categories: ["Jan"],
+          barSeries: [{ name: "Revenue", data: [10] }],
+          lineSeries: [{ name: "Revenue", data: [5] }],
+        }),
+      },
+    ])
+
+    expect(downloadHelpers.downloadMultiSheetExcel).toHaveBeenCalledWith(
+      [
+        {
+          name: "Revenue",
+          columns: ["Category", "Revenue · Amount", "Revenue · Percent"],
+          keys: ["category", "bar-0", "line-0"],
+          rows: [{ category: "Jan", "bar-0": 10, "line-0": 5 }],
+        },
+      ],
+      "test-dashboard"
+    )
+  })
+
+  it("uses provider translations for blank combo labels in dashboard workbooks", async () => {
+    const translations = {
+      ...defaultTranslations,
+      dataChart: {
+        ...defaultTranslations.dataChart,
+        comboAxis: {
+          primaryMeasure: "Medida principal",
+          secondaryMeasure: "Medida secundaria",
+          target: "Objetivo",
+        },
+      },
+    }
+
+    await runExport(
+      [
+        {
+          id: "combo-chart",
+          title: "Revenue",
+          type: "chart",
+          chart: {
+            type: "combo",
+            primaryAxisLabel: " ",
+            secondaryAxisLabel: "",
+          },
+          fetchData: vi.fn().mockResolvedValue({
+            categories: ["Jan"],
+            barSeries: [{ name: "Revenue", data: [{ value: 10, target: 12 }] }],
+            lineSeries: [{ name: "Margin", data: [5] }],
+          }),
+        },
+      ],
+      translations
+    )
+
+    expect(downloadHelpers.downloadMultiSheetExcel).toHaveBeenCalledWith(
+      [
+        {
+          name: "Revenue",
+          columns: [
+            "Category",
+            "Revenue · Medida principal",
+            "Revenue · Medida principal Objetivo",
+            "Margin · Medida secundaria",
+          ],
+          keys: ["category", "bar-0", "bar-0-target", "line-0"],
+          rows: [
+            {
+              category: "Jan",
+              "bar-0": 10,
+              "bar-0-target": 12,
+              "line-0": 5,
+            },
+          ],
+        },
+      ],
+      "test-dashboard"
+    )
   })
 })

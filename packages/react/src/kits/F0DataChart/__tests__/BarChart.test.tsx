@@ -65,6 +65,18 @@ vi.mock("../utils/useContainerSize", () => ({
   useContainerSize: () => containerSize,
 }))
 
+// Install the deterministic canvas measurer before any chart render can cache
+// a context. JSDOM's optional canvas implementation varies by environment.
+beforeAll(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    measureText: (text: string) => ({ width: text.length * 8 }),
+  } as unknown as CanvasRenderingContext2D)
+})
+
+afterAll(() => {
+  vi.restoreAllMocks()
+})
+
 type BarDataItem = number | { value: number; itemStyle?: BarItemStyle }
 type BarItemStyle = { color?: string; borderRadius?: number | number[] }
 
@@ -753,16 +765,6 @@ describe("BarChart — value axis grid density", () => {
 // ---------------------------------------------------------------------------
 
 describe("BarChart — hideOverflowingLabels", () => {
-  // jsdom has no canvas; return a deterministic width so the measurer is stable.
-  beforeAll(() => {
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-      measureText: (text: string) => ({ width: text.length * 8 }),
-    } as unknown as CanvasRenderingContext2D)
-  })
-  afterAll(() => {
-    vi.restoreAllMocks()
-  })
-
   const base = {
     type: "bar" as const,
     categories: ["Jan", "Feb", "Mar"],
@@ -1636,8 +1638,8 @@ describe("BarChart — headroom for labels above columns", () => {
 })
 
 describe("BarChart — category label width", () => {
-  // jsdom has no canvas, so `measureTextWidth` falls back to 8px per character:
-  // every expectation below is (longest label length × 8) + 4px of slack, or the
+  // The suite-level canvas mock measures at 8px per character, so every
+  // expectation below is (longest label length × 8) + 4px of slack, or the
   // container-derived cap where that is smaller.
   const long = "A very long workplace name indeed" // 33 chars → 268
   const short = "Berlin" // 6 chars → 52

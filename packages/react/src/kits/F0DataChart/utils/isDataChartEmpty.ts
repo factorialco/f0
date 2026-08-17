@@ -23,6 +23,15 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
         (s) => !s || !Array.isArray(s.data) || s.data.length === 0
       )
     }
+    case "combo": {
+      // Empty only when neither axis has a single data point. A combo with
+      // bars but no line is still a chart worth rendering — the caller may be
+      // mid-fetch on one of two measures.
+      const hasPoints = (series: { data?: unknown[] }[] | undefined): boolean =>
+        Array.isArray(series) &&
+        series.some((s) => s && Array.isArray(s.data) && s.data.length > 0)
+      return !hasPoints(props.barSeries) && !hasPoints(props.lineSeries)
+    }
     case "funnel":
     case "pie": {
       const series = props.series

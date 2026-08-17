@@ -20,6 +20,7 @@ import {
 import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
+  ComboChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,
@@ -135,6 +136,13 @@ function chartSkeleton(config: DashboardChartConfig) {
           showLegend={config.showLegend}
         />
       )
+    case "combo":
+      return (
+        <ComboChartSkeleton
+          stacked={config.stacked}
+          showLegend={config.showLegend}
+        />
+      )
     case "funnel":
       return (
         <FunnelChartSkeleton
@@ -179,7 +187,11 @@ export function buildChartProps(
   item: DashboardChartItem,
   data: DashboardChartData,
   overrideType?: DashboardChartConfig["type"],
-  overrideOrientation?: "vertical" | "horizontal"
+  overrideOrientation?: "vertical" | "horizontal",
+  comboAxisLabels?: {
+    primaryMeasure: string
+    secondaryMeasure: string
+  }
 ): F0DataChartProps {
   const targetType = overrideType ?? item.chart.type
   // Detect actual data shape — after a transform, item.chart.type may have
@@ -199,7 +211,7 @@ export function buildChartProps(
   // Cross-type transform: auto-detect source shape → canonical → target
   const canonical = toCanonical(data)
   const adapted = fromCanonical(canonical, targetType)
-  const config = defaultChartConfig(targetType)
+  const config = defaultChartConfig(targetType, comboAxisLabels)
 
   // Preserve shared props from the original config
   const shared: Record<string, unknown> = {}
@@ -251,6 +263,14 @@ export function buildChartProps(
         ...shared,
         categories: adapted.categories ?? [],
         series: adapted.series,
+      } as F0DataChartProps
+    case "combo":
+      return {
+        ...config,
+        ...shared,
+        categories: adapted.categories ?? [],
+        barSeries: adapted.barSeries ?? [],
+        lineSeries: adapted.lineSeries ?? [],
       } as F0DataChartProps
     case "funnel":
       return {
@@ -311,6 +331,13 @@ function buildNativeChartProps(
   const { chart } = item
 
   switch (chart.type) {
+    case "combo":
+      return {
+        ...chart,
+        categories: data.categories ?? [],
+        barSeries: data.barSeries ?? [],
+        lineSeries: data.lineSeries ?? [],
+      } as F0DataChartProps
     case "funnel": {
       let funnelSeries = data.series
       if (Array.isArray(data.series)) {
@@ -373,13 +400,14 @@ function buildNativeChartProps(
 // Table view — renders chart data as a OneDataCollection table
 // ---------------------------------------------------------------------------
 
-function ChartTableView({
+export function ChartTableView({
   config,
   data,
 }: {
   config: DashboardChartConfig
   data: DashboardChartData
 }) {
+  const { t } = useI18n()
   // After a chart type transform, item.chart.type may not match the actual
   // data shape. Use detectDataShape to pick the right tabular converter.
   const dataShape = detectDataShape(data, config.type)
@@ -389,21 +417,27 @@ function ChartTableView({
       : config
 
   const tabular = useMemo(
-    () => chartDataToTabular(effectiveConfig, data),
-    [effectiveConfig, data]
+    () =>
+      chartDataToTabular(effectiveConfig, data, {
+        target: t("dataChart.comboAxis.target"),
+        primaryMeasure: t("dataChart.comboAxis.primaryMeasure"),
+        secondaryMeasure: t("dataChart.comboAxis.secondaryMeasure"),
+      }),
+    [effectiveConfig, data, t]
   )
+  const columnKeys = tabular.keys ?? tabular.columns
 
   const sourceDefinition = useMemo(
     () => ({
       dataAdapter: {
         fetchData: () => ({ records: tabular.rows as RecordType[] }),
       },
-      columns: tabular.columns.map((col) => ({
+      columns: tabular.columns.map((col, index) => ({
         label: col,
-        id: col,
+        id: columnKeys[index] ?? col,
       })),
     }),
-    [tabular]
+    [columnKeys, tabular]
   )
 
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
@@ -421,12 +455,12 @@ function ChartTableView({
               // Look up by the stable key when the converter supplies one —
               // header labels can repeat, row keys cannot.
               render: (row: RecordType) =>
-                String(row[tabular.keys?.[index] ?? col] ?? ""),
+                String(row[columnKeys[index] ?? col] ?? ""),
             })),
           },
         },
       ] as const,
-    [tabular.columns]
+    [columnKeys, tabular.columns]
   )
 
   return (
@@ -534,9 +568,19 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const chartProps = useMemo(
     () =>
       data && !unrenderableChart
-        ? buildChartProps(item as DashboardChartItem, data)
+        ? buildChartProps(
+            item as DashboardChartItem,
+            data,
+            undefined,
+            undefined,
+            {
+              primaryMeasure: translations.dataChart.comboAxis.primaryMeasure,
+              secondaryMeasure:
+                translations.dataChart.comboAxis.secondaryMeasure,
+            }
+          )
         : undefined,
-    [item, data, unrenderableChart]
+    [item, data, unrenderableChart, translations.dataChart.comboAxis]
   )
 
   // Determine which chart type options are available for this chart
@@ -572,7 +616,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
     return true
   })
 
-  // Scatter converts to nothing, so its picker would hold only "Table" — and
+  // Scatter and combo convert to nothing, so their picker would hold only
+  // "Table" — and
   // the group is `required`, so selecting it would leave no route back to the
   // chart. Gauge has the same shape and the same latent trap, but it also has
   // that route today; taking it away is a change existing users would see, so
@@ -581,7 +626,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // list above is keyed on — an item configured as something else whose data
   // arrives as `scatterSeries` gets the same one-entry list and needs the same
   // treatment.
-  const hidesChartTypePicker = dataShape === "scatter"
+  const hidesChartTypePicker =
+    safeChart.type === "combo" ||
+    dataShape === "scatter" ||
+    dataShape === "combo"
 
   const chartTypeOptions =
     onTransformChart && !hidesChartTypePicker

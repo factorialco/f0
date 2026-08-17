@@ -1,6 +1,7 @@
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
+  F0DataChartComboLineSeries,
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
@@ -57,6 +58,28 @@ export interface LineChartConfig extends ChartConfigBase {
   showArea?: boolean
   /** Show data point dots on the lines. @default false */
   showDots?: boolean
+}
+
+export interface ComboChartConfig extends ChartConfigBase {
+  type: "combo"
+  /** Visible label for the primary (left) value axis and its series. */
+  primaryAxisLabel: string
+  /** Visible label for the secondary (right) value axis and its series. */
+  secondaryAxisLabel: string
+  /** Stack the bar series into a single bar per category. @default false */
+  stacked?: boolean
+  /** Line interpolation for the line series. @default "linear" */
+  lineType?: "linear" | "smooth" | "step"
+  /** Show data point dots on the lines. @default false */
+  showDots?: boolean
+  /**
+   * Format the secondary (line) value axis and its tooltip rows. Falls back to
+   * {@link ChartConfigBase.valueFormatter}; set it whenever the two axes carry
+   * different units.
+   */
+  secondaryValueFormatter?: (value: number) => string
+  /** Suggested segment count, shared by both value axes. @default 2 */
+  valueAxisSplitNumber?: number
 }
 
 export interface FunnelChartConfig {
@@ -196,6 +219,7 @@ export interface ScatterChartConfig {
 export type DashboardChartConfig =
   | BarChartConfig
   | LineChartConfig
+  | ComboChartConfig
   | FunnelChartConfig
   | PieChartConfig
   | RadarChartConfig
@@ -216,6 +240,17 @@ export interface DashboardChartData {
   yCategories?: string[]
   /** Radar chart axis indicators. */
   indicators?: F0DataChartRadarIndicator[]
+  /**
+   * Combo chart bar series, plotted against the primary value axis.
+   *
+   * Combo keeps its own two fields instead of reusing `series`: the two plausible
+   * reuses are both broken. A tagged `series` array falls through to the bar
+   * branch of every adapter, and a combo's two halves have to stay
+   * distinguishable to be bound to their axes at all.
+   */
+  barSeries?: F0DataChartBarSeries[]
+  /** Combo chart line series, plotted against the secondary value axis. */
+  lineSeries?: F0DataChartComboLineSeries[]
   /** Chart series data — shape depends on chart type. Omit for heatmaps. */
   series?:
     | F0DataChartBarSeries[]

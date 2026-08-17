@@ -154,3 +154,40 @@ describe("buildChartProps — tooltipValueFormatter", () => {
     expect(props.tooltipValueFormatter).toBeUndefined()
   })
 })
+
+describe("buildChartProps — native combo", () => {
+  it("preserves the two axes, formatters, and separate series lists", () => {
+    const primary = (value: number) => `${value} people`
+    const precisePrimary = (value: number) => `${value.toFixed(2)} people`
+    const secondary = (value: number) => `${value}%`
+    const data: DashboardChartData = {
+      categories: ["Jan"],
+      barSeries: [{ name: "Headcount", data: [120] }],
+      lineSeries: [{ name: "Turnover", data: [4.1] }],
+    }
+    const props = buildChartProps(
+      chartItem({
+        type: "combo",
+        primaryAxisLabel: "People",
+        secondaryAxisLabel: "Rate",
+        valueFormatter: primary,
+        tooltipValueFormatter: precisePrimary,
+        secondaryValueFormatter: secondary,
+      }),
+      data
+    )
+
+    expect(props).toMatchObject({
+      type: "combo",
+      primaryAxisLabel: "People",
+      secondaryAxisLabel: "Rate",
+      categories: ["Jan"],
+      barSeries: data.barSeries,
+      lineSeries: data.lineSeries,
+    })
+    if (props.type !== "combo") throw new Error("Expected combo props")
+    expect(props.valueFormatter?.(120)).toBe("120 people")
+    expect(props.tooltipValueFormatter?.(120)).toBe("120.00 people")
+    expect(props.secondaryValueFormatter?.(4.1)).toBe("4.1%")
+  })
+})
