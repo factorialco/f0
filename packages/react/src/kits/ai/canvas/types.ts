@@ -15,6 +15,21 @@ export type CanvasContentBase = {
   title: string
   description?: string
   toolCallId?: string
+  /**
+   * Render this content across the whole frame, covering the docked chat
+   * instead of hugging a seam beside it. For content that is a step of its own
+   * rather than something you work through while talking — picking a template,
+   * say. The chat is only covered, never closed, so the conversation is exactly
+   * where it was when the canvas is dismissed.
+   *
+   * Deliberately NOT called `fullscreen`: the chat's own
+   * `visualizationMode: "fullscreen"` means the opposite arrangement (chat full
+   * width, no canvas), and going back to it is how a covering canvas is
+   * dismissed.
+   *
+   * Defaults to the docked split.
+   */
+  coversChat?: boolean
 }
 
 /**
