@@ -13,7 +13,6 @@ import {
   type F0GraphProps,
 } from "../F0Graph"
 import { F0GraphNode } from "../components/F0GraphNode"
-import { F0GraphStackedNode } from "../components/F0GraphStackedNode"
 
 const meta = {
   title: "Graph/F0Graph",
@@ -1373,22 +1372,16 @@ const StackedChildrenDemo = () => {
       nodes={CATALOG_NODES}
       defaultExpandDepth={2}
       showControls
-      renderNode={(node, ctx) =>
-        ctx.stacked ? (
-          <F0GraphStackedNode
-            {...ctx}
-            avatar={{ type: "team", name: node.data.name }}
-            title={node.data.name}
-          />
-        ) : (
-          <F0GraphNode
-            {...ctx}
-            avatar={{ type: "team", name: node.data.name }}
-            title={node.data.name}
-            subtitle={node.data.kind === "root" ? undefined : "Role"}
-          />
-        )
-      }
+      // No branch on `ctx.stacked`: the graph has already decided this node is
+      // a row, and F0GraphNode reads that off the spread context.
+      renderNode={(node, ctx) => (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "team", name: node.data.name }}
+          title={node.data.name}
+          subtitle={node.data.kind === "role" ? "Role" : undefined}
+        />
+      )}
     />
   )
 }
@@ -1398,7 +1391,7 @@ export const StackedChildren: Story = {
     docs: {
       description: {
         story:
-          "A parent that sets `stackChildren` renders its (leaf) children as a vertical column of `F0GraphStackedNode` rows sharing its x, connected by a single trunk edge. Groups with an expandable child fall back to the normal fan-out.",
+          "A parent that sets `stackChildren` renders its (leaf) children as a vertical column of compact `F0GraphNode` rows sharing its x, connected by a single trunk edge. Groups with an expandable child fall back to the normal fan-out.",
       },
     },
   },

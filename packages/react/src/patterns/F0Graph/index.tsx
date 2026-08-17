@@ -36,8 +36,6 @@ export * from "./components/F0GraphEdge"
 export * from "./components/F0GraphExpander"
 /** Card wrapper for nodes with avatar, title, subtitle, metadata, and actions slots. */
 export * from "./components/F0GraphNode"
-/** Compact row for the children of a node that sets `stackChildren`. */
-export * from "./components/F0GraphStackedNode"
 
 // Hooks
 /** Focus context hook for reading/controlling roving tabindex focus within the graph. */

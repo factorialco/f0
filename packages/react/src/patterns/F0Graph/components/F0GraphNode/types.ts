@@ -122,4 +122,32 @@ export interface F0GraphNodeProps {
   nodeId?: string
   /** Space-separated DOM ids for aria-owns (accessible tree hierarchy) */
   ariaOwns?: string
+  /**
+   * Render as one row of a stacked column instead of as a pill, because the
+   * parent set `stackChildren` (job levels under a role, plan tiers under a
+   * product). `<F0Graph>` decides this and passes it through the render
+   * context, so a `renderNode` that spreads `{...ctx}` gets the right shape
+   * without branching.
+   *
+   * A row keeps the pill's semantics (selection, focus, ARIA, keyboard) and its
+   * title type scale per `variant`, but not its geometry: it fills the parent
+   * card's width, stands at a fixed height the layout has reserved for it, and
+   * drops `subtitle` / `tags` / `actions` / `hoverCard`, which have nowhere to
+   * go in a strip.
+   */
+  stacked?: boolean
+  /**
+   * Content pinned to the trailing edge of a stacked row — a count or a small
+   * icon button. Clicks inside it do not select the node. Ignored unless
+   * `stacked`.
+   *
+   * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+   * would promise a behaviour the graph does not have.
+   */
+  trailing?: ReactNode
+  /**
+   * Row height in px, matching the band `<F0Graph>` reserved via
+   * `stackedNodeHeight`. Ignored unless `stacked`.
+   */
+  stackedHeight?: number
 }

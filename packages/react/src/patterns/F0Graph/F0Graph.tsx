@@ -366,11 +366,18 @@ export interface F0GraphNodeRenderContext {
   ariaOwns?: string
   /**
    * `true` when this node is one row of its parent's stacked column (the parent
-   * set `stackChildren` and the group qualified). Render a compact row — e.g.
-   * `<F0GraphStackedNode>` — instead of the full node card: the layout has
-   * already reserved only `stackedNodeHeight` for it.
+   * set `stackChildren` and the group qualified). `F0GraphNode` reads this off
+   * the spread context and renders a compact row instead of the full card, so a
+   * `renderNode` does not need to branch on it: the layout has already reserved
+   * only `stackedNodeHeight` for the node.
    */
   stacked: boolean
+  /**
+   * The row height the layout reserved for this node, when `stacked`. Undefined
+   * unless the graph was given a custom `stackedNodeHeight`; `F0GraphNode` falls
+   * back to the same default the layout engine uses.
+   */
+  stackedHeight?: number
   onExpandToggle: () => void
   onClick: () => void
   nodeRef: (el: HTMLDivElement | null) => void

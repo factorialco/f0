@@ -693,6 +693,7 @@ export function F0GraphView<T = unknown>(
       deferredLoading: isDeferredLoading || undefined,
       dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
+      stackedNodeHeight: stackedNodeHeightProp,
       largeGraph: isLargeGraph,
     }),
     [
@@ -703,6 +704,7 @@ export function F0GraphView<T = unknown>(
       loadVisibleNodeData,
       isLargeGraph,
       reservedTagHeight,
+      stackedNodeHeightProp,
     ]
   )
 

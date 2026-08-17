@@ -268,3 +268,38 @@ describe("F0Graph — stacked children", () => {
     expect(screen.getByTestId("node-lvl3")).toBeInTheDocument()
   })
 })
+
+// ─── Reserved band reaches the row ────────────────────────────
+
+describe("stacked row height", () => {
+  it("publishes a custom stackedNodeHeight on the render context", async () => {
+    // The layout reserves `stackedNodeHeight` per row; the row has to render at
+    // exactly that height or the column drifts out of its band. So the resolved
+    // value has to reach `renderNode`, not just the layout engine.
+    zeroRender(
+      <div style={{ width: 800, height: 600 }}>
+        <F0Graph<string>
+          nodes={makeStackedNodes()}
+          stackedNodeHeight={72}
+          renderNode={(node, ctx) => (
+            <div
+              ref={ctx.nodeRef}
+              role="treeitem"
+              tabIndex={ctx.tabIndex}
+              data-testid={`node-${node.id}`}
+              data-stacked-height={ctx.stackedHeight ?? "unset"}
+            >
+              {node.data}
+            </div>
+          )}
+          defaultExpandedNodes={new Set(["root", "roleA"])}
+        />
+      </div>
+    )
+
+    expect(await screen.findByTestId("node-lvl1")).toHaveAttribute(
+      "data-stacked-height",
+      "72"
+    )
+  })
+})

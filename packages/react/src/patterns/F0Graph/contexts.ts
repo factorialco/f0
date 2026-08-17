@@ -175,6 +175,13 @@ export interface F0GraphRenderConfigContextValue {
    */
   tagRowHeight?: number
   /**
+   * Height of one stacked row as reserved by the layout engine. Used by the node
+   * wrapper to set `stackedHeight` on the render context, so a row always fills
+   * exactly its band — otherwise a custom `stackedNodeHeight` would move the
+   * layout while the row kept the default height, and the column would drift.
+   */
+  stackedNodeHeight?: number
+  /**
    * `true` when the graph has more rendered nodes than the snap threshold.
    * F0GraphNode uses this to disable variant transitions (chrome opacity,
    * avatar transform, text reveal) so changing zoomLevel snaps instantly

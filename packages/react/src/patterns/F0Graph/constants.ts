@@ -43,12 +43,34 @@ export const STACKED_NODE_TITLE_GAP =
   STACKED_NODE_AVATAR
 
 // Height of one stacked row and the gap between two of them. Shared by the
-// layout engine (which reserves the space) and F0GraphStackedNode (which fills
-// it) — the row must render exactly as tall as the layout believes it is, or
-// the column drifts out of its reserved band.
+// layout engine (which reserves the space) and F0GraphNode's stacked row (which
+// fills it) — the row must render exactly as tall as the layout believes it is,
+// or the column drifts out of its reserved band.
 export const STACKED_NODE_HEIGHT =
   STACKED_NODE_AVATAR + 2 * (STACKED_NODE_PADDING + STACKED_NODE_BORDER)
 export const STACKED_NODE_GAP = 8
+
+/**
+ * The row's title type scale per zoom variant, mirroring the node card's own
+ * (14/20 in detail, 24/32 in compact, no text in dot). Without it a column
+ * keeps detail typography while the cards around it scale up, so the stack
+ * stops reading at the same scale as the parent it hangs from.
+ *
+ * Both steps fit the *same* band, which is the point: 32px of line height plus
+ * the 2×(padding + border) inset is exactly `STACKED_NODE_HEIGHT`, as is the
+ * 32px avatar that governs the detail row. So the row can answer to zoom
+ * without the reserved band changing — and the band must not change, since the
+ * layout runs before the zoom level is known (see the zoomLevel⇄bounds cycle in
+ * F0GraphView).
+ */
+export const STACKED_NODE_TITLE_BY_ZOOM: Record<
+  ZoomLevel,
+  { fontSize: number; lineHeight: string } | null
+> = {
+  detail: { fontSize: 14, lineHeight: "20px" },
+  compact: { fontSize: 24, lineHeight: "32px" },
+  dot: null,
+}
 
 // Fraction of the normal `rankSep` lane a stacked column hangs below its
 // parent. A stack reads as part of the parent rather than as the next rank, so

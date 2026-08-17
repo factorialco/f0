@@ -188,6 +188,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     nodeId: id,
     ariaOwns,
     stacked: stacked ?? false,
+    stackedHeight: renderCfg?.stackedNodeHeight,
     onExpandToggle: () => toggleExpand(id),
     onClick: () => selectNode(id),
     nodeRef: nodeRefCallback,

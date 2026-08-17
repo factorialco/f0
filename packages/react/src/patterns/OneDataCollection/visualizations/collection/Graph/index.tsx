@@ -9,7 +9,6 @@ import {
   F0Graph,
   type F0GraphHandle,
   F0GraphNode,
-  F0GraphStackedNode,
   F0GraphSkeleton,
   tagColumn,
 } from "@/patterns/F0Graph"
@@ -290,25 +289,12 @@ export const GraphCollection = <
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
-            // A stacked row mirrors the card's anatomy (same box, same leading
-            // avatar, same title) so a column reads as a continuation of its
-            // parent. The card-only extras — subtitle, tags, the selection
-            // toolbar — do not apply; a trailing slot takes their place.
-            if (ctx.stacked) {
-              return (
-                <F0GraphStackedNode
-                  {...ctx}
-                  loading={ctx.dataLoading}
-                  avatar={avatar?.(node.data)}
-                  title={title(node.data)}
-                  trailing={stackedTrailing?.(node.data)}
-                  onClick={() => {
-                    ctx.onClick()
-                    itemOnClick?.()
-                  }}
-                />
-              )
-            }
+            // One call for both shapes. When the graph sets `ctx.stacked` this
+            // renders as a row, which mirrors the card's anatomy (same box, same
+            // leading avatar, same title) so a column reads as a continuation of
+            // its parent. The card-only extras below — subtitle, tags, the
+            // selection toolbar, the hover card — are ignored for a row, where
+            // `trailing` takes their place.
             return (
               <F0GraphNode
                 {...ctx}
@@ -317,6 +303,7 @@ export const GraphCollection = <
                 loading={ctx.dataLoading}
                 avatar={avatar?.(node.data)}
                 title={title(node.data)}
+                trailing={stackedTrailing?.(node.data)}
                 subtitle={subtitle?.(node.data)}
                 tags={orderedTags?.(node.data)}
                 actions={nodeActions?.(node.data)}
