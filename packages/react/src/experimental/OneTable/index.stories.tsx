@@ -930,3 +930,36 @@ export const FillColumnWidth: Story = {
     </OneTable>
   ),
 }
+
+/**
+ * The column that needs `fill` is usually the one carrying the row's long text,
+ * which tends to be the frozen first column — so the fluid width has to survive
+ * `position: sticky` and the opaque background a frozen cell paints. It still
+ * takes the leftover width and still ellipsizes on one line at the column's edge.
+ */
+export const FillColumnWidthFrozen: Story = {
+  render: () => (
+    <OneTable>
+      <TableHeader>
+        <TableRow>
+          <TableHead width="fill" sticky={{ left: 0 }}>
+            Message
+          </TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Email</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sampleData.slice(0, 3).map((row) => (
+          <TableRow key={row.id}>
+            <TableCell width="fill" sticky={{ left: 0 }} firstCell>
+              <OneEllipsis>{LONG_MESSAGE}</OneEllipsis>
+            </TableCell>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>{row.email}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </OneTable>
+  ),
+}
