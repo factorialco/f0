@@ -13,7 +13,6 @@ const SvgItalic = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M17 6H13M9 6H13M13 6L11 18H7H15"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

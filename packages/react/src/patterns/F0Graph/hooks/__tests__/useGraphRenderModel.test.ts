@@ -169,7 +169,7 @@ describe("useGraphRenderModel — node windowing", () => {
     expect(result.current.renderedNodeCount).toBe(1)
   })
 
-  it("drops edges whose endpoints are not both windowed", () => {
+  it("pulls in an off-window child so a visible parent's edge still renders", () => {
     const child = treeNode("child", "root", 0, [], 1)
     const root = treeNode("root", null, 1, [child])
     // Rect covers root but not the far-away child.
@@ -182,15 +182,35 @@ describe("useGraphRenderModel — node windowing", () => {
         child: { x: 0, y: 5000 },
       }),
     })
-    expect(result.current.rfNodes.map((n) => n.id)).not.toContain("child")
-    // No surviving edge may reference the windowed-out child.
-    for (const edge of result.current.rfEdges) {
-      expect(edge.source).not.toBe("child")
-      expect(edge.target).not.toBe("child")
-    }
+    // The edge root→child passes through the viewport (root is inside it), so the
+    // child is materialized and the connecting line renders — a visible parent
+    // never looks connected only to the children that happen to stay on screen.
+    expect(result.current.rfNodes.map((n) => n.id)).toContain("child")
+    expect(
+      result.current.rfEdges.some(
+        (e) => e.source === "root" && e.target === "child"
+      )
+    ).toBe(true)
   })
 
-  it("trims aria-owns children that fall outside the window", () => {
+  it("keeps a lone off-window node dropped when no edge crosses the viewport", () => {
+    // Two unrelated roots (no edge between them): the far one is still culled —
+    // the frontier pull-in only materializes endpoints of edges touching the view.
+    const near = treeNode("near", null, 0)
+    const far = treeNode("far", null, 0)
+    mockViewportRect = { minX: -10, minY: -10, maxX: 200, maxY: 200 }
+    const { result } = renderModel({
+      ...baseOptions([near, far], []),
+      enableNodeWindowing: true,
+      layoutEngineProp: fixedLayout({
+        near: { x: 0, y: 0 },
+        far: { x: 5000, y: 5000 },
+      }),
+    })
+    expect(result.current.rfNodes.map((n) => n.id)).not.toContain("far")
+  })
+
+  it("keeps aria-owns to an off-window child once its edge pulls it in", () => {
     const child = treeNode("child", "root", 0, [], 1)
     const root = treeNode("root", null, 1, [child])
     mockViewportRect = { minX: -10, minY: -10, maxX: 200, maxY: 200 }
@@ -202,10 +222,11 @@ describe("useGraphRenderModel — node windowing", () => {
         child: { x: 0, y: 5000 },
       }),
     })
-    // `root` survives but its only child was windowed out → no dangling aria-owns.
+    // The off-window child is materialized to keep the parent's edge, so it is a
+    // valid aria-owns target (not a dangling ref).
     expect(
       graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
-    ).toBeUndefined()
+    ).toEqual(["child"])
   })
 
   it("keeps aria-owns children that remain in the window", () => {
@@ -223,6 +244,38 @@ describe("useGraphRenderModel — node windowing", () => {
     expect(
       graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
     ).toEqual(["child"])
+  })
+
+  it("materializes a windowed node's ancestors so the reporting line stays connected", () => {
+    // Deep chain root → mid → leaf. Only `leaf` sits inside the viewport; its
+    // ancestors are far above it. Regression: a windowed node whose parent
+    // scrolled off-window used to lose its incoming edge and look like a detached
+    // root (an edge only renders when BOTH endpoints are windowed). The ancestor
+    // chain must be pulled in so the line up to the root survives.
+    const leaf = treeNode("leaf", "mid", 0, [], 2)
+    const mid = treeNode("mid", "root", 1, [leaf], 1)
+    const root = treeNode("root", null, 1, [mid])
+    // Rect covers only `leaf` (y≈5000); `mid` (y=2500) and `root` (y=0) are out.
+    mockViewportRect = { minX: -10, minY: 4900, maxX: 200, maxY: 5200 }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "mid"]),
+      enableNodeWindowing: true,
+      layoutEngineProp: fixedLayout({
+        root: { x: 0, y: 0 },
+        mid: { x: 0, y: 2500 },
+        leaf: { x: 0, y: 5000 },
+      }),
+    })
+    const ids = result.current.rfNodes.map((n) => n.id)
+    expect(ids).toContain("leaf")
+    expect(ids).toContain("mid")
+    expect(ids).toContain("root")
+    const hasEdge = (source: string, target: string) =>
+      result.current.rfEdges.some(
+        (e) => e.source === source && e.target === target
+      )
+    expect(hasEdge("root", "mid")).toBe(true)
+    expect(hasEdge("mid", "leaf")).toBe(true)
   })
 })
 

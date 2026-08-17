@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { zeroRender as render, waitFor } from "@/testing/test-utils"
+
+import { fireEvent, zeroRender as render, waitFor } from "@/testing/test-utils"
+
+import type { DashboardItem } from "../types"
 
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
-import type { DashboardItem } from "../types"
 
 type ExpenseRecord = {
   employee: string
@@ -149,6 +151,232 @@ describe("DashboardGrid", () => {
 
     await waitFor(() => {
       expect(collectionRow.style.height).toBe("960px")
+    })
+  })
+
+  describe("row resize", () => {
+    function getResizeHandle(container: HTMLElement): HTMLElement {
+      const handle = container.querySelector(".group\\/resize")
+      if (!(handle instanceof HTMLElement)) {
+        throw new Error("Expected a resize handle to be rendered")
+      }
+      return handle
+    }
+
+    function dragResizeHandle(handle: HTMLElement, deltaY: number) {
+      fireEvent.mouseDown(handle, { clientY: 500 })
+      fireEvent.mouseMove(document, { clientY: 500 + deltaY })
+      fireEvent.mouseUp(document, { clientY: 500 + deltaY })
+    }
+
+    it("shrinks a row when dragging the handle up", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      expect(getDashboardRowHeight(container)).toBe("200px")
+
+      dragResizeHandle(getResizeHandle(container), -50)
+
+      expect(getDashboardRowHeight(container)).toBe("150px")
+    })
+
+    it("shrinks a row back after growing it", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(144)} filters={{}} editMode />
+      )
+
+      dragResizeHandle(getResizeHandle(container), 100)
+      expect(getDashboardRowHeight(container)).toBe("244px")
+
+      dragResizeHandle(getResizeHandle(container), -100)
+      expect(getDashboardRowHeight(container)).toBe("144px")
+    })
+
+    it("clamps shrinking to the per-type minimum height", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      // Metric rows have a 120px minimum
+      dragResizeHandle(getResizeHandle(container), -500)
+
+      expect(getDashboardRowHeight(container)).toBe("120px")
+    })
+
+    it("clamps shrinking to overflowing content height", () => {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId === "headcount") return 180
+          return 0
+        }
+      )
+
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      // Content genuinely overflows (scrollHeight 180 > clientHeight 0), so
+      // the row cannot be dragged below 180px even though the metric type
+      // minimum is 120px.
+      dragResizeHandle(getResizeHandle(container), -500)
+
+      expect(getDashboardRowHeight(container)).toBe("180px")
+    })
+
+    it("clamps shrinking a collection row to its table content height", () => {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId === "expenses") return 460
+          return 0
+        }
+      )
+
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+
+      // The table's content needs 460px — dragging far up must stop there,
+      // not at the 300px collection type minimum.
+      dragResizeHandle(getResizeHandle(container), -400)
+
+      const collectionCard = container.querySelector(
+        '[data-card-id="expenses"]'
+      )
+      const collectionRow = collectionCard?.parentElement
+      if (!(collectionRow instanceof HTMLElement)) {
+        throw new Error("Expected collection row to be rendered")
+      }
+      expect(collectionRow.style.height).toBe("460px")
+    })
+  })
+
+  describe("content overflow containment", () => {
+    it("clips vertical overflow on collection rows so a too-short row can never paint over the next one", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+      )
+
+      const collectionCard = container.querySelector(
+        '[data-card-id="expenses"]'
+      )
+      const collectionRow = collectionCard?.parentElement
+      if (!(collectionRow instanceof HTMLElement)) {
+        throw new Error("Expected collection row to be rendered")
+      }
+      expect(collectionRow.style.overflowY).toBe("clip")
+    })
+
+    it("does not clip rows without collections", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(144)} filters={{}} />
+      )
+
+      const metricCard = container.querySelector('[data-card-id="headcount"]')
+      const metricRow = metricCard?.parentElement
+      if (!(metricRow instanceof HTMLElement)) {
+        throw new Error("Expected metric row to be rendered")
+      }
+      expect(metricRow.style.overflowY).toBe("")
+    })
+
+    it("measures and grows without requestAnimationFrame (hidden tabs, effect churn)", async () => {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId === "expenses") return 960
+          return 0
+        }
+      )
+      // Simulate an environment where rAF never fires (backgrounded tab).
+      vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0)
+
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+      )
+
+      const collectionCard = container.querySelector(
+        '[data-card-id="expenses"]'
+      )
+      const collectionRow = collectionCard?.parentElement
+      if (!(collectionRow instanceof HTMLElement)) {
+        throw new Error("Expected collection row to be rendered")
+      }
+      await waitFor(() => {
+        expect(collectionRow.style.height).toBe("960px")
+      })
+    })
+  })
+
+  describe("pointer drag", () => {
+    function rowOrder(container: HTMLElement): string[] {
+      return Array.from(
+        container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+      ).map((row) =>
+        Array.from(row.querySelectorAll<HTMLElement>("[data-card-id]"))
+          .map((c) => c.dataset.cardId)
+          .join("+")
+      )
+    }
+
+    it("uses a plain (non-native-draggable) grip so the gesture never depends on native HTML5 drag", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      const card = container.querySelector('[data-card-id="expenses"]')
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(card instanceof HTMLElement) || !(grip instanceof HTMLElement)) {
+        throw new Error("Expected card and grip to be rendered")
+      }
+      // Nothing relies on native drag: neither the card nor the grip is
+      // `draggable`. The grip drives a pointer gesture instead.
+      expect(card.getAttribute("draggable")).toBeNull()
+      expect(grip.getAttribute("draggable")).toBeNull()
+    })
+
+    it("reorders a widget via a pointerdown-on-grip → move → up gesture (no native drag)", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      // Grab the first widget's grip, then drive the document-level gesture.
+      // jsdom's synthetic PointerEvent drops clientX/Y, so dispatch native
+      // MouseEvents (which carry them) for the move/up. jsdom rects are all
+      // 0, so any clientY > 0 lands in the bottom third of the last row →
+      // "insert after the last row".
+      fireEvent.pointerDown(grip, { button: 0 })
+      fireEvent(
+        document,
+        new MouseEvent("pointermove", {
+          clientX: 0,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+      fireEvent(
+        document,
+        new MouseEvent("pointerup", {
+          clientX: 0,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+
+      expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+    })
+
+    it("renders no grip when not in edit mode", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+      )
+      expect(
+        container.querySelector('[aria-label="Drag to reorder"]')
+      ).toBeNull()
     })
   })
 })

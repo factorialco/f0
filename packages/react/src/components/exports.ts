@@ -65,7 +65,8 @@ export * from "./F0PdfViewer"
 export * from "./F0Select"
 export * from "./F0Slider"
 export * from "./F0Text"
-export * from "../sds/TimeLine"
+export * from "./F0VideoPlayer"
+export * from "../sds/timeline"
 /**
  * @deprecated OneFilterPicker has moved to @/patterns/OneFilterPicker. Import from there instead.
  */
@@ -98,7 +99,10 @@ export * from "./F0TableOfContentPopover"
 export * from "./OneCalendar"
 export * from "./OneEmptyState"
 export * from "./RichText/exports"
-export * from "../sds/surveys/exports"
+/**
+ * @deprecated Surveys has moved to @/kits/surveys. Import from there instead.
+ */
+export * from "../kits/surveys/exports"
 /**
  * @deprecated UpsellingKit has moved to @/sds/UpsellingKit. Import from there instead.
  */

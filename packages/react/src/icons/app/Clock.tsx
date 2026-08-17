@@ -8,19 +8,12 @@ const SvgClock = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <circle
-      cx={12}
-      cy={12}
-      r={8}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={12} r={8} stroke="currentColor" />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M12 9V12L15.5 14"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

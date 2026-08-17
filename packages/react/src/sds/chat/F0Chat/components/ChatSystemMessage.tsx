@@ -69,8 +69,8 @@ export const ChatSystemMessage = ({
   const payload = message.system
 
   const line = (content: ReactNode) => (
-    <div className="flex justify-center px-4 py-6">
-      <span className="text-center text-sm text-f1-foreground-tertiary">
+    <div className="flex justify-center px-4 py-5">
+      <span className="text-center text-sm text-f1-foreground-tertiary max-w-96">
         {content}
       </span>
     </div>

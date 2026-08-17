@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { type F0ChatFileAttachment } from "../../types"
-import { documentPreviewKind, withinPreviewSizeLimit } from "../attachments"
+import { type F0ChatAttachment, type F0ChatFileAttachment } from "../../types"
+import {
+  documentPreviewKind,
+  formatFileSize,
+  isVideoFileAttachment,
+  partitionChatAttachments,
+  withinPreviewSizeLimit,
+} from "../attachments"
 
 const file = (
   overrides: Partial<F0ChatFileAttachment>
@@ -10,6 +16,43 @@ const file = (
   url: "https://cdn.example.com/doc",
   name: "document",
   ...overrides,
+})
+
+describe("formatFileSize", () => {
+  it("formats byte, kilobyte, megabyte, and gigabyte limits compactly", () => {
+    expect(formatFileSize(512)).toBe("512 B")
+    expect(formatFileSize(1024)).toBe("1 KB")
+    expect(formatFileSize(1536)).toBe("1.5 KB")
+    expect(formatFileSize(100 * 1024 * 1024)).toBe("100 MB")
+    expect(formatFileSize(1.5 * 1024 * 1024)).toBe("1.5 MB")
+    expect(formatFileSize(2 * 1024 * 1024 * 1024)).toBe("2 GB")
+    expect(formatFileSize(1.5 * 1024 * 1024 * 1024)).toBe("1.5 GB")
+  })
+})
+
+describe("isVideoFileAttachment", () => {
+  it("recognizes video MIME types and browser-supported file extensions", () => {
+    expect(
+      isVideoFileAttachment(file({ name: "recording", mimeType: "video/mp4" }))
+    ).toBe(true)
+    expect(
+      isVideoFileAttachment(
+        file({
+          name: "walkthrough.webm",
+          mimeType: "application/octet-stream",
+        })
+      )
+    ).toBe(true)
+    expect(
+      isVideoFileAttachment(
+        file({
+          name: "download",
+          url: "https://cdn.example.com/walkthrough.mov?token=123",
+        })
+      )
+    ).toBe(true)
+    expect(isVideoFileAttachment(file({ name: "report.pdf" }))).toBe(false)
+  })
 })
 
 describe("documentPreviewKind", () => {
@@ -122,5 +165,33 @@ describe("withinPreviewSizeLimit", () => {
 
   it("treats an unknown size as previewable", () => {
     expect(withinPreviewSizeLimit(file({ name: "a.xlsx" }), "sheet")).toBe(true)
+  })
+})
+
+describe("partitionChatAttachments", () => {
+  it("classifies a mixed attachment list in one stable pass", () => {
+    const attachments: F0ChatAttachment[] = [
+      { kind: "image", url: "/image.jpg", name: "image" },
+      file({ name: "clip.mp4" }),
+      file({ name: "report.pdf" }),
+      file({ name: "upload.mp4", progress: 50 }),
+      file({ name: "archive.zip" }),
+      { kind: "location", latitude: 1, longitude: 2 },
+      { kind: "voice", url: "/voice.ogg" },
+    ]
+
+    const result = partitionChatAttachments(attachments)
+
+    expect(result.images.map(({ name }) => name)).toEqual(["image"])
+    expect(result.videos.map(({ name }) => name)).toEqual(["clip.mp4"])
+    expect(
+      result.documents.map(({ file: document, kind }) => [document.name, kind])
+    ).toEqual([["report.pdf", "pdf"]])
+    expect(result.files.map(({ name }) => name)).toEqual([
+      "upload.mp4",
+      "archive.zip",
+    ])
+    expect(result.locations).toHaveLength(1)
+    expect(result.voices).toHaveLength(1)
   })
 })

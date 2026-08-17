@@ -43,6 +43,10 @@ const meta = {
     maxZoom: {
       control: { type: "number", min: 1, max: 4, step: 0.1 },
     },
+    centerOnNodeClick: { control: "boolean" },
+    nodeClickZoom: {
+      control: { type: "number", min: 0.1, max: 2, step: 0.1 },
+    },
 
     // ---- Hidden from controls ----
     nodes: { table: { disable: true } },
@@ -60,6 +64,7 @@ const meta = {
     onNodeSelect: { table: { disable: true } },
     focusedNode: { table: { disable: true } },
     highlightedNodes: { table: { disable: true } },
+    viewportInset: { table: { disable: true } },
     layoutEngine: { table: { disable: true } },
     controlLabels: { table: { disable: true } },
     onZoomLevelChange: { table: { disable: true } },
@@ -742,6 +747,77 @@ export const InitialFocus: Story = {
   },
 }
 
+// ─── Click-to-focus + side-panel inset ─────────────────────────────
+
+/**
+ * Clicking a node flies to it (F0Graph's default `centerOnNodeClick`), zooming
+ * in close and centering it. This demo opens a fixed-width (480px) side panel on
+ * selection and passes `viewportInset={{ right: 480 }}` while it's open, so the
+ * clicked node lands centered in the free area beside the panel instead of behind
+ * it. Click nodes with the panel open vs. closed to see the offset; click the
+ * empty canvas to dismiss the panel.
+ */
+function ClickToFocusWithSidePanelDemo() {
+  const nodes = makeLargeTree(600)
+  const [selected, setSelected] = useState<GraphNode<Employee> | null>(null)
+  const PANEL_WIDTH = 480
+  const byId = useCallback(
+    (id: string) => nodes.find((n) => n.id === id) ?? null,
+    [nodes]
+  )
+
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <F0Graph<Employee>
+        nodes={nodes}
+        renderNode={renderEmployee}
+        showControls
+        defaultExpandDepth={2}
+        selectionMode="single"
+        // The side panel is a fixed-width drawer; feed its width as the inset
+        // while it's open so every fly-to clears it. `0` while closed behaves
+        // exactly as if there were no inset.
+        viewportInset={{ right: selected ? PANEL_WIDTH : 0 }}
+        onSelectedNodesChange={(next) => {
+          const id = [...next][0]
+          setSelected(id ? byId(id) : null)
+        }}
+        onPaneClick={() => setSelected(null)}
+      />
+      {selected && (
+        <div
+          className="absolute right-0 top-0 z-20 flex h-full flex-col gap-2 border-l border-f1-border bg-f1-background p-6 shadow-lg"
+          style={{ width: PANEL_WIDTH }}
+        >
+          <div className="text-lg font-semibold text-f1-foreground">
+            {selected.data.name}
+          </div>
+          <div className="text-f1-foreground-secondary">
+            {selected.data.title}
+          </div>
+          <F0Button
+            variant="neutral"
+            label="Close"
+            onClick={() => setSelected(null)}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+export const ClickToFocusWithSidePanel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click a node to fly to it (default `centerOnNodeClick`). A fixed-width side panel opens on selection and `viewportInset={{ right: 480 }}` keeps the centered node in the visible area beside it. Click the canvas to dismiss.",
+      },
+    },
+  },
+  render: () => <ClickToFocusWithSidePanelDemo />,
+}
+
 // ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
 
 /**
@@ -834,6 +910,116 @@ export const ViewportWindowing: Story = {
     },
   },
   render: () => <ViewportWindowingDemo />,
+}
+
+/**
+ * A tall, deep tree (a spine of `depth` managers, each with a few reports) — the
+ * "muy grande y profundo" org chart shape. The whole tree is expanded on mount
+ * so every node has a layout position far down the canvas. Repro harness for the
+ * windowing panning bug: with windowing on, pan far from the initial frame and
+ * check that nodes AND their connecting edges keep rendering under the camera.
+ */
+function makeDeepTree(
+  depth: number,
+  reportsPerLevel: number
+): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  let nameIndex = 0
+  const nextName = () => {
+    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
+    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    nameIndex++
+    return `${first} ${last}`
+  }
+
+  let prevSpineId: string | null = null
+  for (let level = 0; level < depth; level++) {
+    const spineId = `spine-${level}`
+    nodes.push({
+      id: spineId,
+      parentId: prevSpineId,
+      data: { name: nextName(), title: `Level ${level} Manager` },
+      // spine child + the leaf reports at this level
+      childrenCount: reportsPerLevel + (level < depth - 1 ? 1 : 0),
+    })
+    for (let r = 0; r < reportsPerLevel; r++) {
+      nodes.push({
+        id: `${spineId}-report-${r}`,
+        parentId: spineId,
+        data: { name: nextName(), title: "Individual Contributor" },
+        childrenCount: 0,
+      })
+    }
+    prevSpineId = spineId
+  }
+  return nodes
+}
+
+const DEEP_TREE = makeDeepTree(40, 3)
+
+function DeepTreeWindowingDemo() {
+  const [windowing, setWindowing] = useState(true)
+  const [padding, setPadding] = useState(600)
+  const [visible, setVisible] = useState(0)
+  const [rendered, setRendered] = useState(0)
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 flex flex-col gap-2 rounded-md bg-f1-background p-3 text-sm shadow-md">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={windowing}
+            onChange={(e) => setWindowing(e.target.checked)}
+          />
+          Node windowing
+        </label>
+        <label className="flex items-center gap-2">
+          Padding
+          <input
+            type="range"
+            min={0}
+            max={2000}
+            step={100}
+            value={padding}
+            onChange={(e) => setPadding(Number(e.target.value))}
+          />
+          <span className="tabular-nums">{padding}px</span>
+        </label>
+        <div className="tabular-nums">
+          Visible nodes: <strong>{visible}</strong>
+        </div>
+        <div className="tabular-nums">
+          Rendered nodes: <strong>{rendered}</strong>
+        </div>
+      </div>
+      <F0Graph<Employee>
+        nodes={DEEP_TREE}
+        renderNode={renderEmployee}
+        showControls
+        // Open framed on a deep, off-center node (like the org chart's
+        // focus-on-entry), so most of the tree starts OUTSIDE the first frame.
+        initialFocusNodeId="spine-20"
+        defaultExpandDepth={40}
+        enableNodeWindowing={windowing}
+        nodeWindowPadding={padding}
+        onVisibleNodesChange={setVisible}
+        onRenderedNodesChange={setRendered}
+      />
+    </div>
+  )
+}
+
+export const DeepTreeWindowing: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Repro for the deep-tree windowing panning bug: a 40-level spine opened focused on a deep node. With windowing on, pan away from the initial frame and confirm nodes and their connecting edges keep rendering under the camera (they must not vanish once you leave the initially-framed region).",
+      },
+    },
+  },
+  render: () => <DeepTreeWindowingDemo />,
 }
 
 // ─── Viewport-driven data loading (A2) ─────────────────────────

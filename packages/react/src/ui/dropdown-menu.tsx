@@ -60,9 +60,16 @@ DropdownMenuSubContent.displayName =
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
+    /**
+     * Portal target. Defaults to `document.body`; set it to a fullscreened
+     * element so the menu renders inside the top layer (Radix portals to the
+     * body otherwise, which is hidden while an ancestor is fullscreen).
+     */
+    container?: HTMLElement | null
+  }
+>(({ className, sideOffset = 4, container, ...props }, ref) => (
+  <DropdownMenuPrimitive.Portal container={container ?? undefined}>
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
@@ -90,6 +97,13 @@ const DropdownMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded py-2 pl-3 pr-5 text-base font-medium outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:h-full after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] first:pt-3 first:after:top-1 first:after:h-[calc(100%-0.25rem)] last:pb-3 last:after:bottom-1 last:after:h-[calc(100%-0.25rem)] hover:after:opacity-100 focus:after:opacity-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      // THE ONLY ITEM is both the first and the last, and `first:`/`last:` then
+      // pull the highlight in opposite directions with a fixed height between
+      // them: over-constrained, so one inset is dropped and the highlight runs
+      // flush to that edge — the menu reads as missing its padding on one side.
+      // Insetting from both ends and letting the height follow is the same 4px
+      // gap the multi-item cases get.
+      "only:after:inset-y-1 only:after:h-auto",
       "focus:outline-none focus:ring-0 focus:ring-transparent", // Temporal fix for Gamma issue
       inset && "pl-8",
       className

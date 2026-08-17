@@ -20,14 +20,12 @@ const SvgVideoRecorder = (
       strokeLinecap="round"
       strokeLinejoin="round"
       rx={3}
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M17 11L21 9V15L17 13V11Z"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

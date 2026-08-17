@@ -196,15 +196,51 @@ export function FileFieldRenderer({
     if (!hasFormValue) return
 
     initialFilesApplied.current = true
-    setEntries(
-      resolveInitialEntries(initialFilesPool, formField.value, isMultiple)
-    )
+    setEntries((prev) => {
+      // Preserve files the user added at runtime (those backed by a File). The
+      // one-time pool sync only seeds pre-existing files, so it must never drop
+      // an in-flight or just-uploaded entry whose value isn't part of the pool
+      // (a fresh upload's value never is). Without this, uploading the first
+      // file into a field whose pool is empty (or resolves after the value is
+      // populated) wiped that file from the list.
+      const runtimeEntries = prev.filter((entry) => entry.file)
+      const runtimeValues = new Set(
+        runtimeEntries
+          .map((entry) => entry.value)
+          .filter((value): value is string => value != null)
+      )
+      const seededEntries = resolveInitialEntries(
+        initialFilesPool,
+        formField.value,
+        isMultiple
+      ).filter(
+        (entry) => entry.value == null || !runtimeValues.has(entry.value)
+      )
+      return [...seededEntries, ...runtimeEntries]
+    })
   }, [initialFilesPool, formField.value, isMultiple])
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const translations = forms.file
 
   const hasFiles = entries.length > 0
+
+  // An entry with a File but no resolved value (and no error) is still
+  // uploading. Only meaningful when an upload hook is present — without one
+  // the value can never resolve, so we must not block submission forever.
+  const hasPendingUploads =
+    !!resolvedUseUpload &&
+    entries.some((entry) => entry.file && !entry.value && !entry.error)
+
+  // Report this field's upload state up to the form so it can block
+  // submission until every upload settles.
+  const registerUploadState = context?.registerUploadState
+  useEffect(() => {
+    registerUploadState?.(inputId, hasPendingUploads)
+  }, [registerUploadState, inputId, hasPendingUploads])
+  useEffect(() => {
+    return () => registerUploadState?.(inputId, false)
+  }, [registerUploadState, inputId])
 
   // In single mode, hide dropzone once a file entry exists.
   // In multiple mode, hide dropzone if maxFiles limit is reached.
@@ -272,56 +308,69 @@ export function FileFieldRenderer({
         return
       }
 
-      // Multiple mode: use functional updater to always read latest entries count.
-      // Validation error is captured via a local variable and scheduled after.
-      let errorMsg: string | null = null
+      // Multiple mode. Validate and build the new entries synchronously, then
+      // apply the error and merge separately. Doing the validation inside the
+      // setEntries updater would rely on React invoking that updater
+      // synchronously (eager state computation) so the captured error could be
+      // read right after — but that is not guaranteed. When the entries update
+      // is batched, the updater runs during render, after the error read, so
+      // the validation error was silently dropped (single mode never hit this
+      // because it sets the error synchronously).
+      const remaining =
+        field.maxFiles != null ? field.maxFiles - entries.length : Infinity
 
-      setEntries((prev) => {
-        const remaining =
-          field.maxFiles != null ? field.maxFiles - prev.length : Infinity
-
-        if (remaining <= 0) {
-          errorMsg = translations.maxFilesReached.replace(
+      if (remaining <= 0) {
+        setValidationError(
+          translations.maxFilesReached.replace(
             "{{maxFiles}}",
             String(field.maxFiles)
           )
-          return prev
-        }
+        )
+        return
+      }
 
-        const filesToProcess = files.slice(0, remaining)
-        if (files.length > remaining) {
-          errorMsg = translations.maxFilesReached.replace(
-            "{{maxFiles}}",
-            String(field.maxFiles)
-          )
-        }
-
-        const newEntries: FileEntry[] = []
-        for (const file of filesToProcess) {
-          const validationMsg = validateFile(file)
-          if (validationMsg) {
-            errorMsg = validationMsg
-            continue
-          }
-          if (!resolvedUseUpload) {
-            console.warn(
-              "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+      const filesToProcess = files.slice(0, remaining)
+      let errorMsg: string | null =
+        files.length > remaining
+          ? translations.maxFilesReached.replace(
+              "{{maxFiles}}",
+              String(field.maxFiles)
             )
-          }
-          newEntries.push({
-            key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-            file,
-          })
-        }
-        return [...prev, ...newEntries]
-      })
+          : null
 
-      // Apply captured error after the state update batch
+      const newEntries: FileEntry[] = []
+      for (const file of filesToProcess) {
+        const validationMsg = validateFile(file)
+        if (validationMsg) {
+          errorMsg = validationMsg
+          continue
+        }
+        if (!resolvedUseUpload) {
+          console.warn(
+            "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+          )
+        }
+        newEntries.push({
+          key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+          file,
+        })
+      }
+
       if (errorMsg !== null) {
         setValidationError(errorMsg)
       }
+      if (newEntries.length > 0) {
+        setEntries((prev) => [...prev, ...newEntries])
+      }
     },
-    [isMultiple, field.maxFiles, validateFile, resolvedUseUpload, translations]
+    [
+      isMultiple,
+      field.maxFiles,
+      validateFile,
+      resolvedUseUpload,
+      translations,
+      entries.length,
+    ]
   )
 
   const handleDragOver = useCallback(
@@ -511,7 +560,7 @@ export function FileFieldRenderer({
       {validationError && (
         <div className="-mt-2 flex items-center gap-1">
           <F0Icon icon={AlertCircle} color="critical" />
-          <p className="text-sm font-medium text-f1-foreground-critical">
+          <p className="text-base font-medium text-f1-foreground-critical">
             {validationError}
           </p>
         </div>

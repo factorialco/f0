@@ -5,6 +5,20 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0TagList, TagType } from "../"
 import { mockTags } from "./mockData"
 
+const longLabelDotTags = [
+  { text: "Strategic Workforce Planning", color: "viridian" as const },
+  {
+    text: "Cross-functional Stakeholder Management",
+    color: "malibu" as const,
+  },
+  { text: "Advanced Data Analysis & Reporting", color: "yellow" as const },
+  {
+    text: "Ruggedized Industrial Handheld Barcode Scanner (Model XR-9000)",
+    color: "purple" as const,
+  },
+  { text: "Change Management", color: "lilac" as const },
+]
+
 /**
  * The TagList component displays a collection of tags of a single type.
  *
@@ -44,6 +58,43 @@ export const WithRemainingCount: Story = {
     tags: mockTags.dot.slice(0, 2),
     remainingCount: 10,
   },
+}
+
+/**
+ * Hover the `+N` counter to open the overflow popover. Each hidden tag's label is
+ * shown in full and the popover adapts its width to the longest label, without a
+ * horizontal scrollbar. Very long labels are capped (`max-w-72`) and ellipsized.
+ *
+ * This is the scenario used by the Job Catalog nested table (Competencies / Devices
+ * columns), where long names must stay fully readable in the popover.
+ */
+export const OverflowPopoverLongLabels: Story = {
+  args: {
+    type: "dot",
+    max: 1,
+    tags: longLabelDotTags,
+  },
+}
+
+/**
+ * In a narrow container a visible tag that does not fit truncates in place — hover
+ * it for OneEllipsis' full-text tooltip — instead of overflowing and painting over
+ * the `+N` counter, which stays visible. This is the Job Catalog Roles-table cell
+ * case (Competencies / Devices), where a node's own long attribute leads the cell.
+ */
+export const LongTagTruncatesInNarrowCell: Story = {
+  args: {
+    type: "dot",
+    max: 3,
+    tags: longLabelDotTags,
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[340px] overflow-hidden">
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const Snapshot: Story = {

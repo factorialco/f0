@@ -47,12 +47,7 @@ const SvgOne = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => {
 
       {hasColorClass
         ? pieces.map((piece) => (
-            <path
-              key={piece.id}
-              d={piece.path}
-              fill="currentColor"
-              vectorEffect="non-scaling-stroke"
-            />
+            <path key={piece.id} d={piece.path} fill="currentColor" />
           ))
         : pieces.map((piece) => (
             <foreignObject

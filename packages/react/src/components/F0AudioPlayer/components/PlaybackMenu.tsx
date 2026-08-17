@@ -1,6 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle, Ellipsis } from "@/icons/app"
+import { type LanguageOption, languageLabel } from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -20,6 +21,10 @@ interface PlaybackMenuProps {
   onRateChange: (rate: number) => void
   disabled?: boolean
   extraItems?: AudioPlayerMenuAction[]
+  /** Dubbed-audio languages (empty / single = no language section). */
+  audioLanguages?: LanguageOption[]
+  audioLanguage?: string
+  onAudioLanguageChange?: (locale: string) => void
 }
 
 export const PlaybackMenu = ({
@@ -28,9 +33,13 @@ export const PlaybackMenu = ({
   onRateChange,
   disabled,
   extraItems = [],
+  audioLanguages = [],
+  audioLanguage,
+  onAudioLanguageChange,
 }: PlaybackMenuProps) => {
   const i18n = useI18n()
   const showSpeed = playbackRates.length > 0
+  const showAudioLanguages = audioLanguages.length > 1
 
   return (
     <DropdownMenu>
@@ -76,9 +85,38 @@ export const PlaybackMenu = ({
             })}
           </>
         )}
-        {extraItems.length > 0 && (
+        {showAudioLanguages && (
           <>
             {showSpeed && <DropdownMenuSeparator />}
+            <DropdownMenuLabel className="text-f1-foreground-secondary">
+              {i18n.audioPlayer.audio}
+            </DropdownMenuLabel>
+            {audioLanguages.map((option) => {
+              const selected = option.locale === audioLanguage
+              return (
+                <DropdownMenuItem
+                  key={option.locale}
+                  onSelect={() => onAudioLanguageChange?.(option.locale)}
+                  className={cn(
+                    "justify-between gap-3 px-3 text-sm text-f1-foreground",
+                    selected &&
+                      "before:absolute before:inset-x-1 before:inset-y-0 before:rounded before:bg-f1-background-selected-bold/10 before:content-[''] dark:before:bg-f1-background-selected-bold/20"
+                  )}
+                >
+                  <span className="relative">{languageLabel(option)}</span>
+                  {selected && (
+                    <span className="relative flex text-f1-icon-selected">
+                      <F0Icon icon={CheckCircle} size="md" />
+                    </span>
+                  )}
+                </DropdownMenuItem>
+              )
+            })}
+          </>
+        )}
+        {extraItems.length > 0 && (
+          <>
+            {(showSpeed || showAudioLanguages) && <DropdownMenuSeparator />}
             {extraItems.map((action) => (
               <DropdownMenuItem
                 key={action.label}

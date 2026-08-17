@@ -48,7 +48,7 @@ const singleStep = [
 ]
 
 const meta = {
-  title: "AI/Widgets/UpsellKit/F0QuestionCard",
+  title: "F0QuestionCard",
   component: F0QuestionCardMultiStep,
   decorators: [
     (Story) => (

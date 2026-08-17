@@ -11,9 +11,9 @@ export * from "./Headers/exports"
 export * from "../../sds/Home/Communities/exports"
 
 /**
- * @deprecated Reactions has moved to @/kits/Social/Reactions. Import from there instead.
+ * @deprecated Reactions has moved to @/sds/social/Reactions. Import from there instead.
  */
-export * from "../../kits/Social/Reactions"
+export * from "../../sds/social/Reactions"
 
 /**
  * @deprecated These exports have moved to @/ui. Import from there instead.

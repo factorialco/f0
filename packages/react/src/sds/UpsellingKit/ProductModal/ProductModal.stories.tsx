@@ -9,7 +9,7 @@ import UpsellIcon from "@/icons/app/Upsell"
 import { ProductModal } from "./index"
 
 const meta = {
-  title: "UpsellingKit/ProductModal",
+  title: "ProductModal",
   component: ProductModal,
   parameters: {
     layout: "fullscreen",

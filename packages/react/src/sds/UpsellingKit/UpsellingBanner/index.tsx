@@ -7,7 +7,7 @@ import {
   BaseBanner,
   type BannerAction,
   type BaseBannerProps,
-} from "@/sds/ai/Banners/BaseBanner"
+} from "@/kits/ai/Banners/BaseBanner"
 
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 

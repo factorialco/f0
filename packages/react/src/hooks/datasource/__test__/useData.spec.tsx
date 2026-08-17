@@ -525,4 +525,128 @@ describe("mergeFiltersWithIntersection", () => {
     // Verify that fetchData was called (lanes functionality is working)
     expect(mockAdapter.fetchData).toHaveBeenCalled()
   })
+
+  describe("page size reuse", () => {
+    // Backs the `perPage: "auto"` flow: it over-fetches a first page, then
+    // shrinks the page size to what fits. Shrinking must reuse the already
+    // loaded records — never fetch again.
+    const buildPagedSource = (records: TestRecord[], perPage: number) => {
+      const fetchData = vi.fn(
+        async (options: PaginatedFetchOptions<TestFilters>) => {
+          const pp = options.pagination?.perPage ?? 10
+          const page =
+            "currentPage" in options.pagination
+              ? (options.pagination.currentPage ?? 1)
+              : 1
+          const start = (page - 1) * pp
+          return {
+            records: records.slice(start, start + pp),
+            total: records.length,
+            currentPage: page,
+            perPage: pp,
+            pagesCount: Math.ceil(records.length / pp),
+            type: "pages" as const,
+          }
+        }
+      )
+      const adapter: PaginatedDataAdapter<
+        TestRecord,
+        TestFilters,
+        PaginatedFetchOptions<TestFilters>,
+        PageBasedPaginatedResponse<TestRecord>
+      > = { fetchData, paginationType: "pages", perPage }
+      const source: TestSource = {
+        dataAdapter: adapter,
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+      }
+      return { source, fetchData }
+    }
+
+    it("reuses loaded records when the page size shrinks (no refetch)", async () => {
+      const records: TestRecord[] = Array.from({ length: 30 }, (_, i) => ({
+        id: i + 1,
+        name: `Test ${i + 1}`,
+      }))
+      // Stable sources per page size; only the adapter reference changes when
+      // the page size does (mirrors OneDataCollection's memoized adapter).
+      const big = buildPagedSource(records, 20)
+      const small = buildPagedSource(records, 10)
+      small.fetchData = big.fetchData // share the spy; shrink must not call it
+      small.source.dataAdapter.fetchData = big.source.dataAdapter.fetchData
+
+      const { result, rerender } = renderHook(({ source }) => useData(source), {
+        initialProps: { source: big.source },
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(big.fetchData).toHaveBeenCalledTimes(1)
+      expect(result.current.data.records).toHaveLength(20)
+      expect(result.current.paginationInfo?.perPage).toBe(20)
+
+      // Shrink the page size (auto measured that fewer rows fit).
+      rerender({ source: small.source })
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      // No extra loading: fetchData is still called exactly once, and the
+      // already-loaded records are simply trimmed to the new page size.
+      expect(big.fetchData).toHaveBeenCalledTimes(1)
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.data.records).toHaveLength(10)
+      expect(result.current.data.records.map((r) => r.id)).toEqual([
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      ])
+      const pagination = result.current.paginationInfo
+      expect(pagination?.type).toBe("pages")
+      if (pagination?.type === "pages") {
+        expect(pagination.perPage).toBe(10)
+        expect(pagination.pagesCount).toBe(3)
+      }
+    })
+
+    it("does fetch when the page size grows beyond the loaded records", async () => {
+      const records: TestRecord[] = Array.from({ length: 30 }, (_, i) => ({
+        id: i + 1,
+        name: `Test ${i + 1}`,
+      }))
+      const small = buildPagedSource(records, 10)
+      const big = buildPagedSource(records, 20)
+      big.fetchData = small.fetchData
+      big.source.dataAdapter.fetchData = small.source.dataAdapter.fetchData
+
+      const { result, rerender } = renderHook(({ source }) => useData(source), {
+        initialProps: { source: small.source },
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(small.fetchData).toHaveBeenCalledTimes(1)
+      expect(result.current.data.records).toHaveLength(10)
+
+      // Growing needs records we don't have yet, so a fetch is expected.
+      rerender({ source: big.source })
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(small.fetchData).toHaveBeenCalledTimes(2)
+      expect(result.current.data.records).toHaveLength(20)
+    })
+  })
 })

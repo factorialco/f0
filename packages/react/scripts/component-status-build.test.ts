@@ -4,7 +4,10 @@ import { dirname, join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vitest"
 
-import { computeComponentStatusData } from "./component-status-build.mjs"
+import {
+  a11yTierOf,
+  computeComponentStatusData,
+} from "./component-status-build.mjs"
 
 /**
  * These tests exercise the filesystem scan / extraction against a synthetic
@@ -233,5 +236,46 @@ describe("computeComponentStatusData (extraction)", () => {
       data.components.filter((c) => c.apiStatus === "stable").length
     )
     expect(data.stats.byDocQuality.gold).toBe(1)
+  })
+})
+
+describe("a11yTierOf", () => {
+  test("'skipped' when a story opts out via skipCi", () => {
+    expect(
+      a11yTierOf(`export const S = { parameters: { a11y: { skipCi: true } } }`)
+    ).toBe("skipped")
+  })
+
+  test("'skipped' when a story opts out via withSkipA11y()", () => {
+    expect(
+      a11yTierOf(`export const S = withSkipA11y({ parameters: {} })`)
+    ).toBe("skipped")
+  })
+
+  test("'enforced' when axe is blocking (test: \"error\") with no skips or downgrades", () => {
+    expect(
+      a11yTierOf(`export default { parameters: { a11y: { test: "error" } } }`)
+    ).toBe("enforced")
+  })
+
+  test("'todo' when no a11y config is present", () => {
+    expect(a11yTierOf(`export default { title: "X" }`)).toBe("todo")
+  })
+
+  test("'todo' when a file mixes error with a per-story todo (documented limitation)", () => {
+    expect(
+      a11yTierOf(
+        `export default { parameters: { a11y: { test: "error" } } }
+         export const Known = { parameters: { a11y: { test: "todo" } } }`
+      )
+    ).toBe("todo")
+  })
+
+  test("skip wins over error (precedence)", () => {
+    expect(
+      a11yTierOf(
+        `export default { parameters: { a11y: { test: "error", skipCi: true } } }`
+      )
+    ).toBe("skipped")
   })
 })

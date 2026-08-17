@@ -16,14 +16,12 @@ const SvgEqualLess = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M19 19H5"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M18 16L6 10.5L18 5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

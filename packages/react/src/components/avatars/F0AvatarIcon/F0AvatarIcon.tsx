@@ -13,8 +13,8 @@ export type F0AvatarIconProps = {
 
 const sizes = {
   sm: "size-6 rounded-sm",
-  md: "size-8 rounded-md",
-  lg: "size-10 rounded-lg",
+  md: "size-8 rounded",
+  lg: "size-10 rounded-md",
 }
 
 export const F0AvatarIcon = ({
@@ -27,7 +27,7 @@ export const F0AvatarIcon = ({
   return (
     <div
       className={cn(
-        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background dark:bg-f1-background-inverse-secondary",
+        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background",
         sizes[size]
       )}
       aria-label={ariaLabel}

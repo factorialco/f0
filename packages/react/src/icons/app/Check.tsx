@@ -13,14 +13,12 @@ const SvgCheck = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M10.75 16.75L17.75 7.25004"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M6.25 11.75L10.75 16.75"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

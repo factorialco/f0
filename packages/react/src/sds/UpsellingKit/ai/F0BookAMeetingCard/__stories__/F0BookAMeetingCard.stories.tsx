@@ -7,7 +7,7 @@ import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 import { F0BookAMeetingCard } from ".."
 
 const meta = {
-  title: "AI/Widgets/UpsellKit/F0BookAMeetingCard",
+  title: "F0BookAMeetingCard",
   component: F0BookAMeetingCard,
   decorators: [
     (Story) => (

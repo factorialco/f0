@@ -113,6 +113,9 @@ describe("ChatDocumentAttachmentCard (text)", () => {
     ])
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("app.log")
+    expect(
+      screen.queryByRole("button", { name: "Download app.log" })
+    ).not.toBeInTheDocument()
 
     expect(await screen.findByText(/plain log line 1/)).toBeInTheDocument()
     await waitFor(() =>
@@ -131,7 +134,7 @@ describe("ChatDocumentAttachmentCard (text)", () => {
         mimeType: "text/markdown",
       },
     ])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open CHANGELOG.md" }))
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument()
     // The heading renders as an actual <h1> (generous timeout: the viewer
@@ -140,11 +143,11 @@ describe("ChatDocumentAttachmentCard (text)", () => {
       await screen.findByRole(
         "heading",
         { name: "Release notes" },
-        { timeout: 5000 }
+        { timeout: 60_000 }
       )
     ).toBeInTheDocument()
     expect(screen.getByText("Chat: document previews")).toBeInTheDocument()
-  })
+  }, 60_000)
 
   it("renders plain text fullscreen as monospaced source", async () => {
     renderChat([
@@ -155,7 +158,7 @@ describe("ChatDocumentAttachmentCard (text)", () => {
         mimeType: "text/plain",
       },
     ])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open app.log" }))
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument()
     await waitFor(
@@ -185,5 +188,8 @@ describe("ChatDocumentAttachmentCard (text)", () => {
       ).not.toBeInTheDocument()
     )
     expect(screen.getByText("notes.txt")).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Download notes.txt" })
+    ).toBeInTheDocument()
   })
 })

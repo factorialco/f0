@@ -53,7 +53,6 @@ const HomeAnimated = React.forwardRef<SVGSVGElement, HomeProps>(
         <motion.path
           d="M6.25629 8.10265L10.2563 5.24551C11.2994 4.50044 12.7006 4.50044 13.7437 5.24551L17.7437 8.10265C18.5321 8.66579 19 9.575 19 10.5439V16.5C19 18.1569 17.6569 19.5 16 19.5H15C14.4477 19.5 14 19.0523 14 18.5V16C14 14.8954 13.1046 14 12 14C10.8954 14 10 14.8954 10 16V18.5C10 19.0523 9.55228 19.5 9 19.5H8C6.34315 19.5 5 18.1569 5 16.5V10.5439C5 9.575 5.4679 8.66579 6.25629 8.10265Z"
           initial="normal"
-          vectorEffect="non-scaling-stroke"
           variants={homeVariants}
           transition={homeTransition}
           animate={animate}
@@ -61,7 +60,6 @@ const HomeAnimated = React.forwardRef<SVGSVGElement, HomeProps>(
         <motion.path
           d="M13.2 19.5L17 19.5C18.6569 19.5 20 18.1568 20 16.5V10.4196C20 9.52098 19.5971 8.66965 18.9022 8.09983L15.8295 5.58019C15.2931 5.14036 14.6209 4.89999 13.9273 4.89999H10"
           initial="normal"
-          vectorEffect="non-scaling-stroke"
           variants={pathVariants}
           transition={homeTransition}
           animate={animate}

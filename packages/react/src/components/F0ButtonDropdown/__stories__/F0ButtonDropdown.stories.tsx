@@ -17,6 +17,7 @@ const meta = {
   title: "Button/ButtonDropdown",
   component: F0ButtonDropdown,
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
     design: {
       type: "figma",

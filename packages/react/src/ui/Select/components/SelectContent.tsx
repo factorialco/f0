@@ -153,11 +153,19 @@ const SelectContent = forwardRef<
       )
     }, [value])
 
+    /**
+     * Where the selected item sits in the list, or -1 when it isn't there at all
+     * (nothing selected, or its group is collapsed).
+     *
+     * `?? -1` rather than `|| 0`: `findIndex` returns -1 on a miss and `-1 || 0`
+     * is `-1` — truthy — so the miss used to be handed to `scrollToIndex`, which
+     * clamps it and scrolled the list to the top. A miss now means "don't scroll".
+     */
     const positionIndex = useMemo(() => {
       return (
         items?.findIndex(
           (item) => item.value !== undefined && valueArray.has(item.value)
-        ) || 0
+        ) ?? -1
       )
     }, [items, valueArray])
 
@@ -191,10 +199,28 @@ const SelectContent = forwardRef<
       }
     }, [virtualizer, animationStarted, asList])
 
+    /**
+     * REVEALING THE SELECTION IS AN OPENING GESTURE, once per session, not
+     * something that happens again whenever its index moves.
+     *
+     * Keyed on the index, this re-ran mid-scroll: the index shifts whenever the
+     * list above the selection changes — which is exactly what expanding or
+     * collapsing a GROUP does — and the list jumped back under the pointer. So it
+     * now fires for the first valid index of an open session and then stands down
+     * until the list closes again.
+     */
+    const revealedSelection = useRef(false)
     useEffect(() => {
-      // Scroll to selected item when position changes
+      // A closed list starts a fresh session. `asList` never closes, so its one
+      // reveal is on mount.
+      if (!open && !asList) revealedSelection.current = false
+    }, [open, asList])
+    useEffect(() => {
+      if (revealedSelection.current || positionIndex < 0) return
+      if (!open && !asList) return
+      revealedSelection.current = true
       virtualizer.scrollToIndex(positionIndex)
-    }, [virtualizer, positionIndex])
+    }, [asList, open, positionIndex, virtualizer])
 
     const virtualItems = virtualizer.getVirtualItems()
 
@@ -218,6 +244,16 @@ const SelectContent = forwardRef<
           height: virtualizer.getTotalSize() + VIEWBOX_VERTICAL_PADDING,
           width: "100%",
           position: "relative",
+          // ONE SCROLLPORT, and it is the ScrollArea's (`parentRef`, which is what
+          // the virtualizer measures and scrolls). This div is Radix's
+          // `Select.Viewport` via `asChild`, so Radix merges its own
+          // `overflow: hidden auto; flex: 1 1 0%` onto it — a SECOND scroller
+          // nested inside the first, and a spacer that flex could shrink below the
+          // height the virtualizer just gave it. Both are overridden here, where
+          // the child's style wins the merge: the wheel then moves one list
+          // instead of handing off between two.
+          overflow: "visible",
+          flex: "none",
         }}
       >
         <div

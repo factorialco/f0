@@ -14,6 +14,8 @@ interface FormActionBarProps {
   isDirty: boolean
   actionBarStatus: ActionBarStatus
   hasErrors: boolean
+  /** Whether any file field still has an upload in flight */
+  hasPendingUploads: boolean
   errorCount: number
   resolvedActionBarLabel: string | undefined
   submitLabel: string
@@ -36,6 +38,7 @@ export const FormActionBar = forwardRef<F0ActionBarRef, FormActionBarProps>(
       isDirty,
       actionBarStatus,
       hasErrors,
+      hasPendingUploads,
       errorCount,
       resolvedActionBarLabel,
       submitLabel,
@@ -104,7 +107,7 @@ export const FormActionBar = forwardRef<F0ActionBarRef, FormActionBarProps>(
               label: submitLabel,
               icon: submitIcon,
               onClick: onSubmit,
-              disabled: hasErrors,
+              disabled: hasErrors || hasPendingUploads,
             },
           ]}
           secondaryActions={

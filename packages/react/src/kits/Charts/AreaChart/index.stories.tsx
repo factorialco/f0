@@ -5,7 +5,7 @@ import { AreaChart } from "./index"
 const meta: Meta = {
   title: "Charts/AreaChart",
   component: AreaChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   argTypes: {
     blurArea: {
       control: "select",

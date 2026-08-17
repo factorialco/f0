@@ -14,13 +14,24 @@ const { dialogContentSpy } = vi.hoisted(() => ({ dialogContentSpy: vi.fn() }))
 vi.mock("../dialog-primitive", () => ({
   // Passthrough so its children always render.
   Dialog: ({ children }: { children?: ReactNode }) => <>{children}</>,
-  // forwardRef so the ref DialogWrapper passes doesn't warn; the spy records props.
-  DialogContent: forwardRef(function DialogContentMock(
-    props: { children?: ReactNode },
-    _ref
-  ) {
+  // forwardRef so the ref DialogWrapper passes doesn't warn; the spy records
+  // props. The real DialogContent hands the inner content box to `contentBoxRef`
+  // (the element DialogWrapper measures), so the mock does the same with the div.
+  DialogContent: forwardRef<
+    HTMLDivElement,
+    {
+      children?: ReactNode
+      contentBoxRef?: (el: HTMLDivElement | null) => void
+    }
+  >(function DialogContentMock(props, ref) {
     dialogContentSpy(props)
-    return <div data-testid="dialog-content">{props.children}</div>
+    return (
+      <div ref={ref} data-testid="dialog-content">
+        <div ref={props.contentBoxRef} data-testid="dialog-content-box">
+          {props.children}
+        </div>
+      </div>
+    )
   }),
 }))
 
@@ -78,5 +89,69 @@ describe("DialogWrapper portal target", () => {
     expect(dialogContentSpy).toHaveBeenCalledWith(
       expect.objectContaining({ container })
     )
+  })
+})
+
+describe("DialogWrapper onWidthChange", () => {
+  const baseProps = {
+    isOpen: true,
+    onOpenChange: vi.fn(),
+    onClose: vi.fn(),
+    children: <div>Content</div>,
+    position: "right" as const,
+  }
+
+  // jsdom has no ResizeObserver and no real layout, so stub both: a no-op
+  // observer (mount already emits once directly) and a fixed measured width.
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      }
+    )
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      width: 492,
+    } as DOMRect)
+  })
+
+  it("reports the content width once the drawer mounts", () => {
+    const onWidthChange = vi.fn()
+    render(<DialogWrapper {...baseProps} onWidthChange={onWidthChange} />)
+
+    expect(onWidthChange).toHaveBeenCalledWith(492)
+  })
+
+  it("reports 0 when the drawer unmounts so the offset can be cleared", () => {
+    const onWidthChange = vi.fn()
+    const { unmount } = render(
+      <DialogWrapper {...baseProps} onWidthChange={onWidthChange} />
+    )
+    onWidthChange.mockClear()
+
+    unmount()
+
+    expect(onWidthChange).toHaveBeenCalledWith(0)
+  })
+
+  // Regression: the width must come from the inner content box (`contentBoxRef`),
+  // NOT the full-viewport `fixed inset-0` positioner the forwarded `ref` lands
+  // on. Give the two different widths and assert the box's wins.
+  it("measures the inner content box, not the full-viewport positioner", () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        const width =
+          this.getAttribute("data-testid") === "dialog-content-box" ? 492 : 1440
+        return { width } as DOMRect
+      }
+    )
+    const onWidthChange = vi.fn()
+    render(<DialogWrapper {...baseProps} onWidthChange={onWidthChange} />)
+
+    expect(onWidthChange).toHaveBeenCalledWith(492)
+    expect(onWidthChange).not.toHaveBeenCalledWith(1440)
   })
 })

@@ -54,7 +54,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
         className={cn(
           "flex items-start justify-between py-5",
           withInset && "px-5",
-          "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0"
+          "[&>div]:px-0 [&>div]:mx-0 [&>div]:border-0"
         )}
       >
         <SectionHeader title={title} description={description ?? ""} />

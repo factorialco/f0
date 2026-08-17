@@ -33,8 +33,8 @@ export const DocsContainer: FC<PropsWithChildren<DocsContainerProps>> = (
   return (
     <BaseContainer theme={isDark ? darkTheme : lightTheme} {...props}>
       <I18nProvider translations={storybookTranslations}>
-        <ImportBanner isDark={isDark} />
         <ComponentStatusPanel />
+        <ImportBanner />
         {children}
       </I18nProvider>
     </BaseContainer>

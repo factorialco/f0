@@ -15,7 +15,69 @@ type EmojiMartElement = HTMLElement & {
   update?: (props: object) => void
 }
 
+const INVALID_EMOJI_BUTTON_ARIA = [
+  "aria-posinset",
+  "aria-selected",
+  "aria-setsize",
+] as const
+
+/**
+ * emoji-mart currently places listbox-only ARIA attributes on native buttons.
+ * Keep the valid button names/activation model while removing attributes that
+ * are not permitted for the button role. The observer also covers search and
+ * category changes that replace buttons inside the shadow root.
+ */
+function observeEmojiButtonAria(element: EmojiMartElement): () => void {
+  let observer: MutationObserver | null = null
+  let animationFrame: number | null = null
+  let attempts = 0
+
+  const connect = () => {
+    const root = element.shadowRoot
+    if (!root) {
+      if (attempts < 10) {
+        attempts += 1
+        animationFrame = requestAnimationFrame(connect)
+      }
+      return
+    }
+
+    const normalize = () => {
+      const selector = INVALID_EMOJI_BUTTON_ARIA.map(
+        (attribute) => `button[${attribute}]`
+      ).join(",")
+      for (const button of root.querySelectorAll(selector)) {
+        for (const attribute of INVALID_EMOJI_BUTTON_ARIA) {
+          button.removeAttribute(attribute)
+        }
+      }
+
+      // Emoji buttons use roving tabindex and are not tabbable until the
+      // picker moves focus into them. Make the independently scrollable list
+      // reachable so keyboard users can scroll it before choosing an emoji.
+      root.querySelector<HTMLElement>(".scroll")?.setAttribute("tabindex", "0")
+    }
+
+    normalize()
+    observer = new MutationObserver(normalize)
+    observer.observe(root, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: [...INVALID_EMOJI_BUTTON_ARIA],
+    })
+  }
+
+  connect()
+
+  return () => {
+    observer?.disconnect()
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame)
+  }
+}
+
 export type EmojiPickerProps = {
+  className?: string
   data?: unknown
   onEmojiSelect?: (emoji: { native: string }) => void
   locale?: string
@@ -33,11 +95,13 @@ export type EmojiPickerProps = {
   dynamicWidth?: boolean
 }
 
-function EmojiPickerElement(props: EmojiPickerProps) {
+function EmojiPickerElement({ className, ...props }: EmojiPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const elementRef = useRef<EmojiMartElement | null>(null)
   const propsRef = useRef(props)
+  const classNameRef = useRef(className)
   propsRef.current = props
+  classNameRef.current = className
 
   // createElement (not `new`, which @emoji-mart/react uses) instantiates the
   // *registered* element class. With a duplicated emoji-mart class in the
@@ -51,6 +115,7 @@ function EmojiPickerElement(props: EmojiPickerProps) {
       "em-emoji-picker"
     ) as EmojiMartElement
     elementRef.current = element
+    element.className = classNameRef.current ?? ""
     // Seed props *before* appending: connectedCallback reads `this.props`
     // synchronously on append to build the picker. A post-append `update()`
     // is dropped because emoji-mart's attributeChangedCallback bails while its
@@ -58,8 +123,10 @@ function EmojiPickerElement(props: EmojiPickerProps) {
     // and options unset — so selecting an emoji would do nothing.
     element.props = propsRef.current
     container.appendChild(element)
+    const stopObservingAria = observeEmojiButtonAria(element)
 
     return () => {
+      stopObservingAria()
       element.remove()
       elementRef.current = null
     }
@@ -67,7 +134,11 @@ function EmojiPickerElement(props: EmojiPickerProps) {
 
   // Push later prop changes to the live element (as @emoji-mart/react does).
   useEffect(() => {
-    elementRef.current?.update?.(props)
+    const element = elementRef.current
+    if (!element) return
+
+    element.className = className ?? ""
+    element.update?.(props)
   })
 
   return <div ref={containerRef} />

@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.1.0](https://github.com/factorialco/f0/compare/f0-core-v2.0.0...f0-core-v2.1.0) (2026-08-11)
+
+
+### Features
+
+* **chat:** improve identity, navigation and scroll ([#4985](https://github.com/factorialco/f0/issues/4985)) ([bbe7b9f](https://github.com/factorialco/f0/commit/bbe7b9f9c8fb44a9df403282bc8adaabbf9928ac))
+
+## [2.0.0](https://github.com/factorialco/f0/compare/f0-core-v1.56.0...f0-core-v2.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884))
+
+### Features
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884)) ([c0c0c57](https://github.com/factorialco/f0/commit/c0c0c5780cf2b295849dda8db3b69734f6f9a91d))
+
+## [1.56.0](https://github.com/factorialco/f0/compare/f0-core-v1.55.0...f0-core-v1.56.0) (2026-07-24)
+
+
+### Features
+
+* **F0VideoPlayer:** add video player component ([#4754](https://github.com/factorialco/f0/issues/4754)) ([626ce82](https://github.com/factorialco/f0/commit/626ce8277900f45e05b1ecdfd14195cc64bebf13))
+
+## [1.55.0](https://github.com/factorialco/f0/compare/f0-core-v1.54.0...f0-core-v1.55.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
 ## [1.54.0](https://github.com/factorialco/f0/compare/f0-core-v1.53.0...f0-core-v1.54.0) (2026-06-29)
 
 

@@ -62,6 +62,33 @@ export const Default: Story = {
   args: { ...baseProps },
 }
 
+const teamAvatar = {
+  type: "team",
+  name: "Marketing",
+} as const
+
+/**
+ * The node silhouette follows the avatar variant — no extra prop. A `person`
+ * avatar keeps the circular dot/pill (org chart); a `team`/`icon`/… avatar makes
+ * the node a rounded-square card (Teams / Job Catalog).
+ */
+export const AvatarShape: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-4">
+      <F0GraphNode
+        avatar={personAvatar}
+        title="Person → circle"
+        subtitle="Org chart look"
+      />
+      <F0GraphNode
+        avatar={teamAvatar}
+        title="Team → square"
+        subtitle="Teams / Job Catalog"
+      />
+    </div>
+  ),
+}
+
 export const States: Story = {
   render: () => (
     <div className="flex flex-wrap items-start gap-4">

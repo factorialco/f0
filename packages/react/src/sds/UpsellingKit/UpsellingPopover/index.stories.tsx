@@ -4,7 +4,7 @@ import { useState } from "react"
 import { UpsellingPopover } from "."
 
 const meta: Meta<typeof UpsellingPopover> = {
-  title: "UpsellingKit/UpsellingPopover",
+  title: "UpsellingPopover",
   component: UpsellingPopover,
   argTypes: {
     actions: {

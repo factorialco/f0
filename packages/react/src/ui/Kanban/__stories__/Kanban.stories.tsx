@@ -585,3 +585,48 @@ export const SimpleOnMoveTest: Story = {
     })
   },
 }
+
+export const ContentHeight: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  args: { lanes: [], renderCard: () => null, getKey: () => "" },
+  render: function Render() {
+    const [instanceId] = useState(() => Symbol("kanban-content-height"))
+    const many: Task[] = Array.from({ length: 14 }, (_, i) => ({
+      id: `m${i}`,
+      title: `Task ${i + 1}`,
+    }))
+    const lanes: KanbanProps<Task>["lanes"] = [
+      { id: "backlog", title: "Backlog", items: many, variant: "neutral" },
+      {
+        id: "in-progress",
+        title: "In Progress",
+        items: mockRight,
+        variant: "info",
+      },
+      { id: "done", title: "Done", items: mockLeft, variant: "positive" },
+    ]
+    return (
+      <DndProvider driver={createAtlaskitDriver(instanceId)}>
+        {/* Constrained, scrollable outer container: with heightMode="content" the
+          lanes should grow to the tallest (Backlog) and this box should scroll —
+          NOT each lane scrolling internally. */}
+        <div className="h-[480px] overflow-auto rounded-lg border border-f1-border-secondary">
+          <Kanban<Task>
+            heightMode="content"
+            lanes={lanes}
+            getKey={(item: Task) => item.id}
+            renderCard={(item: Task, index: number, total: number) => (
+              <KanbanCard<Task>
+                drag={{ id: item.id, type: "list-card", data: { ...item } }}
+                id={item.id}
+                index={index}
+                total={total}
+                title={item.title}
+              />
+            )}
+          />
+        </div>
+      </DndProvider>
+    )
+  },
+}

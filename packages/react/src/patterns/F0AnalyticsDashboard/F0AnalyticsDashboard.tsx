@@ -1,3 +1,4 @@
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { useEffect, useMemo, useState } from "react"
 
 import type {
@@ -38,6 +39,8 @@ export const F0AnalyticsDashboard = <
   filters,
   presets,
   defaultFilters,
+  filtersValue,
+  onFiltersChange,
   items,
   editMode,
   onLayoutChange,
@@ -51,9 +54,13 @@ export const F0AnalyticsDashboard = <
 }: F0AnalyticsDashboardProps<Filters>) => {
   const i18n = useI18n()
 
-  const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
-    () => defaultFilters ?? ({} as FiltersState<Filters>)
-  )
+  const [currentFilters = {}, setCurrentFilters] = useControllableState<
+    FiltersState<Filters>
+  >({
+    prop: filtersValue,
+    defaultProp: defaultFilters ?? ({} as FiltersState<Filters>),
+    onChange: onFiltersChange,
+  })
 
   const initialNavState = useMemo(() => {
     if (!navigationFilters)

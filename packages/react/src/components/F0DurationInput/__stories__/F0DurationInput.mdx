@@ -116,7 +116,7 @@ A11y wiring is not visually demonstrable. It includes: `role="group"` on the con
 
 - `value={5400}` with `units={["hours", "minutes"]}` renders `1h 30min`.
 - `value={90061}` with `units={["days", "hours", "minutes", "seconds"]}` renders `1d 1h 1min 1s`.
-- Non-finite or negative values are coerced to `0`.
+- Non-finite values are coerced to `0`. Negative values are also coerced to `0` unless `allowNegative` is set.
 
 Segments that are **not visible** do not contribute to the emitted value. With `units={["hours", "minutes"]}`, the seconds component is dropped — `5430` becomes `5400` (`1h 30min`) on the next normalisation.
 
@@ -136,6 +136,16 @@ Each unit accepts an optional config via `fields={{ [unit]: { ... } }}`:
 - `maxVisibleDigits` — caps the width of the segment in `ch` units. Defaults to `2`. Increase it when `max` allows three-digit values (e.g. `max: 999`).
 - `suffix` — overrides the default suffix (`d`, `h`, `min`, `s`).
 - `ariaLabel` — overrides the segment's accessible name.
+
+### Negative durations
+
+With `allowNegative`, the input accepts a minus sign at the start of the first visible segment. The sign applies to the **whole duration**, not the individual segment: `-1h 15min` means minus 75 minutes, and `value`/`onChange` carry `-4500`.
+
+- Typing `-` alone keeps a pending sign and emits `0`; a dangling sign is dropped on blur.
+- Removing the sign (or clearing the first segment) returns the duration to positive.
+- Segment `max` clamping applies to the magnitude.
+
+<Canvas of={Stories.AllowNegative} />
 
 ### Status messages
 
@@ -216,6 +226,18 @@ Pass `status={{ type, message }}` to colour the border and render a message belo
           <code>(seconds: number) =&gt; void</code>
         </td>
         <td>Fired on every keystroke with the total in seconds. Required.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>allowNegative</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Accepts a leading minus sign in the first visible segment, making the
+          whole duration negative. Defaults to <code>false</code>.
+        </td>
       </tr>
       <tr>
         <td>

@@ -17,6 +17,12 @@ interface F0FormContextValue {
   /** Default upload hook shared across all file fields */
   useUpload?: UseFileUpload
   /**
+   * Registers whether a given file field currently has an upload in progress.
+   * The form aggregates these signals to block submission until every upload
+   * settles. `id` must be stable for the lifetime of the field.
+   */
+  registerUploadState?: (id: string, isUploading: boolean) => void
+  /**
    * Submit configuration for the form.
    */
   submitConfig?: F0FormSubmitConfig

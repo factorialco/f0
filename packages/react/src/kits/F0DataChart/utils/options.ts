@@ -13,6 +13,20 @@ interface CategoryAxisOptions {
   /** Axis length in pixels — used to auto-compute label interval */
   axisLength?: number
   /**
+   * Minimum pixels each label needs along the axis before labels start being
+   * skipped. Defaults to a horizontal-text width; horizontal charts (stacked
+   * labels on the Y axis) should pass a line-height instead.
+   */
+  minLabelSpace?: number
+  /**
+   * How many categories the axis actually draws, when that is fewer than
+   * `data.length` — a horizontal chart with more rows than fit shows a window
+   * of them and scrolls (see `horizontalCategoryWindow`). Skipping labels has
+   * to be decided from the rows on screen; measuring against the whole dataset
+   * thins labels for crowding the reader never sees.
+   */
+  visibleCount?: number
+  /**
    * Whether to leave space at the edges of the category axis.
    * - `true` (default for ECharts) — centres categories with padding at edges.
    *   Appropriate for bar charts where bars need centering space.
@@ -50,8 +64,47 @@ const MIN_LABEL_WIDTH = 60
 /** Smallest readable label width when truncating with ellipsis (~3 chars). */
 const MIN_TRUNCATED_LABEL_WIDTH = 24
 
-/** Horizontal breathing room reserved between adjacent centered labels. */
-const LABEL_GAP = 8
+/**
+ * The most a chart may spend on axis labels: a share of the container, itself
+ * capped, so a wide chart can afford longer names without a huge one handing
+ * most of itself over to text.
+ *
+ * This is a ceiling, not an allowance. A horizontal bar chart measures its own
+ * category names and asks for exactly what they need (see
+ * `measuredCategoryLabelWidth` in `useBarChartOptions`), so labels short enough
+ * to fit leave the rest of the width to the bars, and only a name that would
+ * cross this line gets truncated.
+ */
+const CATEGORY_LABEL_MAX_WIDTH = 400
+const CATEGORY_LABEL_WIDTH_SHARE = 0.3
+
+/**
+ * Ceiling on the width labels may take at this container size.
+ *
+ * Exported for charts that measure their own labels and need to clamp the
+ * result — the fallback below applies to callers that don't.
+ */
+export function labelWidthCap(containerWidth: number | undefined): number {
+  return Math.min(
+    CATEGORY_LABEL_MAX_WIDTH,
+    (containerWidth ?? 600) * CATEGORY_LABEL_WIDTH_SHARE
+  )
+}
+
+/**
+ * Gap between a category label and the axis line it names, up from ECharts' own
+ * default of 8. On a horizontal chart this is the channel between the names and
+ * the bars, and at 8 the two read as one block. `containLabel` accounts for it,
+ * so the plot gives up the width rather than the label being clipped.
+ */
+const CATEGORY_LABEL_MARGIN = 12
+
+/**
+ * Breathing room reserved between adjacent labels. Zero: the label box is the
+ * whole slot, so a label is only skipped when it genuinely has no room. ECharts
+ * still drops labels that would actually collide, via `axisLabel.hideOverlap`.
+ */
+const LABEL_GAP = 0
 
 /**
  * Compute how many labels to skip so that they don't overlap.
@@ -63,13 +116,16 @@ const LABEL_GAP = 8
  */
 export function computeLabelInterval(
   categoryCount: number,
-  containerWidth: number | undefined
+  axisLength: number | undefined,
+  // Space each label needs along the axis. For a horizontal axis this is the
+  // label width; for a vertical axis (horizontal charts) it's the line-height.
+  minSpace: number = MIN_LABEL_WIDTH
 ): number | undefined {
-  if (!containerWidth || categoryCount <= 1) return undefined
-  const spacePerLabel = containerWidth / categoryCount
-  if (spacePerLabel >= MIN_LABEL_WIDTH) return undefined
+  if (!axisLength || categoryCount <= 1) return undefined
+  const spacePerLabel = axisLength / categoryCount
+  if (spacePerLabel >= minSpace) return undefined
   // How many labels fit comfortably
-  const fitCount = Math.max(1, Math.floor(containerWidth / MIN_LABEL_WIDTH))
+  const fitCount = Math.max(1, Math.floor(axisLength / minSpace))
   // interval = skip every N labels so that only fitCount labels are shown
   return Math.max(0, Math.ceil(categoryCount / fitCount) - 1)
 }
@@ -136,11 +192,13 @@ export function buildCategoryAxis({
   theme,
   formatter,
   axisLength,
+  minLabelSpace,
   boundaryGap,
   maxLabelWidth,
   show = true,
   smartLayout = false,
   edgeAligned = false,
+  visibleCount,
 }: CategoryAxisOptions) {
   // When smartLayout is enabled, compute `{interval, labelWidth}` from the
   // available pixels so that we show as many labels as possible with ellipsis.
@@ -151,7 +209,8 @@ export function buildCategoryAxis({
       : undefined
 
   const interval =
-    layout?.interval ?? computeLabelInterval(data.length, axisLength)
+    layout?.interval ??
+    computeLabelInterval(visibleCount ?? data.length, axisLength, minLabelSpace)
 
   // Resolved truncation width: smart layout takes precedence; otherwise the
   // explicit `maxLabelWidth` override is used as before.
@@ -176,6 +235,7 @@ export function buildCategoryAxis({
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
       hideOverlap: true,
+      margin: CATEGORY_LABEL_MARGIN,
       // Edge-aligned charts must always render the first and last labels —
       // skipping either of them would expose an unlabelled chart edge.
       ...(edgeAligned ? { showMinLabel: true, showMaxLabel: true } : {}),
@@ -215,6 +275,30 @@ interface ValueAxisOptions {
   maxLabelWidth?: number
   /** Whether the axis labels are rendered. Grid lines stay controlled by showGrid. */
   show?: boolean
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  splitNumber?: number
+  /** Pins the axis maximum, replacing ECharts' rounded-up nice value. */
+  max?: number
+  /**
+   * Which edge the axis labels sit on. Horizontal charts pass `"top"`: their
+   * value axis is the X axis, and a tall category list pushes a bottom axis
+   * far away from the first rows a reader starts on.
+   */
+  position?: "top" | "bottom" | "left" | "right"
+  /**
+   * Fit the axis to the data range instead of anchoring it at zero. ECharts
+   * defaults this off, which is right for bar/line (a bar not starting at zero
+   * misstates its magnitude) but collapses a two-measure plot whose values sit
+   * far from the origin.
+   */
+  scale?: boolean
+  /**
+   * Anchor the first and last labels to the axis ends so they cannot overflow
+   * the chart container — the value-axis counterpart of `edgeAligned` on
+   * {@link buildCategoryAxis}. Needed when the axis bound coincides with the
+   * plot edge, which is the normal case for a scaled axis.
+   */
+  alignEdgeLabels?: boolean
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -224,9 +308,18 @@ export function buildValueAxis({
   formatter,
   maxLabelWidth,
   show = true,
+  splitNumber,
+  max,
+  position,
+  scale,
+  alignEdgeLabels,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
+    ...(splitNumber !== undefined ? { splitNumber } : {}),
+    ...(max !== undefined ? { max } : {}),
+    ...(position !== undefined ? { position } : {}),
+    ...(scale !== undefined ? { scale } : {}),
     axisLine: {
       show: false,
     },
@@ -239,6 +332,9 @@ export function buildValueAxis({
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
       hideOverlap: true,
+      ...(alignEdgeLabels
+        ? { alignMinLabel: "left" as const, alignMaxLabel: "right" as const }
+        : {}),
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(Number(_value)),
@@ -359,6 +455,156 @@ interface TooltipOptions {
   customFormatter?: (params: unknown) => string
 }
 
+/** Escape consumer-provided tooltip text before inserting it into HTML. */
+export function escapeTooltipText(value: unknown): string {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
+// ---------------------------------------------------------------------------
+// Shared tooltip content renderer
+// ---------------------------------------------------------------------------
+
+/** Minimum tooltip width (px) so short values don't produce a cramped box. */
+const TOOLTIP_MIN_WIDTH = 130
+
+/** A context line below the headline value, e.g. "14.1% of total". */
+export interface ValueTooltipRow {
+  /** Emphasized leading text — a value, percentage, or delta. */
+  value: string
+  /** Trailing description, e.g. "of total", "target", "from previous". */
+  label: string
+  /** Color for the emphasized part. Defaults to the primary foreground. */
+  color?: string
+  /** ECharts' colored dot, for rows that stand for a series. Trusted HTML. */
+  marker?: string
+  /**
+   * Render the value at headline size instead of the compact row size. For
+   * charts whose data point has no single headline value but whose numbers
+   * still deserve the emphasis every other chart's `value` gets — a scatter
+   * point is two coordinates, neither subordinate to the other.
+   */
+  size?: "large"
+}
+
+export interface ValueTooltipContent {
+  /**
+   * ECharts' own colored dot. Trusted HTML generated per data point (it
+   * reflects per-point color overrides), so it is the one part rendered
+   * unescaped. Everything else is escaped.
+   */
+  marker?: string
+  /** Series, slice, or stage name. */
+  title?: string
+  /** Secondary line under the title — usually the category. */
+  subtitle?: string
+  /** Headline value, already formatted. Omit for tooltips that only list rows. */
+  value?: string
+  /** Context lines below the headline. Falsy entries are skipped. */
+  rows?: (ValueTooltipRow | undefined | false)[]
+}
+
+/**
+ * Render the shared F0 chart tooltip: colored dot + name, category, a large
+ * value, then context rows. Every chart type uses this so a tooltip reads the
+ * same regardless of which visualization the user is hovering.
+ */
+export function renderValueTooltip(
+  { marker, title, subtitle, value, rows = [] }: ValueTooltipContent,
+  theme: ChartTheme
+): string {
+  const secondary = `color: ${theme.colors.foregroundSecondary}; font-size: 12px`
+  const headline = "font-size: 20px; font-weight: 600; line-height: 1.2"
+  const visibleRows = rows.filter((row): row is ValueTooltipRow => Boolean(row))
+
+  const renderRow = (row: ValueTooltipRow): string => {
+    const color = row.color ?? theme.colors.foreground
+    const marker = String(row.marker ?? "")
+
+    if (row.size === "large") {
+      // Label sits under its value rather than beside it: with two stacked
+      // large rows, trailing labels would leave the numbers ragged.
+      return `<div style="margin-top: 6px">${marker}<div style="${headline}; color: ${color}">${escapeTooltipText(row.value)}</div><div style="${secondary}">${escapeTooltipText(row.label)}</div></div>`
+    }
+
+    return `<div style="${secondary}">${marker}<strong style="color: ${color}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
+  }
+
+  const html = [
+    title !== undefined
+      ? `<div style="font-weight: 600">${String(marker ?? "")}${escapeTooltipText(title)}</div>`
+      : "",
+    subtitle !== undefined
+      ? `<div style="${secondary}">${escapeTooltipText(subtitle)}</div>`
+      : "",
+    value !== undefined
+      ? `<div style="${headline}; margin-top: 6px">${escapeTooltipText(value)}</div>`
+      : "",
+    visibleRows.length > 0
+      ? `<div style="margin-top: 6px">${visibleRows.map(renderRow).join("")}</div>`
+      : "",
+  ].join("")
+
+  return `<div style="min-width: ${TOOLTIP_MIN_WIDTH}px">${html}</div>`
+}
+
+/**
+ * The formatter every chart type uses for the values in its tooltip.
+ *
+ * A tooltip reads the number the same way the rest of the chart does, so it
+ * takes `valueFormatter` — the one that writes the axis and the labels. That is
+ * what carries a unit across: a chart whose axis says "€46,390.86" would
+ * otherwise hover as "46390.863", dropping the currency and exposing raw
+ * float precision.
+ *
+ * `tooltipValueFormatter` overrides it, for the case where the axis has to stay
+ * compact ("125k") but the tooltip should be exact ("125,000"). With neither,
+ * the value falls back to a plain localized number.
+ */
+export function tooltipValueFormat(
+  tooltipValueFormatter?: (value: number) => string,
+  valueFormatter?: (value: number) => string
+): (value: number) => string {
+  const format = tooltipValueFormatter ?? valueFormatter
+  return (value) => (format ? format(value) : value.toLocaleString())
+}
+
+/**
+ * Build a tooltip dot in an explicit color, matching the one ECharts injects
+ * as `params.marker`. Needed where ECharts' own marker uses the palette rather
+ * than the color actually painted (e.g. the gauge arc).
+ */
+export function renderMarker(color: string): string {
+  // The color lands in a style attribute — keep it to CSS color syntax.
+  const safe = color.replace(/[^a-zA-Z0-9#(),.%\s/-]/g, "")
+  return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${safe}"></span>`
+}
+
+/**
+ * Format a signed percentage delta ("+22.2%") and pick its semantic color.
+ * Returns `undefined` when there is nothing meaningful to compare against.
+ */
+export function deltaRow(
+  value: number,
+  previous: number | undefined,
+  label: string,
+  theme: ChartTheme
+): ValueTooltipRow | undefined {
+  if (previous === undefined || previous === 0 || !Number.isFinite(value)) {
+    return undefined
+  }
+  const change = ((value - previous) / Math.abs(previous)) * 100
+  return {
+    value: `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`,
+    label,
+    color: change >= 0 ? theme.colors.positive : theme.colors.critical,
+  }
+}
+
 /**
  * Build a fully styled axis-triggered tooltip that optionally filters out
  * ghost series (e.g. target gradient bars).
@@ -432,14 +678,14 @@ export function buildTooltip({
 
         if (filtered.length === 0) return ""
 
-        const header = `<div style="margin-bottom: 4px; font-weight: 500">${String(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
+        const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
         const items = filtered
           .map(
             (p: { marker?: string; seriesName?: string; value?: number }) => {
               const formattedValue = valueFormatter
                 ? valueFormatter(Number(p.value))
                 : String(p.value)
-              return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong></div>`
+              return `<div>${String(p.marker ?? "")} ${escapeTooltipText(p.seriesName ?? "")} <strong>${escapeTooltipText(formattedValue)}</strong></div>`
             }
           )
           .join("")
@@ -512,6 +758,9 @@ export function buildAxes({
   showCategoryAxis = true,
   showValueAxis = true,
   categoryMaxLabelWidth,
+  categoryVisibleCount,
+  valueAxisSplitNumber,
+  valueAxisMax,
 }: {
   isVertical: boolean
   categories: string[]
@@ -532,8 +781,21 @@ export function buildAxes({
    * "September" still get rendered horizontally and truncate gracefully.
    */
   categoryMaxLabelWidth?: number
+  /**
+   * Categories the axis actually draws, when a horizontal chart windows its
+   * rows. Forwarded to `buildCategoryAxis` as `visibleCount`.
+   */
+  categoryVisibleCount?: number
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  valueAxisSplitNumber?: number
+  /**
+   * Pins the value axis maximum instead of letting ECharts round up to a nice
+   * number. Set by a chart whose value-axis labels are hidden, where that
+   * rounding buys no readable ticks and only costs plot space.
+   */
+  valueAxisMax?: number
 }) {
-  const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
+  const yAxisMaxLabelWidth = labelWidthCap(containerWidth)
 
   // Estimate the horizontal space taken by the value (Y) axis labels + grid
   // padding so the smart layout knows how wide the plot area really is.
@@ -544,17 +806,28 @@ export function buildAxes({
     ? Math.max(0, containerWidth - Y_AXIS_RESERVED)
     : undefined
 
+  // On a horizontal chart the category labels stack vertically on the Y axis,
+  // so each needs a line-height of room — not the horizontal-text width used
+  // for the X axis. Using the width constant there dropped labels far too
+  // eagerly (reserving ~60px of height for a ~17px-tall label).
+  const verticalLabelSpace =
+    Math.round(theme.textStyle.fontSize * 1.4) + LABEL_GAP
+
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
     axisLength: isVertical ? xPlotLength : containerHeight,
+    minLabelSpace: isVertical ? undefined : verticalLabelSpace,
     boundaryGap,
     show: showCategoryAxis,
     // Vertical charts get the smart layout (truncate-then-skip). Horizontal
     // charts (category on Y axis) keep their fixed cap.
     smartLayout: isVertical,
     edgeAligned: isVertical && boundaryGap === false,
+    ...(categoryVisibleCount !== undefined
+      ? { visibleCount: categoryVisibleCount }
+      : {}),
     ...(categoryMaxLabelWidth !== undefined
       ? { maxLabelWidth: categoryMaxLabelWidth }
       : !isVertical
@@ -567,16 +840,28 @@ export function buildAxes({
     showGrid,
     formatter: valueFormatter,
     show: showValueAxis,
-    ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
+    splitNumber: valueAxisSplitNumber,
+    ...(valueAxisMax !== undefined ? { max: valueAxisMax } : {}),
+    // Vertical charts keep the value axis on the left. Horizontal charts move
+    // it to the top: rows are read top-down from the first category, so the
+    // scale belongs where the reading starts — and it stays in view when a
+    // long category list makes the chart taller than its container.
+    ...(isVertical
+      ? { maxLabelWidth: yAxisMaxLabelWidth }
+      : { position: "top" as const }),
   })
 
   return {
     xAxis: (isVertical
       ? { ...categoryAxis }
       : { ...valueAxis }) as echarts.EChartsOption["xAxis"],
+    // ECharts draws category index 0 at the BOTTOM of a Y axis, which flips
+    // the data order visually (server-sorted desc reads as asc). `inverse`
+    // keeps rows reading top-to-bottom in data order, mirroring how vertical
+    // bars read left-to-right.
     yAxis: (isVertical
       ? { ...valueAxis }
-      : { ...categoryAxis }) as echarts.EChartsOption["yAxis"],
+      : { ...categoryAxis, inverse: true }) as echarts.EChartsOption["yAxis"],
   }
 }
 
@@ -607,6 +892,8 @@ interface BaseChartOptionsParams {
   tooltipFilterSeries?: (seriesName: string) => boolean
   /** Custom tooltip formatter — when provided, replaces the default one */
   tooltipFormatter?: (params: unknown) => string
+  /** Value formatter used only in the tooltip (defaults to `valueFormatter`) */
+  tooltipValueFormatter?: (value: number) => string
   /** User-provided ECharts overrides (shallow-merged on top) */
   echartsOptions?: Partial<echarts.EChartsOption>
   /** Container width in pixels — used to auto-compute category label interval */
@@ -621,6 +908,18 @@ interface BaseChartOptionsParams {
   showValueAxis?: boolean
   /** Optional ellipsis truncation width for the category axis labels */
   categoryMaxLabelWidth?: number
+  /**
+   * Categories the axis actually draws, when a horizontal chart windows its
+   * rows — label skipping is decided from these rather than the whole dataset.
+   */
+  categoryVisibleCount?: number
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  valueAxisSplitNumber?: number
+  /**
+   * Pins the value axis maximum instead of letting ECharts round up to a nice
+   * number. Set by a chart whose value-axis labels are hidden.
+   */
+  valueAxisMax?: number
 }
 
 /**
@@ -642,6 +941,7 @@ export function buildBaseChartOptions({
   categoryFormatter,
   tooltipFilterSeries,
   tooltipFormatter,
+  tooltipValueFormatter,
   echartsOptions,
   containerWidth,
   containerHeight,
@@ -649,6 +949,9 @@ export function buildBaseChartOptions({
   showCategoryAxis = true,
   showValueAxis = true,
   categoryMaxLabelWidth,
+  categoryVisibleCount,
+  valueAxisSplitNumber,
+  valueAxisMax,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -663,6 +966,9 @@ export function buildBaseChartOptions({
     showCategoryAxis,
     showValueAxis,
     categoryMaxLabelWidth,
+    categoryVisibleCount,
+    valueAxisSplitNumber,
+    valueAxisMax,
   })
 
   const baseOptions: echarts.EChartsOption = {
@@ -684,7 +990,9 @@ export function buildBaseChartOptions({
     tooltip: buildTooltip({
       theme,
       filterSeries: tooltipFilterSeries,
-      valueFormatter,
+      // Tooltip can format values differently from the axis/labels (e.g. show
+      // the precise number while the labels stay compact).
+      valueFormatter: tooltipValueFormatter ?? valueFormatter,
       customFormatter: tooltipFormatter,
     }),
     emphasis: DEFAULT_EMPHASIS,

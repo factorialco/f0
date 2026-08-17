@@ -12,18 +12,8 @@ import {
   useRef,
 } from "react"
 
-import {
-  BACKGROUND_DOT_GAP,
-  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-} from "../constants"
-import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
-import {
-  EXPANDER_Y_OFFSET_BY_ZOOM,
-  type CollapserNodeData,
-  type ExpanderNodeData,
-  type GraphNodeData,
-} from "../internal/ReactFlowAdapters"
+import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
   GraphEdge,
   GraphNode,
@@ -33,6 +23,17 @@ import type {
   TreeNode,
   ZoomLevel,
 } from "../types"
+
+import {
+  BACKGROUND_DOT_GAP,
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+} from "../constants"
+import {
+  EXPANDER_Y_OFFSET_BY_ZOOM,
+  type CollapserNodeData,
+  type ExpanderNodeData,
+  type GraphNodeData,
+} from "../internal/ReactFlowAdapters"
 import {
   collectVisibleNodes,
   computeLayoutBounds,
@@ -411,14 +412,62 @@ export function useGraphRenderModel<T>({
         ids.add(pn.id)
       }
     }
+    // Keep every windowed node connected to its ancestry: walk each windowed
+    // node's parent chain up to the root and materialize those ancestors too,
+    // even when they sit outside the viewport window. An edge only renders when
+    // BOTH endpoints are windowed (see `rfEdges`), and a node only renders when
+    // it is windowed (see `rfNodes`) — so without this a node whose parent
+    // scrolled off-window loses its incoming edge and looks like a detached root
+    // (the reporting line up to the CEO disappears). Bounded by tree DEPTH, not
+    // breadth: windowed siblings share ancestors, so this adds a thin spine, not
+    // a subtree. The walk stops as soon as it reaches an id already in the set,
+    // so each ancestor is visited at most once (and it is cycle-safe).
+    const base = Array.from(ids)
+    for (const startId of base) {
+      let parentId = nodeMap.get(startId)?.parentId ?? null
+      while (parentId !== null && !ids.has(parentId)) {
+        ids.add(parentId)
+        parentId = nodeMap.get(parentId)?.parentId ?? null
+      }
+    }
+
+    // Draw every edge that passes through the window. An edge's path enters the
+    // viewport only when one of its endpoints sits inside it, so for each visible
+    // edge with exactly one endpoint IN THE VIEWPORT (not merely materialized via
+    // the ancestry spine), pull the other endpoint in too — React Flow can then
+    // route the edge even when the layout pushed that endpoint off-viewport. This
+    // keeps a visible parent's line to an off-screen child: expanding a wide node
+    // spreads its siblings past the screen edge, and without this the parent
+    // would look connected only to the child that stayed on screen. The reverse
+    // (a visible child's line up to an off-screen parent) is already covered by
+    // the ancestry walk above. Keyed on the VIEWPORT set — not `ids` — so an
+    // off-screen spine ancestor does not drag in all of its children at every
+    // level. A collapsed parent contributes only its expander-stub edge (its real
+    // children aren't in `visibleEdges`), so closed subtrees stay windowed out.
+    const viewportIds = new Set(base)
+    for (const edge of visibleEdges) {
+      const sourceIn = viewportIds.has(edge.source)
+      const targetIn = viewportIds.has(edge.target)
+      if (sourceIn !== targetIn) {
+        ids.add(edge.source)
+        ids.add(edge.target)
+      }
+    }
     return ids
   }, [
     enableNodeWindowing,
     viewportRect,
+    visibleEdges,
     layout.nodes,
     nodeWidthProp,
     effectiveNodeHeight,
+    nodeMap,
   ])
+
+  // Identity-stable projections of tree nodes into the shape node wrappers
+  // receive, keyed by node id. One entry per node ever materialized — the same
+  // order of magnitude the tree itself already holds.
+  const graphNodeCacheRef = useRef(new Map<string, GraphNode<T>>())
 
   // ── React Flow nodes ── Only the windowed nodes are materialized (all of them
   // when windowing is off). Building here — rather than building everything and
@@ -431,6 +480,14 @@ export function useGraphRenderModel<T>({
     // (well within the window padding), so they follow the parent's membership.
     const inWindow = (id: string): boolean =>
       !windowedIds || windowedIds.has(id)
+
+    // Whether windowing is actually driving this render (a viewport is measured
+    // and the feature is on). Only then do we seed `handles`/dimensions on the
+    // nodes — see the handle geometry below. With windowing off, React Flow's own
+    // `onlyRenderVisibleElements` is active, and marking nodes measured up front
+    // would let it cull them before their real size is known; leaving it as-is
+    // keeps the original non-windowed behavior untouched.
+    const windowingActive = windowedIds !== null
 
     // Direction-aware port positions for React Flow edge routing
     const isHorizontal = direction === "LR" || direction === "RL"
@@ -451,18 +508,72 @@ export function useGraphRenderModel<T>({
             ? Position.Left
             : Position.Right
 
+    // Precomputed handle geometry so React Flow can route a node's edges on the
+    // very commit the node is added — before its DOM handles are measured.
+    // Without a `handles` array React Flow has no handle bounds for a freshly
+    // windowed-in node, so `getEdgePosition` returns null and every edge touching
+    // it is dropped from the DOM for that frame — connecting/reporting lines
+    // flicker or vanish while panning a large/flat/deep tree. Providing the port
+    // offsets lets React Flow derive the endpoint immediately; the real measured
+    // handle bounds take over once the node's DOM mounts. Node dimensions are
+    // supplied below (`width`/`height`) so the node also counts as "initialized".
+    const handleOffset = (p: Position): { x: number; y: number } =>
+      p === Position.Top
+        ? { x: BASE_W / 2, y: 0 }
+        : p === Position.Bottom
+          ? { x: BASE_W / 2, y: BASE_H }
+          : p === Position.Left
+            ? { x: 0, y: BASE_H / 2 }
+            : { x: BASE_W, y: BASE_H / 2 }
+    const graphNodeHandles = [
+      {
+        type: "source" as const,
+        position: sourcePos,
+        ...handleOffset(sourcePos),
+        width: 1,
+        height: 1,
+      },
+      {
+        type: "target" as const,
+        position: targetPos,
+        ...handleOffset(targetPos),
+        width: 1,
+        height: 1,
+      },
+    ] as RFNode["handles"]
+
     const nodes: RFNode[] = []
 
     for (const treeNode of visibleTreeNodes) {
       if (!inWindow(treeNode.id)) continue
       const pos = positionMap.get(treeNode.id)
-      const graphNode: GraphNode<T> = {
-        id: treeNode.id,
-        parentId: treeNode.parentId,
-        data: treeNode.data,
-        childrenCount: treeNode.childrenCount,
-        childrenLoaded: treeNode.childrenLoaded,
-        dataLoaded: treeNode.dataLoaded,
+
+      // The node wrapper's `memo` compares `data.graphNode` by identity, so
+      // building a fresh projection on every rebuild made that check fail
+      // unconditionally — every windowing recompute re-rendered every on-screen
+      // node, even when nothing about the node had changed. Reuse the previous
+      // object whenever all projected fields are equal.
+      const cached = graphNodeCacheRef.current.get(treeNode.id)
+      let graphNode: GraphNode<T>
+      if (
+        cached !== undefined &&
+        cached.parentId === treeNode.parentId &&
+        cached.data === treeNode.data &&
+        cached.childrenCount === treeNode.childrenCount &&
+        cached.childrenLoaded === treeNode.childrenLoaded &&
+        cached.dataLoaded === treeNode.dataLoaded
+      ) {
+        graphNode = cached
+      } else {
+        graphNode = {
+          id: treeNode.id,
+          parentId: treeNode.parentId,
+          data: treeNode.data,
+          childrenCount: treeNode.childrenCount,
+          childrenLoaded: treeNode.childrenLoaded,
+          dataLoaded: treeNode.dataLoaded,
+        }
+        graphNodeCacheRef.current.set(treeNode.id, graphNode)
       }
       const aria = ariaTreeInfo.get(treeNode.id)
 
@@ -484,6 +595,14 @@ export function useGraphRenderModel<T>({
           y: (pos?.y ?? 0) * yStretch,
         },
         width: BASE_W,
+        // Only while windowing drives the render: seed the node's size and port
+        // handles so React Flow can route its edges on the commit it is added,
+        // before the DOM is measured (otherwise a freshly windowed-in node's
+        // connecting lines drop for that frame). Omitted when windowing is off so
+        // React Flow's own viewport culling keeps its original behavior.
+        ...(windowingActive
+          ? { height: BASE_H, handles: graphNodeHandles }
+          : null),
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {

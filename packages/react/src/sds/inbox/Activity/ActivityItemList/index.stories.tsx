@@ -30,7 +30,7 @@ const meta: Meta<typeof ActivityItemList> = {
   },
 
   component: ActivityItemList,
-  title: "Inbox/Activity/ActivityItemList",
+  title: "Inbox/ActivityItemList",
   parameters: {
     layout: "centered",
   },

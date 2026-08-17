@@ -52,6 +52,11 @@ const card = (container: HTMLElement): Element | null =>
   container.querySelector("button")
 
 describe("ReplyQuote chained corner", () => {
+  it("keeps the quoted message on a neutral nested surface", () => {
+    const { container } = renderQuote({ isMine: false, isFirstOfRun: true })
+    expect(card(container)).toHaveClass("bg-f1-background-tertiary")
+  })
+
   it("rounds the tail-side top corner to hug the bubble (others, run start)", () => {
     const { container } = renderQuote({ isMine: false, isFirstOfRun: true })
     expect(card(container)).toHaveClass("rounded-tl-xl")

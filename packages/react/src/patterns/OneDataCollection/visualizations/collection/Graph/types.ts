@@ -6,6 +6,7 @@ import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typin
 import type {
   F0GraphNodeTag,
   F0GraphNodeTagColumn,
+  ViewportInset,
   ZoomPreset,
 } from "@/patterns/F0Graph"
 import type {
@@ -30,7 +31,11 @@ export type GraphVisualizationOptions<
   title: (record: R) => string
   /** Secondary line of text for a node. */
   subtitle?: (record: R) => string
-  /** Avatar shown on the leading side of the node pill. */
+  /**
+   * Avatar shown on the leading side of the node pill. Its variant also drives
+   * the node silhouette: `person` → circular dot/pill, any other variant
+   * (`team`, `icon`, …) → rounded-square card.
+   */
   avatar?: (record: R) => AvatarVariant
   /**
    * Tags rendered in the node metadata row. A tag may set `column` to place it
@@ -151,8 +156,37 @@ export type GraphVisualizationOptions<
   minZoom?: number
   /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
   maxZoom?: number
+  /**
+   * Whether clicking a node flies to it (centers + zooms in close), passed
+   * through to F0Graph. Defaults to `true` — pass `false` for a static camera on
+   * click (selection still happens). Re-centers on every click, even a repeat.
+   * The fly starts a beat after the click so it picks up a `viewportInset` set in
+   * response to that same click (a side panel opening).
+   */
+  centerOnNodeClick?: boolean
+  /**
+   * Zoom a node click lands on (pass-through). Defaults to F0Graph's
+   * `NODE_CLICK_ZOOM` (`1.5`), clamped to `maxZoom`. Lower it for a dense tree.
+   */
+  nodeClickZoom?: number
+  /**
+   * Region of the canvas (screen px) covered by a side panel / drawer the
+   * consumer opens over the graph (pass-through to F0Graph). Every fly-to path
+   * shifts its target so the clicked / revealed node lands centered in the free
+   * area beside the panel instead of behind it. For a fixed-width drawer, pass
+   * its width while open (e.g. `{ right: 480 }`) and omit it while closed.
+   */
+  viewportInset?: ViewportInset
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
+  /**
+   * Optional action(s) rendered at the bottom-right of the graph canvas
+   * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+   * so it tracks the graph's visible area and reflows when a side panel shrinks
+   * it — clear of the controls (bottom-left). Use for a persistent affordance
+   * like a "Give feedback" button.
+   */
+  canvasFooterActions?: ReactNode
   /**
    * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
    * the viewport are handed to React Flow — for very large trees (thousands of

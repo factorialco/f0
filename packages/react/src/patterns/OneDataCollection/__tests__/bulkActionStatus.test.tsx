@@ -3,7 +3,7 @@ import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
-import { aiTranslations } from "@/sds/ai/F0AiChat"
+import { aiTranslations } from "@/kits/ai/F0AiChat"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
   zeroRender as render,

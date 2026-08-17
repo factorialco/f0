@@ -16,14 +16,8 @@ const SvgQuestion = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M9 9C9 7 10.5 6 12 6C13.5 6 15 7.5 15 9C15 12 12 11.5 12 14"
-      vectorEffect="non-scaling-stroke"
     />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M12 17V17.1"
-      vectorEffect="non-scaling-stroke"
-    />
+    <path stroke="currentColor" strokeLinecap="round" d="M12 17V17.1" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgQuestion)

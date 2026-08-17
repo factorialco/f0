@@ -1,4 +1,5 @@
 import { getAbbreviateMonth, getDayOfMonth } from "@/lib/date"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 
@@ -11,12 +12,13 @@ export const F0AvatarDate = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
 }: F0AvatarDateProps) => {
+  const locale = useDateFnsLocale()
   const dateDay = getDayOfMonth(date)
-  const month = getAbbreviateMonth(date)
+  const month = getAbbreviateMonth(date, locale)
 
   return (
     <div
-      className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
+      className="flex h-10 w-10 flex-col items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
     >

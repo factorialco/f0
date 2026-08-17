@@ -61,7 +61,6 @@ const ClockAnimated = React.forwardRef<SVGSVGElement, ClockProps>(
           animate={animate}
           initial="normal"
           transition={handTransition}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.line
           x1="12"
@@ -72,7 +71,6 @@ const ClockAnimated = React.forwardRef<SVGSVGElement, ClockProps>(
           animate={animate}
           initial="normal"
           transition={handMinuteTransition}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

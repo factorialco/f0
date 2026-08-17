@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { ProductWidget } from "."
 
 const meta: Meta<typeof ProductWidget> = {
-  title: "UpsellingKit/ProductWidget",
+  title: "ProductWidget",
   component: ProductWidget,
 }
 

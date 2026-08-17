@@ -22,6 +22,7 @@ import { NumberCell } from "./types/number"
 import { PercentageCell } from "./types/percentage"
 import { PersonCell } from "./types/person"
 import { ProgressBarCell } from "./types/progressBar"
+import { ProgressSeriesCell } from "./types/progressSeries"
 import { StatusCell } from "./types/status"
 import { SummaryCell } from "./types/summary"
 import { TagCell } from "./types/tag"
@@ -55,6 +56,7 @@ export const valueDisplayRenderers = {
   person: PersonCell,
   percentage: PercentageCell,
   progressBar: ProgressBarCell,
+  progressSeries: ProgressSeriesCell,
   barSeries: BarSeriesCell,
   categoryBarChart: CategoryBarChartCell,
   hourDistribution: HourDistributionCell,

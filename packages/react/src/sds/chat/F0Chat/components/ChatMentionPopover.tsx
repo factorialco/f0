@@ -14,6 +14,7 @@ import {
 
 export type ChatMentionPopoverProps = {
   isOpen: boolean
+  listboxId: string
   /** Rows to display: the "everyone" option (when matching) then members. */
   results: MentionCandidate[]
   isLoading: boolean
@@ -24,6 +25,14 @@ export type ChatMentionPopoverProps = {
   everyoneDescription: string
 }
 
+const optionId = (listboxId: string, candidate: MentionCandidate): string => {
+  const key =
+    candidate.kind === "everyone" ? "everyone" : `user-${candidate.user.id}`
+  return `${listboxId}-option-${key.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+}
+
+export const getChatMentionOptionId = optionId
+
 /**
  * Inline `@`-mention autocomplete, positioned above the textarea — the comms
  * twin of the AI chat's MentionPopover (same chrome, positioning and skeletons).
@@ -31,6 +40,7 @@ export type ChatMentionPopoverProps = {
  */
 export function ChatMentionPopover({
   isOpen,
+  listboxId,
   results,
   isLoading,
   selectedIndex,
@@ -63,6 +73,7 @@ export function ChatMentionPopover({
   return (
     <div
       ref={listRef}
+      id={listboxId}
       role="listbox"
       style={{
         position: "absolute",
@@ -85,6 +96,7 @@ export function ChatMentionPopover({
           <div
             key={key}
             ref={isSelected ? selectedItemRef : undefined}
+            id={optionId(listboxId, candidate)}
             role="option"
             aria-selected={isSelected}
             className={cn(

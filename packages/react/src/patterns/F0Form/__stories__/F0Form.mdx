@@ -79,6 +79,15 @@ return <F0Form formDefinition={formDefinition} />
         <td>✓</td>
       </tr>
       <tr>
+        <td>`f0FormField.phone(config)`</td>
+        <td>
+          `z.object({ prefix, number })` validated with libphonenumber
+          (`validate: "valid" | "possible" | false`, default `"valid"`)
+        </td>
+        <td>phone input (`F0PhoneInput`)</td>
+        <td>✓</td>
+      </tr>
+      <tr>
         <td>`f0FormField.url(config)`</td>
         <td>`z.string().url()`</td>
         <td>text input (url)</td>
@@ -229,6 +238,41 @@ role: f0FormField.select({
 ```
 
 When using enum-inferred select fields, use `undefined` (not `""`) as the default value for empty initial state.
+
+### Select options from a data source
+
+Instead of a static `options` array, `select` and `multiSelect` accept a `source` — the same `DataSourceDefinition` abstraction that powers `OneDataCollection` and tables — together with a `mapOptions` function that turns each record into an option. Use this when options come from an API, or when the list is large enough to benefit from server-side search and pagination. `source` and `options` are mutually exclusive.
+
+```tsx
+import { createDataSourceDefinition } from "@factorialco/f0-react"
+
+// A source fetches records; `search` is passed through so filtering can happen server-side.
+const countriesSource = createDataSourceDefinition<Country>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      const records = await api.countries.list({ query: search })
+      return { records }
+    },
+  },
+})
+
+const schema = z.object({
+  country: f0FormField.select({
+    label: "Country",
+    showSearchBox: true,
+    source: countriesSource,
+    mapOptions: (c) => ({
+      value: c.id,
+      label: c.name,
+      description: c.continent,
+    }),
+  }),
+})
+```
+
+Because filtering is delegated to the source's `fetchData({ search })`, the client-side `searchFn` prop is not available in this mode. For paginated results, give the adapter `paginationType: "infinite-scroll"` and the dropdown loads more as the user scrolls. The same `source` + `mapOptions` pair works with `multiSelect` for multiple selection.
+
+<Canvas of={Stories.SelectWithDataSource} />
 
 ### `optional` flag
 
@@ -626,8 +670,19 @@ links: f0FormField.entitiesList({
 ## Accessibility
 
 - All fields rendered by F0Form include ARIA labels derived from the `label` config.
-- Error messages are linked to their field via `aria-describedby`.
+  That `aria-label` is what names the control for assistive technology.
+- **Known limitation:** the visible label is _not_ programmatically associated with
+  its control, so clicking it does not move focus to the input. The label carries no
+  `for` attribute — the input's `id` is generated inside `F0InputField` and the field
+  renderers do not thread one through, so any `for` we could write today would point
+  at a nonexistent element. Screen-reader users are unaffected (the `aria-label`
+  above names the control); pointer users lose the click-to-focus affordance.
+- Help text and error messages are linked to their field via `aria-describedby`,
+  and the attribute is only emitted for the ones actually rendered — a field with
+  no `helpText` and no error carries no `aria-describedby`.
 - The form's submit button manages `aria-busy` during async submission.
+- Every story in this section runs axe in CI at blocking severity
+  (`a11y: { test: "error" }`), covering WCAG 2.0/2.1/2.2 at levels A and AA.
 
 ---
 
@@ -660,6 +715,29 @@ Use `sections` to split a long form into named groups with independent submit bu
 
 <Canvas of={Stories.WithSectionsSidepanel} />
 
+## Only selected section
+
+For large forms, set `showOnlySelectedSection: true` on the `styling` prop to render only the currently selected section instead of stacking all sections at once. Navigation items in the sidepanel remain the same; only the visible content changes.
+
+<Canvas of={Stories.WithOnlySelectedSection} />
+
+**Behaviour details:**
+
+- **Value preservation** — hidden sections remain mounted (via `display: none`), so field values, dirty state, and validation are preserved across section switches.
+- **Error navigation** — if submission triggers validation errors in a hidden section, F0Form automatically reveals that section before focusing the offending field.
+- **Conditional sections** — sections whose `renderIf` evaluates to false are excluded from the sidepanel and skipped during section switching.
+- **Small screens** — the sidepanel (and therefore `showOnlySelectedSection`) is automatically disabled on viewports ≤ 560 px, where all sections stack vertically instead.
+- **Row layout** — fields grouped with the same `row` key switch to a stacked vertical layout when their container is narrower than 480 px (container query), so rows stay readable next to the sidepanel at medium viewport widths.
+
+```tsx
+const formDefinition = useF0FormDefinition({ ... })
+
+<F0Form
+  formDefinition={formDefinition}
+  styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+/>
+```
+
 ## Styling
 
 The optional `styling` config controls the form layout:
@@ -676,6 +754,52 @@ The optional `styling` config controls the form layout:
   styling={{ noPadding: true }}
 />
 ```
+
+## Submit configuration
+
+The optional `submitConfig` controls how the form is submitted and what submit affordance is rendered. In single-schema mode `label`, `icon`, `savingMessage` and `successMessageDuration` are shared by every type, and `type` picks the affordance, defaulting to `"default"`. Per-section schema mode takes a smaller config, described at the end of this section.
+
+### `type: "default"` — inline submit button
+
+A button rendered at the end of the form.
+
+- `showSubmitWhenDirty` — keep the button hidden until the form has unsaved changes. It appears on the first edit and goes away again after a successful save, so its absence reads as "nothing pending". The internal action bar still shows the Saving → Saved feedback unless you also set `hideActionBar`. Use it for pages made of several independently-savable blocks, where a permanently visible Save button is noise. Defaults to `false`.
+- `hideSubmitButton` — never render the button. For submitting from outside the form via `useF0Form`. Takes precedence over `showSubmitWhenDirty`.
+- `hideActionBar` — hide the internal loading/success feedback bar when the parent provides its own.
+
+```tsx
+<F0Form
+  name="personal-information"
+  schema={schema}
+  defaultValues={defaultValues}
+  onSubmit={onSubmit}
+  submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+/>
+```
+
+<Canvas of={Stories.ShowSubmitWhenDirty} />
+
+### `type: "action-bar"` — floating bar
+
+A bar that appears at the bottom of the viewport once the form is dirty, so it is dirty-gated by construction. Extra options: `discardable` to add a Discard button that resets the form, `discardConfig` for its label and icon, and `actionBarLabel` for the bar's own text.
+
+<Canvas of={Stories.WithActionBar} />
+
+<Canvas of={Stories.WithActionBarAndDiscard} />
+
+### `type: "autosubmit"` — debounced auto-save
+
+No button at all: the form submits itself `delay` ms (default `800`) after the last change, and the internal action bar shows the Saving → Saved feedback. `hideActionBar` suppresses that feedback.
+
+<Canvas of={Stories.Autosubmit} />
+
+<Canvas of={Stories.AutosubmitCustomDelay} />
+
+### Per-section schema mode
+
+With a per-section schema each section submits on its own, so `submitConfig` accepts `label`, `icon`, `showSubmitWhenDirty` and `hideSubmitButton` per section. Set it at the form level to apply to every section, and override it on `sections[id].submitConfig` for one.
+
+<Canvas of={Stories.PerSectionShowSubmitWhenDirty} />
 
 ## Conditional rendering
 

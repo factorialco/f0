@@ -168,7 +168,16 @@ const _UpsellRequestResponseDialog = forwardRef<
       >
         <DialogContent
           ref={ref}
-          className="bottom-3 top-auto max-w-[400px] translate-y-0 sm:bottom-auto sm:top-[50%] sm:translate-y-[-50%]"
+          // Alignment belongs to the WRAPPER, which is the flex container
+          // (`fixed inset-0 flex items-center justify-center`). The card itself is
+          // `relative`, so offsetting it with `top-[50%] translate-y-[-50%]` — the
+          // centring trick for an ABSOLUTE element — stacked a second centring on
+          // top of the flex one: a percentage `top` resolves against the
+          // full-viewport wrapper, so the card was pushed half a viewport down and
+          // only pulled back half its own height, landing it near the bottom of the
+          // screen on desktop.
+          wrapperClassName="items-end sm:items-center"
+          className="mb-3 max-w-[400px] sm:mb-0"
           container={portalContainer}
         >
           <DialogHeader

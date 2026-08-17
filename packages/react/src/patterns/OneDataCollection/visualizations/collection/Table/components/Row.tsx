@@ -1,4 +1,5 @@
-import { forwardRef, useEffect } from "react"
+import { useIsPresent } from "motion/react"
+import { forwardRef, useEffect, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -26,12 +27,14 @@ import { Checkbox } from "@/ui/checkbox"
 
 import type {
   CellRendererProps,
+  ColId,
   ReferenceType,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { getColumnId } from "../hooks/useColums"
 import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
@@ -68,6 +71,8 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** When true, plays the green "flash on add" background animation once. */
+  isNew?: boolean
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
@@ -78,6 +83,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  /** Marker class for each animating column's cells, keyed by column id. */
+  collapsingCellClasses?: ReadonlyMap<ColId, string>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
@@ -109,6 +116,10 @@ export type NestedRowProps = {
   onAddRow?: OnAddRowConfig
   stickyRow?: boolean
 }
+
+// Must match the `row-flash` animation duration in tailwind.config.ts.
+// ponytail: two sources of truth for the duration; bump both if the animation timing changes.
+const ROW_FLASH_DURATION_MS = 1500
 
 const referenceTypeClasses: Record<ReferenceType, string> = {
   none: "",
@@ -143,11 +154,13 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    isNew = false,
     referenceRowType: referenceRowTypeFn,
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
     headerGroups,
+    collapsingCellClasses,
     registerSelectable,
     unregisterSelectable,
   }: RowProps<
@@ -167,6 +180,20 @@ const RowComponentInner = <
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
   const i18n = useI18n()
+
+  // Play the green "flash on add" highlight once, when a newly-added row
+  // mounts. `isNew` is captured at mount (a re-render would otherwise flip it
+  // back to false and cancel the animation early). Once the CSS animation
+  // (tailwind.config.ts `row-flash`) finishes, we turn the class back off —
+  // otherwise it stays attached to the row forever and can replay on any
+  // later re-render that touches this row's class list.
+  const [flashing, setFlashing] = useState(isNew)
+
+  useEffect(() => {
+    if (!flashing) return
+    const timeout = setTimeout(() => setFlashing(false), ROW_FLASH_DURATION_MS)
+    return () => clearTimeout(timeout)
+  }, [flashing])
 
   const renderCell = (
     item: R,
@@ -199,14 +226,33 @@ const RowComponentInner = <
     nestedRowProps?.hasLoadedChildren === undefined ||
     nestedRowProps?.hasLoadedChildren
 
+  // False from the moment AnimatePresence starts animating this row out —
+  // well before it unmounts. A row leaves the selection registry then, not on
+  // unmount: rows fading out are no longer selectable, so a "select all"
+  // clicked mid-exit must not reach them. `true` outside AnimatePresence.
+  const isPresent = useIsPresent()
+
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
   useEffect(() => {
-    if (id === undefined || !willRenderOwnRow || !registerSelectable) return
+    if (
+      id === undefined ||
+      !willRenderOwnRow ||
+      !registerSelectable ||
+      !isPresent
+    )
+      return
     registerSelectable(id, item)
     return () => unregisterSelectable?.(id)
-  }, [id, item, willRenderOwnRow, registerSelectable, unregisterSelectable])
+  }, [
+    id,
+    item,
+    willRenderOwnRow,
+    registerSelectable,
+    unregisterSelectable,
+    isPresent,
+  ])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
@@ -227,6 +273,7 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         headerGroups={headerGroups}
+        collapsingCellClasses={collapsingCellClasses}
         key={key}
         fromVisualization={fromVisualization}
         registerSelectable={registerSelectable}
@@ -257,6 +304,7 @@ const RowComponentInner = <
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
         isSelected && "bg-f1-background-selected-secondary",
+        flashing && "animate-row-flash",
         referenceTypeClasses[referenceRowType]
       )}
     >
@@ -328,7 +376,12 @@ const RowComponentInner = <
             }}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
-            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
+            highlighted={!!column.highlighted}
+            className={cn(
+              cellRenderedClass,
+              isLastInGroup && groupBorderClass,
+              collapsingCellClasses?.get(getColumnId(column))
+            )}
           >
             {CellRenderer ? (
               <CellRenderer
@@ -370,7 +423,12 @@ const RowComponentInner = <
           <>
             {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
             <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+              {/* Narrower fade gutter (pl-8) for tables so the overlay covers
+                  less of the last column's content than the default pl-20. */}
+              <ItemActionsRowContainer
+                dropDownOpen={dropDownOpen}
+                className="pl-8"
+              >
                 <ItemActionsRow
                   primaryItemActions={primaryItemActions}
                   dropdownItemActions={dropdownItemActions}

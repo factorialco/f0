@@ -2,19 +2,22 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
+import { BellOff, PalmTree } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-import { MicrophoneNegative, PalmTree } from "@/icons/app"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
 import {
   isUserMessage,
   type F0ChatAttachment,
   type F0ChatEditInput,
+  type F0ChatItem,
   type F0ChatRuntime,
   type F0ChatSearchResult,
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 import {
   type Seed,
   ME,
@@ -43,9 +46,28 @@ export const MockChatAppProvider = ({
   )
 }
 
+export const resolveMockReactionUsers = (
+  seed: Seed | undefined,
+  messages: F0ChatItem[],
+  messageId: string,
+  emoji: string
+): F0ChatUser[] => {
+  const message = messages.find(
+    (item) => isUserMessage(item) && item.id === messageId
+  )
+  if (!seed || !message || !isUserMessage(message)) return []
+
+  const reaction = message.reactions?.find((item) => item.emoji === emoji)
+  if (!reaction) return []
+  if (reaction.users?.length === reaction.count) return reaction.users
+
+  return seed.participants.slice(0, reaction.count)
+}
+
 /** F0ChatRuntime for one conversation, backed by the shared store. */
 export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const app = useMockChatApp()
+  const i18n = useI18n()
   const seed = SEED_BY_ID.get(convId)
   const state = app.states[convId]
 
@@ -69,6 +91,16 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (messageId: string, emoji: string) =>
       app.toggleReaction(convId, messageId, emoji),
     [app, convId]
+  )
+  const loadReactionUsers = useCallback(
+    async (messageId: string, emoji: string): Promise<F0ChatUser[]> =>
+      resolveMockReactionUsers(
+        seed,
+        app.states[convId]?.messages ?? [],
+        messageId,
+        emoji
+      ),
+    [app.states, convId, seed]
   )
   const deleteMessage = useCallback(
     (messageId: string) => app.deleteMessage(convId, messageId),
@@ -97,6 +129,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
                       name: file.name,
                       size: file.size,
                       mimeType: file.type,
+                      thumbnailUrl: file.type.startsWith("video/")
+                        ? "/video-poster.webp"
+                        : undefined,
                     }
               })
             ),
@@ -168,13 +203,17 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
         lastName: "",
       },
       presence: seed?.presence,
-      muted: app.muted[convId] ?? false,
       pinned: app.pinned[convId] ?? false,
       // Surface the same states the sidebar shows (e.g. on vacation) in the header.
-      statuses:
-        seed?.type === "dm" && seed.participants[0]?.vacation
+      statuses: [
+        ...(seed?.statuses?.filter((status) => status.icon !== BellOff) ?? []),
+        ...(app.muted[convId]
+          ? [{ icon: BellOff, label: i18n.chat.muted }]
+          : []),
+        ...(seed?.type === "dm" && seed.participants[0]?.vacation
           ? [{ icon: PalmTree, label: "On vacation" }]
-          : undefined,
+          : []),
+      ],
       memberCount: seed ? seed.participants.length + 1 : undefined,
       // DMs expose the counterpart for the header identity hover card.
       user:
@@ -191,6 +230,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     retryMessage,
     loadOlder,
     toggleReaction,
+    loadReactionUsers,
     deleteMessage,
     deleteFailedMessage,
     editMessage,
@@ -202,7 +242,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
-    maxFiles: 5,
+    maxFiles: 8,
+    // ApplicationFrame demonstrates a 100 MB per-file upload limit.
+    maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     transcribe: mockTranscribe,
     markRead,
     searchMessages,
@@ -249,12 +291,12 @@ export const useMockChatGroups = (
         // Live "Writing…" while the other side is typing in this conversation.
         typing: (state?.typingIds.length ?? 0) > 0,
         presence: seed.type === "dm" ? seed.presence : undefined,
-        // On-vacation takes precedence over the mute icon.
-        status: dmPerson?.vacation
-          ? { icon: PalmTree, label: "On vacation" }
-          : muted[seed.id]
-            ? { icon: MicrophoneNegative, label: "Muted" }
-            : undefined,
+        statuses: [
+          ...(dmPerson?.vacation
+            ? [{ icon: PalmTree, label: "On vacation" }]
+            : []),
+          ...(muted[seed.id] ? [{ icon: BellOff, label: "Muted" }] : []),
+        ],
       }
     }
     // Pinned (favourite) chats — both people and groups — surface in their own

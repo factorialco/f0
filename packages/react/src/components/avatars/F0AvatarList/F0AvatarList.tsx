@@ -33,8 +33,22 @@ export const F0AvatarList = ({
   noTooltip = false,
   remainingCount: initialRemainingCount,
   max,
+  // Deprecated and intentionally ignored — see `F0AvatarListProps`. Kept in the
+  // destructuring, under these exact names, because the pattern is emitted
+  // verbatim into the public .d.ts signature of `F0AvatarList`: dropping or
+  // renaming them reads as a breaking public API change for props that still
+  // exist and still typecheck. `void` below satisfies `noUnusedLocals`.
+  //
+  // `layout` is listed here rather than left out of the destructuring so the
+  // ignore is deliberate in the code, not an omission a reader has to infer:
+  // it was documented for long enough that both of its values already have a
+  // home on `max` (unset = the old `"fill"`, a number = the old `"compact"`).
   tooltipScroll,
+  layout,
 }: F0AvatarListProps) => {
+  void tooltipScroll
+  void layout
+
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
     const sizesMappingList: Record<string, AvatarListSize> = {
@@ -73,6 +87,13 @@ export const F0AvatarList = ({
       // the cluster is rendered inside narrow columns (e.g. OneDataCollection
       // list fields). Without this, a configured `max: 3` could still render
       // as `1 avatar + "+N"` if the column was tight.
+      //
+      // This is also why the deprecated `layout` prop needs no implementation:
+      // `max` unset leaves both bounds open and the row fills its container
+      // (the old `"fill"`), while any `max` pins both bounds to a fixed
+      // footprint (the old `"compact"`). Do not give `max` a numeric default —
+      // that would take the fill behaviour away from every consumer that omits
+      // it, including OneDataCollection list fields.
       min={max}
       items={avatars.map((avatar) => ({ type, ...avatar }) as AvatarVariant)}
       gap={gap}
@@ -135,7 +156,6 @@ export const F0AvatarList = ({
             size={size}
             type={type === "person" ? "rounded" : "base"}
             avatarType={type}
-            tooltipScroll={tooltipScroll}
             list={
               initialRemainingCount
                 ? undefined

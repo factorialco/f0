@@ -165,7 +165,15 @@ export const WithDots: Story = {
 // Formatting & minimal variants
 // ---------------------------------------------------------------------------
 
-/** Custom value + category formatters for currency / abbreviated month names. */
+/**
+ * Custom value + category formatters for currency / abbreviated month names.
+ *
+ * `valueFormatter` writes the axis, where space is tight, so it compacts
+ * millions to `4M €` — and the tooltip would read the same way, since a tooltip
+ * uses that formatter unless told otherwise. Here it is told otherwise: hover a
+ * point and it reads `4,000,000 €`, from `tooltipValueFormatter`, because the
+ * card has room for the exact figure.
+ */
 export const CustomFormatters: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
@@ -186,6 +194,7 @@ export const CustomFormatters: Story = {
       },
     ],
     valueFormatter: (v) => `${v / 1_000_000}M €`,
+    tooltipValueFormatter: (v) => `${v.toLocaleString("en-US")} €`,
     categoryFormatter: (v) => v.slice(0, 3),
   },
 }

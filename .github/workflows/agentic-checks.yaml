@@ -18,7 +18,7 @@ jobs:
       actions: read
       pull-requests: write
     if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft == false
-    runs-on: build-s
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     concurrency:
       group: 🤖-agentic-checks-agentic-check-agentic-check-${{ matrix.id }}-${{ github.event.pull_request.number }}
@@ -56,32 +56,67 @@ jobs:
       MODEL: azure-cognitive-services/gpt-5.3-codex
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - name: Runner uptime
-        run: uptime
-      - name: Repository last commit
-        run: which git && (git log -n 1 --pretty=format:"%h %s %an %ar" || true)
-      - name: Runner disk space
-        run: df -h
-      - name: Host machine IP
+      # --- Trust model ---
+      # The check script and the prompts must come from the base branch, never from
+      # the PR head: this job runs with an Azure API key in the environment, and the
+      # head revision is authored by whoever opened the PR. Checkout base first,
+      # stash the trusted copies outside the workspace, then check out the head.
+      - name: Checkout base branch (trusted revision)
+        timeout-minutes: 5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 1
+      - id: copy-trusted
+        name: Stash trusted script and prompt
         run: |-
-          echo "🐳 Pod: ${{ runner.name }}"
-          echo "🖥️ Self hosted machine ip: $(curl -s --max-time 5 https://api.ipify.org || echo '<unavailable>')"
-      - timeout-minutes: 5
+          if [[ -f .github/scripts/agentic-check.sh ]] && [[ -f "$PROMPT_FILE" ]]; then
+            cp .github/scripts/agentic-check.sh "$RUNNER_TEMP/agentic-check.sh"
+            cp "$PROMPT_FILE" "$RUNNER_TEMP/prompt.md"
+            echo "trusted=true" >> "$GITHUB_OUTPUT"
+            echo "Using trusted script and prompt from base branch (${{ github.event.pull_request.base.sha }})"
+          else
+            echo "::warning::Script or prompt not found on base branch — skipping check (running the PR's own copy is not allowed)"
+            echo "trusted=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Checkout PR head
+        timeout-minutes: 5
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
+          fetch-depth: 1
+      - name: Restore trusted script and prompt
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: |-
+          cp "$RUNNER_TEMP/agentic-check.sh" .github/scripts/agentic-check.sh
+          cp "$RUNNER_TEMP/prompt.md" "$PROMPT_FILE"
       - name: Install OpenCode CLI
+        if: steps.copy-trusted.outputs.trusted == 'true'
         run: npm install -g opencode-ai@1.15.5
+      # OpenCode probes its own skills directory under $HOME on startup. With only
+      # /tmp/* allowed, that read is auto-rejected, the tool call returns an error
+      # and the agent abandons the review without emitting a VERDICT marker — an
+      # agent failure that looks exactly like a model refusal in the logs. $HOME is
+      # resolved at runtime rather than hardcoded so this does not silently rebreak
+      # on a different runner image.
+      - name: Compose OpenCode config
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: |-
+          CONFIG=$(jq -nc --arg own_config "${HOME}/.config/opencode/*" '{
+            snapshot: false,
+            small_model: "azure-cognitive-services/gpt-5.3-codex",
+            permission: { external_directory: { "/tmp/*": "allow", ($own_config): "allow" } },
+            provider: { "azure-cognitive-services": { models: { "gpt-5.3-codex": { name: "GPT 5.3 Codex" } } } }
+          }')
+          echo "OPENCODE_CONFIG_CONTENT=${CONFIG}" >> "$GITHUB_ENV"
+          echo "OpenCode config: ${CONFIG}"
       - id: run-agentic-check
         name: Run Agentic Check
+        if: steps.copy-trusted.outputs.trusted == 'true'
         continue-on-error: true
         env:
           AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
           AZURE_RESOURCE_NAME: platform-dx-ai
-          OPENCODE_CONFIG_CONTENT: >-
-            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
-            5.3 Codex"}}}}}
         run: |-
           SCRIPT_LOG=$(mktemp)
 
@@ -122,9 +157,6 @@ jobs:
         env:
           AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
           AZURE_RESOURCE_NAME: platform-dx-ai
-          OPENCODE_CONFIG_CONTENT: >-
-            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
-            5.3 Codex"}}}}}
         run: |-
           echo "::group::OpenCode usage statistics"
           opencode stats || echo "opencode stats failed (non-fatal)"

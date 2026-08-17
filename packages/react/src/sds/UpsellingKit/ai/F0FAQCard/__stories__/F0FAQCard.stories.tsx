@@ -40,7 +40,7 @@ const sampleFAQItems: F0FAQItem[] = [
 ]
 
 const meta = {
-  title: "AI/Widgets/UpsellKit/F0FAQCard",
+  title: "F0FAQCard",
   component: F0FAQCard,
   decorators: [
     (Story) => (

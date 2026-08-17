@@ -21,6 +21,7 @@ function entry(overrides: Partial<ComponentEntry> = {}): ComponentEntry {
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: true,
     docQuality: "gold" as DocQuality,
     docSignals: {
@@ -31,6 +32,7 @@ function entry(overrides: Partial<ComponentEntry> = {}): ComponentEntry {
       hasDoDonts: true,
       exampleCount: 4,
     },
+    a11yTier: "enforced",
     storyFile: "components/F0Example/__stories__/F0Example.stories.tsx",
     ...overrides,
   }
@@ -324,13 +326,27 @@ describe("effectiveStatus parity (TS policy vs generator helper)", () => {
 })
 
 describe("STABLE_REQUIREMENTS", () => {
-  test("is the checklist of stories, tests, play, docs, and doc quality", () => {
+  test("is the checklist of stories, tests, play, snapshot, docs, doc quality, and a11y", () => {
     expect(STABLE_REQUIREMENTS.map((r) => r.key)).toEqual([
       "stories",
       "unitTests",
       "playFunction",
+      "snapshot",
       "mdxDocs",
       "docQuality",
+      "a11y",
     ])
   })
+
+  test.each(["skipped", "todo"] as const)(
+    "a component clean on everything but a11y (%s) is not stable",
+    (a11yTier) => {
+      const status = evaluateComponentStatus(
+        entry({ apiStatus: "stable", tags: ["stable"], a11yTier })
+      )
+      expect(status.meetsBar).toBe(false)
+      expect(status.missing).toEqual(["Accessibility enforced"])
+      expect(status.effectiveStatus).toBe("experimental")
+    }
+  )
 })

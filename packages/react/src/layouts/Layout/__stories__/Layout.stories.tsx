@@ -58,11 +58,6 @@ const meta = {
   },
   parameters: withSkipA11y({
     layout: "fullscreen",
-    a11y: {
-      config: {
-        rules: [{ id: "svg-img-alt", enabled: false }],
-      },
-    },
     docs: {
       description: {
         component: [

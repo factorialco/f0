@@ -4,9 +4,15 @@ import type { LayoutDirection, ZoomLevel } from "./types"
 
 // ─── Zoom ──────────────────────────────────────────────────────
 
+/**
+ * Every node wrapper subscribes to this context, so it must only carry values
+ * that change at DISCRETE steps. The live (continuous) zoom factor is
+ * deliberately absent: publishing it here re-created the context value on every
+ * zoom frame and re-rendered every node in the graph — `memo` on the wrappers
+ * cannot stop a context change. Only the derived `zoomLevel` belongs here.
+ */
 export interface F0GraphZoomContextValue {
   zoomLevel: ZoomLevel
-  currentZoom: number
   direction: LayoutDirection
 }
 

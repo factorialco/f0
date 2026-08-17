@@ -7,8 +7,10 @@ import type { F0DataChartRadarProps } from "../../types"
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildItemTooltip,
+  renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -44,6 +46,7 @@ export function useRadarChartOptions(
     showLegend = true,
     showLabels = false,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartRadarProps,
   size: RadarChartSize
@@ -55,6 +58,10 @@ export function useRadarChartOptions(
     const responsive = resolveResponsiveDisplay(size)
     const effectiveShowLegend = responsive.showLegend && showLegend
     const { showIndicatorNames, nameWidth } = responsive
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     // Auto-calculate max for each indicator if not provided
     const radarIndicators = indicators.map((ind, i) => {
@@ -158,17 +165,19 @@ export function useRadarChartOptions(
             value?: number[]
           }
           const values = p.value ?? []
-          const header = `<div style="margin-bottom: 4px">${String(p.marker ?? "")} <strong>${String(p.name ?? "")}</strong></div>`
-          const items = indicators
-            .map((ind, i) => {
-              const val = values[i] ?? 0
-              const formattedVal = valueFormatter
-                ? valueFormatter(val)
-                : String(val)
-              return `<div>${ind.name}: <strong>${formattedVal}</strong></div>`
-            })
-            .join("")
-          return `${header}${items}`
+          // A radar point carries every indicator at once, so there is no
+          // single headline value — the indicators are the rows.
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: String(p.name ?? ""),
+              rows: indicators.map((indicator, i) => ({
+                value: formatTooltipValue(values[i] ?? 0),
+                label: indicator.name,
+              })),
+            },
+            theme
+          )
         },
       }),
       emphasis: DEFAULT_EMPHASIS,
@@ -186,6 +195,7 @@ export function useRadarChartOptions(
     showLegend,
     showLabels,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     containerSize,

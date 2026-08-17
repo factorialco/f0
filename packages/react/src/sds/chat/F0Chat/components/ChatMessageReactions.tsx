@@ -1,13 +1,12 @@
+import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
 
-import { AnimatePresence, motion } from "motion/react"
-
-import { Picker } from "@/kits/Social/Reactions/Picker"
-import { Reaction } from "@/kits/Social/Reactions/reaction"
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Picker } from "@/sds/social/Reactions/Picker"
+import { Reaction } from "@/sds/social/Reactions/reaction"
 
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import {
@@ -29,8 +28,8 @@ export const ChatMessageReactions = ({
   isMine: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
-  const { toggleReaction, capabilities } = useF0ChatStable()
+  const { reducedMotion } = useChatRenderConfig()
+  const { toggleReaction, loadReactionUsers, capabilities } = useF0ChatStable()
   // Existing pills stay VISIBLE without the capability (the data is real) —
   // only adding/toggling is disabled.
   const canReact = capabilities?.canReact !== false
@@ -72,6 +71,17 @@ export const ChatMessageReactions = ({
               initialCount={reaction.count}
               hasReacted={reaction.reactedByMe}
               users={reaction.users}
+              loadUsers={
+                loadReactionUsers &&
+                (reaction.users?.length ?? 0) < reaction.count
+                  ? () =>
+                      loadReactionUsers(
+                        message.id,
+                        reaction.emoji,
+                        reaction.count
+                      )
+                  : undefined
+              }
               onInteraction={
                 canReact
                   ? (emoji) => void toggleReaction(message.id, emoji)

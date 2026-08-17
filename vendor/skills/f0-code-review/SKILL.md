@@ -30,7 +30,8 @@ Flag these as blocking — they must be fixed before merge:
 - Missing `displayName` on `forwardRef` components
 - Direct Radix/third-party primitive import (must use `@/ui/` wrappers)
 - New component name missing `F0` prefix
-- New component placed in `experimental/` instead of `components/` (use `experimentalComponent` from `@/lib/experimental.ts`)
+- New component placed in `components/` instead of `experimental/` (every new component must start in `experimental/` per the F0 lifecycle — only Foundations promotes to stable; see `packages/react/docs/definition-of-done.mdx`)
+- New component missing `experimentalComponent()` wrapper from `@/lib/experimental.ts` (required for the runtime warning consumers see)
 - Internal components or `internal-types.ts` exported publicly
 - New component not exported in `exports.ts`
 
@@ -49,6 +50,16 @@ Flag these as blocking — they must be fixed before merge:
 ### Security
 
 - `dangerouslySetInnerHTML` without explicit justification
+
+### Deprecation
+
+When the PR adds or modifies a `@deprecated` export, verify:
+
+- All three JSDoc tags are present: `@deprecated`, `@removeIn`, `@migration`
+- `@removeIn` targets a future major version (not the current one)
+- `@migration` URL is reachable and points to a real migration guide
+- Story tag updated to `"deprecated"` (with `"!autodocs"` if a manual MDX exists)
+- See `packages/react/docs/development/release-and-versioning.mdx` for the full policy
 
 ## Suggestions (Non-blocking)
 

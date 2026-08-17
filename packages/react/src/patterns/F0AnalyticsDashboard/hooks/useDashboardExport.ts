@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
 import type {
   FiltersDefinition,
@@ -12,6 +12,7 @@ import type {
   DashboardMetricItem,
 } from "../types"
 
+import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"
 import { extractColumns } from "../utils/extractColumns"
@@ -20,6 +21,8 @@ type SheetData = {
   name: string
   columns: string[]
   rows: Record<string, unknown>[]
+  /** Row-lookup keys parallel to `columns`, when headers may collide. */
+  keys?: string[]
 }
 
 interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
@@ -33,6 +36,15 @@ interface UseDashboardExportResult {
   isExporting: boolean
 }
 
+function getItemFilters<Filters extends FiltersDefinition>(
+  item: { useDashboardFilters?: boolean },
+  filters: FiltersState<Filters>
+): FiltersState<Filters> {
+  return item.useDashboardFilters === false
+    ? ({} as FiltersState<Filters>)
+    : filters
+}
+
 async function buildMetricsSheet<Filters extends FiltersDefinition>(
   metricItems: DashboardMetricItem<Filters>[],
   filters: FiltersState<Filters>
@@ -44,7 +56,9 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
 
   for (const item of metricItems) {
     try {
-      const data: DashboardMetricData = await item.fetchData(filters)
+      const data: DashboardMetricData = await item.fetchData(
+        getItemFilters(item, filters)
+      )
       const row: Record<string, unknown> = {
         Metric: item.title,
         Value: data.value,
@@ -90,12 +104,25 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
     async (item): Promise<SheetData | null> => {
       if (item.type === "chart") {
         try {
-          const data: DashboardChartData = await item.fetchData(filters)
+          const data: DashboardChartData = await item.fetchData(
+            getItemFilters(item, filters)
+          )
+          // Same guard `ChartItem` applies when rendering: without it an
+          // unrenderable config throws inside the converter and the sheet is
+          // dropped by the catch below, which reads as a silent omission
+          // rather than a stated one.
+          if (!isRenderableChart(item.chart)) {
+            console.warn(
+              `[useDashboardExport] Skipped chart "${item.title}": unsupported chart type`
+            )
+            return null
+          }
           const tabular = chartDataToTabular(item.chart, data)
           return {
             name: item.title,
             columns: tabular.columns,
             rows: tabular.rows,
+            keys: tabular.keys,
           }
         } catch (err) {
           console.warn(
@@ -108,7 +135,7 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
 
       if (item.type === "collection") {
         try {
-          const sourceDef = item.createSource(filters)
+          const sourceDef = item.createSource(getItemFilters(item, filters))
           const result = await sourceDef.dataAdapter.fetchData({
             filters: {},
             sortings: [],
@@ -149,17 +176,29 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
 }: UseDashboardExportOptions<Filters>): UseDashboardExportResult {
   const [isExporting, setIsExporting] = useState(false)
 
+  // The export callback must keep a STABLE identity across renders. It is
+  // handed to consumers via `onExportReady`, which typically stores it in
+  // state — if its identity followed `items`/`filters` (rebuilt by many
+  // consumers on every render), that store-on-change would re-render the
+  // consumer and loop forever. Latest values are read through refs instead.
+  const itemsRef = useRef(items)
+  itemsRef.current = items
+  const filtersRef = useRef(filters)
+  filtersRef.current = filters
+  const filenameRef = useRef(filename)
+  filenameRef.current = filename
+
   const exportAsExcel = useCallback(async () => {
     setIsExporting(true)
     try {
-      const sheets = await buildAllSheets(items, filters)
+      const sheets = await buildAllSheets(itemsRef.current, filtersRef.current)
       if (sheets.length > 0) {
-        downloadMultiSheetExcel(sheets, filename)
+        downloadMultiSheetExcel(sheets, filenameRef.current)
       }
     } finally {
       setIsExporting(false)
     }
-  }, [items, filters, filename])
+  }, [])
 
   return { exportAsExcel, isExporting }
 }

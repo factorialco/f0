@@ -112,6 +112,22 @@ export interface UseDataReturn<R extends RecordType> {
 
   // Merged filters (default values and current values)
   mergedFilters: FiltersState<FiltersDefinition>
+
+  /**
+   * Opaque identity of the query whose response produced `data` — filters,
+   * search, sortings and pagination position, as they were when that fetch was
+   * issued. Undefined until the first response commits.
+   *
+   * Compare it across renders to tell "these rows answer a different question"
+   * from "these rows changed". The live filter/search state on the source can't
+   * do that: it moves a render (and a debounce) before the matching rows do, so
+   * there is always a window where it describes a query the rendered rows do
+   * not answer.
+   *
+   * Optional so existing constructors of this interface (mocks, adapters) stay
+   * valid; `useData` itself always returns it.
+   */
+  committedQuery?: string
 }
 
 type DataType<T> = PromiseState<T>
@@ -315,7 +331,24 @@ export function useData<
   const [totalItems, setTotalItems] = useState<number | undefined>(undefined)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
 
+  // Identifies the query whose response produced the records currently
+  // rendered — not the query the user has selected, which changes a render (or
+  // a debounce) before its data arrives. Consumers that must tell "these rows
+  // answer a different question" from "these rows changed" need this rather
+  // than the live filter/search state.
+  const [committedQuery, setCommittedQuery] = useState<string | undefined>(
+    undefined
+  )
+
   const isLoadingMoreRef = useRef(false)
+
+  // Latest loaded records + the query/pageSize that produced them, so a
+  // shrinking page size can reuse the already-loaded records instead of
+  // refetching (see the initial fetch effect below).
+  const rawDataRef = useRef(rawData)
+  rawDataRef.current = rawData
+  const lastFetchSignatureRef = useRef<string | undefined>(undefined)
+  const lastFetchedPerPageRef = useRef<number | undefined>(undefined)
 
   // The provided `currentPage` only seeds the very first page-based fetch
   // (e.g. restoring a page from the URL); later fetches reset to page 1 as
@@ -374,7 +407,8 @@ export function useData<
     (
       result: PaginatedResponse<R> | SimpleResult<R>,
       appendMode: boolean,
-      isLoadingYet?: boolean
+      isLoadingYet?: boolean,
+      query?: string
     ) => {
       /**
        * Call to the onResponse callback
@@ -444,6 +478,9 @@ export function useData<
       setIsLoading(!!isLoadingYet)
       setIsLoadingMore(false)
       isLoadingMoreRef.current = false
+      // Stamp the rendered records with the query they answer. Batched with
+      // the setters above, so this costs no extra render.
+      if (query !== undefined) setCommittedQuery(query)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -456,6 +493,7 @@ export function useData<
       setIsLoadingMore,
       setTotalItems,
       isLoadingMoreRef,
+      setCommittedQuery,
     ]
   )
 
@@ -604,14 +642,28 @@ export function useData<
           }
         )
 
+        // What this particular fetch is asking for. Stamped onto the records it
+        // returns so consumers can tell a different question from a changed
+        // answer. The pagination position is part of it: paging and load-more
+        // swap the rows by navigation, not by insertion.
+        const query = JSON.stringify({
+          filters,
+          search,
+          sortings,
+          currentPage,
+          cursor,
+        })
+
         function fetcher(): PromiseOrObservable<ResultType> {
           setTotalItems(undefined)
 
           const defaultPerPage = 20
 
-          // Safely access perPage, defaulting to 20 if not available
+          // Safely access perPage, defaulting to 20 if not available.
+          // "auto" is resolved to a number by OneDataCollection before it
+          // reaches this hook; fall back to the default if it wasn't.
           const perPageValue =
-            "perPage" in dataAdapter && dataAdapter.perPage !== undefined
+            "perPage" in dataAdapter && typeof dataAdapter.perPage === "number"
               ? dataAdapter.perPage
               : defaultPerPage
 
@@ -638,7 +690,7 @@ export function useData<
 
         // Handle synchronous data
         if (!("then" in result || "subscribe" in result)) {
-          handleFetchSuccess(result, appendMode)
+          handleFetchSuccess(result, appendMode, undefined, query)
           return
         }
 
@@ -649,7 +701,7 @@ export function useData<
         const subscription = observable.subscribe({
           next: (state) => {
             if (state.data) {
-              handleFetchSuccess(state.data, appendMode, state.loading)
+              handleFetchSuccess(state.data, appendMode, state.loading, query)
             } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
@@ -758,6 +810,51 @@ export function useData<
     () => {
       if (!enabled) return
       if (!isLoadingMoreRef.current) {
+        // Page-based reuse: when only the page size shrank (same filters /
+        // sortings / search) and page 1 already holds at least that many
+        // records, trim the loaded records instead of refetching — no extra
+        // network round-trip. This is what makes the auto page size hide items
+        // it over-fetched without loading again.
+        const perPageValue =
+          "perPage" in dataAdapter && typeof dataAdapter.perPage === "number"
+            ? dataAdapter.perPage
+            : undefined
+        const currentPagination = paginationInfoRef.current
+        const fetchSignature = JSON.stringify({
+          filters: mergedFilters,
+          sortings: currentSortings,
+          grouping: currentGrouping,
+          search: searchValue.current,
+          paginationType: dataAdapter.paginationType,
+        })
+        const canReuseLoadedData =
+          dataAdapter.paginationType === "pages" &&
+          perPageValue !== undefined &&
+          fetchSignature === lastFetchSignatureRef.current &&
+          lastFetchedPerPageRef.current !== undefined &&
+          perPageValue < lastFetchedPerPageRef.current &&
+          isPageBasedPagination(currentPagination) &&
+          currentPagination.currentPage === 1 &&
+          rawDataRef.current.length >= perPageValue
+
+        if (canReuseLoadedData) {
+          lastFetchedPerPageRef.current = perPageValue
+          setRawData((prev) => prev.slice(0, perPageValue))
+          setPaginationInfo((info) =>
+            info && info.type === "pages"
+              ? {
+                  ...info,
+                  perPage: perPageValue,
+                  pagesCount: Math.max(1, Math.ceil(info.total / perPageValue)),
+                }
+              : info
+          )
+          return
+        }
+
+        lastFetchSignatureRef.current = fetchSignature
+        lastFetchedPerPageRef.current = perPageValue
+
         setIsLoading(true)
         // Seed the first page-based fetch from `currentPage` (if provided), then
         // fall back to page 1 for every subsequent fetch (filter/search/sorting
@@ -812,6 +909,7 @@ export function useData<
     loadMore,
     mergedFilters,
     totalItems: total,
+    committedQuery,
   }
 }
 

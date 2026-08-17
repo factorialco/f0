@@ -1,82 +1,106 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { KeyPoint, Grid } from "./_lifecycle-visuals"
 
-<Meta title="How to contribute?" />
+<Meta title="About F0/How to contribute" />
 
-# How to contribute
+# Contributing to F0
 
-Thank you for your interest in helping us improve our platform. Your
-contributions are essential to keeping F0 robust and user-friendly. Below are
-several ways you can contribute to the design system, organized from small tasks
-to those that require more time.
+Contributing to F0 happens **in the chat with your AI agent** — it reads the repo and walks you through it. F0 is open source — anyone can use it and shape it — but it grows **intentionally**: we add things with clear cross-team value, and say no with a documented reason and an alternative. Below are the steps, and each one has prompts you can drop straight into your agent. (F0 ships **AGENTS.md** and skills, so any AGENTS.md-aware agent works — Claude Code, Codex, OpenCode, or whatever you use.)
 
-Reach us in
-[#f0 Slack channel](https://factorialteam.slack.com/archives/C06QT46115K), we
-are happy to support you!
+<KeyPoint eyebrow="Start here" title="Tell your agent what you want to build">
+Open **your agent** in the `f0` repo and say what you need — e.g. _"I need X in F0 — is there anything already, and if not, what process should I follow to contribute it?"_ It takes it from there and walks you through the steps below.
+</KeyPoint>
 
-## 📣 Report an issue
+## The steps, from idea to F0
 
-If you notice a bug, performance issue or if something that doesn't work as
-expected, leave us an
-[issue in Github](https://github.com/factorialco/f0/issues). Provide as much
-context as possible, including steps to reproduce, browser information, and
-screenshots if relevant.
+### 1 · Look first
 
-### What to expect
+_Ask your agent, or browse Storybook._
 
-Once reported, the issue will be reviewed, prioritized, and tagged. We'll notify
-you if more information is needed or if it has been resolved. Do not resolve it
-until the bug is confirmed, unless the issue is crystal clear.
+- Understand what F0 already has.
+- Check if you can use — or extend — something that already exists.
 
-## 🔧 Fix things and make small enhancements
+> **Ask your agent** — _"Is there already an F0 component, kit or pattern for X?"_ · _"Could I cover X by extending an existing component instead?"_
 
-Fixes, such as a bugs in the code, erroneous Figma library components,
-mismatching Names between the code and Figma or confusing documentation sentence
-changes.
+### 2 · Is it worth being in F0 for everyone?
 
-Small enhancements, such as adding a new icon to the existing icon library. This
-change doesn’t break existing behavior and can be confined to minimize impact
-across the design system.
+- Is it new, or an evolution of something that exists?
+- Is it a real need — not a one-off?
+- Will other teams or product areas use it too?
 
-1. Open a [list of issues](https://github.com/factorialco/f0/issues) and pick
-   any bug, or enhancement you like.
-2. Claim the issue by commenting on it, then submit request with your solution.
+> If it's a one-off for a single screen with no reuse, build it in your product from F0 pieces — a valid outcome, not a rejection.
 
-### What to expect
+### 3 · Design it right
 
-We’ll review it and provide feedback, or approve it if the contribution meets
-the guidelines. If a design review is needed, we'll bring the designers in.
-Usually it won't take much time.
+_Your agent suggests · Foundations confirms._
 
-## 🛠️ Make large enhancements
+- Decide where it lives — Core, a Kit, or Domain specific (see [Where it goes](/docs/about-f0-where-it-goes--documentation)).
+- Build it abstract, so other teams can reuse it — not tied to your screen.
 
-A large enhancement extends an existing feature, such as an alert’s
-dismissibility, description, and position. Any major visual or code change is a
-large contribution.
+> **Ask your agent** — _"Where should X live — Core, a Kit, or Domain specific?"_ · _"How do I build X so other teams can reuse it?"_
 
-1. Claim the issue by commenting on it, share the approach you want to take
-2. Get in contact with the team in #f0 channel
-3. Implement the enhancement and open a PR
-4. Keep repeating until done
+### 4 · Validate with the team
 
-### What to expect
+- Share the proposal in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) — bring whatever fits: the need, a Figma, a prototype, a draft PR.
+- Foundations reviews it (design + development) and gives the OK before it's final.
 
-Expect the process to take more time than you expect. Big changes require
-thorough review of many people because they touch several zones of expertise:
-design, code, accessibility and documentation.
+> **Ask your agent** — _"Draft a #f0-support message proposing X: what it is, where it'd live, and what I'm bringing."_
 
-## 🏗️ Propose new pattern or component
+**Depth scales with impact** — a prop or an icon is light; a shared pattern needs buy-in; changing something already in use needs a migration plan (see [Release & Versioning](/docs/about-f0-release-and-versioning--documentation)). Match the process to the blast radius, not the amount of code.
 
-To be successful, proposals need to show that the component or pattern being
-suggested would be useful and unique:
+Once it's validated, you build it to the [Definition of Done](/docs/about-f0-definition-of-done--documentation) — it ships as **experimental**, and once it's adopted, it's promoted to **stable** (Core & Kit by Foundations; a Domain specific component in place, by its own team).
 
-- There is evidence that this component or pattern would be useful for many
-  teams or services
-- It does not replicate something already in the Design System.
+---
 
-There is no set process on how to add new components to the F0 yet. Get in
-contact with us in #f0 channel
+## What if it's not a straight yes?
 
-### What to expect
+Alignment can end in one of these — each has a next step, none is a dead end:
 
-It will take time and resources, since an introduction of a pattern requires all
-the pieces: research, design, code, documentation, etc.
+<Unstyled>
+  <Grid items={[
+    { label: "iterate", text: "Foundations asks for changes or more evidence → refine and bring it back to the same thread. Nothing is thrown away." },
+    { label: "redirect", text: "It's real but belongs in a Kit, as Domain specific, or as an extension → re-enter at that home; your agent points you to the exact place." },
+    { label: "lives-in-product", text: "One screen, no reuse or shared identity → build it there with your agent / Composer from F0 pieces. A valid outcome, not a rejection.", color: "#3fae74" },
+    { label: "declined", text: "Doesn't fit F0's strategy → a documented reason and, where possible, a concrete alternative.", color: "#ff6364" },
+  ]} />
+</Unstyled>
+
+---
+
+## Reporting a bug
+
+Fixing a bug, or something looks broken? That's **not a new contribution**. Ask your agent for the owner (or check [CODEOWNERS](https://github.com/factorialco/f0/blob/main/CODEOWNERS)), open a PR with steps to reproduce, and flag it in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) if it's blocking you.
+
+---
+
+## Maturity levels
+
+F0 has **three** maturity levels: **Experimental**, **Stable**, and **Deprecated**. See the [Component Maturity model](/docs/about-f0-components-maturity--documentation) for what each one guarantees and what it requires.
+
+---
+
+## Who does what
+
+F0 is built and maintained by the **Foundations team**, with contributions from every product team. Three roles matter in the flow:
+
+- **Foundations** — owns Core (`components/`, `patterns/`, `ui/`, `kits/`, `layouts/`, `hooks/`) and the shared **tokens** and **icons**. They review what enters F0, and **approve and promote Core & Kit to stable**. (A **Domain specific** component is its team's to promote, in place.) Reach them in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403).
+- **Your team** — builds the contribution and **owns and maintains it**. While it's experimental, your team is its **CODEOWNER** (add its path to [`CODEOWNERS`](https://github.com/factorialco/f0/blob/main/CODEOWNERS)) and fields its bugs. On promotion, a Core/Kit component's ownership transfers to Foundations; a **Domain specific** component stays yours.
+- **Your agent** — the **access layer**: it searches, filters, guides placement, and builds to the standard. It does **not** approve, mark anything stable, or merge on your behalf — those are human / Foundations calls.
+
+**Source of truth:** the repo — code, [`CODEOWNERS`](https://github.com/factorialco/f0/blob/main/CODEOWNERS), and these docs — is authoritative. If your agent ever seems to contradict them, the repo wins; treat its output as a suggestion to verify, not a ruling.
+
+---
+
+## Working with AI agents
+
+Your agent is the **entry point** to F0. F0 ships **AGENTS.md** and skills in the repo, so any AGENTS.md-aware agent (Claude Code, Codex, OpenCode, …) reads the repo, searches Storybook, filters your request, and drives the build. Each step has a matching **skill** that tells it exactly how F0 does things:
+
+| Task                              | Skill                                                                                                                       |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Propose & build a new component   | [`f0-component-contribution`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-component-contribution/SKILL.md)  |
+| Promote experimental → stable     | [`f0-component-promotion`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-component-promotion/SKILL.md)        |
+| Write Storybook stories           | [`f0-storybook-stories`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-storybook-stories/SKILL.md)            |
+| Write MDX documentation           | [`f0-docs`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-docs/SKILL.md)                                      |
+| Pre-commit quality checks         | [`f0-quality-gate`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-quality-gate/SKILL.md)                      |
+
+See [AI Configuration](/docs/ai-configuration--documentation) for the full list.

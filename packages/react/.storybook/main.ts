@@ -14,6 +14,7 @@ import {
   computeComponentStatusData,
   effectiveStatusByLeaf,
 } from "../scripts/component-status-build.mjs"
+import { productUsageVitePlugin } from "../scripts/product-usage-scan.mjs"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -63,9 +64,26 @@ const config: StorybookConfig = {
     { directory: "../src/experimental/Widgets", titlePrefix: "Components" },
     { directory: "../src/experimental/Utilities", titlePrefix: "Components" },
     { directory: "../src/experimental/OneTable", titlePrefix: "Components" },
-    { directory: "../src/experimental/F0CardHorizontal", titlePrefix: "Components" },
-    { directory: "../src/experimental/F0SegmentedBar", titlePrefix: "Components" },
-    { directory: "../src/experimental/F0VersionHistory", titlePrefix: "Components" },
+    {
+      directory: "../src/experimental/F0CardHorizontal",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental/F0MeetingCard",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental/F0ProgressSeries",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental/F0SegmentedBar",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental/F0VersionHistory",
+      titlePrefix: "Components",
+    },
     { directory: "../src/hooks/toast", titlePrefix: "Components" },
 
     // ── Patterns · Core compositions (layouts folded in) ─────────
@@ -74,21 +92,42 @@ const config: StorybookConfig = {
     { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
 
     // ── Kits · functional bundles (AI + Chat promoted from sds) ──
-    { directory: "../src/kits", titlePrefix: "Kits" },
-    { directory: "../src/sds/ai", titlePrefix: "Kits" },
-    { directory: "../src/sds/chat", titlePrefix: "Kits" },
-    { directory: "../src/experimental/AiPromotionChat", titlePrefix: "Kits/AI" },
+    { directory: "../src/kits/Charts", titlePrefix: "Kits" },
+    { directory: "../src/kits/F0DataChart", titlePrefix: "Kits" },
+    { directory: "../src/kits/ai", titlePrefix: "Kits" },
+    { directory: "../src/kits/surveys", titlePrefix: "Kits" },
+    {
+      directory: "../src/experimental/AiPromotionChat",
+      titlePrefix: "Kits/AI",
+    },
 
     // ── Domain specific · owned by a single domain (was "SDS") ───
     { directory: "../src/sds/Home", titlePrefix: "Domain specific" },
     { directory: "../src/sds/Profile", titlePrefix: "Domain specific" },
     { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
-    { directory: "../src/sds/surveys", titlePrefix: "Domain specific" },
-    { directory: "../src/sds/TimeLine", titlePrefix: "Domain specific/Time tracking" },
-    { directory: "../src/sds/UpsellingKit", titlePrefix: "Domain specific/Growth" },
+    { directory: "../src/sds/social", titlePrefix: "Domain specific/social" }, // Reactions
+    {
+      directory: "../src/sds/timeline",
+      titlePrefix: "Domain specific/timeline",
+    }, // composed timeline (lives in sds/)
+    {
+      directory: "../src/sds/chat",
+      titlePrefix: "Domain specific/Communications",
+    }, // unvalidated chat — holding area until recurrent use is proven, then promote
+    {
+      directory: "../src/sds/UpsellingKit",
+      titlePrefix: "Domain specific/Growth",
+    },
 
     // ── Resources · hooks, utilities, examples ───────────────────
-    { directory: "../src/lib", titlePrefix: "Resources" },
+    { directory: "../src/lib/F0Box", titlePrefix: "Components" }, // layout primitive → Components
+    { directory: "../src/lib/Await", titlePrefix: "Resources" },
+    { directory: "../src/lib/F0GridStack", titlePrefix: "Resources" },
+    { directory: "../src/lib/OneEllipsis", titlePrefix: "Resources" },
+    { directory: "../src/lib/VirtualList", titlePrefix: "Resources" },
+    { directory: "../src/lib/data-testid", titlePrefix: "Resources" },
+    { directory: "../src/lib/numeric", titlePrefix: "Resources" },
+    { directory: "../src/lib/providers", titlePrefix: "Resources" },
     { directory: "../src/hooks/datasource", titlePrefix: "Resources" },
     { directory: "../src/examples", titlePrefix: "Resources/Examples" },
 
@@ -104,16 +143,28 @@ const config: StorybookConfig = {
     // Core · internal primitives (chrome that wraps public components)
     { directory: "../src/ui/Action", titlePrefix: "Components/Primitives" },
     { directory: "../src/ui/Card", titlePrefix: "Components/Primitives" },
-    { directory: "../src/ui/ChevronToggle", titlePrefix: "Components/Primitives" },
+    {
+      directory: "../src/ui/ChevronToggle",
+      titlePrefix: "Components/Primitives",
+    },
     { directory: "../src/ui/Counter", titlePrefix: "Components/Primitives" },
-    { directory: "../src/ui/DatePickerPopup", titlePrefix: "Components/Primitives" },
+    {
+      directory: "../src/ui/DatePickerPopup",
+      titlePrefix: "Components/Primitives",
+    },
     { directory: "../src/ui/Dialog", titlePrefix: "Components/Primitives" },
     { directory: "../src/ui/IconBadge", titlePrefix: "Components/Primitives" },
-    { directory: "../src/ui/OverflowList", titlePrefix: "Components/Primitives" },
+    {
+      directory: "../src/ui/OverflowList",
+      titlePrefix: "Components/Primitives",
+    },
     { directory: "../src/ui/Select", titlePrefix: "Components/Primitives" },
     { directory: "../src/ui/Spinner", titlePrefix: "Components/Primitives" },
     { directory: "../src/ui/Toast", titlePrefix: "Components/Primitives" },
-    { directory: "../src/ui/VerticalOverflowList", titlePrefix: "Components/Primitives" },
+    {
+      directory: "../src/ui/VerticalOverflowList",
+      titlePrefix: "Components/Primitives",
+    },
     // Core · components (the widget itself; no public wrapper)
     { directory: "../src/ui/ButtonCopy", titlePrefix: "Components" },
     { directory: "../src/ui/ButtonGroup", titlePrefix: "Components" },
@@ -128,7 +179,10 @@ const config: StorybookConfig = {
     { directory: "../src/ui/Lane", titlePrefix: "Patterns" },
     // Resources
     { directory: "../src/ui/OneRestrictComponent", titlePrefix: "Resources" },
-    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
+    // ── Local-only pages ────────────────────────────────────────
+    // "Unused components" reports internal product and prototype usage, so it
+    // is kept out of the public Storybook the same way the usage tag is.
+    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : ["./local-docs/*.mdx"]),
   ],
   staticDirs: ["../public", "./static"],
   addons: [
@@ -198,6 +252,15 @@ const config: StorybookConfig = {
     )
     if (!hasComponentStatus) {
       config.plugins.push(componentStatusVitePlugin())
+    }
+
+    // Serve usage data (scanned from local factorialco/factorial and
+    // factorial-composer checkouts) to the docs "Where is this used in the
+    // product?" tag. It only ever registers a dev-server route, and the tag
+    // itself is compiled out of production bundles — this data is internal and
+    // must not reach the public Storybook at f0.factorial.dev.
+    if (!process.env.STORYBOOK_PUBLIC_BUILD) {
+      config.plugins.push(productUsageVitePlugin())
     }
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served

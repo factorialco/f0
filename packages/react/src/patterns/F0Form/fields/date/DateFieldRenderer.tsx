@@ -68,10 +68,16 @@ export function DateFieldRenderer({
     formField.onChange(pickerValueToDate(value) ?? null)
   }
 
-  // Trigger validation when the picker closes, not on every change
+  // Trigger validation when the picker closes, not on every change.
+  // Defer to the next tick: when the user types a date and clicks outside, the
+  // popover's dismiss fires during the outside pointerdown — before the input's
+  // blur commits the typed value. Validating synchronously here would read the
+  // stale value and flag a valid date as invalid. Deferring lets the input's
+  // blur (onChange) commit first, so validation runs against the final value.
+  // (Enter and calendar selection already commit before closing, so they work.)
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      formField.onBlur()
+      setTimeout(() => formField.onBlur(), 0)
     }
   }
 

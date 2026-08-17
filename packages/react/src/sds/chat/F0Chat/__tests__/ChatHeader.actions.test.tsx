@@ -1,8 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
+import { BellOff, Pencil } from "@/icons/app"
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
-import { Pencil } from "@/icons/app"
 
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
@@ -61,6 +60,105 @@ beforeAll(() => {
 })
 
 describe("ChatHeader host actions", () => {
+  it("uses a hash glyph when a group has no emoji or custom image", () => {
+    renderChat(makeRuntime())
+
+    expect(screen.getByTestId("chat-group-avatar-fallback")).toHaveTextContent(
+      "＃"
+    )
+    expect(screen.queryByRole("img", { name: "Product Team" })).toBeNull()
+  })
+
+  it("keeps an explicit group emoji instead of the hash fallback", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "emoji", emoji: "🚀" },
+        },
+      })
+    )
+
+    expect(
+      screen.queryByTestId("chat-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "🚀" })).toBeInTheDocument()
+  })
+
+  it("keeps a custom group image instead of the hash fallback", () => {
+    const { container } = renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: {
+            type: "team",
+            name: "Product Team",
+            src: "/product-team.png",
+          },
+        },
+      })
+    )
+
+    expect(
+      screen.queryByTestId("chat-group-avatar-fallback")
+    ).not.toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-hidden="true"]')
+    ).toBeInTheDocument()
+  })
+
+  it("shows the muted channel status beside the title", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "emoji", emoji: "🚀" },
+          statuses: [{ icon: BellOff, label: "Muted" }],
+        },
+      })
+    )
+
+    expect(screen.getByLabelText("Muted")).toHaveClass("text-f1-icon")
+  })
+
+  it("announces online presence in a direct message", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c2",
+          type: "dm",
+          title: "María José",
+          avatar: { type: "person", firstName: "María", lastName: "José" },
+          presence: "online",
+        },
+      })
+    )
+
+    expect(screen.getByLabelText("Online")).toBeInTheDocument()
+  })
+
+  it("does not announce online presence for an offline direct message", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c2",
+          type: "dm",
+          title: "María José",
+          avatar: { type: "person", firstName: "María", lastName: "José" },
+          presence: "offline",
+        },
+      })
+    )
+
+    expect(screen.queryByLabelText("Online")).not.toBeInTheDocument()
+  })
+
   it("renders an inline action as its own icon button and fires the callback", () => {
     const onClick = vi.fn()
     const runtime = makeRuntime()

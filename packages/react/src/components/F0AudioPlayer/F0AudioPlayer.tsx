@@ -5,9 +5,11 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { AudioScrubber } from "./components/AudioScrubber"
+import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
 import type { F0AudioPlayerProps } from "./types"
+import { preserveAudioPosition, useAudioLanguage } from "./useAudioLanguage"
 import { usePlayerController } from "./usePlayerController"
 import { getDataAttributes } from "./utils"
 
@@ -30,12 +32,22 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
       disabled = false,
       ariaLabel,
       size = "md",
+      defaultLanguage,
       className,
     } = props
 
     const i18n = useI18n()
-    const controller = usePlayerController(props)
+    const audioLang = useAudioLanguage(src, defaultLanguage)
+    const controller = usePlayerController({
+      ...props,
+      src: audioLang.resolvedSrc,
+    })
     const dataAttributes = getDataAttributes(props)
+
+    const changeAudioLanguage = (locale: string) => {
+      preserveAudioPosition(controller.audioRef.current)
+      audioLang.setLocale(locale)
+    }
 
     return (
       <div
@@ -48,7 +60,10 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
         <audio
           ref={controller.audioRef}
           src={controller.currentSrc}
-          preload={preload ?? (typeof src === "function" ? "none" : "metadata")}
+          preload={
+            preload ??
+            (typeof audioLang.resolvedSrc === "function" ? "none" : "metadata")
+          }
           autoPlay={autoPlay}
         />
 
@@ -72,6 +87,16 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
           duration={controller.duration}
           size={size}
         />
+
+        {/* Inline audio-language picker when several dubbed tracks are given. */}
+        {audioLang.languages.length > 1 && audioLang.activeLocale && (
+          <LanguageSelect
+            value={audioLang.activeLocale}
+            options={audioLang.languages}
+            onChange={changeAudioLanguage}
+            kind={i18n.audioPlayer.audio}
+          />
+        )}
       </div>
     )
   }

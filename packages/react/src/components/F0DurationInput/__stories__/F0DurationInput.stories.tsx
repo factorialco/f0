@@ -24,6 +24,7 @@ const meta = {
     label: { control: "text" },
     value: { control: "number" },
     units: { control: false },
+    allowNegative: { control: "boolean" },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     readonly: { control: "boolean" },
@@ -212,6 +213,33 @@ export const CustomSuffixes: Story = {
   },
 }
 
+export const AllowNegative: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With `allowNegative`, a minus sign typed at the start of the first segment makes the whole duration negative (e.g. to adjust tracked time). `value` and `onChange` carry negative total seconds.",
+      },
+    },
+  },
+  render: () => {
+    const [value, setValue] = useState(-4500)
+    return (
+      <div className="flex flex-col gap-2">
+        <F0DurationInput
+          label="Time adjustment"
+          value={value}
+          onChange={setValue}
+          allowNegative
+        />
+        <span className="text-sm text-f1-foreground-secondary">
+          Value: {value} seconds
+        </span>
+      </div>
+    )
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -285,6 +313,12 @@ export const Snapshot: Story = {
           value={1800}
           onChange={() => {}}
           hideLabel
+        />
+        <F0DurationInput
+          label="Negative duration"
+          value={-4500}
+          onChange={() => {}}
+          allowNegative
         />
       </section>
 

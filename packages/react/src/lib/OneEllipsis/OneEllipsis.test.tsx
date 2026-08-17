@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { act, render, screen } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { OneEllipsis } from "./OneEllipsis"
 
@@ -49,6 +49,16 @@ describe("OneEllipsis", () => {
       lineHeight: "20px",
     })
     window.getComputedStyle = mockGetComputedStyle
+  })
+
+  afterEach(() => {
+    // The mocked dimensions live on the prototype; drop them so a measurement
+    // from one test never leaks into the next.
+    delete (HTMLElement.prototype as { scrollWidth?: number }).scrollWidth
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth
+    delete (HTMLElement.prototype as { scrollHeight?: number }).scrollHeight
+    delete (HTMLElement.prototype as { clientHeight?: number }).clientHeight
+    vi.useRealTimers()
   })
 
   it("renders text without ellipsis when content fits", () => {
@@ -167,5 +177,76 @@ describe("OneEllipsis", () => {
 
     // Tooltip should be gone again
     expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
+  })
+
+  it("keeps the ellipsized text hoverable (pointer-events-auto) so its tooltip is reachable inside a pointer-events-none container", () => {
+    // Content overflows -> ellipsis + tooltip.
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      value: 200,
+    })
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 100,
+    })
+
+    render(<OneEllipsis>A long label that overflows its container</OneEllipsis>)
+
+    // Table cells set `pointer-events: none`; the trigger must re-enable pointer
+    // events on itself or the hover never reaches the tooltip.
+    expect(screen.getByTestId("one-ellipsis").className).toContain(
+      "pointer-events-auto"
+    )
+  })
+
+  it("does not force pointer-events when the text fits, since there is no tooltip", () => {
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      value: 100,
+    })
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 100,
+    })
+
+    render(<OneEllipsis>Short</OneEllipsis>)
+
+    expect(screen.getByTestId("one-ellipsis").className).not.toContain(
+      "pointer-events-auto"
+    )
+  })
+
+  it("re-measures after layout so text width-constrained only on a later pass still detects its ellipsis without a resize event", () => {
+    vi.useFakeTimers()
+
+    // Fits on the initial synchronous measure.
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      value: 100,
+    })
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 100,
+    })
+
+    render(<OneEllipsis>Label constrained only after layout</OneEllipsis>)
+    expect(screen.getByTestId("one-ellipsis").className).not.toContain(
+      "pointer-events-auto"
+    )
+
+    // An ancestor width-constrains the text on a later layout pass (e.g. an
+    // OverflowList inside a table cell) but the ResizeObserver does not fire.
+    // The post-layout re-measure (rAF + timeout) must still catch it.
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      value: 200,
+    })
+    act(() => {
+      vi.advanceTimersByTime(150)
+    })
+
+    expect(screen.getByTestId("one-ellipsis").className).toContain(
+      "pointer-events-auto"
+    )
   })
 })

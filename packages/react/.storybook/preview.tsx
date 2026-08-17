@@ -10,12 +10,13 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
-import { aiTranslations } from "@/sds/ai/F0AiChat/types"
+import { aiTranslations } from "@/kits/ai/F0AiChat/types"
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { ThemeProvider } from "@/lib/providers/theme"
+import { A11Y_RUN_ONLY } from "@/lib/storybook-utils/a11yAxeConfig"
 
 import {
   getAllComponentStatuses,
@@ -58,8 +59,15 @@ export const withTheme = () => {
   }
 }
 
-export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
+export const F0 = (Story: StoryFn, { parameters, viewMode }: StoryContext) => {
   const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
+
+  // Docs pages are capped to a readable measure (see preview-head.html). Page
+  // shells — the Home layouts, ApplicationFrame — are about the whole canvas
+  // and have nothing to do with reading, so they opt out with
+  // `parameters: { docsFullWidth: true }` and the measure steps aside there.
+  const optOutOfDocsMeasure =
+    viewMode === "docs" && parameters.docsFullWidth === true
 
   return (
     <F0Provider
@@ -116,6 +124,13 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
       renderDataTestIdAttribute={true}
     >
+      {optOutOfDocsMeasure && (
+        <span
+          data-docs-full-width
+          aria-hidden="true"
+          style={{ display: "none" }}
+        />
+      )}
       <Story />
     </F0Provider>
   )
@@ -137,6 +152,12 @@ const preview: Preview = {
           },
         ],
       },
+
+      // Same rule scope CI enforces (see src/lib/storybook-utils/a11yAxeConfig.ts).
+      // Without this the addon ran axe's defaults, which omit rules axe ships
+      // disabled — notably `target-size` (WCAG 2.2 SC 2.5.8) — so a story could
+      // show 0 violations in the panel and still fail CI.
+      options: { runOnly: A11Y_RUN_ONLY },
 
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
@@ -176,20 +197,26 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Top-level order mirrors the F0 component lifecycle (PR #4253):
-       * ownership drives the sections (Components/Patterns = Core, Kits,
-       * Domain specific); maturity is a badge, not a section. Everything
-       * not listed here falls back to alphabetical.
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns/Lifecycle groups in the specific order defined below.
+       * Inside `Lifecycle/`, the order follows the actual workflow
+       * (contribute → DoD → maturity → review → release).
        */
       storySort: {
         method: "alphabetical",
         order: [
-          // Get started (lifecycle docs are ordered by PR #4253)
+          // Get started: Introduction (how to consume) → About F0 (the definition) → Using F0
           "Introduction",
-          "How to contribute",
-          "Components maturity",
+          "About F0",
+          [
+            "What is F0",
+            "How to contribute",
+            "Where it goes",
+            "Definition of Done",
+            "Components Maturity",
+            "Release and Versioning",
+          ],
           "AI configuration",
-          "Changelog",
           // Foundations
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],

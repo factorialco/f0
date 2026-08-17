@@ -1,4 +1,5 @@
+import * as AiIcons from "./ai"
 import * as AppIcons from "./app"
 import * as ModuleIcons from "./modules"
-export { AppIcons, ModuleIcons }
+export { AiIcons, AppIcons, ModuleIcons }
 export * from "./types"

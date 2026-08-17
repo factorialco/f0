@@ -65,4 +65,26 @@ describe("DateCell", () => {
     expect(pickerProps.minDate).toBe(minDate)
     expect(pickerProps.maxDate).toBe(maxDate)
   })
+
+  it("resolves a per-row dateConfig function against the current item", () => {
+    const startDate = "2026-06-15"
+
+    render(
+      <DateCell
+        {...defaultProps}
+        item={{ id: "1", startDate }}
+        editableColumn={makeEditableColumn({
+          dateConfig: (item) => ({
+            minDate: item.startDate ? new Date(item.startDate) : undefined,
+          }),
+        })}
+      />
+    )
+
+    const pickerProps = f0DatePickerMock.mock.calls.at(-1)?.[0] as {
+      minDate?: Date
+    }
+
+    expect(pickerProps.minDate).toEqual(new Date(startDate))
+  })
 })

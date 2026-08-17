@@ -1,6 +1,14 @@
 import React from "react"
 
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/ui/tooltip"
+
+import { A11yRow, A11yTooltipRow } from "./A11yRow"
+import {
   getComponentStatus,
   type ApiStatus,
   type ComponentEntry,
@@ -91,43 +99,172 @@ export function ComponentStability({
       </p>
 
       {status.showChecklist && (
-        <ul className="mt-4 list-none space-y-3 p-0">
-          {status.requirements.map((req) => (
-            <li key={req.key} className="flex items-start gap-2">
-              <span
-                aria-hidden
-                className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+        // role="list" divs (not <ul>/<li>): Storybook docs injects a global
+        // `#storybook-docs ul { margin-bottom: 24px !important }` that .sb-unstyled
+        // doesn't neutralize and no utility class can outrank, so semantic-role
+        // divs keep the spacing under our control while preserving list semantics.
+        <div role="list" className="mt-4 space-y-3">
+          {status.requirements.map((req) =>
+            req.key === "a11y" ? (
+              <A11yRow
+                key={req.key}
+                detail={req.detail}
+                tier={status.a11yTier}
+              />
+            ) : (
+              <div
+                key={req.key}
+                role="listitem"
+                className="flex items-start gap-2"
               >
-                {req.met ? "✓" : "✕"}
-              </span>
-              <div>
-                <div className="text-base text-f1-foreground">{req.label}</div>
-                <div className="mt-0.5 text-base text-f1-foreground-secondary">
-                  {req.detail}
-                  {req.criteria && req.criteria.length > 0 && (
-                    <ul className="mt-1 list-none space-y-0.5 p-0">
-                      {req.criteria.map((criterion) => (
-                        <li
-                          key={criterion.label}
-                          className="flex items-start gap-2 !text-base"
-                        >
-                          <span
-                            aria-hidden
-                            className={`shrink-0 ${criterion.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                <span
+                  aria-hidden
+                  className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                >
+                  {req.met ? "✓" : "✕"}
+                </span>
+                <div>
+                  <div className="text-base text-f1-foreground">
+                    {req.label}
+                  </div>
+                  <div className="mt-0.5 text-base text-f1-foreground-secondary">
+                    {req.detail}
+                    {req.criteria && req.criteria.length > 0 && (
+                      <div role="list" className="mt-1 space-y-0.5">
+                        {req.criteria.map((criterion) => (
+                          <div
+                            key={criterion.label}
+                            role="listitem"
+                            className="flex items-start gap-2 text-base"
                           >
-                            {criterion.met ? "✓" : "✕"}
-                          </span>
-                          <span>{criterion.label}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                            <span
+                              aria-hidden
+                              className={`shrink-0 ${criterion.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                            >
+                              {criterion.met ? "✓" : "✕"}
+                            </span>
+                            <span>{criterion.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </li>
-          ))}
-        </ul>
+            )
+          )}
+        </div>
       )}
     </div>
+  )
+}
+
+/**
+ * The maturity summary + Definition-of-Done checklist, rendered statically for
+ * the `ComponentMaturityTag` tooltip. It carries the same information as the
+ * `ComponentStability` panel. The accessibility row runs the same live axe
+ * audit as the panel, fired automatically on open since a tooltip is transient
+ * and can't hold a "check the rendered stories" disclosure.
+ */
+function StatusDetails({ status }: { status: ComponentStatus }) {
+  // The tooltip surface is dark with a white (`f1-foreground-inverse`) base, so
+  // colors are expressed as opacity over that inherited white rather than the
+  // `f1-foreground-secondary` token (which resolves to a too-dim 50% white here).
+  return (
+    <div className="text-f1-foreground-inverse">
+      <p className="m-0 text-base opacity-90">{status.summary}</p>
+
+      {status.showChecklist && (
+        <div role="list" className="mt-3 space-y-3">
+          {status.requirements.map((req) =>
+            req.key === "a11y" ? (
+              <A11yTooltipRow
+                key={req.key}
+                detail={req.detail}
+                tier={status.a11yTier}
+              />
+            ) : (
+              <div
+                key={req.key}
+                role="listitem"
+                className="flex items-start gap-2"
+              >
+                <span
+                  aria-hidden
+                  className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "opacity-60"}`}
+                >
+                  {req.met ? "✓" : "✕"}
+                </span>
+                <div>
+                  <div className="text-base">{req.label}</div>
+                  <div className="mt-0.5 text-base opacity-75">
+                    {req.detail}
+                    {req.criteria && req.criteria.length > 0 && (
+                      <div role="list" className="mt-1 space-y-0.5">
+                        {req.criteria.map((criterion) => (
+                          <div
+                            key={criterion.label}
+                            role="listitem"
+                            className="flex items-start gap-2 text-base"
+                          >
+                            <span
+                              aria-hidden
+                              className={`shrink-0 ${criterion.met ? "text-f1-foreground-positive" : "opacity-60"}`}
+                            >
+                              {criterion.met ? "✓" : "✕"}
+                            </span>
+                            <span>{criterion.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * The maturity status badge, sized to sit inline next to a component title. On
+ * hover/focus it reveals the full maturity summary and Definition-of-Done
+ * checklist in a tooltip — the same information the `ComponentStability` panel
+ * shows, so collapsing the section loses no context.
+ *
+ * Renders nothing when the name doesn't resolve to a tracked component.
+ */
+export function ComponentMaturityTag({
+  componentName,
+  components,
+  className,
+}: ComponentStabilityProps) {
+  const status = getComponentStatus(componentName, components)
+  if (!status) return null
+
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span
+            className={`sb-unstyled inline-flex cursor-help align-middle ${className ?? ""}`}
+          >
+            <StatusBadge status={status} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          align="start"
+          className="max-h-[70vh] max-w-sm overflow-y-auto"
+        >
+          <div className="sb-unstyled p-1">
+            <StatusDetails status={status} />
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }

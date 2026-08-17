@@ -1,12 +1,39 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { type IconType } from "@/components/F0Icon"
-import { type TranscribeFn } from "@/sds/ai/F0AiChat/types"
+import { type VideoPlayerContent } from "@/components/F0VideoPlayer"
+import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
+
+export const f0ChatSenderColors = [
+  "viridian",
+  "malibu",
+  "yellow",
+  "purple",
+  "lilac",
+  "barbie",
+  "smoke",
+  "army",
+  "flubber",
+  "indigo",
+  "camel",
+  "radical",
+  "orange",
+  "red",
+  "grass",
+] as const
+
+export type F0ChatSenderColor = (typeof f0ChatSenderColors)[number]
 
 /** A participant in a conversation. */
 export type F0ChatUser = {
   id: string
   name: string
   avatar?: AvatarVariant
+  /**
+   * Stable sender accent. For photo avatars, choose the palette hue closest to
+   * the image's dominant colour so the name and incoming bubble feel related.
+   * When omitted, F0 uses the same name hash as a generated person avatar.
+   */
+  avatarColor?: F0ChatSenderColor
   /** Secondary line for the hover card (e.g. job title). */
   subtitle?: string
   /** Link to the person's profile, shown as "View profile" in the hover card. */
@@ -47,7 +74,6 @@ export type F0ChatChannel = {
   avatar: AvatarVariant
   /** DM only — the other person's presence. */
   presence?: "online" | "offline"
-  muted?: boolean
   /**
    * Whether the conversation is pinned (favourited) by the current user. Drives
    * the header pin toggle and lets the host surface a "Pinned" group in the
@@ -60,7 +86,11 @@ export type F0ChatChannel = {
    * factorial sources these from its own data (e.g. HR vacation status).
    */
   statuses?: F0ChatChannelStatus[]
-  /** Group only. */
+  /**
+   * Group only. Total channel members, including the current user. F0 compares
+   * `memberCount - 1` with the unique other members in `readBy` (or its count
+   * fallback) before showing the all-read footer state.
+   */
   memberCount?: number
   /** DM only — the counterpart, used for the header identity hover card. */
   user?: F0ChatUser
@@ -82,6 +112,17 @@ export type F0ChatFileAttachment = {
   name: string
   size?: number
   mimeType?: string
+  /** Poster used when a video file renders through the inline F0VideoPlayer. */
+  thumbnailUrl?: string
+  /**
+   * Optional captions/audio-description sources for video files. Passed
+   * directly to F0VideoPlayer; ignored for non-video files.
+   */
+  videoContent?: VideoPlayerContent
+  /** Initial locale for localized video audio and accessibility content. */
+  videoDefaultLanguage?: string
+  /** Declare that a video file has no audio, so captions are not required. */
+  videoSilent?: boolean
   /** 0–100 while uploading; undefined once done. */
   progress?: number
 }
@@ -137,6 +178,10 @@ export type F0ChatReaction = {
   emoji: string
   count: number
   reactedByMe: boolean
+  /**
+   * People who reacted with this emoji. Hosts may omit this initial list and
+   * provide {@link F0ChatRuntime.loadReactionUsers} to resolve it lazily.
+   */
   users?: F0ChatUser[]
 }
 
@@ -147,7 +192,10 @@ export type F0ChatReaction = {
  * shows a tappable critical alert whose menu is reduced to Retry / Delete.
  * `delivered` (reached the counterpart's device, not read yet) is for backends
  * that distinguish it — Stream doesn't, so the factorial adapter never emits it
- * and those messages go straight from `sent` to `read`.
+ * and those messages go straight from `sent` to `read`. In groups, `read`
+ * should only be emitted when all other channel members have read the message;
+ * F0 also guards that transition with `channel.memberCount` and the available
+ * `readBy` / `readByCount`.
  */
 export type F0ChatMessageStatus =
   | "sending"
@@ -211,9 +259,14 @@ export type F0ChatMessage = {
    */
   mentionedEveryone?: boolean
   /**
-   * Group read receipts — how many other members have read this message.
-   * Approximated by counting members whose last-read pointer is at/after this
-   * message (Stream exposes no per-message reader list).
+   * Group read receipts — the other members who have read this message.
+   * Hosts derive this from their transport's per-member read pointers.
+   */
+  readBy?: F0ChatUser[]
+  /**
+   * Group read-receipt count for hosts that cannot provide reader identities.
+   * Prefer `readBy` when identities are available; F0 derives its count from
+   * `readBy.length`.
    */
   readByCount?: number
   /**
@@ -446,6 +499,16 @@ export type F0ChatRuntime = {
   loadOlder: () => void
   toggleReaction: (messageId: string, emoji: string) => void | Promise<void>
   /**
+   * Resolve the complete user list for one reaction on demand. F0 calls this
+   * when the reaction receives pointer hover or keyboard focus and caches the
+   * result while its count is unchanged. Omit when every reaction already
+   * carries its complete {@link F0ChatReaction.users} list.
+   */
+  loadReactionUsers?: (
+    messageId: string,
+    emoji: string
+  ) => Promise<F0ChatUser[]>
+  /**
    * Delete a message that exists server-side (soft delete → tombstone, or hard
    * delete → removed from `messages`).
    *
@@ -493,6 +556,13 @@ export type F0ChatRuntime = {
    */
   maxFiles?: number
   /**
+   * Maximum size in bytes for each file selected, dropped, or pasted into the
+   * composer. When any file exceeds the limit, the composer rejects the whole
+   * batch before calling `uploadFiles` and keeps the validation error visible
+   * until the next attachment attempt. Omit for no size limit.
+   */
+  maxFileSizeBytes?: number
+  /**
    * Optional voice dictation — same signature as the AI chat (streams partials).
    * Not part of the Stream transport; a host wires it to its own speech service
    * (the Stream adapter omits it, so the mic button stays hidden there).
@@ -536,8 +606,8 @@ export type F0ChatRuntime = {
   /**
    * Toggle the conversation's muted state for the current user. Transport
    * capability only — the header no longer auto-renders a Mute action; the
-   * host surfaces one via {@link F0ChatHeaderAction} (the header still shows
-   * the `channel.muted` status icon either way). factorial →
+   * host surfaces one via {@link F0ChatHeaderAction}. The current muted state
+   * is represented like any other entry in `channel.statuses`. factorial →
    * `channel.mute()` / `channel.unmute()`.
    */
   toggleMute?: () => void | Promise<void>

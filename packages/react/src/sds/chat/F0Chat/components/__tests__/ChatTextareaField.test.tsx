@@ -10,13 +10,36 @@ const baseProps = () => ({
   textareaRef: createRef<HTMLTextAreaElement>(),
   highlightRef: createRef<HTMLDivElement>(),
   placeholder: "Message",
+  accessibleLabel: "Write a message",
   onChange: vi.fn(),
   onKeyDown: vi.fn(),
+  onPaste: vi.fn(),
   onCursorUpdate: vi.fn(),
   onScroll: vi.fn(),
+  isAutocompleteOpen: false,
 })
 
 describe("ChatTextareaField emoji overlay", () => {
+  it("exposes the emoji list as an accessible combobox", () => {
+    zeroRender(
+      <ChatTextareaField
+        {...baseProps()}
+        value=":sm"
+        highlightSegments={[{ type: "text", text: ":sm" }]}
+        hasOverlay={false}
+        isAutocompleteOpen
+        autocompleteListboxId="emoji-list"
+        activeAutocompleteOptionId="emoji-smile"
+      />
+    )
+
+    const composer = document.querySelector('[role="combobox"]')
+    expect(composer).toHaveAccessibleName("Write a message")
+    expect(composer).toHaveAttribute("aria-expanded", "true")
+    expect(composer).toHaveAttribute("aria-controls", "emoji-list")
+    expect(composer).toHaveAttribute("aria-activedescendant", "emoji-smile")
+  })
+
   it("paints emoji as twemoji in the overlay when active", () => {
     const segments: HighlightSegment[] = [{ type: "text", text: "hi 😀" }]
     const { container } = zeroRender(

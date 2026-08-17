@@ -5,7 +5,7 @@ import { CategoryBarChart } from "./index"
 const meta = {
   title: "Charts/CategoryBarChart",
   component: CategoryBarChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   args: {
     data: [
       { name: "Category 1", value: 300 },

@@ -32,6 +32,18 @@
   @apply cursor-pointer;
 }
 
+/* Node positioning must be instant. On expand/collapse the anchor-hold pans the
+ * viewport in a single frame (see `handleAnchorReflow`), assuming the node snaps
+ * to its new position in that same frame. A `transition` on the node transform —
+ * e.g. a bare global `.react-flow__node { transition: transform … }` rule leaked
+ * from elsewhere in a consuming app — breaks that: the camera jumps while the
+ * node eases, so the anchored node visibly slides. Own the invariant here rather
+ * than trust consumer CSS. Content transitions live on inner [data-zoom-level]
+ * elements and are unaffected. */
+.f0-graph .react-flow__node {
+  transition: none;
+}
+
 /* Respect OS reduced-motion preference — disable CSS transitions */
 @media (prefers-reduced-motion: reduce) {
   .f0-graph [data-zoom-level],

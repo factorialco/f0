@@ -1,11 +1,19 @@
-import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { AnimatePresence, motion } from "motion/react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
-import { useReducedMotion } from "@/lib/a11y"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
@@ -15,6 +23,10 @@ import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
 import { SendingClock } from "./ChatMessageStatusIcon"
+
+/** See armActionsSoon: long enough for a click burst on the placeholder to
+ * finish, well under the pointer travel time from row edge to the ellipsis. */
+const ARM_ACTIONS_ON_HOVER_MS = 150
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -42,8 +54,50 @@ export const ChatMessageItem = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   const [actionsOpen, setActionsOpen] = useState(false)
+  // The actions popover (Radix Popover + tooltip provider + timers) mounts
+  // on first interaction intent, not with the row: with the transcript's
+  // overscan, mounting it eagerly multiplies that cost by every rendered row
+  // during the first scroll pass. Until then a visually identical plain
+  // trigger holds its place (same component minus tooltip/popover), so hover
+  // reveal and keyboard tab order don't change. Failed messages skip the
+  // deferral — their trigger is always visible.
+  const [actionsArmed, setActionsArmed] = useState(false)
+  const actionsWrapperRef = useRef<HTMLDivElement>(null)
+  const restoreActionsFocusRef = useRef(false)
+  const armTimerRef = useRef<number | null>(null)
+  const armActions = useCallback(() => {
+    // Arming while the placeholder holds focus swaps the focused node — hand
+    // focus over so tabbing never lands in a void.
+    if (actionsWrapperRef.current?.contains(document.activeElement)) {
+      restoreActionsFocusRef.current = true
+    }
+    setActionsArmed(true)
+  }, [])
+  // Hover arming waits out any in-flight click: a click's event burst
+  // (pointer, focus, click) must finish on the placeholder node — swapping it
+  // mid-burst would swallow the click (the detached node no longer bubbles to
+  // the React root). A click faster than this is handled by the placeholder
+  // itself; a hover slower than this reaches an already-real trigger.
+  const armActionsSoon = useCallback(() => {
+    if (armTimerRef.current != null) return
+    armTimerRef.current = window.setTimeout(() => {
+      armTimerRef.current = null
+      armActions()
+    }, ARM_ACTIONS_ON_HOVER_MS)
+  }, [armActions])
+  useEffect(
+    () => () => {
+      if (armTimerRef.current != null) window.clearTimeout(armTimerRef.current)
+    },
+    []
+  )
+  useLayoutEffect(() => {
+    if (!restoreActionsFocusRef.current) return
+    restoreActionsFocusRef.current = false
+    actionsWrapperRef.current?.querySelector("button")?.focus()
+  }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
@@ -78,6 +132,7 @@ export const ChatMessageItem = ({
         "group flex flex-col",
         isMine ? "items-end" : "items-start"
       )}
+      onPointerEnter={actionsArmed ? undefined : armActionsSoon}
     >
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
@@ -85,14 +140,14 @@ export const ChatMessageItem = ({
       {hasContent && (
         <div
           className={cn(
-            "flex w-full gap-2",
+            "flex w-full",
             isMine ? "flex-row-reverse items-center" : "items-end"
           )}
         >
           {bubbleGutter}
           <div
             className={cn(
-              "flex min-w-0 items-center gap-1",
+              "flex min-w-0 items-center gap-0.5",
               isMine ? "flex-row-reverse" : "flex-row"
             )}
           >
@@ -102,14 +157,19 @@ export const ChatMessageItem = ({
               className={cn(
                 // Match the bubble's chained corners so the highlight ring and
                 // hover surface follow its exact shape (not a fixed 2xl box).
-                bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun),
+                bubbleCornerClass({
+                  isMine,
+                  isFirstOfRun,
+                  isLastOfRun,
+                  layer: "outer",
+                }),
                 // Shadow AND radius transition together (single property list —
                 // tailwind-merge would otherwise drop one): the jump-to ring
                 // fades instead of snapping, and a run extending animates the
                 // tail corner. `min-w-0` lets this flex item shrink below its
                 // content's intrinsic width so the reply quote's single line
                 // truncates instead of forcing the bubble wider than the column.
-                "flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
+                "p-0.5 flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200 motion-reduce:transition-none",
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and
@@ -117,7 +177,7 @@ export const ChatMessageItem = ({
                 highlighted &&
                   "ring-1 ring-f1-special-ring ring-offset-2 ring-offset-f1-background",
                 !message.deleted &&
-                  "group-hover:bg-f1-background-hover focus-within:bg-f1-background-hover",
+                  "group-hover:bg-f1-background-secondary focus-within:bg-f1-background-secondary",
                 actionsOpen && "bg-f1-background-hover"
               )}
             >
@@ -168,6 +228,7 @@ export const ChatMessageItem = ({
                 (same popover, reduced to Retry / Delete). */}
             {!message.deleted && message.status !== "sending" && (
               <div
+                ref={actionsWrapperRef}
                 className={cn(
                   message.status === "failed"
                     ? "opacity-100"
@@ -195,12 +256,29 @@ export const ChatMessageItem = ({
                       onOpenChange={setActionsOpen}
                     />
                   </motion.div>
-                ) : (
+                ) : actionsArmed ? (
                   <ChatMessageActions
                     message={message}
                     isMine={isMine}
                     open={actionsOpen}
                     onOpenChange={setActionsOpen}
+                  />
+                ) : (
+                  // Same trigger the popover renders, minus the popover and
+                  // tooltip machinery — indistinguishable until interaction.
+                  // Activating it (click, tap, Enter) arms AND opens, so the
+                  // very first interaction behaves exactly like the real one.
+                  <ButtonInternal
+                    variant="outline"
+                    hideLabel
+                    noAutoTooltip
+                    label={i18n.chat.moreActions}
+                    icon={Ellipsis}
+                    pressed={false}
+                    onClick={() => {
+                      armActions()
+                      setActionsOpen(true)
+                    }}
                   />
                 )}
               </div>

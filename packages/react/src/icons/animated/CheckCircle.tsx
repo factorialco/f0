@@ -58,7 +58,6 @@ const CheckCircleAnimated = React.forwardRef<
         variants={circleVariants}
         transition={circleTransition}
         animate={animate}
-        vectorEffect="non-scaling-stroke"
       />
       <motion.path
         d="M16.52 9.39C16.7354 9.10281 16.6772 8.69539 16.39 8.48C16.1028 8.26461 15.6954 8.32281 15.48 8.61L11.4297 14.0104L8.95963 11.5404C8.70578 11.2865 8.29423 11.2865 8.04039 11.5404C7.78655 11.7942 7.78655 12.2058 8.04039 12.4596L11.0404 15.4596C11.1736 15.5929 11.3581 15.6617 11.5461 15.6484C11.734 15.635 11.9069 15.5407 12.02 15.39L16.52 9.39Z"
@@ -69,7 +68,6 @@ const CheckCircleAnimated = React.forwardRef<
         variants={checkVariants}
         transition={checkTransition}
         animate={animate}
-        vectorEffect="non-scaling-stroke"
       />
     </svg>
   )

@@ -14,6 +14,7 @@ const meta: Meta<typeof F0Alert> = {
   tags: ["stable", "!autodocs"],
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
   argTypes: {
     title: {

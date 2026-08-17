@@ -1,8 +1,7 @@
-import { act } from "react"
-
 import { describe, expect, it } from "vitest"
 
-import { zeroRenderHook as renderHook } from "@/testing/test-utils"
+import { BellOff, PalmTree } from "@/icons/app"
+import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { isSystemMessage, type F0ChatUser } from "../../types"
 import { useMockChatRuntime, type MockChatSeed } from "../createMockChatRuntime"
@@ -61,5 +60,33 @@ describe("useMockChatRuntime membership events", () => {
     act(() => result.current.addMembers([luis]))
 
     expect(result.current.unreadCount).toBe(before)
+  })
+
+  it("derives and toggles muted status with BellOff without affecting other statuses", () => {
+    const mutedSeed: MockChatSeed = {
+      ...seed,
+      channel: {
+        ...seed.channel,
+        statuses: [
+          { icon: PalmTree, label: "On vacation" },
+          { icon: BellOff, label: "Muted" },
+        ],
+      },
+    }
+    const { result } = renderHook(() => useMockChatRuntime(mutedSeed))
+    const countStatus = (icon: typeof BellOff) =>
+      result.current.channel.statuses?.filter((status) => status.icon === icon)
+        .length ?? 0
+
+    expect(countStatus(BellOff)).toBe(1)
+    expect(countStatus(PalmTree)).toBe(1)
+
+    act(() => result.current.toggleMute?.())
+    expect(countStatus(BellOff)).toBe(0)
+    expect(countStatus(PalmTree)).toBe(1)
+
+    act(() => result.current.toggleMute?.())
+    expect(countStatus(BellOff)).toBe(1)
+    expect(countStatus(PalmTree)).toBe(1)
   })
 })

@@ -4,6 +4,7 @@ import { Plus } from "lucide-react"
 import { expect, fn, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { OneEmptyState } from "../OneEmptyState"
 
@@ -105,4 +106,36 @@ export const WithUpsell: Story = {
       },
     ],
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col items-center gap-8">
+      <OneEmptyState
+        variant="default"
+        emoji="📄"
+        title="No items added yet"
+        description="Start by adding your first item."
+        actions={[
+          { label: "New item", onClick: fn(), variant: "outline", icon: Plus },
+        ]}
+      />
+      <OneEmptyState
+        variant="info"
+        title="Nothing to show here"
+        description="Items you add will appear in this list."
+      />
+      <OneEmptyState
+        variant="warning"
+        title="We couldn't load the data"
+        description="Please try again in a moment."
+      />
+      <OneEmptyState
+        variant="critical"
+        title="Unauthorized"
+        description="You don't have access to this resource."
+      />
+    </div>
+  ),
 }

@@ -18,6 +18,19 @@ interactions with records from a Data Collection. Use them to decide whether an
 interaction should stay in the current surface, open a dialog, guide the user
 through a wizard, or navigate to a dedicated page.
 
+## Page layout
+
+A page fully focused on CRUD is built around a single Data Collection that is
+the main thing the user consumes there. For these surfaces, render the
+collection in
+[`fullHeight`](/?path=/docs/patterns-data-collection-full-height--documentation)
+mode: the toolbar and pagination stay pinned in view while only the rows
+scroll, so users never lose the filters or page controls and the collection
+uses all the vertical space the page has. With page-based pagination, pair it
+with `perPage: "auto"` so the page size fits the available height. Reserve the
+default content-height mode for collections that are just one section among many
+on a page.
+
 ## CRUD by view
 
 Open a fullscreen scenario that shows create, read, update, and delete

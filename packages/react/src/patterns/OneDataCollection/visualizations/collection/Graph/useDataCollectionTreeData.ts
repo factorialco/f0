@@ -415,8 +415,10 @@ export function useDataCollectionTreeData<
         sortings,
         navigationFilters: src.currentNavigationFilters,
       }
+      // `adapter.perPage` may be `"auto"` (height-based sizing), which doesn't
+      // apply to the tree/graph fetch — fall back to the default page size.
       const perPage =
-        "perPage" in adapter && adapter.perPage
+        "perPage" in adapter && typeof adapter.perPage === "number"
           ? adapter.perPage
           : DEFAULT_TREE_PER_PAGE
 

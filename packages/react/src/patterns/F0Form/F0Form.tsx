@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
+import { useMediaQuery } from "usehooks-ts"
 import { z } from "zod"
 
 import type {
@@ -46,6 +47,7 @@ import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "./fields/FieldRenderer"
+import { evaluateRenderIf } from "./fields/utils"
 import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
@@ -59,6 +61,16 @@ import { createZodErrorMap } from "./zodErrorMap"
  * before the form is silently submitted after the user stops editing.
  */
 const DEFAULT_AUTOSUBMIT_DELAY_MS = 800
+
+/**
+ * Small-screen detection matching the convention used by dialogs.
+ * On these viewports the sections sidepanel is hidden entirely — there is
+ * not enough horizontal space for navigation next to the form content.
+ */
+const useIsSmallScreen = () =>
+  useMediaQuery("(max-width: 560px)", {
+    initializeWithValue: false,
+  })
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -131,20 +143,35 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     useUpload,
   } = props
 
-  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  // The sidepanel is hidden entirely on small (mobile) viewports; sections
+  // then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
   const noPadding = styling?.noPadding ?? false
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
+  // Only effective when the sidepanel is actually rendered (it provides the
+  // only way to switch between sections).
+  const showOnlySelectedSection =
+    showSectionsSidepanel &&
+    (styling?.showOnlySelectedSection ?? false) &&
+    !!sections &&
+    sectionIds.length > 0
+
   const handleSectionClick = useCallback(
     (sectionId: string) => {
+      // When only the selected section is shown, the content swaps in place —
+      // there is no anchor to scroll to.
+      if (showOnlySelectedSection) return
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" })
       }
     },
-    [name]
+    [name, showOnlySelectedSection]
   )
 
   const [activeSection, setActiveSection] = useState<string | undefined>(
@@ -178,7 +205,13 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           <div
             key={sectionId}
             id={generateAnchorId(name, sectionId)}
-            className={cn("scroll-mt-4", index !== 0 && SECTION_MARGIN)}
+            className={cn(
+              "scroll-mt-4",
+              index !== 0 && !showOnlySelectedSection && SECTION_MARGIN,
+              // Hide (rather than unmount) inactive sections so each
+              // section form keeps its values and dirty state.
+              showOnlySelectedSection && sectionId !== activeSection && "hidden"
+            )}
           >
             <F0FormSection
               formName={name}
@@ -541,8 +574,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   const { useUpload } = props
 
-  // Resolve styling configuration
-  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  // Resolve styling configuration. The sidepanel is hidden entirely on
+  // small (mobile) viewports; sections then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
   const noPadding = styling?.noPadding ?? false
 
   // Resolve submit type from config
@@ -558,6 +594,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const hideSubmitButton =
     (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
     !!submitConfig?.hideSubmitButton
+  const showSubmitWhenDirty =
+    (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
+    !!submitConfig?.showSubmitWhenDirty
   const hideActionBar =
     submitConfig?.type !== "action-bar" && !!submitConfig?.hideActionBar
   const showSubmitButton = !isActionBar && !isAutosubmit && !hideSubmitButton
@@ -637,9 +676,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const handleSectionClick = useCallback(
     (sectionId: string) => {
       setActiveSection(sectionId)
+      const container = scrollContainerRef.current
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      const container = scrollContainerRef.current
       if (element && container) {
         // Scroll within the form's own scroll container to avoid
         // shifting parent containers (e.g. the canvas panel).
@@ -651,17 +690,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     },
     [name]
   )
-
-  // Convert sections to TOCItems for the TableOfContent component
-  const tocItems: TOCItem[] = useMemo(() => {
-    if (!sections || !showSectionsSidepanel) return []
-
-    return sectionIds.map((sectionId) => ({
-      id: sectionId,
-      label: sections[sectionId]?.title ?? sectionId,
-      onClick: () => handleSectionClick(sectionId),
-    }))
-  }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
   // Create custom error map for localized validation messages
   const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
@@ -691,8 +719,80 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     wasLoadingRef.current = isFormLoading
   }, [isFormLoading, defaultValues, form])
 
+  const hasConditionalSections = useMemo(
+    () =>
+      definition.some(
+        (item) => item.type === "section" && !!item.section.renderIf
+      ),
+    [definition]
+  )
+
+  // Subscribe to value changes only when a section's visibility can actually
+  // change — evaluating renderIf needs the latest values (same pattern as
+  // SectionRenderer, which evaluates the same conditions to hide content).
+  const formValuesForSections =
+    showSectionsSidepanel && hasConditionalSections ? form.watch() : undefined
+
+  // Sections whose renderIf currently evaluates to false are not rendered by
+  // SectionRenderer, so they must not be offered in the sidepanel either.
+  // Computed inline (not memoized) because watch() can return the same
+  // mutated object across renders.
+  const visibleSectionIds = formValuesForSections
+    ? definition
+        .filter((item): item is SectionDefinition => item.type === "section")
+        .filter(
+          (item) =>
+            !item.section.renderIf ||
+            evaluateRenderIf(item.section.renderIf, formValuesForSections)
+        )
+        .map((item) => item.id)
+    : sectionIds
+
+  // If the active section becomes hidden by renderIf, fall back to the first
+  // visible one.
+  const effectiveActiveSection =
+    activeSection && visibleSectionIds.includes(activeSection)
+      ? activeSection
+      : visibleSectionIds[0]
+
+  // Convert visible sections to TOCItems for the TableOfContent component.
+  // Built inline (not memoized) because visibleSectionIds is recomputed on
+  // every render when conditional sections exist.
+  const tocItems: TOCItem[] =
+    sections && showSectionsSidepanel
+      ? visibleSectionIds.map((sectionId) => ({
+          id: sectionId,
+          label: sections[sectionId]?.title ?? sectionId,
+          onClick: () => handleSectionClick(sectionId),
+        }))
+      : []
+
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
+
+  // Track file fields with in-flight uploads. Submission is blocked until the
+  // set empties so a form is never submitted with a file that hasn't finished
+  // uploading (its form value isn't set until the upload completes).
+  const [uploadingFieldIds, setUploadingFieldIds] = useState<Set<string>>(
+    () => new Set()
+  )
+  const registerUploadState = useCallback(
+    (id: string, isUploading: boolean) => {
+      setUploadingFieldIds((prev) => {
+        if (isUploading === prev.has(id)) return prev
+        const next = new Set(prev)
+        if (isUploading) next.add(id)
+        else next.delete(id)
+        return next
+      })
+    },
+    []
+  )
+  const hasPendingUploads = uploadingFieldIds.size > 0
+  // Mirror into a ref so the submit handler can guard against non-button
+  // submits (Enter key, autosubmit) without being re-created every render.
+  const hasPendingUploadsRef = useRef(hasPendingUploads)
+  hasPendingUploadsRef.current = hasPendingUploads
 
   const [actionBarStatus, setActionBarStatus] =
     useState<ActionBarStatus>("idle")
@@ -700,6 +800,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autosubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const actionBarRef = useRef<F0ActionBarRef | null>(null)
+
+  // Tracks whether the component is still mounted. Guards state updates that
+  // are reached through an async path (`await onSubmit(...)`) or a timer
+  // callback: if the form unmounts while a submit is in flight, the unmount
+  // cleanup below has already run — a timer scheduled *after* the await would
+  // never be captured/cleared, and its callback (or the post-await setState)
+  // would run against a torn-down tree. See the unmount effect that flips this.
+  const isMountedRef = useRef(true)
 
   /**
    * Snapshot of the focused input element + caret position taken before a
@@ -738,6 +846,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Handle form submission with status flow: idle -> loading -> success -> idle
   const handleSubmit = async (data: TValues) => {
+    // Block submission while any file field still has an upload in flight.
+    // Covers non-button submit paths (Enter key, autosubmit); the visible
+    // submit controls are also disabled via `hasPendingUploads`.
+    if (hasPendingUploadsRef.current) return
+
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
       successTimerRef.current = null
@@ -755,6 +868,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     const result = await onSubmit(cleanedData)
 
+    // The form may have unmounted while `onSubmit` was in flight. The unmount
+    // cleanup has already run, so any state update here — or a timer scheduled
+    // below — would leak past teardown. Bail out.
+    if (!isMountedRef.current) return
+
     if (result.success) {
       form.reset(form.getValues())
       resetErrorNavigation()
@@ -762,6 +880,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       setActionBarStatus("success")
 
       successTimerRef.current = setTimeout(() => {
+        if (!isMountedRef.current) return
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
@@ -783,11 +902,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
       }
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
+        autosubmitTimerRef.current = null
       }
     }
   }, [])
@@ -836,7 +958,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     const snapshot = focusSnapshotRef.current
     focusSnapshotRef.current = null
     if (!snapshot) return
-    if (!snapshot.element.isConnected) return
+    if (!snapshot.element.isConnected) {
+      // `showSubmitWhenDirty` removes the submit button on a successful save.
+      // If it was the focused element, park focus on the form so tab order
+      // resumes here instead of restarting at the top of the document.
+      if (showSubmitWhenDirty && formElementRef.current) {
+        formElementRef.current.setAttribute("tabindex", "-1")
+        formElementRef.current.focus()
+      }
+      return
+    }
     if (document.activeElement === snapshot.element) return
 
     snapshot.element.focus()
@@ -856,7 +987,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         // Ignore — the focus call above is the important part.
       }
     }
-  }, [isSubmitting])
+  }, [isSubmitting, showSubmitWhenDirty])
 
   // Auto-save: debounced auto-submit when fields change. Triggered by every
   // field in form-level autosubmit mode, or only by fields with `autoSave` when
@@ -888,6 +1019,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
+        if (!isMountedRef.current) return
         // Re-check dirtiness at fire time (RHF's `isDirty` has settled by now,
         // unlike inside the synchronous watch callback): skip a save when the
         // form is back to its last-saved state — e.g. a row was added then
@@ -1071,6 +1203,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     }),
     [
@@ -1080,6 +1213,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       props.renderCustomField,
       isFormLoading,
       useUpload,
+      registerUploadState,
       submitConfig,
     ]
   )
@@ -1096,7 +1230,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       (active.tagName === "BUTTON" ||
         (active.tagName === "INPUT" &&
           (active as HTMLInputElement).type === "submit"))
-    if (!isButtonActivation) snapshotFocus()
+    // With `showSubmitWhenDirty` the submit button unmounts itself on a
+    // successful save, so a button activation is snapshotted too — otherwise
+    // focus would be dropped on the floor when it disappears.
+    if (!isButtonActivation || showSubmitWhenDirty) snapshotFocus()
     submitHandler(event)
   }
 
@@ -1107,7 +1244,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       className={cn(
         "flex flex-col w-full mx-auto max-w-content",
         className,
-        styling?.showSectionsSidepanel && "[&>div:last-child]:pb-6"
+        showSectionsSidepanel && "[&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}
@@ -1160,7 +1297,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.id}
-                className={index !== 0 ? SECTION_MARGIN : ""}
+                className={cn(index !== 0 && SECTION_MARGIN)}
               >
                 <SectionRenderer section={groupedItem.item} />
               </div>
@@ -1178,17 +1315,19 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       )}
 
       {/* Default submit button */}
-      {!isActionBar && showSubmitButton && (
-        <div className="mt-4 flex justify-end">
-          <F0Button
-            type="submit"
-            label={submitLabel}
-            icon={submitIcon}
-            loading={isSubmitting}
-            disabled={hasErrors || isFormLoading}
-          />
-        </div>
-      )}
+      {!isActionBar &&
+        showSubmitButton &&
+        (!showSubmitWhenDirty || isDirty) && (
+          <div className="mt-4 flex justify-end">
+            <F0Button
+              type="submit"
+              label={submitLabel}
+              icon={submitIcon}
+              loading={isSubmitting}
+              disabled={hasErrors || isFormLoading || hasPendingUploads}
+            />
+          </div>
+        )}
     </form>
   )
 
@@ -1201,7 +1340,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
               <F0TableOfContent
                 items={tocItems}
-                activeItem={activeSection}
+                activeItem={effectiveActiveSection}
                 scrollable={false}
               />
             </div>
@@ -1227,6 +1366,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             isDirty={isDirty}
             actionBarStatus={actionBarStatus}
             hasErrors={hasErrors}
+            hasPendingUploads={hasPendingUploads}
             errorCount={errorCount}
             resolvedActionBarLabel={resolvedActionBarLabel}
             submitLabel={submitLabel}

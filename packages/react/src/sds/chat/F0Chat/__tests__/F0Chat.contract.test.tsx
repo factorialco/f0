@@ -150,9 +150,8 @@ describe("connection states", () => {
 })
 
 describe("delivery states", () => {
-  // Optimistic footer (WhatsApp): sending/sent/delivered all show the bare
-  // time — the label never changes when the ack lands (zero flicker). A slow
-  // send is the SendingClock's job; only read/failed speak up.
+  // Sending and legacy messages keep the bare time. Once acknowledged, sent
+  // and delivered share "Sent · time"; read advances to "Read · time".
   const bareTimeOf = (message: F0ChatMessage) =>
     new Intl.DateTimeFormat(undefined, {
       hour: "2-digit",
@@ -166,17 +165,20 @@ describe("delivery states", () => {
     expect(screen.queryByText("Sending…")).not.toBeInTheDocument()
   })
 
-  it("does not announce success — sent keeps the bare time", () => {
+  it("shows sent with the time once the message is acknowledged", () => {
     const message = mine("sent")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
-    expect(screen.queryByText(/^Sent/)).not.toBeInTheDocument()
+    expect(
+      screen.getByText(`Sent · ${bareTimeOf(message)}`)
+    ).toBeInTheDocument()
   })
 
-  it("keeps delivered silent too (the Info panel carries that detail)", () => {
+  it("keeps delivered under the sent footer label", () => {
     const message = mine("delivered")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
+    expect(
+      screen.getByText(`Sent · ${bareTimeOf(message)}`)
+    ).toBeInTheDocument()
     expect(screen.queryByText(/^Delivered/)).not.toBeInTheDocument()
   })
 

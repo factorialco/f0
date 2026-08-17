@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
 import { useState, useMemo } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -8,9 +8,10 @@ import {
   CompoundTone,
 } from "@/ui/value-display/types/compound"
 
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
+import { ItemActionsDefinition } from "../../../item-actions"
+import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/Table",
@@ -443,7 +444,7 @@ export const TableKpiCompoundValues: Story = {
     docs: {
       description: {
         story:
-          "A KPI-focused table showcasing multi-segment `compound` values with semantic tones and `value / value` formatting.",
+          "A KPI-highlighted table showcasing multi-segment `compound` values with semantic tones and `value / value` formatting.",
       },
     },
   },
@@ -629,7 +630,7 @@ export const TableWithGroupedHeaders: Story = {
             type: "table",
             options: {
               ...baseOptions,
-              headerGroupLabels: {
+              headerGroups: {
                 personal: "Personal Information",
                 employment: "Employment Details",
               },
@@ -685,6 +686,615 @@ export const TableWithGroupedHeaders: Story = {
         ]}
       />
     )
+  },
+}
+
+export const TableWithCollapsibleHeaderGroups: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A header group becomes collapsible as soon as its definition declares `collapsedColumns`: the ids of the columns that stay visible while the group is collapsed. Everything else in the group is hidden until the user expands it. Groups declared as a plain string (`headcount` here) stay purely visual.",
+      },
+    },
+  },
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        team: "Engineering",
+        headcount: 42,
+        janSalaries: "€310,400",
+        janBonuses: "€24,000",
+        janTotal: "€334,400",
+        febSalaries: "€318,900",
+        febBonuses: "€12,500",
+        febTotal: "€331,400",
+      },
+      {
+        id: 2,
+        team: "Design",
+        headcount: 11,
+        janSalaries: "€78,200",
+        janBonuses: "€4,000",
+        janTotal: "€82,200",
+        febSalaries: "€80,100",
+        febBonuses: "€2,000",
+        febTotal: "€82,100",
+      },
+      {
+        id: 3,
+        team: "Sales",
+        headcount: 27,
+        janSalaries: "€164,700",
+        janBonuses: "€38,900",
+        janTotal: "€203,600",
+        febSalaries: "€169,300",
+        febBonuses: "€41,200",
+        febTotal: "€210,500",
+      },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: {
+                headcount: "Headcount",
+                january: {
+                  label: "January",
+                  // Only the total stays visible while the group is collapsed
+                  collapsedColumns: ["jan-total"],
+                },
+                february: {
+                  label: "February",
+                  collapsedColumns: ["feb-total"],
+                  defaultCollapsed: true,
+                },
+              },
+              onHeaderGroupCollapsedChange: (groupId, collapsed) => {
+                console.log(`Header group "${groupId}" collapsed:`, collapsed)
+              },
+              columns: [
+                {
+                  label: "Team",
+                  id: "team",
+                  render: (item) => item.team,
+                },
+                {
+                  label: "People",
+                  id: "people",
+                  align: "right",
+                  headerGroupId: "headcount",
+                  render: (item) => `${item.headcount}`,
+                },
+                {
+                  label: "Salaries",
+                  id: "jan-salaries",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janSalaries,
+                },
+                {
+                  label: "Bonuses",
+                  id: "jan-bonuses",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janBonuses,
+                },
+                {
+                  label: "Total",
+                  id: "jan-total",
+                  align: "right",
+                  headerGroupId: "january",
+                  render: (item) => item.janTotal,
+                },
+                {
+                  label: "Salaries",
+                  id: "feb-salaries",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febSalaries,
+                },
+                {
+                  label: "Bonuses",
+                  id: "feb-bonuses",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febBonuses,
+                },
+                {
+                  label: "Total",
+                  id: "feb-total",
+                  align: "right",
+                  headerGroupId: "february",
+                  render: (item) => item.febTotal,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // February starts collapsed: only its total column is rendered.
+    const february = await canvas.findByRole("button", { name: "February" })
+    expect(february).toHaveAttribute("aria-expanded", "false")
+    expect(canvas.queryByText("€318,900")).not.toBeInTheDocument()
+
+    await userEvent.click(february)
+
+    await waitFor(() =>
+      expect(february).toHaveAttribute("aria-expanded", "true")
+    )
+    await waitFor(
+      () => expect(canvas.getByText("€318,900")).toBeInTheDocument(),
+      { timeout: 5000 }
+    )
+  },
+}
+
+export const TableWithCollapsibleHeaderGroupsAndSorting: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Sorting and collapsing don't compete: the collapse toggle lives in the spanning header row and the sort control in the column row below it, so a group's own cell never carries a sort affordance. Sorting is owned by the datasource and keyed by sorting key, not by column, so collapsing a group never resets it — sort by *Bonuses*, collapse *January*, and the rows keep that order even though the column (and its indicator) is gone. Expanding brings the indicator back. This mirrors what already happens when a column is hidden from the column-settings popover.",
+      },
+    },
+  },
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        team: "Engineering",
+        headcount: 42,
+        janSalaries: 310400,
+        janBonuses: 24000,
+        febSalaries: 318900,
+        febBonuses: 12500,
+      },
+      {
+        id: 2,
+        team: "Design",
+        headcount: 11,
+        janSalaries: 78200,
+        janBonuses: 4000,
+        febSalaries: 80100,
+        febBonuses: 2000,
+      },
+      {
+        id: 3,
+        team: "Sales",
+        headcount: 27,
+        janSalaries: 164700,
+        janBonuses: 38900,
+        febSalaries: 169300,
+        febBonuses: 41200,
+      },
+      {
+        id: 4,
+        team: "Support",
+        headcount: 19,
+        janSalaries: 96500,
+        janBonuses: 11200,
+        febSalaries: 98400,
+        febBonuses: 9800,
+      },
+    ]
+
+    const eur = (value: number) => `€${value.toLocaleString("en-US")}`
+    const janTotal = (item: (typeof records)[number]) =>
+      item.janSalaries + item.janBonuses
+    const febTotal = (item: (typeof records)[number]) =>
+      item.febSalaries + item.febBonuses
+
+    const sortValue: Record<
+      string,
+      (item: (typeof records)[number]) => number | string
+    > = {
+      team: (item) => item.team,
+      "jan-salaries": (item) => item.janSalaries,
+      "jan-bonuses": (item) => item.janBonuses,
+      "jan-total": janTotal,
+      "feb-salaries": (item) => item.febSalaries,
+      "feb-bonuses": (item) => item.febBonuses,
+      "feb-total": febTotal,
+    }
+
+    const source = useDataCollectionSource({
+      sortings: {
+        team: { label: "Team" },
+        "jan-salaries": { label: "January salaries" },
+        "jan-bonuses": { label: "January bonuses" },
+        "jan-total": { label: "January total" },
+        "feb-salaries": { label: "February salaries" },
+        "feb-bonuses": { label: "February bonuses" },
+        "feb-total": { label: "February total" },
+      },
+      dataAdapter: {
+        fetchData: async ({ sortings }) => {
+          if (!sortings || sortings.length === 0) return { records }
+
+          const [{ field, order }] = sortings
+          const read = sortValue[field as string]
+          if (!read) return { records }
+
+          const sorted = [...records].sort((a, b) => {
+            const left = read(a)
+            const right = read(b)
+            const diff =
+              typeof left === "string" && typeof right === "string"
+                ? left.localeCompare(right)
+                : Number(left) - Number(right)
+            return order === "asc" ? diff : -diff
+          })
+
+          return { records: sorted }
+        },
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: {
+                headcount: "Headcount",
+                january: {
+                  label: "January",
+                  collapsedColumns: ["jan-total"],
+                },
+                february: {
+                  label: "February",
+                  collapsedColumns: ["feb-total"],
+                },
+              },
+              columns: [
+                {
+                  label: "Team",
+                  id: "team",
+                  sorting: "team",
+                  render: (item) => item.team,
+                },
+                {
+                  label: "People",
+                  id: "people",
+                  align: "right",
+                  headerGroupId: "headcount",
+                  render: (item) => `${item.headcount}`,
+                },
+                {
+                  label: "Salaries",
+                  id: "jan-salaries",
+                  align: "right",
+                  sorting: "jan-salaries",
+                  headerGroupId: "january",
+                  render: (item) => eur(item.janSalaries),
+                },
+                {
+                  label: "Bonuses",
+                  id: "jan-bonuses",
+                  align: "right",
+                  sorting: "jan-bonuses",
+                  headerGroupId: "january",
+                  render: (item) => eur(item.janBonuses),
+                },
+                {
+                  label: "Total",
+                  id: "jan-total",
+                  align: "right",
+                  sorting: "jan-total",
+                  headerGroupId: "january",
+                  render: (item) => eur(janTotal(item)),
+                },
+                {
+                  label: "Salaries",
+                  id: "feb-salaries",
+                  align: "right",
+                  sorting: "feb-salaries",
+                  headerGroupId: "february",
+                  render: (item) => eur(item.febSalaries),
+                },
+                {
+                  label: "Bonuses",
+                  id: "feb-bonuses",
+                  align: "right",
+                  sorting: "feb-bonuses",
+                  headerGroupId: "february",
+                  render: (item) => eur(item.febBonuses),
+                },
+                {
+                  label: "Total",
+                  id: "feb-total",
+                  align: "right",
+                  sorting: "feb-total",
+                  headerGroupId: "february",
+                  render: (item) => eur(febTotal(item)),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Grouping is what lets two columns share a label, so "Bonuses" is
+    // deliberately ambiguous: January's comes first, February's second.
+    const bonusesHeaders = () =>
+      canvas
+        .getAllByRole("columnheader")
+        .filter((cell) => cell.textContent?.includes("Bonuses"))
+
+    // The first two rows are the spanning group row and the column row.
+    const firstTeam = () =>
+      canvas.getAllByRole("row")[2]?.querySelector("td")?.textContent
+
+    const january = await canvas.findByRole("button", { name: "January" })
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(2))
+
+    // The group's own cell carries the collapse toggle and nothing else — the
+    // sort control sits in the column header row below it.
+    expect(january.closest("th")).not.toHaveAttribute("aria-sort")
+
+    // Sort ascending by January's Bonuses, which January will hide on collapse.
+    await userEvent.click(
+      within(bonusesHeaders()[0]).getByRole("button", { name: "Sort" })
+    )
+    await waitFor(() =>
+      expect(bonusesHeaders()[0]).toHaveAttribute("aria-sort", "ascending")
+    )
+
+    // Design has the smallest January bonus, so it leads after sorting.
+    await waitFor(() => expect(firstTeam()).toContain("Design"))
+
+    // Collapsing hides the sorted column, but the order it produced survives.
+    await userEvent.click(january)
+
+    // The toggle answers the click straight away, while the columns only swap
+    // once the fade reaches its dimmest point — so the count has to be waited
+    // for separately rather than inferred from aria-expanded.
+    expect(january).toHaveAttribute("aria-expanded", "false")
+
+    // February stays expanded, so one "Bonuses" header remains — its own.
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(1))
+    expect(bonusesHeaders()[0]).not.toHaveAttribute("aria-sort", "ascending")
+    expect(firstTeam()).toContain("Design")
+
+    // Expanding restores January's column with its indicator intact.
+    await userEvent.click(january)
+    await waitFor(() => expect(bonusesHeaders()).toHaveLength(2))
+    expect(bonusesHeaders()[0]).toHaveAttribute("aria-sort", "ascending")
+  },
+}
+
+export const TableWithHighlightedHeaderGroup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Setting `highlighted` on a header group definition emphasizes the spanning header and every column in the group with a subtle gray background — equivalent to setting the `highlighted` column option on each of its columns — and the emphasis survives collapsing the group. Here a full year of sortable, collapsible months starts collapsed except August, the highlighted month — the same shape as a monthly cost overview highlighting the current month.",
+      },
+    },
+  },
+  render: () => {
+    const months = [
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec",
+    ] as const
+    type Month = (typeof months)[number]
+
+    const monthLabels: Record<Month, string> = {
+      jan: "January",
+      feb: "February",
+      mar: "March",
+      apr: "April",
+      may: "May",
+      jun: "June",
+      jul: "July",
+      aug: "August",
+      sep: "September",
+      oct: "October",
+      nov: "November",
+      dec: "December",
+    }
+
+    const highlightedMonth: Month = "aug"
+
+    const monthly = (baseSalaries: number, baseBonuses: number) =>
+      Object.fromEntries(
+        months.map((month, index) => [
+          month,
+          {
+            salaries: baseSalaries + index * 1200,
+            bonuses: baseBonuses + index * 250,
+          },
+        ])
+      ) as Record<Month, { salaries: number; bonuses: number }>
+
+    const records = [
+      { id: 1, team: "Engineering", months: monthly(310400, 24000) },
+      { id: 2, team: "Design", months: monthly(78200, 4000) },
+      { id: 3, team: "Sales", months: monthly(164700, 38900) },
+      { id: 4, team: "Support", months: monthly(96500, 11200) },
+    ]
+
+    const eur = (value: number) => `€${value.toLocaleString("en-US")}`
+    const monthTotal = (item: (typeof records)[number], month: Month) =>
+      item.months[month].salaries + item.months[month].bonuses
+
+    const sortings = {
+      team: { label: "Team" },
+      ...Object.fromEntries(
+        months.flatMap((month) => [
+          [`${month}-salaries`, { label: `${monthLabels[month]} salaries` }],
+          [`${month}-bonuses`, { label: `${monthLabels[month]} bonuses` }],
+          [`${month}-total`, { label: `${monthLabels[month]} total` }],
+        ])
+      ),
+    } as Record<string, { label: string }>
+
+    const source = useDataCollectionSource({
+      sortings,
+      dataAdapter: {
+        fetchData: async ({ sortings }) => {
+          if (!sortings || sortings.length === 0) return { records }
+
+          const [{ field, order }] = sortings
+          const read = (item: (typeof records)[number]): number | string => {
+            if (field === "team") return item.team
+            const [month, metric] = String(field).split("-") as [
+              Month,
+              "salaries" | "bonuses" | "total",
+            ]
+            if (!item.months[month]) return 0
+            return metric === "total"
+              ? monthTotal(item, month)
+              : item.months[month][metric]
+          }
+
+          const sorted = [...records].sort((a, b) => {
+            const left = read(a)
+            const right = read(b)
+            const diff =
+              typeof left === "string" && typeof right === "string"
+                ? left.localeCompare(right)
+                : Number(left) - Number(right)
+            return order === "asc" ? diff : -diff
+          })
+
+          return { records: sorted }
+        },
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              frozenColumns: 1,
+              headerGroups: Object.fromEntries(
+                months.map((month) => [
+                  month,
+                  {
+                    label: monthLabels[month],
+                    // Only the total stays visible while collapsed
+                    collapsedColumns: [`${month}-total`],
+                    defaultCollapsed: month !== highlightedMonth,
+                    // Focuses the spanning header and every column in the group
+                    highlighted: month === highlightedMonth,
+                  },
+                ])
+              ),
+              columns: [
+                {
+                  id: "team",
+                  label: "Team",
+                  sorting: "team",
+                  render: (item) => item.team,
+                },
+                ...months.flatMap((month) => [
+                  {
+                    id: `${month}-salaries`,
+                    label: "Salaries",
+                    align: "right" as const,
+                    headerGroupId: month,
+                    sorting: `${month}-salaries`,
+                    render: (item: (typeof records)[number]) =>
+                      eur(item.months[month].salaries),
+                  },
+                  {
+                    id: `${month}-bonuses`,
+                    label: "Bonuses",
+                    align: "right" as const,
+                    headerGroupId: month,
+                    sorting: `${month}-bonuses`,
+                    render: (item: (typeof records)[number]) =>
+                      eur(item.months[month].bonuses),
+                  },
+                  {
+                    id: `${month}-total`,
+                    label: "Total",
+                    align: "right" as const,
+                    headerGroupId: month,
+                    sorting: `${month}-total`,
+                    render: (item: (typeof records)[number]) =>
+                      eur(monthTotal(item, month)),
+                  },
+                ]),
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The highlighted group's spanning header is emphasized.
+    const highlightClass = "hsl(var(--neutral-2))"
+    const augustGroup = await canvas.findByRole("button", { name: "August" })
+    expect(augustGroup.closest("th")?.className).toContain(highlightClass)
+
+    // Every column of the highlighted group carries the emphasis and the marker:
+    // the group header plus its three expanded columns.
+    const highlightedHeaders = canvasElement.querySelectorAll(
+      "th[data-highlighted]"
+    )
+    expect(highlightedHeaders.length).toBe(4)
+    highlightedHeaders.forEach((header) => {
+      expect(header.className).toContain(highlightClass)
+    })
+
+    // Collapsing the highlighted month keeps its visible total column emphasized.
+    await userEvent.click(augustGroup)
+    await waitFor(() =>
+      expect(augustGroup).toHaveAttribute("aria-expanded", "false")
+    )
+    await waitFor(() => {
+      const collapsedHighlighted = canvasElement.querySelectorAll(
+        "th[data-highlighted]"
+      )
+      // The group header plus the remaining total column.
+      expect(collapsedHighlighted.length).toBe(2)
+      expect(
+        collapsedHighlighted[collapsedHighlighted.length - 1].className
+      ).toContain(highlightClass)
+    })
   },
 }
 
@@ -887,5 +1497,102 @@ export const WithColumnAddRemove: Story = {
         />
       </div>
     )
+  },
+}
+
+/**
+ * The hover "⋮" row-actions overlay must not swallow the last column's content.
+ * Here the trailing column is a `tagList` whose "+N" pill sits under the overlay's
+ * fade area. The overlay is transparent to pointer events (only the buttons are
+ * clickable), so hovering the "+N" still opens its popover.
+ *
+ * Mirrors Factorial's Job Catalog nested table (Competencies / Devices columns).
+ */
+export const RowActionsKeepTagListHoverable: Story = {
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        name: "Field Technician",
+        devices: ["Ruggedized Handheld Scanner", "Thermal Printer", "Tablet"],
+      },
+      {
+        id: 2,
+        name: "Warehouse Operator",
+        devices: ["Forklift Terminal", "Barcode Gun", "Label Printer"],
+      },
+    ]
+
+    const itemActions: ItemActionsDefinition<(typeof records)[number]> = (
+      item
+    ) => [
+      { label: "Edit", onClick: () => console.log(`Edit ${item.name}`) },
+      {
+        label: "Delete",
+        critical: true,
+        onClick: () => console.log(`Delete ${item.name}`),
+      },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+      itemActions,
+    })
+
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  { label: "Role", render: (item) => item.name },
+                  {
+                    label: "Devices",
+                    render: (item) => ({
+                      type: "tagList",
+                      value: {
+                        type: "raw",
+                        tags: item.devices.map((text) => ({
+                          text,
+                          description: text,
+                        })),
+                        max: 1,
+                      },
+                    }),
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const roleCell = await canvas.findByText("Field Technician")
+    const row = roleCell.closest("tr")!
+
+    // The actions overlay does not intercept pointer events on the content
+    // beneath it (only the buttons do).
+    const overlay = row.querySelector("aside")
+    expect(overlay).not.toBeNull()
+    expect(getComputedStyle(overlay!).pointerEvents).toBe("none")
+
+    // Hovering the "+N" overflow pill still opens its popover, listing the
+    // hidden device names in full.
+    const plus = await within(row).findByText(/^\+\d+$/)
+    await userEvent.hover(plus)
+
+    const popover = await within(document.body).findByText(
+      "Thermal Printer",
+      undefined,
+      { timeout: 2000 }
+    )
+    expect(popover).toBeInTheDocument()
   },
 }

@@ -17,6 +17,14 @@ F0 is Factorial's design system. It provides modular, reusable UI components for
 - TypeScript strict — `any` is never acceptable
 - All code and comments in English
 - Use `pnpm` as the package manager
+- **Every new component follows the [F0 component lifecycle](packages/react/docs/definition-of-done.mdx)** — propose, design, build in `experimental/`, validate real-world use, then promote to stable.
+
+### Accessibility skip ratchet (Path to AA)
+
+Skipping axe in stories is not allowed for new code, and existing skips are tracked in `packages/react/.storybook/a11y-skip-allowlist.json` — a map of story file → allowed `skipCi`/`withSkipA11y` call-site count that may **only shrink**. Two rules when touching stories:
+
+- **Removing a skip** (`a11y: { skipCi: true }` or a `withSkipA11y(...)` call): you MUST also lower that file's count in the allowlist — delete the entry when it reaches zero. The `a11ySkipAllowlist.test.ts` unit test fails otherwise ("stale entries").
+- **Never add a skip** — not in new files, not in grandfathered ones. Use `a11y: { test: "todo" }` for known-failing stories instead. Any added skip fails the unit test and the Storybook test-runner.
 
 ### Formatting
 
@@ -78,4 +86,6 @@ The repo includes a `.mcp.json` at the root that configures the local Storybook 
 
 **Remote / published** (docs toolset only):
 
-The Azure Static Web Apps deployment also exposes `/mcp` with the docs toolset enabled. Use the published URL for read-only component documentation access without a local dev server.
+The Azure Static Web Apps deployment exposes the MCP server at `https://f0.factorial.dev/mcp` with the docs toolset enabled. Use this URL for read-only component documentation access without a local dev server.
+
+The Azure Function itself is mounted at `/api/mcp` (Azure Static Web Apps serves managed Functions under the `/api/` prefix); `/mcp` is a rewrite to it configured in `packages/react/.storybook/static/staticwebapp.config.json`, so the remote endpoint matches the local `/mcp` convention.

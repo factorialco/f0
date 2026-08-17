@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "cva"
+import { useId } from "react"
 
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -73,6 +74,22 @@ const _Chip = ({
   avatar,
   icon,
 }: ChipProps) => {
+  const closeDescriptionId = useId()
+  const content = (
+    <>
+      {avatar && <F0Avatar avatar={avatar} size="xs" />}
+      <div className="flex items-center gap-0.5">
+        {icon && <F0Icon icon={icon} size="sm" className="text-f1-icon" />}
+        <span
+          id={onClose ? closeDescriptionId : undefined}
+          className={deactivated ? "text-f1-foreground/[0.61]" : undefined}
+        >
+          {label}
+        </span>
+      </div>
+    </>
+  )
+
   return (
     <div
       className={cn(
@@ -80,25 +97,23 @@ const _Chip = ({
         onClose && "pr-1.5",
         avatar && "pl-0.5",
         avatar && avatar?.type !== "person" && "rounded-sm",
-        icon && !avatar && "pl-1.5",
-        onClick && "cursor-pointer",
-        onClick && focusRing()
+        icon && !avatar && "pl-1.5"
       )}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          onClick?.()
-        }
-      }}
-      tabIndex={onClick ? 0 : undefined}
     >
-      {avatar && <F0Avatar avatar={avatar} size="xs" />}
-      <div className="flex items-center gap-0.5">
-        {icon && <F0Icon icon={icon} size="sm" className="text-f1-icon" />}
-        <span className={deactivated ? "text-f1-foreground/[0.61]" : undefined}>
-          {label}
-        </span>
-      </div>
+      {onClick ? (
+        <button
+          type="button"
+          className={cn(
+            "-m-0.5 flex min-w-0 cursor-pointer items-center gap-1 rounded-full border-0 bg-transparent p-0.5 font-inherit text-inherit",
+            focusRing()
+          )}
+          onClick={onClick}
+        >
+          {content}
+        </button>
+      ) : (
+        content
+      )}
       {onClose && (
         <button
           type="button"
@@ -114,6 +129,7 @@ const _Chip = ({
           )}
           tabIndex={0}
           aria-label="Close"
+          aria-describedby={closeDescriptionId}
         >
           <F0Icon icon={CrossedCircle} size="sm" />
         </button>

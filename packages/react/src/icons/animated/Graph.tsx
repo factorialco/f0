@@ -75,7 +75,6 @@ const GraphAnimated = React.forwardRef<SVGSVGElement, GraphProps>(
           variants={axisVariants}
           transition={axisTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M8 14L12 10L15 13L20 8"
@@ -83,7 +82,6 @@ const GraphAnimated = React.forwardRef<SVGSVGElement, GraphProps>(
           variants={graphVariants}
           transition={graphTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M17 8H20V11"
@@ -91,7 +89,6 @@ const GraphAnimated = React.forwardRef<SVGSVGElement, GraphProps>(
           variants={arrowVariants}
           transition={arrowTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils"
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 /**
- * Replicates OneTable's TableCell mechanics: the content wrapper is
- * `pointer-events-none` and a stretched link (`pointer-events-auto`) captures
- * the row-navigation click, which the wrapper forwards via `onClick`. The chart
- * segments re-enable pointer events so the tooltip still opens on hover/focus
- * while a click still navigates the row.
+ * Mirrors OneTable's TableCell wrapper chain (`experimental/OneTable/TableCell`),
+ * `h-full` included - without it the mock under-reports the real hover area.
  */
 function ClickableTableCell({
   children,
@@ -21,12 +18,14 @@ function ClickableTableCell({
 }) {
   const linkRef = useRef<HTMLAnchorElement>(null)
   return (
-    <div className={cn("relative", className)}>
-      <div
-        className="pointer-events-none relative z-[1]"
-        onClick={() => linkRef.current?.click()}
-      >
-        {children}
+    <div className={cn("relative h-full", className)}>
+      <div className="pointer-events-none h-full items-start">
+        <div
+          className="relative z-[1] h-full"
+          onClick={() => linkRef.current?.click()}
+        >
+          {children}
+        </div>
       </div>
       <a
         ref={linkRef}
@@ -81,7 +80,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with a tooltip on hover/focus. Mirrors the standalone CategoryBarChart kit but sized for table cells.\n\n- **Tooltip**: shown by default per segment (color dot + name + value/percentage). Set `hideTooltip: true` on the value to suppress it.\n- **Clickable cells**: inside OneDataCollection the cell sits in a `pointer-events-none` wrapper with a stretched navigation link. The bar segments re-enable pointer events so the tooltip still opens, while a click on the cell navigates the row.",
+          "Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with a tooltip on hover/focus. Mirrors the standalone CategoryBarChart kit but sized for table cells.\n\n- **Tooltip**: one tooltip for the whole cell, listing *every* segment (color dot + name + value/percentage), so a single hover anywhere in the cell — bar, gaps, or the empty space above and below it — reveals the full legend instead of forcing the reader to hover each segment. Hovering a specific segment drills down to it: that row is highlighted and the rest are dimmed. Set `hideTooltip: true` on the value to suppress it.\n- **Loading**: set `loading: true` to render a skeleton with the same height/width as the loaded bar until the data is there, instead of flashing the empty dash.\n- **Clickable cells**: inside OneDataCollection the cell sits in a `pointer-events-none` wrapper with a stretched navigation link. The bar segments re-enable pointer events so the tooltip still opens, while a click on the cell navigates the row.",
       },
     },
   },
@@ -115,9 +114,9 @@ export const GenderDistribution: Story = {
   type: "categoryBarChart",
   value: {
     dataPoints: [
-      { name: "Female", value: 12 },
-      { name: "Male", value: 8 },
-      { name: "Non-binary", value: 2 },
+      { name: "Female", value: 12 },     // categorical-1
+      { name: "Male", value: 8 },        // categorical-2
+      { name: "Non-binary", value: 2 },  // categorical-3
     ],
   },
 }`,
@@ -209,11 +208,14 @@ export const InsideClickableTableCell: Story = {
 type DataCollectionArgs = {
   /** When true, wrap each cell in OneTable's clickable mechanics. */
   clickableCells: boolean
+  /** When true, render each cell as a loading skeleton instead of the bar. */
+  loading: boolean
 }
 
 export const DataCollectionExample: StoryObj<DataCollectionArgs> = {
   args: {
     clickableCells: true,
+    loading: true,
   },
   argTypes: {
     clickableCells: {
@@ -221,6 +223,12 @@ export const DataCollectionExample: StoryObj<DataCollectionArgs> = {
       control: "boolean",
       description:
         "Wrap each cell in OneTable's clickable mechanics (pointer-events-none content + stretched navigation link). When off, the cells are plain (no row navigation), which is how the tooltip behaves outside OneDataCollection.",
+    },
+    loading: {
+      name: "Loading",
+      control: "boolean",
+      description:
+        "When on, every cell renders a skeleton (same size as the loaded bar) instead of the chart — this is what the column shows while the row's data is still loading, in place of the empty dash.",
     },
   },
   parameters: {
@@ -245,7 +253,7 @@ const value = {
       },
     },
   },
-  render: ({ clickableCells }) => {
+  render: ({ clickableCells, loading }) => {
     const wrap = (node: React.ReactNode) =>
       clickableCells ? <ClickableTableCell>{node}</ClickableTableCell> : node
     return (
@@ -262,10 +270,10 @@ const value = {
               key={row.team}
               className="border-0 border-b border-solid border-f1-border-secondary hover:bg-f1-background-hover"
             >
-              <td className="py-3 pr-4 align-middle text-f1-foreground">
+              <td className="h-full py-3 pr-4 align-top text-f1-foreground">
                 {wrap(row.team)}
               </td>
-              <td className="w-1/2 py-3 align-middle">
+              <td className="h-full w-1/2 py-3 align-top">
                 {wrap(
                   <Cell
                     item={mockItem}
@@ -273,7 +281,7 @@ const value = {
                       label: "Work location",
                       render: () => ({
                         type: "categoryBarChart",
-                        value: { dataPoints: row.dataPoints },
+                        value: { dataPoints: row.dataPoints, loading },
                       }),
                     }}
                   />
@@ -296,9 +304,9 @@ export const WithCustomColors: Story = {
         type: "categoryBarChart",
         value: {
           dataPoints: [
-            { name: "A", value: 40, color: "categorical-1" },
-            { name: "B", value: 30, color: "categorical-3" },
-            { name: "C", value: 20, color: "categorical-5" },
+            { name: "A", value: 40, color: "viridian" },
+            { name: "B", value: 30, color: "yellow" },
+            { name: "C", value: 20, color: "barbie" },
           ],
         },
       }),
@@ -307,13 +315,50 @@ export const WithCustomColors: Story = {
   parameters: {
     docs: {
       source: {
-        code: `{
+        code: `// Base-color tokens from the 15-color F0DataChart palette
+{
   type: "categoryBarChart",
   value: {
     dataPoints: [
-      { name: "A", value: 40, color: "categorical-1" },
-      { name: "B", value: 30, color: "categorical-3" },
-      { name: "C", value: 20, color: "categorical-5" },
+      { name: "A", value: 40, color: "viridian" },
+      { name: "B", value: 30, color: "yellow" },
+      { name: "C", value: 20, color: "barbie" },
+    ],
+  },
+}`,
+      },
+    },
+  },
+}
+
+export const LegacyColors: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Category",
+      render: () => ({
+        type: "categoryBarChart",
+        value: {
+          dataPoints: [
+            { name: "Categorical", value: 40, color: "categorical-3" },
+            { name: "Positive", value: 30, color: "feedback-positive" },
+            { name: "Negative", value: 20, color: "feedback-negative" },
+          ],
+        },
+      }),
+    },
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `// Legacy kits/Charts tokens are still supported (categorical-* / feedback-*)
+{
+  type: "categoryBarChart",
+  value: {
+    dataPoints: [
+      { name: "Categorical", value: 40, color: "categorical-3" },
+      { name: "Positive", value: 30, color: "feedback-positive" },
+      { name: "Negative", value: 20, color: "feedback-negative" },
     ],
   },
 }`,
@@ -412,6 +457,39 @@ export const Empty: Story = {
         code: `{
   type: "categoryBarChart",
   value: { dataPoints: [] }, // renders a fallback dash
+}`,
+      },
+    },
+  },
+}
+
+export const Loading: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Work location",
+      render: () => ({
+        type: "categoryBarChart",
+        value: {
+          loading: true,
+          dataPoints: [],
+        },
+      }),
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**Loading**: set `loading: true` while the row's data is still loading. The cell renders a skeleton with the exact same height and width as the loaded bar (`h-2 w-full`), so the row doesn't jump and no empty dash flashes before the values arrive.",
+      },
+      source: {
+        code: `{
+  type: "categoryBarChart",
+  value: {
+    loading: true, // skeleton matches the loaded bar size until data is there
+    dataPoints: [],
+  },
 }`,
       },
     },

@@ -9,6 +9,7 @@ const defaultProps = {
   isDirty: true,
   actionBarStatus: "idle" as const,
   hasErrors: false,
+  hasPendingUploads: false,
   errorCount: 0,
   resolvedActionBarLabel: "You have changes pending to be saved",
   submitLabel: "Save",
@@ -129,6 +130,20 @@ describe("FormActionBar", () => {
       expect(
         screen.queryByRole("button", { name: "Go to previous error" })
       ).not.toBeInTheDocument()
+    })
+
+    it("disables the submit action while an upload is in flight", () => {
+      render(<FormActionBar {...defaultProps} hasPendingUploads={true} />)
+
+      const saveButtons = screen.getAllByRole("button", { name: /save/i })
+      saveButtons.forEach((btn) => expect(btn).toBeDisabled())
+    })
+
+    it("enables the submit action when no upload is in flight", () => {
+      render(<FormActionBar {...defaultProps} hasPendingUploads={false} />)
+
+      const saveButtons = screen.getAllByRole("button", { name: /save/i })
+      saveButtons.forEach((btn) => expect(btn).not.toBeDisabled())
     })
 
     it("calls goToPreviousError when clicking navigation", async () => {

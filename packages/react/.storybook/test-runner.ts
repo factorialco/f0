@@ -7,9 +7,100 @@ import {
   injectAxe,
 } from "axe-playwright"
 import type Reporter from "axe-playwright/dist/types"
+import { appendFileSync, readFileSync } from "fs"
+import { join } from "path"
+
+// NOTE: the `.ts` extension is required — the test-runner's loader does not
+// resolve extensionless sibling imports (Storybook warns "extensionless imports
+// detected" and the module fails to load at runtime).
+import {
+  A11Y_CI_CONTEXT,
+  A11Y_RUN_ONLY,
+} from "../src/lib/storybook-utils/a11yAxeConfig.ts"
+
+// Story files grandfathered to skip axe while their violations are burned
+// down (Path to AA). Maps file → number of allowed skip call-sites; counts
+// may only shrink. Enforced per-count by a11ySkipAllowlist.test.ts; here we
+// only need the file names.
+const a11ySkipAllowlist: Set<string> = new Set(
+  Object.keys(
+    JSON.parse(
+      readFileSync(
+        new URL("./a11y-skip-allowlist.json", import.meta.url),
+        "utf-8"
+      )
+    ).files
+  )
+)
+
+const A11Y_TEST_MODES = ["error", "todo", "warning"] as const
+
+// Machine-readable a11y record consumed by the PR-comment step
+// (.scripts/check-a11y-comment.ts). One JSONL line per violating story so the
+// workflow can report the issues in the stories a PR changed. Written to the
+// package root (cwd is packages/react under `pnpm --filter … test-storybook`,
+// matching where the check script reads it) — an absolute path, since the
+// test-runner relocates import.meta.url when it transforms this module.
+const A11Y_ARTIFACT = join(process.cwd(), "a11y-violations.jsonl")
+
+/**
+ * Map an axe rule's tags to its WCAG success criterion, level and version.
+ * Inlined (not shared with A11yRow's copy) because the test-runner's loader
+ * doesn't resolve sibling .ts imports cleanly — dedupe once both land.
+ */
+function wcagFromTags(tags: string[]): {
+  sc: string | null
+  level: string
+  version: string
+} {
+  let sc: string | null = null
+  for (const t of tags) {
+    const m = /^wcag(\d)(\d)(\d{1,2})$/.exec(t)
+    if (m) {
+      sc = `${m[1]}.${m[2]}.${m[3]}`
+      break
+    }
+  }
+  const level = tags.some((t) => /^wcag2\d?aa$/.test(t)) ? "AA" : "A"
+  const version =
+    tags.includes("wcag22a") || tags.includes("wcag22aa")
+      ? "2.2"
+      : tags.includes("wcag21a") || tags.includes("wcag21aa")
+        ? "2.1"
+        : "2.0"
+  return { sc, level, version }
+}
 
 // Infer the violations type from getViolations return type
 type Violations = Awaited<ReturnType<typeof getViolations>>
+
+/**
+ * Append one compact JSONL line describing a story's violations. Best-effort:
+ * never let artifact writing break a test. Kept small (rule id/impact/SC +
+ * node counts, no node HTML) so each append stays within O_APPEND atomicity.
+ */
+function recordA11yViolations(
+  story: { id: string; title: string; name: string; file: string },
+  mode: string,
+  violations: Violations
+): void {
+  try {
+    const line =
+      JSON.stringify({
+        ...story,
+        mode,
+        rules: violations.map((v) => ({
+          id: v.id,
+          impact: v.impact ?? null,
+          nodes: v.nodes.length,
+          ...wcagFromTags(v.tags),
+        })),
+      }) + "\n"
+    appendFileSync(A11Y_ARTIFACT, line)
+  } catch {
+    // ignore — the comment is a nice-to-have, not worth failing CI over
+  }
+}
 
 /**
  * Custom reporter that only logs violations, suppressing success messages
@@ -39,18 +130,143 @@ const config: TestRunnerConfig = {
       console.error("Failed to inject axe:", error)
       throw error
     }
+
+    // Custom rule: an audio-only recording needs a transcription to be
+    // accessible (WCAG 2.1 SC 1.2.1, Audio-only). axe can't detect this
+    // automatically, so F0AudioPlayerCard exposes the outcome on a
+    // `data-audio-transcription` attribute and we flag the "missing" state.
+    // The rule only matches that attribute, so it's scoped to the audio player
+    // and never touches other components. It's tagged WCAG A so it runs inside
+    // the existing `runOnly` scope; stories that intentionally omit a
+    // transcription can downgrade it with `a11y: { test: "todo" }`.
+    try {
+      await page.evaluate(() => {
+        window.axe.configure({
+          checks: [
+            {
+              id: "f0-audio-has-transcription",
+              evaluate: (node: Element) =>
+                node.getAttribute("data-audio-transcription") !== "missing",
+              metadata: {
+                impact: "serious",
+                messages: {
+                  pass: "The audio recording has a transcription available.",
+                  fail:
+                    "This audio-only recording has no transcription: none was " +
+                    "passed via `content.transcription` and none could be " +
+                    "derived from the audio file. Provide a transcription so " +
+                    "the spoken content is accessible (WCAG 2.1 SC 1.2.1).",
+                },
+              },
+            },
+          ],
+          rules: [
+            {
+              id: "f0-audio-transcription",
+              selector: "[data-audio-transcription]",
+              any: ["f0-audio-has-transcription"],
+              enabled: true,
+              // `wcag2a`/`wcag21a` keep the rule inside the runner's WCAG A/AA
+              // `runOnly` scope; `wcag121` is the success-criterion tag the CI
+              // a11y-comment mapper (see `wcagFromTags`) reads to label this as
+              // SC 1.2.1 (Audio-only) rather than leaving the criterion blank.
+              tags: ["wcag2a", "wcag21a", "wcag121"],
+              metadata: {
+                description:
+                  "Audio-only recordings must provide a transcription (WCAG 2.1 SC 1.2.1)",
+                help: "Provide a transcription for the audio recording",
+                helpUrl:
+                  "https://www.w3.org/WAI/WCAG21/Understanding/audio-only-and-video-only-prerecorded.html",
+              },
+            },
+          ],
+        })
+
+        // Sibling rule for video: prerecorded video needs captions (WCAG 2.1
+        // SC 1.2.2). Same pattern — scoped to `data-video-captions`, so it only
+        // matches F0VideoPlayer. `wcag122` is the success-criterion tag the CI
+        // a11y-comment mapper reads to label it as SC 1.2.2.
+        window.axe.configure({
+          checks: [
+            {
+              id: "f0-video-has-captions",
+              evaluate: (node: Element) =>
+                node.getAttribute("data-video-captions") !== "missing",
+              metadata: {
+                impact: "serious",
+                messages: {
+                  pass: "The video has captions available.",
+                  fail:
+                    "This prerecorded video has no captions: none were passed " +
+                    "via `content.captions` and none are embedded in the video " +
+                    "file. Provide captions so the spoken content is accessible " +
+                    "(WCAG 2.1 SC 1.2.2).",
+                },
+              },
+            },
+          ],
+          rules: [
+            {
+              id: "f0-video-captions",
+              selector: "[data-video-captions]",
+              any: ["f0-video-has-captions"],
+              enabled: true,
+              tags: ["wcag2a", "wcag21a", "wcag122"],
+              metadata: {
+                description:
+                  "Prerecorded video must provide captions (WCAG 2.1 SC 1.2.2)",
+                help: "Provide captions for the video",
+                helpUrl:
+                  "https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html",
+              },
+            },
+          ],
+        })
+      })
+    } catch (error) {
+      console.error(
+        "Failed to register the audio-transcription a11y rule:",
+        error
+      )
+      throw error
+    }
   },
   async postVisit(page, context) {
     try {
       // Get the entire context of a story, including parameters, args, argTypes, etc.
       const storyContext = await getStoryContext(page, context)
 
-      // Do not run a11y tests on disabled stories.
-      if (storyContext.parameters?.a11y?.skipCi) {
-        return
+      const a11yParams = storyContext.parameters?.a11y ?? {}
+      // Storybook reports the CSF file as "./src/...", the allowlist stores "src/..."
+      const storyFile = (storyContext.parameters?.fileName ?? "").replace(
+        /^\.\//,
+        ""
+      )
+
+      if (a11yParams.skipCi) {
+        // Grandfathered files keep skipping while their violations are burned
+        // down (Path to AA). The allowlist may only shrink.
+        if (a11ySkipAllowlist.has(storyFile)) {
+          return
+        }
+        throw new Error(
+          `[a11y] "a11y.skipCi" is not allowed for new stories (story: ${context.id}, file: ${storyFile || "unknown"}). ` +
+            `Every new story must run axe in CI — use a11y: { test: "todo" } for known-failing stories, ` +
+            `or fix the violations and use test: "error".`
+        )
       }
 
-      const a11yConfig = storyContext.parameters?.a11y?.config || {}
+      // Resolve the test mode up front. "off" (or anything unknown) is not
+      // allowed in CI — it used to silently fall through without warning.
+      const testMode = a11yParams.test ?? "error"
+      if (!A11Y_TEST_MODES.includes(testMode)) {
+        throw new Error(
+          `[a11y] Unsupported a11y.test mode "${testMode}" (story: ${context.id}). ` +
+            `Allowed modes: ${A11Y_TEST_MODES.join(", ")}. Use "todo" for known-failing stories.`
+        )
+      }
+
+      const a11yConfig = a11yParams.config || {}
       // Apply story-level a11y rules
       await configureAxe(page, a11yConfig)
 
@@ -73,12 +289,11 @@ const config: TestRunnerConfig = {
         }
       })
 
-      // Get violations without throwing an error
-      const violations = await getViolations(page, "#storybook-root", {
-        runOnly: {
-          type: "tag",
-          values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
-        },
+      // Get violations without throwing an error. The rule scope is shared with
+      // the a11y addon (see src/lib/storybook-utils/a11yAxeConfig.ts) so the
+      // panel and CI cannot drift apart.
+      const violations = await getViolations(page, A11Y_CI_CONTEXT, {
+        runOnly: A11Y_RUN_ONLY,
       })
 
       // Report violations if any are found
@@ -86,23 +301,38 @@ const config: TestRunnerConfig = {
         const reporter = new SilentReporter()
         await reporter.report(violations)
 
-        // Check the test mode: 'error', 'todo', 'warning', or 'off'
-        const testMode = storyContext.parameters?.a11y?.test || "error"
+        // Record for the PR-comment step — both todo debt and enforced
+        // failures, written before the error-mode throw below.
+        recordA11yViolations(
+          {
+            id: context.id,
+            title: context.title,
+            name: context.name,
+            file: storyFile,
+          },
+          testMode,
+          violations
+        )
 
         if (testMode === "error") {
           // Throw a simple, single-line error for error mode
           throw new Error(
             `${violations.length} accessibility violation${violations.length === 1 ? "" : "s"} detected`
           )
-        } else if (testMode === "todo" || testMode === "warning") {
-          // Log a simple warning message for todo/warning mode
-          console.warn(
-            `${violations.length} accessibility violation${violations.length === 1 ? "" : "s"} detected`
-          )
-          // Don't throw, just return (test continues)
-          return
         }
-        // 'off' mode is already handled by skipCi check above
+
+        // 'todo' / 'warning': log without failing the test
+        console.warn(
+          `${violations.length} accessibility violation${violations.length === 1 ? "" : "s"} detected`
+        )
+        // Surface the debt in the GitHub Actions job summary
+        if (process.env.GITHUB_STEP_SUMMARY) {
+          appendFileSync(
+            process.env.GITHUB_STEP_SUMMARY,
+            `- ⚠️ ${context.title} / ${context.name}: ${violations.length} a11y violation${violations.length === 1 ? "" : "s"} (test: "${testMode}")\n`
+          )
+        }
+        return
       }
     } catch (error) {
       if (

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { UpsellingButton } from "./index"
 
 const meta = {
-  title: "UpsellingKit/UpsellingButton",
+  title: "UpsellingButton",
   component: UpsellingButton,
   parameters: {
     layout: "centered",

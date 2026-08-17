@@ -5,7 +5,6 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   F0Graph,
   type F0GraphHandle,
@@ -13,10 +12,11 @@ import {
   F0GraphSkeleton,
   tagColumn,
 } from "@/patterns/F0Graph"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
-import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
+import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { resolveGraphReveal } from "./reveal"
@@ -77,7 +77,11 @@ export const GraphCollection = <
   zoomPreset,
   minZoom,
   maxZoom,
+  centerOnNodeClick,
+  nodeClickZoom,
+  viewportInset,
   showControls,
+  canvasFooterActions,
   enableNodeWindowing,
   nodeWindowPadding,
   loadVisibleNodeData,
@@ -225,7 +229,7 @@ export const GraphCollection = <
   // tree at once instead of re-fitting as nodes stream in.
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col border-solid border-t border-0 border-f1-border-secondary bg-[hsl(var(--neutral-3))]">
+    <div className="flex h-full min-h-0 flex-1 flex-col border-0 border-t border-solid border-f1-border-secondary bg-[hsl(var(--neutral-3))]">
       {isInitialLoading ? (
         <F0GraphSkeleton showTags={tags !== undefined} />
       ) : (
@@ -251,9 +255,15 @@ export const GraphCollection = <
             if (next.size > 0) clearFocus()
           }}
           showControls={showControls ?? true}
+          canvasFooterActions={canvasFooterActions}
           zoomPreset={zoomPreset}
           minZoom={minZoom}
           maxZoom={maxZoom}
+          // Fly-to on click is F0Graph's default; centers + zooms in close on the
+          // clicked node and offsets for the side panel via `viewportInset`.
+          centerOnNodeClick={centerOnNodeClick}
+          nodeClickZoom={nodeClickZoom}
+          viewportInset={viewportInset}
           enableNodeWindowing={enableNodeWindowing}
           nodeWindowPadding={nodeWindowPadding}
           // The hook's own hydration loader (two-phase mode) wins; otherwise
@@ -289,10 +299,12 @@ export const GraphCollection = <
                 actions={nodeActions?.(node.data)}
                 hoverCard
                 onClick={() => {
+                  // Select + fly-to is handled by F0Graph's default
+                  // `centerOnNodeClick` (closer zoom, panel-aware offset), so we
+                  // no longer center imperatively here. `ctx.onClick()` keeps
+                  // keyboard (Enter) selection working, where there's no pointer
+                  // click for F0Graph's own click path to catch.
                   ctx.onClick()
-                  // Center on the node the user actually clicked (never fires on
-                  // an empty-canvas click); re-centers even on a repeat click.
-                  graphRef.current?.focusNode(ctx.nodeId)
                   itemOnClick?.()
                 }}
               />

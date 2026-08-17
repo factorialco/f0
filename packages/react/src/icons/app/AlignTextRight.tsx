@@ -16,21 +16,18 @@ const SvgAlignTextRight = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M5 8H19"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M5 12H19"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M13 16H19"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

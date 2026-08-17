@@ -135,6 +135,76 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
+  it("renders metadata as secondary text next to the label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "es",
+            label: "Spain",
+            metadata: { type: "dialCode", dialCode: "+34" },
+          },
+          {
+            value: "kr",
+            label: "South Korea",
+            metadata: { type: "dialCode", dialCode: "+82" },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    const dialCode = screen.getByText("+34")
+    expect(dialCode.className).toContain("text-f1-foreground-secondary")
+    // Metadata is a row-sibling of the label, not a stacked second line
+    expect(dialCode.parentElement?.className).not.toContain("flex-col")
+    expect(
+      within(dialCode.parentElement as HTMLElement).getByText("Spain")
+    ).toBeInTheDocument()
+    expect(screen.getByText("+82")).toBeInTheDocument()
+  })
+
+  it("warns in dev when a metadata dial code is malformed, once per value", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const user = userEvent.setup()
+    const brokenOptions = [
+      {
+        value: "xx",
+        label: "Broken",
+        metadata: { type: "dialCode", dialCode: "34" } as const,
+      },
+    ]
+    const { rerender } = render(
+      <F0Select
+        {...defaultSelectProps}
+        options={brokenOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('dialCode "34" is not a valid dial code')
+    )
+
+    // Virtualized rows re-render on every scroll-in — the warning must not repeat
+    const warnCalls = warn.mock.calls.length
+    rerender(
+      <F0Select
+        {...defaultSelectProps}
+        options={brokenOptions}
+        onChange={() => {}}
+      />
+    )
+    expect(warn).toHaveBeenCalledTimes(warnCalls)
+    warn.mockRestore()
+  })
+
   it("opens even when Date.now is frozen (MockDate in stories)", async () => {
     // Regression: the open/close debounce used lodash.debounce, which decides
     // its trailing edge by reading Date.now(). Stories that freeze the clock
@@ -753,7 +823,7 @@ describe("Select", () => {
     )
   })
 
-  it("cancels staged changes without closing when cancel button is clicked", async () => {
+  it("closes the dropdown and discards staged changes when cancel is clicked", async () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
@@ -762,7 +832,7 @@ describe("Select", () => {
         {...defaultSelectProps}
         multiple
         options={mockOptions}
-        value={["option1", "option2"]}
+        value={["option1"]}
         onChange={handleChange}
         withApplySelection
       />
@@ -772,47 +842,142 @@ describe("Select", () => {
     await user.click(screen.getByText("Option 2"))
     await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
     expect(handleChange).not.toHaveBeenCalled()
 
-    await user.click(screen.getByText("Option 3"))
+    await openSelect(user)
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.arrayContaining(["option1", "option2", "option3"]),
-      expect.arrayContaining([
-        {
-          id: "option1",
-          name: "Option 1",
-          description: "Description 1",
-        },
-        {
-          id: "option2",
-          name: "Option 2",
-          description: "Description 2",
-        },
-        {
-          id: "option3",
-          name: "Option 3",
-          description: "Description 3",
-        },
-      ]),
-      expect.arrayContaining([
-        expect.objectContaining({
-          label: "Option 1",
-          value: "option1",
-          description: "Description 1",
-        }),
-        expect.objectContaining({
-          label: "Option 2",
-          value: "option2",
-        }),
-        expect.objectContaining({
-          label: "Option 3",
-          value: "option3",
-        }),
-      ])
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={vi.fn()}
+        withApplySelection
+        applySelectionLabel="Add to schedule"
+      />
     )
+
+    await openSelect(user)
+
+    expect(
+      screen.getByRole("button", { name: "Add to schedule" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Apply selection" })
+    ).not.toBeInTheDocument()
+  })
+
+  describe("selected item's display", () => {
+    it("shows `selectedLabel` on the trigger while the row keeps its `label`", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          value="option1"
+          options={[
+            {
+              value: "option1",
+              label: "Tokens",
+              selectedLabel: "Tokens — Design system",
+            },
+            { value: "option2", label: "Components" },
+          ]}
+          onChange={() => {}}
+        />
+      )
+
+      // The trigger has no group header or siblings to read "Tokens" against.
+      expect(screen.getByText("Tokens — Design system")).toBeInTheDocument()
+
+      await openSelect(user)
+
+      // The row does, so it stays short.
+      expect(screen.getByText("Tokens")).toBeInTheDocument()
+    })
+
+    it("draws ONE glyph on the trigger when the field and the option both have an icon", async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <F0Select
+          {...defaultSelectProps}
+          icon={Search}
+          value="option1"
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      // The field's icon owns the trigger's glyph slot; the selected option's is
+      // left out, because the two are drawn in different places and would sit 4px
+      // apart. `mockOptions[0]` carries an icon of its own.
+      const trigger = screen.getByRole("combobox")
+      expect(trigger.querySelectorAll("svg")).toHaveLength(0)
+      expect(container.querySelectorAll("svg").length).toBeGreaterThan(0)
+
+      // …while the ROW keeps its icon. Scoped to the list: the trigger shows the
+      // same label, so an unscoped query finds both.
+      await openSelect(user)
+      const row = within(screen.getByRole("listbox"))
+        .getByText("Option 1")
+        .closest("[role='option']")
+      expect(row?.querySelectorAll("svg").length).toBeGreaterThan(0)
+    })
+
+    describe("hover tooltip", () => {
+      /**
+       * The trigger is WIRED as a tooltip trigger: Radix marks its (asChild)
+       * trigger with `data-state`, and renders the content lazily — so this is
+       * what "there is a tooltip here" looks like before anyone hovers. Opening
+       * it for real needs Radix's 700ms timer, which deadlocks `user.hover`
+       * under fake timers and does not resolve under real ones in jsdom; what the
+       * tooltip SAYS is asserted in `F0Select.triggerTooltip.test.tsx`, against a
+       * stubbed tooltip.
+       */
+      const tooltipWrapper = () =>
+        screen.getByRole("combobox").closest("div[data-state]")
+
+      it("is wired on the trigger when an item is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            value="option1"
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
+      })
+
+      it("is not wired at all when nothing is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        // Nothing selected, nothing to explain.
+        expect(tooltipWrapper()).toBeNull()
+      })
+    })
   })
 
   describe("asList mode", () => {
@@ -1027,6 +1192,46 @@ describe("Select", () => {
       // The other group remains collapsed
       expect(screen.queryByText("Carol")).not.toBeInTheDocument()
     })
+
+    /**
+     * ONE SCROLLPORT. The virtualized list is rendered through Radix's
+     * `Select.Viewport` with `asChild`, so Radix merges its own
+     * `overflow: hidden auto; flex: 1 1 0%` onto the virtualizer's SIZER — which
+     * made a second scroll container inside the `ScrollArea` that already scrolls
+     * the list. Two nested scrollers is the "double scroll" a grouped list is long
+     * enough to expose: the wheel fills the inner one, then hands off to the outer.
+     */
+    it("leaves the scrolling to ONE element, not two", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(true)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+
+      const sizer = document.querySelector<HTMLElement>(
+        "[data-radix-select-viewport]"
+      )
+      expect(sizer).not.toBeNull()
+      // The spacer must not scroll, and must not be shrinkable below the height
+      // the virtualizer gave it.
+      expect(sizer!.style.overflow).toBe("visible")
+      // `flex: none` as the browser stores it.
+      expect(sizer!.style.flex).toBe("0 0 auto")
+    })
+
+    // NOTE: the other half of this fix — that expanding a group no longer scrolls
+    // the list back to the selection — has no honest test here. jsdom has no
+    // layout, so the virtualizer's scroll is a no-op and any assertion about it
+    // passes whether the bug is present or not. It is verified in a browser.
   })
 
   describe("onCreate", () => {

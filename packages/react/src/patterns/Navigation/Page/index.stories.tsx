@@ -21,6 +21,7 @@ const meta: Meta<typeof Page> = {
   tags: ["autodocs", "experimental"],
   parameters: {
     layout: "fullscreen",
+    docsFullWidth: true,
   },
   decorators: [
     (Story) => (

@@ -1,27 +1,44 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
+import { BellOff } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
   isUserMessage,
   type F0ChatAttachment,
+  type F0ChatChannelStatus,
   type F0ChatItem,
   type F0ChatLinkPreview,
+  type F0ChatMessageStatus,
   type F0ChatMention,
+  type F0ChatReaction,
+  type F0ChatSenderColor,
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./constants"
 
 // ---------------------------------------------------------------------------
 // People
 // ---------------------------------------------------------------------------
 
 /** A mock participant. `online` gates replies (offline people never respond);
- * `vacation` shows the "on vacation" affordance and implies offline. */
+ * `vacation` shows the "on vacation" affordance independently of presence. */
 export type MockPerson = F0ChatUser & {
   avatar: AvatarVariant
   online: boolean
   vacation?: boolean
 }
+
+const PHOTO_AVATAR_COLORS = [
+  "viridian",
+  "orange",
+  "malibu",
+  "barbie",
+  "purple",
+  "army",
+  "flubber",
+  "camel",
+] as const satisfies readonly F0ChatSenderColor[]
 
 const person = (
   id: string,
@@ -30,7 +47,12 @@ const person = (
   subtitle: string,
   // `image` (index into the mock photo set) gives a photo avatar; omit it to use
   // the initials + colour avatar — the mock mixes both on purpose.
-  opts: { online?: boolean; vacation?: boolean; image?: number } = {}
+  opts: {
+    online?: boolean
+    vacation?: boolean
+    image?: number
+    avatarColor?: F0ChatSenderColor
+  } = {}
 ): MockPerson =>
   ({
     id,
@@ -44,6 +66,14 @@ const person = (
         ? { src: mockImage("person", opts.image) }
         : {}),
     },
+    ...(opts.avatarColor
+      ? { avatarColor: opts.avatarColor }
+      : opts.image !== undefined
+        ? {
+            avatarColor:
+              PHOTO_AVATAR_COLORS[opts.image % PHOTO_AVATAR_COLORS.length],
+          }
+        : {}),
     profileHref: `/people/${id}`,
     online: opts.online ?? false,
     vacation: opts.vacation,
@@ -69,6 +99,7 @@ const MARCUS = person("u_marcus", "Marcus", "Bennett", "Engineering Manager", {
 })
 const PRIYA = person("u_priya", "Priya", "Raman", "Account Executive", {
   online: true,
+  vacation: true,
   image: 2,
 })
 // No photo — initials + colour avatar.
@@ -100,6 +131,19 @@ const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
 // No photo — initials + colour avatar.
 const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
 
+/** Extra members for the large read-receipt demo. Together with the named
+ * participants, they make every Quarterly Reporting message expose 45 readers
+ * so the message-info list has a realistic overflow state. */
+const RECEIPT_DEMO_READERS = Array.from({ length: 42 }, (_, index) => {
+  const number = String(index + 1).padStart(2, "0")
+  return person(
+    `u_receipt_demo_${number}`,
+    "Demo",
+    `Reader ${number}`,
+    "Quarterly Reporting member"
+  )
+})
+
 // ---------------------------------------------------------------------------
 // Seeds — every conversation is deliberately different (empty, short, long,
 // DMs and multi-person groups with topical messages).
@@ -119,6 +163,20 @@ type MessageLine = {
   linkPreviews?: F0ChatLinkPreview[]
   /** Attachments (images, files, shared locations) for the media demos. */
   attachments?: F0ChatAttachment[]
+  /** Group members who read this message. */
+  readBy?: F0ChatUser[]
+  /** Reactions shown under the message. */
+  reactions?: F0ChatReaction[]
+  /** Delivery state override for outgoing-message fixtures. */
+  status?: F0ChatMessageStatus
+  /** Host-provided explanation for a failed outgoing message. */
+  failureReason?: string
+  /** Count-only read receipt for hosts without reader identities. */
+  readByCount?: number
+  /** Soft-deleted tombstone fixture. */
+  deleted?: boolean
+  /** Marks the message as edited shortly after it was sent. */
+  edited?: boolean
 }
 
 /** A membership event in the transcript — becomes a centered system row. */
@@ -137,7 +195,8 @@ export type Seed = {
   title: string
   avatar: AvatarVariant
   presence?: "online" | "offline"
-  muted?: boolean
+  /** Channel statuses shown consistently in the header and sidebar. */
+  statuses?: F0ChatChannelStatus[]
   /** Demo: starts in the "Pinned" sidebar group (favourited). */
   pinned?: boolean
   participants: MockPerson[]
@@ -163,9 +222,8 @@ export type Seed = {
   myRole?: "admin" | "member" | "guest"
 }
 
-/** Group avatar: the emoji when one is given, otherwise the company avatar
- * built from the group's name (its initials). A company avatar is never passed
- * by hand — it's always this name-derived fallback. */
+/** Group avatar data: an explicit emoji when one is given; otherwise a
+ * name-derived company avatar that chat surfaces replace with the ＃ fallback. */
 const groupAvatar = (name: string, emoji?: string): AvatarVariant =>
   emoji ? { type: "emoji", emoji } : { type: "company", name }
 
@@ -204,6 +262,428 @@ const manyGroupLines = (people: MockPerson[], count: number): Line[] =>
     // Newest last (smallest `min`); ~12 min apart so it spans a few hours.
     min: Math.max(1 * MIN, (count - i) * 12 * MIN),
   }))
+
+const EVERYTHING_STRESS_PARTICIPANTS = [
+  ELEANOR,
+  MARCUS,
+  PRIYA,
+  THEO,
+  NADIA,
+  OWEN,
+  HARPER,
+  GRACE,
+  SAM,
+  NOAH,
+  ISLA,
+  VIKTOR,
+]
+
+const EVERYTHING_STRESS_HISTORY_COUNT = 320
+
+const EVERYTHING_STRESS_COPY = [
+  "Opening the daily thread with the overnight metrics ✅",
+  "The rollout is still healthy across every region",
+  "Can someone double-check the mobile dashboard before standup?",
+  "I compared it with yesterday and the totals line up",
+  "The accessibility pass found two labels we should improve",
+  "I have added both fixes to the release checklist",
+  "Customer feedback is especially positive on the faster search",
+  "One edge case remains when a very long name wraps onto three lines",
+  "I will add it to the visual regression matrix",
+  "The data import finished successfully for all offices 🎉",
+  "Reminder: the deploy window closes at 17:00 Barcelona time",
+  "Everything is documented in the handoff notes",
+]
+
+/**
+ * A deliberately excessive transcript for profiling ApplicationFrame with a
+ * cold module cache. The oldest block provides hundreds of variable-height
+ * rows; the middle block concentrates every rich message shape; the newest
+ * block stays text-only so the first transcript paint is measurable before a
+ * user scrolls into the heavy previews.
+ */
+const everythingStressLines = (): Line[] => {
+  const history: Line[] = Array.from(
+    { length: EVERYTHING_STRESS_HISTORY_COUNT },
+    (_, index) => {
+      const author =
+        index % 13 === 5
+          ? EVERYTHING_STRESS_PARTICIPANTS[(index - 1) % 12]
+          : EVERYTHING_STRESS_PARTICIPANTS[index % 12]
+      const line: MessageLine = {
+        from: author,
+        body:
+          index % 19 === 0
+            ? `${EVERYTHING_STRESS_COPY[index % EVERYTHING_STRESS_COPY.length]}\n\nThis deliberately wraps onto several lines so variable-height measurement is exercised at every point in the year-long history.`
+            : EVERYTHING_STRESS_COPY[index % EVERYTHING_STRESS_COPY.length],
+        min: (EVERYTHING_STRESS_HISTORY_COUNT - index + 10) * DAY,
+      }
+
+      if (index > 8 && index % 29 === 0) {
+        line.replyToIndex = index - 7
+      }
+      if (index % 37 === 0) {
+        line.reactions = [
+          {
+            emoji: index % 74 === 0 ? "🎉" : "👍",
+            count: 3,
+            reactedByMe: index % 74 === 0,
+            users: [ELEANOR, MARCUS, GRACE],
+          },
+        ]
+      }
+      if (index % 53 === 0) {
+        line.body = `@${ME.name} ${line.body}`
+        line.mentions = [
+          {
+            id: ME.id,
+            name: ME.name,
+            avatar: ME.avatar,
+            subtitle: ME.subtitle,
+            profileHref: ME.profileHref,
+          },
+        ]
+      }
+
+      return line
+    }
+  )
+
+  let min = 10 * DAY
+  const rich: Line[] = []
+  const add = (
+    line: Omit<MessageLine, "min"> | Omit<SystemLine, "min">,
+    gap = 6 * HOUR
+  ) => {
+    if ("system" in line) {
+      rich.push({ system: line.system, min })
+    } else {
+      rich.push({ ...line, min })
+    }
+    min -= gap
+  }
+
+  add({
+    system: {
+      event: "member.added",
+      members: [ELEANOR, MARCUS, PRIYA, THEO, NADIA, OWEN],
+    },
+  })
+  add({
+    from: ELEANOR,
+    body: "A single image with explicit intrinsic dimensions",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 0),
+        thumbnailUrl: mockImage("card", 0),
+        name: "dashboard-overview.webp",
+        mimeType: "image/webp",
+        width: 1200,
+        height: 800,
+      },
+    ],
+  })
+  add({
+    from: MARCUS,
+    body: "A four-image gallery with mixed aspect ratios",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 1),
+        name: "office-portrait.webp",
+        width: 800,
+        height: 1200,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 2),
+        name: "office-landscape.webp",
+        width: 1600,
+        height: 900,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 3),
+        name: "analytics-square.webp",
+        width: 1000,
+        height: 1000,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 4),
+        name: "team-landscape.webp",
+        width: 1400,
+        height: 900,
+      },
+    ],
+  })
+  add({
+    from: PRIYA,
+    body: "Meet beside the main entrance",
+    attachments: [
+      {
+        kind: "location",
+        latitude: 41.3894,
+        longitude: 2.1607,
+        name: "Factorial HQ — Barcelona",
+      },
+    ],
+  })
+  add({
+    from: THEO,
+    body: "",
+    attachments: [
+      {
+        kind: "voice",
+        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+        durationSeconds: 3,
+        mimeType: "audio/mpeg",
+        name: "voice-note.mp3",
+      },
+    ],
+  })
+  add({
+    from: NADIA,
+    body: "PDF preview with a stable outer frame",
+    attachments: [
+      {
+        kind: "file",
+        url: "/f0-pdf-viewer-sample.pdf",
+        name: "extremely-long-report.pdf",
+        mimeType: "application/pdf",
+        size: 2_048_000,
+      },
+    ],
+  })
+  add({
+    from: OWEN,
+    body: "Spreadsheet previews in both supported formats",
+    attachments: [
+      {
+        kind: "file",
+        url: "/f0-document-sample.xlsx",
+        name: "annual-model.xlsx",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+      {
+        kind: "file",
+        url: "/f0-document-sample.csv",
+        name: "all-offices.csv",
+        mimeType: "text/csv",
+      },
+    ],
+  })
+  add({
+    from: HARPER,
+    body: "Word, Markdown and plain-text document previews",
+    attachments: [
+      {
+        kind: "file",
+        url: "/f0-document-sample.docx",
+        name: "customer-handoff.docx",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      },
+      {
+        kind: "file",
+        url: "/f0-document-sample.md",
+        name: "release-notes.md",
+        mimeType: "text/markdown",
+      },
+      {
+        kind: "file",
+        url: "/f0-document-sample.txt",
+        name: "worker-output.txt",
+        mimeType: "text/plain",
+      },
+    ],
+  })
+  add({
+    from: GRACE,
+    body: "Two videos exercise serialized cold-start initialization",
+    attachments: [
+      {
+        kind: "file",
+        url: "/Big_Buck_Bunny_alt.webm",
+        name: "product-walkthrough.webm",
+        mimeType: "video/webm",
+        thumbnailUrl: "/video-poster.webp",
+        videoContent: {
+          captions: MOCK_VIDEO_CAPTIONS,
+          descriptions: MOCK_VIDEO_DESCRIPTIONS,
+        },
+      },
+      {
+        kind: "file",
+        url: "/Big_Buck_Bunny_alt.webm",
+        name: "accessibility-review.webm",
+        mimeType: "video/webm",
+        thumbnailUrl: "/video-poster.webp",
+        videoSilent: true,
+      },
+    ],
+  })
+  add({
+    from: SAM,
+    body: "A generic download and an upload still in progress",
+    attachments: [
+      {
+        kind: "file",
+        url: "#",
+        name: "launch-deck.pptx",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        size: 8_388_608,
+      },
+      {
+        kind: "file",
+        url: "#",
+        name: "archive-upload.zip",
+        mimeType: "application/zip",
+        size: 24_000_000,
+        progress: 63,
+      },
+    ],
+  })
+  const attachmentMessageIndex = history.length + rich.length - 1
+  add({
+    from: NOAH,
+    body: "Replying to the attachment bundle above",
+    replyToIndex: attachmentMessageIndex,
+  })
+  add({
+    from: ISLA,
+    body: "The complete handbook is here: https://handbook.example.com/product",
+    linkPreviews: [
+      {
+        url: "https://handbook.example.com/product",
+        title: "Product handbook — end-to-end guide",
+        description:
+          "Planning, delivery, quality, analytics and release processes in one place.",
+        imageUrl: mockImage("card", 5),
+      },
+    ],
+  })
+  add({
+    from: VIKTOR,
+    body: "Two compact unfurls: https://status.example.com and https://metrics.example.com",
+    linkPreviews: [
+      {
+        url: "https://status.example.com",
+        title: "Platform status",
+        description: "All systems operational.",
+      },
+      {
+        url: "https://metrics.example.com",
+        title: "Release metrics",
+        description: "Cold start, interaction and rendering measurements.",
+      },
+    ],
+  })
+  add({
+    from: ME,
+    body: "This outgoing message is still sending",
+    status: "sending",
+  })
+  add({
+    from: ME,
+    body: "This outgoing message reached the server",
+    status: "sent",
+  })
+  add({
+    from: ME,
+    body: "This outgoing message reached every device",
+    status: "delivered",
+  })
+  add({
+    from: ME,
+    body: "This outgoing message has been read",
+    status: "read",
+    readBy: [ELEANOR, MARCUS, GRACE, ...RECEIPT_DEMO_READERS],
+  })
+  add({
+    from: ME,
+    body: "This message intentionally demonstrates a failed send",
+    status: "failed",
+    failureReason: "Simulated network error for the stress fixture",
+  })
+  add({
+    from: MARCUS,
+    body: "This text was refined after posting",
+    edited: true,
+    reactions: [
+      {
+        emoji: "❤️",
+        count: 5,
+        reactedByMe: true,
+        users: [ME, ELEANOR, PRIYA, GRACE, SAM],
+      },
+      {
+        emoji: "🚀",
+        count: 2,
+        reactedByMe: false,
+        users: [NOAH, VIKTOR],
+      },
+    ],
+  })
+  add({
+    from: PRIYA,
+    body: "This content is replaced by the deleted-message tombstone",
+    deleted: true,
+  })
+  add({
+    from: GRACE,
+    body: `@${ME.name} please verify this direct mention before release`,
+    mentions: [
+      {
+        id: ME.id,
+        name: ME.name,
+        avatar: ME.avatar,
+        subtitle: ME.subtitle,
+        profileHref: ME.profileHref,
+      },
+    ],
+  })
+  add({
+    from: SAM,
+    body: "@here the stress fixture is ready for profiling",
+    mentionedEveryone: true,
+    readBy: [],
+    readByCount: 57,
+  })
+  add({
+    system: { event: "member.removed", members: [THEO, NADIA] },
+  })
+  add({ system: { event: "member.left", members: [OWEN] } })
+
+  const recent = Array.from(
+    { length: 40 },
+    (_, index): Line => ({
+      from: EVERYTHING_STRESS_PARTICIPANTS[index % 12],
+      body:
+        index % 9 === 0
+          ? `Recent unread checkpoint ${index + 1}\nThis wraps to keep the initial viewport representative without loading a preview.`
+          : `Recent unread checkpoint ${index + 1} — lightweight transcript content`,
+      min: Math.max(5 * MIN, (40 - index) * 2 * HOUR),
+      ...(index === 11
+        ? {
+            reactions: [
+              {
+                emoji: "👀",
+                count: 4,
+                reactedByMe: false,
+                users: [ELEANOR, MARCUS, PRIYA, GRACE],
+              },
+            ],
+          }
+        : {}),
+    })
+  )
+
+  return [...history, ...rich, ...recent]
+}
 
 export const SEEDS: Seed[] = [
   // DM — always typing (online): sidebar "Writing…" + a dots bubble, non-stop.
@@ -336,14 +816,14 @@ export const SEEDS: Seed[] = [
       },
     ],
   },
-  // DM — muted (online): the conversation is silenced (mute icon in the sidebar).
+  // DM — vacation + muted + online + unread: showcases all states together.
   {
     id: "dm-priya",
     type: "dm",
     title: PRIYA.name,
     avatar: PRIYA.avatar,
     presence: "online",
-    muted: true,
+    statuses: [{ icon: BellOff, label: "Muted" }],
     participants: [PRIYA],
     unread: 4,
     lines: [
@@ -574,15 +1054,14 @@ export const SEEDS: Seed[] = [
     ],
   },
   // GROUP — document attachments of every previewable kind (pdf, xlsx, csv,
-  // docx, md, txt) plus a non-previewable deck that stays a plain chip. The
-  // sample files live in `public/`, same as the F0Chat "Document attachments"
-  // story.
+  // docx, md, txt), two inline videos in one message, and a non-previewable deck
+  // that stays a plain chip. The sample files live in `public/`.
   {
     id: "grp-reporting",
     type: "group",
     title: "Quarterly Reporting",
-    avatar: groupAvatar("Quarterly Reporting", "📊"),
-    participants: [GRACE, MARCUS, SAM],
+    avatar: groupAvatar("Quarterly Reporting"),
+    participants: [GRACE, MARCUS, SAM, ...RECEIPT_DEMO_READERS],
     lines: [
       {
         from: GRACE,
@@ -652,9 +1131,39 @@ export const SEEDS: Seed[] = [
       },
       {
         from: ME,
-        body: "And the kickoff deck — no client-side preview for ppt, stays a chip",
+        body: "And the kickoff deck — plus two walkthrough videos",
         min: 10 * MIN,
+        reactions: [
+          {
+            emoji: "🎉",
+            count: 3,
+            reactedByMe: false,
+            users: [GRACE, MARCUS, SAM],
+          },
+        ],
         attachments: [
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "quarterly-walkthrough.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "chart-deep-dive.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
           {
             kind: "file",
             url: "#",
@@ -664,6 +1173,24 @@ export const SEEDS: Seed[] = [
         ],
       },
     ],
+  },
+  // GROUP — the intentionally excessive ApplicationFrame profiling fixture.
+  // It combines a year-long transcript with every rich message shape and ten
+  // additional history pages while keeping the initial unread window light.
+  {
+    id: "grp-everything-stress",
+    type: "group",
+    title: "Everything Chat — Stress Test",
+    avatar: groupAvatar("Everything Chat — Stress Test", "🧪"),
+    statuses: [{ icon: BellOff, label: "Muted" }],
+    pinned: true,
+    participants: EVERYTHING_STRESS_PARTICIPANTS,
+    lines: everythingStressLines(),
+    unread: 40,
+    olderPages: 10,
+    alwaysTyping: true,
+    multiTyping: true,
+    myRole: "admin",
   },
   // GROUP — extensive, weeks/days of history.
   {
@@ -846,7 +1373,7 @@ export const SEEDS: Seed[] = [
     id: "grp-release",
     type: "group",
     title: "Release War Room",
-    avatar: groupAvatar("Release War Room", "🔥"),
+    avatar: groupAvatar("Release War Room"),
     participants: [MARCUS, GRACE],
     multiTyping: true,
     lines: [
@@ -960,6 +1487,23 @@ export type ConvState = {
 let seq = 0
 export const nextId = (): string => `m-${seq++}`
 
+/** Reader identities for a group message in the ApplicationFrame mock. */
+export const groupReadersFor = (
+  seed: Seed | undefined,
+  authorId: string
+): F0ChatUser[] | undefined => {
+  if (seed?.type !== "group") return undefined
+
+  const uniqueParticipants = new Map(
+    [...seed.participants, ME].map((participant) => [
+      participant.id,
+      participant,
+    ])
+  )
+  uniqueParticipants.delete(authorId)
+  return [...uniqueParticipants.values()]
+}
+
 const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
@@ -978,13 +1522,24 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       body: line.body,
       createdAt: new Date(sentMs).toISOString(),
       isMine,
-      status: isMine ? "read" : undefined,
+      status: line.status ?? (isMine ? "read" : undefined),
+      failureReason: line.failureReason,
       // The other side read my messages shortly after they were sent (DM info).
-      readAt: isMine ? new Date(sentMs + 60_000).toISOString() : undefined,
+      readAt:
+        isMine && (line.status ?? "read") === "read"
+          ? new Date(sentMs + 60_000).toISOString()
+          : undefined,
       mentions: line.mentions,
       mentionedEveryone: line.mentionedEveryone,
       linkPreviews: line.linkPreviews,
       attachments: line.attachments,
+      readBy: line.readBy ?? groupReadersFor(seed, line.from.id),
+      readByCount: line.readByCount,
+      reactions: line.reactions,
+      deleted: line.deleted,
+      editedAt: line.edited
+        ? new Date(sentMs + 5 * 60_000).toISOString()
+        : undefined,
     }
   })
   // Second pass: resolve reply references now that every message has an id.

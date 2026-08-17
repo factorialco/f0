@@ -8,20 +8,8 @@ const SvgRecord = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <circle
-      cx={12}
-      cy={12}
-      r={8}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
-    <circle
-      cx={12}
-      cy={12}
-      r={6}
-      fill="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={12} r={8} stroke="currentColor" />
+    <circle cx={12} cy={12} r={6} fill="currentColor" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgRecord)

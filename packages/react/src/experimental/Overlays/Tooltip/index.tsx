@@ -25,6 +25,7 @@ type TooltipInternalProps = {
   shortcut?: ComponentProps<typeof Shortcut>["keys"]
   delay?: number
   instant?: boolean
+  onOpen?: () => void
 } & (
   | {
       label: string
@@ -43,6 +44,7 @@ export function TooltipInternal({
   shortcut,
   instant = false,
   delay = 700,
+  onOpen,
 }: TooltipInternalProps) {
   const [open, setOpen] = useState(false)
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -62,9 +64,10 @@ export function TooltipInternal({
   }, [clearOpenTimeout])
 
   const scheduleOpen = useCallback(() => {
+    onOpen?.()
     clearOpenTimeout()
     openTimeoutRef.current = setTimeout(() => setOpen(true), openDelayMs)
-  }, [clearOpenTimeout, openDelayMs])
+  }, [clearOpenTimeout, onOpen, openDelayMs])
 
   useEffect(() => close, [close])
 
@@ -101,6 +104,7 @@ export function TooltipInternal({
             onPointerDown={() => close()}
             onFocus={(e) => {
               if (isFocusVisible(e.currentTarget)) {
+                onOpen?.()
                 setOpen(true)
               } else {
                 // If focus comes from mouse/touch/programmatic focus, keep closed.
@@ -134,7 +138,7 @@ export function TooltipInternal({
   )
 }
 
-const privateProps = ["delay"] as const
+const privateProps = ["delay", "onOpen"] as const
 
 export type TooltipProps = Omit<
   TooltipInternalProps,

@@ -307,6 +307,94 @@ export const WithoutEnhance: Story = {
   },
 }
 
+/**
+ * Every step of the font-size scale the `textStyle` mark can carry. 16px is the
+ * body size, so text at 16 normally carries no mark at all; it is shown here for
+ * comparison. Sizes arrive this way from imported documents, which is why they
+ * have to survive being opened and saved.
+ */
+export const FontSizes: Story = {
+  args: {
+    ...Default.args,
+    initialEditorState: {
+      title: "Font sizes",
+      content: {
+        type: "doc",
+        content: [12, 14, 16, 18, 20, 24, 29].map((px) => ({
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: `${px}px — the quick brown fox jumps over the lazy dog`,
+              marks: [{ type: "textStyle", attrs: { fontSize: `${px}px` } }],
+            },
+          ],
+        })),
+      },
+    },
+  },
+}
+
+/** Three levels of the same list type, innermost first. */
+const nestedList = (type: "bulletList" | "orderedList", markers: string[]) =>
+  markers.reduceRight<Record<string, unknown> | null>((child, marker) => {
+    const paragraph = {
+      type: "paragraph",
+      content: [{ type: "text", text: `Level ${marker}` }],
+    }
+
+    return {
+      type,
+      content: [
+        { type: "listItem", content: child ? [paragraph, child] : [paragraph] },
+      ],
+    }
+  }, null)!
+
+const headingLevelsContent = {
+  type: "doc",
+  content: [
+    ...[1, 2, 3, 4, 5, 6].flatMap((level) => [
+      {
+        type: "heading",
+        attrs: { level },
+        content: [{ type: "text", text: `Heading ${level}` }],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Body text, for comparison with the heading." },
+        ],
+      },
+    ]),
+    ...[1, 2, 3].map((indent) => ({
+      type: "paragraph",
+      attrs: { indent },
+      content: [
+        { type: "text", text: `Paragraph indented to level ${indent}` },
+      ],
+    })),
+    nestedList("bulletList", ["disc", "circle", "square"]),
+    nestedList("orderedList", ["decimal", "lower-alpha", "lower-roman"]),
+  ],
+}
+
+/**
+ * Every heading level and both nested list types. Content imported from
+ * documents nests several levels deep, so h4-h6 have to read as distinct from
+ * each other and from body text, and a sub-list must not repeat its parent's
+ * marker.
+ */
+export const HeadingLevels: Story = {
+  args: {
+    ...Default.args,
+    initialEditorState: {
+      title: "Heading levels",
+      content: headingLevelsContent,
+    },
+  },
+}
+
 export const WithWarningAlert: Story = {
   args: {
     ...Default.args,

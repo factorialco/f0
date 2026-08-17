@@ -10,7 +10,8 @@ import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
 import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
 
-import { FormCardValueFormatterProvider } from "@/sds/ai/F0AiChat/providers/FormCardValueFormatterProvider"
+import { CoachmarkProvider } from "@/experimental/Overlays/F0Coachmark"
+import { FormCardValueFormatterProvider } from "@/kits/ai/F0AiChat/providers/FormCardValueFormatterProvider"
 
 import { ToastProvider } from "../../../hooks/toast/ToastProvider"
 import { ImageContextValue, ImageProvider } from "../../imageHandler"
@@ -25,6 +26,7 @@ import { DataCollectionStorageHandler } from "../datacollection/types"
 import { I18nProvider, I18nProviderProps } from "../i18n"
 import { L10nProvider, L10nProviderProps } from "../l10n"
 import { UserPlatformProvider } from "../user-platafform"
+import type { HourCycle } from "../user-platafform/types"
 
 interface LayoutProps {
   fullScreen?: boolean
@@ -99,6 +101,13 @@ export const F0Provider: React.FC<{
   layout?: Omit<ComponentProps<typeof LayoutProvider>, "children">
   i18n: Omit<I18nProviderProps, "children">
   l10n: Omit<L10nProviderProps, "children">
+  /**
+   * Global user preference for how times are displayed and edited (12h/24h).
+   * When set, F0 time fields render/parse in this hour cycle so the app can
+   * honor the user's preference instead of the browser locale. When omitted,
+   * time fields use the native browser-locale input.
+   */
+  hourCycle?: HourCycle
   isDev?: boolean
   showExperimentalWarnings?: boolean
   dataCollectionStorageHandler?: DataCollectionStorageHandler
@@ -122,6 +131,7 @@ export const F0Provider: React.FC<{
   image,
   i18n,
   l10n,
+  hourCycle,
   isDev = false,
   dataCollectionStorageHandler,
   showExperimentalWarnings = false,
@@ -134,6 +144,7 @@ export const F0Provider: React.FC<{
         isDev={isDev}
         showExperimentalWarnings={showExperimentalWarnings}
         renderDataTestIdAttribute={renderDataTestIdAttribute}
+        hourCycle={hourCycle}
       >
         <L10nProvider {...l10n}>
           <I18nProvider {...i18n}>
@@ -159,7 +170,9 @@ export const F0Provider: React.FC<{
                                 value={formComponent}
                               >
                                 <FormCardValueFormatterProvider>
-                                  {children}
+                                  <CoachmarkProvider>
+                                    {children}
+                                  </CoachmarkProvider>
                                 </FormCardValueFormatterProvider>
                               </FormComponentContext.Provider>
                             </FormOverlaysProvider>

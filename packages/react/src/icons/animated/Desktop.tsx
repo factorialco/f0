@@ -47,33 +47,18 @@ const DesktopAnimated = React.forwardRef<SVGSVGElement, DesktopProps>(
         strokeLinejoin="round"
         {...props}
       >
-        <path
-          d="M6 4H18C19.6569 4 21 5.34315 21 7V13C21 14.6569 19.6569 16 18 16H6C4.34315 16 3 14.6569 3 13V7C3 5.34315 4.34315 4 6 4Z"
-          vectorEffect="non-scaling-stroke"
-        />
-        <path d="M7 20H17" vectorEffect="non-scaling-stroke" />
-        <path d="M9 20L9 16" vectorEffect="non-scaling-stroke" />
-        <path d="M15 20L15 16" vectorEffect="non-scaling-stroke" />
+        <path d="M6 4H18C19.6569 4 21 5.34315 21 7V13C21 14.6569 19.6569 16 18 16H6C4.34315 16 3 14.6569 3 13V7C3 5.34315 4.34315 4 6 4Z" />
+        <path d="M7 20H17" />
+        <path d="M9 20L9 16" />
+        <path d="M15 20L15 16" />
         <motion.g
           variants={containerVariants}
           animate={animate}
           initial="normal"
         >
-          <motion.path
-            d="M6 7.5H14"
-            variants={lineVariants}
-            vectorEffect="non-scaling-stroke"
-          />
-          <motion.path
-            d="M6 10H17"
-            variants={lineVariants}
-            vectorEffect="non-scaling-stroke"
-          />
-          <motion.path
-            d="M6 12.5H11"
-            variants={lineVariants}
-            vectorEffect="non-scaling-stroke"
-          />
+          <motion.path d="M6 7.5H14" variants={lineVariants} />
+          <motion.path d="M6 10H17" variants={lineVariants} />
+          <motion.path d="M6 12.5H11" variants={lineVariants} />
         </motion.g>
       </svg>
     )

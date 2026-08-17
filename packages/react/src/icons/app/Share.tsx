@@ -13,14 +13,12 @@ const SvgShare = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M10 5H8C6.34315 5 5 6.34315 5 8V16C5 17.6569 6.34315 19 8 19H16C17.6569 19 19 17.6569 19 16V13.5"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M17 4L20 7M20 7L17 10M20 7H16C13.7909 7 12 8.79086 12 11V11.5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

@@ -8,15 +8,7 @@ const SvgCircle = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <rect
-      width={16}
-      height={16}
-      x={4}
-      y={4}
-      fill="currentColor"
-      rx={8}
-      vectorEffect="non-scaling-stroke"
-    />
+    <rect width={16} height={16} x={4} y={4} fill="currentColor" rx={8} />
   </svg>
 )
 const ForwardRef = forwardRef(SvgCircle)

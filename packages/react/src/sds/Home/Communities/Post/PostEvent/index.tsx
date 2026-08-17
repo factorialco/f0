@@ -2,6 +2,7 @@ import { f1Colors } from "@factorialco/f0-core"
 
 import { CalendarEvent } from "@/experimental/Widgets/Content/CalendarEvent"
 import { formatTime } from "@/lib/date"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -20,7 +21,9 @@ export const BasePostEvent = ({
   place,
   date,
 }: PostEventProps) => {
-  let description = formatTime(date)
+  const locale = useDateFnsLocale()
+
+  let description = formatTime(date, locale)
 
   const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
     event.stopPropagation()

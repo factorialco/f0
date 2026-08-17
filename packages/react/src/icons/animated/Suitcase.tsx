@@ -64,24 +64,12 @@ const SuitcaseAnimated = React.forwardRef<SVGSVGElement, SuitcaseProps>(
             initial="normal"
             transition={lidTransition}
           >
-            <path
-              d="M9 6.5V6.5C9 5.39543 9.89543 4.5 11 4.5H13C14.1046 4.5 15 5.39543 15 6.5V6.5"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              d="M4 10C4 8.34315 5.34315 7 7 7H17C18.6569 7 20 8.34315 20 10V12H4V10Z"
-              vectorEffect="non-scaling-stroke"
-            />
+            <path d="M9 6.5V6.5C9 5.39543 9.89543 4.5 11 4.5H13C14.1046 4.5 15 5.39543 15 6.5V6.5" />
+            <path d="M4 10C4 8.34315 5.34315 7 7 7H17C18.6569 7 20 8.34315 20 10V12H4V10Z" />
           </motion.g>
           <g>
-            <path
-              d="M11 12V13.75C11 13.8881 11.1119 14 11.25 14H12.75C12.8881 14 13 13.8881 13 13.75V12"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              d="M4 12H20V16C20 17.6569 18.6569 19 17 19H7C5.34315 19 4 17.6569 4 16V12Z"
-              vectorEffect="non-scaling-stroke"
-            />
+            <path d="M11 12V13.75C11 13.8881 11.1119 14 11.25 14H12.75C12.8881 14 13 13.8881 13 13.75V12" />
+            <path d="M4 12H20V16C20 17.6569 18.6569 19 17 19H7C5.34315 19 4 17.6569 4 16V12Z" />
           </g>
         </motion.g>
       </svg>

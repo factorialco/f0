@@ -1,13 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
+
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Chat } from "./F0Chat"
+import { ChatBubble } from "./components/ChatBubble"
+import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
+import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
+import { ChatUIProvider } from "./providers/ChatUIProvider"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
-import { type F0ChatRuntime, type F0ChatUser } from "./types"
+import {
+  f0ChatSenderColors,
+  type F0ChatMessage,
+  type F0ChatRuntime,
+  type F0ChatUser,
+} from "./types"
 
 const me: F0ChatUser = { id: "me", name: "Me" }
 const ana: F0ChatUser = {
@@ -16,10 +29,132 @@ const ana: F0ChatUser = {
   subtitle: "Product Designer",
 }
 
+const paletteRuntime: F0ChatRuntime = {
+  currentUserId: "me",
+  channel: {
+    id: "palette",
+    type: "group",
+    title: "Sender surface palette",
+    avatar: { type: "company", name: "Sender surface palette" },
+  },
+  status: "ready",
+  messages: [],
+  typingUsers: [],
+  hasMoreOlder: false,
+  loadingOlder: false,
+  unreadCount: 0,
+  firstUnreadId: null,
+  sendMessage: () => undefined,
+  retryMessage: () => undefined,
+  loadOlder: () => undefined,
+  toggleReaction: () => undefined,
+  deleteMessage: () => undefined,
+  onInputActivity: () => undefined,
+}
+
+const paletteVoiceUrl = "data:audio/wav;base64,UklGRg=="
+
 /** Gives F0Chat a bounded height so its internal `h-full` flex layout resolves. */
 const Frame = ({ children }: { children: ReactNode }): ReactNode => (
   <div style={{ height: 680, display: "flex", width: "100%" }}>{children}</div>
 )
+
+const BubblePalette = (): ReactNode => {
+  const messages = f0ChatSenderColors.map((avatarColor) => {
+    const author: F0ChatUser = {
+      id: `palette-${avatarColor}`,
+      name: avatarColor,
+      avatarColor,
+    }
+    const message: F0ChatMessage = {
+      id: `palette-message-${avatarColor}`,
+      author,
+      body: "Incoming message",
+      createdAt: "2026-01-01T12:00:00.000Z",
+      isMine: false,
+      attachments: [
+        {
+          kind: "voice",
+          url: paletteVoiceUrl,
+          name: `${avatarColor}-voice.wav`,
+          mimeType: "audio/wav",
+          durationSeconds: 12,
+        },
+        {
+          kind: "file",
+          url: `#${avatarColor}`,
+          name: `${avatarColor}.bin`,
+          mimeType: "application/octet-stream",
+        },
+      ],
+      linkPreviews: [
+        {
+          url: `https://example.com/${avatarColor}`,
+          title: "Link preview",
+        },
+      ],
+    }
+
+    return { author, message }
+  })
+  const ownMessage: F0ChatMessage = {
+    id: "palette-message-own",
+    author: me,
+    body: "My neutral bubble",
+    createdAt: "2026-01-01T12:00:00.000Z",
+    isMine: true,
+    attachments: [
+      {
+        kind: "voice",
+        url: paletteVoiceUrl,
+        name: "neutral-voice.wav",
+        mimeType: "audio/wav",
+        durationSeconds: 12,
+      },
+      {
+        kind: "file",
+        url: "#mine",
+        name: "neutral.bin",
+        mimeType: "application/octet-stream",
+      },
+    ],
+    linkPreviews: [
+      { url: "https://example.com/mine", title: "Neutral link preview" },
+    ],
+  }
+
+  const palette = (
+    <div className="grid grid-cols-4 gap-2">
+      {messages.map(({ author, message }) => (
+        <div key={message.id} className="flex flex-col items-start gap-1">
+          <ChatMessageAttachments message={message} isMine={false} />
+          <ChatBubble message={message} author={author} isMine={false} />
+        </div>
+      ))}
+      <div className="flex flex-col items-end gap-1">
+        <ChatMessageAttachments message={ownMessage} isMine />
+        <ChatBubble message={ownMessage} isMine />
+      </div>
+    </div>
+  )
+
+  return (
+    <F0ChatProvider runtime={paletteRuntime}>
+      <ChatUIProvider>
+        <div className="grid w-full max-w-[1440px] grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="rounded-lg bg-f1-background p-4 text-f1-foreground">
+            <h3 className="mb-3 text-base font-medium">Light</h3>
+            {palette}
+          </div>
+          <div className="dark rounded-lg bg-f1-background p-4 text-f1-foreground">
+            <h3 className="mb-3 text-base font-medium">Dark</h3>
+            {palette}
+          </div>
+        </div>
+      </ChatUIProvider>
+    </F0ChatProvider>
+  )
+}
 
 const dmChannel = {
   id: "dm-ana",
@@ -43,7 +178,13 @@ const bruno: F0ChatUser = {
   id: "bruno",
   name: "Bruno Martínez",
   subtitle: "Engineering Manager",
-  avatar: { type: "person", firstName: "Bruno", lastName: "Martínez" },
+  avatar: {
+    type: "person",
+    firstName: "Bruno",
+    lastName: "Martínez",
+    src: "/avatars/person02.jpg",
+  },
+  avatarColor: "orange",
   profileHref: "/people/bruno",
 }
 const carmen: F0ChatUser = {
@@ -65,8 +206,8 @@ const groupChannel = {
 /**
  * Group conversation with `@`-mentions: type `@` to open the popover (with
  * `@here` pinned on top), pick a member or everyone, and send — the sent chip
- * is highlighted. The two seeded incoming messages demo a mention of you and an
- * `@here`, both rendered with the self-mention emphasis.
+ * uses the same accessible neutral styling. The two seeded incoming messages
+ * demo a mention of you and an `@here`.
  */
 const GroupConversation = (): ReactNode => {
   const runtime = useMockChatRuntime({
@@ -277,7 +418,7 @@ const StormHud = ({
   }, [commitsRef])
 
   return (
-    <div className="absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 font-mono text-xs text-f1-foreground shadow-md">
+    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-xs text-f1-foreground shadow-md">
       <div>
         {fps} fps · {eventsPerSecond} ev/s
       </div>
@@ -367,6 +508,47 @@ const Conversation = ({
         <F0Chat headerActions={headerActions} />
       </F0ChatProvider>
     </Frame>
+  )
+}
+
+/** Voice-note regression at the width used by a minimized chat panel. */
+const CompactVoiceConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "compact-voice",
+        author: ana,
+        body: "",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "voice",
+            url: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+            durationSeconds: 62,
+            mimeType: "audio/mpeg",
+            name: "voice-note.mp3",
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <div
+      style={{ display: "flex", height: 520, width: 360 }}
+      data-testid="compact-chat-frame"
+    >
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </div>
   )
 }
 
@@ -543,10 +725,10 @@ const MembershipConversation = (): ReactNode => {
 
 /**
  * Previewable documents (PDF, Excel/CSV, Word, text/markdown) render as a
- * Slack-style card: a content snapshot (lazy — each parser only loads when a
- * card scrolls into view) under a header with the type badge, name and a quick
- * download. Clicking the snapshot opens the fullscreen viewer for that kind.
- * Non-previewable files (PowerPoint, binary .doc…) keep the plain chip.
+ * document card: a content snapshot (lazy — each parser only loads when a card
+ * scrolls into view) under a header with the type badge and name. Clicking the
+ * snapshot opens the fullscreen viewer, where download remains available.
+ * Non-previewable files (PowerPoint, binary .doc…) keep the downloadable chip.
  */
 const DocumentConversation = (): ReactNode => {
   const runtime = useMockChatRuntime({
@@ -650,9 +832,91 @@ const DocumentConversation = (): ReactNode => {
   )
 }
 
+/**
+ * Videos play directly in the conversation through F0VideoPlayer. Several
+ * videos in one message stack vertically instead of shrinking into a grid, so
+ * every player uses the available width up to the chat media limit. The
+ * built-in player controls provide inline playback and fullscreen.
+ */
+const VideoConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 4,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "video-1",
+        author: ana,
+        body: "Two cuts from today’s walkthrough",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "walkthrough.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "/Big_Buck_Bunny_alt.webm",
+            name: "deep-dive.webm",
+            mimeType: "video/webm",
+            thumbnailUrl: "/video-poster.webp",
+            videoContent: {
+              captions: MOCK_VIDEO_CAPTIONS,
+              descriptions: MOCK_VIDEO_DESCRIPTIONS,
+            },
+          },
+          {
+            kind: "file",
+            url: "#",
+            name: "source-deck.pptx",
+            mimeType: "application/vnd.ms-powerpoint",
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+const ColdStartVideoConversation = (): ReactNode => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  if (isOpen) return <VideoConversation />
+
+  return (
+    <div className="flex h-[680px] items-center justify-center">
+      <ButtonInternal
+        variant="neutral"
+        size="md"
+        label="Open cold conversation"
+        onClick={() => setIsOpen(true)}
+      />
+    </div>
+  )
+}
+
 const meta = {
-  title: "Chat/F0Chat",
+  title: "F0Chat",
   component: F0Chat,
+  tags: ["!autodocs", "experimental"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof F0Chat>
 
@@ -661,6 +925,101 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => <Conversation initialCount={40} />,
+}
+
+export const Snapshot: Story = {
+  render: () => (
+    <div className="flex flex-col gap-8 bg-f1-background p-4">
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-default-chat"
+      >
+        <h2 className="text-lg font-medium">Emoji autocomplete</h2>
+        <Conversation initialCount={12} />
+      </section>
+      <section
+        className="flex w-fit flex-col gap-2"
+        data-testid="snapshot-compact-voice"
+      >
+        <h2 className="text-lg font-medium">Compact voice attachment</h2>
+        <CompactVoiceConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-documents"
+      >
+        <h2 className="text-lg font-medium">Document attachments</h2>
+        <DocumentConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-videos"
+      >
+        <h2 className="text-lg font-medium">Video attachments</h2>
+        <VideoConversation />
+      </section>
+      <section className="flex w-fit flex-col gap-2">
+        <h2 className="text-lg font-medium">Sender surface palette</h2>
+        <BubblePalette />
+      </section>
+    </div>
+  ),
+  parameters: withSnapshot({}),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("Open emoji autocomplete", async () => {
+      const defaultChat = within(canvas.getByTestId("snapshot-default-chat"))
+      const composer = defaultChat.getByRole("combobox", {
+        name: /write something here/i,
+      })
+      await userEvent.clear(composer)
+      await userEvent.type(composer, ":smil")
+      await expect(
+        defaultChat.getByRole("listbox", { name: "Add emoji" })
+      ).toBeVisible()
+    })
+
+    await step("Render the compact voice attachment", async () => {
+      const compactVoiceSection = canvas.getByTestId("snapshot-compact-voice")
+      const compactVoice = within(compactVoiceSection)
+      compactVoiceSection.scrollIntoView({ block: "center" })
+      await waitFor(
+        () =>
+          expect(
+            compactVoice.getByTestId("chat-voice-attachment")
+          ).toBeVisible(),
+        { timeout: 15_000 }
+      )
+    })
+
+    await step("Render document snapshots", async () => {
+      const documents = within(canvas.getByTestId("snapshot-documents"))
+      canvas
+        .getByTestId("snapshot-documents")
+        .scrollIntoView({ block: "center" })
+      await expect(
+        await documents.findAllByTestId("chat-document-attachment")
+      ).not.toHaveLength(0)
+    })
+
+    await step("Settle the stable video players", async () => {
+      const videos = within(canvas.getByTestId("snapshot-videos"))
+      canvas.getByTestId("snapshot-videos").scrollIntoView({ block: "center" })
+      const videoCards = await videos.findAllByTestId("chat-video-attachment")
+      await expect(videoCards).not.toHaveLength(0)
+      await waitFor(
+        () => {
+          for (const card of videoCards) {
+            expect(card).not.toHaveAttribute("aria-busy")
+            expect(
+              within(card).getByTestId("chat-video-placeholder")
+            ).toHaveClass("opacity-0")
+          }
+        },
+        { timeout: 15_000 }
+      )
+    })
+  },
 }
 
 /** Composer micro-interaction QA. Try, in order: hover a message → Reply (the
@@ -672,6 +1031,80 @@ export const Default: Story = {
 export const ComposerMotion: Story = {
   name: "Composer micro-interactions",
   render: () => <Conversation initialCount={8} />,
+}
+
+/** Minimized-chat regression (360px panel): the waveform compresses before
+ * reaching the fixed time/speed slot instead of overflowing across it. */
+export const CompactVoiceAttachment: Story = {
+  name: "Compact voice attachment",
+  render: () => <CompactVoiceConversation />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const frame = canvas.getByTestId("compact-chat-frame")
+    const card = await canvas.findByTestId("chat-voice-attachment")
+    const waveform = await canvas.findByTestId("chat-voice-waveform")
+    const time = await canvas.findByTestId("chat-voice-time")
+
+    const frameRect = frame.getBoundingClientRect()
+    const cardRect = card.getBoundingClientRect()
+    const waveformRect = waveform.getBoundingClientRect()
+    const timeRect = time.getBoundingClientRect()
+
+    await expect(cardRect.right).toBeLessThanOrEqual(frameRect.right)
+    await expect(waveformRect.width).toBeGreaterThan(0)
+    await expect(waveformRect.right).toBeLessThanOrEqual(timeRect.left)
+  },
+}
+
+/** Slack-style inline emoji lookup: type `:` followed by a shortcode or name,
+ * then use arrows + Enter/Tab to replace the query with the selected emoji. */
+export const EmojiAutocomplete: Story = {
+  name: "Composer emoji autocomplete",
+  render: () => <Conversation initialCount={8} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+
+    await step("Search and select with the keyboard", async () => {
+      await userEvent.type(composer, ":smil")
+      const listbox = canvas.getByRole("listbox", { name: "Add emoji" })
+      const selectedOption = within(listbox).getByRole("option", {
+        name: /:smile:.*Grinning Face with Smiling Eyes/,
+      })
+
+      await expect(listbox).toBeVisible()
+      await expect(composer).toHaveAttribute("aria-expanded", "true")
+      await expect(composer).toHaveAttribute("aria-controls", listbox.id)
+      await expect(composer).toHaveAttribute(
+        "aria-activedescendant",
+        selectedOption.id
+      )
+      await expect(selectedOption).toHaveAttribute("aria-selected", "true")
+
+      await userEvent.keyboard("{Enter}")
+      await expect(composer).toHaveValue("😄 ")
+      await expect(
+        canvas.queryByRole("listbox", { name: "Add emoji" })
+      ).not.toBeInTheDocument()
+      await expect(composer).toHaveAttribute("aria-expanded", "false")
+      await expect(composer).toHaveFocus()
+    })
+
+    await step("Convert a complete alias", async () => {
+      await userEvent.clear(composer)
+      await userEvent.type(composer, ":thumbsup:")
+      await expect(composer).toHaveValue("👍")
+    })
+
+    await step("Leave the visual example open", async () => {
+      await userEvent.type(composer, " :joy")
+      await expect(
+        canvas.getByRole("listbox", { name: "Add emoji" })
+      ).toBeVisible()
+    })
+  },
 }
 
 /** Group chat with functional `@`-mentions (`@here` for everyone + members). */
@@ -690,10 +1123,105 @@ export const GroupMembershipEvents: Story = {
 
 /** Document attachments: Slack-style snapshot cards for PDF, Excel/CSV, Word
  * and text/markdown — click to open the fullscreen viewer for each kind.
- * Non-previewable files (ppt) keep the plain chip. */
+ * Non-previewable files (ppt) keep the downloadable chip. */
 export const WithDocumentAttachments: Story = {
   name: "Document attachments",
   render: () => <DocumentConversation />,
+}
+
+/** Inline video attachments: each F0VideoPlayer stays wide, multiple videos
+ * stack vertically, and the player itself provides playback, download and
+ * fullscreen. */
+export const WithVideoAttachments: Story = {
+  name: "Video attachments",
+  render: () => <VideoConversation />,
+  play: async ({ canvasElement, step }) => {
+    await step(
+      "Show stable video players after media becomes ready",
+      async () => {
+        const canvas = within(canvasElement)
+        const cards = await canvas.findAllByTestId("chat-video-attachment")
+
+        await waitFor(
+          () => {
+            for (const card of cards) {
+              expect(card).not.toHaveAttribute("aria-busy")
+              expect(card).toHaveClass(
+                "aspect-video",
+                "w-[36rem]",
+                "max-w-full"
+              )
+              expect(
+                within(card).getByTestId("chat-video-placeholder")
+              ).toHaveClass("pointer-events-none", "opacity-0")
+            }
+          },
+          { timeout: 15_000 }
+        )
+      }
+    )
+  },
+}
+
+/** First-mount regression: opening the conversation exercises the real
+ * virtualized transcript and the initial video-preview lifecycle together. */
+export const ColdStartVideoAttachments: Story = {
+  name: "Cold-start video attachments",
+  tags: ["chat-scroll-regression"],
+  render: () => <ColdStartVideoConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Open a conversation with video previews", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: "Open cold conversation" })
+      )
+    })
+
+    await step("Reveal the transcript after initial positioning", async () => {
+      const message = await canvas.findByText(
+        "Two cuts from today’s walkthrough",
+        undefined,
+        { timeout: 15_000 }
+      )
+      await waitFor(() => expect(message).toBeVisible(), { timeout: 15_000 })
+    })
+
+    await step("Keep the video cards at their final dimensions", async () => {
+      const cards = await canvas.findAllByTestId("chat-video-attachment")
+      const initialRects = cards.map((card) => card.getBoundingClientRect())
+
+      for (const card of cards) {
+        await expect(card).toHaveClass(
+          "aspect-video",
+          "w-[36rem]",
+          "max-w-full"
+        )
+      }
+
+      await waitFor(
+        () => {
+          for (const card of cards) {
+            expect(card).not.toHaveAttribute("aria-busy")
+            expect(
+              within(card).getByTestId("chat-video-placeholder")
+            ).toHaveClass("opacity-0")
+          }
+        },
+        { timeout: 15_000 }
+      )
+
+      cards.forEach((card, index) => {
+        const finalRect = card.getBoundingClientRect()
+        expect(
+          Math.abs(finalRect.width - initialRects[index].width)
+        ).toBeLessThanOrEqual(1)
+        expect(
+          Math.abs(finalRect.height - initialRects[index].height)
+        ).toBeLessThanOrEqual(1)
+      })
+    })
+  },
 }
 
 /** Resilient sending under a bad connection: instant bubble, delayed sending

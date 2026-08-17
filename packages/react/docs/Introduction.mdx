@@ -1,53 +1,40 @@
-import { Meta } from "@storybook/addon-docs/blocks";
+import { Meta } from "@storybook/addon-docs/blocks"
+import { KeyPoint } from "./_lifecycle-visuals"
 
 <Meta title="Introduction" />
 
-# Introduction
+# Start with F0
 
-## What is f0?
+F0 is Factorial's design system — the components, patterns, tokens and rules every Factorial product shares. This is its home: where you come to **understand** it and to **contribute** to it.
 
-f0 is Factorial's official design system, created to unify the user experience across all our products. It provides a robust set of reusable components, design patterns, and guidelines that promote consistency, accessibility, and efficiency between design and development.
+<KeyPoint title="The door is your agent">
+Whatever you're doing, start by talking to **your AI agent** in the [`factorialco/f0`](https://github.com/factorialco/f0) repo. F0 ships its rules as **AGENTS.md** and skills, so any AGENTS.md-aware agent — Claude Code, Codex, OpenCode, or whatever you use — reads them, knows the catalogue, and builds to the standard with you. When a real decision is needed, it happens in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403).
+</KeyPoint>
 
-f0 is more than just a UI component library — it's a living ecosystem that evolves with our products and user needs. It includes:
+**Set it up once.** Open the [`factorialco/f0`](https://github.com/factorialco/f0) repo in your agent — it auto-loads the F0 skills. New to it? Ask it to clone and set the repo up for you; there's nothing manual to track.
 
-- **Reusable, responsive UI component library**
-- **Design tokens** for color, typography, spacing, and more
-- **Interaction patterns** and UX best practices
-- **Accessibility standards and guidelines**
-- **Tools and resources** for designers and developers
-- **Complete documentation** for frictionless implementation
+**Not sure how to phrase it? Try:**
 
-## Why f0?
+- _"Give me a quick tour of F0 — what's here and how is it organized?"_
+- _"Does F0 already have a component for picking a date range? Show me how to use it."_
+- _"I want to add a component that doesn't exist yet — walk me through contributing it."_
 
-f0 was created to support the development of scalable, cohesive products at Factorial. It helps teams:
+## What are you here to do?
 
-- Speed up product development
-- Ensure consistency across products
-- Improve accessibility and usability
-- Focus on solving product-specific challenges instead of reinventing basic UI elements
+### Understand F0
+
+What the system is and how it's built. Start with **[What is F0](/docs/about-f0-what-is-f0--documentation)** — what it is, why it exists, and the five principles. Then the model:
+
+- [Where it goes](/docs/about-f0-where-it-goes--documentation) — how F0 is organized: Core / Kits / Domain specific
+- [Components Maturity](/docs/about-f0-components-maturity--documentation) — the three levels: experimental, stable, deprecated
+
+### Contribute to F0
+
+Add or change something in the system itself. Start with **[How to contribute](/docs/about-f0-how-to-contribute--documentation)** — the whole flow, from idea to stable. The rest of the contract, as you need it:
+
+- [Definition of Done](/docs/about-f0-definition-of-done--documentation) — the bar a change must meet
+- [Release &amp; Versioning](/docs/about-f0-release-and-versioning--documentation) — versioning and the deprecation policy
 
 ---
 
-# System Principles
-
-f0's principles guide how we build and use our design system to create coherent user experiences across all Factorial products.
-
-## 1. Product first
-
-We prioritize the overall product experience over individual features. Every design decision considers its impact across the Factorial platform, ensuring scalable and consistent solutions. Before adding new components, we carefully evaluate how they integrate with existing workflows.
-
-## 2. Pragmatism and systematization
-
-We develop flexible and efficient solutions tailored to our users' real-world challenges. Our patterns adapt to a variety of use cases, helping users work more efficiently and giving our teams adjustable components.
-
-## 3. Purposeful consistency
-
-We maintain meaningful consistency in visual design and interaction patterns. This helps users build intuition when using the platform, reducing cognitive load and increasing efficiency. We reuse established patterns and ensure that new components follow existing models.
-
-## 4. Accessibility by default
-
-Accessibility is built into our design from the start — not an afterthought. All our components follow WCAG guidelines and are usable across devices. This improves overall usability and extends our reach, ensuring compatibility with screen readers, keyboard navigation, and proper contrast.
-
-## 5. Efficient composition
-
-We design components to work well together, allowing complex interfaces to be built from simple, dynamic blocks. Our components have consistent APIs and predictable behavior, making integration easier and accelerating development.
+_Just building a screen day to day?_ That's **prototyping**, not contributing — describe the screen to your agent and it composes a real, working screen from existing F0 components in **F0 Compose**. You're using the system, not changing it.

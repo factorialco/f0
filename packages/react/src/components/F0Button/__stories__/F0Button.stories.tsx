@@ -15,6 +15,7 @@ const meta = {
   component: F0Button,
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Web-components?node-id=41-1256&t=99GWQFvFLZtKW49N-4",

@@ -76,6 +76,15 @@ chips list.
   meta={OneFiltersPickerStories}
 />
 
+Committed changes update the public picker optimistically, so chips and presets
+respond even when a host only observes `onChange` and does not immediately echo
+the next `value`. A later `value` prop change re-seeds the applied state.
+
+<Canvas
+  of={OneFiltersPickerStories.OptimisticWithoutEcho}
+  meta={OneFiltersPickerStories}
+/>
+
 ## Filter Types
 
 ### In

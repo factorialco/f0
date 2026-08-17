@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
-import { type TranscribeFn } from "@/sds/ai/F0AiChat/types"
+import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
 
 // TipTap's BubbleMenu relies on tippy, which doesn't work under jsdom: its
 // plugin view throws on the first dictation transaction. Mock it out, same as

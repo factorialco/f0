@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   zeroRender as render,
   screen,
@@ -68,6 +68,33 @@ describe("ApplicationFrame split panel (conversations left, AI chat right)", () 
     expect(conversation.closest(".right-0")).toBeNull()
     // The AI chat window stays hidden while the conversation is up.
     expect(screen.queryByText("AI CHAT")).not.toBeInTheDocument()
+  })
+
+  it("gives the hosted window its final width before the entrance animation", async () => {
+    renderFrame()
+    await userEvent.click(screen.getByText("open-conv"))
+
+    let element: HTMLElement | null = screen.getByText("CONVERSATION")
+    while (element && element.style.width !== "100%") {
+      element = element.parentElement
+    }
+
+    expect(element).not.toBeNull()
+    expect(element).toHaveStyle({ width: "100%" })
+    expect(element?.style.width).not.toBe("0px")
+  })
+
+  it("contains horizontal overscroll inside the application shell", () => {
+    renderFrame()
+
+    const main = document.getElementById("content")
+    const root = main?.closest(".grid")
+    expect(root).toHaveClass("w-full", "max-w-full", "overflow-hidden")
+    expect(main).toHaveClass("overflow-x-hidden", "overflow-y-auto")
+    expect(main?.firstElementChild).toHaveClass(
+      "overflow-x-hidden",
+      "overflow-y-auto"
+    )
   })
 
   it("the One switch swaps the conversation for the right-docked AI chat", async () => {

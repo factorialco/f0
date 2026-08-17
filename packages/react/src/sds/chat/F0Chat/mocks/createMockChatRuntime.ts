@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { BellOff } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import {
@@ -14,6 +16,7 @@ import {
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 
 /** Seed describing a fake conversation the mock runtime should simulate. */
 export type MockChatSeed = {
@@ -508,17 +511,24 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
                 name: file.name,
                 size: file.size,
                 mimeType: file.type,
+                thumbnailUrl: file.type.startsWith("video/")
+                  ? "/video-poster.webp"
+                  : undefined,
               }
         })
       ),
     []
   )
 
+  const i18n = useI18n()
+
   // Pinned (favourite) / muted state — surfaced by the host as header actions
   // (F0ChatHeaderAction) wired to these transport methods.
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
-  const [muted, setMuted] = useState(seed.channel.muted ?? false)
+  const [muted, setMuted] = useState(
+    seed.channel.statuses?.some((status) => status.icon === BellOff) ?? false
+  )
   const toggleMute = useCallback(() => setMuted((value) => !value), [])
 
   // Membership events (groups): each appends a centered system row — one item
@@ -582,7 +592,17 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
 
   return {
     currentUserId: seed.me.id,
-    channel: { ...seed.channel, pinned, muted, memberCount },
+    channel: {
+      ...seed.channel,
+      pinned,
+      statuses: [
+        ...(seed.channel.statuses?.filter(
+          (status) => status.icon !== BellOff
+        ) ?? []),
+        ...(muted ? [{ icon: BellOff, label: i18n.chat.muted }] : []),
+      ],
+      memberCount,
+    },
     status: "ready",
     messages,
     typingUsers,
@@ -603,7 +623,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
-    maxFiles: 5,
+    maxFiles: 8,
+    // F0Chat stories use the same 100 MB per-file limit as ApplicationFrame.
+    maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     // Same streaming dictation mock the AI chat / RichText stories use.
     transcribe: mockTranscribe,
     markRead,

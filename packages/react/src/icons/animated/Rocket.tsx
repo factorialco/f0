@@ -61,7 +61,6 @@ const RocketAnimated = React.forwardRef<SVGSVGElement, RocketProps>(
           variants={shipVariants}
           transition={shipTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M4.66921 17.526C4.74318 16.6629 5.46533 16 6.33156 16V16C7.25301 16 8 16.747 8 17.6684V17.6684C8 18.5347 7.3371 19.2568 6.47404 19.3308L4.5 19.5L4.66921 17.526Z"
@@ -69,7 +68,6 @@ const RocketAnimated = React.forwardRef<SVGSVGElement, RocketProps>(
           variants={fireVariants}
           transition={fireTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

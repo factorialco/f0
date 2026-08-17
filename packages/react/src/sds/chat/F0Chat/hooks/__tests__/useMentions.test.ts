@@ -78,6 +78,35 @@ describe("useMentions", () => {
     })
   })
 
+  it("keeps an empty DM trigger searchable after no initial results", async () => {
+    const searchMembers = vi.fn((query: string) =>
+      Promise.resolve(query === "Ana" ? [MEMBERS[0]!] : [])
+    )
+    const props = makeProps({
+      everyoneLabel: undefined,
+      searchMembers,
+    })
+    const { result, rerender } = renderHook(
+      (nextProps: Props) => useMentions(nextProps),
+      {
+        initialProps: props,
+      }
+    )
+
+    rerender({ ...props, inputValue: "@", cursorPosition: 1 })
+    await waitFor(() => expect(searchMembers).toHaveBeenCalledWith(""))
+    expect(result.current.isOpen).toBe(true)
+
+    rerender({ ...props, inputValue: "@Ana", cursorPosition: 4 })
+    await waitFor(() => expect(searchMembers).toHaveBeenCalledWith("Ana"))
+    await waitFor(() =>
+      expect(result.current.results[0]).toMatchObject({
+        kind: "user",
+        user: { id: "ana-g" },
+      })
+    )
+  })
+
   it("reports everyone + selected members in getMentions()", async () => {
     let value = ""
     let cursor = 0

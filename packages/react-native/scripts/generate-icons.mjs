@@ -3,14 +3,14 @@
 /**
  * Regenerates the React Native icon components from the package's own SVG source.
  *
- * Source of truth: packages/react-native/assets/icons/{app,modules}
- * Output:          packages/react-native/src/icons/{app,modules}
+ * Source of truth: packages/react-native/assets/icons/{ai,app,modules}
+ * Output:          packages/react-native/src/icons/{ai,app,modules}
  *
  * The icon source lives INSIDE this package — React Native is independent from
  * @factorialco/f0-core and no longer pulls icons from it.
  *
  * Usage:
- *   pnpm generate-icons          Regenerate src/icons/{app,modules} from the SVG source.
+ *   pnpm generate-icons          Regenerate src/icons/{ai,app,modules} from the SVG source.
  *   pnpm generate-icons --check  Verify the committed output is in sync (used in CI). Exits 1 on drift.
  *
  * The SVG -> component transform is delegated to @svgr/cli with the exact same
@@ -45,7 +45,7 @@ const PKG_DIR = resolve(SCRIPT_DIR, "..")
 const REPO_ROOT = resolve(PKG_DIR, "..", "..")
 const SVG_SOURCE = resolve(PKG_DIR, "assets/icons")
 const OUT_ROOT = resolve(PKG_DIR, "src/icons")
-const GROUPS = ["app", "modules"]
+const GROUPS = ["ai", "app", "modules"]
 
 const CHECK = process.argv.includes("--check")
 const PRUNE = process.argv.includes("--prune")

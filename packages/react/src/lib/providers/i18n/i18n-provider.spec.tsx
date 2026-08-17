@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { aiTranslations } from "@/sds/ai/F0AiChat"
+import { aiTranslations } from "@/kits/ai/F0AiChat"
 
 import { I18nProvider, TranslationsType, useI18n } from "./i18n-provider"
 import { defaultTranslations } from "./i18n-provider-defaults"
@@ -54,6 +54,79 @@ describe("I18nProvider", () => {
     )
 
     expect(screen.getByTestId("translation")).toHaveTextContent("Desar")
+  })
+
+  // A dictionary written against an older f0 does not know keys added since.
+  // Components read many of them by property access, so the gaps have to close
+  // with English rather than surface as `undefined` (or throw on a subtree).
+  it("fills keys the consumer's dictionary is missing with the defaults", () => {
+    const stale = {
+      ...defaultTranslations,
+      actions: { ...defaultTranslations.actions, save: "Desar" },
+      dataChart: {
+        ...defaultTranslations.dataChart,
+        // An older dictionary predates the whole tooltip subtree.
+        tooltip: undefined,
+      },
+    } as unknown as TranslationsType
+
+    function ReadsNewKeys() {
+      const i18n = useI18n()
+      return (
+        <>
+          <div data-testid="overridden">{i18n.actions.save}</div>
+          <div data-testid="missing-subtree">
+            {i18n.dataChart.tooltip.ofTotal}
+          </div>
+          <div data-testid="via-t">
+            {i18n.t("dataChart.tooltip.fromStage", { stage: "Applied" })}
+          </div>
+        </>
+      )
+    }
+
+    render(
+      <I18nProvider translations={stale}>
+        <ReadsNewKeys />
+      </I18nProvider>
+    )
+
+    expect(screen.getByTestId("overridden")).toHaveTextContent("Desar")
+    expect(screen.getByTestId("missing-subtree")).toHaveTextContent(
+      defaultTranslations.dataChart.tooltip.ofTotal
+    )
+    expect(screen.getByTestId("via-t")).toHaveTextContent("from Applied")
+  })
+
+  it("keeps a partially translated subtree and defaults only its gaps", () => {
+    const partial = {
+      ...defaultTranslations,
+      dataChart: {
+        ...defaultTranslations.dataChart,
+        tooltip: { ofTotal: "del total" },
+      },
+    } as unknown as TranslationsType
+
+    function ReadsTooltipKeys() {
+      const i18n = useI18n()
+      return (
+        <>
+          <div data-testid="translated">{i18n.dataChart.tooltip.ofTotal}</div>
+          <div data-testid="defaulted">{i18n.dataChart.tooltip.target}</div>
+        </>
+      )
+    }
+
+    render(
+      <I18nProvider translations={partial}>
+        <ReadsTooltipKeys />
+      </I18nProvider>
+    )
+
+    expect(screen.getByTestId("translated")).toHaveTextContent("del total")
+    expect(screen.getByTestId("defaulted")).toHaveTextContent(
+      defaultTranslations.dataChart.tooltip.target
+    )
   })
 
   it("falls back to default translations when used outside a provider", () => {

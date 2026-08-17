@@ -21,14 +21,29 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import type {
+  F0GraphHandle,
+  F0GraphNodeRenderContext,
+  F0GraphProps,
+} from "../../F0Graph"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+} from "../../types"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
+
 import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,
   FIT_VIEW_PADDING_LOOSE,
+  FIT_VIEW_PADDING_TIGHT,
   FOCUS_SETTLE_DELAY_MS,
   INITIAL_FOCUS_MAX_ZOOM,
   LARGE_GRAPH_SNAP_THRESHOLD,
   NODE_CLICK_DISTANCE_SQ,
+  NODE_CLICK_ZOOM,
 } from "../../constants"
 import {
   F0GraphActionsContext,
@@ -39,18 +54,13 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
-import type {
-  F0GraphHandle,
-  F0GraphNodeRenderContext,
-  F0GraphProps,
-} from "../../F0Graph"
+import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
 import { useGraphRenderModel } from "../../hooks/useGraphRenderModel"
 import { useGraphViewport } from "../../hooks/useGraphViewport"
-import { useSelectionFocus } from "../../hooks/useSelectionFocus"
-import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useLazyTree } from "../../hooks/useLazyTree"
+import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
 import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
 import { ClickSpark } from "../../internal/ClickSpark"
@@ -59,17 +69,10 @@ import {
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
 } from "../../internal/ReactFlowAdapters"
-import type {
-  GraphEdge,
-  GraphNode,
-  LayoutDirection,
-  PositionedNode,
-} from "../../types"
 import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
-import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {
@@ -161,10 +164,14 @@ export function F0GraphView<T = unknown>(
     onPaneClick: onPaneClickProp,
     focusedNode,
     initialFocusNodeId,
+    centerOnNodeClick = true,
+    nodeClickZoom,
+    viewportInset,
     highlightedNodes: highlightedProp,
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
     canvasActions,
+    canvasFooterActions,
     showControls = false,
     onZoomLevelChange,
     onViewportChange,
@@ -313,7 +320,6 @@ export function F0GraphView<T = unknown>(
 
   // ── Viewport zoom + control handlers ──
   const {
-    currentZoom,
     zoomLevel,
     viewportReady,
     handleViewportChange,
@@ -322,6 +328,8 @@ export function F0GraphView<T = unknown>(
     handleFitView,
     handleFocusUser,
     centerOnNode,
+    getFitPadding,
+    hasViewportInset,
   } = useGraphViewport({
     defaultZoom,
     zoomPreset,
@@ -332,7 +340,19 @@ export function F0GraphView<T = unknown>(
     nodeWindowingActive: enableNodeWindowing ?? false,
     getContentBounds,
     getNodePosition: getNodePositionStable,
+    viewportInset,
   })
+
+  // Windowing only actually drives the render once the first viewport has settled
+  // (before then the mount-time fit needs every node — see the gate on the render
+  // model below). Computed once and reused for BOTH the render model AND React
+  // Flow's own `onlyRenderVisibleElements`: when F0 is windowing it already hands
+  // React Flow just the nodes near the viewport (grown by `nodeWindowPadding`), so
+  // React Flow must render ALL of them. Letting React Flow run its own viewport
+  // culling on top re-drops that padding band — nodes pop in at the viewport edge,
+  // and edges whose (windowed-in) endpoint sits just outside the exact viewport are
+  // dropped entirely, so connecting lines vanish while panning a large/deep tree.
+  const nodeWindowingActive = (enableNodeWindowing ?? false) && viewportReady
 
   // ── Selection + roving-tabindex focus ──
   const {
@@ -380,7 +400,6 @@ export function F0GraphView<T = unknown>(
     rfNodes,
     rfEdges,
     reservedTagHeight,
-    tagsAffectLayout,
     renderedNodeCount,
     renderedNodeIds,
     contentBounds,
@@ -405,7 +424,7 @@ export function F0GraphView<T = unknown>(
     hoveredEdgeId,
     // Gate windowing on the first settled viewport so the mount-time `fitView`
     // frames the whole graph before the camera decides which nodes to keep.
-    enableNodeWindowing: (enableNodeWindowing ?? false) && viewportReady,
+    enableNodeWindowing: nodeWindowingActive,
     nodeWindowPadding,
   })
 
@@ -493,7 +512,21 @@ export function F0GraphView<T = unknown>(
   useEffect(() => {
     if (didInitialFitRef.current || renderedNodeIds.length === 0) return
     didInitialFitRef.current = true
-    reactFlow.fitView(initialFitViewOptions)
+    // Honor the inset on the first frame too, so an already-open panel never
+    // opens the graph with the focus target behind it. When there's no inset the
+    // options are passed through untouched (identical to before).
+    reactFlow.fitView(
+      hasViewportInset
+        ? {
+            ...initialFitViewOptions,
+            // Base matches React Flow's own default fitView padding (0.1), so
+            // with no inset this stays byte-identical to the untouched call.
+            padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
+          }
+        : initialFitViewOptions
+    )
+    // Guarded by `didInitialFitRef` so it runs once; `hasViewportInset` /
+    // `getFitPadding` are read fresh at that point and intentionally omitted.
   }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
 
   // ── Fly to the consumer-controlled focused node ──
@@ -520,10 +553,74 @@ export function F0GraphView<T = unknown>(
     reactFlow.fitView({
       nodes: framed ?? [{ id }],
       duration: 300,
-      padding: FIT_VIEW_PADDING_LOOSE,
+      padding: getFitPadding(FIT_VIEW_PADDING_LOOSE),
       maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom),
     })
   }
+
+  // ── Fly to a clicked node ──
+  // Unlike `flyToFocusedRef` (which frames the node with its children at a capped
+  // zoom for context), a click is a deliberate "take me here", so it centers on
+  // the node alone and lands closer (`nodeClickZoom` / `NODE_CLICK_ZOOM`, clamped
+  // to `maxZoom`) regardless of the current zoom. Read via a ref so `handleNodeClick`
+  // stays stable and always sees the latest props. `centerOnNode` uses the node's
+  // layout position, so it works even for a node windowed out of the store and
+  // applies the `viewportInset` offset; the id-based fit is an unreachable
+  // fallback (a just-clicked node always has a position).
+  const flyToNodeClickRef = useRef<(id: string) => void>(() => {})
+  flyToNodeClickRef.current = (id: string) => {
+    const zoom = Math.min(nodeClickZoom ?? NODE_CLICK_ZOOM, maxZoom)
+    if (centerOnNode(id, 300, zoom)) return
+    reactFlow.fitView({
+      nodes: [{ id }],
+      duration: 300,
+      padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
+      maxZoom: zoom,
+    })
+  }
+
+  // Click handler shared by both selection paths: select the node, then (unless
+  // opted out) fly to it. Kept out of `selectNode` itself so keyboard navigation
+  // — which also calls `selectNode` — never moves the camera.
+  //
+  // The fly is deferred by the same settle delay the `focusedNode` path uses,
+  // because the consumer's side panel usually opens *as a result of* this click:
+  // its `viewportInset` only reaches us on a later render, so flying synchronously
+  // would read an empty inset and center on the full canvas — the very case the
+  // inset exists for — and the panel would then open over the node.
+  const nodeClickFlyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  useEffect(
+    () => () => {
+      if (nodeClickFlyTimerRef.current) {
+        clearTimeout(nodeClickFlyTimerRef.current)
+      }
+    },
+    []
+  )
+
+  const handleNodeClick = useCallback(
+    (id: string) => {
+      selectNode(id)
+      // Fly only for real data nodes. The canvas pointer-up also fires for the
+      // expander/collapser pseudo-nodes (their `.react-flow__node` wrappers carry
+      // `expander-`/`collapser-` ids, absent from `nodeMap`); flying to one would
+      // chase the toggle's position as it shifts on expand/collapse. Gating on
+      // `nodeMap` leaves the toggle itself untouched.
+      if (!centerOnNodeClick || !nodeMap.has(id)) return
+      // A second click supersedes a still-pending fly rather than queueing both.
+      if (nodeClickFlyTimerRef.current) {
+        clearTimeout(nodeClickFlyTimerRef.current)
+      }
+      nodeClickFlyTimerRef.current = setTimeout(
+        () => flyToNodeClickRef.current(id),
+        FOCUS_SETTLE_DELAY_MS
+      )
+    },
+    [selectNode, centerOnNodeClick, nodeMap]
+  )
+
   useEffect(() => {
     if (!focusedNode) return
     // Fires only when `focusedNode` transitions to a new value (entry,
@@ -554,9 +651,11 @@ export function F0GraphView<T = unknown>(
   )
 
   // ── Split context values (wrappers subscribe to only what they need) ──
+  // `currentZoom` is intentionally NOT published: it changes on every zoom frame
+  // and would invalidate this context — and with it every node wrapper — 60×/s.
   const zoomContextValue = useMemo(
-    () => ({ zoomLevel, currentZoom, direction }),
-    [zoomLevel, currentZoom, direction]
+    () => ({ zoomLevel, direction }),
+    [zoomLevel, direction]
   )
 
   const expandContextValue = useMemo(() => ({ expandedNodes }), [expandedNodes])
@@ -576,6 +675,12 @@ export function F0GraphView<T = unknown>(
     deferredNodes !== undefined &&
     deferredMerge.deferredStatus === "loading"
 
+  // Depend on the derived flag, not the raw count: every node wrapper consumes
+  // this context, so keying it on `visibleTreeNodes.length` re-rendered all of
+  // them on every expansion (measured during a search-and-reveal navigation)
+  // even though only the threshold crossing changes what anything renders.
+  const isLargeGraph = visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD
+
   const renderConfigContextValue = useMemo(
     () => ({
       renderEdge,
@@ -584,7 +689,7 @@ export function F0GraphView<T = unknown>(
       deferredLoading: isDeferredLoading || undefined,
       dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
-      largeGraph: visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD,
+      largeGraph: isLargeGraph,
     }),
     [
       renderEdge,
@@ -592,8 +697,7 @@ export function F0GraphView<T = unknown>(
       visibleTagTypesSet,
       isDeferredLoading,
       loadVisibleNodeData,
-      visibleTreeNodes.length,
-      tagsAffectLayout,
+      isLargeGraph,
       reservedTagHeight,
     ]
   )
@@ -647,11 +751,20 @@ export function F0GraphView<T = unknown>(
                         const dy = e.clientY - start.y
                         if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
                         const target = e.target as HTMLElement | null
+                        // Opt-out affordances inside a node (e.g. the tag row)
+                        // are marked `data-no-node-select`: a pointerup on one
+                        // must not select the node. Checked before the node
+                        // lookup because this fires regardless of any inner
+                        // `onClick` stopPropagation.
+                        if (target?.closest("[data-no-node-select]")) return
                         const nodeEl =
                           target?.closest<HTMLElement>(".react-flow__node")
                         if (!nodeEl) return
                         const id = nodeEl.getAttribute("data-id")
-                        if (id) selectNode(id)
+                        // select + fly-to (the fly is opt-out via
+                        // `centerOnNodeClick`). This is the click-only path;
+                        // keyboard selection goes through `selectNode` directly.
+                        if (id) handleNodeClick(id)
                       }}
                       className="h-full w-full"
                     >
@@ -660,7 +773,14 @@ export function F0GraphView<T = unknown>(
                         edges={rfEdges}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
-                        onlyRenderVisibleElements
+                        // With F0 node windowing active, F0 already limits the
+                        // node array to the padded viewport, so React Flow must
+                        // render everything it is handed — a second, tighter
+                        // viewport cull here would drop the padding band and the
+                        // edges crossing the viewport edge (vanishing nodes/lines
+                        // on pan). Keep React Flow's own culling only when F0 is
+                        // NOT windowing (the original large-graph safeguard).
+                        onlyRenderVisibleElements={!nodeWindowingActive}
                         minZoom={minZoom}
                         maxZoom={maxZoom}
                         defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
@@ -715,6 +835,15 @@ export function F0GraphView<T = unknown>(
                         data-no-spark
                       >
                         {canvasActions}
+                      </div>
+                    )}
+
+                    {canvasFooterActions && (
+                      <div
+                        className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2"
+                        data-no-spark
+                      >
+                        {canvasFooterActions}
                       </div>
                     )}
 

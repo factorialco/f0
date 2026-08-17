@@ -7,7 +7,7 @@ import { PageHeader } from "../index"
 
 // The real switch renders null unless the AI toggle context is enabled, so we
 // stub it to a stable marker and assert only PageHeader's show/hide decision.
-vi.mock("@/sds/ai/F0OneSwitch", () => ({
+vi.mock("@/kits/ai/F0OneSwitch", () => ({
   F0OneSwitch: () => <div data-testid="one-switch" />,
 }))
 

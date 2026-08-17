@@ -41,14 +41,8 @@ const SettingsAnimated = React.forwardRef<SVGSVGElement, SettingsProps>(
           animate={animate}
           initial="normal"
           transition={cogTransition}
-          vectorEffect="non-scaling-stroke"
         />
-        <circle
-          cx="11.9995"
-          cy="12"
-          r="2.5"
-          vectorEffect="non-scaling-stroke"
-        />
+        <circle cx="11.9995" cy="12" r="2.5" />
       </svg>
     )
   }

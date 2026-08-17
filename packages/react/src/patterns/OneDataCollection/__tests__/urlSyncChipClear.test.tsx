@@ -55,9 +55,11 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
       expect(window.location.search).toContain("dc_salary=1000..5000")
     })
 
-    // Clear the *first* chip (department).
-    const closeButtons = await screen.findAllByRole("button", { name: "Close" })
-    await userEvent.click(closeButtons[0])
+    const close = await screen.findByRole("button", {
+      name: "Close",
+      description: "Department: Engineering",
+    })
+    await userEvent.click(close)
 
     await waitFor(() => {
       expect(window.location.search).not.toContain("dc_department")

@@ -11,33 +11,10 @@ const SvgBarGraph = (
     ref={ref}
     {...props}
   >
-    <rect
-      width={16}
-      height={12}
-      x={4}
-      y={6}
-      stroke="currentColor"
-      rx={3}
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M8 13L8 15"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M12 9L12 15"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M16 11L16 15"
-      vectorEffect="non-scaling-stroke"
-    />
+    <rect width={16} height={12} x={4} y={6} stroke="currentColor" rx={3} />
+    <path stroke="currentColor" strokeLinecap="round" d="M8 13L8 15" />
+    <path stroke="currentColor" strokeLinecap="round" d="M12 9L12 15" />
+    <path stroke="currentColor" strokeLinecap="round" d="M16 11L16 15" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgBarGraph)

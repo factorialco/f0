@@ -21,6 +21,8 @@ export type ButtonInternalProps = Pick<
   | "fontSize"
 > &
   DataAttributes & {
+    /** Native button behavior. */
+    type?: ButtonType
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
@@ -30,6 +32,14 @@ export type ButtonInternalProps = Pick<
      * expandable region (e.g. a tree/graph expander).
      */
     "aria-expanded"?: boolean
+    /**
+     * Identifies the expandable region controlled by the button.
+     */
+    "aria-controls"?: string
+    /**
+     * Describes the type of popup opened by the button.
+     */
+    "aria-haspopup"?: React.AriaAttributes["aria-haspopup"]
     /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).

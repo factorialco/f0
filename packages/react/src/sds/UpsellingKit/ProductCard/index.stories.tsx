@@ -5,7 +5,7 @@ import { ComponentProps } from "react"
 import { ProductCard } from "./index"
 
 const meta: Meta<typeof ProductCard> = {
-  title: "UpsellingKit/ProductCard",
+  title: "ProductCard",
   component: ProductCard,
   tags: ["autodocs", "no-sidebar"],
   parameters: {

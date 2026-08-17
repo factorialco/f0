@@ -56,7 +56,53 @@ export const defaultTranslations = {
     position: "{{current}} of {{total}}",
     viewDetail: "View detail",
     hideDetail: "Hide detail",
+    viewTranscription: "View transcription",
+    hideTranscription: "Hide transcription",
+    viewSummary: "View summary",
+    hideSummary: "Hide summary",
     details: "Recording details",
+    summary: "Summary",
+    transcription: "Transcription",
+    language: "Language",
+    audio: "Audio",
+  },
+  meetingCard: {
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    inProgress: "In progress",
+    inProgressTitle: "Call in progress",
+    summarizing: "Summarizing",
+    finished: "Finished",
+    cancelled: "Cancelled",
+    startingNow: "Starting now",
+    startsIn: {
+      one: "In {{count}} min",
+      other: "In {{count}} mins",
+    },
+    startedAgo: {
+      one: "{{count}} min ago",
+      other: "{{count}} mins ago",
+    },
+    invited: {
+      one: "{{count}} guest",
+      other: "{{count}} guests",
+    },
+    inside: {
+      one: "{{count}} inside",
+      other: "{{count}} inside",
+    },
+    duration: {
+      one: "{{count}} min",
+      other: "{{count}} mins",
+    },
+    attendees: "Attendees",
+    join: "Join",
+    summary: "Summary",
+  },
+  coachmark: {
+    next: "Next",
+    done: "Got it",
   },
   actions: {
     add: "Add",
@@ -487,6 +533,7 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
@@ -498,8 +545,10 @@ export const defaultTranslations = {
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
-    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    removeNamedFile: "Remove {{name}}",
+    // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
     fileUploadError: "Upload failed",
     micPermissionDenied:
       "Microphone access is blocked. Allow it in your browser settings to dictate.",
@@ -545,6 +594,7 @@ export const defaultTranslations = {
     reply: "Reply",
     react: "Add reaction",
     download: "Download",
+    downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
     // Editing your own message (within the edit window). `editing` heads the
     // composer chip; `edited` is the muted marker after an edited message body.
@@ -562,7 +612,10 @@ export const defaultTranslations = {
     previousImage: "Previous image",
     nextImage: "Next image",
     openDocument: "Open document",
+    openNamedDocument: "Open {{name}}",
     documentPreview: "Document preview",
+    videoPlayerLabel: "Video player: {{name}}",
+    loadingVideo: "Loading video: {{name}}",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
@@ -607,6 +660,14 @@ export const defaultTranslations = {
       one: "{{count}} unread",
       other: "{{count}} unread",
     },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above",
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below",
+    },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
@@ -624,6 +685,19 @@ export const defaultTranslations = {
       title: "No data available",
       description: "Try a different date or fewer filters",
     },
+    windowedCategories: "Showing {{count}} of {{total}} categories",
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}",
+    },
+  },
+  progressSeries: {
+    noData: "No data",
+    canceled: "Canceled",
   },
   select: {
     noResults: "No results found",
@@ -637,6 +711,12 @@ export const defaultTranslations = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
+  },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found",
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -857,6 +937,9 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+      phone: {
+        invalid: "Enter a valid phone number",
+      },
     },
   },
   graph: {
@@ -870,11 +953,45 @@ export const defaultTranslations = {
       navigation: "Graph navigation",
     },
   },
+  map: {
+    region: "Map",
+    navigation: "Map navigation",
+    listLabel: "Locations",
+    location: "location",
+    locations: "locations",
+    unnamedLocation: "Location",
+    cluster: "Cluster of {{count}} locations",
+    skipToList: "Skip to location list",
+    loadError: "Couldn't load the map.",
+    retry: "Retry",
+    currentLocation: "Your location",
+    controls: {
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fit: "Fit to markers",
+      locate: "My location",
+    },
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {
     toolbar: "Document toolbar",
@@ -894,6 +1011,29 @@ export const defaultTranslations = {
       one: "Showing the first row",
       other: "Showing the first {{count}} rows",
     },
+  },
+  videoPlayer: {
+    regionLabel: "Video player",
+    play: "Play",
+    pause: "Pause",
+    playing: "Playing",
+    paused: "Paused",
+    mute: "Mute",
+    unmute: "Unmute",
+    noAudio: "No audio",
+    volume: "Volume",
+    seekLabel: "Seek",
+    enterFullscreen: "Enter fullscreen",
+    exitFullscreen: "Exit fullscreen",
+    playbackSpeed: "Playback speed ({{rate}})",
+    playbackSpeedLabel: "Playback speed",
+    timeProgress: "{{current}} of {{total}}",
+    captions: "Captions",
+    audioDescription: "Audio description",
+    audio: "Audio",
+    subtitles: "Subtitles",
+    settings: "Settings",
+    off: "Off",
   },
 } as const
 

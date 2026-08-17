@@ -43,16 +43,19 @@ function DefaultDialogScenario() {
   const [open, setOpen] = useState(false)
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    filters: resourceFilters,
-    primaryActions: () => ({
-      label: "Create resource",
-      icon: Add,
-      onClick: () => setOpen(true),
-    }),
-    secondaryActions: defaultCrudSecondaryActions(),
-  })
+  const source = useDataCollectionSource(
+    {
+      dataAdapter: createResourceDataAdapter(resources),
+      filters: resourceFilters,
+      primaryActions: () => ({
+        label: "Create resource",
+        icon: Add,
+        onClick: () => setOpen(true),
+      }),
+      secondaryActions: defaultCrudSecondaryActions(),
+    },
+    [resources]
+  )
 
   return (
     <CrudPatternLayout>
@@ -106,16 +109,19 @@ function RightDialogScenario() {
   const [open, setOpen] = useState(false)
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    filters: resourceFilters,
-    primaryActions: () => ({
-      label: "Create resource",
-      icon: Add,
-      onClick: () => setOpen(true),
-    }),
-    secondaryActions: defaultCrudSecondaryActions(),
-  })
+  const source = useDataCollectionSource(
+    {
+      dataAdapter: createResourceDataAdapter(resources),
+      filters: resourceFilters,
+      primaryActions: () => ({
+        label: "Create resource",
+        icon: Add,
+        onClick: () => setOpen(true),
+      }),
+      secondaryActions: defaultCrudSecondaryActions(),
+    },
+    [resources]
+  )
 
   return (
     <CrudPatternLayout>
@@ -217,17 +223,20 @@ function WizardDialogScenario() {
 function KanbanLaneCreateScenario() {
   const [resources, setResources] = useState(initialResources)
 
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    filters: resourceFilters,
-    lanes: kanbanSourceLanes,
-    primaryActions: () => ({
-      label: "Create resource",
-      icon: Add,
-      onClick: () => {},
-    }),
-    secondaryActions: defaultCrudSecondaryActions(),
-  })
+  const source = useDataCollectionSource(
+    {
+      dataAdapter: createResourceDataAdapter(resources),
+      filters: resourceFilters,
+      lanes: kanbanSourceLanes,
+      primaryActions: () => ({
+        label: "Create resource",
+        icon: Add,
+        onClick: () => {},
+      }),
+      secondaryActions: defaultCrudSecondaryActions(),
+    },
+    [resources]
+  )
 
   return (
     <CrudPatternLayout>
@@ -262,11 +271,14 @@ function KanbanLaneCreateScenario() {
 function EditableTableAddRowScenario() {
   const [resources, setResources] = useState(initialResources)
 
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    filters: resourceFilters,
-    secondaryActions: defaultCrudSecondaryActions(),
-  })
+  const source = useDataCollectionSource(
+    {
+      dataAdapter: createResourceDataAdapter(resources),
+      filters: resourceFilters,
+      secondaryActions: defaultCrudSecondaryActions(),
+    },
+    [resources]
+  )
 
   return (
     <CrudPatternLayout>
@@ -323,16 +335,19 @@ function ListCreateDialogScenario() {
   const [open, setOpen] = useState(false)
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    filters: resourceFilters,
-    primaryActions: () => ({
-      label: "Create resource",
-      icon: Add,
-      onClick: () => setOpen(true),
-    }),
-    secondaryActions: defaultCrudSecondaryActions(),
-  })
+  const source = useDataCollectionSource(
+    {
+      dataAdapter: createResourceDataAdapter(resources),
+      filters: resourceFilters,
+      primaryActions: () => ({
+        label: "Create resource",
+        icon: Add,
+        onClick: () => setOpen(true),
+      }),
+      secondaryActions: defaultCrudSecondaryActions(),
+    },
+    [resources]
+  )
 
   return (
     <CrudPatternLayout>
@@ -382,16 +397,19 @@ function ListCreateRightDialogScenario() {
   const [open, setOpen] = useState(false)
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    filters: resourceFilters,
-    primaryActions: () => ({
-      label: "Create resource",
-      icon: Add,
-      onClick: () => setOpen(true),
-    }),
-    secondaryActions: defaultCrudSecondaryActions(),
-  })
+  const source = useDataCollectionSource(
+    {
+      dataAdapter: createResourceDataAdapter(resources),
+      filters: resourceFilters,
+      primaryActions: () => ({
+        label: "Create resource",
+        icon: Add,
+        onClick: () => setOpen(true),
+      }),
+      secondaryActions: defaultCrudSecondaryActions(),
+    },
+    [resources]
+  )
 
   return (
     <CrudPatternLayout>

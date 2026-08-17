@@ -189,6 +189,13 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    */
   hideSubmitButton?: boolean
   /**
+   * When true, the submit button is only visible once the form has unsaved changes.
+   * It goes back to hidden after a successful submit.
+   * Ignored when `hideSubmitButton` is true.
+   * @default false
+   */
+  showSubmitWhenDirty?: boolean
+  /**
    * When true, hides the internal action bar (loading/success feedback).
    * Useful when the parent component provides its own action bar.
    * @default false
@@ -248,7 +255,9 @@ export type F0FormSubmitConfig =
  */
 export interface F0FormStylingConfig {
   /**
-   * Shows a sidebar with section navigation (Table of Contents)
+   * Shows a sidebar with section navigation (Table of Contents).
+   * Automatically hidden on small viewports (max-width 560px), where
+   * sections stack as in the regular layout.
    * @default false
    */
   showSectionsSidepanel?: boolean
@@ -257,6 +266,23 @@ export interface F0FormStylingConfig {
    * @default false
    */
   noPadding?: boolean
+}
+
+/**
+ * Styling configuration for per-section schema forms.
+ * Extends the base config with options that only apply when each section
+ * has its own independent schema and submit button.
+ */
+export interface F0FormPerSectionStylingConfig extends F0FormStylingConfig {
+  /**
+   * Renders only the section selected in the sidepanel instead of stacking
+   * all sections. Useful for large forms where showing every section at once
+   * is overwhelming. Hidden sections stay mounted so their values, dirty
+   * state, and validation are preserved.
+   * Has no effect unless `showSectionsSidepanel` is true.
+   * @default false
+   */
+  showOnlySelectedSection?: boolean
 }
 
 /**
@@ -508,7 +534,7 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   /**
    * Styling configuration for form layout and appearance.
    */
-  styling?: F0FormStylingConfig
+  styling?: F0FormPerSectionStylingConfig
   /**
    * Ref to control the form programmatically from outside.
    */
@@ -573,7 +599,7 @@ export interface F0FormPropsWithPerSectionDefinition<
 > {
   formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<T>
   className?: string
-  styling?: F0FormStylingConfig
+  styling?: F0FormPerSectionStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
   /** Upload hook shared by all file fields in the form. */

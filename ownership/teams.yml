@@ -1,0 +1,51 @@
+# Teams that can be used as `owner` or reviewer in a module's package.yml.
+# They must exist in the GitHub org (https://github.com/orgs/factorialco/teams)
+# and have at least write access to this repository to act as code owners.
+teams:
+  - "@factorialco/f0"
+  - "@factorialco/f0-devs"
+  - "@factorialco/f0-designers"
+  - "@factorialco/f0-general"
+  - "@factorialco/mobile"
+  - "@factorialco/foundations"
+  - "@factorialco/organizations"
+  - "@factorialco/time-tracking"
+  - "@factorialco/growth-product"
+  - "@factorialco/platform-ai-building-blocks"
+  - "@factorialco/talent-engagement"
+  - "@factorialco/talent-spaces"
+
+# Members of the teams used by the PR review policy (review-policy.ts).
+# The default Actions token cannot read org team membership, so we mirror it
+# here (same pattern as ownership/teams/*.yml in factorialco/factorial).
+# Keep in sync with https://github.com/orgs/factorialco/teams
+policy_teams:
+  f0-devs:
+    members:
+      - albertpmz
+      - arnaub
+      - developerdanx
+      - eliseo-juan
+      - fleveque
+      - rubenmoya
+      - sauldom102
+      - siguenzaraul
+  f0-designers:
+    members:
+      - desiree-np
+      - oskar-hernandez
+      - warcos-fact
+  f0-general:
+    members:
+      - albertpmz
+      - arnaub
+      - daniellorente20-factorial
+      - desiree-np
+      - developerdanx
+      - eliseo-juan
+      - fleveque
+      - oskar-hernandez
+      - rubenmoya
+      - sauldom102
+      - siguenzaraul
+      - warcos-fact

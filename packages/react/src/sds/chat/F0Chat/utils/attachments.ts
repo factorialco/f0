@@ -1,6 +1,40 @@
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
 
-import { type F0ChatFileAttachment } from "../types"
+import {
+  type F0ChatAttachment,
+  type F0ChatFileAttachment,
+  type F0ChatImageAttachment,
+  type F0ChatLocationAttachment,
+  type F0ChatVoiceAttachment,
+} from "../types"
+
+const VIDEO_EXTENSIONS = new Set(["m4v", "mov", "mp4", "ogv", "webm"])
+
+/** Compact binary size used in composer validation messages. */
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) {
+    const kilobytes = bytes / 1024
+    return `${Number.isInteger(kilobytes) ? kilobytes : kilobytes.toFixed(1)} KB`
+  }
+  if (bytes < 1024 * 1024 * 1024) {
+    const megabytes = bytes / (1024 * 1024)
+    return `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)} MB`
+  }
+  const gigabytes = bytes / (1024 * 1024 * 1024)
+  return `${Number.isInteger(gigabytes) ? gigabytes : gigabytes.toFixed(1)} GB`
+}
+
+/** Whether a generic file attachment can render in the native F0 video player. */
+export const isVideoFileAttachment = (file: F0ChatFileAttachment): boolean => {
+  if (file.mimeType?.toLowerCase().startsWith("video/")) return true
+
+  return [file.name, file.url].some((candidate) => {
+    const cleanCandidate = candidate.split(/[?#]/, 1)[0] ?? ""
+    const extension = cleanCandidate.split(".").at(-1)?.toLowerCase()
+    return extension !== undefined && VIDEO_EXTENSIONS.has(extension)
+  })
+}
 
 /**
  * Document families with an in-chat preview (Slack-style snapshot card + the
@@ -68,3 +102,59 @@ export const withinPreviewSizeLimit = (
   file: F0ChatFileAttachment,
   kind: ChatDocumentKind
 ): boolean => (file.size ?? 0) <= PREVIEW_MAX_BYTES[kind]
+
+export type PartitionedChatAttachments = {
+  images: F0ChatImageAttachment[]
+  videos: F0ChatFileAttachment[]
+  documents: { file: F0ChatFileAttachment; kind: ChatDocumentKind }[]
+  files: F0ChatFileAttachment[]
+  locations: F0ChatLocationAttachment[]
+  voices: F0ChatVoiceAttachment[]
+}
+
+/** Classifies each attachment exactly once for the transcript renderer. */
+export const partitionChatAttachments = (
+  attachments: F0ChatAttachment[]
+): PartitionedChatAttachments => {
+  const result: PartitionedChatAttachments = {
+    images: [],
+    videos: [],
+    documents: [],
+    files: [],
+    locations: [],
+    voices: [],
+  }
+
+  for (const attachment of attachments) {
+    if (attachment.kind === "image") {
+      result.images.push(attachment)
+      continue
+    }
+    if (attachment.kind === "location") {
+      result.locations.push(attachment)
+      continue
+    }
+    if (attachment.kind === "voice") {
+      result.voices.push(attachment)
+      continue
+    }
+
+    if (
+      attachment.progress === undefined &&
+      isVideoFileAttachment(attachment)
+    ) {
+      result.videos.push(attachment)
+      continue
+    }
+
+    const kind =
+      attachment.progress === undefined ? documentPreviewKind(attachment) : null
+    if (kind && withinPreviewSizeLimit(attachment, kind)) {
+      result.documents.push({ file: attachment, kind })
+    } else {
+      result.files.push(attachment)
+    }
+  }
+
+  return result
+}

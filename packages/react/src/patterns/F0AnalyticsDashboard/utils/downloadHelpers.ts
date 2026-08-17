@@ -107,16 +107,19 @@ export function downloadMultiSheetExcel(
     name: string
     columns: string[]
     rows: Record<string, unknown>[]
+    /** Row-lookup keys parallel to `columns`; see {@link downloadAsExcel}. */
+    keys?: string[]
   }[],
   filename: string
 ): void {
   const workbook = XLSX.utils.book_new()
 
   for (const sheet of sheets) {
+    const rowKeys = sheet.keys ?? sheet.columns
     const wsData = [
       sheet.columns,
       ...sheet.rows.map((row) =>
-        sheet.columns.map((col) => serializeValue(row[col]))
+        rowKeys.map((key) => serializeValue(row[key]))
       ),
     ]
     const worksheet = XLSX.utils.aoa_to_sheet(wsData)

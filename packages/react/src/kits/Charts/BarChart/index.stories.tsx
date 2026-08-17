@@ -5,7 +5,7 @@ import { BarChart } from "./index"
 const meta: Meta = {
   title: "Charts/BarChart",
   component: BarChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="w-100 h-52">

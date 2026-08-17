@@ -7,38 +7,47 @@ import * as ChipStories from "./index.stories"
 
 A chip typically represents user-supplied information.
 
-```tsx
-import { OneChip } from "@factorialco/f0/dist/experimental"
-```
-
 ## Anatomy
 
 <Canvas of={ChipStories.Default} />
 <Controls of={ChipStories.Default} />
 
-## Examples
+## Guidelines
 
-### Removable
+### Usage examples
+
+#### Removable
 
 Chips can optionally be made removable by setting the `onClose` prop.
 
 <Canvas of={ChipStories.WithClose} />
 
-### With avatars
+When a chip is both clickable and removable, its primary and removal actions
+remain separate.
+
+<Canvas of={ChipStories.ClickableAndRemovable} />
+
+#### With avatars
 
 Chips can optionally display an avatar by setting the `avatar` prop.
 
 <Canvas of={ChipStories.WithAvatar} />
 
-### With deactivated avatar and label
+#### With deactivated avatar and label
 
 Chips can optionally display a deactivated avatar and label by setting the
 `deactivated` prop.
 
 <Canvas of={ChipStories.WithDeactivatedAvatarAndLabel} />
 
-### With an icon
+#### With an icon
 
 Chips can optionally display an icon by setting the `icon` prop.
 
 <Canvas of={ChipStories.WithIcon} />
+
+## Accessibility
+
+Clickable and removable chips render their actions as sibling buttons. The
+removal button keeps the name "Close" and exposes the chip label as its
+accessible description.
