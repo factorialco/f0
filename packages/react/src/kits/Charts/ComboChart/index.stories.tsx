@@ -178,3 +178,67 @@ export const Biaxial: Meta<typeof ComboChart<typeof departmentConfig>> = {
     legend: true,
   },
 }
+
+const headcountConfig = {
+  actuals: {
+    label: "Actuals",
+    color: "categorical-1",
+  },
+  incoming: {
+    label: "Incoming",
+    color: "categorical-4",
+  },
+  terminations: {
+    label: "Terminations",
+    color: "categorical-3",
+  },
+  planned: {
+    label: "Planned",
+    color: "categorical-2",
+    dashed: true,
+  },
+}
+
+export const StackedBySignWithLine: Meta<
+  typeof ComboChart<typeof headcountConfig>
+> = {
+  args: {
+    dataConfig: headcountConfig,
+    data: [
+      {
+        label: "January",
+        values: { actuals: 60, incoming: 12, terminations: 0, planned: 80 },
+      },
+      {
+        label: "February",
+        values: { actuals: 70, incoming: 0, terminations: -8, planned: 78 },
+      },
+      {
+        label: "March",
+        values: { actuals: 66, incoming: 24, terminations: 0, planned: 95 },
+      },
+      {
+        label: "April",
+        values: { actuals: 90, incoming: 0, terminations: -20, planned: 110 },
+      },
+    ],
+    bar: {
+      type: "stacked-by-sign",
+      categories: ["actuals", "incoming", "terminations"],
+    },
+    line: {
+      categories: ["planned"],
+      dot: true,
+      lineType: "linear",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    legend: true,
+  },
+}
