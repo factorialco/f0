@@ -3232,7 +3232,7 @@ describe("TableCollection", () => {
     /**
      * Cells are `align-top`, so a value shorter than the row sticks to the cell's
      * top padding rather than its center. Every cell's value is wrapped in a
-     * centering band (`min-h-8 items-center`) so values of different intrinsic
+     * centering band (`min-h-6 items-center`) so values of different intrinsic
      * heights — a 20px line of text, a 20px avatar, a 26px tag — share one center
      * at the row's natural height, while the band stays pinned to the top when a
      * tall value stretches the row.
@@ -3269,7 +3269,7 @@ describe("TableCollection", () => {
       expect(cells.length).toBeGreaterThan(0)
 
       for (const cell of cells) {
-        const band = cell.querySelector(".min-h-8.items-center")
+        const band = cell.querySelector(".min-h-6.items-center")
         expect(band).not.toBeNull()
         expect(band).toContainElement(
           cell.querySelector<HTMLElement>(".truncate, span")

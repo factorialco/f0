@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useState, useMemo } from "react"
+import { useState, useMemo, type ReactNode } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
@@ -1695,78 +1695,156 @@ export const RowActionsKeepTagListHoverable: Story = {
   },
 }
 
+const ALIGNMENT_PEOPLE = [
+  {
+    id: 1,
+    firstName: "Dani",
+    lastName: "Smith",
+    role: "Senior Engineer",
+    department: "Engineering",
+    notes:
+      "Leads the payroll integrations squad and is the main point of contact for the quarterly compliance review.",
+  },
+  {
+    id: 2,
+    firstName: "Desirée",
+    lastName: "Johnson",
+    role: "Product Manager",
+    department: "Product",
+    notes: "Owns the onboarding funnel.",
+  },
+]
+
+const AlignmentCase = ({
+  caption,
+  children,
+}: {
+  caption: string
+  children: ReactNode
+}) => (
+  <section>
+    <h3 className="mb-2 font-medium text-f1-foreground">{caption}</h3>
+    {children}
+  </section>
+)
+
 /**
- * Cells of different intrinsic heights in the same row: plain text (a 20px line),
- * a person avatar (20px) and a tag (26px).
+ * The three shapes a row can take, so the effect of the content band is visible
+ * side by side:
  *
- * Cells are `align-top`, so before the content band each of these sat flush with the
- * cell's top padding: the tag alone set the row's height (42px) and the text and
- * avatar beside it ended up 3px above its center. They now share one center, because
- * cell content is centered inside a 32px band rather than pinned to the cell's top
- * edge — which also holds the row at its intended 48px. See
+ * 1. **Text only** — every value is a 20px line, so the 24px band sets the row: 40px,
+ *    the same height the cell's loading skeleton reserves.
+ * 2. **With a long text** — the wrapped value stretches the row well past the band.
+ *    The single-line cells stay beside its *first* line rather than drifting to the
+ *    middle of a much taller row, which is what `align-top` buys us.
+ * 3. **With tags** — a 26px tag and a 20px avatar next to 20px text. The tag is taller
+ *    than the band, so it still sets the row height (42px, unchanged), but the text
+ *    beside it now lands on its center instead of 3px above it.
+ *
+ * Cells are `align-top`, so without the band each value sits flush with the cell's
+ * top padding and lands on a different vertical center. See
  * `ui/value-display/const.ts`.
  */
 export const CellsOfDifferentHeightsShareOneCenter: Story = {
   render: () => {
-    const records = [
-      {
-        id: 1,
-        firstName: "Dani",
-        lastName: "Smith",
-        role: "Senior Engineer",
-        department: "Engineering",
-      },
-      {
-        id: 2,
-        firstName: "Desirée",
-        lastName: "Johnson",
-        role: "Product Manager",
-        department: "Product",
-      },
-    ]
-
-    const source = useDataCollectionSource({
-      dataAdapter: { fetchData: async () => ({ records }) },
-    })
+    const dataAdapter = {
+      fetchData: async () => ({ records: ALIGNMENT_PEOPLE }),
+    }
+    const textOnlySource = useDataCollectionSource({ dataAdapter })
+    const longTextSource = useDataCollectionSource({ dataAdapter })
+    const tagsSource = useDataCollectionSource({ dataAdapter })
 
     return (
-      <OneDataCollection
-        source={source}
-        visualizations={[
-          {
-            type: "table",
-            options: {
-              columns: [
-                {
-                  label: "Name",
-                  render: (item) => ({
-                    type: "person",
-                    value: {
-                      firstName: item.firstName,
-                      lastName: item.lastName,
+      <div className="flex flex-col gap-8">
+        <AlignmentCase caption="Text only">
+          <OneDataCollection
+            source={textOnlySource}
+            visualizations={[
+              {
+                type: "table",
+                options: {
+                  columns: [
+                    {
+                      label: "Name",
+                      render: (item) => `${item.firstName} ${item.lastName}`,
                     },
-                  }),
+                    { label: "Role", render: (item) => item.role },
+                    {
+                      label: "Department",
+                      render: (item) => item.department,
+                    },
+                  ],
                 },
-                { label: "Role", render: (item) => item.role },
-                {
-                  label: "Department",
-                  render: (item) => ({
-                    type: "tag",
-                    value: { label: item.department },
-                  }),
+              },
+            ]}
+          />
+        </AlignmentCase>
+
+        <AlignmentCase caption="With a long text">
+          <OneDataCollection
+            source={longTextSource}
+            visualizations={[
+              {
+                type: "table",
+                options: {
+                  columns: [
+                    {
+                      label: "Name",
+                      render: (item) => `${item.firstName} ${item.lastName}`,
+                    },
+                    { label: "Role", render: (item) => item.role },
+                    {
+                      label: "Notes",
+                      width: 260,
+                      render: (item) => ({
+                        type: "longText",
+                        value: { text: item.notes, lines: 3 },
+                      }),
+                    },
+                  ],
                 },
-              ],
-            },
-          },
-        ]}
-      />
+              },
+            ]}
+          />
+        </AlignmentCase>
+
+        <AlignmentCase caption="With tags">
+          <OneDataCollection
+            source={tagsSource}
+            visualizations={[
+              {
+                type: "table",
+                options: {
+                  columns: [
+                    {
+                      label: "Name",
+                      render: (item) => ({
+                        type: "person",
+                        value: {
+                          firstName: item.firstName,
+                          lastName: item.lastName,
+                        },
+                      }),
+                    },
+                    { label: "Role", render: (item) => item.role },
+                    {
+                      label: "Department",
+                      render: (item) => ({
+                        type: "tag",
+                        value: { label: item.department },
+                      }),
+                    },
+                  ],
+                },
+              },
+            ]}
+          />
+        </AlignmentCase>
+      </div>
     )
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-
-    const roleCell = await canvas.findByText("Senior Engineer")
-    const row = roleCell.closest("tr")!
 
     /** Vertical center of a cell's first line of text, relative to the cell. */
     const firstLineCenter = (cell: HTMLTableCellElement) => {
@@ -1783,21 +1861,49 @@ export const CellsOfDifferentHeightsShareOneCenter: Story = {
       return null
     }
 
-    const cells = [...row.querySelectorAll("td")].filter(
-      (cell) => cell.getBoundingClientRect().height > 0
-    )
-    const rowCenter = row.getBoundingClientRect().height / 2
+    const firstLineCenters = (row: HTMLTableRowElement) =>
+      [...row.querySelectorAll("td")]
+        .filter((cell) => cell.getBoundingClientRect().height > 0)
+        .map(firstLineCenter)
+        .filter((center): center is number => center !== null)
+
+    /** The first data row of the table under the given caption. */
+    const rowUnder = async (caption: string) => {
+      const heading = await canvas.findByRole("heading", { name: caption })
+      const table = heading.parentElement!.querySelector("table")!
+      return within(table).getAllByRole("row")[1] as HTMLTableRowElement
+    }
+
+    const textOnly = await rowUnder("Text only")
+    const withLongText = await rowUnder("With a long text")
+    const withTags = await rowUnder("With tags")
+
+    // The band is 24px and the cell's `py-2` adds 8px above and below it.
+    const BAND_CENTER = 20
+    // The 26px tag overshoots the band by 1px on each side, so its own center sits
+    // 1px below everything else's — the widest gap this layout allows.
+    const TOLERANCE = 1.5
 
     await waitFor(() => {
-      // The tag is the tallest content here, and it does not push the row past
-      // the 48px floor — so the band is the whole row and every value display
-      // lines up on its center.
-      expect(row.getBoundingClientRect().height).toBe(48)
+      // Rows keep the height their own content asks for: the band sets it at 40px
+      // when every value is a line of text, and the taller tag sets it at 42px.
+      expect(textOnly.getBoundingClientRect().height).toBe(40)
+      expect(withTags.getBoundingClientRect().height).toBe(42)
 
-      for (const cell of cells) {
-        const center = firstLineCenter(cell)
-        if (center === null) continue
-        expect(Math.abs(center - rowCenter)).toBeLessThanOrEqual(1)
+      for (const row of [textOnly, withTags]) {
+        for (const center of firstLineCenters(row)) {
+          expect(Math.abs(center - BAND_CENTER)).toBeLessThanOrEqual(TOLERANCE)
+        }
+      }
+
+      // The wrapped value stretches the row, but the band stays pinned to the
+      // top — so every cell, the long one included, still puts its first line on
+      // the band's center rather than the row's.
+      const longRowHeight = withLongText.getBoundingClientRect().height
+      expect(longRowHeight).toBeGreaterThan(48)
+      for (const center of firstLineCenters(withLongText)) {
+        expect(Math.abs(center - BAND_CENTER)).toBeLessThanOrEqual(TOLERANCE)
+        expect(Math.abs(center - longRowHeight / 2)).toBeGreaterThan(TOLERANCE)
       }
     })
   },
