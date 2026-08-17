@@ -40,7 +40,9 @@ const meta = {
 } satisfies Meta<typeof Chip>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// See the note in F0Icon.stories.tsx: `StoryObj<typeof meta>` overflows TS's
+// union complexity limit once `icon` accepts the icon-name union.
+type Story = StoryObj<typeof Chip>
 
 export const Default: Story = {
   args: {

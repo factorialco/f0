@@ -85,9 +85,12 @@ export const ChatHeader = ({
       !action.channelTypes || action.channelTypes.includes(channel.type)
   )
   // Inline without an icon can't render as an icon button → falls to the menu.
+  // `Omit` before re-adding `icon` on purpose: intersecting `icon?: IconType`
+  // with `icon: IconType` makes TS distribute one icon union across the other,
+  // which overflows its union complexity limit (TS2590).
   const isInline = (
     action: F0ChatHeaderAction
-  ): action is F0ChatHeaderAction & { icon: IconType } =>
+  ): action is Omit<F0ChatHeaderAction, "icon"> & { icon: IconType } =>
     action.placement === "inline" && action.icon != null
   const inlineActions = channelActions.filter(isInline)
   const menuActions = channelActions.filter((action) => !isInline(action))

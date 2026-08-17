@@ -1,12 +1,8 @@
 import { f1Colors } from "@factorialco/f0-core"
 import { cva, type VariantProps } from "cva"
-import {
-  forwardRef,
-  ForwardRefExoticComponent,
-  RefAttributes,
-  SVGProps,
-} from "react"
+import { forwardRef, SVGProps } from "react"
 
+import { resolveIcon, type IconType } from "@/icons/resolve"
 import { cn } from "@/lib/utils"
 
 const iconVariants = cva({
@@ -41,8 +37,23 @@ type NestedKeyOf<T> = {
       : `${K}`
 }[keyof T & string]
 
+export type {
+  AiIconName,
+  AppIconName,
+  IconName,
+  IconNamespace,
+  IconNamesByNamespace,
+  ModulesIconName,
+} from "@/icons/registry"
+export type { IconComponent } from "@/icons/types"
+export type { IconType }
+
 export interface F0IconProps
   extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
+  /**
+   * The icon to render, either as a name (`"pencil"`, `"modules:payroll"`) or
+   * as an imported icon component. Animated icons must be passed as components.
+   */
   icon: IconType
   size?: "lg" | "md" | "sm" | "xs"
   state?: "normal" | "animate"
@@ -53,19 +64,19 @@ export interface F0IconProps
     | Lowercase<NestedKeyOf<typeof f1Colors.icon>>
 }
 
-export type IconType = ForwardRefExoticComponent<
-  SVGProps<SVGSVGElement> &
-    RefAttributes<SVGSVGElement> & {
-      animate?: "normal" | "animate"
-    }
->
 export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
   { size, icon, state = "normal", color = "currentColor", ...props },
   ref
 ) {
   if (!icon) return null
-  const Component = icon
-  const isAnimated = icon.displayName?.includes("Animated")
+
+  const Component = resolveIcon(icon)
+  if (!Component) {
+    console.warn(`F0Icon: the icon "${icon}" is not supported.`)
+    return null
+  }
+
+  const isAnimated = Component.displayName?.includes("Animated")
 
   const isHexColor = color.startsWith("#")
 

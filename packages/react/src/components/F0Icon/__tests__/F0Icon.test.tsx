@@ -1,6 +1,7 @@
 import { createRef, forwardRef, type SVGProps } from "react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
+import * as AppIcons from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0Icon, type IconType } from "../index"
@@ -126,6 +127,55 @@ describe("F0Icon", () => {
       expect(icon).not.toHaveClass("aspect-square")
     }
   )
+
+  describe("icon names", () => {
+    it("renders an icon passed as a name", () => {
+      const { container } = render(<F0Icon icon="pencil" size="lg" />)
+      const bySymbol = render(<F0Icon icon={AppIcons.Pencil} size="lg" />)
+
+      expect(container.innerHTML).toBe(bySymbol.container.innerHTML)
+    })
+
+    it("applies size and color to a named icon just like a component", () => {
+      render(
+        <F0Icon icon="pencil" size="xs" color="critical" aria-label="Edit" />
+      )
+
+      const icon = screen.getByLabelText("Edit")
+      expect(icon).toHaveClass("w-3", "text-f1-icon-critical")
+      expect(icon).toHaveAttribute("data-has-color", "true")
+    })
+
+    it("resolves names from the prefixed namespaces", () => {
+      const { container } = render(<F0Icon icon="modules:payroll" />)
+
+      expect(container.querySelector("svg")).toBeInTheDocument()
+    })
+
+    it("warns and renders nothing for an unknown name", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      // Only reachable from untyped data — TypeScript rejects the literal.
+      const { container } = render(<F0Icon icon={"nope" as IconType} />)
+
+      expect(container.querySelector("svg")).not.toBeInTheDocument()
+      expect(warn).toHaveBeenCalledWith(
+        'F0Icon: the icon "nope" is not supported.'
+      )
+
+      warn.mockRestore()
+    })
+
+    it("does not treat an inherited Object property as an icon", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      const { container } = render(<F0Icon icon={"toString" as IconType} />)
+
+      expect(container.querySelector("svg")).not.toBeInTheDocument()
+
+      warn.mockRestore()
+    })
+  })
 
   it("forwards SVG attributes, refs, and the public data test id", () => {
     const ref = createRef<SVGSVGElement>()
