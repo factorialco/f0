@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.36.0](https://github.com/factorialco/f0/compare/f0-react-v6.35.0...f0-react-v6.36.0) (2026-08-17)
+
+
+### Features
+
+* **OneDataCollection:** add defaultExpanded to nested tables ([#5045](https://github.com/factorialco/f0/issues/5045)) ([3d51401](https://github.com/factorialco/f0/commit/3d5140118b0c7d1cfb45834978f893f73c61fa12))
+
 ## [6.35.0](https://github.com/factorialco/f0/compare/f0-react-v6.34.0...f0-react-v6.35.0) (2026-08-17)
 
 
