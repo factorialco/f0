@@ -12,17 +12,29 @@ import type { IconComponent } from "./types";
  * <F0Icon icon={CalendarAnimated} /> // animated icons are component-only
  * ```
  *
- * The type parameter narrows which sets a prop accepts. It defaults to all of
- * them, so a plain `IconType` keeps meaning what it always has:
+ * To accept only some of the icon sets, use {@link IconTypeOf}.
+ */
+export type IconType = IconComponent | IconName;
+/**
+ * An icon restricted to some of the icon sets, as a component or a name.
  *
  * ```ts
- * icon: IconType                    // any name, or a component
- * icon: IconType<"modules">         // module names only, or a component
- * icon: IconType<"modules" | "ai">  // either of those sets, or a component
- * icon: IconName<"modules">         // module names only, no component
+ * icon: IconType                      // any name, or a component
+ * icon: IconTypeOf<"modules">         // module names only, or a component
+ * icon: IconTypeOf<"modules" | "ai">  // either of those sets, or a component
+ * icon: IconName<"modules">           // module names only, no component
  * ```
+ *
+ * Narrowing constrains the *names*. A component still satisfies this type,
+ * because icon components are structurally identical and can't be told apart
+ * by the set they came from.
+ *
+ * `IconType` is deliberately not generic: it appears on hundreds of public
+ * props, and a default type argument gets expanded to
+ * `IconType<keyof IconNamesByNamespace>` in the rolled-up `.d.ts`, which is
+ * what consumers would then see on every one of them.
  */
-export type IconType<Namespace extends IconNamespace = IconNamespace> = IconComponent | IconName<Namespace>;
+export type IconTypeOf<Namespace extends IconNamespace> = IconComponent | IconName<Namespace>;
 /** Whether `value` names an icon in the registry. */
 export declare function isIconName(value: string): value is IconName;
 /**

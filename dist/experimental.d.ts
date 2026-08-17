@@ -8799,17 +8799,9 @@ declare const iconSizes: {
  * <F0Icon icon={CalendarAnimated} /> // animated icons are component-only
  * ```
  *
- * The type parameter narrows which sets a prop accepts. It defaults to all of
- * them, so a plain `IconType` keeps meaning what it always has:
- *
- * ```ts
- * icon: IconType                    // any name, or a component
- * icon: IconType<"modules">         // module names only, or a component
- * icon: IconType<"modules" | "ai">  // either of those sets, or a component
- * icon: IconName<"modules">         // module names only, no component
- * ```
+ * To accept only some of the icon sets, use {@link IconTypeOf}.
  */
-declare type IconType<Namespace extends IconNamespace = IconNamespace> = IconComponent | IconName<Namespace>;
+declare type IconType = IconComponent | IconName;
 
 declare const iconVariants: (props?: ({
     size?: "lg" | "md" | "sm" | "xs" | undefined;
