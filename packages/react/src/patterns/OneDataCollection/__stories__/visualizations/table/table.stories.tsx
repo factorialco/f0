@@ -1694,3 +1694,111 @@ export const RowActionsKeepTagListHoverable: Story = {
     expect(popover).toBeInTheDocument()
   },
 }
+
+/**
+ * Cells of different intrinsic heights in the same row: plain text (a 20px line),
+ * a person avatar (20px) and a tag (26px).
+ *
+ * Cells are `align-top`, so before the content band each of these sat flush with the
+ * cell's top padding: the tag alone set the row's height (42px) and the text and
+ * avatar beside it ended up 3px above its center. They now share one center, because
+ * cell content is centered inside a 32px band rather than pinned to the cell's top
+ * edge — which also holds the row at its intended 48px. See
+ * `ui/value-display/const.ts`.
+ */
+export const CellsOfDifferentHeightsShareOneCenter: Story = {
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        firstName: "Dani",
+        lastName: "Smith",
+        role: "Senior Engineer",
+        department: "Engineering",
+      },
+      {
+        id: 2,
+        firstName: "Desirée",
+        lastName: "Johnson",
+        role: "Product Manager",
+        department: "Product",
+      },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  render: (item) => ({
+                    type: "person",
+                    value: {
+                      firstName: item.firstName,
+                      lastName: item.lastName,
+                    },
+                  }),
+                },
+                { label: "Role", render: (item) => item.role },
+                {
+                  label: "Department",
+                  render: (item) => ({
+                    type: "tag",
+                    value: { label: item.department },
+                  }),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const roleCell = await canvas.findByText("Senior Engineer")
+    const row = roleCell.closest("tr")!
+
+    /** Vertical center of a cell's first line of text, relative to the cell. */
+    const firstLineCenter = (cell: HTMLTableCellElement) => {
+      const cellRect = cell.getBoundingClientRect()
+      const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT)
+      let node: Node | null
+      while ((node = walker.nextNode())) {
+        if (!node.textContent?.trim()) continue
+        const range = document.createRange()
+        range.selectNodeContents(node)
+        const [line] = [...range.getClientRects()].filter((r) => r.height > 0)
+        if (line) return (line.top + line.bottom) / 2 - cellRect.top
+      }
+      return null
+    }
+
+    const cells = [...row.querySelectorAll("td")].filter(
+      (cell) => cell.getBoundingClientRect().height > 0
+    )
+    const rowCenter = row.getBoundingClientRect().height / 2
+
+    await waitFor(() => {
+      // The tag is the tallest content here, and it does not push the row past
+      // the 48px floor — so the band is the whole row and every value display
+      // lines up on its center.
+      expect(row.getBoundingClientRect().height).toBe(48)
+
+      for (const cell of cells) {
+        const center = firstLineCenter(cell)
+        if (center === null) continue
+        expect(Math.abs(center - rowCenter)).toBeLessThanOrEqual(1)
+      }
+    })
+  },
+}
