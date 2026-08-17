@@ -10,6 +10,8 @@ import type {
   F0DataChartLineType,
 } from "../../types"
 
+import type { ValueTooltipRow } from "../../utils/options"
+
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,
@@ -146,6 +148,8 @@ export function useLineChartOptions(
   {
     categories,
     series,
+    context,
+    contextLabelFormatter,
     lineType = "linear",
     showArea = true,
     showDots = false,
@@ -200,6 +204,33 @@ export function useLineChartOptions(
       valueFormatter
     )
 
+    // How many entities the hovered point covers. Formatted as a plain integer
+    // rather than through `formatTooltipValue`, which carries the plotted
+    // measure's unit — a headcount shown as "€1,204.00" is a different
+    // quantity, not a differently styled one.
+    const contextRow = (
+      seriesName: string,
+      dataIndex: number
+    ): ValueTooltipRow | undefined => {
+      if (!context?.length) return undefined
+
+      // One entry serves every series — a category's population does not
+      // change with the measure plotted against it. That fallback is only
+      // right for the single-entry case: with several, an unmatched series has
+      // no count of its own, and entry 0's would be a plausible wrong number.
+      const matched = context[series.findIndex((s) => s.name === seriesName)]
+      const entry = matched ?? (context.length === 1 ? context[0] : undefined)
+      const count = entry?.data[dataIndex]
+      if (!entry || count === undefined || !Number.isFinite(count)) {
+        return undefined
+      }
+
+      return {
+        value: count.toLocaleString(),
+        label: contextLabelFormatter?.(count) ?? entry.name,
+      }
+    }
+
     // Lines keep the axis trigger — a line is too thin to hover reliably —
     // but render the shared tooltip card. With one series that is the same
     // card every other chart type shows; with several, the category heads
@@ -238,20 +269,36 @@ export function useLineChartOptions(
                 i18n.dataChart.tooltip.fromPrevious,
                 theme
               ),
+              contextRow(String(first.seriesName ?? ""), dataIndex),
             ],
           },
           theme
         )
       }
 
+      // The multi-series card is already a list of series, so a count per
+      // series would double its length. One entry means one population for the
+      // whole category, which is a single honest row; per-series counts belong
+      // to marks the reader can hover individually.
+      const sharedContext =
+        context?.length === 1 && points[0]
+          ? contextRow(
+              String(points[0].seriesName ?? ""),
+              points[0].dataIndex ?? 0
+            )
+          : undefined
+
       return renderValueTooltip(
         {
           title: category,
-          rows: points.map((point) => ({
-            marker: point.marker,
-            value: formatTooltipValue(Number(point.value)),
-            label: String(point.seriesName ?? ""),
-          })),
+          rows: [
+            ...points.map((point) => ({
+              marker: point.marker,
+              value: formatTooltipValue(Number(point.value)),
+              label: String(point.seriesName ?? ""),
+            })),
+            sharedContext,
+          ],
         },
         theme
       )
@@ -278,6 +325,8 @@ export function useLineChartOptions(
   }, [
     categories,
     series,
+    context,
+    contextLabelFormatter,
     lineType,
     showArea,
     showDots,

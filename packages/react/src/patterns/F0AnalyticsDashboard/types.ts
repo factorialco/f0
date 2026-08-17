@@ -47,6 +47,12 @@ export interface BarChartConfig extends ChartConfigBase {
   orientation?: "vertical" | "horizontal"
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
+  /**
+   * Name what {@link DashboardChartData.context} counts, given the count — so
+   * the tooltip label agrees with it in number ("1 person" against "256
+   * people"). Falls back to the context entry's own `name`.
+   */
+  contextLabelFormatter?: (count: number) => string
 }
 
 export interface LineChartConfig extends ChartConfigBase {
@@ -57,6 +63,12 @@ export interface LineChartConfig extends ChartConfigBase {
   showArea?: boolean
   /** Show data point dots on the lines. @default false */
   showDots?: boolean
+  /**
+   * Name what {@link DashboardChartData.context} counts, given the count — so
+   * the tooltip label agrees with it in number ("1 person" against "256
+   * people"). Falls back to the context entry's own `name`.
+   */
+  contextLabelFormatter?: (count: number) => string
 }
 
 export interface FunnelChartConfig {
@@ -105,6 +117,12 @@ export interface PieChartConfig {
    * while the tooltip carries the exact figure.
    */
   tooltipValueFormatter?: (value: number) => string
+  /**
+   * Name what {@link DashboardChartData.context} counts, given the count — so
+   * the tooltip label agrees with it in number ("1 person" against "256
+   * people"). Falls back to the context entry's own `name`.
+   */
+  contextLabelFormatter?: (count: number) => string
 }
 
 export interface RadarChartConfig {
@@ -226,6 +244,18 @@ export interface DashboardChartData {
     | { value: number; name?: string }
   /** Heatmap data points as [xIndex, yIndex, value] tuples. */
   data?: [number, number, number][]
+  /**
+   * How many entities each plotted segment covers — the population behind the
+   * value, which the value alone never states: an average salary of €52,400
+   * describes a very different team over 12 people than over 1,200.
+   *
+   * Mirrors {@link series}: one entry per series when the counts differ between
+   * them (a chart split by a dimension counts each cell), otherwise a single
+   * entry every series reads. Chart renderers draw `series` alone, so a count
+   * can never be plotted as a mark of its own — it reaches the reader through
+   * the table view, the exports, and the bar tooltip.
+   */
+  context?: { name: string; data: number[] }[]
   /**
    * Scatter series — x/y pairs, optionally split into color groups. Kept on
    * its own field rather than reusing `series` or `data` so shape detection

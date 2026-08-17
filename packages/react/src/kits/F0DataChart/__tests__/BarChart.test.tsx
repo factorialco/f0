@@ -1300,6 +1300,219 @@ describe("BarChart — item tooltip", () => {
     expect(description).not.toContain("Category 21")
   })
 
+  // The count of entities behind a bar: how many people an average was taken
+  // over, which the plotted value alone never says.
+  describe("segment context", () => {
+    const salary = {
+      categories: ["Engineering", "Sales"],
+      series: [{ name: "Average salary", data: [52400, 41000] }],
+    }
+
+    it("adds a row naming what it counts", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          {...salary}
+          context={[{ name: "Active headcount", data: [1204, 380] }]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Average salary",
+        value: 52400,
+        dataIndex: 0,
+      })
+      expect(html).toContain("1,204")
+      expect(html).toContain("Active headcount")
+    })
+
+    // The value formatter carries the plotted measure's unit. Running a
+    // headcount through it renders a different quantity, not a restyled one.
+    it("formats the count as a plain integer, never in the measure's unit", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          {...salary}
+          valueFormatter={(v) => `€${v.toLocaleString("en-US")}`}
+          context={[{ name: "Active headcount", data: [1204, 380] }]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Average salary",
+        value: 52400,
+        dataIndex: 0,
+      })
+      expect(html).toContain("€52,400")
+      expect(html).toContain("1,204")
+      expect(html).not.toContain("€1,204")
+    })
+
+    it("reads a single entry for every series", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          categories={["Engineering"]}
+          series={[
+            { name: "Average salary", data: [52400] },
+            { name: "Median salary", data: [50000] },
+          ]}
+          context={[{ name: "Active headcount", data: [1204] }]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Median salary",
+        value: 50000,
+        dataIndex: 0,
+      })
+      expect(html).toContain("1,204")
+    })
+
+    // A split chart's segment is a cell: the women in Engineering are not the
+    // people in Engineering, so each series carries its own counts.
+    it("picks the hovered series' entry when the chart is split", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          categories={["Engineering"]}
+          series={[
+            { name: "Female", data: [48900] },
+            { name: "Male", data: [55100] },
+          ]}
+          context={[
+            { name: "Active headcount", data: [612] },
+            { name: "Active headcount", data: [592] },
+          ]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Male",
+        value: 55100,
+        dataIndex: 0,
+      })
+      expect(html).toContain("592")
+      expect(html).not.toContain("612")
+    })
+
+    // With one entry it stands for every series. With several, a series that
+    // matches none has no count of its own — reporting the first entry's would
+    // be a plausible wrong number rather than a visible gap.
+    it("omits the row for an unmatched series when entries are per-series", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          categories={["Engineering"]}
+          series={[
+            { name: "Female", data: [48900] },
+            { name: "Male", data: [55100] },
+            { name: "Not specified", data: [51000] },
+          ]}
+          context={[
+            { name: "Active headcount", data: [612] },
+            { name: "Active headcount", data: [592] },
+          ]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Not specified",
+        value: 51000,
+        dataIndex: 0,
+      })
+      expect(html).not.toContain("Active headcount")
+      expect(html).not.toContain("612")
+    })
+
+    it("omits the row when the entry has no count for that bar", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          {...salary}
+          context={[{ name: "Active headcount", data: [1204] }]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Sales",
+        seriesName: "Average salary",
+        value: 41000,
+        dataIndex: 1,
+      })
+      expect(html).not.toContain("Active headcount")
+    })
+
+    // "1 people" is the sloppiness the formatter exists to avoid: only the
+    // count decides whether the label is singular.
+    it("lets a formatter inflect the label to agree with the count", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          {...salary}
+          context={[{ name: "Active headcount", data: [256, 1] }]}
+          contextLabelFormatter={(count) => (count === 1 ? "person" : "people")}
+        />
+      )
+
+      const many = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Average salary",
+        value: 52400,
+        dataIndex: 0,
+      })
+      const one = getTooltipFormatter()?.({
+        name: "Sales",
+        seriesName: "Average salary",
+        value: 41000,
+        dataIndex: 1,
+      })
+
+      // The count and its label sit in separate elements, so assert on each.
+      expect(many).toContain(">256<")
+      expect(many).toContain("people")
+      expect(many).not.toContain("Active headcount")
+      expect(one).toContain(">1<")
+      expect(one).toContain("person")
+    })
+
+    it("falls back to the entry name when no formatter is given", () => {
+      render(
+        <F0DataChart
+          type="bar"
+          {...salary}
+          context={[{ name: "Active headcount", data: [1204, 380] }]}
+        />
+      )
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Average salary",
+        value: 52400,
+        dataIndex: 0,
+      })
+      expect(html).toContain("Active headcount")
+    })
+
+    it("renders the usual tooltip when no context is given", () => {
+      render(<F0DataChart type="bar" {...salary} />)
+
+      const html = getTooltipFormatter()?.({
+        name: "Engineering",
+        seriesName: "Average salary",
+        value: 52400,
+        dataIndex: 0,
+      })
+      expect(html).toContain("52,400")
+      expect(html).not.toContain("headcount")
+    })
+  })
+
   it("lets a caller's own echartsOptions.tooltip win over the built-in one", () => {
     const ownFormatter = () => "custom tooltip"
     render(

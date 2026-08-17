@@ -26,6 +26,7 @@ export type {
   F0DataChartScatterDataPoint,
   F0DataChartScatterProps,
   F0DataChartScatterSeries,
+  F0DataChartSegmentContext,
 } from "./types"
 
 export { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"

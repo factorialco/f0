@@ -43,6 +43,8 @@ export function usePieChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
   {
     series,
+    context,
+    contextLabelFormatter,
     innerRadius = 0,
     showLegend = true,
     showLabels = true,
@@ -174,9 +176,20 @@ export function usePieChartOptions(
             name?: string
             value?: number
             percent?: number
+            dataIndex?: number
           }
           const val = Number(p.value ?? 0)
           const total = dataPoints.reduce((sum, point) => sum + point.value, 0)
+          // A pie has one series, so a single context entry covers every
+          // slice. Counts stay plain integers: `formatTooltipValue` carries
+          // the plotted measure's unit, and a headcount is not in euros.
+          // No `?? 0` on the index: without one there is no way to tell which
+          // slice is hovered, and defaulting would report slice 0's count for
+          // every one of them.
+          const entry = context?.[0]
+          const count =
+            p.dataIndex === undefined ? undefined : entry?.data[p.dataIndex]
+          const hasCount = count !== undefined && Number.isFinite(count)
           return renderValueTooltip(
             {
               marker: p.marker,
@@ -191,6 +204,11 @@ export function usePieChartOptions(
                   value: formatTooltipValue(total),
                   label: i18n.dataChart.tooltip.total,
                 },
+                hasCount &&
+                  entry && {
+                    value: count.toLocaleString(),
+                    label: contextLabelFormatter?.(count) ?? entry.name,
+                  },
               ],
             },
             theme
@@ -207,6 +225,8 @@ export function usePieChartOptions(
     return baseOptions
   }, [
     series,
+    context,
+    contextLabelFormatter,
     innerRadius,
     showLegend,
     showLabels,

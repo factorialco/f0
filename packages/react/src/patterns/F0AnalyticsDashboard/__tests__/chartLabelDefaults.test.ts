@@ -154,3 +154,83 @@ describe("buildChartProps — tooltipValueFormatter", () => {
     expect(props.tooltipValueFormatter).toBeUndefined()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Segment counts have to survive the route the props actually take. A line item
+// takes the cross-type transform on EVERY render — `detectDataShape` reports
+// any array-series data as "bar", so a line's detected shape never equals its
+// target type — and that branch rebuilds the props from scratch.
+// ---------------------------------------------------------------------------
+
+describe("buildChartProps — segment context", () => {
+  const dataWithContext: DashboardChartData = {
+    categories: ["A", "B"],
+    series: [{ name: "X", data: [1, 2] }],
+    context: [{ name: "Active headcount", data: [1204, 380] }],
+  }
+
+  const contextItem = (chart: DashboardChartConfig): DashboardChartItem => ({
+    id: "item",
+    title: "Item",
+    type: "chart",
+    chart,
+    fetchData: () => Promise.resolve(dataWithContext),
+  })
+
+  const propsFor = (chart: DashboardChartConfig) =>
+    buildChartProps(contextItem(chart), dataWithContext) as {
+      context?: { name: string; data: number[] }[]
+      contextLabelFormatter?: (count: number) => string
+    }
+
+  it("reaches a line chart, which never takes the native path", () => {
+    const props = propsFor({ type: "line" })
+
+    expect(props.context).toEqual([
+      { name: "Active headcount", data: [1204, 380] },
+    ])
+  })
+
+  it("reaches a bar chart on the native path", () => {
+    expect(propsFor({ type: "bar" }).context).toEqual([
+      { name: "Active headcount", data: [1204, 380] },
+    ])
+  })
+
+  it("carries the label formatter through the transform too", () => {
+    const formatter = (count: number) => (count === 1 ? "person" : "people")
+    const props = propsFor({ type: "line", contextLabelFormatter: formatter })
+
+    expect(props.contextLabelFormatter).toBe(formatter)
+  })
+
+  // A pie's slices ARE the categories the counts were aligned to, and
+  // `pieToTabular` emits the context column either way — so without this the
+  // table kept a count column the tooltip had lost.
+  it("reaches a pie transformed from another type", () => {
+    expect(propsFor({ type: "pie" }).context).toEqual([
+      { name: "Active headcount", data: [1204, 380] },
+    ])
+  })
+
+  it("carries the label formatter to a pie as well", () => {
+    const formatter = (count: number) => `${count} people`
+    const props = propsFor({ type: "pie", contextLabelFormatter: formatter })
+
+    expect(props.contextLabelFormatter).toBe(formatter)
+  })
+
+  // Its slices are not the categories the counts were aligned to.
+  it("does not hand counts to a type that cannot place them", () => {
+    expect(propsFor({ type: "funnel" }).context).toBeUndefined()
+  })
+
+  // The formatter travels with the counts. A funnel has no such prop, so
+  // passing it along would be handing a type a prop it does not accept.
+  it("does not hand the label formatter to a type that gets no counts", () => {
+    const formatter = (count: number) => `${count} people`
+    const props = propsFor({ type: "funnel", contextLabelFormatter: formatter })
+
+    expect(props.contextLabelFormatter).toBeUndefined()
+  })
+})

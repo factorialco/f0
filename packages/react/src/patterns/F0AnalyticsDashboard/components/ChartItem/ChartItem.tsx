@@ -215,6 +215,30 @@ export function buildChartProps(
   if ("showLegend" in item.chart) {
     shared.showLegend = item.chart.showLegend
   }
+  // Segment counts survive a transform between the types that render them.
+  // A line item reaches this path on every render, not just after a user
+  // transform: `detectDataShape` reports any array-series data as "bar", so a
+  // line's shape never equals its target type.
+  //
+  // Bar, line and pie are the types that render a context row, matching the
+  // native path. Pie belongs here because `pieToTabular` emits the context
+  // column regardless: without it, transforming a bar into a pie left the
+  // table showing a count column the tooltip had lost. Slices come from the
+  // same categories the counts were aligned to, so the indices still line up.
+  //
+  // The formatter travels with the counts rather than in `shared`, which every
+  // branch spreads — a funnel or a gauge has no `contextLabelFormatter` prop.
+  const contextForTarget =
+    data.context &&
+    (targetType === "bar" || targetType === "line" || targetType === "pie")
+      ? {
+          context: data.context,
+          ...("contextLabelFormatter" in item.chart &&
+          item.chart.contextLabelFormatter
+            ? { contextLabelFormatter: item.chart.contextLabelFormatter }
+            : {}),
+        }
+      : {}
   // Only bar targets inherit the source config's `showLabels`. Other types keep
   // their own default, so transforming a pie (labels on by default) into a line
   // doesn't drag labels along. `undefined` is not an explicit value — letting it
@@ -241,6 +265,7 @@ export function buildChartProps(
         ...config,
         ...shared,
         ...(orientation ? { orientation } : {}),
+        ...contextForTarget,
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
@@ -249,6 +274,7 @@ export function buildChartProps(
       return {
         ...config,
         ...shared,
+        ...contextForTarget,
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
@@ -262,6 +288,7 @@ export function buildChartProps(
       return {
         ...config,
         ...shared,
+        ...contextForTarget,
         series: adapted.series,
       } as F0DataChartProps
     case "radar":
@@ -320,7 +347,11 @@ function buildNativeChartProps(
       return { ...chart, series: funnelSeries } as F0DataChartProps
     }
     case "pie":
-      return { ...chart, series: data.series } as F0DataChartProps
+      return {
+        ...chart,
+        series: data.series,
+        ...(data.context ? { context: data.context } : {}),
+      } as F0DataChartProps
     case "radar":
       return {
         ...chart,
@@ -362,6 +393,7 @@ function buildNativeChartProps(
         ...(chart.type === "bar"
           ? { showLabels: chart.showLabels ?? true }
           : {}),
+        ...(data.context ? { context: data.context } : {}),
         categories,
         series,
       } as F0DataChartProps
