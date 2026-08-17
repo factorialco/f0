@@ -1,6 +1,11 @@
 # Changelog
 
-## [6.32.2](https://github.com/factorialco/f0/compare/f0-react-v6.32.1...f0-react-v6.32.2) (2026-08-17)
+## [6.33.0](https://github.com/factorialco/f0/compare/f0-react-v6.32.1...f0-react-v6.33.0) (2026-08-17)
+
+
+### Features
+
+* **OneDataCollection:** permission-locked graph metadata toggle ([#5121](https://github.com/factorialco/f0/issues/5121)) ([460a3d2](https://github.com/factorialco/f0/commit/460a3d229f7c626e393e5fa903d654f09d5675fa))
 
 
 ### Bug Fixes
