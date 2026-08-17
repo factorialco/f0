@@ -1,4 +1,4 @@
-import { ForwardedRef } from "react"
+import { ForwardedRef, Fragment, useId } from "react"
 import {
   Bar,
   CartesianGrid,
@@ -85,12 +85,29 @@ type StackedBarShapeProps = RectangleProps & {
   payload?: Record<string, unknown>
 }
 
+type BarGradientSign = "positive" | "negative"
+
+const projectedGradientId = (
+  chartUid: string,
+  category: string,
+  sign: BarGradientSign
+) => `combo-projected-${chartUid}-${category}-${sign}`
+
 /**
  * Rounds only the outer corners of a stacked bar: the top of the outermost
  * positive segment and the bottom of the outermost negative one. Middle
  * segments stay square so the stack reads as one continuous bar.
+ *
+ * Projected segments fade toward the zero line, so a stack can show two
+ * visible tips: the outermost segment overall and the outermost solid
+ * (non-projected) one sitting under the projected ones. Both get rounded.
  */
-const createStackedBarShape = (category: string, categories: string[]) => {
+const createStackedBarShape = (
+  category: string,
+  categories: string[],
+  projectedCategories: Set<string>,
+  chartUid: string
+) => {
   const StackedBarShape = (props: unknown) => {
     const { payload, ...rest } = props as StackedBarShapeProps
     const valueOf = (key: string) => {
@@ -99,23 +116,60 @@ const createStackedBarShape = (category: string, categories: string[]) => {
     }
 
     const value = valueOf(category)
-    const outermost = [...categories]
+    const sameSign = (key: string) =>
+      value < 0 ? valueOf(key) < 0 : valueOf(key) > 0
+    const outermost = [...categories].reverse().find(sameSign)
+    const outermostSolid = [...categories]
       .reverse()
-      .find((key) => (value < 0 ? valueOf(key) < 0 : valueOf(key) > 0))
-    const isOutermost = value !== 0 && outermost === category
+      .find((key) => sameSign(key) && !projectedCategories.has(key))
+    const isProjected = projectedCategories.has(category)
+    const isTip =
+      value !== 0 &&
+      (outermost === category || (!isProjected && outermostSolid === category))
 
     // Segments below zero come in with a negative height and Rectangle mirrors
     // the path for them, so the first two radius slots land on the bar tip on
     // both sides of the axis.
-    const radius: [number, number, number, number] = isOutermost
+    const radius: [number, number, number, number] = isTip
       ? [4, 4, 0, 0]
       : [0, 0, 0, 0]
 
-    return <Rectangle {...rest} radius={radius} />
+    const fill = isProjected
+      ? `url(#${projectedGradientId(
+          chartUid,
+          category,
+          value < 0 ? "negative" : "positive"
+        )})`
+      : rest.fill
+
+    return <Rectangle {...rest} fill={fill} radius={radius} />
   }
 
   StackedBarShape.displayName = `StackedBar-${category}`
   return StackedBarShape
+}
+
+/**
+ * Shape for projected bars outside a stack: keeps the default geometry and
+ * only swaps the solid fill for the fading gradient matching the bar's sign.
+ */
+const createProjectedBarShape = (category: string, chartUid: string) => {
+  const ProjectedBarShape = (props: unknown) => {
+    const { payload, ...rest } = props as StackedBarShapeProps
+    const value = payload?.[category]
+    const sign: BarGradientSign =
+      typeof value === "number" && value < 0 ? "negative" : "positive"
+
+    return (
+      <Rectangle
+        {...rest}
+        fill={`url(#${projectedGradientId(chartUid, category, sign)})`}
+      />
+    )
+  }
+
+  ProjectedBarShape.displayName = `ProjectedBar-${category}`
+  return ProjectedBarShape
 }
 
 type ChartDataPoint<K extends ChartConfig> = {
@@ -183,12 +237,22 @@ const _ComboChart = <K extends ChartConfig>(
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const preparedData = prepareData(data)
+  const chartUid = useId().replace(/:/g, "")
 
   const barCategories = bar?.categories
     ? Array.isArray(bar.categories)
       ? bar.categories
       : [bar.categories]
     : []
+  const isStackedBar =
+    bar?.type === "stacked" || bar?.type === "stacked-by-sign"
+  const projectedBarCategories = new Set(
+    barCategories.filter((key) => dataConfig[key].projected).map(String)
+  )
+  const barColor = (category: keyof K, index: number) =>
+    dataConfig[category].color
+      ? getColor(dataConfig[category].color)
+      : getCategoricalColor(index)
   const lineCategories = line?.categories
     ? Array.isArray(line.categories)
       ? line.categories
@@ -365,29 +429,73 @@ const _ComboChart = <K extends ChartConfig>(
           }
         />
 
+        {projectedBarCategories.size > 0 && (
+          <defs>
+            {barCategories
+              .filter((category) =>
+                projectedBarCategories.has(String(category))
+              )
+              .map((category) => {
+                const color = barColor(
+                  category,
+                  barCategories.indexOf(category)
+                )
+
+                // One gradient per sign: the strong stop sits on the bar tip
+                // and fades toward the zero line, so it flips for segments
+                // hanging below the axis.
+                return (
+                  <Fragment key={`projected-gradient-${String(category)}`}>
+                    {(["positive", "negative"] as const).map((sign) => (
+                      <linearGradient
+                        key={sign}
+                        id={projectedGradientId(
+                          chartUid,
+                          String(category),
+                          sign
+                        )}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor={color}
+                          stopOpacity={sign === "positive" ? 0.4 : 0.05}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor={color}
+                          stopOpacity={sign === "positive" ? 0.05 : 0.4}
+                        />
+                      </linearGradient>
+                    ))}
+                  </Fragment>
+                )
+              })}
+          </defs>
+        )}
+
         {barCategories.map((category, index) => (
           <Bar
             key={`bar-${String(category)}`}
             isAnimationActive={false}
             dataKey={String(category)}
-            stackId={
-              bar?.type === "stacked" || bar?.type === "stacked-by-sign"
-                ? "stack"
-                : undefined
-            }
-            fill={
-              dataConfig[category].color
-                ? getColor(dataConfig[category].color)
-                : getCategoricalColor(index)
-            }
+            stackId={isStackedBar ? "stack" : undefined}
+            fill={barColor(category, index)}
             radius={4}
             shape={
-              bar?.type === "stacked" || bar?.type === "stacked-by-sign"
+              isStackedBar
                 ? createStackedBarShape(
                     String(category),
-                    barCategories.map(String)
+                    barCategories.map(String),
+                    projectedBarCategories,
+                    chartUid
                   )
-                : undefined
+                : projectedBarCategories.has(String(category))
+                  ? createProjectedBarShape(String(category), chartUid)
+                  : undefined
             }
             maxBarSize={32}
           >

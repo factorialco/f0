@@ -28,6 +28,12 @@ export type ChartConfig = {
      * projected or planned series. Ignored by bar-only series.
      */
     dashed?: boolean
+    /**
+     * Mark this series as projected (provisional, not yet actual) data. Where
+     * the chart draws it as bars they fade toward the zero line with a
+     * gradient instead of using a solid fill.
+     */
+    projected?: boolean
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
