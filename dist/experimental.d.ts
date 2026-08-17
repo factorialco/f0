@@ -1565,6 +1565,10 @@ export declare const CalendarEventList: FC<CalendarEventListProps>;
 
 export declare interface CalendarEventListProps {
     events: CalendarEventProps[];
+    /**
+     * The space between events, in px. Applies to BOTH paths — the overflow list
+     * and `showAllItems` — so a list that stops overflowing keeps its rhythm.
+     */
     gap?: number;
     showAllItems?: boolean;
     minSize?: number;
@@ -9861,10 +9865,19 @@ export declare interface NewHomeLayoutProps {
      */
     onChangeWidgetParams?: (id: string, params: WidgetParams) => void;
     /**
-     * Draws a widget for params being tried out in that dialog, before they are
-     * saved. Defaults to the widget with those params swapped in — which is
-     * already live for everything they derive (title, info); supply this to
-     * rebuild its slots as well.
+     * REBUILDS a widget for params being tried out in that dialog, before they are
+     * saved — the same widget with slots that follow the new params, which only
+     * the app can produce. It hands back DATA, and f0 draws it through the same
+     * `SlotWidget` the column uses, so the preview cannot drift from the card.
+     *
+     * Without it the preview is the widget with those params swapped in — already
+     * live for everything they derive (title, info), just not for its slots.
+     */
+    rebuildWidget?: (widget: HomeWidgetItem, params: WidgetParams) => HomeWidgetItem;
+    /**
+     * @deprecated Use `rebuildWidget`. A preview the app renders has to reproduce
+     * `SlotWidget` by hand and drifts from the column the moment either side
+     * changes. Ignored when `rebuildWidget` is given.
      */
     renderWidgetPreview?: (widget: HomeWidgetItem, params: WidgetParams) => ReactNode;
     /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
@@ -9875,7 +9888,11 @@ export declare interface NewHomeLayoutProps {
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
     asideWidth?: number;
-    /** Max px width of the (centered) main-column content. */
+    /**
+     * Max px width of the (centered) main-column content. Defaults to
+     * `max-w-content` (712px), so a composer or a message list in the main column
+     * lines up with the same reading column the chat uses.
+     */
     mainWidth?: number;
     /**
      * How far the page surface reaches past this layout's box, in px — set it to
@@ -11961,6 +11978,66 @@ export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
  */
 export declare type SlotSkeletonRenderer<P = unknown> = (params: P, ctx: HomeSkeletonCtx) => ReactNode;
 
+export declare function SlotWidget({ header, params, fullHeight, action, summaries, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
+
+/**
+ * SlotWidget — one Home widget rendered from data: the f0 `Widget` frame (the
+ * only allowed widget wrapper) with an ordered list of SLOTS stacked below the
+ * header, a DASHED divider between consecutive slots.
+ *
+ * Each slot is `{ visualization, params }`; how a visualization is drawn comes
+ * from the merged renderer map (`defaultSlotRenderers` + the `slotRenderers`
+ * prop). Bespoke visualizations (e.g. `clock-in`) have no default and must be
+ * supplied via `slotRenderers`.
+ *
+ * `loading` swaps every slot's content for that visualization's SKELETON,
+ * keeping the frame, the chrome and the seams — the card doesn't change shape
+ * when the data lands, it fills in.
+ *
+ * THE WAY OUT IS A FOOTER BUTTON. `header.link` is still how a widget declares
+ * it, but it lands under the content as a named button rather than as an
+ * icon in the header's top-right: that corner belongs to the overflow menu
+ * (`actions`), and a button that says "Go to Calendar" needs no tooltip to say
+ * where it goes.
+ *
+ * A CONFIGURABLE widget's `header.title` and `header.info` may be functions of
+ * its `params` — "Hours · Design team" rather than "Hours" — so the card says
+ * what it is currently showing.
+ *
+ * `header.info` is NOT an icon in the header: it is the widget's OTHER SIDE. The
+ * card turns over to show it (see `flipped`), which is room enough to explain
+ * itself in a sentence instead of a tooltip cramped beside the title.
+ */
+export declare type SlotWidgetProps = HomeWidgetChrome & {
+    header?: HomeWidgetHeader;
+    /** The params `header.title` / `header.info` are computed from, if they are. */
+    params?: WidgetParams;
+    /**
+     * Shows the widget's BACK — `header.info`, centered — by turning the card
+     * over. The column drives it from the widget's own menu (`WidgetContainer`).
+     */
+    flipped?: boolean;
+    /** Turns it back. Called when the back face is clicked. */
+    onFlipBack?: () => void;
+    fullHeight?: boolean;
+    slots: HomeWidgetSlot[];
+    /**
+     * Draws each slot's SKELETON instead of its content. How many placeholder
+     * items each one draws is the slot's own `expectedItemsCount`.
+     */
+    loading?: boolean;
+    /** Per-visualization renderers, MERGED OVER `defaultSlotRenderers`. */
+    slotRenderers?: SlotRenderers;
+    /**
+     * The header's overflow menu — the three dots at its top-right. This is where
+     * a column's "Remove widget" lands (see `WidgetContainer`).
+     */
+    actions?: WidgetProps["actions"];
+    /** Forwarded to the f0 `Widget`: the lifted look while the card is dragged. */
+    isDragging?: boolean;
+    ctx?: HomeRenderCtx;
+};
+
 /**
  * Type helper to extract keys from a SortingsDefinition
  */
@@ -13475,7 +13552,7 @@ export declare type WidgetAvatarsListItemProps = {
  * remaining row takes over, so the preview always shows something the CTA can
  * actually add.
  */
-export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, previewWidth, title, }: WidgetCatalogProps): JSX_2.Element;
+export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, previewWidth, slotRenderers, title, }: WidgetCatalogProps): JSX_2.Element;
 
 /**
  * One DOMAIN in the picker: a heading the widgets under it belong to.
@@ -13498,14 +13575,25 @@ export declare interface WidgetCatalogItem {
     title: string;
     icon: IconType;
     /**
-     * The LIVE PREVIEW of the widget — the same node the Home renders (e.g. a
-     * `SlotWidget`), so the preview can't drift from what gets added.
+     * The LIVE PREVIEW of the widget.
+     *
+     * GIVE IT THE WIDGET ITSELF — the same `HomeWidgetItem` the layout would be
+     * handed — and the catalog draws it through `SlotWidget`, exactly as the
+     * column will. That is the only form that cannot drift: a preview assembled
+     * out of content components reproduces the frame, the seams and the spacing
+     * by hand, and the first of those to fall out of step is silent.
+     *
+     * A `ReactNode` is still accepted, for a widget the app draws its own way
+     * (`renderWidget`) or for something that isn't a widget at all.
      */
-    preview: ReactNode;
+    preview: HomeWidgetItem | ReactNode;
     /**
      * What this widget is telling you — the widget's own `header.info`, shown under
      * the preview. Deciding whether to add a widget is exactly the moment that
      * sentence is worth reading, so the picker says it without being asked.
+     *
+     * Taken from the widget's own header when `preview` is a `HomeWidgetItem`, so
+     * for those it is usually nothing to pass.
      */
     info?: string;
     /**
@@ -13538,8 +13626,27 @@ export declare interface WidgetCatalogProps {
      * to it, so a rail-bound widget previews at rail width.
      */
     previewWidth?: number;
+    /**
+     * Per-visualization renderers for the previews this dialog draws itself,
+     * MERGED OVER the kit's `defaultSlotRenderers`. Pass the SAME map the layout
+     * gets: a widget whose visualization is bespoke would otherwise preview as
+     * "No renderer for slot …" and then render properly once added.
+     */
+    slotRenderers?: SlotRenderers;
     title?: string;
 }
+
+/**
+ * The `Widget` chrome an item carries, ready to spread onto `SlotWidget`.
+ *
+ * `alert` and `status` are mutually exclusive on the frame, and which one an
+ * item means is decided by whether it declares an `alert` at all — so the two
+ * are never handed over together.
+ *
+ * Public because drawing a `HomeWidgetItem` yourself is public (`SlotWidget`),
+ * and this is the one part of that spread with a rule in it.
+ */
+export declare const widgetChrome: (widget: HomeWidgetItem) => HomeWidgetChrome;
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export declare type WidgetContainerSide = "main" | "right";
