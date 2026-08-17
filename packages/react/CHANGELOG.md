@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.35.0](https://github.com/factorialco/f0/compare/f0-react-v6.34.0...f0-react-v6.35.0) (2026-08-17)
+
+
+### Features
+
+* **OneDataCollection:** add boldRootRows table option ([#5083](https://github.com/factorialco/f0/issues/5083)) ([8affa01](https://github.com/factorialco/f0/commit/8affa012e96995d8492901970671a29b4f8565e4))
+
 ## [6.34.0](https://github.com/factorialco/f0/compare/f0-react-v6.33.0...f0-react-v6.34.0) (2026-08-17)
 
 
