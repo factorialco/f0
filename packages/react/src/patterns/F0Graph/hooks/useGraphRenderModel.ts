@@ -739,6 +739,7 @@ export function useGraphRenderModel<T>({
           parentId: parent.id,
           parentWidth: BASE_W,
           collapseLabel: controlLabels?.collapseChildren,
+          stacked: stackedParentIds.has(parent.id),
         } as CollapserNodeData,
       })
     }

@@ -18,7 +18,11 @@ import type {
 } from "../components/F0GraphNode"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
-import { STACKED_NODE_WIDTH_INSET, STACKED_RANK_SEP_RATIO } from "../constants"
+import {
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  STACKED_NODE_WIDTH_INSET,
+  STACKED_RANK_SEP_RATIO,
+} from "../constants"
 
 /**
  * Horizontal inset of a node's visible box inside the layout box the engine
@@ -92,6 +96,8 @@ export interface CollapserNodeData {
   parentId: string
   parentWidth: number
   collapseLabel?: string
+  /** Set when this collapser sits over a stacked column, whose lane is shorter. */
+  stacked?: boolean
 }
 
 export type CollapserRFNode = RFNode<CollapserNodeData>
@@ -120,12 +126,36 @@ export const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
 
 // Same centering, for the shortened lane above a stacked column. Without it the
 // affordance would keep the full-lane offset and overlap the first row.
-const STACKED_RANK_SEP = NODE_RANK_SEP * STACKED_RANK_SEP_RATIO
+export const STACKED_RANK_SEP = NODE_RANK_SEP * STACKED_RANK_SEP_RATIO
 export const EXPANDER_Y_OFFSET_STACKED_BY_ZOOM: Record<ZoomLevel, number> = {
   detail: (STACKED_RANK_SEP - EXPANDER_SIZE.detail) / 2,
   compact: (STACKED_RANK_SEP - EXPANDER_SIZE.compact) / 2,
   dot: (STACKED_RANK_SEP - EXPANDER_SIZE.dot) / 2,
 }
+
+/**
+ * Height of the collapser's hover area — the band that reveals the button. In a
+ * full rank lane this sits comfortably between a node and its children.
+ */
+export const COLLAPSER_HOVER_HEIGHT = 80
+
+/**
+ * The same band over a stacked column, which halves the lane. At full height the
+ * box would reach past the end of the lane and cover the top of the first row,
+ * and since it is `pointer-events-auto` and above the nodes it would swallow
+ * that row's clicks. Clamped to whatever the lane has left below the button's
+ * own offset, so hovering the lane still reveals the button while every row
+ * stays clickable end to end.
+ */
+export const collapserHoverHeightStacked = (zoom: ZoomLevel): number =>
+  Math.max(
+    0,
+    Math.floor(
+      STACKED_RANK_SEP -
+        (EXPANDER_Y_OFFSET_STACKED_BY_ZOOM[zoom] +
+          COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM[zoom])
+    )
+  )
 
 // ─── F0GraphNodeWrapper ────────────────────────────────────────
 
@@ -346,7 +376,8 @@ function F0GraphCollapserWrapperInner({
   const i18n = useI18n()
   if (!zoomCtx || !actionsCtx) return null
 
-  const { parentId, parentWidth, collapseLabel } = data as CollapserNodeData
+  const { parentId, parentWidth, collapseLabel, stacked } =
+    data as CollapserNodeData
   if (zoomCtx.zoomLevel === "dot") return null
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -378,7 +409,12 @@ function F0GraphCollapserWrapperInner({
           "group pointer-events-auto flex items-start justify-center pt-2",
           focusRing()
         )}
-        style={{ width: parentWidth, height: 80 }}
+        style={{
+          width: parentWidth,
+          height: stacked
+            ? collapserHoverHeightStacked(zoomCtx.zoomLevel)
+            : COLLAPSER_HOVER_HEIGHT,
+        }}
       >
         <div
           className={cn(
