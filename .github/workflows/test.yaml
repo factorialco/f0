@@ -55,6 +55,42 @@ jobs:
 
   # ------------------------------------------------------------------------------
 
+  # A bugfix PR must ship a regression test: red on latest main (the test
+  # reproduces the bug) and green with the fix applied. The `fix` label is
+  # added by pr-name.yaml from the conventional-commit title; the title
+  # fallback covers the first event, before that label lands. Escape hatch
+  # for fixes that genuinely can't be unit-tested: the `skip-red-green` label.
+  bugfix-red-green:
+    needs: detect-changes
+    name: "[⚛️ REACT] Bugfix Red-Green"
+    if: |
+      github.event_name == 'pull_request' &&
+      needs.detect-changes.outputs.package_react == 'true' &&
+      (contains(github.event.pull_request.labels.*.name, 'fix') || startsWith(github.event.pull_request.title, 'fix')) &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-red-green') &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: the script diffs against origin/main and builds a
+          # worktree of it for the red run.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "22.x"
+      - name: Build core package
+        run: pnpm --filter @factorialco/f0-core build
+      - name: Verify the regression test (red on main, green with the fix)
+        run: pnpm --filter @factorialco/f0-react run check:bugfix-red-green
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_REF: origin/${{ github.base_ref }}
+
+  # ------------------------------------------------------------------------------
+
   test-react-native:
     needs: detect-changes
     name: "[📱 REACT NATIVE] Unit Tests"

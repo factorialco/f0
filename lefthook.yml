@@ -1,3 +1,12 @@
+# Preflight before pushing: bugfix branches must include a regression unit
+# test (and it must pass locally), and new components must meet the full
+# Definition of Done. Same policies CI enforces on the PR — this just surfaces
+# them before the push. Skip once with F0_SKIP_PREFLIGHT=1 git push.
+pre-push:
+  commands:
+    preflight:
+      run: pnpm exec tsx packages/react/.scripts/pre-push-preflight.ts
+
 # Validate commit messages
 commit-msg:
   commands:
