@@ -85,7 +85,7 @@ const F0GraphStackedNodeBase = forwardRef<
         aria-posinset={posInSet}
         aria-selected={state === "selected"}
         className={cn(
-          "group flex w-full items-center rounded-md border border-solid",
+          "group flex w-full items-center rounded-xl border border-solid",
           "bg-f1-background outline-none transition-[border-color,background-color,opacity] duration-200",
           isMarked
             ? "border-f1-border-selected-bold ring-2 ring-f1-background-selected ring-offset-0"
