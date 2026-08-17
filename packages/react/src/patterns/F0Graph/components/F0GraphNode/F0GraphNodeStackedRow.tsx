@@ -4,7 +4,9 @@ import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import type { GraphNodeState, GraphNodeVariant } from "./types"
+import type { F0GraphNodeTag, GraphNodeState, GraphNodeVariant } from "./types"
+
+import { F0GraphNodeTags } from "./F0GraphNodeTags"
 
 import {
   STACKED_NODE_AVATAR,
@@ -26,6 +28,12 @@ interface F0GraphNodeStackedRowProps {
   avatar?: AvatarVariant
   title?: ReactNode
   trailing?: ReactNode
+  /**
+   * Already filtered by `visibleTagTypes` and gated to detail zoom by
+   * [[F0GraphNode]]. Rendered under the strip, inside the room the layout
+   * reserved for them.
+   */
+  tags?: F0GraphNodeTag[]
   loading?: boolean
   height?: number
 }
@@ -34,10 +42,10 @@ interface F0GraphNodeStackedRowProps {
  * One row of a stacked column — what [[F0GraphNode]] renders when the graph
  * passes `stacked`, because this node's parent set `stackChildren`.
  *
- * It mirrors the card's anatomy (leading avatar, same title type scale per zoom)
- * so a column reads as a continuation of the parent above it, but it is a strip:
- * fixed height, indented a little narrower than the card, no subtitle, no tags,
- * no expand affordance.
+ * It mirrors the card's anatomy (leading avatar, same title type scale per zoom,
+ * tags underneath) so a column reads as a continuation of the parent above it,
+ * but it is a strip: fixed height, indented a little narrower than the card, no
+ * subtitle, no expand affordance.
  */
 export const F0GraphNodeStackedRow = ({
   shellProps,
@@ -46,6 +54,7 @@ export const F0GraphNodeStackedRow = ({
   avatar,
   title,
   trailing,
+  tags,
   loading,
   height = STACKED_NODE_HEIGHT,
 }: F0GraphNodeStackedRowProps) => {
@@ -58,8 +67,9 @@ export const F0GraphNodeStackedRow = ({
   // than growing like the card's dot, which would overflow the reserved band and
   // collide with the row below.
   const isDot = titleType === null
+  const tagsVisible = !!tags?.length
 
-  return (
+  const strip = (
     <div
       {...shellProps}
       data-zoom-level={variant}
@@ -152,6 +162,28 @@ export const F0GraphNodeStackedRow = ({
           {trailing}
         </div>
       )}
+    </div>
+  )
+
+  if (!tagsVisible) return strip
+
+  // The strip keeps the `treeitem` semantics and its own fixed height; the tags
+  // sit under it in the extra room the layout reserved (see the tag reservation
+  // in useGraphRenderModel). Wrapping rather than growing the strip is what
+  // keeps a row a row — the band grows, the strip does not.
+  return (
+    <div className="flex w-full flex-col gap-1.5">
+      {strip}
+      {/* Tags are informational: clicking one must not select the node. Same two
+          paths as the trailing slot — the row's `onClick` and the canvas
+          `pointerup` handler, which reads `data-no-node-select`. */}
+      <div
+        className="max-w-full"
+        data-no-node-select
+        onClick={(e) => e.stopPropagation()}
+      >
+        <F0GraphNodeTags tags={tags!} align="start" />
+      </div>
     </div>
   )
 }

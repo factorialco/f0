@@ -12,7 +12,7 @@ import {
   type F0GraphNodeRenderContext,
   type F0GraphProps,
 } from "../F0Graph"
-import { F0GraphNode } from "../components/F0GraphNode"
+import { F0GraphNode, type F0GraphNodeTag } from "../components/F0GraphNode"
 
 const meta = {
   title: "Graph/F0Graph",
@@ -1335,6 +1335,7 @@ export const StagedLoadingError: Story = {
 interface CatalogNode {
   name: string
   kind: "root" | "role" | "level"
+  headcount?: number
 }
 
 const CATALOG_NODES: GraphNode<CatalogNode>[] = [
@@ -1359,7 +1360,11 @@ const CATALOG_NODES: GraphNode<CatalogNode>[] = [
       ...levels.map((level, levelIndex) => ({
         id: `${roleId}-level-${levelIndex}`,
         parentId: roleId,
-        data: { name: `${level} ${role}`, kind: "level" as const },
+        data: {
+          name: `${level} ${role}`,
+          kind: "level" as const,
+          headcount: 2 + levelIndex * 3,
+        },
         childrenCount: 0,
       })),
     ]
@@ -1386,6 +1391,47 @@ const StackedChildrenDemo = () => {
   )
 }
 
+/**
+ * Six tag types on one row, so the wrap behaviour and the mixed tag heights are
+ * visible rather than implied. Each type is its own show/hide column, so the
+ * controls popover can toggle them independently.
+ */
+function levelTags(node: CatalogNode): F0GraphNodeTag[] {
+  const { headcount = 0, name } = node
+  return [
+    { type: "raw", text: `${headcount} people` },
+    { type: "status", text: "Open", variant: "positive" },
+    { type: "team", name: name.split(" ")[1] ?? "Platform" },
+    { type: "person", name: "Bob Smith" },
+    { type: "company", name: "Acme" },
+    { type: "alert", text: "Review due", level: "warning" },
+  ]
+}
+
+const StackedChildrenWithTagsDemo = () => {
+  return (
+    <F0Graph<CatalogNode>
+      nodes={CATALOG_NODES}
+      defaultExpandDepth={2}
+      showControls
+      // Declaring the columns is what makes the reservation scale: the layout
+      // sizes the tag area from how many tag types are visible. Passing only
+      // `reserveTagRow` would reserve a single row no matter how many tags
+      // render, and the wrapped rows would collide with the row below.
+      nodeTagTypes={["raw", "status", "team", "person", "company", "alert"]}
+      renderNode={(node, ctx) => (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "team", name: node.data.name }}
+          title={node.data.name}
+          subtitle={node.data.kind === "role" ? "Role" : undefined}
+          tags={node.data.headcount ? levelTags(node.data) : undefined}
+        />
+      )}
+    />
+  )
+}
+
 export const StackedChildren: Story = {
   parameters: {
     docs: {
@@ -1396,6 +1442,18 @@ export const StackedChildren: Story = {
     },
   },
   render: () => <StackedChildrenDemo />,
+}
+
+export const StackedChildrenWithTags: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Tags on stacked rows. The strip keeps its fixed height and the tags sit under it, in room the layout reserves per row (`reserveTagRow`) exactly as it does for a card. Detail zoom only — the tags leave with the title in compact and dot.",
+      },
+    },
+  },
+  render: () => <StackedChildrenWithTagsDemo />,
 }
 
 export const Snapshot: Story = {

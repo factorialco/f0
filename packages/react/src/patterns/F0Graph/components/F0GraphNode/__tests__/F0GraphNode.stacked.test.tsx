@@ -159,17 +159,63 @@ describe("F0GraphNode (stacked)", () => {
         stacked
         title="Senior"
         subtitle="Level 3"
-        tags={[{ type: "raw", label: "Ops" }]}
         actions={<button>act</button>}
       />
     )
 
     expect(screen.queryByText("Level 3")).not.toBeInTheDocument()
-    expect(screen.queryByText("Ops")).not.toBeInTheDocument()
     expect(
       screen.queryByRole("button", { name: "act" })
     ).not.toBeInTheDocument()
   })
+
+  // ── Tags ──
+  // Tags do fit a row: the strip keeps its height and they sit underneath, in
+  // room the layout reserves per row.
+
+  it("renders tags under the strip, leaving the strip's own height alone", () => {
+    zeroRender(
+      <F0GraphNode
+        stacked
+        title="Senior"
+        tags={[{ type: "raw", text: "Ops" }]}
+      />
+    )
+
+    expect(screen.getByText("Ops")).toBeInTheDocument()
+    const strip = screen.getByRole("treeitem")
+    expect(strip).toHaveStyle({ height: `${STACKED_NODE_HEIGHT}px` })
+    // The tags sit outside the treeitem, so clicking one cannot select the row.
+    expect(strip).not.toContainElement(screen.getByText("Ops"))
+  })
+
+  it("marks the tag row so the canvas pointer handler skips it", () => {
+    const { container } = zeroRender(
+      <F0GraphNode
+        stacked
+        title="Senior"
+        tags={[{ type: "raw", text: "Ops" }]}
+      />
+    )
+
+    expect(container.querySelector("[data-no-node-select]")).not.toBeNull()
+  })
+
+  it.each(["compact", "dot"] as const)(
+    "drops tags at %s zoom, where the title has gone too",
+    (variant) => {
+      zeroRender(
+        <F0GraphNode
+          stacked
+          title="Senior"
+          variant={variant}
+          tags={[{ type: "raw", text: "Ops" }]}
+        />
+      )
+
+      expect(screen.queryByText("Ops")).not.toBeInTheDocument()
+    }
+  )
 
   it("still renders the card shape when not stacked", () => {
     zeroRender(<F0GraphNode title="Senior" subtitle="Level 3" />)

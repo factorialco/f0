@@ -143,6 +143,15 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       onKeyDown: handleKeyDown,
     }
 
+    const isCompact = variant === "compact"
+    const isDot = variant === "dot"
+    const isDetail = variant === "detail"
+    const filteredTagsForShape = tags
+      ? visibleTagTypes
+        ? tags.filter((t) => visibleTagTypes.has(tagColumn(t)))
+        : tags
+      : undefined
+
     // A row has no pill chrome, no dot↔compact avatar growth and no hover card,
     // so it short-circuits every layer below.
     if (stacked) {
@@ -154,15 +163,13 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           avatar={avatar}
           title={title}
           trailing={trailing}
+          tags={isDetail ? filteredTagsForShape : undefined}
           loading={loading}
           height={stackedHeight}
         />
       )
     }
 
-    const isCompact = variant === "compact"
-    const isDot = variant === "dot"
-    const isDetail = variant === "detail"
     // Node silhouette follows the avatar's own shape (see F0Avatar): a `person`
     // avatar is a circle, so the node stays a circular dot / pill; every other
     // avatar (`team`, `company`, `icon`, …) is a rounded square, so the node

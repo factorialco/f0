@@ -27,6 +27,7 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  STACKED_NODE_HEIGHT,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
@@ -306,11 +307,17 @@ export function useGraphRenderModel<T>({
     : 0
   const reservedTagHeight = tagRowCount * TAG_ROW_HEIGHT
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
+  // A stacked row's band takes the same tag reservation as a card's rect. The
+  // strip itself stays `stackedNodeHeight` (the render config publishes that
+  // untouched); the extra room is where the tags below it go, so the next row
+  // starts under them instead of on top of them.
+  const effectiveStackedHeight =
+    (stackedNodeHeightProp ?? STACKED_NODE_HEIGHT) + reservedTagHeight
 
   const builtInEngine = useLayoutEngine({
     nodeWidth: nodeWidthProp,
     nodeHeight: effectiveNodeHeight,
-    stackedNodeHeight: stackedNodeHeightProp,
+    stackedNodeHeight: effectiveStackedHeight,
     stackedNodeGap: stackedNodeGapProp,
     snapGrid: BACKGROUND_DOT_GAP,
   })
