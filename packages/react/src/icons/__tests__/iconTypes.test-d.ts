@@ -2,7 +2,7 @@ import { assertType, describe, expectTypeOf, it } from "vitest"
 
 import * as AppIcons from "../app"
 import type { AppIconName, IconName, IconNamespace } from "../registry"
-import type { IconType } from "../resolve"
+import type { IconType, IconTypeOf } from "../resolve"
 
 describe("IconType", () => {
   it("accepts a component, which is what keeps existing props working", () => {
@@ -25,24 +25,28 @@ describe("IconType", () => {
   })
 })
 
-describe("IconType<Namespace>", () => {
+describe("IconTypeOf<Namespace>", () => {
   it("narrows to a single set", () => {
-    assertType<IconType<"modules">>("modules:payroll")
+    assertType<IconTypeOf<"modules">>("modules:payroll")
     // @ts-expect-error -- app names are outside the `modules` set
-    assertType<IconType<"modules">>("pencil")
+    assertType<IconTypeOf<"modules">>("pencil")
     // @ts-expect-error -- ai names are outside the `modules` set
-    assertType<IconType<"modules">>("ai:summary")
+    assertType<IconTypeOf<"modules">>("ai:summary")
   })
 
   it("narrows to a union of sets", () => {
-    assertType<IconType<"modules" | "ai">>("modules:payroll")
-    assertType<IconType<"modules" | "ai">>("ai:summary")
+    assertType<IconTypeOf<"modules" | "ai">>("modules:payroll")
+    assertType<IconTypeOf<"modules" | "ai">>("ai:summary")
     // @ts-expect-error -- app names are outside both sets
-    assertType<IconType<"modules" | "ai">>("pencil")
+    assertType<IconTypeOf<"modules" | "ai">>("pencil")
   })
 
   it("still accepts a component when narrowed, so the escape hatch survives", () => {
-    assertType<IconType<"modules">>(AppIcons.Pencil)
+    assertType<IconTypeOf<"modules">>(AppIcons.Pencil)
+  })
+
+  it("widens back to IconType when given every set", () => {
+    expectTypeOf<IconTypeOf<IconNamespace>>().toEqualTypeOf<IconType>()
   })
 })
 

@@ -58,23 +58,26 @@ return <F0Icon icon={Pencil} size="md" />
 
 #### Restricting a prop to certain sets
 
-`IconType` takes an optional type parameter naming the sets a prop accepts. It
-defaults to all of them, so a plain `IconType` means what it always has. Use
-`IconName` instead of `IconType` when the value has to stay serialisable — it
-drops the component from the union:
+`IconTypeOf<…>` names the sets a prop accepts. Use `IconName` instead when the
+value has to stay serialisable — it drops the component from the union:
 
 ```tsx
 type Props = {
-  icon: IconType                   // any name, or a component
-  moduleIcon: IconType<"modules">  // module names only, or a component
-  badge: IconType<"modules" | "ai"> // either set, or a component
-  persisted: IconName<"modules">   // module names only, no component
+  icon: IconType                       // any name, or a component
+  moduleIcon: IconTypeOf<"modules">    // module names only, or a component
+  badge: IconTypeOf<"modules" | "ai">  // either set, or a component
+  persisted: IconName<"modules">       // module names only, no component
 }
 ```
 
-Narrowing constrains the *names*. A component still satisfies `IconType<…>`,
+Narrowing constrains the *names*. A component still satisfies `IconTypeOf<…>`,
 because icon components are structurally identical and can't be told apart by
 their set — the escape hatch stays open.
+
+`IconType` itself is deliberately not generic. It appears on hundreds of public
+props, and a generic with a default type argument gets expanded in the shipped
+type declarations, so consumers would see `IconType<keyof IconNamesByNamespace>`
+on every icon prop instead of a plain `IconType`.
 
 #### Names known only at runtime
 

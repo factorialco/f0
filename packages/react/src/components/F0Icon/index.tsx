@@ -22,6 +22,7 @@ export type {
   IconNamespace,
   IconNamesByNamespace,
   IconType,
+  IconTypeOf,
   ModulesIconName,
 } from "./F0Icon"
 export { isIconName, resolveIcon, resolveIconName } from "@/icons/resolve"

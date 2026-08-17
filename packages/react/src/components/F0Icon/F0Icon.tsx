@@ -46,6 +46,7 @@ export type {
   ModulesIconName,
 } from "@/icons/registry"
 export type { IconComponent } from "@/icons/types"
+export type { IconTypeOf } from "@/icons/resolve"
 export type { IconType }
 
 export interface F0IconProps
