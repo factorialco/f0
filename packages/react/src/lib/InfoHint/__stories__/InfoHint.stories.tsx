@@ -69,7 +69,7 @@ const shows = async (node: () => HTMLElement) =>
 const meta = {
   title: "InfoHint",
   component: InfoHint,
-  tags: ["autodocs", "internal"],
+  tags: ["internal", "!autodocs"],
   parameters: {
     layout: "centered",
     docs: {
