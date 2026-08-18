@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.37.1](https://github.com/factorialco/f0/compare/f0-react-v6.37.0...f0-react-v6.37.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **F0Select:** keep one trigger node across selection changes ([#5152](https://github.com/factorialco/f0/issues/5152)) ([abb61b7](https://github.com/factorialco/f0/commit/abb61b7db849cde8447aa2593347ca5456700fe5))
+
 ## [6.37.0](https://github.com/factorialco/f0/compare/f0-react-v6.36.0...f0-react-v6.37.0) (2026-08-18)
 
 
