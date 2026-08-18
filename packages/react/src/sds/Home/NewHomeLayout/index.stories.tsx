@@ -1362,24 +1362,27 @@ const clockInDay = (
  * clock's button, and the day decides which button that is. Click the glyph — or
  * the tile's own controls, which drive the same state — to move between all three.
  *
- * Each state has its own COLOUR, which is what `tone` is for — one word paints the
- * pill and the button together, so the rail says which state you are in before
- * you have read the number.
+ * Each state has its own COLOUR, and it is the colour the TILE already uses for
+ * it — `CLOCK_IN_COLORS`, the same values its status dot pulses and its bar is
+ * drawn in. One word (`tone`) paints the pill and the button together, so the
+ * rail says which state you are in before you have read the number, and says it
+ * in the same green the card does.
  *
- * - **Clocked out.** No reading to show, so no pill: just the accent play button.
- *   The day is on offer, not overdue.
- * - **Clocked in.** An `accent` PILL — the running total in HOURS AND MINUTES, its
- *   separator blinking once a second the way a clock does (`ticking`), with "Take
- *   a break" as a plain chip at the end of it. Nothing is being asked of you, so
- *   the icon holds still.
- * - **On a break.** A `warning` pill counting the BREAK, and the button FLASHES
- *   between the clock's own icon and the play triangle: amber says paused, the
- *   flash asks you to do something about it.
+ * - **Clocked out.** The dark slab (`neutral`), holding what the day came to, with
+ *   the accent play button on it. Nothing is running, so nothing blinks.
+ * - **Clocked in.** A `positive` pill — `--positive-50`, the tile's own green —
+ *   with the running total in HOURS AND MINUTES, its separator blinking once a
+ *   second the way a clock does (`ticking`), and "Take a break" as a plain chip at
+ *   the end of it. Nothing is being asked of you, so the icon holds still.
+ * - **On a break.** A `promote` pill — `--promote-50`, the tile's amber — counting
+ *   the BREAK, and the button FLASHES between the clock's own icon and the play
+ *   triangle: the colour says paused, the flash asks you to do something about it.
  *
  * Hover any of them and the card floats out as ever — the pill gives its width
- * back while it does, since the card says all of it in full.
+ * back while it does, since the card says all of it in full, and the button it
+ * leaves behind is the same button it always was.
  *
- * Both readings are HOURS AND MINUTES on a real clock, so they change once a
+ * Every reading is HOURS AND MINUTES on a real clock, so they change once a
  * minute. What says "this is running" second to second is the blink, not a digit.
  */
 const ClockGlyphActionHome = () => {
@@ -1409,8 +1412,11 @@ const ClockGlyphActionHome = () => {
           icon: SolidPause,
           label: "Take a break",
           text: hhmm(worked),
-          // The day is RUNNING: the accent pill, and the clock's own blink.
-          tone: "accent",
+          // THE SAME GREEN THE TILE PULSES: `positive` is `--positive-50`, which
+          // is exactly what `CLOCK_IN_COLORS["clocked-in"]` paints the status dot
+          // and the day's bar. The glyph and the card are one state, so they are
+          // one colour.
+          tone: "positive",
           ticking: true,
           onClick: () => {
             setOnBreak(0)
@@ -1422,9 +1428,10 @@ const ClockGlyphActionHome = () => {
             icon: SolidPlay,
             label: "Resume",
             text: hhmm(onBreak),
-            // A DIFFERENT COLOUR for a different state — amber says paused
-            // without saying broken, and the flashing icon does the asking.
-            tone: "warning",
+            // …and the same amber, `--promote-50`, that the tile pulses on a
+            // break (`CLOCK_IN_COLORS.break`) — not `warning`, which is a
+            // different yellow and would say something the tile isn't saying.
+            tone: "promote",
             ticking: true,
             flashing: true,
             onClick: () => setStatus("clocked-in"),
@@ -1432,10 +1439,12 @@ const ClockGlyphActionHome = () => {
         : {
             icon: SolidPlay,
             label: "Clock in",
-            onClick: () => {
-              setWorked(0)
-              setStatus("clocked-in")
-            },
+            // STILL A READING, on the dark slab: what the day came to so far. The
+            // clock has stopped, so nothing blinks — the tone is what says the
+            // difference between a total that is still moving and one that isn't.
+            text: hhmm(worked),
+            tone: "neutral",
+            onClick: () => setStatus("clocked-in"),
           }
 
   const [clock, ...rest] = RIGHT_WIDGETS

@@ -624,6 +624,7 @@ export const railActionTones = [
   "accent",
   "critical",
   "warning",
+  "promote",
   "positive",
 ] as const
 
@@ -661,11 +662,18 @@ export type HomeWidgetRailAction = {
    *
    * - `"neutral"` (the default) — the dark slab, with the accent button on it.
    *   Nothing about the state is remarkable; it is simply running.
-   * - `"accent"`, `"critical"`, `"warning"`, `"positive"` — the pill takes that
-   *   colour and the button becomes a plain chip carrying it in its icon, so the
-   *   two never fight over the same hue.
+   * - `"accent"`, `"critical"`, `"warning"`, `"promote"`, `"positive"` — the pill
+   *   takes that colour and the button becomes a plain chip carrying it in its
+   *   icon, so the two never fight over the same hue.
    *
    * Without a `text` there is no pill, and the tone paints the button itself.
+   *
+   * PICK THE ONE THE WIDGET ALREADY USES. A rail action stands in for a state the
+   * card is also showing, and the semantic tones are the same values that state
+   * is drawn with elsewhere — a clock-in tile pulses `--positive-50` while it
+   * runs and `--promote-50` on a break, which is exactly `"positive"` and
+   * `"promote"` here. Two names for one state is how a glyph ends up a different
+   * green from the card it came out of.
    */
   tone?: RailActionTone
   /**

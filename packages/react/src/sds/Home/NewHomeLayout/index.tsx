@@ -236,6 +236,17 @@ const RAIL_ACTION_TONES = {
     solo: "bg-f1-background-warning-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
     soloIcon: "inverse",
   },
+  // The amber `--promote-50`, which is also the colour a clock-in tile pulses on
+  // a break: a rail action that mirrors a widget's own status should be able to
+  // mirror its colour exactly, not approximate it with `warning`.
+  promote: {
+    pill: "bg-f1-background-promote-bold text-f1-foreground-inverse",
+    button:
+      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    icon: "promote",
+    solo: "bg-f1-background-promote-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    soloIcon: "inverse",
+  },
   positive: {
     pill: "bg-f1-background-positive-bold text-f1-foreground-inverse",
     button:
