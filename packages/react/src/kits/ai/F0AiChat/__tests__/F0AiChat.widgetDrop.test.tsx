@@ -19,8 +19,14 @@ import {
 } from "../providers/AiChatStateProvider"
 
 const Probe = () => {
-  const { setOpen, pendingQuote, setIsClarifying, setPanelContent, setMode } =
-    useAiChat()
+  const {
+    setOpen,
+    pendingQuote,
+    setIsClarifying,
+    setPanelContent,
+    setMode,
+    openGame,
+  } = useAiChat()
 
   return (
     <>
@@ -40,6 +46,9 @@ const Probe = () => {
       </button>
       <button type="button" onClick={() => setMode("voice")}>
         Start voice mode
+      </button>
+      <button type="button" onClick={() => openGame("pong")}>
+        Start Pong
       </button>
       <span data-testid="quote">{pendingQuote?.text ?? ""}</span>
     </>
@@ -232,6 +241,7 @@ describe("F0AiChat widget drop", () => {
     ],
     ["hosted panel", () => renderChat()],
     ["voice mode", () => renderChat()],
+    ["Pong", () => renderChat()],
   ])("does not expose a widget drop zone over %s", async (surface, setup) => {
     setup()
     await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
@@ -243,6 +253,8 @@ describe("F0AiChat widget drop", () => {
       await userEvent.click(
         screen.getByRole("button", { name: "Start voice mode" })
       )
+    } else if (surface === "Pong") {
+      await userEvent.click(screen.getByRole("button", { name: "Start Pong" }))
     }
 
     expect(document.querySelector("[data-ai-chat-dropzone]")).toBeNull()

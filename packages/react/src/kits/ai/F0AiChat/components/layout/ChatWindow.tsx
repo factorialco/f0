@@ -60,6 +60,7 @@ export const SidebarWindow = ({
     closeGame,
     panelSide,
   } = useAiChat()
+  const canAcceptWidgetDrop = acceptsWidgetDrop && activeGame === null
   const isCanvasMode = visualizationMode === "canvas"
   const reducedMotion = useReducedMotion()
   // Hosts dock the whole panel left for a chat-first experience (communications);
@@ -144,7 +145,7 @@ export const SidebarWindow = ({
   useEffect(() => {
     const onStart = (e: Event) => {
       // Same freeze as the file drop: a clarifying flow owns the panel.
-      if (!acceptsWidgetDrop || isClarifying) return
+      if (!canAcceptWidgetDrop || isClarifying) return
       const detail = (e as CustomEvent<WidgetDragStartDetail>).detail
       if (
         typeof detail?.id !== "string" ||
@@ -163,20 +164,20 @@ export const SidebarWindow = ({
       window.removeEventListener(WIDGET_DRAG_START, onStart)
       window.removeEventListener(WIDGET_DRAG_END, onEnd)
     }
-  }, [acceptsWidgetDrop, isClarifying, setDragQuoteBoth])
+  }, [canAcceptWidgetDrop, isClarifying, setDragQuoteBoth])
 
   // A view change, host overlay, or clarifying flow can take ownership of the
   // shell while a pointer is still down. Retract the invitation immediately
   // so releasing over non-chat content can never create an invisible quote.
   useEffect(() => {
-    if (!acceptsWidgetDrop || isClarifying) setDragQuoteBoth(null)
-  }, [acceptsWidgetDrop, isClarifying, setDragQuoteBoth])
+    if (!canAcceptWidgetDrop || isClarifying) setDragQuoteBoth(null)
+  }, [canAcceptWidgetDrop, isClarifying, setDragQuoteBoth])
 
   // Releasing over the chat quotes the widget. This is a handler on the card,
   // so a release anywhere else simply never reaches it — the grid's own
   // `pointerup` clears the invitation via WIDGET_DRAG_END.
   const handlePointerUp = useCallback(() => {
-    if (!acceptsWidgetDrop || isClarifying) {
+    if (!canAcceptWidgetDrop || isClarifying) {
       setDragQuoteBoth(null)
       return
     }
@@ -190,7 +191,7 @@ export const SidebarWindow = ({
       focusChatInput()
     }
   }, [
-    acceptsWidgetDrop,
+    canAcceptWidgetDrop,
     focusChatInput,
     isClarifying,
     setDragQuoteBoth,
@@ -309,7 +310,7 @@ export const SidebarWindow = ({
             // Marks this card as a drop target for pointer-driven drags
             // elsewhere in the app (the dashboard grid hit-tests for it to
             // suppress its own reorder while the cursor is over the chat).
-            data-ai-chat-dropzone={acceptsWidgetDrop ? "" : undefined}
+            data-ai-chat-dropzone={canAcceptWidgetDrop ? "" : undefined}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -321,7 +322,7 @@ export const SidebarWindow = ({
             </div>
             {/* `canDrop` gates only the file drop — quoting a dragged widget
                 needs no upload handler, so it renders on its own. */}
-            {(canDrop || (acceptsWidgetDrop && dragQuote !== null)) && (
+            {(canDrop || (canAcceptWidgetDrop && dragQuote !== null)) && (
               <DropOverlay
                 visible={(canDrop && fileDragOver) || dragQuote !== null}
                 mode={dragQuote !== null ? "discuss" : "files"}

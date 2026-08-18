@@ -114,12 +114,17 @@ export const DragWidgetToQuote: Story = {
     const clientX = dropRect.left + dropRect.width / 2
     const clientY = dropRect.top + dropRect.height / 2
 
-    await step("Show the chat invitation when widget dragging starts", () => {
-      fireEvent.pointerDown(grip, { button: 0 })
-      expect(
-        canvas.getByText("Drop here to discuss with One")
-      ).toBeInTheDocument()
-    })
+    await step(
+      "Show the chat invitation when widget dragging starts",
+      async () => {
+        fireEvent.pointerDown(grip, { button: 0 })
+        await waitFor(() =>
+          expect(
+            canvas.getByText("Drop here to discuss with One")
+          ).toBeInTheDocument()
+        )
+      }
+    )
 
     await step("Drop into chat without reordering the dashboard", async () => {
       fireEvent.pointerMove(ownerDocument, { clientX, clientY })
