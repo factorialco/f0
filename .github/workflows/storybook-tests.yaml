@@ -92,9 +92,8 @@ jobs:
           retention-days: 1
 
   # Single job to gate the branch on, so protection rules do not have to list
-  # every shard (and do not need editing when SHARD_TOTAL changes). It keeps the
-  # name the unsharded job used to have, so it is a drop-in for anything that
-  # already referenced "[⚛️ REACT] Storybook Tests".
+  # every shard, and does not need editing when SHARD_TOTAL changes. Named to
+  # match the "✅ …" gate every other PR workflow now exposes.
   #
   # `if: always()` is load-bearing. Without it a failing shard makes this job
   # *skipped* rather than *failed*, and a skipped check is not a red check — the
@@ -106,7 +105,7 @@ jobs:
   # PR comment and is not worth blocking a merge over.
   storybook-tests-passed:
     needs: [detect-changes, test]
-    name: "[⚛️ REACT] Storybook Tests"
+    name: "✅ Storybook Tests"
     if: always()
     runs-on: ubuntu-latest
     steps:
