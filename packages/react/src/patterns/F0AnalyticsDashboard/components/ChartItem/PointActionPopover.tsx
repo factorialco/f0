@@ -21,7 +21,7 @@ export type PointActionPopoverProps = {
   /** Called when the action is chosen. */
   onAsk: () => void
   /** Called when the popover should close without acting. */
-  onDismiss: () => void
+  onDismiss: (reason: "escape" | "outside" | "viewport") => void
 }
 
 /**
@@ -77,13 +77,17 @@ export function PointActionPopover({
   useEffect(() => {
     if (!anchor) return
 
+    const focusFrame = requestAnimationFrame(() => {
+      containerRef.current?.querySelector<HTMLButtonElement>("button")?.focus()
+    })
+
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDismiss()
+      if (e.key === "Escape") onDismiss("escape")
     }
     const onPointerDown = (e: PointerEvent) => {
       const el = containerRef.current
       if (el && e.target instanceof Node && el.contains(e.target)) return
-      onDismiss()
+      onDismiss("outside")
     }
 
     document.addEventListener("keydown", onKeyDown)
@@ -94,10 +98,11 @@ export function PointActionPopover({
     // entirely, and a popover that follows it out would be worse than one
     // that goes away. Capture, because the dashboard scrolls inside its own
     // containers and `scroll` doesn't bubble.
-    const onViewportChange = () => onDismiss()
+    const onViewportChange = () => onDismiss("viewport")
     window.addEventListener("scroll", onViewportChange, true)
     window.addEventListener("resize", onViewportChange)
     return () => {
+      cancelAnimationFrame(focusFrame)
       document.removeEventListener("keydown", onKeyDown)
       document.removeEventListener("pointerdown", onPointerDown, true)
       window.removeEventListener("scroll", onViewportChange, true)

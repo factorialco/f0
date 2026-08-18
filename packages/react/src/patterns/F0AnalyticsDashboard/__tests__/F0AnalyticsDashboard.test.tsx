@@ -234,6 +234,58 @@ describe("F0AnalyticsDashboard Ask One", () => {
       title: "Headcount",
     })
   })
+
+  it("passes a keyboard-selected chart point through the public handler", async () => {
+    const user = userEvent.setup()
+    const onAskAi = vi.fn()
+
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          {
+            id: "headcount-chart",
+            title: "Headcount by department",
+            type: "chart",
+            chart: { type: "bar" },
+            fetchData: () =>
+              Promise.resolve({
+                categories: ["Engineering"],
+                series: [{ name: "Headcount", data: [145] }],
+              }),
+          },
+        ]}
+        onAskAi={onAskAi}
+      />
+    )
+
+    const trigger = await screen.findByRole("button", {
+      name: "Ask One: Headcount by department",
+    })
+    trigger.focus()
+    await user.keyboard("{Enter}")
+    await user.click(
+      await screen.findByRole("menuitem", {
+        name: "Headcount by department — Engineering, Headcount: 145",
+      })
+    )
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount-chart",
+      title: "Headcount by department",
+      point: {
+        source: "keyboard",
+        seriesName: "Headcount",
+        category: "Engineering",
+        value: 145,
+        values: [145],
+        series: [{ name: "Headcount", seriesIndex: 0, value: 145 }],
+        dataIndex: 0,
+        seriesIndex: 0,
+        clientX: 0,
+        clientY: 0,
+      },
+    })
+  })
 })
 
 describe("F0AnalyticsDashboard — unrenderable chart config", () => {
