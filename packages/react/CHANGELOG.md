@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.37.2](https://github.com/factorialco/f0/compare/f0-react-v6.37.1...f0-react-v6.37.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** center table cell content in a 24px band ([#5154](https://github.com/factorialco/f0/issues/5154)) ([bc06d99](https://github.com/factorialco/f0/commit/bc06d99a47a24d9bc30284350b6f7767b6ca99f7))
+
 ## [6.37.1](https://github.com/factorialco/f0/compare/f0-react-v6.37.0...f0-react-v6.37.1) (2026-08-18)
 
 
