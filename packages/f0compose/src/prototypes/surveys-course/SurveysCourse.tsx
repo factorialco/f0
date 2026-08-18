@@ -4104,9 +4104,9 @@ function LearnerCourseScreen() {
   const learnerTabs = [
     { id: "overview", label: "Overview", onClick: () => {} },
     { id: "content", label: "Course content", onClick: () => goToTab("content") },
-    { id: "evaluations", label: "Evaluations", onClick: () => goToTab("evaluations") },
     { id: "materials", label: "Materials", onClick: () => {} },
     { id: "sessions", label: "Sessions", onClick: () => {} },
+    { id: "evaluations", label: "Evaluations", onClick: () => goToTab("evaluations") },
     { id: "certificates", label: "Certificates", onClick: () => {} },
   ]
 
@@ -4139,6 +4139,7 @@ function LearnerCourseScreen() {
         <F0Box display="flex" flexDirection="column" gap="2xl">
           {learnerTab === "content" && (
           <F0BoxWithClassName className="px-12 flex flex-col gap-4">
+          <F0Heading content="Modules" variant="heading" as="h2" />
           <OneDataCollection
             id={`${SLUG}/learner-content/v1`}
             storage={false}
@@ -4180,6 +4181,8 @@ function LearnerCourseScreen() {
                 description="Knowledge tests and surveys for this course will appear here."
               />
             ) : (
+            <>
+            <F0Heading content="Evaluations" variant="heading" as="h2" />
             <div style={{ position: "relative" }}>
             <OneDataCollection
               id={`${SLUG}/learner-evaluations/v1`}
@@ -4224,6 +4227,7 @@ function LearnerCourseScreen() {
               ]}
             />
             </div>
+            </>
             )}
           </F0BoxWithClassName>
           )}
