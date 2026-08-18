@@ -1,7 +1,7 @@
 import { forwardRef } from "react"
 
 import { F0Link } from "@/components/F0Link"
-import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { type MobileDropdownItem } from "@/experimental/Navigation/Dropdown"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
@@ -67,7 +67,7 @@ export interface F0CardHorizontalProps {
   /**
    * Overflow (⋯) menu actions, rendered as the trailing control of the row.
    */
-  otherActions?: DropdownItem[]
+  otherActions?: MobileDropdownItem[]
 
   /**
    * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair

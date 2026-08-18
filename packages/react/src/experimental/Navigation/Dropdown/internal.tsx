@@ -36,6 +36,13 @@ export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   critical?: boolean
   avatar?: AvatarVariant
   disabled?: boolean
+  /**
+   * Marks an item as one choice in a single-selection menu. Selectable items
+   * expose `menuitemradio` semantics and run their callback immediately so a
+   * selection is committed before the menu's close callback can unmount it.
+   * Desktop Dropdown only; MobileDropdown excludes this property.
+   */
+  selected?: boolean
 }
 
 export type DropdownInternalProps = {
@@ -46,6 +53,8 @@ export type DropdownInternalProps = {
   align?: "start" | "end" | "center"
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** Container element used by the menu portal. */
+  portalContainer?: HTMLElement | null
   label?: string
   /**
    * Whether the dropdown trigger is disabled. When true, the menu cannot be
@@ -64,6 +73,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     icon: _icon,
     avatar: _avatar,
     description: _description,
+    selected,
     href,
     critical,
     disabled,
@@ -80,6 +90,9 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
       asChild
       className={cn(itemClass, "cursor-pointer")}
       disabled={disabled}
+      {...(selected === undefined
+        ? {}
+        : { role: "menuitemradio", "aria-checked": selected })}
     >
       {href ? (
         <Link
@@ -125,12 +138,15 @@ function renderDropdownItem(
       key={index}
       item={{
         ...item,
-        onClick: () => {
-          // Seems to be a bug on radix-ui that mix the animation events, and if the dropdown triggers a dialog, the dialog will be closed before the dropdown is closed
-          setTimeout(() => {
-            item.onClick?.()
-          }, 200)
-        },
+        onClick:
+          item.selected === undefined
+            ? () => {
+                // Seems to be a bug on radix-ui that mix the animation events, and if the dropdown triggers a dialog, the dialog will be closed before the dropdown is closed
+                setTimeout(() => {
+                  item.onClick?.()
+                }, 200)
+              }
+            : item.onClick,
       }}
     />
   )
@@ -144,6 +160,7 @@ export function DropdownInternal({
   children,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
+  portalContainer,
   label,
   disabled,
   ...rest
@@ -212,7 +229,7 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align}>
+      <DropdownMenuContent align={align} container={portalContainer}>
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>

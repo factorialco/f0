@@ -62,8 +62,8 @@ const meta: Meta = {
         component:
           "<p>Renders an select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so can handle large amount of items</p>" +
-          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> is accessible but visually hidden.</p>' +
-          "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
+          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value, non-clearable, and static; their required <code>label</code> is accessible but visually hidden, and their popup reuses Dropdown.</p>' +
+          "<p>Field options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row. Dropdown-backed inline options support descriptions, icons, avatars, and disabled state, but not Select metadata or tags.</p>",
       },
     },
   },
@@ -72,7 +72,7 @@ const meta: Meta = {
       control: "radio",
       options: selectVariants,
       description:
-        "Field renders the standard form control. Inline renders a compact, borderless single-value row control and does not support clearing, multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props.",
+        "Field renders the standard form control. Inline renders a compact, borderless single-value row control backed by Dropdown and does not support Select metadata or tags, data sources, search, clearing, multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props.",
       table: {
         type: { summary: selectVariants.join(" | ") },
         defaultValue: { summary: "field" },

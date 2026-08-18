@@ -1,16 +1,27 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
-import { createRef, useState } from "react"
+import { createRef, forwardRef, type SVGProps, useState } from "react"
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest"
 
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
 
-import type { F0SelectItemProps, F0SelectProps } from "../types"
+import type {
+  F0SelectInlineItemProps,
+  F0SelectItemProps,
+  F0SelectProps,
+} from "../types"
 
 import { Delete, Search } from "../../../icons/app"
 import { F0Select } from "../index"
+
+const SelectedOptionLeadingIcon = forwardRef<
+  SVGSVGElement,
+  SVGProps<SVGSVGElement>
+>(function SelectedOptionLeadingIcon(props, ref) {
+  return <svg {...props} ref={ref} data-testid="selected-option-leading-icon" />
+})
 
 const mockOptions: F0SelectItemProps<string, RecordType>[] = [
   {
@@ -331,6 +342,35 @@ describe("Select", () => {
       >().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["loading"]>().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["error"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["source"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["mapOptions"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["searchFn"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["showSearchBox"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["fitContentWidth"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["portalContainer"]>().toEqualTypeOf<
+        HTMLElement | null | undefined
+      >()
+      type InlineOption = Exclude<
+        InlineProps["options"][number],
+        { type: "separator" }
+      >
+      expectTypeOf<InlineOption["tag"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineOption["metadata"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["defaultItem"]>().toEqualTypeOf<
+        InlineOption | undefined
+      >()
+
+      type InlineRecordProps = Extract<
+        F0SelectProps<"viewer", RecordType>,
+        { variant: "inline" }
+      >
+      type InlineRecordOption = Exclude<
+        InlineRecordProps["options"][number],
+        { type: "separator" }
+      >
+      expectTypeOf<InlineRecordOption["item"]>().toEqualTypeOf<
+        RecordType | undefined
+      >()
     })
 
     const roleOptions = [
@@ -351,6 +391,16 @@ describe("Select", () => {
       },
     ]
 
+    const openInlineSelect = async (
+      user: ReturnType<typeof userEvent.setup>,
+      name = "Access level"
+    ) => {
+      await user.click(screen.getByRole("button", { name: new RegExp(name) }))
+      await waitFor(() => {
+        expect(screen.getByRole("menu")).toBeInTheDocument()
+      })
+    }
+
     it("renders selected and placeholder states and follows controlled updates", async () => {
       const { rerender } = render(
         <F0Select
@@ -363,8 +413,9 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const trigger = screen.getByRole("button", { name: /Access level/ })
       expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      expect(trigger).toHaveAccessibleName("Access level: Viewer")
       expect(screen.queryByText("Access level")).not.toBeInTheDocument()
 
       rerender(
@@ -380,6 +431,7 @@ describe("Select", () => {
 
       await waitFor(() => {
         expect(within(trigger).getByText("Editor")).toBeInTheDocument()
+        expect(trigger).toHaveAccessibleName("Access level: Editor")
       })
 
       rerender(
@@ -395,6 +447,7 @@ describe("Select", () => {
 
       await waitFor(() => {
         expect(within(trigger).getByText("Select role")).toBeInTheDocument()
+        expect(trigger).toHaveAccessibleName("Access level: Select role")
       })
     })
 
@@ -410,7 +463,7 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const trigger = screen.getByRole("button", { name: /Access level/ })
       expect(trigger.className).toContain("h-7")
       expect(trigger.className).toContain("pl-3")
       expect(trigger.className).toContain("pr-1")
@@ -431,58 +484,12 @@ describe("Select", () => {
       expect(trigger.className).toContain("pr-2")
     })
 
-    it("keeps the requested sm size when an option uses a status tag", () => {
-      render(
-        <F0Select
-          variant="inline"
-          label="Approval status"
-          options={[
-            {
-              value: "approved",
-              label: "Approved",
-              tag: {
-                type: "status",
-                text: "Approved",
-                variant: "positive",
-              },
-            },
-          ]}
-          value="approved"
-          size="sm"
-          onChange={() => {}}
-        />
-      )
-
-      expect(
-        screen.getByRole("combobox", { name: "Approval status" }).className
-      ).toContain("h-7")
-    })
-
-    it("uses defaultItem while a data source is loading", () => {
-      const source = createDataSourceDefinition<RecordType>({
-        dataAdapter: {
-          paginationType: "infinite-scroll",
-          fetchData: () =>
-            Promise.resolve({
-              type: "infinite-scroll" as const,
-              cursor: undefined,
-              perPage: 100,
-              hasMore: false,
-              records: [],
-              total: 0,
-            }),
-        },
-      })
-
+    it("uses defaultItem when the selected option is not in the list", () => {
       render(
         <F0Select
           variant="inline"
           label="Access level"
-          source={source}
-          mapOptions={(item) => ({
-            value: item.id as string,
-            label: item.name as string,
-          })}
+          options={[]}
           value="viewer"
           defaultItem={{ value: "viewer", label: "Viewer" }}
           onChange={() => {}}
@@ -490,9 +497,9 @@ describe("Select", () => {
       )
 
       expect(
-        within(
-          screen.getByRole("combobox", { name: "Access level" })
-        ).getByText("Viewer")
+        within(screen.getByRole("button", { name: /Access level/ })).getByText(
+          "Viewer"
+        )
       ).toBeInTheDocument()
     })
 
@@ -507,7 +514,7 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const trigger = screen.getByRole("button", { name: /Access level/ })
       expect(trigger.className).toContain("w-fit")
       expect(trigger.className).toContain("gap-1")
       expect(trigger.className).toContain("rounded-sm")
@@ -533,7 +540,7 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const trigger = screen.getByRole("button", { name: /Access level/ })
       expect(trigger).toBeDisabled()
       expect(trigger.className).toContain("disabled:bg-f1-background-tertiary")
       expect(trigger.className).toContain(
@@ -543,12 +550,77 @@ describe("Select", () => {
       await user.click(trigger)
 
       expect(trigger).toHaveAttribute("aria-expanded", "false")
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument()
     })
 
     it("selects an option and reports it through onChange", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
+      const handleSelectedOption = vi.fn()
+      const editorRecord: RecordType = {
+        id: "editor",
+        role: "editor",
+      }
+      const options: F0SelectInlineItemProps<string, RecordType>[] =
+        roleOptions.map((option) =>
+          option.value === "editor" ? { ...option, item: editorRecord } : option
+        )
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={options}
+          value="viewer"
+          onChange={handleChange}
+          onChangeSelectedOption={handleSelectedOption}
+        />
+      )
+
+      await openInlineSelect(user)
+      await user.click(screen.getByRole("menuitemradio", { name: /Editor/ }))
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith(
+          "editor",
+          editorRecord,
+          expect.objectContaining({ value: "editor", label: "Editor" })
+        )
+      })
+      expect(handleSelectedOption).toHaveBeenCalledWith(
+        expect.objectContaining({
+          value: "editor",
+          label: "Editor",
+          item: editorRecord,
+        }),
+        true
+      )
+      await waitFor(() => {
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument()
+      })
+      expect(
+        within(screen.getByRole("button", { name: /Access level/ })).getByText(
+          "Editor"
+        )
+      ).toBeInTheDocument()
+
+      await openInlineSelect(user)
+      expect(
+        screen.getByRole("menuitemradio", { name: /Editor/ })
+      ).toHaveAttribute("aria-checked", "true")
+      expect(
+        screen
+          .getByRole("menuitemradio", { name: /Editor/ })
+          .querySelector("svg")
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("menuitemradio", { name: /Viewer/ })
+      ).toHaveAttribute("aria-checked", "false")
+    })
+
+    it("does not emit a change when the selected option is activated", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      const handleSelectedOption = vi.fn()
       render(
         <F0Select
           variant="inline"
@@ -556,129 +628,20 @@ describe("Select", () => {
           options={roleOptions}
           value="viewer"
           onChange={handleChange}
+          onChangeSelectedOption={handleSelectedOption}
         />
       )
 
-      await openSelect(user)
-      await user.keyboard("{ArrowUp}{Enter}")
+      await openInlineSelect(user)
+      await user.click(screen.getByRole("menuitemradio", { name: /Viewer/ }))
 
-      await waitFor(() => {
-        expect(handleChange).toHaveBeenCalledWith(
-          "editor",
-          undefined,
-          expect.objectContaining({ value: "editor", label: "Editor" })
-        )
-      })
-      await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-      })
-      expect(
-        within(
-          screen.getByRole("combobox", { name: "Access level" })
-        ).getByText("Editor")
-      ).toBeInTheDocument()
+      expect(handleChange).not.toHaveBeenCalled()
+      expect(handleSelectedOption).not.toHaveBeenCalled()
     })
 
-    it("defaults to content width and honors an explicit popup-width override", async () => {
+    it("forwards opening and closing transitions through onOpenChange", async () => {
       const user = userEvent.setup()
-      const firstRender = render(
-        <F0Select
-          variant="inline"
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          onChange={() => {}}
-        />
-      )
-
-      await openSelect(user)
-      expect(screen.getByRole("listbox").className).toContain("w-max")
-
-      firstRender.unmount()
-
-      render(
-        <F0Select
-          variant="inline"
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          fitContentWidth={false}
-          onChange={() => {}}
-        />
-      )
-
-      await openSelect(user)
-      expect(screen.getByRole("listbox").className).toContain("min-w-80")
-    })
-
-    it("uses compact popup rows without changing field option styling", async () => {
-      const user = userEvent.setup()
-      const inlineRender = render(
-        <F0Select
-          variant="inline"
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          onChange={() => {}}
-        />
-      )
-
-      await openSelect(user)
-
-      const inlineListbox = screen.getByRole("listbox")
-      const inlineOption = screen.getByRole("option", { name: /Viewer/ })
-      const inlineDescription = screen.getByText("Can view")
-      const inlineIndicator = inlineOption.querySelector(".text-f1-icon-bold")
-
-      expect(inlineListbox.className).toContain("rounded-lg")
-      expect(inlineListbox.className).toContain("shadow-lg")
-      expect(inlineOption.className).toContain("px-2")
-      expect(inlineOption.className).toContain("py-1.5")
-      expect(inlineOption.className).not.toContain(
-        "data-[state=checked]:after:bg-f1-background-selected-bold/10"
-      )
-      expect(inlineDescription.className).toContain("text-sm")
-      expect(inlineIndicator).toBeInTheDocument()
-      expect(
-        inlineIndicator?.querySelector("svg")?.className.baseVal
-      ).toContain("w-4")
-
-      inlineRender.unmount()
-
-      render(
-        <F0Select
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          onChange={() => {}}
-        />
-      )
-
-      await openSelect(user)
-
-      const fieldListbox = screen.getByRole("listbox")
-      const fieldOption = screen.getByRole("option", { name: /Viewer/ })
-      const fieldDescription = screen.getByText("Can view")
-      const fieldIndicator = fieldOption.querySelector(".text-f1-icon-selected")
-
-      expect(fieldListbox.className).toContain("rounded-md")
-      expect(fieldListbox.className).toContain("shadow-md")
-      expect(fieldOption.className).toContain("px-3")
-      expect(fieldOption.className).toContain("py-2")
-      expect(fieldOption.className).toContain(
-        "data-[state=checked]:after:bg-f1-background-selected-bold/10"
-      )
-      expect(fieldDescription.className).not.toContain("text-sm")
-      expect(fieldIndicator).toBeInTheDocument()
-      expect(fieldIndicator?.querySelector("svg")?.className.baseVal).toContain(
-        "w-5"
-      )
-    })
-
-    it("renders menu-style actions and closes before restoring trigger focus", async () => {
-      const user = userEvent.setup()
-      const handleRemove = vi.fn()
-      const callOrder: string[] = []
+      const handleOpenChange = vi.fn()
       render(
         <F0Select
           variant="inline"
@@ -686,51 +649,26 @@ describe("Select", () => {
           options={roleOptions}
           value="viewer"
           onChange={() => {}}
-          onOpenChange={(open) => {
-            if (!open) callOrder.push("close")
-          }}
-          actions={[
-            {
-              label: "Remove access",
-              icon: Delete,
-              variant: "critical",
-              onClick: () => {
-                callOrder.push("action")
-                handleRemove()
-              },
-            },
-          ]}
+          onOpenChange={handleOpenChange}
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
-      await openSelect(user)
-      const action = screen.getByRole("button", { name: "Remove access" })
-
-      expect(action.className).toContain("h-9")
-      expect(action.className).toContain("text-base")
-      expect(action.className).toContain("text-f1-foreground-critical")
-      expect(action.querySelector(".size-6")).toBeInTheDocument()
-
-      await user.click(action)
-
+      await openInlineSelect(user)
       await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+        expect(handleOpenChange).toHaveBeenCalledWith(true)
       })
+
+      await user.keyboard("{Escape}")
       await waitFor(() => {
-        expect(handleRemove).toHaveBeenCalledOnce()
-      })
-      expect(callOrder).toEqual(["close", "action"])
-      await waitFor(() => {
-        expect(trigger).toHaveFocus()
+        expect(handleOpenChange).toHaveBeenLastCalledWith(false)
       })
     })
 
-    it("runs an action when closing unmounts the select", async () => {
+    it("commits selection before a close callback unmounts the control", async () => {
       const user = userEvent.setup()
-      const handleRemove = vi.fn()
+      const handleChange = vi.fn()
 
-      function UnmountOnCloseSelect() {
+      const UnmountingInlineSelect = () => {
         const [mounted, setMounted] = useState(true)
 
         return mounted ? (
@@ -739,32 +677,249 @@ describe("Select", () => {
             label="Access level"
             options={roleOptions}
             value="viewer"
-            onChange={() => {}}
-            onOpenChange={(open) => {
-              if (!open) setMounted(false)
+            onChange={handleChange}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) setMounted(false)
             }}
-            actions={[
-              {
-                label: "Remove access",
-                onClick: handleRemove,
-              },
-            ]}
           />
-        ) : (
-          <span>Select unmounted</span>
-        )
+        ) : null
       }
 
-      render(<UnmountOnCloseSelect />)
-
-      await openSelect(user)
-      await user.click(screen.getByRole("button", { name: "Remove access" }))
+      render(<UnmountingInlineSelect />)
+      await openInlineSelect(user)
+      await user.click(screen.getByRole("menuitemradio", { name: /Editor/ }))
 
       await waitFor(() => {
-        expect(screen.getByText("Select unmounted")).toBeInTheDocument()
+        expect(handleChange).toHaveBeenCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor" })
+        )
+      })
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /Access level/ })
+        ).not.toBeInTheDocument()
+      })
+    })
+
+    it("forwards a popup portal container to Dropdown", async () => {
+      const user = userEvent.setup()
+      const portalContainer = document.createElement("div")
+      document.body.append(portalContainer)
+
+      try {
+        render(
+          <F0Select
+            variant="inline"
+            label="Access level"
+            options={roleOptions}
+            value="viewer"
+            portalContainer={portalContainer}
+            onChange={() => {}}
+          />
+        )
+
+        await openInlineSelect(user)
+
+        expect(within(portalContainer).getByRole("menu")).toBeInTheDocument()
+      } finally {
+        portalContainer.remove()
+      }
+    })
+
+    it("renders options with the existing content-sized Dropdown", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      await openInlineSelect(user)
+
+      const menu = screen.getByRole("menu")
+      const selectedItem = screen.getByRole("menuitemradio", { name: /Viewer/ })
+
+      expect(menu.className).toContain("min-w-[--radix-popper-anchor-width]")
+      expect(screen.getAllByRole("menuitemradio")).toHaveLength(3)
+      expect(selectedItem).toHaveAttribute("aria-checked", "true")
+      expect(
+        screen.getByRole("menuitemradio", { name: /Editor/ })
+      ).toHaveAttribute("aria-checked", "false")
+      expect(within(selectedItem).getByText("Can view")).toBeInTheDocument()
+      const selectionIndicator = selectedItem.querySelector(
+        '[aria-hidden="true"]'
+      )
+      expect(selectionIndicator).toHaveClass("ml-auto", "self-center")
+      expect(selectedItem.lastElementChild).toBe(selectionIndicator)
+      expect(selectionIndicator?.querySelector("svg")).toBeInTheDocument()
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    it("preserves a selected option icon before the trailing check", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={[
+            {
+              value: "viewer",
+              label: "Viewer",
+              icon: SelectedOptionLeadingIcon,
+            },
+          ]}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      await openInlineSelect(user)
+
+      const selectedItem = screen.getByRole("menuitemradio", {
+        name: "Viewer",
+      })
+      const selectionIndicator = selectedItem.querySelector(
+        '[aria-hidden="true"]'
+      )
+
+      expect(
+        within(selectedItem).getByTestId("selected-option-leading-icon")
+      ).toBe(selectedItem.firstElementChild)
+      expect(selectedItem.lastElementChild).toBe(selectionIndicator)
+      expect(selectedItem.querySelectorAll("svg")).toHaveLength(2)
+    })
+
+    it("maps option separators, avatars, icons, and disabled state", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      const options: F0SelectInlineItemProps<string>[] = [
+        {
+          value: "owner",
+          label: "Owner",
+          avatar: {
+            type: "person",
+            firstName: "Ada",
+            lastName: "Lovelace",
+            "aria-label": "Owner avatar",
+          },
+        },
+        { type: "separator" },
+        {
+          value: "editor",
+          label: "Editor",
+          icon: Search,
+          disabled: true,
+        },
+        { type: "separator" },
+      ]
+
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={options}
+          value="owner"
+          onChange={handleChange}
+          actions={[{ label: "Manage access", onClick: () => {} }]}
+        />
+      )
+
+      await openInlineSelect(user)
+
+      const owner = screen.getByRole("menuitemradio", { name: /Owner/ })
+      const editor = screen.getByRole("menuitemradio", { name: /Editor/ })
+      expect(within(owner).getByLabelText("Owner avatar")).toBeInTheDocument()
+      expect(owner.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+      expect(editor.querySelector("svg")).toBeInTheDocument()
+      expect(editor).toHaveAttribute("data-disabled")
+      expect(screen.getAllByRole("separator")).toHaveLength(2)
+
+      await user.click(editor)
+      expect(handleChange).not.toHaveBeenCalled()
+      expect(screen.getByRole("menu")).toBeInTheDocument()
+    })
+
+    it("omits separators when actions are the only menu content", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          placeholder="Choose access"
+          options={[{ type: "separator" }]}
+          value={undefined}
+          onChange={() => {}}
+          actions={[{ label: "Manage access", onClick: () => {} }]}
+        />
+      )
+
+      await openInlineSelect(user)
+
+      expect(
+        screen.getByRole("menuitem", { name: "Manage access" })
+      ).toBeInTheDocument()
+      expect(screen.queryByRole("separator")).not.toBeInTheDocument()
+    })
+
+    it("maps actions to ordinary and critical Dropdown items", async () => {
+      const user = userEvent.setup()
+      const handleManage = vi.fn()
+      const handleRemove = vi.fn()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+          actions={[
+            {
+              label: "Manage access",
+              icon: Search,
+              onClick: handleManage,
+            },
+            {
+              label: "Remove access",
+              icon: Delete,
+              variant: "critical",
+              onClick: handleRemove,
+            },
+          ]}
+        />
+      )
+
+      const trigger = screen.getByRole("button", { name: /Access level/ })
+      await openInlineSelect(user)
+      const ordinaryAction = screen.getByRole("menuitem", {
+        name: "Manage access",
+      })
+      const action = screen.getByRole("menuitem", { name: "Remove access" })
+
+      expect(ordinaryAction.className).not.toContain(
+        "text-f1-foreground-critical"
+      )
+      expect(ordinaryAction.querySelector("svg")).toBeInTheDocument()
+      expect(action.className).toContain("text-f1-foreground-critical")
+      expect(action.querySelector("svg")).toBeInTheDocument()
+      expect(screen.getAllByRole("separator")).toHaveLength(1)
+
+      await user.click(action)
+
+      await waitFor(() => {
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument()
       })
       await waitFor(() => {
         expect(handleRemove).toHaveBeenCalledOnce()
+      })
+      expect(handleManage).not.toHaveBeenCalled()
+      await waitFor(() => {
+        expect(trigger).toHaveFocus()
       })
     })
 
@@ -790,97 +945,48 @@ describe("Select", () => {
         />
       )
 
-      await openSelect(user)
-      const action = screen.getByRole("button", { name: "Remove access" })
+      await openInlineSelect(user)
+      const action = screen.getByRole("menuitem", { name: "Remove access" })
 
-      expect(action).toBeDisabled()
+      expect(action).toHaveAttribute("data-disabled")
       await user.click(action)
 
       expect(handleRemove).not.toHaveBeenCalled()
-      expect(screen.getByRole("listbox")).toBeInTheDocument()
+      expect(screen.getByRole("menu")).toBeInTheDocument()
     })
 
-    it("moves focus between options and menu actions with Tab", async () => {
+    it("inherits Dropdown keyboard navigation and focus restoration", async () => {
       const user = userEvent.setup()
-      const handleManage = vi.fn()
-      const handleRemove = vi.fn()
+      const handleChange = vi.fn()
       render(
         <F0Select
           variant="inline"
           label="Access level"
           options={roleOptions}
           value="viewer"
-          onChange={() => {}}
-          actions={[
-            { label: "Manage access", onClick: handleManage },
-            {
-              label: "Remove access",
-              icon: Delete,
-              variant: "critical",
-              onClick: handleRemove,
-            },
-          ]}
+          onChange={handleChange}
         />
       )
 
-      await openSelect(user)
-      const selectedOption = screen.getByRole("option", { name: /Viewer/ })
-      const manageAction = screen.getByRole("button", {
-        name: "Manage access",
-      })
-      const removeAction = screen.getByRole("button", {
-        name: "Remove access",
-      })
+      const trigger = screen.getByRole("button", { name: /Access level/ })
+      trigger.focus()
+      await user.keyboard("{Enter}")
 
       await waitFor(() => {
-        expect(selectedOption).toHaveFocus()
+        expect(screen.getByRole("menu")).toBeInTheDocument()
       })
-      await user.keyboard("{Tab}")
-      expect(manageAction).toHaveFocus()
-
-      await user.keyboard("{Tab}")
-      expect(removeAction).toHaveFocus()
-
-      await user.keyboard("{Shift>}{Tab}{/Shift}")
-      expect(manageAction).toHaveFocus()
-
-      await user.keyboard(" ")
-      await waitFor(() => {
-        expect(handleManage).toHaveBeenCalledOnce()
-      })
-      expect(handleRemove).not.toHaveBeenCalled()
-      await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-      })
-    })
-
-    it("does not intercept Tab from inline popup controls", async () => {
-      const user = userEvent.setup()
-      render(
-        <F0Select
-          variant="inline"
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          showSearchBox
-          searchBoxPlaceholder="Search roles"
-          onChange={() => {}}
-          actions={[{ label: "Remove access", onClick: vi.fn() }]}
-        />
-      )
-
-      await openSelect(user)
-      const search = screen.getByRole("searchbox", { name: "Search roles" })
-      const action = screen.getByRole("button", { name: "Remove access" })
+      await user.keyboard("{ArrowDown}{Enter}")
 
       await waitFor(() => {
-        expect(search).toHaveFocus()
+        expect(handleChange).toHaveBeenCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor" })
+        )
       })
-      await user.keyboard("{Tab}")
-
-      expect(search).toHaveFocus()
-      expect(action).not.toHaveFocus()
-      expect(screen.getByRole("listbox")).toBeInTheDocument()
+      await waitFor(() => {
+        expect(trigger).toHaveFocus()
+      })
     })
 
     it("forwards refs through both trigger variants", () => {
@@ -911,7 +1017,7 @@ describe("Select", () => {
       )
 
       expect(inlineRef.current).toBe(
-        screen.getByRole("combobox", { name: "Inline access level" })
+        screen.getByRole("button", { name: /Inline access level/ })
       )
     })
   })

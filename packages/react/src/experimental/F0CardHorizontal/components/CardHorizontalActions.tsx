@@ -1,6 +1,6 @@
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { type StatusVariant } from "@/components/tags/F0TagStatus"
-import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { type MobileDropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Check, Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import {
@@ -178,7 +178,7 @@ interface CardHorizontalActionsProps {
   primaryAction?: CardPrimaryAction
   secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
   /** Overflow (⋯) menu actions — always live in the left "more" menu. */
-  otherActions?: DropdownItem[]
+  otherActions?: MobileDropdownItem[]
   /** Confirm (✓) icon-only action — enables the confirm/reject variant. */
   confirmAction?: CardHorizontalConfirmAction
   /** Reject (✗) icon-only action — enables the confirm/reject variant. */

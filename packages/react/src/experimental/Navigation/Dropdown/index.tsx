@@ -33,6 +33,15 @@ type DropdownProps = Omit<
   onOpenChange?: (open: boolean) => void
 } & WithDataTestIdProps
 
+/** Mobile drawer actions exclude the desktop Dropdown's selected-menu state. */
+export type MobileDropdownItem =
+  | Exclude<DropdownItem, DropdownItemObject>
+  | (Omit<DropdownItemObject, "selected"> & { selected?: never })
+
+type MobileDropdownProps = Omit<DropdownProps, "items"> & {
+  items: MobileDropdownItem[]
+}
+
 const _Dropdown = (props: DropdownProps) => {
   const { open, onOpenChange, dataTestId, ...rest } = props
   const publicProps = privateProps.reduce((acc, key) => {
@@ -59,7 +68,11 @@ export const Dropdown = experimentalComponent("Dropdown", _Dropdown)
 
 export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
 
-const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
+const _MobileDropdown = ({
+  items,
+  children,
+  dataTestId,
+}: MobileDropdownProps) => {
   const [open, setOpen] = useState(false)
 
   return (

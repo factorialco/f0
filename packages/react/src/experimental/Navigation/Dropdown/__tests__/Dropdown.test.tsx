@@ -1,9 +1,10 @@
-import { describe, expect, it, vi } from "vitest"
+import { useState } from "react"
+import { describe, expect, expectTypeOf, it, vi } from "vitest"
 
 import { Add, Pencil } from "@/icons/app"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
-import { Dropdown } from "../index"
+import { Dropdown, type MobileDropdownItem } from "../index"
 
 const items = [
   { label: "Create", onClick: vi.fn(), icon: Add },
@@ -105,5 +106,112 @@ describe("Dropdown (experimental) — enabled regression", () => {
     expect(trigger).not.toBeDisabled()
     await userEvent.click(trigger)
     expect(await screen.findByText("Create")).toBeInTheDocument()
+  })
+
+  it("runs a delayed action after closing unmounts the Dropdown", async () => {
+    const handleAction = vi.fn()
+
+    function UnmountOnCloseDropdown() {
+      const [mounted, setMounted] = useState(true)
+      const [open, setOpen] = useState(false)
+
+      return mounted ? (
+        <Dropdown
+          items={[{ label: "Remove access", onClick: handleAction }]}
+          open={open}
+          onOpenChange={(nextOpen) => {
+            setOpen(nextOpen)
+            if (!nextOpen) setMounted(false)
+          }}
+        >
+          <button>Access level</button>
+        </Dropdown>
+      ) : (
+        <span>Dropdown unmounted</span>
+      )
+    }
+
+    render(<UnmountOnCloseDropdown />)
+    await userEvent.click(screen.getByRole("button", { name: "Access level" }))
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Remove access" })
+    )
+
+    expect(await screen.findByText("Dropdown unmounted")).toBeInTheDocument()
+    await vi.waitFor(() => {
+      expect(handleAction).toHaveBeenCalledOnce()
+    })
+  })
+})
+
+describe("Dropdown (experimental) — selectable items", () => {
+  it("keeps selectable state out of MobileDropdown items", () => {
+    type MobileDropdownItemObject = Exclude<
+      MobileDropdownItem,
+      { type: "separator" } | { type: "label" }
+    >
+
+    expectTypeOf<
+      MobileDropdownItemObject["selected"]
+    >().toEqualTypeOf<undefined>()
+  })
+
+  it("exposes selected state with menuitemradio semantics", async () => {
+    const selectEditor = vi.fn()
+    render(
+      <Dropdown
+        items={[
+          { label: "Viewer", selected: true, onClick: vi.fn() },
+          { label: "Editor", selected: false, onClick: selectEditor },
+        ]}
+      >
+        <button>Access level</button>
+      </Dropdown>
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Access level" }))
+
+    expect(
+      screen.getByRole("menuitemradio", { name: "Viewer" })
+    ).toHaveAttribute("aria-checked", "true")
+    expect(
+      screen.getByRole("menuitemradio", { name: "Editor" })
+    ).toHaveAttribute("aria-checked", "false")
+
+    const selectedItem = screen.getByRole("menuitemradio", { name: "Viewer" })
+    const selectionIndicator = selectedItem.querySelector(
+      '[aria-hidden="true"]'
+    )
+    expect(selectionIndicator).toHaveClass("ml-auto", "self-center")
+    expect(selectedItem.lastElementChild).toBe(selectionIndicator)
+    expect(selectionIndicator?.querySelector("svg")).toBeInTheDocument()
+    expect(
+      screen
+        .getByRole("menuitemradio", { name: "Editor" })
+        .querySelector('[aria-hidden="true"]')
+    ).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("menuitemradio", { name: "Editor" }))
+    expect(selectEditor).toHaveBeenCalledOnce()
+  })
+
+  it("renders content in a supplied portal container", () => {
+    const portalContainer = document.createElement("div")
+    document.body.append(portalContainer)
+
+    try {
+      render(
+        <Dropdown
+          items={items}
+          open
+          onOpenChange={() => {}}
+          portalContainer={portalContainer}
+        />
+      )
+
+      expect(portalContainer).toContainElement(screen.getByRole("menu"))
+    } finally {
+      portalContainer.remove()
+    }
   })
 })
