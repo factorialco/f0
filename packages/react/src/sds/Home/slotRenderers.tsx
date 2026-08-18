@@ -13,7 +13,7 @@ import {
   type ModuleId,
 } from "@/components/avatars/F0AvatarModule"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
-import { F0Button } from "@/components/F0Button"
+import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
@@ -614,6 +614,66 @@ export const widgetParamsAreComplete = (
   params: WidgetParams | undefined
 ): boolean => (schema ? schema.safeParse(params ?? {}).success : true)
 
+/**
+ * A DIRECT ACTION on a widget's collapsed glyph: the one thing the widget can be
+ * told to do without being opened — resume a paused timer, clock out, join the
+ * call that starts now.
+ *
+ * The glyph BECOMES the button, because 40px is one control's worth of room. So
+ * the widget is still one hover away (hovering or focusing the glyph floats it
+ * over the feed, as any glyph does) and the CLICK is the action's rather than the
+ * panel's.
+ *
+ * Only the COLLAPSED rail draws it. Expanded, the card's own footer button
+ * (`action`) is where a widget's call to action belongs, and stacked (below `md`)
+ * there is no glyph to put it on.
+ */
+export type HomeWidgetRailAction = {
+  /** The action's own glyph — `Play` to resume, `Pause` for a running timer. */
+  icon: IconType
+  /**
+   * What it does, in the imperative ("Resume"): the glyph's tooltip, and half of
+   * its accessible name — the widget's title is the other half, since "Resume"
+   * alone says nothing about which of the strip's glyphs it is.
+   */
+  label: string
+  onClick: () => void
+  /** The button's colour. The accent (`default`) unless you say otherwise. */
+  variant?: F0ButtonProps["variant"]
+  /**
+   * A LIVE READING to put beside the button — the running total, the break you
+   * are on, the minutes left. The glyph grows into a dark PILL to hold it,
+   * overflowing its 40px column leftwards, and the whole strip right-aligns
+   * behind it.
+   *
+   * It is only shown while the widget is STOWED. Hovering floats the card, which
+   * has the same number in full context, so the pill shrinks back to its button
+   * rather than sitting on top of the card repeating itself.
+   *
+   * Keep it SHORT — "7:12" hours and minutes, "0:20" into a break. This is a
+   * glyph, not a status bar, and a digit that changes every second in the corner
+   * of the page is a distraction rather than a reading.
+   */
+  time?: string
+  /**
+   * The reading is COUNTING: its separators blink once a second, the way a clock
+   * does, so a stowed timer is visibly running rather than merely displayed.
+   * Reduced motion holds them lit.
+   */
+  ticking?: boolean
+  /**
+   * THE STATE IS ASKING TO BE ACTED ON — a timer left on a break, a shift you
+   * never clocked out of. The glyph alternates once a second between the
+   * widget's own icon and the action's, so the strip can say which module wants
+   * something AND what it wants without growing a second control.
+   *
+   * It settles on the action's icon while the widget is floating, so what you
+   * click is never the face that happened to be up. Reduced motion is honoured:
+   * the glyph simply stays the button.
+   */
+  flashing?: boolean
+}
+
 /** A widget as handed to the layout: header + an ordered list of slots. */
 export type HomeWidgetItem = HomeWidgetChrome & {
   id: string
@@ -648,6 +708,11 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    * "Add widget" picker, so the strip can never drift from the catalog.
    */
   icon?: IconType
+  /**
+   * The one thing the widget can do FROM THE COLLAPSED RAIL, drawn on its glyph
+   * instead of the catalog `icon`. See `HomeWidgetRailAction`.
+   */
+  railAction?: HomeWidgetRailAction
   /**
    * PINNED: the widget stays put. It offers no "Remove widget" in its menu, it
    * cannot be dragged, and no other widget can displace it — for widgets a user

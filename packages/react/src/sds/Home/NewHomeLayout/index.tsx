@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react"
 import {
   Children,
   type CSSProperties,
@@ -11,21 +12,19 @@ import {
   useState,
 } from "react"
 
-import { AnimatePresence, motion } from "motion/react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import Menu from "@/icons/app/Menu"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 // No `Pencil`/`Check`: there is no edit mode to toggle any more.
 import { Plus } from "@/icons/app"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
-import { Action } from "@/ui/Action"
+import Menu from "@/icons/app/Menu"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
+import { Action } from "@/ui/Action"
 
 import {
   entranceDelay,
@@ -44,14 +43,6 @@ import {
   RIGHT_AREA_DELAY_MS,
   withReducedMotion,
 } from "../home-motion"
-import { SlotWidget } from "../SlotWidget"
-import { useRailMotion } from "./useRailMotion"
-import { useScrollFade } from "../useScrollFade"
-import {
-  WidgetContainer,
-  type WidgetContainerSide,
-  type WidgetVirtualization,
-} from "../WidgetContainer"
 import {
   widgetTitle,
   type HomeRenderCtx,
@@ -59,6 +50,14 @@ import {
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
+import { SlotWidget } from "../SlotWidget"
+import { useScrollFade } from "../useScrollFade"
+import {
+  WidgetContainer,
+  type WidgetContainerSide,
+  type WidgetVirtualization,
+} from "../WidgetContainer"
+import { useRailMotion } from "./useRailMotion"
 
 /**
  * The DaytimePage gradient wash, by period — the same stops and the same 8%
@@ -109,8 +108,73 @@ const CONTENT_WIDTH = 712
 const GLYPH_GAP_PX = 8
 
 /**
+ * THE GLYPH'S SECOND — how long each face of a flashing glyph is up, and how long
+ * a ticking readout's separator stays lit. One period, not two half-periods: a
+ * faster alternation reads as a fault rather than as a request, and a clock that
+ * blinks twice a second isn't a clock.
+ */
+const GLYPH_FLASH_MS = 1000
+
+/**
+ * The one-second beat both the flashing icon and the ticking readout are drawn
+ * on: `true` for the first half of it, `false` for the second.
+ *
+ * It rests on `true` whenever it isn't running, so every way of stopping — reduced
+ * motion, the widget floating under the pointer, a state that stopped asking for
+ * anything — leaves the glyph in the state that says the most: the action's icon,
+ * the separator lit.
+ */
+const useFlash = (running: boolean) => {
+  const reducedMotion = useReducedMotion()
+  const [lit, setLit] = useState(true)
+
+  useEffect(() => {
+    if (!running || reducedMotion) {
+      setLit(true)
+      return
+    }
+    const beat = setInterval(() => setLit((was) => !was), GLYPH_FLASH_MS)
+    return () => clearInterval(beat)
+  }, [running, reducedMotion])
+
+  return lit
+}
+
+/**
+ * A rail action's live reading, BLINKING LIKE A CLOCK: the digits stand still and
+ * the separators go dim for half of every second, which is what says the number is
+ * counting rather than parked.
+ *
+ * Opacity only, and the string is never taken apart in the accessibility tree — a
+ * screen reader still reads "0:42", not "0 42". `tabular-nums` so a digit rolling
+ * over doesn't move the pill.
+ */
+const TickingTime = ({ time, ticking }: { time: string; ticking: boolean }) => {
+  const lit = useFlash(ticking)
+
+  return (
+    <span className="whitespace-nowrap px-2 text-2xl font-semibold tabular-nums">
+      {time.split(":").map((part, index) => (
+        <Fragment key={index}>
+          {index > 0 ? (
+            <span
+              className="transition-opacity duration-200"
+              style={{ opacity: lit ? 1 : 0.24 }}
+            >
+              :
+            </span>
+          ) : null}
+          {part}
+        </Fragment>
+      ))}
+    </span>
+  )
+}
+
+/**
  * One widget as the collapsed strip shows it: its own catalog glyph, standing in
- * for the whole card.
+ * for the whole card — or, when the widget carries a `railAction`, that action's
+ * button wearing the same 40px.
  *
  * It ARRIVES FROM LARGER THAN LIFE — the card that just shrank into it — and
  * leaves the other way, blooming back out into the card it becomes. While its
@@ -135,6 +199,108 @@ const CollapsedGlyph = ({
   onClose: () => void
 }) => {
   const reducedMotion = useReducedMotion()
+  const action = widget.railAction
+  // The flash pauses while the widget is FLOATING, because the panel is open for
+  // exactly one reason — the pointer (or the focus ring) is on the glyph — and a
+  // face that changed under the pointer would make the click a coin toss about
+  // which icon was pressed.
+  const actionFace = useFlash(!!action?.flashing && !open)
+  /**
+   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card itself is out with the
+   * same reading in full context — and the pill would be a 100px overhang sitting
+   * on top of it, saying it again — so the glyph gives the room back and is simply
+   * its button again.
+   */
+  const time = action?.time && !open ? action.time : undefined
+
+  /** The genie, identical whichever face the glyph wears. */
+  const glyphMotion = {
+    initial: {
+      opacity: 0,
+      scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
+    },
+    animate: { opacity: 1, scale: open ? GENIE_GLYPH_OPEN_SCALE : 1 },
+    exit: { opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE },
+    whileHover: reducedMotion ? undefined : { scale: GENIE_GLYPH_HOVER_SCALE },
+    whileTap: reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE },
+    transition: withReducedMotion(
+      { ...glyphTransition, delay: entranceDelay(order, delayMs) },
+      reducedMotion
+    ),
+  }
+
+  /* Same accent dot HomeListItem draws for unread rows — the ring keeps it
+     legible over any glyph, action button included. */
+  const updatesDot = widget.hasUpdates ? (
+    <span className="pointer-events-none absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
+  ) : null
+
+  if (action) {
+    // The action's button IS the glyph — one control, so nothing is nested in
+    // anything and the strip's geometry is untouched (`size-10` + `compact`
+    // hold the button to the 40px every other glyph is).
+    //
+    // Which means the panel can't be a click any more: hover opens it as ever,
+    // and FOCUS opens it too, so reaching the glyph by keyboard still gets you
+    // to the widget's own controls — they are the next thing in the tab order.
+    //
+    // With a `time` the whole thing becomes a PILL: the reading, then the button
+    // inset in it at 32px. The pill keeps the strip's 40px HEIGHT — the one
+    // dimension the strip's rhythm and the cards' stow are built on — and takes
+    // the width it needs off the left, out over the feed.
+    return (
+      <Tooltip label={action.label}>
+        <motion.div
+          className={cn(
+            // `pointer-events-auto` against the strip's `none`: a pill is wider
+            // than the rail's column, and the box holding it must not become a
+            // 100px dead margin down the side of the feed.
+            "pointer-events-auto relative shrink-0",
+            // The pill is the GLYPH'S OWN geometry, grown sideways: the 40px
+            // height every glyph has, the button unchanged inside it, and
+            // `rounded-lg` — one step up from the button's `rounded-md`, which is
+            // what the radius scale says a container holding an `lg` control
+            // takes. Nothing here is a shape the strip doesn't already use.
+            time
+              ? "flex flex-row items-center gap-1 rounded-lg bg-f1-background-inverse p-1 text-f1-foreground-inverse -mr-1"
+              : "rounded-lg"
+          )}
+          onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+          onFocus={(event) => onOpen(widget.id, event.currentTarget)}
+          {...glyphMotion}
+        >
+          {time ? <TickingTime time={time} ticking={!!action.ticking} /> : null}
+          <Action
+            type="button"
+            variant={action.variant ?? "default"}
+            // THE SAME BUTTON either way — 40px at the strip's own radius,
+            // whether it is standing alone as the glyph or sitting at the end of
+            // a pill. A reading beside it doesn't make it a different control.
+            size="lg"
+            compact
+            // FLAT, like every other glyph in the strip. A button's elevation
+            // chrome — the drop shadow and the `::after` top highlight — is for a
+            // control raised off a page; here it reads as a border, and the
+            // highlight's own radius is a step tighter than an `lg` button's, so
+            // it cuts a visible arc across each corner. The strip is tiles.
+            className="size-10 shadow-none after:hidden active:shadow-none"
+            // "Resume" on its own doesn't say which glyph this is; the tooltip
+            // can lean on the strip for that, an accessible name can't.
+            aria-label={`${action.label}, ${widgetTitle(widget)}`}
+            onClick={() => action.onClick()}
+          >
+            <F0Icon
+              size="md"
+              // No widget icon means no second face to flash to — the action's
+              // is the only one there is.
+              icon={actionFace || !widget.icon ? action.icon : widget.icon}
+            />
+          </Action>
+          {updatesDot}
+        </motion.div>
+      </Tooltip>
+    )
+  }
 
   return (
     <motion.button
@@ -147,23 +313,10 @@ const CollapsedGlyph = ({
       onClick={(event) =>
         open ? onClose() : onOpen(widget.id, event.currentTarget)
       }
-      className="rounded-lg"
-      initial={{
-        opacity: 0,
-        scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
-      }}
-      animate={{ opacity: 1, scale: open ? GENIE_GLYPH_OPEN_SCALE : 1 }}
-      exit={{ opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE }}
-      whileHover={
-        reducedMotion ? undefined : { scale: GENIE_GLYPH_HOVER_SCALE }
-      }
-      whileTap={reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE }}
-      transition={withReducedMotion(
-        { ...glyphTransition, delay: entranceDelay(order, delayMs) },
-        reducedMotion
-      )}
+      // See the strip: it takes no pointer events, so each glyph takes its own.
+      className="pointer-events-auto rounded-lg"
+      {...glyphMotion}
     >
-      {/* Same accent dot HomeListItem uses for unread rows. */}
       <span className="relative inline-flex">
         {widget.icon ? (
           <F0AvatarIcon icon={widget.icon} size="lg" />
@@ -172,11 +325,7 @@ const CollapsedGlyph = ({
             {widgetTitle(widget).charAt(0)}
           </span>
         )}
-        {widget.hasUpdates ? (
-          // Same dot HomeListItem draws for unread rows — the ring keeps it
-          // legible over any glyph.
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
-        ) : null}
+        {updatesDot}
       </span>
     </motion.button>
   )
@@ -823,11 +972,21 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               key="collapsed-strip"
               ref={stripFade.ref}
               className={cn(
-                // `items-start` so a glyph is 40px wide whatever the column is
+                // `items-end` so a glyph is its own 40px whatever the column is
                 // doing: the strip lives in the rail's column, and that column
                 // spends the collapse on its way DOWN from the full rail width —
-                // stretched, the glyphs would start card-wide and shrink.
-                "-m-1 flex min-h-0 flex-col items-start gap-2 overflow-y-auto p-1",
+                // stretched, the glyphs would start card-wide and shrink. END
+                // rather than start because a `railAction` with a time is a PILL
+                // wider than the column: the box grows to it and hangs out over
+                // the feed to the LEFT (`justifySelf: end` below), and the 40px
+                // glyphs have to stay on the rail's edge while it does.
+                //
+                // Which is also why the box itself takes NO pointer events: at a
+                // pill's width it would otherwise be a dead margin down the side
+                // of the feed, eating clicks meant for the cards under it. Each
+                // glyph turns them back on for its own 40px (`pointer-events-auto`).
+                "-m-1 flex min-h-0 flex-col items-end gap-2 overflow-y-auto p-1",
+                "pointer-events-none",
                 SCROLLBAR_HIDDEN
               )}
               style={{
@@ -877,7 +1036,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                     type="button"
                     aria-label={t.widgets.addWidget}
                     onClick={() => onClickAddNewWidget("right")}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
+                    className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}

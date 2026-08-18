@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
-import { useEffect, useState } from "react"
+import { forwardRef, useEffect, useState, type SVGProps } from "react"
 
+import { type IconType } from "@/components/F0Icon"
 import { Calendar, Clock } from "@/icons/app"
 import {
   act,
@@ -55,6 +56,18 @@ const RAIL = [
   widget("clock", { locked: true }),
   widget("events", { hasUpdates: true }),
 ]
+
+/**
+ * An icon a test can NAME. The real ones are anonymous paths, and a glyph that
+ * flashes between two of them is only testable if the two can be told apart.
+ */
+const markedIcon = (mark: string): IconType =>
+  forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>((props, ref) => (
+    <svg {...props} ref={ref} data-icon={mark} />
+  )) as IconType
+
+/** How many times the rail action has been run. */
+let resumes = 0
 
 const renderLayout = (width: number, props = {}) => {
   layoutWidth = width
@@ -141,6 +154,7 @@ beforeEach(() => {
   })
   resizeCallbacks = []
   clockMounts = 0
+  resumes = 0
   // jsdom has no ResizeObserver. This one keeps its callback so a test can fire
   // it (`resizeLayoutTo`) instead of only serving the initial read.
   vi.stubGlobal(
@@ -238,6 +252,219 @@ describe("NewHomeLayout", () => {
       expect(
         screen.getByRole("button", { name: "clock" }).querySelector(dot)
       ).toBeNull()
+    })
+  })
+
+  /**
+   * A widget's `railAction` turns its glyph into that action's button. The glyph
+   * is still the way to the widget — hover, or focus — but the CLICK is the
+   * action's, which is the whole point of putting it there.
+   */
+  describe("a glyph that is an action", () => {
+    const ACTION_RAIL = [
+      widget("clock", {
+        icon: markedIcon("module"),
+        // A body only this widget has, so "is the card floating?" doesn't have to
+        // be asked of a word the header carries too.
+        slots: [
+          {
+            visualization: "indicators",
+            params: { items: [{ label: "tracked today", content: "1" }] },
+          },
+        ],
+        railAction: {
+          icon: markedIcon("action"),
+          label: "Resume",
+          flashing: true,
+          onClick: () => resumes++,
+        },
+      }),
+      widget("events"),
+    ]
+
+    /** Which icon the glyph is wearing right now. */
+    const face = (button: HTMLElement) =>
+      button.querySelector("[data-icon]")?.getAttribute("data-icon")
+
+    const glyph = () =>
+      screen.getByRole("button", { name: "Resume, clock" }) as HTMLElement
+
+    test("names itself after the action AND the widget it belongs to", () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      expect(glyph()).toBeInTheDocument()
+      // The plain glyph's name is gone: there is one control here, not two.
+      expect(
+        screen.queryByRole("button", { name: "clock" })
+      ).not.toBeInTheDocument()
+    })
+
+    test("runs the action on every click — it never toggles the panel", async () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      await userEvent.click(glyph())
+      await userEvent.click(glyph())
+
+      // A plain glyph's second click would have PUT THE WIDGET BACK. This one
+      // does what it says twice, and the panel stays out.
+      expect(resumes).toBe(2)
+      expect(screen.getByText("tracked today")).toBeVisible()
+    })
+
+    test("still floats its widget on hover, like any other glyph", async () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      await userEvent.hover(glyph())
+
+      expect(screen.getByText("tracked today")).toBeVisible()
+      expect(resumes).toBe(0)
+    })
+
+    test("floats its widget on FOCUS too — the click is spoken for", () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      act(() => glyph().focus())
+
+      expect(screen.getByText("tracked today")).toBeVisible()
+    })
+
+    test("flashing alternates the two icons once a second", () => {
+      vi.useFakeTimers()
+      try {
+        renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+        // It starts on the action's face: whatever happens, the glyph opens by
+        // saying what it does.
+        expect(face(glyph())).toBe("action")
+        act(() => vi.advanceTimersByTime(1000))
+        expect(face(glyph())).toBe("module")
+        act(() => vi.advanceTimersByTime(1000))
+        expect(face(glyph())).toBe("action")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("settles on the action's face while the widget is floating", async () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      await userEvent.hover(glyph())
+
+      vi.useFakeTimers()
+      try {
+        act(() => vi.advanceTimersByTime(3000))
+        expect(face(glyph())).toBe("action")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("holds still when the state stops asking", () => {
+      vi.useFakeTimers()
+      try {
+        renderLayout(1000, {
+          rightWidgets: [
+            widget("clock", {
+              icon: markedIcon("module"),
+              railAction: {
+                icon: markedIcon("action"),
+                label: "Clock out",
+                onClick: () => {},
+              },
+            }),
+          ],
+        })
+
+        const button = screen.getByRole("button", {
+          name: "Clock out, clock",
+        }) as HTMLElement
+        expect(face(button)).toBe("action")
+        act(() => vi.advanceTimersByTime(3000))
+        expect(face(button)).toBe("action")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("is the COLLAPSED rail's affordance only", () => {
+      renderLayout(1400, { rightWidgets: ACTION_RAIL })
+
+      // Expanded, the card's own footer is where a call to action belongs.
+      expect(
+        screen.queryByRole("button", { name: "Resume, clock" })
+      ).not.toBeInTheDocument()
+    })
+
+    /**
+     * A `time` turns the glyph into a pill: the reading, then the button. It is
+     * the STOWED widget's stand-in, so it gives its width back the moment the card
+     * itself is out.
+     */
+    describe("with a live reading on it", () => {
+      const TICKING_RAIL = [
+        widget("clock", {
+          icon: markedIcon("module"),
+          slots: [
+            {
+              visualization: "indicators",
+              params: { items: [{ label: "tracked today", content: "1" }] },
+            },
+          ],
+          railAction: {
+            icon: markedIcon("action"),
+            label: "Take a break",
+            time: "7:12",
+            ticking: true,
+            onClick: () => resumes++,
+          },
+        }),
+      ]
+
+      const pill = () =>
+        screen.getByRole("button", { name: "Take a break, clock" })
+          .parentElement as HTMLElement
+
+      test("draws the reading beside the button", () => {
+        renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+        // Whole and unsplit: a screen reader reads "7:12", not "7 12".
+        expect(pill()).toHaveTextContent("7:12")
+      })
+
+      test("hands the width back while the widget is floating", async () => {
+        renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+        await userEvent.hover(
+          screen.getByRole("button", { name: "Take a break, clock" })
+        )
+
+        // The card is out with the same numbers in full — the pill would only be
+        // an overhang repeating them.
+        expect(screen.getByText("tracked today")).toBeVisible()
+        expect(pill()).not.toHaveTextContent("7:12")
+      })
+
+      test("blinks the separator once a second, digits held still", () => {
+        vi.useFakeTimers()
+        try {
+          renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+          const separator = () =>
+            [...pill().querySelectorAll("span")].find(
+              (span) => span.textContent === ":"
+            ) as HTMLElement
+
+          expect(separator().style.opacity).toBe("1")
+          act(() => vi.advanceTimersByTime(1000))
+          expect(separator().style.opacity).not.toBe("1")
+          // The reading itself never changes — only the app's clock moves it.
+          expect(pill()).toHaveTextContent("7:12")
+          act(() => vi.advanceTimersByTime(1000))
+          expect(separator().style.opacity).toBe("1")
+        } finally {
+          vi.useRealTimers()
+        }
+      })
     })
   })
 
