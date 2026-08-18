@@ -186,6 +186,7 @@ export function usePointClick(
         chart.dispatchAction({ type: "hideTip" })
 
         handler({
+          source: "pointer",
           seriesName: column.nearest.name,
           category: String(categories[dataIndex] ?? ""),
           value: column.nearest.value,
@@ -234,12 +235,19 @@ export function usePointClick(
       // but a scatter point *is* both numbers, so the whole tuple is reported
       // alongside it rather than discarded here.
       const list = Array.isArray(p.value) ? p.value : [p.value]
-      const raw = list[list.length - 1]
       // `Number(null)` is 0 and `Number("")` is 0, so a gap in the data would
       // otherwise be reported as a real zero.
-      if (raw === null || raw === undefined || raw === "") return
-      const value = Number(raw)
-      if (!Number.isFinite(value)) return
+      if (
+        list.some(
+          (entry) => entry === null || entry === undefined || entry === ""
+        )
+      )
+        return
+      const values = list.map(Number)
+      // Every tuple member is semantic data: a finite Y cannot make a broken
+      // scatter X or heatmap index safe to quote.
+      if (values.some((entry) => !Number.isFinite(entry))) return
+      const value = values[values.length - 1]
 
       // `hideTip` is safe to fire even with no tooltip showing.
       chart.dispatchAction({ type: "hideTip" })
@@ -248,10 +256,11 @@ export function usePointClick(
       const seriesIndex = p.seriesIndex ?? 0
 
       handler({
+        source: "pointer",
         seriesName,
         category: String(p.name ?? ""),
         value,
-        values: list.map(Number),
+        values,
         // A mark identifies exactly one series, so the list has one entry.
         // Only a line click resolves a whole column.
         series: [{ name: seriesName, seriesIndex, value }],

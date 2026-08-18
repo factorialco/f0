@@ -23,7 +23,7 @@ export const LineChart = (props: F0DataChartLineProps) => {
   usePointClick(chartRef, props.onPointClick, "plot")
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
-  useLegendInteraction(chartRef)
+  useLegendInteraction(chartRef, props.onLegendSelectionChange)
 
   // ECharts (zrender) sets `cursor: pointer` on the canvas element via inline
   // style whenever an axis label has `triggerEvent: true` (which we need for

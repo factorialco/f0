@@ -119,6 +119,7 @@ describe("usePointClick", () => {
     })
 
     expect(onPointClick).toHaveBeenCalledWith({
+      source: "pointer",
       seriesName: "Male",
       category: "Barcelona office",
       value: 18,
@@ -153,6 +154,37 @@ describe("usePointClick", () => {
     )
   })
 
+  it("rejects a tuple when any measure is not finite", () => {
+    const stub = makeChartStub()
+    const onPointClick = vi.fn()
+    render(<Harness chart={stub.instance} onPointClick={onPointClick} />)
+
+    fire(stub, {
+      componentType: "series",
+      seriesName: "Engineering",
+      value: [Number.NaN, 0.6],
+    })
+
+    expect(onPointClick).not.toHaveBeenCalled()
+  })
+
+  it.each([null, undefined, ""])(
+    "rejects a tuple when an earlier measure is %s",
+    (invalid) => {
+      const stub = makeChartStub()
+      const onPointClick = vi.fn()
+      render(<Harness chart={stub.instance} onPointClick={onPointClick} />)
+
+      fire(stub, {
+        componentType: "series",
+        seriesName: "Engineering",
+        value: [invalid, 0.6],
+      })
+
+      expect(onPointClick).not.toHaveBeenCalled()
+    }
+  )
+
   it("keeps the whole tuple of a heatmap cell", () => {
     const stub = makeChartStub()
     const onPointClick = vi.fn()
@@ -167,6 +199,55 @@ describe("usePointClick", () => {
 
     expect(onPointClick).toHaveBeenCalledWith(
       expect.objectContaining({ value: 37, values: [2, 4, 37] })
+    )
+  })
+
+  it.each([
+    {
+      name: "radar",
+      params: {
+        componentType: "series",
+        name: "Team A",
+        value: [8, 7],
+        dataIndex: 1,
+        seriesIndex: 0,
+      },
+      expected: {
+        seriesName: "",
+        category: "Team A",
+        value: 7,
+        values: [8, 7],
+        dataIndex: 1,
+        seriesIndex: 0,
+      },
+    },
+    {
+      name: "gauge",
+      params: {
+        componentType: "series",
+        name: "Goal",
+        value: 72,
+        dataIndex: 0,
+        seriesIndex: 0,
+      },
+      expected: {
+        seriesName: "",
+        category: "Goal",
+        value: 72,
+        values: [72],
+        dataIndex: 0,
+        seriesIndex: 0,
+      },
+    },
+  ])("normalizes $name item semantics", ({ params, expected }) => {
+    const stub = makeChartStub()
+    const onPointClick = vi.fn()
+    render(<Harness chart={stub.instance} onPointClick={onPointClick} />)
+
+    fire(stub, params)
+
+    expect(onPointClick).toHaveBeenCalledWith(
+      expect.objectContaining({ source: "pointer", ...expected })
     )
   })
 
@@ -339,6 +420,7 @@ describe("usePointClick — plot hit area (line charts)", () => {
     clickPlot(stub, 140, 164)
 
     expect(onPointClick).toHaveBeenCalledWith({
+      source: "pointer",
       seriesName: "Headcount",
       category: "Feb",
       value: 30,

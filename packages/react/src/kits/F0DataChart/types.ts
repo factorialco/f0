@@ -52,6 +52,8 @@ export interface F0DataChartPointClickSeries {
  * same rows its tooltip shows.
  */
 export interface F0DataChartPointClick {
+  /** Interaction surface that resolved the point. */
+  source: "pointer" | "keyboard"
   /** Series the mark belongs to, as shown in the legend ("Male"). */
   seriesName: string
   /** Category the mark sits at ("Barcelona office"). Empty for chart types with no category axis. */
@@ -84,10 +86,11 @@ export interface F0DataChartPointClick {
   /** Index of the series the mark belongs to. */
   seriesIndex: number
   /**
-   * Where the click landed, in viewport coordinates — enough to anchor a
+   * Where a pointer click landed, in viewport coordinates — enough to anchor a
    * floating element without the consumer having to reach for the chart's own
    * geometry. Taken from the touch on a touch device, where the event itself
-   * carries no coordinates. Both are 0 if neither did.
+   * carries no coordinates. Both are 0 for a keyboard-resolved point or if a
+   * pointer event carried no coordinates; use {@link source} to distinguish.
    */
   clientX: number
   clientY: number
@@ -99,6 +102,12 @@ export interface F0DataChartPointClick {
 interface F0DataChartCommonProps {
   /** Customize or opt out of the empty state shown when data is empty. */
   emptyState?: F0DataChartEmptyStateProps
+  /**
+   * Reports the chart's live legend visibility after an interactive toggle.
+   * Primarily used by accessible companion surfaces that must expose the same
+   * data currently shown on the canvas.
+   */
+  onLegendSelectionChange?: (selected: Record<string, boolean>) => void
   /**
    * Called when the user clicks a single mark (bar segment, slice, point).
    * Omit to leave clicks inert, which is the default for every chart.

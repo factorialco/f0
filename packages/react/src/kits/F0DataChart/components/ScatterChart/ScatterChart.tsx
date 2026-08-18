@@ -20,7 +20,7 @@ export const ScatterChart = (props: F0DataChartScatterProps) => {
   usePointClick(chartRef, props.onPointClick)
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
-  useLegendInteraction(chartRef)
+  useLegendInteraction(chartRef, props.onLegendSelectionChange)
 
   // The Y axis carries a `maxLabelWidth`, so it sets `triggerEvent: true` for
   // the truncation tooltip — which makes zrender put `cursor: pointer` on the

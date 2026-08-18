@@ -32,7 +32,7 @@ export const BarChart = (props: F0DataChartBarProps) => {
   usePointClick(chartRef, props.onPointClick)
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
-  useLegendInteraction(chartRef)
+  useLegendInteraction(chartRef, props.onLegendSelectionChange)
   useLegendSelection(
     chartRef,
     useCallback(

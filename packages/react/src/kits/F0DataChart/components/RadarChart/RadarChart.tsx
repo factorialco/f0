@@ -16,7 +16,7 @@ export const RadarChart = (props: F0DataChartRadarProps) => {
   const options = useRadarChartOptions(ref, props, size)
   const chartRef = useEChartsInstance(ref, options)
   usePointClick(chartRef, props.onPointClick)
-  useLegendInteraction(chartRef)
+  useLegendInteraction(chartRef, props.onLegendSelectionChange)
 
   return <div ref={ref} className="h-full w-full" />
 }
