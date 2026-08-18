@@ -299,6 +299,28 @@ describe("NewHomeLayout", () => {
       ).not.toBeInTheDocument()
     })
 
+    /**
+     * The tooltip is the only place the action's NAME is written — the glyph is
+     * an icon — so it opens INSTANTLY. On the default wait it was a name you had
+     * to stop and ask for, on a control you point at on your way past.
+     */
+    test("names the action without a wait", () => {
+      vi.useFakeTimers()
+      try {
+        renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+        // `fireEvent`, not `userEvent`: the tooltip is a TIMER, and userEvent's
+        // own waiting deadlocks against fake ones.
+        fireEvent.pointerEnter(glyph(), { pointerType: "mouse" })
+        // Well past the instant 100ms, and well inside the default 700ms.
+        act(() => vi.advanceTimersByTime(200))
+
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Resume")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
     test("runs the action on every click — it never toggles the panel", async () => {
       renderLayout(1000, { rightWidgets: ACTION_RAIL })
 

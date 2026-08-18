@@ -366,8 +366,13 @@ const CollapsedGlyph = ({
     // button at the end of it. The pill keeps the strip's 40px HEIGHT — the one
     // dimension the strip's rhythm and the cards' stow are built on — and takes
     // the width it needs off the left, out over the feed.
+    //
+    // The tooltip is `instant`: it is the only place the action's NAME is
+    // written, and the glyph is a control you point at on your way past. The
+    // default 700ms wait is for a label that merely confirms what you can
+    // already read — here it withheld the whole thing.
     return (
-      <Tooltip label={action.label}>
+      <Tooltip label={action.label} instant>
         <motion.div
           className={cn(
             // `pointer-events-auto` against the strip's `none`: a pill is wider
