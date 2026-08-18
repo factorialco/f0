@@ -141,20 +141,27 @@ const useFlash = (running: boolean) => {
 }
 
 /**
- * A rail action's live reading, BLINKING LIKE A CLOCK: the digits stand still and
- * the separators go dim for half of every second, which is what says the number is
- * counting rather than parked.
+ * A rail action's reading, and — while it is `ticking` — BLINKING LIKE A CLOCK:
+ * the characters stand still and the separators go dim for half of every second,
+ * which is what says the number is counting rather than parked. A reading with
+ * nothing to separate is simply drawn.
  *
  * Opacity only, and the string is never taken apart in the accessibility tree — a
  * screen reader still reads "0:42", not "0 42". `tabular-nums` so a digit rolling
  * over doesn't move the pill.
  */
-const TickingTime = ({ time, ticking }: { time: string; ticking: boolean }) => {
+const GlyphReading = ({
+  text,
+  ticking,
+}: {
+  text: string
+  ticking: boolean
+}) => {
   const lit = useFlash(ticking)
 
   return (
     <span className="whitespace-nowrap px-2 text-2xl font-semibold tabular-nums">
-      {time.split(":").map((part, index) => (
+      {text.split(":").map((part, index) => (
         <Fragment key={index}>
           {index > 0 ? (
             <span
@@ -211,7 +218,7 @@ const CollapsedGlyph = ({
    * on top of it, saying it again — so the glyph gives the room back and is simply
    * its button again.
    */
-  const time = action?.time && !open ? action.time : undefined
+  const text = action?.text && !open ? action.text : undefined
 
   /** The genie, identical whichever face the glyph wears. */
   const glyphMotion = {
@@ -244,8 +251,8 @@ const CollapsedGlyph = ({
     // and FOCUS opens it too, so reaching the glyph by keyboard still gets you
     // to the widget's own controls — they are the next thing in the tab order.
     //
-    // With a `time` the whole thing becomes a PILL: the reading, then the button
-    // inset in it at 32px. The pill keeps the strip's 40px HEIGHT — the one
+    // With a `text` the whole thing becomes a PILL: the reading, then the same
+    // button at the end of it. The pill keeps the strip's 40px HEIGHT — the one
     // dimension the strip's rhythm and the cards' stow are built on — and takes
     // the width it needs off the left, out over the feed.
     return (
@@ -261,7 +268,7 @@ const CollapsedGlyph = ({
             // `rounded-lg` — one step up from the button's `rounded-md`, which is
             // what the radius scale says a container holding an `lg` control
             // takes. Nothing here is a shape the strip doesn't already use.
-            time
+            text
               ? "flex flex-row items-center gap-1 rounded-lg bg-f1-background-inverse p-1 text-f1-foreground-inverse -mr-1"
               : "rounded-lg"
           )}
@@ -269,7 +276,9 @@ const CollapsedGlyph = ({
           onFocus={(event) => onOpen(widget.id, event.currentTarget)}
           {...glyphMotion}
         >
-          {time ? <TickingTime time={time} ticking={!!action.ticking} /> : null}
+          {text ? (
+            <GlyphReading text={text} ticking={!!action.ticking} />
+          ) : null}
           <Action
             type="button"
             variant={action.variant ?? "default"}
@@ -976,7 +985,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 // doing: the strip lives in the rail's column, and that column
                 // spends the collapse on its way DOWN from the full rail width —
                 // stretched, the glyphs would start card-wide and shrink. END
-                // rather than start because a `railAction` with a time is a PILL
+                // rather than start because a `railAction` with a reading is a PILL
                 // wider than the column: the box grows to it and hangs out over
                 // the feed to the LEFT (`justifySelf: end` below), and the 40px
                 // glyphs have to stay on the rail's edge while it does.

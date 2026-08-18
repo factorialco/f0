@@ -396,7 +396,7 @@ describe("NewHomeLayout", () => {
     })
 
     /**
-     * A `time` turns the glyph into a pill: the reading, then the button. It is
+     * A `text` turns the glyph into a pill: the reading, then the button. It is
      * the STOWED widget's stand-in, so it gives its width back the moment the card
      * itself is out.
      */
@@ -413,7 +413,7 @@ describe("NewHomeLayout", () => {
           railAction: {
             icon: markedIcon("action"),
             label: "Take a break",
-            time: "7:12",
+            text: "7:12",
             ticking: true,
             onClick: () => resumes++,
           },

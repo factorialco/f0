@@ -641,24 +641,24 @@ export type HomeWidgetRailAction = {
   /** The button's colour. The accent (`default`) unless you say otherwise. */
   variant?: F0ButtonProps["variant"]
   /**
-   * A LIVE READING to put beside the button — the running total, the break you
-   * are on, the minutes left. The glyph grows into a dark PILL to hold it,
-   * overflowing its 40px column leftwards, and the whole strip right-aligns
-   * behind it.
+   * A READING to put beside the button — a clock's running total or the break
+   * you are on today, but any short string the state can be summed up in. The
+   * glyph grows into a dark PILL to hold it, overflowing its 40px column
+   * leftwards, and the whole strip right-aligns behind it.
    *
    * It is only shown while the widget is STOWED. Hovering floats the card, which
-   * has the same number in full context, so the pill shrinks back to its button
+   * says the same thing in full context, so the pill shrinks back to its button
    * rather than sitting on top of the card repeating itself.
    *
-   * Keep it SHORT — "7:12" hours and minutes, "0:20" into a break. This is a
-   * glyph, not a status bar, and a digit that changes every second in the corner
-   * of the page is a distraction rather than a reading.
+   * Keep it SHORT — "7:12", "0:20", "3 left". This is a glyph, not a status bar,
+   * and anything that has to be read twice does not belong on one.
    */
-  time?: string
+  text?: string
   /**
-   * The reading is COUNTING: its separators blink once a second, the way a clock
-   * does, so a stowed timer is visibly running rather than merely displayed.
-   * Reduced motion holds them lit.
+   * The reading is COUNTING: the separators in `text` blink once a second, the
+   * way a clock does, so a stowed timer is visibly running rather than merely
+   * displayed. Reduced motion holds them lit, and a `text` with nothing to
+   * separate simply stands still.
    */
   ticking?: boolean
   /**

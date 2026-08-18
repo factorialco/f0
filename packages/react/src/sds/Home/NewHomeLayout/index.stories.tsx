@@ -1404,7 +1404,7 @@ const ClockGlyphActionHome = () => {
       ? {
           icon: SolidPause,
           label: "Take a break",
-          time: hhmm(worked),
+          text: hhmm(worked),
           ticking: true,
           onClick: () => {
             setOnBreak(0)
@@ -1415,7 +1415,7 @@ const ClockGlyphActionHome = () => {
         ? {
             icon: SolidPlay,
             label: "Resume",
-            time: hhmm(onBreak),
+            text: hhmm(onBreak),
             ticking: true,
             // The state is asking to be acted on — a day left on a break.
             flashing: true,
