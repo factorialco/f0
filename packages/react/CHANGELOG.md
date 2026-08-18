@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.37.0](https://github.com/factorialco/f0/compare/f0-react-v6.36.0...f0-react-v6.37.0) (2026-08-18)
+
+
+### Features
+
+* **Cocreation:** make template selection its own step ([#5094](https://github.com/factorialco/f0/issues/5094)) ([d132d66](https://github.com/factorialco/f0/commit/d132d6652b2a74a62fa9c5e9a59dddbd05b72699))
+* **F0AvatarPerson:** add pending state for roles to be filled ([#5148](https://github.com/factorialco/f0/issues/5148)) ([28638d8](https://github.com/factorialco/f0/commit/28638d842a3dfeb3e6f5c03c0a07d24c8d893df2))
+
 ## [6.36.0](https://github.com/factorialco/f0/compare/f0-react-v6.35.0...f0-react-v6.36.0) (2026-08-17)
 
 
