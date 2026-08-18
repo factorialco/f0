@@ -12,15 +12,32 @@ import {
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AnalyticsDashboard } from "../index"
+import type { DashboardItem } from "../types"
 import { mixedItems } from "./mockDataMixed"
 
 const widget = mixedItems.filter((item) => item.id === "headcount")
+const pointWidget = [
+  {
+    id: "point-headcount",
+    title: "Headcount by Department",
+    description: "Click the bar to mention this value in chat",
+    type: "chart",
+    chart: {
+      type: "bar",
+      tooltipValueFormatter: (value: number) => `${value} people`,
+    },
+    fetchData: async () => ({
+      categories: ["Engineering"],
+      series: [{ name: "Headcount", data: [145] }],
+    }),
+  },
+] satisfies DashboardItem[]
 
-const AskOneLayout = () => {
+const AskOneLayout = ({ items = widget }: { items?: DashboardItem[] }) => {
   return (
     <div className="flex h-full w-full gap-2 overflow-hidden">
       <div className="min-h-0 min-w-0 flex-1 overflow-auto">
-        <F0AnalyticsDashboard items={widget} />
+        <F0AnalyticsDashboard items={items} />
       </div>
       <div className="flex min-h-0 w-[420px] shrink-0">
         <F0AiChat
@@ -134,5 +151,60 @@ export const WidgetQuotedInChat: Story = {
       const textbox = await canvas.findByRole("textbox")
       await waitFor(() => expect(textbox).toHaveFocus())
     })
+  },
+}
+
+/**
+ * Click the Engineering bar, then choose Ask One from the anchored action. The
+ * complete category, series, and formatted value appear in the real composer.
+ */
+export const ChartPointFlow: Story = {
+  render: () => <AskOneLayout items={pointWidget} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click the Engineering bar to reveal the anchored Ask One action, or Tab to the chart's Ask One trigger to open the keyboard point menu. Choose the point to review the complete quote in the focused chat composer.",
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Open the keyboard point menu", async () => {
+      const trigger = await canvas.findByRole("button", {
+        name: "Ask One: Headcount by Department",
+      })
+      trigger.focus()
+      await expect(trigger).toHaveFocus()
+      await userEvent.keyboard("{Enter}")
+      const menuId = trigger.getAttribute("aria-controls")
+      if (!menuId)
+        throw new Error("The point menu trigger has no aria-controls")
+
+      const menu = await waitFor(() => {
+        const element = canvasElement.ownerDocument.getElementById(menuId)
+        expect(element).toBeInTheDocument()
+        return within(element!)
+      })
+      await userEvent.click(
+        await menu.findByRole("menuitem", {
+          name: "Headcount by Department — Engineering, Headcount: 145 people",
+        })
+      )
+    })
+
+    await step(
+      "Verify the formatted point in the focused composer",
+      async () => {
+        const removeQuote = await canvas.findByRole("button", {
+          name: "Remove quote",
+        })
+        await expect(removeQuote.parentElement).toHaveTextContent(
+          "Headcount by Department — Engineering Headcount: 145 people"
+        )
+        await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
+      }
+    )
   },
 }
