@@ -28,6 +28,7 @@ import {
   EntitySelect,
   F0TableOfContent,
   DetailsItemsList,
+  OneEmptyState,
   OneDataCollection,
   Page,
   PageHeader,
@@ -4028,10 +4029,12 @@ const myTrainingModuleInfo = {
   href: `/p/${SLUG}?view=learner-course`,
 }
 
-/** Learner course detail — Course content tab with modules + Evaluations (mobile parity). */
+/** Learner course detail — modules in Course content, evaluations in their own tab. */
 function LearnerCourseScreen() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const allDone = searchParams.get("done") === "1"
+  // Evaluations ya no vive dentro de Course content: tiene su propia pestaña.
+  const learnerTab = searchParams.get("ltab") === "evaluations" ? "evaluations" : "content"
   const learnerStatus: Record<string, "Completed" | "Pending"> = {
     "m1-1": "Completed",
     "m1-2": "Completed",
@@ -4070,7 +4073,11 @@ function LearnerCourseScreen() {
   //   clickable listed and takeable now (materialize-on-click)
   const evVariant = searchParams.get("ev") ?? "hidden"
   const evaluations =
-    evVariant === "hidden" ? LEARNER_EVALUATIONS : [...LEARNER_EVALUATIONS, ...SCHEDULED_EVALUATIONS]
+    evVariant === "empty"
+      ? []
+      : evVariant === "hidden"
+        ? LEARNER_EVALUATIONS
+        : [...LEARNER_EVALUATIONS, ...SCHEDULED_EVALUATIONS]
 
   const evaluationsSource = useDataCollectionSource<LearnerEvaluation>(
     {
@@ -4087,9 +4094,17 @@ function LearnerCourseScreen() {
     [evVariant]
   )
 
+  const goToTab = (tab: "content" | "evaluations") => {
+    const params = new URLSearchParams(window.location.search)
+    if (tab === "content") params.delete("ltab")
+    else params.set("ltab", tab)
+    setSearchParams(Object.fromEntries(params.entries()))
+  }
+
   const learnerTabs = [
     { id: "overview", label: "Overview", onClick: () => {} },
-    { id: "content", label: "Course content", onClick: () => {} },
+    { id: "content", label: "Course content", onClick: () => goToTab("content") },
+    { id: "evaluations", label: "Evaluations", onClick: () => goToTab("evaluations") },
     { id: "materials", label: "Materials", onClick: () => {} },
     { id: "sessions", label: "Sessions", onClick: () => {} },
     { id: "certificates", label: "Certificates", onClick: () => {} },
@@ -4115,15 +4130,15 @@ function LearnerCourseScreen() {
             }
             primaryAction={{ label: allDone ? "Review course" : "Resume course", onClick: () => {} }}
           />
-          <Tabs key="content" tabs={learnerTabs} activeTabId="content" />
+          <Tabs key={learnerTab} tabs={learnerTabs} activeTabId={learnerTab} />
         </>
       }
     >
       <StandardLayout>
         <NotificationsLayer />
         <F0Box display="flex" flexDirection="column" gap="2xl">
+          {learnerTab === "content" && (
           <F0BoxWithClassName className="px-12 flex flex-col gap-4">
-          <F0Heading content="Modules" variant="heading" as="h2" />
           <OneDataCollection
             id={`${SLUG}/learner-content/v1`}
             storage={false}
@@ -4154,9 +4169,17 @@ function LearnerCourseScreen() {
             ]}
           />
           </F0BoxWithClassName>
+          )}
 
+          {learnerTab === "evaluations" && (
           <F0BoxWithClassName className="px-12 flex flex-col gap-4">
-            <F0Heading content="Evaluations" variant="heading" as="h2" />
+            {evaluations.length === 0 ? (
+              <OneEmptyState
+                emoji="📋"
+                title="No evaluations yet"
+                description="Knowledge tests and surveys for this course will appear here."
+              />
+            ) : (
             <div style={{ position: "relative" }}>
             <OneDataCollection
               id={`${SLUG}/learner-evaluations/v1`}
@@ -4184,8 +4207,8 @@ function LearnerCourseScreen() {
                         render: (evaluation: LearnerEvaluation) =>
                           evaluation.opensAt
                             ? {
-                                type: "alertTag" as const,
-                                value: { level: "info" as const, label: `Locked · ${evaluation.opensAt}` },
+                                type: "tag" as const,
+                                value: { label: evaluation.opensAt, icon: LockLocked },
                               }
                             : evaluation.status === "Passed"
                               ? { type: "status" as const, value: { status: "positive" as const, label: "Passed" } }
@@ -4201,7 +4224,9 @@ function LearnerCourseScreen() {
               ]}
             />
             </div>
+            )}
           </F0BoxWithClassName>
+          )}
         </F0Box>
       </StandardLayout>
     </Page>
