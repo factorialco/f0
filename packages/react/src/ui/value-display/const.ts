@@ -22,8 +22,9 @@
  * 24px is the content height a cell's own loading state reserves (`min-h-[24px]` in
  * `experimental/OneTable/TableCell`), so a row does not change height when its data
  * arrives. It also leaves a row's height set by its own content: text-only rows come
- * out at 40px and a row with a tag at 42px, rather than every row being padded up to
- * a uniform floor.
+ * out at 41px and a row with a tag at 43px, rather than every row being padded up to
+ * a uniform floor. (Each includes the 1px the row spends on its own separator; see
+ * the cell padding in `ui/table.tsx`.)
  */
 
 /**

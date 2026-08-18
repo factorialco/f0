@@ -1885,10 +1885,11 @@ export const CellsOfDifferentHeightsShareOneCenter: Story = {
     const TOLERANCE = 1.5
 
     await waitFor(() => {
-      // Rows keep the height their own content asks for: the band sets it at 40px
-      // when every value is a line of text, and the taller tag sets it at 42px.
-      expect(textOnly.getBoundingClientRect().height).toBe(40)
-      expect(withTags.getBoundingClientRect().height).toBe(42)
+      // Rows keep the height their own content asks for: the band sets it at 41px
+      // when every value is a line of text, and the taller tag sets it at 43px.
+      // Both include the 1px the row spends on its own separator.
+      expect(textOnly.getBoundingClientRect().height).toBe(41)
+      expect(withTags.getBoundingClientRect().height).toBe(43)
 
       for (const row of [textOnly, withTags]) {
         for (const center of firstLineCenters(row)) {
