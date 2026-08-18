@@ -36,6 +36,7 @@ import {
   SolidPause,
   SolidPlay,
   Target,
+  Timer,
 } from "@/icons/app"
 import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
@@ -1373,9 +1374,10 @@ const clockInDay = (
  * - **Clocked in.** A `positive` pill — `--positive-50`, the tile's own green —
  *   with the running total in HOURS AND MINUTES, its separator blinking once a
  *   second the way a clock does (`ticking`), and "Take a break" as a plain chip at
- *   the end of it. Nothing is being asked of you, so the icon holds still.
+ *   the end of it. The face turns over on the same second (`flashing`), between
+ *   the timer and the break it offers.
  * - **On a break.** A `promote` pill — `--promote-50`, the tile's amber — counting
- *   the BREAK, and the button FLASHES between the clock's own icon and the play
+ *   the BREAK, and the button FLASHES between the timer icon and the play
  *   triangle: the colour says paused, the flash asks you to do something about it.
  *
  * Hover any of them and the card floats out as ever — the pill gives its width
@@ -1418,6 +1420,10 @@ const ClockGlyphActionHome = () => {
           // one colour.
           tone: "positive",
           ticking: true,
+          // Ticking as well as counting: the icon turns over between the timer
+          // and what the button does, so a running day says so twice — the
+          // separator's blink and the face's turn, on the same second.
+          flashing: true,
           onClick: () => {
             setOnBreak(0)
             setStatus("break")
@@ -1449,7 +1455,13 @@ const ClockGlyphActionHome = () => {
 
   const [clock, ...rest] = RIGHT_WIDGETS
   const day = clockInDay(status, worked, onBreak, new Date())
-  const rail: HomeWidgetItem[] = [{ ...clock, railAction }, ...rest]
+  // `Timer`, not the catalog's plain `Clock`: this icon is the OTHER FACE of the
+  // flash, so it is read a second at a time next to a running total — a stopwatch
+  // says which clock is meant, where a wall clock would just say "time".
+  const rail: HomeWidgetItem[] = [
+    { ...clock, icon: Timer, railAction },
+    ...rest,
+  ]
 
   return (
     // Capped BELOW what two columns need (712 + 16 + 396), so the rail is in its

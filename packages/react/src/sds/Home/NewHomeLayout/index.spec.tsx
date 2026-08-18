@@ -437,18 +437,27 @@ describe("NewHomeLayout", () => {
        * BUTTON STAYS EXACTLY AS IT WAS: hover is when you are aiming at it, and a
        * control that repaints itself mid-aim is one you cannot hit.
        */
-      test("hands the width back while the widget floats, button unchanged", async () => {
+      test("hands the width back while the widget floats, button unrepainted", async () => {
         renderLayout(1000, { rightWidgets: TICKING_RAIL })
 
         const button = () =>
           screen.getByRole("button", { name: "Take a break, clock" })
-        const before = button().className
+        /** Everything about the button EXCEPT whether its border is showing. */
+        const paint = () =>
+          button()
+            .className.split(" ")
+            .filter((c) => c !== "ring-1")
+
+        const before = paint()
 
         await userEvent.hover(button())
 
         expect(screen.getByText("tracked today")).toBeVisible()
         expect(pill()).not.toHaveTextContent("7:12")
-        expect(button().className).toBe(before)
+        // Same fill, same icon colour, same size — only the border came on, and
+        // that is the one thing hover is allowed to change.
+        expect(paint()).toEqual(before)
+        expect(button().className).toContain("ring-1")
       })
 
       test("blinks the separator once a second, digits held still", () => {
@@ -531,6 +540,10 @@ describe("NewHomeLayout", () => {
         const hoverFills = classes.filter((c) => c.startsWith("hover:bg-"))
 
         expect(hoverFills).toEqual(["hover:bg-f1-background"])
+        // The border answers the GLYPH's hover, not the button's own — pointing
+        // at the reading is pointing at the thing the button belongs to.
+        expect(classes).toContain("group-hover:ring-1")
+        expect(classes).not.toContain("hover:ring-1")
       })
 
       test("keeps the dark slab and the accent button by default", () => {

@@ -207,53 +207,60 @@ const RAIL_ACTION_TONES = {
   neutral: {
     pill: "bg-f1-background-inverse text-f1-foreground-inverse",
     button:
-      "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+      "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover",
     icon: "inverse",
-    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    ring: "ring-f1-border-inverse",
+    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover",
     soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
   },
   accent: {
     pill: "bg-f1-background-accent-bold text-f1-foreground-inverse",
-    button:
-      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    button: "bg-f1-background hover:bg-f1-background",
     icon: "accent",
-    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover",
     soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
   },
   critical: {
     pill: "bg-f1-background-critical-bold text-f1-foreground-inverse",
-    button:
-      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    button: "bg-f1-background hover:bg-f1-background",
     icon: "critical",
-    solo: "bg-f1-background-critical-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-critical-bold",
     soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
   },
   warning: {
     pill: "bg-f1-background-warning-bold text-f1-foreground-inverse",
-    button:
-      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    button: "bg-f1-background hover:bg-f1-background",
     icon: "warning",
-    solo: "bg-f1-background-warning-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-warning-bold",
     soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
   },
   // The amber `--promote-50`, which is also the colour a clock-in tile pulses on
   // a break: a rail action that mirrors a widget's own status should be able to
   // mirror its colour exactly, not approximate it with `warning`.
   promote: {
     pill: "bg-f1-background-promote-bold text-f1-foreground-inverse",
-    button:
-      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    button: "bg-f1-background hover:bg-f1-background",
     icon: "promote",
-    solo: "bg-f1-background-promote-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-promote-bold",
     soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
   },
   positive: {
     pill: "bg-f1-background-positive-bold text-f1-foreground-inverse",
-    button:
-      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    button: "bg-f1-background hover:bg-f1-background",
     icon: "positive",
-    solo: "bg-f1-background-positive-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-positive-bold",
     soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
   },
 } as const satisfies Record<
   RailActionTone,
@@ -261,8 +268,10 @@ const RAIL_ACTION_TONES = {
     pill: string
     button: string
     icon: F0IconProps["color"]
+    ring: string
     solo: string
     soloIcon: F0IconProps["color"]
+    soloRing: string
   }
 >
 
@@ -364,7 +373,10 @@ const CollapsedGlyph = ({
             // `pointer-events-auto` against the strip's `none`: a pill is wider
             // than the rail's column, and the box holding it must not become a
             // 100px dead margin down the side of the feed.
-            "pointer-events-auto relative shrink-0",
+            //
+            // `group` so the BUTTON can answer this whole box's hover — see its
+            // border below.
+            "group pointer-events-auto relative shrink-0",
             // The pill is the GLYPH'S OWN geometry, grown sideways: the 40px
             // height every glyph has, the button unchanged inside it, and
             // `rounded-lg` — one step up from the button's `rounded-md`, which is
@@ -394,15 +406,25 @@ const CollapsedGlyph = ({
             // whether it is standing alone as the glyph or sitting at the end of
             // a pill. A reading beside it doesn't make it a different control.
             size="lg"
-            compact
             // FLAT, like every other glyph in the strip. A button's elevation
             // chrome — the drop shadow and the `::after` top highlight — is for a
             // control raised off a page; here it reads as a border, and the
             // highlight's own radius is a step tighter than an `lg` button's, so
             // it cuts a visible arc across each corner. The strip is tiles.
             className={cn(
-              "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none",
-              action.text ? tone.button : tone.solo
+              // `[&_.main]:px-0` — the button is 40px of icon, not a label with
+              // room around it, and an `lg` button's own padding would squeeze a
+              // 24px glyph out of a 40px box. The tile centres it instead.
+              "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none [&_.main]:px-0",
+              action.text ? tone.button : tone.solo,
+              // THE BORDER ANSWERS THE WHOLE GLYPH, not just its 40px: the pill is
+              // one object, and pointing at the reading is pointing at the thing
+              // the button belongs to. It stays for as long as the widget is out
+              // (`open`), so crossing from the glyph into the card it opened
+              // doesn't switch the button off behind you.
+              "ring-inset group-hover:ring-1",
+              open && "ring-1",
+              action.text ? tone.ring : tone.soloRing
             )}
             // "Resume" on its own doesn't say which glyph this is; the tooltip
             // can lean on the strip for that, an accessible name can't.
@@ -410,7 +432,10 @@ const CollapsedGlyph = ({
             onClick={() => action.onClick()}
           >
             <F0Icon
-              size="md"
+              // The strip's own glyph size: `F0AvatarIcon` at `lg` draws its icon
+              // at 24px, and an action glyph that drew a smaller one read as a
+              // different KIND of tile rather than the same tile doing something.
+              size="lg"
               // `color` rather than a text class: it marks the svg
               // `data-has-color`, which is what stops the button variant's own
               // icon rules from painting over the tone.
