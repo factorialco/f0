@@ -614,6 +614,102 @@ export const widgetParamsAreComplete = (
   params: WidgetParams | undefined
 ): boolean => (schema ? schema.safeParse(params ?? {}).success : true)
 
+/**
+ * The colours a rail action's chip can take, by what the state MEANS rather than
+ * by hue: the same five a tag or a banner picks from, so a red pill in the rail
+ * is red for the same reason a red tag is.
+ */
+export const railActionTones = [
+  "neutral",
+  "accent",
+  "critical",
+  "warning",
+  "promote",
+  "positive",
+] as const
+
+export type RailActionTone = (typeof railActionTones)[number]
+
+/**
+ * A DIRECT ACTION on a widget's collapsed glyph: the one thing the widget can be
+ * told to do without being opened — resume a paused timer, clock out, join the
+ * call that starts now.
+ *
+ * The glyph BECOMES the button, because 40px is one control's worth of room. So
+ * the widget is still one hover away (hovering or focusing the glyph floats it
+ * over the feed, as any glyph does) and the CLICK is the action's rather than the
+ * panel's.
+ *
+ * Only the COLLAPSED rail draws it. Expanded, the card's own footer button
+ * (`action`) is where a widget's call to action belongs, and stacked (below `md`)
+ * there is no glyph to put it on.
+ */
+export type HomeWidgetRailAction = {
+  /** The action's own glyph — `Play` to resume, `Pause` for a running timer. */
+  icon: IconType
+  /**
+   * What it does, in the imperative ("Resume"): the glyph's tooltip, and half of
+   * its accessible name — the widget's title is the other half, since "Resume"
+   * alone says nothing about which of the strip's glyphs it is.
+   */
+  label: string
+  onClick: () => void
+  /**
+   * WHAT COLOUR THE STATE IS. One tone paints the whole chip — the pill behind
+   * the reading and the button at the end of it — because they are one object,
+   * and two colours picked separately is how you end up with a red button on an
+   * amber pill.
+   *
+   * - `"neutral"` (the default) — the dark slab, with the accent button on it.
+   *   Nothing about the state is remarkable; it is simply running.
+   * - `"accent"`, `"critical"`, `"warning"`, `"promote"`, `"positive"` — the pill
+   *   takes that colour and the button becomes a plain chip carrying it in its
+   *   icon, so the two never fight over the same hue.
+   *
+   * Without a `text` there is no pill, and the tone paints the button itself.
+   *
+   * PICK THE ONE THE WIDGET ALREADY USES. A rail action stands in for a state the
+   * card is also showing, and the semantic tones are the same values that state
+   * is drawn with elsewhere — a clock-in tile pulses `--positive-50` while it
+   * runs and `--promote-50` on a break, which is exactly `"positive"` and
+   * `"promote"` here. Two names for one state is how a glyph ends up a different
+   * green from the card it came out of.
+   */
+  tone?: RailActionTone
+  /**
+   * A READING to put beside the button — a clock's running total or the break
+   * you are on today, but any short string the state can be summed up in. The
+   * glyph grows into a dark PILL to hold it, overflowing its 40px column
+   * leftwards, and the whole strip right-aligns behind it.
+   *
+   * It is only drawn while the widget is STOWED. Hovering floats the card, which
+   * says the same thing in full context, so the pill gives its width back and
+   * leaves the button — the one part of it you can act on.
+   *
+   * Keep it SHORT — "7:12", "0:20", "3 left". This is a glyph, not a status bar,
+   * and anything that has to be read twice does not belong on one.
+   */
+  text?: string
+  /**
+   * The reading is COUNTING: the separators in `text` blink once a second, the
+   * way a clock does, so a stowed timer is visibly running rather than merely
+   * displayed. Reduced motion holds them lit, and a `text` with nothing to
+   * separate simply stands still.
+   */
+  ticking?: boolean
+  /**
+   * THE STATE IS ASKING TO BE ACTED ON — a timer left on a break, a shift you
+   * never clocked out of. The glyph alternates once a second between the
+   * widget's own icon and the action's, so the strip can say which module wants
+   * something AND what it wants without growing a second control.
+   *
+   * It settles on the action's icon while the widget is floating, so what you
+   * click is never the face that happened to be up. Reduced motion is honoured:
+   * the glyph simply stays the button.
+   */
+  flashing?: boolean
+}
+
 /** A widget as handed to the layout: header + an ordered list of slots. */
 export type HomeWidgetItem = HomeWidgetChrome & {
   id: string
@@ -648,6 +744,11 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    * "Add widget" picker, so the strip can never drift from the catalog.
    */
   icon?: IconType
+  /**
+   * The one thing the widget can do FROM THE COLLAPSED RAIL, drawn on its glyph
+   * instead of the catalog `icon`. See `HomeWidgetRailAction`.
+   */
+  railAction?: HomeWidgetRailAction
   /**
    * PINNED: the widget stays put. It offers no "Remove widget" in its menu, it
    * cannot be dragged, and no other widget can displace it — for widgets a user

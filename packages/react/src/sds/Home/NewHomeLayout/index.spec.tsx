@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
-import { useEffect, useState } from "react"
+import { forwardRef, useEffect, useState, type SVGProps } from "react"
 
+import { type IconType } from "@/components/F0Icon"
 import { Calendar, Clock } from "@/icons/app"
 import {
   act,
@@ -55,6 +56,18 @@ const RAIL = [
   widget("clock", { locked: true }),
   widget("events", { hasUpdates: true }),
 ]
+
+/**
+ * An icon a test can NAME. The real ones are anonymous paths, and a glyph that
+ * flashes between two of them is only testable if the two can be told apart.
+ */
+const markedIcon = (mark: string): IconType =>
+  forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>((props, ref) => (
+    <svg {...props} ref={ref} data-icon={mark} />
+  )) as IconType
+
+/** How many times the rail action has been run. */
+let resumes = 0
 
 const renderLayout = (width: number, props = {}) => {
   layoutWidth = width
@@ -141,6 +154,7 @@ beforeEach(() => {
   })
   resizeCallbacks = []
   clockMounts = 0
+  resumes = 0
   // jsdom has no ResizeObserver. This one keeps its callback so a test can fire
   // it (`resizeLayoutTo`) instead of only serving the initial read.
   vi.stubGlobal(
@@ -241,6 +255,333 @@ describe("NewHomeLayout", () => {
     })
   })
 
+  /**
+   * A widget's `railAction` turns its glyph into that action's button. The glyph
+   * is still the way to the widget — hover, or focus — but the CLICK is the
+   * action's, which is the whole point of putting it there.
+   */
+  describe("a glyph that is an action", () => {
+    const ACTION_RAIL = [
+      widget("clock", {
+        icon: markedIcon("module"),
+        // A body only this widget has, so "is the card floating?" doesn't have to
+        // be asked of a word the header carries too.
+        slots: [
+          {
+            visualization: "indicators",
+            params: { items: [{ label: "tracked today", content: "1" }] },
+          },
+        ],
+        railAction: {
+          icon: markedIcon("action"),
+          label: "Resume",
+          flashing: true,
+          onClick: () => resumes++,
+        },
+      }),
+      widget("events"),
+    ]
+
+    /** Which icon the glyph is wearing right now. */
+    const face = (button: HTMLElement) =>
+      button.querySelector("[data-icon]")?.getAttribute("data-icon")
+
+    const glyph = () =>
+      screen.getByRole("button", { name: "Resume, clock" }) as HTMLElement
+
+    test("names itself after the action AND the widget it belongs to", () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      expect(glyph()).toBeInTheDocument()
+      // The plain glyph's name is gone: there is one control here, not two.
+      expect(
+        screen.queryByRole("button", { name: "clock" })
+      ).not.toBeInTheDocument()
+    })
+
+    /**
+     * The tooltip is the only place the action's NAME is written — the glyph is
+     * an icon — so it opens INSTANTLY. On the default wait it was a name you had
+     * to stop and ask for, on a control you point at on your way past.
+     */
+    test("names the action without a wait", () => {
+      vi.useFakeTimers()
+      try {
+        renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+        // `fireEvent`, not `userEvent`: the tooltip is a TIMER, and userEvent's
+        // own waiting deadlocks against fake ones.
+        fireEvent.pointerEnter(glyph(), { pointerType: "mouse" })
+        // Well past the instant 100ms, and well inside the default 700ms.
+        act(() => vi.advanceTimersByTime(200))
+
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Resume")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("runs the action on every click — it never toggles the panel", async () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      await userEvent.click(glyph())
+      await userEvent.click(glyph())
+
+      // A plain glyph's second click would have PUT THE WIDGET BACK. This one
+      // does what it says twice, and the panel stays out.
+      expect(resumes).toBe(2)
+      expect(screen.getByText("tracked today")).toBeVisible()
+    })
+
+    test("still floats its widget on hover, like any other glyph", async () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      await userEvent.hover(glyph())
+
+      expect(screen.getByText("tracked today")).toBeVisible()
+      expect(resumes).toBe(0)
+    })
+
+    test("floats its widget on FOCUS too — the click is spoken for", () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      act(() => glyph().focus())
+
+      expect(screen.getByText("tracked today")).toBeVisible()
+    })
+
+    test("flashing alternates the two icons once a second", () => {
+      vi.useFakeTimers()
+      try {
+        renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+        // It starts on the action's face: whatever happens, the glyph opens by
+        // saying what it does.
+        expect(face(glyph())).toBe("action")
+        act(() => vi.advanceTimersByTime(1000))
+        expect(face(glyph())).toBe("module")
+        act(() => vi.advanceTimersByTime(1000))
+        expect(face(glyph())).toBe("action")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("settles on the action's face while the widget is floating", async () => {
+      renderLayout(1000, { rightWidgets: ACTION_RAIL })
+
+      await userEvent.hover(glyph())
+
+      vi.useFakeTimers()
+      try {
+        act(() => vi.advanceTimersByTime(3000))
+        expect(face(glyph())).toBe("action")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("holds still when the state stops asking", () => {
+      vi.useFakeTimers()
+      try {
+        renderLayout(1000, {
+          rightWidgets: [
+            widget("clock", {
+              icon: markedIcon("module"),
+              railAction: {
+                icon: markedIcon("action"),
+                label: "Clock out",
+                onClick: () => {},
+              },
+            }),
+          ],
+        })
+
+        const button = screen.getByRole("button", {
+          name: "Clock out, clock",
+        }) as HTMLElement
+        expect(face(button)).toBe("action")
+        act(() => vi.advanceTimersByTime(3000))
+        expect(face(button)).toBe("action")
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test("is the COLLAPSED rail's affordance only", () => {
+      renderLayout(1400, { rightWidgets: ACTION_RAIL })
+
+      // Expanded, the card's own footer is where a call to action belongs.
+      expect(
+        screen.queryByRole("button", { name: "Resume, clock" })
+      ).not.toBeInTheDocument()
+    })
+
+    /**
+     * A `text` turns the glyph into a pill: the reading, then the button. It is
+     * the STOWED widget's stand-in, so it gives its width back the moment the card
+     * itself is out.
+     */
+    describe("with a live reading on it", () => {
+      const TICKING_RAIL = [
+        widget("clock", {
+          icon: markedIcon("module"),
+          slots: [
+            {
+              visualization: "indicators",
+              params: { items: [{ label: "tracked today", content: "1" }] },
+            },
+          ],
+          railAction: {
+            icon: markedIcon("action"),
+            label: "Take a break",
+            text: "7:12",
+            ticking: true,
+            onClick: () => resumes++,
+          },
+        }),
+      ]
+
+      const pill = () =>
+        screen.getByRole("button", { name: "Take a break, clock" })
+          .parentElement as HTMLElement
+
+      test("draws the reading beside the button", () => {
+        renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+        // Whole and unsplit: a screen reader reads "7:12", not "7 12".
+        expect(pill()).toHaveTextContent("7:12")
+      })
+
+      /**
+       * The pill goes when the card comes out — it would only be an overhang
+       * repeating what the card says in full, over the panel it belongs to. THE
+       * BUTTON STAYS EXACTLY AS IT WAS: hover is when you are aiming at it, and a
+       * control that repaints itself mid-aim is one you cannot hit.
+       */
+      test("hands the width back while the widget floats, button unrepainted", async () => {
+        renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+        const button = () =>
+          screen.getByRole("button", { name: "Take a break, clock" })
+        /** Everything about the button EXCEPT whether its border is showing. */
+        const paint = () =>
+          button()
+            .className.split(" ")
+            .filter((c) => c !== "ring-1")
+
+        const before = paint()
+
+        await userEvent.hover(button())
+
+        expect(screen.getByText("tracked today")).toBeVisible()
+        expect(pill()).not.toHaveTextContent("7:12")
+        // Same fill, same icon colour, same size — only the border came on, and
+        // that is the one thing hover is allowed to change.
+        expect(paint()).toEqual(before)
+        expect(button().className).toContain("ring-1")
+      })
+
+      test("blinks the separator once a second, digits held still", () => {
+        vi.useFakeTimers()
+        try {
+          renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+          const separator = () =>
+            [...pill().querySelectorAll("span")].find(
+              (span) => span.textContent === ":"
+            ) as HTMLElement
+
+          expect(separator().style.opacity).toBe("1")
+          act(() => vi.advanceTimersByTime(1000))
+          expect(separator().style.opacity).not.toBe("1")
+          // The reading itself never changes — only the app's clock moves it.
+          expect(pill()).toHaveTextContent("7:12")
+          act(() => vi.advanceTimersByTime(1000))
+          expect(separator().style.opacity).toBe("1")
+        } finally {
+          vi.useRealTimers()
+        }
+      })
+
+      /**
+       * A `tone` is ONE decision for the whole chip: the pill takes the colour and
+       * the button becomes a plain chip carrying it in the icon, so the two halves
+       * never put two strong hues beside each other.
+       */
+      test("paints the pill and the button from one tone", () => {
+        renderLayout(1000, {
+          rightWidgets: [
+            widget("clock", {
+              icon: markedIcon("module"),
+              railAction: {
+                icon: markedIcon("action"),
+                label: "Resume",
+                text: "0:20",
+                tone: "warning",
+                onClick: () => {},
+              },
+            }),
+          ],
+        })
+
+        const button = screen.getByRole("button", { name: "Resume, clock" })
+        const pill = button.parentElement as HTMLElement
+
+        expect(pill.className).toContain("bg-f1-background-warning-bold")
+        // Not the tone again on the button — a plain chip, tone in the icon.
+        expect(button.className).toContain("bg-f1-background")
+        expect(button.className).not.toContain("warning")
+      })
+
+      /**
+       * The chip's `hover:` fill is its RESTING fill, on purpose: `tailwind-merge`
+       * settles classes per variant, so a plain `bg-*` leaves the button variant's
+       * own `hover:bg-*` standing — and the page's hover tint over a bold pill
+       * reads as the button going see-through.
+       */
+      test("does not let anything repaint the chip on hover", () => {
+        renderLayout(1000, {
+          rightWidgets: [
+            widget("clock", {
+              icon: markedIcon("module"),
+              railAction: {
+                icon: markedIcon("action"),
+                label: "Resume",
+                text: "0:20",
+                tone: "critical",
+                onClick: () => {},
+              },
+            }),
+          ],
+        })
+
+        const classes = screen
+          .getByRole("button", { name: "Resume, clock" })
+          .className.split(" ")
+        const hoverFills = classes.filter((c) => c.startsWith("hover:bg-"))
+
+        expect(hoverFills).toEqual(["hover:bg-f1-background"])
+        // The border answers the GLYPH's hover, not the button's own — pointing
+        // at the reading is pointing at the thing the button belongs to.
+        expect(classes).toContain("group-hover:ring-1")
+        expect(classes).not.toContain("hover:ring-1")
+      })
+
+      test("keeps the dark slab and the accent button by default", () => {
+        renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+        const button = screen.getByRole("button", {
+          name: "Take a break, clock",
+        })
+        expect((button.parentElement as HTMLElement).className).toContain(
+          "bg-f1-background-inverse"
+        )
+        expect(button.className).toContain("bg-f1-background-accent-bold")
+      })
+    })
+  })
+
   describe("stacked, below md", () => {
     test("drops the rail entirely — not even the strip", () => {
       renderLayout(700)
@@ -305,6 +646,34 @@ describe("NewHomeLayout", () => {
       await renderDeferredRail(1000)
 
       expect(screen.getByText("08:00")).not.toBeVisible()
+    })
+
+    /**
+     * THE FLOATING CARD IS OVER THE FEED, and it has to win that on the layout's
+     * terms rather than by out-bidding whatever the feed contains — Home's own
+     * Ask-AI composer is `z-20`, and the next thing an app puts in the column is
+     * not this layout's to know.
+     *
+     * The contract is three classes, which is what this asserts: the main column
+     * ISOLATES (so every z-index inside it is settled within the column, not
+     * against the panel), the panel sits above it, and the strip sits above the
+     * panel — a glyph is what the card came out of, so it stays in front.
+     *
+     * Asserted as classes because jsdom has no Tailwind: it can tell you the
+     * class is there, never what it paints. The real check is the Storybook story.
+     */
+    test("layers the floating card over the column, and the strip over both", () => {
+      const { container } = renderLayout(1000)
+
+      const main = container.querySelector(
+        ".overflow-y-auto.min-h-0, .min-h-0.overflow-y-auto"
+      ) as HTMLElement
+      const strip = container.querySelector("aside.-m-1") as HTMLElement
+      const panel = container.querySelector("aside.absolute") as HTMLElement
+
+      expect(main.className).toContain("isolate")
+      expect(panel.className).toContain("z-10")
+      expect(strip.className).toContain("z-20")
     })
 
     test("hovering a glyph floats THAT widget, and only it", async () => {

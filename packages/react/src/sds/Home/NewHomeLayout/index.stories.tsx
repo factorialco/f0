@@ -33,7 +33,10 @@ import {
   Receipt,
   Search,
   Settings,
+  SolidPause,
+  SolidPlay,
   Target,
+  Timer,
 } from "@/icons/app"
 import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
@@ -43,10 +46,12 @@ import {
   ClockInControls,
   type ClockInProject,
 } from "../ClockIn/ClockInControls"
+import { type ClockInStatus } from "../ClockIn/ClockInGraph"
 import {
   fromParams,
   homeSlot,
   type HomeWidgetItem,
+  type HomeWidgetRailAction,
   listSlot,
   resolveWidgetHeader,
   type SlotRenderers,
@@ -510,7 +515,23 @@ const CLOCK_IN_PROJECTS: ClockInProject[] = [
  * this same render rather than a hand-built stand-in that has to be kept in
  * step with it.
  */
-const ClockInTile = ({ loading }: { loading?: boolean }) => {
+const ClockInTile = ({
+  loading,
+  day,
+  onClockIn,
+  onClockOut,
+  onBreak,
+}: {
+  loading?: boolean
+  /**
+   * The day the tile is showing. `ClockInControls` reads its own status off the
+   * LAST entry's `variant`, so the day is the state — see `clockInDay` below.
+   */
+  day?: ClockInDay
+  onClockIn?: () => void
+  onClockOut?: () => void
+  onBreak?: () => void
+}) => {
   const [locationId, setLocationId] = useState("remote")
   const [projectId, setProjectId] = useState<string | undefined>()
 
@@ -519,8 +540,8 @@ const ClockInTile = ({ loading }: { loading?: boolean }) => {
       variant="horizontal-bar"
       loading={loading}
       labels={CLOCK_IN_LABELS}
-      data={[]}
-      trackedMinutes={0}
+      data={day?.data ?? []}
+      trackedMinutes={day?.trackedMinutes ?? 0}
       remainingMinutes={8 * 60}
       locations={CLOCK_IN_LOCATIONS}
       locationId={locationId}
@@ -528,8 +549,10 @@ const ClockInTile = ({ loading }: { loading?: boolean }) => {
       projects={CLOCK_IN_PROJECTS}
       projectId={projectId}
       onChangeProjectId={setProjectId}
-      onClockIn={() => {}}
-      onClockOut={() => {}}
+      canShowBreakButton
+      onClockIn={onClockIn ?? (() => {})}
+      onClockOut={onClockOut ?? (() => {})}
+      onBreak={onBreak}
     />
   )
 }
@@ -1282,6 +1305,199 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* ============================= glyph actions ============================= */
+
+/**
+ * HOURS AND MINUTES, as a glyph shows them: `7:04`. Seconds are what a stopwatch
+ * counts; a working day is read in hours, and the blinking separator is what says
+ * it is running — not a digit changing sixty times a minute.
+ */
+const hhmm = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60)
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`
+}
+
+/** What `ClockInControls` needs to draw the day — and to know which state it is in. */
+type ClockInDay = {
+  data: { from: Date; to: Date; variant: ClockInStatus }[]
+  trackedMinutes: number
+}
+
+/**
+ * THE DAY as the three states leave it. `ClockInControls` derives its status from
+ * the LAST entry's variant, so "on a break" is a worked stretch followed by a break
+ * stretch — the tile then says "On a break" on its own, with no status prop to keep
+ * in step with the rail.
+ *
+ * The clock started `worked + onBreak` seconds ago, so the two readings and the bar
+ * describe the same day.
+ */
+const clockInDay = (
+  status: ClockInStatus,
+  worked: number,
+  onBreak: number,
+  now: Date
+): ClockInDay => {
+  const at = (secondsAgo: number) => new Date(now.getTime() - secondsAgo * 1000)
+  const trackedMinutes = Math.floor(worked / 60)
+
+  if (status === "clocked-out") return { data: [], trackedMinutes: 0 }
+  if (status === "clocked-in")
+    return {
+      data: [{ from: at(worked), to: now, variant: "clocked-in" }],
+      trackedMinutes,
+    }
+  return {
+    data: [
+      { from: at(worked + onBreak), to: at(onBreak), variant: "clocked-in" },
+      { from: at(onBreak), to: now, variant: "break" },
+    ],
+    trackedMinutes,
+  }
+}
+
+/**
+ * THE RAIL'S ONE-CLICK STATE, as time tracking uses it: the clock's glyph is the
+ * clock's button, and the day decides which button that is. Click the glyph — or
+ * the tile's own controls, which drive the same state — to move between all three.
+ *
+ * Each state has its own COLOUR, and it is the colour the TILE already uses for
+ * it — `CLOCK_IN_COLORS`, the same values its status dot pulses and its bar is
+ * drawn in. One word (`tone`) paints the pill and the button together, so the
+ * rail says which state you are in before you have read the number, and says it
+ * in the same green the card does.
+ *
+ * - **Clocked out.** The dark slab (`neutral`), holding what the day came to, with
+ *   the accent play button on it. Nothing is running, so nothing blinks.
+ * - **Clocked in.** A `positive` pill — `--positive-50`, the tile's own green —
+ *   with the running total in HOURS AND MINUTES, its separator blinking once a
+ *   second the way a clock does (`ticking`), and "Take a break" as a plain chip at
+ *   the end of it. The face turns over on the same second (`flashing`), between
+ *   the timer and the break it offers.
+ * - **On a break.** A `promote` pill — `--promote-50`, the tile's amber — counting
+ *   the BREAK, and the button FLASHES between the timer icon and the play
+ *   triangle: the colour says paused, the flash asks you to do something about it.
+ *
+ * Hover any of them and the card floats out as ever — the pill gives its width
+ * back while it does, since the card says all of it in full, and the button it
+ * leaves behind is the same button it always was.
+ *
+ * Every reading is HOURS AND MINUTES on a real clock, so they change once a
+ * minute. What says "this is running" second to second is the blink, not a digit.
+ */
+const ClockGlyphActionHome = () => {
+  const [status, setStatus] = useState<ClockInStatus>("clocked-in")
+  /** Seconds worked today, and seconds into the CURRENT break. */
+  const [worked, setWorked] = useState((7 * 60 + 12) * 60)
+  const [onBreak, setOnBreak] = useState(0)
+
+  // The story's own clock, whichever counter the state says is running — REAL
+  // TIME, a second a second. It is kept in seconds so the day's bar and the
+  // tile's total stay in step with the pill, but nothing ever shows them: the
+  // glyph is read in hours and minutes, and a figure that moved every second in
+  // the corner of the page would be a stopwatch, not a day. In the real Home
+  // this is all the app's; the rail only draws the string it is handed.
+  useEffect(() => {
+    if (status === "clocked-out") return
+    const tick = setInterval(() => {
+      if (status === "clocked-in") setWorked((seconds) => seconds + 1)
+      else setOnBreak((seconds) => seconds + 1)
+    }, 1000)
+    return () => clearInterval(tick)
+  }, [status])
+
+  const railAction: HomeWidgetRailAction =
+    status === "clocked-in"
+      ? {
+          icon: SolidPause,
+          label: "Take a break",
+          text: hhmm(worked),
+          // THE SAME GREEN THE TILE PULSES: `positive` is `--positive-50`, which
+          // is exactly what `CLOCK_IN_COLORS["clocked-in"]` paints the status dot
+          // and the day's bar. The glyph and the card are one state, so they are
+          // one colour.
+          tone: "positive",
+          ticking: true,
+          // Ticking as well as counting: the icon turns over between the timer
+          // and what the button does, so a running day says so twice — the
+          // separator's blink and the face's turn, on the same second.
+          flashing: true,
+          onClick: () => {
+            setOnBreak(0)
+            setStatus("break")
+          },
+        }
+      : status === "break"
+        ? {
+            icon: SolidPlay,
+            label: "Resume",
+            text: hhmm(onBreak),
+            // …and the same amber, `--promote-50`, that the tile pulses on a
+            // break (`CLOCK_IN_COLORS.break`) — not `warning`, which is a
+            // different yellow and would say something the tile isn't saying.
+            tone: "promote",
+            ticking: true,
+            flashing: true,
+            onClick: () => setStatus("clocked-in"),
+          }
+        : {
+            icon: SolidPlay,
+            label: "Clock in",
+            // STILL A READING, on the dark slab: what the day came to so far. The
+            // clock has stopped, so nothing blinks — the tone is what says the
+            // difference between a total that is still moving and one that isn't.
+            text: hhmm(worked),
+            tone: "neutral",
+            onClick: () => setStatus("clocked-in"),
+          }
+
+  const [clock, ...rest] = RIGHT_WIDGETS
+  const day = clockInDay(status, worked, onBreak, new Date())
+  // `Timer`, not the catalog's plain `Clock`: this icon is the OTHER FACE of the
+  // flash, so it is read a second at a time next to a running total — a stopwatch
+  // says which clock is meant, where a wall clock would just say "time".
+  const rail: HomeWidgetItem[] = [
+    { ...clock, icon: Timer, railAction },
+    ...rest,
+  ]
+
+  return (
+    // Capped BELOW what two columns need (712 + 16 + 396), so the rail is in its
+    // collapsed strip — the only presentation that draws glyphs at all.
+    <div className="mx-auto h-full w-full max-w-[1000px] p-6">
+      <NewHomeLayout
+        rightWidgets={rail}
+        // The tile and the glyph are the SAME state: clocking in from the card
+        // grows the pill in the rail, and vice versa.
+        slotRenderers={{
+          "clock-in": {
+            render: () => (
+              <ClockInTile
+                day={day}
+                onClockIn={() => setStatus("clocked-in")}
+                onClockOut={() => setStatus("clocked-out")}
+                onBreak={() => {
+                  setOnBreak(0)
+                  setStatus("break")
+                }}
+              />
+            ),
+            skeleton: () => <ClockInTile loading />,
+          },
+        }}
+      >
+        {mainColumnBlocks()}
+      </NewHomeLayout>
+    </div>
+  )
+}
+
+export const GlyphAction: Story = {
+  // A story with a clock in it: every snapshot of it would differ from the last.
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <ClockGlyphActionHome />,
 }
 
 /* ============================== virtualization ============================== */
