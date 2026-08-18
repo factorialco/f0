@@ -1362,15 +1362,19 @@ const clockInDay = (
  * clock's button, and the day decides which button that is. Click the glyph — or
  * the tile's own controls, which drive the same state — to move between all three.
  *
- * - **Clocked out.** Nothing is running, so the glyph is a quiet `neutral` play:
- *   the day is on offer, not overdue.
- * - **Clocked in.** The glyph is a PILL — the running total in HOURS AND MINUTES,
- *   its separator blinking once a second the way a clock does (`ticking`), with
- *   "Take a break" at the end of it. Nothing is being asked of you, so the icon
- *   holds still.
- * - **On a break.** Still a pill, now counting the BREAK, and the button FLASHES
- *   between the clock's own icon and the play triangle: the one state that is
- *   asking to be acted on.
+ * Each state has its own COLOUR, which is what `tone` is for — one word paints the
+ * pill and the button together, so the rail says which state you are in before
+ * you have read the number.
+ *
+ * - **Clocked out.** No reading to show, so no pill: just the accent play button.
+ *   The day is on offer, not overdue.
+ * - **Clocked in.** An `accent` PILL — the running total in HOURS AND MINUTES, its
+ *   separator blinking once a second the way a clock does (`ticking`), with "Take
+ *   a break" as a plain chip at the end of it. Nothing is being asked of you, so
+ *   the icon holds still.
+ * - **On a break.** A `warning` pill counting the BREAK, and the button FLASHES
+ *   between the clock's own icon and the play triangle: amber says paused, the
+ *   flash asks you to do something about it.
  *
  * Hover any of them and the card floats out as ever — the pill gives its width
  * back while it does, since the card says all of it in full.
@@ -1405,6 +1409,8 @@ const ClockGlyphActionHome = () => {
           icon: SolidPause,
           label: "Take a break",
           text: hhmm(worked),
+          // The day is RUNNING: the accent pill, and the clock's own blink.
+          tone: "accent",
           ticking: true,
           onClick: () => {
             setOnBreak(0)
@@ -1416,15 +1422,16 @@ const ClockGlyphActionHome = () => {
             icon: SolidPlay,
             label: "Resume",
             text: hhmm(onBreak),
+            // A DIFFERENT COLOUR for a different state — amber says paused
+            // without saying broken, and the flashing icon does the asking.
+            tone: "warning",
             ticking: true,
-            // The state is asking to be acted on — a day left on a break.
             flashing: true,
             onClick: () => setStatus("clocked-in"),
           }
         : {
             icon: SolidPlay,
             label: "Clock in",
-            variant: "neutral",
             onClick: () => {
               setWorked(0)
               setStatus("clocked-in")

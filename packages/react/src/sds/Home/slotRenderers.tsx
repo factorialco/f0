@@ -13,7 +13,7 @@ import {
   type ModuleId,
 } from "@/components/avatars/F0AvatarModule"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
-import { F0Button, type F0ButtonProps } from "@/components/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
@@ -615,6 +615,21 @@ export const widgetParamsAreComplete = (
 ): boolean => (schema ? schema.safeParse(params ?? {}).success : true)
 
 /**
+ * The colours a rail action's chip can take, by what the state MEANS rather than
+ * by hue: the same five a tag or a banner picks from, so a red pill in the rail
+ * is red for the same reason a red tag is.
+ */
+export const railActionTones = [
+  "neutral",
+  "accent",
+  "critical",
+  "warning",
+  "positive",
+] as const
+
+export type RailActionTone = (typeof railActionTones)[number]
+
+/**
  * A DIRECT ACTION on a widget's collapsed glyph: the one thing the widget can be
  * told to do without being opened — resume a paused timer, clock out, join the
  * call that starts now.
@@ -638,17 +653,30 @@ export type HomeWidgetRailAction = {
    */
   label: string
   onClick: () => void
-  /** The button's colour. The accent (`default`) unless you say otherwise. */
-  variant?: F0ButtonProps["variant"]
+  /**
+   * WHAT COLOUR THE STATE IS. One tone paints the whole chip — the pill behind
+   * the reading and the button at the end of it — because they are one object,
+   * and two colours picked separately is how you end up with a red button on an
+   * amber pill.
+   *
+   * - `"neutral"` (the default) — the dark slab, with the accent button on it.
+   *   Nothing about the state is remarkable; it is simply running.
+   * - `"accent"`, `"critical"`, `"warning"`, `"positive"` — the pill takes that
+   *   colour and the button becomes a plain chip carrying it in its icon, so the
+   *   two never fight over the same hue.
+   *
+   * Without a `text` there is no pill, and the tone paints the button itself.
+   */
+  tone?: RailActionTone
   /**
    * A READING to put beside the button — a clock's running total or the break
    * you are on today, but any short string the state can be summed up in. The
    * glyph grows into a dark PILL to hold it, overflowing its 40px column
    * leftwards, and the whole strip right-aligns behind it.
    *
-   * It is only shown while the widget is STOWED. Hovering floats the card, which
-   * says the same thing in full context, so the pill shrinks back to its button
-   * rather than sitting on top of the card repeating itself.
+   * It is only drawn while the widget is STOWED. Hovering floats the card, which
+   * says the same thing in full context, so the pill gives its width back and
+   * leaves the button — the one part of it you can act on.
    *
    * Keep it SHORT — "7:12", "0:20", "3 left". This is a glyph, not a status bar,
    * and anything that has to be read twice does not belong on one.

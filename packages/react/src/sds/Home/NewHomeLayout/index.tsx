@@ -14,7 +14,7 @@ import {
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, type F0IconProps } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 // No `Pencil`/`Check`: there is no edit mode to toggle any more.
 import { Plus } from "@/icons/app"
@@ -31,8 +31,6 @@ import {
   entranceTransition,
   GENIE_GLYPH_ENTER_SCALE,
   GENIE_GLYPH_EXIT_SCALE,
-  GENIE_GLYPH_HOVER_SCALE,
-  GENIE_GLYPH_OPEN_SCALE,
   GENIE_GLYPH_TAP_SCALE,
   GENIE_ORIGIN,
   GENIE_RETRACTED_OFFSET_PX,
@@ -47,6 +45,7 @@ import {
   widgetTitle,
   type HomeRenderCtx,
   type HomeWidgetItem,
+  type RailActionTone,
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
@@ -140,11 +139,14 @@ const useFlash = (running: boolean) => {
   return lit
 }
 
+/** How far a blinking reading goes down on the off beat. */
+const TICK_DIM = 0.24
+
 /**
- * A rail action's reading, and — while it is `ticking` — BLINKING LIKE A CLOCK:
- * the characters stand still and the separators go dim for half of every second,
- * which is what says the number is counting rather than parked. A reading with
- * nothing to separate is simply drawn.
+ * A rail action's reading, BLINKING LIKE A CLOCK while it is `ticking`: the
+ * figures stand still and the separators go dim for half of every second, which
+ * is what says the number is counting rather than parked. The figures never
+ * blink — a reading you cannot read at a glance is not a reading.
  *
  * Opacity only, and the string is never taken apart in the accessibility tree — a
  * screen reader still reads "0:42", not "0 42". `tabular-nums` so a digit rolling
@@ -166,7 +168,7 @@ const GlyphReading = ({
           {index > 0 ? (
             <span
               className="transition-opacity duration-200"
-              style={{ opacity: lit ? 1 : 0.24 }}
+              style={{ opacity: lit ? 1 : TICK_DIM }}
             >
               :
             </span>
@@ -177,6 +179,81 @@ const GlyphReading = ({
     </span>
   )
 }
+
+/**
+ * WHAT A TONE PAINTS. One entry per tone, and each says the same three things:
+ * the pill's fill, the button's fill, and what colour the button's icon takes.
+ *
+ * The pairing is the point. `neutral` is the dark slab with the accent button on
+ * it — a chip that isn't saying anything in particular. Every OTHER tone colours
+ * the pill and turns the button into a plain chip carrying that colour in its
+ * icon, so the two halves never put two strong hues side by side. Without a
+ * reading there is no pill, and `solo` is what the button wears on its own.
+ *
+ * THE CHIP KEEPS ITS FILL ON HOVER — `hover:` set to the SAME colour, which is
+ * not redundant: `tailwind-merge` only settles classes within one variant, so a
+ * plain `bg-*` never displaces the button variant's `hover:bg-*`, and the chip
+ * was repainting itself with the page's hover tint the moment you pointed at it.
+ * Over a bold pill that reads as the button going see-through rather than
+ * lighting up. What the chip does instead is take a BORDER — the glyphs no longer
+ * scale under the pointer (see `glyphMotion`), so the ring is the feedback: a
+ * hairline on the plain chips, and the inverse one on the solid buttons, which is
+ * the only border that shows on a bold fill.
+ *
+ * Literal class strings, one per tone: Tailwind reads source text, so a class
+ * built from a variable never reaches the stylesheet.
+ */
+const RAIL_ACTION_TONES = {
+  neutral: {
+    pill: "bg-f1-background-inverse text-f1-foreground-inverse",
+    button:
+      "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    icon: "inverse",
+    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    soloIcon: "inverse",
+  },
+  accent: {
+    pill: "bg-f1-background-accent-bold text-f1-foreground-inverse",
+    button:
+      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    icon: "accent",
+    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    soloIcon: "inverse",
+  },
+  critical: {
+    pill: "bg-f1-background-critical-bold text-f1-foreground-inverse",
+    button:
+      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    icon: "critical",
+    solo: "bg-f1-background-critical-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    soloIcon: "inverse",
+  },
+  warning: {
+    pill: "bg-f1-background-warning-bold text-f1-foreground-inverse",
+    button:
+      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    icon: "warning",
+    solo: "bg-f1-background-warning-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    soloIcon: "inverse",
+  },
+  positive: {
+    pill: "bg-f1-background-positive-bold text-f1-foreground-inverse",
+    button:
+      "bg-f1-background hover:bg-f1-background hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    icon: "positive",
+    solo: "bg-f1-background-positive-bold hover:ring-1 hover:ring-inset hover:ring-f1-border-inverse",
+    soloIcon: "inverse",
+  },
+} as const satisfies Record<
+  RailActionTone,
+  {
+    pill: string
+    button: string
+    icon: F0IconProps["color"]
+    solo: string
+    soloIcon: F0IconProps["color"]
+  }
+>
 
 /**
  * One widget as the collapsed strip shows it: its own catalog glyph, standing in
@@ -213,22 +290,36 @@ const CollapsedGlyph = ({
   // which icon was pressed.
   const actionFace = useFlash(!!action?.flashing && !open)
   /**
-   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card itself is out with the
-   * same reading in full context — and the pill would be a 100px overhang sitting
-   * on top of it, saying it again — so the glyph gives the room back and is simply
-   * its button again.
+   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card is out with the same
+   * reading in full context, so the pill goes and leaves the button it was built
+   * around — which also takes the overhang out of the panel's way.
+   *
+   * THE BUTTON ITSELF DOES NOT CHANGE while that happens. Its colours come from
+   * whether the action HAS a reading, not from whether the pill is drawn right
+   * now (`action.text`, not this) — a control that repaints under the pointer is
+   * one you cannot aim at, and hover is exactly when you are aiming.
    */
   const text = action?.text && !open ? action.text : undefined
+  /** What the state's colour paints — the pill, the button, and its icon. */
+  const tone = RAIL_ACTION_TONES[action?.tone ?? "neutral"]
 
-  /** The genie, identical whichever face the glyph wears. */
+  /**
+   * The genie, identical whichever face the glyph wears.
+   *
+   * EVERY SCALE HERE IS TRANSIENT — arriving, leaving, the press — and none of
+   * them is HELD. A held fractional scale is rasterized once and then stretched:
+   * the glyph's icon and a pill's figures go soft, and they stay soft for as long
+   * as you keep the pointer there, which is exactly when they are being read. The
+   * hover and open states say what they have to say with the panel they open, the
+   * tooltip, and the button's own hover border.
+   */
   const glyphMotion = {
     initial: {
       opacity: 0,
       scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
     },
-    animate: { opacity: 1, scale: open ? GENIE_GLYPH_OPEN_SCALE : 1 },
+    animate: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE },
-    whileHover: reducedMotion ? undefined : { scale: GENIE_GLYPH_HOVER_SCALE },
     whileTap: reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE },
     transition: withReducedMotion(
       { ...glyphTransition, delay: entranceDelay(order, delayMs) },
@@ -269,7 +360,10 @@ const CollapsedGlyph = ({
             // what the radius scale says a container holding an `lg` control
             // takes. Nothing here is a shape the strip doesn't already use.
             text
-              ? "flex flex-row items-center gap-1 rounded-lg bg-f1-background-inverse p-1 text-f1-foreground-inverse -mr-1"
+              ? cn(
+                  "-mr-1 flex flex-row items-center gap-1 rounded-lg p-1",
+                  tone.pill
+                )
               : "rounded-lg"
           )}
           onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
@@ -281,7 +375,10 @@ const CollapsedGlyph = ({
           ) : null}
           <Action
             type="button"
-            variant={action.variant ?? "default"}
+            // `ghost` and then painted: the tone decides this button's fill and
+            // its icon TOGETHER with the pill's, and a variant would bring a
+            // second opinion about both.
+            variant="ghost"
             // THE SAME BUTTON either way — 40px at the strip's own radius,
             // whether it is standing alone as the glyph or sitting at the end of
             // a pill. A reading beside it doesn't make it a different control.
@@ -292,7 +389,10 @@ const CollapsedGlyph = ({
             // control raised off a page; here it reads as a border, and the
             // highlight's own radius is a step tighter than an `lg` button's, so
             // it cuts a visible arc across each corner. The strip is tiles.
-            className="size-10 shadow-none after:hidden active:shadow-none"
+            className={cn(
+              "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none",
+              action.text ? tone.button : tone.solo
+            )}
             // "Resume" on its own doesn't say which glyph this is; the tooltip
             // can lean on the strip for that, an accessible name can't.
             aria-label={`${action.label}, ${widgetTitle(widget)}`}
@@ -300,6 +400,10 @@ const CollapsedGlyph = ({
           >
             <F0Icon
               size="md"
+              // `color` rather than a text class: it marks the svg
+              // `data-has-color`, which is what stops the button variant's own
+              // icon rules from painting over the tone.
+              color={action.text ? tone.icon : tone.soloIcon}
               // No widget icon means no second face to flash to — the action's
               // is the only one there is.
               icon={actionFace || !widget.icon ? action.icon : widget.icon}
@@ -906,7 +1010,18 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             screen instead of being cut short inside the page. */}
         <div
           ref={mainFade.ref}
-          className={cn("relative min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
+          className={cn(
+            // `isolate` — A STACKING CONTEXT OF ITS OWN, and the reason the
+            // floating panel is not buried by the feed. Without it the column is
+            // `relative` at `z-index: auto`, which is no context at all: every
+            // z-index INSIDE it competes at the layout's level, and the content a
+            // Home puts here brings its own (the Ask-AI composer is `z-20`, and
+            // whatever a card does next is not this layout's to know). Isolated,
+            // the whole column is one layer that the panel's `z-10` clears, no
+            // matter what its contents bid.
+            "relative isolate min-h-0 overflow-y-auto",
+            SCROLLBAR_HIDDEN
+          )}
           style={{
             // Placed rather than flowed, because the strip and the rail body
             // BOTH want this row's second column and for a moment mid-collapse
@@ -995,7 +1110,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 // of the feed, eating clicks meant for the cards under it. Each
                 // glyph turns them back on for its own 40px (`pointer-events-auto`).
                 "-m-1 flex min-h-0 flex-col items-end gap-2 overflow-y-auto p-1",
-                "pointer-events-none",
+                // ABOVE THE PANEL (`z-10`): a glyph is what the floating card
+                // came out of, so it stays in front of it — and a pill overhangs
+                // far enough to be half-covered otherwise.
+                "pointer-events-none z-20",
                 SCROLLBAR_HIDDEN
               )}
               style={{
