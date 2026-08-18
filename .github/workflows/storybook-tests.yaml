@@ -55,13 +55,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
+          # `-chromium` in the key: the cache now holds only the one browser we
+          # launch, so it must not restore an older all-browsers entry.
+          key: playwright-chromium-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
           restore-keys: |
-            playwright-browsers-${{ steps.playwright-version.outputs.version }}-
-            playwright-browsers-
+            playwright-chromium-${{ steps.playwright-version.outputs.version }}-
+            playwright-chromium-
+      # Chromium only. The test-runner never launches anything else (TEST_BROWSERS
+      # is unset, so it defaults to chromium), but a bare `install --with-deps`
+      # apt-installs the WebKit and Firefox system libraries too — the gstreamer
+      # /fluidsynth/rav1e pile. That apt step runs even on a browser-cache hit
+      # and was the least predictable part of the job, measured between 27s and
+      # 121s across the 8 shards of run 32146702636.
       - name: Install Playwright
         run: |
-          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps
+          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps chromium
       - name: Build Storybook
         run: |
           pnpm --filter @factorialco/f0-core build
