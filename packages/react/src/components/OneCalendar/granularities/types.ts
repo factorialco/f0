@@ -30,6 +30,9 @@ export interface GranularityDefinition {
   calendarView: CalendarView
   // Week starts on day (only used by week granularity)
   weekStartsOn?: WeekStartsOn
+  // Hides the calendar header navigation and the date input: the view owns the
+  // full set of selectable values, so there is nothing to navigate or type
+  hideViewControls?: boolean
   // Label for the granularity in the calendar view
   label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode
   // Format the date to a date range with dates as string

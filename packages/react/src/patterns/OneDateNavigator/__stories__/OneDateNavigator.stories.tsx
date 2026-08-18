@@ -82,6 +82,17 @@ const meta = {
         },
       },
     },
+    periods: {
+      description:
+        "Consumer-defined ranges (payroll cycles, academic terms, …) offered as an extra entry in the granularity selector, named by its `label`. Each period is listed with its own label and date range, and the navigation arrows step from one period to the next.",
+      table: {
+        type: {
+          summary: "DatePeriodsDefinition",
+          detail:
+            "type DatePeriodsDefinition = { label?: string, header?: string, periods: { label: string, description?: string, from: Date, to: Date }[] }",
+        },
+      },
+    },
     value: {
       description: "The value of the date picker",
       table: {
@@ -510,5 +521,39 @@ export const WithDefaultCompareTo: Story = {
   args: {
     ...WithCompareTo.args,
     defaultCompareTo: "1",
+  },
+}
+
+// Payroll cycles: labelled by month, but each one runs from the 25th of the
+// previous month to the 24th of its own.
+const payrollPeriods = Array.from({ length: 12 }, (_, month) => ({
+  label: new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(2026, month, 1)),
+  from: new Date(2025, month + 11, 25),
+  to: new Date(2026, month, 24),
+}))
+
+export const WithPeriods: Story = {
+  args: {
+    defaultValue: {
+      value: {
+        from: new Date(2026, 6, 25),
+        to: new Date(2026, 7, 24),
+      },
+      granularity: "periods",
+    } as DatePickerValue,
+    granularities: ["day", "week", "month"],
+    periods: {
+      label: "Payroll",
+      header: "Spain — Iberia Workforce SL",
+      periods: payrollPeriods,
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The trigger shows the period's own label, not a formatted date range
+    expect(canvas.getByText("August 2026")).toBeInTheDocument()
   },
 }

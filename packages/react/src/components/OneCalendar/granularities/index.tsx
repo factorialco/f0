@@ -2,12 +2,18 @@ import { WeekStartDay, WeekStartsOn } from "../types"
 import { dayGranularity } from "./day"
 import { halfyearGranularity } from "./halfyear"
 import { monthGranularity } from "./month"
+import {
+  createPeriodsGranularity,
+  DatePeriodsDefinition,
+  periodsGranularity,
+} from "./periods"
 import { quarterGranularity } from "./quarter"
 import { rangeGranularity } from "./range"
 import { GranularityDefinition } from "./types"
 import { createWeekGranularity, weekGranularity } from "./week"
 import { yearGranularity } from "./year"
 export * from "./consts"
+export * from "./periods/types"
 export * from "./types"
 
 export const granularityDefinitions = {
@@ -18,6 +24,7 @@ export const granularityDefinitions = {
   halfyear: halfyearGranularity,
   year: yearGranularity,
   range: rangeGranularity,
+  periods: periodsGranularity,
 } as const satisfies Record<string, GranularityDefinition>
 
 export type GranularityDefinitionKey = keyof typeof granularityDefinitions
@@ -25,20 +32,32 @@ export type GranularityDefinitionKey = keyof typeof granularityDefinitions
 /**
  * Get granularity definitions with week granularity configured with the specified weekStartsOn.
  * The week granularity is only created when needed (lazy creation).
+ *
+ * The `periods` granularity is only selectable once the consumer supplies its
+ * periods; without them it renders an empty list.
  */
 export function getGranularityDefinitions(
-  weekStartsOn?: WeekStartsOn
+  weekStartsOn?: WeekStartsOn,
+  periods?: DatePeriodsDefinition
 ): Record<string, GranularityDefinition> {
   const effectiveWeekStartsOn = weekStartsOn ?? WeekStartDay.Monday
 
   // Only create week granularity if it's different from the default
   // Otherwise, return the static definitions directly
-  if (effectiveWeekStartsOn === WeekStartDay.Monday) {
-    return granularityDefinitions
+  const definitions =
+    effectiveWeekStartsOn === WeekStartDay.Monday
+      ? granularityDefinitions
+      : {
+          ...granularityDefinitions,
+          week: createWeekGranularity(effectiveWeekStartsOn),
+        }
+
+  if (!periods) {
+    return definitions
   }
 
   return {
-    ...granularityDefinitions,
-    week: createWeekGranularity(effectiveWeekStartsOn),
+    ...definitions,
+    periods: createPeriodsGranularity(periods),
   }
 }

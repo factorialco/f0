@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
 import {
+  DatePeriodsDefinition,
   GranularityDefinition,
   GranularityDefinitionKey,
   GranularityDefinitionSimple,
@@ -45,6 +46,8 @@ interface OneCalendarInternalProps {
   weekStartsOn?: WeekStartsOn
   /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
   selectOnCellOnly?: boolean
+  /** Consumer-defined ranges rendered by the `periods` view. */
+  periods?: DatePeriodsDefinition
 }
 
 export type OneCalendarProps = Omit<
@@ -90,6 +93,7 @@ const OneCalendarInternal = ({
   compact = false,
   weekStartsOn,
   selectOnCellOnly = false,
+  periods,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
@@ -118,9 +122,12 @@ const OneCalendarInternal = ({
   const [motionDirection, setMotionDirection] = useState(1)
 
   const granularity = useMemo(() => {
-    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    const definitions = getGranularityDefinitions(
+      effectiveWeekStartsOn,
+      periods
+    )
     return definitions[view]
-  }, [view, effectiveWeekStartsOn])
+  }, [view, effectiveWeekStartsOn, periods])
 
   const setSelected = useCallback(
     (date: Date | DateRange | null) => {
@@ -311,7 +318,7 @@ const OneCalendarInternal = ({
 
   return (
     <div className="flex flex-col">
-      {showInput && (
+      {showInput && !granularity.hideViewControls && (
         <div className="mb-2 flex gap-2">
           <Input
             label={i18n.date.from}
@@ -353,7 +360,7 @@ const OneCalendarInternal = ({
           )}
         </div>
       )}
-      {showNavigation && (
+      {showNavigation && !granularity.hideViewControls && (
         <div
           className={cn(
             "flex items-center justify-between",

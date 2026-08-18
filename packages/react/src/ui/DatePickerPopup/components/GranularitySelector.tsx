@@ -6,12 +6,15 @@ interface GranularitySelectorProps {
   granularities: GranularityDefinitionKey[]
   value?: GranularityDefinitionKey
   onChange: (granularity: GranularityDefinitionKey) => void
+  /** Names the consumer-defined periods entry, e.g. "Payroll" */
+  periodsLabel?: string
 }
 
 export function GranularitySelector({
   granularities,
   value,
   onChange,
+  periodsLabel,
 }: GranularitySelectorProps) {
   const i18n = useI18n()
 
@@ -26,12 +29,14 @@ export function GranularitySelector({
         <SelectContent>
           {granularities.map((granularity) => (
             <SelectItem key={granularity} value={granularity}>
-              {(
-                i18n.date.granularities as Record<
-                  GranularityDefinitionKey,
-                  { label: string }
-                >
-              )[granularity]?.label || granularity}
+              {(granularity === "periods" ? periodsLabel : undefined) ||
+                (
+                  i18n.date.granularities as Record<
+                    GranularityDefinitionKey,
+                    { label: string }
+                  >
+                )[granularity]?.label ||
+                granularity}
             </SelectItem>
           ))}
         </SelectContent>
