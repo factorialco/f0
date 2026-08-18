@@ -127,6 +127,35 @@ export const MultipleGranularities: Story = {
   },
 }
 
+// Payroll cycles: labelled by month, but each one runs from the 25th of the
+// previous month to the 24th of its own.
+const payrollPeriods = Array.from({ length: 12 }, (_, month) => ({
+  label: new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(2025, month, 1)),
+  from: new Date(2024, month + 11, 25),
+  to: new Date(2025, month, 24),
+}))
+
+export const WithPeriods: Story = {
+  args: {
+    navigationFilters: {
+      date: {
+        type: "date-navigator",
+        defaultValue: new Date(2025, 6, 30),
+        defaultGranularity: "periods",
+        granularity: ["day", "week", "month"],
+        periods: {
+          label: "Payroll",
+          header: "Spain — Iberia Workforce SL",
+          periods: payrollPeriods,
+        },
+      },
+    },
+  },
+}
+
 export const WithPresets: Story = {
   args: {
     navigationFilters: {
