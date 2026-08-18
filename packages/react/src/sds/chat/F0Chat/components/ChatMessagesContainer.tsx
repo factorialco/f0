@@ -182,9 +182,12 @@ const CHAT_VIRTUOSO_COMPONENTS = {
 
 // Keep the next rows mounted far enough ahead for Virtuoso to measure them
 // before they enter the viewport. The item-count floor matters for very tall
-// media rows, where a pixel-only buffer can contain a single item.
-const CHAT_VIEWPORT_INCREASE = { top: 400, bottom: 200 }
-const CHAT_MIN_OVERSCAN_ITEMS = { top: 4, bottom: 3 }
+// media rows, where a pixel-only buffer can contain a single item. The top
+// buffer is generous on purpose: scrolling up through never-measured history
+// is where estimate→real corrections happen, and they only stay invisible
+// when the row being measured is still well above the viewport.
+const CHAT_VIEWPORT_INCREASE = { top: 1200, bottom: 200 }
+const CHAT_MIN_OVERSCAN_ITEMS = { top: 6, bottom: 3 }
 
 const chatRowKey = (index: number, row: ChatRow): string =>
   row?.key ?? `chat-gap-${index}`
@@ -569,7 +572,11 @@ export const ChatMessagesContainer = (): ReactNode => {
           totalListHeightChanged={handleListHeightChanged}
           increaseViewportBy={CHAT_VIEWPORT_INCREASE}
           minOverscanItemCount={CHAT_MIN_OVERSCAN_ITEMS}
-          defaultItemHeight={48}
+          // Median measured row height in text-heavy transcripts (bubble +
+          // run spacing). Unmeasured history is estimated with this; the
+          // closer it sits to reality, the smaller the scroll correction when
+          // a row is first measured.
+          defaultItemHeight={64}
           // Reporting measurements in the ResizeObserver callback avoids an
           // extra provisional frame when a previously unseen row is mounted.
           skipAnimationFrameInResizeObserver

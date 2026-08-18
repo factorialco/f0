@@ -677,7 +677,7 @@ export const ChatComposer = (): ReactNode => {
       <div className="pointer-events-auto mx-auto w-full max-w-content">
         <div
           data-testid="chat-composer-surface"
-          className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background/95 shadow-md backdrop-blur-[2px]"
+          className="relative flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background/90 shadow-md backdrop-blur-[2px]"
         >
           <ChatEmojiAutocomplete
             isOpen={emojiAutocomplete.isOpen}

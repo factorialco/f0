@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, useMemo, useState } from "react"
+import { Fragment, isValidElement, ReactNode, useMemo, useState } from "react"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import {
@@ -12,6 +12,13 @@ import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
+import {
+  resolveWidgetHeader,
+  widgetChrome,
+  type HomeWidgetItem,
+  type SlotRenderers,
+} from "../slotRenderers"
+import { SlotWidget } from "../SlotWidget"
 import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 
 /** One entry in the widget catalog dialog. */
@@ -20,14 +27,25 @@ export interface WidgetCatalogItem {
   title: string
   icon: IconType
   /**
-   * The LIVE PREVIEW of the widget — the same node the Home renders (e.g. a
-   * `SlotWidget`), so the preview can't drift from what gets added.
+   * The LIVE PREVIEW of the widget.
+   *
+   * GIVE IT THE WIDGET ITSELF — the same `HomeWidgetItem` the layout would be
+   * handed — and the catalog draws it through `SlotWidget`, exactly as the
+   * column will. That is the only form that cannot drift: a preview assembled
+   * out of content components reproduces the frame, the seams and the spacing
+   * by hand, and the first of those to fall out of step is silent.
+   *
+   * A `ReactNode` is still accepted, for a widget the app draws its own way
+   * (`renderWidget`) or for something that isn't a widget at all.
    */
-  preview: ReactNode
+  preview: HomeWidgetItem | ReactNode
   /**
    * What this widget is telling you — the widget's own `header.info`, shown under
    * the preview. Deciding whether to add a widget is exactly the moment that
    * sentence is worth reading, so the picker says it without being asked.
+   *
+   * Taken from the widget's own header when `preview` is a `HomeWidgetItem`, so
+   * for those it is usually nothing to pass.
    */
   info?: string
   /**
@@ -75,8 +93,63 @@ export interface WidgetCatalogProps {
    * to it, so a rail-bound widget previews at rail width.
    */
   previewWidth?: number
+  /**
+   * Per-visualization renderers for the previews this dialog draws itself,
+   * MERGED OVER the kit's `defaultSlotRenderers`. Pass the SAME map the layout
+   * gets: a widget whose visualization is bespoke would otherwise preview as
+   * "No renderer for slot …" and then render properly once added.
+   */
+  slotRenderers?: SlotRenderers
   title?: string
 }
+
+/**
+ * Which of the two things a `preview` is. A `HomeWidgetItem` is a plain object
+ * with `slots`; every `ReactNode` that is an object at all is an element, a
+ * portal or an iterable — so `isValidElement` and the shape between them tell
+ * the union apart without asking the caller to say which they meant.
+ */
+const isWidgetItem = (
+  preview: WidgetCatalogItem["preview"]
+): preview is HomeWidgetItem =>
+  typeof preview === "object" &&
+  preview !== null &&
+  !isValidElement(preview) &&
+  Array.isArray((preview as HomeWidgetItem).slots)
+
+/**
+ * One catalog preview. A widget handed over as DATA is drawn here through the
+ * same `SlotWidget` a column uses — which is the whole point of taking data: the
+ * preview and the card it previews are one render, so they cannot come out
+ * differently. Anything else is passed through as given.
+ */
+const CatalogPreview = ({
+  preview,
+  slotRenderers,
+}: {
+  preview: WidgetCatalogItem["preview"]
+  slotRenderers?: SlotRenderers
+}) => {
+  if (!isWidgetItem(preview)) return <>{preview}</>
+  return (
+    <SlotWidget
+      {...widgetChrome(preview)}
+      header={preview.header}
+      params={preview.params}
+      fullHeight={preview.fullHeight}
+      slots={preview.slots}
+      loading={preview.loading}
+      slotRenderers={slotRenderers}
+    />
+  )
+}
+
+/** The sentence under a preview: the item's own, else the widget's. */
+const previewInfo = (item: WidgetCatalogItem) =>
+  item.info ??
+  (isWidgetItem(item.preview)
+    ? resolveWidgetHeader(item.preview.header, item.preview.params)?.info
+    : undefined)
 
 /**
  * A section's heading: its glyph and its name.
@@ -118,6 +191,7 @@ export function WidgetCatalog({
   onAdd,
   groups,
   previewWidth = 396,
+  slotRenderers,
   title = "Add widget",
 }: WidgetCatalogProps) {
   const t = useI18n()
@@ -241,10 +315,15 @@ export function WidgetCatalog({
             down the list, so each row you land on announces its widget. */}
         <WidgetPreviewPane
           previewKey={selected?.id}
-          info={selected?.info}
+          info={selected ? previewInfo(selected) : undefined}
           previewWidth={previewWidth}
         >
-          {selected?.preview}
+          {selected ? (
+            <CatalogPreview
+              preview={selected.preview}
+              slotRenderers={slotRenderers}
+            />
+          ) : null}
         </WidgetPreviewPane>
       </div>
     </F0Dialog>

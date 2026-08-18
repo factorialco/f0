@@ -297,11 +297,11 @@ describe("chat scrolling performance wiring", () => {
     )
 
     expect(virtuosoHarness.increaseViewportBy).toEqual({
-      top: 400,
+      top: 1200,
       bottom: 200,
     })
     expect(virtuosoHarness.minOverscanItemCount).toEqual({
-      top: 4,
+      top: 6,
       bottom: 3,
     })
     expect(virtuosoHarness.skipAnimationFrameInResizeObserver).toBe(true)

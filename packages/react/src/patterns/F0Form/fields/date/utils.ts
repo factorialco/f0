@@ -1,6 +1,9 @@
 /**
  * Shared utilities for date/time field manipulation
  */
+import { format, isValid, parse } from "date-fns"
+
+import type { HourCycle } from "@/lib/providers/user-platafform/types"
 
 /**
  * Extracts time string (HH:mm) from a Date
@@ -48,4 +51,33 @@ export function combineDateAndTime(
   }
 
   return result
+}
+
+const timePattern = (hourCycle: HourCycle): string =>
+  hourCycle === "12h" ? "hh:mm a" : "HH:mm"
+
+/**
+ * Formats a Date as a time string in the given hour cycle
+ * (e.g. "08:00 PM" for 12h, "20:00" for 24h).
+ */
+export function dateToDisplayTime(
+  date: Date | undefined,
+  hourCycle: HourCycle
+): string {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) return ""
+  return format(date, timePattern(hourCycle))
+}
+
+/**
+ * Parses a time string in the given hour cycle back to a Date (today's date as
+ * base). Returns undefined when the input isn't a valid time.
+ */
+export function displayTimeToDate(
+  input: string,
+  hourCycle: HourCycle
+): Date | undefined {
+  const trimmed = input.trim()
+  if (!trimmed) return undefined
+  const parsed = parse(trimmed, timePattern(hourCycle), new Date())
+  return isValid(parsed) ? parsed : undefined
 }

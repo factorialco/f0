@@ -104,12 +104,14 @@ export const TableCollection = <
   columns: originalColumns,
   source,
   frozenColumns = 0,
+  defaultExpanded,
   onSelectItems,
   onLoadData,
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
   referenceRowType,
+  boldRootRows,
   headerGroups: headerGroupsOption,
   onHeaderGroupCollapsedChange,
   bordered,
@@ -427,11 +429,14 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
-
+  // Mounted unconditionally rather than swapped for a `Fragment` on flat
+  // tables: it only holds nested state that flat tables never read, and
+  // choosing the wrapper by branch made it impossible to pass it props without
+  // rebuilding the component type — which would remount the whole table
+  // whenever a consumer passed an inline `defaultExpanded` predicate.
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <TableWrapper>
+      <NestedDataProvider defaultExpanded={defaultExpanded}>
         <div
           ref={tableContainerRef}
           className={cn(
@@ -878,6 +883,7 @@ export const TableCollection = <
                       checkColumnWidth={checkColumnWidth}
                       tableWithChildren={tableWithChildren}
                       referenceRowType={referenceRowType}
+                      boldRootRows={boldRootRows}
                       rowWrapper={RowWrapper}
                       cellRenderer={cellRenderer}
                       fromVisualization={fromVisualization}
@@ -1127,7 +1133,7 @@ export const TableCollection = <
           setPage={setPage}
           className="pb-4"
         />
-      </TableWrapper>
+      </NestedDataProvider>
     </div>
   )
 }

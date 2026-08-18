@@ -349,3 +349,17 @@ export const galleryListVisualization = {
     fields: [templateQuestionsField],
   },
 }
+
+// Card visualization for the AI Canvas template galleries — the same content as
+// `galleryListVisualization` (title, description, and Questions only; no
+// Category, which the gallery's own title already frames) laid out as cards.
+// The Questions property keeps its `hide` guard so the synthetic "Empty Survey"
+// entry renders as a bare "start from scratch" card with no metadata row.
+export const galleryCardVisualization = {
+  type: "card" as const,
+  options: {
+    title: (item: Template) => item.name,
+    description: (item: Template) => item.description,
+    cardProperties: [{ ...templateQuestionsField, icon: File }],
+  },
+}

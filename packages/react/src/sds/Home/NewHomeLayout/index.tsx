@@ -94,6 +94,15 @@ const GradientWash = ({
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
 /**
+ * `max-w-content` in px — the reading column every F0 surface shares (the chat's
+ * own composer and message list are capped by the same token). The layout needs
+ * the NUMBER, not the class: the same width decides when the rail can no longer
+ * have its column (`autoCollapsed`) and how wide a params preview is drawn, and
+ * neither is a place a utility class can be read from. Keep it in step with
+ * `maxWidth.content` in `packages/react/tailwind.config.ts`.
+ */
+const CONTENT_WIDTH = 712
+/**
  * The gap between the strip's glyphs — `gap-2` on the strip below, and the number
  * a stowing widget needs to know where its own glyph is. Keep the two in step.
  */
@@ -245,10 +254,22 @@ export interface NewHomeLayoutProps {
    */
   onChangeWidgetParams?: (id: string, params: WidgetParams) => void
   /**
-   * Draws a widget for params being tried out in that dialog, before they are
-   * saved. Defaults to the widget with those params swapped in — which is
-   * already live for everything they derive (title, info); supply this to
-   * rebuild its slots as well.
+   * REBUILDS a widget for params being tried out in that dialog, before they are
+   * saved — the same widget with slots that follow the new params, which only
+   * the app can produce. It hands back DATA, and f0 draws it through the same
+   * `SlotWidget` the column uses, so the preview cannot drift from the card.
+   *
+   * Without it the preview is the widget with those params swapped in — already
+   * live for everything they derive (title, info), just not for its slots.
+   */
+  rebuildWidget?: (
+    widget: HomeWidgetItem,
+    params: WidgetParams
+  ) => HomeWidgetItem
+  /**
+   * @deprecated Use `rebuildWidget`. A preview the app renders has to reproduce
+   * `SlotWidget` by hand and drifts from the column the moment either side
+   * changes. Ignored when `rebuildWidget` is given.
    */
   renderWidgetPreview?: (
     widget: HomeWidgetItem,
@@ -262,7 +283,11 @@ export interface NewHomeLayoutProps {
   period?: HomePeriod
   /** Fixed px width of the side rail. */
   asideWidth?: number
-  /** Max px width of the (centered) main-column content. */
+  /**
+   * Max px width of the (centered) main-column content. Defaults to
+   * `max-w-content` (712px), so a composer or a message list in the main column
+   * lines up with the same reading column the chat uses.
+   */
   mainWidth?: number
   /**
    * How far the page surface reaches past this layout's box, in px — set it to
@@ -311,12 +336,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       virtualization,
       onRemoveWidget,
       onChangeWidgetParams,
+      rebuildWidget,
       renderWidgetPreview,
       onClickAddNewWidget,
       onReorderWidgets,
       period = "morning",
       asideWidth = 396,
-      mainWidth = 800,
+      mainWidth = CONTENT_WIDTH,
       bleed = 24,
       stackedPinsAfter = 2,
       ctx = {},
@@ -741,6 +767,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           <WidgetContainer
             side="main"
             className="relative mx-auto w-full"
+            // `mainWidth` rather than the `max-w-content` utility, at the same
+            // 712px by default: the cap is a prop, and a class cannot take one.
             style={{ maxWidth: `${mainWidth}px` }}
             widgets={
               stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets
@@ -757,6 +785,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             }
             onRemoveWidget={onRemoveWidget}
             onChangeWidgetParams={onChangeWidgetParams}
+            rebuildWidget={rebuildWidget}
             renderWidgetPreview={renderWidgetPreview}
             paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
@@ -961,6 +990,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               }
               onRemoveWidget={onRemoveWidget}
               onChangeWidgetParams={onChangeWidgetParams}
+              rebuildWidget={rebuildWidget}
               renderWidgetPreview={renderWidgetPreview}
               paramsPreviewWidth={asideWidth}
               // Not from the panel: collapsed, the strip carries the add

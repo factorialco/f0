@@ -10,4 +10,11 @@ export type SortAndHideListItem = {
    * list has an `onRemove` handler, a trash affordance is revealed on hover.
    */
   removable?: boolean
+  /**
+   * When set, the entry is locked: its switch renders forced OFF and disabled,
+   * wrapped in a tooltip showing this text (e.g. a missing-permission reason).
+   * Distinct from a non-hideable (`canHide: false`) row — that draws a lock icon
+   * and stays ON; a `disabledReason` row shows no lock icon and stays OFF.
+   */
+  disabledReason?: string
 }

@@ -1,3 +1,8 @@
+// The map's stylesheet loads eagerly with the chat: injecting a stylesheet at
+// runtime (when the lazy maplibre chunk lands mid-scroll) invalidates styles
+// document-wide, which is felt as a hitch on the first location attachment.
+import "maplibre-gl/dist/maplibre-gl.css"
+
 import { lazy, type ReactNode, Suspense } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"

@@ -101,6 +101,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       v <= CHAT_WIDTH_MAX
   )
 
+  // Not persisted: this is the live state of a pointer drag, not a preference.
+  const [isResizing, setIsResizing] = useState(false)
+
   const [open, setOpen] = usePersistedState<boolean>(
     CHAT_OPEN_STORAGE_KEY,
     defaultVisualizationMode === "fullscreen",
@@ -373,6 +376,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        isResizing,
+        setIsResizing,
         tracking,
         entityRefs,
         canvasActions,

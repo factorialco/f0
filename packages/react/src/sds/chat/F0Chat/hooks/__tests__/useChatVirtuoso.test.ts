@@ -420,6 +420,77 @@ describe("useChatVirtuoso wheel takeover", () => {
     act(() => result.current.handleScrollerRef(null))
   })
 
+  it("prefetches the previous page before the top edge, once per attempt", () => {
+    const loadOlder = vi.fn()
+    const { result, rerender } = renderHook(
+      ({ loadingOlder }: { loadingOlder: boolean }) =>
+        useChatVirtuoso({
+          ...hookOptions([{ id: "message-1" }]),
+          hasMoreOlder: true,
+          loadingOlder,
+          loadOlder,
+        }),
+      { initialProps: { loadingOlder: false } }
+    )
+    // attachScroller starts at scrollTop 500 with clientHeight 500 — inside
+    // the prefetch band.
+    const viewport = attachScroller(result.current.handleScrollerRef)
+
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).toHaveBeenCalledTimes(1)
+
+    // Latched: further scrolls don't stack requests for the same attempt.
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).toHaveBeenCalledTimes(1)
+    act(() => result.current.handleStartReached())
+    expect(loadOlder).toHaveBeenCalledTimes(1)
+
+    // The host finishing the attempt (loadingOlder edge) re-arms the latch.
+    rerender({ loadingOlder: true })
+    rerender({ loadingOlder: false })
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).toHaveBeenCalledTimes(2)
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  it("does not prefetch while far from the top or already loading", () => {
+    const loadOlder = vi.fn()
+    const { result } = renderHook(() =>
+      useChatVirtuoso({
+        ...hookOptions([{ id: "message-1" }]),
+        hasMoreOlder: true,
+        loadingOlder: true,
+        loadOlder,
+      })
+    )
+    const viewport = attachScroller(result.current.handleScrollerRef)
+
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).not.toHaveBeenCalled()
+    act(() => result.current.handleScrollerRef(null))
+
+    const farLoadOlder = vi.fn()
+    const { result: farResult } = renderHook(() =>
+      useChatVirtuoso({
+        ...hookOptions([{ id: "message-1" }]),
+        hasMoreOlder: true,
+        loadOlder: farLoadOlder,
+      })
+    )
+    const farViewport = attachScroller(farResult.current.handleScrollerRef)
+    farViewport.setScrollHeight(5000)
+    farViewport.setScrollTop(4000)
+
+    act(() => farViewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(farLoadOlder).not.toHaveBeenCalled()
+    act(() => farResult.current.handleScrollerRef(null))
+  })
+
   it.each([0, 120])(
     "does not pause following for a %i downward/empty wheel delta",
     (deltaY) => {
