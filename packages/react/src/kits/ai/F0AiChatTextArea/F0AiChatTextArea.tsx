@@ -189,11 +189,16 @@ export const F0AiChatTextArea = ({
   }, [])
 
   useEffect(() => {
+    if (isClarifying) {
+      setFocusChatInputFunction(null)
+      return
+    }
+
     setFocusChatInputFunction(() => {
       textareaRef.current?.focus()
     })
     return () => setFocusChatInputFunction(null)
-  }, [setFocusChatInputFunction])
+  }, [isClarifying, setFocusChatInputFunction])
 
   // Expose the file-drop handler to parents that own a wider drop zone
   // (e.g. the whole chat window). The handler is stable for the lifetime
