@@ -12,6 +12,10 @@ export const WIDGET_DRAG_START = "f0:widget-drag-start"
 export const WIDGET_DRAG_END = "f0:widget-drag-end"
 
 export type WidgetDragStartDetail = {
+  /** Stable dashboard item identifier passed to a host-owned Ask One action. */
+  id: string
   /** Human-readable widget title, used as the quoted text. */
   title: string
+  /** Host override for Ask One. When present, chat must not mutate its quote. */
+  onAskAi?: (item: { id: string; title: string }) => void
 }

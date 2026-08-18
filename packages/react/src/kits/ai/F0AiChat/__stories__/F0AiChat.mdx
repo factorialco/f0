@@ -180,6 +180,8 @@ composer without changing the dashboard layout.
   discuss with One”.
 - WHEN the pointer is released over the chat → THEN the widget title becomes
   the pending quote and the dashboard does not reorder it.
+- WHEN the dashboard supplies `onAskAi` → THEN the drop calls the host with
+  the widget `id` and `title` without changing the built-in pending quote.
 - WHEN the pointer is released elsewhere, cancelled, or the dashboard unmounts
   → THEN the invitation closes without adding a quote.
 - WHEN chat is showing voice mode, hosted content, a host overlay, or a

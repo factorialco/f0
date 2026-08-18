@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { ReactNode } from "react"
+import { useEffect, useRef } from "react"
 
 import {
   act,
@@ -45,6 +46,18 @@ const Probe = () => {
   )
 }
 
+const TestChatInput = () => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { setFocusChatInputFunction } = useAiChat()
+
+  useEffect(() => {
+    setFocusChatInputFunction(() => textareaRef.current?.focus())
+    return () => setFocusChatInputFunction(null)
+  }, [setFocusChatInputFunction])
+
+  return <textarea aria-label="Ask One" ref={textareaRef} />
+}
+
 /**
  * No `fileAttachments`, so the file-drop path is off throughout — these tests
  * also cover that the widget overlay isn't gated behind an upload handler.
@@ -55,7 +68,7 @@ const renderChat = ({ overlay }: { overlay?: ReactNode } = {}) =>
       enabled
       chatHeader={<button type="button">Header action</button>}
       chatMessages={<div>Messages</div>}
-      chatInput={<button type="button">Send</button>}
+      chatInput={<TestChatInput />}
       VoiceMode={() => <div>Voice content</div>}
     >
       <Probe />
@@ -67,7 +80,9 @@ const renderChat = ({ overlay }: { overlay?: ReactNode } = {}) =>
 const startWidgetDrag = (title: string) =>
   act(() => {
     window.dispatchEvent(
-      new CustomEvent(WIDGET_DRAG_START, { detail: { title } })
+      new CustomEvent(WIDGET_DRAG_START, {
+        detail: { id: "headcount", title },
+      })
     )
   })
 
@@ -115,6 +130,7 @@ describe("F0AiChat widget drop", () => {
     expect(screen.getByTestId("quote")).toHaveTextContent(
       "Headcount by department"
     )
+    expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
     expect(
       screen.queryByText("Drop here to discuss with One")
     ).not.toBeInTheDocument()
@@ -160,7 +176,10 @@ describe("F0AiChat widget drop", () => {
     act(() => {
       window.dispatchEvent(
         new CustomEvent(WIDGET_DRAG_START, {
-          detail: { title: "Headcount by department" },
+          detail: {
+            id: "headcount",
+            title: "Headcount by department",
+          },
         })
       )
       fireEvent.pointerUp(dropZone())
@@ -248,5 +267,30 @@ describe("F0AiChat widget drop", () => {
     expect(
       screen.queryByText("Drop here to discuss with One")
     ).not.toBeInTheDocument()
+  })
+
+  it("hands a dropped widget to the host without mutating the built-in quote", async () => {
+    const onAskAi = vi.fn()
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(WIDGET_DRAG_START, {
+          detail: {
+            id: "headcount",
+            title: "Headcount by department",
+            onAskAi,
+          },
+        })
+      )
+    })
+    fireEvent.pointerUp(dropZone())
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by department",
+    })
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
   })
 })

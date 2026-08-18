@@ -1,6 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./index.stories"
 import * as AskOneStories from "./AskOne.stories"
+import * as WidgetDropStories from "@/kits/ai/F0AiChat/__stories__/F0AiChatWidgetDrop.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
@@ -140,6 +141,14 @@ real chat composer.
 
 <Canvas of={AskOneStories.WidgetQuotedInChat} />
 
+**Drag shortcut in edit mode**
+
+On a multi-item editable dashboard, dragging a titled widget into the visible
+chat is a pointer shortcut for the same action. The automated story finishes
+with the quote visible and the dashboard order unchanged.
+
+<Canvas of={WidgetDropStories.DragWidgetToQuote} />
+
 Pass `onAskAi` when the host needs to own the action instead of sending it to
 the mounted chat:
 
@@ -158,6 +167,10 @@ the mounted chat:
 - WHEN **Ask One** uses the built-in behavior → THEN the dashboard exits widget fullscreen, quotes the title, and opens the chat.
 - WHEN `onAskAi` is provided → THEN the action calls the host with the widget `id` and `title` without changing chat or fullscreen state.
 - WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
+- WHEN a widget is dropped on chat → THEN it follows the same built-in or
+  host-owned behavior as the menu action.
+- WHEN the pointer drag is cancelled or ends outside chat → THEN no quote or
+  host action is created.
 - WHEN a widget has no title → THEN the action is hidden because there is nothing to quote.
 
 ### Ask One from a chart point

@@ -553,6 +553,48 @@ describe("DashboardGrid", () => {
         }
       })
 
+      it("announces the widget identity and host-owned Ask One action", () => {
+        const onAskAi = vi.fn()
+        const details: Array<{
+          id: string
+          title: string
+          onAskAi?: typeof onAskAi
+        }> = []
+        const onStart = (event: Event) => {
+          details.push(
+            (
+              event as CustomEvent<{
+                id: string
+                title: string
+                onAskAi?: typeof onAskAi
+              }>
+            ).detail
+          )
+        }
+        window.addEventListener("f0:widget-drag-start", onStart)
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+            onAskAi={onAskAi}
+          />
+        )
+
+        try {
+          grabFirstGrip(container)
+          expect(details).toEqual([
+            { id: "expenses", title: "Expenses", onAskAi },
+          ])
+          fireEvent(
+            document,
+            new MouseEvent("pointercancel", { bubbles: true })
+          )
+        } finally {
+          window.removeEventListener("f0:widget-drag-start", onStart)
+        }
+      })
+
       it("retracts the invitation when the pointer is cancelled", () => {
         const { container } = render(
           <DashboardGrid

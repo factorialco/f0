@@ -128,7 +128,10 @@ export const DragWidgetToQuote: Story = {
       const removeQuote = await canvas.findByRole("button", {
         name: "Remove quote",
       })
-      await expect(removeQuote.parentElement).not.toHaveTextContent("")
+      await expect(removeQuote.parentElement).toHaveTextContent(
+        "Total Headcount"
+      )
+      await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
       await expect(
         canvasElement.querySelector<HTMLElement>("[data-card-id]")?.dataset
           .cardId

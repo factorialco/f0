@@ -55,6 +55,7 @@ export const SidebarWindow = ({
     setFileDragOver,
     processDroppedFiles,
     setPendingQuote,
+    focusChatInput,
     activeGame,
     closeGame,
     panelSide,
@@ -129,21 +130,30 @@ export const SidebarWindow = ({
   // The ref — not the state — is what the release reads, so a release that
   // lands in the same React batch as the state update still sees the title
   // instead of a stale `null`. The state exists to drive the overlay's render.
-  const dragQuoteRef = useRef<string | null>(null)
+  const dragQuoteRef = useRef<WidgetDragStartDetail | null>(null)
   const [dragQuote, setDragQuote] = useState<string | null>(null)
 
-  const setDragQuoteBoth = useCallback((title: string | null) => {
-    dragQuoteRef.current = title
-    setDragQuote(title)
-  }, [])
+  const setDragQuoteBoth = useCallback(
+    (detail: WidgetDragStartDetail | null) => {
+      dragQuoteRef.current = detail
+      setDragQuote(detail?.title ?? null)
+    },
+    []
+  )
 
   useEffect(() => {
     const onStart = (e: Event) => {
       // Same freeze as the file drop: a clarifying flow owns the panel.
       if (!acceptsWidgetDrop || isClarifying) return
       const detail = (e as CustomEvent<WidgetDragStartDetail>).detail
-      if (typeof detail?.title !== "string" || !detail.title.trim()) return
-      setDragQuoteBoth(detail.title)
+      if (
+        typeof detail?.id !== "string" ||
+        !detail.id ||
+        typeof detail.title !== "string" ||
+        !detail.title.trim()
+      )
+        return
+      setDragQuoteBoth(detail)
     }
     const onEnd = () => setDragQuoteBoth(null)
 
@@ -170,11 +180,22 @@ export const SidebarWindow = ({
       setDragQuoteBoth(null)
       return
     }
-    const title = dragQuoteRef.current
-    if (title === null) return
+    const detail = dragQuoteRef.current
+    if (detail === null) return
     setDragQuoteBoth(null)
-    if (title) setPendingQuote({ text: title })
-  }, [acceptsWidgetDrop, isClarifying, setDragQuoteBoth, setPendingQuote])
+    if (detail.onAskAi) {
+      detail.onAskAi({ id: detail.id, title: detail.title })
+    } else {
+      setPendingQuote({ text: detail.title })
+      focusChatInput()
+    }
+  }, [
+    acceptsWidgetDrop,
+    focusChatInput,
+    isClarifying,
+    setDragQuoteBoth,
+    setPendingQuote,
+  ])
 
   const fullscreen = visualizationMode === "fullscreen"
   // Stays LOCAL: it gates this handle's document mousemove listener and its
