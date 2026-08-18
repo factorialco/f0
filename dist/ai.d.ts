@@ -975,7 +975,6 @@ declare type AvatarBadge = ({
     type: Exclude<BadgeProps["type"], undefined>;
     icon: BadgeProps["icon"];
 }) & {
-    /** Shown when hovering the avatar */
     tooltip?: string;
 };
 
@@ -1072,6 +1071,11 @@ declare type BaseAvatarProps = {
      * The badge to display on the avatar. Can be a module badge or a custom badge.
      */
     badge?: AvatarBadge;
+    /**
+     * Optional tooltip wrapping the whole avatar, shown when hovering anywhere
+     * on it.
+     */
+    tooltip?: string;
 } & Partial<Pick<InternalAvatarProps, "aria-label" | "aria-labelledby">> & ({
     size: AvatarSize;
 } | {
@@ -4085,6 +4089,11 @@ declare type F0AvatarPersonProps = {
      * The badge to display on the avatar. Can be a module badge or a custom badge.
      */
     badge?: AvatarBadge;
+    /**
+     * Optional tooltip wrapping the whole avatar, shown when hovering anywhere
+     * on it.
+     */
+    tooltip?: string;
     /**
      * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
      *
