@@ -9,27 +9,37 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  # Number of machines the ~2.3k stories are split across. MUST match the length
+  # of `strategy.matrix.shard` below — GitHub can't derive one from the other, so
+  # they are kept in sync by hand. Raising it shortens the run but every shard
+  # pays the same ~3.5min of fixed setup (checkout, install, Playwright,
+  # Storybook build), so the returns flatten quickly past ~4-6.
+  SHARD_TOTAL: 4
+
 jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
   test:
     needs: detect-changes
-    name: "[⚛️ REACT] Storybook Tests"
+    name: "[⚛️ REACT] Storybook Tests (${{ matrix.shard }}/4)"
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    strategy:
+      # Every shard should report — a failure in one is not a reason to hide the
+      # results (or the a11y debt) found by the others.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Full history so the a11y comment can diff changed files vs main.
-          fetch-depth: 0
       - uses: ./.github/actions/setup-node-pnpm
       - name: Get Playwright version
         id: playwright-version
@@ -53,30 +63,77 @@ jobs:
           pnpm --filter @factorialco/f0-core build
           pnpm --filter @factorialco/f0-react run build-storybook --quiet
 
+      # `--shard` is forwarded to Jest, which splits by *test file* (one file per
+      # CSF module). Balance is therefore approximate: the heaviest single suite
+      # is ~50s, so shards land within a few tens of seconds of each other.
       - name: Serve Storybook and run tests
         id: run_tests
-        env:
-          DEBUG: vite
-          VITEST_LOG_LEVEL: debug
         run: |
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
              "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
-             "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook"
+             "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook --shard=${{ matrix.shard }}/${{ env.SHARD_TOTAL }}"
 
-      # Turn the a11y violations captured during the run into a PR comment,
-      # scoped to the stories/components this PR changed. Runs whenever the
-      # tests actually executed (pass or fail — enforced failures still count),
-      # but not when Storybook failed to build (run_tests skipped).
+      # Each shard only sees the stories it ran, so the JSONL is partial. The
+      # a11y-comment job below stitches the shards back together.
+      - name: Upload a11y violations
+        if: always() && steps.run_tests.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-violations-${{ matrix.shard }}
+          path: packages/react/a11y-violations.jsonl
+          if-no-files-found: ignore
+          retention-days: 1
+
+  # Turn the a11y violations captured across all shards into a single PR
+  # comment, scoped to the stories/components this PR changed. Runs whenever the
+  # tests actually executed (pass or fail — enforced failures still count), but
+  # not when the test job was skipped entirely.
+  a11y-comment:
+    needs: [detect-changes, test]
+    name: "[⚛️ REACT] a11y PR comment"
+    if: >
+      always() && needs.test.result != 'skipped' &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the a11y comment can diff changed files vs main.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      # No `merge-multiple` — every shard names its file `a11y-violations.jsonl`,
+      # so merging would have them overwrite each other. Downloading into
+      # per-artifact subdirectories keeps all four, and `cat` concatenates them
+      # (the format is one self-contained JSON object per line).
+      - name: Download a11y violations from all shards
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: a11y-violations-*
+          path: /tmp/a11y-shards
+      - name: Merge shard artifacts
+        run: |
+          shopt -s nullglob
+          files=(/tmp/a11y-shards/*/a11y-violations.jsonl)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No a11y violation artifacts found — nothing to report."
+            exit 0
+          fi
+          cat "${files[@]}" > packages/react/a11y-violations.jsonl
+          echo "Merged ${#files[@]} shard(s), $(wc -l < packages/react/a11y-violations.jsonl) violating stories."
       - name: Build a11y comment for changed components
         id: a11y_comment
-        if: >
-          always() && steps.run_tests.outcome != 'skipped' &&
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
         continue-on-error: true
         run: |
+          [ -f packages/react/a11y-violations.jsonl ] || exit 0
           git fetch origin main --quiet || true
-          pnpm --filter @factorialco/f0-react exec tsx .scripts/check-a11y-comment.ts \
+          npx --yes tsx@4 packages/react/.scripts/check-a11y-comment.ts \
             --compare-commit origin/main > /tmp/a11y-output.txt 2>&1 || true
           LAST_JSON_LINE=$(grep -n '^{' /tmp/a11y-output.txt | tail -n 1 | cut -d: -f1)
           if [ -n "$LAST_JSON_LINE" ]; then
@@ -89,10 +146,7 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
       - name: Post a11y PR comment
-        if: >
-          always() && steps.a11y_comment.outputs.body != '' &&
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
+        if: always() && steps.a11y_comment.outputs.body != ''
         continue-on-error: true
         uses: ./.github/actions/add-or-update-pr-comment
         with:
