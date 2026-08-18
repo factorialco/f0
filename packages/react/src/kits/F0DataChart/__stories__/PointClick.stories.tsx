@@ -15,7 +15,7 @@ import { F0DataChart } from "../index"
 const meta = {
   component: F0DataChart,
   title: "F0DataChart/Point click",
-  tags: ["autodocs", "experimental"],
+  tags: ["experimental", "!autodocs", "no-sidebar"],
 } satisfies Meta<typeof F0DataChart>
 
 export default meta

@@ -9,6 +9,7 @@ import * as HeatmapStories from "./Heatmap.stories"
 import * as ScatterStories from "./Scatter.stories"
 import * as SkeletonsStories from "./Skeletons.stories"
 import * as EmptyStatesStories from "./EmptyStates.stories"
+import * as PointClickStories from "./PointClick.stories"
 
 <Meta title="F0DataChart/Overview" />
 
@@ -367,6 +368,56 @@ import {
 ---
 
 ## Customization
+
+### Point click
+
+Pass `onPointClick` when a host needs to respond to the chart mark a reader
+selects. Without the callback, chart clicks remain inert.
+
+```tsx
+<F0DataChart
+  type="bar"
+  categories={["Barcelona", "Madrid"]}
+  series={[{ name: "Headcount", data: [39, 43] }]}
+  onPointClick={(point) => {
+    console.log(point.category, point.seriesName, point.value)
+  }}
+/>
+```
+
+The callback includes the category, series, raw numeric value, configured
+indices, and viewport coordinates for anchoring a host-owned action. `values`
+keeps the complete numeric tuple for chart types such as scatter and heatmap;
+`series` keeps every resolved series when a line click represents a whole
+category.
+
+**Mark-sized targets**
+
+Bar segments, slices, cells, and points respond only when the mark itself is
+clicked. Use this story to compare the visible value with the callback payload.
+
+<Canvas of={PointClickStories.OnAMark} />
+
+**Line plot targets**
+
+Lines are too thin to target reliably, so the complete plot column is
+clickable. The nearest series becomes the headline value and `series` contains
+all visible values at the resolved category, matching the axis tooltip.
+
+<Canvas of={PointClickStories.AnywhereInAPlotArea} />
+
+**Multi-measure points**
+
+For scatter charts, read `values` rather than only `value`: the tuple preserves
+both measures that define the point.
+
+<Canvas of={PointClickStories.BothMeasuresOfAScatterPoint} />
+
+- WHEN `onPointClick` is omitted → THEN clicking the chart produces no callback or visual change.
+- WHEN a bar, pie, funnel, gauge, heatmap, radar, or scatter mark is clicked → THEN the callback reports that ECharts series item.
+- WHEN a line plot column is clicked → THEN the callback reports the nearest visible series as the headline and every visible series at that category in `series`.
+- WHEN a value is `null`, `undefined`, empty, or non-numeric → THEN the click is ignored; a genuine zero is still reported.
+- WHEN a successful pick is reported → THEN the chart dismisses its hover tooltip so the host can present one action at the same anchor.
 
 ### Value & Category Formatters
 
