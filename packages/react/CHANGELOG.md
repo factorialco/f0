@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.38.0](https://github.com/factorialco/f0/compare/f0-react-v6.37.2...f0-react-v6.38.0) (2026-08-18)
+
+
+### Features
+
+* **NewHomeLayout:** add rail actions to collapsed widget glyphs ([#5159](https://github.com/factorialco/f0/issues/5159)) ([569e698](https://github.com/factorialco/f0/commit/569e698f6ed4fbe334028d013d4ad07395ce4298))
+
 ## [6.37.2](https://github.com/factorialco/f0/compare/f0-react-v6.37.1...f0-react-v6.37.2) (2026-08-18)
 
 
