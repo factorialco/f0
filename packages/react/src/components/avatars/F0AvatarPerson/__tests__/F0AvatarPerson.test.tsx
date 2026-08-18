@@ -49,19 +49,20 @@ describe("F0AvatarPerson", () => {
     ).toBeInTheDocument()
   })
 
-  it("shows the badge tooltip when hovering the avatar", async () => {
+  it("shows the tooltip when hovering the avatar", async () => {
     const user = userEvent.setup()
     zeroRender(
       <F0AvatarPerson
         firstName="Jane"
         lastName="Smith"
-        badge={{ type: "positive", icon: Check, tooltip: "Verified profile" }}
+        badge={{ type: "positive", icon: Check }}
+        tooltip="Verified profile"
       />
     )
 
     // Tooltip content only mounts while the tooltip is open, and the default
-    // open delay is 700ms, so this has to hover and wait it out. Hovering the
-    // avatar itself (the initials), not the badge, must open it.
+    // open delay is 700ms, so this has to hover and wait it out. The tooltip
+    // wraps the whole avatar: hovering the initials must open it.
     await user.hover(screen.getByText("JS"))
 
     const tooltip = await screen.findByRole("tooltip", {}, { timeout: 3000 })

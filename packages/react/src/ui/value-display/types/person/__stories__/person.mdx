@@ -5,8 +5,9 @@ import * as PersonStories from "./person.stories"
 
 ### person
 
-Renders a person avatar. It supports badge (regular or module) and a tooltip,
-shown when hovering the avatar. Useful to display information about the badge.
+Renders a person avatar. It supports badge (regular or module) and a tooltip in
+the badge. Useful to display information about the member of the badge. It also
+supports an avatar-level tooltip, shown when hovering anywhere on the avatar.
 
 #### Value type
 
@@ -16,6 +17,7 @@ type value = {
     lastName: string
     src?: string // the avatar image
     badge?: AvatarBadge
+    tooltip?: string // wraps the whole avatar, shown when hovering anywhere on it
     deactivated?: boolean
 }
 
@@ -27,7 +29,7 @@ type AvatarBadge = ({
     icon: IconType
 
 }) & {
-  tooltip?: string // Shown when hovering the avatar
+  tooltip?: string // This is the tooltip for the badge
 }
 ```
 

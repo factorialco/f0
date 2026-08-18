@@ -44,6 +44,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       badge,
       flag,
       icon,
+      tooltip,
     },
     ref
   ) => {
@@ -159,18 +160,21 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
         </div>
 
         {badge && (
-          <div className="absolute -bottom-0.5 -right-0.5">{badgeContent}</div>
+          <div className="absolute -bottom-0.5 -right-0.5">
+            {badge.tooltip ? (
+              <Tooltip description={badge.tooltip}>{badgeContent}</Tooltip>
+            ) : (
+              badgeContent
+            )}
+          </div>
         )}
       </div>
     )
 
-    // The tooltip wraps the whole avatar (a real element the trigger can
-    // attach to), so hovering anywhere on it — not just the badge — shows it.
-    return badge?.tooltip ? (
-      <Tooltip description={badge.tooltip}>{avatar}</Tooltip>
-    ) : (
-      avatar
-    )
+    // The avatar-level tooltip wraps the whole avatar element, so hovering
+    // anywhere on it shows the tooltip (unlike badge.tooltip, which stays
+    // anchored to the badge).
+    return tooltip ? <Tooltip description={tooltip}>{avatar}</Tooltip> : avatar
   }
 )
 

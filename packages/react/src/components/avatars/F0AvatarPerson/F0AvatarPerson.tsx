@@ -11,6 +11,7 @@ export const F0AvatarPerson = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  tooltip,
   deactivated,
   pending,
 }: F0AvatarPersonProps) => {
@@ -30,6 +31,7 @@ export const F0AvatarPerson = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
+      tooltip={tooltip}
       icon={stateIcon ? { icon: stateIcon, color: "secondary" } : undefined}
     />
   )

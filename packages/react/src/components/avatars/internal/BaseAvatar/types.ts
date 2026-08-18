@@ -53,6 +53,11 @@ export type BaseAvatarProps = {
    * The badge to display on the avatar. Can be a module badge or a custom badge.
    */
   badge?: AvatarBadge
+  /**
+   * Optional tooltip wrapping the whole avatar, shown when hovering anywhere
+   * on it.
+   */
+  tooltip?: string
 } & Partial<Pick<InternalAvatarProps, "aria-label" | "aria-labelledby">> &
   (
     | {

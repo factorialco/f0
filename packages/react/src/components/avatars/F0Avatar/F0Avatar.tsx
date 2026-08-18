@@ -36,6 +36,7 @@ export const F0Avatar = ({
           firstName={avatar.firstName}
           lastName={avatar.lastName}
           badge={avatar.badge}
+          tooltip={avatar.tooltip}
           src={avatar.src}
           size={size}
           aria-label={avatar["aria-label"]}

@@ -15,6 +15,11 @@ interface PersonValue {
   lastName: string
   src?: string
   deactivated?: boolean
+  /**
+   * Optional tooltip wrapping the whole avatar, shown when hovering anywhere
+   * on it.
+   */
+  tooltip?: string
 }
 
 export type PersonCellValue = WithAvatarBadge<PersonValue>
@@ -38,6 +43,7 @@ export const PersonCell = (
           lastName: args.lastName.toString(),
           src: args.src,
           badge: args.badge,
+          tooltip: args.tooltip,
           deactivated: args.deactivated,
         }}
         size="xs"
