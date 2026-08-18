@@ -413,6 +413,97 @@ describe("DashboardGrid", () => {
       chat.remove()
     })
 
+    it("does not reorder when the gesture ends over a later AI chat drop zone", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+
+      const firstChat = document.createElement("div")
+      firstChat.setAttribute("data-ai-chat-dropzone", "")
+      firstChat.getBoundingClientRect = () =>
+        ({ left: 800, right: 1000, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(firstChat)
+
+      const secondChat = document.createElement("div")
+      secondChat.setAttribute("data-ai-chat-dropzone", "")
+      secondChat.getBoundingClientRect = () =>
+        ({ left: 400, right: 700, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(secondChat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      try {
+        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+
+        expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+      } finally {
+        firstChat.remove()
+        secondChat.remove()
+      }
+    })
+
+    it("uses the release position when the last move still pointed at the grid", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      const chat = document.createElement("div")
+      chat.setAttribute("data-ai-chat-dropzone", "")
+      chat.getBoundingClientRect = () =>
+        ({ left: 400, right: 800, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(chat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      try {
+        fireEvent.pointerDown(grip, { button: 0 })
+        // Cache a real grid target first.
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 0,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+        // No final pointermove reaches the document before release in chat.
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+
+        expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+      } finally {
+        chat.remove()
+      }
+    })
+
     describe("announcing the drag", () => {
       const listen = () => {
         const started: (string | undefined)[] = []

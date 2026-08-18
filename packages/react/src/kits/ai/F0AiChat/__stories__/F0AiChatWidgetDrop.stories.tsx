@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, fireEvent, waitFor, within } from "storybook/test"
 
 import { useEffect } from "react"
 
@@ -61,7 +62,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["!autodocs", "experimental"],
+  tags: ["!autodocs", "experimental", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="h-screen w-full overflow-hidden p-2">
@@ -92,4 +93,46 @@ type Story = StoryObj<typeof meta>
  */
 export const DragWidgetToQuote: Story = {
   render: () => <WidgetDropLayout />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const ownerDocument = canvasElement.ownerDocument
+    const firstCard = await waitFor(() => {
+      const card = canvasElement.querySelector<HTMLElement>("[data-card-id]")
+      expect(card).toBeInTheDocument()
+      return card!
+    })
+    const originalFirstCardId = firstCard.dataset.cardId
+    const grip = (await canvas.findAllByLabelText("Drag to reorder"))[0]
+    const dropZone = await waitFor(() => {
+      const element = ownerDocument.querySelector<HTMLElement>(
+        "[data-ai-chat-dropzone]"
+      )
+      expect(element).toBeInTheDocument()
+      return element!
+    })
+    const dropRect = dropZone.getBoundingClientRect()
+    const clientX = dropRect.left + dropRect.width / 2
+    const clientY = dropRect.top + dropRect.height / 2
+
+    await step("Show the chat invitation when widget dragging starts", () => {
+      fireEvent.pointerDown(grip, { button: 0 })
+      expect(
+        canvas.getByText("Drop here to discuss with One")
+      ).toBeInTheDocument()
+    })
+
+    await step("Drop into chat without reordering the dashboard", async () => {
+      fireEvent.pointerMove(ownerDocument, { clientX, clientY })
+      fireEvent.pointerUp(dropZone, { clientX, clientY })
+
+      const removeQuote = await canvas.findByRole("button", {
+        name: "Remove quote",
+      })
+      await expect(removeQuote.parentElement).not.toHaveTextContent("")
+      await expect(
+        canvasElement.querySelector<HTMLElement>("[data-card-id]")?.dataset
+          .cardId
+      ).toBe(originalFirstCardId)
+    })
+  },
 }

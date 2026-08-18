@@ -237,8 +237,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   const dropTargetRef = useRef<typeof dropTarget>(null)
   dropTargetRef.current = dropTarget
   const ghostRef = useRef<HTMLDivElement | null>(null)
-  /** The AI chat's drop zone, looked up once per drag rather than per move. */
-  const chatDropZoneRef = useRef<Element | null>(null)
+  /** AI chat drop zones, looked up once per drag rather than per move. */
+  const chatDropZonesRef = useRef<Element[]>([])
   /** Teardown for the drag in flight, so an unmount can retract it. */
   const endDragRef = useRef<(() => void) | null>(null)
 
@@ -300,8 +300,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // Found once when the drag starts, not on every move — this runs per
       // `pointermove`. The rect is still read live, since the panel can be
       // resized mid-drag.
-      const chatEl = chatDropZoneRef.current
-      if (chatEl) {
+      for (const chatEl of chatDropZonesRef.current) {
         const c = chatEl.getBoundingClientRect()
         if (
           clientX >= c.left &&
@@ -375,8 +374,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       dropTargetRef.current = null
       setDragId(id)
       setDropTarget(null)
-      chatDropZoneRef.current = document.querySelector(
-        "[data-ai-chat-dropzone]"
+      chatDropZonesRef.current = Array.from(
+        document.querySelectorAll("[data-ai-chat-dropzone]")
       )
 
       // Announce the drag so other drop targets can invite it immediately,
@@ -426,12 +425,18 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         if (commit && draggedId && target) commitDrop(draggedId, target)
         dragIdRef.current = null
         dropTargetRef.current = null
-        chatDropZoneRef.current = null
+        chatDropZonesRef.current = []
         setDragId(null)
         setDropTarget(null)
         window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
       }
-      const up = () => endDrag(true)
+      const up = (ev: PointerEvent) => {
+        // The release is authoritative. A coalesced final move or a resized
+        // panel can make the cached hover target stale; resolving once more
+        // prevents a chat drop from also committing the old grid reorder.
+        dropTargetRef.current = resolveDropTarget(ev.clientX, ev.clientY)
+        endDrag(true)
+      }
       const cancel = () => endDrag(false)
 
       endDragRef.current = () => endDrag(false)
