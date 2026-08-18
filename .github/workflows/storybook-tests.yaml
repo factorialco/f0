@@ -12,10 +12,14 @@ concurrency:
 env:
   # Number of machines the ~2.3k stories are split across. MUST match the length
   # of `strategy.matrix.shard` below — GitHub can't derive one from the other, so
-  # they are kept in sync by hand. Raising it shortens the run but every shard
-  # pays the same ~3.5min of fixed setup (checkout, install, Playwright,
-  # Storybook build), so the returns flatten quickly past ~4-6.
-  SHARD_TOTAL: 4
+  # they are kept in sync by hand.
+  #
+  # 8 is about the end of the useful range. Every shard pays the same ~4.3min of
+  # fixed cost before it runs a single story (~90s install + ~40s Playwright +
+  # ~170s Storybook build), and at 8 shards the test step is already down to
+  # ~2min — so past here the build, not the tests, is what the job waits on.
+  # Measured at 4 shards: 236/245/277/172s of test time.
+  SHARD_TOTAL: 8
 
 jobs:
   # Detect which projects have changed
@@ -23,7 +27,7 @@ jobs:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
   test:
     needs: detect-changes
-    name: "[⚛️ REACT] Storybook Tests (${{ matrix.shard }}/4)"
+    name: "[⚛️ REACT] Storybook Tests (${{ matrix.shard }}/8)"
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
@@ -35,7 +39,7 @@ jobs:
       # results (or the a11y debt) found by the others.
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     permissions:
       contents: read
     steps:
@@ -64,8 +68,11 @@ jobs:
           pnpm --filter @factorialco/f0-react run build-storybook --quiet
 
       # `--shard` is forwarded to Jest, which splits by *test file* (one file per
-      # CSF module). Balance is therefore approximate: the heaviest single suite
-      # is ~50s, so shards land within a few tens of seconds of each other.
+      # CSF module) using a hash of the file path — so shards get an even file
+      # *count*, not an even duration. The heaviest single suite is ~50s, which
+      # is the floor on how balanced this can get; at 8 shards that outlier is a
+      # visible fraction of a ~2min shard. Balancing by measured duration would
+      # need a custom Jest testSequencer.
       - name: Serve Storybook and run tests
         id: run_tests
         run: |
@@ -83,6 +90,40 @@ jobs:
           path: packages/react/a11y-violations.jsonl
           if-no-files-found: ignore
           retention-days: 1
+
+  # Single job to gate the branch on, so protection rules do not have to list
+  # every shard (and do not need editing when SHARD_TOTAL changes). It keeps the
+  # name the unsharded job used to have, so it is a drop-in for anything that
+  # already referenced "[⚛️ REACT] Storybook Tests".
+  #
+  # `if: always()` is load-bearing. Without it a failing shard makes this job
+  # *skipped* rather than *failed*, and a skipped check is not a red check — the
+  # gate would silently pass. So it always runs and inspects the results itself.
+  #
+  # `skipped` is deliberately accepted: detect-changes legitimately skips the
+  # whole matrix when the react package is untouched. Only failure/cancellation
+  # is fatal. a11y-comment is intentionally *not* gated on — it is a best-effort
+  # PR comment and is not worth blocking a merge over.
+  storybook-tests-passed:
+    needs: [detect-changes, test]
+    name: "[⚛️ REACT] Storybook Tests"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every shard passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Dependency results: $RESULTS"
+          if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ]; then
+            echo "::error::At least one Storybook Tests shard failed."
+            exit 1
+          fi
+          if [ "${{ contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "::error::At least one Storybook Tests shard was cancelled."
+            exit 1
+          fi
+          echo "All Storybook Tests shards passed (or were skipped)."
 
   # Turn the a11y violations captured across all shards into a single PR
   # comment, scoped to the stories/components this PR changed. Runs whenever the

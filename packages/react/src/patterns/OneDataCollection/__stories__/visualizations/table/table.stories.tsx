@@ -1867,12 +1867,23 @@ export const CellsOfDifferentHeightsShareOneCenter: Story = {
         .map(firstLineCenter)
         .filter((center): center is number => center !== null)
 
-    /** The first data row of the table under the given caption. */
-    const rowUnder = async (caption: string) => {
-      const heading = await canvas.findByRole("heading", { name: caption })
-      const table = heading.parentElement!.querySelector("table")!
-      return within(table).getAllByRole("row")[1] as HTMLTableRowElement
-    }
+    /**
+     * The first data row of the table under the given caption.
+     *
+     * The heading renders on the first paint but the collection does not: while
+     * it loads, the table is an `aria-hidden` `role="presentation"` skeleton
+     * with no accessible rows. Awaiting the heading therefore proves nothing, so
+     * retry the row lookup (re-querying the table each time) until the real rows
+     * are there.
+     */
+    const rowUnder = (caption: string) =>
+      waitFor(async () => {
+        const heading = await canvas.findByRole("heading", { name: caption })
+        const table = heading.parentElement!.querySelector("table")!
+        const [, firstDataRow] = within(table).getAllByRole("row")
+        expect(firstDataRow).toBeInTheDocument()
+        return firstDataRow as HTMLTableRowElement
+      })
 
     const textOnly = await rowUnder("Text only")
     const withLongText = await rowUnder("With a long text")
