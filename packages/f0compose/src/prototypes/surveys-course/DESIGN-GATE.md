@@ -550,3 +550,6 @@ Restricciones que me impongo:
 - **No duplicar**: si hay pestaña, el bloque desaparece del Course content. Nunca en los dos sitios.
 - Nombre **Evaluations**, no "Surveys": dentro hay knowledge tests, y "surveys" arrastra el nombre de la tab que se mata.
 - **Empty state con el molde del producto**, no inventado: `No <cosa> yet` + cuándo aparecerá (copiado de "No certificates yet / Once you complete the course, your certificate will appear here" y "No materials yet / All course materials will appear here once uploaded").
+
+- Orden de pestañas (Jon, 12-ago): Evaluations va **penúltima**, antes de Certificates — el orden cuenta la secuencia (contenido → sesiones → evaluación → certificado) y no parte el grupo de material del curso.
+- **Misma arquitectura de información en las dos pestañas**: título h2 en Course content ("Modules") y en Evaluations ("Evaluations"). Al separarlas los había quitado; incoherente.
