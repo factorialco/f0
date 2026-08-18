@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useRef, useState, type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
@@ -129,6 +129,7 @@ export function DashboardItem({
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const shouldFocusChatAfterMenuRef = useRef(false)
   /**
    * When true, the dropdown menu's content is swapped from the action list
    * to a markdown rendering of `explanation`. The dropdown trigger stays
@@ -143,6 +144,7 @@ export function DashboardItem({
     enabled: aiEnabled,
     setPendingQuote,
     setOpen: setAiChatOpen,
+    focusChatInput,
   } = useAiChat()
 
   const handleDropdownOpenChange = (open: boolean) => {
@@ -324,6 +326,12 @@ export function DashboardItem({
               <DropdownMenuContent
                 align="end"
                 className={cn("py-1", isExplanationView && "w-96 max-w-[90vw]")}
+                onCloseAutoFocus={(event) => {
+                  if (!shouldFocusChatAfterMenuRef.current) return
+                  event.preventDefault()
+                  shouldFocusChatAfterMenuRef.current = false
+                  focusChatInput()
+                }}
               >
                 {isExplanationView && hasExplanation ? (
                   <div className="px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2">
@@ -393,6 +401,7 @@ export function DashboardItem({
                             // before handing the widget over — same reason the
                             // delete action does.
                             if (isFullscreen) onFullscreenChange?.(false)
+                            shouldFocusChatAfterMenuRef.current = true
                             setPendingQuote({ text: title })
                             setAiChatOpen(true)
                           }}

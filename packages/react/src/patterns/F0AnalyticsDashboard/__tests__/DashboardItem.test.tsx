@@ -194,10 +194,16 @@ describe("DashboardItem — description action", () => {
       userEvent.click(screen.getByLabelText("Other actions"))
 
     it("offers the action and hands the widget to the chat", async () => {
+      const onFullscreenChange = vi.fn()
       render(
         <AiChatStateProvider enabled>
           <QuoteProbe />
-          <DashboardItem title="Headcount by workplace" isLoading={false}>
+          <DashboardItem
+            title="Headcount by workplace"
+            isLoading={false}
+            isFullscreen
+            onFullscreenChange={onFullscreenChange}
+          >
             <div>Content</div>
           </DashboardItem>
         </AiChatStateProvider>
@@ -210,6 +216,7 @@ describe("DashboardItem — description action", () => {
       expect(probe).toHaveAttribute("data-quote", "Headcount by workplace")
       // Opens the chat too — otherwise the quote lands somewhere unseen.
       expect(probe).toHaveAttribute("data-open", "true")
+      expect(onFullscreenChange).toHaveBeenCalledWith(false)
     })
 
     it("is absent without a chat provider, where the setters are inert", async () => {
@@ -232,6 +239,7 @@ describe("DashboardItem — description action", () => {
 
     it("hands the widget to the host instead, when it takes the action", async () => {
       const onAskAi = vi.fn()
+      const onFullscreenChange = vi.fn()
       render(
         <AiChatStateProvider enabled>
           <QuoteProbe />
@@ -239,7 +247,9 @@ describe("DashboardItem — description action", () => {
             title="Headcount by workplace"
             itemId="headcount"
             isLoading={false}
+            isFullscreen
             onAskAi={onAskAi}
+            onFullscreenChange={onFullscreenChange}
           >
             <div>Content</div>
           </DashboardItem>
@@ -258,6 +268,7 @@ describe("DashboardItem — description action", () => {
       const probe = screen.getByTestId("probe")
       expect(probe).toHaveAttribute("data-quote", "")
       expect(probe).toHaveAttribute("data-open", "false")
+      expect(onFullscreenChange).not.toHaveBeenCalled()
     })
 
     it("offers the action with no chat mounted, once the host answers it", async () => {
@@ -277,6 +288,25 @@ describe("DashboardItem — description action", () => {
       await userEvent.click(screen.getByText("Ask One"))
 
       expect(onAskAi).toHaveBeenCalledTimes(1)
+    })
+
+    it("hides the action when the title cannot produce a quote", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <DashboardItem
+            title="   "
+            isLoading={false}
+            actions={[{ label: "CSV", onClick: vi.fn() }]}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+
+      expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
+      expect(screen.getByText("Download")).toBeInTheDocument()
     })
   })
 })

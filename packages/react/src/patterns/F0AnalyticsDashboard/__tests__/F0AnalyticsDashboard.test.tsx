@@ -212,6 +212,30 @@ describe("F0AnalyticsDashboard report filters", () => {
   })
 })
 
+describe("F0AnalyticsDashboard Ask One", () => {
+  it("passes the public host handler through to a rendered widget", async () => {
+    const user = userEvent.setup()
+    const onAskAi = vi.fn()
+
+    render(
+      <F0AnalyticsDashboard
+        items={[metricItem(vi.fn().mockResolvedValue({ value: 42 }))]}
+        onAskAi={onAskAi}
+      />
+    )
+
+    await user.click(
+      await screen.findByRole("button", { name: "Other actions" })
+    )
+    await user.click(screen.getByRole("menuitem", { name: "Ask One" }))
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount",
+    })
+  })
+})
+
 describe("F0AnalyticsDashboard — unrenderable chart config", () => {
   // A host app that maps a wire chart type it has no case for yields
   // `undefined`. Every type switch here lacks a default, so without a guard
