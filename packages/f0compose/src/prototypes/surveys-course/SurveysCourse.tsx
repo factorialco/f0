@@ -4169,14 +4169,7 @@ function LearnerCourseScreen() {
                     itemDefinition: (evaluation: LearnerEvaluation) => ({
                       title: evaluation.name,
                       description: [`${evaluation.minutes} mins · ${evaluation.questions} questions`],
-                      avatar: {
-                        type: "icon" as const,
-                        icon: SCHEDULED_IDS.has(evaluation.id)
-                          ? LockLocked
-                          : evaluation.kind === "Knowledge test"
-                            ? Question
-                            : Envelope,
-                      },
+                      avatar: { type: "icon" as const, icon: evaluation.kind === "Knowledge test" ? Question : Envelope },
                     }),
                     fields: [
                       {
@@ -4191,8 +4184,8 @@ function LearnerCourseScreen() {
                         render: (evaluation: LearnerEvaluation) =>
                           evaluation.opensAt
                             ? {
-                                type: "tag" as const,
-                                value: { label: evaluation.opensAt, icon: CalendarArrowRight },
+                                type: "alertTag" as const,
+                                value: { level: "info" as const, label: `Locked · ${evaluation.opensAt}` },
                               }
                             : evaluation.status === "Passed"
                               ? { type: "status" as const, value: { status: "positive" as const, label: "Passed" } }

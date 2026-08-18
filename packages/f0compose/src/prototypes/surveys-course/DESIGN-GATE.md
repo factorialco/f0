@@ -535,3 +535,18 @@ Verificado en el catálogo antes de decidir (por eso el candado y no otra cosa):
 Por tanto, lo máximo con el catálogo actual: **candado (`LockLocked`) en el avatar** + chip con la fecha de apertura + `itemUrl` undefined. Que el hover siga es limitación conocida del componente, no un descuido: queda como petición a F0 (con el fichero y la línea para argumentarla).
 
 Copy del estado `waiting` del redirect: añade que puede refrescar o volver, porque no hay auto-refresh y el job tarda 1-2 min (Álvaro: "somehow they need to know that they should refresh or come back again").
+
+## Evaluations pasa a pestaña propia (12-ago, decisión de Jon)
+
+Cambio de dirección respecto a la paridad del 27-jul: el bloque de Evaluations sale del Course content y pasa a **su propia pestaña** en el curso del alumno. Motivo (Jon): solución simple ahora y hacerlo bien cuando lleguen los workflows en Q4; da menos problema.
+
+Lo que sostiene la decisión (argumentado antes de construir):
+- El flujo principal ya lo cubre el redirect al acabar el contenido, así que la lista es sitio de **consulta**, no camino. Para consultar, una pestaña es mejor que el final del syllabus.
+- La paridad que importaba (no salir del curso) se mantiene; se pierde solo la paridad de sitio exacto, que mobile también rehará con los workflows.
+- Menos lógica condicional que la cascada de mobile, y no toca el Course content (syllabus + SCORM).
+- Resuelve el caso abierto del curso sin contenido: la pestaña existe siempre; el Course content no (verificado en TdV).
+
+Restricciones que me impongo:
+- **No duplicar**: si hay pestaña, el bloque desaparece del Course content. Nunca en los dos sitios.
+- Nombre **Evaluations**, no "Surveys": dentro hay knowledge tests, y "surveys" arrastra el nombre de la tab que se mata.
+- **Empty state con el molde del producto**, no inventado: `No <cosa> yet` + cuándo aparecerá (copiado de "No certificates yet / Once you complete the course, your certificate will appear here" y "No materials yet / All course materials will appear here once uploaded").
