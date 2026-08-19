@@ -1,7 +1,7 @@
 /**
- * @deprecated ResourceHeader has moved to @/patterns/ResourceHeader. Import from there instead.
+ * @deprecated F0ResourceHeader has moved to @/patterns/F0ResourceHeader. Import from there instead.
  */
-export * from "../../../patterns/ResourceHeader"
+export * from "../../../patterns/F0ResourceHeader"
 /**
  * @deprecated SectionHeader has moved to @/patterns/SectionHeader. Import from there instead.
  */

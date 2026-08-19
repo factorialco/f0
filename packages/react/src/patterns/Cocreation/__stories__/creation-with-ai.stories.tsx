@@ -44,7 +44,7 @@ import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { useAiChat } from "@/kits/ai/F0AiChat"
 import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
 import {
@@ -429,7 +429,7 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
   type: "templates",
   // Standard canvas header: title (from content) on the left, close on the
   // right — mirrors the design system's panel-header structure (no
-  // ResourceHeader chrome). Rendered as a component so closing can return to the
+  // F0ResourceHeader chrome). Rendered as a component so closing can return to the
   // first step of cocreation rather than just dismissing the canvas (see
   // `TemplatesCanvasHeader`); the framework `onClose` is intentionally dropped.
   renderHeader: ({ content }) => <TemplatesCanvasHeader content={content} />,
@@ -553,7 +553,7 @@ function useCloseTemplatesCanvas() {
 // story-specific (not part of the closed SDS `CanvasContent` union), so we keep
 // a local content type and cast at the `openCanvas` call site. `mode` selects
 // the surface: "preview" is the read-only `SurveyAnsweringForm` (template
-// browsing), while "edit" is the editable resource view — a `ResourceHeader` +
+// browsing), while "edit" is the editable resource view — a `F0ResourceHeader` +
 // Questions/Settings tabs over the interactive `SurveyFormBuilder` (see
 // `SurveyEditorCanvasHeader` / `SurveyEditorCanvasBody`).
 type SurveyCanvasContent = CanvasContentBase & {
@@ -637,7 +637,7 @@ const UNTITLED_SURVEY_NAME = "Untitled survey"
 // Build the canvas content for a blank survey opened by the "Empty survey"
 // welcome card (or the typed "Create" flow). Reuses the survey canvas entity
 // (mode "edit") but with no sample questions: it mirrors a real Survey resource
-// view — a `ResourceHeader` + Questions/Settings tab strip — with the
+// view — a `F0ResourceHeader` + Questions/Settings tab strip — with the
 // interactive `SurveyFormBuilder` (seeded empty) living under the "Questions"
 // tab (see `SurveyEditorCanvasHeader` / `SurveyEditorCanvasBody`). The
 // `surveyId` ties it to its entry in the multi-survey store.
@@ -1432,7 +1432,7 @@ function TemplatePreviewAlert() {
  * `FlowContent`'s `setBeforeClose`).
  * The framework `onClose` is intentionally ignored in favour of these. "Use this template"
  * swaps in the editable resource view (mode "edit"), carrying the template's
- * name and description so its `ResourceHeader` is populated. Defined as a
+ * name and description so its `F0ResourceHeader` is populated. Defined as a
  * component so it can read `openCanvas` / `setVisualizationMode` from context.
  */
 function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
@@ -1902,7 +1902,7 @@ function countQuestions(elements: SurveyFormBuilderElement[]): number {
 
 /**
  * Header for the editable survey canvas. Mirrors a real Survey resource view: a
- * `ResourceHeader` (title, optional description, Draft status, Publish action,
+ * `F0ResourceHeader` (title, optional description, Draft status, Publish action,
  * "⋯" menu, metadata) stacked over the Questions / Settings tab strip — the
  * same chrome the split phase renders for a created survey. The "Questions"
  * metadata reflects the live question count from the shared canvas state.
@@ -1919,7 +1919,7 @@ function SurveyEditorCanvasHeader({
   const i18n = useI18n()
   return (
     <>
-      <ResourceHeader
+      <F0ResourceHeader
         title={name}
         description={content.description}
         status={{ label: "Status", text: "Draft", variant: "neutral" }}
@@ -2058,7 +2058,7 @@ const surveyCanvasEntity: CanvasEntityDefinition<SurveyCanvasContent> = {
   ),
   // "preview" is the read-only template browse view (its own thin header +
   // answering form); "edit" (incl. the empty survey) is the editable resource
-  // view — ResourceHeader + Questions/Settings tabs over the form builder.
+  // view — F0ResourceHeader + Questions/Settings tabs over the form builder.
   renderHeader: ({ content, onClose }) =>
     content.mode === "preview" ? (
       <SurveyCanvasHeader content={content} />

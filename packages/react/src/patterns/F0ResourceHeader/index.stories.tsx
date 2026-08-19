@@ -8,11 +8,11 @@ import * as Icon from "@/icons/app"
 import { Archive, Comment, Download, ExternalLink, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { ResourceHeader } from "./index"
+import { F0ResourceHeader } from "./index"
 
-const meta: Meta<typeof ResourceHeader> = {
+const meta: Meta<typeof F0ResourceHeader> = {
   title: "Resource header",
-  component: ResourceHeader,
+  component: F0ResourceHeader,
   tags: ["stable"],
   parameters: {
     layout: "padded",
@@ -49,7 +49,7 @@ const meta: Meta<typeof ResourceHeader> = {
 
 export default meta
 
-type Story = StoryObj<typeof ResourceHeader>
+type Story = StoryObj<typeof F0ResourceHeader>
 
 // Hoisted so the play function has a type-safe handle on the spy: `args.primaryAction`
 // is a union (PrimaryActionButton | PrimaryDropdownAction) and has no `onClick` in common.
@@ -635,7 +635,7 @@ export const DeactivatedEmployee: Story = {
   },
 }
 
-type ResourceHeaderProps = ComponentProps<typeof ResourceHeader>
+type F0ResourceHeaderProps = ComponentProps<typeof F0ResourceHeader>
 
 export const Snapshot: Story = {
   tags: ["!dev"],
@@ -643,18 +643,20 @@ export const Snapshot: Story = {
   render: () => {
     return (
       <div>
-        <ResourceHeader {...(NoDescription.args as ResourceHeaderProps)} />
-        <ResourceHeader {...(Default.args as ResourceHeaderProps)} />
-        <ResourceHeader
-          {...(WithLongDescription.args as ResourceHeaderProps)}
+        <F0ResourceHeader {...(NoDescription.args as F0ResourceHeaderProps)} />
+        <F0ResourceHeader {...(Default.args as F0ResourceHeaderProps)} />
+        <F0ResourceHeader
+          {...(WithLongDescription.args as F0ResourceHeaderProps)}
         />
-        <ResourceHeader {...(WithDropdownAction.args as ResourceHeaderProps)} />
-        <ResourceHeader
-          {...(WithSecondaryDropdownAction.args as ResourceHeaderProps)}
+        <F0ResourceHeader
+          {...(WithDropdownAction.args as F0ResourceHeaderProps)}
         />
-        <ResourceHeader {...(PersonHeader.args as ResourceHeaderProps)} />
-        <ResourceHeader
-          {...(DeactivatedEmployee.args as ResourceHeaderProps)}
+        <F0ResourceHeader
+          {...(WithSecondaryDropdownAction.args as F0ResourceHeaderProps)}
+        />
+        <F0ResourceHeader {...(PersonHeader.args as F0ResourceHeaderProps)} />
+        <F0ResourceHeader
+          {...(DeactivatedEmployee.args as F0ResourceHeaderProps)}
         />
       </div>
     )
