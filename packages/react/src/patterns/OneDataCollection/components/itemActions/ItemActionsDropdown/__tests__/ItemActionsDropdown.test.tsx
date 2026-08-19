@@ -15,7 +15,11 @@ vi.mock("@/lib/utils", () => ({
   focusRing: (className: string) => className,
 }))
 
-vi.mock("@/icons/app", () => ({
+// Partial mock via `importOriginal`: the icon-name registry imports the whole
+// `@/icons/app` namespace, so a mock that only lists a couple of icons makes
+// every other lookup fail to resolve.
+vi.mock("@/icons/app", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/icons/app")>()),
   Ellipsis: () => <div data-testid="ellipsis-icon">...</div>,
   Windows: () => <div data-testid="windows-icon">Windows</div>,
 }))

@@ -16,7 +16,38 @@ F0 ships three sets of icons, all generated from SVG sources in `packages/core/a
 
 ### Usage
 
-Render any icon with <LinkTo kind="Icon" story="Documentation">F0Icon</LinkTo> for inline use, or <LinkTo kind="Avatars/AvatarIcon" story="Documentation">F0AvatarIcon</LinkTo> for the contained avatar treatment:
+Every prop that takes an `IconType` — `F0Icon`, `F0AvatarIcon`, `F0Button`, menu
+items, table cells, and so on — accepts a **kebab-case icon name**. This is the
+preferred form: no import, and TypeScript still validates the name and
+autocompletes it.
+
+```tsx
+import { F0Icon } from "@factorialco/f0-react"
+
+return <F0Icon icon="pencil" size="md" />
+```
+
+```tsx
+import { F0AvatarIcon } from "@factorialco/f0-react"
+
+return <F0AvatarIcon icon="pencil" size="md" />
+```
+
+Names come from the icon's component name, lowercased and hyphenated:
+`AlertCircleLine` → `"alert-circle-line"`, `Heading1` → `"heading-1"`. App icons
+are unprefixed; every other set carries its namespace, which is what keeps the
+~35 names that exist in more than one set (`Calendar`, `Search`, `People`, …)
+distinct:
+
+| Set        | Name form                | Example              |
+| ---------- | ------------------------ | -------------------- |
+| App        | `"<name>"`               | `"pencil"`           |
+| Module     | `"modules:<name>"`       | `"modules:payroll"`  |
+| AI         | `"ai:<name>"`            | `"ai:summary"`       |
+| Animated   | component only           | see below            |
+
+Passing the component still works everywhere and always will — reach for it when
+the icon is chosen dynamically from imported symbols, or for animated icons:
 
 ```tsx
 import { F0Icon } from "@factorialco/f0-react"
@@ -25,11 +56,39 @@ import { Pencil } from "@factorialco/f0-react/icons/app"
 return <F0Icon icon={Pencil} size="md" />
 ```
 
-```tsx
-import { F0AvatarIcon } from "@factorialco/f0-react"
-import { Pencil } from "@factorialco/f0-react/icons/app"
+#### Restricting a prop to certain sets
 
-return <F0AvatarIcon icon={Pencil} size="md" />
+`IconTypeOf<…>` names the sets a prop accepts. Use `IconName` instead when the
+value has to stay serialisable — it drops the component from the union:
+
+```tsx
+type Props = {
+  icon: IconType                       // any name, or a component
+  moduleIcon: IconTypeOf<"modules">    // module names only, or a component
+  badge: IconTypeOf<"modules" | "ai">  // either set, or a component
+  persisted: IconName<"modules">       // module names only, no component
+}
+```
+
+Narrowing constrains the *names*. A component still satisfies `IconTypeOf<…>`,
+because icon components are structurally identical and can't be told apart by
+their set — the escape hatch stays open.
+
+`IconType` itself is deliberately not generic. It appears on hundreds of public
+props, and a generic with a default type argument gets expanded in the shipped
+type declarations, so consumers would see `IconType<keyof IconNamesByNamespace>`
+on every icon prop instead of a plain `IconType`.
+
+#### Names known only at runtime
+
+If an icon name only exists at runtime — it arrives from an API or a config file
+— resolve it explicitly and decide your own fallback:
+
+```tsx
+import { F0Icon, resolveIconName } from "@factorialco/f0-react"
+import { Placeholder } from "@factorialco/f0-react/icons/app"
+
+return <F0Icon icon={resolveIconName(iconFromApi) ?? Placeholder} />
 ```
 
 For module icons, use <LinkTo kind="Avatars/AvatarModule" story="Documentation">F0AvatarModule</LinkTo> with the module ID — do not render the raw SVG directly:
@@ -40,7 +99,9 @@ import { F0AvatarModule } from "@factorialco/f0-react"
 return <F0AvatarModule module="timeoff" size="md" />
 ```
 
-For animated icons, pass `state="animate"` on hover:
+For animated icons, pass `state="animate"` on hover. These are the one set
+without names: they each import the motion runtime, and the name registry is
+bundled eagerly, so keeping them out spares every other consumer that cost.
 
 ```tsx
 import { F0Icon } from "@factorialco/f0-react"

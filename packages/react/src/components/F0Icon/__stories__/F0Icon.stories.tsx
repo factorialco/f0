@@ -13,7 +13,7 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
 
-import { F0Icon } from "../index"
+import { F0Icon, type IconName } from "../index"
 
 const meta = {
   title: "Icon",
@@ -45,12 +45,51 @@ const meta = {
 } satisfies Meta<ComponentProps<typeof F0Icon>>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// `StoryObj<typeof F0Icon>` rather than `StoryObj<typeof meta>`: the latter
+// computes required-vs-optional args across every prop, and multiplying the
+// ~480 props inherited from `SVGProps` by the icon-name union overflows TS's
+// union complexity limit (TS2590).
+type Story = StoryObj<typeof F0Icon>
 
 export const App: Story = {
   args: {
     size: "lg",
     icon: Icons.ChartLine,
+  },
+}
+
+const NAMES = [
+  "chart-line",
+  "pencil",
+  "heading-1",
+  "modules:payroll",
+  "modules:calendar",
+  "ai:summary",
+] as const satisfies readonly IconName[]
+
+/**
+ * `icon` also accepts a kebab-case name, which avoids importing the component.
+ * App icons are unprefixed; other sets carry their namespace — which is what
+ * keeps `calendar` and `modules:calendar` distinct.
+ */
+export const ByName: Story = {
+  args: { size: "lg" },
+  argTypes: { icon: { table: { disable: true } } },
+  render: ({ size }: ComponentProps<typeof F0Icon>) => (
+    <div className="flex items-center gap-4">
+      {NAMES.map((name) => (
+        <div key={name} className="flex flex-col items-center gap-2">
+          <F0Icon icon={name} size={size} aria-hidden="true" />
+          <code className="text-xs text-f1-foreground-secondary">{name}</code>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // One SVG per name proves each namespace resolves through the registry.
+    await expect(canvasElement.querySelectorAll("svg")).toHaveLength(
+      NAMES.length
+    )
   },
 }
 
