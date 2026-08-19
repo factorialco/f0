@@ -107,6 +107,81 @@ const FLIP_EASING = "cubic-bezier(0.4, 0, 0.1, 1)"
 /** How far the card lifts toward you at the top of the jump. */
 const FLIP_JUMP = 1.04
 
+/**
+ * A widget's CONTENT: the slot stack, with the dividers between slots and the
+ * skeletons while it loads — everything `SlotWidget` draws, minus the card.
+ *
+ * Public because the frame is not always wanted. A surface that drills into a
+ * widget (an overlay listing the tasks one of its grouped rows summarises) is
+ * already a surface: wrapped in a `Widget` it would be a card inside a card,
+ * with two borders and two paddings. Rendering the slots here keeps the rows
+ * IDENTICAL to the widget's — same slots, same renderers — which composing them
+ * by hand would not.
+ *
+ * Inside a card, prefer `SlotWidget`: it is this plus the frame.
+ */
+export function SlotWidgetContent({
+  slots,
+  loading = false,
+  slotRenderers,
+  ctx = {},
+}: Pick<SlotWidgetProps, "slots" | "loading" | "slotRenderers" | "ctx">) {
+  const renderers = slotRenderers
+    ? { ...defaultSlotRenderers, ...slotRenderers }
+    : defaultSlotRenderers
+
+  return (
+    // ONE child, so a Widget frame's internal `gap-4` applies once to the whole
+    // slot stack instead of around every slot AND every divider.
+    <div
+      className="flex flex-col"
+      {...(loading
+        ? { "aria-busy": true, "aria-live": "polite" as const }
+        : {})}
+    >
+      {slots.map((slot, index) => {
+        const entry = resolveSlotRenderer(renderers[slot.visualization])
+        const slotCtx = {
+          ...ctx,
+          isLastSlot: index === slots.length - 1,
+        }
+        return (
+          <Fragment key={index}>
+            {/* Wrapped rather than passing className: Separator spreads its
+                rest props AFTER its own classes, so a className would replace
+                them (and its 1px height) instead of adding the margin. */}
+            {index > 0 ? (
+              <div className="my-3">
+                <Separator bare />
+              </div>
+            ) : null}
+            {loading ? (
+              // A placeholder says nothing worth reading out — the stack
+              // above already announces that the widget is busy.
+              <div aria-hidden="true">
+                {/* A visualization with no skeleton of its own (a bespoke
+                    renderer passed as a bare function, an unregistered one)
+                    still gets a placeholder rather than the dashed notice. */}
+                {(entry?.skeleton ?? defaultSlotSkeleton)(slot.params, {
+                  ...slotCtx,
+                  expectedItemsCount:
+                    slot.expectedItemsCount ?? DEFAULT_EXPECTED_ITEMS_COUNT,
+                })}
+              </div>
+            ) : entry ? (
+              entry.render(slot.params, slotCtx)
+            ) : (
+              <div className="rounded-md border border-dashed border-f1-border p-2 text-f1-foreground-secondary">
+                {`No renderer for slot "${slot.visualization}"`}
+              </div>
+            )}
+          </Fragment>
+        )
+      })}
+    </div>
+  )
+}
+
 export function SlotWidget({
   header,
   params,
@@ -142,10 +217,6 @@ export function SlotWidget({
     const landed = setTimeout(() => setJumping(false), FLIP_MS)
     return () => clearTimeout(landed)
   }, [flipped, shouldReduceMotion])
-  const renderers = slotRenderers
-    ? { ...defaultSlotRenderers, ...slotRenderers }
-    : defaultSlotRenderers
-
   // Everything the params decide (title, info) is resolved first, so from here
   // down the header is the plain one the frame takes. The LINK stays in it: the
   // frame draws it as the title itself.
@@ -171,54 +242,12 @@ export function SlotWidget({
       {...(alert ? { alert } : { status })}
       isDragging={isDragging}
     >
-      {/* ONE child, so the Widget frame's internal `gap-4` applies once to the
-          whole slot stack instead of around every slot AND every divider. */}
-      <div
-        className="flex flex-col"
-        {...(loading
-          ? { "aria-busy": true, "aria-live": "polite" as const }
-          : {})}
-      >
-        {slots.map((slot, index) => {
-          const entry = resolveSlotRenderer(renderers[slot.visualization])
-          const slotCtx = {
-            ...ctx,
-            isLastSlot: index === slots.length - 1,
-          }
-          return (
-            <Fragment key={index}>
-              {/* Wrapped rather than passing className: Separator spreads its
-                  rest props AFTER its own classes, so a className would replace
-                  them (and its 1px height) instead of adding the margin. */}
-              {index > 0 ? (
-                <div className="my-3">
-                  <Separator bare />
-                </div>
-              ) : null}
-              {loading ? (
-                // A placeholder says nothing worth reading out — the stack
-                // above already announces that the widget is busy.
-                <div aria-hidden="true">
-                  {/* A visualization with no skeleton of its own (a bespoke
-                      renderer passed as a bare function, an unregistered one)
-                      still gets a placeholder rather than the dashed notice. */}
-                  {(entry?.skeleton ?? defaultSlotSkeleton)(slot.params, {
-                    ...slotCtx,
-                    expectedItemsCount:
-                      slot.expectedItemsCount ?? DEFAULT_EXPECTED_ITEMS_COUNT,
-                  })}
-                </div>
-              ) : entry ? (
-                entry.render(slot.params, slotCtx)
-              ) : (
-                <div className="rounded-md border border-dashed border-f1-border p-2 text-f1-foreground-secondary">
-                  {`No renderer for slot "${slot.visualization}"`}
-                </div>
-              )}
-            </Fragment>
-          )
-        })}
-      </div>
+      <SlotWidgetContent
+        ctx={ctx}
+        loading={loading}
+        slotRenderers={slotRenderers}
+        slots={slots}
+      />
     </Widget>
   )
 
