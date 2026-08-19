@@ -24,6 +24,7 @@ import {
   buildAccessibleChartPoints,
   buildChartProps,
   ChartItem,
+  hasAccessibleChartPoint,
 } from "../components/ChartItem/ChartItem"
 
 /** The mark a click lands on, as `usePointClick` would report it. */
@@ -150,6 +151,30 @@ describe("ChartItem — asking about a mark", () => {
     expect(onAskAi).toHaveBeenCalledTimes(1)
   })
 
+  it("clears a picked mark when its responder becomes unavailable", async () => {
+    const onAskAi = vi.fn()
+    const view = render(
+      <ChartItem item={item} filters={{}} onAskAi={onAskAi} />
+    )
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "mark" })).toBeInTheDocument()
+    )
+    await userEvent.click(screen.getByRole("button", { name: "mark" }))
+    expect(
+      await screen.findByRole("button", { name: "Ask One" })
+    ).toBeInTheDocument()
+
+    view.rerender(<ChartItem item={item} filters={{}} />)
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: "Ask One" })
+      ).not.toBeInTheDocument()
+    )
+    expect(onAskAi).not.toHaveBeenCalled()
+  })
+
   it("preserves host-owned focus after keyboard point selection", async () => {
     let hostButton: HTMLButtonElement | null = null
     const onAskAi = vi.fn(() => hostButton?.focus())
@@ -260,6 +285,60 @@ describe("ChartItem — asking about a mark", () => {
     await waitFor(() => expect(trigger).toHaveFocus())
   })
 
+  it("closes the keyboard point menu when refreshed data replaces its actions", async () => {
+    let resolveRefresh:
+      | ((value: {
+          categories: string[]
+          series: { name: string; data: number[] }[]
+        }) => void)
+      | undefined
+    const fetchData = vi
+      .fn()
+      .mockResolvedValueOnce({
+        categories: ["Barcelona office"],
+        series: [{ name: "Male", data: [18] }],
+      })
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveRefresh = resolve
+          })
+      )
+    const refreshItem = { ...item, fetchData }
+    const view = render(
+      <AiChatStateProvider enabled>
+        <ChartItem item={refreshItem} filters={{}} />
+      </AiChatStateProvider>
+    )
+
+    const trigger = await screen.findByRole("button", {
+      name: "Ask One: Headcount by workplace",
+    })
+    trigger.focus()
+    await userEvent.keyboard("{Enter}")
+    expect(
+      await screen.findByRole("menuitem", {
+        name: "Headcount by workplace — Barcelona office, Male: 18",
+      })
+    ).toBeInTheDocument()
+
+    view.rerender(
+      <AiChatStateProvider enabled>
+        <ChartItem item={refreshItem} filters={{ department: ["Design"] }} />
+      </AiChatStateProvider>
+    )
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(2))
+
+    resolveRefresh?.({
+      categories: ["Madrid office"],
+      series: [{ name: "Female", data: [22] }],
+    })
+
+    await waitFor(() =>
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument()
+    )
+  })
+
   it("pages large point sets instead of mounting every menu item", async () => {
     const categories = Array.from(
       { length: 101 },
@@ -318,6 +397,31 @@ describe("ChartItem — asking about a mark", () => {
     await waitFor(() => expect(pointAction).toHaveFocus())
 
     await userEvent.keyboard("{Escape}")
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", {
+          name: "Ask One: Headcount by workplace",
+        })
+      ).toHaveFocus()
+    )
+  })
+
+  it("returns focus to the keyboard point trigger after viewport movement", async () => {
+    render(
+      <AiChatStateProvider enabled>
+        <ChartItem item={item} filters={{}} />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "mark" })).toBeInTheDocument()
+    )
+    await userEvent.click(screen.getByRole("button", { name: "mark" }))
+    const pointAction = await screen.findByRole("button", { name: "Ask One" })
+    await waitFor(() => expect(pointAction).toHaveFocus())
+
+    window.dispatchEvent(new Event("resize"))
 
     await waitFor(() =>
       expect(
@@ -751,7 +855,14 @@ describe("buildAccessibleChartPoints", () => {
       indicators: [{ name: "Performance" }],
       series: [{ name: "Team A", data: [Number.NaN] }],
     } as const,
+    {
+      type: "heatmap",
+      xCategories: ["09:00"],
+      yCategories: ["Monday"],
+      data: [[0, 0] as unknown as [number, number, number]],
+    } as const,
   ])("does not expose malformed $type data", (chart) => {
     expect(buildAccessibleChartPoints(chart)).toEqual([])
+    expect(hasAccessibleChartPoint(chart)).toBe(false)
   })
 })

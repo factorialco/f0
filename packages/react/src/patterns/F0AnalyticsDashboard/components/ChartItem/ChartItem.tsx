@@ -385,7 +385,8 @@ export function buildAccessibleChartPoints(
   }
 }
 
-function hasAccessibleChartPoint(
+/** @internal Exported for keyboard-surface contract tests. */
+export function hasAccessibleChartPoint(
   chart: F0DataChartProps,
   selected: Record<string, boolean> = {}
 ): boolean {
@@ -426,7 +427,9 @@ function hasAccessibleChartPoint(
     case "gauge":
       return numericPointValue(chart.value) !== null
     case "heatmap":
-      return chart.data.some((tuple) => tuple.every(Number.isFinite))
+      return chart.data.some(([x, y, value]) =>
+        [x, y, value].every(Number.isFinite)
+      )
     case "scatter":
       return chart.series.some(
         (series) =>
@@ -877,6 +880,15 @@ export function ChartItem<Filters extends FiltersDefinition>({
     setLegendSelection(undefined)
   }, [data, isLoading, item.chart])
 
+  const pointAskOwner = onAskAi ? "host" : aiEnabled ? "chat" : "none"
+
+  // A pending point belongs to the responder that was available when it was
+  // picked. Do not let a later host/chat ownership change redirect that action
+  // or leave a dead popover behind.
+  useEffect(() => {
+    setPickedPoint(null)
+  }, [pointAskOwner])
+
   const handleAskAboutPoint = useCallback(
     (point: F0DataChartPointClick) => {
       if (onAskAi) {
@@ -967,7 +979,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const dismissPointAction = useCallback(
     (reason: "escape" | "outside" | "viewport") => {
       setPickedPoint(null)
-      if (reason === "escape") {
+      if (reason !== "outside") {
         requestAnimationFrame(() => keyboardPointTriggerRef.current?.focus())
       }
     },

@@ -58,6 +58,7 @@ export function AccessiblePointActions({
   useEffect(() => {
     setActions(null)
     setPage(0)
+    setOpen(false)
   }, [getActions])
 
   useEffect(() => {
