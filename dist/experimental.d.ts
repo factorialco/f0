@@ -8176,8 +8176,11 @@ export declare const getGranularityDefinition: (granularityKey: GranularityDefin
  *
  * The `periods` granularity is only selectable once the consumer supplies its
  * periods; without them it renders an empty list.
+ *
+ * Accepts a bare `weekStartsOn` for the original call style, or an options
+ * object when more than the week start is configured.
  */
-export declare function getGranularityDefinitions(weekStartsOn?: WeekStartsOn, periods?: DatePeriodsDefinition): Record<string, GranularityDefinition>;
+export declare function getGranularityDefinitions(options?: WeekStartsOn | GranularityDefinitionsOptions): Record<string, GranularityDefinition>;
 
 export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
 
@@ -8207,6 +8210,7 @@ export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
+    selectorLabel?: string;
     hideDateInput?: boolean;
     getViewDateBounds?: () => {
         min?: Date;
@@ -8254,6 +8258,11 @@ export declare const granularityDefinitions: {
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+export declare type GranularityDefinitionsOptions = {
+    weekStartsOn?: WeekStartsOn;
+    periods?: DatePeriodsDefinition;
+};
 
 declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -14190,10 +14199,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -14201,8 +14208,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
