@@ -28,8 +28,15 @@ jobs:
   test:
     needs: detect-changes
     name: "[⚛️ REACT] Storybook Tests (${{ matrix.shard }}/8)"
+    # A change to this workflow runs the matrix too. Without it the shards are
+    # skipped whenever a PR touches only .github/ — and because the gate below
+    # deliberately treats "skipped" as passing, a change to the Storybook Tests
+    # workflow could not be validated before merging it: the gate went green
+    # having run nothing. That is how the apt stall this workflow now guards
+    # against reached main in the first place.
     if: |
-      needs.detect-changes.outputs.package_react == 'true' &&
+      (needs.detect-changes.outputs.package_react == 'true' ||
+       needs.detect-changes.outputs.workflow_storybook_tests == 'true') &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     timeout-minutes: 30
