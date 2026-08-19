@@ -6,6 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { DeferredNodesPayload, GraphNode } from "../types"
+import type { F0GraphNodeTag } from "../components/F0GraphNode"
 
 import {
   F0Graph,
@@ -1322,6 +1323,120 @@ export const StagedLoadingError: Story = {
       console.error("[StagedLoadingError] Deferred load failed:", error.message)
     },
   },
+}
+
+// ─── Tag row reservation (repro) ───────────────────────────────
+
+/**
+ * Mirrors the org chart: four toggleable tag columns with realistic, long
+ * labels. Use the metadata popover to hide them all (dead space below the
+ * card?) and to toggle combinations that wrap to two rows (does the outgoing
+ * edge start above the last row?).
+ */
+const TAG_REPRO_NODES: GraphNode<Employee>[] = [
+  {
+    id: "tr-1",
+    parentId: null,
+    data: { name: "Fidel Johnson", title: "People Director, CPO" },
+    childrenCount: 2,
+  },
+  {
+    id: "tr-2",
+    parentId: "tr-1",
+    data: { name: "Nina Volkov", title: "Frontend Lead" },
+    childrenCount: 0,
+  },
+  {
+    id: "tr-3",
+    parentId: "tr-1",
+    data: { name: "Diego Martín", title: "Backend Lead" },
+    childrenCount: 0,
+  },
+]
+
+const TAG_REPRO_COLUMNS = [
+  "workplace",
+  "reports",
+  "hired",
+  "legalEntity",
+] as const
+
+const tagReproTags = (node: GraphNode<Employee>): F0GraphNodeTag[] => [
+  { type: "raw", column: "workplace", text: "Tokyo office 11" },
+  { type: "raw", column: "reports", text: "20 reports" },
+  { type: "raw", column: "hired", text: "May 2025" },
+  { type: "raw", column: "legalEntity", text: `${node.data.name} SL` },
+]
+
+const TagRowReproDemo = () => {
+  const [visible, setVisible] = useState<string[]>([...TAG_REPRO_COLUMNS])
+  const toggle = (c: string) =>
+    setVisible((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    )
+
+  return (
+    <div className="flex h-full w-full flex-col">
+      <div
+        className="flex flex-wrap items-center gap-2 p-2"
+        data-testid="tag-controls"
+      >
+        {TAG_REPRO_COLUMNS.map((c) => (
+          <F0Button
+            key={c}
+            size="sm"
+            variant={visible.includes(c) ? "default" : "outline"}
+            label={c}
+            onClick={() => toggle(c)}
+          />
+        ))}
+        <F0Button
+          size="sm"
+          variant="outline"
+          label="Hide all"
+          onClick={() => setVisible([])}
+        />
+        <F0Button
+          size="sm"
+          variant="outline"
+          label="Show all"
+          onClick={() => setVisible([...TAG_REPRO_COLUMNS])}
+        />
+      </div>
+      <div className="min-h-0 flex-1">
+        <F0Graph<Employee>
+          nodes={TAG_REPRO_NODES}
+          defaultExpandDepth={2}
+          nodeTagTypes={TAG_REPRO_COLUMNS}
+          visibleTagTypes={visible}
+          renderNode={(node, ctx) => {
+            const [firstName = "", lastName = ""] = node.data.name.split(" ")
+            return (
+              <F0GraphNode
+                {...ctx}
+                avatar={{ type: "person", firstName, lastName }}
+                title={node.data.name}
+                subtitle={node.data.title}
+                tags={tagReproTags(node)}
+              />
+            )
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+export const TagRowReservation: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Repro for the tag-row reservation: the layout reserves a block below every card, estimated from the visible tag COUNT rather than what the tags actually render. Hide every column (dead space should collapse) and pick combinations that wrap to two rows (the edge should still start below the last row).",
+      },
+    },
+  },
+  render: () => <TagRowReproDemo />,
 }
 
 export const Snapshot: Story = {

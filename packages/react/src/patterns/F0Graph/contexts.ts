@@ -175,6 +175,17 @@ export interface F0GraphRenderConfigContextValue {
    */
   tagRowHeight?: number
   /**
+   * Reports how tall a node's currently shown tag block measures, in layout px.
+   * Places what hangs below that card, so hiding columns lengthens its
+   * connector instead of leaving a gap.
+   *
+   * Per-node only. The rank pitch must not be derived from these reports —
+   * windowing and lazy hydration mean they cover a moving slice of the graph,
+   * so any cross-node maximum climbs as the user pans and drags the layout with
+   * it. The reservation is counted from the declared tag columns instead.
+   */
+  reportTagRowHeight?: (nodeId: string, height: number) => void
+  /**
    * `true` when the graph has more rendered nodes than the snap threshold.
    * F0GraphNode uses this to disable variant transitions (chrome opacity,
    * avatar transform, text reveal) so changing zoomLevel snaps instantly

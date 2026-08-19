@@ -10,6 +10,7 @@ import { memo } from "react"
 import type { EdgeVariant, F0GraphEdgeProps } from "./types"
 
 import { useF0GraphZoomInternal } from "../../contexts"
+import { EDGE_BUS_OFFSET, EDGE_MIN_STEM } from "../../constants"
 
 // Semantic edge stroke colors. Defined as CSS vars on .f0-graph in
 // F0Graph.css so they flip automatically in dark mode and stay aligned
@@ -77,6 +78,25 @@ export function F0GraphEdgeBase({
   const getPath = usesStraightSnap
     ? getStraightPath
     : (pathGetters[pathType] ?? pathGetters.smoothstep)
+
+  // Where the connector makes its horizontal run. Smoothstep defaults to the
+  // midpoint between the two nodes, which drags the run around with the SOURCE:
+  // a parent showing three chip rows starts lower and pushes its bus down, one
+  // showing none lifts it. Sibling branches then never line up.
+  //
+  // Anchoring it a fixed distance above the target instead puts every bus into
+  // the same band — targets in a rank share a y — so the horizontals read as a
+  // grid regardless of how much metadata each parent happens to show. Clamped
+  // so a short connector keeps a bit of vertical stem instead of the run
+  // colliding with the node it just left.
+  const busY =
+    isVertical && edgeProps.targetY > edgeProps.sourceY
+      ? Math.max(
+          edgeProps.sourceY + EDGE_MIN_STEM,
+          edgeProps.targetY - EDGE_BUS_OFFSET
+        )
+      : undefined
+
   const [edgePath] = getPath({
     sourceX: edgeProps.sourceX,
     sourceY: edgeProps.sourceY,
@@ -85,6 +105,7 @@ export function F0GraphEdgeBase({
     sourcePosition: edgeProps.sourcePosition,
     targetPosition: edgeProps.targetPosition,
     borderRadius: 10,
+    ...(busY !== undefined ? { centerY: busY } : null),
   })
 
   const color = strokeColors[variant]

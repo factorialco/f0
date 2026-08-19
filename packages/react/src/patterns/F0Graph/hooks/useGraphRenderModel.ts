@@ -27,6 +27,7 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  TAG_BLOCK_CLEARANCE,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
@@ -49,6 +50,9 @@ import { useViewportGeometry } from "./useViewportGeometry"
 // (and the next rank) below the metadata instead of overlapping it.
 const TAG_ROW_HEIGHT = 36
 const ESTIMATED_TAGS_PER_ROW = 2
+// Gap between the pill and the tag block (`gap-1.5` on the node's column).
+// Added to the measured tag height so the reservation covers the whole stack.
+const TAG_ROW_GAP = 6
 
 interface UseGraphRenderModelOptions<T> {
   roots: TreeNode<T>[]
@@ -67,8 +71,9 @@ interface UseGraphRenderModelOptions<T> {
     ctx: F0GraphNodeRenderContext
   ) => ReactNode
   nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
-  visibleTagTypesSet: Set<F0GraphNodeTagColumn>
   reserveTagRow?: boolean
+  /** Per-node height of the tag block CURRENTLY on screen, in px. */
+  visibleTagHeights?: ReadonlyMap<string, number>
   nodeWidthProp?: number
   nodeHeightProp?: number
   layoutEngineProp?: LayoutEngine
@@ -122,8 +127,8 @@ export function useGraphRenderModel<T>({
   resolvedEdgesProp,
   stableRenderNode,
   nodeTagTypes,
-  visibleTagTypesSet,
   reserveTagRow,
+  visibleTagHeights,
   nodeWidthProp,
   nodeHeightProp,
   layoutEngineProp,
@@ -267,21 +272,71 @@ export function useGraphRenderModel<T>({
   // ── Layout edges: include expander edges so the engine sees the full graph ──
   const layoutEdges = useMemo(() => visibleEdges, [visibleEdges])
 
-  // The tag row only contributes to layout when the consumer opts into the
-  // popover (`nodeTagTypes`) and at least one type is currently visible, or
-  // when `reserveTagRow` is explicitly set (e.g. tags rendered via
-  // `renderNode` without using the popover). Inflating the box otherwise
-  // would push the source handle and the expander below the pill.
+  // The tag row only contributes to layout when the consumer declares columns
+  // (`nodeTagTypes`), or when `reserveTagRow` is explicitly set (e.g. tags
+  // rendered via `renderNode` without using the popover). Inflating the box
+  // otherwise would push the source handle and the expander below the pill.
+  //
+  // Declaring the columns is what reserves the room — not how many happen to be
+  // visible right now. The box is sized for the fully-open block so the rank
+  // pitch is constant and toggling metadata cannot move a node; the currently
+  // hidden rows simply become connector length (see `contentHeightOf`).
   const tagsAffectLayout =
-    reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : false)
-  // Same-type tags collapse to a single pill, so the visible tag-type count is
-  // a good proxy for how many pills (and therefore rows) are rendered.
-  const visibleTagCount = nodeTagTypes ? visibleTagTypesSet.size : 1
-  const tagRowCount = tagsAffectLayout
-    ? Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW))
-    : 0
-  const reservedTagHeight = tagRowCount * TAG_ROW_HEIGHT
+    nodeTagTypes && nodeTagTypes.length > 0 ? true : (reserveTagRow ?? false)
+  // The reservation is arithmetic — derived from how many tag columns the
+  // consumer DECLARED — and deliberately never measured from the DOM.
+  //
+  // Measuring the tallest rendered node looks correct and is not: a graph with
+  // node windowing only ever renders a slice, and a graph with lazy hydration
+  // only knows a node's labels once it has been fetched. The true tallest node
+  // is therefore undiscoverable at first paint, and every pan that reveals a
+  // taller one raises the reservation, which changes the rank pitch, which
+  // slides every generation off its line. Ratcheting the max only converts that
+  // oscillation into a one-way creep; it does not make the pitch fixed.
+  //
+  // Counting declared columns is knowable before a single node renders, so the
+  // pitch is final on frame one and identical for every viewport, hydration
+  // state and toggle combination.
+  const declaredTagCount = nodeTagTypes ? nodeTagTypes.length : 1
+  const tagBlockHeight = !tagsAffectLayout
+    ? 0
+    : Math.max(1, Math.ceil(declaredTagCount / ESTIMATED_TAGS_PER_ROW)) *
+        TAG_ROW_HEIGHT +
+      TAG_ROW_GAP
+
+  // Reserve the "all columns open" block, never the currently visible one. The
+  // rank pitch is then the widest case the graph can ever need, so toggling
+  // metadata cannot move a single node — what changes is how much of the lane
+  // is left for the connector (see `contentHeightOf`). `TAG_BLOCK_CLEARANCE` is
+  // the clearance kept between the last chip row and the expander pill.
+  const reservedTagHeight =
+    tagBlockHeight > 0 ? tagBlockHeight + TAG_BLOCK_CLEARANCE : 0
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
+
+  // Where a node's connector and expander hang from: below whichever chip rows
+  // survive the current toggles, plus the same clearance the box reserves. The
+  // box above is identical for every node; this is not, so hiding a column
+  // lengthens the line instead of stranding it under a band of empty canvas.
+  //
+  // The clearance has to be applied here too, not only to the box: reserving it
+  // inside the box sets the rank pitch, but the edge still left from the exact
+  // bottom of the tags and read as touching the last chip.
+  //
+  // Clamped to the box: the reservation is an estimate of how the chips wrap,
+  // so a node whose labels wrap onto an extra row would otherwise anchor its
+  // connector past the next rank. Clamping keeps the invariant that a node
+  // never grows beyond its lane — that node's last chip row sits closer to the
+  // connector than the clearance would like, which is a cosmetic cost paid by
+  // the outlier instead of a layout shift paid by every node.
+  const contentHeightOf = (id: string): number => {
+    const base = nodeHeightProp ?? 56
+    const visible = visibleTagHeights?.get(id) ?? 0
+    if (visible <= 0) return base
+    return Math.min(
+      base + visible + TAG_ROW_GAP + TAG_BLOCK_CLEARANCE,
+      effectiveNodeHeight
+    )
+  }
 
   const builtInEngine = useLayoutEngine({
     nodeWidth: nodeWidthProp,
@@ -517,30 +572,38 @@ export function useGraphRenderModel<T>({
     // offsets lets React Flow derive the endpoint immediately; the real measured
     // handle bounds take over once the node's DOM mounts. Node dimensions are
     // supplied below (`width`/`height`) so the node also counts as "initialized".
-    const handleOffset = (p: Position): { x: number; y: number } =>
-      p === Position.Top
-        ? { x: BASE_W / 2, y: 0 }
-        : p === Position.Bottom
-          ? { x: BASE_W / 2, y: BASE_H }
-          : p === Position.Left
-            ? { x: 0, y: BASE_H / 2 }
-            : { x: BASE_W, y: BASE_H / 2 }
-    const graphNodeHandles = [
-      {
-        type: "source" as const,
-        position: sourcePos,
-        ...handleOffset(sourcePos),
-        width: 1,
-        height: 1,
-      },
-      {
-        type: "target" as const,
-        position: targetPos,
-        ...handleOffset(targetPos),
-        width: 1,
-        height: 1,
-      },
-    ] as RFNode["handles"]
+    //
+    // Built per box because the source handle follows a node's PAINTED bottom,
+    // not the shared layout box: a node showing fewer chip rows than the
+    // reserved "all open" block anchors its edge higher, so the connector
+    // lengthens instead of starting inside the empty part of the box.
+    const handlesForBox = (w: number, h: number): RFNode["handles"] => {
+      const handleOffset = (p: Position): { x: number; y: number } =>
+        p === Position.Top
+          ? { x: w / 2, y: 0 }
+          : p === Position.Bottom
+            ? { x: w / 2, y: h }
+            : p === Position.Left
+              ? { x: 0, y: h / 2 }
+              : { x: w, y: h / 2 }
+      return [
+        {
+          type: "source" as const,
+          position: sourcePos,
+          ...handleOffset(sourcePos),
+          width: 1,
+          height: 1,
+        },
+        {
+          type: "target" as const,
+          position: targetPos,
+          ...handleOffset(targetPos),
+          width: 1,
+          height: 1,
+        },
+      ] as RFNode["handles"]
+    }
+    const graphNodeHandles = handlesForBox(BASE_W, BASE_H)
 
     const nodes: RFNode[] = []
 
@@ -600,8 +663,22 @@ export function useGraphRenderModel<T>({
         // before the DOM is measured (otherwise a freshly windowed-in node's
         // connecting lines drop for that frame). Omitted when windowing is off so
         // React Flow's own viewport culling keeps its original behavior.
+        //
+        // The height is this node's PAINTED height, not the reserved box. React
+        // Flow stretches the node element to whatever `height` says and pins the
+        // bottom handle to that element's edge — hand it the reservation and the
+        // edge leaves from the bottom of the empty band instead of from under
+        // the chips, which is the blank gap a node with few chips would show.
+        // The reservation stays where it belongs: in the layout, setting the
+        // rank pitch. React Flow never needs to know about it.
         ...(windowingActive
-          ? { height: BASE_H, handles: graphNodeHandles }
+          ? {
+              height: contentHeightOf(treeNode.id),
+              handles:
+                contentHeightOf(treeNode.id) === BASE_H
+                  ? graphNodeHandles
+                  : handlesForBox(BASE_W, contentHeightOf(treeNode.id)),
+            }
           : null),
         sourcePosition: sourcePos,
         targetPosition: targetPos,
@@ -629,6 +706,10 @@ export function useGraphRenderModel<T>({
       }
       const pw = parentNode.width ?? BASE_W
       const ph = parentNode.height ?? BASE_H
+      // Hang from what the parent paints, then re-centre in the (now longer)
+      // lane below it. With no tags this is exactly the old offset.
+      const pContent = contentHeightOf(exp.parentId)
+      const laneShift = (ph - pContent) / 2
       const expX = isHorizontal
         ? direction === "LR"
           ? parentNode.x + pw + EXPANDER_Y_OFFSET
@@ -637,7 +718,7 @@ export function useGraphRenderModel<T>({
       const expY = isHorizontal
         ? parentNode.y * yStretch
         : direction === "TB"
-          ? parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET
+          ? parentNode.y * yStretch + pContent + EXPANDER_Y_OFFSET + laneShift
           : parentNode.y * yStretch - ph
       nodes.push({
         id: exp.id,
@@ -666,6 +747,8 @@ export function useGraphRenderModel<T>({
       const py = parentPos?.y ?? 0
       const pw = parentPos?.width ?? BASE_W
       const ph = parentPos?.height ?? BASE_H
+      const pContent = contentHeightOf(parent.id)
+      const laneShift = (ph - pContent) / 2
       const colX = isHorizontal
         ? direction === "LR"
           ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
@@ -674,7 +757,11 @@ export function useGraphRenderModel<T>({
       const colY = isHorizontal
         ? py * yStretch
         : direction === "TB"
-          ? py * yStretch + ph + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? py * yStretch +
+            pContent +
+            EXPANDER_Y_OFFSET +
+            COLLAPSER_OFFSET_ADJUSTMENT +
+            laneShift
           : py * yStretch - ph
       nodes.push({
         id: `collapser-${parent.id}`,
@@ -703,6 +790,12 @@ export function useGraphRenderModel<T>({
     COLLAPSER_OFFSET_ADJUSTMENT,
     nodeWidthProp,
     effectiveNodeHeight,
+    // The seeded node height and the expander/collapser offsets are all derived
+    // from `contentHeightOf`, which reads this map. Leaving it out froze them at
+    // whatever the first render measured: toggling a column re-measured the
+    // chips and updated the map, but the nodes kept their old height, so the
+    // connector never grew back or shrank.
+    visibleTagHeights,
     direction,
     ariaTreeInfo,
     controlLabels?.collapseChildren,

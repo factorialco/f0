@@ -394,6 +394,27 @@ export function F0GraphView<T = unknown>(
     [reactFlow]
   )
 
+  // ── Measured tag block ──
+  // Each node reports what its tag block currently occupies, which places what
+  // hangs below THAT card (its connector and expander).
+  //
+  // Nothing here feeds the rank pitch. That is deliberate: these reports only
+  // ever cover the nodes React Flow has rendered, and with windowing plus lazy
+  // hydration that is a moving slice of the graph. A maximum taken across them
+  // would climb every time a pan revealed a taller node, shifting every rank —
+  // and the shift changes which nodes are windowed, so the two feed each other.
+  // The reservation is counted from the declared tag columns instead.
+  const tagHeightsRef = useRef(new Map<string, number>())
+  const [visibleTagHeights, setVisibleTagHeights] = useState<
+    ReadonlyMap<string, number>
+  >(new Map())
+  const reportTagRowHeight = useCallback((id: string, height: number) => {
+    const store = tagHeightsRef.current
+    if (store.get(id) === height) return
+    store.set(id, height)
+    setVisibleTagHeights(new Map(store))
+  }, [])
+
   // ── React Flow render model (layout + anchor + rf nodes/edges) ──
   const {
     visibleTreeNodes,
@@ -413,8 +434,8 @@ export function F0GraphView<T = unknown>(
     resolvedEdgesProp,
     stableRenderNode,
     nodeTagTypes,
-    visibleTagTypesSet,
     reserveTagRow,
+    visibleTagHeights,
     nodeWidthProp,
     nodeHeightProp,
     layoutEngineProp,
@@ -689,6 +710,7 @@ export function F0GraphView<T = unknown>(
       deferredLoading: isDeferredLoading || undefined,
       dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
+      reportTagRowHeight,
       largeGraph: isLargeGraph,
     }),
     [
@@ -699,6 +721,7 @@ export function F0GraphView<T = unknown>(
       loadVisibleNodeData,
       isLargeGraph,
       reservedTagHeight,
+      reportTagRowHeight,
     ]
   )
 

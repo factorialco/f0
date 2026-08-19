@@ -15,6 +15,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import type { F0GraphNodeProps } from "./types"
 
+import { TAG_BLOCK_CLEARANCE } from "../../constants"
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
@@ -133,6 +134,33 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         : tags
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0
+
+    // Reports how tall this node's tag block is RIGHT NOW. Everything hanging
+    // below the card — the outgoing edge, the expander — anchors to it, so
+    // hiding columns lengthens the connector instead of leaving a blank band.
+    //
+    // Strictly a per-node number. The rank pitch is NOT derived from it: with
+    // windowing and lazy hydration only a slice of the graph is ever measured,
+    // so any cross-node maximum taken from these reports would keep rising as
+    // the user pans and drag the whole layout with it. The reservation is
+    // counted from the declared columns instead (see `useGraphRenderModel`).
+    const tagsRef = useRef<HTMLDivElement | null>(null)
+    const reportTagRowHeight = renderCfg?.reportTagRowHeight
+    useEffect(() => {
+      if (!reportTagRowHeight || !nodeId) return
+      // `offsetHeight`, never `getBoundingClientRect`: nodes live inside React
+      // Flow's viewport, which is CSS-transformed by the current zoom. A rect
+      // reports the SCALED height, so at any zoom but 1 the reported block —
+      // and with it the connector anchor — comes out multiplied by the zoom
+      // factor. `offsetHeight` is layout px, immune to the transform, which is
+      // the number the layout actually works in.
+      const report = () =>
+        reportTagRowHeight(nodeId, tagsRef.current?.offsetHeight ?? 0)
+      report()
+      const observer = new ResizeObserver(report)
+      if (tagsRef.current) observer.observe(tagsRef.current)
+      return () => observer.disconnect()
+    }, [reportTagRowHeight, nodeId, tagsVisible, filteredTags])
 
     // The hover card only makes sense in the compacted modes, where part of the
     // node's info is not on screen. In detail everything is already visible, so
@@ -402,7 +430,18 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 ? { duration: 0 }
                 : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
             }
+            ref={tagsRef}
             className="max-w-[256px]"
+            // Clearance below the last chip row, carried by the DOM rather than
+            // only by the layout maths. React Flow puts the source handle at the
+            // node element's bottom edge whenever it measures the node itself
+            // (everything except the windowed path, which is seeded with the
+            // same offset) — so without this the outgoing edge leaves flush with
+            // the chips and reads as running behind them.
+            //
+            // Margin, not padding: `getBoundingClientRect` excludes it, so the
+            // reported block height stays the height of the chips alone.
+            style={{ marginBottom: TAG_BLOCK_CLEARANCE }}
             // Tags are informational: clicking a tag must not select the node.
             // Two paths select a node: the node-level `onClick` (selection, plus
             // any consumer `itemOnClick`) — swallowed here via stopPropagation —
