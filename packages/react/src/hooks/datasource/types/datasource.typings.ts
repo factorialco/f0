@@ -16,6 +16,15 @@ import { SelectedItemsState } from "./selection.typings"
 import { SortingsDefinition, SortingsState } from "./sortings.typings"
 
 /**
+ * Options handed to `fetchSelectableTotal`: enough to scope the count to what
+ * the user is currently looking at.
+ */
+export type SelectableTotalOptions<Filters extends FiltersDefinition> = {
+  filters: FiltersState<Filters>
+  search?: string
+}
+
+/**
  * Defines the structure and configuration of a data source for a collection.
  * @template R - The type of records in the collection
  * @template Filters - The available filter configurations for the collection
@@ -81,6 +90,19 @@ export type DataSourceDefinition<
 
   /** Selectable items value under the checkbox column (undefined if not selectable) */
   selectable?: (item: R) => string | number | undefined
+  /**
+   * Resolves how many items match `selectable` across the whole dataset for the
+   * current filters/search.
+   *
+   * `selectable` is a client-side predicate, so F0 can only count the rows it
+   * has loaded — `paginationInfo.total` counts every record, selectable or not.
+   * Without this callback, a collection with non-selectable rows falls back to
+   * a cross-page "select all" label with no number rather than showing a wrong
+   * one. Sortings are not passed: they don't change a count.
+   */
+  fetchSelectableTotal?: (
+    options: SelectableTotalOptions<Filters>
+  ) => Promise<number>
   /** Default selected items */
   defaultSelectedItems?: SelectedItemsState<R>
   /**
@@ -143,6 +165,13 @@ export type DataSource<
   Sortings extends SortingsDefinition,
   Grouping extends GroupingDefinition<R>,
 > = DataSourceDefinition<R, Filters, Sortings, Grouping> & {
+  /**
+   * Total selectable items resolved from `fetchSelectableTotal` for the current
+   * filters/search. Undefined while in flight, on failure, or when the source
+   * doesn't provide the callback.
+   */
+  selectableTotal?: number
+
   /** Current state of applied filters */
   currentFilters: FiltersState<Filters>
   /** Function to update the current filters state */

@@ -21,8 +21,11 @@ import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
+  hasNonSelectableRecords,
   OnSelectItemsCallback,
   RecordType,
+  resolveSelectableTotal,
+  useHasNonSelectableRows,
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
@@ -889,7 +892,21 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
+  // Whether the last loaded page contained a record that fails the `selectable`
+  // predicate. Once that's true, totalItems (every record, selectable or not)
+  // can't stand in for the selectable total.
+  const [pageHasNonSelectableRows, setPageHasNonSelectableRows] =
+    useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  const allItemsSelectedTotal = resolveSelectableTotal({
+    fetchedTotal: source.selectableTotal,
+    paginationTotal: totalItems,
+    hasNonSelectableRows: useHasNonSelectableRows(pageHasNonSelectableRows, {
+      filters: source.currentFilters,
+      search: source.debouncedCurrentSearch,
+    }),
+  })
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -931,6 +948,7 @@ const OneDataCollectionComp = <
     filters,
     isInitialLoading: isInitialLoadingFromCallback,
     search,
+    data,
   }: Parameters<OnLoadDataCallback<R, Filters>>[0]) => {
     if (isInitialLoadingFromCallback) {
       return
@@ -938,6 +956,9 @@ const OneDataCollectionComp = <
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
+    setPageHasNonSelectableRows(
+      hasNonSelectableRecords(data, source.selectable)
+    )
     setFirstDataLoaded(true)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
@@ -1813,7 +1834,7 @@ const OneDataCollectionComp = <
               onUnselect={() => clearSelectedItemsFunc?.()}
               allPagesSelection={!!source.allPagesSelection}
               isAllItemsSelected={isAllItemsSelected}
-              totalItems={totalItems}
+              totalItems={allItemsSelectedTotal}
             />
           )}
         </>
