@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.41.0](https://github.com/factorialco/f0/compare/f0-react-v6.40.0...f0-react-v6.41.0) (2026-08-19)
+
+
+### Features
+
+* **valueDisplay:** add neutral variant to tag cell ([#5081](https://github.com/factorialco/f0/issues/5081)) ([19e2da4](https://github.com/factorialco/f0/commit/19e2da4bb9d5bc24d6e623221cb54c9175418bf4))
+
 ## [6.40.0](https://github.com/factorialco/f0/compare/f0-react-v6.39.0...f0-react-v6.40.0) (2026-08-19)
 
 
