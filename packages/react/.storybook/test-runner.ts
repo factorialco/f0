@@ -270,23 +270,36 @@ const config: TestRunnerConfig = {
       // Apply story-level a11y rules
       await configureAxe(page, a11yConfig)
 
-      // Add a longer delay to ensure previous axe run is complete
-      await page.waitForTimeout(500)
+      // Let the story settle before scanning, then make sure no axe run is
+      // still in flight.
+      //
+      // This used to be a flat `page.waitForTimeout(500)` followed by a polling
+      // loop. At ~2.3k stories that fixed sleep was ~19 minutes of pure idling
+      // spread across the CI workers — around 40% of the whole job. Both waits
+      // are now deterministic and finish in a frame or two:
+      //
+      //  - two `requestAnimationFrame` ticks let layout/entry animations reach
+      //    their committed state, which is what the sleep was really buying us
+      //    (axe reads computed styles for contrast and target-size);
+      //  - `waitForFunction` on `axe.isRunning` replaces the hand-rolled 100ms
+      //    poll, so a concurrent run is awaited exactly as long as it needs.
+      //
+      // A11Y_SETTLE_MS restores an extra flat delay if a component turns out to
+      // need one, without another round-trip through this file.
+      await page.evaluate(
+        (extraMs) =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() =>
+                extraMs > 0 ? setTimeout(resolve, extraMs) : resolve()
+              )
+            )
+          }),
+        Number(process.env.A11Y_SETTLE_MS ?? 0)
+      )
 
-      // Ensure any previous axe runs are complete
-      await page.evaluate(() => {
-        if (window.axe?.isRunning) {
-          return new Promise((resolve) => {
-            const checkRunning = () => {
-              if (!window.axe?.isRunning) {
-                resolve(true)
-              } else {
-                setTimeout(checkRunning, 100)
-              }
-            }
-            checkRunning()
-          })
-        }
+      await page.waitForFunction(() => !window.axe?.isRunning, undefined, {
+        timeout: 10_000,
       })
 
       // Get violations without throwing an error. The rule scope is shared with

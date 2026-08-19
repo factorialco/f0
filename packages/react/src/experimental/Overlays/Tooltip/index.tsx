@@ -51,6 +51,13 @@ export function TooltipInternal({
 
   const openDelayMs = useMemo(() => (instant ? 100 : delay), [delay, instant])
 
+  /**
+   * A tooltip with nothing to say must not open. Deciding it here lets callers
+   * whose text can be empty keep it mounted — unmounting it instead changes the
+   * element type above the trigger, and React then remounts the trigger.
+   */
+  const hasContent = Boolean(label || description || shortcut)
+
   const clearOpenTimeout = useCallback(() => {
     if (openTimeoutRef.current) {
       clearTimeout(openTimeoutRef.current)
@@ -64,10 +71,11 @@ export function TooltipInternal({
   }, [clearOpenTimeout])
 
   const scheduleOpen = useCallback(() => {
+    if (!hasContent) return
     onOpen?.()
     clearOpenTimeout()
     openTimeoutRef.current = setTimeout(() => setOpen(true), openDelayMs)
-  }, [clearOpenTimeout, onOpen, openDelayMs])
+  }, [clearOpenTimeout, hasContent, onOpen, openDelayMs])
 
   useEffect(() => close, [close])
 
@@ -86,7 +94,7 @@ export function TooltipInternal({
         disableHoverableContent={instant}
       >
         <TooltipPrimitive
-          open={open}
+          open={hasContent && open}
           onOpenChange={(nextOpen) => {
             // We control when the tooltip opens so it doesn't show on mouse click
             // focus/programmatic focus. Still allow Radix to request closing (e.g. escape).
@@ -103,6 +111,7 @@ export function TooltipInternal({
             onPointerLeave={() => close()}
             onPointerDown={() => close()}
             onFocus={(e) => {
+              if (!hasContent) return
               if (isFocusVisible(e.currentTarget)) {
                 onOpen?.()
                 setOpen(true)

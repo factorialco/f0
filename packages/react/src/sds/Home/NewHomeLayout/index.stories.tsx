@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
@@ -6,16 +6,18 @@ import { z } from "zod"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { f0FormField } from "@/patterns/F0Form"
 
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Card } from "@/components/F0Card"
+import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
   Building,
   Calendar,
+  ChartVerticalBars,
   Check,
   ChevronRight,
   Clock,
@@ -26,21 +28,30 @@ import {
   Globe,
   Home as HomeIcon,
   PalmTree,
+  Pencil,
   Person,
   Receipt,
+  Search,
   Settings,
+  SolidPause,
+  SolidPlay,
   Target,
+  Timer,
 } from "@/icons/app"
+import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
+import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
+import { F0Box } from "@/lib/F0Box"
 
 import {
   ClockInControls,
   type ClockInProject,
 } from "../ClockIn/ClockInControls"
-import { SlotWidget } from "../SlotWidget"
+import { type ClockInStatus } from "../ClockIn/ClockInGraph"
 import {
   fromParams,
   homeSlot,
   type HomeWidgetItem,
+  type HomeWidgetRailAction,
   listSlot,
   resolveWidgetHeader,
   type SlotRenderers,
@@ -61,30 +72,200 @@ import { NewHomeLayout } from "./index"
 
 /* =============================== main column =============================== */
 
+/* --------------------------------- greeting -------------------------------- */
+
+/** `xl` avatars — 56px, which is what the notch below is cut for. */
+const GREETING_AVATAR_PX = 56
+/** How far the person's avatar rides over the company's. */
+const GREETING_AVATAR_OVERLAP_PX = 10
 /**
- * The Ask-AI greeting: the One mark, the gradient welcome phrase, the muted
- * question. The gradient stops are F0's own welcome-phrase literals.
+ * The notch cut out of the leading avatar for the one overlapping it: a circle
+ * centred on that avatar (its own centre, less the overlap) with 2px of air
+ * around it, so the two read as a cluster rather than as one card on another.
+ *
+ * A MASK rather than a ring on the top avatar: the gap has to show whatever the
+ * greeting is sitting on — here the page's own gradient — and a ring can only
+ * paint a colour.
+ */
+const GREETING_NOTCH = {
+  x: GREETING_AVATAR_PX - GREETING_AVATAR_OVERLAP_PX + GREETING_AVATAR_PX / 2,
+  y: GREETING_AVATAR_PX / 2,
+  r: GREETING_AVATAR_PX / 2 + 2,
+}
+
+/**
+ * WHOSE HOME THIS IS: the company, and the person reading it, overlapped.
+ *
+ * Two `F0Avatar`s rather than an `F0AvatarList`, which is the component for a
+ * cluster and would own both the overlap and the notch: it stops at `md` (32px),
+ * and it takes ONE avatar `type` for the whole row — this pair is a company
+ * square under a round person, at 56px. Give the list an `xl` size and per-item
+ * types and this becomes one `F0AvatarList`.
+ */
+const GreetingAvatars = () => (
+  <F0Box display="flex" flexDirection="row" alignItems="center">
+    <div
+      className="flex"
+      style={{
+        maskImage: `radial-gradient(circle at ${GREETING_NOTCH.x}px ${GREETING_NOTCH.y}px, transparent ${GREETING_NOTCH.r}px, #000 ${GREETING_NOTCH.r + 0.5}px)`,
+      }}
+    >
+      <F0Avatar size="xl" avatar={{ type: "company", name: "Factorial" }} />
+    </div>
+    <div className="flex" style={{ marginLeft: -GREETING_AVATAR_OVERLAP_PX }}>
+      <F0Avatar
+        size="xl"
+        avatar={{
+          type: "person",
+          firstName: "Hellen",
+          lastName: "the HR",
+          src: "https://i.pravatar.cc/120?img=45",
+        }}
+      />
+    </div>
+  </F0Box>
+)
+
+/**
+ * The Ask-AI greeting: the company/person cluster over the welcome phrase.
+ *
+ * TWO HEADINGS, not one, in a wrapping row: each sentence wraps as a unit, so a
+ * narrow column breaks between them rather than mid-question. `F0Text` cannot
+ * carry this type — its variants stop at body copy — so the phrase is
+ * `F0Heading`'s `heading-large` (22px/600), which is exactly the design's.
  */
 const Greeting = () => (
-  <div className="flex flex-col items-center gap-3 py-2">
-    <F0OneIcon size="lg" />
-    <p className="m-0 text-2xl font-semibold">
-      <span
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, #E55619, #E51943, #A1ADE5)",
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-        }}
-      >
-        Good Morning, Hellen.
-      </span>{" "}
-      <span className="text-f1-foreground-secondary">
-        What can I do for you?
-      </span>
-    </p>
-  </div>
+  <F0Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    gap="md"
+    paddingBottom="2xl"
+  >
+    <GreetingAvatars />
+    <F0Box
+      display="flex"
+      flexDirection="row"
+      flexWrap="wrap"
+      alignItems="center"
+      justifyContent="center"
+      gap="xs"
+    >
+      <F0Heading
+        variant="heading-large"
+        align="center"
+        content="Good Morning, Hellen."
+      />
+      <F0Heading
+        variant="heading-large"
+        as="h2"
+        align="center"
+        content="What can I do for you?"
+      />
+    </F0Box>
+  </F0Box>
+)
+
+/* --------------------------------- composer -------------------------------- */
+
+const HOME_PLACEHOLDERS = [
+  "Ask for time off, an expense, a payslip…",
+  "Who's out of office this week?",
+  "Draft my self-review from these bullet points…",
+  "What's left of my leave this year?",
+]
+
+/**
+ * The starter prompts, INSIDE the field (`welcomeScreenSuggestionsPlacement`):
+ * on Home the composer is the page's own hero, so the suggestions belong in its
+ * foot rather than standing above it as they do in the chat panel.
+ */
+const HOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title: "My hours this month",
+        prompt:
+          "Summarize the hours I have clocked this month against my contract, and flag any day that is missing a clock-out.",
+      },
+      {
+        title: "Team leave next month",
+        prompt: "Show who in my team is on leave next month, week by week.",
+      },
+    ],
+  },
+  {
+    icon: Search,
+    label: "Find",
+    items: [
+      {
+        title: "Who's out of office this week?",
+        prompt:
+          "List everyone on time-off or sick leave between today and the end of the week.",
+      },
+      { title: "My last payslip", prompt: "Open my most recent payslip." },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title: "Request time off",
+        prompt: "Request time off for the last week of August.",
+      },
+      {
+        title: "Draft my self-review",
+        prompt:
+          "Turn these bullet points into review-ready text for my self-review.",
+      },
+    ],
+  },
+]
+
+/**
+ * Home's composer: the chat's own field, with `padding="none"` so the gutter is
+ * the greeting's rather than the chat panel's, and its suggestions in the
+ * field's foot.
+ *
+ * `isWelcomeScreen` is what Home always is — there is no conversation here; a
+ * submitted prompt is what opens the chat, which in a story is a logged payload.
+ * The `xs` inset is the field's focus glow, which the main column would otherwise
+ * clip against its own scrollport.
+ */
+const HomeComposer = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <F0Box padding="xs">
+      <F0AiChatTextArea
+        ref={ref}
+        padding="none"
+        isWelcomeScreen
+        placeholders={HOME_PLACEHOLDERS}
+        welcomeScreenSuggestions={HOME_SUGGESTIONS}
+        welcomeScreenSuggestionsPlacement="inside"
+        onSuggestionClick={(item) =>
+          console.log("suggestion", item.prompt ?? item.title)
+        }
+        onSubmit={(payload) => console.log("submit", payload)}
+      />
+    </F0Box>
+  )
+}
+
+/**
+ * The greeting and the composer as ONE block of the main column: the composer is
+ * the greeting's other half (it owns no gutter of its own), and the column's
+ * stagger should bring them in together. It also keeps the block count where the
+ * layout's `stackedPinsAfter` default expects it — greeting, then shortcuts.
+ */
+const HomeHero = () => (
+  <F0Box display="flex" flexDirection="column">
+    <Greeting />
+    <HomeComposer />
+  </F0Box>
 )
 
 const SHORTCUTS: Array<{ icon: IconType; title: string }> = [
@@ -175,7 +356,7 @@ const FeedSection = ({
 // An ARRAY, not a fragment: the layout inserts pinned widgets BETWEEN these
 // blocks when it stacks, and `Children.toArray` only sees seams in an array.
 const mainColumnBlocks = () => [
-  <Greeting key="greeting" />,
+  <HomeHero key="hero" />,
   <ShortcutCards key="shortcuts" />,
   <FeedSection
     key="needs-you"
@@ -334,7 +515,23 @@ const CLOCK_IN_PROJECTS: ClockInProject[] = [
  * this same render rather than a hand-built stand-in that has to be kept in
  * step with it.
  */
-const ClockInTile = ({ loading }: { loading?: boolean }) => {
+const ClockInTile = ({
+  loading,
+  day,
+  onClockIn,
+  onClockOut,
+  onBreak,
+}: {
+  loading?: boolean
+  /**
+   * The day the tile is showing. `ClockInControls` reads its own status off the
+   * LAST entry's `variant`, so the day is the state — see `clockInDay` below.
+   */
+  day?: ClockInDay
+  onClockIn?: () => void
+  onClockOut?: () => void
+  onBreak?: () => void
+}) => {
   const [locationId, setLocationId] = useState("remote")
   const [projectId, setProjectId] = useState<string | undefined>()
 
@@ -343,8 +540,8 @@ const ClockInTile = ({ loading }: { loading?: boolean }) => {
       variant="horizontal-bar"
       loading={loading}
       labels={CLOCK_IN_LABELS}
-      data={[]}
-      trackedMinutes={0}
+      data={day?.data ?? []}
+      trackedMinutes={day?.trackedMinutes ?? 0}
       remainingMinutes={8 * 60}
       locations={CLOCK_IN_LOCATIONS}
       locationId={locationId}
@@ -352,8 +549,10 @@ const ClockInTile = ({ loading }: { loading?: boolean }) => {
       projects={CLOCK_IN_PROJECTS}
       projectId={projectId}
       onChangeProjectId={setProjectId}
-      onClockIn={() => {}}
-      onClockOut={() => {}}
+      canShowBreakButton
+      onClockIn={onClockIn ?? (() => {})}
+      onClockOut={onClockOut ?? (() => {})}
+      onBreak={onBreak}
     />
   )
 }
@@ -694,8 +893,9 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
 /* ============================ add-widget catalog ============================ */
 
 /**
- * The catalog the picker offers. Every preview is the REAL widget — the same
- * `SlotWidget` render the rail makes — so what you preview is what gets added.
+ * The catalog the picker offers. Every preview is the WIDGET ITSELF, handed over
+ * as data — the picker draws it through the same `SlotWidget` the rail uses, so
+ * what you preview is what gets added, down to the spacing.
  */
 const CATALOG_ITEMS = [
   ...RIGHT_WIDGETS.map((widget) => ({
@@ -703,66 +903,55 @@ const CATALOG_ITEMS = [
     // `widgetTitle` rather than the header's own: a configurable widget's title
     // can be a function of its params, and a catalog row needs the text.
     title: widgetTitle(widget),
-    // The same sentence the widget's info side shows, under the preview.
-    info: resolveWidgetHeader(widget.header, widget.params)?.info,
     icon: widget.icon!,
-    preview: (
-      <SlotWidget
-        header={widget.header}
-        params={widget.params}
-        slots={widget.slots}
-        slotRenderers={SLOT_RENDERERS}
-      />
-    ),
+    // The rail's own widget, unchanged. Its `info` comes with it.
+    preview: widget,
   })),
   {
     id: "time-off",
     title: "Time off",
     icon: PalmTree,
-    preview: (
-      <SlotWidget
-        header={{ title: "Time off" }}
-        slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "Days left", content: "12" }] },
-          },
-        ]}
-      />
-    ),
+    preview: {
+      id: "time-off",
+      header: { title: "Time off" },
+      slots: [
+        {
+          visualization: "indicators",
+          params: { items: [{ label: "Days left", content: "12" }] },
+        },
+      ],
+    },
   },
   {
     id: "tasks",
     title: "Tasks",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Tasks", count: 3 }}
-        slots={[
-          listSlot({ clickBehavior: "link" }, [
-            { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
-            { id: "2", title: "Review expense report", href: "/tasks/2" },
-            { id: "3", title: "Approve time off", href: "/tasks/3" },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "tasks",
+      header: { title: "Tasks", count: 3 },
+      slots: [
+        listSlot({ clickBehavior: "link" }, [
+          { id: "1", title: "Sign the Q3 addendum", href: "/tasks/1" },
+          { id: "2", title: "Review expense report", href: "/tasks/2" },
+          { id: "3", title: "Approve time off", href: "/tasks/3" },
+        ]),
+      ],
+    },
   },
   {
     id: "goals",
     title: "Goals",
     icon: Target,
-    preview: (
-      <SlotWidget
-        header={{ title: "Goals" }}
-        slots={[
-          {
-            visualization: "indicators",
-            params: { items: [{ label: "On track", content: "4/5" }] },
-          },
-        ]}
-      />
-    ),
+    preview: {
+      id: "goals",
+      header: { title: "Goals" },
+      slots: [
+        {
+          visualization: "indicators",
+          params: { items: [{ label: "On track", content: "4/5" }] },
+        },
+      ],
+    },
   },
   // The schema showcase: each of these leans on a different `list` schema —
   // what you preview here is exactly what the slot vocabulary can say.
@@ -770,150 +959,146 @@ const CATALOG_ITEMS = [
     id: "team",
     title: "Team",
     icon: Person,
-    preview: (
-      <SlotWidget
-        header={{ title: "Team", count: 6 }}
-        slots={[
-          // Alert left + the people themselves trailing: two-line rows (md).
-          listSlot(
+    preview: {
+      id: "team",
+      header: { title: "Team", count: 6 },
+      slots: [
+        // Alert left + the people themselves trailing: two-line rows (md).
+        listSlot(
+          {
+            left: "alert",
+            right: "person-list",
+            descriptionRequired: true,
+            clickBehavior: "link",
+          },
+          [
             {
-              left: "alert",
-              right: "person-list",
-              descriptionRequired: true,
-              clickBehavior: "link",
+              id: "in",
+              title: "Clocked in",
+              description: "4 people",
+              alert: "positive",
+              avatars: [
+                { firstName: "Ada", lastName: "Lovelace" },
+                { firstName: "Alan", lastName: "Turing" },
+              ],
+              remainingCount: 2,
+              href: "/attendance",
             },
-            [
-              {
-                id: "in",
-                title: "Clocked in",
-                description: "4 people",
-                alert: "positive",
-                avatars: [
-                  { firstName: "Ada", lastName: "Lovelace" },
-                  { firstName: "Alan", lastName: "Turing" },
-                ],
-                remainingCount: 2,
-                href: "/attendance",
-              },
-              {
-                id: "away",
-                title: "Away",
-                description: "2 people",
-                alert: "warning",
-                avatars: [{ firstName: "Grace", lastName: "Hopper" }],
-                href: "/attendance/away",
-              },
-            ]
-          ),
-        ]}
-      />
-    ),
+            {
+              id: "away",
+              title: "Away",
+              description: "2 people",
+              alert: "warning",
+              avatars: [{ firstName: "Grace", lastName: "Hopper" }],
+              href: "/attendance/away",
+            },
+          ]
+        ),
+      ],
+    },
   },
   {
     id: "people",
     title: "People",
     icon: Person,
-    preview: (
-      <SlotWidget
-        header={{ title: "New joiners", count: 7 }}
-        slots={[
-          // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
-          listSlot(
-            {
-              left: "person",
-              subtitleRequired: true,
-              clickBehavior: "link",
-              maxVisibleItems: 3,
+    preview: {
+      id: "people",
+      header: { title: "New joiners", count: 7 },
+      slots: [
+        // maxVisibleItems: 3 of 7 rows, the rest behind "View more (4)".
+        listSlot(
+          {
+            left: "person",
+            subtitleRequired: true,
+            clickBehavior: "link",
+            maxVisibleItems: 3,
+          },
+          [
+            "Ada Lovelace",
+            "Alan Turing",
+            "Grace Hopper",
+            "Katherine Johnson",
+            "Margaret Hamilton",
+            "Annie Easley",
+            "Mary Jackson",
+          ].map((name, index) => ({
+            id: String(index),
+            title: name,
+            subtitle: "Engineering",
+            avatar: {
+              firstName: name.split(" ")[0],
+              lastName: name.split(" ")[1],
             },
-            [
-              "Ada Lovelace",
-              "Alan Turing",
-              "Grace Hopper",
-              "Katherine Johnson",
-              "Margaret Hamilton",
-              "Annie Easley",
-              "Mary Jackson",
-            ].map((name, index) => ({
-              id: String(index),
-              title: name,
-              subtitle: "Engineering",
-              avatar: {
-                firstName: name.split(" ")[0],
-                lastName: name.split(" ")[1],
-              },
-              href: `/employees/${index}`,
-            }))
-          ),
-        ]}
-      />
-    ),
+            href: `/employees/${index}`,
+          }))
+        ),
+      ],
+    },
   },
   {
     id: "documents",
     title: "Documents",
     icon: File,
-    preview: (
-      <SlotWidget
-        header={{ title: "Documents" }}
-        alert="2 documents need signing"
-        action={{ label: "Sign now", onClick: () => {} }}
-        slots={[
-          // File avatars, two-line rows (md).
-          listSlot(
-            { left: "file", descriptionRequired: true, clickBehavior: "link" },
-            [
-              {
-                id: "1",
-                title: "Q3 addendum.pdf",
-                description: "Needs your signature",
-                avatar: {
-                  file: { name: "q3-addendum.pdf", type: "application/pdf" },
-                },
-                href: "/documents/1",
+    preview: {
+      id: "documents",
+      header: { title: "Documents" },
+      alert: "2 documents need signing",
+      action: { label: "Sign now", onClick: () => {} },
+      slots: [
+        // File avatars, two-line rows (md).
+        listSlot(
+          { left: "file", descriptionRequired: true, clickBehavior: "link" },
+          [
+            {
+              id: "1",
+              title: "Q3 addendum.pdf",
+              description: "Needs your signature",
+              avatar: {
+                file: { name: "q3-addendum.pdf", type: "application/pdf" },
               },
-              {
-                id: "2",
-                title: "Remote policy.pdf",
-                description: "Needs your signature",
-                avatar: {
-                  file: { name: "remote-policy.pdf", type: "application/pdf" },
-                },
-                href: "/documents/2",
+              href: "/documents/1",
+            },
+            {
+              id: "2",
+              title: "Remote policy.pdf",
+              description: "Needs your signature",
+              avatar: {
+                file: { name: "remote-policy.pdf", type: "application/pdf" },
               },
-            ]
-          ),
-        ]}
-      />
-    ),
+              href: "/documents/2",
+            },
+          ]
+        ),
+      ],
+    },
   },
   {
     id: "offices",
     title: "Offices",
     icon: Building,
-    preview: (
-      <SlotWidget
-        header={{ title: "Offices" }}
-        slots={[
-          // Flag left + counter right: one-line rows (sm).
-          listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
-            {
-              id: "es",
-              title: "Spain",
-              avatar: { flag: "es" },
-              count: 24,
-              href: "/offices/es",
-            },
-            {
-              id: "pt",
-              title: "Portugal",
-              avatar: { flag: "pt" },
-              count: 9,
-              href: "/offices/pt",
-            },
-          ]),
-        ]}
-      />
-    ),
+    preview: {
+      id: "offices",
+      header: { title: "Offices" },
+      slots: [
+        // Flag left + counter right: one-line rows (sm).
+        listSlot({ left: "flag", right: "counter", clickBehavior: "link" }, [
+          {
+            id: "es",
+            title: "Spain",
+            avatar: { flag: "es" },
+            count: 24,
+            href: "/offices/es",
+          },
+          {
+            id: "pt",
+            title: "Portugal",
+            avatar: { flag: "pt" },
+            count: 9,
+            href: "/offices/pt",
+          },
+        ]),
+      ],
+    },
   },
 ]
 
@@ -981,14 +1166,10 @@ const Home = () => {
         }}
         // The preview rebuilds the widget the same way the rail does, so the
         // dialog shows the events the params will really produce — not just the
-        // title following along.
-        renderWidgetPreview={(widget, params) =>
-          widget.id === "events" ? (
-            <SlotWidget
-              {...eventsWidget(params as EventsParams)}
-              slotRenderers={SLOT_RENDERERS}
-            />
-          ) : null
+        // title following along. It hands back the WIDGET; the layout draws it
+        // through the same `SlotWidget` the rail uses.
+        rebuildWidget={(widget, params) =>
+          widget.id === "events" ? eventsWidget(params as EventsParams) : widget
         }
         onReorderWidgets={(_, ids) =>
           setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
@@ -1007,6 +1188,9 @@ const Home = () => {
         groups={CATALOG_GROUPS}
         onAdd={() => setOpen(false)}
         previewWidth={side === "right" ? 396 : 768}
+        // The same map the layout gets — a preview drawn without it would show
+        // "No renderer for slot …" for every bespoke visualization.
+        slotRenderers={SLOT_RENDERERS}
       />
     </div>
   )
@@ -1121,6 +1305,199 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* ============================= glyph actions ============================= */
+
+/**
+ * HOURS AND MINUTES, as a glyph shows them: `7:04`. Seconds are what a stopwatch
+ * counts; a working day is read in hours, and the blinking separator is what says
+ * it is running — not a digit changing sixty times a minute.
+ */
+const hhmm = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60)
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`
+}
+
+/** What `ClockInControls` needs to draw the day — and to know which state it is in. */
+type ClockInDay = {
+  data: { from: Date; to: Date; variant: ClockInStatus }[]
+  trackedMinutes: number
+}
+
+/**
+ * THE DAY as the three states leave it. `ClockInControls` derives its status from
+ * the LAST entry's variant, so "on a break" is a worked stretch followed by a break
+ * stretch — the tile then says "On a break" on its own, with no status prop to keep
+ * in step with the rail.
+ *
+ * The clock started `worked + onBreak` seconds ago, so the two readings and the bar
+ * describe the same day.
+ */
+const clockInDay = (
+  status: ClockInStatus,
+  worked: number,
+  onBreak: number,
+  now: Date
+): ClockInDay => {
+  const at = (secondsAgo: number) => new Date(now.getTime() - secondsAgo * 1000)
+  const trackedMinutes = Math.floor(worked / 60)
+
+  if (status === "clocked-out") return { data: [], trackedMinutes: 0 }
+  if (status === "clocked-in")
+    return {
+      data: [{ from: at(worked), to: now, variant: "clocked-in" }],
+      trackedMinutes,
+    }
+  return {
+    data: [
+      { from: at(worked + onBreak), to: at(onBreak), variant: "clocked-in" },
+      { from: at(onBreak), to: now, variant: "break" },
+    ],
+    trackedMinutes,
+  }
+}
+
+/**
+ * THE RAIL'S ONE-CLICK STATE, as time tracking uses it: the clock's glyph is the
+ * clock's button, and the day decides which button that is. Click the glyph — or
+ * the tile's own controls, which drive the same state — to move between all three.
+ *
+ * Each state has its own COLOUR, and it is the colour the TILE already uses for
+ * it — `CLOCK_IN_COLORS`, the same values its status dot pulses and its bar is
+ * drawn in. One word (`tone`) paints the pill and the button together, so the
+ * rail says which state you are in before you have read the number, and says it
+ * in the same green the card does.
+ *
+ * - **Clocked out.** The dark slab (`neutral`), holding what the day came to, with
+ *   the accent play button on it. Nothing is running, so nothing blinks.
+ * - **Clocked in.** A `positive` pill — `--positive-50`, the tile's own green —
+ *   with the running total in HOURS AND MINUTES, its separator blinking once a
+ *   second the way a clock does (`ticking`), and "Take a break" as a plain chip at
+ *   the end of it. The face turns over on the same second (`flashing`), between
+ *   the timer and the break it offers.
+ * - **On a break.** A `promote` pill — `--promote-50`, the tile's amber — counting
+ *   the BREAK, and the button FLASHES between the timer icon and the play
+ *   triangle: the colour says paused, the flash asks you to do something about it.
+ *
+ * Hover any of them and the card floats out as ever — the pill gives its width
+ * back while it does, since the card says all of it in full, and the button it
+ * leaves behind is the same button it always was.
+ *
+ * Every reading is HOURS AND MINUTES on a real clock, so they change once a
+ * minute. What says "this is running" second to second is the blink, not a digit.
+ */
+const ClockGlyphActionHome = () => {
+  const [status, setStatus] = useState<ClockInStatus>("clocked-in")
+  /** Seconds worked today, and seconds into the CURRENT break. */
+  const [worked, setWorked] = useState((7 * 60 + 12) * 60)
+  const [onBreak, setOnBreak] = useState(0)
+
+  // The story's own clock, whichever counter the state says is running — REAL
+  // TIME, a second a second. It is kept in seconds so the day's bar and the
+  // tile's total stay in step with the pill, but nothing ever shows them: the
+  // glyph is read in hours and minutes, and a figure that moved every second in
+  // the corner of the page would be a stopwatch, not a day. In the real Home
+  // this is all the app's; the rail only draws the string it is handed.
+  useEffect(() => {
+    if (status === "clocked-out") return
+    const tick = setInterval(() => {
+      if (status === "clocked-in") setWorked((seconds) => seconds + 1)
+      else setOnBreak((seconds) => seconds + 1)
+    }, 1000)
+    return () => clearInterval(tick)
+  }, [status])
+
+  const railAction: HomeWidgetRailAction =
+    status === "clocked-in"
+      ? {
+          icon: SolidPause,
+          label: "Take a break",
+          text: hhmm(worked),
+          // THE SAME GREEN THE TILE PULSES: `positive` is `--positive-50`, which
+          // is exactly what `CLOCK_IN_COLORS["clocked-in"]` paints the status dot
+          // and the day's bar. The glyph and the card are one state, so they are
+          // one colour.
+          tone: "positive",
+          ticking: true,
+          // Ticking as well as counting: the icon turns over between the timer
+          // and what the button does, so a running day says so twice — the
+          // separator's blink and the face's turn, on the same second.
+          flashing: true,
+          onClick: () => {
+            setOnBreak(0)
+            setStatus("break")
+          },
+        }
+      : status === "break"
+        ? {
+            icon: SolidPlay,
+            label: "Resume",
+            text: hhmm(onBreak),
+            // …and the same amber, `--promote-50`, that the tile pulses on a
+            // break (`CLOCK_IN_COLORS.break`) — not `warning`, which is a
+            // different yellow and would say something the tile isn't saying.
+            tone: "promote",
+            ticking: true,
+            flashing: true,
+            onClick: () => setStatus("clocked-in"),
+          }
+        : {
+            icon: SolidPlay,
+            label: "Clock in",
+            // STILL A READING, on the dark slab: what the day came to so far. The
+            // clock has stopped, so nothing blinks — the tone is what says the
+            // difference between a total that is still moving and one that isn't.
+            text: hhmm(worked),
+            tone: "neutral",
+            onClick: () => setStatus("clocked-in"),
+          }
+
+  const [clock, ...rest] = RIGHT_WIDGETS
+  const day = clockInDay(status, worked, onBreak, new Date())
+  // `Timer`, not the catalog's plain `Clock`: this icon is the OTHER FACE of the
+  // flash, so it is read a second at a time next to a running total — a stopwatch
+  // says which clock is meant, where a wall clock would just say "time".
+  const rail: HomeWidgetItem[] = [
+    { ...clock, icon: Timer, railAction },
+    ...rest,
+  ]
+
+  return (
+    // Capped BELOW what two columns need (712 + 16 + 396), so the rail is in its
+    // collapsed strip — the only presentation that draws glyphs at all.
+    <div className="mx-auto h-full w-full max-w-[1000px] p-6">
+      <NewHomeLayout
+        rightWidgets={rail}
+        // The tile and the glyph are the SAME state: clocking in from the card
+        // grows the pill in the rail, and vice versa.
+        slotRenderers={{
+          "clock-in": {
+            render: () => (
+              <ClockInTile
+                day={day}
+                onClockIn={() => setStatus("clocked-in")}
+                onClockOut={() => setStatus("clocked-out")}
+                onBreak={() => {
+                  setOnBreak(0)
+                  setStatus("break")
+                }}
+              />
+            ),
+            skeleton: () => <ClockInTile loading />,
+          },
+        }}
+      >
+        {mainColumnBlocks()}
+      </NewHomeLayout>
+    </div>
+  )
+}
+
+export const GlyphAction: Story = {
+  // A story with a clock in it: every snapshot of it would differ from the last.
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <ClockGlyphActionHome />,
 }
 
 /* ============================== virtualization ============================== */

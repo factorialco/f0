@@ -192,6 +192,26 @@ export type F0AiChatTextAreaProps = {
   welcomeScreenCards?: F0AiChatWelcomeCard[]
 
   /**
+   * The composer's own inset against whatever contains it.
+   *
+   * - `"default"` — the gutter the chat layouts expect (16px sides, 8px top,
+   *   12px bottom). It is what keeps the field off the chat window's edges and
+   *   leaves room for the focus glow, which bleeds a few pixels outside the
+   *   field's border box.
+   *
+   * - `"none"` — no inset, for hosts that place the composer inside a container
+   *   that already owns the spacing (a landing/home hero, a card). The host then
+   *   owns BOTH sides of that bargain: give the composer some room of your own,
+   *   and don't clip overflow around it, or the focus glow gets cut at the edge.
+   *
+   * Only the outer inset changes; the gap between the composer and the blocks
+   * below it (suggestions, cards, footer, disclaimer) is unaffected.
+   *
+   * @default "default"
+   */
+  padding?: "default" | "none"
+
+  /**
    * When true on the welcome screen, the composer adopts the fullscreen
    * layout: the input slot grows to claim the bottom half (so the textarea
    * rises toward the vertical center) and the welcome cards render below it.

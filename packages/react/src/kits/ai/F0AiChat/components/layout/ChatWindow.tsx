@@ -42,6 +42,7 @@ export const SidebarWindow = ({
     resizable,
     setChatWidth,
     resetChatWidth,
+    setIsResizing,
     fileAttachments,
     isClarifying,
     fileDragOver,
@@ -111,7 +112,20 @@ export const SidebarWindow = ({
     [setFileDragOver]
   )
   const fullscreen = visualizationMode === "fullscreen"
-  const [isResizing, setIsResizing] = useState(false)
+  // Stays LOCAL: it gates this handle's document mousemove listener and its
+  // active style, and a split layout renders two windows — a shared gate would
+  // have the idle handle grab the pointer too and apply a second delta from its
+  // own stale start position.
+  const [isDragging, setIsDragging] = useState(false)
+  // ...but the drag is mirrored outward, because the canvas panel is laid out
+  // against this window's edge and has to follow it 1:1 (see ApplicationFrame's
+  // canvas inset). Cleared on unmount too, so a window torn down mid-drag
+  // doesn't strand the flag.
+  useEffect(() => {
+    if (!isDragging) return
+    setIsResizing?.(true)
+    return () => setIsResizing?.(false)
+  }, [isDragging, setIsResizing])
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,
   })
@@ -127,11 +141,11 @@ export const SidebarWindow = ({
   )
 
   const wrapperTransition = useMemo(() => {
-    if (isResizing || reducedMotion) return { duration: 0 }
+    if (isDragging || reducedMotion) return { duration: 0 }
     if (shouldPlayEntranceAnimation)
       return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-  }, [isResizing, reducedMotion, shouldPlayEntranceAnimation])
+  }, [isDragging, reducedMotion, shouldPlayEntranceAnimation])
   const closedClipPath = isLeft ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)"
 
   return (
@@ -184,8 +198,8 @@ export const SidebarWindow = ({
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
-              isResizing={isResizing}
-              setIsResizing={setIsResizing}
+              isResizing={isDragging}
+              setIsResizing={setIsDragging}
               isCanvasMode={isCanvasMode}
               side="right"
             />
@@ -230,8 +244,8 @@ export const SidebarWindow = ({
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
-              isResizing={isResizing}
-              setIsResizing={setIsResizing}
+              isResizing={isDragging}
+              setIsResizing={setIsDragging}
               isCanvasMode={isCanvasMode}
               side="left"
             />

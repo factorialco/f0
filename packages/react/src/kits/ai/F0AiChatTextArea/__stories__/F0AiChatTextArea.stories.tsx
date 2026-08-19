@@ -265,6 +265,7 @@ type WrapperProps = {
   fullscreen?: boolean
   inProgress?: boolean
   toolbarStart?: React.ReactNode
+  padding?: "default" | "none"
 }
 
 const Wrapper = ({
@@ -285,6 +286,7 @@ const Wrapper = ({
   fullscreen,
   inProgress,
   toolbarStart,
+  padding,
 }: WrapperProps) => {
   const [pendingContext, setPendingContext] = useState<PendingContext | null>(
     initialPendingContext
@@ -360,6 +362,7 @@ const Wrapper = ({
         welcomeScreenCards={cardsWithBehavior}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
+        padding={padding}
       />
       {submissions.length > 0 && (
         <div className="rounded-md border border-f1-border p-3 text-sm">
@@ -424,6 +427,23 @@ export const TransitionDemo: Story = {
       </div>
     )
   },
+}
+
+// The composer with no inset of its own, for hosts that already own the
+// spacing (a home hero, a card). The dashed frame stands in for that host:
+// note the field now runs edge to edge, and the focus glow needs the host to
+// leave it a few pixels of room and not clip overflow.
+export const NoPadding: Story = {
+  args: {
+    padding: "none",
+  },
+  decorators: [
+    (Story) => (
+      <div className="rounded-md border border-dashed border-f1-border p-6">
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const WithRotatingPlaceholders: Story = {

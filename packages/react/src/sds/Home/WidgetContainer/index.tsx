@@ -36,9 +36,9 @@ import { cn } from "@/lib/utils"
 import { arrivalWindowMs, useElapsed } from "../home-motion"
 import {
   resolveWidgetHeader,
+  widgetChrome,
   widgetTitle,
   type HomeRenderCtx,
-  type HomeWidgetChrome,
   type HomeWidgetItem,
   type SlotRenderers,
   type WidgetParams,
@@ -111,20 +111,6 @@ const DROP_ANIMATION = {
   duration: 450,
   easing: "cubic-bezier(0.4, 0, 0.1, 1)",
 }
-
-/** The `Widget` chrome an item carries, ready to spread onto `SlotWidget`. */
-const widgetChrome = (widget: HomeWidgetItem) =>
-  ("alert" in widget && widget.alert !== undefined
-    ? {
-        action: widget.action,
-        summaries: widget.summaries,
-        alert: widget.alert,
-      }
-    : {
-        action: widget.action,
-        summaries: widget.summaries,
-        status: "status" in widget ? widget.status : undefined,
-      }) as HomeWidgetChrome
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
@@ -314,10 +300,28 @@ export interface WidgetContainerProps {
    */
   onChangeWidgetParams?: (id: string, params: WidgetParams) => void
   /**
-   * Draws a widget for params the user is trying out in that dialog, before they
-   * are saved. Defaults to the widget as it is with those params swapped in —
-   * enough for everything the params DERIVE (its title, its info); supply this
-   * to rebuild its slots too, which only the app can do.
+   * REBUILDS a widget for params the user is trying out in that dialog, before
+   * they are saved — the same widget with slots that follow the new params,
+   * which only the app can produce (it knows where their data comes from).
+   *
+   * It hands back DATA, not a rendered node, so the preview is drawn by this
+   * column through the same `SlotWidget` the column itself uses: a preview and
+   * the card it is previewing cannot come out differently, because they are the
+   * same render.
+   *
+   * Without it the preview is the widget as it is with those params swapped in
+   * — already live for everything the params DERIVE (its title, its info), just
+   * not for its slots.
+   */
+  rebuildWidget?: (
+    widget: HomeWidgetItem,
+    params: WidgetParams
+  ) => HomeWidgetItem
+  /**
+   * @deprecated Use `rebuildWidget`, which returns the widget as DATA and lets
+   * f0 draw it — a preview rendered by the app has to reproduce `SlotWidget` by
+   * hand, and drifts from the column the moment either side changes. Ignored
+   * when `rebuildWidget` is given.
    */
   renderWidgetPreview?: (
     widget: HomeWidgetItem,
@@ -369,6 +373,7 @@ export function WidgetContainer({
   stow,
   addWidgetLabel,
   onChangeWidgetParams,
+  rebuildWidget,
   renderWidgetPreview,
   paramsPreviewWidth,
   removeLabel,
@@ -825,10 +830,16 @@ export function WidgetContainer({
           // The preview is the WIDGET, drawn with the params being tried out —
           // so whatever they derive (its title, its info) is what you watch
           // change. Its slots can only follow if the app rebuilds them.
+          //
+          // Every branch ends in this column's OWN `render`, so the preview is
+          // the card: `rebuildWidget` only changes what data goes in. The
+          // deprecated `renderWidgetPreview` is the one that steps outside it.
           renderPreview={(params) =>
-            renderWidgetPreview
-              ? renderWidgetPreview(editingParams, params)
-              : render(editingParams, undefined, params)
+            rebuildWidget
+              ? render(rebuildWidget(editingParams, params), undefined, params)
+              : renderWidgetPreview
+                ? renderWidgetPreview(editingParams, params)
+                : render(editingParams, undefined, params)
           }
           onSave={(params) => onChangeWidgetParams(editingParams.id, params)}
         />

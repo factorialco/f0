@@ -2,6 +2,38 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 const FALLBACK_REVEAL_MS = 1_000
 
+/** How long the reveal waits for the webfont swap before giving up on it. */
+const FONTS_SETTLE_CAP_MS = 300
+
+// Webfont settling, shared per document (fonts load once): the Inter swap
+// rewraps every measured row, so the first reveal shouldn't happen mid-swap.
+// Settles for good on document.fonts.ready or after the cap — later font
+// loads (e.g. lazy-loaded previews) never re-gate the reveal.
+let fontsSettled: boolean | null = null
+const fontsSettledListeners = new Set<() => void>()
+
+const areFontsSettled = (): boolean => {
+  if (fontsSettled !== null) return fontsSettled
+  // jsdom has no document.fonts — treat it as settled.
+  const fonts: FontFaceSet | undefined =
+    typeof document !== "undefined" ? document.fonts : undefined
+  if (!fonts?.ready || fonts.status === "loaded") {
+    fontsSettled = true
+    return true
+  }
+  fontsSettled = false
+  const settle = () => {
+    if (fontsSettled) return
+    fontsSettled = true
+    const listeners = [...fontsSettledListeners]
+    fontsSettledListeners.clear()
+    listeners.forEach((listener) => listener())
+  }
+  void fonts.ready.then(settle)
+  window.setTimeout(settle, FONTS_SETTLE_CAP_MS)
+  return false
+}
+
 /**
  * Reveals the transcript only after Virtuoso has finished its provisional
  * entry window and the viewport has held the same size for two paint frames.
@@ -60,13 +92,25 @@ export const useTranscriptReadiness = (
         if (
           viewportRef.current &&
           listVisibleRef.current &&
-          sizeVersionRef.current === version
+          sizeVersionRef.current === version &&
+          areFontsSettled()
         ) {
           markReady()
         }
       })
     })
   }, [cancelFrames, markReady])
+
+  // Re-check once the webfont settles (the stability frames above may have
+  // passed while the swap was still pending). The 1s fallback is unaffected.
+  useEffect(() => {
+    if (areFontsSettled()) return
+    const listener = () => scheduleStabilityCheck()
+    fontsSettledListeners.add(listener)
+    return () => {
+      fontsSettledListeners.delete(listener)
+    }
+  }, [resetKey, scheduleStabilityCheck])
 
   const setViewport = useCallback(
     (element: HTMLElement | null) => {

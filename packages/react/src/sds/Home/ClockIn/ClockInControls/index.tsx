@@ -5,6 +5,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
@@ -57,6 +58,40 @@ export type ClockInControlsVariant = "default" | "horizontal-bar"
  */
 const FIELD_WITHOUT_FILL =
   "[&_[data-testid=input-field-wrapper]]:bg-transparent"
+
+/**
+ * THE DAY'S PULSE, beside the status it belongs to: the dot in the state's own
+ * colour, with a halo ticking out of it and fading, once every second and a half.
+ *
+ * BOTH VARIANTS draw it. The bar variant used to leave it out on the grounds that
+ * its own bar is coloured by the same state — but a bar says what the day HAS
+ * been, and this says the day is still going: it is the only thing on the tile
+ * that moves when the clock is running.
+ *
+ * Reduced motion keeps the dot and drops the halo. The halo repeats forever, and
+ * a signal you cannot pause is exactly the kind that has to be able to hold still.
+ */
+const StatusPulse = ({ color }: { color: string }) => {
+  const reducedMotion = useReducedMotion()
+
+  return (
+    <div className="relative aspect-square h-4 shrink-0 self-center">
+      {!reducedMotion && (
+        <motion.div
+          className="absolute inset-0 rounded-full opacity-20"
+          style={{ backgroundColor: color }}
+          initial={{ scale: 0.5, opacity: 0.6 }}
+          animate={{ scale: 1.6, opacity: 0 }}
+          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
+        />
+      )}
+      <div
+        className="absolute inset-[3px] rounded-full"
+        style={{ backgroundColor: color }}
+      />
+    </div>
+  )
+}
 
 /** Everything both variants take, on the same terms. */
 interface ClockInControlsBaseProps {
@@ -561,9 +596,7 @@ export function ClockInControls({
       <div className="flex flex-col gap-2">
         {/* The state and the running total, one line, ONE type size: they are
             two halves of one fact ("clocked out, nothing tracked yet"), so
-            neither is made subordinate to the other. No status dot here — the
-            bar below is coloured by that same state, and the total has the
-            place the dot holds in the default variant. */}
+            neither is made subordinate to the other. */}
         <div className="flex flex-row items-end justify-between gap-2">
           <div className="flex min-w-0 flex-row items-baseline gap-1.5">
             {/* `shrink-0`: the STATE is the headline and must read in full — left
@@ -571,6 +604,10 @@ export function ClockInControls({
             <span className="line-clamp-1 shrink-0 text-xl font-semibold text-f1-foreground">
               {statusText}
             </span>
+            {/* The same pulse the default variant carries, beside the same words.
+                The row is `items-baseline` for the text; the dot centres itself
+                against it (`self-center`) rather than sitting on the baseline. */}
+            <StatusPulse color={statusColor} />
             {/* WHICH break, next to the fact that you're on one — it belongs to
                 the status, not to the controls. Break names are consumer copy and
                 can run long ("Lunch break — canteen, second shift"), so it
@@ -647,27 +684,7 @@ export function ClockInControls({
                 <span className="line-clamp-1 text-2xl font-semibold text-f1-foreground">
                   {statusText}
                 </span>
-                <div className="relative aspect-square h-4">
-                  <motion.div
-                    className="absolute inset-0 rounded-full opacity-20"
-                    style={{
-                      backgroundColor: statusColor,
-                    }}
-                    initial={{ scale: 0.5, opacity: 0.6 }}
-                    animate={{ scale: 1.6, opacity: 0 }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      repeatDelay: 1,
-                    }}
-                  />
-                  <div
-                    className="absolute inset-[3px] rounded-full"
-                    style={{
-                      backgroundColor: statusColor,
-                    }}
-                  />
-                </div>
+                <StatusPulse color={statusColor} />
               </div>
               {subtitle && (
                 <p className="line-clamp-1 text-f1-foreground-secondary">

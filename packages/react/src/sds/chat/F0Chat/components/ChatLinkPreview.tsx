@@ -1,9 +1,9 @@
 import { type ReactNode } from "react"
 
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
 import { type F0ChatLinkPreview } from "../types"
+import { ClampText } from "./ClampText"
 import { FadeInImage } from "./FadeInImage"
 
 const hostOf = (url: string): string => {
@@ -46,9 +46,9 @@ const PreviewTexts = ({
 }): ReactNode => (
   <div className="flex min-w-0 flex-col gap-0.5 p-2.5">
     {preview.title && (
-      <OneEllipsis className="text-base font-medium text-f1-foreground">
+      <ClampText className="text-base font-medium text-f1-foreground">
         {preview.title}
-      </OneEllipsis>
+      </ClampText>
     )}
     {preview.description && (
       <span
@@ -60,9 +60,9 @@ const PreviewTexts = ({
         {preview.description}
       </span>
     )}
-    <OneEllipsis className="text-sm text-f1-foreground">
+    <ClampText className="text-sm text-f1-foreground">
       {hostOf(preview.url)}
-    </OneEllipsis>
+    </ClampText>
   </div>
 )
 

@@ -125,7 +125,7 @@ describe("F0Chat", () => {
     expect(composer).toBeVisible()
     expect(composer.closest(".pointer-events-auto")).toBeInTheDocument()
     expect(screen.getByTestId("chat-composer-surface")).toHaveClass(
-      "bg-f1-background/95",
+      "bg-f1-background/90",
       "shadow-md",
       "backdrop-blur-[2px]"
     )

@@ -26,7 +26,10 @@ import {
   UserMessage as F0UserMessage,
   type F0UserMessageExtraProps,
 } from "./components/UserMessage"
-import { WelcomeScreen } from "./components/WelcomeScreen"
+import {
+  WelcomeScreen,
+  type WelcomeScreenCta,
+} from "./components/WelcomeScreen"
 import { type Message, type RenderableTurn } from "./types"
 import { useMessageScroll } from "./useMessageScroll"
 
@@ -58,6 +61,9 @@ export type F0AiMessagesContainerProps = {
   initialMessageCaption?: string
   /** Smaller secondary line below the welcome phrase. */
   initialMessageSubtitle?: string
+  /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+   *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+  initialMessageCta?: WelcomeScreenCta
   /** Called when the user clicks the welcome phrase (used by F0AiChat to open
    *  the pong easter egg). When omitted the phrase is non-interactive. */
   onWelcomeClick?: () => void
@@ -114,6 +120,7 @@ const Messages = ({
   initialMessage,
   initialMessageCaption,
   initialMessageSubtitle,
+  initialMessageCta,
   onWelcomeClick,
   renderToolCall,
   onReplyQuote,
@@ -300,6 +307,7 @@ const Messages = ({
                   messages={welcomeMessages}
                   caption={initialMessageCaption}
                   subtitle={initialMessageSubtitle}
+                  cta={initialMessageCta}
                   onClick={onWelcomeClick}
                   fullscreen={fullscreen}
                 />

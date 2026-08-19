@@ -298,6 +298,125 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("boldRootRows", () => {
+    type NestedPerson = Person & { children?: NestedPerson[] }
+
+    const parent: NestedPerson = {
+      id: 1,
+      name: "Parent Row",
+      email: "parent@example.com",
+      displayName: "Parent Row",
+      children: [
+        {
+          id: 2,
+          name: "Leaf Row",
+          email: "leaf@example.com",
+          displayName: "Leaf Row",
+        },
+      ],
+    }
+
+    const createNestedSource = () =>
+      ({
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+        itemsWithChildren: (item: NestedPerson) => !!item.children?.length,
+        fetchChildren: ({ item }: { item: NestedPerson }) => ({
+          records: item.children ?? [],
+        }),
+        dataAdapter: {
+          paginationType: "pages",
+          fetchData: async () => ({
+            records: [parent],
+            type: "pages",
+            total: 1,
+            perPage: 20,
+            currentPage: 1,
+            pagesCount: 1,
+          }),
+        },
+      }) as unknown as DataCollectionSource<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+
+    // Child rows (depth > 0) staying regular is covered by the
+    // TableWithBoldRootRows story play test: expanding a nested row here
+    // triggers a pre-existing jsdom-only render loop in useData when a later
+    // test renders a failing fetch (see useData.ts subscription error path).
+    it("bolds root rows", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource()}
+          boldRootRows
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent Row")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent Row").closest("tr")
+      expect(parentRow?.className).toMatch(/font-semibold/)
+    })
+
+    it("keeps every row regular when the option is off", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent Row")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent Row").closest("tr")
+      expect(parentRow?.className).not.toMatch(/font-semibold/)
+    })
+  })
+
   describe("features", () => {
     it("renders custom column formatting", async () => {
       const columnsWithCustomRender = [
@@ -3106,6 +3225,92 @@ describe("TableCollection", () => {
       await user.click(engineeringHeading)
 
       expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+    })
+  })
+
+  describe("cell content alignment", () => {
+    /**
+     * Cells are `align-top`, so a value shorter than the row sticks to the cell's
+     * top padding rather than its center. Every cell's value is wrapped in a
+     * centering band (`min-h-6 items-center`) so values of different intrinsic
+     * heights — a 20px line of text, a 20px avatar, a 26px tag — share one center
+     * at the row's natural height, while the band stays pinned to the top when a
+     * tall value stretches the row.
+     *
+     * Asserted on the class rather than on measured geometry because jsdom does
+     * not lay out: `getBoundingClientRect()` returns zeroes for every element.
+     * The rendered positions are covered by the
+     * `CellsOfDifferentHeightsShareOneCenter` story's play function.
+     */
+    it("wraps every cell value in the centering band", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const cells = screen.getAllByRole("cell")
+      expect(cells.length).toBeGreaterThan(0)
+
+      for (const cell of cells) {
+        const band = cell.querySelector(".min-h-6.items-center")
+        expect(band).not.toBeNull()
+        expect(band).toContainElement(
+          cell.querySelector<HTMLElement>(".truncate, span")
+        )
+      }
+    })
+
+    it("pads the cell to offset the separator the row paints over it", async () => {
+      // TableRow draws its 1px rule on its own last pixel (`after:bottom-0`), so a
+      // symmetric `py` leaves the gap below the value a pixel shorter than the gap
+      // above it. The bottom padding carries that pixel back.
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const SEPARATOR_PX = 1
+      const cell = screen.getAllByRole("cell")[0]
+
+      const top = /(?:^| )pt-(\d+(?:\.\d+)?)(?: |$)/.exec(cell.className)
+      const bottom = /(?:^| )pb-\[(\d+)px\](?: |$)/.exec(cell.className)
+      expect(top).not.toBeNull()
+      expect(bottom).not.toBeNull()
+      expect(Number(bottom![1])).toBe(Number(top![1]) * 4 + SEPARATOR_PX)
     })
   })
 })

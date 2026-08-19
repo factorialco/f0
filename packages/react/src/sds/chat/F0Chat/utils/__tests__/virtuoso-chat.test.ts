@@ -5,7 +5,9 @@ import {
   entryLocation,
   followDecision,
   nextFirstItemIndex,
+  PREFETCH_OLDER_VIEWPORTS,
   PREPEND_OFFSET,
+  shouldPrefetchOlder,
   shouldRepinOnGrowth,
   UNREAD_DIVIDER_TOP_GAP,
   windowEnds,
@@ -137,6 +139,29 @@ describe("shouldRepinOnGrowth", () => {
   it("ignores shrink — the browser clamps it", () => {
     expect(shouldRepinOnGrowth({ ...base, height: 960 })).toBe(false)
     expect(shouldRepinOnGrowth({ ...base, height: 1000 })).toBe(false)
+  })
+})
+
+describe("shouldPrefetchOlder", () => {
+  it("prefetches within the viewport threshold of the top", () => {
+    const clientHeight = 500
+    const threshold = clientHeight * PREFETCH_OLDER_VIEWPORTS
+    expect(shouldPrefetchOlder({ scrollTop: 0, clientHeight })).toBe(true)
+    expect(shouldPrefetchOlder({ scrollTop: threshold, clientHeight })).toBe(
+      true
+    )
+    expect(
+      shouldPrefetchOlder({ scrollTop: threshold + 1, clientHeight })
+    ).toBe(false)
+  })
+
+  it("honors a custom viewport multiplier", () => {
+    expect(shouldPrefetchOlder({ scrollTop: 600, clientHeight: 500 }, 1)).toBe(
+      false
+    )
+    expect(shouldPrefetchOlder({ scrollTop: 400, clientHeight: 500 }, 1)).toBe(
+      true
+    )
   })
 })
 

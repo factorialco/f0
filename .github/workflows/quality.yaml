@@ -9,6 +9,20 @@ jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
+  # Intentionally NOT gated on detect-changes: a big file can land anywhere in
+  # the repo, including paths no package filter watches, and this check is a
+  # couple of seconds. It needs no pnpm install either — just git and tsx.
+  file-sizes:
+    name: "File sizes"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Check no tracked file is oversized
+        run: npx --yes tsx@4 scripts/check-file-sizes.ts
+
   format:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -100,6 +114,32 @@ jobs:
       # Pure filesystem scan of src/ — no build or Storybook needed.
       - name: Check the stable DoD ratchet
         run: pnpm --filter @factorialco/f0-react run check:stable-dod
+  # Every component ADDED by a PR must meet the full mechanical Definition of
+  # Done from day one — no new debt. Runs on every react PR (the script exits
+  # 0 when no story file was added) rather than gating on the `new-component`
+  # label, which is applied asynchronously by pr-package-labels.yaml and could
+  # miss the first event. Escape hatch: the `skip-new-component-dod` label.
+  new-component-dod:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-new-component-dod') &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] New Component Definition of Done"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: the script diffs against origin/main to find added
+          # story files.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-node-pnpm
+      # Pure filesystem scan of src/ + a git diff — no build needed.
+      - name: Check new components meet the full DoD
+        run: pnpm --filter @factorialco/f0-react run check:new-component-dod
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -253,3 +293,32 @@ jobs:
           comment-type: cycle_dependency
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-body: ${{ steps.comment.outputs.body }}
+
+  # Single check to gate the branch on. It collapses this workflow's jobs into
+  # one status, so branch protection lists one stable name and never needs
+  # editing when jobs are added, removed, renamed or sharded.
+  #
+  # `if: always()` is load-bearing. Without it a failing dependency leaves this
+  # job *skipped* rather than *failed*, and GitHub counts a skipped required
+  # check as satisfied — the gate would go green over a red build.
+  #
+  # `skipped` is accepted on purpose: detect-changes skips the jobs for a
+  # package that this PR did not touch. Only failure/cancellation is fatal.
+  quality-passed:
+    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, cycle-dependencies]
+    name: "✅ Quality"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every Quality check passed
+        run: |
+          echo "Dependency results: ${{ join(needs.*.result, ' ') }}"
+          if ${{ contains(needs.*.result, 'failure') }}; then
+            echo "::error::A Quality check failed."
+            exit 1
+          fi
+          if ${{ contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::A Quality check was cancelled."
+            exit 1
+          fi
+          echo "All Quality checks passed (or were skipped as not applicable)."

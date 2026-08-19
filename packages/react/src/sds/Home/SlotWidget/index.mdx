@@ -149,6 +149,43 @@ What the params CAN'T do by themselves is rebuild the widget's slots — only th
 app knows where that data comes from. Persist what `onChangeWidgetParams` hands
 you, pass it back as the widget's `params`, and rebuild the slots from it.
 
+## Previews: hand over the widget, not a render of it
+
+A widget is previewed twice — in the "Add widget" catalog and in "Edit params" —
+and both previews are the **same card the column draws**, because both take the
+widget as **data** and render it through this component.
+
+```tsx
+// The catalog: `preview` IS the widget.
+<WidgetCatalog
+  widgets={[{ id: "events", title: "Events", icon: Calendar, preview: eventsWidget }]}
+  slotRenderers={SLOT_RENDERERS}   // the same map the layout gets
+  onAdd={add}
+  isOpen={open}
+  onClose={close}
+/>
+
+// "Edit params": hand back the WIDGET for the params being tried out.
+<NewHomeLayout
+  rightWidgets={widgets}
+  slotRenderers={SLOT_RENDERERS}
+  onChangeWidgetParams={save}
+  rebuildWidget={(widget, params) =>
+    widget.id === "events" ? eventsWidget(params) : widget
+  }
+/>
+```
+
+Its `info` comes with it: a catalog item that declares none shows the widget's
+own `header.info` under the preview, the same sentence its info side carries.
+
+**Don't assemble a preview out of the content components.** A hand-built
+approximation has to reproduce the frame, the seams and the spacing — and the
+first of those to fall out of step does so silently, so a widget previews one
+way and lands on the page another. Passing a `ReactNode` still works, for a
+widget the app draws its own way (`renderWidget`); a `HomeWidgetItem` is the
+form that cannot drift.
+
 ## Loading
 
 `loading` swaps every slot's content for that visualization's **skeleton**,

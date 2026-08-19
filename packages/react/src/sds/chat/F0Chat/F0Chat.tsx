@@ -60,6 +60,9 @@ const ChatShell = ({
   return (
     <div
       ref={shellRef}
+      // Opts the transcript into the metric-adjusted font fallback (styles.css)
+      // so rows measured before the Inter swap don't rewrap after it.
+      data-f0-chat-shell=""
       className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
       onDragEnter={(e) => {
         if (!isFileDrag(e)) return
