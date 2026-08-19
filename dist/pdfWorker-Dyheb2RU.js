@@ -2,7 +2,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { createContext, useReducer, forwardRef, useRef, useImperativeHandle, useEffect, useCallback, useMemo, useContext, useLayoutEffect } from "react";
 import { e as clsx } from "./tooltip-DTpaXpXW.js";
 import { W as invariant } from "./F0CanvasPanel-x0HG1lL2.js";
-import { d as dequal } from "./CoachmarkProvider-CFLKo91w.js";
+import { d as dequal } from "./CoachmarkProvider-TYy5nAbB.js";
 import { a as getAugmentedNamespace, g as getDefaultExportFromCjs } from "./_commonjsHelpers-ByX85dGu.js";
 import { c as commonjsRequire } from "./_commonjs-dynamic-modules-BpilXLfW.js";
 import './pdfWorker.css';var pdf$1 = { exports: {} };
