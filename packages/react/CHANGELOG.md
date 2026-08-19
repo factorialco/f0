@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.41.1](https://github.com/factorialco/f0/compare/f0-react-v6.41.0...f0-react-v6.41.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **F0ResourceHeader:** rename to clear stable DoD name-prefix check ([#5171](https://github.com/factorialco/f0/issues/5171)) ([de75230](https://github.com/factorialco/f0/commit/de75230fc458569df84c8cfce5a96e62e1bf8508))
+
 ## [6.41.0](https://github.com/factorialco/f0/compare/f0-react-v6.40.0...f0-react-v6.41.0) (2026-08-19)
 
 
