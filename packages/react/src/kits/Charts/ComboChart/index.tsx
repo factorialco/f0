@@ -31,6 +31,7 @@ import {
 } from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { prepareData } from "../utils/muncher"
+import { ProjectedBar } from "../utils/ProjectedBar"
 import { ChartPropsBase } from "../utils/types"
 
 const createScatter = (categoryKey: string) => {
@@ -89,8 +90,16 @@ type StackedBarShapeProps = RectangleProps & {
  * Rounds only the outer corners of a stacked bar: the top of the outermost
  * positive segment and the bottom of the outermost negative one. Middle
  * segments stay square so the stack reads as one continuous bar.
+ *
+ * Projected segments render through ProjectedBar and fade out, so the
+ * outermost solid segment keeps its rounded tip even when projected ones sit
+ * above it.
  */
-const createStackedBarShape = (category: string, categories: string[]) => {
+const createStackedBarShape = (
+  category: string,
+  categories: string[],
+  projectedCategories: Set<string>
+) => {
   const StackedBarShape = (props: unknown) => {
     const { payload, ...rest } = props as StackedBarShapeProps
     const valueOf = (key: string) => {
@@ -99,17 +108,19 @@ const createStackedBarShape = (category: string, categories: string[]) => {
     }
 
     const value = valueOf(category)
-    const outermost = [...categories]
+    const outermostSolid = [...categories]
       .reverse()
-      .find((key) => (value < 0 ? valueOf(key) < 0 : valueOf(key) > 0))
-    const isOutermost = value !== 0 && outermost === category
+      .find(
+        (key) =>
+          (value < 0 ? valueOf(key) < 0 : valueOf(key) > 0) &&
+          !projectedCategories.has(key)
+      )
 
     // Segments below zero come in with a negative height and Rectangle mirrors
     // the path for them, so the first two radius slots land on the bar tip on
     // both sides of the axis.
-    const radius: [number, number, number, number] = isOutermost
-      ? [4, 4, 0, 0]
-      : [0, 0, 0, 0]
+    const radius: [number, number, number, number] =
+      outermostSolid === category ? [4, 4, 0, 0] : [0, 0, 0, 0]
 
     return <Rectangle {...rest} radius={radius} />
   }
@@ -189,6 +200,15 @@ const _ComboChart = <K extends ChartConfig>(
       ? bar.categories
       : [bar.categories]
     : []
+  const isStackedBar =
+    bar?.type === "stacked" || bar?.type === "stacked-by-sign"
+  const projectedBarCategories = new Set(
+    barCategories.filter((key) => dataConfig[key].projected).map(String)
+  )
+  const barColor = (category: keyof K, index: number) =>
+    dataConfig[category].color
+      ? getColor(dataConfig[category].color)
+      : getCategoricalColor(index)
   const lineCategories = line?.categories
     ? Array.isArray(line.categories)
       ? line.categories
@@ -365,43 +385,51 @@ const _ComboChart = <K extends ChartConfig>(
           }
         />
 
-        {barCategories.map((category, index) => (
-          <Bar
-            key={`bar-${String(category)}`}
-            isAnimationActive={false}
-            dataKey={String(category)}
-            stackId={
-              bar?.type === "stacked" || bar?.type === "stacked-by-sign"
-                ? "stack"
-                : undefined
-            }
-            fill={
-              dataConfig[category].color
-                ? getColor(dataConfig[category].color)
-                : getCategoricalColor(index)
-            }
-            radius={4}
-            shape={
-              bar?.type === "stacked" || bar?.type === "stacked-by-sign"
-                ? createStackedBarShape(
-                    String(category),
-                    barCategories.map(String)
-                  )
-                : undefined
-            }
-            maxBarSize={32}
-          >
-            {label && (
-              <LabelList
-                key={`label-${String(category)}`}
-                position="top"
-                offset={10}
-                className="fill-f1-foreground"
-                fontSize={12}
-              />
-            )}
-          </Bar>
-        ))}
+        {barCategories.map((category, index) => {
+          const commonProps = {
+            isAnimationActive: false,
+            dataKey: String(category),
+            stackId: isStackedBar ? "stack" : undefined,
+            fill: barColor(category, index),
+            radius: 4,
+            maxBarSize: 32,
+          }
+          const labelList = label && (
+            <LabelList
+              key={`label-${String(category)}`}
+              position="top"
+              offset={10}
+              className="fill-f1-foreground"
+              fontSize={12}
+            />
+          )
+
+          return projectedBarCategories.has(String(category)) ? (
+            <ProjectedBar
+              key={`bar-${String(category)}`}
+              {...commonProps}
+              stackKeys={isStackedBar ? barCategories.map(String) : undefined}
+            >
+              {labelList}
+            </ProjectedBar>
+          ) : (
+            <Bar
+              key={`bar-${String(category)}`}
+              {...commonProps}
+              shape={
+                isStackedBar
+                  ? createStackedBarShape(
+                      String(category),
+                      barCategories.map(String),
+                      projectedBarCategories
+                    )
+                  : undefined
+              }
+            >
+              {labelList}
+            </Bar>
+          )
+        })}
 
         {lineCategories.map((category, index) => {
           const stroke = dataConfig[category].color

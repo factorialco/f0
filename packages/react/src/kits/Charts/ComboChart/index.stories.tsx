@@ -199,6 +199,134 @@ const headcountConfig = {
   },
 }
 
+const forecastConfig = {
+  actuals: {
+    label: "Actuals",
+    color: "categorical-1",
+  },
+  incoming: {
+    label: "Incoming",
+    color: "categorical-4",
+  },
+  terminations: {
+    label: "Terminations",
+    color: "categorical-3",
+  },
+  forecastGrowth: {
+    label: "Forecast growth",
+    color: "categorical-6",
+    projected: true,
+  },
+  forecastAttrition: {
+    label: "Forecast attrition",
+    color: "categorical-3",
+    projected: true,
+  },
+  planned: {
+    label: "Planned",
+    color: "categorical-2",
+    dashed: true,
+  },
+}
+
+export const ProjectedBars: Meta<typeof ComboChart<typeof forecastConfig>> = {
+  args: {
+    dataConfig: forecastConfig,
+    data: [
+      {
+        label: "January",
+        values: {
+          actuals: 78,
+          incoming: 10,
+          terminations: 0,
+          forecastGrowth: 24,
+          forecastAttrition: 0,
+          planned: 86,
+        },
+      },
+      {
+        label: "February",
+        values: {
+          actuals: 80,
+          incoming: 0,
+          terminations: -8,
+          forecastGrowth: 33,
+          forecastAttrition: 0,
+          planned: 84,
+        },
+      },
+      {
+        label: "March",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 73,
+          forecastAttrition: 0,
+          planned: 100,
+        },
+      },
+      {
+        label: "April",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 98,
+          forecastAttrition: 0,
+          planned: 122,
+        },
+      },
+      {
+        label: "May",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 87,
+          forecastAttrition: -55,
+          planned: 128,
+        },
+      },
+      {
+        label: "June",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 34,
+          forecastAttrition: -60,
+          planned: 76,
+        },
+      },
+    ],
+    bar: {
+      type: "stacked-by-sign",
+      categories: [
+        "actuals",
+        "incoming",
+        "terminations",
+        "forecastGrowth",
+        "forecastAttrition",
+      ],
+    },
+    line: {
+      categories: ["planned"],
+      dot: true,
+      lineType: "linear",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    legend: true,
+  },
+}
+
 export const StackedBySignWithLine: Meta<
   typeof ComboChart<typeof headcountConfig>
 > = {
