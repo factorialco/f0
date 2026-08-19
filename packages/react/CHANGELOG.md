@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.42.0](https://github.com/factorialco/f0/compare/f0-react-v6.41.1...f0-react-v6.42.0) (2026-08-19)
+
+
+### Features
+
+* **SlotWidget:** export its content, frameless ([#5179](https://github.com/factorialco/f0/issues/5179)) ([2252dfd](https://github.com/factorialco/f0/commit/2252dfd3cb03d6022545f2e114b789d36c144a01))
+
 ## [6.41.1](https://github.com/factorialco/f0/compare/f0-react-v6.41.0...f0-react-v6.41.1) (2026-08-19)
 
 
