@@ -10,7 +10,7 @@ import {
   FilterDefinition,
   FilterTypeKey,
   filterTypes,
-} from "@/patterns/OneFilterPicker/filterTypes/filters"
+} from "@/patterns/F0FilterPicker/filterTypes/filters"
 
 type ActiveFiltersChipsProps<Filters extends FiltersDefinition> = {
   filters: Filters

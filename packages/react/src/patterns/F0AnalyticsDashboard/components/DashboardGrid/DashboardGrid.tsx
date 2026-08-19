@@ -4,7 +4,7 @@ import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { F0Icon } from "@/components/F0Icon"
 import Handle from "@/icons/app/Handle"

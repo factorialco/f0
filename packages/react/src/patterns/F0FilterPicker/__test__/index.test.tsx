@@ -6,7 +6,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type { FiltersDefinition } from "../types"
 
-import { ChipsList, Controls, OneFilterPicker, Root } from "../index"
+import { ChipsList, Controls, F0FilterPicker, Root } from "../index"
 
 /**
  * OverflowList renders items in both a hidden measurement container
@@ -48,14 +48,14 @@ describe("Filters", () => {
 
       // Render with initial state
       render(
-        <OneFilterPicker
+        <F0FilterPicker
           filters={definition}
           value={{
             search: "test",
             department: ["engineering"],
           }}
           onChange={onChange}
-        ></OneFilterPicker>
+        ></F0FilterPicker>
       )
 
       // Check for active filters in the UI
@@ -79,7 +79,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+        <F0FilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       // Open filter popover
@@ -99,7 +99,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <OneFilterPicker
+        <F0FilterPicker
           filters={definition}
           value={{ search: "test query" }}
           onChange={onChange}
@@ -121,7 +121,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       const { rerender } = render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+        <F0FilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       await openFilterPopover(user)
@@ -133,7 +133,7 @@ describe("Filters", () => {
       // Controlled hosts commonly rebuild the value object every render.
       // An identity-only change must not wipe the unapplied draft.
       rerender(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+        <F0FilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       expect(
@@ -149,7 +149,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+        <F0FilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       await openFilterPopover(user)
@@ -173,7 +173,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+        <F0FilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       await openFilterPopover(user)
@@ -233,7 +233,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <OneFilterPicker
+        <F0FilterPicker
           filters={definition}
           value={{
             department: ["engineering"],
@@ -260,7 +260,7 @@ describe("Filters", () => {
     it("re-seeds optimistic state when the value prop changes", async () => {
       const onChange = vi.fn()
       const { rerender } = render(
-        <OneFilterPicker
+        <F0FilterPicker
           filters={definition}
           value={{ department: ["engineering"] }}
           onChange={onChange}
@@ -274,7 +274,7 @@ describe("Filters", () => {
       ).toBeInTheDocument()
 
       rerender(
-        <OneFilterPicker
+        <F0FilterPicker
           filters={definition}
           value={{ department: ["design"] }}
           onChange={onChange}
@@ -293,7 +293,7 @@ describe("Filters", () => {
       "keeps the trigger name stable and describes active filters in %s mode",
       (mode) => {
         render(
-          <OneFilterPicker
+          <F0FilterPicker
             filters={definition}
             value={{ department: ["engineering"] }}
             onChange={vi.fn()}
@@ -327,7 +327,7 @@ describe("Presets", () => {
     ]
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{}}
         presets={presets}
@@ -355,7 +355,7 @@ describe("Presets", () => {
     ]
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{}}
         presets={presets}
@@ -389,7 +389,7 @@ describe("Presets", () => {
 
     // Render with filters matching the first preset
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["engineering"] }}
         presets={presets}
@@ -426,7 +426,7 @@ describe("Presets", () => {
     ]
 
     const { rerender } = render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{}}
         presets={presets}
@@ -441,7 +441,7 @@ describe("Presets", () => {
 
     // Simulate the update
     rerender(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["engineering"] }}
         presets={presets}
@@ -469,7 +469,7 @@ describe("Presets", () => {
     ]
 
     const { rerender } = render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{}}
         presets={presets}
@@ -484,7 +484,7 @@ describe("Presets", () => {
 
     // Simulate the update
     rerender(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["engineering"] }}
         presets={presets}
@@ -527,7 +527,7 @@ describe("Presets", () => {
     ]
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{}}
         presets={presets}
@@ -561,7 +561,7 @@ describe("Presets - Chip Visibility", () => {
 
     // Render with filters matching the preset
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["engineering"] }}
         presets={presets}
@@ -590,7 +590,7 @@ describe("Presets - Chip Visibility", () => {
     // Render with preset filter + manual filter
     // With exact match, the preset is NOT selected because of the extra "search" key
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["engineering"], search: "test query" }}
         presets={presets}
@@ -624,7 +624,7 @@ describe("Presets - Chip Visibility", () => {
 
     // Render with modified value (design instead of engineering)
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["design"] }}
         presets={presets}
@@ -660,7 +660,7 @@ describe("Presets - Chip Visibility", () => {
 
     // Render with only one filter matching (search modified)
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={definition}
         value={{ department: ["engineering"], search: "different" }}
         presets={multiFilterPresets}
@@ -686,7 +686,7 @@ describe("Filters Type Safety", () => {
   it.skip("should enforce type safety in props", () => {
     // Valid usage - this should type check
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {
@@ -707,7 +707,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {
@@ -723,7 +723,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             // @ts-expect-error - Missing options in "in" filter
@@ -739,7 +739,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {
@@ -761,7 +761,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {
@@ -783,7 +783,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {
@@ -805,7 +805,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             // @ts-expect-error - Missing required options in "in" filter
@@ -824,7 +824,7 @@ describe("Filters Type Safety", () => {
   it.skip("should enforce type safety in presets", () => {
     // Valid usage - this should type check
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {
@@ -851,7 +851,7 @@ describe("Filters Type Safety", () => {
     )
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={
           {
             status: {

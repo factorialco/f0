@@ -7,7 +7,7 @@ import type { F0DataChartProps } from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import {
   ChartFunnel,

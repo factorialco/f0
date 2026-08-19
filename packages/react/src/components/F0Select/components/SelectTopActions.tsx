@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useState } from "react"
 
-import { OneFilterPicker } from "@/patterns/OneFilterPicker"
+import { F0FilterPicker } from "@/patterns/F0FilterPicker"
 import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
 import {
   FiltersDefinition,
@@ -90,7 +90,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             </div>
           )}
           {filters && (
-            <OneFilterPicker
+            <F0FilterPicker
               filters={filters}
               value={currentFilters}
               onChange={onFiltersChange}

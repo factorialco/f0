@@ -1,11 +1,11 @@
 import { DateRange } from "@/components/OneCalendar/types"
 import { SortingsDefinition, SortingsState } from "@/hooks/datasource"
-import { NumberFilterValue } from "@/patterns/OneFilterPicker/filterTypes/NumberFilter/NumberFilter"
+import { NumberFilterValue } from "@/patterns/F0FilterPicker/filterTypes/NumberFilter/NumberFilter"
 import {
   FilterDefinition,
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { getDataCollectionStorageKey } from "./dataCollectionStorageKey"
 import { DataCollectionStorage } from "./types"

@@ -1,1 +1,1 @@
-export * from "@/patterns/OneFilterPicker/types"
+export * from "@/patterns/F0FilterPicker/types"

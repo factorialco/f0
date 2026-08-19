@@ -7,7 +7,7 @@ import {
 } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-import * as OneFiltersPickerStories from "./OneFilterPicker.stories"
+import * as F0FilterPickerStories from "./F0FilterPicker.stories"
 
 <Meta title="Filters/FilterPicker/Presets" />
 
@@ -34,15 +34,12 @@ many preconfigured filters.
 
 ### Basic example
 
-<Canvas
-  of={OneFiltersPickerStories.WithPresets}
-  meta={OneFiltersPickerStories}
-/>
+<Canvas of={F0FilterPickerStories.WithPresets} meta={F0FilterPickerStories} />
 ### Example with items count
 
 <Canvas
-  of={OneFiltersPickerStories.WithPreselectedFiltersAndItemCount}
-  meta={OneFiltersPickerStories}
+  of={F0FilterPickerStories.WithPreselectedFiltersAndItemCount}
+  meta={F0FilterPickerStories}
 />
 
 ## Setting Presets
@@ -51,7 +48,7 @@ To enable presets in your data collection component, supply the presets
 attribute in the source prop.
 
 ```tsx
-<OneFiltersPicker>
+<F0FilterPicker>
   ... presets=
   {[
     {
@@ -70,7 +67,7 @@ attribute in the source prop.
       },
     },
   ]}
-</OneFiltersPicker>
+</F0FilterPicker>
 ```
 
 ## Presets
@@ -117,8 +114,8 @@ Presets always use replace behavior:
 ### Example
 
 <Canvas
-  of={OneFiltersPickerStories.WithPresetsAndInitialFilters}
-  meta={OneFiltersPickerStories}
+  of={F0FilterPickerStories.WithPresetsAndInitialFilters}
+  meta={F0FilterPickerStories}
 />
 
 ### Usage
@@ -142,7 +139,7 @@ const presets = [
 
 ## Result Count
 
-When the `resultCount` prop is provided to `OneFilterPicker`, the chips row
+When the `resultCount` prop is provided to `F0FilterPicker`, the chips row
 displays a "N results for:" prefix before the filter chips, showing how many
 items match the current filter selection.
 

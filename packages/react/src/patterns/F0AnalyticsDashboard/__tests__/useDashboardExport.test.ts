@@ -4,7 +4,7 @@ import { act, zeroRenderHook } from "@/testing/test-utils"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { useDashboardExport } from "../hooks/useDashboardExport"
 import type { DashboardItem } from "../types"

@@ -6,7 +6,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type { FiltersDefinition } from "../types"
 
-import { OneFilterPicker } from "../index"
+import { F0FilterPicker } from "../index"
 
 /**
  * Grouped ("in" filter with nested children) options store their selection under
@@ -78,10 +78,10 @@ const expandGroup = async (
   await user.click(chevrons[index])
 }
 
-describe("OneFilterPicker - grouped (nested) options", () => {
+describe("F0FilterPicker - grouped (nested) options", () => {
   it("counts an applied hidden nested filter in the trigger", () => {
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={groupedDefinition}
         value={{ space: ["1"] }}
         onChange={vi.fn()}
@@ -100,7 +100,7 @@ describe("OneFilterPicker - grouped (nested) options", () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={groupedDefinition}
         value={{}}
         onChange={vi.fn()}
@@ -122,7 +122,7 @@ describe("OneFilterPicker - grouped (nested) options", () => {
     const onChange = vi.fn()
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={groupedDefinition}
         value={{}}
         onChange={onChange}
@@ -150,7 +150,7 @@ describe("OneFilterPicker - grouped (nested) options", () => {
     const onChange = vi.fn()
 
     render(
-      <OneFilterPicker
+      <F0FilterPicker
         filters={groupedDefinition}
         value={{}}
         onChange={onChange}

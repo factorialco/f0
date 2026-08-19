@@ -8,7 +8,7 @@ import {
 import {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 import { useF0EventCatcher } from "../../lib/providers/events"
 import { normalizeEventValue } from "../../lib/providers/events/normalize"
 

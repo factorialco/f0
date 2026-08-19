@@ -4,7 +4,7 @@ import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
 } from "@/kits/F0DataChart"
-import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
+import type { PresetsDefinition } from "@/patterns/F0FilterPicker/types"
 
 import type {
   DashboardChartData,

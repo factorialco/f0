@@ -44,7 +44,7 @@ export type WithDataTestIdProps = {
  * Otherwise renders children as-is with no wrapper element.
  *
  * Use this directly inside components with complex generic types (e.g. F0Select,
- * OneFilterPicker) where the `withDataTestId` HOC would erase type parameters.
+ * F0FilterPicker) where the `withDataTestId` HOC would erase type parameters.
  *
  * @example
  * ```tsx

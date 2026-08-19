@@ -14,7 +14,7 @@ import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 // Re-exported under its own name: the same shape types a table column header
 // and a widget header, and a host typing a widget's `info` shouldn't have to

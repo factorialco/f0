@@ -2,9 +2,9 @@ import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
-import { ControlledOneFilterPicker } from "@/patterns/OneFilterPicker/internal/ControlledOneFilterPicker"
+import { ControlledF0FilterPicker } from "@/patterns/F0FilterPicker/internal/ControlledF0FilterPicker"
 
 interface FilterBarProps<Filters extends FiltersDefinition> {
   filters?: Filters
@@ -17,7 +17,7 @@ interface FilterBarProps<Filters extends FiltersDefinition> {
 /**
  * Dashboard-level filter bar.
  *
- * Renders `OneFilterPicker` with the dashboard source's filters, presets,
+ * Renders `F0FilterPicker` with the dashboard source's filters, presets,
  * and current filter values. This is the single point of filter control
  * for the entire dashboard.
  */
@@ -34,7 +34,7 @@ export function FilterBar<Filters extends FiltersDefinition>({
   }
 
   return (
-    <ControlledOneFilterPicker
+    <ControlledF0FilterPicker
       filters={filters}
       value={value}
       presets={presets}

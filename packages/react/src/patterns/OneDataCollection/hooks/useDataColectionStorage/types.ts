@@ -7,7 +7,7 @@ import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource"
-import { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
+import { PresetsDefinition } from "@/patterns/F0FilterPicker/types"
 
 import {
   NavigationFiltersDefinition,

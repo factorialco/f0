@@ -53,7 +53,7 @@ This file uses the shared documentation quality scale from `documentation-qualit
 | `F0Widget`                | None                                                                                                 | **None**     |                                                       |
 | `F0WizardForm`            | None                                                                                                 | **None**     | See `factorial-f0` skill for F0 Forms docs            |
 | `OneEllipsis`             | None                                                                                                 | **None**     | Old naming (`One` prefix, rename on touch)            |
-| `OneFilterPicker`         | `OneFilterPicker/__stories__/OneFiltersPicker.mdx` + `presets.mdx` + `OneFiltersPicker.internal.mdx` | **Good**     | Most MDX files per component                          |
+| `F0FilterPicker`         | `F0FilterPicker/__stories__/F0FilterPicker.mdx` + `presets.mdx`                                       | **Gold**     | Anatomy + props table, Guidelines with DoDonts, Accessibility |
 
 ---
 

@@ -1,4 +1,4 @@
-export * from "@/patterns/OneFilterPicker/types"
+export * from "@/patterns/F0FilterPicker/types"
 export * from "./adaptDataAdapterToInfiniteScroll"
 export * from "./itemNeighbors"
 export * from "./types"

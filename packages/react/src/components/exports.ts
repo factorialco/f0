@@ -68,9 +68,20 @@ export * from "./F0Text"
 export * from "./F0VideoPlayer"
 export * from "../sds/timeline"
 /**
- * @deprecated OneFilterPicker has moved to @/patterns/OneFilterPicker. Import from there instead.
+ * @deprecated F0FilterPicker has moved to @/patterns/F0FilterPicker. Import from there instead.
  */
-export { OneFilterPicker } from "../patterns/OneFilterPicker/OneFilterPicker"
+export { F0FilterPicker } from "../patterns/F0FilterPicker/F0FilterPicker"
+/**
+ * @deprecated Renamed to `F0FilterPicker`. Import that from
+ * @/patterns/F0FilterPicker instead. This alias exists only so existing
+ * consumers keep working across the rename.
+ * @removeIn 7.0.0
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-onefilterpicker-to-f0filterpicker.md
+ */
+export {
+  F0FilterPicker as OneFilterPicker,
+  type F0FilterPickerRootProps as OneFilterPickerRootProps,
+} from "../patterns/F0FilterPicker/F0FilterPicker"
 export type {
   DateFilterDefinition,
   FilterDefinition,
@@ -85,7 +96,7 @@ export type {
   CurrentFilters,
   PresetDefinition,
   PresetsDefinition,
-} from "../patterns/OneFilterPicker/types"
+} from "../patterns/F0FilterPicker/types"
 export * from "./tags/exports"
 /**
  * @deprecated Await has moved to @/lib/Await. Import from there instead.

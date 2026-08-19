@@ -1,4 +1,4 @@
-import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
+import type { FiltersDefinition, FiltersState } from "../F0FilterPicker/types"
 
 /**
  * Shared styling and behavior props used by both public and internal components.

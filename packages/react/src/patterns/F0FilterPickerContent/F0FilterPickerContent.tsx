@@ -13,11 +13,11 @@ import { cn } from "@/lib/utils"
 import type {
   FilterTypeContext,
   FilterTypeSchema,
-} from "../OneFilterPicker/filterTypes/types"
-import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
+} from "../F0FilterPicker/filterTypes/types"
+import type { FiltersDefinition, FiltersState } from "../F0FilterPicker/types"
 import type { F0FilterPickerContentProps } from "./types"
 
-import { getFilterType } from "../OneFilterPicker/filterTypes"
+import { getFilterType } from "../F0FilterPicker/filterTypes"
 import { FilterPickerInternal } from "./internal"
 
 const DEFAULT_FORM_HEIGHT = 388
