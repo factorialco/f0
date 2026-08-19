@@ -15,6 +15,16 @@ import type {
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 import type { DashboardMetricItem } from "../types"
 
+// Keep this dashboard integration test at the chart boundary: jsdom has no
+// canvas context, while ChartItem's keyboard point surface is ordinary DOM.
+vi.mock("@/kits/F0DataChart", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/kits/F0DataChart")>()
+  return {
+    ...actual,
+    F0DataChart: () => <div aria-label="Chart" role="img" />,
+  }
+})
+
 const filters = {
   department: {
     type: "in",
