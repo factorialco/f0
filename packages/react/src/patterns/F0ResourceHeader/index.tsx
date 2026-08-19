@@ -24,7 +24,7 @@ type Props = {} & Pick<
  * Header for a resource detail page: avatar, title, description, status,
  * metadata and its primary, secondary and overflow actions.
  */
-export const ResourceHeader = ({
+export const F0ResourceHeader = ({
   avatar,
   title,
   description,
@@ -56,4 +56,4 @@ export const ResourceHeader = ({
   )
 }
 
-export type ResourceHeaderProps = Props
+export type F0ResourceHeaderProps = Props

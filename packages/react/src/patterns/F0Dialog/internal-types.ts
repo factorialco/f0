@@ -4,7 +4,7 @@ import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 import { TabsProps } from "@/patterns/Navigation/Tabs"
-import { ResourceHeaderProps } from "@/patterns/ResourceHeader"
+import { F0ResourceHeaderProps } from "@/patterns/F0ResourceHeader"
 
 import {
   DialogControls,
@@ -26,7 +26,7 @@ export type F0DialogHeaderProps = {
   }
   otherActions?: DropdownInternalProps["items"]
   navigation?: NavigationProps
-  resourceHeader?: ResourceHeaderProps
+  resourceHeader?: F0ResourceHeaderProps
   controls?: DialogControls
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 

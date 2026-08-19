@@ -3,15 +3,15 @@ import { describe, expect, it, vi } from "vitest"
 import { Download } from "@/icons/app"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
-import { ResourceHeader } from "../index"
+import { F0ResourceHeader } from "../index"
 
-describe("ResourceHeader", () => {
+describe("F0ResourceHeader", () => {
   it("renders secondary dropdown actions and calls the selected actions", async () => {
     const user = userEvent.setup()
     const onExport = vi.fn()
 
     render(
-      <ResourceHeader
+      <F0ResourceHeader
         title="Reports"
         secondaryActions={[
           {
