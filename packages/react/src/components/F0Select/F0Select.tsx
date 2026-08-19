@@ -273,6 +273,10 @@ const F0SelectComponent = forwardRef(function Select<
     const initial = toArray(value) ?? defaultValues ?? []
     return initial.map(String)
   })
+  const controlledInlineValue =
+    variant === "inline" && typeof value === "string"
+      ? String(value)
+      : undefined
 
   useEffect(() => {
     const incomingValues = (toArray(value) ?? []).map(String)
@@ -803,9 +807,26 @@ const F0SelectComponent = forwardRef(function Select<
         // from deferred-apply back to immediate-emit isn't suppressed.
         lastEmittedSingleRef.current = { value: valueKey }
         onChange?.(value as T, originalItem, option)
+
+        // A controlled inline select must keep the prop as its source of truth.
+        // The selection hook updates optimistically so `onChange` can be emitted;
+        // if the parent leaves `value` unchanged, restore both the selection
+        // state and the primitive value after that emission. Resetting the
+        // emission guard also allows the user to retry the same rejected value.
+        if (
+          controlledInlineValue !== undefined &&
+          valueKey !== controlledInlineValue
+        ) {
+          hasUserInteracted.current = false
+          lastEmittedSingleRef.current = null
+          clearSelection()
+          handleSelectItemChange(controlledInlineValue, true)
+          setLocalValue([controlledInlineValue])
+        }
       }
     }
   }, [
+    controlledInlineValue,
     getMultiSelectionPayload,
     hasDeferredApply,
     optionMapper,

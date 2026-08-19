@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
-import { createRef } from "react"
+import { createRef, useState } from "react"
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest"
 
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
@@ -100,6 +100,18 @@ describe("Select", () => {
     await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
     const teaser = screen.getByRole("listbox")
     fireEvent.animationStart(teaser)
+  }
+
+  const getSelectContent = () => {
+    const content = screen
+      .getByRole("listbox")
+      .closest<HTMLElement>("[data-radix-select-content]")
+
+    if (!content) {
+      throw new Error("Select content shell not found")
+    }
+
+    return content
   }
 
   it("renders with placeholder", async () => {
@@ -244,9 +256,9 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    const listbox = screen.getByRole("listbox")
-    expect(listbox.className).toContain("w-max")
-    expect(listbox.className).not.toContain("min-w-80")
+    const content = getSelectContent()
+    expect(content.className).toContain("w-max")
+    expect(content.className).not.toContain("min-w-80")
   })
 
   it("keeps the default 20rem dropdown minimum without fitContentWidth", async () => {
@@ -261,7 +273,7 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    expect(screen.getByRole("listbox").className).toContain("min-w-80")
+    expect(getSelectContent().className).toContain("min-w-80")
   })
 
   it("keeps the field presentation when variant is omitted", () => {
@@ -514,15 +526,25 @@ describe("Select", () => {
     it("selects an option and reports it through onChange", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
-      render(
-        <F0Select
-          variant="inline"
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          onChange={handleChange}
-        />
-      )
+
+      const ControlledInlineSelect = () => {
+        const [value, setValue] = useState("viewer")
+
+        return (
+          <F0Select
+            variant="inline"
+            label="Access level"
+            options={roleOptions}
+            value={value}
+            onChange={(nextValue, originalItem, option) => {
+              handleChange(nextValue, originalItem, option)
+              setValue(nextValue)
+            }}
+          />
+        )
+      }
+
+      render(<ControlledInlineSelect />)
 
       await openSelect(user)
       await user.keyboard("{ArrowUp}{Enter}")
@@ -533,6 +555,7 @@ describe("Select", () => {
           undefined,
           expect.objectContaining({ value: "editor", label: "Editor" })
         )
+        expect(handleChange).toHaveBeenCalledTimes(1)
       })
       await waitFor(() => {
         expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
@@ -542,6 +565,61 @@ describe("Select", () => {
           screen.getByRole("combobox", { name: "Access level" })
         ).getByText("Editor")
       ).toBeInTheDocument()
+    })
+
+    it("restores a controlled value rejected by the parent and allows retrying it", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+
+      await openSelect(user)
+      await user.keyboard("{ArrowUp}{Enter}")
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledTimes(1)
+        expect(handleChange).toHaveBeenLastCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor", label: "Editor" })
+        )
+        expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      })
+
+      await waitFor(() => {
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      })
+      await openSelect(user)
+
+      expect(screen.getByRole("option", { name: /Viewer/ })).toHaveAttribute(
+        "data-state",
+        "checked"
+      )
+      expect(screen.getByRole("option", { name: /Editor/ })).toHaveAttribute(
+        "data-state",
+        "unchecked"
+      )
+
+      await user.keyboard("{ArrowUp}{Enter}")
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledTimes(2)
+        expect(handleChange).toHaveBeenLastCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor", label: "Editor" })
+        )
+        expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      })
     })
 
     it("defaults to content width and honors an explicit popup-width override", async () => {
@@ -557,7 +635,7 @@ describe("Select", () => {
       )
 
       await openSelect(user)
-      expect(screen.getByRole("listbox").className).toContain("w-max")
+      expect(getSelectContent().className).toContain("w-max")
 
       firstRender.unmount()
 
@@ -573,7 +651,7 @@ describe("Select", () => {
       )
 
       await openSelect(user)
-      expect(screen.getByRole("listbox").className).toContain("min-w-80")
+      expect(getSelectContent().className).toContain("min-w-80")
     })
 
     it("reuses the standard popup and option presentation", async () => {
@@ -590,13 +668,13 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const listbox = screen.getByRole("listbox")
+      const content = getSelectContent()
       const option = screen.getByRole("option", { name: /Viewer/ })
       const description = screen.getByText("Can view")
       const indicator = option.querySelector(".text-f1-icon-selected")
 
-      expect(listbox.className).toContain("rounded-md")
-      expect(listbox.className).toContain("shadow-md")
+      expect(content.className).toContain("rounded-md")
+      expect(content.className).toContain("shadow-md")
       expect(option.className).toContain("px-3")
       expect(option.className).toContain("py-2")
       expect(option.className).toContain(
@@ -621,6 +699,7 @@ describe("Select", () => {
           options={roleOptions}
           value="viewer"
           onChange={() => {}}
+          showSearchBox
           actions={[
             {
               label: "Remove access",
@@ -632,9 +711,31 @@ describe("Select", () => {
       )
 
       await openSelect(user)
-      await user.click(screen.getByRole("button", { name: "Remove access" }))
+      const search = screen.getByRole("searchbox")
+      const action = screen.getByRole("button", { name: "Remove access" })
 
-      expect(handleRemove).toHaveBeenCalledOnce()
+      search.focus()
+      await user.tab()
+      expect(document.activeElement).toHaveAttribute("role", "option")
+
+      await user.tab()
+      expect(action).toHaveFocus()
+
+      await user.tab({ shift: true })
+      expect(document.activeElement).toHaveAttribute("role", "option")
+
+      await user.tab({ shift: true })
+      expect(search).toHaveFocus()
+
+      await user.tab()
+      await user.tab()
+      expect(action).toHaveFocus()
+
+      await user.keyboard("{Enter}")
+
+      await waitFor(() => {
+        expect(handleRemove).toHaveBeenCalledOnce()
+      })
     })
 
     it("forwards refs through both trigger variants", () => {

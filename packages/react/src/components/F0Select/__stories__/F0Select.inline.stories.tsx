@@ -179,7 +179,9 @@ export const ViewerSelected: Story = {
 
     await step("Expose the initial combobox state", async () => {
       await expect(trigger).toHaveAttribute("aria-expanded", "false")
-      await expect(canvas.getByText("Viewer")).toBeInTheDocument()
+      await waitFor(() => {
+        expect(canvas.getByText("Viewer")).toBeInTheDocument()
+      })
     })
 
     await step("Open from the keyboard and navigate to Editor", async () => {
@@ -287,9 +289,8 @@ export const Open: Story = {
   args: {
     value: "viewer",
   },
-  // The shared popup currently aria-hides its focusable trigger and places its
-  // footer inside the listbox root. Keep axe running and surface that existing
-  // aria-hidden-focus / aria-required-children debt as non-blocking.
+  // The shared popup currently aria-hides its focusable trigger. Keep axe
+  // running and surface that existing aria-hidden-focus debt as non-blocking.
   parameters: {
     a11y: { test: "todo" },
   },

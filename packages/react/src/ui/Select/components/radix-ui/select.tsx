@@ -902,8 +902,7 @@ const SelectContentImpl = React.forwardRef<
             onDismiss={() => context.onOpenChange(false)}
           >
             <SelectPosition
-              role="listbox"
-              id={context.contentId}
+              data-radix-select-content=""
               data-state={context.open ? "open" : "closed"}
               dir={context.dir}
               onContextMenu={(event) => event.preventDefault()}
@@ -966,6 +965,36 @@ const SelectContentImpl = React.forwardRef<
 })
 
 SelectContentImpl.displayName = CONTENT_IMPL_NAME
+
+/* -------------------------------------------------------------------------------------------------
+ * SelectListbox
+ * -----------------------------------------------------------------------------------------------*/
+
+const LISTBOX_NAME = "SelectListbox"
+
+type SelectListboxElement = React.ElementRef<typeof Primitive.div>
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface SelectListboxProps extends PrimitiveDivProps {}
+
+const SelectListbox = React.forwardRef<
+  SelectListboxElement,
+  SelectListboxProps
+>((props: ScopedProps<SelectListboxProps>, forwardedRef) => {
+  const { __scopeSelect, ...listboxProps } = props
+  const context = useSelectContext(LISTBOX_NAME, __scopeSelect)
+
+  return (
+    <Primitive.div
+      {...listboxProps}
+      ref={forwardedRef}
+      role="listbox"
+      id={context.contentId}
+      aria-multiselectable={context.multiple || undefined}
+    />
+  )
+})
+
+SelectListbox.displayName = LISTBOX_NAME
 
 /* -------------------------------------------------------------------------------------------------
  * SelectItemAlignedPosition
@@ -2106,6 +2135,7 @@ const Value = SelectValue
 const Icon = SelectIcon
 const Portal = SelectPortal
 const Content = SelectContent
+const Listbox = SelectListbox
 const Viewport = SelectViewport
 const Group = SelectGroup
 const Label = SelectLabel
@@ -2127,6 +2157,7 @@ export {
   ItemIndicator,
   ItemText,
   Label,
+  Listbox,
   Portal,
   //
   Root,
@@ -2142,6 +2173,7 @@ export {
   SelectItemIndicator,
   SelectItemText,
   SelectLabel,
+  SelectListbox,
   SelectPortal,
   SelectScrollDownButton,
   SelectScrollUpButton,
@@ -2163,6 +2195,7 @@ export type {
   SelectItemProps,
   SelectItemTextProps,
   SelectLabelProps,
+  SelectListboxProps,
   SelectPortalProps,
   SelectProps,
   SelectScrollDownButtonProps,
