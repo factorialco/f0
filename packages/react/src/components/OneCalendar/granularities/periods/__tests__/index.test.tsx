@@ -1,6 +1,7 @@
 import { endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it } from "vitest"
 
+import { getGranularityDefinitions } from "../../index"
 import { createPeriodsGranularity, periodsGranularity } from "../index"
 import { DatePeriod } from "../types"
 
@@ -190,6 +191,33 @@ describe("periodsGranularity", () => {
       const bounds = granularity.getViewDateBounds?.()
       expect(bounds?.min?.getFullYear()).toBe(2026)
       expect(bounds?.max?.getFullYear()).toBe(2026)
+    })
+  })
+
+  // Consumers pass `periods` as an inline literal, so a fresh object arrives on
+  // every render. The definition must stay identical or every memo and effect
+  // keyed on it re-runs.
+  describe("definition identity", () => {
+    it("reuses the definition for equal periods from different objects", () => {
+      const first = getGranularityDefinitions({
+        periods: { label: "Payroll", periods: [...periods] },
+      })
+      const second = getGranularityDefinitions({
+        periods: { label: "Payroll", periods: [...periods] },
+      })
+
+      expect(first.periods).toBe(second.periods)
+    })
+
+    it("rebuilds the definition when the periods change", () => {
+      const before = getGranularityDefinitions({
+        periods: { label: "Payroll", periods },
+      })
+      const after = getGranularityDefinitions({
+        periods: { label: "Payroll", periods: periods.slice(1) },
+      })
+
+      expect(before.periods).not.toBe(after.periods)
     })
   })
 

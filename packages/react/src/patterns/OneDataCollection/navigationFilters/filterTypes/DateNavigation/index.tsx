@@ -37,10 +37,9 @@ const dateNavigatorFilter: NavigationFilter<
       return value
     }
 
-    const granularityDefinition = getGranularityDefinitions(
-      undefined,
-      filterDef.periods
-    )[granularity]
+    const granularityDefinition = getGranularityDefinitions({
+      periods: filterDef.periods,
+    })[granularity]
     return {
       value: granularityDefinition.toRange(value),
       valueString: granularityDefinition.toString(value, i18n),

@@ -75,10 +75,10 @@ function _OneDateNavigator({
 
   const granularityDefinition = useMemo(() => {
     const granularityKey = localValue?.granularity ?? "day"
-    const definitions = getGranularityDefinitions(
-      effectiveWeekStartsOn,
-      periods
-    )
+    const definitions = getGranularityDefinitions({
+      weekStartsOn: effectiveWeekStartsOn,
+      periods,
+    })
     return definitions[granularityKey]
   }, [localValue?.granularity, effectiveWeekStartsOn, periods])
 

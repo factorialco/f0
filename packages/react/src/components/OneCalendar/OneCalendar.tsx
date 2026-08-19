@@ -28,7 +28,7 @@ import {
   CalendarHeaderDropdowns,
   getYearBounds,
 } from "./components/CalendarHeaderDropdowns"
-import { isActiveDate, toDateRange } from "./utils"
+import { earliestDate, isActiveDate, latestDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
 
@@ -122,10 +122,10 @@ const OneCalendarInternal = ({
   const [motionDirection, setMotionDirection] = useState(1)
 
   const granularity = useMemo(() => {
-    const definitions = getGranularityDefinitions(
-      effectiveWeekStartsOn,
-      periods
-    )
+    const definitions = getGranularityDefinitions({
+      weekStartsOn: effectiveWeekStartsOn,
+      periods,
+    })
     return definitions[view]
   }, [view, effectiveWeekStartsOn, periods])
 
@@ -173,11 +173,8 @@ const OneCalendarInternal = ({
   // header to the years it can actually show, so the dropdown never offers a
   // year with nothing in it. Consumer bounds still apply on top.
   const viewDateBounds = granularity.getViewDateBounds?.()
-  const laterOf = (a?: Date, b?: Date) => (a && b ? (a > b ? a : b) : (a ?? b))
-  const earlierOf = (a?: Date, b?: Date) =>
-    a && b ? (a < b ? a : b) : (a ?? b)
-  const headerMinDate = laterOf(minDate, viewDateBounds?.min)
-  const headerMaxDate = earlierOf(maxDate, viewDateBounds?.max)
+  const headerMinDate = latestDate(minDate, viewDateBounds?.min)
+  const headerMaxDate = earliestDate(maxDate, viewDateBounds?.max)
 
   // Views with header dropdowns clamp arrow navigation to the year dropdown's
   // range, so the view can never land on a year the dropdown can't display.

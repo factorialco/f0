@@ -30,6 +30,10 @@ export interface GranularityDefinition {
   calendarView: CalendarView
   // Week starts on day (only used by week granularity)
   weekStartsOn?: WeekStartsOn
+  // Names this granularity in the granularity selector. Data-driven
+  // granularities carry a consumer-supplied name; the rest fall back to the
+  // i18n label for their key
+  selectorLabel?: string
   // Hides the date input: the view owns the full set of selectable values, so
   // there is nothing to type
   hideDateInput?: boolean

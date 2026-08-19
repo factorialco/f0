@@ -127,16 +127,24 @@ export function DatePickerPopup({
     [localValue?.granularity]
   )
 
-  const granularityDefinition = useMemo(() => {
-    const definitions = getGranularityDefinitions(
-      effectiveWeekStartsOn,
-      periods
-    )
-    return definitions[localGranularity]
-  }, [localGranularity, effectiveWeekStartsOn, periods])
+  const definitions = useMemo(
+    () =>
+      getGranularityDefinitions({
+        weekStartsOn: effectiveWeekStartsOn,
+        periods,
+      }),
+    [effectiveWeekStartsOn, periods]
+  )
+
+  const granularityDefinition = useMemo(
+    () => definitions[localGranularity],
+    [definitions, localGranularity]
+  )
 
   // Supplying periods is what makes them selectable; listing the key in
-  // `granularities` only controls where the entry sits in the selector.
+  // `granularities` only controls where the entry sits in the selector. Tying
+  // the entry to the data means the selector can never offer a periods entry
+  // with nothing behind it.
   const granularityOptions = useMemo(
     () =>
       periods && !granularities.includes("periods")
@@ -171,12 +179,8 @@ export function DatePickerPopup({
     const selectedPreset = presetId ? presets[+presetId] : undefined
     if (!selectedPreset) return
 
-    const presetDefinitions = getGranularityDefinitions(
-      effectiveWeekStartsOn,
-      periods
-    )
     handleSelect({
-      value: presetDefinitions[selectedPreset.granularity].toRange(
+      value: definitions[selectedPreset.granularity].toRange(
         typeof selectedPreset.value === "function"
           ? selectedPreset.value()
           : selectedPreset.value
@@ -323,7 +327,7 @@ export function DatePickerPopup({
                     granularities={granularityOptions}
                     value={localGranularity}
                     onChange={handleSelectGranularity}
-                    periodsLabel={periods?.label}
+                    definitions={definitions}
                   />
                 )}
               </div>

@@ -20,10 +20,9 @@ export function DateNavigation({
     ? options.granularity
     : [options.granularity]
 
-  const granularityDefinition = getGranularityDefinitions(
-    undefined,
-    options.periods
-  )[value?.granularity || availableGranularities[0]]
+  const granularityDefinition = getGranularityDefinitions({
+    periods: options.periods,
+  })[value?.granularity || availableGranularities[0]]
 
   const handleChange = (newDateRange: DatePickerValue | undefined) => {
     if (!newDateRange || !newDateRange.value) {

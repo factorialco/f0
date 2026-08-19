@@ -4,6 +4,7 @@ import { addDays } from "date-fns"
 import { granularityDefinitions } from "@/components/OneCalendar/granularities/index"
 
 import { ExampleComponent } from "../mockData"
+import { payrollPeriods } from "@/lib/storybook-utils/payrollPeriods"
 
 const meta = {
   title: "Data Collection/Navigation Filters",
@@ -127,20 +128,6 @@ export const MultipleGranularities: Story = {
   },
 }
 
-// Payroll cycles: labelled by month, but each one runs from the 25th of the
-// previous month to the 24th of its own. Two years, so the header's year
-// dropdown and arrows have somewhere to go.
-const payrollPeriods = [2025, 2026].flatMap((year) =>
-  Array.from({ length: 12 }, (_, month) => ({
-    label: new Intl.DateTimeFormat("en-US", {
-      month: "long",
-      year: "numeric",
-    }).format(new Date(year, month, 1)),
-    from: new Date(year, month - 1, 25),
-    to: new Date(year, month, 24),
-  }))
-)
-
 export const WithPeriods: Story = {
   args: {
     navigationFilters: {
@@ -152,7 +139,7 @@ export const WithPeriods: Story = {
         periods: {
           label: "Payroll",
           header: "Spain — Iberia Workforce SL",
-          periods: payrollPeriods,
+          periods: payrollPeriods([2025, 2026]),
         },
       },
     },

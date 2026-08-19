@@ -75,6 +75,7 @@ export const createPeriodsGranularity = (
 
   return {
     calendarView: "periods",
+    selectorLabel: definition.label,
     hideDateInput: true,
     getViewDateBounds: () => {
       const first = periods.at(0)
