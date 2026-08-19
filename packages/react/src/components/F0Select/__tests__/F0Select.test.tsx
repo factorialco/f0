@@ -964,7 +964,7 @@ describe("Select", () => {
         expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
       })
 
-      it("is not wired at all when nothing is selected", () => {
+      it("stays wired when nothing is selected", () => {
         render(
           <F0Select
             {...defaultSelectProps}
@@ -974,8 +974,11 @@ describe("Select", () => {
           />
         )
 
-        // Nothing selected, nothing to explain.
-        expect(tooltipWrapper()).toBeNull()
+        // Wired but silent: nothing selected means nothing to explain, and an
+        // empty tooltip never opens (`Tooltip.emptyContent.test.tsx`). Dropping
+        // the wiring instead would change the element type above the trigger and
+        // remount it (`F0Select.triggerIdentity.test.tsx`).
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
       })
     })
   })

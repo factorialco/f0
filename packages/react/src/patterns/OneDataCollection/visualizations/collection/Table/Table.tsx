@@ -34,6 +34,7 @@ import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPa
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
+import { tableCellContentClassName } from "@/ui/value-display/const"
 
 import type {
   TableCustomizationProps,
@@ -988,7 +989,8 @@ export const TableCollection = <
                             <div
                               className={cn(
                                 column.align === "right" ? "justify-end" : "",
-                                "flex"
+                                "flex",
+                                tableCellContentClassName
                               )}
                             >
                               {(() => {

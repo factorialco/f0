@@ -1,5 +1,33 @@
 # Changelog
 
+## [6.38.1](https://github.com/factorialco/f0/compare/f0-react-v6.38.0...f0-react-v6.38.1) (2026-08-19)
+
+
+### Performance Improvements
+
+* **storybook:** shrink the 45MB sample video and guard against regressions ([#5165](https://github.com/factorialco/f0/issues/5165)) ([9b63bf3](https://github.com/factorialco/f0/commit/9b63bf328daa97187a9074cab7ce9b0c79e414fa))
+
+## [6.38.0](https://github.com/factorialco/f0/compare/f0-react-v6.37.2...f0-react-v6.38.0) (2026-08-18)
+
+
+### Features
+
+* **NewHomeLayout:** add rail actions to collapsed widget glyphs ([#5159](https://github.com/factorialco/f0/issues/5159)) ([569e698](https://github.com/factorialco/f0/commit/569e698f6ed4fbe334028d013d4ad07395ce4298))
+
+## [6.37.2](https://github.com/factorialco/f0/compare/f0-react-v6.37.1...f0-react-v6.37.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** center table cell content in a 24px band ([#5154](https://github.com/factorialco/f0/issues/5154)) ([bc06d99](https://github.com/factorialco/f0/commit/bc06d99a47a24d9bc30284350b6f7767b6ca99f7))
+
+## [6.37.1](https://github.com/factorialco/f0/compare/f0-react-v6.37.0...f0-react-v6.37.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **F0Select:** keep one trigger node across selection changes ([#5152](https://github.com/factorialco/f0/issues/5152)) ([abb61b7](https://github.com/factorialco/f0/commit/abb61b7db849cde8447aa2593347ca5456700fe5))
+
 ## [6.37.0](https://github.com/factorialco/f0/compare/f0-react-v6.36.0...f0-react-v6.37.0) (2026-08-18)
 
 

@@ -24,6 +24,7 @@ import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
+import { tableCellContentClassName } from "@/ui/value-display/const"
 
 import type {
   CellRendererProps,
@@ -361,7 +362,8 @@ const RowComponentInner = <
           <div
             className={cn(
               column.align === "right" ? "justify-end" : "",
-              "flex"
+              "flex",
+              tableCellContentClassName
             )}
           >
             {renderCell(item, column)}
