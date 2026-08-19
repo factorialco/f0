@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { DataSource, PaginationInfo } from "../types"
+import { DataSource, PaginationInfo, SelectedItemsState } from "../types"
 import { Data, GROUP_ID_SYMBOL } from "../useData"
 import { useSelectable } from "../useSelectable/useSelectable"
 
@@ -1428,6 +1428,134 @@ describe("useSelectable", () => {
         expect(count).toBeGreaterThanOrEqual(0)
         expect(count).toBe(2)
       })
+    })
+  })
+
+  // Regression: pre-selected value stuck unchecked when its option row loads
+  // before the (async) controlled value resolves. Mirrors F0Select's config
+  // (allPagesSelection + infinite-scroll + additive multi-select). The options
+  // page is added to `data` first — so the pre-selected on-page item is seeded
+  // as checked:false — and only then does the external `selectedState` arrive
+  // marking it checked:true. The additive merge used to ignore that, leaving
+  // the item unchecked (selector shows one fewer than are actually selected).
+  describe("pre-selected value arriving after its option row", () => {
+    const makeData = (ids: number[]): Data<TestRecord> => {
+      const records = ids.map((id) => ({
+        id,
+        name: `Item ${id}`,
+        group: "group1",
+        [GROUP_ID_SYMBOL]: undefined,
+      }))
+      return {
+        type: "flat",
+        records,
+        groups: [
+          { key: "all", label: "All", records, itemCount: records.length },
+        ],
+      }
+    }
+
+    const cursorInfo: PaginationInfo = {
+      type: "infinite-scroll",
+      total: 100,
+      perPage: 25,
+      cursor: "0",
+      hasNextPage: true,
+    }
+
+    const externalValue = (ids: number[]): SelectedItemsState<TestRecord> => ({
+      allSelected: false,
+      items: new Map(ids.map((id) => [id, { id, checked: true }])),
+      groups: new Map(),
+    })
+
+    it("keeps every externally-selected id checked, even the one already on the page", async () => {
+      const emptyData = makeData([])
+      // 42 is on the loaded page; 51 and 38 are off-page (not in records).
+      const pageData = makeData([42, 1, 2, 3])
+
+      const { result, rerender } = renderHook(
+        ({ data, selectedState }) =>
+          useSelectable({
+            data,
+            paginationInfo: cursorInfo,
+            source: mockSource,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+            allPagesSelection: true,
+            resetOnPageChange: false,
+            preserveSelectionOnDatasetChange: true,
+            selectedState,
+          }),
+        {
+          initialProps: {
+            data: emptyData,
+            selectedState: undefined as
+              | SelectedItemsState<TestRecord>
+              | undefined,
+          },
+        }
+      )
+
+      // 1) Options page loads while the value is still unresolved.
+      rerender({ data: pageData, selectedState: undefined })
+      // 2) The controlled value resolves, selecting all three assignees.
+      rerender({ data: pageData, selectedState: externalValue([42, 51, 38]) })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(3)
+      })
+      expect(result.current.selectedItems.has(42)).toBe(true)
+      expect(result.current.selectedItems.has(51)).toBe(true)
+      expect(result.current.selectedItems.has(38)).toBe(true)
+      expect([...result.current.selectionStatus.selectedIds].sort()).toEqual([
+        38, 42, 51,
+      ])
+    })
+
+    it("does not override a local selection the external value omits (stays additive)", async () => {
+      const pageData = makeData([7, 8, 9])
+
+      const { result, rerender } = renderHook(
+        ({ selectedState }) =>
+          useSelectable({
+            data: pageData,
+            paginationInfo: cursorInfo,
+            source: mockSource,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+            allPagesSelection: true,
+            resetOnPageChange: false,
+            preserveSelectionOnDatasetChange: true,
+            selectedState,
+          }),
+        {
+          initialProps: {
+            selectedState: externalValue([7]),
+          },
+        }
+      )
+
+      await waitFor(() =>
+        expect(result.current.selectedItems.has(7)).toBe(true)
+      )
+
+      // User adds 8 locally (not yet reflected in the external value).
+      act(() => {
+        result.current.handleSelectItemChange(pageData.records[1], true)
+      })
+      await waitFor(() =>
+        expect(result.current.selectedItems.has(8)).toBe(true)
+      )
+
+      // External value updates to a different id set that omits 8; the merge
+      // must not silently drop the still-pending local selection.
+      rerender({ selectedState: externalValue([7, 9]) })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.has(9)).toBe(true)
+      })
+      expect(result.current.selectedItems.has(8)).toBe(true)
     })
   })
 })
