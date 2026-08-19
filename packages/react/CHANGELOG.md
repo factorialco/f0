@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.42.2](https://github.com/factorialco/f0/compare/f0-react-v6.42.1...f0-react-v6.42.2) (2026-08-19)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** make the all-items-selected label visible on the dark action bar ([#5180](https://github.com/factorialco/f0/issues/5180)) ([2091615](https://github.com/factorialco/f0/commit/2091615b3c8b66a0322753f25b2624c0bc2766a9))
+
 ## [6.42.1](https://github.com/factorialco/f0/compare/f0-react-v6.42.0...f0-react-v6.42.1) (2026-08-19)
 
 
