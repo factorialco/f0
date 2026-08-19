@@ -39,6 +39,19 @@ export const findPeriodIndex = (
   return period ? periods.indexOf(period) : -1
 }
 
+/**
+ * The year a period is filed under in the view. Consumer periods are labelled
+ * by where they end — a "January 2026" payroll cycle runs from 25 Dec 2025 —
+ * so the end date, not the start, decides the year.
+ */
+export const periodYear = (period: DatePeriod): number =>
+  period.to.getFullYear()
+
+export const periodsOfYear = (
+  periods: DatePeriod[],
+  year: number
+): DatePeriod[] => periods.filter((period) => periodYear(period) === year)
+
 export const formatPeriodRange = (
   period: DatePeriod,
   locale = "en-US"

@@ -128,15 +128,18 @@ export const MultipleGranularities: Story = {
 }
 
 // Payroll cycles: labelled by month, but each one runs from the 25th of the
-// previous month to the 24th of its own.
-const payrollPeriods = Array.from({ length: 12 }, (_, month) => ({
-  label: new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    year: "numeric",
-  }).format(new Date(2025, month, 1)),
-  from: new Date(2024, month + 11, 25),
-  to: new Date(2025, month, 24),
-}))
+// previous month to the 24th of its own. Two years, so the header's year
+// dropdown and arrows have somewhere to go.
+const payrollPeriods = [2025, 2026].flatMap((year) =>
+  Array.from({ length: 12 }, (_, month) => ({
+    label: new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric",
+    }).format(new Date(year, month, 1)),
+    from: new Date(year, month - 1, 25),
+    to: new Date(year, month, 24),
+  }))
+)
 
 export const WithPeriods: Story = {
   args: {

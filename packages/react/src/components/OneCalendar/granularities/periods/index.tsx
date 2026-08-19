@@ -1,4 +1,4 @@
-import { endOfDay, parse, startOfDay } from "date-fns"
+import { addYears, endOfDay, parse, startOfDay } from "date-fns"
 
 import { DateRange, DateRangeComplete } from "../../types"
 import {
@@ -75,7 +75,15 @@ export const createPeriodsGranularity = (
 
   return {
     calendarView: "periods",
-    hideViewControls: true,
+    hideDateInput: true,
+    getViewDateBounds: () => {
+      const first = periods.at(0)
+      const last = periods.at(-1)
+      if (!first || !last) {
+        return undefined
+      }
+      return { min: endOfDay(first.to), max: endOfDay(last.to) }
+    },
     add: (date, delta) => shift(date, delta) ?? date,
     getPrevNext: (value, options) => {
       const index = findPeriodIndex(periods, value)
@@ -130,14 +138,19 @@ export const createPeriodsGranularity = (
       return toPeriodsGranularityDateRange(parsed, periods)
     },
     navigate: (date, direction) => shift(date, direction)?.from ?? date,
-    navigateUIView: (viewDate) => viewDate,
-    label: () => definition.header ?? "",
+    navigateUIView: (viewDate, direction) => addYears(viewDate, direction),
+    label: (viewDate) => String(viewDate.getFullYear()),
+    // The view files a period under the year it ends in, so the view date has
+    // to land in that year too — a January cycle starting 25 Dec must not send
+    // the view back to the previous year.
     getViewDateFromDate: (date) =>
-      toPeriodsGranularityDateRange(date, periods)?.from ?? date,
+      toPeriodsGranularityDateRange(date, periods)?.to ?? date,
     render: (renderProps) => (
       <PeriodsView
         periods={periods}
         header={definition.header}
+        year={renderProps.viewDate.getFullYear()}
+        motionDirection={renderProps.motionDirection}
         selected={renderProps.selected}
         onSelect={renderProps.onSelect}
         minDate={renderProps.minDate}

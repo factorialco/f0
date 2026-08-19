@@ -170,6 +170,29 @@ describe("periodsGranularity", () => {
     })
   })
 
+  describe("view date", () => {
+    it("files a period under the year it ends in", () => {
+      // The January cycle starts on 25 Dec 2025 but belongs to 2026
+      const viewDate = granularity.getViewDateFromDate(new Date(2025, 11, 28))
+      expect(viewDate.getFullYear()).toBe(2026)
+    })
+
+    it("moves the view a year at a time", () => {
+      expect(
+        granularity.navigateUIView(new Date(2026, 5, 1), 1).getFullYear()
+      ).toBe(2027)
+      expect(
+        granularity.navigateUIView(new Date(2026, 5, 1), -1).getFullYear()
+      ).toBe(2025)
+    })
+
+    it("bounds the view to the years the periods cover", () => {
+      const bounds = granularity.getViewDateBounds?.()
+      expect(bounds?.min?.getFullYear()).toBe(2026)
+      expect(bounds?.max?.getFullYear()).toBe(2026)
+    })
+  })
+
   describe("without periods", () => {
     it("falls back to the date's own range", () => {
       const date = new Date(2026, 0, 10)

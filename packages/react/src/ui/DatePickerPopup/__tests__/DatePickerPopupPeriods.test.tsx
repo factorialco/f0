@@ -12,6 +12,11 @@ const periods = {
   header: "Spain — Iberia Workforce SL",
   periods: [
     {
+      label: "December 2025",
+      from: new Date(2025, 10, 25),
+      to: new Date(2025, 11, 24),
+    },
+    {
       label: "January 2026",
       from: new Date(2025, 11, 25),
       to: new Date(2026, 0, 24),
@@ -88,11 +93,25 @@ describe("DatePickerPopup with periods", () => {
     })
   })
 
-  it("hides the calendar navigation and input in the periods view", async () => {
+  it("pages the list by year and hides the date input", async () => {
     await openPeriods()
 
     await screen.findByText("January 2026")
-    expect(screen.queryByRole("button", { name: "Previous" })).toBeNull()
+    expect(screen.getByRole("button", { name: "Previous" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument()
     expect(screen.queryByRole("textbox")).toBeNull()
+  })
+
+  it("only lists the periods of the year in view", async () => {
+    const { user } = await openPeriods()
+
+    await screen.findByText("January 2026")
+    // The 2026 cycles start on 25 Dec 2025 but belong to the year they end in
+    expect(screen.queryByText("December 2025")).toBeNull()
+
+    await user.click(screen.getByRole("button", { name: "Previous" }))
+
+    expect(await screen.findByText("December 2025")).toBeInTheDocument()
+    expect(screen.queryByText("January 2026")).toBeNull()
   })
 })
