@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC, Fragment } from "react"
 
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
@@ -44,18 +44,18 @@ const _OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
         </div>
         <div className="flex w-full flex-col rounded-xl border border-solid border-f1-border">
           {steps.map((step, index) => (
-            <>
+            <Fragment key={step.title}>
               <ApprovalStep
-                key={step.title}
                 title={step.title}
                 approvalsRequired={step.approvalsRequired}
                 status={step.status}
                 approvers={step.approvers}
+                approvalDate={step.approvalDate}
               />
               {index !== steps.length - 1 && (
                 <div className="h-px w-full bg-f1-border-secondary" />
               )}
-            </>
+            </Fragment>
           ))}
         </div>
       </div>

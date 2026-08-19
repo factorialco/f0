@@ -160,12 +160,12 @@ export function TableCell({
         // The row hover keeps reading through the highlighted cell, so a hovered
         // row stays one uniform surface.
         highlighted &&
-          "bg-f1-background-secondary group-hover:bg-f1-background-hover",
+          "bg-[hsl(var(--neutral-2))] group-hover:bg-f1-background-hover",
         // Sticky cells paint their opaque background on the `before` layer;
         // the highlighted tint has to land there too or it stays hidden under it.
         highlighted &&
           isSticky &&
-          "before:bg-f1-background-secondary group-hover:before:bg-f1-background-hover",
+          "before:bg-[hsl(var(--neutral-2))] group-hover:before:bg-f1-background-hover",
         href && "cursor-pointer",
         className
       )}

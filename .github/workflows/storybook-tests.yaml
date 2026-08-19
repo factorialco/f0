@@ -9,27 +9,41 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  # Number of machines the ~2.3k stories are split across. MUST match the length
+  # of `strategy.matrix.shard` below — GitHub can't derive one from the other, so
+  # they are kept in sync by hand.
+  #
+  # 8 is about the end of the useful range. Every shard pays the same ~4.3min of
+  # fixed cost before it runs a single story (~90s install + ~40s Playwright +
+  # ~170s Storybook build), and at 8 shards the test step is already down to
+  # ~2min — so past here the build, not the tests, is what the job waits on.
+  # Measured at 4 shards: 236/245/277/172s of test time.
+  SHARD_TOTAL: 8
+
 jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
   test:
     needs: detect-changes
-    name: "[⚛️ REACT] Storybook Tests"
+    name: "[⚛️ REACT] Storybook Tests (${{ matrix.shard }}/8)"
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    strategy:
+      # Every shard should report — a failure in one is not a reason to hide the
+      # results (or the a11y debt) found by the others.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Full history so the a11y comment can diff changed files vs main.
-          fetch-depth: 0
       - uses: ./.github/actions/setup-node-pnpm
       - name: Get Playwright version
         id: playwright-version
@@ -41,42 +55,133 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
+          # `-chromium` in the key: the cache now holds only the one browser we
+          # launch, so it must not restore an older all-browsers entry.
+          key: playwright-chromium-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
           restore-keys: |
-            playwright-browsers-${{ steps.playwright-version.outputs.version }}-
-            playwright-browsers-
+            playwright-chromium-${{ steps.playwright-version.outputs.version }}-
+            playwright-chromium-
+      # Chromium only. The test-runner never launches anything else (TEST_BROWSERS
+      # is unset, so it defaults to chromium), but a bare `install --with-deps`
+      # apt-installs the WebKit and Firefox system libraries too — the gstreamer
+      # /fluidsynth/rav1e pile. That apt step runs even on a browser-cache hit
+      # and was the least predictable part of the job, measured between 27s and
+      # 121s across the 8 shards of run 32146702636.
       - name: Install Playwright
         run: |
-          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps
+          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps chromium
       - name: Build Storybook
         run: |
           pnpm --filter @factorialco/f0-core build
           pnpm --filter @factorialco/f0-react run build-storybook --quiet
 
+      # `--shard` is forwarded to Jest, which splits by *test file* (one file per
+      # CSF module) using a hash of the file path — so shards get an even file
+      # *count*, not an even duration. The heaviest single suite is ~50s, which
+      # is the floor on how balanced this can get; at 8 shards that outlier is a
+      # visible fraction of a ~2min shard. Balancing by measured duration would
+      # need a custom Jest testSequencer.
       - name: Serve Storybook and run tests
         id: run_tests
-        env:
-          DEBUG: vite
-          VITEST_LOG_LEVEL: debug
         run: |
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
              "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
-             "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook"
+             "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook --shard=${{ matrix.shard }}/${{ env.SHARD_TOTAL }}"
 
-      # Turn the a11y violations captured during the run into a PR comment,
-      # scoped to the stories/components this PR changed. Runs whenever the
-      # tests actually executed (pass or fail — enforced failures still count),
-      # but not when Storybook failed to build (run_tests skipped).
+      # Each shard only sees the stories it ran, so the JSONL is partial. The
+      # a11y-comment job below stitches the shards back together.
+      - name: Upload a11y violations
+        if: always() && steps.run_tests.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-violations-${{ matrix.shard }}
+          path: packages/react/a11y-violations.jsonl
+          if-no-files-found: ignore
+          retention-days: 1
+
+  # Single job to gate the branch on, so protection rules do not have to list
+  # every shard, and does not need editing when SHARD_TOTAL changes. Named to
+  # match the "✅ …" gate every other PR workflow now exposes.
+  #
+  # `if: always()` is load-bearing. Without it a failing shard makes this job
+  # *skipped* rather than *failed*, and a skipped check is not a red check — the
+  # gate would silently pass. So it always runs and inspects the results itself.
+  #
+  # `skipped` is deliberately accepted: detect-changes legitimately skips the
+  # whole matrix when the react package is untouched. Only failure/cancellation
+  # is fatal. a11y-comment is intentionally *not* gated on — it is a best-effort
+  # PR comment and is not worth blocking a merge over.
+  storybook-tests-passed:
+    needs: [detect-changes, test]
+    name: "✅ Storybook Tests"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every shard passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Dependency results: $RESULTS"
+          if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ]; then
+            echo "::error::At least one Storybook Tests shard failed."
+            exit 1
+          fi
+          if [ "${{ contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "::error::At least one Storybook Tests shard was cancelled."
+            exit 1
+          fi
+          echo "All Storybook Tests shards passed (or were skipped)."
+
+  # Turn the a11y violations captured across all shards into a single PR
+  # comment, scoped to the stories/components this PR changed. Runs whenever the
+  # tests actually executed (pass or fail — enforced failures still count), but
+  # not when the test job was skipped entirely.
+  a11y-comment:
+    needs: [detect-changes, test]
+    name: "[⚛️ REACT] a11y PR comment"
+    if: >
+      always() && needs.test.result != 'skipped' &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the a11y comment can diff changed files vs main.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      # No `merge-multiple` — every shard names its file `a11y-violations.jsonl`,
+      # so merging would have them overwrite each other. Downloading into
+      # per-artifact subdirectories keeps all four, and `cat` concatenates them
+      # (the format is one self-contained JSON object per line).
+      - name: Download a11y violations from all shards
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: a11y-violations-*
+          path: /tmp/a11y-shards
+      - name: Merge shard artifacts
+        run: |
+          shopt -s nullglob
+          files=(/tmp/a11y-shards/*/a11y-violations.jsonl)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No a11y violation artifacts found — nothing to report."
+            exit 0
+          fi
+          cat "${files[@]}" > packages/react/a11y-violations.jsonl
+          echo "Merged ${#files[@]} shard(s), $(wc -l < packages/react/a11y-violations.jsonl) violating stories."
       - name: Build a11y comment for changed components
         id: a11y_comment
-        if: >
-          always() && steps.run_tests.outcome != 'skipped' &&
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
         continue-on-error: true
         run: |
+          [ -f packages/react/a11y-violations.jsonl ] || exit 0
           git fetch origin main --quiet || true
-          pnpm --filter @factorialco/f0-react exec tsx .scripts/check-a11y-comment.ts \
+          npx --yes tsx@4 packages/react/.scripts/check-a11y-comment.ts \
             --compare-commit origin/main > /tmp/a11y-output.txt 2>&1 || true
           LAST_JSON_LINE=$(grep -n '^{' /tmp/a11y-output.txt | tail -n 1 | cut -d: -f1)
           if [ -n "$LAST_JSON_LINE" ]; then
@@ -89,10 +194,7 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
       - name: Post a11y PR comment
-        if: >
-          always() && steps.a11y_comment.outputs.body != '' &&
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
+        if: always() && steps.a11y_comment.outputs.body != ''
         continue-on-error: true
         uses: ./.github/actions/add-or-update-pr-comment
         with:

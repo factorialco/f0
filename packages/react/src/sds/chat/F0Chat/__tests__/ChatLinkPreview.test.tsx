@@ -5,6 +5,7 @@ import { zeroRender as render, screen } from "@/testing/test-utils"
 import { ChatBubble } from "../components/ChatBubble"
 import { ChatLinkPreview } from "../components/ChatLinkPreview"
 import { type F0ChatMessage } from "../types"
+import { messageSurfaceColorClass } from "../utils/sender-color"
 
 const PREVIEW = {
   url: "https://www.example.com/some/article",
@@ -139,5 +140,54 @@ describe("ChatBubble link previews", () => {
   it("shows no card when the message has no linkPreviews", () => {
     render(<ChatBubble message={makeMessage("plain text")} isMine={false} />)
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
+  })
+
+  it("keeps incoming link previews on a neutral grey surface", () => {
+    const message = {
+      ...makeMessage("https://www.example.com/some/article"),
+      author: {
+        id: "other",
+        name: "María José",
+        avatarColor: "orange" as const,
+      },
+      linkPreviews: [PREVIEW],
+    }
+    render(<ChatBubble message={message} isMine={false} />)
+
+    const previewCard = screen
+      .getAllByRole("link")
+      .find((link) => link.textContent?.includes("An interesting article"))
+    const inlineLink = screen
+      .getAllByRole("link")
+      .find((link) => link !== previewCard)
+    const senderSurface = messageSurfaceColorClass(message.author, false)
+
+    expect(previewCard).toHaveClass(
+      "bg-f1-background-secondary",
+      "hover:ring-1"
+    )
+    expect(previewCard).not.toHaveClass(senderSurface)
+    expect(inlineLink?.closest(".rounded-2xl")).toHaveClass(senderSurface)
+    expect(previewCard).not.toHaveClass(
+      "hover:bg-f1-background-secondary",
+      "hover:opacity-90"
+    )
+    expect(screen.getByAltText("")).toHaveClass("bg-f1-background-secondary")
+  })
+
+  it("keeps my link preview on the neutral nested surface", () => {
+    const message = {
+      ...makeMessage("https://www.example.com/some/article"),
+      author: { id: "me", name: "Me" },
+      isMine: true,
+      linkPreviews: [PREVIEW],
+    }
+    render(<ChatBubble message={message} isMine />)
+
+    const previewCard = screen
+      .getAllByRole("link")
+      .find((link) => link.textContent?.includes("An interesting article"))
+
+    expect(previewCard).toHaveClass("bg-f1-background-secondary")
   })
 })

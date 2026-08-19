@@ -23,6 +23,11 @@ export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
     icon?: React.ComponentType
+    /**
+     * Render this series dashed where the chart draws it as a line, e.g. for
+     * projected or planned series. Ignored by bar-only series.
+     */
+    dashed?: boolean
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }

@@ -62,6 +62,7 @@ export const GraphCollection = <
   nodeTagTypes,
   defaultVisibleTagTypes,
   pinnedTagTypes,
+  lockedTagTypes,
   currentUserNodeId,
   getNodeId,
   getChildrenCount,
@@ -200,6 +201,9 @@ export const GraphCollection = <
   const allTagTypes = nodeTagTypes ? [...nodeTagTypes] : []
   const defaultVisibleSet = new Set(defaultVisibleTagTypes ?? allTagTypes)
   const pinnedSet = new Set<string>(pinnedTagTypes ?? [])
+  // Columns the actor can't see: never rendered on a node, whatever the saved
+  // visibility says (their settings toggle is locked OFF + disabled too).
+  const lockedSet = new Set<string>(Object.keys(lockedTagTypes ?? {}))
   const hiddenSet = new Set(
     graphSettings?.hidden ??
       allTagTypes.filter((type) => !defaultVisibleSet.has(type))
@@ -211,7 +215,8 @@ export const GraphCollection = <
       (order.indexOf(b) === -1 ? Infinity : order.indexOf(b))
   )
   const visibleTagTypes = orderedTagTypes.filter(
-    (type) => pinnedSet.has(type) || !hiddenSet.has(type)
+    (type) =>
+      !lockedSet.has(type) && (pinnedSet.has(type) || !hiddenSet.has(type))
   )
 
   // Reorder each node's tags to match the configured metadata order.

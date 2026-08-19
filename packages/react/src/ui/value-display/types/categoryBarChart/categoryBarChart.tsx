@@ -1,22 +1,24 @@
 import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
-import { CSSProperties } from "react"
+import { CSSProperties, useState } from "react"
 
 import { Skeleton } from "@/ui/skeleton"
+import {
+  buildCategoryBarSegments,
+  CATEGORY_BAR_TOOLTIP_DELAY_MS,
+  CategoryBarTooltipContent,
+  formatCategoryBarPercentage,
+  toCategoryBarTooltipItems,
+} from "@/kits/Charts/CategoryBarChart/CategoryBarTooltipContent"
 import {
   type ChartColorToken,
   chartColorTokens,
   resolveChartColorToken,
 } from "@/kits/F0DataChart/utils/colors"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
+import { Tooltip, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
 
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 /**
  * Legacy `kits/Charts` color tokens, resolved as `hsl(var(--chart-*))`.
@@ -105,11 +107,6 @@ function cellWrapperStyle(meta: ValueDisplayRendererContext): CSSProperties {
     : { minHeight: CELL_MIN_HEIGHT_PX, minWidth: 80 }
 }
 
-function formatPercentage(value: number, total: number): string {
-  const pct = (value / total) * 100
-  return pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)
-}
-
 function EmptyCell({ meta }: { meta: ValueDisplayRendererContext }) {
   return (
     <div
@@ -121,6 +118,89 @@ function EmptyCell({ meta }: { meta: ValueDisplayRendererContext }) {
     >
       –
     </div>
+  )
+}
+
+/**
+ * A real component, not inline in `CategoryBarChartCell`: renderers call that as
+ * a plain function, so it can't hold hooks.
+ */
+function CategoryBar({
+  dataPoints,
+  total,
+  hideTooltip,
+  meta,
+}: {
+  dataPoints: CategoryBarDataPoint[]
+  total: number
+  hideTooltip?: boolean
+  meta: ValueDisplayRendererContext
+}) {
+  const [activeKey, setActiveKey] = useState<string | undefined>(undefined)
+
+  const segments = buildCategoryBarSegments(dataPoints, total, (point, index) =>
+    point.color ? resolveSegmentColor(point.color) : getCategoricalColor(index)
+  )
+
+  const tooltipItems = toCategoryBarTooltipItems(segments, total)
+
+  return (
+    <TooltipProvider delayDuration={CATEGORY_BAR_TOOLTIP_DELAY_MS}>
+      <Tooltip>
+        {/* `role="group"`, not `img`: an img subtree is presentational, which
+            would prune the per-segment labels. */}
+        <TooltipTrigger asChild>
+          <div
+            className={cn(
+              cellWrapperClassName(),
+              "pointer-events-auto",
+              focusRing(),
+              // Enlarges the hit box; the negative margin cancels it so the
+              // layout box is unchanged. `h-full` can't be used instead - it
+              // doesn't resolve through a table row.
+              meta.visualization === "table" && "-my-2.5 box-content py-2.5"
+            )}
+            style={cellWrapperStyle(meta)}
+            data-cell-type="categoryBarChart"
+            role="group"
+            aria-label="Category bar chart"
+            tabIndex={0}
+          >
+            {/* Leaving the bar, or crossing a gap between segments, clears the
+                drill-down. */}
+            <div
+              className="flex h-2 w-full gap-1 overflow-hidden"
+              onMouseLeave={() => setActiveKey(undefined)}
+              onMouseOver={(event) => {
+                if (event.target === event.currentTarget) {
+                  setActiveKey(undefined)
+                }
+              }}
+            >
+              {segments.map((segment) => (
+                <div
+                  key={segment.key}
+                  className="pointer-events-auto h-full overflow-hidden rounded-2xs"
+                  style={{
+                    width: `${segment.percentage}%`,
+                    backgroundColor: segment.color,
+                  }}
+                  role="img"
+                  aria-label={`${segment.name}: ${segment.value} (${formatCategoryBarPercentage(segment.value, total)}%)`}
+                  onMouseEnter={() => setActiveKey(segment.key)}
+                />
+              ))}
+            </div>
+          </div>
+        </TooltipTrigger>
+        {!hideTooltip && tooltipItems.length > 0 && (
+          <CategoryBarTooltipContent
+            items={tooltipItems}
+            activeKey={activeKey}
+          />
+        )}
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 
@@ -154,57 +234,11 @@ export const CategoryBarChartCell = (
   }
 
   return (
-    <div
-      className={cellWrapperClassName()}
-      style={cellWrapperStyle(meta)}
-      data-cell-type="categoryBarChart"
-      role="img"
-      aria-label="Category bar chart"
-    >
-      <TooltipProvider>
-        <div className="flex h-2 w-full gap-1 overflow-hidden">
-          {dataPoints.map((point, index) => {
-            const percentage = (point.value / total) * 100
-            const color = point.color
-              ? resolveSegmentColor(point.color)
-              : getCategoricalColor(index)
-
-            if (percentage === 0) return null
-
-            return (
-              <Tooltip key={`${point.name}-${index}`}>
-                <TooltipTrigger
-                  className="pointer-events-auto h-full cursor-default overflow-hidden rounded-2xs"
-                  style={{ width: `${percentage}%` }}
-                  asChild
-                >
-                  <div
-                    className="h-full w-full"
-                    style={{ backgroundColor: color }}
-                    role="img"
-                    aria-label={`${point.name}: ${point.value} (${formatPercentage(point.value, total)}%)`}
-                    tabIndex={0}
-                  />
-                </TooltipTrigger>
-                {!args.hideTooltip && (
-                  <TooltipContent className="flex items-center gap-1 text-sm">
-                    <div
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="pl-0.5 pr-2 text-f1-foreground-inverse-secondary">
-                      {point.name}
-                    </span>
-                    <span className="font-mono font-medium tabular-nums text-f1-foreground-inverse">
-                      {point.value} ({formatPercentage(point.value, total)}%)
-                    </span>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            )
-          })}
-        </div>
-      </TooltipProvider>
-    </div>
+    <CategoryBar
+      dataPoints={dataPoints}
+      total={total}
+      hideTooltip={args.hideTooltip}
+      meta={meta}
+    />
   )
 }

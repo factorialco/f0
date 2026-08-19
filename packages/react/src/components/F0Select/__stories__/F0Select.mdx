@@ -570,6 +570,7 @@ values embedded in desktop rows.
 - WHEN <code>variant="inline"</code> → THEN selection is single and non-clearable, custom triggers and field-only state props are unavailable, and the popup fits its content by default.
 - WHEN <code>fitContentWidth=false</code> is explicit → THEN the standard 20rem popup minimum overrides the inline default.
 - WHEN an option has a <code>description</code> → THEN its popup row is 64px high; otherwise it remains 32px high.
+- WHEN an option defines <code>selectedLabel</code> → THEN the trigger displays it while the popup row keeps <code>label</code>.
 - WHEN <code>actions</code> are provided → THEN the existing action footer renders below the option list.
 - WHEN the inline popup closes → THEN focus returns to its trigger.
 - <code>T</code> is the string value type and <code>R</code> is the original

@@ -24,6 +24,18 @@ export type F0AvatarPersonProps = {
   badge?: AvatarBadge
   /**
    * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+   *
+   * Mutually exclusive with `pending`: they represent opposite ends of the
+   * employee lifecycle. If both are set, `deactivated` takes precedence.
    */
   deactivated?: boolean
+  /**
+   * Whether the position is still to be filled — a person who is planned but
+   * not hired yet (e.g. an open role in headcount planning). If true, the
+   * avatar will display a search-person icon instead of the person's name or
+   * picture.
+   *
+   * Mutually exclusive with `deactivated`.
+   */
+  pending?: boolean
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">

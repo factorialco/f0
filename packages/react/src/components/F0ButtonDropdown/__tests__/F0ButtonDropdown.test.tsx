@@ -16,6 +16,7 @@ vi.mock("@/ui/Action", () => ({
     appendOutside,
     disabled,
     pressed,
+    tooltip,
     ...props
   }) => (
     <>
@@ -23,6 +24,9 @@ vi.mock("@/ui/Action", () => ({
         onClick={onClick}
         disabled={disabled}
         data-pressed={pressed}
+        // Serialized so a test can assert the two-line (label + description)
+        // shape, not just that some tooltip was passed.
+        data-tooltip={tooltip ? JSON.stringify(tooltip) : undefined}
         {...props}
       >
         {prepend && <div data-testid="action-prepend">{prepend}</div>}
@@ -329,6 +333,83 @@ describe("F0ButtonDropdown", () => {
       expect(screen.getByTestId("action-label").textContent).toBe(
         "Regular expense"
       )
+    })
+
+    it("shows the selected item on the trigger — its label AND its icon", () => {
+      render(
+        <F0ButtonDropdown
+          mode="dropdown"
+          value="mileage"
+          items={mockItemsWithDescriptions}
+          onClick={mockOnClick}
+        />
+      )
+
+      expect(screen.getByTestId("action-label").textContent).toBe("Mileage")
+      // The icon is what makes the trigger read as the option you picked, the
+      // same way split mode's main button does.
+      expect(screen.getByTestId("action-prepend")).toBeInTheDocument()
+    })
+
+    it("lets an explicit trigger label win over the selected item's", () => {
+      render(
+        <F0ButtonDropdown
+          mode="dropdown"
+          value="mileage"
+          trigger="New expense"
+          items={mockItemsWithDescriptions}
+          onClick={mockOnClick}
+        />
+      )
+
+      expect(screen.getByTestId("action-label").textContent).toBe("New expense")
+      // …while the selected item's icon still shows what is chosen.
+      expect(screen.getByTestId("action-prepend")).toBeInTheDocument()
+    })
+
+    it("tooltips the control's name over the selection, in two lines", () => {
+      render(
+        <F0ButtonDropdown
+          mode="dropdown"
+          value="mileage"
+          tooltip="Expense type"
+          items={mockItemsWithDescriptions}
+          onClick={mockOnClick}
+        />
+      )
+
+      expect(screen.getByTestId("button-dropdown-trigger")).toHaveAttribute(
+        "data-tooltip",
+        JSON.stringify({ label: "Expense type", description: "Mileage" })
+      )
+    })
+
+    it("leaves the tooltip as given when nothing is selected", () => {
+      render(
+        <F0ButtonDropdown
+          mode="dropdown"
+          tooltip="Expense type"
+          items={mockItemsWithDescriptions}
+          onClick={mockOnClick}
+        />
+      )
+
+      expect(screen.getByTestId("button-dropdown-trigger")).toHaveAttribute(
+        "data-tooltip",
+        JSON.stringify("Expense type")
+      )
+    })
+
+    it("has no icon on the trigger when nothing is selected", () => {
+      render(
+        <F0ButtonDropdown
+          mode="dropdown"
+          items={mockItemsWithDescriptions}
+          onClick={mockOnClick}
+        />
+      )
+
+      expect(screen.queryByTestId("action-prepend")).not.toBeInTheDocument()
     })
 
     it("renders nothing when no items are provided", () => {

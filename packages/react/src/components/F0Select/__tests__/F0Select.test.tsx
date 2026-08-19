@@ -1288,6 +1288,108 @@ describe("Select", () => {
     ).not.toBeInTheDocument()
   })
 
+  describe("selected item's display", () => {
+    it("shows `selectedLabel` on the trigger while the row keeps its `label`", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          value="option1"
+          options={[
+            {
+              value: "option1",
+              label: "Tokens",
+              selectedLabel: "Tokens — Design system",
+            },
+            { value: "option2", label: "Components" },
+          ]}
+          onChange={() => {}}
+        />
+      )
+
+      // The trigger has no group header or siblings to read "Tokens" against.
+      expect(screen.getByText("Tokens — Design system")).toBeInTheDocument()
+
+      await openSelect(user)
+
+      // The row does, so it stays short.
+      expect(screen.getByText("Tokens")).toBeInTheDocument()
+    })
+
+    it("draws ONE glyph on the trigger when the field and the option both have an icon", async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <F0Select
+          {...defaultSelectProps}
+          icon={Search}
+          value="option1"
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      // The field's icon owns the trigger's glyph slot; the selected option's is
+      // left out, because the two are drawn in different places and would sit 4px
+      // apart. `mockOptions[0]` carries an icon of its own.
+      const trigger = screen.getByRole("combobox")
+      expect(trigger.querySelectorAll("svg")).toHaveLength(0)
+      expect(container.querySelectorAll("svg").length).toBeGreaterThan(0)
+
+      // …while the ROW keeps its icon. Scoped to the list: the trigger shows the
+      // same label, so an unscoped query finds both.
+      await openSelect(user)
+      const row = within(screen.getByRole("listbox"))
+        .getByText("Option 1")
+        .closest("[role='option']")
+      expect(row?.querySelectorAll("svg").length).toBeGreaterThan(0)
+    })
+
+    describe("hover tooltip", () => {
+      /**
+       * The trigger is WIRED as a tooltip trigger: Radix marks its (asChild)
+       * trigger with `data-state`, and renders the content lazily — so this is
+       * what "there is a tooltip here" looks like before anyone hovers. Opening
+       * it for real needs Radix's 700ms timer, which deadlocks `user.hover`
+       * under fake timers and does not resolve under real ones in jsdom; what the
+       * tooltip SAYS is asserted in `F0Select.triggerTooltip.test.tsx`, against a
+       * stubbed tooltip.
+       */
+      const tooltipWrapper = () =>
+        screen.getByRole("combobox").closest("div[data-state]")
+
+      it("is wired on the trigger when an item is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            value="option1"
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
+      })
+
+      it("stays wired when nothing is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        // Wired but silent: nothing selected means nothing to explain, and an
+        // empty tooltip never opens (`Tooltip.emptyContent.test.tsx`). Dropping
+        // the wiring instead would change the element type above the trigger and
+        // remount it (`F0Select.triggerIdentity.test.tsx`).
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
+      })
+    })
+  })
+
   describe("asList mode", () => {
     it("preserves selection after searching and clicking an item", async () => {
       const handleChange = vi.fn()
@@ -1500,6 +1602,46 @@ describe("Select", () => {
       // The other group remains collapsed
       expect(screen.queryByText("Carol")).not.toBeInTheDocument()
     })
+
+    /**
+     * ONE SCROLLPORT. The virtualized list is rendered through Radix's
+     * `Select.Viewport` with `asChild`, so Radix merges its own
+     * `overflow: hidden auto; flex: 1 1 0%` onto the virtualizer's SIZER — which
+     * made a second scroll container inside the `ScrollArea` that already scrolls
+     * the list. Two nested scrollers is the "double scroll" a grouped list is long
+     * enough to expose: the wheel fills the inner one, then hands off to the outer.
+     */
+    it("leaves the scrolling to ONE element, not two", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(true)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+
+      const sizer = document.querySelector<HTMLElement>(
+        "[data-radix-select-viewport]"
+      )
+      expect(sizer).not.toBeNull()
+      // The spacer must not scroll, and must not be shrinkable below the height
+      // the virtualizer gave it.
+      expect(sizer!.style.overflow).toBe("visible")
+      // `flex: none` as the browser stores it.
+      expect(sizer!.style.flex).toBe("0 0 auto")
+    })
+
+    // NOTE: the other half of this fix — that expanding a group no longer scrolls
+    // the list back to the selection — has no honest test here. jsdom has no
+    // layout, so the virtualizer's scroll is a no-op and any assertion about it
+    // passes whether the bug is present or not. It is verified in a browser.
   })
 
   describe("onCreate", () => {

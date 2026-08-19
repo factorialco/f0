@@ -45,6 +45,46 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   disabled?: boolean
 }
 
+/**
+ * Whether an href LEAVES THIS APP — the only thing that should ever decide
+ * `target="_blank"`. Everything else belongs in the current tab, where the app's
+ * own router (`LinkProvider`'s `component`) can take the navigation.
+ *
+ * Four things are NOT external, and each of them used to be:
+ *
+ * - A bare `#fragment`. It does not leave the DOCUMENT, let alone the site.
+ * - The SAME HOST under a different scheme. `http://app.example.com/x` while you
+ *   sit on `https://app.example.com` is the app you are already in; comparing
+ *   ORIGINS (scheme included) called it another site and tore the SPA down to
+ *   open a new tab. Hosts are what "same domain" means.
+ * - The same hostname on ANOTHER PORT. This compares `hostname`, not `host`, so
+ *   the port is ignored entirely: an app served through a dev server or a proxy
+ *   sits on one (`app.local.factorial.dev:8080`) while the links it renders are
+ *   written without one (`https://app.local.factorial.dev/dashboard#…`), and
+ *   comparing `host` sent every one of those to a new tab. A port is a way IN to
+ *   a machine, not a different site — and where a port genuinely does separate
+ *   two apps, the cost of being wrong here is one same-tab navigation, against a
+ *   torn-down SPA the other way.
+ * - A non-web scheme (`mailto:`, `tel:`, `sms:`). The OS handles those; a tab
+ *   would open only to close itself again.
+ *
+ * Anything unparseable is treated as internal: a new tab is the more disruptive
+ * guess, so it is not the one to make when in doubt.
+ */
+export const isExternalHref = (href?: string): boolean => {
+  if (!href || href.startsWith("#")) return false
+  if (typeof window === "undefined") return false
+  try {
+    const url = new URL(href, window.location.href)
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false
+    // `hostname`, not `host`: the port is how you reach this app, not which
+    // app it is — see the note above.
+    return url.hostname !== window.location.hostname
+  } catch {
+    return false
+  }
+}
+
 function stripTrailingSlash(path: string) {
   return path.endsWith("/") ? path.slice(0, -1) : path
 }

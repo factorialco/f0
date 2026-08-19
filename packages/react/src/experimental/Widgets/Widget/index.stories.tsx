@@ -80,6 +80,20 @@ export const WithAction: Story = {
   },
 }
 
+/**
+ * Two footer buttons: `action` takes an ARRAY for a card that carries both its
+ * own call to action and the way out of it, side by side in the footer.
+ */
+export const WithTwoActions: Story = {
+  args: {
+    ...meta.args,
+    action: [
+      { label: "Sign now", onClick: fn() },
+      { label: "Go to Documents", onClick: fn() },
+    ],
+  },
+}
+
 export const WithCriticalAlert: Story = {
   args: {
     ...meta.args,

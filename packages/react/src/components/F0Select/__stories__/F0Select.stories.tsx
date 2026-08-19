@@ -1423,6 +1423,52 @@ export const WithCustomTrigger: Story = {
   ),
 }
 
+export const CustomTriggerFillsContainerHeight: Story = {
+  // A regression guard, not documentation
+  tags: ["!dev"],
+  args: {
+    label: "Choose a color",
+    onChange: fn(),
+    value: "red",
+    options: [
+      { value: "red", label: "Red" },
+      { value: "green", label: "Green" },
+    ],
+  },
+  render: ({ value, options, onChange, ...args }) => (
+    <div className="flex h-10 items-center" data-testid="fixed-height-field">
+      <div className="h-full shrink-0">
+        <F0Select
+          label="Choose a color"
+          value={value}
+          options={options}
+          onChange={onChange}
+          {...args}
+        >
+          <span className="flex h-full items-center px-2">Red</span>
+        </F0Select>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    /*
+     * A custom trigger sizes its content against the consumer's container, so
+     * every wrapper F0Select renders in between has to pass that height
+     * through — a wrapper that swallows it still renders a valid DOM, so this
+     * has to be real pixels. 1px tolerance for subpixel display scaling.
+     */
+    const trigger = canvas.getByRole("combobox")
+    const fieldHeight = canvas
+      .getByTestId("fixed-height-field")
+      .getBoundingClientRect().height
+    // Without layout (0 vs 0) the comparison below would pass vacuously
+    await expect(fieldHeight).toBeGreaterThan(0)
+    const drift = Math.abs(trigger.getBoundingClientRect().height - fieldHeight)
+    await expect(drift).toBeLessThanOrEqual(1)
+  },
+}
+
 export const WithOnCreate: Story = {
   args: {
     label: "Select Employee",

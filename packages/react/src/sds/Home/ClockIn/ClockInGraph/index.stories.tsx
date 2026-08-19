@@ -174,3 +174,40 @@ export const WithOvertime: Story = {
     ],
   },
 }
+
+/**
+ * `variant="horizontal-bar"` — the same day, the same segments and the same
+ * colours, laid along a full-width 6px rail instead of the dial's sweep. It
+ * carries no text: a line that thin has nowhere to put the running total, so in
+ * this variant the numbers belong to the layout around it — which is what
+ * `ClockInControls`' own `horizontal-bar` variant does with it.
+ */
+export const HorizontalBar: Story = {
+  args: {
+    ...WithAlternatingEntriesAndFinalClockedIn.args,
+    variant: "horizontal-bar",
+  },
+  render: (args) => (
+    <div className="w-[360px]">
+      <ClockInGraph {...args} />
+    </div>
+  ),
+}
+
+export const HorizontalBarEmpty: Story = {
+  ...HorizontalBar,
+  args: {
+    trackedMinutes: 0,
+    remainingMinutes: 8 * 60,
+    data: [],
+    variant: "horizontal-bar",
+  },
+}
+
+export const HorizontalBarWithOvertime: Story = {
+  ...HorizontalBar,
+  args: {
+    ...WithOvertime.args,
+    variant: "horizontal-bar",
+  },
+}

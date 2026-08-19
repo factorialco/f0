@@ -1,4 +1,6 @@
-import { ReactNode, useState } from "react"
+import { type CSSProperties, ReactNode, useState } from "react"
+
+import { type z } from "zod"
 
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
@@ -12,7 +14,7 @@ import {
 } from "@/components/avatars/F0AvatarModule"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
-import { type IconType } from "@/components/F0Icon"
+import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
@@ -25,9 +27,25 @@ import {
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { WidgetProps } from "@/experimental/Widgets/Widget"
+import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
+import { type F0FormSchema } from "@/patterns/F0Form"
 
-import { HomeListItem } from "./HomeListItem"
+import { HomeListItem, type HomeListItemAction } from "./HomeListItem"
+import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
+
+/**
+ * The item-churn animation, re-exported so a BESPOKE renderer draws its items
+ * the way the built-in ones do: wrap the items in `HomeSlotItems` and each one
+ * in a `HomeSlotItem` keyed by its stable id. An item added or removed then
+ * fades while its height closes, so the card resizes continuously instead of
+ * jumping.
+ *
+ * `useIsBulkChange` is the other half of it: feed its answer to each item's
+ * `animated` so a render that REPLACES the list — "View more" revealing thirty
+ * rows, a filter clearing — draws the new list at once instead of animating
+ * every row of it.
+ */
+export { HomeSlotItem, HomeSlotItems, useIsBulkChange }
 
 /**
  * The Home kit's slot vocabulary and how each slot is drawn. `SlotWidget`
@@ -100,6 +118,165 @@ type AvatarData<T extends AvatarVariant["type"]> = Omit<
 export type ListLeftKind = AvatarVariant["type"] | "module" | "alert"
 
 /**
+ * The tint a row's ICON glyph can carry. f0's NAMED palette — the same hues
+ * `ui/Avatar` colours initials with — deliberately, rather than the semantic
+ * families (`critical`, `warning`, `positive`): a colour here says which KIND
+ * of thing the row is, so a feed can give every category its own without any of
+ * them reading as an alert. For "this is urgent", the left kind is `alert`.
+ */
+export const listIconColors = [
+  "viridian",
+  "malibu",
+  "yellow",
+  "purple",
+  "lilac",
+  "barbie",
+  "smoke",
+  "army",
+  "flubber",
+  "indigo",
+  "camel",
+] as const
+
+export type ListIconPaletteColor = (typeof listIconColors)[number]
+
+/**
+ * A row's glyph tint: one of {@link listIconColors}, or a HEX of your own.
+ *
+ * Prefer a palette name. Those eleven hues were picked to sit beside each other
+ * in one column and to hold up in both themes, which is the whole job here — a
+ * feed's glyphs are read as a SET, and a colour chosen per row without seeing
+ * the others is how a card ends up with two greens that mean different things.
+ *
+ * The hex is for the case the palette genuinely cannot serve: a colour that is
+ * already data — a calendar's own colour, a module's brand, a category a user
+ * picked themselves. It is treated exactly like a palette hue (a tenth of it as
+ * the tile, the hue itself as the icon), so a bespoke colour and a named one
+ * still draw the same glyph. `#RGB` and `#RRGGBB` both parse; anything else
+ * falls back to the plain, untinted glyph rather than drawing nothing.
+ */
+export type ListIconColor = ListIconPaletteColor | `#${string}`
+
+/**
+ * The tinted glyph, one literal class string per colour: Tailwind reads source
+ * text, so a class built from a variable never reaches the stylesheet.
+ *
+ * The tile is the hue at a TENTH of its strength and the icon is the hue
+ * itself, which is what keeps a row of them legible side by side — the icons
+ * carry the colour, the tiles only suggest it. Dark mode needs the tile
+ * stronger to register against the card at all, hence the second value.
+ */
+const LIST_ICON_TINT: Record<ListIconPaletteColor, string> = {
+  viridian:
+    "bg-[hsl(theme(colors.viridian.50)_/_0.1)] text-[hsl(theme(colors.viridian.50))] dark:bg-[hsl(theme(colors.viridian.50)_/_0.24)]",
+  malibu:
+    "bg-[hsl(theme(colors.malibu.50)_/_0.1)] text-[hsl(theme(colors.malibu.50))] dark:bg-[hsl(theme(colors.malibu.50)_/_0.24)]",
+  yellow:
+    "bg-[hsl(theme(colors.yellow.50)_/_0.1)] text-[hsl(theme(colors.yellow.50))] dark:bg-[hsl(theme(colors.yellow.50)_/_0.24)]",
+  purple:
+    "bg-[hsl(theme(colors.purple.50)_/_0.1)] text-[hsl(theme(colors.purple.50))] dark:bg-[hsl(theme(colors.purple.50)_/_0.24)]",
+  lilac:
+    "bg-[hsl(theme(colors.lilac.50)_/_0.1)] text-[hsl(theme(colors.lilac.50))] dark:bg-[hsl(theme(colors.lilac.50)_/_0.24)]",
+  barbie:
+    "bg-[hsl(theme(colors.barbie.50)_/_0.1)] text-[hsl(theme(colors.barbie.50))] dark:bg-[hsl(theme(colors.barbie.50)_/_0.24)]",
+  smoke:
+    "bg-[hsl(theme(colors.smoke.50)_/_0.1)] text-[hsl(theme(colors.smoke.50))] dark:bg-[hsl(theme(colors.smoke.50)_/_0.24)]",
+  army: "bg-[hsl(theme(colors.army.50)_/_0.1)] text-[hsl(theme(colors.army.50))] dark:bg-[hsl(theme(colors.army.50)_/_0.24)]",
+  flubber:
+    "bg-[hsl(theme(colors.flubber.50)_/_0.1)] text-[hsl(theme(colors.flubber.50))] dark:bg-[hsl(theme(colors.flubber.50)_/_0.24)]",
+  indigo:
+    "bg-[hsl(theme(colors.indigo.50)_/_0.1)] text-[hsl(theme(colors.indigo.50))] dark:bg-[hsl(theme(colors.indigo.50)_/_0.24)]",
+  camel:
+    "bg-[hsl(theme(colors.camel.50)_/_0.1)] text-[hsl(theme(colors.camel.50))] dark:bg-[hsl(theme(colors.camel.50)_/_0.24)]",
+}
+
+/**
+ * A hex as the `r g b` channels those `rgb(… / …)` classes take — `#4F46E5` →
+ * `"79 70 229"`. `#RGB` expands the way CSS expands it; anything else is
+ * `undefined`, which is what makes an unusable colour fall back to the plain
+ * glyph instead of painting the tile black.
+ */
+const hexChannels = (hex: string): string | undefined => {
+  const digits = hex.slice(1)
+  const full =
+    digits.length === 3
+      ? digits
+          .split("")
+          .map((digit) => digit + digit)
+          .join("")
+      : digits
+  if (!/^[0-9a-f]{6}$/i.test(full)) return undefined
+  const value = parseInt(full, 16)
+  return `${(value >> 16) & 255} ${(value >> 8) & 255} ${value & 255}`
+}
+
+/**
+ * The custom-hex tint. The COLOUR comes in as a CSS variable and the classes
+ * stay literal, which is what keeps the two theme steps working: an inline
+ * style cannot carry a `dark:` variant, and a Tailwind class cannot carry a
+ * value that is only known at runtime. The variable is the seam between them.
+ */
+const LIST_ICON_TINT_CUSTOM = cn(
+  "bg-[rgb(var(--list-icon-tint)_/_0.1)] text-[rgb(var(--list-icon-tint))]",
+  "dark:bg-[rgb(var(--list-icon-tint)_/_0.24)]"
+)
+
+/** How a glyph paints itself: a palette class, or the variable + its classes. */
+const listIconTint = (
+  color: ListIconColor
+): { className: string; style?: CSSProperties } | undefined => {
+  if (!color.startsWith("#"))
+    return { className: LIST_ICON_TINT[color as ListIconPaletteColor] }
+
+  const channels = hexChannels(color)
+  return channels
+    ? {
+        className: LIST_ICON_TINT_CUSTOM,
+        style: { "--list-icon-tint": channels } as CSSProperties,
+      }
+    : undefined
+}
+
+/** Every glyph size a `list` row draws at — see {@link listGlyphSize}. */
+type ListGlyphSize = "sm" | "md" | "lg"
+
+/** The same box `F0AvatarIcon` draws, so a tinted row lines up with a plain one. */
+const LIST_ICON_SIZE = {
+  sm: "size-6 rounded-sm",
+  md: "size-8 rounded",
+  lg: "size-10 rounded-md",
+} satisfies Record<ListGlyphSize, string>
+
+/**
+ * A `list` row's icon glyph WITH A TINT — the Home kit's own, because
+ * `F0AvatarIcon` is deliberately neutral (a white tile with a border) and
+ * colouring it is a Home decision, not a design-system one. Without a `color`
+ * a row draws the plain `F0AvatarIcon` instead; this is the same box either way.
+ */
+const ListIconGlyph = ({
+  icon,
+  tint,
+  size,
+}: {
+  icon: IconType
+  tint: NonNullable<ReturnType<typeof listIconTint>>
+  size: ListGlyphSize
+}) => (
+  <div
+    className={cn(
+      "flex aspect-square items-center justify-center",
+      LIST_ICON_SIZE[size],
+      tint.className
+    )}
+    style={tint.style}
+  >
+    {/* No `color`: F0Icon defaults to `currentColor`, which the tile's own
+        `text-` class has already set to the hue. */}
+    <F0Icon icon={icon} size={size} />
+  </div>
+)
+
+/**
  * What every row draws on its RIGHT: a counter, one avatar (e.g. the sender),
  * or a compact strip of avatars with an optional `remainingCount`.
  */
@@ -120,15 +297,35 @@ export interface ListSchema {
   left?: ListLeftKind
   /** The one right treatment every row draws. Omit for none. */
   right?: ListRightKind
+  /**
+   * The `right` treatment is ALLOWED but not demanded: rows that carry its data
+   * draw it and the rest trail nothing — a feed where only some items came from
+   * a person. Without this every row must supply it, which is what keeps an
+   * ordinary list even.
+   */
+  rightOptional?: boolean
   /** Every row carries an inline subtitle (on the title's line, after a dot). */
   subtitleRequired?: boolean
   /** Every row carries a second line — this is what makes rows two-line. */
   descriptionRequired?: boolean
   /**
+   * A second line is ALLOWED but not demanded: some rows carry a `description`
+   * and others don't — a feed where only a few items have a due date or a
+   * sender. The list is still a two-line list (the glyphs stay `md`, so the
+   * column of them lines up); the rows without one are simply shorter.
+   *
+   * `descriptionRequired` wins when both are set: demanding it already allows it.
+   *
+   * Such a list does NOT auto-compact past {@link LIST_COMPACT_AFTER} rows —
+   * see {@link listCompacts}. `compact: true` still forces it.
+   */
+  descriptionOptional?: boolean
+  /**
    * `"link"` rows each carry an `href` and render as REAL anchors (role
    * `link`, routed through the app's `LinkProvider`) — never an onClick;
    * that's the only click behavior rows have. Omit for inert rows.
-   * Same-tab for relative and `#` hrefs, `target="_blank"` for other domains.
+   * Same-tab for paths, `#` fragments and this host under any scheme;
+   * `target="_blank"` only for ANOTHER host (see `isExternalHref`).
    */
   clickBehavior?: "link"
   /**
@@ -149,16 +346,25 @@ type ListLeftData<L> = L extends "module"
   ? { module: ModuleId }
   : L extends "alert"
     ? { alert: AlertType }
-    : L extends AvatarVariant["type"]
-      ? { avatar: AvatarData<L> }
-      : object
+    : // The icon glyph takes a `color` no other left kind does — the rest carry
+      // their own identity (a face, a flag, a module's brand), an icon does not.
+      L extends "icon"
+      ? { avatar: AvatarData<"icon"> & { color?: ListIconColor } }
+      : L extends AvatarVariant["type"]
+        ? { avatar: AvatarData<L> }
+        : object
 
-type ListRightData<R> = R extends "counter"
-  ? { count: number }
+/** The row data a schema field demands, or merely allows under `rightOptional`. */
+type Demanded<T, Optional> = Optional extends true ? Partial<T> : T
+
+type ListRightData<R, Optional> = R extends "counter"
+  ? Demanded<{ count: number }, Optional>
   : R extends `${infer T extends F0AvatarListProps["type"]}-list`
-    ? { avatars: Array<AvatarData<T>>; remainingCount?: number }
+    ? Demanded<{ avatars: Array<AvatarData<T>> }, Optional> & {
+        remainingCount?: number
+      }
     : R extends AvatarVariant["type"]
-      ? { rightAvatar: AvatarData<R> }
+      ? Demanded<{ rightAvatar: AvatarData<R> }, Optional>
       : object
 
 type ListClickData<C> = C extends "link" ? { href: string } : object
@@ -170,16 +376,32 @@ type ListTextData<S extends ListSchema> = {
   : { subtitle?: never }) &
   (S["descriptionRequired"] extends true
     ? { description: string }
-    : { description?: never })
+    : S["descriptionOptional"] extends true
+      ? { description?: string }
+      : { description?: never })
+
+/**
+ * One HOVER ACTION on a `list` row: an icon button over the row's right edge
+ * that acts on that row alone — "Clock out", "Dismiss". Per ROW rather than per
+ * schema, because unlike everything else about a row what you can do to it is
+ * genuinely its own: a feed mixes items you can dismiss with items you can't.
+ */
+export type ListRowAction = HomeListItemAction
 
 /** One row of a `list` slot — its shape FOLLOWS from the slot's schema. */
 export type ListItem<S extends ListSchema = ListSchema> = {
   id: string | number
   /** An accent dot on the left glyph — unseen/pending. */
   unread?: boolean
+  /**
+   * What can be DONE to this row, revealed on hover (and on focus, so they are
+   * reachable by keyboard) behind a fade over whatever the row trails. Keep it
+   * to two: the strip covers the row's right-hand side while it shows.
+   */
+  actions?: ListRowAction[]
 } & ListTextData<S> &
   ListLeftData<S["left"]> &
-  ListRightData<S["right"]> &
+  ListRightData<S["right"], S["rightOptional"]> &
   ListClickData<S["clickBehavior"]>
 
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
@@ -193,6 +415,20 @@ export interface ListParams<S extends ListSchema = ListSchema> {
  * a tooltip on the row, and the glyphs drop to `sm`.
  */
 export const LIST_COMPACT_AFTER = 6
+
+/**
+ * Whether a list draws itself compact: asked for, or long enough to have earned
+ * it.
+ *
+ * Auto-compacting tames a long column of UNIFORMLY two-line rows — that is the
+ * wall it was written for. A list whose second line is OPTIONAL is not that
+ * column (most of its rows are already one line, and folding the few that
+ * aren't would hide the only thing distinguishing them), so it compacts only
+ * when the schema asks it to.
+ */
+const listCompacts = (schema: ListSchema, visibleRows: number): boolean =>
+  Boolean(schema.compact) ||
+  (!schema.descriptionOptional && visibleRows > LIST_COMPACT_AFTER)
 
 /** `event-list` params: f0 calendar-event rows (color band + date avatars). */
 export interface EventListParams {
@@ -263,10 +499,245 @@ export type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> &
     | { status?: WidgetProps["status"]; alert?: never }
   )
 
+/* ---------------------------- configurable widgets ---------------------------- */
+
+/**
+ * What a user has CONFIGURED about a widget — the values of the fields its
+ * `paramsSchema` declares, keyed by field name. Dates arrive as `Date`s, a
+ * multi-select as an array: whatever the schema's zod types say.
+ */
+export type WidgetParams = Record<string, unknown>
+
+/**
+ * A widget's params SCHEMA: an F0Form schema, so the fields are declared once —
+ * in zod, with their f0 field config — and F0Form draws and validates them.
+ *
+ * That buys the whole vocabulary rather than a bespoke one: `z.string()`,
+ * `z.number()`, `z.date()` (`fieldType: "datetime"` for a time as well),
+ * `z.enum()`, and a select fed by a DATASOURCE (`source` + `mapOptions`, with
+ * `multiple` for many) — `z.array()` for the multi-select's value. A field is
+ * REQUIRED unless its zod type is `.optional()`, so "the user must set this"
+ * needs nothing new either.
+ *
+ * ```tsx
+ * paramsSchema: z.object({
+ *   since: f0FormField(z.date(), { label: "Since" }),
+ *   team: f0FormField(z.array(z.string()), {
+ *     label: "Teams",
+ *     source: teamsDataSource,
+ *     mapOptions: (team) => ({ value: team.id, label: team.name }),
+ *     multiple: true,
+ *   }),
+ * })
+ * ```
+ */
+export type WidgetParamsSchema = F0FormSchema
+
+/**
+ * A widget property that may be COMPUTED FROM ITS PARAMS instead of fixed — the
+ * title that says which team it is showing, the info that explains the period
+ * you picked. It gets the params the widget has now (`{}` when it has none), so
+ * the same function serves a widget before and after it is configured.
+ */
+export type FromWidgetParams<T> = T | ((params: WidgetParams) => T)
+
+/**
+ * A params-driven value, TYPED against the widget's own schema — how to write a
+ * `title` or an `info` that reads its params without casting at every access:
+ *
+ * ```tsx
+ * title: fromParams(HOURS_PARAMS, (p) => `Hours · ${p.period ?? "this week"}`)
+ * ```
+ *
+ * The params arrive `Partial`, and that is not a formality: a widget exists
+ * before it is configured (the moment it is added, or while its dialog is open
+ * on an incomplete form), so every field has to be treated as possibly unset.
+ * The schema argument is there only to carry the type.
+ */
+export const fromParams =
+  <S extends WidgetParamsSchema, T>(
+    _schema: S,
+    compute: (params: Partial<z.infer<S>>) => T
+  ) =>
+  (params: WidgetParams): T =>
+    compute(params as Partial<z.infer<S>>)
+
+/**
+ * A Home widget's header. The frame's, except that the two things a user reads
+ * to know WHAT they are looking at may follow the params they set.
+ */
+export type HomeWidgetHeader = Omit<
+  NonNullable<WidgetProps["header"]>,
+  "title" | "info"
+> & {
+  title?: FromWidgetParams<string>
+  /**
+   * The `i` beside the title: hovering it explains the widget. Takes the params
+   * too, so it can say what the numbers actually cover.
+   */
+  info?: FromWidgetParams<string>
+}
+
+/** Resolves a header's params-driven parts against the params in hand. */
+export const resolveWidgetHeader = (
+  header: HomeWidgetHeader | undefined,
+  params: WidgetParams = {}
+): WidgetProps["header"] => {
+  if (!header) return undefined
+  const { title, info, ...rest } = header
+  const from = <T,>(value: FromWidgetParams<T> | undefined) =>
+    typeof value === "function"
+      ? (value as (params: WidgetParams) => T)(params)
+      : value
+  return { ...rest, title: from(title), info: from(info) }
+}
+
+/**
+ * A widget's title as TEXT — resolved against its own params, and falling back
+ * to its id so there is always something to name it by (an aria-label on the
+ * collapsed rail's glyph, a row in the catalog).
+ */
+export const widgetTitle = (widget: {
+  id: string
+  header?: HomeWidgetHeader
+  params?: WidgetParams
+}): string =>
+  resolveWidgetHeader(widget.header, widget.params)?.title ?? widget.id
+
+/**
+ * Whether every REQUIRED param of a schema is set — what "this widget can't be
+ * shown until you configure it" comes down to. Use it to send a freshly added
+ * widget straight into its params dialog.
+ */
+export const widgetParamsAreComplete = (
+  schema: WidgetParamsSchema | undefined,
+  params: WidgetParams | undefined
+): boolean => (schema ? schema.safeParse(params ?? {}).success : true)
+
+/**
+ * The colours a rail action's chip can take, by what the state MEANS rather than
+ * by hue: the same five a tag or a banner picks from, so a red pill in the rail
+ * is red for the same reason a red tag is.
+ */
+export const railActionTones = [
+  "neutral",
+  "accent",
+  "critical",
+  "warning",
+  "promote",
+  "positive",
+] as const
+
+export type RailActionTone = (typeof railActionTones)[number]
+
+/**
+ * A DIRECT ACTION on a widget's collapsed glyph: the one thing the widget can be
+ * told to do without being opened — resume a paused timer, clock out, join the
+ * call that starts now.
+ *
+ * The glyph BECOMES the button, because 40px is one control's worth of room. So
+ * the widget is still one hover away (hovering or focusing the glyph floats it
+ * over the feed, as any glyph does) and the CLICK is the action's rather than the
+ * panel's.
+ *
+ * Only the COLLAPSED rail draws it. Expanded, the card's own footer button
+ * (`action`) is where a widget's call to action belongs, and stacked (below `md`)
+ * there is no glyph to put it on.
+ */
+export type HomeWidgetRailAction = {
+  /** The action's own glyph — `Play` to resume, `Pause` for a running timer. */
+  icon: IconType
+  /**
+   * What it does, in the imperative ("Resume"): the glyph's tooltip, and half of
+   * its accessible name — the widget's title is the other half, since "Resume"
+   * alone says nothing about which of the strip's glyphs it is.
+   */
+  label: string
+  onClick: () => void
+  /**
+   * WHAT COLOUR THE STATE IS. One tone paints the whole chip — the pill behind
+   * the reading and the button at the end of it — because they are one object,
+   * and two colours picked separately is how you end up with a red button on an
+   * amber pill.
+   *
+   * - `"neutral"` (the default) — the dark slab, with the accent button on it.
+   *   Nothing about the state is remarkable; it is simply running.
+   * - `"accent"`, `"critical"`, `"warning"`, `"promote"`, `"positive"` — the pill
+   *   takes that colour and the button becomes a plain chip carrying it in its
+   *   icon, so the two never fight over the same hue.
+   *
+   * Without a `text` there is no pill, and the tone paints the button itself.
+   *
+   * PICK THE ONE THE WIDGET ALREADY USES. A rail action stands in for a state the
+   * card is also showing, and the semantic tones are the same values that state
+   * is drawn with elsewhere — a clock-in tile pulses `--positive-50` while it
+   * runs and `--promote-50` on a break, which is exactly `"positive"` and
+   * `"promote"` here. Two names for one state is how a glyph ends up a different
+   * green from the card it came out of.
+   */
+  tone?: RailActionTone
+  /**
+   * A READING to put beside the button — a clock's running total or the break
+   * you are on today, but any short string the state can be summed up in. The
+   * glyph grows into a dark PILL to hold it, overflowing its 40px column
+   * leftwards, and the whole strip right-aligns behind it.
+   *
+   * It is only drawn while the widget is STOWED. Hovering floats the card, which
+   * says the same thing in full context, so the pill gives its width back and
+   * leaves the button — the one part of it you can act on.
+   *
+   * Keep it SHORT — "7:12", "0:20", "3 left". This is a glyph, not a status bar,
+   * and anything that has to be read twice does not belong on one.
+   */
+  text?: string
+  /**
+   * The reading is COUNTING: the separators in `text` blink once a second, the
+   * way a clock does, so a stowed timer is visibly running rather than merely
+   * displayed. Reduced motion holds them lit, and a `text` with nothing to
+   * separate simply stands still.
+   */
+  ticking?: boolean
+  /**
+   * THE STATE IS ASKING TO BE ACTED ON — a timer left on a break, a shift you
+   * never clocked out of. The glyph alternates once a second between the
+   * widget's own icon and the action's, so the strip can say which module wants
+   * something AND what it wants without growing a second control.
+   *
+   * It settles on the action's icon while the widget is floating, so what you
+   * click is never the face that happened to be up. Reduced motion is honoured:
+   * the glyph simply stays the button.
+   */
+  flashing?: boolean
+}
+
 /** A widget as handed to the layout: header + an ordered list of slots. */
 export type HomeWidgetItem = HomeWidgetChrome & {
   id: string
-  header?: WidgetProps["header"]
+  header?: HomeWidgetHeader
+  /**
+   * THIS WIDGET'S OWN menu items — "Mark all as read", "Export as CSV", whatever
+   * it can do that no other widget can. They go in the widget's three-dots menu,
+   * FIRST: the column adds what every widget carries (what its info means, its
+   * params, removing it) after them, and removing it sits behind a separator.
+   *
+   * Ordinary `DropdownItem`s, so they take an `icon`, a `description`, `critical`
+   * for a destructive one, `disabled`, or a `type: "separator"` of your own to
+   * group them. A `locked` widget still shows them.
+   */
+  actions?: WidgetProps["actions"]
+  /**
+   * The widget is CONFIGURABLE: these are the params the user may set, as an
+   * F0Form schema. Declaring it — together with the layout's
+   * `onChangeWidgetParams` — is what puts "Edit params" in the widget's menu.
+   */
+  paramsSchema?: WidgetParamsSchema
+  /**
+   * The params it is configured with right now. They drive whatever the widget
+   * derives from them (its `title`, its `info`) and are the dialog's starting
+   * point; rebuilding the SLOTS for new params is the app's own job, since only
+   * it knows where their data comes from.
+   */
+  params?: WidgetParams
   fullHeight?: boolean
   /**
    * The widget's catalog glyph — shown for it in the collapsed rail and in the
@@ -274,9 +745,14 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    */
   icon?: IconType
   /**
-   * PINNED: the widget stays put. In edit mode it shows no remove control and
-   * does not wiggle (nor drag, once dragging lands) — for widgets a user must
-   * always have, like Clock in.
+   * The one thing the widget can do FROM THE COLLAPSED RAIL, drawn on its glyph
+   * instead of the catalog `icon`. See `HomeWidgetRailAction`.
+   */
+  railAction?: HomeWidgetRailAction
+  /**
+   * PINNED: the widget stays put. It offers no "Remove widget" in its menu, it
+   * cannot be dragged, and no other widget can displace it — for widgets a user
+   * must always have, like Clock in.
    */
   locked?: boolean
   /**
@@ -291,6 +767,29 @@ export type HomeWidgetItem = HomeWidgetChrome & {
    */
   loading?: boolean
 }
+
+/**
+ * The `Widget` chrome an item carries, ready to spread onto `SlotWidget`.
+ *
+ * `alert` and `status` are mutually exclusive on the frame, and which one an
+ * item means is decided by whether it declares an `alert` at all — so the two
+ * are never handed over together.
+ *
+ * Public because drawing a `HomeWidgetItem` yourself is public (`SlotWidget`),
+ * and this is the one part of that spread with a rule in it.
+ */
+export const widgetChrome = (widget: HomeWidgetItem): HomeWidgetChrome =>
+  ("alert" in widget && widget.alert !== undefined
+    ? {
+        action: widget.action,
+        summaries: widget.summaries,
+        alert: widget.alert,
+      }
+    : {
+        action: widget.action,
+        summaries: widget.summaries,
+        status: "status" in widget ? widget.status : undefined,
+      }) as HomeWidgetChrome
 
 /**
  * Row-based slots cancel their rows' own padding so the rows sit flush with the
@@ -318,7 +817,7 @@ type ListRow = {
   subtitle?: string
   description?: string
   unread?: boolean
-  avatar?: object
+  avatar?: object & { icon?: IconType; color?: ListIconColor }
   module?: ModuleId
   alert?: AlertType
   count?: number
@@ -326,18 +825,31 @@ type ListRow = {
   avatars?: AvatarData<F0AvatarListProps["type"]>[]
   remainingCount?: number
   href?: string
+  actions?: ListRowAction[]
 }
 
 /** The left props a row gets from its schema's `left` kind. */
 const listLeft = (
   left: ListLeftKind | undefined,
   row: ListRow,
-  avatarSize: AvatarSize & ("sm" | "md")
+  avatarSize: AvatarSize & ListGlyphSize
 ) => {
   if (left === "module" && row.module)
     return { left: <F0AvatarModule module={row.module} size={avatarSize} /> }
   if (left === "alert" && row.alert)
     return { left: <F0AvatarAlert type={row.alert} size={avatarSize} /> }
+  // A TINTED icon is the Home kit's own glyph, so it goes in as a node. An icon
+  // row without a `color` — or with one that cannot be parsed — falls through to
+  // the plain `F0AvatarIcon` below.
+  if (left === "icon" && row.avatar?.icon && row.avatar.color) {
+    const tint = listIconTint(row.avatar.color)
+    if (tint)
+      return {
+        left: (
+          <ListIconGlyph icon={row.avatar.icon} tint={tint} size={avatarSize} />
+        ),
+      }
+  }
   if (left && row.avatar)
     return {
       avatar: { type: left, ...row.avatar } as AvatarVariant,
@@ -346,10 +858,16 @@ const listLeft = (
   return {}
 }
 
-/** The right node a row gets from its schema's `right` kind. */
+/**
+ * The right node a row gets from its schema's `right` kind. The faces are sized
+ * from the same step as the left glyph but one down: they are WHO a row is
+ * about, which is secondary to what it is, and a strip of them matching the
+ * leading glyph turns the row into two competing anchors.
+ */
 const listRight = (
   right: ListRightKind | undefined,
-  row: ListRow
+  row: ListRow,
+  avatarSize: "sm" | "md"
 ): ReactNode => {
   if (!right) return undefined
   if (right === "counter")
@@ -358,8 +876,12 @@ const listRight = (
     return row.avatars && row.avatars.length > 0 ? (
       <F0AvatarList
         type={right.slice(0, -"-list".length) as F0AvatarListProps["type"]}
-        size="sm"
-        layout="compact"
+        size={avatarSize}
+        // Explicit, because it is the prop that actually produces the compact
+        // strip this slot documents. The deprecated `layout="compact"` that
+        // used to sit here was inert, so the strip was really sized by the
+        // rail's width — which in a narrow rail collapsed it to a bare `+N`.
+        max={3}
         avatars={row.avatars as never}
         remainingCount={row.remainingCount}
       />
@@ -367,10 +889,26 @@ const listRight = (
   return row.rightAvatar ? (
     <F0Avatar
       avatar={{ type: right, ...row.rightAvatar } as AvatarVariant}
-      size="sm"
+      size={avatarSize}
     />
   ) : undefined
 }
+
+/**
+ * How big a row's LEADING glyph draws. Prescriptive, from two things the row
+ * cannot argue with:
+ *
+ * - its own SHAPE — two-line rows carry a bigger glyph than one-line ones, so
+ *   the glyph is about as tall as the text beside it either way;
+ * - the CARD's width — in the Home's 396px rail a 40px tile beside a truncated
+ *   title is the loudest thing in the widget, and in the main column the same
+ *   row at rail size reads as a list that forgot to grow. Past the frame's wide
+ *   threshold every step moves up one (see `useWidgetIsWide`).
+ *
+ * Compact rows are one-line by definition, so they take the one-line step.
+ */
+const listGlyphSize = (twoLine: boolean, isWide: boolean): ListGlyphSize =>
+  isWide ? (twoLine ? "lg" : "md") : twoLine ? "md" : "sm"
 
 /**
  * The `list` slot's body. A component rather than a plain render function
@@ -385,44 +923,75 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const { schema, items } = params
   const allRows = items as ListRow[]
   const [expanded, setExpanded] = useState(false)
+  // ASKED, not measured: the slot is built before the frame renders but drawn
+  // inside it, so the card it landed in is the one thing it can only learn from
+  // context. `false` for a list rendered outside a `Widget`.
+  const isWide = useWidgetIsWide()
 
   const max = schema.maxVisibleItems
   const overflows = max != null && allRows.length > max
   const rows = overflows && !expanded ? allRows.slice(0, max) : allRows
+  // "View more" can reveal thirty rows at once, and thirty of them animating in
+  // is a shove rather than a change — past a few, the list is simply new.
+  const isBulkChange = useIsBulkChange(rows.length)
 
-  const compact = Boolean(schema.compact) || rows.length > LIST_COMPACT_AFTER
-  const twoLine = Boolean(schema.descriptionRequired) && !compact
-  const avatarSize = twoLine ? "md" : "sm"
+  const compact = listCompacts(schema, rows.length)
+  // A list that ALLOWS a second line is a two-line list even where a given row
+  // has none: the glyphs keep the two-line step so the column of them lines up
+  // down the card.
+  const twoLine =
+    (Boolean(schema.descriptionRequired) ||
+      Boolean(schema.descriptionOptional)) &&
+    !compact
+  const avatarSize = listGlyphSize(twoLine, isWide)
+  const rightAvatarSize = isWide ? "md" : "sm"
 
   return (
     <div className={cn(slotRowBleed(ctx), "flex flex-col")}>
-      {rows.map(({ href, description, ...row }) => {
-        const node = (
-          <HomeListItem
-            title={row.title}
-            subtitle={row.subtitle}
-            description={compact ? undefined : description}
-            unread={row.unread}
-            {...listLeft(schema.left, row, avatarSize)}
-            right={listRight(schema.right, row)}
-            href={schema.clickBehavior === "link" ? href : undefined}
-          />
-        )
-        return compact && description ? (
-          // The hidden second line surfaces on hover. The span is the
-          // tooltip's trigger — HomeListItem doesn't forward trigger props.
-          <Tooltip key={row.id} label={description}>
-            <span className="block">{node}</span>
-          </Tooltip>
-        ) : (
-          <div key={row.id}>{node}</div>
-        )
-      })}
+      {/* Keyed by the row's OWN id, so a row that goes away is the one that
+          animates out and the rest close the gap. */}
+      <HomeSlotItems>
+        {rows.map(({ href, description, ...row }) => {
+          const node = (
+            <HomeListItem
+              title={row.title}
+              subtitle={row.subtitle}
+              description={compact ? undefined : description}
+              unread={row.unread}
+              {...listLeft(schema.left, row, avatarSize)}
+              right={listRight(schema.right, row, rightAvatarSize)}
+              actions={row.actions}
+              href={schema.clickBehavior === "link" ? href : undefined}
+            />
+          )
+          return (
+            <HomeSlotItem key={row.id} animated={!isBulkChange}>
+              {compact && description ? (
+                // The hidden second line surfaces on hover. The span is the
+                // tooltip's trigger — HomeListItem doesn't forward trigger props.
+                <Tooltip label={description}>
+                  <span className="block">{node}</span>
+                </Tooltip>
+              ) : (
+                node
+              )}
+            </HomeSlotItem>
+          )
+        })}
+      </HomeSlotItems>
       {overflows ? (
         <div className="mt-1 self-start">
+          {/* `neutral`, the same button a widget's own call to action is (the
+              frame's `action`): "View more" is something you press, and a ghost
+              button under a dense list of rows reads as another row. Past the
+              width threshold it takes the SAME step every card-sized control
+              takes (`WIDE_WIDGET_PX`) — `md`, and `outline` rather than
+              `neutral`, exactly like the frame's footer button — so a wide
+              card doesn't grow its rows and its footer around a button still
+              drawn at rail size. */}
           <F0Button
-            variant="ghost"
-            size="sm"
+            variant={isWide ? "outline" : "neutral"}
+            size={isWide ? "md" : "sm"}
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
             }
@@ -430,6 +999,42 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
           />
         </div>
       ) : null}
+    </div>
+  )
+}
+
+/**
+ * The `event-list` slot's body. A component rather than a plain render function
+ * for the same reason `ListSlot` is one: the churn animation asks whether this
+ * render is a bulk replacement, and that is a hook.
+ *
+ * The events are drawn here rather than through `CalendarEventList` because the
+ * churn needs its own wrapper AROUND each event (`HomeSlotItem`), and that
+ * component owns the space between its items — there is nowhere to put one.
+ * `EVENT_LIST_GAP` therefore sits on this container, the direct parent of the
+ * event items, and matches that component's own 8px default.
+ */
+function EventListSlot({
+  params,
+  ctx,
+}: {
+  params: EventListParams
+  ctx: HomeRenderCtx
+}) {
+  const { events } = params
+  const isBulkChange = useIsBulkChange(events.length)
+
+  return (
+    <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
+      {/* The same churn the `list` rows get — an event dropping off the widget
+          should read as one leaving, not as a redraw. */}
+      <HomeSlotItems>
+        {events.map((event) => (
+          <HomeSlotItem key={event.title} animated={!isBulkChange}>
+            <CalendarEvent {...event} />
+          </HomeSlotItem>
+        ))}
+      </HomeSlotItems>
     </div>
   )
 }
@@ -454,6 +1059,13 @@ export const SLOT_SKELETON_ITEM_TESTID = "slot-skeleton-item"
  * than as items, so the placeholder titles vary the way real ones do.
  */
 const SKELETON_TITLE_WIDTHS = ["w-1/2", "w-2/3", "w-2/5", "w-3/5"]
+
+/** A placeholder glyph's box per step — the rounding is the schema's business. */
+const SKELETON_GLYPH_SIZE = {
+  sm: "size-6",
+  md: "size-8",
+  lg: "size-10",
+} satisfies Record<ListGlyphSize, string>
 
 const skeletonTitleWidth = (index: number) =>
   SKELETON_TITLE_WIDTHS[index % SKELETON_TITLE_WIDTHS.length]
@@ -485,14 +1097,23 @@ const ListSlotSkeleton = ({
   ctx: HomeSkeletonCtx
 }) => {
   const schema = params.schema ?? {}
+  const isWide = useWidgetIsWide()
   // Rows past `maxVisibleItems` fold behind "View more", so the loaded list
   // never shows more than that — nor should the placeholder.
   const count = Math.max(
     0,
     Math.min(ctx.expectedItemsCount, schema.maxVisibleItems ?? Infinity)
   )
-  const compact = Boolean(schema.compact) || count > LIST_COMPACT_AFTER
-  const twoLine = Boolean(schema.descriptionRequired) && !compact
+  const compact = listCompacts(schema, count)
+  // Same rule the real list follows, so the glyphs are the size they will be.
+  const twoLine =
+    (Boolean(schema.descriptionRequired) ||
+      Boolean(schema.descriptionOptional)) &&
+    !compact
+  // The SECOND LINE, though, is only drawn where every row is going to have
+  // one: with `descriptionOptional` some rows won't, and a placeholder that
+  // promises a line each would leave the card taller than what replaces it.
+  const twoLinePlaceholder = Boolean(schema.descriptionRequired) && !compact
   // More items than the list will show means the loaded list carries the "View
   // more" button at its bottom — so the placeholder leaves room for it.
   const overflows = ctx.expectedItemsCount > count
@@ -510,14 +1131,15 @@ const ListSlotSkeleton = ({
             <Skeleton
               className={cn(
                 "shrink-0",
-                twoLine ? "size-8" : "size-6",
+                // The size the real glyph will be — same rule, same card.
+                SKELETON_GLYPH_SIZE[listGlyphSize(twoLine, isWide)],
                 schema.left === "person" ? "rounded-full" : "rounded-sm"
               )}
             />
           ) : null}
           <div className="flex min-w-0 flex-1 flex-col">
             <SkeletonLine className={skeletonTitleWidth(index)} />
-            {twoLine ? <SkeletonLine className="w-1/4" /> : null}
+            {twoLinePlaceholder ? <SkeletonLine className="w-1/4" /> : null}
           </div>
           {schema.right ? (
             <Skeleton className="h-4 w-10 shrink-0 rounded-sm" />
@@ -526,7 +1148,7 @@ const ListSlotSkeleton = ({
       ))}
       {overflows ? (
         <div className="mt-1 self-start">
-          {/* An `sm` ghost button — what "View more (n)" will be. */}
+          {/* An `sm` neutral button — what "View more (n)" will be. */}
           <Skeleton className="h-6 w-24 rounded-sm" />
         </div>
       ) : null}
@@ -612,21 +1234,13 @@ export const defaultSlotRenderers: SlotRenderers = {
       />
     ),
   },
-  // The events are rendered here rather than through `CalendarEventList` for one
-  // reason: that component's `showAllItems` container has no gap, and its `gap`
-  // prop only reaches the overflow path — so `EVENT_LIST_GAP` has to sit on the
-  // DIRECT parent of the event items, which is this container.
+  // The events are rendered here rather than through `CalendarEventList`
+  // because each one is wrapped for the CHURN (see `EventListSlot`), which asks
+  // for a per-item wrapper that component has no way to put in.
   "event-list": {
-    render: (params, ctx) => {
-      const { events } = params as EventListParams
-      return (
-        <div className={cn(slotRowBleed(ctx), "flex flex-col", EVENT_LIST_GAP)}>
-          {events.map((event) => (
-            <CalendarEvent key={event.title} {...event} />
-          ))}
-        </div>
-      )
-    },
+    render: (params, ctx) => (
+      <EventListSlot params={params as EventListParams} ctx={ctx} />
+    ),
     skeleton: (_params, ctx) => <EventListSlotSkeleton ctx={ctx} />,
   },
   indicators: {

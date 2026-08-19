@@ -3,11 +3,37 @@ import { type IconType } from "@/components/F0Icon"
 import { type VideoPlayerContent } from "@/components/F0VideoPlayer"
 import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
 
+export const f0ChatSenderColors = [
+  "viridian",
+  "malibu",
+  "yellow",
+  "purple",
+  "lilac",
+  "barbie",
+  "smoke",
+  "army",
+  "flubber",
+  "indigo",
+  "camel",
+  "radical",
+  "orange",
+  "red",
+  "grass",
+] as const
+
+export type F0ChatSenderColor = (typeof f0ChatSenderColors)[number]
+
 /** A participant in a conversation. */
 export type F0ChatUser = {
   id: string
   name: string
   avatar?: AvatarVariant
+  /**
+   * Stable sender accent. For photo avatars, choose the palette hue closest to
+   * the image's dominant colour so the name and incoming bubble feel related.
+   * When omitted, F0 uses the same name hash as a generated person avatar.
+   */
+  avatarColor?: F0ChatSenderColor
   /** Secondary line for the hover card (e.g. job title). */
   subtitle?: string
   /** Link to the person's profile, shown as "View profile" in the hover card. */
@@ -48,7 +74,6 @@ export type F0ChatChannel = {
   avatar: AvatarVariant
   /** DM only — the other person's presence. */
   presence?: "online" | "offline"
-  muted?: boolean
   /**
    * Whether the conversation is pinned (favourited) by the current user. Drives
    * the header pin toggle and lets the host surface a "Pinned" group in the
@@ -581,8 +606,8 @@ export type F0ChatRuntime = {
   /**
    * Toggle the conversation's muted state for the current user. Transport
    * capability only — the header no longer auto-renders a Mute action; the
-   * host surfaces one via {@link F0ChatHeaderAction} (the header still shows
-   * the `channel.muted` status icon either way). factorial →
+   * host surfaces one via {@link F0ChatHeaderAction}. The current muted state
+   * is represented like any other entry in `channel.statuses`. factorial →
    * `channel.mute()` / `channel.unmute()`.
    */
   toggleMute?: () => void | Promise<void>

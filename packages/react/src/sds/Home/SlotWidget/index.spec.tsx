@@ -1,6 +1,7 @@
-import { describe, expect, test } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { Clock, Cross } from "@/icons/app"
+import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
 import {
   DEFAULT_EXPECTED_ITEMS_COUNT,
@@ -311,6 +312,323 @@ describe("list slot schema", () => {
 
     expect(screen.getByText("3")).toBeInTheDocument()
   })
+
+  test("descriptionOptional lets some rows carry a second line and others not — and the list stays two-line", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "person", descriptionOptional: true }, [
+            {
+              id: "1",
+              title: "Ada",
+              description: "Due Today",
+              avatar: { firstName: "Ada", lastName: "Lovelace" },
+            },
+            {
+              id: "2",
+              title: "Alan",
+              avatar: { firstName: "Alan", lastName: "Turing" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    expect(screen.getByText("Due Today")).toBeInTheDocument()
+    // The glyphs stay md for BOTH rows, so the column of them lines up even
+    // though only one row is two lines tall.
+    expect(container.querySelectorAll(".size-8")).toHaveLength(2)
+    expect(container.querySelector(".size-6")).toBeNull()
+  })
+
+  test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
+    const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
+      id: String(i),
+      title: `Person ${i}`,
+      // Only the first row has one, which is the point of `descriptionOptional`.
+      ...(i === 0 ? { description: "Due Today" } : {}),
+      avatar: { firstName: `Person ${i}`, lastName: "Doe" },
+    }))
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[listSlot({ left: "person", descriptionOptional: true }, many)]}
+      />
+    )
+
+    expect(screen.getByText("Due Today")).toBeInTheDocument()
+    expect(container.querySelector(".size-8")).not.toBeNull()
+
+    // `compact: true` still forces it.
+    const { container: forced } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", descriptionOptional: true, compact: true },
+            many
+          ),
+        ]}
+      />
+    )
+    expect(forced.querySelector(".size-8")).toBeNull()
+  })
+
+  test("a row's actions are its own: named buttons that act on that row alone", async () => {
+    const dismissFirst = vi.fn()
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ clickBehavior: "link" }, [
+            {
+              id: "1",
+              title: "You never clocked out",
+              href: "/attendance",
+              actions: [
+                { label: "Dismiss this", icon: Cross, onClick: dismissFirst },
+              ],
+            },
+            // The next row offers none — actions are per row, not per schema.
+            { id: "2", title: "Sign your contract", href: "/documents/1" },
+          ]),
+        ]}
+      />
+    )
+
+    expect(screen.getAllByRole("button", { name: /Dismiss/ })).toHaveLength(1)
+
+    await userEvent.click(screen.getByRole("button", { name: "Dismiss this" }))
+    expect(dismissFirst).toHaveBeenCalledTimes(1)
+  })
+
+  describe("glyphs follow the card they landed in", () => {
+    const withCardWidth = (width: number) => {
+      vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(
+        function (this: HTMLElement) {
+          return this.getAttribute("role") === "article" ? width : 0
+        }
+      )
+    }
+
+    afterEach(() => vi.restoreAllMocks())
+
+    const twoLineList = (
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", right: "person", descriptionRequired: true },
+            [
+              {
+                id: "1",
+                title: "Ada",
+                description: "Out until Friday",
+                avatar: { firstName: "Ada", lastName: "Lovelace" },
+                rightAvatar: { firstName: "Alan", lastName: "Turing" },
+              },
+            ]
+          ),
+        ]}
+      />
+    )
+
+    test("in the rail the leading glyph is md and the trailing face sm", () => {
+      withCardWidth(396)
+      const { container } = zeroRender(twoLineList)
+
+      expect(container.querySelector(".size-8")).not.toBeNull()
+      expect(container.querySelector(".size-10")).toBeNull()
+    })
+
+    test("past 480px both step up — the leading glyph to lg, the face to md", () => {
+      withCardWidth(600)
+      const { container } = zeroRender(twoLineList)
+
+      // The leading glyph is now lg (40px) and the trailing face md (32px),
+      // so the row keeps its two anchors a step apart.
+      expect(container.querySelector(".size-10")).not.toBeNull()
+      expect(container.querySelector(".size-8")).not.toBeNull()
+      expect(container.querySelector(".size-6")).toBeNull()
+    })
+
+    test("the placeholder draws the size the real glyph will be, so the card doesn't resize when data lands", () => {
+      withCardWidth(600)
+      const { container } = zeroRender(
+        <SlotWidget
+          loading
+          slots={[
+            listSlot({ left: "person", descriptionRequired: true }, [], {
+              expectedItemsCount: 2,
+            }),
+          ]}
+        />
+      )
+
+      expect(container.querySelectorAll(".size-10")).toHaveLength(2)
+    })
+
+    const truncatedList = (
+      <SlotWidget
+        slots={[
+          listSlot(
+            { left: "person", descriptionRequired: true, maxVisibleItems: 2 },
+            Array.from({ length: 5 }, (_, i) => ({
+              id: String(i),
+              title: `Person ${i}`,
+              description: `Detail ${i}`,
+              avatar: { firstName: "Ada", lastName: "Lovelace" },
+            }))
+          ),
+        ]}
+      />
+    )
+
+    test("in the rail View more keeps its ghost size", () => {
+      withCardWidth(396)
+      zeroRender(truncatedList)
+
+      // The chosen size lands on the button's INNER box — the same assertion
+      // the frame's footer-button spec makes.
+      expect(
+        screen.getByRole("button", { name: "View more (3)" }).className
+      ).toContain("[&_.main]:h-6")
+    })
+
+    test("past 480px View more steps up with the card — md, like the footer button", () => {
+      withCardWidth(600)
+      zeroRender(truncatedList)
+
+      expect(
+        screen.getByRole("button", { name: "View more (3)" }).className
+      ).toContain("[&_.main]:h-8")
+    })
+  })
+
+  describe("items coming and going", () => {
+    const rows = (names: string[]) =>
+      names.map((name) => ({
+        id: name,
+        title: name,
+        avatar: { firstName: name, lastName: "Doe" },
+      }))
+
+    const listOf = (names: string[]) => (
+      <SlotWidget slots={[listSlot({ left: "person" }, rows(names))]} />
+    )
+
+    test("a row that goes away leaves — it is not stranded by its own exit animation", async () => {
+      const { rerender } = zeroRender(listOf(["Ada", "Alan", "Grace"]))
+
+      expect(screen.getByText("Alan")).toBeInTheDocument()
+
+      rerender(listOf(["Ada", "Grace"]))
+
+      // It animates out rather than vanishing, so it is still there for a beat.
+      // What matters is that it is GONE afterwards: an `AnimatePresence` whose
+      // exit never completes keeps a removed row in the DOM forever.
+      await waitFor(() =>
+        expect(screen.queryByText("Alan")).not.toBeInTheDocument()
+      )
+      expect(screen.getByText("Ada")).toBeInTheDocument()
+      expect(screen.getByText("Grace")).toBeInTheDocument()
+    })
+
+    test("a row that arrives is drawn", async () => {
+      const { rerender } = zeroRender(listOf(["Ada"]))
+
+      rerender(listOf(["Ada", "Grace"]))
+
+      await waitFor(() => expect(screen.getByText("Grace")).toBeInTheDocument())
+    })
+  })
+
+  test("an icon row's color tints its glyph; without one it draws the plain avatar", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Clocked out", avatar: { icon: Clock } },
+          ]),
+        ]}
+      />
+    )
+
+    // The neutral F0AvatarIcon: a bordered white tile.
+    expect(
+      container.querySelector(".border-f1-border-secondary")
+    ).not.toBeNull()
+    expect(container.querySelector("[class*='colors.purple']")).toBeNull()
+
+    rerender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            {
+              id: "1",
+              title: "Clocked out",
+              avatar: { icon: Clock, color: "purple" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    expect(container.querySelector("[class*='colors.purple']")).not.toBeNull()
+  })
+
+  test("a hex tints the glyph too — as channels on a variable, so both themes still apply", () => {
+    const { container } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            {
+              id: "1",
+              title: "Design sync",
+              avatar: { icon: Clock, color: "#4F46E5" },
+            },
+          ]),
+        ]}
+      />
+    )
+
+    const glyph = container.querySelector<HTMLElement>(
+      "[class*='--list-icon-tint']"
+    )
+    // The colour rides in on the variable while the classes stay literal —
+    // that is what keeps the `dark:` step working for a runtime value.
+    expect(glyph?.style.getPropertyValue("--list-icon-tint")).toBe("79 70 229")
+  })
+
+  test("a three-digit hex expands, and an unusable one falls back to the plain glyph", () => {
+    const { container, rerender } = zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Row", avatar: { icon: Clock, color: "#0af" } },
+          ]),
+        ]}
+      />
+    )
+
+    expect(
+      container
+        .querySelector<HTMLElement>("[class*='--list-icon-tint']")
+        ?.style.getPropertyValue("--list-icon-tint")
+    ).toBe("0 170 255")
+
+    rerender(
+      <SlotWidget
+        slots={[
+          listSlot({ left: "icon" }, [
+            { id: "1", title: "Row", avatar: { icon: Clock, color: "#nope" } },
+          ]),
+        ]}
+      />
+    )
+
+    // No tile painted black, no crash: the neutral bordered F0AvatarIcon.
+    expect(container.querySelector("[class*='--list-icon-tint']")).toBeNull()
+    expect(
+      container.querySelector(".border-f1-border-secondary")
+    ).not.toBeNull()
+  })
 })
 
 describe("SlotWidget loading", () => {
@@ -486,5 +804,177 @@ describe("SlotWidget chrome", () => {
     expect(screen.getByText("Gross")).toBeInTheDocument()
     expect(screen.getByText("3,200")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Sign now" })).toBeInTheDocument()
+  })
+
+  /**
+   * The way out of a widget is a NAMED BUTTON under its content, not an icon in
+   * the header's top-right — that corner is the overflow menu's now.
+   */
+  describe("the header's link", () => {
+    test("makes the TITLE the way out", async () => {
+      const onClick = vi.fn()
+      zeroRender(
+        <SlotWidget
+          header={{
+            title: "Events",
+            link: { title: "Go to Calendar", onClick },
+          }}
+          slots={slots}
+        />
+      )
+
+      const link = screen.getByRole("button", { name: "Go to Calendar" })
+      // The visible text is the widget's name; the accessible name is where it
+      // goes. Nothing is added to the footer for it.
+      expect(link).toHaveTextContent("Events")
+
+      await userEvent.click(link)
+      expect(onClick).toHaveBeenCalled()
+    })
+
+    test("is a real anchor when it carries a url", () => {
+      zeroRender(
+        <SlotWidget
+          header={{
+            title: "Resources",
+            link: { title: "Go to factorial.co", url: "https://factorial.co" },
+          }}
+          slots={slots}
+        />
+      )
+
+      expect(
+        screen.getByRole("link", { name: "Go to factorial.co" })
+      ).toHaveAttribute("href", "https://factorial.co")
+    })
+
+    test("opens another HOST in a new tab, and this one in place", () => {
+      const { rerender } = zeroRender(
+        <SlotWidget
+          header={{
+            title: "Resources",
+            link: { title: "Go out", url: "https://factorial.co" },
+          }}
+          slots={slots}
+        />
+      )
+
+      expect(screen.getByRole("link", { name: "Go out" })).toHaveAttribute(
+        "target",
+        "_blank"
+      )
+
+      // A fragment on this app — the case that used to open a new tab.
+      rerender(
+        <SlotWidget
+          header={{
+            title: "Events",
+            link: { title: "Go to Calendar", url: "/calendar#core.events" },
+          }}
+          slots={slots}
+        />
+      )
+
+      expect(
+        screen.getByRole("link", { name: "Go to Calendar" })
+      ).not.toHaveAttribute("target")
+    })
+
+    test("leaves the FOOTER to the widget's own call to action", () => {
+      zeroRender(
+        <SlotWidget
+          header={{
+            title: "Documents",
+            link: { title: "Go to Documents", onClick: () => {} },
+          }}
+          action={{ label: "Sign now", onClick: () => {} }}
+          slots={slots}
+        />
+      )
+
+      // Two separate things: the CTA in the footer, the way out as the title.
+      expect(
+        screen.getByRole("button", { name: "Sign now" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Go to Documents" })
+      ).toHaveTextContent("Documents")
+    })
+  })
+
+  /**
+   * `header.info` is the widget's OTHER SIDE: the card turns over to it, keeping
+   * its title, and one small button turns it back.
+   */
+  describe("the info side", () => {
+    const withInfo = {
+      title: "Hours",
+      info: "Hours logged this week against a 38h weekly target.",
+    }
+
+    test("is out of reach until the card is turned", () => {
+      zeroRender(<SlotWidget header={withInfo} slots={slots} />)
+
+      // The face EXISTS — it is the card's other side, and it is what gives the
+      // turn something to turn to — but it is hidden from the a11y tree and from
+      // the pointer while it faces away. (`backface-visibility` is what hides it
+      // visually, and jsdom computes no 3D, so this is the assertion that means
+      // anything here.)
+      expect(
+        screen.queryByRole("button", { name: "Got it" })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByText(withInfo.info).closest("[aria-hidden]")
+      ).toHaveAttribute("aria-hidden", "true")
+    })
+
+    test("keeps the title, centers the info and offers a way back", async () => {
+      const onFlipBack = vi.fn()
+      zeroRender(
+        <SlotWidget
+          header={withInfo}
+          slots={slots}
+          flipped
+          onFlipBack={onFlipBack}
+        />
+      )
+
+      // The title is on BOTH faces — twice in the tree, once per side.
+      expect(screen.getAllByText("Hours")).toHaveLength(2)
+      expect(screen.getByText(withInfo.info)).toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole("button", { name: "Got it" }))
+      expect(onFlipBack).toHaveBeenCalled()
+    })
+
+    test("a widget with no info has no other side to turn to", () => {
+      const { container } = zeroRender(
+        <SlotWidget header={{ title: "Events" }} slots={slots} />
+      )
+
+      expect(container.querySelector("[data-turning]")).toBeNull()
+      expect(
+        screen.queryByRole("button", { name: "Got it" })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  test("puts its actions in the header's overflow menu", async () => {
+    const onClick = vi.fn()
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Events" }}
+        actions={[{ label: "Remove widget", onClick }]}
+        slots={slots}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Actions" }))
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Remove widget" })
+    )
+
+    // The dropdown defers its items' onClick past its own close animation.
+    await waitFor(() => expect(onClick).toHaveBeenCalled())
   })
 })
