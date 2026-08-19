@@ -1,13 +1,165 @@
 import { describe, expect, it, vi } from "vitest"
+import { useEffect, useState } from "react"
+import { flushSync } from "react-dom"
 
-import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
+import {
+  act,
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { Select } from "./Select"
 import { SelectContent } from "./SelectContent"
 import { SelectItem } from "./SelectItem"
 import { SelectTrigger } from "./SelectTrigger"
 
+function DeferredSelectItem({
+  value,
+  label,
+  delay = 20,
+}: {
+  value: string
+  label: string
+  delay?: number
+}) {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setIsVisible(true), delay)
+    return () => clearTimeout(timeout)
+  }, [delay])
+
+  return isVisible ? <SelectItem value={value}>{label}</SelectItem> : null
+}
+
 describe("SelectContent", () => {
+  it("focuses the selected option when it mounts after the popup", async () => {
+    render(
+      <Select open value="first" onValueChange={vi.fn()}>
+        <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+        <SelectContent>
+          <DeferredSelectItem value="first" label="First" />
+          <SelectItem value="second">Second</SelectItem>
+        </SelectContent>
+      </Select>
+    )
+
+    const selectedOption = await screen.findByRole("option", { name: "First" })
+
+    await waitFor(() => expect(selectedOption).toHaveFocus())
+  })
+
+  it("moves focus from its fallback to a selected option that mounts after the grace period", async () => {
+    render(
+      <Select open value="first" onValueChange={vi.fn()}>
+        <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+        <SelectContent>
+          <DeferredSelectItem value="first" label="First" delay={120} />
+          <SelectItem value="second">Second</SelectItem>
+        </SelectContent>
+      </Select>
+    )
+
+    const fallbackOption = screen.getByRole("option", { name: "Second" })
+    await waitFor(() => expect(fallbackOption).toHaveFocus())
+
+    const selectedOption = await screen.findByRole("option", { name: "First" })
+    await waitFor(() => expect(selectedOption).toHaveFocus())
+  })
+
+  it("focuses the first option after it mounts for a placeholder value", async () => {
+    render(
+      <Select open value="" onValueChange={vi.fn()}>
+        <SelectTrigger aria-label="Choose an option">Choose</SelectTrigger>
+        <SelectContent>
+          <DeferredSelectItem value="first" label="First" />
+        </SelectContent>
+      </Select>
+    )
+
+    const firstOption = await screen.findByRole("option", { name: "First" })
+
+    await waitFor(() => expect(firstOption).toHaveFocus())
+  })
+
+  it("focuses the first option when the current value does not exist", async () => {
+    render(
+      <Select open value="stale" onValueChange={vi.fn()}>
+        <SelectTrigger aria-label="Choose an option">Missing</SelectTrigger>
+        <SelectContent>
+          <SelectItem value="first">First</SelectItem>
+          <SelectItem value="second">Second</SelectItem>
+        </SelectContent>
+      </Select>
+    )
+
+    const firstOption = await screen.findByRole("option", { name: "First" })
+
+    await waitFor(() => expect(firstOption).toHaveFocus())
+  })
+
+  it("cleans up the fallback timer when focusing content closes the popup", async () => {
+    vi.useFakeTimers()
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout")
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout")
+
+    function CloseOnContentFocus() {
+      const [open, setOpen] = useState(true)
+
+      return (
+        <>
+          <button type="button">Outside action</button>
+          <Select
+            open={open}
+            value="stale"
+            onOpenChange={setOpen}
+            onValueChange={vi.fn()}
+          >
+            <SelectTrigger aria-label="Choose an option">Missing</SelectTrigger>
+            <SelectContent onFocus={() => flushSync(() => setOpen(false))}>
+              <SelectItem value="first">First</SelectItem>
+              <SelectItem value="second">Second</SelectItem>
+            </SelectContent>
+          </Select>
+        </>
+      )
+    }
+
+    try {
+      const { unmount } = render(<CloseOnContentFocus />)
+      const firstOption = screen.getByRole("option", { name: "First" })
+      const firstOptionFocusSpy = vi.spyOn(firstOption, "focus")
+
+      await act(async () => vi.advanceTimersByTimeAsync(20))
+
+      const fallbackTimerCallIndex = setTimeoutSpy.mock.calls.findIndex(
+        ([, delay]) => delay === 50
+      )
+      const fallbackTimer =
+        setTimeoutSpy.mock.results[fallbackTimerCallIndex]?.value
+
+      expect(fallbackTimerCallIndex).toBeGreaterThanOrEqual(0)
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(fallbackTimer)
+
+      const outsideAction = screen.getByRole("button", {
+        name: "Outside action",
+      })
+      outsideAction.focus()
+      await act(async () => vi.advanceTimersByTimeAsync(100))
+
+      expect(outsideAction).toHaveFocus()
+      expect(firstOptionFocusSpy).not.toHaveBeenCalled()
+
+      unmount()
+    } finally {
+      setTimeoutSpy.mockRestore()
+      clearTimeoutSpy.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
   it("keeps footer actions outside the listbox and traverses them with Tab", async () => {
     const user = userEvent.setup()
 

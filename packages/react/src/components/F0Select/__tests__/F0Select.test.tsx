@@ -708,6 +708,8 @@ describe("Select", () => {
       const description = screen.getByText("Can view")
       const indicator = option.querySelector(".text-f1-icon-selected")
 
+      await waitFor(() => expect(option).toHaveFocus())
+
       expect(content.className).toContain("rounded-md")
       expect(content.className).toContain("shadow-md")
       expect(option.className).toContain("px-3")
