@@ -46,35 +46,35 @@ values embedded in desktop rows.
         <td><code>string</code></td>
         <td>—</td>
         <td>Yes</td>
-        <td>Visible field label, or the accessible-name prefix for an inline select.</td>
+        <td>Visible field label, or the accessible name for an inline select.</td>
       </tr>
       <tr>
         <td><code>options</code></td>
-        <td><code>F0SelectItemProps&lt;T&gt;[] | F0SelectInlineItemProps&lt;T&gt;[]</code></td>
+        <td><code>F0SelectItemProps&lt;T&gt;[]</code></td>
         <td><code>[]</code></td>
         <td>Without <code>source</code></td>
-        <td>Static items and separators. Required inline; mutually exclusive with <code>source</code> for fields. Inline rows support Dropdown content—label, description, icon, avatar, and disabled state—but not Select metadata or tags.</td>
+        <td>Static items and separators. Mutually exclusive with <code>source</code>.</td>
       </tr>
       <tr>
         <td><code>source</code></td>
         <td><code>DataSourceDefinition</code></td>
         <td>—</td>
         <td>Without <code>options</code></td>
-        <td>Field-only data source for remote, filtered, grouped, or paginated options.</td>
+        <td>Data source for remote, filtered, grouped, or paginated options.</td>
       </tr>
       <tr>
         <td><code>mapOptions</code></td>
         <td><code>(item: R) =&gt; F0SelectItemProps&lt;T, R&gt;</code></td>
         <td>—</td>
         <td>With <code>source</code></td>
-        <td>Field-only mapper from each data-source record to an option.</td>
+        <td>Maps each data-source record to an option.</td>
       </tr>
       <tr>
         <td><code>searchFn</code></td>
         <td><code>(option, search?) =&gt; boolean | undefined</code></td>
         <td>Label matching</td>
         <td>—</td>
-        <td>Overrides filtering for static field options.</td>
+        <td>Overrides filtering for static options.</td>
       </tr>
       <tr>
         <td><code>size</code></td>
@@ -122,10 +122,10 @@ values embedded in desktop rows.
       </tr>
       <tr>
         <td><code>defaultItem</code></td>
-        <td>Field: <code>F0SelectItemObject&lt;T, R&gt; | F0SelectItemObject&lt;T, R&gt;[]</code>; inline: <code>F0SelectInlineItemObject&lt;T, R&gt;</code></td>
+        <td><code>F0SelectItemObject&lt;T, R&gt; | F0SelectItemObject&lt;T, R&gt;[]</code></td>
         <td>—</td>
         <td>—</td>
-        <td>Initial item data used before an option is available from the data set. Inline items exclude field-only metadata and tags.</td>
+        <td>Initial item data used before an option is available from the data set.</td>
       </tr>
       <tr>
         <td><code>onChange</code></td>
@@ -188,7 +188,7 @@ values embedded in desktop rows.
         <td><code>boolean</code></td>
         <td><code>true</code></td>
         <td>—</td>
-        <td>Field-only behavior that keeps manual selections when search, filters, or sorting change.</td>
+        <td>Keeps manual selections when search, filters, or sorting change.</td>
       </tr>
 
       <tr>
@@ -215,7 +215,7 @@ values embedded in desktop rows.
         <td><code>boolean</code></td>
         <td><code>false</code></td>
         <td>—</td>
-        <td>Shows a search input above field options. Not available inline.</td>
+        <td>Shows a search input above the options.</td>
       </tr>
       <tr>
         <td><code>searchBoxPlaceholder</code></td>
@@ -257,7 +257,7 @@ values embedded in desktop rows.
         <td><code>Action[]</code></td>
         <td>—</td>
         <td>—</td>
-        <td>Adds footer buttons to fields. Inline selects map actions to existing Dropdown items, including icons, disabled state, and critical styling.</td>
+        <td>Adds footer actions. Use a critical action for destructive choices such as removing access.</td>
       </tr>
       <tr>
         <td><code>onCreate</code></td>
@@ -271,14 +271,14 @@ values embedded in desktop rows.
         <td><code>HTMLElement | null</code></td>
         <td>Document or dialog container</td>
         <td>—</td>
-        <td>Overrides where field or inline popup content is portalled. Inline forwards it to Dropdown.</td>
+        <td>Overrides where popup content is portalled.</td>
       </tr>
       <tr>
         <td><code>fitContentWidth</code></td>
         <td><code>boolean</code></td>
-        <td><code>false</code></td>
+        <td><code>false</code> field; <code>true</code> inline</td>
         <td>—</td>
-        <td>Sizes the field popup to its content instead of the standard 20rem minimum. Inline always uses Dropdown's content sizing.</td>
+        <td>Sizes the popup to its content instead of the standard 20rem minimum.</td>
       </tr>
 
       <tr>
@@ -387,7 +387,7 @@ values embedded in desktop rows.
 <Canvas of={InlineStories.Variants} />
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Variant</th>
@@ -410,8 +410,7 @@ values embedded in desktop rows.
         </td>
         <td>
           Compact desktop rows that edit one role, status, or access level
-          without clearing. The borderless trigger delegates its popup, option
-          rows, actions, focus, and keyboard behavior to Dropdown.
+          without clearing.
         </td>
       </tr>
     </tbody>
@@ -423,7 +422,7 @@ values embedded in desktop rows.
 <Canvas of={InlineStories.Sizes} />
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Size</th>
@@ -454,7 +453,7 @@ values embedded in desktop rows.
 **When to use**
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -479,8 +478,7 @@ values embedded in desktop rows.
       <tr>
         <td>Large or remote option set</td>
         <td>
-          A field select uses a data source for pagination, grouping, sorting,
-          or filters. Inline selects intentionally use static options only.
+          A data source supplies pagination, grouping, sorting, or filters.
         </td>
       </tr>
     </tbody>
@@ -490,7 +488,7 @@ values embedded in desktop rows.
 **When not to use**
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -540,7 +538,7 @@ values embedded in desktop rows.
   - **Correct:** "Owner", "Editor", "Viewer"
   - **Incorrect:** "This person can only view the policy"
 - Use descriptions for extra capability detail rather than lengthening the label
-- Name actions with an explicit verb and object
+- Name footer actions with an explicit verb and object
   - **Correct:** "Remove access"
   - **Incorrect:** "Remove"
 
@@ -567,13 +565,13 @@ values embedded in desktop rows.
 
 ### Behavior
 
-- WHEN <code>variant="inline"</code> → THEN the required <code>label</code> prefixes the trigger's accessible name, followed by its selected label or placeholder, and is not rendered visually.
-- WHEN <code>variant="inline"</code> → THEN selection is single and non-clearable, options are static Dropdown rows without Select metadata or tags, and custom triggers plus field-only search, data-source, validation, list, preview, and apply props are unavailable.
-- WHEN the inline trigger opens → THEN the existing Dropdown renders a content-sized menu and owns its popup styling, focus management, and keyboard behavior.
-- WHEN an inline option is selected → THEN its value, original item, and option are reported through the standard callbacks; Dropdown exposes its checked state and marks it with a trailing check without consuming the option's leading icon or avatar slot.
-- WHEN <code>actions</code> are provided → THEN field selects keep their existing button footer, while inline selects append the actions to Dropdown after one separator.
-- WHEN an inline action has an <code>icon</code>, <code>variant="critical"</code>, or <code>disabled</code> → THEN those values map directly to Dropdown's icon, critical, and disabled item behavior.
-- WHEN the inline menu closes → THEN Dropdown restores focus to its trigger.
+- WHEN <code>variant="inline"</code> → THEN the required <code>label</code> becomes the trigger's accessible name and is not rendered visually.
+- WHEN <code>variant="inline"</code> → THEN the trigger uses the compact borderless presentation while the popup reuses the field variant's option rows, selection indicator, and action footer.
+- WHEN <code>variant="inline"</code> → THEN selection is single and non-clearable, custom triggers and field-only state props are unavailable, and the popup fits its content by default.
+- WHEN <code>fitContentWidth=false</code> is explicit → THEN the standard 20rem popup minimum overrides the inline default.
+- WHEN an option has a <code>description</code> → THEN its popup row is 64px high; otherwise it remains 32px high.
+- WHEN <code>actions</code> are provided → THEN the existing action footer renders below the option list.
+- WHEN the inline popup closes → THEN focus returns to its trigger.
 - <code>T</code> is the string value type and <code>R</code> is the original
   record type, defaulting to <code>unknown</code>. A literal union such as
   <code>"owner" | "editor" | "viewer"</code> keeps <code>value</code>, option
@@ -611,18 +609,10 @@ Use a data source when options load remotely or require pagination.
 
 ## Accessibility
 
-### Field keyboard interaction
-
-- The field trigger is a combobox. <kbd>Enter</kbd>, <kbd>Space</kbd>, or an arrow key opens its listbox.
-- <kbd>Arrow up</kbd> and <kbd>Arrow down</kbd> move through options;
-  <kbd>Enter</kbd> selects the focused option.
-- <kbd>Escape</kbd> closes the listbox and restores focus to the field trigger.
-- Searchable fields move focus into their search input while keeping listbox keyboard navigation available.
-
-### Inline keyboard interaction
+### Keyboard interaction
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Key</th>
@@ -634,31 +624,25 @@ Use a data source when options load remotely or require pagination.
         <td>
           <kbd>Tab</kbd>
         </td>
-        <td>
-          Moves focus to or away from the closed trigger. While the menu is
-          open, Dropdown owns the standard menu dismissal and focus behavior.
-        </td>
+        <td>Moves focus to or away from the closed trigger.</td>
       </tr>
       <tr>
         <td>
           <kbd>Enter</kbd> / <kbd>Space</kbd>
         </td>
-        <td>
-          Opens the popup, selects the focused option, or activates a focused
-          action item.
-        </td>
+        <td>Opens the popup or selects the focused option.</td>
       </tr>
       <tr>
         <td>
           <kbd>Arrow up</kbd> / <kbd>Arrow down</kbd>
         </td>
-        <td>Moves focus between enabled option and action items.</td>
+        <td>Moves focus between enabled options.</td>
       </tr>
       <tr>
         <td>
           <kbd>Home</kbd> / <kbd>End</kbd>
         </td>
-        <td>Moves focus to the first or last enabled menu item.</td>
+        <td>Moves focus to the first or last enabled option.</td>
       </tr>
       <tr>
         <td>
@@ -670,16 +654,9 @@ Use a data source when options load remotely or require pagination.
   </table>
 </Unstyled>
 
-### Field screen reader behavior
+### Screen reader behavior
 
-- The visible or visually hidden field label names a <code>combobox</code> trigger.
-- The popup exposes a <code>listbox</code> with <code>option</code> children and the current selected state.
-- Validation status, hints, and errors remain associated with the field control.
-
-### Inline screen reader behavior
-
-- The trigger is a labeled button with <code>aria-haspopup="menu"</code> and <code>aria-expanded</code>. Its accessible name combines the required <code>label</code> with the current option label or placeholder. Make the label specific to the subject in repeated rows—for example "Access level for Jane Doe".
-- Dropdown exposes options as <code>menuitemradio</code> elements with <code>aria-checked</code>, while actions remain <code>menuitem</code> elements.
-- Option and action labels provide each Dropdown item's accessible name.
+- The trigger exposes <code>role="combobox"</code>, <code>aria-expanded</code>, and <code>aria-controls</code>; popup options are announced within a listbox.
+- Inline <code>label</code> text is applied as <code>aria-label</code>. Make it specific to the controlled value and, in repeated rows, to the subject—for example "Access level for Jane Doe".
 - The inline chevron is decorative and hidden from the accessibility tree.
 - Disabled triggers use the native <code>disabled</code> state.

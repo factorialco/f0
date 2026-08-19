@@ -1,8 +1,8 @@
 import { useDeepCompareEffect } from "@reactuses/core"
+import { useComposedRefs } from "@radix-ui/react-compose-refs"
 import { cva } from "cva"
 import { isEqual } from "lodash"
 import {
-  type ComponentPropsWithoutRef,
   forwardRef,
   useCallback,
   useContext,
@@ -18,7 +18,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { F0InputField } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
-import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -123,10 +122,7 @@ const inlineSelectTriggerVariants = cva({
   },
 })
 
-type InlineSelectTriggerProps = Omit<
-  ComponentPropsWithoutRef<"button">,
-  "children"
-> & {
+type InlineSelectTriggerProps = {
   label: string
   placeholder?: string
   selection: F0SelectItemObject<string>[]
@@ -138,31 +134,14 @@ const InlineSelectTrigger = forwardRef<
   HTMLButtonElement,
   InlineSelectTriggerProps
 >(function InlineSelectTrigger(
-  {
-    label,
-    placeholder,
-    selection,
-    hasValue,
-    size,
-    className,
-    type = "button",
-    ...props
-  },
+  { label, placeholder, selection, hasValue, size },
   ref
 ) {
-  const accessibleValue = hasValue ? selection[0]?.label : placeholder
-
   return (
-    <button
-      {...props}
+    <SelectTrigger
       ref={ref}
-      type={type}
-      aria-label={accessibleValue ? `${label}: ${accessibleValue}` : label}
-      className={cn(
-        inlineSelectTriggerVariants({ size }),
-        focusRing(),
-        className
-      )}
+      aria-label={label}
+      className={cn(inlineSelectTriggerVariants({ size }), focusRing())}
     >
       <span className="flex min-w-0 max-w-full items-center">
         {hasValue ? (
@@ -179,7 +158,7 @@ const InlineSelectTrigger = forwardRef<
       >
         <F0Icon icon={ChevronDown} size="sm" />
       </span>
-    </button>
+    </SelectTrigger>
   )
 })
 
@@ -260,7 +239,17 @@ const F0SelectComponent = forwardRef(function Select<
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
+  const inlineTriggerRef = useRef<HTMLButtonElement>(null)
+  const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
+  const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
+
+  useEffect(() => {
+    if (variant === "inline" && previousOpenRef.current && !openLocal) {
+      inlineTriggerRef.current?.focus({ preventScroll: true })
+    }
+    previousOpenRef.current = openLocal
+  }, [openLocal, variant])
 
   const defaultItems = useMemo(
     () =>
@@ -581,7 +570,7 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }, [data.records, optionMapper, getDisplayItemsForSelection])
   const effectiveSize = hasStatusTag ? "md" : size
-  const effectiveFitContentWidth = fitContentWidth ?? false
+  const effectiveFitContentWidth = fitContentWidth ?? variant === "inline"
 
   const onSearchChangeLocal = (value: string) => {
     setCurrentSearch(value)
@@ -1102,52 +1091,6 @@ const F0SelectComponent = forwardRef(function Select<
       .map((item) => String(item.id))
   }, [selectedState.items])
 
-  const inlineDropdownItems = useMemo<DropdownItem[]>(() => {
-    if (variant !== "inline") return []
-
-    const optionItems: DropdownItem[] = options.map((option) => {
-      if (option.type === "separator") {
-        return { type: "separator" }
-      }
-
-      const isSelected = localValue[0] === String(option.value)
-
-      return {
-        label: option.label,
-        description: option.description,
-        avatar: option.avatar,
-        icon: option.icon,
-        disabled: option.disabled,
-        selected: isSelected,
-        onClick: () => {
-          if (isSelected || option.disabled) return
-          onItemCheckChange(String(option.value), true)
-        },
-      }
-    })
-
-    const actionItems: DropdownItem[] = (actions ?? []).map((action) => ({
-      label: action.label,
-      icon: action.icon,
-      critical: action.variant === "critical",
-      disabled: action.disabled,
-      onClick: action.onClick,
-    }))
-
-    if (optionItems.length > 0 && actionItems.length > 0) {
-      const normalizedOptionItems = [...optionItems]
-      while (normalizedOptionItems.at(-1)?.type === "separator") {
-        normalizedOptionItems.pop()
-      }
-
-      return normalizedOptionItems.length > 0
-        ? [...normalizedOptionItems, { type: "separator" }, ...actionItems]
-        : actionItems
-    }
-
-    return [...optionItems, ...actionItems]
-  }, [actions, localValue, onItemCheckChange, options, variant])
-
   /**
    * Common props for the select primitive
    */
@@ -1333,129 +1276,116 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }
 
-  if (variant === "inline") {
-    return (
-      <DataTestIdWrapper dataTestId={dataTestId}>
-        <Dropdown
-          items={inlineDropdownItems}
-          open={openLocal ?? false}
-          onOpenChange={handleChangeOpenLocal}
-          disabled={disabled}
-          portalContainer={effectivePortalContainer}
-        >
+  return (
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <SelectPrimitive {...selectPrimitiveProps}>
+        {variant === "inline" ? (
           <InlineSelectTrigger
-            ref={ref}
+            ref={composedTriggerRef}
             label={label}
             placeholder={placeholder}
             selection={getDisplayItemsForSelection}
             hasValue={!!localValue[0]}
             size={size}
-            disabled={disabled}
           />
-        </Dropdown>
-      </DataTestIdWrapper>
-    )
-  }
-
-  return (
-    <DataTestIdWrapper dataTestId={dataTestId}>
-      <SelectPrimitive {...selectPrimitiveProps}>
-        <SelectTrigger ref={ref} asChild>
-          {children ? (
-            <div
-              className="flex w-full items-center justify-between"
-              aria-label={label || placeholder}
-            >
-              {children}
-            </div>
-          ) : (
-            <F0InputField
-              label={label}
-              error={error}
-              required={required}
-              status={status}
-              hint={hint}
-              icon={icon}
-              labelIcon={labelIcon}
-              hideLabel={hideLabel}
-              value={
-                multiple
-                  ? // For multiple: use count of selected items
-                    Math.max(
-                      localValue.length,
-                      selectionMeta.selectedItemsCount
-                    ).toString()
-                  : // For single: use the selected value directly
-                    (localValue[0] ?? undefined)
-              }
-              isEmpty={(value) =>
-                multiple ? !value || +(value ?? 0) === 0 : !value
-              }
-              onClear={() => {
-                hasUserInteracted.current = true
-                clearSelection()
-                // Clear the cache when clearing selection
-                selectedItemsCache.current.clear()
-                // Call with undefined to indicate no item is selected
-                ;(
-                  onChangeSelectedOption as (
-                    option: undefined,
-                    checked: boolean
-                  ) => void
-                )?.(undefined, false)
-              }}
-              placeholder={placeholder || ""}
-              disabled={disabled}
-              clearable={clearable}
-              size={effectiveSize}
-              loadingIndicator={{
-                asOverlay: true,
-                offset: 34,
-              }}
-              loading={isInitialLoading || loading || isLoading}
-              name={name}
-              onClickContent={() => {
-                handleChangeOpenLocal(!openLocal)
-              }}
-              append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={effectiveSize}
-                />
-              }
-            >
-              <button
+        ) : (
+          <SelectTrigger ref={composedTriggerRef} asChild>
+            {children ? (
+              <div
                 className="flex w-full items-center justify-between"
                 aria-label={label || placeholder}
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
               >
-                {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
-                  : !!localValue[0]) && (
-                  <SelectedItems
-                    multiple={multiple}
-                    totalSelectedCount={
-                      multiple
-                        ? Math.max(
-                            localValue.length,
-                            selectionMeta.selectedItemsCount
-                          )
-                        : localValue[0]
-                          ? 1
-                          : 0
-                    }
-                    allSelected={selectedState.allSelected}
-                    selection={getDisplayItemsForSelection}
+                {children}
+              </div>
+            ) : (
+              <F0InputField
+                label={label}
+                error={error}
+                required={required}
+                status={status}
+                hint={hint}
+                icon={icon}
+                labelIcon={labelIcon}
+                hideLabel={hideLabel}
+                value={
+                  multiple
+                    ? // For multiple: use count of selected items
+                      Math.max(
+                        localValue.length,
+                        selectionMeta.selectedItemsCount
+                      ).toString()
+                    : // For single: use the selected value directly
+                      (localValue[0] ?? undefined)
+                }
+                isEmpty={(value) =>
+                  multiple ? !value || +(value ?? 0) === 0 : !value
+                }
+                onClear={() => {
+                  hasUserInteracted.current = true
+                  clearSelection()
+                  // Clear the cache when clearing selection
+                  selectedItemsCache.current.clear()
+                  // Call with undefined to indicate no item is selected
+                  ;(
+                    onChangeSelectedOption as (
+                      option: undefined,
+                      checked: boolean
+                    ) => void
+                  )?.(undefined, false)
+                }}
+                placeholder={placeholder || ""}
+                disabled={disabled}
+                clearable={clearable}
+                size={effectiveSize}
+                loadingIndicator={{
+                  asOverlay: true,
+                  offset: 34,
+                }}
+                loading={isInitialLoading || loading || isLoading}
+                name={name}
+                onClickContent={() => {
+                  handleChangeOpenLocal(!openLocal)
+                }}
+                append={
+                  <Arrow
+                    open={openLocal}
+                    disabled={disabled}
+                    size={effectiveSize}
                   />
-                )}
-              </button>
-            </F0InputField>
-          )}
-        </SelectTrigger>
+                }
+              >
+                <button
+                  className="flex w-full items-center justify-between"
+                  aria-label={label || placeholder}
+                  onClick={(e) => {
+                    e.preventDefault()
+                  }}
+                >
+                  {(multiple
+                    ? localValue.length > 0 ||
+                      selectionMeta.selectedItemsCount > 0
+                    : !!localValue[0]) && (
+                    <SelectedItems
+                      multiple={multiple}
+                      totalSelectedCount={
+                        multiple
+                          ? Math.max(
+                              localValue.length,
+                              selectionMeta.selectedItemsCount
+                            )
+                          : localValue[0]
+                            ? 1
+                            : 0
+                      }
+                      allSelected={selectedState.allSelected}
+                      selection={getDisplayItemsForSelection}
+                    />
+                  )}
+                </button>
+              </F0InputField>
+            )}
+          </SelectTrigger>
+        )}
         {openLocal && selectContent}
       </SelectPrimitive>
     </DataTestIdWrapper>

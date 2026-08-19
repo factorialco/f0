@@ -12,7 +12,6 @@ import {
   Dropdown,
   type DropdownItem,
   MobileDropdown,
-  type MobileDropdownItem,
 } from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -108,7 +107,7 @@ export interface ButtonGroupProps {
   /** Secondary actions (buttons / split buttons / inline separators), or a single link. */
   secondaryActions?: ButtonGroupSecondaryItem[] | ButtonGroupSecondaryLink
   /** Extra actions, always reachable through the "⋯" menu (supports separators / critical). */
-  otherActions?: MobileDropdownItem[]
+  otherActions?: DropdownItem[]
   /** Button + menu-trigger size. Responsive `{ base, md }` flips with `stack`. @default "md" */
   size?: ButtonGroupSize
   /** Row alignment. @default "end" */
@@ -216,7 +215,7 @@ interface ButtonGroupBranchProps {
   primaryAction?: ButtonGroupPrimaryAction
   secondaryItems: ButtonGroupSecondaryItem[]
   secondaryLink?: ButtonGroupSecondaryLink
-  otherActions: MobileDropdownItem[]
+  otherActions: DropdownItem[]
   size: ButtonSize
   align: "end" | "between"
   canOverflow: boolean

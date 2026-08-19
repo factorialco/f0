@@ -1,9 +1,5 @@
-import {
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  forwardRef,
-  useMemo,
-} from "react"
+import * as React from "react"
+import { useMemo } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle } from "@/icons/app"
@@ -13,9 +9,9 @@ import { Checkbox } from "@/ui/checkbox"
 import { useSelectContext } from "../SelectContext.tsx"
 import * as SelectPrimitive from "./radix-ui"
 
-const SelectItem = forwardRef<
-  ElementRef<typeof SelectPrimitive.Item>,
-  ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
     selected?: boolean
     multiple?: boolean
   }

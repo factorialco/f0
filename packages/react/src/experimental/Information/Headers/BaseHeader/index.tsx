@@ -19,8 +19,8 @@ import {
 } from "@/experimental/Information/utils"
 import {
   Dropdown,
+  DropdownItem,
   MobileDropdown,
-  type MobileDropdownItem,
 } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -51,7 +51,7 @@ interface BaseHeaderProps {
   description?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]
-  otherActions?: (MobileDropdownItem & { isVisible?: boolean })[]
+  otherActions?: (DropdownItem & { isVisible?: boolean })[]
   status?: {
     label: string
     text: string
