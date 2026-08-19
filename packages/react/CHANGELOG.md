@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.39.0](https://github.com/factorialco/f0/compare/f0-react-v6.38.1...f0-react-v6.39.0) (2026-08-19)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add info hint to widget headers ([#5103](https://github.com/factorialco/f0/issues/5103)) ([2ada46d](https://github.com/factorialco/f0/commit/2ada46d3b286e235f2d3c9f231ed344caa7bc508))
+
 ## [6.38.1](https://github.com/factorialco/f0/compare/f0-react-v6.38.0...f0-react-v6.38.1) (2026-08-19)
 
 
