@@ -18,6 +18,8 @@ import type {
 } from "../components/F0GraphNode"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
+import { STACKED_RANK_SEP_RATIO } from "../constants"
+
 function handlePositions(direction: LayoutDirection): {
   source: Position
   target: Position
@@ -57,6 +59,8 @@ export interface GraphNodeData extends Record<string, unknown> {
   ariaSetSize: number
   ariaPosInSet: number
   visibleChildIds?: string[]
+  /** Set when this node is one row of its parent's stacked column. */
+  stacked?: boolean
 }
 
 export type GraphRFNode = RFNode<GraphNodeData>
@@ -108,6 +112,15 @@ export const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
   dot: (NODE_RANK_SEP - EXPANDER_SIZE.dot) / 2,
 }
 
+// Same centering, for the shortened lane above a stacked column. Without it the
+// affordance would keep the full-lane offset and overlap the first row.
+const STACKED_RANK_SEP = NODE_RANK_SEP * STACKED_RANK_SEP_RATIO
+export const EXPANDER_Y_OFFSET_STACKED_BY_ZOOM: Record<ZoomLevel, number> = {
+  detail: (STACKED_RANK_SEP - EXPANDER_SIZE.detail) / 2,
+  compact: (STACKED_RANK_SEP - EXPANDER_SIZE.compact) / 2,
+  dot: (STACKED_RANK_SEP - EXPANDER_SIZE.dot) / 2,
+}
+
 // ─── F0GraphNodeWrapper ────────────────────────────────────────
 
 function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
@@ -130,6 +143,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     ariaSetSize,
     ariaPosInSet,
     visibleChildIds,
+    stacked,
   } = data as GraphNodeData
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -173,6 +187,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     posInSet: ariaPosInSet,
     nodeId: id,
     ariaOwns,
+    stacked: stacked ?? false,
     onExpandToggle: () => toggleExpand(id),
     onClick: () => selectNode(id),
     nodeRef: nodeRefCallback,
@@ -192,7 +207,13 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
       >
         <div
           className="pointer-events-auto"
-          style={{ maxWidth: "calc(100% - 20px)" }}
+          // A card is content-sized inside the inset layout box; a stacked row
+          // fills that same inset width instead, so the column's rows line up
+          // flush with the edges of the parent card above them.
+          style={{
+            width: stacked ? "100%" : undefined,
+            maxWidth: "calc(100% - 20px)",
+          }}
         >
           {renderNode(graphNode, ctx)}
         </div>
@@ -214,6 +235,7 @@ export const F0GraphNodeWrapper = memo(
     if (prevData.ariaLevel !== nextData.ariaLevel) return false
     if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
     if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
+    if (prevData.stacked !== nextData.stacked) return false
     if (
       (prevData.visibleChildIds?.join(",") ?? "") !==
       (nextData.visibleChildIds?.join(",") ?? "")

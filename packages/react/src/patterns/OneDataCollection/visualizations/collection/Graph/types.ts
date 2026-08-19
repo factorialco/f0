@@ -74,6 +74,26 @@ export type GraphVisualizationOptions<
   /** Number of children a node has. A node is expandable when this is `> 0`. */
   getChildrenCount: (record: R) => number
   /**
+   * Whether this record's children render as a vertical stack of compact rows
+   * directly under it, instead of the default horizontal fan-out. Use it for
+   * children that read as a list belonging to the record rather than as
+   * branches in their own right — job levels under a role, plan tiers under a
+   * product. A stacked group reserves no horizontal space, so the record's
+   * siblings close in around it.
+   *
+   * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+   * all of them); a group with an expandable child keeps the normal fan-out.
+   * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+   * `avatar` / `subtitle` / `tags` do not apply to them.
+   */
+  stackChildren?: (record: R) => boolean
+  /**
+   * Trailing content for a stacked row — a checkbox, a count, a small icon
+   * button. Rendered at the row's trailing edge; clicks inside it do not select
+   * the node. Ignored for records that are not rendered as stacked rows.
+   */
+  stackedTrailing?: (record: R) => ReactNode
+  /**
    * Returns the filters that, applied to the source `dataAdapter`, fetch the
    * direct children of `parentId`. `parentId === null` must return the roots.
    */

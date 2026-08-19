@@ -30,6 +30,7 @@ import {
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
+  EXPANDER_Y_OFFSET_STACKED_BY_ZOOM,
   type CollapserNodeData,
   type ExpanderNodeData,
   type GraphNodeData,
@@ -39,6 +40,7 @@ import {
   computeLayoutBounds,
   deriveEdgesFromTree,
   nodeIntersectsRect,
+  resolveStackedParents,
 } from "../utils"
 import { useLayoutEngine } from "./useLayoutEngine"
 import { useViewportGeometry } from "./useViewportGeometry"
@@ -71,6 +73,8 @@ interface UseGraphRenderModelOptions<T> {
   reserveTagRow?: boolean
   nodeWidthProp?: number
   nodeHeightProp?: number
+  stackedNodeHeightProp?: number
+  stackedNodeGapProp?: number
   layoutEngineProp?: LayoutEngine
   zoomLevel: ZoomLevel
   direction: LayoutDirection
@@ -126,6 +130,8 @@ export function useGraphRenderModel<T>({
   reserveTagRow,
   nodeWidthProp,
   nodeHeightProp,
+  stackedNodeHeightProp,
+  stackedNodeGapProp,
   layoutEngineProp,
   zoomLevel,
   direction,
@@ -197,6 +203,13 @@ export function useGraphRenderModel<T>({
     return map
   }, [visibleTreeNodes, expandedNodes])
 
+  // ── Stacked groups ── Single source of truth for "does this group stack?",
+  // shared by the layout input, the edge pass and the node render context.
+  const { stackedParentIds, stackedChildIndex } = useMemo(
+    () => resolveStackedParents(visibleTreeNodes),
+    [visibleTreeNodes]
+  )
+
   // ── Edges ──
   const resolvedEdges = useMemo((): GraphEdge[] => {
     if (resolvedEdgesProp && resolvedEdgesProp.length > 0)
@@ -261,8 +274,19 @@ export function useGraphRenderModel<T>({
       childrenCount: 0,
       childrenLoaded: true,
     }))
-    return [...visibleTreeNodes, ...expanderTreeNodes]
-  }, [visibleTreeNodes, expanderNodes])
+    // Hand the engine the RESOLVED flag, never the raw request: a group whose
+    // children can expand falls back to the normal fan-out, and the engine must
+    // not see `stackChildren` on it (it would lay the children out as a column
+    // with nowhere to hang their subtrees). Copies are made only for the nodes
+    // whose flag actually changes, so identity — and the layout memo — holds for
+    // every other node.
+    const treeNodes = visibleTreeNodes.map((node) => {
+      const stacked = stackedParentIds.has(node.id)
+      if (Boolean(node.stackChildren) === stacked) return node
+      return { ...node, stackChildren: stacked }
+    })
+    return [...treeNodes, ...expanderTreeNodes]
+  }, [visibleTreeNodes, expanderNodes, stackedParentIds])
 
   // ── Layout edges: include expander edges so the engine sees the full graph ──
   const layoutEdges = useMemo(() => visibleEdges, [visibleEdges])
@@ -286,6 +310,8 @@ export function useGraphRenderModel<T>({
   const builtInEngine = useLayoutEngine({
     nodeWidth: nodeWidthProp,
     nodeHeight: effectiveNodeHeight,
+    stackedNodeHeight: stackedNodeHeightProp,
+    stackedNodeGap: stackedNodeGapProp,
     snapGrid: BACKGROUND_DOT_GAP,
   })
   const layoutEngine = layoutEngineProp ?? builtInEngine
@@ -322,6 +348,9 @@ export function useGraphRenderModel<T>({
   // Scales per zoom level (+100% each step) so the larger expander button remains
   // visually centered in its lane.
   const EXPANDER_Y_OFFSET = EXPANDER_Y_OFFSET_BY_ZOOM[zoomLevel]
+  // A stacked column hangs in a shortened lane, so its affordance is centered
+  // in that shorter gap instead of the full rank one.
+  const EXPANDER_Y_OFFSET_STACKED = EXPANDER_Y_OFFSET_STACKED_BY_ZOOM[zoomLevel]
   const COLLAPSER_OFFSET_ADJUSTMENT =
     COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM[zoomLevel]
 
@@ -517,30 +546,37 @@ export function useGraphRenderModel<T>({
     // offsets lets React Flow derive the endpoint immediately; the real measured
     // handle bounds take over once the node's DOM mounts. Node dimensions are
     // supplied below (`width`/`height`) so the node also counts as "initialized".
-    const handleOffset = (p: Position): { x: number; y: number } =>
-      p === Position.Top
-        ? { x: BASE_W / 2, y: 0 }
-        : p === Position.Bottom
-          ? { x: BASE_W / 2, y: BASE_H }
-          : p === Position.Left
-            ? { x: 0, y: BASE_H / 2 }
-            : { x: BASE_W, y: BASE_H / 2 }
-    const graphNodeHandles = [
-      {
-        type: "source" as const,
-        position: sourcePos,
-        ...handleOffset(sourcePos),
-        width: 1,
-        height: 1,
-      },
-      {
-        type: "target" as const,
-        position: targetPos,
-        ...handleOffset(targetPos),
-        width: 1,
-        height: 1,
-      },
-    ] as RFNode["handles"]
+    //
+    // Built per box size rather than once, because a stacked row is shorter
+    // than a node card — seeding it with the card's height would anchor its
+    // handles below the row and bend the trunk edge into it.
+    const handlesForBox = (w: number, h: number): RFNode["handles"] => {
+      const handleOffset = (p: Position): { x: number; y: number } =>
+        p === Position.Top
+          ? { x: w / 2, y: 0 }
+          : p === Position.Bottom
+            ? { x: w / 2, y: h }
+            : p === Position.Left
+              ? { x: 0, y: h / 2 }
+              : { x: w, y: h / 2 }
+      return [
+        {
+          type: "source" as const,
+          position: sourcePos,
+          ...handleOffset(sourcePos),
+          width: 1,
+          height: 1,
+        },
+        {
+          type: "target" as const,
+          position: targetPos,
+          ...handleOffset(targetPos),
+          width: 1,
+          height: 1,
+        },
+      ] as RFNode["handles"]
+    }
+    const graphNodeHandles = handlesForBox(BASE_W, BASE_H)
 
     const nodes: RFNode[] = []
 
@@ -587,6 +623,12 @@ export function useGraphRenderModel<T>({
         visibleChildIds = kept.length > 0 ? kept : undefined
       }
 
+      // A stacked row carries its own (shorter) box from the layout; every
+      // other node uses the shared card size.
+      const isStacked = stackedChildIndex.has(treeNode.id)
+      const boxW = isStacked ? (pos?.width ?? BASE_W) : BASE_W
+      const boxH = isStacked ? (pos?.height ?? BASE_H) : BASE_H
+
       nodes.push({
         id: treeNode.id,
         type: "graphNode",
@@ -594,14 +636,17 @@ export function useGraphRenderModel<T>({
           x: pos?.x ?? 0,
           y: (pos?.y ?? 0) * yStretch,
         },
-        width: BASE_W,
+        width: boxW,
         // Only while windowing drives the render: seed the node's size and port
         // handles so React Flow can route its edges on the commit it is added,
         // before the DOM is measured (otherwise a freshly windowed-in node's
         // connecting lines drop for that frame). Omitted when windowing is off so
         // React Flow's own viewport culling keeps its original behavior.
         ...(windowingActive
-          ? { height: BASE_H, handles: graphNodeHandles }
+          ? {
+              height: boxH,
+              handles: isStacked ? handlesForBox(boxW, boxH) : graphNodeHandles,
+            }
           : null),
         sourcePosition: sourcePos,
         targetPosition: targetPos,
@@ -612,6 +657,7 @@ export function useGraphRenderModel<T>({
           ariaSetSize: aria?.setSize ?? 1,
           ariaPosInSet: aria?.posInSet ?? 1,
           visibleChildIds,
+          stacked: isStacked || undefined,
         } as GraphNodeData,
       })
     }
@@ -629,15 +675,18 @@ export function useGraphRenderModel<T>({
       }
       const pw = parentNode.width ?? BASE_W
       const ph = parentNode.height ?? BASE_H
+      const laneOffset = stackedParentIds.has(exp.parentId)
+        ? EXPANDER_Y_OFFSET_STACKED
+        : EXPANDER_Y_OFFSET
       const expX = isHorizontal
         ? direction === "LR"
-          ? parentNode.x + pw + EXPANDER_Y_OFFSET
+          ? parentNode.x + pw + laneOffset
           : parentNode.x - pw
         : parentNode.x
       const expY = isHorizontal
         ? parentNode.y * yStretch
         : direction === "TB"
-          ? parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET
+          ? parentNode.y * yStretch + ph + laneOffset
           : parentNode.y * yStretch - ph
       nodes.push({
         id: exp.id,
@@ -666,15 +715,18 @@ export function useGraphRenderModel<T>({
       const py = parentPos?.y ?? 0
       const pw = parentPos?.width ?? BASE_W
       const ph = parentPos?.height ?? BASE_H
+      const laneOffset = stackedParentIds.has(parent.id)
+        ? EXPANDER_Y_OFFSET_STACKED
+        : EXPANDER_Y_OFFSET
       const colX = isHorizontal
         ? direction === "LR"
-          ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? px + pw + laneOffset + COLLAPSER_OFFSET_ADJUSTMENT
           : px - pw
         : px
       const colY = isHorizontal
         ? py * yStretch
         : direction === "TB"
-          ? py * yStretch + ph + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? py * yStretch + ph + laneOffset + COLLAPSER_OFFSET_ADJUSTMENT
           : py * yStretch - ph
       nodes.push({
         id: `collapser-${parent.id}`,
@@ -700,11 +752,14 @@ export function useGraphRenderModel<T>({
     expandedNodes,
     stableRenderNode,
     EXPANDER_Y_OFFSET,
+    EXPANDER_Y_OFFSET_STACKED,
     COLLAPSER_OFFSET_ADJUSTMENT,
+    stackedParentIds,
     nodeWidthProp,
     effectiveNodeHeight,
     direction,
     ariaTreeInfo,
+    stackedChildIndex,
     controlLabels?.collapseChildren,
   ])
 
@@ -730,34 +785,47 @@ export function useGraphRenderModel<T>({
       !windowedIds ||
       (windowedIds.has(edge.source) && windowedIds.has(edge.target))
 
-    return visibleEdges.filter(inWindow).map((edge): RFEdge => {
-      const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
-      const isHovered = isInteractive && edge.id === hoveredEdgeId
-      const baseData = edge.data as Record<string, unknown> | undefined
-      return {
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        type: "graphEdge",
-        data: {
-          ...baseData,
-          graphEdge: edge,
-          // Interactive edges shift to the `hover` variant on pointer-enter.
-          // Consumer-provided `variant` in edge.data still wins when not hovered.
-          ...(isHovered ? { variant: "hover" as const } : null),
-          showDot:
-            !edge.target.startsWith("expander-") &&
-            !edge.source.startsWith("expander-") &&
-            !parentsWithCollapsers.has(edge.source),
-        },
-      }
-    })
+    // A stacked group is drawn as one trunk into the top of the column, not a
+    // line per row: the rows read as a list belonging to the parent, and a
+    // connector into each 40px row would be a ladder of stubs. Filtered HERE
+    // rather than out of `visibleEdges` — the layout engine derives its
+    // parent→child adjacency from that same list, so removing the edges earlier
+    // would orphan every row below the first and scatter it as its own root.
+    const drawn = (edge: GraphEdge): boolean =>
+      (stackedChildIndex.get(edge.target) ?? 0) === 0
+
+    return visibleEdges
+      .filter(inWindow)
+      .filter(drawn)
+      .map((edge): RFEdge => {
+        const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
+        const isHovered = isInteractive && edge.id === hoveredEdgeId
+        const baseData = edge.data as Record<string, unknown> | undefined
+        return {
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          type: "graphEdge",
+          data: {
+            ...baseData,
+            graphEdge: edge,
+            // Interactive edges shift to the `hover` variant on pointer-enter.
+            // Consumer-provided `variant` in edge.data still wins when not hovered.
+            ...(isHovered ? { variant: "hover" as const } : null),
+            showDot:
+              !edge.target.startsWith("expander-") &&
+              !edge.source.startsWith("expander-") &&
+              !parentsWithCollapsers.has(edge.source),
+          },
+        }
+      })
   }, [
     visibleEdges,
     visibleTreeNodes,
     expandedNodes,
     hoveredEdgeId,
     windowedIds,
+    stackedChildIndex,
   ])
 
   return {
