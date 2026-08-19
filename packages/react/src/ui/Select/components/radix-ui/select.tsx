@@ -717,6 +717,16 @@ const SelectContentImpl = React.forwardRef<
   )
 
   const focusSelectedItem = React.useCallback(() => {
+    const activeElement = document.activeElement
+    const focusIsInsideContent =
+      activeElement instanceof HTMLElement &&
+      activeElement !== content &&
+      content?.contains(activeElement)
+
+    if (focusIsInsideContent) {
+      return
+    }
+
     if (!context.multiple) {
       focusFirst([selectedItem, content])
       return
@@ -725,11 +735,23 @@ const SelectContentImpl = React.forwardRef<
 
   // Since this is not dependent on layout, we want to ensure this runs at the same time as
   // other effects across components. Hence why we don't call `focusSelectedItem` inside `position`.
+  const hasFocusedOnOpenRef = React.useRef(false)
+  const focusSelectedItemRef = React.useRef(focusSelectedItem)
+  focusSelectedItemRef.current = focusSelectedItem
   React.useEffect(() => {
-    if (isPositioned) {
-      focusSelectedItem()
+    if (!context.open) {
+      hasFocusedOnOpenRef.current = false
+      return
     }
-  }, [isPositioned, focusSelectedItem])
+
+    if (isPositioned && !hasFocusedOnOpenRef.current) {
+      const timeout = setTimeout(() => {
+        hasFocusedOnOpenRef.current = true
+        focusSelectedItemRef.current()
+      }, 0)
+      return () => clearTimeout(timeout)
+    }
+  }, [context.open, isPositioned])
 
   // prevent selecting items on `pointerup` in some cases after opening from `pointerdown`
   // and close on `pointerup` outside.
@@ -923,15 +945,19 @@ const SelectContentImpl = React.forwardRef<
                 (event) => {
                   const isModifierKey =
                     event.ctrlKey || event.altKey || event.metaKey
+                  const isSearchbox =
+                    event.target instanceof HTMLElement &&
+                    event.target.getAttribute("role") === "searchbox"
 
                   // select should not be navigated using tab key so we prevent it
                   if (event.key === "Tab") event.preventDefault()
 
-                  if (!isModifierKey && event.key.length === 1)
+                  if (!isModifierKey && !isSearchbox && event.key.length === 1)
                     handleTypeaheadSearch(event.key)
 
                   if (
-                    ["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)
+                    ["ArrowUp", "ArrowDown"].includes(event.key) ||
+                    (!isSearchbox && ["Home", "End"].includes(event.key))
                   ) {
                     const items = getItems().filter((item) => !item.disabled)
                     let candidateNodes = items.map((item) => item.ref.current!)

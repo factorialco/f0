@@ -102,6 +102,41 @@ describe("Select", () => {
     fireEvent.animationStart(teaser)
   }
 
+  const createDeferredOptionsSource = () => {
+    let resolveFetch: (() => void) | undefined
+    const source = createDataSourceDefinition<RecordType>({
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: async () => {
+          await new Promise<void>((resolve) => {
+            resolveFetch = resolve
+          })
+          return {
+            type: "infinite-scroll" as const,
+            cursor: undefined,
+            perPage: 100,
+            hasMore: false,
+            records: [
+              { id: "option1", name: "Option 1" },
+              { id: "option2", name: "Option 2" },
+            ],
+            total: 2,
+          }
+        },
+      },
+    })
+
+    return {
+      source,
+      resolve: () => {
+        if (!resolveFetch) {
+          throw new Error("The deferred options request has not started")
+        }
+        resolveFetch()
+      },
+    }
+  }
+
   const getSelectContent = () => {
     const content = screen
       .getByRole("listbox")
@@ -1002,22 +1037,102 @@ describe("Select", () => {
 
   it("should not lose the focus when the search input is focused and the list changes", async () => {
     const user = userEvent.setup({ delay: 100 })
+    const onSearchChange = vi.fn()
     render(
       <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
+        onSearchChange={onSearchChange}
         showSearchBox
       />
     )
 
     await openSelect(user)
-    await user.type(screen.getByRole("searchbox"), "Option 1")
+    const searchInput = screen.getByRole("searchbox")
+    await user.type(searchInput, "Option 1")
 
+    await waitFor(() =>
+      expect(onSearchChange).toHaveBeenLastCalledWith("Option 1")
+    )
     expect(screen.getByText("Option 1")).toBeInTheDocument()
     await waitFor(() =>
       expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
     )
+    expect(searchInput).toHaveFocus()
+  })
+
+  it("keeps search focus when async options load", async () => {
+    const user = userEvent.setup()
+    const deferredOptions = createDeferredOptionsSource()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        source={deferredOptions.source}
+        mapOptions={(item) => ({
+          value: item.id as string,
+          label: item.name as string,
+        })}
+        value="option2"
+        defaultItem={{ value: "option2", label: "Option 2" }}
+        showSearchBox
+      />
+    )
+
+    await openSelect(user)
+    const searchInput = screen.getByRole("searchbox")
+    await waitFor(() => expect(searchInput).toHaveFocus())
+
+    deferredOptions.resolve()
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getByRole("option", {
+          name: "Option 2",
+        })
+      ).toBeInTheDocument()
+    )
+    expect(searchInput).toHaveFocus()
+  })
+
+  it("keeps footer focus when async options load", async () => {
+    const user = userEvent.setup()
+    const deferredOptions = createDeferredOptionsSource()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        source={deferredOptions.source}
+        mapOptions={(item) => ({
+          value: item.id as string,
+          label: item.name as string,
+        })}
+        value="option2"
+        defaultItem={{ value: "option2", label: "Option 2" }}
+        showSearchBox
+        actions={[{ label: "Manage options", onClick: vi.fn() }]}
+      />
+    )
+
+    await openSelect(user)
+    const searchInput = screen.getByRole("searchbox")
+    const footerAction = screen.getByRole("button", { name: "Manage options" })
+    await waitFor(() => expect(searchInput).toHaveFocus())
+
+    await user.tab()
+    expect(footerAction).toHaveFocus()
+
+    deferredOptions.resolve()
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getByRole("option", {
+          name: "Option 2",
+        })
+      ).toBeInTheDocument()
+    )
+    expect(footerAction).toHaveFocus()
   })
 
   it("shows empty message when no options match search", async () => {

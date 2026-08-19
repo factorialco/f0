@@ -95,4 +95,68 @@ describe("SelectContent", () => {
     await user.tab({ shift: true })
     expect(search).toHaveFocus()
   })
+
+  it("keeps text editing keys inside the searchbox", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <Select open value="first" onValueChange={vi.fn()}>
+        <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+        <SelectContent
+          top={
+            <input
+              aria-label="Search options"
+              defaultValue="query"
+              role="searchbox"
+              tabIndex={-1}
+            />
+          }
+        >
+          <SelectItem value="first">First</SelectItem>
+          <SelectItem value="second">Second</SelectItem>
+        </SelectContent>
+      </Select>
+    )
+
+    await screen.findByRole("listbox")
+    const search = screen.getByRole("searchbox", { name: "Search options" })
+
+    search.focus()
+    search.setSelectionRange(search.value.length, search.value.length)
+    await user.keyboard("s")
+
+    expect(search).toHaveFocus()
+    expect(search).toHaveValue("querys")
+
+    search.setSelectionRange(2, 2)
+    await user.keyboard("{Home}")
+    expect(search.selectionStart).toBe(0)
+
+    await user.keyboard("{End}")
+    expect(search.selectionStart).toBe(search.value.length)
+    expect(search).toHaveFocus()
+  })
+
+  it("keeps typeahead navigation on options", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <Select open value="first" onValueChange={vi.fn()}>
+        <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+        <SelectContent>
+          <SelectItem value="first">First</SelectItem>
+          <SelectItem value="second">Second</SelectItem>
+        </SelectContent>
+      </Select>
+    )
+
+    await screen.findByRole("listbox")
+    const firstOption = screen.getByRole("option", { name: "First" })
+    const secondOption = screen.getByRole("option", { name: "Second" })
+
+    firstOption.focus()
+    await user.keyboard("s")
+
+    expect(secondOption).toHaveFocus()
+  })
 })
