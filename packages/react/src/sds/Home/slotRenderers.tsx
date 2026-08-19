@@ -4,6 +4,7 @@ import { type z } from "zod"
 
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import {
   F0AvatarList,
   F0AvatarListProps,
@@ -253,28 +254,35 @@ const LIST_ICON_SIZE = {
  * colouring it is a Home decision, not a design-system one. Without a `color`
  * a row draws the plain `F0AvatarIcon` instead; this is the same box either way.
  */
-const ListIconGlyph = ({
+export const ListIconGlyph = ({
   icon,
-  tint,
-  size,
+  color,
+  size = "lg",
 }: {
   icon: IconType
-  tint: NonNullable<ReturnType<typeof listIconTint>>
-  size: ListGlyphSize
-}) => (
-  <div
-    className={cn(
-      "flex aspect-square items-center justify-center",
-      LIST_ICON_SIZE[size],
-      tint.className
-    )}
-    style={tint.style}
-  >
-    {/* No `color`: F0Icon defaults to `currentColor`, which the tile's own
-        `text-` class has already set to the hue. */}
-    <F0Icon icon={icon} size={size} />
-  </div>
-)
+  /** A palette name or `#rrggbb`; an unparseable value draws the plain tile. */
+  color: ListIconColor
+  size?: ListGlyphSize
+}) => {
+  const tint = listIconTint(color)
+
+  if (!tint) return <F0AvatarIcon icon={icon} size={size} />
+
+  return (
+    <div
+      className={cn(
+        "flex aspect-square items-center justify-center",
+        LIST_ICON_SIZE[size],
+        tint.className
+      )}
+      style={tint.style}
+    >
+      {/* No `color`: F0Icon defaults to `currentColor`, which the tile own
+          `text-` class has already set to the hue. */}
+      <F0Icon icon={icon} size={size} />
+    </div>
+  )
+}
 
 /**
  * What every row draws on its RIGHT: a counter, one avatar (e.g. the sender),
@@ -846,7 +854,11 @@ const listLeft = (
     if (tint)
       return {
         left: (
-          <ListIconGlyph icon={row.avatar.icon} tint={tint} size={avatarSize} />
+          <ListIconGlyph
+            icon={row.avatar.icon}
+            color={row.avatar.color}
+            size={avatarSize}
+          />
         ),
       }
   }
