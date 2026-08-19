@@ -11,24 +11,26 @@ import {
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { Counter } from "@/ui/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Delete, EllipsisHorizontal, MoveDown, MoveUp } from "@/icons/app"
 import { Link, useNavigation } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn, focusRing } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { DragProvider, useDragContext } from "./DragContext"
 
+export type MenuItemTagVariant = "default" | "warning"
+
 export interface MenuItem extends NavigationItem {
   icon: IconType
   badge?: number
-  tag?: string
+  tag?: string | { text: string; variant?: MenuItemTagVariant }
 }
 
 type FavoriteMenuItem = (
@@ -61,6 +63,13 @@ export interface MenuProps {
   onFavoritesChange?: (favorites: FavoriteMenuItem[]) => void
 }
 
+const menuTagVariantClassName: Record<MenuItemTagVariant, string | undefined> =
+  {
+    default: undefined,
+    warning:
+      "border-transparent bg-f1-background-warning text-f1-foreground-warning",
+  }
+
 const MenuItemContent = ({
   item,
   active,
@@ -68,6 +77,8 @@ const MenuItemContent = ({
   item: MenuItem
   active: boolean
 }) => {
+  const tag = typeof item.tag === "string" ? { text: item.tag } : item.tag
+
   return (
     <div className="flex w-full items-center justify-between">
       <div className="flex min-w-0 items-center gap-1.5 font-medium text-f1-foreground">
@@ -81,9 +92,14 @@ const MenuItemContent = ({
         />
         <span>{item.label}</span>
       </div>
-      {(item.tag || item.badge) && (
+      {(tag || item.badge) && (
         <div className="flex flex-shrink-0 items-center gap-1.5">
-          {item.tag && <F0TagRaw text={item.tag} />}
+          {tag && (
+            <F0TagRaw
+              text={tag.text}
+              className={menuTagVariantClassName[tag.variant ?? "default"]}
+            />
+          )}
           {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
         </div>
       )}
@@ -93,7 +109,7 @@ const MenuItemContent = ({
 
 const MenuItem = ({ item }: { item: MenuItem }) => {
   const { isActive } = useNavigation()
-  const { label: _label, icon: _icon, ...rest } = item
+  const { label: _label, icon: _icon, tag: _tag, badge: _badge, ...rest } = item
 
   const active = isActive(rest.href, { exact: rest.exactMatch })
 
