@@ -200,6 +200,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
     <DashboardItem
       title={item.title}
       description={item.description}
+      info={item.info}
       explanation={item.explanation}
       isLoading={isLoading}
       error={error}

@@ -16,6 +16,7 @@ export type {
   FunnelChartConfig,
   GaugeChartConfig,
   HeatmapChartConfig,
+  InfoHintContent,
   LineChartConfig,
   MetricFormat,
   PieChartConfig,

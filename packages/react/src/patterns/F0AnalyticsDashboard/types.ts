@@ -8,12 +8,18 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
+import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
+
+// Re-exported under its own name: the same shape types a table column header
+// and a widget header, and a host typing a widget's `info` shouldn't have to
+// reach for the table's `TableHeaderInfo` alias to do it.
+export type { InfoHintContent }
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -245,6 +251,17 @@ export interface DashboardItemBase {
   title: string
   /** Optional description below the title */
   description?: string
+  /**
+   * Optional help copy for what the widget measures, revealed by an ⓘ icon
+   * beside the title. A string renders a plain tooltip; the structured form
+   * renders a hoverable card that can carry a link — the same affordance a
+   * table column header offers, so a figure explains itself the same way
+   * wherever it is read.
+   *
+   * Distinct from `description` (which states what this widget shows) and from
+   * `explanation` (how it is computed, behind the menu).
+   */
+  info?: string | InfoHintContent
   /**
    * Optional markdown explanation of how this item's data is calculated.
    * When set, the per-item dropdown menu shows a "Where does this data come

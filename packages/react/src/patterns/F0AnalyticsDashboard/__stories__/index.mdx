@@ -100,6 +100,25 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
   }}
 />
 
+### Widget information hints
+
+Use `info` for the definition of the figure itself. A string reveals a short
+tooltip; structured content reveals a titled card with an optional link to the
+definition's source. Keep this separate from `description`, which states what
+the widget shows, and `explanation`, which documents how the result was
+calculated.
+
+In the story below, hover or focus the information icons beside **Headcount by
+Department** and **Avg. Salary**. The other widgets intentionally omit `info`,
+so the new affordance can be compared with the unchanged header.
+
+<Canvas of={Stories.MixedDashboard} />
+
+- WHEN an item provides `info` → THEN an information trigger appears beside its title on chart, metric, and collection widgets.
+- WHEN `info` is omitted → THEN the header layout and interaction remain unchanged.
+- WHEN the widget is in an error state → THEN the information trigger remains available to explain what the failed widget was meant to measure.
+- WHEN the title is long → THEN it truncates around the fixed-size trigger instead of pushing the trigger out of the header.
+
 ### Report filters
 
 Report filters are one applied state shared by every participating item. Pass `filtersValue` with `onFiltersChange` to own that state — for example to hydrate a saved report and persist each committed change — or pass only `defaultFilters` to let the dashboard own it.
