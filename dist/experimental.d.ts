@@ -7351,6 +7351,18 @@ export declare type F0ProgressSeriesSize = (typeof f0ProgressSeriesSizes)[number
 export declare const f0ProgressSeriesSizes: readonly ["sm", "md", "lg"];
 
 /**
+ * Header for a resource detail page: avatar, title, description, status,
+ * metadata and its primary, secondary and overflow actions.
+ */
+declare const F0ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
+export { F0ResourceHeader }
+export { F0ResourceHeader as ResourceHeader }
+
+declare type F0ResourceHeaderProps = Props;
+export { F0ResourceHeaderProps }
+export { F0ResourceHeaderProps as ResourceHeaderProps }
+
+/**
  * @experimental This is an experimental component, use it at your own risk
  */
 export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
@@ -9022,6 +9034,27 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
      * Used to determine if additional requests should be made for pagination.
      */
     hasMore: boolean;
+};
+
+/**
+ * Structured help copy for a labelled thing — a table column, a dashboard
+ * widget. `link` is for what the description implies but cannot do: opening the
+ * catalog entry the copy came from.
+ */
+declare type InfoHintContent = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the icon trigger. Falls back to `label` on the host
+     * and then to a generic "More information", so the trigger is never named
+     * after the thing it describes alone — a name identical to the heading
+     * beside it says nothing about what the control does.
+     */
+    label?: string;
 };
 
 /**
@@ -11370,14 +11403,6 @@ export declare const resolveSlotRenderer: (entry: SlotRendererEntry | undefined)
 /** Resolves a header's params-driven parts against the params in hand. */
 export declare const resolveWidgetHeader: (header: HomeWidgetHeader | undefined, params?: WidgetParams) => WidgetProps["header"];
 
-/**
- * Header for a resource detail page: avatar, title, description, status,
- * metadata and its primary, secondary and overflow actions.
- */
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
-
-export declare type ResourceHeaderProps = Props;
-
 declare type RestrictComponentProps = {
     identifier: string;
     allowedRoutes?: string[];
@@ -12130,6 +12155,21 @@ export declare type SlotSkeletonRenderer<P = unknown> = (params: P, ctx: HomeSke
 export declare function SlotWidget({ header, params, fullHeight, action, summaries, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
 
 /**
+ * A widget's CONTENT: the slot stack, with the dividers between slots and the
+ * skeletons while it loads — everything `SlotWidget` draws, minus the card.
+ *
+ * Public because the frame is not always wanted. A surface that drills into a
+ * widget (an overlay listing the tasks one of its grouped rows summarises) is
+ * already a surface: wrapped in a `Widget` it would be a card inside a card,
+ * with two borders and two paddings. Rendering the slots here keeps the rows
+ * IDENTICAL to the widget's — same slots, same renderers — which composing them
+ * by hand would not.
+ *
+ * Inside a card, prefer `SlotWidget`: it is this plus the frame.
+ */
+export declare function SlotWidgetContent({ slots, loading, slotRenderers, ctx, }: Pick<SlotWidgetProps, "slots" | "loading" | "slotRenderers" | "ctx">): JSX_2.Element;
+
+/**
  * SlotWidget — one Home widget rendered from data: the f0 `Widget` frame (the
  * only allowed widget wrapper) with an ordered list of SLOTS stacked below the
  * header, a DASHED divider between consecutive slots.
@@ -12445,19 +12485,16 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, highlighted, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
-declare type TableHeaderInfo = {
-    title: string;
-    description: string;
-    link?: {
-        label: string;
-        onClick: () => void;
-    };
-    /**
-     * Accessible name for the info-icon trigger. Defaults to the column label
-     * when the header's children are a string.
-     */
-    label?: string;
-};
+/**
+ * Structured help copy for a column header. The same shape every other
+ * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
+ * the column label when the header's children are a string.
+ *
+ * A table-specific name for a shape that is no longer table-specific: the
+ * canonical export is `InfoHintContent`, and this stays as an alias so
+ * existing imports keep working.
+ */
+declare type TableHeaderInfo = InfoHintContent;
 
 declare interface TableHeadProps {
     children: React.ReactNode;
@@ -14221,8 +14258,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -14230,10 +14269,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

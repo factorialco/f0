@@ -3826,6 +3826,17 @@ export declare interface DashboardItemBase {
     /** Optional description below the title */
     description?: string;
     /**
+     * Optional help copy for what the widget measures, revealed by an ⓘ icon
+     * beside the title. A string renders a plain tooltip; the structured form
+     * renders a hoverable card that can carry a link — the same affordance a
+     * table column header offers, so a figure explains itself the same way
+     * wherever it is read.
+     *
+     * Distinct from `description` (which states what this widget shows) and from
+     * `explanation` (how it is computed, behind the menu).
+     */
+    info?: string | InfoHintContent;
+    /**
      * Optional markdown explanation of how this item's data is calculated.
      * When set, the per-item dropdown menu shows a "Where does this data come
      * from?" entry that opens a dialog rendering this content as markdown.
@@ -11976,6 +11987,8 @@ export declare interface F0QuestionCardStep {
     options: F0QuestionCardOption[];
 }
 
+declare type F0ResourceHeaderProps = Props_4;
+
 /**
  * F0 config options specific to rich text fields
  */
@@ -12812,7 +12825,7 @@ export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
     icon?: IconType;
     /** Description text (e.g., "Completed on 20/2025") */
     description?: string;
-    /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as ResourceHeader */
+    /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as F0ResourceHeader */
     metadata?: (MetadataItem | undefined | boolean)[];
     /** Primary action button (displayed on the right after a divider) */
     primaryAction?: F0TimelineRowAction;
@@ -14336,6 +14349,27 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
      * Used to determine if additional requests should be made for pagination.
      */
     hasMore: boolean;
+};
+
+/**
+ * Structured help copy for a labelled thing — a table column, a dashboard
+ * widget. `link` is for what the description implies but cannot do: opening the
+ * catalog entry the copy came from.
+ */
+export declare type InfoHintContent = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the icon trigger. Falls back to `label` on the host
+     * and then to a generic "More information", so the trigger is never named
+     * after the thing it describes alone — a name identical to the heading
+     * beside it says nothing about what the control does.
+     */
+    label?: string;
 };
 
 /**
@@ -16829,8 +16863,6 @@ export declare function resolveWindowNeighbors<R extends RecordType>({ records, 
     idProvider: (item: R, index?: number) => DataSourceItemId;
 }): NeighborResolution<R>;
 
-declare type ResourceHeaderProps = Props_4;
-
 /** All styling props that can be overridden per breakpoint */
 export declare interface ResponsiveStyleProps {
     display?: DisplayToken;
@@ -17423,7 +17455,7 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
 declare interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
     inline: true;
     /**
-     * Hide the built-in ResourceHeader (title + description). Useful when the
+     * Hide the built-in F0ResourceHeader (title + description). Useful when the
      * embedding page already renders its own resource header above the form.
      */
     hideResourceHeader?: boolean;
@@ -17461,7 +17493,7 @@ declare interface SurveyAnsweringFormSharedProps {
     elements: SurveyFormBuilderElement[];
     title: string;
     description?: string;
-    resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">;
+    resourceHeader?: Omit<F0ResourceHeaderProps, "title" | "description">;
     defaultValues?: Partial<SurveyAnswers>;
     loading?: boolean;
     datasets?: SurveyDatasets;
@@ -17669,19 +17701,16 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, highlighted, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
-declare type TableHeaderInfo = {
-    title: string;
-    description: string;
-    link?: {
-        label: string;
-        onClick: () => void;
-    };
-    /**
-     * Accessible name for the info-icon trigger. Defaults to the column label
-     * when the header's children are a string.
-     */
-    label?: string;
-};
+/**
+ * Structured help copy for a column header. The same shape every other
+ * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
+ * the column label when the header's children are a string.
+ *
+ * A table-specific name for a shape that is no longer table-specific: the
+ * canonical export is `InfoHintContent`, and this stays as an alias so
+ * existing imports keep working.
+ */
+declare type TableHeaderInfo = InfoHintContent;
 
 declare interface TableHeadProps {
     children: React.ReactNode;
@@ -19933,8 +19962,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -19942,10 +19973,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
