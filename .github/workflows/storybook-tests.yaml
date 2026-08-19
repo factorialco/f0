@@ -61,15 +61,55 @@ jobs:
           restore-keys: |
             playwright-chromium-${{ steps.playwright-version.outputs.version }}-
             playwright-chromium-
-      # Chromium only. The test-runner never launches anything else (TEST_BROWSERS
-      # is unset, so it defaults to chromium), but a bare `install --with-deps`
-      # apt-installs the WebKit and Firefox system libraries too — the gstreamer
-      # /fluidsynth/rav1e pile. That apt step runs even on a browser-cache hit
-      # and was the least predictable part of the job, measured between 27s and
-      # 121s across the 8 shards of run 32146702636.
+      # Chromium only, and deliberately *without* `--with-deps`. The test-runner
+      # never launches anything else (TEST_BROWSERS is unset, so it defaults to
+      # chromium), and every shared library chromium needs is already on the
+      # ubuntu-latest image — on a passing shard `--with-deps` reported all of
+      # them "already the newest version" and installed nothing but the nine font
+      # packages the next step now handles.
+      #
+      # What `--with-deps` did buy was an unconditional `apt-get update`, which
+      # was the least predictable part of this job (27s–121s across the 8 shards
+      # of run 32146702636) and then its worst failure mode outright: when the
+      # runner's azure.archive.ubuntu.com mirror is unreachable, apt falls back to
+      # archive.ubuntu.com and can stall indefinitely fetching the package
+      # indices. apt sets no timeout there by default, and neither did this step,
+      # so the stall consumed the entire 30-minute job budget before a single
+      # story ran — 4 of 8 shards in run 32230793617, then 7 of 8 in 32233463322.
+      #
+      # With the browser cache warm this step now touches no apt mirror at all.
       - name: Install Playwright
+        timeout-minutes: 5
         run: |
-          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps chromium
+          pnpx playwright@${{ steps.playwright-version.outputs.version }} install chromium
+
+      # The font packages `--with-deps` used to pull (CJK/Thai/Cyrillic coverage
+      # plus freefont), installed on their own so a slow or unreachable apt mirror
+      # can no longer take the whole job down with it:
+      #
+      #   * `timeout-minutes` bounds a stall at 3 minutes instead of 30,
+      #   * `continue-on-error` keeps a mirror outage from failing the shard, and
+      #   * the Acquire::* options stop apt hanging on a dead mirror in the first
+      #     place — by default it has neither a timeout nor a retry limit.
+      #
+      # Non-fatal is the right call because nothing in this job depends on these
+      # fonts today: no story contains CJK, Thai or Cyrillic text, and the
+      # test-runner makes no pixel assertions (axe + play functions only — visual
+      # diffing lives in Chromatic, which sets up its own browser). They are kept
+      # so a future story with international text renders real glyphs rather than
+      # tofu, not because the suite needs them to pass.
+      - name: Install browser fonts
+        timeout-minutes: 3
+        continue-on-error: true
+        run: |
+          APT_OPTS=(-o Acquire::Retries=3
+                    -o Acquire::http::Timeout=15
+                    -o Acquire::https::Timeout=15)
+          sudo apt-get "${APT_OPTS[@]}" update
+          sudo apt-get "${APT_OPTS[@]}" install -y --no-install-recommends \
+            fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf \
+            fonts-unifont fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings \
+            xfonts-scalable xfonts-utils
       - name: Build Storybook
         run: |
           pnpm --filter @factorialco/f0-core build
