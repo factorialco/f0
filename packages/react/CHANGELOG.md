@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.42.1](https://github.com/factorialco/f0/compare/f0-react-v6.42.0...f0-react-v6.42.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **ui/switch:** meet the WCAG 2.2 target-size floor ([#5173](https://github.com/factorialco/f0/issues/5173)) ([c67e39c](https://github.com/factorialco/f0/commit/c67e39c1a0cf25ae43232fdba21bccc3de820c42))
+
 ## [6.42.0](https://github.com/factorialco/f0/compare/f0-react-v6.41.1...f0-react-v6.42.0) (2026-08-19)
 
 
