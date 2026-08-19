@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.40.0](https://github.com/factorialco/f0/compare/f0-react-v6.39.0...f0-react-v6.40.0) (2026-08-19)
+
+
+### Features
+
+* **ComboChart:** add projected bars for provisional data ([#5153](https://github.com/factorialco/f0/issues/5153)) ([c8c2eb6](https://github.com/factorialco/f0/commit/c8c2eb6d1cf1643944905486bee6556f51cf4e80))
+
 ## [6.39.0](https://github.com/factorialco/f0/compare/f0-react-v6.38.1...f0-react-v6.39.0) (2026-08-19)
 
 
