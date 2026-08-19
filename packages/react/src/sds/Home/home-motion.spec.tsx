@@ -8,8 +8,10 @@ import {
   ENTRANCE_STAGGER_CAP_MS,
   ENTRANCE_STAGGER_MS,
   entranceDelay,
+  ITEM_CHURN_BULK_AFTER,
   useDelayedTrue,
   useElapsed,
+  useIsBulkChange,
 } from "./home-motion"
 
 describe("entranceDelay", () => {
@@ -129,5 +131,57 @@ describe("useDelayedTrue", () => {
     rerender({ value: true })
 
     expect(result.current).toBe(true)
+  })
+})
+
+describe("useIsBulkChange", () => {
+  test("one item coming or going is churn, not a replacement", () => {
+    const { result, rerender } = zeroRenderHook(
+      ({ count }: { count: number }) => useIsBulkChange(count),
+      { initialProps: { count: 5 } }
+    )
+
+    expect(result.current).toBe(false)
+
+    rerender({ count: 4 })
+    expect(result.current).toBe(false)
+
+    rerender({ count: 5 })
+    expect(result.current).toBe(false)
+  })
+
+  test(`more than ${ITEM_CHURN_BULK_AFTER} at once is the list being replaced`, () => {
+    const { result, rerender } = zeroRenderHook(
+      ({ count }: { count: number }) => useIsBulkChange(count),
+      { initialProps: { count: 3 } }
+    )
+
+    // "View more" revealing the rest: thirty rows is a new list, not thirty
+    // arrivals.
+    rerender({ count: 33 })
+    expect(result.current).toBe(true)
+
+    // …and folding them away again is the same thing in reverse.
+    rerender({ count: 3 })
+    expect(result.current).toBe(true)
+  })
+
+  test("the threshold is inclusive — exactly that many still animates", () => {
+    const { result, rerender } = zeroRenderHook(
+      ({ count }: { count: number }) => useIsBulkChange(count),
+      { initialProps: { count: 0 } }
+    )
+
+    rerender({ count: ITEM_CHURN_BULK_AFTER })
+    expect(result.current).toBe(false)
+
+    rerender({ count: ITEM_CHURN_BULK_AFTER * 2 + 1 })
+    expect(result.current).toBe(true)
+  })
+
+  test("the FIRST render is never a bulk change — a list that mounts full has not changed", () => {
+    const { result } = zeroRenderHook(() => useIsBulkChange(100))
+
+    expect(result.current).toBe(false)
   })
 })

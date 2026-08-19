@@ -71,6 +71,10 @@ describe("check-stable-dod ratchet", () => {
   })
 
   it.each([
+    [
+      "a non-F0-named component folder",
+      { storyFile: "components/Widget/__stories__/Widget.stories.tsx" },
+    ],
     ["stories", { hasStories: false }],
     ["unit tests", { hasUnitTests: false }],
     ["play function", { hasPlayFunction: false }],

@@ -180,3 +180,32 @@ jobs:
                 core.info(`Label "${label}" not present; nothing to remove`);
               }
             }
+
+  # Single check to gate the branch on. It collapses this workflow's jobs into
+  # one status, so branch protection lists one stable name and never needs
+  # editing when jobs are added, removed, renamed or sharded.
+  #
+  # `if: always()` is load-bearing. Without it a failing dependency leaves this
+  # job *skipped* rather than *failed*, and GitHub counts a skipped required
+  # check as satisfied — the gate would go green over a red build.
+  #
+  # `skipped` is accepted on purpose: detect-changes skips the jobs for a
+  # package that this PR did not touch. Only failure/cancellation is fatal.
+  api-surface-passed:
+    needs: [detect-changes, build-dts, api-diff]
+    name: "✅ API Surface"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every API Surface check passed
+        run: |
+          echo "Dependency results: ${{ join(needs.*.result, ' ') }}"
+          if ${{ contains(needs.*.result, 'failure') }}; then
+            echo "::error::A API Surface check failed."
+            exit 1
+          fi
+          if ${{ contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::A API Surface check was cancelled."
+            exit 1
+          fi
+          echo "All API Surface checks passed (or were skipped as not applicable)."

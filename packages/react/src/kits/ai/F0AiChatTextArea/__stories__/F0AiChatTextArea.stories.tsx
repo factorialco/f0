@@ -179,6 +179,41 @@ const WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
   },
 ]
 
+// Deliberately long titles so each item overflows the popover width and gets
+// truncated — the case the hover marquee exists for.
+const LONG_WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title:
+          "Break down all the leave taken and the overtime worked across every single department in the company during April",
+        prompt:
+          "Give me a breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+      },
+      {
+        title:
+          "Show the current gross salary of every active employee across all offices, sorted from the highest to the lowest",
+        prompt:
+          "List the current gross salary of every active employee, sorted from highest to lowest.",
+      },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title:
+          "Draft a detailed Senior Backend Engineer job description focused on large-scale distributed systems and reliability",
+        prompt:
+          "Draft a job description for a Senior Backend Engineer focused on distributed systems.",
+      },
+    ],
+  },
+]
+
 const noop = () => {}
 
 const buildClarifyingState = (
@@ -224,11 +259,13 @@ type WrapperProps = {
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  welcomeScreenSuggestionsPlacement?: "above" | "inside"
   welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
   inProgress?: boolean
   toolbarStart?: React.ReactNode
+  padding?: "default" | "none"
 }
 
 const Wrapper = ({
@@ -243,11 +280,13 @@ const Wrapper = ({
   disclaimer,
   footer,
   welcomeScreenSuggestions,
+  welcomeScreenSuggestionsPlacement,
   welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
   inProgress,
   toolbarStart,
+  padding,
 }: WrapperProps) => {
   const [pendingContext, setPendingContext] = useState<PendingContext | null>(
     initialPendingContext
@@ -310,6 +349,7 @@ const Wrapper = ({
         disclaimer={disclaimer}
         footer={footer}
         welcomeScreenSuggestions={welcomeScreenSuggestions}
+        welcomeScreenSuggestionsPlacement={welcomeScreenSuggestionsPlacement}
         onSuggestionClick={(item) => {
           // Suggestions always send a prompt (item.prompt, falling back to its
           // title) — unlike cards, the host doesn't branch on behavior.
@@ -322,6 +362,7 @@ const Wrapper = ({
         welcomeScreenCards={cardsWithBehavior}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
+        padding={padding}
       />
       {submissions.length > 0 && (
         <div className="rounded-md border border-f1-border p-3 text-sm">
@@ -386,6 +427,23 @@ export const TransitionDemo: Story = {
       </div>
     )
   },
+}
+
+// The composer with no inset of its own, for hosts that already own the
+// spacing (a home hero, a card). The dashed frame stands in for that host:
+// note the field now runs edge to edge, and the focus glow needs the host to
+// leave it a few pixels of room and not clip overflow.
+export const NoPadding: Story = {
+  args: {
+    padding: "none",
+  },
+  decorators: [
+    (Story) => (
+      <div className="rounded-md border border-dashed border-f1-border p-6">
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const WithRotatingPlaceholders: Story = {
@@ -487,6 +545,94 @@ export const WithWelcomeSuggestions: Story = {
           name: "April leave and overtime summary",
         })
       ).not.toBeInTheDocument()
+    })
+  },
+}
+
+// `welcomeScreenSuggestionsPlacement: "inside"` — the suggestions move INTO the
+// field, at its foot, and the send button moves onto the textarea's own line.
+// With no attachments, dictation or `toolbarStart` the composer is exactly two
+// bands (text + send, then the chips), which is the home-page "ask" bar shape.
+// Note there is no `fullscreen`: this placement doesn't need the welcome screen's
+// vertical room, because it isn't claiming any space above the field.
+export const WithWelcomeSuggestionsInside: Story = {
+  args: {
+    isWelcomeScreen: true,
+    welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
+    welcomeScreenSuggestionsPlacement: "inside",
+    placeholders: ROTATING_PLACEHOLDERS,
+    disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("The chips sit inside the field, above its bottom edge", () => {
+      const textarea = canvasElement.querySelector(
+        'textarea[name="one-ai-input"]'
+      )!
+      const trigger = page.getByRole("button", { name: "Analyze" })
+      const form = textarea.closest("form")!
+
+      // Inside the form → enclosed by the field's border and focus highlight.
+      expect(form.contains(trigger)).toBe(true)
+      // …and after the textarea, so it reads as the field's foot.
+      expect(
+        textarea.compareDocumentPosition(trigger) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy()
+    })
+
+    await step("Send trails the text instead of sitting in its own row", () => {
+      const textarea = canvasElement.querySelector(
+        'textarea[name="one-ai-input"]'
+      )!
+      // The text band: TextareaField's grid, then the row that holds it.
+      const textBand = textarea.parentElement!.parentElement!
+      const send = page.getByRole("button", { name: /send/i })
+      const trigger = page.getByRole("button", { name: "Analyze" })
+
+      expect(textBand.contains(send)).toBe(true)
+      // …and the chips are their own band under it, not in this one.
+      expect(textBand.contains(trigger)).toBe(false)
+    })
+
+    await step("Picking a group opens its panel", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Analyze" }))
+      await expect(
+        page.getByRole("dialog", { name: "Analyze" })
+      ).toBeInTheDocument()
+      await expect(
+        page.getByRole("button", { name: "April leave and overtime summary" })
+      ).toBeInTheDocument()
+    })
+  },
+}
+
+// Long suggestion titles are truncated with an ellipsis; hovering (or focusing)
+// an item holds briefly and then reveals the hidden tail with a one-way marquee
+// — the label scrolls left just far enough to show the end, fading the leading
+// edge, and snaps back instantly on leave. Honours `prefers-reduced-motion`.
+export const WithLongWelcomeSuggestions: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenSuggestions: LONG_WELCOME_SUGGESTIONS,
+    disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+    const longTitle = LONG_WELCOME_SUGGESTIONS[0].items[0].title
+
+    await step("Open a group and hover a truncated item", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Analyze" }))
+
+      const item = await page.findByRole("button", { name: longTitle })
+      // The full title is the accessible name even though it renders truncated.
+      await expect(item).toBeInTheDocument()
+
+      // Hovering starts the marquee reveal (visible in the browser; nothing to
+      // assert on the transform here, which would be timing-dependent).
+      await userEvent.hover(item)
     })
   },
 }

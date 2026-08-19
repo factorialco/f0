@@ -1,7 +1,6 @@
 import { type ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -10,6 +9,7 @@ import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { senderNameColorClass } from "../utils/sender-color"
+import { ClampText } from "./ClampText"
 
 /**
  * Reply quote nested at the top of the bubble (WhatsApp-style): a compact card
@@ -66,19 +66,17 @@ export const ReplyQuote = ({
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
-          <OneEllipsis
+          <ClampText
             className={cn(
               "text-sm font-medium",
               senderNameColorClass(reply.author)
             )}
           >
             {senderName}
-          </OneEllipsis>
+          </ClampText>
           <span className="flex min-w-0 items-center gap-1 text-f1-foreground-secondary">
             {icon && <F0Icon icon={icon} size="sm" color="default" />}
-            <OneEllipsis className="min-w-0 text-base" lines={1}>
-              {label}
-            </OneEllipsis>
+            <ClampText className="min-w-0 text-base">{label}</ClampText>
           </span>
         </div>
       </button>

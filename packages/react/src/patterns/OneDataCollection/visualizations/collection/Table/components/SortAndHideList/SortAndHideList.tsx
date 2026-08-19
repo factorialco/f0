@@ -2,10 +2,11 @@ import { Reorder, useDragControls } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { useI18n } from "@/lib/providers/i18n"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { Delete, Handle, LockLocked } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
+import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 
 import { SortAndHideListItem } from "./types"
@@ -16,6 +17,8 @@ type ItemProps = {
   onRemove?: (item: SortAndHideListItem) => void
   allowSorting: boolean
   allowHiding: boolean
+  isFirst: boolean
+  isLast: boolean
 }
 
 const Item = ({
@@ -24,9 +27,18 @@ const Item = ({
   onRemove,
   allowSorting,
   allowHiding,
+  isFirst,
+  isLast,
 }: ItemProps) => {
   const i18n = useI18n()
-  const classes = "group flex items-center gap-2 text-medium text-sm pr-4"
+  // Edge padding lives on the inner content div because motion/react writes
+  // inline padding styles on the outer list items (and the group), which would
+  // otherwise override Tailwind's first:/last: utilities.
+  const classes = cn(
+    "group flex items-center gap-2 text-medium text-sm pr-4",
+    isFirst && "pt-1",
+    isLast && "pb-1"
+  )
   const controls = useDragControls()
   const showRemove = !!item.removable && !!onRemove
 
@@ -47,7 +59,7 @@ const Item = ({
         >
           {item.sortable ? (
             <F0Icon icon={Handle} size="xs" />
-          ) : (
+          ) : item.disabledReason ? null : (
             <F0Icon icon={LockLocked} size="sm" />
           )}
         </div>
@@ -73,20 +85,31 @@ const Item = ({
           />
         </div>
       )}
-      {allowHiding && (
-        <Switch
-          checked={item.visible}
-          onCheckedChange={(checked) => {
-            onChangeVisibility({
-              ...item,
-              visible: checked,
-            })
-          }}
-          title={item.label}
-          hideLabel
-          disabled={!item.canHide}
-        />
-      )}
+      {allowHiding &&
+        (item.disabledReason ? (
+          // Locked by the caller (e.g. no permission): forced OFF + disabled,
+          // with the reason in a tooltip. The switch is wrapped in a span so the
+          // tooltip still triggers on hover — a disabled control fires no pointer
+          // events of its own (same idiom as the disabled Dropdown menu item).
+          <TooltipWrapper tooltip={item.disabledReason}>
+            <span className="inline-flex cursor-not-allowed">
+              <Switch checked={false} title={item.label} hideLabel disabled />
+            </span>
+          </TooltipWrapper>
+        ) : (
+          <Switch
+            checked={item.visible}
+            onCheckedChange={(checked) => {
+              onChangeVisibility({
+                ...item,
+                visible: checked,
+              })
+            }}
+            title={item.label}
+            hideLabel
+            disabled={!item.canHide}
+          />
+        ))}
     </div>
   )
 
@@ -144,7 +167,7 @@ export const SortAndHideList = ({
       axis="y"
       layoutScroll
     >
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Item
           item={item}
           key={item.id}
@@ -152,6 +175,8 @@ export const SortAndHideList = ({
           onRemove={onRemove}
           allowSorting={allowSorting}
           allowHiding={allowHiding}
+          isFirst={index === 0}
+          isLast={index === items.length - 1}
         />
       ))}
     </Reorder.Group>

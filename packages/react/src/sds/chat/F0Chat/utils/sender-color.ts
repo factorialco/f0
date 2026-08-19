@@ -104,4 +104,6 @@ export const messageSurfaceColorClass = (
   user: F0ChatUser,
   isMine: boolean
 ): string =>
-  isMine ? "bg-f1-background-tertiary" : senderBubbleColorClass(user)
+  isMine
+    ? "bg-f1-background-tertiary dark:bg-f1-background-secondary"
+    : senderBubbleColorClass(user)

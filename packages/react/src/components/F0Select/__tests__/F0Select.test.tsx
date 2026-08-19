@@ -964,7 +964,7 @@ describe("Select", () => {
         expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
       })
 
-      it("is not wired at all when nothing is selected", () => {
+      it("stays wired when nothing is selected", () => {
         render(
           <F0Select
             {...defaultSelectProps}
@@ -974,8 +974,11 @@ describe("Select", () => {
           />
         )
 
-        // Nothing selected, nothing to explain.
-        expect(tooltipWrapper()).toBeNull()
+        // Wired but silent: nothing selected means nothing to explain, and an
+        // empty tooltip never opens (`Tooltip.emptyContent.test.tsx`). Dropping
+        // the wiring instead would change the element type above the trigger and
+        // remount it (`F0Select.triggerIdentity.test.tsx`).
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
       })
     })
   })
@@ -1192,6 +1195,46 @@ describe("Select", () => {
       // The other group remains collapsed
       expect(screen.queryByText("Carol")).not.toBeInTheDocument()
     })
+
+    /**
+     * ONE SCROLLPORT. The virtualized list is rendered through Radix's
+     * `Select.Viewport` with `asChild`, so Radix merges its own
+     * `overflow: hidden auto; flex: 1 1 0%` onto the virtualizer's SIZER — which
+     * made a second scroll container inside the `ScrollArea` that already scrolls
+     * the list. Two nested scrollers is the "double scroll" a grouped list is long
+     * enough to expose: the wheel fills the inner one, then hands off to the outer.
+     */
+    it("leaves the scrolling to ONE element, not two", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(true)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+
+      const sizer = document.querySelector<HTMLElement>(
+        "[data-radix-select-viewport]"
+      )
+      expect(sizer).not.toBeNull()
+      // The spacer must not scroll, and must not be shrinkable below the height
+      // the virtualizer gave it.
+      expect(sizer!.style.overflow).toBe("visible")
+      // `flex: none` as the browser stores it.
+      expect(sizer!.style.flex).toBe("0 0 auto")
+    })
+
+    // NOTE: the other half of this fix — that expanding a group no longer scrolls
+    // the list back to the selection — has no honest test here. jsdom has no
+    // layout, so the virtualizer's scroll is a no-op and any assertion about it
+    // passes whether the bug is present or not. It is verified in a browser.
   })
 
   describe("onCreate", () => {

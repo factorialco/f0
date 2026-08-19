@@ -326,8 +326,9 @@ describe("effectiveStatus parity (TS policy vs generator helper)", () => {
 })
 
 describe("STABLE_REQUIREMENTS", () => {
-  test("is the checklist of stories, tests, play, snapshot, docs, doc quality, and a11y", () => {
+  test("is the checklist of naming, stories, tests, play, snapshot, docs, doc quality, and a11y", () => {
     expect(STABLE_REQUIREMENTS.map((r) => r.key)).toEqual([
+      "naming",
       "stories",
       "unitTests",
       "playFunction",
@@ -337,6 +338,25 @@ describe("STABLE_REQUIREMENTS", () => {
       "a11y",
     ])
   })
+
+  test.each([
+    ["components/F0Widget/__stories__/F0Widget.stories.tsx", true],
+    ["components/F0Widget/F0Widget.stories.tsx", true],
+    ["components/Widget/__stories__/Widget.stories.tsx", false],
+    ["components/F0widget/__stories__/F0widget.stories.tsx", false],
+    ["experimental/Lists/DetailsItem.stories.tsx", false],
+  ])(
+    "naming judges the component folder of %s as F0-named=%s",
+    (storyFile, ok) => {
+      const status = evaluateComponentStatus(
+        entry({ apiStatus: "stable", tags: ["stable"], storyFile })
+      )
+      expect(status.meetsBar).toBe(ok)
+      if (!ok) {
+        expect(status.missing).toEqual(['Named with the "F0" prefix'])
+      }
+    }
+  )
 
   test.each(["skipped", "todo"] as const)(
     "a component clean on everything but a11y (%s) is not stable",

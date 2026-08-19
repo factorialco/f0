@@ -67,5 +67,8 @@ export function useScrollFade(fade: number = SCROLL_FADE_PX) {
     return { maskImage: mask, WebkitMaskImage: mask }
   }, [ends, fade])
 
-  return { ref: setEl, style }
+  // `element` as well as the ref, because a scroll region is worth more than its
+  // own mask: whatever else needs to know what is on screen in it — a virtualized
+  // column, say — needs the element, and this hook already has it in state.
+  return { ref: setEl, style, element: el }
 }
