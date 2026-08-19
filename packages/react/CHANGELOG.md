@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.38.1](https://github.com/factorialco/f0/compare/f0-react-v6.38.0...f0-react-v6.38.1) (2026-08-19)
+
+
+### Performance Improvements
+
+* **storybook:** shrink the 45MB sample video and guard against regressions ([#5165](https://github.com/factorialco/f0/issues/5165)) ([9b63bf3](https://github.com/factorialco/f0/commit/9b63bf328daa97187a9074cab7ce9b0c79e414fa))
+
 ## [6.38.0](https://github.com/factorialco/f0/compare/f0-react-v6.37.2...f0-react-v6.38.0) (2026-08-18)
 
 
