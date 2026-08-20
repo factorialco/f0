@@ -258,29 +258,33 @@ export const Tree: Story = {
       await expect(item).toHaveAttribute("aria-level")
     }
 
-    // Selecting a person.
+    // Close and reopen the focused branch from the keyboard. This asserts
+    // `aria-expanded` on the node itself rather than whether a particular child
+    // is on screen, because the camera culls off-screen nodes and which ones
+    // survive is not a stable thing to assert on.
+    const focused = canvasElement.querySelector<HTMLElement>(
+      '[role="treeitem"][tabindex="0"]'
+    )
+    if (!focused) throw new Error("no treeitem holds the roving tabindex")
+    focused.focus()
+    await expect(focused).toHaveAttribute("aria-expanded", "true")
+
+    await userEvent.keyboard("{ArrowLeft}")
+    await waitFor(() =>
+      expect(focused).toHaveAttribute("aria-expanded", "false")
+    )
+    await userEvent.keyboard("{ArrowRight}")
+    await waitFor(() =>
+      expect(focused).toHaveAttribute("aria-expanded", "true")
+    )
+
+    // Selecting a person. Last, because the click flies the camera.
     const ceo = canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
-    await expect(ceo).toHaveAttribute("aria-expanded", "true")
     await userEvent.click(ceo)
     await waitFor(() =>
       expect(
         canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
       ).toHaveAttribute("aria-selected", "true")
-    )
-
-    // Closing the CTO's branch hides his reports, reopening brings them back.
-    await expect(
-      canvas.getByRole("treeitem", { name: /Aisha Patel/ })
-    ).toBeVisible()
-    await userEvent.keyboard("{ArrowDown}{ArrowLeft}")
-    await waitFor(() =>
-      expect(canvas.queryByRole("treeitem", { name: /Aisha Patel/ })).toBeNull()
-    )
-    await userEvent.keyboard("{ArrowRight}")
-    await waitFor(() =>
-      expect(
-        canvas.getByRole("treeitem", { name: /Aisha Patel/ })
-      ).toBeVisible()
     )
   },
 }

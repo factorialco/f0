@@ -19,7 +19,8 @@ interface UseGraphKeyboardOptions<T> {
   setFocusedNodeId: (id: string | null) => void
   flatVisibleOrderRef: MutableRefObject<string[]>
   expandedNodesRef: MutableRefObject<Set<string>>
-  nodeRefsMapRef: MutableRefObject<Map<string, HTMLElement>>
+  /** Focuses a node, deferring until it mounts when culling removed it. */
+  requestNodeFocus: (nodeId: string) => void
 }
 
 export interface UseGraphKeyboardResult {
@@ -41,7 +42,7 @@ export function useGraphKeyboard<T>({
   setFocusedNodeId,
   flatVisibleOrderRef,
   expandedNodesRef,
-  nodeRefsMapRef,
+  requestNodeFocus,
 }: UseGraphKeyboardOptions<T>): UseGraphKeyboardResult {
   const reactFlow = useReactFlow()
 
@@ -170,19 +171,23 @@ export function useGraphKeyboard<T>({
       if (targetId) {
         focusedNodeIdRef.current = targetId
         setFocusedNodeId(targetId)
-        const targetEl = nodeRefsMapRef.current.get(targetId)
-        if (targetEl) {
-          targetEl.focus()
-          // Fly-to focused node respecting reduced motion
-          const rm = window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-          ).matches
-          reactFlow.fitView({
-            nodes: [{ id: targetId.replace(/^(expander|collapser)-/, "") }],
-            duration: rm ? 0 : 300,
-            padding: FIT_VIEW_PADDING_LOOSE,
-          })
-        }
+
+        // Fly unconditionally. The target may have been culled or windowed out,
+        // and flying is what puts it back in the DOM. This used to sit inside an
+        // `if (mounted)` guard, which stranded focus outright: the node could not
+        // be focused because it was off-screen, and the camera never moved
+        // because the node could not be focused. Nothing brought it back, so the
+        // roving tabindex pointed at an element that did not exist and the graph
+        // dropped out of the tab order.
+        const rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        reactFlow.fitView({
+          nodes: [{ id: targetId.replace(/^(expander|collapser)-/, "") }],
+          duration: rm ? 0 : 300,
+          padding: FIT_VIEW_PADDING_LOOSE,
+        })
+
+        // Focus now when it is mounted, otherwise as soon as the fly mounts it.
+        requestNodeFocus(targetId)
       }
     },
     [
@@ -193,7 +198,7 @@ export function useGraphKeyboard<T>({
       focusedNodeIdRef,
       flatVisibleOrderRef,
       expandedNodesRef,
-      nodeRefsMapRef,
+      requestNodeFocus,
       setFocusedNodeId,
     ]
   )

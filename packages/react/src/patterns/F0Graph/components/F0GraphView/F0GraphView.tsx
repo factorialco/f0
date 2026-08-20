@@ -364,10 +364,10 @@ export function F0GraphView<T = unknown>(
     setFocusedNodeId,
     focusedNodeIdRef,
     registerNodeRef,
-    nodeRefsMapRef,
     flatVisibleOrderRef,
     selectNode,
     clearSelection,
+    requestNodeFocus,
   } = useSelectionFocus<T>({
     roots,
     expandedNodes,
@@ -455,7 +455,7 @@ export function F0GraphView<T = unknown>(
     setFocusedNodeId,
     flatVisibleOrderRef,
     expandedNodesRef,
-    nodeRefsMapRef,
+    requestNodeFocus,
   })
 
   // Notify parent of visible node count changes
