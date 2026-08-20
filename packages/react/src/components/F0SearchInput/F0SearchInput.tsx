@@ -47,36 +47,17 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
 
     useImperativeHandle(ref, () => input.current as HTMLInputElement)
 
+    // Take focus when `autoFocus` turns on: on mount, and again whenever it
+    // flips back to true on an input that is already mounted — F0Select toggles
+    // it while its filters panel is open, and React's native `autoFocus` only
+    // fires when the DOM node is created, so it cannot cover that transition.
+    //
+    // No timer, and none is needed: effects run child-before-parent, so this
+    // input holds focus before any ancestor's open-focus effect runs, and
+    // SelectContentImpl now leaves an already-focused descendant alone.
     useEffect(() => {
-      const element = input.current
-
-      if (
-        !props.autoFocus ||
-        props.disabled ||
-        !element ||
-        document.activeElement === element
-      ) {
-        return
-      }
-
-      let timeout: ReturnType<typeof setTimeout> | undefined
-      const stopAutoFocus = () => {
-        if (timeout !== undefined) {
-          clearTimeout(timeout)
-          timeout = undefined
-        }
-        element.removeEventListener("focus", stopAutoFocus)
-      }
-
-      element.addEventListener("focus", stopAutoFocus)
-      timeout = setTimeout(() => {
-        element.focus()
-        stopAutoFocus()
-      }, 50)
-
-      return () => {
-        stopAutoFocus()
-      }
+      if (!props.autoFocus || props.disabled) return
+      input.current?.focus()
     }, [props.autoFocus, props.disabled])
 
     const valueToEmitRef = useRef<string | undefined>(undefined)
