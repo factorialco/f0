@@ -1,0 +1,96 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0AiAnnouncementCard.stories"
+
+<Meta of={Stories} />
+
+# AiAnnouncementCard
+
+Tells a user that a One capability exists where they already are, and takes them
+straight into it. Built for narrow surfaces — a card floating beside the One
+toggle, or the assistant's own panel. For a message about the user's current
+context rather than a new capability use `F0Callout`; for a wide, page-level
+promotion use `BaseBanner`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+The card is `w-full` and takes its width from its container — it is designed
+against a 308px surface, but the assistant panel is wider, so it adapts rather
+than fixing its own width.
+
+## When to use
+
+| Use it for                                                                                | Instead of                                                               |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Announcing a capability the user can try right now, in the surface they are already in    | `F0Callout`, which reports a state rather than offering a new capability |
+| A promotion that must sit in a popover, side panel, or any container narrower than a page | `BaseBanner`, which goes horizontal at `sm` and needs the full width     |
+| A dismissible promotion with a short screen capture showing the capability                | `F0AiProposalCard`, which has no media and only one action               |
+
+## When not to use
+
+| Not for                                                      | Use instead                                     |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| Reporting severity — an error, a warning, a success          | `F0Callout` (`critical`, `warning`, `positive`) |
+| A decision that must block the workflow                      | `F0Dialog`                                      |
+| Transient confirmation after an action                       | Toast notification                              |
+| A wide, page-level banner above the content                  | `BaseBanner`                                    |
+| Showing an AI-generated proposal the user accepts or rejects | `F0AiProposalCard`                              |
+
+## Media
+
+`mediaUrl` renders at 16:9 above the text. A `.mp4` source becomes a muted,
+looping, autoplaying video — announcement media is usually a few seconds of
+screen capture, so it has to play silently and without controls. Anything else
+renders as an image. Media is optional; a text-only announcement is still valid.
+
+<Canvas of={Stories.WithoutMedia} />
+
+## Actions
+
+`primaryAction` renders as a bordered button, and `secondaryAction` borderless
+beside it as an opt-out.
+
+The card does not brand its own primary action — no AI treatment, no One mark,
+even though it lives in the AI kit. Whether an action deserves to look different
+is the consumer's call, and f0 cannot know it: the same card announces things
+that hand you to One and things that open a screen.
+
+Some consumers cannot name their buttons ahead of time: which button an
+announcement gets is decided at runtime, by authored content, a feature flag, or
+a permission check. Those go in `children`, which lands in the actions row after
+both actions, and the consumer keeps its own dispatch.
+
+<Canvas of={Stories.WithCustomActions} />
+
+## Behavior
+
+- The description clamps to two lines by default, so unbounded copy cannot grow
+  the card past a narrow surface. It clamps in CSS, so the full text stays in the
+  DOM for assistive tech.
+- **`clampDescription={false}` turns that off**, and you should when the
+  description is the only place that information exists. The clamp truncates
+  silently — there is no "read more" and nowhere else to read the rest. A taller
+  card is a problem an author can see and fix; hidden text is not.
+- `onClose` both shows the dismiss control and is called when it is used. The
+  card removes itself; whether it comes back is the consumer's decision.
+- Without `onClose` no dismiss control is rendered.
+
+<Canvas of={Stories.LongDescription} />
+
+<Canvas of={Stories.UnclampedDescription} />
+
+## Accessibility
+
+- The card is a named region, labelled by its title, so it can be reached and
+  identified without reading the surrounding page.
+- Media is decorative (`alt=""`): the title and description carry the meaning,
+  so announcing the image would only repeat them.
+- The dismiss control is an icon-only button with a `Close` label for assistive
+  tech.
+- **The consumer owns the announcement.** A card that appears without the user
+  doing anything is a change they were not expecting. If it can appear
+  mid-session rather than on load, render it inside a polite live region so it
+  is announced rather than silently arriving.
