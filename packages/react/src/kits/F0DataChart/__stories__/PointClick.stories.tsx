@@ -43,6 +43,7 @@ const Readout = ({ point }: { point: F0DataChartPointClick | null }) => {
 
   return (
     <dl className="grid grid-cols-[110px_1fr] gap-x-4 gap-y-1 rounded-xl bg-f1-background-tertiary p-3 font-mono text-xs">
+      <Row label="source" value={point.source} />
       <Row label="seriesName" value={point.seriesName || "(empty)"} />
       <Row label="category" value={point.category || "(empty)"} />
       <Row label="value" value={String(point.value)} />
@@ -81,6 +82,36 @@ const ClickDemo = ({
   )
 }
 
+const LegendSelectionDemo = () => {
+  const [selection, setSelection] = useState<Record<string, boolean> | null>(
+    null
+  )
+
+  return (
+    <div className="flex w-[600px] flex-col gap-3">
+      <p className="text-sm text-f1-foreground-secondary">
+        Click a legend item to isolate it, then click it again to restore every
+        series.
+      </p>
+      <div className="h-[320px] w-full rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-3">
+        <F0DataChart {...REVENUE} onLegendSelectionChange={setSelection} />
+      </div>
+      <dl className="grid grid-cols-[110px_1fr] gap-x-4 gap-y-1 rounded-xl bg-f1-background-tertiary p-3 font-mono text-xs">
+        <Row
+          label="selected"
+          value={
+            selection
+              ? Object.entries(selection)
+                  .map(([name, visible]) => `${name}: ${visible}`)
+                  .join("  ·  ")
+              : "No legend change yet."
+          }
+        />
+      </dl>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
@@ -99,7 +130,7 @@ const HEADCOUNT: F0DataChartProps = {
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
 
-const REVENUE: F0DataChartProps = {
+const REVENUE = {
   type: "line",
   categories: MONTHS,
   series: [
@@ -107,7 +138,7 @@ const REVENUE: F0DataChartProps = {
     { name: "Design", data: [1.8, 2.0, 2.2, 2.4, 2.6, 2.5] },
     { name: "Sales", data: [3.0, 3.1, 3.0, 2.9, 2.8, 3.4] },
   ],
-}
+} satisfies F0DataChartProps
 
 /**
  * A handful of employees, plus the two anomalies a scatter exists to reveal:
@@ -203,4 +234,12 @@ export const BothMeasuresOfAScatterPoint: Story = {
       hint="Click the outlier at the top right. `values` keeps the salary that `value` alone would lose."
     />
   ),
+}
+
+/**
+ * The observer receives the final legend state after the chart's isolate,
+ * restore, or ordinary toggle behavior has completed.
+ */
+export const LegendSelectionChanges: Story = {
+  render: () => <LegendSelectionDemo />,
 }

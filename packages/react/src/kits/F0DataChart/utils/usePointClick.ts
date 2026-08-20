@@ -133,6 +133,51 @@ export function usePointClick(
       if (typeof chart.getZr !== "function") return
       const zr = chart.getZr()
       if (!zr) return
+      let isAxisHover = false
+
+      const pointOf = (ev: unknown): [number, number] | null => {
+        const { offsetX, offsetY } = ev as {
+          offsetX?: number
+          offsetY?: number
+        }
+        return typeof offsetX === "number" && typeof offsetY === "number"
+          ? [offsetX, offsetY]
+          : null
+      }
+
+      const onPlotMouseMove = (ev: unknown) => {
+        if (isAxisHover) {
+          zr.setCursorStyle("default")
+          return
+        }
+
+        const pixel = pointOf(ev)
+        if (handlerRef.current && pixel && chart.containPixel("grid", pixel)) {
+          zr.setCursorStyle("pointer")
+        }
+      }
+
+      const onPlotGlobalOut = () => {
+        isAxisHover = false
+        zr.setCursorStyle("default")
+      }
+
+      const onAxisMouseOver = (params: unknown) => {
+        const componentType = (params as { componentType?: string })
+          .componentType
+        if (componentType === "xAxis" || componentType === "yAxis") {
+          isAxisHover = true
+          zr.setCursorStyle("default")
+        }
+      }
+
+      const onAxisMouseOut = (params: unknown) => {
+        const componentType = (params as { componentType?: string })
+          .componentType
+        if (componentType === "xAxis" || componentType === "yAxis") {
+          isAxisHover = false
+        }
+      }
 
       const onPlotClick = (ev: unknown) => {
         const handler = handlerRef.current
@@ -143,10 +188,8 @@ export function usePointClick(
           offsetY?: number
           event?: NativePosition
         }
-        if (typeof e.offsetX !== "number" || typeof e.offsetY !== "number")
-          return
-
-        const pixel: [number, number] = [e.offsetX, e.offsetY]
+        const pixel = pointOf(e)
+        if (!pixel) return
         // The plot area only: clicks on the legend, the axes or the margins
         // aren't picks, and this is exactly the region the tooltip covers.
         if (!chart.containPixel("grid", pixel)) return
@@ -199,10 +242,21 @@ export function usePointClick(
       }
 
       zr.on("click", onPlotClick)
+      zr.on("mousemove", onPlotMouseMove)
+      zr.on("globalout", onPlotGlobalOut)
+      chart.on("mouseover", onAxisMouseOver)
+      chart.on("mouseout", onAxisMouseOut)
       return () => {
         // `off` throws on a disposed instance, which happens when the chart
         // unmounts before this cleanup runs.
-        if (!chart.isDisposed?.()) zr.off("click", onPlotClick)
+        if (!chart.isDisposed?.()) {
+          zr.off("click", onPlotClick)
+          zr.off("mousemove", onPlotMouseMove)
+          zr.off("globalout", onPlotGlobalOut)
+          chart.off("mouseover", onAxisMouseOver)
+          chart.off("mouseout", onAxisMouseOut)
+          zr.setCursorStyle("default")
+        }
       }
     }
 

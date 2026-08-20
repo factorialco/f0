@@ -44,23 +44,39 @@ function makeLineChartStub(option: {
   xAxis?: { data?: unknown[] }[]
   legend?: { selected?: Record<string, boolean> }[]
 }) {
-  const zrHandlers: ((ev: unknown) => void)[] = []
+  const zrHandlers: Record<string, ((ev: unknown) => void)[]> = {}
+  const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
+  const cursorStyles: string[] = []
   const dispatched: { type: string }[] = []
   let disposed = false
   return {
     zrHandlers,
+    chartHandlers,
+    cursorStyles,
     dispatched,
     dispose: () => {
       disposed = true
     },
     instance: {
+      on: (event: string, fn: (params: unknown) => void) => {
+        chartHandlers[event] = [...(chartHandlers[event] ?? []), fn]
+      },
+      off: (event: string, fn: (params: unknown) => void) => {
+        chartHandlers[event] = (chartHandlers[event] ?? []).filter(
+          (handler) => handler !== fn
+        )
+      },
       getZr: () => ({
-        on: (_event: string, fn: (ev: unknown) => void) => {
-          zrHandlers.push(fn)
+        on: (event: string, fn: (ev: unknown) => void) => {
+          zrHandlers[event] = [...(zrHandlers[event] ?? []), fn]
         },
-        off: (_event: string, fn: (ev: unknown) => void) => {
-          const i = zrHandlers.indexOf(fn)
-          if (i >= 0) zrHandlers.splice(i, 1)
+        off: (event: string, fn: (ev: unknown) => void) => {
+          zrHandlers[event] = (zrHandlers[event] ?? []).filter(
+            (handler) => handler !== fn
+          )
+        },
+        setCursorStyle: (cursor: string) => {
+          cursorStyles.push(cursor)
         },
       }),
       containPixel: (_finder: string, [x, y]: [number, number]) =>
@@ -100,7 +116,30 @@ const clickPlot = (
   offsetX: number,
   offsetY: number,
   event?: unknown
-) => stub.zrHandlers.forEach((h) => h({ offsetX, offsetY, event }))
+) =>
+  stub.zrHandlers.click?.forEach((handler) =>
+    handler({ offsetX, offsetY, event })
+  )
+
+const hoverPlot = (
+  stub: ReturnType<typeof makeLineChartStub>,
+  offsetX: number,
+  offsetY: number
+) =>
+  stub.zrHandlers.mousemove?.forEach((handler) => handler({ offsetX, offsetY }))
+
+const leavePlot = (stub: ReturnType<typeof makeLineChartStub>) =>
+  stub.zrHandlers.globalout?.forEach((handler) => handler({}))
+
+const enterAxis = (stub: ReturnType<typeof makeLineChartStub>) =>
+  stub.chartHandlers.mouseover?.forEach((handler) =>
+    handler({ componentType: "xAxis" })
+  )
+
+const leaveAxis = (stub: ReturnType<typeof makeLineChartStub>) =>
+  stub.chartHandlers.mouseout?.forEach((handler) =>
+    handler({ componentType: "xAxis" })
+  )
 
 describe("usePointClick", () => {
   it("reports the clicked mark, normalised", () => {
@@ -542,6 +581,49 @@ describe("usePointClick — plot hit area (line charts)", () => {
     expect(onPointClick).not.toHaveBeenCalled()
   })
 
+  it("adds a pointer cursor inside the plot without overriding native targets", () => {
+    const stub = makeLineChartStub(lineOption)
+    renderLine(stub)
+
+    hoverPlot(stub, 140, 100)
+    hoverPlot(stub, 10, 100)
+    hoverPlot(stub, 200, 260)
+
+    expect(stub.cursorStyles).toEqual(["pointer"])
+  })
+
+  it("keeps the default cursor when the plot has no click handler", () => {
+    const stub = makeLineChartStub(lineOption)
+    render(<Harness chart={stub.instance} hitArea="plot" />)
+
+    hoverPlot(stub, 140, 100)
+
+    expect(stub.cursorStyles).toEqual([])
+  })
+
+  it("restores the default cursor after leaving the chart", () => {
+    const stub = makeLineChartStub(lineOption)
+    renderLine(stub)
+
+    hoverPlot(stub, 140, 100)
+    leavePlot(stub)
+
+    expect(stub.cursorStyles).toEqual(["pointer", "default"])
+  })
+
+  it("keeps axis labels default without overriding the legend", () => {
+    const stub = makeLineChartStub(lineOption)
+    renderLine(stub)
+
+    enterAxis(stub)
+    hoverPlot(stub, 10, 100)
+    hoverPlot(stub, 10, 100)
+    leaveAxis(stub)
+    hoverPlot(stub, 200, 260)
+
+    expect(stub.cursorStyles).toEqual(["default", "default", "default"])
+  })
+
   it("stays quiet when no series has a value at that category", () => {
     const stub = makeLineChartStub({
       xAxis: [{ data: ["Jan"] }],
@@ -595,7 +677,9 @@ describe("usePointClick — plot hit area (line charts)", () => {
 
     unmount()
 
-    expect(stub.zrHandlers).toHaveLength(0)
+    expect(Object.values(stub.zrHandlers).flat()).toHaveLength(0)
+    expect(Object.values(stub.chartHandlers).flat()).toHaveLength(0)
+    expect(stub.cursorStyles.at(-1)).toBe("default")
     clickPlot(stub, 140, 164)
     expect(onPointClick).not.toHaveBeenCalled()
   })

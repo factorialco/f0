@@ -389,7 +389,16 @@ The callback includes the category, series, raw numeric value, configured
 indices, `source: "pointer"`, and viewport coordinates for anchoring a host-owned action. `values`
 keeps the complete numeric tuple for chart types such as scatter and heatmap;
 `series` keeps every resolved series when a line click represents a whole
-category.
+category. `category` is the clicked mark's ECharts name—an axis category, pie
+slice, funnel stage, scatter label, or gauge/radar item name—and can be empty.
+`seriesName` is the configured series name and can also be empty when ECharts
+does not report one.
+
+This callback is intentionally pointer-only. ECharts renders marks into one
+canvas rather than focusable DOM nodes. Hosts using this callback must provide
+an equivalent keyboard-accessible data or action surface outside the canvas. A
+future keyboard path can add another `source` value without breaking pointer
+consumers.
 
 **Mark-sized targets**
 
@@ -402,7 +411,9 @@ clicked. Use this story to compare the visible value with the callback payload.
 
 Lines are too thin to target reliably, so the complete plot column is
 clickable. The nearest series becomes the headline value and `series` contains
-all visible values at the resolved category, matching the axis tooltip.
+all visible values at the resolved category, matching the axis tooltip. When a
+handler is present, the pointer cursor identifies the clickable plot; axis
+labels retain the default cursor because they are not point targets.
 
 <Canvas of={PointClickStories.AnywhereInAPlotArea} />
 
@@ -418,6 +429,18 @@ both measures that define the point.
 - WHEN a line plot column is clicked → THEN the callback reports the nearest visible series as the headline and every visible series at that category in `series`.
 - WHEN any value in a point tuple is `null`, `undefined`, empty, or non-numeric → THEN the click is ignored; a genuine zero is still reported.
 - WHEN a successful pick is reported → THEN the chart dismisses its hover tooltip so the host can present one action at the same anchor.
+
+### Legend selection changes
+
+Legend-bearing charts (`bar`, `line`, `funnel`, `pie`, `radar`, and `scatter`)
+accept `onLegendSelectionChange`. After a reader toggles a legend item, the
+callback reports the final `{ [legendName]: visible }` mapping, including the
+chart's isolate and restore behavior. Companion data or action surfaces can use
+that mapping to stay aligned with what remains visible on the canvas. Gauge has
+no legend, and heatmap uses a visual scale rather than an interactive legend,
+so neither variant accepts this prop.
+
+<Canvas of={PointClickStories.LegendSelectionChanges} />
 
 ### Value & Category Formatters
 

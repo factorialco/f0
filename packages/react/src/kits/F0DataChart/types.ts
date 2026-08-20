@@ -34,7 +34,7 @@ export interface F0DataChartEmptyStateProps {
 
 /** One series' value at the category a click resolved to. */
 export interface F0DataChartPointClickSeries {
-  /** Series name, as shown in the legend ("Male"). */
+  /** Configured series name. Empty when ECharts does not report one. */
   name: string
   /** Index of the series in the chart's own series list. */
   seriesIndex: number
@@ -53,10 +53,13 @@ export interface F0DataChartPointClickSeries {
  */
 export interface F0DataChartPointClick {
   /** Interaction surface that resolved the point. */
-  source: "pointer" | "keyboard"
-  /** Series the mark belongs to, as shown in the legend ("Male"). */
+  source: "pointer"
+  /** Configured series name for the mark. Empty when ECharts does not report one. */
   seriesName: string
-  /** Category the mark sits at ("Barcelona office"). Empty for chart types with no category axis. */
+  /**
+   * Mark name reported by ECharts: an axis category, pie slice, funnel stage,
+   * scatter label, or gauge/radar item name. Empty when the mark has no name.
+   */
   category: string
   /** Raw, unformatted value. Consumers apply their own formatting. */
   value: number
@@ -89,8 +92,8 @@ export interface F0DataChartPointClick {
    * Where a pointer click landed, in viewport coordinates — enough to anchor a
    * floating element without the consumer having to reach for the chart's own
    * geometry. Taken from the touch on a touch device, where the event itself
-   * carries no coordinates. Both are 0 for a keyboard-resolved point or if a
-   * pointer event carried no coordinates; use {@link source} to distinguish.
+   * carries no coordinates. Both are 0 if the pointer event carried no
+   * coordinates.
    */
   clientX: number
   clientY: number
@@ -103,12 +106,6 @@ interface F0DataChartCommonProps {
   /** Customize or opt out of the empty state shown when data is empty. */
   emptyState?: F0DataChartEmptyStateProps
   /**
-   * Reports the chart's live legend visibility after an interactive toggle.
-   * Primarily used by accessible companion surfaces that must expose the same
-   * data currently shown on the canvas.
-   */
-  onLegendSelectionChange?: (selected: Record<string, boolean>) => void
-  /**
    * Called when the user clicks a single mark (bar segment, slice, point).
    * Omit to leave clicks inert, which is the default for every chart.
    *
@@ -118,6 +115,16 @@ interface F0DataChartCommonProps {
    * {@link F0DataChartPointClick.series}, matching what the tooltip showed.
    */
   onPointClick?: (point: F0DataChartPointClick) => void
+}
+
+/** Props shared only by variants with an interactive legend. */
+interface F0DataChartLegendInteractionProps {
+  /**
+   * Reports the chart's live legend visibility after an interactive toggle.
+   * Primarily used by accessible companion surfaces that must expose the same
+   * data currently shown on the canvas.
+   */
+  onLegendSelectionChange?: (selected: Record<string, boolean>) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +196,8 @@ export interface F0DataChartLineSeries {
 // Shared base props
 // ---------------------------------------------------------------------------
 
-interface F0DataChartBaseProps extends F0DataChartCommonProps {
+interface F0DataChartBaseProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Labels for the category axis (one per data point) */
   categories: string[]
 
@@ -372,7 +380,8 @@ export interface F0DataChartFunnelSeries {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
+export interface F0DataChartFunnelProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "funnel"
   /** The funnel series to render */
@@ -450,7 +459,8 @@ export interface F0DataChartPieSeries {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartPieProps extends F0DataChartCommonProps {
+export interface F0DataChartPieProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "pie"
   /** The pie series to render */
@@ -511,7 +521,8 @@ export interface F0DataChartRadarSeries {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export interface F0DataChartRadarProps extends F0DataChartCommonProps {
+export interface F0DataChartRadarProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "radar"
   /** Axes of the radar — defines the dimensions to compare */
@@ -664,7 +675,8 @@ export interface F0DataChartScatterSeries {
  * continuous — so this interface is separate from `F0DataChartBaseProps`.
  * Pass multiple `series` to color-split the points by a group dimension.
  */
-export interface F0DataChartScatterProps extends F0DataChartCommonProps {
+export interface F0DataChartScatterProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "scatter"
   /** One or more point groups. Multiple series render as a color split. */

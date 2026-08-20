@@ -25,18 +25,5 @@ export const LineChart = (props: F0DataChartLineProps) => {
   useAxisLabelTooltip(chartRef, ref, theme)
   useLegendInteraction(chartRef, props.onLegendSelectionChange)
 
-  // ECharts (zrender) sets `cursor: pointer` on the canvas element via inline
-  // style whenever an axis label has `triggerEvent: true` (which we need for
-  // the truncation tooltip). `axisLabel.cursor` is ignored for canvas-rendered
-  // labels, so `useAxisLabelTooltip` toggles `data-axis-hover="true"` on the
-  // container while the cursor is over an axis label, and the Tailwind
-  // arbitrary variant below scopes the `cursor: default !important` reset to
-  // exactly that window — leaving the rest of the chart with its normal
-  // pointer cursor over data points.
-  return (
-    <div
-      ref={ref}
-      className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default"
-    />
-  )
+  return <div ref={ref} className="h-full w-full" />
 }
