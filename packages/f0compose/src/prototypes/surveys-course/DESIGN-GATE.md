@@ -553,3 +553,10 @@ Restricciones que me impongo:
 
 - Orden de pestañas (Jon, 12-ago): Evaluations va **penúltima**, antes de Certificates — el orden cuenta la secuencia (contenido → sesiones → evaluación → certificado) y no parte el grupo de material del curso.
 - **Misma arquitectura de información en las dos pestañas**: título h2 en Course content ("Modules") y en Evaluations ("Evaluations"). Al separarlas los había quitado; incoherente.
+
+## Copy de evaluaciones bloqueadas — mobile (Figma, decisión de Jon)
+
+- El de fecha: **"Opens 4 Aug"**. El de fin de curso: **"Opens on completion"** (no "Opens when you finish the course" — no cabe en chip móvil, y acortar más pierde claridad: "at end" no se entiende).
+- Regla que salió: el chip lleva un valor atómico (como la fecha); si el texto es una frase, o se acorta a valor atómico o baja a la segunda línea de la card (que en las bloqueadas está libre porque no muestran `min · questions`).
+- Traducción web→mobile de la fila: estado = icono izquierdo (check/candado/punteado), no tag de texto; `Required` va en la línea de subtítulo como texto (no chip), y solo si lo es; la card bloqueada no muestra duración.
+- Pendiente: en web hoy pone "Opens when you finish the course"; unificar a "Opens on completion" si se quiere paridad de copy.
