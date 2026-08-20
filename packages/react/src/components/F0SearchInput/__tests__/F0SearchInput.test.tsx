@@ -66,6 +66,42 @@ describe("F0SearchInput", () => {
 
       expect(nextButton).toHaveFocus()
     })
+
+    it("focuses on mount without waiting for any timer", () => {
+      render(<F0SearchInput autoFocus />)
+
+      // No `advanceTimersByTime`: autoFocus must not depend on a delay racing
+      // whatever else wants focus. Effects run child-before-parent, so the
+      // input already owns focus when an ancestor's open-focus effect runs.
+      expect(screen.getByRole("searchbox")).toHaveFocus()
+    })
+
+    it("focuses again when autoFocus flips back on while mounted", () => {
+      const Harness = ({ autoFocus }: { autoFocus: boolean }) => (
+        <>
+          <F0SearchInput autoFocus={autoFocus} />
+          <button type="button">Next</button>
+        </>
+      )
+
+      const { rerender } = render(<Harness autoFocus={false} />)
+
+      const input = screen.getByRole("searchbox")
+      const nextButton = screen.getByRole("button", { name: "Next" })
+
+      act(() => {
+        nextButton.focus()
+      })
+      expect(nextButton).toHaveFocus()
+
+      // F0Select drives `autoFocus={!asList && !isFiltersOpenLocal}`, so it
+      // turns back on for an input that never unmounted. React's native
+      // `autoFocus` only fires when the node is created and cannot cover this;
+      // the host asking for focus declaratively is not focus stealing.
+      rerender(<Harness autoFocus />)
+
+      expect(input).toHaveFocus()
+    })
   })
 
   describe("threshold behavior", () => {
