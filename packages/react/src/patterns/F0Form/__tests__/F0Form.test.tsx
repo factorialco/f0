@@ -10,6 +10,7 @@ import {
   within,
   act,
 } from "@/testing/test-utils"
+import { createDataSourceDefinition } from "@/hooks/datasource"
 
 import type { F0FieldAlertProps } from "../f0Schema"
 import type { F0SectionConfig } from "../types"
@@ -48,6 +49,68 @@ describe("F0Form", () => {
     expect(screen.getByLabelText("Name")).toBeInTheDocument()
     // Check for submit button - use getByText since the button has label text
     expect(screen.getByText("Submit")).toBeInTheDocument()
+  })
+
+  it("calls a select onCreate callback with the search text", async () => {
+    const user = userEvent.setup()
+    const onCreate = vi.fn()
+    const formSchema = z.object({
+      competencyGroupId: f0FormField(z.string(), {
+        label: "Competency group",
+        fieldType: "select",
+        options: [],
+        showSearchBox: true,
+        onCreate,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="select-on-create"
+        schema={formSchema}
+        defaultValues={{ competencyGroupId: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    await user.click(screen.getByRole("combobox"))
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    await user.type(screen.getByRole("searchbox"), "New group")
+    await user.click(
+      await screen.findByRole("button", { name: 'Create "New group"' })
+    )
+
+    expect(onCreate).toHaveBeenCalledOnce()
+    expect(onCreate).toHaveBeenCalledWith("New group")
+  })
+
+  it("does not show a create action when select onCreate is absent", async () => {
+    const user = userEvent.setup()
+    const formSchema = z.object({
+      competencyGroupId: f0FormField(z.string(), {
+        label: "Competency group",
+        fieldType: "select",
+        options: [],
+        showSearchBox: true,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="select-without-on-create"
+        schema={formSchema}
+        defaultValues={{ competencyGroupId: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    await user.click(screen.getByRole("combobox"))
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    await user.type(screen.getByRole("searchbox"), "New group")
+
+    expect(
+      screen.queryByRole("button", { name: 'Create "New group"' })
+    ).not.toBeInTheDocument()
   })
 
   it("renders a private inputType as a masked field with an eye toggle", () => {
@@ -752,6 +815,52 @@ describe("isFieldRequired", () => {
 })
 
 describe("getSchemaDefinition - field types", () => {
+  it("preserves the select onCreate callback", () => {
+    const onCreate = vi.fn()
+    const formSchema = z.object({
+      competencyGroupId: f0FormField(z.string(), {
+        label: "Competency group",
+        fieldType: "select",
+        options: [],
+        onCreate,
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { onCreate?: (value: string) => Promise<void> | void }
+    }
+
+    expect(fieldItem.field.onCreate).toBe(onCreate)
+  })
+
+  it("preserves the select onCreate callback with a data source", () => {
+    const onCreate = vi.fn()
+    const source = createDataSourceDefinition<{ id: string; name: string }>({
+      dataAdapter: {
+        fetchData: async () => ({ records: [] }),
+      },
+    })
+    const formSchema = z.object({
+      competencyGroupId: f0FormField(z.string(), {
+        label: "Competency group",
+        fieldType: "select",
+        source,
+        mapOptions: (item) => ({ value: item.id, label: item.name }),
+        onCreate,
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { onCreate?: (value: string) => Promise<void> | void }
+    }
+
+    expect(fieldItem.field.onCreate).toBe(onCreate)
+  })
+
   it("creates date field from z.date()", () => {
     const formSchema = z.object({
       birthDate: f0FormField(z.date(), { label: "Birth Date" }),
