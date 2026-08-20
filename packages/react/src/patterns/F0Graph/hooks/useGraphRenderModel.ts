@@ -577,16 +577,6 @@ export function useGraphRenderModel<T>({
       }
       const aria = ariaTreeInfo.get(treeNode.id)
 
-      // aria-owns: only for expanded nodes, and only the children still in the
-      // window (an entry pointing at a windowed-out node would be a dangling ref).
-      let visibleChildIds: string[] | undefined
-      if (expandedNodes.has(treeNode.id) && treeNode.children.length > 0) {
-        const kept = treeNode.children
-          .map((c) => c.id)
-          .filter((id) => inWindow(id))
-        visibleChildIds = kept.length > 0 ? kept : undefined
-      }
-
       nodes.push({
         id: treeNode.id,
         type: "graphNode",
@@ -611,7 +601,6 @@ export function useGraphRenderModel<T>({
           ariaLevel: aria?.level ?? 1,
           ariaSetSize: aria?.setSize ?? 1,
           ariaPosInSet: aria?.posInSet ?? 1,
-          visibleChildIds,
         } as GraphNodeData,
       })
     }

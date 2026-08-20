@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { zeroRender, screen } from "@/testing/test-utils"
 
@@ -184,74 +184,75 @@ describe("F0Graph a11y — arrow-key navigation", () => {
   })
 })
 
-// ─── Task 3 — aria-owns ───────────────────────────────────────
+// ─── Task 3 — the accessible tree owns the rendered nodes ─────
 
-describe("F0Graph a11y — aria-owns", () => {
-  it("passes ariaOwns for expanded nodes with visible children", () => {
-    const capturedOwns = new Map<string, string | undefined>()
+describe("F0Graph a11y — the tree owns the rendered treeitems", () => {
+  it("exposes exactly one labelled tree", () => {
+    zeroRender(
+      <div style={{ width: 800, height: 600 }}>
+        <F0Graph nodes={makeNodes()} renderNode={renderNodeFn} />
+      </div>
+    )
 
-    const spyRenderNode = (
-      node: GraphNode<string>,
-      ctx: F0GraphNodeRenderContext
-    ) => {
-      capturedOwns.set(node.id, ctx.ariaOwns)
-      return <span>{node.data}</span>
-    }
+    expect(screen.getAllByRole("tree", { name: "Graph view" })).toHaveLength(1)
+  })
 
+  it("owns every rendered node, so each treeitem has a tree parent", async () => {
     zeroRender(
       <div style={{ width: 800, height: 600 }}>
         <F0Graph
           nodes={makeNodes()}
-          renderNode={spyRenderNode}
+          renderNode={renderNodeFn}
           defaultExpandedNodes={new Set(["1", "2"])}
         />
       </div>
     )
 
-    if (capturedOwns.size > 0) {
-      // Node 1 (CEO) is expanded with children 2 and 3 visible
-      const ceoOwns = capturedOwns.get("1")
-      expect(ceoOwns).toContain("f0-graph-node-2")
-      expect(ceoOwns).toContain("f0-graph-node-3")
+    // The attribute mirrors the DOM through a MutationObserver, so it lands once
+    // React Flow has mounted its nodes rather than on the first commit.
+    const tree = screen.getByRole("tree", { name: "Graph view" })
+    await vi.waitFor(() => {
+      expect(tree.getAttribute("aria-owns")).toBeTruthy()
+    })
 
-      // Node 2 (CTO) is expanded with children 4 and 5 visible
-      const ctoOwns = capturedOwns.get("2")
-      expect(ctoOwns).toContain("f0-graph-node-4")
-      expect(ctoOwns).toContain("f0-graph-node-5")
+    const owned = (tree.getAttribute("aria-owns") ?? "")
+      .split(" ")
+      .filter(Boolean)
+    expect(owned.length).toBeGreaterThan(0)
 
-      // Node 3 (CFO) has no children — no ariaOwns
-      expect(capturedOwns.get("3")).toBeUndefined()
+    // Every owned id must resolve. Dangling references were the old failure
+    // mode: `aria-owns` used to be declared parent-to-child, and culling
+    // off-screen nodes left a third of those ids pointing at nothing.
+    for (const id of owned) {
+      expect(document.getElementById(id)).not.toBeNull()
+    }
+
+    // And every rendered treeitem must be owned, or it has no tree parent.
+    const rendered = Array.from(
+      document.querySelectorAll<HTMLElement>("[role='treeitem']")
+    ).map((el) => el.id)
+    for (const id of rendered) {
+      expect(owned).toContain(id)
     }
   })
 
-  it("does not pass ariaOwns for collapsed nodes", () => {
-    const capturedOwns = new Map<string, string | undefined>()
-
-    const spyRenderNode = (
-      node: GraphNode<string>,
-      ctx: F0GraphNodeRenderContext
-    ) => {
-      capturedOwns.set(node.id, ctx.ariaOwns)
-      return <span>{node.data}</span>
-    }
-
+  it("does not nest ownership: no treeitem declares aria-owns of its own", () => {
     zeroRender(
       <div style={{ width: 800, height: 600 }}>
         <F0Graph
           nodes={makeNodes()}
-          renderNode={spyRenderNode}
-          defaultExpandedNodes={new Set(["1"])}
+          renderNode={renderNodeFn}
+          defaultExpandedNodes={new Set(["1", "2"])}
         />
       </div>
     )
 
-    if (capturedOwns.size > 0) {
-      // Node 2 (CTO) is collapsed — no ariaOwns even though it has children
-      expect(capturedOwns.get("2")).toBeUndefined()
-    }
+    // Depth travels on aria-level/setsize/posinset instead. Two owners for one
+    // element is ambiguous, and the browser picks one.
+    const owning = document.querySelectorAll("[role='treeitem'][aria-owns]")
+    expect(owning).toHaveLength(0)
   })
 })
-
 // ─── Task 4 — Keyboard pan + zoom ─────────────────────────────
 
 describe("F0Graph a11y — keyboard pan + zoom", () => {

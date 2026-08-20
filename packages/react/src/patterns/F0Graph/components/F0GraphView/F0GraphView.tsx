@@ -54,6 +54,7 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
+import { useAccessibleTreeOwns } from "../../hooks/useAccessibleTreeOwns"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
@@ -275,6 +276,8 @@ export function F0GraphView<T = unknown>(
   // ── Refs for the canvas / pointer tracking ──
   const canvasRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  // The `role="tree"` element that owns the rendered treeitems by reference.
+  const treeRef = useRef<HTMLDivElement>(null)
   // Distinguishes a click on a node from a pan drag ending over one.
   const pointerDownRef = useRef<{ x: number; y: number; id: number } | null>(
     null
@@ -464,6 +467,9 @@ export function F0GraphView<T = unknown>(
   useEffect(() => {
     onRenderedNodesChange?.(renderedNodeCount)
   }, [renderedNodeCount, onRenderedNodesChange])
+
+  // Keep the accessible tree owning exactly the treeitems currently mounted.
+  useAccessibleTreeOwns(treeRef, containerRef)
 
   // Viewport-driven data loading: request rich data for on-screen nodes.
   // With windowing, hold off until the viewport has settled — before then
@@ -729,10 +735,27 @@ export function F0GraphView<T = unknown>(
                     data-zoom-level={zoomLevel}
                     className="f0-graph relative h-full w-full outline-none"
                   >
+                    {/*
+                      The accessible tree. It is deliberately NOT an ancestor of
+                      the canvas: React Flow hardcodes `role="application"` on
+                      its wrapper and injects a live region and its own focusable
+                      boxes, none of which are legal children of `role="tree"`,
+                      so a tree wrapped around the canvas can never satisfy
+                      `aria-required-children`. Owning the rendered treeitems
+                      from an empty element sidesteps all of that and leaves
+                      React Flow's DOM untouched. Depth rides on
+                      `aria-level` / `aria-setsize` / `aria-posinset`, which is
+                      the same shape a virtualized tree uses: only the rendered
+                      slice is present, and setsize reports the real total.
+                    */}
                     <div
-                      ref={containerRef}
+                      ref={treeRef}
                       role="tree"
                       aria-label={controlLabels?.graphView ?? i18n.graph.view}
+                      className="absolute h-0 w-0"
+                    />
+                    <div
+                      ref={containerRef}
                       onKeyDown={handleTreeKeyDown}
                       onPointerDown={(e) => {
                         pointerDownRef.current = {
@@ -814,6 +837,16 @@ export function F0GraphView<T = unknown>(
                         nodesDraggable={false}
                         nodesConnectable={false}
                         elementsSelectable={false}
+                        // React Flow's own tab stops are redundant here and
+                        // actively harmful: it puts `tabindex="0"` on every node
+                        // wrapper (doubling every node's tab stop, since the
+                        // node inside is already focusable via the roving
+                        // tabindex) and on every edge, so Tab walked through
+                        // four "Edge from 1 to 2" stops before reaching a
+                        // person. F0Graph owns keyboard navigation in
+                        // `useGraphKeyboard`.
+                        nodesFocusable={false}
+                        edgesFocusable={false}
                         nodeClickDistance={4}
                         panOnDrag
                         zoomOnScroll

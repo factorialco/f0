@@ -12,6 +12,8 @@ import {
   type F0GraphNodeRenderContext,
 } from "../F0Graph"
 
+import { graphKeyTarget } from "./helpers"
+
 // ─── Helpers ───────────────────────────────────────────────────
 
 function makeNodes(): GraphNode<string>[] {
@@ -86,8 +88,7 @@ describe("F0Graph — imperative handle", () => {
     )
 
     // Select the first focused node via keyboard.
-    const tree = screen.getByRole("tree", { name: "Graph view" })
-    dispatchKey(tree, "Enter")
+    dispatchKey(graphKeyTarget(), "Enter")
     expect(onSelectedNodesChange.mock.calls.at(-1)?.[0]).toEqual(new Set(["1"]))
 
     onSelectedNodesChange.mockClear()

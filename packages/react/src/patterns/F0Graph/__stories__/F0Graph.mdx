@@ -155,11 +155,16 @@ decoupled from focus. Search and node detail are owned by the consumer
 (e.g. OneDataCollection's search and an `F0Dialog` opened from the node
 click), not by F0Graph.
 
+Pass `expandedNodes` and `selectedNodes` together with their change
+callbacks to drive both from your own state:
+
+<Canvas of={F0GraphStories.Controlled} />
+
 ---
 
 ## Guidelines
 
-### When to use
+### When to use, and when not to use
 
 <DoDonts
   do={{

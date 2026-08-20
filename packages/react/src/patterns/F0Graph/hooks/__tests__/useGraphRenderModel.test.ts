@@ -4,10 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { createElement, type MutableRefObject, type ReactNode } from "react"
 
-import type {
-  ExpanderNodeData,
-  GraphNodeData,
-} from "../../internal/ReactFlowAdapters"
+import type { ExpanderNodeData } from "../../internal/ReactFlowAdapters"
 import type { LayoutEngine, TreeNode } from "../../types"
 import type { ViewportRect } from "../../utils"
 import { useGraphRenderModel } from "../useGraphRenderModel"
@@ -130,11 +127,6 @@ const fixedLayout = (
   },
 })
 
-const graphNodeData = (
-  rfNodes: ReturnType<typeof useGraphRenderModel>["rfNodes"],
-  id: string
-) => rfNodes.find((n) => n.id === id)?.data as GraphNodeData | undefined
-
 describe("useGraphRenderModel — node windowing", () => {
   beforeEach(() => {
     mockViewportRect = null
@@ -210,7 +202,7 @@ describe("useGraphRenderModel — node windowing", () => {
     expect(result.current.rfNodes.map((n) => n.id)).not.toContain("far")
   })
 
-  it("keeps aria-owns to an off-window child once its edge pulls it in", () => {
+  it("renders an off-window child once its edge pulls it in", () => {
     const child = treeNode("child", "root", 0, [], 1)
     const root = treeNode("root", null, 1, [child])
     mockViewportRect = { minX: -10, minY: -10, maxX: 200, maxY: 200 }
@@ -222,14 +214,13 @@ describe("useGraphRenderModel — node windowing", () => {
         child: { x: 0, y: 5000 },
       }),
     })
-    // The off-window child is materialized to keep the parent's edge, so it is a
-    // valid aria-owns target (not a dangling ref).
-    expect(
-      graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
-    ).toEqual(["child"])
+    // The off-window child is still materialized to keep the parent's edge, so
+    // the tree can own it (`renderedNodeIds` feeds the `aria-owns` in
+    // F0GraphView) rather than reporting a parent with no reachable children.
+    expect(result.current.renderedNodeIds).toContain("child")
   })
 
-  it("keeps aria-owns children that remain in the window", () => {
+  it("reports in-window children as rendered so the tree can own them", () => {
     const child = treeNode("child", "root", 0, [], 1)
     const root = treeNode("root", null, 1, [child])
     mockViewportRect = { minX: -100, minY: -100, maxX: 5200, maxY: 5200 }
@@ -241,9 +232,7 @@ describe("useGraphRenderModel — node windowing", () => {
         child: { x: 0, y: 100 },
       }),
     })
-    expect(
-      graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
-    ).toEqual(["child"])
+    expect(result.current.renderedNodeIds).toEqual(["root", "child"])
   })
 
   it("materializes a windowed node's ancestors so the reporting line stays connected", () => {

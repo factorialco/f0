@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useCallback, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -18,6 +19,9 @@ const meta = {
   title: "Graph/F0Graph",
   component: F0Graph<Employee>,
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   decorators: [
     (Story) => (
       <div className="h-[600px] w-full bg-f1-background">
@@ -227,6 +231,57 @@ export const Tree: Story = {
     nodes: BASIC_NODES,
     renderNode: renderEmployee,
     defaultExpandDepth: 2,
+  },
+  // Primary flow: read the hierarchy, select a person, close a branch and
+  // reopen it. The first assertion is also the regression guard for the
+  // accessible tree — React Flow lays every node out as a flat, absolutely
+  // positioned sibling, so the tree owns the rendered items by reference and a
+  // treeitem left unowned has no tree parent at all.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // `aria-owns` mirrors the DOM through a MutationObserver, so it settles once
+    // React Flow has mounted its nodes rather than on the first commit.
+    const tree = canvas.getByRole("tree", { name: "Graph view" })
+    const ownedIds = () =>
+      (tree.getAttribute("aria-owns") ?? "").split(" ").filter(Boolean)
+
+    await waitFor(() => {
+      const owned = ownedIds()
+      expect(owned.length).toBeGreaterThan(0)
+      expect(owned.length).toBe(canvas.getAllByRole("treeitem").length)
+    })
+
+    const owned = ownedIds()
+    for (const item of canvas.getAllByRole("treeitem")) {
+      await expect(owned).toContain(item.id)
+      await expect(item).toHaveAttribute("aria-level")
+    }
+
+    // Selecting a person.
+    const ceo = canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
+    await expect(ceo).toHaveAttribute("aria-expanded", "true")
+    await userEvent.click(ceo)
+    await waitFor(() =>
+      expect(
+        canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
+      ).toHaveAttribute("aria-selected", "true")
+    )
+
+    // Closing the CTO's branch hides his reports, reopening brings them back.
+    await expect(
+      canvas.getByRole("treeitem", { name: /Aisha Patel/ })
+    ).toBeVisible()
+    await userEvent.keyboard("{ArrowDown}{ArrowLeft}")
+    await waitFor(() =>
+      expect(canvas.queryByRole("treeitem", { name: /Aisha Patel/ })).toBeNull()
+    )
+    await userEvent.keyboard("{ArrowRight}")
+    await waitFor(() =>
+      expect(
+        canvas.getByRole("treeitem", { name: /Aisha Patel/ })
+      ).toBeVisible()
+    )
   },
 }
 
