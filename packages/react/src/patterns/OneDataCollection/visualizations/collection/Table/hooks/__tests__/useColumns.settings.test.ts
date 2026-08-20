@@ -338,7 +338,7 @@ describe("useColumns with settings", () => {
     expect(result.current.colsOrder).toEqual(["column2", "column3", "column1"])
   })
 
-  it("uses the controlled lock instead of implicitly locking the first column", () => {
+  it("uses controlled locks instead of implicitly locking the first column", () => {
     const { result } = renderHook(() =>
       useColumns(
         mockColumns,
@@ -346,7 +346,7 @@ describe("useColumns with settings", () => {
         { hidden: ["column2"] },
         true,
         true,
-        "column2",
+        ["column2", "column3"],
         true
       )
     )
@@ -354,8 +354,11 @@ describe("useColumns with settings", () => {
     const first = result.current.columnsWithStatus.find(
       ({ column }) => column.id === "column1"
     )
-    const locked = result.current.columnsWithStatus.find(
+    const firstLocked = result.current.columnsWithStatus.find(
       ({ column }) => column.id === "column2"
+    )
+    const secondLocked = result.current.columnsWithStatus.find(
+      ({ column }) => column.id === "column3"
     )
 
     expect(first).toMatchObject({
@@ -364,21 +367,59 @@ describe("useColumns with settings", () => {
       locked: false,
       sortable: true,
     })
-    expect(locked).toMatchObject({
+    expect(firstLocked).toMatchObject({
       canHide: false,
       frozen: false,
       locked: true,
       sortable: false,
       visible: true,
     })
-    expect(result.current.columns.map((column) => column.id)).toContain(
-      "column2"
-    )
+    expect(secondLocked).toMatchObject({
+      canHide: false,
+      frozen: false,
+      locked: true,
+      sortable: false,
+      visible: true,
+    })
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column2",
+      "column3",
+      "column1",
+      "column4",
+    ])
   })
 
-  it("allows every non-frozen column to be editable when the controlled lock is cleared", () => {
+  it("returns an unlocked column to its saved position", () => {
+    const settings: TableVisualizationSettings = {
+      hidden: [],
+      order: ["column2", "column1", "column3", "column4"],
+    }
+    const { result, rerender } = renderHook(
+      ({ lockedColumnIds }) =>
+        useColumns(mockColumns, 0, settings, true, true, lockedColumnIds, true),
+      { initialProps: { lockedColumnIds: ["column3"] } }
+    )
+
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column3",
+      "column2",
+      "column1",
+      "column4",
+    ])
+
+    rerender({ lockedColumnIds: [] })
+
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column2",
+      "column1",
+      "column3",
+      "column4",
+    ])
+  })
+
+  it("allows every non-frozen column to be editable when controlled locks are empty", () => {
     const { result } = renderHook(() =>
-      useColumns(mockColumns, 0, {}, true, true, null, true)
+      useColumns(mockColumns, 0, {}, true, true, [], true)
     )
 
     expect(result.current.columnsWithStatus).toEqual(
@@ -393,12 +434,12 @@ describe("useColumns with settings", () => {
     )
   })
 
-  it("keeps frozen columns permanently locked alongside the controlled lock", () => {
+  it("keeps frozen columns permanently locked alongside controlled locks", () => {
     const { result } = renderHook(() =>
-      useColumns(mockColumns, 1, {}, true, true, "column2", true)
+      useColumns(mockColumns, 1, {}, true, true, ["column2", "column3"], true)
     )
 
-    expect(result.current.columnsWithStatus.slice(0, 2)).toEqual([
+    expect(result.current.columnsWithStatus.slice(0, 3)).toEqual([
       expect.objectContaining({
         column: expect.objectContaining({ id: "column1" }),
         frozen: true,
@@ -406,6 +447,11 @@ describe("useColumns with settings", () => {
       }),
       expect.objectContaining({
         column: expect.objectContaining({ id: "column2" }),
+        frozen: false,
+        locked: true,
+      }),
+      expect.objectContaining({
+        column: expect.objectContaining({ id: "column3" }),
         frozen: false,
         locked: true,
       }),

@@ -327,7 +327,7 @@ const lockableItems = [
 ]
 
 const LockableList = () => {
-  const [lockedId, setLockedId] = useState<string | null>("name")
+  const [lockedIds, setLockedIds] = useState<string[]>(["name"])
 
   return (
     <div className="w-72">
@@ -336,12 +336,18 @@ const LockableList = () => {
         allowHiding
         items={lockableItems.map((item) => ({
           ...item,
-          locked: item.id === lockedId,
+          locked: lockedIds.includes(item.id),
           lockable: true,
-          sortable: item.id !== lockedId,
-          canHide: item.id !== lockedId,
+          sortable: !lockedIds.includes(item.id),
+          canHide: !lockedIds.includes(item.id),
         }))}
-        onLockedChange={(item, locked) => setLockedId(locked ? item.id : null)}
+        onLockedChange={(item, locked) =>
+          setLockedIds((current) =>
+            locked
+              ? [...new Set([...current, item.id])]
+              : current.filter((id) => id !== item.id)
+          )
+        }
         onRemove={fn()}
       />
     </div>
@@ -349,7 +355,7 @@ const LockableList = () => {
 }
 
 /**
- * Unlock the required column, then lock another one. Hover or keyboard focus
+ * Independently unlock and lock frozen columns. Hover or keyboard focus
  * reveals lock and remove actions for every unlocked row.
  */
 const playLockTransfer: NonNullable<Story["play"]> = async ({
@@ -359,23 +365,25 @@ const playLockTransfer: NonNullable<Story["play"]> = async ({
   const canvas = within(canvasElement)
   const page = within(canvasElement.ownerDocument.body)
 
-  await step("Unlock the current required column", async () => {
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Unlock column: Name" })
-    )
+  await step("Unlock and relock the first frozen column", async () => {
+    canvas.getByRole("button", { name: "Unlock column: Name" }).focus()
+    await userEvent.keyboard("{Enter}")
     await expect(
       canvas.queryByRole("button", { name: "Unlock column: Name" })
     ).not.toBeInTheDocument()
     await expect(
       canvas.getByRole("button", { name: "Lock column: Name" })
     ).toHaveFocus()
+    await userEvent.keyboard("{Enter}")
+    await expect(
+      canvas.getByRole("button", { name: "Unlock column: Name" })
+    ).toHaveFocus()
   })
 
-  await step("Lock a different column", async () => {
+  await step("Lock a second column without unlocking the first", async () => {
     const emailRow = canvas.getByText("Email").closest("li")!
-    await userEvent.click(
-      within(emailRow).getByRole("button", { name: "Lock column: Email" })
-    )
+    within(emailRow).getByRole("button", { name: "Lock column: Email" }).focus()
+    await userEvent.keyboard("{Enter}")
     await waitFor(() => {
       const updatedEmailRow = canvas.getByText("Email").closest("li")!
       expect(
@@ -384,22 +392,42 @@ const playLockTransfer: NonNullable<Story["play"]> = async ({
         })
       ).toHaveFocus()
       expect(within(updatedEmailRow).getByRole("switch")).toBeDisabled()
+      expect(
+        canvas.getByRole("button", { name: "Unlock column: Name" })
+      ).toBeInTheDocument()
     })
+  })
+
+  await step("Pointer activation does not pin row actions", async () => {
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Unlock column: Email" })
+    )
+    const emailRow = canvas.getByText("Email").closest("li")!
+    const lockEmail = within(emailRow).getByRole("button", {
+      name: "Lock column: Email",
+    })
+    expect(lockEmail).not.toHaveFocus()
+
+    lockEmail.focus()
+    await userEvent.keyboard("{Enter}")
+    await expect(
+      canvas.getByRole("button", { name: "Unlock column: Email" })
+    ).toHaveFocus()
   })
 
   const focusedUnlock = canvas.getByRole("button", {
     name: "Unlock column: Email",
   })
   focusedUnlock.blur()
-  const nameRow = canvas.getByText("Name").closest("li") as HTMLElement
-  const nameActions = nameRow.querySelector(
+  const roleRow = canvas.getByText("Role").closest("li") as HTMLElement
+  const roleActions = roleRow.querySelector(
     "[data-column-actions]"
   ) as HTMLElement
-  nameActions.tabIndex = -1
-  nameActions.focus()
+  roleActions.tabIndex = -1
+  roleActions.focus()
   await waitFor(() => {
-    expect(nameActions).toHaveFocus()
-    expect(getComputedStyle(nameActions).opacity).toBe("1")
+    expect(roleActions).toHaveFocus()
+    expect(getComputedStyle(roleActions).opacity).toBe("1")
     expect(page.queryByRole("tooltip")).toBeNull()
   })
 }

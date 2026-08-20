@@ -1599,9 +1599,9 @@ export const WithColumnAddRemove: Story = {
 }
 
 /**
- * Demonstrates a consumer-controlled required column. The current lock can be
- * cleared, then transferred to any non-frozen column. Locked columns stay
- * visible and cannot be reordered or removed.
+ * Demonstrates consumer-controlled frozen columns. Each lock can be toggled
+ * independently; locked columns move left, stay sticky, and return to their
+ * saved positions when unlocked.
  */
 export const WithLockableColumns: Story = {
   render: () => {
@@ -1610,7 +1610,7 @@ export const WithLockableColumns: Story = {
       "email",
       "role",
     ])
-    const [lockedColumnId, setLockedColumnId] = useState<string | null>("name")
+    const [lockedColumnIds, setLockedColumnIds] = useState<string[]>(["name"])
 
     const columns = visibleIds
       .map((id) => addRemoveColumns.find((column) => column.id === id))
@@ -1634,8 +1634,8 @@ export const WithLockableColumns: Story = {
                 allowColumnReordering: true,
                 allowColumnHiding: true,
                 columns,
-                lockedColumnId,
-                onLockedColumnChange: setLockedColumnId,
+                lockedColumnIds,
+                onLockedColumnIdsChange: setLockedColumnIds,
                 onAddColumn: () => {
                   const next = addRemoveColumns.find(
                     (column) => !visibleIds.includes(column.id)
@@ -1665,11 +1665,13 @@ export const WithLockableColumns: Story = {
       await settingsDialog.findByText("Table settings")
     })
 
-    await step("Unlock the current required column", async () => {
+    await step("Unlock and relock the first frozen column", async () => {
       const nameRow = settingsDialog.getByText("Name").closest("li")!
-      await userEvent.click(
-        within(nameRow).getByRole("button", { name: "Unlock column: Name" })
-      )
+      const unlockName = within(nameRow).getByRole("button", {
+        name: "Unlock column: Name",
+      })
+      unlockName.focus()
+      await userEvent.keyboard("{Enter}")
       await waitFor(() => {
         const updatedNameRow = settingsDialog.getByText("Name").closest("li")!
         const updatedName = within(updatedNameRow)
@@ -1678,36 +1680,90 @@ export const WithLockableColumns: Story = {
           updatedName.getByRole("button", { name: "Lock column: Name" })
         ).toHaveFocus()
       })
+      await userEvent.keyboard("{Enter}")
+      await expect(
+        settingsDialog.getByRole("button", { name: "Unlock column: Name" })
+      ).toHaveFocus()
     })
 
-    await step("Lock another column", async () => {
-      const emailRow = settingsDialog.getByText("Email").closest("li")!
-      await userEvent.click(
-        within(emailRow).getByRole("button", { name: "Lock column: Email" })
-      )
+    const expectColumnOrder = async (labels: string[]) => {
       await waitFor(() => {
-        const updatedEmailRow = settingsDialog.getByText("Email").closest("li")!
         expect(
-          within(updatedEmailRow).getByRole("button", {
-            name: "Unlock column: Email",
+          canvas
+            .getAllByRole("columnheader")
+            .map((header) =>
+              labels.find((label) => header.textContent?.startsWith(label))
+            )
+        ).toEqual(labels)
+      })
+    }
+
+    await step("Freeze a later column beside the existing lock", async () => {
+      const roleRow = settingsDialog.getByText("Role").closest("li")!
+      const lockRole = within(roleRow).getByRole("button", {
+        name: "Lock column: Role",
+      })
+      lockRole.focus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => {
+        const updatedRoleRow = settingsDialog.getByText("Role").closest("li")!
+        expect(
+          within(updatedRoleRow).getByRole("button", {
+            name: "Unlock column: Role",
           })
         ).toHaveFocus()
-        expect(within(updatedEmailRow).getByRole("switch")).toBeDisabled()
+        expect(within(updatedRoleRow).getByRole("switch")).toBeDisabled()
+        expect(
+          settingsDialog.getByRole("button", {
+            name: "Unlock column: Name",
+          })
+        ).toBeInTheDocument()
       })
-      settingsDialog
-        .getByRole("button", { name: "Unlock column: Email" })
-        .blur()
-      const nameRow = settingsDialog
-        .getByText("Name")
-        .closest("li") as HTMLElement
-      const nameActions = nameRow.querySelector(
+      await expectColumnOrder(["Name", "Role", "Email"])
+      const [nameHeader, roleHeader, emailHeader] =
+        canvas.getAllByRole("columnheader")
+      expect(getComputedStyle(nameHeader!).position).toBe("sticky")
+      expect(getComputedStyle(roleHeader!).position).toBe("sticky")
+      expect(getComputedStyle(emailHeader!).position).not.toBe("sticky")
+    })
+
+    await step("Return an unlocked column to its saved position", async () => {
+      const lockedRoleRow = settingsDialog.getByText("Role").closest("li")!
+      await userEvent.click(
+        within(lockedRoleRow).getByRole("button", {
+          name: "Unlock column: Role",
+        })
+      )
+      await expectColumnOrder(["Name", "Email", "Role"])
+      const unlockedRoleRow = settingsDialog.getByText("Role").closest("li")!
+      const roleActions = unlockedRoleRow.querySelector(
         "[data-column-actions]"
       ) as HTMLElement
-      nameActions.tabIndex = -1
-      nameActions.focus()
+      const lockRole = within(unlockedRoleRow).getByRole("button", {
+        name: "Lock column: Role",
+      })
+      expect(lockRole).not.toHaveFocus()
+      expect(roleActions.contains(document.activeElement)).toBe(false)
+
+      lockRole.focus()
+      await userEvent.keyboard("{Enter}")
+      await expectColumnOrder(["Name", "Role", "Email"])
+      await expect(
+        settingsDialog.getByRole("button", { name: "Unlock column: Role" })
+      ).toHaveFocus()
+
+      settingsDialog.getByRole("button", { name: "Unlock column: Role" }).blur()
+      const emailRow = settingsDialog
+        .getByText("Email")
+        .closest("li") as HTMLElement
+      const emailActions = emailRow.querySelector(
+        "[data-column-actions]"
+      ) as HTMLElement
+      emailActions.tabIndex = -1
+      emailActions.focus()
       await waitFor(() => {
-        expect(nameActions).toHaveFocus()
-        expect(getComputedStyle(nameActions).opacity).toBe("1")
+        expect(emailActions).toHaveFocus()
+        expect(getComputedStyle(emailActions).opacity).toBe("1")
         expect(page.queryByRole("tooltip")).toBeNull()
       })
     })

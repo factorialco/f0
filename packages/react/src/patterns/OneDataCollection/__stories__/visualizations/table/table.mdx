@@ -116,16 +116,16 @@ type TableVisualizationOptions<T> = {
   onRemoveColumn?: (columnId: string) => void
 
   /**
-   * The current user-managed required column. This is independent from
-   * frozenColumns and does not make the column sticky while scrolling.
+   * The user-managed frozen columns. They move into a sticky group on the left
+   * in the order listed here.
    */
-  lockedColumnId?: string | null
+  lockedColumnIds?: readonly string[]
 
   /**
-   * Enables lock/unlock actions in the settings popover. Receives the next
-   * locked column id, or null when the current lock is cleared.
+   * Enables lock/unlock actions in the settings popover. Receives the complete
+   * set of locked column ids after each change.
    */
-  onLockedColumnChange?: (columnId: string | null) => void
+  onLockedColumnIdsChange?: (columnIds: string[]) => void
 
   /** Wraps the table in a rounded border container. */
   bordered?: boolean
@@ -422,18 +422,20 @@ Allow users to show/hide columns using column settings:
 
 <Canvas of={TableStories.TableColumnOrderingAndHidden} meta={TableStories} />
 
-### User-managed Required Column
+### User-managed Frozen Columns
 
-Use `lockedColumnId` with `onLockedColumnChange` when users need to choose which
-column must remain in the table. The locked column stays visible and cannot be
-reordered or removed. Its lock button clears the requirement; hovering or
-keyboard-focusing an unlocked row reveals an action that transfers the lock.
-Omit the callback when the locked column is fixed and should not expose lock
-controls.
+Use `lockedColumnIds` with `onLockedColumnIdsChange` when users need to choose
+which columns remain visible while scrolling horizontally. Every locked column
+moves into a sticky group on the left and cannot be hidden, reordered, or
+removed. The order of `lockedColumnIds` is the order of that group, so newly
+locked columns append beside the existing locks. Unlocking removes only that
+column and returns it to its saved table position. Its closed-lock button
+removes the lock; hovering or keyboard-focusing an unlocked settings row
+reveals a closed-lock action that adds it without changing the other locks.
 
-This lock controls table configuration only. It does not freeze a column while
-scrolling. Set `frozenColumns: 0` for one transferable lock; any column covered
-by `frozenColumns` remains permanently locked.
+Columns covered by `frozenColumns` remain permanently locked before the
+user-managed group. Omit `onLockedColumnIdsChange` when the locked set is fixed
+and should not expose controls.
 
 <Canvas
   of={TableStories.WithLockableColumns}
@@ -442,7 +444,7 @@ by `frozenColumns` remains permanently locked.
 />
 
 ```tsx
-const [lockedColumnId, setLockedColumnId] = useState<string | null>("name")
+const [lockedColumnIds, setLockedColumnIds] = useState<string[]>(["name"])
 
 <OneDataCollection
   source={source}
@@ -454,8 +456,8 @@ const [lockedColumnId, setLockedColumnId] = useState<string | null>("name")
         frozenColumns: 0,
         allowColumnHiding: true,
         allowColumnReordering: true,
-        lockedColumnId,
-        onLockedColumnChange: setLockedColumnId,
+        lockedColumnIds,
+        onLockedColumnIdsChange: setLockedColumnIds,
         onRemoveColumn: removeColumn,
       },
     },
@@ -466,7 +468,8 @@ const [lockedColumnId, setLockedColumnId] = useState<string | null>("name")
 Keyboard users can tab to the visible lock button or the focus-revealed row
 actions and activate them with <kbd>Enter</kbd> or <kbd>Space</kbd>. The icon
 buttons include the target label in their accessible name, for example “Lock
-column: Email.”
+column: Email.” Pointer activation does not leave the row actions visually
+stuck; keyboard activation keeps focus on the corresponding control.
 
 ### Reference Rows
 

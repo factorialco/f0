@@ -5,7 +5,7 @@ import { Reorder, useDragControls } from "motion/react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
-import { Delete, Handle, LockLocked, LockUnlocked } from "@/icons/app"
+import { Delete, Handle, LockLocked } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { TooltipWrapper } from "@/lib/tooltip-wrapper"
@@ -77,6 +77,19 @@ const Item = ({
   const lockButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null)
   const unlockButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null)
   const pendingLockFocusRef = useRef<"lock" | "unlock" | null>(null)
+  const keyboardActivationRef = useRef(false)
+
+  const shouldRestoreFocus = (event: React.MouseEvent<HTMLElement>) => {
+    const shouldRestore = keyboardActivationRef.current || event.detail === 0
+    keyboardActivationRef.current = false
+    return shouldRestore
+  }
+
+  const trackKeyboardActivation = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      keyboardActivationRef.current = true
+    }
+  }
 
   useEffect(() => {
     const pendingFocus = pendingLockFocusRef.current
@@ -95,7 +108,7 @@ const Item = ({
 
   const content = (
     <div className={classes}>
-      {(allowSorting || locked) && (
+      {(allowSorting || item.showLockState) && (
         <div
           className={cn(
             "flex shrink-0 items-center justify-center text-f1-icon",
@@ -111,21 +124,30 @@ const Item = ({
           {sortable ? (
             <F0Icon icon={Handle} size="xs" />
           ) : showUnlock ? (
-            <ButtonInternal
-              variant="ghost"
-              size="sm"
-              compact
-              hideLabel
-              icon={LockUnlocked}
-              label={i18n.t("collections.table.settings.unlockColumn", {
-                label: item.label,
-              })}
-              ref={unlockButtonRef}
-              onClick={() => {
-                pendingLockFocusRef.current = "lock"
-                onLockedChange?.(item, false)
+            <span
+              onKeyDown={trackKeyboardActivation}
+              onPointerDown={() => {
+                keyboardActivationRef.current = false
               }}
-            />
+            >
+              <ButtonInternal
+                variant="ghost"
+                size="sm"
+                compact
+                hideLabel
+                icon={LockLocked}
+                label={i18n.t("collections.table.settings.unlockColumn", {
+                  label: item.label,
+                })}
+                ref={unlockButtonRef}
+                onClick={(event) => {
+                  pendingLockFocusRef.current = shouldRestoreFocus(event)
+                    ? "lock"
+                    : null
+                  onLockedChange?.(item, false)
+                }}
+              />
+            </span>
           ) : item.disabledReason ? null : (
             <F0Icon icon={LockLocked} size="sm" />
           )}
@@ -146,21 +168,30 @@ const Item = ({
         >
           <div className="flex items-center">
             {showLock && (
-              <ButtonInternal
-                variant="ghost"
-                size="sm"
-                compact
-                hideLabel
-                icon={LockLocked}
-                label={i18n.t("collections.table.settings.lockColumn", {
-                  label: item.label,
-                })}
-                ref={lockButtonRef}
-                onClick={() => {
-                  pendingLockFocusRef.current = "unlock"
-                  onLockedChange?.(item, true)
+              <span
+                onKeyDown={trackKeyboardActivation}
+                onPointerDown={() => {
+                  keyboardActivationRef.current = false
                 }}
-              />
+              >
+                <ButtonInternal
+                  variant="ghost"
+                  size="sm"
+                  compact
+                  hideLabel
+                  icon={LockLocked}
+                  label={i18n.t("collections.table.settings.lockColumn", {
+                    label: item.label,
+                  })}
+                  ref={lockButtonRef}
+                  onClick={(event) => {
+                    pendingLockFocusRef.current = shouldRestoreFocus(event)
+                      ? "unlock"
+                      : null
+                    onLockedChange?.(item, true)
+                  }}
+                />
+              </span>
             )}
             {showRemove && (
               <ButtonInternal

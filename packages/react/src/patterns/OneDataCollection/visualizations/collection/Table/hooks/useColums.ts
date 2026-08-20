@@ -20,6 +20,15 @@ export const getColumnId = <
 ) => {
   return column.id ?? column.label ?? "column"
 }
+
+export const getNextLockedColumnIds = (
+  currentIds: readonly ColId[] | undefined,
+  columnId: ColId,
+  locked: boolean
+) =>
+  locked
+    ? [...new Set([...(currentIds ?? []), columnId])]
+    : (currentIds ?? []).filter((id) => id !== columnId)
 /**
  * Get the order of the columns from the definition and sort them by the order putting the ones with no order at the end
  * @param columns - The columns to get the order from
@@ -59,6 +68,7 @@ type UseColumnsReturn<
   setColsHidden: (colsHidden: ColId[]) => void
   colsOrder: ColId[]
   setColsOrder: (colsOrder: ColId[]) => void
+  savedOrder: ColId[]
   columnsWithStatus: {
     column: TableColumnDefinition<R, Sortings, Summaries> & { id: ColId }
     canHide: boolean
@@ -86,7 +96,7 @@ export const useColumns = <
   settings?: TableVisualizationSettings,
   allowSorting?: boolean,
   allowHiding?: boolean,
-  lockedColumnId?: ColId | null,
+  lockedColumnIds?: readonly ColId[],
   usesExplicitColumnLocking?: boolean
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   // Merge user preferences with developer defaults for NEW columns
@@ -137,11 +147,44 @@ export const useColumns = <
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
   }, [JSON.stringify(settings?.order), allowSorting])
 
+  const nonEditableColumns = usesExplicitColumnLocking
+    ? frozenColumns
+    : frozenColumns || 1
+  const columnsInSavedOrder = useMemo(() => {
+    const leadingColumns = originalColumns.slice(0, nonEditableColumns)
+    const orderedColumns = [...originalColumns.slice(nonEditableColumns)].sort(
+      (a, b) => {
+        const aIndex = colsOrder.indexOf(getColumnId(a))
+        const bIndex = colsOrder.indexOf(getColumnId(b))
+        const aPos = aIndex === -1 ? colsOrder.length : aIndex
+        const bPos = bIndex === -1 ? colsOrder.length : bIndex
+        return aPos - bPos
+      }
+    )
+
+    return [...leadingColumns, ...orderedColumns]
+  }, [originalColumns, nonEditableColumns, colsOrder])
+  const savedOrder = useMemo(
+    () => columnsInSavedOrder.map(getColumnId),
+    [columnsInSavedOrder]
+  )
+
   const columnsWithStatus = useMemo(() => {
-    const cols = [...originalColumns]
-    const nonEditableColumns = usesExplicitColumnLocking
-      ? frozenColumns
-      : frozenColumns || 1
+    const leadingColumns = columnsInSavedOrder.slice(0, nonEditableColumns)
+    const orderedColumns = columnsInSavedOrder.slice(nonEditableColumns)
+    const orderedColumnsById = new Map(
+      orderedColumns.map((column) => [getColumnId(column), column])
+    )
+    const managedLockedColumns = [...new Set(lockedColumnIds ?? [])]
+      .map((id) => orderedColumnsById.get(id))
+      .filter(
+        (column): column is TableColumnDefinition<R, Sortings, Summaries> =>
+          !!column
+      )
+    const managedLockedIds = new Set(managedLockedColumns.map(getColumnId))
+    const unlockedColumns = orderedColumns.filter(
+      (column) => !managedLockedIds.has(getColumnId(column))
+    )
 
     const withStatus = (
       column: TableColumnDefinition<R, Sortings, Summaries>,
@@ -150,7 +193,8 @@ export const useColumns = <
     ) => {
       const id = getColumnId(column)
       const locked =
-        frozen || (!!usesExplicitColumnLocking && id === lockedColumnId)
+        frozen ||
+        (!!usesExplicitColumnLocking && !!lockedColumnIds?.includes(id))
 
       return {
         column: {
@@ -174,32 +218,30 @@ export const useColumns = <
       // Frozen columns can not be hidden even if the id is in status
       // The first column remains non-editable by default for backwards
       // compatibility. A lock value or callback opts into explicit semantics.
-      ...cols
-        .slice(0, nonEditableColumns)
-        .map((column, index) => withStatus(column, index, true)),
-      // The rest of the columns are sorted and hidden using the status in colsOrder and colsHidden
-      ...cols
-        .slice(nonEditableColumns)
-        .sort((a, b) => {
-          const aIndex = colsOrder.indexOf(getColumnId(a))
-          const bIndex = colsOrder.indexOf(getColumnId(b))
-          // Columns not in saved order (indexOf === -1) should appear at the end
-          const aPos = aIndex === -1 ? colsOrder.length : aIndex
-          const bPos = bIndex === -1 ? colsOrder.length : bIndex
-          return aPos - bPos
-        })
-        .map((column, index) =>
-          withStatus(column, index + nonEditableColumns, false)
-        ),
+      ...leadingColumns.map((column, index) => withStatus(column, index, true)),
+      // User-managed locks form a frozen group after permanent frozen columns.
+      // Their array order records the order in which users locked them.
+      ...managedLockedColumns.map((column, index) =>
+        withStatus(column, index + leadingColumns.length, false)
+      ),
+      // Unlocked columns retain their saved order, so unlocking returns a
+      // column to the position it had before it joined the frozen group.
+      ...unlockedColumns.map((column, index) =>
+        withStatus(
+          column,
+          index + leadingColumns.length + managedLockedColumns.length,
+          false
+        )
+      ),
     ]
   }, [
     frozenColumns,
-    colsOrder,
     colsHidden,
-    originalColumns,
+    columnsInSavedOrder,
+    nonEditableColumns,
     allowSorting,
     allowHiding,
-    lockedColumnId,
+    lockedColumnIds,
     usesExplicitColumnLocking,
   ])
 
@@ -216,5 +258,6 @@ export const useColumns = <
     setColsHidden,
     colsOrder,
     setColsOrder,
+    savedOrder,
   }
 }

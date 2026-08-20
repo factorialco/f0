@@ -140,7 +140,7 @@ describe("SortAndHideList lock affordance", () => {
     },
   ]
 
-  it("unlocks the current required column", async () => {
+  it("shows a closed lock on a locked column and unlocks it", async () => {
     const onLockedChange = vi.fn()
     render(
       <SortAndHideList
@@ -151,9 +151,18 @@ describe("SortAndHideList lock affordance", () => {
       />
     )
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Unlock column: Name" })
-    )
+    const unlockButton = screen.getByRole("button", {
+      name: "Unlock column: Name",
+    })
+    expect(
+      Array.from(unlockButton.querySelectorAll("path")).some(
+        (path) =>
+          path.getAttribute("d") ===
+          "M8 10V8C8 5.79086 9.79086 4 12 4V4C14.2091 4 16 5.79086 16 8V10"
+      )
+    ).toBe(true)
+
+    await userEvent.click(unlockButton)
 
     expect(onLockedChange).toHaveBeenCalledWith(
       expect.objectContaining({ id: "name" }),
@@ -180,6 +189,24 @@ describe("SortAndHideList lock affordance", () => {
       expect.objectContaining({ id: "email" }),
       true
     )
+  })
+
+  it("renders independent unlock actions for every locked column", () => {
+    render(
+      <SortAndHideList
+        items={lockableItems.map((item) => ({ ...item, locked: true }))}
+        onLockedChange={vi.fn()}
+        allowSorting
+        allowHiding
+      />
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Unlock column: Name" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Unlock column: Email" })
+    ).toBeInTheDocument()
   })
 
   it("keeps remove and visibility unavailable for the locked column", () => {
