@@ -115,6 +115,18 @@ type TableVisualizationOptions<T> = {
    */
   onRemoveColumn?: (columnId: string) => void
 
+  /**
+   * The current user-managed required column. This is independent from
+   * frozenColumns and does not make the column sticky while scrolling.
+   */
+  lockedColumnId?: string | null
+
+  /**
+   * Enables lock/unlock actions in the settings popover. Receives the next
+   * locked column id, or null when the current lock is cleared.
+   */
+  onLockedColumnChange?: (columnId: string | null) => void
+
   /** Wraps the table in a rounded border container. */
   bordered?: boolean
 
@@ -409,6 +421,52 @@ Allow users to show/hide columns using column settings:
 ```
 
 <Canvas of={TableStories.TableColumnOrderingAndHidden} meta={TableStories} />
+
+### User-managed Required Column
+
+Use `lockedColumnId` with `onLockedColumnChange` when users need to choose which
+column must remain in the table. The locked column stays visible and cannot be
+reordered or removed. Its lock button clears the requirement; hovering or
+keyboard-focusing an unlocked row reveals an action that transfers the lock.
+Omit the callback when the locked column is fixed and should not expose lock
+controls.
+
+This lock controls table configuration only. It does not freeze a column while
+scrolling. Set `frozenColumns: 0` for one transferable lock; any column covered
+by `frozenColumns` remains permanently locked.
+
+<Canvas
+  of={TableStories.WithLockableColumns}
+  meta={TableStories}
+  story={{ autoplay: true }}
+/>
+
+```tsx
+const [lockedColumnId, setLockedColumnId] = useState<string | null>("name")
+
+<OneDataCollection
+  source={source}
+  visualizations={[
+    {
+      type: "table",
+      options: {
+        columns,
+        frozenColumns: 0,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+        lockedColumnId,
+        onLockedColumnChange: setLockedColumnId,
+        onRemoveColumn: removeColumn,
+      },
+    },
+  ]}
+/>
+```
+
+Keyboard users can tab to the visible lock button or the focus-revealed row
+actions and activate them with <kbd>Enter</kbd> or <kbd>Space</kbd>. The icon
+buttons include the target label in their accessible name, for example “Lock
+column: Email.”
 
 ### Reference Rows
 

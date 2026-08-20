@@ -30,6 +30,8 @@ export type SortAndHideSettingsProps = {
    * calls this with the entry id. Removing is distinct from hiding.
    */
   onRemoveColumn?: (id: string) => void
+  /** Called when the user transfers or clears the required-column lock. */
+  onLockedColumnChange?: (id: string | null) => void
 }
 
 /**
@@ -48,6 +50,7 @@ export const SortAndHideSettings = ({
   allowHiding,
   onAddColumn,
   onRemoveColumn,
+  onLockedColumnChange,
 }: SortAndHideSettingsProps) => {
   const i18n = useI18n()
   const { setVisualizationSettings } = useDataCollectionSettings()
@@ -99,6 +102,11 @@ export const SortAndHideSettings = ({
           onChange={onChange}
           onRemove={
             onRemoveColumn ? (item) => onRemoveColumn(item.id) : undefined
+          }
+          onLockedChange={
+            onLockedColumnChange
+              ? (item, locked) => onLockedColumnChange(locked ? item.id : null)
+              : undefined
           }
           allowSorting={allowSorting}
           allowHiding={allowHiding}

@@ -64,6 +64,8 @@ type UseColumnsReturn<
     canHide: boolean
     visible: boolean
     sortable: boolean
+    frozen: boolean
+    locked: boolean
     order: number
   }[]
 }
@@ -83,7 +85,9 @@ export const useColumns = <
   frozenColumns: number,
   settings?: TableVisualizationSettings,
   allowSorting?: boolean,
-  allowHiding?: boolean
+  allowHiding?: boolean,
+  lockedColumnId?: ColId | null,
+  usesExplicitColumnLocking?: boolean
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   // Merge user preferences with developer defaults for NEW columns
   // New columns (not in saved order) should respect their hidden: true default
@@ -135,21 +139,44 @@ export const useColumns = <
 
   const columnsWithStatus = useMemo(() => {
     const cols = [...originalColumns]
-    const nonEditableColumns = frozenColumns || 1
+    const nonEditableColumns = usesExplicitColumnLocking
+      ? frozenColumns
+      : frozenColumns || 1
+
+    const withStatus = (
+      column: TableColumnDefinition<R, Sortings, Summaries>,
+      index: number,
+      frozen: boolean
+    ) => {
+      const id = getColumnId(column)
+      const locked =
+        frozen || (!!usesExplicitColumnLocking && id === lockedColumnId)
+
+      return {
+        column: {
+          ...column,
+          id,
+        },
+        canHide: locked
+          ? false
+          : allowHiding
+            ? !(column.noHiding ?? false)
+            : false,
+        visible: locked || !colsHidden.includes(id),
+        sortable: !locked && !!allowSorting,
+        frozen,
+        locked,
+        order: index,
+      }
+    }
 
     return [
       // Frozen columns can not be hidden even if the id is in status
-      // The frist column is always visible and not sortable even if frozenColumns is 0
-      ...cols.slice(0, nonEditableColumns).map((column, index) => ({
-        column: {
-          ...column,
-          id: getColumnId(column),
-        },
-        canHide: false,
-        visible: true,
-        sortable: false,
-        order: index,
-      })),
+      // The first column remains non-editable by default for backwards
+      // compatibility. A lock value or callback opts into explicit semantics.
+      ...cols
+        .slice(0, nonEditableColumns)
+        .map((column, index) => withStatus(column, index, true)),
       // The rest of the columns are sorted and hidden using the status in colsOrder and colsHidden
       ...cols
         .slice(nonEditableColumns)
@@ -161,16 +188,9 @@ export const useColumns = <
           const bPos = bIndex === -1 ? colsOrder.length : bIndex
           return aPos - bPos
         })
-        .map((column, index) => ({
-          column: {
-            ...column,
-            id: getColumnId(column),
-          },
-          canHide: allowHiding ? !(column.noHiding ?? false) : false,
-          visible: !colsHidden.includes(getColumnId(column)),
-          sortable: !!allowSorting,
-          order: index + frozenColumns,
-        })),
+        .map((column, index) =>
+          withStatus(column, index + nonEditableColumns, false)
+        ),
     ]
   }, [
     frozenColumns,
@@ -179,6 +199,8 @@ export const useColumns = <
     originalColumns,
     allowSorting,
     allowHiding,
+    lockedColumnId,
+    usesExplicitColumnLocking,
   ])
 
   const columns = useMemo(() => {

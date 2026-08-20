@@ -111,6 +111,8 @@ export const TableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  lockedColumnId,
+  onLockedColumnChange,
   referenceRowType,
   boldRootRows,
   headerGroups: headerGroupsOption,
@@ -158,7 +160,9 @@ export const TableCollection = <
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
-    allowColumnHiding
+    allowColumnHiding,
+    lockedColumnId,
+    lockedColumnId !== undefined || !!onLockedColumnChange
   )
 
   // Header groups own the collapsed state and drop the columns hidden by a

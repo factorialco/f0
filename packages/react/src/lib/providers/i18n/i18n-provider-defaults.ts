@@ -247,6 +247,8 @@ export const defaultTranslations = {
         hideAllColumns: "Hide all",
         addColumn: "Add column",
         removeColumn: "Remove column",
+        lockColumn: "Lock column: {{label}}",
+        unlockColumn: "Unlock column: {{label}}",
       },
     },
     editableTable: {

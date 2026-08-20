@@ -23,6 +23,10 @@ type TableSettingsProps = {
    * sets `noRemoving`). Called with the column id to drop it from the table.
    */
   onRemoveColumn?: (columnId: string) => void
+  /** The currently user-managed required column. */
+  lockedColumnId?: string | null
+  /** Enables transferring or clearing the required-column lock. */
+  onLockedColumnChange?: (columnId: string | null) => void
 }
 
 export const TableSettings = ({
@@ -33,27 +37,26 @@ export const TableSettings = ({
   visualizationKey = "table",
   onAddColumn,
   onRemoveColumn,
+  lockedColumnId,
+  onLockedColumnChange,
 }: TableSettingsProps) => {
   const { settings } = useDataCollectionSettings()
 
   const visualizationSettings = settings.visualization[visualizationKey]
 
+  const usesExplicitColumnLocking =
+    lockedColumnId !== undefined || !!onLockedColumnChange
   const { columnsWithStatus } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings,
     allowSorting,
-    allowHiding
+    allowHiding,
+    lockedColumnId,
+    usesExplicitColumnLocking
   )
 
   const items = useMemo(() => {
-    // The leading `frozenColumns || 1` columns are non-editable (always-visible,
-    // not reorderable). They can never be removed — mirror that for the trash.
-    const lockedCount = frozenColumns || 1
-    const lockedIds = new Set(
-      columnsWithStatus.slice(0, lockedCount).map((column) => column.column.id)
-    )
-
     return (
       columnsWithStatus
         // If allowHiding is false, we show only the columns that are visible
@@ -64,13 +67,13 @@ export const TableSettings = ({
           sortable: column.sortable,
           canHide: column.canHide,
           visible: column.visible,
+          locked: column.locked,
+          lockable: !!onLockedColumnChange && !column.frozen,
           removable:
-            !!onRemoveColumn &&
-            !lockedIds.has(column.column.id) &&
-            !column.column.noRemoving,
+            !!onRemoveColumn && !column.locked && !column.column.noRemoving,
         }))
     )
-  }, [columnsWithStatus, allowHiding, frozenColumns, onRemoveColumn])
+  }, [columnsWithStatus, allowHiding, onLockedColumnChange, onRemoveColumn])
 
   return (
     <SortAndHideSettings
@@ -80,6 +83,7 @@ export const TableSettings = ({
       allowHiding={allowHiding}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
+      onLockedColumnChange={onLockedColumnChange}
     />
   )
 }

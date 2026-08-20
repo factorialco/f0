@@ -1,10 +1,15 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
+import {
+  screen,
+  userEvent,
+  within,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import type { SortAndHideListItem } from "./types"
 
-import { SortAndHideList } from "./SortAndHideList"
+import { mergeReorderedItems, SortAndHideList } from "./SortAndHideList"
 
 const items: SortAndHideListItem[] = [
   { id: "name", label: "Name", sortable: false, canHide: false, visible: true },
@@ -108,6 +113,109 @@ describe("SortAndHideList remove affordance", () => {
     expect(
       screen.queryByRole("button", { name: "Remove column" })
     ).not.toBeInTheDocument()
+  })
+})
+
+describe("SortAndHideList lock affordance", () => {
+  const lockableItems: SortAndHideListItem[] = [
+    {
+      id: "name",
+      label: "Name",
+      sortable: false,
+      canHide: false,
+      visible: true,
+      removable: false,
+      locked: true,
+      lockable: true,
+    },
+    {
+      id: "email",
+      label: "Email",
+      sortable: true,
+      canHide: true,
+      visible: true,
+      removable: true,
+      locked: false,
+      lockable: true,
+    },
+  ]
+
+  it("unlocks the current required column", async () => {
+    const onLockedChange = vi.fn()
+    render(
+      <SortAndHideList
+        items={lockableItems}
+        onLockedChange={onLockedChange}
+        allowSorting
+        allowHiding
+      />
+    )
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Unlock column: Name" })
+    )
+
+    expect(onLockedChange).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "name" }),
+      false
+    )
+  })
+
+  it("locks another column from its row actions", async () => {
+    const onLockedChange = vi.fn()
+    render(
+      <SortAndHideList
+        items={lockableItems}
+        onLockedChange={onLockedChange}
+        allowSorting
+        allowHiding
+      />
+    )
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Lock column: Email" })
+    )
+
+    expect(onLockedChange).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "email" }),
+      true
+    )
+  })
+
+  it("keeps remove and visibility unavailable for the locked column", () => {
+    const onRemove = vi.fn()
+    render(
+      <SortAndHideList
+        items={lockableItems}
+        onRemove={onRemove}
+        onLockedChange={vi.fn()}
+        allowSorting
+        allowHiding
+      />
+    )
+
+    const nameRow = screen.getByText("Name").closest("li") as HTMLElement
+    expect(
+      within(nameRow).queryByRole("button", { name: "Remove column" })
+    ).not.toBeInTheDocument()
+    expect(screen.getAllByRole("switch")[0]).toBeDisabled()
+  })
+
+  it("keeps a locked middle item at its current index when other rows reorder", () => {
+    const role = {
+      id: "role",
+      label: "Role",
+      sortable: true,
+      canHide: true,
+      visible: true,
+    }
+
+    expect(
+      mergeReorderedItems(
+        [lockableItems[1]!, lockableItems[0]!, role],
+        [role, lockableItems[1]!]
+      )
+    ).toEqual([role, lockableItems[0], lockableItems[1]])
   })
 })
 

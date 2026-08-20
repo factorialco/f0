@@ -223,6 +223,23 @@ export type TableVisualizationOptions<
    */
   onRemoveColumn?: (columnId: ColId) => void
 
+  /**
+   * The user-managed required column in the column-settings popover. A locked
+   * column stays visible and cannot be reordered or removed. This does not pin
+   * the column while scrolling; use `frozenColumns` for that behavior.
+   *
+   * Set `frozenColumns` to `0` when the user should be able to transfer the
+   * only lock between columns. Frozen columns remain permanently locked.
+   */
+  lockedColumnId?: ColId | null
+
+  /**
+   * Called when the user locks a column or unlocks the current one. Passing
+   * this callback enables the lock controls in the column-settings popover.
+   * The new value is a column id, or `null` when no column is locked.
+   */
+  onLockedColumnChange?: (columnId: ColId | null) => void
+
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
 

@@ -337,4 +337,78 @@ describe("useColumns with settings", () => {
     // Should restore developer-defined order
     expect(result.current.colsOrder).toEqual(["column2", "column3", "column1"])
   })
+
+  it("uses the controlled lock instead of implicitly locking the first column", () => {
+    const { result } = renderHook(() =>
+      useColumns(
+        mockColumns,
+        0,
+        { hidden: ["column2"] },
+        true,
+        true,
+        "column2",
+        true
+      )
+    )
+
+    const first = result.current.columnsWithStatus.find(
+      ({ column }) => column.id === "column1"
+    )
+    const locked = result.current.columnsWithStatus.find(
+      ({ column }) => column.id === "column2"
+    )
+
+    expect(first).toMatchObject({
+      canHide: true,
+      frozen: false,
+      locked: false,
+      sortable: true,
+    })
+    expect(locked).toMatchObject({
+      canHide: false,
+      frozen: false,
+      locked: true,
+      sortable: false,
+      visible: true,
+    })
+    expect(result.current.columns.map((column) => column.id)).toContain(
+      "column2"
+    )
+  })
+
+  it("allows every non-frozen column to be editable when the controlled lock is cleared", () => {
+    const { result } = renderHook(() =>
+      useColumns(mockColumns, 0, {}, true, true, null, true)
+    )
+
+    expect(result.current.columnsWithStatus).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          column: expect.objectContaining({ id: "column1" }),
+          canHide: true,
+          locked: false,
+          sortable: true,
+        }),
+      ])
+    )
+  })
+
+  it("keeps frozen columns permanently locked alongside the controlled lock", () => {
+    const { result } = renderHook(() =>
+      useColumns(mockColumns, 1, {}, true, true, "column2", true)
+    )
+
+    expect(result.current.columnsWithStatus.slice(0, 2)).toEqual([
+      expect.objectContaining({
+        column: expect.objectContaining({ id: "column1" }),
+        frozen: true,
+        locked: true,
+      }),
+      expect.objectContaining({
+        column: expect.objectContaining({ id: "column2" }),
+        frozen: false,
+        locked: true,
+      }),
+    ])
+  })
 })

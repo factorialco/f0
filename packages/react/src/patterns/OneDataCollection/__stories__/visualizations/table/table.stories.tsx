@@ -1599,6 +1599,122 @@ export const WithColumnAddRemove: Story = {
 }
 
 /**
+ * Demonstrates a consumer-controlled required column. The current lock can be
+ * cleared, then transferred to any non-frozen column. Locked columns stay
+ * visible and cannot be reordered or removed.
+ */
+export const WithLockableColumns: Story = {
+  render: () => {
+    const [visibleIds, setVisibleIds] = useState<string[]>([
+      "name",
+      "email",
+      "role",
+    ])
+    const [lockedColumnId, setLockedColumnId] = useState<string | null>("name")
+
+    const columns = visibleIds
+      .map((id) => addRemoveColumns.find((column) => column.id === id))
+      .filter((column): column is (typeof addRemoveColumns)[number] =>
+        Boolean(column)
+      )
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records: addRemoveRecords }) },
+    })
+
+    return (
+      <div style={{ maxWidth: 720 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 0,
+                allowColumnReordering: true,
+                allowColumnHiding: true,
+                columns,
+                lockedColumnId,
+                onLockedColumnChange: setLockedColumnId,
+                onAddColumn: () => {
+                  const next = addRemoveColumns.find(
+                    (column) => !visibleIds.includes(column.id)
+                  )
+                  if (next) {
+                    setVisibleIds((prev) => [...prev, next.id])
+                  }
+                },
+                onRemoveColumn: (columnId) =>
+                  setVisibleIds((prev) => prev.filter((id) => id !== columnId)),
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const page = within(canvasElement.closest("body")!)
+    let settingsDialog!: ReturnType<typeof within>
+
+    await step("Open the table settings", async () => {
+      await canvas.findByText("Person 1")
+      await userEvent.click(canvas.getByRole("button", { name: "Settings" }))
+      settingsDialog = within(await page.findByRole("dialog"))
+      await settingsDialog.findByText("Table settings")
+    })
+
+    await step("Unlock the current required column", async () => {
+      const nameRow = settingsDialog.getByText("Name").closest("li")!
+      await userEvent.click(
+        within(nameRow).getByRole("button", { name: "Unlock column: Name" })
+      )
+      await waitFor(() => {
+        const updatedNameRow = settingsDialog.getByText("Name").closest("li")!
+        const updatedName = within(updatedNameRow)
+        expect(updatedName.getByRole("switch")).not.toBeDisabled()
+        expect(
+          updatedName.getByRole("button", { name: "Lock column: Name" })
+        ).toHaveFocus()
+      })
+    })
+
+    await step("Lock another column", async () => {
+      const emailRow = settingsDialog.getByText("Email").closest("li")!
+      await userEvent.click(
+        within(emailRow).getByRole("button", { name: "Lock column: Email" })
+      )
+      await waitFor(() => {
+        const updatedEmailRow = settingsDialog.getByText("Email").closest("li")!
+        expect(
+          within(updatedEmailRow).getByRole("button", {
+            name: "Unlock column: Email",
+          })
+        ).toHaveFocus()
+        expect(within(updatedEmailRow).getByRole("switch")).toBeDisabled()
+      })
+      settingsDialog
+        .getByRole("button", { name: "Unlock column: Email" })
+        .blur()
+      const nameRow = settingsDialog
+        .getByText("Name")
+        .closest("li") as HTMLElement
+      const nameActions = nameRow.querySelector(
+        "[data-column-actions]"
+      ) as HTMLElement
+      nameActions.tabIndex = -1
+      nameActions.focus()
+      await waitFor(() => {
+        expect(nameActions).toHaveFocus()
+        expect(getComputedStyle(nameActions).opacity).toBe("1")
+        expect(page.queryByRole("tooltip")).toBeNull()
+      })
+    })
+  },
+}
+
+/**
  * The hover "⋮" row-actions overlay must not swallow the last column's content.
  * Here the trailing column is a `tagList` whose "+N" pill sits under the overlay's
  * fade area. The overlay is transparent to pointer events (only the buttons are
