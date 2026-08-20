@@ -153,9 +153,11 @@ the mounted chat:
 ```
 
 - WHEN an enabled AI chat is mounted and a widget has a title → THEN its actions menu includes **Ask One**.
+- WHEN a widget is in an error state but still has a title → THEN **Ask One** remains available from its error header.
 - WHEN no chat is available and `onAskAi` is omitted → THEN the action is hidden instead of offering a dead command.
 - WHEN **Ask One** uses the built-in behavior → THEN the dashboard exits widget fullscreen, quotes the title, and opens the chat.
 - WHEN `onAskAi` is provided → THEN the action calls the host with the widget `id` and `title` without changing chat or fullscreen state.
+- WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
 - WHEN a widget has no title → THEN the action is hidden because there is nothing to quote.
 
 ### Report filters

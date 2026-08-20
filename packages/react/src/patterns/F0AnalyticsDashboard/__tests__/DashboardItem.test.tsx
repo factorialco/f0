@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
+import {
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import {
   AiChatStateProvider,
@@ -190,8 +195,11 @@ describe("DashboardItem — description action", () => {
       )
     }
 
-    const openMenu = async () =>
-      userEvent.click(screen.getByLabelText("Other actions"))
+    const openMenu = async () => {
+      const trigger = screen.getByLabelText("Other actions")
+      await userEvent.click(trigger)
+      return trigger
+    }
 
     it("offers the action and hands the widget to the chat", async () => {
       const onFullscreenChange = vi.fn()
@@ -209,7 +217,7 @@ describe("DashboardItem — description action", () => {
         </AiChatStateProvider>
       )
 
-      await openMenu()
+      const trigger = await openMenu()
       await userEvent.click(screen.getByText("Ask One"))
 
       const probe = screen.getByTestId("probe")
@@ -217,6 +225,10 @@ describe("DashboardItem — description action", () => {
       // Opens the chat too — otherwise the quote lands somewhere unseen.
       expect(probe).toHaveAttribute("data-open", "true")
       expect(onFullscreenChange).toHaveBeenCalledWith(false)
+      // The composer is not mounted in this harness. Radix must keep its
+      // normal restoration instead of dropping focus on document.body while
+      // the provider buffers the request.
+      await waitFor(() => expect(trigger).toHaveFocus())
     })
 
     it("is absent without a chat provider, where the setters are inert", async () => {
@@ -287,7 +299,49 @@ describe("DashboardItem — description action", () => {
       await openMenu()
       await userEvent.click(screen.getByText("Ask One"))
 
-      expect(onAskAi).toHaveBeenCalledTimes(1)
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+      })
+    })
+
+    it("hides a host-owned action when a direct item has no ID", () => {
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          isLoading={false}
+          onAskAi={vi.fn()}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Other actions" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("keeps Ask One available when the widget data failed", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            isLoading={false}
+            error={new Error("Failed to load")}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(screen.getByTestId("probe")).toHaveAttribute(
+        "data-quote",
+        "Headcount by workplace"
+      )
     })
 
     it("hides the action when the title cannot produce a quote", async () => {

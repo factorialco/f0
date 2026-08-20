@@ -13,12 +13,24 @@ import { F0AiChatTextArea } from "../F0AiChatTextArea"
 const FocusHarness = () => {
   const [showInput, setShowInput] = useState(false)
   const [isClarifying, setIsClarifying] = useState(false)
-  const { focusChatInput } = useAiChat()
+  const { focusChatInput, setOpen } = useAiChat()
 
   return (
     <>
       <button type="button" onClick={focusChatInput}>
         Focus composer
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setOpen(true)
+          focusChatInput()
+        }}
+      >
+        Open and focus composer
+      </button>
+      <button type="button" onClick={() => setOpen(false)}>
+        Close chat
       </button>
       <button type="button" onClick={() => setShowInput(true)}>
         Mount composer
@@ -101,5 +113,24 @@ describe("F0AiChatTextArea focus bridge", () => {
     await user.click(screen.getByRole("button", { name: "Restore composer" }))
 
     await waitFor(() => expect(screen.getByRole("textbox")).toHaveFocus())
+  })
+
+  it("discards a buffered focus request when the chat closes", async () => {
+    const user = userEvent.setup()
+    render(
+      <AiChatStateProvider enabled>
+        <FocusHarness />
+      </AiChatStateProvider>
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: "Open and focus composer" })
+    )
+    await user.click(screen.getByRole("button", { name: "Close chat" }))
+    const mountButton = screen.getByRole("button", { name: "Mount composer" })
+    await user.click(mountButton)
+
+    expect(screen.getByRole("textbox")).not.toHaveFocus()
+    expect(mountButton).toHaveFocus()
   })
 })

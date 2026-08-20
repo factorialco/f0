@@ -216,12 +216,14 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // request as soon as it becomes available.
   const focusChatInputRef = useRef<(() => void) | null>(null)
   const pendingChatInputFocusRef = useRef(false)
-  const focusChatInput = useCallback(() => {
+  const focusChatInput = useCallback((): boolean => {
     if (focusChatInputRef.current) {
       focusChatInputRef.current()
-    } else {
-      pendingChatInputFocusRef.current = true
+      return true
     }
+
+    pendingChatInputFocusRef.current = true
+    return false
   }, [])
   const setFocusChatInputFunction = useCallback((fn: (() => void) | null) => {
     focusChatInputRef.current = fn
@@ -241,6 +243,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   useEffect(() => {
     if (!open) {
+      // A focus request belongs to the interaction that opened the panel.
+      // Once that panel closes, replaying it on a later mount would steal
+      // focus from whatever the user moved on to.
+      pendingChatInputFocusRef.current = false
       setCanvasContent(null)
       setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
@@ -502,6 +508,7 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   placeholders: [],
   welcomeScreenSuggestions: [],
   welcomeScreenCards: [],
+  focusChatInput: () => false,
 }
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {

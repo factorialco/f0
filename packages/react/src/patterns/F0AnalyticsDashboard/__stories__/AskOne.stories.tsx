@@ -9,6 +9,7 @@ import {
   MockConnectedChatInput,
   MockConnectedMessagesContainer,
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AnalyticsDashboard } from "../index"
 import { mixedItems } from "./mockDataMixed"
@@ -85,6 +86,7 @@ type Story = StoryObj<typeof meta>
  */
 export const WidgetMenuAction: Story = {
   render: () => <AskOneLayout />,
+  parameters: withSnapshot({}),
   play: async ({ canvasElement, step }) => {
     await step("Open the widget actions menu", async () => {
       const { menu } = await openAskOneMenu(canvasElement)
