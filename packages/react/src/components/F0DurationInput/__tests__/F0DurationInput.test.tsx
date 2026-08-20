@@ -5,6 +5,7 @@ import { fireEvent } from "@testing-library/react"
 import { useState } from "react"
 
 import { F0DurationInput } from ".."
+import type { DurationUnit } from "../types"
 import {
   fieldsToSeconds,
   secondsToFields,
@@ -483,6 +484,145 @@ describe("F0DurationInput", () => {
       expect(screen.getByText("Max 8h per day")).toBeInTheDocument()
     })
 
+    it("marks the segments as required for assistive tech", () => {
+      render(
+        <F0DurationInput
+          label="Minimum hours"
+          value={0}
+          onChange={() => {}}
+          required
+        />
+      )
+
+      // The asterisk beside the label is aria-hidden, so without this the
+      // required state is visual-only (and invisible too under hideLabel).
+      expect(screen.getByLabelText("Hours")).toHaveAttribute(
+        "aria-required",
+        "true"
+      )
+      expect(screen.getByLabelText("Minutes")).toHaveAttribute(
+        "aria-required",
+        "true"
+      )
+    })
+
+    it("omits aria-required when not required", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      expect(screen.getByLabelText("Hours")).not.toHaveAttribute(
+        "aria-required"
+      )
+    })
+
+    it("announces the status message via aria-describedby", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          status={{ type: "error", message: "Duration is required" }}
+        />
+      )
+
+      const hours = screen.getByLabelText("Hours")
+      const describedBy = hours.getAttribute("aria-describedby")
+      expect(describedBy).toBeTruthy()
+
+      // The reference must resolve to the element holding the message.
+      const message = document.getElementById(describedBy as string)
+      expect(message).toHaveTextContent("Duration is required")
+      expect(screen.getByRole("group")).toHaveAttribute(
+        "aria-describedby",
+        describedBy
+      )
+    })
+
+    it("derives aria-invalid from an error status", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          status={{ type: "error", message: "Duration is required" }}
+        />
+      )
+
+      expect(screen.getByRole("group")).toHaveAttribute("aria-invalid", "true")
+      expect(screen.getByLabelText("Hours")).toHaveAttribute(
+        "aria-invalid",
+        "true"
+      )
+    })
+
+    it("does not mark a warning or info status as invalid", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={3600}
+          onChange={() => {}}
+          status={{ type: "warning", message: "Over standard hours" }}
+        />
+      )
+
+      expect(screen.getByLabelText("Hours")).not.toHaveAttribute("aria-invalid")
+    })
+
+    it("lets an explicit aria-invalid win over the status", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          aria-invalid={false}
+          status={{ type: "error", message: "Duration is required" }}
+        />
+      )
+
+      expect(screen.getByLabelText("Hours")).toHaveAttribute(
+        "aria-invalid",
+        "false"
+      )
+    })
+
+    it("composes a consumer aria-describedby with the status message", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          aria-describedby="external-hint"
+          status={{ type: "error", message: "Duration is required" }}
+        />
+      )
+
+      const describedBy = screen
+        .getByLabelText("Hours")
+        .getAttribute("aria-describedby")
+      expect(describedBy).toContain("external-hint")
+      expect(describedBy?.split(" ")).toHaveLength(2)
+    })
+
+    it("does not reference a message element that never renders", () => {
+      // A status with no message renders nothing, which is how F0Form drives
+      // the error state. Pointing at the absent container would itself fail.
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          status={{ type: "error" }}
+        />
+      )
+
+      expect(screen.getByLabelText("Hours")).not.toHaveAttribute(
+        "aria-describedby"
+      )
+      expect(screen.getByLabelText("Hours")).toHaveAttribute(
+        "aria-invalid",
+        "true"
+      )
+    })
+
     it("renders required asterisk", () => {
       render(
         <F0DurationInput
@@ -862,6 +1002,40 @@ describe("F0DurationInput", () => {
       )
 
       expect(screen.getByLabelText("Minutes")).toHaveValue("120")
+    })
+
+    it("re-syncs the segments when the parent pushes a new value", () => {
+      const Wrapper = ({ value }: { value: number }) => (
+        <F0DurationInput label="Duration" value={value} onChange={() => {}} />
+      )
+
+      const { rerender } = render(<Wrapper value={5400} />)
+      expect(screen.getByLabelText("Hours")).toHaveValue("1")
+      expect(screen.getByLabelText("Minutes")).toHaveValue("30")
+
+      rerender(<Wrapper value={9000} />)
+
+      expect(screen.getByLabelText("Hours")).toHaveValue("2")
+      expect(screen.getByLabelText("Minutes")).toHaveValue("30")
+    })
+
+    it("re-decomposes the same value when units change at runtime", () => {
+      const Wrapper = ({ units }: { units: DurationUnit[] }) => (
+        <F0DurationInput
+          label="Duration"
+          value={5400}
+          onChange={() => {}}
+          units={units}
+        />
+      )
+
+      const { rerender } = render(<Wrapper units={["hours", "minutes"]} />)
+      expect(screen.getByLabelText("Hours")).toHaveValue("1")
+
+      rerender(<Wrapper units={["minutes"]} />)
+
+      expect(screen.queryByLabelText("Hours")).not.toBeInTheDocument()
+      expect(screen.getByLabelText("Minutes")).toHaveValue("90")
     })
 
     it("does not preserve hidden unit remainder on change", () => {
