@@ -13,7 +13,10 @@ import {
 import { F0Icon } from "@/components/F0Icon"
 import { Bullet } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { InputMessages } from "@/components/F0InputField/components/InputMessages"
+import {
+  InputMessages,
+  inputStatusMessages,
+} from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
 
 import type {
@@ -311,6 +314,20 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     const statusType = status?.type ?? "default"
     const showLabel = !hideLabel && label.length > 0
 
+    // Wire the status message to the field so it is announced, not just seen.
+    // Only reference the container when it actually renders — a dangling
+    // aria-describedby is worse than none.
+    const messageId = `${baseId}-message`
+    const hasStatusMessage = inputStatusMessages(status).length > 0
+    const resolvedDescribedBy =
+      [ariaDescribedBy, hasStatusMessage ? messageId : undefined]
+        .filter(Boolean)
+        .join(" ") || undefined
+    // An explicit prop always wins: F0Form drives this itself, passing
+    // `{ type: "error" }` with no message and describing the field its own way.
+    const resolvedAriaInvalid =
+      ariaInvalid ?? (statusType === "error" || undefined)
+
     return (
       <div
         ref={ref}
@@ -344,8 +361,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           onClick={handleContainerClick}
           role="group"
           aria-label={resolvedAriaLabel}
-          aria-describedby={ariaDescribedBy}
-          aria-invalid={ariaInvalid}
+          aria-describedby={resolvedDescribedBy}
+          aria-invalid={resolvedAriaInvalid}
           aria-disabled={disabled || undefined}
           data-status={statusType}
           data-disabled={disabled ? "" : undefined}
@@ -392,8 +409,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   aria-label={
                     fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]
                   }
-                  aria-describedby={ariaDescribedBy}
-                  aria-invalid={ariaInvalid}
+                  aria-describedby={resolvedDescribedBy}
+                  aria-invalid={resolvedAriaInvalid}
+                  aria-required={required || undefined}
                   value={displayValue}
                   placeholder="0"
                   onChange={handleFieldChange(unit, max)}
@@ -409,7 +427,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
             )
           })}
         </div>
-        <InputMessages status={status} />
+        <InputMessages status={status} id={messageId} />
       </div>
     )
   }

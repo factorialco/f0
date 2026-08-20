@@ -182,13 +182,12 @@ A11y wiring is not visually demonstrable, so it is listed rather than shown:
 - The container is a `role="group"` with an `aria-label` derived from `label`, or from `ariaLabel` when that is set. The group is what carries the field's accessible name, which is why `hideLabel` can drop the visible `<label>` without leaving the field unnamed.
 - Every segment carries its own `aria-label` (`Days` / `Hours` / `Minutes` / `Seconds`), overridable per unit via `fields[unit].ariaLabel`, so a screen reader announces which part of the duration has focus. Those defaults are hardcoded English and are not read from `I18nProvider`, so in a localized app set `fields[unit].ariaLabel` alongside any custom `suffix`. Leaving it unset announces the segment in the wrong language, and a custom `suffix` without a matching label also breaks Label in Name (SC 2.5.3).
 - Segments are `inputMode="numeric"`, which brings up the numeric keypad on touch devices.
-- `aria-invalid` is set on the group and on every segment; `aria-disabled` on the group only (segments carry the native `disabled` attribute); `aria-readonly` on the segments only. `aria-describedby` reaches both, so an external error message is announced from any segment.
+- `aria-invalid` is set on the group and on every segment; `aria-disabled` on the group only (segments carry the native `disabled` attribute); `aria-readonly` on the segments only. `aria-describedby` reaches both, so a message is announced from any segment.
+- A `status` message is wired to the field automatically: the message container gets an id that both the group and every segment reference through `aria-describedby`, and `status={{ type: "error" }}` sets `aria-invalid` on its own. An `aria-describedby` you pass is composed with it rather than replaced, and an `aria-invalid` you pass wins outright, so a form library keeps full control.
+- `required` sets `aria-required` on every segment, so the requirement survives `hideLabel` (the asterisk beside the label is `aria-hidden`).
 - A `console.warn` fires in development when neither `label` nor `ariaLabel` is provided.
 
-Two gaps to know about, both needing a component change rather than a prop:
-
-- **The built-in `status` message is not announced.** It renders as visible text with no `id`, no `role="alert"` and no `aria-live`, and `status={{ type: "error" }}` does not set `aria-invalid` on its own. A screen-reader user gets the border colour and nothing else. Pass your own `aria-describedby` (pointing at your message element) and `aria-invalid` when the error has to be announced.
-- **`required` is visual-only.** It renders the marker beside the label but sets neither `required` nor `aria-required` on the segments, so with `hideLabel` the requirement is both invisible and unannounced.
+One gap remains: the status message is **described**, not **live**. It carries no `role="alert"` or `aria-live`, so a message that appears after the field is already focused is not announced until focus moves. Wrap it yourself if you need that.
 
 ### Keyboard interaction
 
