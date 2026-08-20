@@ -1,14 +1,8 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from "react"
+import { forwardRef, useCallback, useImperativeHandle, useRef } from "react"
 
+import { InputFieldProps } from "@/components/F0InputField"
 import { Search } from "@/icons/app"
 import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/components/F0InputField"
 
 export type F0SearchInputProps = {
   value?: string
@@ -45,28 +39,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
   ) => {
     const input = useRef<HTMLInputElement>(null)
 
-    const interval = useRef<NodeJS.Timeout | null>(null)
-
     useImperativeHandle(ref, () => input.current as HTMLInputElement)
-
-    useEffect(() => {
-      if (!props.autoFocus) {
-        if (interval.current) {
-          clearInterval(interval.current)
-        }
-        return
-      }
-
-      interval.current = setInterval(() => {
-        input.current?.focus()
-      }, 50)
-
-      return () => {
-        if (interval.current) {
-          clearInterval(interval.current)
-        }
-      }
-    }, [props.autoFocus])
 
     const valueToEmitRef = useRef<string | undefined>(undefined)
 
@@ -82,7 +55,6 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
             setTimeout(() => {
               if (valueToEmitRef.current !== undefined) {
                 onChange(valueToEmitRef.current)
-                input.current?.focus()
               }
               valueToEmitRef.current = undefined
             }, debounceTime)
@@ -98,7 +70,6 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         key="search-input"
         ref={input}
         type="search"
-        tabIndex={-1}
         icon={Search}
         value={value}
         label={props.placeholder ?? "Search"}
@@ -110,6 +81,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         size={size}
         autoFocus={props.autoFocus}
         clearable={clearable}
+        onClear={() => input.current?.focus()}
         onBlur={onBlur}
         onFocus={onFocus}
         name={props.name}
@@ -120,7 +92,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
 
 /**
  * F0SearchInput is the writable search field — a single-line text input
- * pre-configured with a search icon, `role="searchbox"`, debouncing, and
+ * pre-configured with a search icon, `role="searchbox"`, delayed updates, and
  * an optional minimum-length threshold before emitting changes.
  */
 F0SearchInput.displayName = "F0SearchInput"

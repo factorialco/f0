@@ -288,6 +288,7 @@ describe("Select", () => {
     await openSelect(user)
 
     expect(screen.getByText("Search options")).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole("searchbox")).toHaveFocus())
   })
 
   it("renders icon tags with text", async () => {
@@ -504,12 +505,48 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    await user.type(screen.getByRole("searchbox"), "Option 1")
+    const searchbox = screen.getByRole("searchbox")
+    await user.type(searchbox, "Option 1")
 
+    expect(searchbox).toHaveFocus()
+    expect(searchbox).toHaveValue("Option 1")
     expect(screen.getByText("Option 1")).toBeInTheDocument()
     await waitFor(() =>
       expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
     )
+  })
+
+  it("keeps search editing and Tab navigation inside the searchable content", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+        showSearchBox
+      />
+    )
+
+    await openSelect(user)
+    const searchbox = screen.getByRole("searchbox")
+    await user.type(searchbox, "1")
+    await user.keyboard("{Home}{ArrowRight}{End}")
+
+    expect(searchbox).toHaveFocus()
+    expect(searchbox).toHaveValue("1")
+
+    await user.tab()
+    const clearButton = screen.getByRole("button", { name: "Clear" })
+    expect(clearButton).toHaveFocus()
+
+    await user.tab()
+    expect(document.activeElement).toHaveAttribute(
+      "data-scroll-container",
+      "true"
+    )
+
+    await user.tab({ shift: true })
+    expect(clearButton).toHaveFocus()
   })
 
   it("shows empty message when no options match search", async () => {

@@ -563,7 +563,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                          "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
+                          "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
                         aria-label="Clear"
