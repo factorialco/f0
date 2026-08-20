@@ -3,10 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { IconType } from "@/components/F0Icon"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
-import type {
-  F0DataChartPointClick,
-  F0DataChartProps,
-} from "@/kits/F0DataChart"
+import type { F0DataChartProps } from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -42,6 +39,7 @@ import type {
   DashboardChartData,
   DashboardChartItem,
   F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardPointClick,
 } from "../../types"
 
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
@@ -140,7 +138,7 @@ function formatPointValue(
 export function buildPointQuoteText(
   title: string,
   chart: F0DataChartProps,
-  point: F0DataChartPointClick
+  point: F0AnalyticsDashboardPointClick
 ): string {
   if (chart.type === "scatter" && point.values.length >= 2) {
     const heading = point.category ? `${title} — ${point.category}` : title
@@ -200,7 +198,7 @@ export function buildPointQuoteText(
 
 type AccessibleChartPoint = {
   key: string
-  point: F0DataChartPointClick
+  point: F0AnalyticsDashboardPointClick
 }
 
 function numericPointValue(point: unknown): number | null {
@@ -215,7 +213,7 @@ function numericPointValue(point: unknown): number | null {
 
 function accessiblePoint(
   key: string,
-  point: F0DataChartPointClick
+  point: F0AnalyticsDashboardPointClick
 ): AccessibleChartPoint {
   return { key, point }
 }
@@ -238,7 +236,7 @@ export function buildAccessibleChartPoints(
         return series.data.flatMap((entry, dataIndex) => {
           const value = numericPointValue(entry)
           if (value === null) return []
-          const point: F0DataChartPointClick = {
+          const point: F0AnalyticsDashboardPointClick = {
             seriesName: series.name,
             category: chart.categories[dataIndex] ?? "",
             value,
@@ -262,7 +260,7 @@ export function buildAccessibleChartPoints(
         })
         const first = series[0]
         if (!first) return []
-        const point: F0DataChartPointClick = {
+        const point: F0AnalyticsDashboardPointClick = {
           seriesName: first.name,
           category,
           value: first.value,
@@ -279,7 +277,7 @@ export function buildAccessibleChartPoints(
         if (selected[entry.name] === false) return []
         const value = numericPointValue(entry.value)
         if (value === null) return []
-        const point: F0DataChartPointClick = {
+        const point: F0AnalyticsDashboardPointClick = {
           seriesName: chart.series.name,
           category: entry.name,
           value,
@@ -296,7 +294,7 @@ export function buildAccessibleChartPoints(
         if (selected[entry.name] === false) return []
         const value = numericPointValue(entry.value)
         if (value === null) return []
-        const point: F0DataChartPointClick = {
+        const point: F0AnalyticsDashboardPointClick = {
           seriesName: chart.series.name,
           category: entry.name,
           value,
@@ -320,7 +318,7 @@ export function buildAccessibleChartPoints(
         }
         const value = values.at(-1)
         if (value === undefined) return []
-        const point: F0DataChartPointClick = {
+        const point: F0AnalyticsDashboardPointClick = {
           seriesName: "",
           category: series.name,
           value,
@@ -335,7 +333,7 @@ export function buildAccessibleChartPoints(
     case "gauge": {
       const value = numericPointValue(chart.value)
       if (value === null) return []
-      const point: F0DataChartPointClick = {
+      const point: F0AnalyticsDashboardPointClick = {
         seriesName: "",
         category: chart.name ?? "",
         value,
@@ -350,7 +348,7 @@ export function buildAccessibleChartPoints(
     case "heatmap":
       return chart.data.flatMap(([x, y, value], dataIndex) => {
         if (![x, y, value].every(Number.isFinite)) return []
-        const point: F0DataChartPointClick = {
+        const point: F0AnalyticsDashboardPointClick = {
           seriesName: "",
           category: "",
           value,
@@ -369,7 +367,7 @@ export function buildAccessibleChartPoints(
           const [x, y] = Array.isArray(entry) ? entry : [entry.x, entry.y]
           if (![x, y].every(Number.isFinite)) return []
           const category = Array.isArray(entry) ? "" : (entry.label ?? "")
-          const point: F0DataChartPointClick = {
+          const point: F0AnalyticsDashboardPointClick = {
             seriesName: series.name,
             category,
             value: y,
@@ -847,9 +845,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
    * charts get clicked while reading, and hijacking every click to open the
    * chat would make exploring one hostile.
    */
-  const [pickedPoint, setPickedPoint] = useState<F0DataChartPointClick | null>(
-    null
-  )
+  const [pickedPoint, setPickedPoint] =
+    useState<F0AnalyticsDashboardPointClick | null>(null)
   const [legendSelection, setLegendSelection] = useState<
     Record<string, boolean> | undefined
   >()
@@ -872,15 +869,19 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [item, data, unrenderableChart]
   )
 
-  // A point belongs to one exact render. A filter/config/refetch transition
+  // A point belongs to one exact data render. A filter/type/refetch transition
   // can retain old data while loading; never let that stale mark reappear or
-  // resolve its tuple indexes against the next result.
+  // resolve its tuple indexes against the next result. Do not key this on the
+  // host's item/chart object identity: inline dashboard configs are normally
+  // rebuilt on every parent render even when their semantics are unchanged.
   useEffect(() => {
     setPickedPoint(null)
     setLegendSelection(undefined)
-  }, [data, isLoading, item.chart])
+  }, [data, isLoading, safeChart.type])
 
   const pointAskOwner = onAskAi ? "host" : aiEnabled ? "chat" : "none"
+  const canAskAboutPoint =
+    pointAskOwner !== "none" && item.title.trim().length > 0
 
   // A pending point belongs to the responder that was available when it was
   // picked. Do not let a later host/chat ownership change redirect that action
@@ -890,7 +891,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   }, [pointAskOwner])
 
   const handleAskAboutPoint = useCallback(
-    (point: F0DataChartPointClick) => {
+    (point: F0AnalyticsDashboardPointClick) => {
       if (onAskAi) {
         // The host answers this the same way it answers the ⋯ menu, with the
         // mark attached. It gets the raw point rather than the sentence built
@@ -954,9 +955,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const hasAccessiblePointActions = useMemo(
     () =>
       !!chartProps &&
-      !!(aiEnabled || onAskAi) &&
+      canAskAboutPoint &&
       hasAccessibleChartPoint(chartProps, legendSelection),
-    [chartProps, aiEnabled, onAskAi, legendSelection]
+    [chartProps, canAskAboutPoint, legendSelection]
   )
 
   const getAccessiblePointActions = useCallback<() => AccessiblePointAction[]>(
@@ -1159,10 +1160,14 @@ export function ChartItem<Filters extends FiltersDefinition>({
           >
             <F0DataChart
               {...chartProps}
-              onLegendSelectionChange={setLegendSelection}
+              {...(chartProps.type !== "gauge" && chartProps.type !== "heatmap"
+                ? { onLegendSelectionChange: setLegendSelection }
+                : {})}
               // Something has to be able to answer the click: the host, or
               // failing that a mounted chat.
-              onPointClick={aiEnabled || onAskAi ? setPickedPoint : undefined}
+              onPointClick={
+                canAskAboutPoint ? (point) => setPickedPoint(point) : undefined
+              }
               // Windowing rows is only offered where the reader can get them
               // back: this widget puts the count and a "show all" link in its
               // description. Without an expand handler there is nowhere for that
@@ -1184,6 +1189,14 @@ export function ChartItem<Filters extends FiltersDefinition>({
             <AccessiblePointActions
               hasActions={hasAccessiblePointActions}
               getActions={getAccessiblePointActions}
+              resetOn={{
+                data,
+                isLoading,
+                chartType: safeChart.type,
+                legendSelection,
+                owner: pointAskOwner,
+                title: item.title,
+              }}
               label={translations.ai.dashboardItem.askOne}
               triggerLabel={`${translations.ai.dashboardItem.askOne}: ${item.title}`}
               previousLabel={translations.navigation.previous}

@@ -197,6 +197,7 @@ no pointer position to anchor to.
 - WHEN a scatter point is quoted → THEN both the X and Y measures are included with their axis names and formatters.
 - WHEN a line category is quoted → THEN every visible series at that category is included, matching the axis tooltip.
 - WHEN `onAskAi` owns the action → THEN it receives the raw point and the built-in chat state remains unchanged.
+- WHEN the chart has no title → THEN pointer and keyboard point actions are hidden because there is no widget context to quote.
 - WHEN the chart moves because of scrolling or resizing, or the reader presses <kbd>Escape</kbd> or clicks elsewhere → THEN the anchored action closes.
 - WHEN a screen reader reaches the point action → THEN its trigger is named **Ask One: _chart title_** and each menu item exposes the complete formatted point context.
 

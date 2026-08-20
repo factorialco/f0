@@ -18,6 +18,7 @@ import {
 } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 
 import type { DashboardChartItem } from "../types"
+import type { F0AnalyticsDashboardPointClick } from "../types"
 
 import {
   buildPointQuoteText,
@@ -70,6 +71,13 @@ const item: DashboardChartItem = {
       series: [{ name: "Male", data: [18] }],
     }),
 }
+
+const filters = {}
+
+const rebuildItem = (): DashboardChartItem => ({
+  ...item,
+  chart: { type: "bar" },
+})
 
 const pickAMark = async () => {
   await waitFor(() =>
@@ -173,6 +181,89 @@ describe("ChartItem — asking about a mark", () => {
       ).not.toBeInTheDocument()
     )
     expect(onAskAi).not.toHaveBeenCalled()
+  })
+
+  it("keeps a picked mark through an unrelated inline-config rerender", async () => {
+    let revision = 0
+    const onAskAi = vi.fn()
+    const renderInlineItem = () => (
+      <ChartItem
+        item={rebuildItem()}
+        filters={filters}
+        onAskAi={(target) => onAskAi(revision, target)}
+      />
+    )
+    const view = render(renderInlineItem())
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "mark" })).toBeInTheDocument()
+    )
+    await userEvent.click(screen.getByRole("button", { name: "mark" }))
+    expect(
+      await screen.findByRole("button", { name: "Ask One" })
+    ).toBeInTheDocument()
+
+    revision = 1
+    view.rerender(renderInlineItem())
+
+    const pointAction = screen.getByRole("button", { name: "Ask One" })
+    expect(pointAction).toBeInTheDocument()
+    await userEvent.click(pointAction)
+    expect(onAskAi).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ point: POINT })
+    )
+  })
+
+  it("keeps the keyboard point menu through an unrelated inline-config rerender", async () => {
+    let revision = 0
+    const onAskAi = vi.fn()
+    const renderInlineItem = () => (
+      <ChartItem
+        item={rebuildItem()}
+        filters={filters}
+        onAskAi={(target) => onAskAi(revision, target)}
+      />
+    )
+    const view = render(renderInlineItem())
+
+    const trigger = await screen.findByRole("button", {
+      name: "Ask One: Headcount by workplace",
+    })
+    trigger.focus()
+    await userEvent.keyboard("{Enter}")
+    const pointAction = await screen.findByRole("menuitem", {
+      name: "Headcount by workplace — Barcelona office, Male: 18",
+    })
+
+    revision = 1
+    view.rerender(renderInlineItem())
+
+    expect(screen.getByRole("menu")).toBeInTheDocument()
+    await userEvent.click(pointAction)
+    expect(onAskAi).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({
+        point: expect.objectContaining({ source: "keyboard" }),
+      })
+    )
+  })
+
+  it("does not expose point actions for a chart without a title", async () => {
+    render(
+      <AiChatStateProvider enabled>
+        <ChartItem item={{ ...item, title: "   " }} filters={filters} />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "mark" })).toBeInTheDocument()
+    )
+    await userEvent.click(screen.getByRole("button", { name: "mark" }))
+
+    expect(
+      screen.queryByRole("button", { name: /Ask One/ })
+    ).not.toBeInTheDocument()
   })
 
   it("preserves host-owned focus after keyboard point selection", async () => {
@@ -652,7 +743,7 @@ describe("buildAccessibleChartPoints", () => {
   const cases: Array<{
     name: string
     chart: F0DataChartProps
-    expected: F0DataChartPointClick[]
+    expected: F0AnalyticsDashboardPointClick[]
   }> = [
     {
       name: "line categories with their complete finite series column",

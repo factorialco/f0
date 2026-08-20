@@ -443,16 +443,14 @@ export type DashboardItemLayout = {
 // Root component props
 // ---------------------------------------------------------------------------
 
-/**
- * Props for the F0AnalyticsDashboard component.
- *
- * The entire dashboard is defined declaratively via `filters` (optional shared
- * filter definitions), `presets`, and `items` (an ordered array of chart /
- * collection configs).
- *
- * An LLM can generate the full `items` array as JSON (minus the `fetchData`
- * functions) to build dashboards on the fly.
- */
+/** A point selected from either the chart canvas or its keyboard companion. */
+export type F0AnalyticsDashboardPointClick = Omit<
+  F0DataChartPointClick,
+  "source"
+> & {
+  source: "pointer" | "keyboard"
+}
+
 /**
  * What the user asked about: a whole widget, or one mark inside it.
  *
@@ -463,9 +461,19 @@ export type DashboardItemLayout = {
 export interface F0AnalyticsDashboardAskAiTarget {
   id: string
   title: string
-  point?: F0DataChartPointClick
+  point?: F0AnalyticsDashboardPointClick
 }
 
+/**
+ * Props for the F0AnalyticsDashboard component.
+ *
+ * The entire dashboard is defined declaratively via `filters` (optional shared
+ * filter definitions), `presets`, and `items` (an ordered array of chart /
+ * collection configs).
+ *
+ * An LLM can generate the full `items` array as JSON (minus the `fetchData`
+ * functions) to build dashboards on the fly.
+ */
 export interface F0AnalyticsDashboardProps<
   Filters extends FiltersDefinition = FiltersDefinition,
 > {

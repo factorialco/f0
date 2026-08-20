@@ -19,6 +19,15 @@ export type AccessiblePointAction = {
 type AccessiblePointActionsProps = {
   hasActions: boolean
   getActions: () => AccessiblePointAction[]
+  /** Semantic inputs that make a cached point action stale. */
+  resetOn: {
+    data: unknown
+    isLoading: boolean
+    chartType: string
+    legendSelection: Record<string, boolean> | undefined
+    owner: "host" | "chat" | "none"
+    title: string
+  }
   label: string
   triggerLabel: string
   previousLabel: string
@@ -36,6 +45,7 @@ type AccessiblePointActionsProps = {
 export function AccessiblePointActions({
   hasActions,
   getActions,
+  resetOn,
   label,
   triggerLabel,
   previousLabel,
@@ -54,12 +64,16 @@ export function AccessiblePointActions({
   const contentRef = useRef<HTMLDivElement>(null)
   const shouldFocusPageRef = useRef(false)
   const shouldFocusInitialActionRef = useRef(false)
+  const getActionsRef = useRef(getActions)
+  getActionsRef.current = getActions
+
+  const { data, isLoading, chartType, legendSelection, owner, title } = resetOn
 
   useEffect(() => {
     setActions(null)
     setPage(0)
     setOpen(false)
-  }, [getActions])
+  }, [data, isLoading, chartType, legendSelection, owner, title])
 
   useEffect(() => {
     if (!shouldFocusPageRef.current) return
@@ -126,7 +140,7 @@ export function AccessiblePointActions({
         onOpenChange={(nextOpen) => {
           if (nextOpen && actions === null) {
             shouldFocusInitialActionRef.current = true
-            setActions(getActions())
+            setActions(getActionsRef.current())
           }
           setOpen(nextOpen)
         }}
@@ -196,7 +210,15 @@ export function AccessiblePointActions({
                 // Run after Radix has closed its modal focus scope. A host may
                 // open and focus its own chat or dialog; doing that while the
                 // menu is still modal would bounce focus back into this menu.
-                pendingActionRef.current = action.onSelect
+                pendingActionRef.current = () => {
+                  // The host may replace its callback during an unrelated
+                  // render while this menu is open. Resolve the same stable
+                  // point key against the latest action set at selection time.
+                  getActionsRef
+                    .current()
+                    .find((latestAction) => latestAction.key === action.key)
+                    ?.onSelect()
+                }
               }}
             >
               {action.getLabel()}

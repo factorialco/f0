@@ -13,6 +13,7 @@ export type {
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardPointClick,
   F0AnalyticsDashboardProps,
   FunnelChartConfig,
   GaugeChartConfig,
