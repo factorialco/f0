@@ -1,43 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { GraphNode } from "../../../types"
-
-import { F0Graph, type F0GraphNodeRenderContext } from "../../../F0Graph"
-import { F0GraphNode } from "../../F0GraphNode"
 import { F0GraphControls } from "../F0GraphControls"
-
-interface Person {
-  name: string
-  title: string
-}
-
-const NODES: GraphNode<Person>[] = [
-  {
-    id: "a",
-    parentId: null,
-    data: { name: "Alice Moreno", title: "Manager" },
-    childrenCount: 1,
-  },
-  {
-    id: "b",
-    parentId: "a",
-    data: { name: "Bob Smith", title: "Engineer" },
-  },
-]
-
-function renderPerson(node: GraphNode<Person>, ctx: F0GraphNodeRenderContext) {
-  const [firstName = "", lastName = ""] = node.data.name.split(" ")
-  return (
-    <F0GraphNode
-      {...ctx}
-      avatar={{ type: "person", firstName, lastName }}
-      title={node.data.name}
-      subtitle={node.data.title}
-    />
-  )
-}
 
 const meta = {
   component: F0GraphControls,
@@ -45,6 +11,9 @@ const meta = {
   tags: ["stable", "!autodocs"],
   parameters: {
     layout: "centered",
+    a11y: {
+      test: "error",
+    },
   },
 } satisfies Meta<typeof F0GraphControls>
 
@@ -52,44 +21,137 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  args: {
+    onZoomIn: fn(),
+    onZoomOut: fn(),
+    onFitView: fn(),
+    onFocusUser: fn(),
+  },
   parameters: {
     docs: {
       description: {
         story:
-          "Shows the toolbar with every available control enabled — Find me, fit-to-view, and the metadata-visibility popover — rendered inside a real `<F0Graph>`.",
+          "Shows the complete graph navigation toolbar with Find me, Fit to view, Zoom in, and Zoom out controls.",
       },
     },
   },
-  render: () => (
-    <div style={{ width: 480, height: 320 }} className="bg-f1-background">
-      <F0Graph
-        nodes={NODES}
-        edges={[]}
-        renderNode={renderPerson}
-        defaultExpandDepth={1}
-        showControls
-        currentUserNodeId="a"
-        nodeTagTypes={["person", "team", "status"]}
-        defaultVisibleTagTypes={["person", "team", "status"]}
-      />
-    </div>
-  ),
+  play: async ({ canvasElement, args, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Expose the toolbar and its accessible name", async () => {
+      await expect(
+        canvas.getByRole("toolbar", { name: "Graph navigation" })
+      ).toBeInTheDocument()
+    })
+
+    await step("Run the first action from the keyboard", async () => {
+      const findMe = canvas.getByRole("button", { name: "Find me" })
+
+      await userEvent.tab()
+      await expect(findMe).toHaveFocus()
+      await userEvent.keyboard("{Enter}")
+      await expect(args.onFocusUser).toHaveBeenCalledTimes(1)
+    })
+
+    await step("Run the remaining graph navigation actions", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Fit to view" }))
+      await expect(args.onFitView).toHaveBeenCalledTimes(1)
+
+      await userEvent.click(canvas.getByRole("button", { name: "Zoom in" }))
+      await expect(args.onZoomIn).toHaveBeenCalledTimes(1)
+
+      await userEvent.click(canvas.getByRole("button", { name: "Zoom out" }))
+      await expect(args.onZoomOut).toHaveBeenCalledTimes(1)
+    })
+  },
+}
+
+export const WithoutFindMe: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    onZoomIn: fn(),
+    onZoomOut: fn(),
+    onFitView: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(
+      canvas.queryByRole("button", { name: "Find me" })
+    ).not.toBeInTheDocument()
+    await expect(canvas.getAllByRole("button")).toHaveLength(3)
+  },
+}
+
+export const CustomLabels: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    onZoomIn: fn(),
+    onZoomOut: fn(),
+    onFitView: fn(),
+    onFocusUser: fn(),
+    labels: {
+      findMe: "Center on my node",
+      fitView: "Show every node",
+      zoomIn: "Increase graph zoom",
+      zoomOut: "Decrease graph zoom",
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(
+      canvas.getByRole("button", { name: "Center on my node" })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole("button", { name: "Show every node" })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole("button", { name: "Increase graph zoom" })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole("button", { name: "Decrease graph zoom" })
+    ).toBeInTheDocument()
+  },
+}
+
+export const AsyncFindMe: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    onZoomIn: fn(),
+    onZoomOut: fn(),
+    onFitView: fn(),
+    onFocusUser: fn(
+      () => new Promise<void>((resolve) => window.setTimeout(resolve, 200))
+    ),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const findMe = canvas.getByRole("button", { name: "Find me" })
+
+    await userEvent.click(findMe)
+    await expect(args.onFocusUser).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(findMe).toBeDisabled())
+    await waitFor(() => expect(findMe).toBeEnabled())
+  },
 }
 
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
+  args: {
+    onZoomIn: fn(),
+    onZoomOut: fn(),
+    onFitView: fn(),
+    onFocusUser: fn(),
+  },
   parameters: withSnapshot({}),
-  render: () => (
-    <div style={{ width: 480, height: 320 }} className="bg-f1-background">
-      <F0Graph
-        nodes={NODES}
-        edges={[]}
-        renderNode={renderPerson}
-        defaultExpandDepth={1}
-        showControls
-        currentUserNodeId="a"
-        nodeTagTypes={["person", "team", "status"]}
-        defaultVisibleTagTypes={["person", "team", "status"]}
+  render: (args) => (
+    <div className="flex items-start gap-8 bg-f1-background p-4">
+      <F0GraphControls {...args} />
+      <F0GraphControls
+        onZoomIn={args.onZoomIn}
+        onZoomOut={args.onZoomOut}
+        onFitView={args.onFitView}
       />
     </div>
   ),

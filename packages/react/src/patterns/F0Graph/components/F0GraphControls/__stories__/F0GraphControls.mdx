@@ -1,90 +1,249 @@
-import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
-
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import * as Stories from "./F0GraphControls.stories"
 
 <Meta of={Stories} />
 
 # F0GraphControls
 
-A floating toolbar that provides zoom and viewport controls for the graph
-canvas, plus an optional "Find me" shortcut for centering on the current
-user's node and a metadata-visibility popover for toggling node tag
-types.
+Provides a compact toolbar for graph viewport navigation. It is rendered automatically by `F0Graph` when `showControls` is enabled and can also support custom graph canvases.
 
----
-
-## Overview
-
-F0GraphControls is rendered automatically by `<F0Graph>` when
-`showControls={true}`. It can also be used standalone for custom graph
-implementations that need a consistent control surface.
-
-The story below renders `<F0Graph>` with every available control
-enabled — Find me, fit-to-view, and the metadata-visibility popover —
-so the toolbar is shown in its fully-loaded state.
+## Anatomy
 
 <Canvas of={Stories.Default} />
+
 <Controls of={Stories.Default} />
 
----
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>onZoomIn</code>
+        </td>
+        <td>
+          <code>{`() => void`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Runs when the Zoom in button is activated.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onZoomOut</code>
+        </td>
+        <td>
+          <code>{`() => void`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Runs when the Zoom out button is activated.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onFitView</code>
+        </td>
+        <td>
+          <code>{`() => void`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Runs when the Fit to view button is activated.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onFocusUser</code>
+        </td>
+        <td>
+          <code>{`() => void | Promise<void>`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Shows the Find me button and runs when it is activated. A returned
+          promise drives the button loading state.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>labels</code>
+        </td>
+        <td>
+          <code>F0GraphControlLabels</code>
+        </td>
+        <td>Localized F0 defaults</td>
+        <td>—</td>
+        <td>
+          Overrides the accessible names for <code>zoomIn</code>,{" "}
+          <code>zoomOut</code>, <code>fitView</code>, and <code>findMe</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
-## Behavior
+The toolbar contains Fit to view, Zoom in, and Zoom out controls separated into viewport and zoom groups. Find me appears first when `onFocusUser` is available.
 
-- **Find me** — appears when `onFocusUser` is provided. Pass
-  `currentUserNodeId` to `<F0Graph>` to enable this button automatically.
-- **Fit to view** — always rendered.
-- **Metadata visibility** — appears when `tagTypes.length > 0` and
-  `onToggleTagType` is provided. The popover lists each tag type with a
-  toggle switch bound to `visibleTagTypes`. If `tagTypes` is empty (or
-  omitted), or `onToggleTagType` is not provided, the metadata popover
-  button is hidden.
+## Guidelines
 
----
+### Design best practices
 
-## Props
+**When to use**
 
-| Prop              | Type                                          | Default | Description                                                                                                          |
-| ----------------- | --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
-| `onZoomIn`        | `() => void`                                  | —       | Callback for zoom-in button                                                                                          |
-| `onZoomOut`       | `() => void`                                  | —       | Callback for zoom-out button                                                                                         |
-| `onFitView`       | `() => void`                                  | —       | Callback for fit-to-view button                                                                                      |
-| `onFocusUser`     | `() => void`                                  | —       | Callback for the Find me button. Button is hidden if omitted.                                                        |
-| `tagTypes`        | `ReadonlyArray<F0GraphNodeTagType>`           | —       | Tag types to expose in the metadata-visibility popover. When omitted (or empty), the popover button is not rendered. |
-| `visibleTagTypes` | `ReadonlySet<F0GraphNodeTagType>`             | —       | Currently visible tag types (set form). Required when `tagTypes` is set.                                             |
-| `onToggleTagType` | `(type: F0GraphNodeTagType) => void`          | —       | Callback when the user toggles a tag type in the popover.                                                            |
-| `tagTypeLabels`   | `Partial<Record<F0GraphNodeTagType, string>>` | —       | Friendly labels per tag type for the popover.                                                                        |
-| `labels`          | `F0GraphControlLabels`                        | —       | Override default English labels for controls (`zoomIn`, `zoomOut`, `fitView`, `findMe`, `metadataSettings`).         |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0GraphControls when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Standard F0 graph</td>
+        <td>
+          Viewport controls should be added through{" "}
+          <code>F0Graph showControls</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>Custom graph canvas</td>
+        <td>
+          The canvas needs the same compact viewport-navigation surface as{" "}
+          <code>F0Graph</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>Person-centered graph</td>
+        <td>
+          A current-person node can be revealed and centered through{" "}
+          <code>onFocusUser</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
-#### F0GraphControlLabels
+**When not to use**
 
-| Key                | Type     | Description                                                    |
-| ------------------ | -------- | -------------------------------------------------------------- |
-| `zoomIn`           | `string` | Label for zoom-in button                                       |
-| `zoomOut`          | `string` | Label for zoom-out button                                      |
-| `fitView`          | `string` | Label for fit-to-view button                                   |
-| `findMe`           | `string` | Label for the Find me button                                   |
-| `metadataSettings` | `string` | Aria label for the metadata-visibility popover trigger button. |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          An <code>F0Graph</code> already renders its controls
+        </td>
+        <td>
+          Use the existing <code>showControls</code> toolbar instead of mounting
+          a duplicate.
+        </td>
+      </tr>
+      <tr>
+        <td>Actions modify graph data rather than the viewport</td>
+        <td>
+          Use <code>canvasActions</code> or <code>canvasFooterActions</code> on{" "}
+          <code>F0Graph</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>Navigation outside a graph canvas</td>
+        <td>
+          Use <code>F0Link</code> for navigation or <code>F0Button</code> for an
+          action.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
----
+**Do's and don'ts**
 
-## Usage
+<DoDonts
+  do={{
+    description:
+      "Let F0Graph own one consistent viewport toolbar through showControls.",
+  }}
+  dont={{
+    description:
+      "Don't add a second set of zoom controls beside an existing graph toolbar.",
+  }}
+/>
 
-Most consumers never render `F0GraphControls` directly — pass
-`showControls` (and optionally `currentUserNodeId`) to `<F0Graph>`
-instead. Use standalone only when building a custom graph canvas
-that needs the same control toolbar.
+### Behavior
 
-```tsx
-import { F0GraphControls } from "@factorialco/f0-react"
+- WHEN `onFocusUser` is provided → THEN Find me appears before the other controls.
+- WHEN `onFocusUser` is omitted → THEN the toolbar contains only Fit to view, Zoom in, and Zoom out.
+- WHEN `onFocusUser` returns a promise → THEN Find me shows its loading state until the promise settles.
+- WHEN a value is provided in `labels` → THEN it replaces the matching localized accessible name.
 
-function Example() {
-  return (
-    <F0GraphControls
-      onZoomIn={handleZoomIn}
-      onZoomOut={handleZoomOut}
-      onFitView={handleFitView}
-      onFocusUser={handleFocusUser}
-    />
-  )
-}
-```
+**Asynchronous person focus**
+
+Find me blocks repeated activation while an asynchronous focus action is pending.
+
+<Canvas of={Stories.AsyncFindMe} />
+
+### Usage examples
+
+**Viewport controls without person focus**
+
+Use three controls when the graph has no current-person concept.
+
+<Canvas of={Stories.WithoutFindMe} />
+
+**Product-specific accessible names**
+
+Override labels when the surrounding graph terminology needs more specific button names.
+
+<Canvas of={Stories.CustomLabels} />
+
+## Accessibility
+
+The container uses `role="toolbar"` with the localized accessible name “Graph navigation.” Each icon-only button exposes its label as an accessible name, and the divider is not focusable.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd>
+        </td>
+        <td>Move focus through the toolbar buttons in visual order.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Activate the focused graph control.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The toolbar is announced as “Graph navigation.”
+- Controls are announced by their localized or overridden labels rather than by icon names.
+- Custom labels must describe the action and remain distinct from one another.
