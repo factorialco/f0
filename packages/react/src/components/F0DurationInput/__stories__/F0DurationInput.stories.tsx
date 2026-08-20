@@ -90,7 +90,7 @@ export const Default: Story = {
     await step("Rejects non-digit keystrokes", async () => {
       await userEvent.type(hours, "a")
       await expect(hours).toHaveValue("2")
-      // The value alone proves nothing here — handleFieldChange strips
+      // The value alone proves nothing here. handleFieldChange strips
       // non-digits, so an unfiltered "a" would still settle back to "2". The
       // call count is what shows onKeyDown stopped the event at the source.
       await expect(args.onChange).toHaveBeenCalledTimes(3)
@@ -279,7 +279,7 @@ export const AllowNegative: Story = {
     },
   },
   // The minus rule is selection-dependent (only at caret 0 of the first
-  // segment, only when no sign is present), which jsdom can only fake — the
+  // segment, only when no sign is present), which jsdom can only fake. The
   // unit tests drive it with synthetic keyDown events. This drives real
   // keystrokes and reads the emitted seconds back off the story's own readout.
   play: async ({ canvasElement, step }) => {

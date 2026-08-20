@@ -315,7 +315,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     const showLabel = !hideLabel && label.length > 0
 
     // Wire the status message to the field so it is announced, not just seen.
-    // Only reference the container when it actually renders — a dangling
+    // Only reference the container when it actually renders. A dangling
     // aria-describedby is worse than none.
     const messageId = `${baseId}-message`
     const hasStatusMessage = inputStatusMessages(status).length > 0
