@@ -149,8 +149,8 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     : () => {}
 
   // No `aria-owns` from here. React Flow renders every node as a flat sibling,
-  // so parent/child links used to be declared with `aria-owns` — but React Flow
-  // culls off-screen nodes, which left those references pointing at ids that no
+  // so parent/child links used to be declared with `aria-owns`. It also culls
+  // off-screen nodes, which left those references pointing at ids that no
   // longer existed (36 of 123 dead on the LargeTree story). `F0GraphView` now
   // exposes one `role="tree"` that owns the rendered items directly and depth
   // travels on `aria-level` / `aria-setsize` / `aria-posinset`, which are

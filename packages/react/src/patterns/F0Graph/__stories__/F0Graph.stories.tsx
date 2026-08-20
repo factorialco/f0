@@ -233,9 +233,9 @@ export const Tree: Story = {
     defaultExpandDepth: 2,
   },
   // Primary flow: read the hierarchy, select a person, close a branch and
-  // reopen it. The first assertion is also the regression guard for the
-  // accessible tree — React Flow lays every node out as a flat, absolutely
-  // positioned sibling, so the tree owns the rendered items by reference and a
+  // reopen it. The first assertion doubles as the regression guard for the
+  // accessible tree. React Flow lays every node out as a flat, absolutely
+  // positioned sibling, so the tree owns the rendered items by reference, and a
   // treeitem left unowned has no tree parent at all.
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
