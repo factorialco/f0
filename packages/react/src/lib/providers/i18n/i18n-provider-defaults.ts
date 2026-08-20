@@ -347,6 +347,11 @@ export const defaultTranslations = {
         currentDate: "Today",
         label: "Range",
       },
+      periods: {
+        currentDate: "Current period",
+        label: "Periods",
+        empty: "No periods available",
+      },
     },
     month: {
       january: "January",

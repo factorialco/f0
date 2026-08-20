@@ -5,6 +5,7 @@ export type CalendarView =
   | "week"
   | "quarter"
   | "halfyear"
+  | "periods"
 
 export type CalendarMode = "single" | "range"
 
