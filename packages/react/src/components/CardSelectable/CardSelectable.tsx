@@ -94,6 +94,8 @@ interface CardSelectableProps<T extends CardSelectableValue> {
   isToggle?: boolean
   /** When true, renders without individual card borders (for grouped layout) */
   grouped?: boolean
+  /** When true, tightens the card's padding and the gap before the text */
+  compact?: boolean
 }
 
 function _CardSelectable<T extends CardSelectableValue>({
@@ -104,6 +106,7 @@ function _CardSelectable<T extends CardSelectableValue>({
   onSelect,
   isToggle,
   grouped,
+  compact,
 }: CardSelectableProps<T>) {
   const { forms } = useI18n()
   const shouldReduceMotion = useReducedMotion()
@@ -164,9 +167,10 @@ function _CardSelectable<T extends CardSelectableValue>({
           }
         }}
         className={cn(
-          "flex cursor-pointer items-center gap-3",
+          "flex cursor-pointer items-center",
+          compact ? "gap-2.5" : "gap-3",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-f1-special-ring",
-          grouped ? "px-4 py-3" : "p-4",
+          grouped ? "px-4 py-3" : compact ? "p-3" : "p-4",
           // The link row below supplies the bottom padding so the gap between
           // description and link matches the old in-column `gap-2`.
           moreInfoLink && "pb-0"

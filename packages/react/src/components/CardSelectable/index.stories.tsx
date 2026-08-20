@@ -178,6 +178,21 @@ export const Horizontal: Story = {
   },
 }
 
+export const Compact: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>("new")
+    return (
+      <CardSelectableContainer
+        items={defaultItems}
+        value={value}
+        onChange={setValue}
+        compact
+        label="Payment type selection"
+      />
+    )
+  },
+}
+
 const titleOnlyItems: CardSelectableItem<string>[] = [
   { value: "yes", title: "Yes" },
   { value: "no", title: "No" },

@@ -216,3 +216,58 @@ describe("CardSelectable moreInfoLink", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 })
+
+describe("CardSelectable compact", () => {
+  const items: CardSelectableItem<string>[] = [
+    { value: "a", title: "Option A" },
+  ]
+
+  it("keeps the default padding and gap when compact is not set", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("p-4")
+    expect(card).toHaveClass("gap-3")
+  })
+
+  it("tightens the padding and the gap when compact is set", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        compact
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("p-3")
+    expect(card).toHaveClass("gap-2.5")
+    expect(card).not.toHaveClass("p-4")
+  })
+
+  it("leaves the grouped padding untouched", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        grouped
+        compact
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("px-4")
+    expect(card).toHaveClass("py-3")
+  })
+})
