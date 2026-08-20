@@ -47,6 +47,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       nodeRef,
       nodeId,
       ariaOwns,
+      ariaLabel,
       avatar,
       title,
       subtitle,
@@ -156,6 +157,11 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         aria-posinset={posInSet}
         aria-selected={state === "selected"}
         aria-owns={ariaOwns || undefined}
+        aria-busy={loading || undefined}
+        aria-label={
+          ariaLabel ??
+          (loading && typeof title === "string" ? title : undefined)
+        }
         data-zoom-level={variant}
         className={cn(
           graphNodeContainerVariants({ variant, state }),
