@@ -57,7 +57,15 @@ const InteractiveChildrenContent = () => {
         This card has a link, but the children are interactive.
       </p>
       <div className="flex items-center justify-between">
-        <F0Link href="https://google.com" target="_blank">
+        {/*
+         * `py-0.5` takes the link from its 20px line box to a 24px target so it
+         * satisfies WCAG 2.2 SC 2.5.8 (Target Size, Minimum) on its own. A bare
+         * text link would only pass via the spacing exception, and the switch
+         * sits 11px away — well inside the 24px that exception needs. The
+         * inline exception does not apply either: this is a standalone action,
+         * not a link inside a sentence.
+         */}
+        <F0Link href="https://google.com" target="_blank" className="py-0.5">
           Click me (goes to Google)
         </F0Link>
         <Switch
@@ -85,8 +93,12 @@ const meta = {
     docs: {
       story: { inline: false, height: "320px" },
     },
+    a11y: { test: "error" },
   },
-  tags: ["autodocs", "stable"],
+  // `!autodocs` because Card.mdx is the docs page — the same pairing every other
+  // MDX-documented stable component uses (F0Button, F0Avatar, F0AvatarList,
+  // F0Alert, F0Icon).
+  tags: ["stable", "!autodocs"],
   argTypes: {
     imageFit: {
       control: "select",
