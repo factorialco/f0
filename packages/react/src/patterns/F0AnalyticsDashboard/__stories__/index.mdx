@@ -169,6 +169,8 @@ the mounted chat:
 - WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
 - WHEN a widget is dropped on chat → THEN it follows the same built-in or
   host-owned behavior as the menu action.
+- WHEN the reorder grip is only clicked → THEN no drag invitation appears and
+  no widget action runs.
 - WHEN the pointer drag is cancelled or ends outside chat → THEN no quote or
   host action is created.
 - WHEN a widget has no title → THEN the action is hidden because there is nothing to quote.

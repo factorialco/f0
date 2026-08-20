@@ -89,7 +89,7 @@ type Story = StoryObj<typeof meta>
  *
  * Two things worth watching while dragging over the chat: the dashboard's own
  * drop indicator disappears (releasing there must not also reorder the grid),
- * and leaving the panel without releasing cancels cleanly.
+ * and releasing outside the panel cancels cleanly.
  */
 export const DragWidgetToQuote: Story = {
   render: () => <WidgetDropLayout />,
@@ -103,6 +103,9 @@ export const DragWidgetToQuote: Story = {
     })
     const originalFirstCardId = firstCard.dataset.cardId
     const grip = (await canvas.findAllByLabelText("Drag to reorder"))[0]
+    const gripRect = grip.getBoundingClientRect()
+    const dragStartX = gripRect.left + gripRect.width / 2
+    const dragStartY = gripRect.top + gripRect.height / 2
     const dropZone = await waitFor(() => {
       const element = ownerDocument.querySelector<HTMLElement>(
         "[data-ai-chat-dropzone]"
@@ -115,9 +118,16 @@ export const DragWidgetToQuote: Story = {
     const clientY = dropRect.top + dropRect.height / 2
 
     await step(
-      "Show the chat invitation when widget dragging starts",
+      "Show the chat invitation after meaningful pointer movement",
       async () => {
-        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent.pointerDown(grip, {
+          clientX: dragStartX,
+          clientY: dragStartY,
+        })
+        fireEvent.pointerMove(ownerDocument, {
+          clientX: dragStartX + 8,
+          clientY: dragStartY,
+        })
         await waitFor(() =>
           expect(
             canvas.getByText("Drop here to discuss with One")

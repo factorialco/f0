@@ -171,21 +171,21 @@ Use this pattern for chat-scoped discovery content with host-owned actions.
 
 In an editable, multi-item analytics dashboard, drag a widget by its reorder
 handle and release it over the visible One chat. The chat announces the drop
-target as soon as the gesture starts, then attaches the widget title to the
-composer without changing the dashboard layout.
+target as soon as the pointer moves far enough to become a drag, then attaches
+the widget title to the composer without changing the dashboard layout.
 
 <Canvas of={WidgetDropStories.DragWidgetToQuote} />
 
-- WHEN a titled widget drag starts → THEN the visible chat shows “Drop here to
-  discuss with One”.
+- WHEN a titled widget moves beyond the small click threshold → THEN the visible
+  chat shows “Drop here to discuss with One”; a plain grip click stays quiet.
 - WHEN the pointer is released over the chat → THEN the widget title becomes
   the pending quote and the dashboard does not reorder it.
 - WHEN the dashboard supplies `onAskAi` → THEN the drop calls the host with
   the widget `id` and `title` without changing the built-in pending quote.
 - WHEN the pointer is released elsewhere, cancelled, or the dashboard unmounts
   → THEN the invitation closes without adding a quote.
-- WHEN chat is showing voice mode, hosted content, a host overlay, Pong, or a
-  clarifying flow → THEN that surface is not a widget drop target.
+- WHEN chat is closing or showing voice mode, hosted content, a host overlay,
+  Pong, or a clarifying flow → THEN that surface is not a widget drop target.
 - Dragging is a pointer enhancement for editable dashboards. Use the widget
   menu's **Ask One** action as the keyboard and single-pointer alternative.
 - Dashboard dragging is disabled below the grid's 640 px editing breakpoint;

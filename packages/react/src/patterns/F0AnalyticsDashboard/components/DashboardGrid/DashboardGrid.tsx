@@ -25,6 +25,7 @@ import { MetricItem } from "../MetricItem/MetricItem"
 const GAP = 12
 const MAX_PER_ROW = 4
 const NARROW_THRESHOLD = 640
+const DRAG_START_THRESHOLD = 4
 
 /** Default row height in px, determined by the tallest item type. */
 const ROW_HEIGHTS: Record<string, number> = {
@@ -237,7 +238,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   const dropTargetRef = useRef<typeof dropTarget>(null)
   dropTargetRef.current = dropTarget
   const ghostRef = useRef<HTMLDivElement | null>(null)
-  /** AI chat drop zones, looked up once per drag rather than per move. */
+  /** AI chat drop zones, cached during movement and refreshed on release. */
   const chatDropZonesRef = useRef<Element[]>([])
   /** Teardown for the drag in flight, so an unmount can retract it. */
   const endDragRef = useRef<(() => void) | null>(null)
@@ -370,31 +371,40 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       e.preventDefault()
       e.stopPropagation()
 
+      const startX = e.clientX
+      const startY = e.clientY
+      let hasStartedDrag = false
       dragIdRef.current = id
       dropTargetRef.current = null
-      setDragId(id)
       setDropTarget(null)
-      chatDropZonesRef.current = Array.from(
-        document.querySelectorAll("[data-ai-chat-dropzone]")
-      )
-
-      // Announce the drag so other drop targets can invite it immediately,
-      // rather than waiting for the cursor to reach them. The AI chat listens
-      // for this to offer "discuss this widget" from the first moment of the
-      // gesture. Fired on `window` so the listener needs no shared ancestor.
-      //
-      // Nothing to announce without a title: the title *is* the quote, so the
-      // chat would invite a drop that could only do nothing.
-      const title = itemMapRef.current.get(id)?.title ?? ""
-      if (title) {
-        window.dispatchEvent(
-          new CustomEvent(WIDGET_DRAG_START, {
-            detail: { id, title, onAskAi },
-          })
-        )
-      }
 
       const move = (ev: PointerEvent) => {
+        if (!hasStartedDrag) {
+          if (
+            Math.hypot(ev.clientX - startX, ev.clientY - startY) <
+            DRAG_START_THRESHOLD
+          )
+            return
+
+          hasStartedDrag = true
+          setDragId(id)
+          chatDropZonesRef.current = Array.from(
+            document.querySelectorAll("[data-ai-chat-dropzone]")
+          )
+
+          // Invite other drop targets as soon as this becomes a real drag,
+          // while the pointer is still near the widget rather than waiting
+          // for it to reach the chat. A plain click on the grip stays quiet.
+          const title = itemMapRef.current.get(id)?.title ?? ""
+          if (title) {
+            window.dispatchEvent(
+              new CustomEvent(WIDGET_DRAG_START, {
+                detail: { id, title, onAskAi },
+              })
+            )
+          }
+        }
+
         const ghost = ghostRef.current
         if (ghost) {
           ghost.style.transform = `translate(${ev.clientX + 12}px, ${ev.clientY + 16}px)`
@@ -424,19 +434,27 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
         const draggedId = dragIdRef.current
         const target = dropTargetRef.current
-        if (commit && draggedId && target) commitDrop(draggedId, target)
+        if (commit && hasStartedDrag && draggedId && target)
+          commitDrop(draggedId, target)
         dragIdRef.current = null
         dropTargetRef.current = null
         chatDropZonesRef.current = []
         setDragId(null)
         setDropTarget(null)
-        window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
+        if (hasStartedDrag) {
+          window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
+        }
       }
       const up = (ev: PointerEvent) => {
         // The release is authoritative. A coalesced final move or a resized
         // panel can make the cached hover target stale; resolving once more
         // prevents a chat drop from also committing the old grid reorder.
-        dropTargetRef.current = resolveDropTarget(ev.clientX, ev.clientY)
+        if (hasStartedDrag) {
+          chatDropZonesRef.current = Array.from(
+            document.querySelectorAll("[data-ai-chat-dropzone]")
+          )
+          dropTargetRef.current = resolveDropTarget(ev.clientX, ev.clientY)
+        }
         endDrag(true)
       }
       const cancel = () => endDrag(false)

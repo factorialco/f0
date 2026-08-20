@@ -60,13 +60,17 @@ export const SidebarWindow = ({
     closeGame,
     panelSide,
   } = useAiChat()
-  const canAcceptWidgetDrop = acceptsWidgetDrop && activeGame === null
+  const isVisible = visible ?? open
+  const canAcceptWidgetDrop =
+    acceptsWidgetDrop && activeGame === null && isVisible
+  const canAcceptWidgetDropRef = useRef(canAcceptWidgetDrop)
+  canAcceptWidgetDropRef.current = canAcceptWidgetDrop
+  const widgetDropZoneRef = useRef<HTMLDivElement>(null)
   const isCanvasMode = visualizationMode === "canvas"
   const reducedMotion = useReducedMotion()
   // Hosts dock the whole panel left for a chat-first experience (communications);
   // the default is right. The AI chat follows the panel side too.
   const isLeft = (side ?? panelSide) === "left"
-  const isVisible = visible ?? open
 
   // Was the panel already open on the previous committed render? A window
   // mounting while it was (a swap between the chat and hosted content on
@@ -79,6 +83,15 @@ export const SidebarWindow = ({
 
   const dragCounterRef = useRef(0)
   const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
+
+  // AnimatePresence retains the last rendered DOM props during exit. Remove
+  // the marker imperatively when visibility changes so a closing card cannot
+  // remain discoverable as a live drop zone for the duration of the animation.
+  useEffect(() => {
+    if (!canAcceptWidgetDrop) {
+      widgetDropZoneRef.current?.removeAttribute("data-ai-chat-dropzone")
+    }
+  }, [canAcceptWidgetDrop])
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -177,7 +190,7 @@ export const SidebarWindow = ({
   // so a release anywhere else simply never reaches it — the grid's own
   // `pointerup` clears the invitation via WIDGET_DRAG_END.
   const handlePointerUp = useCallback(() => {
-    if (!canAcceptWidgetDrop || isClarifying) {
+    if (!canAcceptWidgetDropRef.current || isClarifying) {
       setDragQuoteBoth(null)
       return
     }
@@ -292,6 +305,7 @@ export const SidebarWindow = ({
             />
           )}
           <div
+            ref={widgetDropZoneRef}
             aria-hidden={!isVisible}
             className={cn(
               "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",

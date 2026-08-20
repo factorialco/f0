@@ -504,6 +504,51 @@ describe("DashboardGrid", () => {
       }
     })
 
+    it("rechecks chat eligibility on release before suppressing the reorder", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      const chat = document.createElement("div")
+      chat.setAttribute("data-ai-chat-dropzone", "")
+      chat.getBoundingClientRect = () =>
+        ({ left: 400, right: 800, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(chat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      try {
+        fireEvent.pointerDown(grip, { button: 0, clientX: 0, clientY: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 0,
+            bubbles: true,
+          })
+        )
+
+        // The chat can become ineligible mid-gesture (clarifying, closing, or
+        // switching surfaces). Its stale pointerdown snapshot must not swallow
+        // a release that now belongs to the grid.
+        chat.removeAttribute("data-ai-chat-dropzone")
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+
+        expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+      } finally {
+        chat.remove()
+      }
+    })
+
     describe("announcing the drag", () => {
       const listen = () => {
         const started: (string | undefined)[] = []
@@ -530,8 +575,49 @@ describe("DashboardGrid", () => {
         if (!(grip instanceof HTMLElement)) {
           throw new Error("Expected a grip to be rendered")
         }
-        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent.pointerDown(grip, { button: 0, clientX: 0, clientY: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 0,
+            bubbles: true,
+          })
+        )
       }
+
+      it("does not announce a drag for a plain grip click", () => {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+          />
+        )
+        const events = listen()
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+
+        try {
+          fireEvent.pointerDown(grip, { button: 0, clientX: 0, clientY: 0 })
+          fireEvent(
+            document,
+            new MouseEvent("pointerup", {
+              clientX: 0,
+              clientY: 0,
+              bubbles: true,
+            })
+          )
+
+          expect(events.started).toEqual([])
+          expect(events.endCount()).toBe(0)
+          expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+        } finally {
+          events.stop()
+        }
+      })
 
       it("stays quiet for a widget with no title", () => {
         const items = makeCollectionItems(480).map((item) => ({

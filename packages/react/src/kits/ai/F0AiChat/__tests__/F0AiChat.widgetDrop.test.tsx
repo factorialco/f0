@@ -33,6 +33,9 @@ const Probe = () => {
       <button type="button" onClick={() => setOpen(true)}>
         Open chat
       </button>
+      <button type="button" onClick={() => setOpen(false)}>
+        Close chat
+      </button>
       <button type="button" onClick={() => setIsClarifying(true)}>
         Start clarifying
       </button>
@@ -158,6 +161,24 @@ describe("F0AiChat widget drop", () => {
 
     // A later stray release must not retroactively quote the widget.
     fireEvent.pointerUp(dropZone())
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+  })
+
+  it("stops accepting widget drops as soon as the chat starts closing", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+    const exitingCard = dropZone()
+
+    await userEvent.click(screen.getByRole("button", { name: "Close chat" }))
+
+    // AnimatePresence keeps the card mounted during its exit animation, but
+    // it must stop advertising and consuming drops immediately.
+    expect(exitingCard).not.toHaveAttribute("data-ai-chat-dropzone")
+    startWidgetDrag("Headcount by department")
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+    fireEvent.pointerUp(exitingCard)
     expect(screen.getByTestId("quote")).toHaveTextContent("")
   })
 
