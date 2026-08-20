@@ -1,5 +1,7 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
 import * as Stories from "./F0NumberInput.stories"
 
 <Meta of={Stories} />
@@ -41,6 +43,29 @@ import * as Stories from "./F0NumberInput.stories"
 - The value is a duration in hours/minutes. Use [F0DurationInput](?path=/docs/components-inputs-duration-input--documentation).
 - The value is one of a small, discrete set of numbers (e.g. a 1–5 rating). Use a selector with the available options instead.
 - The value is an identifier that happens to look numeric (phone, postal code, credit card). These are formatted strings, not quantities — leading zeros, spaces and country variants matter, and locale-aware formatting would corrupt them. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation) with the right `autocomplete` and `inputMode`.
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Describe the number you expect, and let the field enforce it.",
+    guidelines: [
+      "Set `min`/`max`. The value is clamped as the user types, and the range hint is written for you",
+      "Set `maxDecimals` to the precision the value actually has (`0` for counts, `2` for money)",
+      "Pass `locale` so the decimal and thousands separators match the user",
+      "Add `units` for the unit of measure (`EUR`, `%`, `kg`) instead of asking the user to type it",
+    ],
+  }}
+  dont={{
+    description: "Don't make the stepper the only way to reach a value.",
+    guidelines: [
+      "The stepper arrows only appear on hover or keyboard focus, so a value that takes many steps is hard work. Keep `step` for small nudges and let typing carry the rest",
+      "Don't use it for identifiers that merely look numeric (phone, postal code). Locale formatting corrupts them",
+      "Don't leave `maxDecimals` unset for a count. Decimals are accepted until you set it to `0`",
+    ],
+  }}
+/>
 
 ---
 
