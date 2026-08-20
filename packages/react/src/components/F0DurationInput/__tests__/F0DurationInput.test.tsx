@@ -5,6 +5,7 @@ import { fireEvent } from "@testing-library/react"
 import { useState } from "react"
 
 import { F0DurationInput } from ".."
+import type { DurationUnit } from "../types"
 import {
   fieldsToSeconds,
   secondsToFields,
@@ -862,6 +863,40 @@ describe("F0DurationInput", () => {
       )
 
       expect(screen.getByLabelText("Minutes")).toHaveValue("120")
+    })
+
+    it("re-syncs the segments when the parent pushes a new value", () => {
+      const Wrapper = ({ value }: { value: number }) => (
+        <F0DurationInput label="Duration" value={value} onChange={() => {}} />
+      )
+
+      const { rerender } = render(<Wrapper value={5400} />)
+      expect(screen.getByLabelText("Hours")).toHaveValue("1")
+      expect(screen.getByLabelText("Minutes")).toHaveValue("30")
+
+      rerender(<Wrapper value={9000} />)
+
+      expect(screen.getByLabelText("Hours")).toHaveValue("2")
+      expect(screen.getByLabelText("Minutes")).toHaveValue("30")
+    })
+
+    it("re-decomposes the same value when units change at runtime", () => {
+      const Wrapper = ({ units }: { units: DurationUnit[] }) => (
+        <F0DurationInput
+          label="Duration"
+          value={5400}
+          onChange={() => {}}
+          units={units}
+        />
+      )
+
+      const { rerender } = render(<Wrapper units={["hours", "minutes"]} />)
+      expect(screen.getByLabelText("Hours")).toHaveValue("1")
+
+      rerender(<Wrapper units={["minutes"]} />)
+
+      expect(screen.queryByLabelText("Hours")).not.toBeInTheDocument()
+      expect(screen.getByLabelText("Minutes")).toHaveValue("90")
     })
 
     it("does not preserve hidden unit remainder on change", () => {

@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useEffect, useState } from "react"
 
+import { expect, fn, userEvent, within } from "storybook/test"
+
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0DurationInput } from ".."
@@ -13,6 +15,7 @@ const meta = {
   title: "Inputs/Duration input",
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
     docs: {
       description: {
         component:
@@ -40,6 +43,59 @@ export default meta
 type Story = StoryObj<typeof F0DurationInput>
 
 export const Default: Story = {
+  // 5400 is declared rather than left to the render fallback, because the play
+  // function asserts against it.
+  args: { value: 5400, onChange: fn() },
+  // Covers the guarantees a duration input lives or dies on: one tab stop per
+  // segment, raw values staying visible while typing and only normalising on
+  // blur, and the segments never accepting anything but digits.
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const hours = canvas.getByLabelText("Hours")
+    const minutes = canvas.getByLabelText("Minutes")
+
+    await step("Starts at 1h 30min (5400s)", async () => {
+      await expect(hours).toHaveValue("1")
+      await expect(minutes).toHaveValue("30")
+    })
+
+    await step(
+      "Gives each segment its own tab stop, in render order",
+      async () => {
+        hours.focus()
+        await userEvent.tab()
+        await expect(minutes).toHaveFocus()
+      }
+    )
+
+    await step("Keeps an over-range value raw while editing", async () => {
+      await userEvent.clear(minutes)
+      await userEvent.type(minutes, "75")
+      // 75 is deliberately not clamped to 59: rollover happens on blur, not
+      // per keystroke, so the user still sees what they typed.
+      await expect(minutes).toHaveValue("75")
+      await expect(args.onChange).toHaveBeenLastCalledWith(8100)
+      // One emit per edit (clear, "7", "5") and not one per render.
+      await expect(args.onChange).toHaveBeenCalledTimes(3)
+    })
+
+    await step("Normalises the visible units on blur", async () => {
+      await userEvent.tab()
+      await expect(hours).toHaveValue("2")
+      await expect(minutes).toHaveValue("15")
+      // Blur reshuffles the segments without emitting: 8100s either way.
+      await expect(args.onChange).toHaveBeenCalledTimes(3)
+    })
+
+    await step("Rejects non-digit keystrokes", async () => {
+      await userEvent.type(hours, "a")
+      await expect(hours).toHaveValue("2")
+      // The value alone proves nothing here — handleFieldChange strips
+      // non-digits, so an unfiltered "a" would still settle back to "2". The
+      // call count is what shows onKeyDown stopped the event at the source.
+      await expect(args.onChange).toHaveBeenCalledTimes(3)
+    })
+  },
   render: (args) => {
     const { label: labelArg, onChange: onChangeArg, ...restArgs } = args
     const [value, setValue] = useState(args.value ?? 5400)
@@ -222,6 +278,33 @@ export const AllowNegative: Story = {
       },
     },
   },
+  // The minus rule is selection-dependent (only at caret 0 of the first
+  // segment, only when no sign is present), which jsdom can only fake — the
+  // unit tests drive it with synthetic keyDown events. This drives real
+  // keystrokes and reads the emitted seconds back off the story's own readout.
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const hours = canvas.getByLabelText("Hours")
+
+    await step("Starts at minus 1h 15min (-4500s)", async () => {
+      await expect(hours).toHaveValue("-1")
+      await expect(canvas.getByText("Value: -4500 seconds")).toBeVisible()
+    })
+
+    await step("Drops the sign when the first segment is emptied", async () => {
+      await userEvent.clear(hours)
+      await expect(canvas.getByText("Value: 900 seconds")).toBeVisible()
+    })
+
+    await step(
+      "Takes a minus typed at the head of the first segment",
+      async () => {
+        await userEvent.type(hours, "-1")
+        await expect(hours).toHaveValue("-1")
+        await expect(canvas.getByText("Value: -4500 seconds")).toBeVisible()
+      }
+    )
+  },
   render: () => {
     const [value, setValue] = useState(-4500)
     return (
@@ -301,6 +384,12 @@ export const Snapshot: Story = {
           disabled
           units={["hours", "minutes", "seconds"]}
           status={{ type: "error", message: "This field has an error" }}
+        />
+        <F0DurationInput
+          label="Readonly"
+          value={5400}
+          onChange={() => {}}
+          readonly
         />
         <F0DurationInput
           label="Required"

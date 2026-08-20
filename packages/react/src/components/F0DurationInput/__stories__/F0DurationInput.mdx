@@ -1,5 +1,7 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
 import * as Stories from "./F0DurationInput.stories"
 
 <Meta of={Stories} />
@@ -10,15 +12,13 @@ import * as Stories from "./F0DurationInput.stories"
 
 It shares chrome conventions (label, status, sizes, disabled, readonly) with [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation), but is not a wrapper of it — it ships its own container so the segments can share a single focus ring.
 
----
-
 ## Overview
 
 ### Anatomy
 
 <Canvas of={Stories.Default} />
 
-- **Label**: text describing the input's purpose. Always rendered into the DOM (use `hideLabel` to keep it screen-reader only).
+- **Label**: text describing the input's purpose. `hideLabel` removes it from the DOM entirely; the accessible name then comes from the container's `aria-label`, so the field stays named either way.
 - **Segments**: one `<input>` per visible unit, with an inline suffix (`d`, `h`, `min`, `s` by default).
 - **Bullet separator**: rendered between segments.
 - **Message**: optional `status` message (`error` / `warning` / `info`) below the field.
@@ -84,31 +84,49 @@ Pass `units` to control which segments are rendered. The order is always
 
 Defaults to `["hours", "minutes"]` when `units` is omitted or empty.
 
----
-
 ## Guidelines
 
 ### Design best practices
 
-#### When to use
+**When to use**
 
 - The user must enter a length of time (timer, break duration, leave balance, SLA, contract length).
 - The duration is naturally expressed in mixed units (`1h 30min`, `2d 4h`).
 - You need a tighter, segmented surface instead of a free-text input.
 
-#### When NOT to use
+**When not to use**
 
 - The value is a **point in time** (date, time of day, datetime). Use a date or time picker instead.
 - The value is a **single dimension-less number** (count, percentage). Use [F0NumberInput](?path=/docs/components-inputs-number-input--documentation).
 - You need to express ranges (`from / to`). Compose two date pickers or a range picker.
 
----
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Render a segment for every unit whose precision you intend to keep, and let blur do the normalising.",
+    guidelines: [
+      'units={["hours", "minutes"]} for a working-day duration',
+      'units={["days", "hours"]} for a leave balance',
+      "Accept 75 typed into minutes; blur turns it into 1h 15min",
+      "Use fields[unit].max only when a segment must not roll over",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't pass a value carrying precision finer than the segments you render. The remainder is dropped from the display, and nothing tells you.",
+    guidelines: [
+      'units={["hours", "minutes"]} with value={5430} shows 1h 30min while your state still holds 5430',
+      "Don't omit the seconds segment when seconds carry meaning",
+      "Don't reach for it to enter a point in time, or a range",
+    ],
+  }}
+/>
 
 ## Behavior
 
 What `F0DurationInput` guarantees when used as a controlled input.
-
-A11y wiring is not visually demonstrable. It includes: `role="group"` on the container with `aria-label` derived from `label` or `ariaLabel`, per-segment `aria-label` (overridable via `fields[unit].ariaLabel`), `inputMode="numeric"`, `aria-disabled`, `aria-readonly`, and `aria-invalid` propagation. A `console.warn` fires in development when neither `label` nor `ariaLabel` is provided.
 
 ### Value model
 
@@ -157,7 +175,94 @@ Pass `status={{ type, message }}` to colour the border and render a message belo
 
 <Canvas of={Stories.CustomSuffixes} />
 
----
+## Accessibility
+
+A11y wiring is not visually demonstrable, so it is listed rather than shown:
+
+- The container is a `role="group"` with an `aria-label` derived from `label`, or from `ariaLabel` when that is set. The group is what carries the field's accessible name, which is why `hideLabel` can drop the visible `<label>` without leaving the field unnamed.
+- Every segment carries its own `aria-label` (`Days` / `Hours` / `Minutes` / `Seconds`), overridable per unit via `fields[unit].ariaLabel`, so a screen reader announces which part of the duration has focus. Those defaults are hardcoded English and are not read from `I18nProvider`, so in a localized app set `fields[unit].ariaLabel` alongside any custom `suffix`. Leaving it unset announces the segment in the wrong language, and a custom `suffix` without a matching label also breaks Label in Name (SC 2.5.3).
+- Segments are `inputMode="numeric"`, which brings up the numeric keypad on touch devices.
+- `aria-invalid` is set on the group and on every segment; `aria-disabled` on the group only (segments carry the native `disabled` attribute); `aria-readonly` on the segments only. `aria-describedby` reaches both, so an external error message is announced from any segment.
+- A `console.warn` fires in development when neither `label` nor `ariaLabel` is provided.
+
+Two gaps to know about, both needing a component change rather than a prop:
+
+- **The built-in `status` message is not announced.** It renders as visible text with no `id`, no `role="alert"` and no `aria-live`, and `status={{ type: "error" }}` does not set `aria-invalid` on its own. A screen-reader user gets the border colour and nothing else. Pass your own `aria-describedby` (pointing at your message element) and `aria-invalid` when the error has to be announced.
+- **`required` is visual-only.** It renders the marker beside the label but sets neither `required` nor `aria-required` on the segments, so with `hideLabel` the requirement is both invisible and unannounced.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Moves to the next segment in{" "}
+          <code>days → hours → minutes → seconds</code> order. Leaving a segment
+          is what commits the rollover.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Shift</kbd> + <kbd>Tab</kbd>
+        </td>
+        <td>Moves to the previous segment.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>0</kbd>–<kbd>9</kbd>
+        </td>
+        <td>
+          Types into the focused segment. An over-range value stays visible
+          until blur.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>-</kbd>
+        </td>
+        <td>
+          Only with <code>allowNegative</code>, only at the start of the first
+          segment, and only once. Applies to the whole duration.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>↑</kbd> <kbd>↓</kbd>
+        </td>
+        <td>Nothing. Segments do not step; type the value.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>←</kbd> <kbd>→</kbd> <kbd>Home</kbd> <kbd>End</kbd>
+        </td>
+        <td>Native caret movement inside the focused segment.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Cmd</kbd>/<kbd>Ctrl</kbd> combos
+        </td>
+        <td>
+          Pass through, so select-all, copy and paste work. Non-digits in a
+          pasted value are stripped.
+        </td>
+      </tr>
+      <tr>
+        <td>Any other printable key</td>
+        <td>Blocked on keydown; never reaches the value.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 ## Props
 
@@ -387,7 +492,11 @@ Pass `status={{ type, message }}` to colour the border and render a message belo
         <td>
           <code>boolean</code>
         </td>
-        <td>Hides the visible label; still rendered for screen readers.</td>
+        <td>
+          Removes the visible label from the DOM. The accessible name falls back
+          to the container's <code>aria-label</code>, derived from{" "}
+          <code>label</code> or <code>ariaLabel</code>.
+        </td>
       </tr>
       <tr>
         <td>
