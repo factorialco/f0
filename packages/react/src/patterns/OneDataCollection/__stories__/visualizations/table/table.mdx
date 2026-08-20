@@ -437,6 +437,11 @@ Columns covered by `frozenColumns` remain permanently locked before the
 user-managed group. Omit `onLockedColumnIdsChange` when the locked set is fixed
 and should not expose controls.
 
+The review story renders 15 columns in a 720 px container and scrolls to the
+right after locking Name and Role. This keeps the sticky pair visible beside
+the far-right columns and makes horizontal freeze behavior directly
+reviewable.
+
 <Canvas
   of={TableStories.WithLockableColumns}
   meta={TableStories}
