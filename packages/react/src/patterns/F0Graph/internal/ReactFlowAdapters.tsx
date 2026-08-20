@@ -318,11 +318,19 @@ function F0GraphCollapserWrapperInner({
         className="group pointer-events-auto flex items-start justify-center pt-2"
         style={{ width: parentWidth, height: 80 }}
       >
+        {/*
+          `opacity` rather than `visibility`, because a `visibility: hidden`
+          button cannot take focus and the button now owns the roving tabindex.
+          `pointer-events-none` comes along with it so the hidden state stays
+          non-interactive exactly as `visibility: hidden` was, and there is no
+          transition, so the reveal snaps on hover the way it always has.
+        */}
         <div
           className={cn(
-            "backdrop-blur-[120px] transition-opacity",
-            "focus-within:opacity-100 group-hover:opacity-100",
-            isFocused ? "opacity-100" : "opacity-0"
+            "backdrop-blur-[120px]",
+            "group-hover:pointer-events-auto group-hover:opacity-100",
+            "focus-within:pointer-events-auto focus-within:opacity-100",
+            isFocused ? "opacity-100" : "pointer-events-none opacity-0"
           )}
         >
           <F0Button
