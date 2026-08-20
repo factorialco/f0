@@ -101,7 +101,7 @@ export const F0DialogHeader = ({
 
   const TabsStrip = () =>
     tabs ? (
-      <div className="overflow-hidden">
+      <div className="shrink-0 overflow-hidden">
         <div className="-mx-2">
           <Tabs
             tabs={tabs}
