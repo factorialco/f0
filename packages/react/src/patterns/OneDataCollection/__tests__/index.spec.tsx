@@ -4,7 +4,7 @@ import { LayoutGrid } from "lucide-react"
 import { describe, expect, test, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
 
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker"
 
 import { aiTranslations } from "@/kits/ai/F0AiChat"
 import {

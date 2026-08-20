@@ -2,7 +2,7 @@ import type { F0GraphNodeTagColumn } from "@/patterns/F0Graph"
 
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 
 import type { SortAndHideListItem } from "../../Table/components/SortAndHideList/types"
 import type { GraphVisualizationOptions } from "../types"

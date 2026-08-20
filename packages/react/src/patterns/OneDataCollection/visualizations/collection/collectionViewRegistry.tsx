@@ -1,5 +1,5 @@
 import { IconType } from "@/components/F0Icon"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {

@@ -14,7 +14,7 @@ import { Tabs, TabItem } from "@/patterns/Navigation/Tabs"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker"
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 
 import type { ItemActionsDefinition } from "../../item-actions"

@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
-import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
+import type { PresetsDefinition } from "@/patterns/F0FilterPicker/types"
 
 import { ExampleComponent, filters, mockUsers } from "../mockData"
 

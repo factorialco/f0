@@ -8,7 +8,7 @@ import type {
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

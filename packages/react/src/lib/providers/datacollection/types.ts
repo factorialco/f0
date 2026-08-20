@@ -1,7 +1,7 @@
 import {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 import { DataCollectionStatus } from "@/patterns/OneDataCollection/hooks/useDataColectionStorage/types"
 import { DataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 

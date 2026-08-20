@@ -2,7 +2,7 @@ import { act } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { DATA_COLLECTION_URL_PARAM_PREFIX } from "@/lib/providers/datacollection/dataCollectionUrlParams"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { useDataCollectionUrlSync } from "../useDataCollectionUrlSync"

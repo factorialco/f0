@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ForwardedRef, useCallback, useState } from "react"
 
 import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
-import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
+import { FiltersDefinition, FiltersState } from "@/patterns/F0FilterPicker"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import {
   BaseFetchOptions,

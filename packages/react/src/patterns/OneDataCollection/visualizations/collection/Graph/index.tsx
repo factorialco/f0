@@ -12,7 +12,7 @@ import {
   F0GraphSkeleton,
   tagColumn,
 } from "@/patterns/F0Graph"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"

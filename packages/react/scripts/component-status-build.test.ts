@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest"
 import {
   a11yTierOf,
   computeComponentStatusData,
+  isInternalMdx,
 } from "./component-status-build.mjs"
 
 /**
@@ -52,6 +53,16 @@ The card is a plain container and adds no special semantics of its own.
 // Near-empty → "stub".
 const STUB_MDX = `## Anatomy
 tiny
+`
+
+// An implementation-notes page: tagged `internal`, and thin enough to score
+// "stub" if it were ever mistaken for the component's documentation.
+const INTERNAL_MDX = `import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Picker/Internal" tags={["internal"]} />
+
+## Anatomy
+Internal composition notes.
 `
 
 function story(title: string, tags: string[], extra = ""): string {
@@ -134,6 +145,23 @@ beforeAll(() => {
     `const sample = { title: "Cannot access payroll documents" }\n` +
       story("Proposal", ["experimental"])
   )
+
+  // 11) An `internal`-tagged MDX page that sorts BEFORE the real doc page in the
+  // same directory (".internal.mdx" < ".mdx"). It documents implementation
+  // details, so the component's docs must still be scored from F0Picker.mdx.
+  write(
+    "patterns/F0Picker/__stories__/F0Picker.stories.tsx",
+    story("Picker", ["stable"], "\n" + PLAY_STORY)
+  )
+  write("patterns/F0Picker/__stories__/F0Picker.internal.mdx", INTERNAL_MDX)
+  write("patterns/F0Picker/__stories__/F0Picker.mdx", ACCEPTABLE_MDX)
+
+  // 12) A component whose ONLY MDX page is internal has no public docs at all.
+  write(
+    "patterns/F0Hidden/__stories__/F0Hidden.stories.tsx",
+    story("Hidden", ["stable"])
+  )
+  write("patterns/F0Hidden/__stories__/F0Hidden.internal.mdx", INTERNAL_MDX)
 })
 
 afterAll(() => {
@@ -221,6 +249,23 @@ describe("computeComponentStatusData (extraction)", () => {
     expect(names).not.toContain("Cannot access payroll documents")
   })
 
+  test("scores the public doc page, not an internal page that sorts first", () => {
+    // Without the internal filter the alphabetically-first ".internal.mdx" wins
+    // and the component reads as a stub, discarding its real documentation.
+    expect(byName("Picker")).toMatchObject({
+      hasMdxDocs: true,
+      docQuality: "acceptable",
+      docSignals: { sectionsCount: 3, hasProps: true },
+    })
+  })
+
+  test("an internal-only MDX page does not count as documentation", () => {
+    expect(byName("Hidden")).toMatchObject({
+      hasMdxDocs: false,
+      docQuality: "none",
+    })
+  })
+
   test("deduplicates multiple story files for the same title+zone", () => {
     const alerts = computeComponentStatusData(root).components.filter(
       (c) => c.name === "Alert" && c.zone === "components"
@@ -236,6 +281,34 @@ describe("computeComponentStatusData (extraction)", () => {
       data.components.filter((c) => c.apiStatus === "stable").length
     )
     expect(data.stats.byDocQuality.gold).toBe(1)
+  })
+})
+
+describe("isInternalMdx", () => {
+  test("true for a Meta tagged internal, on one line or several", () => {
+    expect(
+      isInternalMdx(`<Meta title="X/Internal" tags={["internal"]} />`)
+    ).toBe(true)
+    expect(
+      isInternalMdx(`<Meta\n  title="X/Internal"\n  tags={["internal"]}\n/>`)
+    ).toBe(true)
+  })
+
+  test("false for a Meta with no tags or other tags", () => {
+    expect(isInternalMdx(`<Meta title="X" />`)).toBe(false)
+    expect(isInternalMdx(`<Meta title="X" tags={["experimental"]} />`)).toBe(
+      false
+    )
+  })
+
+  test("false when the word appears in prose rather than the Meta tags", () => {
+    expect(
+      isInternalMdx(`# Notes\n<Meta title="X" />\n\nFor internal use.`)
+    ).toBe(false)
+  })
+
+  test("false for missing content", () => {
+    expect(isInternalMdx(null)).toBe(false)
   })
 })
 

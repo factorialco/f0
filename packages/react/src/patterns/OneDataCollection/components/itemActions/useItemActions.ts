@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import {
   DropdownItem,
   DropdownItemSeparator,

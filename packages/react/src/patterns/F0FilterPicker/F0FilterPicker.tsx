@@ -21,7 +21,7 @@ import { PresetsDefinition } from "./types"
  * Props for the Filters component.
  * @template Definition - The type defining the structure of available filters
  */
-export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
+export type F0FilterPickerRootProps<Definition extends FiltersDefinition> = {
   /** The definition of available filters and their configurations */
   filters?: Definition
   /** Current state of applied filters */
@@ -129,7 +129,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   mode = "default",
   onOpenChange,
   ...props
-}: OneFilterPickerRootProps<Definition>) => {
+}: F0FilterPickerRootProps<Definition>) => {
   // Optimistic commits are the shipped public contract. Only source-internal
   // consumers such as F0AnalyticsDashboard opt into strict controlled state.
   const stateMode = useContext(FilterPickerStateModeContext)
@@ -203,7 +203,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     </FiltersContext.Provider>
   )
 }
-FiltersRoot.displayName = "OneFilterPicker.Root"
+FiltersRoot.displayName = "F0FilterPicker.Root"
 
 /**
  * Filter controls
@@ -255,7 +255,7 @@ const FiltersControls = () => {
     </>
   )
 }
-FiltersControls.displayName = "OneFilterPicker.Controls"
+FiltersControls.displayName = "F0FilterPicker.Controls"
 
 /**
  * Filter presets
@@ -361,13 +361,13 @@ const FiltersChipsList = () => {
     )
   )
 }
-FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
+FiltersChipsList.displayName = "F0FilterPicker.ChipsList"
 
 /**
- * OneFiltersPicker component to use as a single component
+ * F0FilterPicker component to use as a single component
  */
-const _OneFilterPicker = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
+const _F0FilterPicker = <Definition extends FiltersDefinition>(
+  props: F0FilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => {
   const { dataTestId, ...rootProps } = props
   return (
@@ -398,12 +398,12 @@ const _OneFilterPicker = <Definition extends FiltersDefinition>(
     </DataTestIdWrapper>
   )
 }
-_OneFilterPicker.displayName = "OneFilterPicker"
+_F0FilterPicker.displayName = "F0FilterPicker"
 
-const OneFilterPicker = _OneFilterPicker as <
+const F0FilterPicker = _F0FilterPicker as <
   Definition extends FiltersDefinition,
 >(
-  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
+  props: F0FilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => ReactElement | null
 
 /**
@@ -411,26 +411,26 @@ const OneFilterPicker = _OneFilterPicker as <
  *
  * @example
  * ```tsx
- * <OneFiltersPicker>
+ * <F0FilterPicker>
  *   <div className="flex flex-col gap-2">
- *     <OneFiltersPicker.Controls />
- *     <OneFiltersPicker.Presets />
+ *     <F0FilterPicker.Controls />
+ *     <F0FilterPicker.Presets />
  *     <div className="flex flex-col gap-2">
  *       {children}
  *     </div>
  *   </div>
- *  <OneFiltersPicker.ChipsList />
- * </OneFiltersPicker>
+ *  <F0FilterPicker.ChipsList />
+ * </F0FilterPicker>
  *
- * Use OneFilterPicker as a single component to get a default layout
+ * Use F0FilterPicker as a single component to get a default layout
  * ```tsx
- * <OneFilterPicker />
+ * <F0FilterPicker />
  * ```
  */
 export {
   FiltersChipsList as ChipsList,
   FiltersControls as Controls,
-  OneFilterPicker,
+  F0FilterPicker,
   FiltersPresets as Presets,
   FiltersRoot as Root,
 }

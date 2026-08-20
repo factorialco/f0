@@ -1,7 +1,7 @@
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { IconType } from "@/components/F0Icon"
 import {

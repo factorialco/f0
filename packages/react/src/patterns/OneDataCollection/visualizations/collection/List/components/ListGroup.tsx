@@ -1,4 +1,4 @@
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import {
   GroupingDefinition,
   RecordType,

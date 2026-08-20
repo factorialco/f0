@@ -169,6 +169,18 @@ function getApiStatus(tags) {
   return "unknown"
 }
 
+/**
+ * Whether an MDX page declares itself internal, via `tags={["internal"]}` on its
+ * `<Meta>`. MDX uses JSX attribute syntax, so this cannot reuse `extractTags`,
+ * which reads the `tags: [...]` object property of a story meta.
+ */
+export function isInternalMdx(content) {
+  if (content == null) return false
+  const meta = content.match(/<Meta\b[^>]*>/s)
+  if (!meta) return false
+  return /\btags=\{\[[^\]]*["']internal["']/s.test(meta[0])
+}
+
 const EMPTY_DOC_SIGNALS = {
   sectionsCount: 0,
   hasProps: false,
@@ -269,11 +281,23 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
   const testFiles = allFiles.filter(
     (f) => f.endsWith(".test.tsx") || f.endsWith(".test.ts")
   )
+  // One MDX page per directory represents the component's documentation. A page
+  // tagged `internal` documents implementation details rather than the public
+  // API, so it is never that page — the same rule the story scan below applies
+  // to `internal`-tagged stories ("internal is not a maturity level").
   const mdxByDir = new Map()
   for (const f of allFiles) {
     if (!f.endsWith(".mdx")) continue
     const dir = dirname(f)
-    if (!mdxByDir.has(dir)) mdxByDir.set(dir, f)
+    if (mdxByDir.has(dir)) continue
+    let mdx
+    try {
+      mdx = readFileSync(f, "utf-8")
+    } catch {
+      continue
+    }
+    if (isInternalMdx(mdx)) continue
+    mdxByDir.set(dir, f)
   }
 
   const sep = "/"

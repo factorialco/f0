@@ -6,7 +6,7 @@ import { F0EventCatcherProvider } from "@/lib/providers/events"
 import {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { useEventEmitter } from "./useEventEmitter"
 

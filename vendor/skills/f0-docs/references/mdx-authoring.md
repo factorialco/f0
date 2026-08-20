@@ -18,7 +18,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 <Meta of={Stories} />
 ```
 
-### Umbrella component (multiple story files) — F0DataChart, OneFilterPicker pattern
+### Umbrella component (multiple story files) — F0DataChart, F0FilterPicker pattern
 
 Use `<Meta title="..." />` only when the component spans multiple story files:
 
