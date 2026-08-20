@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.42.3](https://github.com/factorialco/f0/compare/f0-react-v6.42.2...f0-react-v6.42.3) (2026-08-20)
+
+
+### Bug Fixes
+
+* **F0Dialog:** stop scrollable content from squeezing the tabs strip ([#5160](https://github.com/factorialco/f0/issues/5160)) ([9ab3145](https://github.com/factorialco/f0/commit/9ab314563e99fe4b19e036794515508d538cee15))
+
 ## [6.42.2](https://github.com/factorialco/f0/compare/f0-react-v6.42.1...f0-react-v6.42.2) (2026-08-19)
 
 
