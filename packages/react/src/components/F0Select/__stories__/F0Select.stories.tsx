@@ -207,6 +207,7 @@ const meta: Meta = {
         "  onClick: () => void\n" +
         "  icon?: IconType\n" +
         "  variant?: 'ghost' | 'critical'\n" +
+        "  disabled?: boolean\n" +
         "}```",
     },
     loading: {

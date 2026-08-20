@@ -726,9 +726,10 @@ describe("Select", () => {
       )
     })
 
-    it("runs footer actions", async () => {
+    it("runs enabled footer actions and blocks disabled ones", async () => {
       const user = userEvent.setup()
       const handleRemove = vi.fn()
+      const handleDisabledAction = vi.fn()
       render(
         <F0Select
           variant="inline"
@@ -743,6 +744,11 @@ describe("Select", () => {
               variant: "critical",
               onClick: handleRemove,
             },
+            {
+              label: "Unavailable action",
+              onClick: handleDisabledAction,
+              disabled: true,
+            },
           ]}
         />
       )
@@ -750,6 +756,12 @@ describe("Select", () => {
       await openSelect(user)
       const search = screen.getByRole("searchbox")
       const action = screen.getByRole("button", { name: "Remove access" })
+      const disabledAction = screen.getByRole("button", {
+        name: "Unavailable action",
+      })
+
+      expect(disabledAction).toBeDisabled()
+      await user.click(disabledAction)
 
       search.focus()
       await user.tab()
@@ -773,6 +785,7 @@ describe("Select", () => {
       await waitFor(() => {
         expect(handleRemove).toHaveBeenCalledOnce()
       })
+      expect(handleDisabledAction).not.toHaveBeenCalled()
     })
 
     it("forwards refs through both trigger variants", () => {
