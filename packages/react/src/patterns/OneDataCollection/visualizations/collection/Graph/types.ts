@@ -102,6 +102,18 @@ export type GraphVisualizationOptions<
    */
   focusOnEntry?: string
   /**
+   * Id of a node to mark as **selected on entry** — the click-selection ring, so
+   * a deep link lands on the graph looking the way a user's own click leaves it,
+   * not just framed. Seeded on the first render; the selection then follows
+   * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+   * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+   * branch is expanded and framed — otherwise the ring isn't visible until its
+   * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+   * the reveal highlight. Providing it puts the graph's selection in controlled
+   * mode; omitting it leaves selection uncontrolled (the default).
+   */
+  initialSelectedNodeId?: string
+  /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for
    * revealing nodes in branches that have not been expanded yet.
