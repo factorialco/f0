@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.43.0](https://github.com/factorialco/f0/compare/f0-react-v6.42.3...f0-react-v6.43.0) (2026-08-21)
+
+
+### Features
+
+* **F0DataChart:** report the clicked mark via onPointClick ([#5123](https://github.com/factorialco/f0/issues/5123)) ([0c95895](https://github.com/factorialco/f0/commit/0c958951223d525396ac8e6d565606e915dc13a4))
+
 ## [6.42.3](https://github.com/factorialco/f0/compare/f0-react-v6.42.2...f0-react-v6.42.3) (2026-08-20)
 
 
