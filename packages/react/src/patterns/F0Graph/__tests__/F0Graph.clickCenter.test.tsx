@@ -96,8 +96,11 @@ async function clickNode(id: string) {
 }
 
 // Mount, then clear the camera spies so only the click's calls are counted
-// (isolates the click behavior from any mount-time framing).
-const mount = (props: Partial<React.ComponentProps<typeof F0Graph>> = {}) => {
+// (isolates the click behavior from any mount-time framing). The one-shot entry
+// frame runs from React Flow's `onInit` (deferred), so flush it before clearing.
+const mount = async (
+  props: Partial<React.ComponentProps<typeof F0Graph>> = {}
+) => {
   const view = zeroRender(
     <div style={{ width: 800, height: 600 }}>
       <F0Graph
@@ -108,6 +111,9 @@ const mount = (props: Partial<React.ComponentProps<typeof F0Graph>> = {}) => {
       />
     </div>
   )
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
   mockReactFlow.setCenter.mockClear()
   mockReactFlow.fitView.mockClear()
   return view
@@ -115,7 +121,7 @@ const mount = (props: Partial<React.ComponentProps<typeof F0Graph>> = {}) => {
 
 describe("F0Graph — fly to node on click (default)", () => {
   it("flies to the clicked node at NODE_CLICK_ZOOM (1.5) by default", async () => {
-    mount()
+    await mount()
     await clickNode("root")
     expect(mockReactFlow.setCenter).toHaveBeenCalledTimes(1)
     expect(mockReactFlow.setCenter).toHaveBeenLastCalledWith(
@@ -126,14 +132,14 @@ describe("F0Graph — fly to node on click (default)", () => {
   })
 
   it("re-centers on every click, including a repeat click on the same node", async () => {
-    mount()
+    await mount()
     await clickNode("root")
     await clickNode("root")
     expect(mockReactFlow.setCenter).toHaveBeenCalledTimes(2)
   })
 
   it("honors a custom nodeClickZoom, clamped to maxZoom", async () => {
-    mount({ nodeClickZoom: 5, maxZoom: 2 })
+    await mount({ nodeClickZoom: 5, maxZoom: 2 })
     await clickNode("root")
     expect(mockReactFlow.setCenter).toHaveBeenLastCalledWith(
       expect.any(Number),
@@ -143,7 +149,7 @@ describe("F0Graph — fly to node on click (default)", () => {
   })
 
   it("does not move the camera when centerOnNodeClick is false", async () => {
-    mount({ centerOnNodeClick: false })
+    await mount({ centerOnNodeClick: false })
     await clickNode("root")
     expect(mockReactFlow.setCenter).not.toHaveBeenCalled()
     expect(mockReactFlow.fitView).not.toHaveBeenCalled()
@@ -153,19 +159,19 @@ describe("F0Graph — fly to node on click (default)", () => {
   // pseudo-nodes. Clicking one (to toggle) must not fly — it isn't a real node,
   // so the camera would chase the toggle's shifting position.
   it("does not fly when the expander/collapser pseudo-node is clicked", async () => {
-    mount()
+    await mount()
     await clickNode("expander-root")
     expect(mockReactFlow.setCenter).not.toHaveBeenCalled()
     expect(mockReactFlow.fitView).not.toHaveBeenCalled()
   })
 
   it("offsets the center for a right-side viewportInset", async () => {
-    const noInset = mount()
+    const noInset = await mount()
     await clickNode("root")
     const noInsetX = mockReactFlow.setCenter.mock.calls[0][0]
     noInset.unmount()
 
-    mount({ viewportInset: { right: 480 } })
+    await mount({ viewportInset: { right: 480 } })
     await clickNode("root")
     const insetX = mockReactFlow.setCenter.mock.calls[0][0]
 
@@ -180,12 +186,12 @@ describe("F0Graph — click fly waits for a panel the click opens", () => {
   // read no inset and center on the full canvas, leaving the node behind the
   // panel that just opened — so the fly must see the inset that follows it.
   it("uses an inset that only arrives after the click", async () => {
-    const baseline = mount()
+    const baseline = await mount()
     await clickNode("root")
     const noInsetX = mockReactFlow.setCenter.mock.calls[0][0]
     baseline.unmount()
 
-    const { rerender } = mount()
+    const { rerender } = await mount()
     const graph = (props: Partial<React.ComponentProps<typeof F0Graph>>) => (
       <div style={{ width: 800, height: 600 }}>
         <F0Graph
@@ -209,7 +215,7 @@ describe("F0Graph — click fly waits for a panel the click opens", () => {
   })
 
   it("a second click supersedes a still-pending fly instead of queueing both", async () => {
-    mount()
+    await mount()
     pressNode("root")
     pressNode("a")
     await settleFly()
