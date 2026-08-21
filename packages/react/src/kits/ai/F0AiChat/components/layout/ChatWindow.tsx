@@ -62,7 +62,7 @@ export const SidebarWindow = ({
   } = useAiChat()
   const isVisible = visible ?? open
   const canAcceptWidgetDrop =
-    acceptsWidgetDrop && activeGame === null && isVisible
+    acceptsWidgetDrop && activeGame === null && isVisible && !isClarifying
   const canAcceptWidgetDropRef = useRef(canAcceptWidgetDrop)
   canAcceptWidgetDropRef.current = canAcceptWidgetDrop
   const widgetDropZoneRef = useRef<HTMLDivElement>(null)
@@ -157,8 +157,7 @@ export const SidebarWindow = ({
 
   useEffect(() => {
     const onStart = (e: Event) => {
-      // Same freeze as the file drop: a clarifying flow owns the panel.
-      if (!canAcceptWidgetDrop || isClarifying) return
+      if (!canAcceptWidgetDrop) return
       const detail = (e as CustomEvent<WidgetDragStartDetail>).detail
       if (
         typeof detail?.id !== "string" ||
@@ -177,20 +176,20 @@ export const SidebarWindow = ({
       window.removeEventListener(WIDGET_DRAG_START, onStart)
       window.removeEventListener(WIDGET_DRAG_END, onEnd)
     }
-  }, [canAcceptWidgetDrop, isClarifying, setDragQuoteBoth])
+  }, [canAcceptWidgetDrop, setDragQuoteBoth])
 
   // A view change, host overlay, or clarifying flow can take ownership of the
   // shell while a pointer is still down. Retract the invitation immediately
   // so releasing over non-chat content can never create an invisible quote.
   useEffect(() => {
-    if (!canAcceptWidgetDrop || isClarifying) setDragQuoteBoth(null)
-  }, [canAcceptWidgetDrop, isClarifying, setDragQuoteBoth])
+    if (!canAcceptWidgetDrop) setDragQuoteBoth(null)
+  }, [canAcceptWidgetDrop, setDragQuoteBoth])
 
   // Releasing over the chat quotes the widget. This is a handler on the card,
   // so a release anywhere else simply never reaches it — the grid's own
   // `pointerup` clears the invitation via WIDGET_DRAG_END.
   const handlePointerUp = useCallback(() => {
-    if (!canAcceptWidgetDropRef.current || isClarifying) {
+    if (!canAcceptWidgetDropRef.current) {
       setDragQuoteBoth(null)
       return
     }
@@ -203,13 +202,7 @@ export const SidebarWindow = ({
       setPendingQuote({ text: detail.title })
       focusChatInput()
     }
-  }, [
-    canAcceptWidgetDrop,
-    focusChatInput,
-    isClarifying,
-    setDragQuoteBoth,
-    setPendingQuote,
-  ])
+  }, [canAcceptWidgetDrop, focusChatInput, setDragQuoteBoth, setPendingQuote])
 
   const fullscreen = visualizationMode === "fullscreen"
   // Stays LOCAL: it gates this handle's document mousemove listener and its

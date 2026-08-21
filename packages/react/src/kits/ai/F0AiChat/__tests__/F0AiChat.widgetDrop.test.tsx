@@ -227,12 +227,12 @@ describe("F0AiChat widget drop", () => {
       screen.getByRole("button", { name: "Start clarifying" })
     )
 
+    expect(document.querySelector("[data-ai-chat-dropzone]")).toBeNull()
     startWidgetDrag("Headcount by department")
 
     expect(
       screen.queryByText("Drop here to discuss with One")
     ).not.toBeInTheDocument()
-    fireEvent.pointerUp(dropZone())
     expect(screen.getByTestId("quote")).toHaveTextContent("")
   })
 
@@ -243,6 +243,7 @@ describe("F0AiChat widget drop", () => {
     expect(
       screen.getByText("Drop here to discuss with One")
     ).toBeInTheDocument()
+    const previousDropZone = dropZone()
 
     await userEvent.click(
       screen.getByRole("button", { name: "Start clarifying" })
@@ -251,7 +252,9 @@ describe("F0AiChat widget drop", () => {
     expect(
       screen.queryByText("Drop here to discuss with One")
     ).not.toBeInTheDocument()
-    fireEvent.pointerUp(dropZone())
+    expect(previousDropZone).not.toHaveAttribute("data-ai-chat-dropzone")
+    expect(document.querySelector("[data-ai-chat-dropzone]")).toBeNull()
+    fireEvent.pointerUp(previousDropZone)
     expect(screen.getByTestId("quote")).toHaveTextContent("")
   })
 
@@ -262,6 +265,7 @@ describe("F0AiChat widget drop", () => {
     ],
     ["hosted panel", () => renderChat()],
     ["voice mode", () => renderChat()],
+    ["clarifying flow", () => renderChat()],
     ["Pong", () => renderChat()],
   ])("does not expose a widget drop zone over %s", async (surface, setup) => {
     setup()
@@ -273,6 +277,10 @@ describe("F0AiChat widget drop", () => {
     } else if (surface === "voice mode") {
       await userEvent.click(
         screen.getByRole("button", { name: "Start voice mode" })
+      )
+    } else if (surface === "clarifying flow") {
+      await userEvent.click(
+        screen.getByRole("button", { name: "Start clarifying" })
       )
     } else if (surface === "Pong") {
       await userEvent.click(screen.getByRole("button", { name: "Start Pong" }))
