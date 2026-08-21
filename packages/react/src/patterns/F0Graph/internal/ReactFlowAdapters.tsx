@@ -9,7 +9,7 @@ import { type ReactNode, memo } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
@@ -56,7 +56,6 @@ export interface GraphNodeData extends Record<string, unknown> {
   ariaLevel: number
   ariaSetSize: number
   ariaPosInSet: number
-  visibleChildIds?: string[]
 }
 
 export type GraphRFNode = RFNode<GraphNodeData>
@@ -123,14 +122,8 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
   const { expandedNodes } = expandCtx
   const { selectedNodes, highlightedNodes } = selectionCtx
   const { toggleExpand, selectNode } = actionsCtx
-  const {
-    graphNode,
-    renderNode,
-    ariaLevel,
-    ariaSetSize,
-    ariaPosInSet,
-    visibleChildIds,
-  } = data as GraphNodeData
+  const { graphNode, renderNode, ariaLevel, ariaSetSize, ariaPosInSet } =
+    data as GraphNodeData
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
   )
@@ -155,11 +148,14 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
     : () => {}
 
-  const ariaOwns =
-    isExpanded && visibleChildIds && visibleChildIds.length > 0
-      ? visibleChildIds.map((cid) => `f0-graph-node-${cid}`).join(" ")
-      : undefined
-
+  // No `aria-owns` from here. React Flow renders every node as a flat sibling,
+  // so parent/child links used to be declared with `aria-owns`. It also culls
+  // off-screen nodes, which left those references pointing at ids that no
+  // longer existed (36 of 123 dead on the LargeTree story). `F0GraphView` now
+  // exposes one `role="tree"` that owns the rendered items directly and depth
+  // travels on `aria-level` / `aria-setsize` / `aria-posinset`, which are
+  // computed before culling and so stay accurate. The `ariaOwns` prop on
+  // `F0GraphNode` is still honoured for consumers rendering their own canvas.
   const ctx: F0GraphNodeRenderContext = {
     zoomLevel,
     variant,
@@ -172,7 +168,6 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     setSize: ariaSetSize,
     posInSet: ariaPosInSet,
     nodeId: id,
-    ariaOwns,
     onExpandToggle: () => toggleExpand(id),
     onClick: () => selectNode(id),
     nodeRef: nodeRefCallback,
@@ -214,11 +209,6 @@ export const F0GraphNodeWrapper = memo(
     if (prevData.ariaLevel !== nextData.ariaLevel) return false
     if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
     if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
-    if (
-      (prevData.visibleChildIds?.join(",") ?? "") !==
-      (nextData.visibleChildIds?.join(",") ?? "")
-    )
-      return false
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true
@@ -243,37 +233,28 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   )
 
   const isFocused = focusCtx?.focusedNodeId === id
-  const wrapperRefCallback = focusCtx
-    ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
+  const buttonRefCallback = focusCtx
+    ? (el: HTMLElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
   const ariaLabel = i18n.t("actions.expand")
 
+  // The wrapper is layout only. Every interactive attribute lives on the button
+  // inside `F0GraphExpander`, which is a real `<button>` and therefore already
+  // handles Enter / Space natively.
   return (
     <>
       <Handle type="target" position={targetPos} className="!invisible" />
       <div
-        ref={wrapperRefCallback}
-        role="button"
-        tabIndex={isFocused ? 0 : -1}
-        aria-label={ariaLabel}
-        aria-expanded={expanded}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault()
-            actionsCtx.toggleExpand(parentId)
-          }
-        }}
-        className={cn(
-          "pointer-events-auto flex items-start justify-center",
-          focusRing()
-        )}
+        className="pointer-events-auto flex items-start justify-center"
         style={{ width: parentWidth, height: 80 }}
       >
         <F0GraphExpander
+          ref={buttonRefCallback}
           count={count}
           expanded={expanded}
-          tabIndex={-1}
+          tabIndex={isFocused ? 0 : -1}
+          ariaLabel={ariaLabel}
           onClick={() => actionsCtx.toggleExpand(parentId)}
           loading={loading || renderCfg?.deferredLoading}
         />
@@ -320,46 +301,47 @@ function F0GraphCollapserWrapperInner({
   )
 
   const isFocused = focusCtx?.focusedNodeId === id
-  const wrapperRefCallback = focusCtx
-    ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
+  const buttonRefCallback = focusCtx
+    ? (el: HTMLElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
   const ariaLabel = collapseLabel ?? i18n.actions.collapse
 
+  // As in the expander: the wrapper is layout only and the button owns every
+  // interactive attribute. The reveal uses `opacity` rather than `visibility`
+  // because a `visibility: hidden` button cannot take focus, which is why the
+  // wrapper used to carry the tabindex in the first place.
   return (
     <>
       <Handle type="target" position={targetPos} className="!invisible" />
       <div
-        ref={wrapperRefCallback}
-        role="button"
-        tabIndex={isFocused ? 0 : -1}
-        aria-label={ariaLabel}
-        aria-expanded={true}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault()
-            actionsCtx.toggleExpand(parentId)
-          }
-        }}
-        className={cn(
-          "group pointer-events-auto flex items-start justify-center pt-2",
-          focusRing()
-        )}
+        className="group pointer-events-auto flex items-start justify-center pt-2"
         style={{ width: parentWidth, height: 80 }}
       >
+        {/*
+          `opacity` rather than `visibility`, because a `visibility: hidden`
+          button cannot take focus and the button now owns the roving tabindex.
+          `pointer-events-none` comes along with it so the hidden state stays
+          non-interactive exactly as `visibility: hidden` was, and there is no
+          transition, so the reveal snaps on hover the way it always has.
+        */}
         <div
           className={cn(
             "backdrop-blur-[120px]",
-            !isFocused && "invisible group-hover:visible",
-            isFocused && "visible"
+            "group-hover:pointer-events-auto group-hover:opacity-100",
+            "focus-within:pointer-events-auto focus-within:opacity-100",
+            isFocused ? "opacity-100" : "pointer-events-none opacity-0"
           )}
         >
           <F0Button
+            ref={buttonRefCallback}
             variant="neutral"
             size={zoomCtx.zoomLevel === "compact" ? "lg" : "md"}
             icon={Minimize}
             hideLabel
             label={ariaLabel}
+            aria-expanded={true}
+            tabIndex={isFocused ? 0 : -1}
             onClick={() => actionsCtx.toggleExpand(parentId)}
           />
         </div>

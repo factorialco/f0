@@ -7,6 +7,8 @@ import type { GraphNode, ZoomLevel } from "../../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphKeyTarget } from "./helpers"
+
 // React Flow requires DOM dimensions to render nodes.
 // For unit tests we verify mount, callbacks, and structure.
 
@@ -367,9 +369,8 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Focus starts on node "1" (only visible root, collapsed, has children)
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
     expect(onExpandToggle).toHaveBeenCalledWith("1", true)
   })
 
@@ -387,9 +388,8 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Focus starts on node "1" (expanded root)
-    dispatchKey(tree, "ArrowLeft")
+    dispatchKey(graphKeyTarget(), "ArrowLeft")
     expect(onExpandToggle).toHaveBeenCalledWith("1", false)
   })
 
@@ -407,11 +407,10 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Focus on node "1" (expanded). ArrowRight moves focus to first child "2".
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
     // Now focused on node "2" (collapsed, has children). ArrowRight expands it.
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
     expect(onExpandToggle).toHaveBeenCalledWith("2", true)
   })
 
@@ -429,13 +428,12 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Focus on node "1" (expanded). ArrowRight → first child "2".
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
     // Focus on "2" (collapsed). ArrowLeft → move to parent "1".
-    dispatchKey(tree, "ArrowLeft")
+    dispatchKey(graphKeyTarget(), "ArrowLeft")
     // Now focus is back on "1" (expanded). ArrowLeft → collapse "1".
-    dispatchKey(tree, "ArrowLeft")
+    dispatchKey(graphKeyTarget(), "ArrowLeft")
     expect(onExpandToggle).toHaveBeenCalledWith("1", false)
   })
 

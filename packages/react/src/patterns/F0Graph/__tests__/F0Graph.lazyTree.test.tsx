@@ -7,6 +7,8 @@ import type { GraphNode } from "../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphKeyTarget } from "./helpers"
+
 // ─── Helpers ───────────────────────────────────────────────────
 
 function renderNodeFn(node: GraphNode<string>, ctx: F0GraphNodeRenderContext) {
@@ -77,9 +79,8 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Expand root-1 via ArrowRight
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
 
     // Wait for the async load to settle
     await act(async () => {
@@ -105,10 +106,8 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
-
     // Expand
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
     await act(async () => {
       await vi.waitFor(() => {
         expect(loadChildren).toHaveBeenCalledTimes(1)
@@ -116,10 +115,10 @@ describe("F0Graph lazy tree — loadChildren", () => {
     })
 
     // Collapse
-    dispatchKey(tree, "ArrowLeft")
+    dispatchKey(graphKeyTarget(), "ArrowLeft")
 
     // Expand again
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
 
     // Should NOT call loadChildren again — data was already fetched
     // Wait a tick to ensure no additional call is queued
@@ -149,8 +148,7 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
 
     // Resolve the load
     await act(async () => {
@@ -176,8 +174,7 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
 
     // Wait for the rejected promise to settle
     await act(async () => {

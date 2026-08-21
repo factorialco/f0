@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useCallback, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -18,6 +19,9 @@ const meta = {
   title: "Graph/F0Graph",
   component: F0Graph<Employee>,
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   decorators: [
     (Story) => (
       <div className="h-[600px] w-full bg-f1-background">
@@ -227,6 +231,61 @@ export const Tree: Story = {
     nodes: BASIC_NODES,
     renderNode: renderEmployee,
     defaultExpandDepth: 2,
+  },
+  // Primary flow: read the hierarchy, select a person, close a branch and
+  // reopen it. The first assertion doubles as the regression guard for the
+  // accessible tree. React Flow lays every node out as a flat, absolutely
+  // positioned sibling, so the tree owns the rendered items by reference, and a
+  // treeitem left unowned has no tree parent at all.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // `aria-owns` mirrors the DOM through a MutationObserver, so it settles once
+    // React Flow has mounted its nodes rather than on the first commit.
+    const tree = canvas.getByRole("tree", { name: "Graph view" })
+    const ownedIds = () =>
+      (tree.getAttribute("aria-owns") ?? "").split(" ").filter(Boolean)
+
+    await waitFor(() => {
+      const owned = ownedIds()
+      expect(owned.length).toBeGreaterThan(0)
+      expect(owned.length).toBe(canvas.getAllByRole("treeitem").length)
+    })
+
+    const owned = ownedIds()
+    for (const item of canvas.getAllByRole("treeitem")) {
+      await expect(owned).toContain(item.id)
+      await expect(item).toHaveAttribute("aria-level")
+    }
+
+    // Close and reopen the focused branch from the keyboard. This asserts
+    // `aria-expanded` on the node itself rather than whether a particular child
+    // is on screen, because the camera culls off-screen nodes and which ones
+    // survive is not a stable thing to assert on.
+    const focused = canvasElement.querySelector<HTMLElement>(
+      '[role="treeitem"][tabindex="0"]'
+    )
+    if (!focused) throw new Error("no treeitem holds the roving tabindex")
+    focused.focus()
+    await expect(focused).toHaveAttribute("aria-expanded", "true")
+
+    await userEvent.keyboard("{ArrowLeft}")
+    await waitFor(() =>
+      expect(focused).toHaveAttribute("aria-expanded", "false")
+    )
+    await userEvent.keyboard("{ArrowRight}")
+    await waitFor(() =>
+      expect(focused).toHaveAttribute("aria-expanded", "true")
+    )
+
+    // Selecting a person. Last, because the click flies the camera.
+    const ceo = canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
+    await userEvent.click(ceo)
+    await waitFor(() =>
+      expect(
+        canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
+      ).toHaveAttribute("aria-selected", "true")
+    )
   },
 }
 

@@ -14,6 +14,8 @@ import type {
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphKeyTarget } from "./helpers"
+
 // ─── Helpers ───────────────────────────────────────────────────
 
 function makeNodes(): GraphNode<string>[] {
@@ -84,9 +86,8 @@ describe("F0Graph integration — expand/collapse uncontrolled", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Focus starts on node "1" (root, collapsed, has children)
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
 
     expect(onExpandToggle).toHaveBeenCalledWith("1", true)
     expect(onExpandedNodesChange).toHaveBeenCalledWith(new Set(["1"]))
@@ -106,8 +107,7 @@ describe("F0Graph integration — expand/collapse uncontrolled", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
-    dispatchKey(tree, "ArrowLeft")
+    dispatchKey(graphKeyTarget(), "ArrowLeft")
     expect(onExpandToggle).toHaveBeenCalledWith("1", false)
   })
 })
@@ -129,11 +129,10 @@ describe("F0Graph integration — expand/collapse controlled", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Focus on "1" (expanded), ArrowRight moves to first child "2"
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
     // Focus on "2" (collapsed), ArrowRight expands it
-    dispatchKey(tree, "ArrowRight")
+    dispatchKey(graphKeyTarget(), "ArrowRight")
 
     expect(onExpandToggle).toHaveBeenCalledWith("2", true)
     expect(onExpandedNodesChange).toHaveBeenCalledWith(new Set(["1", "2"]))
@@ -174,9 +173,8 @@ describe("F0Graph integration — selection single mode", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Press Enter to select the focused node (node "1")
-    dispatchKey(tree, "Enter")
+    dispatchKey(graphKeyTarget(), "Enter")
 
     // onNodeSelect should have been called — the first focused node is "1"
     // In single mode, selecting "1" fires (id, true)
@@ -208,13 +206,12 @@ describe("F0Graph integration — selection single mode", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Select node "1"
-    dispatchKey(tree, "Enter")
+    dispatchKey(graphKeyTarget(), "Enter")
     // Move to next node
-    dispatchKey(tree, "ArrowDown")
+    dispatchKey(graphKeyTarget(), "ArrowDown")
     // Select next node
-    dispatchKey(tree, "Enter")
+    dispatchKey(graphKeyTarget(), "Enter")
 
     // Last call should have a Set with exactly 1 element (single mode)
     const lastCall =
@@ -243,13 +240,12 @@ describe("F0Graph integration — selection multi mode", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
     // Select node "1"
-    dispatchKey(tree, "Enter")
+    dispatchKey(graphKeyTarget(), "Enter")
     // Move down
-    dispatchKey(tree, "ArrowDown")
+    dispatchKey(graphKeyTarget(), "ArrowDown")
     // Select next node
-    dispatchKey(tree, "Enter")
+    dispatchKey(graphKeyTarget(), "Enter")
 
     // In multi mode, both should be selected
     const lastCall =
