@@ -2087,6 +2087,28 @@ describe("BarChart — legend isolation", () => {
     expect(isolated).toBeLessThan(full as number)
   })
 
+  it("reports the final legend visibility to companion surfaces", () => {
+    const onLegendSelectionChange = vi.fn()
+    render(
+      <F0DataChart
+        {...stacked}
+        onLegendSelectionChange={onLegendSelectionChange}
+      />
+    )
+
+    emitChartEvent("legendselectchanged", {
+      name: "Women",
+      selected: { Women: false, Men: true },
+    })
+
+    // The first click isolates the chosen series under F0's legend behavior,
+    // regardless of ECharts' intermediate default-toggle state.
+    expect(onLegendSelectionChange).toHaveBeenLastCalledWith({
+      Women: true,
+      Men: false,
+    })
+  })
+
   it("restores the full total when the legend is fully selected again", () => {
     render(<F0DataChart {...stacked} />)
     emitChartEvent("legendselectchanged", {

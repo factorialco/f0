@@ -32,12 +32,99 @@ export interface F0DataChartEmptyStateProps {
   disabled?: boolean
 }
 
+/** One series' value at the category a click resolved to. */
+export interface F0DataChartPointClickSeries {
+  /** Configured series name. Empty when ECharts does not report one. */
+  name: string
+  /** Index of the series in the chart's own series list. */
+  seriesIndex: number
+  /** Raw, unformatted value at this category. */
+  value: number
+}
+
+/**
+ * What a click resolved to — one bar segment, one slice, one point, or (for a
+ * line, where the click can land anywhere in the plot area) a whole category.
+ *
+ * The top-level fields always name a single series, so a consumer that wants
+ * one number has one. {@link F0DataChartPointClick.series} carries everything
+ * the click resolved, which for a line is every series at that category — the
+ * same rows its tooltip shows.
+ */
+export interface F0DataChartPointClick {
+  /** Interaction surface that resolved the point. */
+  source: "pointer"
+  /** Configured series name for the mark. Empty when ECharts does not report one. */
+  seriesName: string
+  /**
+   * Mark name reported by ECharts: an axis category, pie slice, funnel stage,
+   * scatter label, or gauge/radar item name. Empty when the mark has no name.
+   */
+  category: string
+  /** Raw, unformatted value. Consumers apply their own formatting. */
+  value: number
+  /**
+   * Every number the mark carries, in series order: `[42]` for a bar or a
+   * slice, `[x, y]` for a scatter point, `[xIndex, yIndex, value]` for a
+   * heatmap cell.
+   *
+   * {@link value} is the last entry, which is the measure for every type
+   * except scatter — there both entries are measures, and quoting only the
+   * last one drops half the point. Read this when the chart type has more
+   * than one number to say.
+   */
+  values: number[]
+  /**
+   * Every series the click resolved, in the order they are configured.
+   *
+   * A line chart accepts a click anywhere in its plot area, so this is the
+   * whole category — one entry per series that has a value there and is
+   * switched on in the legend, exactly the rows its axis tooltip shows.
+   * Everywhere else a click identifies one mark and this holds that one entry,
+   * matching {@link seriesName} and {@link value}.
+   */
+  series: F0DataChartPointClickSeries[]
+  /** Index of the clicked mark within its series. */
+  dataIndex: number
+  /** Index of the series the mark belongs to. */
+  seriesIndex: number
+  /**
+   * Where a pointer click landed, in viewport coordinates — enough to anchor a
+   * floating element without the consumer having to reach for the chart's own
+   * geometry. Taken from the touch on a touch device, where the event itself
+   * carries no coordinates. Both are 0 if the pointer event carried no
+   * coordinates.
+   */
+  clientX: number
+  clientY: number
+}
+
 /**
  * Props shared by every `F0DataChart` variant.
  */
 interface F0DataChartCommonProps {
   /** Customize or opt out of the empty state shown when data is empty. */
   emptyState?: F0DataChartEmptyStateProps
+  /**
+   * Called when the user clicks a single mark (bar segment, slice, point).
+   * Omit to leave clicks inert, which is the default for every chart.
+   *
+   * Line charts accept a click anywhere in the plot area, since a line is too
+   * thin to hit — the same allowance their axis-triggered tooltip already
+   * makes — and answer with the whole category in
+   * {@link F0DataChartPointClick.series}, matching what the tooltip showed.
+   */
+  onPointClick?: (point: F0DataChartPointClick) => void
+}
+
+/** Props shared only by variants with an interactive legend. */
+interface F0DataChartLegendInteractionProps {
+  /**
+   * Reports the chart's live legend visibility after an interactive toggle.
+   * Primarily used by accessible companion surfaces that must expose the same
+   * data currently shown on the canvas.
+   */
+  onLegendSelectionChange?: (selected: Record<string, boolean>) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +196,8 @@ export interface F0DataChartLineSeries {
 // Shared base props
 // ---------------------------------------------------------------------------
 
-interface F0DataChartBaseProps extends F0DataChartCommonProps {
+interface F0DataChartBaseProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Labels for the category axis (one per data point) */
   categories: string[]
 
@@ -292,7 +380,8 @@ export interface F0DataChartFunnelSeries {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
+export interface F0DataChartFunnelProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "funnel"
   /** The funnel series to render */
@@ -370,7 +459,8 @@ export interface F0DataChartPieSeries {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartPieProps extends F0DataChartCommonProps {
+export interface F0DataChartPieProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "pie"
   /** The pie series to render */
@@ -431,7 +521,8 @@ export interface F0DataChartRadarSeries {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export interface F0DataChartRadarProps extends F0DataChartCommonProps {
+export interface F0DataChartRadarProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "radar"
   /** Axes of the radar — defines the dimensions to compare */
@@ -584,7 +675,8 @@ export interface F0DataChartScatterSeries {
  * continuous — so this interface is separate from `F0DataChartBaseProps`.
  * Pass multiple `series` to color-split the points by a group dimension.
  */
-export interface F0DataChartScatterProps extends F0DataChartCommonProps {
+export interface F0DataChartScatterProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "scatter"
   /** One or more point groups. Multiple series render as a color split. */
