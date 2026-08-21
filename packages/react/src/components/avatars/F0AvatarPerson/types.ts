@@ -23,6 +23,11 @@ export type F0AvatarPersonProps = {
    */
   badge?: AvatarBadge
   /**
+   * Optional tooltip wrapping the whole avatar, shown when hovering anywhere
+   * on it.
+   */
+  tooltip?: string
+  /**
    * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
    *
    * Mutually exclusive with `pending`: they represent opposite ends of the

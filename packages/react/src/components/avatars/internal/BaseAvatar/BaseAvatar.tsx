@@ -44,6 +44,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       badge,
       flag,
       icon,
+      tooltip,
     },
     ref
   ) => {
@@ -96,81 +97,84 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       [badge, badgeSize, moduleAvatarSize]
     )
 
-    return (
-      <>
-        <div className="relative inline-flex h-fit w-fit">
-          <div
-            className="relative h-fit w-fit"
-            style={
-              badge
-                ? {
-                    clipPath: getMask.get(
-                      type === "rounded" ? "rounded" : "base",
-                      mappedSize,
-                      badge.type === "module" ? "module" : "default"
-                    ),
-                  }
-                : undefined
+    const avatar = (
+      <div className="relative inline-flex h-fit w-fit">
+        <div
+          className="relative h-fit w-fit"
+          style={
+            badge
+              ? {
+                  clipPath: getMask.get(
+                    type === "rounded" ? "rounded" : "base",
+                    mappedSize,
+                    badge.type === "module" ? "module" : "default"
+                  ),
+                }
+              : undefined
+          }
+        >
+          <AvatarComponent
+            size={
+              (reversedSizesMapping[
+                mappedSize
+              ] as InternalAvatarProps["size"]) ||
+              ("small" as InternalAvatarProps["size"])
+            }
+            type={type}
+            color={avatarColor}
+            ref={ref}
+            role="img"
+            aria-hidden={!hasAria}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
+            translate="no"
+            data-a11y-color-contrast-ignore
+            className={
+              icon
+                ? "bg-f1-background-secondary"
+                : src || flag
+                  ? "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
+                  : ""
             }
           >
-            <AvatarComponent
-              size={
-                (reversedSizesMapping[
-                  mappedSize
-                ] as InternalAvatarProps["size"]) ||
-                ("small" as InternalAvatarProps["size"])
-              }
-              type={type}
-              color={avatarColor}
-              ref={ref}
-              role="img"
-              aria-hidden={!hasAria}
-              aria-label={ariaLabel}
-              aria-labelledby={ariaLabelledby}
-              translate="no"
-              data-a11y-color-contrast-ignore
-              className={
-                icon
-                  ? "bg-f1-background-secondary"
-                  : src || flag
-                    ? "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
-                    : ""
-              }
-            >
-              {icon ? (
-                <F0Icon
-                  icon={icon.icon}
-                  color={icon.color}
-                  size={iconSize[mappedSize]}
-                />
-              ) : flag ? (
-                <span className="absolute inset-0">{flag}</span>
-              ) : (
-                <>
-                  <AvatarImage src={src} alt={initials} />
-                  <AvatarFallback
-                    data-a11y-color-contrast-ignore
-                    className="select-none"
-                  >
-                    {initials}
-                  </AvatarFallback>
-                </>
-              )}
-            </AvatarComponent>
-          </div>
-
-          {badge && (
-            <div className="absolute -bottom-0.5 -right-0.5">
-              {badge.tooltip ? (
-                <Tooltip description={badge.tooltip}>{badgeContent}</Tooltip>
-              ) : (
-                badgeContent
-              )}
-            </div>
-          )}
+            {icon ? (
+              <F0Icon
+                icon={icon.icon}
+                color={icon.color}
+                size={iconSize[mappedSize]}
+              />
+            ) : flag ? (
+              <span className="absolute inset-0">{flag}</span>
+            ) : (
+              <>
+                <AvatarImage src={src} alt={initials} />
+                <AvatarFallback
+                  data-a11y-color-contrast-ignore
+                  className="select-none"
+                >
+                  {initials}
+                </AvatarFallback>
+              </>
+            )}
+          </AvatarComponent>
         </div>
-      </>
+
+        {badge && (
+          <div className="absolute -bottom-0.5 -right-0.5">
+            {badge.tooltip ? (
+              <Tooltip description={badge.tooltip}>{badgeContent}</Tooltip>
+            ) : (
+              badgeContent
+            )}
+          </div>
+        )}
+      </div>
     )
+
+    // The avatar-level tooltip wraps the whole avatar element, so hovering
+    // anywhere on it shows the tooltip (unlike badge.tooltip, which stays
+    // anchored to the badge).
+    return tooltip ? <Tooltip description={tooltip}>{avatar}</Tooltip> : avatar
   }
 )
 

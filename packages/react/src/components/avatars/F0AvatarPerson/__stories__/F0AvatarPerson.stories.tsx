@@ -62,6 +62,17 @@ export const WithBadgeTooltip: Story = {
   },
 }
 
+export const WithTooltip: Story = {
+  args: {
+    ...Default.args,
+    badge: {
+      type: "positive",
+      icon: Check,
+    },
+    tooltip: "Shown when hovering anywhere on the avatar",
+  },
+}
+
 export const Deactivated: Story = {
   args: {
     ...Default.args,
