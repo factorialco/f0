@@ -257,6 +257,15 @@ export type OneDataCollectionProps<
 
   /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
   initialVisualization?: number
+
+  /**
+   * Extra classes merged onto the primary actions dropdown menu (the one
+   * shown when a `primaryActions` item has a `description`), e.g. to cap
+   * its width (`max-w-[280px]`) when a description is long enough to
+   * otherwise stretch the menu. Unset by default, so the menu keeps its
+   * current sizing behavior.
+   */
+  primaryActionsMenuClassName?: string
 }
 
 const OneDataCollectionComp = <
@@ -284,6 +293,7 @@ const OneDataCollectionComp = <
   csvExport,
   savingViewsDisabled,
   initialVisualization = 0,
+  primaryActionsMenuClassName,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -1737,6 +1747,7 @@ const OneDataCollectionComp = <
                       secondaryActions={secondaryActionsItems}
                       otherActions={otherActionsItems}
                       upsellAction={upsellActionItem}
+                      primaryActionsMenuClassName={primaryActionsMenuClassName}
                     />
                   </>
                 )}
