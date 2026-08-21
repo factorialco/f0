@@ -103,6 +103,7 @@ export const TextareaField = ({
         </p>
       )}
       <textarea
+        aria-label={resolvedDefaultPlaceholder}
         autoFocus={false}
         name="one-ai-input"
         rows={1}
