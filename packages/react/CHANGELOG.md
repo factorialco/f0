@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.46.0](https://github.com/factorialco/f0/compare/f0-react-v6.45.0...f0-react-v6.46.0) (2026-08-21)
+
+
+### Features
+
+* **ai:** drop a dashboard widget into the chat to quote it ([#5126](https://github.com/factorialco/f0/issues/5126)) ([42ca2cf](https://github.com/factorialco/f0/commit/42ca2cf032fead144f86f896ff085d81d9f88c40))
+
 ## [6.45.0](https://github.com/factorialco/f0/compare/f0-react-v6.44.0...f0-react-v6.45.0) (2026-08-21)
 
 
