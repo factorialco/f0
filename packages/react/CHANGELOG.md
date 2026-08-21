@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.45.0](https://github.com/factorialco/f0/compare/f0-react-v6.44.0...f0-react-v6.45.0) (2026-08-21)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** offer Ask One on a clicked chart mark ([#5125](https://github.com/factorialco/f0/issues/5125)) ([db1b8c6](https://github.com/factorialco/f0/commit/db1b8c6610adacf2f381c6ef98d2541e3c7b47cd))
+
 ## [6.44.0](https://github.com/factorialco/f0/compare/f0-react-v6.43.0...f0-react-v6.44.0) (2026-08-21)
 
 
