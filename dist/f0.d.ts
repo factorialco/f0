@@ -2684,8 +2684,8 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
-    /** Tightens each card: 12px padding instead of 16px, and a 10px gap before the
-     * text instead of 12px. Padding is unchanged in `grouped` layout. */
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
     compact?: boolean;
 }
 
@@ -2708,8 +2708,8 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
-    /** Tightens each card: 12px padding instead of 16px, and a 10px gap before the
-     * text instead of 12px. Padding is unchanged in `grouped` layout. */
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
     compact?: boolean;
 }
 
@@ -19968,10 +19968,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -19979,8 +19977,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

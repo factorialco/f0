@@ -11128,8 +11128,7 @@ function gG({
               (y.key === "Enter" || y.key === " ") && !d && (y.preventDefault(), f());
             },
             className: Y(
-              "flex cursor-pointer items-center",
-              a ? "gap-2.5" : "gap-3",
+              "flex cursor-pointer items-center gap-3",
               "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-f1-special-ring",
               s ? "px-4 py-3" : a ? "p-3" : "p-4",
               // The link row below supplies the bottom padding so the gap between
@@ -11163,7 +11162,7 @@ function gG({
           {
             className: Y(
               "flex flex-row items-start gap-3 pt-2",
-              s ? "px-4 pb-3" : "px-4 pb-4"
+              s ? "px-4 pb-3" : a ? "px-3 pb-3" : "px-4 pb-4"
             ),
             children: [
               e.avatar && /* Invisible copy of the avatar keeps the link aligned with the
