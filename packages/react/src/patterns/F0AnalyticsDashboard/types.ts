@@ -4,6 +4,7 @@ import type {
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
+  F0DataChartPointClick,
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
@@ -442,6 +443,27 @@ export type DashboardItemLayout = {
 // Root component props
 // ---------------------------------------------------------------------------
 
+/** A point selected from either the chart canvas or its keyboard companion. */
+export type F0AnalyticsDashboardPointClick = Omit<
+  F0DataChartPointClick,
+  "source"
+> & {
+  source: "pointer" | "keyboard"
+}
+
+/**
+ * What the user asked about: a whole widget, or one mark inside it.
+ *
+ * `point` is absent when the ask came from the widget's ⋯ menu and present
+ * when it came from clicking a mark, which is the only thing that tells the
+ * two apart.
+ */
+export interface F0AnalyticsDashboardAskAiTarget {
+  id: string
+  title: string
+  point?: F0AnalyticsDashboardPointClick
+}
+
 /**
  * Props for the F0AnalyticsDashboard component.
  *
@@ -539,8 +561,12 @@ export interface F0AnalyticsDashboardProps<
    *
    * Without it the entry appears only where an AI chat is mounted and enabled,
    * and drives that chat directly.
+   *
+   * `point` is set when the ask came from a clicked mark rather than the
+   * widget menu, so one handler answers both without the host having to tell
+   * them apart by anything other than its presence.
    */
-  onAskAi?: (item: { id: string; title: string }) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   /**
    * Navigation filter definitions (e.g. date-navigator).
    * Rendered above the grid alongside the regular filter bar.

@@ -13,6 +13,7 @@ import { cn, focusRing } from "@/lib/utils"
 import type {
   DashboardMetricData,
   DashboardMetricItem,
+  F0AnalyticsDashboardAskAiTarget,
   MetricFormat,
 } from "../../types"
 
@@ -26,7 +27,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
-  onAskAi?: (item: { id: string; title: string }) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
