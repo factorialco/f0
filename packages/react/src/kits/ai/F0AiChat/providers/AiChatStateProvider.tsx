@@ -211,6 +211,28 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     []
   )
 
+  // Focus bridge — callers can request focus before the chat has mounted.
+  // The textarea registers its local ref callback and consumes one buffered
+  // request as soon as it becomes available.
+  const focusChatInputRef = useRef<(() => void) | null>(null)
+  const pendingChatInputFocusRef = useRef(false)
+  const focusChatInput = useCallback((): boolean => {
+    if (focusChatInputRef.current) {
+      focusChatInputRef.current()
+      return true
+    }
+
+    pendingChatInputFocusRef.current = true
+    return false
+  }, [])
+  const setFocusChatInputFunction = useCallback((fn: (() => void) | null) => {
+    focusChatInputRef.current = fn
+    if (fn && pendingChatInputFocusRef.current) {
+      pendingChatInputFocusRef.current = false
+      fn()
+    }
+  }, [])
+
   const resetChatWidth = () => {
     setChatWidth(DEFAULT_CHAT_WIDTH)
   }
@@ -221,6 +243,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   useEffect(() => {
     if (!open) {
+      // A focus request belongs to the interaction that opened the panel.
+      // Once that panel closes, replaying it on a later mount would steal
+      // focus from whatever the user moved on to.
+      pendingChatInputFocusRef.current = false
       setCanvasContent(null)
       setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
@@ -399,6 +425,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setFileDragOver,
         processDroppedFiles,
         setProcessDroppedFilesFunction,
+        focusChatInput,
+        setFocusChatInputFunction,
         pendingContext,
         setPendingContext,
         pendingQuote,
@@ -480,6 +508,7 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   placeholders: [],
   welcomeScreenSuggestions: [],
   welcomeScreenCards: [],
+  focusChatInput: () => false,
 }
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {

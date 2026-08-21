@@ -1,5 +1,6 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./index.stories"
+import * as AskOneStories from "./AskOne.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
@@ -118,6 +119,46 @@ so the new affordance can be compared with the unchanged header.
 - WHEN `info` is omitted → THEN the header layout and interaction remain unchanged.
 - WHEN the widget is in an error state → THEN the information trigger remains available to explain what the failed widget was meant to measure.
 - WHEN the title is long → THEN it truncates around the fixed-size trigger instead of pushing the trigger out of the header.
+
+### Ask One from a widget
+
+When an enabled AI chat is mounted, each titled widget adds **Ask One** to its
+actions menu. Choosing it opens the chat and places the widget title in the
+composer's quote chip, ready for a question.
+
+**Menu action**
+
+The story leaves the widget menu open so the action, icon, and placement can be
+reviewed directly.
+
+<Canvas of={AskOneStories.WidgetMenuAction} />
+
+**Quoted in the chat**
+
+This story completes the action and leaves the resulting quote visible in the
+real chat composer.
+
+<Canvas of={AskOneStories.WidgetQuotedInChat} />
+
+Pass `onAskAi` when the host needs to own the action instead of sending it to
+the mounted chat:
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAi={({ id, title }) => {
+    openProductChat({ widgetId: id, quote: title })
+  }}
+/>
+```
+
+- WHEN an enabled AI chat is mounted and a widget has a title → THEN its actions menu includes **Ask One**.
+- WHEN a widget is in an error state but still has a title → THEN **Ask One** remains available from its error header.
+- WHEN no chat is available and `onAskAi` is omitted → THEN the action is hidden instead of offering a dead command.
+- WHEN **Ask One** uses the built-in behavior → THEN the dashboard exits widget fullscreen, quotes the title, and opens the chat.
+- WHEN `onAskAi` is provided → THEN the action calls the host with the widget `id` and `title` without changing chat or fullscreen state.
+- WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
+- WHEN a widget has no title → THEN the action is hidden because there is nothing to quote.
 
 ### Report filters
 

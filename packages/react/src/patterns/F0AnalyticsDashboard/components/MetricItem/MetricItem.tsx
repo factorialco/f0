@@ -26,6 +26,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  onAskAi?: (item: { id: string; title: string }) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -187,6 +188,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
   actions,
   editMode,
   handleDelete,
+  onAskAi,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -209,6 +211,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       actions={actions}
       editMode={editMode}
       handleDelete={handleDelete}
+      onAskAi={onAskAi}
       itemId={item.id}
     >
       {data && (

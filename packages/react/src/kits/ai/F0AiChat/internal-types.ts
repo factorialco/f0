@@ -187,6 +187,13 @@ export type AiChatProviderReturnValue = {
   /** @internal Registers the processFiles callback owned by ChatTextarea */
   setProcessDroppedFilesFunction: (fn: ((files: File[]) => void) | null) => void
   /**
+   * Move focus into the mounted chat composer, or queue it until mount.
+   * Returns whether focus moved synchronously.
+   */
+  focusChatInput: () => boolean
+  /** @internal Registers the focus callback owned by ChatTextarea. */
+  setFocusChatInputFunction: (fn: (() => void) | null) => void
+  /**
    * Pre-loaded context shown as an empty state in the chat.
    * Prepended to the first user message as `<pending-context>`.
    */

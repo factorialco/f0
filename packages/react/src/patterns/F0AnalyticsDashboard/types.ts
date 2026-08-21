@@ -528,6 +528,20 @@ export interface F0AnalyticsDashboardProps<
     orientation?: "vertical" | "horizontal"
   ) => void
   /**
+   * Called when the user picks "Ask One" on a widget, replacing what the entry
+   * does by default (quote the widget in the mounted AI chat, then open it).
+   *
+   * Pass this to own the action — send the widget somewhere else, add
+   * tracking, ask for confirmation first. The entry then appears whether or
+   * not an AI chat is mounted, since the host is answering it. Its label stays
+   * `ai.dashboardItem.askOne`, which hosts already override, so the copy is
+   * yours either way.
+   *
+   * Without it the entry appears only where an AI chat is mounted and enabled,
+   * and drives that chat directly.
+   */
+  onAskAi?: (item: { id: string; title: string }) => void
+  /**
    * Navigation filter definitions (e.g. date-navigator).
    * Rendered above the grid alongside the regular filter bar.
    */

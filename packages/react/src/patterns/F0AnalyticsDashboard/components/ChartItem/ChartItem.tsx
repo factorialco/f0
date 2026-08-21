@@ -470,6 +470,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   actions?: DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  onAskAi?: (item: { id: string; title: string }) => void
   onTransformChart?: (
     itemId: string,
     newType: string,
@@ -485,6 +486,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   actions,
   editMode,
   handleDelete,
+  onAskAi,
   onTransformChart,
   isFullscreen,
   onFullscreenChange,
@@ -692,6 +694,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       actions={allActions}
       editMode={editMode}
       handleDelete={handleDelete}
+      onAskAi={onAskAi}
       itemId={item.id}
       chartTypeOptions={chartTypeOptions}
       isFullscreen={isFullscreen}

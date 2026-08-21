@@ -1,5 +1,15 @@
-import { describe, expect, it, vi } from "vitest"
-import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
+
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
@@ -166,6 +176,192 @@ describe("DashboardItem — description action", () => {
       screen.getByRole("button", { name: "Show less" })
     ).toBeInTheDocument()
     expect(screen.queryByText("·")).not.toBeInTheDocument()
+  })
+
+  describe("Ask One", () => {
+    // The chat's open state is persisted, so without this a test inherits
+    // whatever the previous one left behind — and "did the click open it?"
+    // stops meaning anything.
+    beforeEach(() => localStorage.clear())
+
+    const QuoteProbe = () => {
+      const { pendingQuote, open } = useAiChat()
+      return (
+        <span
+          data-testid="probe"
+          data-quote={pendingQuote?.text ?? ""}
+          data-open={String(open)}
+        />
+      )
+    }
+
+    const openMenu = async () => {
+      const trigger = screen.getByLabelText("Other actions")
+      await userEvent.click(trigger)
+      return trigger
+    }
+
+    it("offers the action and hands the widget to the chat", async () => {
+      const onFullscreenChange = vi.fn()
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            isLoading={false}
+            isFullscreen
+            onFullscreenChange={onFullscreenChange}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      const trigger = await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      const probe = screen.getByTestId("probe")
+      expect(probe).toHaveAttribute("data-quote", "Headcount by workplace")
+      // Opens the chat too — otherwise the quote lands somewhere unseen.
+      expect(probe).toHaveAttribute("data-open", "true")
+      expect(onFullscreenChange).toHaveBeenCalledWith(false)
+      // The composer is not mounted in this harness. Radix must keep its
+      // normal restoration instead of dropping focus on document.body while
+      // the provider buffers the request.
+      await waitFor(() => expect(trigger).toHaveFocus())
+    })
+
+    it("is absent without a chat provider, where the setters are inert", async () => {
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          isLoading={false}
+          actions={[{ label: "CSV", onClick: vi.fn() }]}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      await openMenu()
+
+      expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
+      // The rest of the menu is untouched.
+      expect(screen.getByText("Download")).toBeInTheDocument()
+    })
+
+    it("hands the widget to the host instead, when it takes the action", async () => {
+      const onAskAi = vi.fn()
+      const onFullscreenChange = vi.fn()
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            itemId="headcount"
+            isLoading={false}
+            isFullscreen
+            onAskAi={onAskAi}
+            onFullscreenChange={onFullscreenChange}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+      })
+      // The chat is left alone entirely — the host may not even be sending the
+      // widget there, so quoting into it would be a second, unasked-for action.
+      const probe = screen.getByTestId("probe")
+      expect(probe).toHaveAttribute("data-quote", "")
+      expect(probe).toHaveAttribute("data-open", "false")
+      expect(onFullscreenChange).not.toHaveBeenCalled()
+    })
+
+    it("offers the action with no chat mounted, once the host answers it", async () => {
+      const onAskAi = vi.fn()
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          itemId="headcount"
+          isLoading={false}
+          onAskAi={onAskAi}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+      })
+    })
+
+    it("hides a host-owned action when a direct item has no ID", () => {
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          isLoading={false}
+          onAskAi={vi.fn()}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Other actions" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("keeps Ask One available when the widget data failed", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            isLoading={false}
+            error={new Error("Failed to load")}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(screen.getByTestId("probe")).toHaveAttribute(
+        "data-quote",
+        "Headcount by workplace"
+      )
+    })
+
+    it("hides the action when the title cannot produce a quote", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <DashboardItem
+            title="   "
+            isLoading={false}
+            actions={[{ label: "CSV", onClick: vi.fn() }]}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+
+      expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
+      expect(screen.getByText("Download")).toBeInTheDocument()
+    })
   })
 })
 
