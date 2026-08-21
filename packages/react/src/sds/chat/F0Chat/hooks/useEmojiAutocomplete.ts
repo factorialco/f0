@@ -246,7 +246,10 @@ export function useEmojiAutocomplete({
       const hasExistingSeparator = /^\s/.test(after)
       const nextValue =
         before + candidate.native + (hasExistingSeparator ? "" : " ") + after
-      const nextCursorPosition = before.length + candidate.native.length + 1
+      // Step over the separator only when we actually inserted one; otherwise
+      // the caret jumps past the space that was already there.
+      const nextCursorPosition =
+        before.length + candidate.native.length + (hasExistingSeparator ? 0 : 1)
 
       setInputValue(nextValue)
       setCursorPosition(nextCursorPosition)
