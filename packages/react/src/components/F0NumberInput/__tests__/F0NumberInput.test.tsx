@@ -143,6 +143,55 @@ describe("F0NumberInput", () => {
 
       expect(input).toHaveValue("1")
     })
+
+    // The arrow buttons are mouse-only on purpose, so the keyboard route to
+    // the stepper is ArrowUp/ArrowDown on the input (WCAG 2.1.1).
+    describe("from the keyboard", () => {
+      test("ArrowUp increases and ArrowDown decreases the value", async () => {
+        render(<WithStepStory />)
+
+        const input = screen.getByRole("textbox")
+        await userEvent.click(input)
+
+        await userEvent.keyboard("{ArrowUp}")
+        await waitFor(() => expect(input).toHaveValue("2"))
+
+        await userEvent.keyboard("{ArrowDown}")
+        await waitFor(() => expect(input).toHaveValue("1"))
+      })
+
+      test("ArrowUp does not increase the value above the max", async () => {
+        render(<WithStepStory value={5} />)
+
+        const input = screen.getByRole("textbox")
+        await userEvent.click(input)
+        await userEvent.keyboard("{ArrowUp}")
+
+        expect(input).toHaveValue("5")
+      })
+
+      test("ArrowDown does not decrease the value below the min", async () => {
+        render(<WithStepStory value={1} />)
+
+        const input = screen.getByRole("textbox")
+        await userEvent.click(input)
+        await userEvent.keyboard("{ArrowDown}")
+
+        expect(input).toHaveValue("1")
+      })
+
+      test("leaves the value alone when no step is set", async () => {
+        render(
+          <F0NumberInput locale="en-US" value={5} label="No stepper here" />
+        )
+
+        const input = screen.getByRole("textbox")
+        await userEvent.click(input)
+        await userEvent.keyboard("{ArrowUp}")
+
+        expect(input).toHaveValue("5")
+      })
+    })
   })
 
   describe("inline extraContent mode", () => {

@@ -2,6 +2,7 @@ import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import {
   CSSProperties,
   ComponentProps,
+  type KeyboardEvent,
   type ReactNode,
   forwardRef,
   useCallback,
@@ -350,6 +351,23 @@ export const NumberInputInternal = forwardRef<
     handleChange(formatValue(newValue, locale, maxDecimals))
   }
 
+  /**
+   * Keyboard route to the stepper. The arrow buttons are mouse-only by design
+   * (see components/Arrows.tsx), so without this the stepper is unreachable
+   * for a keyboard user: WCAG 2.1.1. Mirrors a native number input, which
+   * steps on ArrowUp/ArrowDown while the field has focus.
+   *
+   * Gated on `step` by handleStep, so fields with no stepper are unaffected.
+   */
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!step || disabled || readonly) return
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return
+
+    // Stop the caret jumping to the start/end of the field as it steps.
+    event.preventDefault()
+    handleStep(event.key === "ArrowUp" ? "increase" : "decrease")()
+  }
+
   useEffect(() => {
     // With grouping, the resting (blurred) display shows thousands separators
     // and the focused display drops them for editing. This branch also drives
@@ -401,6 +419,7 @@ export const NumberInputInternal = forwardRef<
           onBlur?.()
         }}
         onBeforeInput={handleBeforeInput}
+        onKeyDown={handleKeyDown}
         appendTag={units}
         append={
           step ? (

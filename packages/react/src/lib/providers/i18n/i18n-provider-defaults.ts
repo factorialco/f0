@@ -711,6 +711,8 @@ export const defaultTranslations = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
+    increase: "Increase",
+    decrease: "Decrease",
   },
   phoneInput: {
     country: "Country",
