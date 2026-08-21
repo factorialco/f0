@@ -17,6 +17,7 @@ order and visibility of table columns. It allows users to:
 - Reorder items by dragging (visual indication with sort icons)
 - Toggle column visibility using switches
 - Manage required vs optional columns (some columns cannot be hidden)
+- Independently lock or unlock several columns when callbacks are provided
 
 ## Introduction
 
@@ -29,10 +30,12 @@ functionality.
 
 - **Drag to Reorder**: Visual sort icons indicate that items can be reordered
 - **Toggle Visibility**: Switches control whether columns are shown or hidden
-- **Required Columns**: Some columns can be marked as non-hideable (disabled
+- **Frozen Columns**: Some columns can be marked as non-hideable (disabled
   switches)
-- **Accessible**: Full keyboard and screen reader support through proper ARIA
-  attributes
+- **User-managed Locks**: Any number of columns can be independently locked or
+  unlocked
+- **Accessible Controls**: Visibility, lock, and remove actions support keyboard
+  and screen reader use
 
 ## Default Usage
 
@@ -56,10 +59,25 @@ columns would still be visible in the actual table.
 
 ### Mixed States
 
-A realistic example showing a combination of required columns (that cannot be
+A realistic example showing a combination of frozen columns (that cannot be
 hidden), visible optional columns, and hidden optional columns.
 
 <Canvas of={SortAndHideListStories.WithMixedStates} />
+
+### Lockable Items
+
+The lock state is controlled by the caller. Clicking a closed lock unlocks that
+row. Hovering or keyboard-focusing another row reveals “Lock column” next to
+the remove action. Pointer activation releases focus when the row changes, so
+those actions do not remain visually stuck; keyboard activation transfers
+focus to the corresponding control. The story finishes with Name and Email
+locked at the same time and leaves Role's unlocked actions visible for visual
+review.
+
+<Canvas
+  of={SortAndHideListStories.WithLockableItems}
+  story={{ autoplay: true }}
+/>
 
 ### Edge Cases
 
@@ -80,8 +98,11 @@ truncation.
 
 ## Props
 
-The component accepts a single `items` prop which is an array of objects with
-the following structure:
+`allowSorting` and `allowHiding` are required feature flags. `items` contains
+the controlled row state, while `onChange`, `onRemove`, and `onLockedChange`
+report reordering/visibility, removal, and lock changes respectively.
+
+Each item has the following structure:
 
 ```typescript
 {
@@ -89,26 +110,30 @@ the following structure:
   label: string       // Display name for the column
   sortable?: boolean  // Whether the column supports sorting (affects drag handle display)
   canHide?: boolean   // Whether the column can be hidden (affects switch disabled state)
-  hidden?: boolean    // Current visibility state of the column
+  visible?: boolean   // Current visibility state of the column
   order?: number      // Sort order (used for initial ordering)
+  locked?: boolean    // Whether this is one of the frozen items
+  lockable?: boolean  // Whether lock/unlock actions are available
 }
 ```
 
 ## Implementation Notes
 
-- The component currently logs switch changes to the console
-- Integration with actual state management would require passing appropriate
-  callbacks
-- The drag and drop functionality for reordering is indicated visually but not
-  implemented
-- Switch states are controlled by the `hidden` and `canHide` properties
+- `onChange` controls order and visibility.
+- `onRemove` mutates the caller-owned item set rather than hiding an item.
+- `onLockedChange` reports each item and its next lock state; the table caller
+  keeps any number of locks, moves them into its frozen group, and persists
+  their order.
 
 ## Accessibility
 
-- Uses semantic HTML with proper `<ol>` and `<li>` elements
-- Switch components include appropriate `title` attributes for screen readers
-- Maintains proper focus management for keyboard navigation
-- Visual sort icons provide context for drag-and-drop capability
+- Uses semantic list items and native button/switch semantics.
+- Icon-only lock actions include the column label in their accessible name, for
+  example “Lock column: Email.”
+- Locked rows display a closed-lock icon even though activating the button
+  performs the inverse “Unlock column” action.
+- Hover-revealed actions also appear with keyboard focus.
+- The locked row's visibility switch is disabled and remains on.
 
 ## Related Components
 

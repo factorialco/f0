@@ -115,6 +115,18 @@ type TableVisualizationOptions<T> = {
    */
   onRemoveColumn?: (columnId: string) => void
 
+  /**
+   * The user-managed frozen columns. They move into a sticky group on the left
+   * in the order listed here.
+   */
+  lockedColumnIds?: readonly string[]
+
+  /**
+   * Enables lock/unlock actions in the settings popover. Receives the complete
+   * set of locked column ids after each change.
+   */
+  onLockedColumnIdsChange?: (columnIds: string[]) => void
+
   /** Wraps the table in a rounded border container. */
   bordered?: boolean
 
@@ -409,6 +421,60 @@ Allow users to show/hide columns using column settings:
 ```
 
 <Canvas of={TableStories.TableColumnOrderingAndHidden} meta={TableStories} />
+
+### User-managed Frozen Columns
+
+Use `lockedColumnIds` with `onLockedColumnIdsChange` when users need to choose
+which columns remain visible while scrolling horizontally. Every locked column
+moves into a sticky group on the left and cannot be hidden, reordered, or
+removed. The order of `lockedColumnIds` is the order of that group, so newly
+locked columns append beside the existing locks. Unlocking removes only that
+column and returns it to its saved table position. Its closed-lock button
+removes the lock; hovering or keyboard-focusing an unlocked settings row
+reveals a closed-lock action that adds it without changing the other locks.
+
+Columns covered by `frozenColumns` remain permanently locked before the
+user-managed group. Omit `onLockedColumnIdsChange` when the locked set is fixed
+and should not expose controls.
+
+The review story renders 15 columns in a 720 px container and scrolls to the
+right after locking Name and Role. This keeps the sticky pair visible beside
+the far-right columns and makes horizontal freeze behavior directly
+reviewable.
+
+<Canvas
+  of={TableStories.WithLockableColumns}
+  meta={TableStories}
+  story={{ autoplay: true }}
+/>
+
+```tsx
+const [lockedColumnIds, setLockedColumnIds] = useState<string[]>(["name"])
+
+<OneDataCollection
+  source={source}
+  visualizations={[
+    {
+      type: "table",
+      options: {
+        columns,
+        frozenColumns: 0,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+        lockedColumnIds,
+        onLockedColumnIdsChange: setLockedColumnIds,
+        onRemoveColumn: removeColumn,
+      },
+    },
+  ]}
+/>
+```
+
+Keyboard users can tab to the visible lock button or the focus-revealed row
+actions and activate them with <kbd>Enter</kbd> or <kbd>Space</kbd>. The icon
+buttons include the target label in their accessible name, for example “Lock
+column: Email.” Pointer activation does not leave the row actions visually
+stuck; keyboard activation keeps focus on the corresponding control.
 
 ### Reference Rows
 

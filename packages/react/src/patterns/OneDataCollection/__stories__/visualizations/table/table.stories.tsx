@@ -1542,6 +1542,125 @@ const addRemoveColumns: {
   { id: "manager", label: "Manager", render: (item) => item.manager },
 ]
 
+type LockableColumnRow = {
+  id: number
+  name: string
+  email: string
+  role: string
+  department: string
+  team: string
+  location: string
+  manager: string
+  employmentType: string
+  startDate: string
+  office: string
+  country: string
+  timeZone: string
+  costCenter: string
+  legalEntity: string
+  status: string
+}
+
+const lockableColumnRecords: LockableColumnRow[] = Array.from(
+  { length: 6 },
+  (_, i) => ({
+    id: i + 1,
+    name: `Person ${i + 1}`,
+    email: `person${i + 1}@example.com`,
+    role: "Engineer",
+    department: "Product",
+    team: "Platform",
+    location: "Madrid",
+    manager: "Alice",
+    employmentType: "Full time",
+    startDate: "2024-01-15",
+    office: "Madrid HQ",
+    country: "Spain",
+    timeZone: "Europe/Madrid",
+    costCenter: "CC-100",
+    legalEntity: "Factorial HR",
+    status: "Active",
+  })
+)
+
+const lockableColumns: {
+  id: string
+  label: string
+  minWidth: number
+  render: (item: LockableColumnRow) => string
+}[] = [
+  { id: "name", label: "Name", minWidth: 180, render: (item) => item.name },
+  { id: "email", label: "Email", minWidth: 240, render: (item) => item.email },
+  { id: "role", label: "Role", minWidth: 180, render: (item) => item.role },
+  {
+    id: "department",
+    label: "Department",
+    minWidth: 180,
+    render: (item) => item.department,
+  },
+  { id: "team", label: "Team", minWidth: 160, render: (item) => item.team },
+  {
+    id: "manager",
+    label: "Manager",
+    minWidth: 180,
+    render: (item) => item.manager,
+  },
+  {
+    id: "employment-type",
+    label: "Employment type",
+    minWidth: 180,
+    render: (item) => item.employmentType,
+  },
+  {
+    id: "start-date",
+    label: "Start date",
+    minWidth: 160,
+    render: (item) => item.startDate,
+  },
+  {
+    id: "office",
+    label: "Office",
+    minWidth: 160,
+    render: (item) => item.office,
+  },
+  {
+    id: "location",
+    label: "Location",
+    minWidth: 160,
+    render: (item) => item.location,
+  },
+  {
+    id: "country",
+    label: "Country",
+    minWidth: 160,
+    render: (item) => item.country,
+  },
+  {
+    id: "time-zone",
+    label: "Time zone",
+    minWidth: 180,
+    render: (item) => item.timeZone,
+  },
+  {
+    id: "cost-center",
+    label: "Cost center",
+    minWidth: 160,
+    render: (item) => item.costCenter,
+  },
+  {
+    id: "legal-entity",
+    label: "Legal entity",
+    minWidth: 180,
+    render: (item) => item.legalEntity,
+  },
+  {
+    id: "status",
+    label: "Status",
+    minWidth: 140,
+    render: (item) => item.status,
+  },
+]
+
 /**
  * Demonstrates the column add/remove affordances. Open the settings popover
  * (sliders icon): an "Add column" entry sits on top, and hovering any
@@ -1595,6 +1714,273 @@ export const WithColumnAddRemove: Story = {
         />
       </div>
     )
+  },
+}
+
+/**
+ * Demonstrates consumer-controlled frozen columns. Each lock can be toggled
+ * independently; locked columns move left, stay sticky, and return to their
+ * saved positions when unlocked.
+ */
+export const WithLockableColumns: Story = {
+  render: () => {
+    const [visibleIds, setVisibleIds] = useState<string[]>(() =>
+      lockableColumns.map(({ id }) => id)
+    )
+    const [lockedColumnIds, setLockedColumnIds] = useState<string[]>(["name"])
+
+    const columns = visibleIds
+      .map((id) => lockableColumns.find((column) => column.id === id))
+      .filter((column): column is (typeof lockableColumns)[number] =>
+        Boolean(column)
+      )
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records: lockableColumnRecords }),
+      },
+    })
+
+    return (
+      <div style={{ maxWidth: 720 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 0,
+                allowColumnReordering: true,
+                allowColumnHiding: true,
+                columns,
+                lockedColumnIds,
+                onLockedColumnIdsChange: setLockedColumnIds,
+                onAddColumn: () => {
+                  const next = lockableColumns.find(
+                    (column) => !visibleIds.includes(column.id)
+                  )
+                  if (next) {
+                    setVisibleIds((prev) => [...prev, next.id])
+                  }
+                },
+                onRemoveColumn: (columnId) =>
+                  setVisibleIds((prev) => prev.filter((id) => id !== columnId)),
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const page = within(canvasElement.closest("body")!)
+    let settingsDialog!: ReturnType<typeof within>
+
+    await step("Open the table settings", async () => {
+      await canvas.findByText("Person 1")
+      await userEvent.click(canvas.getByRole("button", { name: "Settings" }))
+      settingsDialog = within(await page.findByRole("dialog"))
+      await settingsDialog.findByText("Table settings")
+    })
+
+    await step("Unlock and relock the first frozen column", async () => {
+      const nameRow = settingsDialog.getByText("Name").closest("li")!
+      const unlockName = within(nameRow).getByRole("button", {
+        name: "Unlock column: Name",
+      })
+      unlockName.focus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => {
+        const updatedNameRow = settingsDialog.getByText("Name").closest("li")!
+        const updatedName = within(updatedNameRow)
+        expect(updatedName.getByRole("switch")).not.toBeDisabled()
+        expect(
+          updatedName.getByRole("button", { name: "Lock column: Name" })
+        ).toHaveFocus()
+      })
+      await userEvent.keyboard("{Enter}")
+      await expect(
+        settingsDialog.getByRole("button", { name: "Unlock column: Name" })
+      ).toHaveFocus()
+    })
+
+    const expectLeadingColumnOrder = async (labels: string[]) => {
+      await waitFor(() => {
+        expect(
+          canvas
+            .getAllByRole("columnheader")
+            .map((header) =>
+              labels.find((label) => header.textContent?.startsWith(label))
+            )
+            .filter(Boolean)
+            .slice(0, labels.length)
+        ).toEqual(labels)
+      })
+    }
+
+    await step("Freeze a later column beside the existing lock", async () => {
+      const roleRow = settingsDialog.getByText("Role").closest("li")!
+      const lockRole = within(roleRow).getByRole("button", {
+        name: "Lock column: Role",
+      })
+      lockRole.focus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => {
+        const updatedRoleRow = settingsDialog.getByText("Role").closest("li")!
+        expect(
+          within(updatedRoleRow).getByRole("button", {
+            name: "Unlock column: Role",
+          })
+        ).toHaveFocus()
+        expect(within(updatedRoleRow).getByRole("switch")).toBeDisabled()
+        expect(
+          settingsDialog.getByRole("button", {
+            name: "Unlock column: Name",
+          })
+        ).toBeInTheDocument()
+      })
+      await expectLeadingColumnOrder(["Name", "Role", "Email"])
+      const [nameHeader, roleHeader, emailHeader] =
+        canvas.getAllByRole("columnheader")
+      expect(getComputedStyle(nameHeader!).position).toBe("sticky")
+      expect(getComputedStyle(roleHeader!).position).toBe("sticky")
+      expect(getComputedStyle(emailHeader!).position).not.toBe("sticky")
+    })
+
+    await step(
+      "Keep frozen columns visible while scrolling sideways",
+      async () => {
+        const table = canvas.getByRole("table")
+        const scrollContainer = table.closest(".overflow-auto")
+        if (!(scrollContainer instanceof HTMLElement)) {
+          throw new Error("Table scroll container not found")
+        }
+        const [nameHeader, roleHeader, emailHeader] =
+          canvas.getAllByRole("columnheader")
+        const statusHeader = canvas.getByRole("columnheader", {
+          name: "Status",
+        })
+        const firstRow = canvas.getByText("Person 1").closest("tr")!
+        const [nameCell, roleCell, emailCell] =
+          within(firstRow).getAllByRole("cell")
+
+        expect(scrollContainer.scrollWidth).toBeGreaterThan(
+          scrollContainer.clientWidth
+        )
+        expect(scrollContainer).toHaveClass("overflow-auto")
+        expect(canvas.getAllByRole("columnheader")).toHaveLength(15)
+
+        const stickyPositions = [
+          nameHeader!.getBoundingClientRect().left,
+          roleHeader!.getBoundingClientRect().left,
+          nameCell!.getBoundingClientRect().left,
+          roleCell!.getBoundingClientRect().left,
+        ]
+
+        const maxScrollLeft =
+          scrollContainer.scrollWidth - scrollContainer.clientWidth
+        scrollContainer.scrollLeft = maxScrollLeft
+        scrollContainer.dispatchEvent(new Event("scroll"))
+
+        await waitFor(() => {
+          expect(scrollContainer.scrollLeft).toBe(maxScrollLeft)
+          expect(nameHeader!.getBoundingClientRect().left).toBeCloseTo(
+            stickyPositions[0]!,
+            0
+          )
+          expect(roleHeader!.getBoundingClientRect().left).toBeCloseTo(
+            stickyPositions[1]!,
+            0
+          )
+          expect(nameCell!.getBoundingClientRect().left).toBeCloseTo(
+            stickyPositions[2]!,
+            0
+          )
+          expect(roleCell!.getBoundingClientRect().left).toBeCloseTo(
+            stickyPositions[3]!,
+            0
+          )
+          expect(
+            emailHeader!.getBoundingClientRect().right
+          ).toBeLessThanOrEqual(roleHeader!.getBoundingClientRect().right)
+          expect(emailCell!.getBoundingClientRect().right).toBeLessThanOrEqual(
+            roleCell!.getBoundingClientRect().right
+          )
+          expect(
+            statusHeader.getBoundingClientRect().right
+          ).toBeLessThanOrEqual(scrollContainer.getBoundingClientRect().right)
+          expect(
+            statusHeader.getBoundingClientRect().left
+          ).toBeGreaterThanOrEqual(roleHeader!.getBoundingClientRect().right)
+        })
+      }
+    )
+
+    await step("Return an unlocked column to its saved position", async () => {
+      const lockedRoleRow = settingsDialog.getByText("Role").closest("li")!
+      await userEvent.click(
+        within(lockedRoleRow).getByRole("button", {
+          name: "Unlock column: Role",
+        })
+      )
+      await expectLeadingColumnOrder(["Name", "Email", "Role"])
+      const unlockedRoleRow = settingsDialog.getByText("Role").closest("li")!
+      const roleActions = unlockedRoleRow.querySelector(
+        "[data-column-actions]"
+      ) as HTMLElement
+      const lockRole = within(unlockedRoleRow).getByRole("button", {
+        name: "Lock column: Role",
+      })
+      expect(lockRole).not.toHaveFocus()
+      expect(roleActions.contains(document.activeElement)).toBe(false)
+
+      lockRole.focus()
+      await userEvent.keyboard("{Enter}")
+      await expectLeadingColumnOrder(["Name", "Role", "Email"])
+      await expect(
+        settingsDialog.getByRole("button", { name: "Unlock column: Role" })
+      ).toHaveFocus()
+
+      settingsDialog.getByRole("button", { name: "Unlock column: Role" }).blur()
+      const emailRow = settingsDialog
+        .getByText("Email")
+        .closest("li") as HTMLElement
+      const emailActions = emailRow.querySelector(
+        "[data-column-actions]"
+      ) as HTMLElement
+      emailActions.tabIndex = -1
+      emailActions.focus()
+      await waitFor(() => {
+        expect(emailActions).toHaveFocus()
+        expect(getComputedStyle(emailActions).opacity).toBe("1")
+        expect(page.queryByRole("tooltip")).toBeNull()
+      })
+
+      const table = canvas.getByRole("table")
+      const scrollContainer = table.closest(".overflow-auto")
+      if (!(scrollContainer instanceof HTMLElement)) {
+        throw new Error("Table scroll container not found")
+      }
+      const maxScrollLeft =
+        scrollContainer.scrollWidth - scrollContainer.clientWidth
+      scrollContainer.scrollLeft = maxScrollLeft
+      scrollContainer.dispatchEvent(new Event("scroll"))
+
+      await waitFor(() => {
+        expect(scrollContainer.scrollLeft).toBe(maxScrollLeft)
+        const statusHeader = canvas.getByRole("columnheader", {
+          name: "Status",
+        })
+        expect(statusHeader.getBoundingClientRect().right).toBeLessThanOrEqual(
+          scrollContainer.getBoundingClientRect().right
+        )
+        const roleHeader = canvas.getByRole("columnheader", { name: "Role" })
+        expect(
+          statusHeader.getBoundingClientRect().left
+        ).toBeGreaterThanOrEqual(roleHeader.getBoundingClientRect().right)
+      })
+    })
   },
 }
 

@@ -111,6 +111,8 @@ export const TableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  lockedColumnIds,
+  onLockedColumnIdsChange,
   referenceRowType,
   boldRootRows,
   headerGroups: headerGroupsOption,
@@ -151,6 +153,8 @@ export const TableCollection = <
   )
 
   const { settings } = useDataCollectionSettings()
+  const usesExplicitColumnLocking =
+    lockedColumnIds !== undefined || !!onLockedColumnIdsChange
 
   // Sorted and hidden columns
   const { columns: orderedColumns } = useColumns(
@@ -158,7 +162,9 @@ export const TableCollection = <
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
-    allowColumnHiding
+    allowColumnHiding,
+    lockedColumnIds,
+    usesExplicitColumnLocking
   )
 
   // Header groups own the collapsed state and drop the columns hidden by a
@@ -244,7 +250,22 @@ export const TableCollection = <
     // eslint-disable-next-line react-hooks/exhaustive-deps --  we don't want to re-run this effect when the filters change, just when the data changes
   }, [paginationInfo?.total, data.records])
 
-  const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
+  const frozenColumnIds = useMemo(
+    () =>
+      new Set([
+        ...originalColumns.slice(0, frozenColumns).map(getColumnId),
+        ...(lockedColumnIds ?? []),
+      ]),
+    [originalColumns, frozenColumns, lockedColumnIds]
+  )
+  const frozenColumnsLeft = useMemo(() => {
+    const firstUnlockedColumnIndex = columns.findIndex(
+      (column) => !frozenColumnIds.has(getColumnId(column))
+    )
+    return firstUnlockedColumnIndex === -1
+      ? columns.length
+      : firstUnlockedColumnIndex
+  }, [columns, frozenColumnIds])
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return `id:${String(item.id)}`

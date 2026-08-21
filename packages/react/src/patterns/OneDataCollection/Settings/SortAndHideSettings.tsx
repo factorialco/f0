@@ -30,6 +30,38 @@ export type SortAndHideSettingsProps = {
    * calls this with the entry id. Removing is distinct from hiding.
    */
   onRemoveColumn?: (id: string) => void
+  /** Called when the user locks or unlocks a column. */
+  onLockedColumnChange?: (id: string, locked: boolean) => void
+  /**
+   * Logical column order before locked rows are moved into their visual group.
+   * When present, reordering unlocked rows keeps locked ids in these slots.
+   */
+  orderBaseline?: readonly string[]
+}
+
+export const mergeUnlockedOrderIntoBaseline = (
+  baseline: readonly string[],
+  nextItems: SortAndHideListItem[]
+) => {
+  const nextIds = new Set(nextItems.map((item) => item.id))
+  const lockedIds = new Set(
+    nextItems.filter((item) => item.locked).map((item) => item.id)
+  )
+  const reorderedUnlockedIds = nextItems
+    .filter((item) => !item.locked)
+    .map((item) => item.id)
+  let unlockedIndex = 0
+  const merged = baseline
+    .filter((id) => nextIds.has(id))
+    .map((id) =>
+      lockedIds.has(id) ? id : reorderedUnlockedIds[unlockedIndex++]!
+    )
+  const mergedIds = new Set(merged)
+
+  return [
+    ...merged,
+    ...nextItems.map((item) => item.id).filter((id) => !mergedIds.has(id)),
+  ]
 }
 
 /**
@@ -48,6 +80,8 @@ export const SortAndHideSettings = ({
   allowHiding,
   onAddColumn,
   onRemoveColumn,
+  onLockedColumnChange,
+  orderBaseline,
 }: SortAndHideSettingsProps) => {
   const i18n = useI18n()
   const { setVisualizationSettings } = useDataCollectionSettings()
@@ -55,7 +89,9 @@ export const SortAndHideSettings = ({
   const onChange = (next: SortAndHideListItem[]) => {
     setVisualizationSettings(visualizationKey, (prev) => ({
       ...prev,
-      order: next.map((item) => item.id),
+      order: orderBaseline
+        ? mergeUnlockedOrderIntoBaseline(orderBaseline, next)
+        : next.map((item) => item.id),
       hidden: next.filter((item) => !item.visible).map((item) => item.id),
     }))
   }
@@ -99,6 +135,11 @@ export const SortAndHideSettings = ({
           onChange={onChange}
           onRemove={
             onRemoveColumn ? (item) => onRemoveColumn(item.id) : undefined
+          }
+          onLockedChange={
+            onLockedColumnChange
+              ? (item, locked) => onLockedColumnChange(item.id, locked)
+              : undefined
           }
           allowSorting={allowSorting}
           allowHiding={allowHiding}
