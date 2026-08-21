@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.44.0](https://github.com/factorialco/f0/compare/f0-react-v6.43.0...f0-react-v6.44.0) (2026-08-21)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** offer Ask One in the widget menu ([#5124](https://github.com/factorialco/f0/issues/5124)) ([9893196](https://github.com/factorialco/f0/commit/98931967a5df4dec2b4da0ee0b524d9ab9615d34))
+
 ## [6.43.0](https://github.com/factorialco/f0/compare/f0-react-v6.42.3...f0-react-v6.43.0) (2026-08-21)
 
 
