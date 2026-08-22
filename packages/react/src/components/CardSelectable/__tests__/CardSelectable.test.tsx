@@ -216,3 +216,81 @@ describe("CardSelectable moreInfoLink", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 })
+
+describe("CardSelectable compact", () => {
+  const items: CardSelectableItem<string>[] = [
+    { value: "a", title: "Option A" },
+  ]
+
+  const linkItems: CardSelectableItem<string>[] = [
+    {
+      value: "a",
+      title: "Option A",
+      moreInfoLink: { href: "https://example.test", label: "More" },
+    },
+  ]
+
+  it("keeps the default padding when compact is not set", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        label="test"
+      />
+    )
+
+    expect(screen.getByRole("radio")).toHaveClass("p-4")
+  })
+
+  it("tightens the padding when compact is set", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        compact
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("p-3")
+    expect(card).not.toHaveClass("p-4")
+  })
+
+  it("is a no-op in grouped layout, whose rows are already 12px tall", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        grouped
+        compact
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("px-4")
+    expect(card).toHaveClass("py-3")
+    expect(card).not.toHaveClass("p-3")
+  })
+
+  it("keeps the moreInfoLink row aligned with the tightened card", () => {
+    render(
+      <CardSelectableContainer
+        items={linkItems}
+        value="a"
+        onChange={vi.fn()}
+        compact
+        label="test"
+      />
+    )
+
+    const linkRow = screen.getByRole("link").parentElement
+    expect(linkRow).toHaveClass("px-3")
+    expect(linkRow).toHaveClass("pb-3")
+    expect(linkRow).not.toHaveClass("px-4")
+  })
+})

@@ -23,6 +23,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
     multiple,
     isToggle,
     grouped,
+    compact,
   } = props
 
   const isMultiple = multiple === true
@@ -68,7 +69,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
       <div
         role={groupRole}
         aria-label={label}
-        className="rounded-xl border border-solid border-f1-border overflow-hidden"
+        className="overflow-hidden rounded-xl border border-solid border-f1-border"
       >
         {items.map((item, index) => (
           <div
@@ -86,6 +87,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
               onSelect={() => handleSelect(item.value)}
               isToggle={isToggle}
               grouped
+              compact={compact}
             />
           </div>
         ))}
@@ -112,6 +114,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
           multiple={isMultiple}
           onSelect={() => handleSelect(item.value)}
           isToggle={isToggle}
+          compact={compact}
         />
       ))}
     </div>
