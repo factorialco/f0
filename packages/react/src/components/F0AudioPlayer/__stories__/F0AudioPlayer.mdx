@@ -475,6 +475,25 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
   toggle stays usable even when the player is `disabled` (that only governs
   audio controls), and the panel is height-capped by `detailsMaxHeight`
   (default `200px`) and scrolls beyond it.
+- **A transcript can follow the audio.** Pass `content.transcription` as a list
+  of cues (`{ text, startTime }`) instead of a string and the card syncs the two:
+  the utterance being spoken is marked, the panel keeps it in view, and clicking
+  a line moves playback to that moment — playing keeps playing, paused stays
+  paused. The active cue is the last one whose `startTime` has passed, so an
+  interrupting utterance takes over as it starts and the previous line stays
+  marked through a silence. A cue with no `startTime` is plain text: no mark, no
+  click target, nothing to suggest an affordance that isn't there. Cue `text` is
+  rendered as markdown limited to bold and italic — that's how the speaker gets
+  its label (`"**Recruiter:** ..."`) — so escape `*` and `_` in text you didn't
+  write. Pass a referentially stable array: a new identity on every render
+  defeats the memoisation that keeps a playing transcript from re-rendering with
+  the playhead.
+- **Seeking before the recording has loaded is remembered.** Whether it comes
+  from the scrubber or from a cue, a position set before the audio (or a lazy
+  `src`) has resolved is applied as soon as the recording's metadata arrives —
+  the readout moves straight away so it's clear where playback will resume.
+  Clicking a cue never resolves a lazy `src` on its own, and never starts
+  playback.
 - **Transcription can be derived.** When you don't pass `content.transcription`,
   the card reads the audio element's text tracks — a transcript embedded in the
   file is used first, an attached `<track>` as a fallback — and surfaces it as a
@@ -533,6 +552,32 @@ is needed — the card derives it from the file's own track and shows the
 Transcription tab:
 
 <Canvas of={Stories.CardWithEmbeddedTranscription} />
+
+**Timed transcript**
+
+Give each cue a `startTime` and the transcript becomes navigable: the line being
+spoken is marked and kept in view, and clicking a line jumps the recording there.
+
+<Canvas of={Stories.CardWithTimedTranscription} />
+
+```tsx
+<F0AudioPlayerCard
+  src={recordingUrl}
+  title="AI Call with Alex Williams"
+  content={{
+    summary,
+    transcription: [
+      { text: "**Recruiter:** How did you hear about us?", startTime: 0 },
+      { text: "**Alex:** A friend who works here.", startTime: 9 },
+    ],
+  }}
+/>
+```
+
+Cues without timings render as a plain dialogue — useful for recordings made
+before your transcripts carried timestamps:
+
+<Canvas of={Stories.CardWithUntimedTranscription} />
 
 **Disabled**
 
@@ -605,6 +650,13 @@ Render the controls in a non-interactive state while a recording is unavailable.
   is conveyed visually with a check icon (the options use standard menu
   semantics, not radio semantics).
 - Icons are decorative — the labels, title, and time text carry the meaning.
+- In a timed transcript each cue is a real button, reached with <kbd>Tab</kbd>
+  and activated with <kbd>Enter</kbd> or <kbd>Space</kbd>, and titled "Jump to
+  M:SS". A visually hidden line introduces the list. The cue being spoken
+  carries `aria-current`, and is marked by weight as well as colour so it
+  survives a monochrome or forced-colours rendering. The mark is deliberately
+  **not** announced as it moves: at speech rate that would make the panel
+  unusable.
 - When detail content is provided, the "View detail" / "Hide detail" toggle
   exposes `aria-expanded`, and the panel is a labelled `role="region"`. The
   Summary / Transcription tabs reuse the same `TabNavigation` primitive as the
@@ -616,8 +668,9 @@ An audio-only recording needs a text transcription to be accessible
 ([WCAG 2.1 SC 1.2.1](https://www.w3.org/WAI/WCAG21/Understanding/audio-only-and-video-only-prerecorded.html)).
 `F0AudioPlayerCard` treats this as a first-class concern:
 
-- Pass one via `content.transcription`, or ship it in the audio file's text
-  tracks and the card derives it automatically.
+- Pass one via `content.transcription` — as a string or as timed cues, both
+  count — or ship it in the audio file's text tracks and the card derives it
+  automatically.
 - A card with **no** transcription — neither passed nor derivable — is flagged
   by the `f0-audio-transcription` rule in the Storybook accessibility checks, so
   the gap is visible rather than silent. Stories that intentionally omit one are

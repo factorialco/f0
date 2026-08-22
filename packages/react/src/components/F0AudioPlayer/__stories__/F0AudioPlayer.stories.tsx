@@ -154,6 +154,73 @@ export const CardWithContentExpanded: StoryObj<typeof F0AudioPlayerCard> = {
   },
 }
 
+// A timed transcript: one entry per utterance, each with the second it starts
+// at. The speaker is part of the text, emphasised with markdown — the card
+// renders bold and italic, and nothing else.
+const TIMED_TRANSCRIPT = [
+  {
+    text: "**Interviewer:** Can you tell me about your availability for night shifts and weekends?",
+    startTime: 0,
+  },
+  {
+    text: "**Alex:** Yes, I'm fully available for night shifts, and my commute is under 40 minutes.",
+    startTime: 9,
+  },
+  {
+    text: "**Interviewer:** And how much of your warehouse experience involved digital picking tools?",
+    startTime: 19,
+  },
+  {
+    text: "**Alex:** Mostly paper picking, but I used a handheld scanner in my last role for six months.",
+    startTime: 28,
+  },
+  {
+    text: "**Interviewer:** Understood. When would you be able to start?",
+    startTime: 40,
+  },
+  { text: "**Alex:** I'd need to give two weeks' notice.", startTime: 47 },
+]
+
+/**
+ * Pass `transcription` as a list of cues and the transcript follows the audio:
+ * the utterance being spoken is marked and kept in view, and clicking a line
+ * moves playback to it (playing keeps playing, paused stays paused). Scrolling
+ * the panel by hand stops the auto-scroll until the next jump.
+ *
+ * A cue without a `startTime` is plain text — no mark, no click target — so a
+ * recording whose transcript carries no timings renders as a plain dialogue.
+ */
+export const CardWithTimedTranscription: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    defaultExpanded: true,
+    detailsMaxHeight: 160,
+    content: { summary: SAMPLE_SUMMARY, transcription: TIMED_TRANSCRIPT },
+  },
+}
+
+/**
+ * The same transcript with no timings at all: the cues render as a dialogue,
+ * with nothing suggesting they can be jumped to.
+ */
+export const CardWithUntimedTranscription: StoryObj<typeof F0AudioPlayerCard> =
+  {
+    render: (args) => <F0AudioPlayerCard {...args} />,
+    args: {
+      src: SAMPLE_SRC,
+      title: "AI Call with Alex Williams",
+      subtitle: "May 9, 2025 - 10:00am",
+      defaultExpanded: true,
+      detailsMaxHeight: 160,
+      content: {
+        transcription: TIMED_TRANSCRIPT.map(({ text }) => ({ text })),
+      },
+    },
+  }
+
 // Localized summary + transcript for the multi-language example.
 const SAMPLE_SUMMARY_ES =
   "La llamada con IA confirmó que Alex está disponible para turnos de noche y " +

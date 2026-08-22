@@ -27,7 +27,18 @@ export interface LanguageOption {
 export function isLocalizedList<T>(
   value: Localized<T> | undefined
 ): value is LocalizedOption<T>[] {
-  return Array.isArray(value)
+  // The value itself can be an array (a transcription passed as cues), so an
+  // array only counts as a locale list when its entries carry locale + value.
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        "locale" in entry &&
+        "value" in entry
+    )
+  )
 }
 
 /**
