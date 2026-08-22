@@ -144,8 +144,38 @@ describe("useEmojiAutocomplete", () => {
 
     expect(enter.preventDefault).toHaveBeenCalledOnce()
     expect(setInputValue).toHaveBeenCalledWith("Hello 😄 world")
-    expect(setCursorPosition).toHaveBeenCalledWith(9)
+    // "Hello " is 0-5, the emoji 6-7 (a surrogate pair), the pre-existing space
+    // 8. The caret belongs right after the emoji, NOT past that space — no
+    // separator was inserted here, so there is nothing extra to step over.
+    expect(setCursorPosition).toHaveBeenCalledWith(8)
     expect(textarea).toHaveFocus()
+    expect(textarea.selectionStart).toBe(8)
+  })
+
+  it("inserts a separator and steps over it when none follows the caret", () => {
+    const setInputValue = vi.fn()
+    const setCursorPosition = vi.fn()
+    const textarea = document.createElement("textarea")
+    textarea.value = "Hello :smil"
+    document.body.appendChild(textarea)
+    const { result } = renderHook(() =>
+      useEmojiAutocomplete({
+        inputValue: "Hello :smil",
+        setInputValue,
+        cursorPosition: 11,
+        setCursorPosition,
+        textareaRef: { current: textarea },
+      })
+    )
+
+    act(() =>
+      expect(result.current.handleKeyDown(keyboardEvent("Enter"))).toBe(true)
+    )
+
+    // Nothing followed the query, so a trailing space is added and the caret
+    // lands after it — ready for the next word.
+    expect(setInputValue).toHaveBeenCalledWith("Hello 😄 ")
+    expect(setCursorPosition).toHaveBeenCalledWith(9)
     expect(textarea.selectionStart).toBe(9)
   })
 
