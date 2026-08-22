@@ -30,6 +30,25 @@ export interface AudioPlayerDetailTab {
 }
 
 /**
+ * One utterance of a transcript. Give it a `startTime` and the card syncs it
+ * with playback: the cue being spoken is marked while the recording plays, and
+ * clicking it moves playback to that moment. Without a `startTime` the cue is
+ * plain text — no mark, no click target — so a transcript that carries no
+ * timings renders as a plain dialogue.
+ */
+export interface TranscriptCue {
+  /**
+   * What was said, as a single inline run. Rendered as markdown limited to
+   * bold and italic, which is how a speaker gets its label —
+   * `"**Recruiter:** How did you hear about us?"`. Escape `*` and `_` in text
+   * you didn't write yourself.
+   */
+  text: string
+  /** Where the utterance starts, in seconds from the start of the recording. */
+  startTime?: number
+}
+
+/**
  * Structured detail content for {@link F0AudioPlayerCardProps.content}.
  *
  * Pass a `summary` and/or a `transcription` string and the card builds the
@@ -53,12 +72,18 @@ export interface AudioPlayerContent {
    */
   summary?: Localized<string>
   /**
-   * Plain-text transcription of the recording, shown in the "Transcription"
-   * tab. Line breaks are preserved. When omitted, the card attempts to derive
-   * a transcription from the audio file's embedded/attached text tracks.
-   * Localizable.
+   * Transcription of the recording, shown in the "Transcription" tab.
+   *
+   * Pass a **string** for a plain transcript (line breaks are preserved), or a
+   * list of {@link TranscriptCue} to get a timed one: the card then marks the
+   * cue being spoken, keeps it in view, and moves playback to a cue when it is
+   * clicked. Pass a referentially stable array — a new identity on every
+   * render defeats the memoisation that keeps a playing transcript cheap.
+   *
+   * When omitted, the card attempts to derive a transcription from the audio
+   * file's embedded/attached text tracks. Localizable.
    */
-  transcription?: Localized<string>
+  transcription?: Localized<string | TranscriptCue[]>
 }
 
 export interface F0AudioPlayerProps

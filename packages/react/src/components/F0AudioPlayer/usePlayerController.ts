@@ -44,6 +44,8 @@ export const usePlayerController = (
 
   const audioRef = useRef<HTMLAudioElement>(null)
   const [resolvedSrc, setResolvedSrc] = useState(eagerSrc)
+  const pendingSeekRef = useRef<number | null>(null)
+  const [pendingSeek, setPendingSeek] = useState<number | null>(null)
   const resolvingRef = useRef(false)
   const playAfterResolveRef = useRef(false)
   const refreshedRef = useRef(false)
@@ -91,6 +93,47 @@ export const usePlayerController = (
     duration ?? 0
   )
 
+  // `player` is a fresh object on every render; `player.seek` is not. Depend on
+  // the callback alone so `seek` keeps a stable identity between source
+  // changes — consumers memoise on it.
+  const playerSeek = player.seek
+
+  /**
+   * Move the playhead, from the scrubber or from a caller that knows a position
+   * (a transcript cue). Before metadata there is no timeline to move along —
+   * and with a lazy `src` there is no source yet at all — so the position is
+   * held and applied on the next `loadedmetadata` instead of being dropped.
+   */
+  const seek = useCallback(
+    (seconds: number) => {
+      const audio = audioRef.current
+      const target = Math.max(seconds, 0)
+      if (audio && resolvedSrc && audio.readyState >= audio.HAVE_METADATA) {
+        playerSeek(target)
+        return
+      }
+      pendingSeekRef.current = target
+      setPendingSeek(target)
+    },
+    [playerSeek, resolvedSrc]
+  )
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const applyPendingSeek = () => {
+      const target = pendingSeekRef.current
+      if (target === null) return
+      pendingSeekRef.current = null
+      setPendingSeek(null)
+      playerSeek(target)
+    }
+
+    audio.addEventListener("loadedmetadata", applyPendingSeek)
+    return () => audio.removeEventListener("loadedmetadata", applyPendingSeek)
+  }, [playerSeek])
+
   useEffect(() => {
     if (eagerSrc !== undefined) setResolvedSrc(eagerSrc)
   }, [eagerSrc])
@@ -135,14 +178,16 @@ export const usePlayerController = (
     audioRef,
     currentSrc: resolvedSrc,
     isPlaying: player.isPlaying,
-    currentTime: player.currentTime,
+    // A queued position is where playback will resume, so the scrubber and the
+    // time readout follow it rather than sitting at the stale one.
+    currentTime: pendingSeek ?? player.currentTime,
     duration: player.duration,
     buffered: player.buffered,
     playbackRate: player.playbackRate,
     isLoading: player.isLoading,
     error: player.error,
     toggle,
-    seek: player.seek,
+    seek,
     setPlaybackRate: player.setPlaybackRate,
     playbackRates,
   }

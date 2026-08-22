@@ -1,6 +1,14 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { motion } from "motion/react"
-import { forwardRef, useMemo, useState, type CSSProperties } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
@@ -19,11 +27,23 @@ import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackMenu } from "./components/PlaybackMenu"
 import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
+import { TranscriptCueList } from "./components/TranscriptCueList"
 import type { AudioPlayerDetailTab, F0AudioPlayerCardProps } from "./types"
 import { preserveAudioPosition, useAudioLanguage } from "./useAudioLanguage"
 import { useDerivedTranscription } from "./useDerivedTranscription"
 import { usePlayerController } from "./usePlayerController"
-import { getDataAttributes } from "./utils"
+import {
+  buildCueTimeline,
+  findActiveCueIndex,
+  getDataAttributes,
+} from "./utils"
+
+/**
+ * How long after an auto-scroll a `scroll` event is still assumed to be ours.
+ * A smooth scroll emits events until it settles; anything after that window is
+ * the reader taking over.
+ */
+const AUTO_SCROLL_SETTLE_MS = 700
 
 const F0AudioPlayerCardBase = forwardRef<
   HTMLDivElement,
@@ -98,6 +118,51 @@ const F0AudioPlayerCardBase = forwardRef<
   )
   const transcription = passedTranscription ?? derivedTranscription
 
+  // A transcription is either plain text or a list of cues; only the latter can
+  // be synced with playback.
+  const cues = Array.isArray(transcription) ? transcription : undefined
+  const transcriptionText =
+    typeof transcription === "string" ? transcription : undefined
+  const hasTranscription = Boolean(transcriptionText || cues?.length)
+
+  const timeline = useMemo(() => (cues ? buildCueTimeline(cues) : []), [cues])
+  const isTimed = timeline.length > 0
+  // Derived from the index, not the raw time: `currentTime` moves ~4x/s, this
+  // changes only when a different cue starts speaking.
+  const activeCueIndex = useMemo(
+    () => (isTimed ? findActiveCueIndex(timeline, controller.currentTime) : -1),
+    [isTimed, timeline, controller.currentTime]
+  )
+
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const cueRefs = useRef<Array<HTMLLIElement | null>>([])
+  const readerTookOverRef = useRef(false)
+  const autoScrollUntilRef = useRef(0)
+
+  const handleSeek = useCallback(
+    (seconds: number) => {
+      // Moving the playhead is an explicit "follow the audio again".
+      readerTookOverRef.current = false
+      controller.seek(seconds)
+    },
+    [controller.seek]
+  )
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    const handleScroll = () => {
+      if (performance.now() < autoScrollUntilRef.current) return
+      readerTookOverRef.current = true
+    }
+
+    viewport.addEventListener("scroll", handleScroll)
+    return () => viewport.removeEventListener("scroll", handleScroll)
+    // The viewport only exists once the panel has content, which can arrive
+    // late (a derived transcription), so re-attach when that flips.
+  }, [hasTranscription])
+
   // Normalise whichever input was given into the tab list the panel renders.
   const tabs: AudioPlayerDetailTab[] = useMemo(() => {
     if (usesLegacyDetails) return details ?? []
@@ -109,11 +174,20 @@ const F0AudioPlayerCardBase = forwardRef<
         content: <p className="whitespace-pre-line">{summary}</p>,
       })
     }
-    if (transcription) {
+    if (hasTranscription) {
       built.push({
         value: "transcription",
         label: i18n.audioPlayer.transcription,
-        content: <p className="whitespace-pre-line">{transcription}</p>,
+        content: cues ? (
+          <TranscriptCueList
+            cues={cues}
+            activeIndex={activeCueIndex}
+            onSeek={isTimed ? handleSeek : undefined}
+            cueRefs={cueRefs}
+          />
+        ) : (
+          <p className="whitespace-pre-line">{transcriptionText}</p>
+        ),
       })
     }
     return built
@@ -121,7 +195,12 @@ const F0AudioPlayerCardBase = forwardRef<
     usesLegacyDetails,
     details,
     summary,
-    transcription,
+    hasTranscription,
+    cues,
+    transcriptionText,
+    activeCueIndex,
+    isTimed,
+    handleSeek,
     i18n.audioPlayer.summary,
     i18n.audioPlayer.transcription,
   ])
@@ -131,7 +210,7 @@ const F0AudioPlayerCardBase = forwardRef<
   // derived transcription is "available"; anything else is "missing" — including
   // the deprecated `details` array, whose opaque content we can't confirm as a
   // transcript (migrate to `content.transcription` to be counted as available).
-  const transcriptionState = transcription ? "available" : "missing"
+  const transcriptionState = hasTranscription ? "available" : "missing"
 
   const hasDetails = tabs.length > 0
   // With a single tab there's nothing to switch between, so the segmented
@@ -156,6 +235,27 @@ const F0AudioPlayerCardBase = forwardRef<
     defaultProp: defaultExpanded,
     onChange: onExpandedChange,
   })
+  // Keep the cue being spoken in view, unless the reader has scrolled away.
+  useEffect(() => {
+    if (!isExpanded || activeCueIndex < 0 || readerTookOverRef.current) return
+
+    const viewport = viewportRef.current
+    const cue = cueRefs.current[activeCueIndex]
+    if (!viewport || !cue) return
+
+    const viewportBox = viewport.getBoundingClientRect()
+    const cueBox = cue.getBoundingClientRect()
+    const above = cueBox.top - viewportBox.top
+    const below = cueBox.bottom - viewportBox.bottom
+    if (above >= 0 && below <= 0) return
+
+    autoScrollUntilRef.current = performance.now() + AUTO_SCROLL_SETTLE_MS
+    viewport.scrollTo({
+      top: viewport.scrollTop + (above < 0 ? above : below),
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+    })
+  }, [activeCueIndex, isExpanded, shouldReduceMotion])
+
   const [selectedTab, setSelectedTab] = useState(tabs[0]?.value)
   // Guard against a stale selection if the tabs change (e.g. a recycled card in
   // a list, or a transcription resolving asynchronously): fall back to the
@@ -244,7 +344,7 @@ const F0AudioPlayerCardBase = forwardRef<
           duration={controller.duration}
           buffered={controller.buffered}
           disabled={disabled}
-          onSeek={controller.seek}
+          onSeek={handleSeek}
         />
 
         <PlaybackTime
@@ -298,6 +398,7 @@ const F0AudioPlayerCardBase = forwardRef<
           )}
           <div className={singleTab ? undefined : "pt-2.5"}>
             <ScrollArea
+              viewportRef={viewportRef}
               style={
                 {
                   "--audio-details-max-h": `${detailsMaxHeight}px`,
