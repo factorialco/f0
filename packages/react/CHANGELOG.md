@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.46.1](https://github.com/factorialco/f0/compare/f0-react-v6.46.0...f0-react-v6.46.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **F0Chat:** pin composer text metrics to the textarea ([#5199](https://github.com/factorialco/f0/issues/5199)) ([a9bf9ce](https://github.com/factorialco/f0/commit/a9bf9ce82568ad59541c9ae1a5b04d004050e385))
+
 ## [6.46.0](https://github.com/factorialco/f0/compare/f0-react-v6.45.0...f0-react-v6.46.0) (2026-08-21)
 
 
