@@ -1166,14 +1166,8 @@ describe("Collections", () => {
       expect(screen.getByText("Bob Brown")).toBeInTheDocument()
     })
 
-    // Find the search button/input
-    const searchButton = screen.getByLabelText(/search/i)
-    expect(searchButton).toBeInTheDocument()
-
-    // Click on the search button to open the search input
-    await userEvent.click(searchButton)
-
-    // Find the search input after it's opened
+    // The search input is expanded by default; it only falls back to a
+    // click-to-open icon button on rows too narrow to carry it.
     const searchInput = screen.getByPlaceholderText(/search/i)
     expect(searchInput).toBeInTheDocument()
 
