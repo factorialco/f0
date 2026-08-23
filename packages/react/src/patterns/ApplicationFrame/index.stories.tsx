@@ -96,10 +96,9 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
-import { ME as CHAT_ME, SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
-import { seedFromAttendees } from "@/sds/meetings/F0Meeting/mocks/mockSeeds"
-import { useMockMeetingRuntime } from "@/sds/meetings/F0Meeting/mocks/useMockMeetingRuntime"
+import { useMockHuddle } from "./mocks/useMockHuddle"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { Action } from "@/ui/Action"
 
@@ -1274,71 +1273,37 @@ export const WithAiAssistant: Story = {
 const HuddleContext = createContext<{
   activeConvId: string | null
   start: (convId: string) => void
-}>({ activeConvId: null, start: () => {} })
+  receive: (convId: string) => void
+}>({ activeConvId: null, start: () => {}, receive: () => {} })
 
 const useHuddle = () => useContext(HuddleContext)
 
 /**
- * Owns the call for the whole app shell. `runtime` is always built (hooks
- * cannot be conditional) but only handed to the frame while a huddle is
- * running, which is exactly the shape a real host ends up with.
+ * Owns the call for the whole app shell. The orchestration lives in
+ * `useMockHuddle` because it spans two worlds — the chat's transcript and the
+ * meeting's room — and the frame is the only thing that sees both. That is
+ * exactly where the glue sits in production too.
  */
 const WithHuddle = ({
   children,
 }: {
   children: (meeting: ApplicationFrameProps["meeting"]) => React.ReactNode
 }) => {
-  const [activeConvId, setActiveConvId] = useState<string | null>(null)
-  // Each start is a NEW call, even in the same conversation. The surface
-  // remembers a mode per room so a reload keeps the call where you put it —
-  // without this, hanging up and calling again would reopen in the panel you
-  // left it in rather than at `defaultMode`.
-  const [callCount, setCallCount] = useState(0)
-
-  const seed = useMemo(() => {
-    const conversation = activeConvId ? SEED_BY_ID.get(activeConvId) : undefined
-    return seedFromAttendees({
-      roomId: `huddle:${activeConvId ?? "idle"}:${callCount}`,
-      title: conversation ? `Huddle · ${conversation.title}` : "Huddle",
-      me: { id: CHAT_ME.id, name: CHAT_ME.name, avatar: CHAT_ME.avatar },
-      attendees: (conversation?.participants ?? []).map((participant) => ({
-        id: participant.id,
-        name: participant.name,
-        avatar: participant.avatar,
-      })),
-      // Everyone is already in the room when you arrive: some with moving
-      // footage, some with the camera off, some muted. A grid of identical
-      // placeholders tells you nothing about how the real thing will feel.
-      videoSource: "clip",
-      clipUrls: ["/Big_Buck_Bunny_alt.webm"],
-      // Silence the mock while nothing is running, so an idle shell has no
-      // audio engine and no turn-taking timers behind it.
-      audio: activeConvId !== null,
-    })
-  }, [activeConvId, callCount])
-
-  const { runtime } = useMockMeetingRuntime(seed, {
-    // Hanging up ends the call: the host drops the runtime and the surface
-    // goes with it. Leaving it mounted on a "call ended" screen is the bug
-    // every video product ships once.
-    onLeave: () => setActiveConvId(null),
-  })
+  const huddle = useMockHuddle()
 
   const value = useMemo(
     () => ({
-      activeConvId,
-      start: (convId: string) => {
-        setCallCount((count) => count + 1)
-        setActiveConvId(convId)
-      },
+      activeConvId: huddle.activeConvId,
+      start: huddle.start,
+      receive: huddle.receive,
     }),
-    [activeConvId]
+    [huddle.activeConvId, huddle.start, huddle.receive]
   )
 
   return (
     <HuddleContext.Provider value={value}>
       {children({
-        runtime: activeConvId ? runtime : null,
+        runtime: huddle.runtime,
         defaultMode: "fullscreen",
         actions: [
           {
@@ -1400,7 +1365,8 @@ const MockChatPanel = ({
     { members: seed?.participants }
   )
   // Starting a call is just another host header action — F0Chat needs no
-  // knowledge of meetings for a huddle to exist.
+  // knowledge of meetings for a huddle to exist. `channelTypes` is what keeps
+  // it to DMs: 1:1 only for now, and the contract already had the switch.
   const huddle = useHuddle()
   const actionsWithHuddle = useMemo<F0ChatHeaderAction[]>(
     () => [
@@ -1410,7 +1376,17 @@ const MockChatPanel = ({
         label: "Start huddle",
         icon: Icons.VideoRecorder,
         placement: "inline",
+        channelTypes: ["dm"],
         onClick: () => huddle.start(convId),
+      },
+      {
+        // Demo affordance: the receiving side is half the experience and there
+        // is no second browser here to produce it.
+        id: "huddle-incoming",
+        label: "Simulate incoming huddle",
+        icon: Icons.Phone,
+        channelTypes: ["dm"],
+        onClick: () => huddle.receive(convId),
       },
     ],
     [headerActions, huddle, convId]
