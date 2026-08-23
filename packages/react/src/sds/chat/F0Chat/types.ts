@@ -331,15 +331,67 @@ export type F0ChatSystemMessage = {
   body?: string
 }
 
+export const f0ChatCallStates = ["ringing", "live", "ended", "missed"] as const
+
+/**
+ * Where a call is in its life. One call is ONE transcript item that moves
+ * through these — not a live card plus a log line afterwards.
+ */
+export type F0ChatCallState = (typeof f0ChatCallStates)[number]
+
+export type F0ChatCall = {
+  id: string
+  state: F0ChatCallState
+  /** Who started it. */
+  startedBy: F0ChatUser
+  /** ISO timestamp the call was started. */
+  startedAt: string
+  /** ISO timestamp it ended. Drives the duration on `ended`. */
+  endedAt?: string
+  /** Who is in the room right now. Only meaningful while `ringing` or `live`. */
+  participants?: F0ChatUser[]
+  /**
+   * Present only while the call can be joined. Its absence is what removes the
+   * button — the same convention as the rest of the contract: no callback, no
+   * action. A host that omits it on an `ended` call needs no other flag.
+   */
+  join?: () => void
+}
+
+/**
+ * A call in the transcript, rendered as a card with a Join button. Like a system
+ * message it has no author, no reactions and no replies — but unlike one it is
+ * INTERACTIVE and it MUTATES: the same id carries the call from ringing to
+ * ended, so the history keeps one line per call.
+ *
+ * factorial → a Stream message whose custom fields carry the call state, patched
+ * in place from LiveKit's webhooks (see `F0Meeting/SPEC.md`).
+ */
+export type F0ChatCallMessage = {
+  type: "call"
+  id: string
+  /** ISO timestamp — participates in day separators and ordering. */
+  createdAt: string
+  call: F0ChatCall
+}
+
 /** Anything that can appear in the transcript, oldest → newest. */
-export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage
+export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage | F0ChatCallMessage
 
 export const isSystemMessage = (
   item: F0ChatItem
 ): item is F0ChatSystemMessage => item.type === "system"
 
+export const isCallMessage = (item: F0ChatItem): item is F0ChatCallMessage =>
+  item.type === "call"
+
+/**
+ * Checked positively rather than as "not system": with a third item kind, a
+ * negative test would silently classify calls as messages and render them as
+ * bubbles.
+ */
 export const isUserMessage = (item: F0ChatItem): item is F0ChatMessage =>
-  item.type !== "system"
+  item.type === undefined || item.type === "message"
 
 export type F0ChatSendInput = {
   body: string

@@ -14,6 +14,8 @@ import { BellOff } from "@/icons/app"
 
 import {
   isUserMessage,
+  type F0ChatCall,
+  type F0ChatCallMessage,
   type F0ChatEditInput,
   type F0ChatItem,
   type F0ChatMessage,
@@ -60,6 +62,14 @@ export type MockChatAppValue = {
    * recover via `reconnect` (drives the error state's Retry button). */
   loadState: Record<string, "ready" | "connecting" | "error">
   reconnect: (convId: string) => void
+  /**
+   * Inserts a call item, or replaces it when one with the same id is already
+   * there. Deliberately an UPSERT: it is the same operation the real backend
+   * performs on the Stream message (`upsert_system_message` →
+   * `update_message_partial`), which is what lets one call be one transcript
+   * line from ringing to ended.
+   */
+  upsertCall: (convId: string, call: F0ChatCall) => void
 }
 
 const MockChatAppContext = createContext<MockChatAppValue | null>(null)
@@ -133,6 +143,25 @@ export const useMockChatStore = (): MockChatAppValue => {
       })
     },
     []
+  )
+
+  const upsertCall = useCallback(
+    (convId: string, call: F0ChatCall) => {
+      patch(convId, (s) => {
+        const item: F0ChatCallMessage = {
+          type: "call",
+          id: call.id,
+          createdAt: call.startedAt,
+          call,
+        }
+        const index = s.messages.findIndex((message) => message.id === call.id)
+        if (index === -1) return { ...s, messages: [...s.messages, item] }
+        const messages = [...s.messages]
+        messages[index] = item
+        return { ...s, messages }
+      })
+    },
+    [patch]
   )
 
   const markRead = useCallback(
@@ -446,6 +475,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       toggleMute,
       loadState,
       reconnect,
+      upsertCall,
     }),
     [
       states,
@@ -465,6 +495,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       toggleMute,
       loadState,
       reconnect,
+      upsertCall,
     ]
   )
 }
