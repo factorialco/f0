@@ -248,7 +248,100 @@ rule exists for.
 
 ---
 
-## 7. Open decisions
+## 7. Huddles: the call as a fact of the conversation
+
+Scope so far: **1:1 in DMs**. A call is one item in the chat transcript
+(`F0ChatCallMessage`) that MUTATES through `ringing → live → ended`, or lands on `missed`. One
+call, one line in the history — not a live card plus a log line afterwards.
+
+The chat renders it as a compact `F0MeetingCard`, natively rather than through a host render-prop:
+the transcript is virtualized and a node of unknown height injected by the host is exactly what
+throws off Virtuoso's measurements.
+
+Starting a call needs **nothing** from the chat contract. The header action is host-provided and
+`F0ChatHeaderAction.channelTypes` already restricts it to `["dm"]`, so F0Chat still knows nothing
+about meetings.
+
+### The two transports, and who owns what
+
+GetStream carries the _fact_ that a call exists and its state, because it already fans messages
+out to both sides over its websocket. LiveKit carries the call itself and, crucially, **dictates
+the state**.
+
+```
+you press call
+  │
+  ├─→ startHuddle(channelId)
+  │     backend: 1. LiveKit room `huddle_<channelId>` + token
+  │              2. Stream message upsert, f0_call_state: ringing
+  │              3. returns { serverUrl, token, roomName, messageId }
+  │
+  ├─→ the frontend mounts F0Meeting with the LiveKit adapter
+  │
+  └─→ Stream's websocket delivers the message to BOTH sides
+        → the mapper turns it into F0ChatCallMessage → card with Join
+        → they press Join → same (idempotent) mutation → token → they enter
+
+LiveKit webhooks → backend → PATCH the same Stream message:
+  participant_joined → state: live, participants
+  participant_left   → participants
+  room_finished      → state: ended (or missed) + duration
+```
+
+**The state comes from LiveKit's webhooks, not from the caller's browser.** If that tab dies,
+`room_finished` still arrives and the card settles on `ended`. The other way round, cards stay
+stuck on "in progress" forever — the classic failure of this pattern.
+
+### What already fits
+
+- **`upsert_system_message`** (`providers/base.rb:152`), implemented with
+  `update_message_partial` (`stream/provider.rb:235`). The _upsert_ already exists to rewrite an
+  existing message — it is how membership bursts coalesce — which is exactly the path a card
+  mutating in place needs.
+- **The `f0_*` convention**: custom fields ride untyped on the Stream message and the mapper
+  reads them (`streamChatMappers/index.ts:409`). A call adds `f0_call_state`,
+  `f0_call_started_at`, `f0_call_participants`.
+- **`Providers::SystemEvent`** is provider-agnostic (`system_event.rb`): it gains `CallStarted`
+  and `CallUpdated`, and no Stream-specific name leaves the provider.
+- **Participant domain events already exist** (`meetings/events/participants/{joined,left}.rb`).
+  Communications can consume them the way it already consumes membership events, so Meetings never
+  has to know Communications exists.
+
+### What is still missing
+
+| #   | Gap                                      | Why                                                                                                                                                                                                        |
+| --- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 6   | **A room without a `Meetings::Meeting`** | `Rooms#get_or_create` requires a `meeting_id` **and** an `Attendee` (`repositories/rooms.rb:12-25`). A DM huddle has neither: it needs a `huddle_<channelId>` path authorized by Stream channel membership |
+| 7   | Somewhere to put the call state          | `SystemMessage` is a `T::Struct` with `members`/`remaining_count` and nothing else. Either it gains optional fields, or a sibling `CallMessage` appears                                                    |
+| 8   | The webhook consumer                     | The DTO exists (`dtos/webhooks/livekit.rb`) but nothing translates `room_finished` into a patch of the Stream message. This is the piece the paragraph above rests on                                      |
+| 9   | Idempotency of `startHuddle`             | Two people pressing at once must not create two messages or two rooms. Natural key: a message id derived from the channel plus the room                                                                    |
+
+**Gap #1 (the 10-minute token TTL) escalates from "worth fixing" to blocking here**: the receiver
+asks for their token minutes after the caller did, so joining a call that has been running for a
+while fails outright.
+
+### What the mock does, and what it deliberately does not
+
+`patterns/ApplicationFrame/mocks/useMockHuddle.ts` drives both directions. It lives in the frame
+rather than in either mock package because the frame is what a real host is: the only thing that
+sees both worlds. The chat mock knows nothing about rooms and the meeting mock knows nothing about
+conversations — the same separation the production adapters will have.
+
+Two details worth keeping if this is ever rewritten:
+
+- The other side enters through `drivers.join(...)`, **not** by growing the seed. The mock reads
+  its roster only when the room id changes, so a growing seed updates the card and leaves the room
+  empty. Going through the driver is also the path a real `participant_joined` takes.
+- `startedBy` is derived from the call's DIRECTION, never from its phase. Reading the phase made
+  an incoming call claim you had started it the moment you answered.
+
+There is **no ringing UI**: no sound, no timeout, no accept/decline surface. The receiving side is
+the card in the conversation and nothing else, which is what Slack does. The WhatsApp model would
+be a surface of its own.
+
+---
+
+## 8. Open decisions
 
 - **Fullscreen and the banner.** Undecided whether fullscreen should cover the app banner or sit
   below it. The frame's content rect is already wired, so it is a one-line change once decided.
@@ -261,6 +354,14 @@ rule exists for.
   tiles now change proportion as well as size.
 - **Recording consent.** Who owns the legal copy, and whether F0 should block the room until it
   is acknowledged. `F0MeetingRecording.consentNotice` exists but nothing enforces it.
-- **One call at a time.** The surface assumes a single active meeting. Nothing enforces it.
+- **One call at a time.** The surface assumes a single active meeting. Nothing enforces it, and
+  per-DM huddles make it easy to trigger: calling from a second DM should ask before dropping the
+  first.
 - **Document Picture-in-Picture.** A real OS-level PiP window would replace the floating mode on
   supported browsers. Not started.
+- **Huddles in groups.** The contract does not prevent it (`participants` is an array), but "who
+  is in the call" in a group of twenty is a different design problem.
+- **A crossed ownership boundary.** `F0Chat` (platform-ai-building-blocks) renders
+  `F0MeetingCard` (experimental). The alternative — a host render-prop — avoids the crossing at
+  the cost of an unknown-height row inside a virtualized transcript. Worth a decision from both
+  owners rather than leaving it implicit.
