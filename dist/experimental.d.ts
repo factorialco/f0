@@ -3916,8 +3916,10 @@ declare const defaultTranslations: {
         readonly tomorrow: "Tomorrow";
         readonly inProgress: "In progress";
         readonly inProgressTitle: "Call in progress";
+        readonly ringing: "Ringing…";
         readonly summarizing: "Summarizing";
         readonly finished: "Finished";
+        readonly missed: "Missed";
         readonly cancelled: "Cancelled";
         readonly startingNow: "Starting now";
         readonly startsIn: {
@@ -4471,6 +4473,12 @@ declare const defaultTranslations: {
             };
             readonly membersWithLast: "{{names}} and {{last}}";
             readonly membersWithMore: "{{names}} and {{count}} more";
+        };
+        readonly call: {
+            readonly startedBy: "{{name}} started a huddle";
+            readonly ended: "Huddle ended";
+            readonly missed: "Missed huddle";
+            readonly start: "Start huddle";
         };
         readonly unreadCount: {
             readonly one: "{{count}} unread";
@@ -5928,6 +5936,50 @@ export declare const F0Chat: (props: F0ChatProps) => ReactNode;
 
 export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment;
 
+declare type F0ChatCall = {
+    id: string;
+    state: F0ChatCallState;
+    /** Who started it. */
+    startedBy: F0ChatUser;
+    /** ISO timestamp the call was started. */
+    startedAt: string;
+    /** ISO timestamp it ended. Drives the duration on `ended`. */
+    endedAt?: string;
+    /** Who is in the room right now. Only meaningful while `ringing` or `live`. */
+    participants?: F0ChatUser[];
+    /**
+     * Present only while the call can be joined. Its absence is what removes the
+     * button — the same convention as the rest of the contract: no callback, no
+     * action. A host that omits it on an `ended` call needs no other flag.
+     */
+    join?: () => void;
+};
+
+/**
+ * A call in the transcript, rendered as a card with a Join button. Like a system
+ * message it has no author, no reactions and no replies — but unlike one it is
+ * INTERACTIVE and it MUTATES: the same id carries the call from ringing to
+ * ended, so the history keeps one line per call.
+ *
+ * factorial → a Stream message whose custom fields carry the call state, patched
+ * in place from LiveKit's webhooks (see `F0Meeting/SPEC.md`).
+ */
+declare type F0ChatCallMessage = {
+    type: "call";
+    id: string;
+    /** ISO timestamp — participates in day separators and ordering. */
+    createdAt: string;
+    call: F0ChatCall;
+};
+
+/**
+ * Where a call is in its life. One call is ONE transcript item that moves
+ * through these — not a live card plus a log line afterwards.
+ */
+declare type F0ChatCallState = (typeof f0ChatCallStates)[number];
+
+declare const f0ChatCallStates: readonly ["ringing", "live", "ended", "missed"];
+
 /**
  * Per-channel permissions. Everything is optional and defaults to today's
  * behavior, so hosts only express what their transport restricts (frozen /
@@ -6062,7 +6114,7 @@ export declare type F0ChatImageAttachment = {
 };
 
 /** Anything that can appear in the transcript, oldest → newest. */
-export declare type F0ChatItem = F0ChatMessage | F0ChatSystemMessage;
+export declare type F0ChatItem = F0ChatMessage | F0ChatSystemMessage | F0ChatCallMessage;
 
 /**
  * Open Graph preview of a URL in the body (WhatsApp-style card above the text).
@@ -9687,6 +9739,11 @@ export declare const isPossiblePhoneValue: (value: F0PhoneInputValue | undefined
 
 export declare const isSystemMessage: (item: F0ChatItem) => item is F0ChatSystemMessage;
 
+/**
+ * Checked positively rather than as "not system": with a third item kind, a
+ * negative test would silently classify calls as messages and render them as
+ * bubbles.
+ */
 export declare const isUserMessage: (item: F0ChatItem) => item is F0ChatMessage;
 
 /**
@@ -10109,7 +10166,7 @@ export declare type MeetingState = (typeof meetingStates)[number];
  * the elapsed label, whether Join is actionable) is computed from `startsAt` and
  * `now`.
  */
-export declare const meetingStates: readonly ["scheduled", "inProgress", "summarizing", "finished", "cancelled"];
+export declare const meetingStates: readonly ["ringing", "scheduled", "inProgress", "summarizing", "finished", "missed", "cancelled"];
 
 declare type MeetingSurfaceContextValue = {
     /** What the user chose. Never mutated by the environment. */

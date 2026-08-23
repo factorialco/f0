@@ -2173,8 +2173,10 @@ export declare const defaultTranslations: {
         readonly tomorrow: "Tomorrow";
         readonly inProgress: "In progress";
         readonly inProgressTitle: "Call in progress";
+        readonly ringing: "Ringing…";
         readonly summarizing: "Summarizing";
         readonly finished: "Finished";
+        readonly missed: "Missed";
         readonly cancelled: "Cancelled";
         readonly startingNow: "Starting now";
         readonly startsIn: {
@@ -2728,6 +2730,12 @@ export declare const defaultTranslations: {
             };
             readonly membersWithLast: "{{names}} and {{last}}";
             readonly membersWithMore: "{{names}} and {{count}} more";
+        };
+        readonly call: {
+            readonly startedBy: "{{name}} started a huddle";
+            readonly ended: "Huddle ended";
+            readonly missed: "Missed huddle";
+            readonly start: "Start huddle";
         };
         readonly unreadCount: {
             readonly one: "{{count}} unread";

@@ -317,8 +317,10 @@ const e = {
     tomorrow: "Tomorrow",
     inProgress: "In progress",
     inProgressTitle: "Call in progress",
+    ringing: "Ringing…",
     summarizing: "Summarizing",
     finished: "Finished",
+    missed: "Missed",
     cancelled: "Cancelled",
     startingNow: "Starting now",
     startsIn: {
@@ -895,6 +897,14 @@ const e = {
       // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
       membersWithLast: "{{names}} and {{last}}",
       membersWithMore: "{{names}} and {{count}} more"
+    },
+    // Huddles. One card carries the call from ringing to ended, so the title is
+    // what changes rather than the row.
+    call: {
+      startedBy: "{{name}} started a huddle",
+      ended: "Huddle ended",
+      missed: "Missed huddle",
+      start: "Start huddle"
     },
     unreadCount: {
       one: "{{count}} unread",
