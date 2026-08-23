@@ -49,14 +49,15 @@ export const isWithinJoinWindow = ({
   now: Date
   windowMinutes?: number
 }): boolean => {
-  if (state === "inProgress") return true
+  // A ringing call is joinable by definition: the room already exists.
+  if (state === "inProgress" || state === "ringing") return true
   if (state !== "scheduled") return false
   return getMinutesUntilStart(startsAt, now) <= windowMinutes
 }
 
 /** The Join affordance only makes sense before and during the meeting. */
 export const isJoinRelevant = (state: MeetingState): boolean =>
-  state === "scheduled" || state === "inProgress"
+  state === "scheduled" || state === "inProgress" || state === "ringing"
 
 /**
  * Whether a countdown tag should be shown. Only while waiting inside the join
@@ -112,7 +113,8 @@ export const resolveAttendeesDisplay = (
   state: MeetingState
 ): "avatars" | "count" => {
   if (display !== "auto") return display
-  return state === "inProgress" ? "avatars" : "count"
+  // While a call runs, WHO is in it matters more than how many.
+  return state === "inProgress" || state === "ringing" ? "avatars" : "count"
 }
 
 /**
@@ -130,7 +132,12 @@ export const resolveRelevantCount = ({
   invitedCount?: number
   presentCount?: number
 }): number => {
-  if (state === "inProgress" && presentCount !== undefined) return presentCount
+  if (
+    (state === "inProgress" || state === "ringing") &&
+    presentCount !== undefined
+  ) {
+    return presentCount
+  }
   return invitedCount ?? attendees.length
 }
 
