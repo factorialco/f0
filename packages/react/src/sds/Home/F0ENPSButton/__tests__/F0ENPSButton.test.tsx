@@ -1,3 +1,4 @@
+import { forwardRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import {
@@ -108,6 +109,34 @@ describe("F0ENPSButton", () => {
     expect(face("Not at all likely")).toBeInTheDocument()
     // The faces left alone keep the default scale copy.
     expect(face("Okay")).toBeInTheDocument()
+  })
+
+  it("takes the question's own glyphs through icons", () => {
+    const Thumb = forwardRef<SVGSVGElement>((props, ref) => (
+      <svg ref={ref} {...props} data-testid="thumb" />
+    ))
+    Thumb.displayName = "Thumb"
+
+    zeroRender(<F0ENPSButton icons={{ superPositive: Thumb }} />)
+
+    expect(
+      face("Very good").querySelector("[data-testid=thumb]")
+    ).not.toBeNull()
+    // The faces left alone keep the default mood glyph.
+    expect(face("Okay").querySelector("[data-testid=thumb]")).toBeNull()
+  })
+
+  /**
+   * The face is the whole control, so it is sized past F0Icon's `lg`/24px scale
+   * on the svg itself. jsdom applies no Tailwind, so the class is the assertion.
+   */
+  it("scales the face with the size of the button", () => {
+    const { unmount } = zeroRender(<F0ENPSButton />)
+    expect(face("Okay")).toHaveClass("[&_svg]:w-7")
+    unmount()
+
+    zeroRender(<F0ENPSButton size="md" />)
+    expect(face("Okay")).toHaveClass("[&_svg]:w-6")
   })
 
   it("disables every face", () => {

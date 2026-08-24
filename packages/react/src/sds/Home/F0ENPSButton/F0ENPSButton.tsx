@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import {
+  type ButtonToggleGroupSize,
   F0ButtonToggleGroup,
   type F0ButtonToggleGroupItem,
 } from "@/components/F0ButtonToggleGroup"
@@ -54,6 +55,21 @@ const selectedAccent: Record<Pulse, string> = {
 /** An unanswered face is a muted glyph, not a heading. */
 const unansweredFace = "text-f1-icon"
 
+/**
+ * The face IS the control here — there is no label beside it to carry the
+ * meaning — so it takes as much of the button as the geometry allows: one step
+ * up from the icon size `F0ButtonToggle` derives from the button height, leaving
+ * 4px of room around it (6px at `lg`). `sm` is already at that limit and stays.
+ *
+ * Set on the svg rather than through `F0Icon`'s `size`, whose scale stops at
+ * `lg`/24px — the same way `F0AvatarModule` sizes its own glyph past the scale.
+ */
+const faceSize: Record<ButtonToggleGroupSize, string> = {
+  sm: "[&_svg]:w-4",
+  md: "[&_svg]:w-6",
+  lg: "[&_svg]:w-7",
+}
+
 const isPulse = (value: string): value is Pulse =>
   (pulses as readonly string[]).includes(value)
 
@@ -61,6 +77,7 @@ export const F0ENPSButton = ({
   value,
   onChange,
   labels,
+  icons,
   size = "lg",
   fullWidth = true,
   disabled = false,
@@ -86,7 +103,7 @@ export const F0ENPSButton = ({
 
         return {
           value: pulse,
-          icon: pulseIcon[pulse],
+          icon: icons?.[pulse] ?? pulseIcon[pulse],
           label,
           // `instant`: the face is the whole control and this tooltip is the
           // only place its name is written, so a 700ms wait withholds the scale
@@ -94,11 +111,12 @@ export const F0ENPSButton = ({
           tooltip: { description: label, instant: true },
           className: cn(
             unansweredFace,
+            faceSize[size],
             answer === pulse && selectedAccent[pulse]
           ),
         }
       }),
-    [answer, labels, i18n]
+    [answer, labels, icons, size, i18n]
   )
 
   const handleChange = (next: string) => {

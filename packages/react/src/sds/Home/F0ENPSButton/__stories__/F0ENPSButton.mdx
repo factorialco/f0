@@ -27,7 +27,12 @@ Five faces from `pulses`, in scale order, drawn by `F0ButtonToggleGroup` as one
 single-select group. A face carries no text: its `label` is the accessible name
 **and** the tooltip, so it has to read as the answer being given ("Very bad"),
 never as a number or a position. The default copy comes from `i18n.enps.scale`;
-`labels` replaces it for one face or all five.
+`labels` replaces it for one face or all five, and `icons` does the same for the
+glyphs when the question isn't about mood.
+
+The face is sized past `F0Icon`'s scale — 28px at `lg`, 24px at `md` — because
+it **is** the control: there is no label beside it to carry the meaning, so it
+takes the button, leaving 4px of room around it (6px at `lg`).
 
 Only the answered face is coloured, and it takes its own mood
 (`--mood-super-negative` through `--mood-super-positive`): a 0.1 fill, the same
@@ -111,6 +116,11 @@ from across the page.
 A recommendation question brings its own wording:
 
 <Canvas of={Stories.CustomLabels} />
+
+And a question that isn't about mood brings its own glyphs — a set that still
+reads worst-to-best:
+
+<Canvas of={Stories.CustomFaces} />
 
 An answer that has been sent stays coloured and stops being pressable:
 

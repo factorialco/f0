@@ -1,4 +1,5 @@
 import type { ButtonToggleGroupSize } from "@/components/F0ButtonToggleGroup"
+import type { IconType } from "@/components/F0Icon"
 import type { Pulse } from "@/lib/mood"
 
 export type F0ENPSButtonProps = {
@@ -23,6 +24,17 @@ export type F0ENPSButtonProps = {
    * "Not at all likely", a mood check answers "Terrible".
    */
   labels?: Partial<Record<Pulse, string>>
+
+  /**
+   * Override the face drawn for one or more points of the scale. Defaults to the
+   * five `Face*` icons from `lib/mood` — the same ones `F0AvatarPulse` shows, so
+   * an answer looks the same wherever it turns up.
+   *
+   * Swap them only when the question isn't about mood: a thumbs pair, a set of
+   * stars. Keep the replacements a *set* that reads worst-to-best on its own —
+   * five unrelated glyphs stop being a scale.
+   */
+  icons?: Partial<Record<Pulse, IconType>>
 
   /**
    * The size of each face.

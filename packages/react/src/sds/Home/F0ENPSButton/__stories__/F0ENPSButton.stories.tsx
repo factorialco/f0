@@ -3,6 +3,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
+import {
+  FaceNeutral,
+  ThumbsDown,
+  ThumbsDownFilled,
+  ThumbsUp,
+  ThumbsUpFilled,
+} from "@/icons/app"
 import { pulses, type Pulse } from "@/lib/mood"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -36,6 +43,7 @@ const meta = {
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     labels: { control: "object" },
+    icons: { control: false },
     onChange: { action: "changed" },
   },
   decorators: [
@@ -93,6 +101,36 @@ export const CustomLabels: Story = {
       neutral: "Neither",
       positive: "Likely",
       superPositive: "Extremely likely",
+    },
+  },
+  render: (args) => <Interactive {...args} />,
+}
+
+export const CustomFaces: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`icons` swaps the glyphs for a question that isn't about mood — here a " +
+          "five-point thumbs scale, with the copy to match. Keep the replacements " +
+          "a set that reads worst-to-best on its own.",
+      },
+    },
+  },
+  args: {
+    icons: {
+      superNegative: ThumbsDownFilled,
+      negative: ThumbsDown,
+      neutral: FaceNeutral,
+      positive: ThumbsUp,
+      superPositive: ThumbsUpFilled,
+    },
+    labels: {
+      superNegative: "Definitely not",
+      negative: "Probably not",
+      neutral: "Not sure",
+      positive: "Probably",
+      superPositive: "Definitely",
     },
   },
   render: (args) => <Interactive {...args} />,
