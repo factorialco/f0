@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.48.0](https://github.com/factorialco/f0/compare/f0-react-v6.47.2...f0-react-v6.48.0) (2026-08-24)
+
+
+### Features
+
+* **OneDataCollection:** select a node on graph entry via initialSelectedNodeId ([#5169](https://github.com/factorialco/f0/issues/5169)) ([762bff2](https://github.com/factorialco/f0/commit/762bff25094f9cad254cf08982ae7c62ca003606))
+
 ## [6.47.2](https://github.com/factorialco/f0/compare/f0-react-v6.47.1...f0-react-v6.47.2) (2026-08-24)
 
 
