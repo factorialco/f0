@@ -46,7 +46,7 @@ export const TableSettings = ({
 
   const usesExplicitColumnLocking =
     lockedColumnIds !== undefined || !!onLockedColumnIdsChange
-  const { columnsWithStatus, savedOrder } = useColumns(
+  const { columnsWithStatus, savedOrder, managedLockedColumnIds } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings,
@@ -57,6 +57,12 @@ export const TableSettings = ({
   )
 
   const items = useMemo(() => {
+    const visibleUnlockedIds = new Set(
+      columnsWithStatus
+        .filter((column) => column.visible && !column.locked)
+        .map((column) => column.column.id)
+    )
+
     return (
       columnsWithStatus
         // If allowHiding is false, we show only the columns that are visible
@@ -68,7 +74,13 @@ export const TableSettings = ({
           canHide: column.canHide,
           visible: column.visible,
           locked: column.locked,
-          lockable: !!onLockedColumnIdsChange && !column.frozen,
+          lockable:
+            !!onLockedColumnIdsChange &&
+            !column.frozen &&
+            (column.locked ||
+              [...visibleUnlockedIds].some(
+                (columnId) => columnId !== column.column.id
+              )),
           showLockState: usesExplicitColumnLocking && column.locked,
           removable:
             !!onRemoveColumn && !column.locked && !column.column.noRemoving,
@@ -94,12 +106,13 @@ export const TableSettings = ({
         onLockedColumnIdsChange
           ? (columnId, locked) => {
               onLockedColumnIdsChange(
-                getNextLockedColumnIds(lockedColumnIds, columnId, locked)
+                getNextLockedColumnIds(managedLockedColumnIds, columnId, locked)
               )
             }
           : undefined
       }
       orderBaseline={usesExplicitColumnLocking ? savedOrder : undefined}
+      keepOneUnlockedVisible={usesExplicitColumnLocking}
     />
   )
 }

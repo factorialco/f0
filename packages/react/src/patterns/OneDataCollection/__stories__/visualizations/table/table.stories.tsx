@@ -1985,6 +1985,138 @@ export const WithLockableColumns: Story = {
 }
 
 /**
+ * Locks two columns inside a collapsible group. Collapsing removes the group's
+ * unlocked detail while both locks retain their sticky positions and the Name
+ * column remains the scrollable boundary.
+ */
+export const WithLockableColumnsAndCollapsedGroup: Story = {
+  render: () => {
+    const [lockedColumnIds, setLockedColumnIds] = useState<string[]>([
+      "email",
+      "role",
+    ])
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records: lockableColumnRecords }),
+      },
+    })
+    const columns = [
+      { ...lockableColumns[1]!, headerGroupId: "employment" },
+      { ...lockableColumns[2]!, headerGroupId: "employment" },
+      { ...lockableColumns[3]!, headerGroupId: "employment" },
+      lockableColumns[0]!,
+      lockableColumns[14]!,
+    ]
+
+    return (
+      <div style={{ maxWidth: 720 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns,
+                frozenColumns: 0,
+                allowColumnHiding: true,
+                allowColumnReordering: true,
+                lockedColumnIds,
+                onLockedColumnIdsChange: setLockedColumnIds,
+                headerGroups: {
+                  employment: {
+                    label: "Employment details",
+                    collapsedColumns: ["email"],
+                    defaultCollapsed: true,
+                  },
+                },
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const visibleColumnOrder = () =>
+      canvas
+        .getAllByRole("columnheader")
+        .map((header) => header.textContent)
+        .filter((label) =>
+          ["Email", "Role", "Department", "Name", "Status"].includes(
+            label ?? ""
+          )
+        )
+    const stickyOffsets = () => ({
+      email: getComputedStyle(
+        canvas.getByRole("columnheader", { name: "Email" })
+      ).left,
+      role: getComputedStyle(canvas.getByRole("columnheader", { name: "Role" }))
+        .left,
+    })
+    let collapsedOffsets!: ReturnType<typeof stickyOffsets>
+    let collapsedOrder!: ReturnType<typeof visibleColumnOrder>
+
+    await step(
+      "Keep both locked columns when the group starts collapsed",
+      async () => {
+        await canvas.findByText("Person 1")
+
+        expect(
+          canvas.getByRole("button", { name: "Employment details" })
+        ).toHaveAttribute("aria-expanded", "false")
+        expect(
+          canvas.queryByRole("columnheader", { name: "Department" })
+        ).not.toBeInTheDocument()
+
+        const emailHeader = canvas.getByRole("columnheader", { name: "Email" })
+        const roleHeader = canvas.getByRole("columnheader", { name: "Role" })
+        const nameHeader = canvas.getByRole("columnheader", { name: "Name" })
+        expect(getComputedStyle(emailHeader).position).toBe("sticky")
+        expect(getComputedStyle(roleHeader).position).toBe("sticky")
+        expect(getComputedStyle(nameHeader).position).not.toBe("sticky")
+        collapsedOffsets = stickyOffsets()
+        collapsedOrder = visibleColumnOrder()
+        expect(Number.parseFloat(collapsedOffsets.role)).toBeGreaterThan(
+          Number.parseFloat(collapsedOffsets.email)
+        )
+      }
+    )
+
+    await step(
+      "Expand and collapse without changing the frozen group",
+      async () => {
+        const toggle = canvas.getByRole("button", {
+          name: "Employment details",
+        })
+        toggle.focus()
+        await userEvent.keyboard("{Enter}")
+        expect(toggle).toHaveFocus()
+        expect(toggle).toHaveAttribute("aria-expanded", "true")
+        await canvas.findByRole("columnheader", { name: "Department" })
+        await waitFor(() => {
+          expect(
+            canvasElement.querySelector('[class*="f0-collapsing-group-"]')
+          ).not.toBeInTheDocument()
+        })
+        expect(stickyOffsets()).toEqual(collapsedOffsets)
+
+        await userEvent.keyboard("{Enter}")
+        expect(toggle).toHaveFocus()
+        expect(toggle).toHaveAttribute("aria-expanded", "false")
+        await waitFor(() => {
+          expect(
+            canvas.queryByRole("columnheader", { name: "Department" })
+          ).not.toBeInTheDocument()
+        })
+        expect(stickyOffsets()).toEqual(collapsedOffsets)
+        expect(visibleColumnOrder()).toEqual(collapsedOrder)
+      }
+    )
+  },
+}
+
+/**
  * The hover "⋮" row-actions overlay must not swallow the last column's content.
  * Here the trailing column is a `tagList` whose "+N" pill sits under the overlay's
  * fade area. The overlay is transparent to pointer events (only the buttons are

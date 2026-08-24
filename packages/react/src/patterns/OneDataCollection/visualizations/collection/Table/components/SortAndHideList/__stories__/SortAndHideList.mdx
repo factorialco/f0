@@ -32,8 +32,8 @@ functionality.
 - **Toggle Visibility**: Switches control whether columns are shown or hidden
 - **Frozen Columns**: Some columns can be marked as non-hideable (disabled
   switches)
-- **User-managed Locks**: Any number of columns can be independently locked or
-  unlocked
+- **User-managed Locks**: Caller-controlled rows can be independently marked as
+  lockable, locked, or unlocked
 - **Accessible Controls**: Visibility, lock, and remove actions support keyboard
   and screen reader use
 
@@ -121,9 +121,11 @@ Each item has the following structure:
 
 - `onChange` controls order and visibility.
 - `onRemove` mutates the caller-owned item set rather than hiding an item.
-- `onLockedChange` reports each item and its next lock state; the table caller
-  keeps any number of locks, moves them into its frozen group, and persists
-  their order.
+- `onLockedChange` reports each item and its next lock state. The list renders
+  the caller-provided `locked`, `lockable`, and `canHide` values; `TableSettings`
+  uses them to keep one visible scrollable column whenever one exists outside
+  the permanent frozen group, while moving the other locks into their frozen
+  group.
 
 ## Accessibility
 

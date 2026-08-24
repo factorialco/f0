@@ -227,6 +227,8 @@ export type TableVisualizationOptions<
    * The user-managed frozen columns in the column-settings popover. Locked
    * columns move into a sticky group on the left, stay visible, and cannot be
    * reordered or removed. Their array order controls their order in that group.
+   * One visible managed column always remains unlocked as the table's
+   * scrollable region; an all-locked input is normalized accordingly.
    *
    * Unlocking a column returns it to its saved position. Columns covered by
    * `frozenColumns` remain permanently locked before this managed group.

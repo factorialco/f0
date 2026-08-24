@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
   screen,
   userEvent,
+  waitFor,
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
@@ -38,7 +39,9 @@ describe("Table SettingsRenderer column locking", () => {
     const roleRow = screen.getByText("Role").closest("li") as HTMLElement
     expect(within(nameRow).getByRole("switch")).toBeDisabled()
     expect(within(emailRow).getByRole("switch")).toBeDisabled()
-    expect(within(roleRow).getByRole("switch")).not.toBeDisabled()
+    // The remaining scrollable column cannot be hidden even when the locked
+    // set is read-only.
+    expect(within(roleRow).getByRole("switch")).toBeDisabled()
     expect(
       within(nameRow).queryByRole("button", { name: /column: Name/ })
     ).not.toBeInTheDocument()
@@ -117,6 +120,15 @@ describe("Table SettingsRenderer column locking", () => {
     expect(
       screen.getByRole("button", { name: "Unlock column: Name" })
     ).toBeInTheDocument()
+    const onlyScrollableEmailRow = screen
+      .getByText("Email")
+      .closest("li") as HTMLElement
+    expect(within(onlyScrollableEmailRow).getByRole("switch")).toBeDisabled()
+    expect(
+      within(onlyScrollableEmailRow).queryByRole("button", {
+        name: "Lock column: Email",
+      })
+    ).not.toBeInTheDocument()
 
     expect(
       screen
@@ -165,5 +177,62 @@ describe("Table SettingsRenderer column locking", () => {
     expect(
       within(updatedNameRow).queryByRole("button", { name: "Remove column" })
     ).not.toBeInTheDocument()
+  })
+
+  it("normalizes an externally controlled all-locked set before emitting changes", async () => {
+    const onLockedColumnIdsChange = vi.fn()
+
+    render(
+      <DataCollectionSettingsProvider>
+        <SettingsRenderer
+          columns={columns}
+          frozenColumns={0}
+          allowColumnReordering
+          allowColumnHiding
+          lockedColumnIds={["name", "email", "role"]}
+          onLockedColumnIdsChange={onLockedColumnIdsChange}
+        />
+      </DataCollectionSettingsProvider>
+    )
+
+    const roleRow = screen.getByText("Role").closest("li") as HTMLElement
+    expect(within(roleRow).getByRole("switch")).toBeDisabled()
+    expect(
+      within(roleRow).queryByRole("button", { name: "Lock column: Role" })
+    ).not.toBeInTheDocument()
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Unlock column: Email" })
+    )
+
+    expect(onLockedColumnIdsChange).toHaveBeenCalledWith(["name"])
+  })
+
+  it("keeps one visible unlocked column when bulk hiding", async () => {
+    render(
+      <DataCollectionSettingsProvider>
+        <SettingsRenderer
+          columns={columns}
+          frozenColumns={0}
+          allowColumnReordering
+          allowColumnHiding
+          lockedColumnIds={["name"]}
+          onLockedColumnIdsChange={vi.fn()}
+        />
+      </DataCollectionSettingsProvider>
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide all" }))
+
+    await waitFor(() => {
+      const emailRow = screen.getByText("Email").closest("li") as HTMLElement
+      const roleRow = screen.getByText("Role").closest("li") as HTMLElement
+      expect(within(emailRow).getByRole("switch")).not.toBeChecked()
+      expect(within(roleRow).getByRole("switch")).toBeChecked()
+      expect(within(roleRow).getByRole("switch")).toBeDisabled()
+      expect(
+        within(roleRow).queryByRole("button", { name: "Lock column: Role" })
+      ).not.toBeInTheDocument()
+    })
   })
 })

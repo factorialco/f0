@@ -1,5 +1,6 @@
-import { renderHook } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+
+import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { TableColumnDefinition, TableVisualizationSettings } from "../../types"
 import { useColumns } from "../useColums"
@@ -456,5 +457,81 @@ describe("useColumns with settings", () => {
         locked: true,
       }),
     ])
+    expect(result.current.stickyColumnIds).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+  })
+
+  it("leaves the final ordered column visible and unlocked when every managed column is requested", () => {
+    const { result } = renderHook(() =>
+      useColumns(
+        mockColumns,
+        0,
+        { hidden: ["column4"] },
+        true,
+        true,
+        ["column1", "column2", "column3", "column4"],
+        true
+      )
+    )
+
+    expect(result.current.managedLockedColumnIds).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+    expect(result.current.stickyColumnIds).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+    expect(
+      result.current.columnsWithStatus.find(
+        ({ column }) => column.id === "column4"
+      )
+    ).toMatchObject({
+      canHide: false,
+      locked: false,
+      visible: true,
+    })
+  })
+
+  it("restores a hidden unlocked column when every scrollable column is hidden", () => {
+    const { result } = renderHook(() =>
+      useColumns(
+        mockColumns,
+        0,
+        { hidden: ["column3", "column4"] },
+        true,
+        true,
+        ["column1", "column2"],
+        true
+      )
+    )
+
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column1",
+      "column2",
+      "column4",
+    ])
+    expect(
+      result.current.columnsWithStatus.find(
+        ({ column }) => column.id === "column4"
+      )
+    ).toMatchObject({
+      canHide: false,
+      locked: false,
+      visible: true,
+    })
+  })
+
+  it("does not turn the legacy non-editable first column into a sticky column", () => {
+    const { result } = renderHook(() =>
+      useColumns(mockColumns, 0, {}, true, true)
+    )
+
+    expect(result.current.stickyColumnIds).toEqual([])
   })
 })

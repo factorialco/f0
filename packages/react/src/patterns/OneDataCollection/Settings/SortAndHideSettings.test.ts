@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest"
 
 import type { SortAndHideListItem } from "../visualizations/collection/Table/components/SortAndHideList/types"
-import { mergeUnlockedOrderIntoBaseline } from "./SortAndHideSettings"
+import {
+  mergeUnlockedOrderIntoBaseline,
+  setAllItemsVisibility,
+} from "./SortAndHideSettings"
 
 const item = (id: string, locked = false): SortAndHideListItem => ({
   id,
@@ -31,5 +34,32 @@ describe("mergeUnlockedOrderIntoBaseline", () => {
         ]
       )
     ).toEqual(["name", "location", "role", "email"])
+  })
+})
+
+describe("setAllItemsVisibility", () => {
+  const visibleItem = (id: string, locked = false): SortAndHideListItem => ({
+    ...item(id, locked),
+    canHide: !locked,
+    visible: true,
+  })
+
+  it("keeps the existing hide-all behavior by default", () => {
+    const result = setAllItemsVisibility(
+      [visibleItem("name"), visibleItem("email")],
+      false
+    )
+
+    expect(result.map(({ visible }) => visible)).toEqual([false, false])
+  })
+
+  it("retains the final unlocked item when requested by table settings", () => {
+    const result = setAllItemsVisibility(
+      [visibleItem("name", true), visibleItem("email"), visibleItem("role")],
+      false,
+      true
+    )
+
+    expect(result.map(({ visible }) => visible)).toEqual([true, false, true])
   })
 })

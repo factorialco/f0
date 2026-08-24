@@ -69,6 +69,10 @@ type UseColumnsReturn<
   colsOrder: ColId[]
   setColsOrder: (colsOrder: ColId[]) => void
   savedOrder: ColId[]
+  /** User-managed lock ids after enforcing a remaining scrollable column. */
+  managedLockedColumnIds: ColId[]
+  /** Permanent and user-managed columns that participate in sticky layout. */
+  stickyColumnIds: ColId[]
   columnsWithStatus: {
     column: TableColumnDefinition<R, Sortings, Summaries> & { id: ColId }
     canHide: boolean
@@ -169,22 +173,88 @@ export const useColumns = <
     [columnsInSavedOrder]
   )
 
-  const columnsWithStatus = useMemo(() => {
+  const columnGroups = useMemo(() => {
     const leadingColumns = columnsInSavedOrder.slice(0, nonEditableColumns)
     const orderedColumns = columnsInSavedOrder.slice(nonEditableColumns)
     const orderedColumnsById = new Map(
       orderedColumns.map((column) => [getColumnId(column), column])
     )
-    const managedLockedColumns = [...new Set(lockedColumnIds ?? [])]
+    const requestedManagedLockedColumns = [...new Set(lockedColumnIds ?? [])]
       .map((id) => orderedColumnsById.get(id))
       .filter(
         (column): column is TableColumnDefinition<R, Sortings, Summaries> =>
           !!column
       )
+    const requestedManagedLockedIds = new Set(
+      requestedManagedLockedColumns.map(getColumnId)
+    )
+    const requestedUnlockedColumns = orderedColumns.filter(
+      (column) => !requestedManagedLockedIds.has(getColumnId(column))
+    )
+
+    // A user-managed frozen group must never consume the whole scrollable
+    // table. Prefer an already-visible unlocked column; invalid controlled
+    // input that locks every column falls back to the final ordered column.
+    const fallbackUnlockedColumn = usesExplicitColumnLocking
+      ? (requestedUnlockedColumns.find(
+          (column) => !colsHidden.includes(getColumnId(column))
+        ) ??
+        requestedUnlockedColumns.at(-1) ??
+        orderedColumns.at(-1))
+      : undefined
+    const fallbackUnlockedId = fallbackUnlockedColumn
+      ? getColumnId(fallbackUnlockedColumn)
+      : undefined
+    const managedLockedColumns = requestedManagedLockedColumns.filter(
+      (column) => getColumnId(column) !== fallbackUnlockedId
+    )
     const managedLockedIds = new Set(managedLockedColumns.map(getColumnId))
     const unlockedColumns = orderedColumns.filter(
       (column) => !managedLockedIds.has(getColumnId(column))
     )
+    const visibleUnlockedColumns = unlockedColumns.filter(
+      (column) => !colsHidden.includes(getColumnId(column))
+    )
+    const forcedVisibleUnlockedId =
+      usesExplicitColumnLocking && visibleUnlockedColumns.length === 0
+        ? fallbackUnlockedId
+        : undefined
+    const effectiveVisibleUnlockedIds = unlockedColumns
+      .filter(
+        (column) =>
+          getColumnId(column) === forcedVisibleUnlockedId ||
+          !colsHidden.includes(getColumnId(column))
+      )
+      .map(getColumnId)
+
+    return {
+      leadingColumns,
+      managedLockedColumns,
+      managedLockedIds,
+      unlockedColumns,
+      forcedVisibleUnlockedId,
+      soleVisibleUnlockedId:
+        usesExplicitColumnLocking && effectiveVisibleUnlockedIds.length === 1
+          ? effectiveVisibleUnlockedIds[0]
+          : undefined,
+    }
+  }, [
+    columnsInSavedOrder,
+    nonEditableColumns,
+    lockedColumnIds,
+    usesExplicitColumnLocking,
+    colsHidden,
+  ])
+
+  const columnsWithStatus = useMemo(() => {
+    const {
+      leadingColumns,
+      managedLockedColumns,
+      managedLockedIds,
+      unlockedColumns,
+      forcedVisibleUnlockedId,
+      soleVisibleUnlockedId,
+    } = columnGroups
 
     const withStatus = (
       column: TableColumnDefinition<R, Sortings, Summaries>,
@@ -192,21 +262,21 @@ export const useColumns = <
       frozen: boolean
     ) => {
       const id = getColumnId(column)
-      const locked =
-        frozen ||
-        (!!usesExplicitColumnLocking && !!lockedColumnIds?.includes(id))
+      const locked = frozen || managedLockedIds.has(id)
 
       return {
         column: {
           ...column,
           id,
         },
-        canHide: locked
-          ? false
-          : allowHiding
-            ? !(column.noHiding ?? false)
-            : false,
-        visible: locked || !colsHidden.includes(id),
+        canHide:
+          locked || id === soleVisibleUnlockedId
+            ? false
+            : allowHiding
+              ? !(column.noHiding ?? false)
+              : false,
+        visible:
+          locked || id === forcedVisibleUnlockedId || !colsHidden.includes(id),
         sortable: !locked && !!allowSorting,
         frozen,
         locked,
@@ -234,16 +304,19 @@ export const useColumns = <
         )
       ),
     ]
-  }, [
-    frozenColumns,
-    colsHidden,
-    columnsInSavedOrder,
-    nonEditableColumns,
-    allowSorting,
-    allowHiding,
-    lockedColumnIds,
-    usesExplicitColumnLocking,
-  ])
+  }, [colsHidden, allowSorting, allowHiding, columnGroups])
+
+  const managedLockedColumnIds = useMemo(
+    () => columnGroups.managedLockedColumns.map(getColumnId),
+    [columnGroups.managedLockedColumns]
+  )
+  const stickyColumnIds = useMemo(
+    () => [
+      ...columnsInSavedOrder.slice(0, frozenColumns).map(getColumnId),
+      ...managedLockedColumnIds,
+    ],
+    [columnsInSavedOrder, frozenColumns, managedLockedColumnIds]
+  )
 
   const columns = useMemo(() => {
     return columnsWithStatus
@@ -259,5 +332,7 @@ export const useColumns = <
     colsOrder,
     setColsOrder,
     savedOrder,
+    managedLockedColumnIds,
+    stickyColumnIds,
   }
 }

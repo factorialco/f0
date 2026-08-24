@@ -37,6 +37,8 @@ export type SortAndHideSettingsProps = {
    * When present, reordering unlocked rows keeps locked ids in these slots.
    */
   orderBaseline?: readonly string[]
+  /** Prevents bulk hiding from removing the final scrollable table column. */
+  keepOneUnlockedVisible?: boolean
 }
 
 export const mergeUnlockedOrderIntoBaseline = (
@@ -64,6 +66,29 @@ export const mergeUnlockedOrderIntoBaseline = (
   ]
 }
 
+export const setAllItemsVisibility = (
+  items: SortAndHideListItem[],
+  visible: boolean,
+  keepOneUnlockedVisible = false
+) => {
+  const itemToKeepVisible =
+    !visible && keepOneUnlockedVisible
+      ? [...items]
+          .reverse()
+          .find((item) => !item.locked && item.visible && item.canHide)
+      : undefined
+
+  return items.map((item) => ({
+    ...item,
+    visible:
+      item.id === itemToKeepVisible?.id
+        ? true
+        : item.canHide
+          ? visible
+          : item.visible,
+  }))
+}
+
 /**
  * Shared settings UI for reordering and hiding a list of entries (table
  * columns, graph metadata, …). Persists `{ order, hidden }` to the given
@@ -82,6 +107,7 @@ export const SortAndHideSettings = ({
   onRemoveColumn,
   onLockedColumnChange,
   orderBaseline,
+  keepOneUnlockedVisible = false,
 }: SortAndHideSettingsProps) => {
   const i18n = useI18n()
   const { setVisualizationSettings } = useDataCollectionSettings()
@@ -97,12 +123,7 @@ export const SortAndHideSettings = ({
   }
 
   const toggleAll = (visible: boolean) => {
-    onChange(
-      items.map((item) => ({
-        ...item,
-        visible: item.canHide ? visible : item.visible,
-      }))
-    )
+    onChange(setAllItemsVisibility(items, visible, keepOneUnlockedVisible))
   }
 
   const showToggleAll =
