@@ -216,7 +216,7 @@ export const BaseCommunityPost = ({
 
   return (
     <div
-      className="flex w-full cursor-pointer flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
+      className="@container flex w-full cursor-pointer flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
       onClick={handleClick}
       id={`community-post-${id}`}
     >
@@ -230,9 +230,19 @@ export const BaseCommunityPost = ({
           phones, which is two things to keep in step for one picture. */}
       <div className="flex min-w-0 flex-row items-center gap-3">
         {author ? (
+          // `flex` AND `leading-none`, so the link is exactly the avatar.
+          //
+          // The row was centring this link correctly all along — the link was
+          // just taller than the picture in it. An avatar sits in a text line
+          // box, so a 32px picture came in a 37px box with the extra 5px as
+          // descender space BELOW it, which put the picture 2.5px above the
+          // centre of everything beside it. `leading-[0]` — not `leading-none`,
+          // which still leaves a 1em strut and 2px of it showing — collapses the
+          // line box to the picture, and `flex` keeps the box the child's size.
           <F0Link
             href={author.url || "#"}
             title={authorFullName}
+            className="flex items-center leading-[0]"
             stopPropagation
           >
             <F0AvatarPerson
@@ -247,78 +257,82 @@ export const BaseCommunityPost = ({
         {/* No gap: the name and the date are one two-line block, and the
             avatar beside them is centred on the pair (`items-center` above). */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex flex-row justify-between">
-            <div className="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
-              {author ? (
-                <F0Link
-                  href={author.url}
-                  title={authorFullName}
-                  className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
-                  stopPropagation
-                >
-                  {authorFullName}
-                </F0Link>
-              ) : null}
-              <span
-                className={cn(
-                  "text-f1-foreground-secondary",
-                  !author && "capitalize"
-                )}
-              >
-                {inLabel}
-              </span>
+          <div className="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
+            {author ? (
               <F0Link
-                onClick={group.onClick}
-                title={group.title}
+                href={author.url}
+                title={authorFullName}
                 className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
                 stopPropagation
-                href="#"
               >
-                {group.title}
+                {authorFullName}
               </F0Link>
-            </div>
-
-            <div className="flex flex-row gap-2">
-              <div className="hidden flex-row gap-2 md:flex">
-                {actions?.map((act) => (
-                  <F0Button
-                    hideLabel={!act.label}
-                    key={act.label}
-                    {...(act.icon && { icon: act.icon })}
-                    variant="outline"
-                    size="md"
-                    onClick={act.onClick}
-                    label={act.label ?? ""}
-                    title={act.label ?? ""}
-                  />
-                ))}
-                {dropdownItems?.length && (
-                  <Dropdown
-                    items={dropdownItems}
-                    icon={EllipsisHorizontal}
-                    size="sm"
-                  />
-                )}
-              </div>
-              <div className="md:hidden">
-                <Dropdown
-                  items={[
-                    {
-                      label: comment.label,
-                      onClick: comment.onClick,
-                    },
-                    ...(dropdownItems ?? []),
-                  ]}
-                  icon={EllipsisHorizontal}
-                  size="sm"
-                />
-              </div>
-            </div>
+            ) : null}
+            <span
+              className={cn(
+                "text-f1-foreground-secondary",
+                !author && "capitalize"
+              )}
+            >
+              {inLabel}
+            </span>
+            <F0Link
+              onClick={group.onClick}
+              title={group.title}
+              className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
+              stopPropagation
+              href="#"
+            >
+              {group.title}
+            </F0Link>
           </div>
+
           {/* `text-base`, like the author line above it: the two are one
               header, and a smaller size made the date read as a footnote to the
               line it sits under. */}
           <span className="text-base text-f1-foreground-secondary">{date}</span>
+        </div>
+        {/* THE ACTIONS SIT ON THE AVATAR'S ROW, not on the first line of the
+            heading. Inside that line they were a 32px control on a 21px line,
+            so the whole two-line block grew to fit them and the header carried
+            height nothing was using. Out here they are centred on the header as
+            a whole (`items-center` on the row), beside the name rather than
+            above the date. */}
+        <div className="flex flex-row gap-2">
+          <div className="hidden flex-row gap-2 md:flex">
+            {actions?.map((act) => (
+              <F0Button
+                hideLabel={!act.label}
+                key={act.label}
+                {...(act.icon && { icon: act.icon })}
+                variant="outline"
+                size="md"
+                onClick={act.onClick}
+                label={act.label ?? ""}
+                title={act.label ?? ""}
+              />
+            ))}
+            {dropdownItems?.length && (
+              <Dropdown
+                items={dropdownItems}
+                icon={EllipsisHorizontal}
+                size="sm"
+              />
+            )}
+          </div>
+          <div className="md:hidden">
+            <Dropdown
+              items={[
+                {
+                  label: comment.label,
+                  onClick: comment.onClick,
+                },
+                ...(dropdownItems ?? []),
+              ]}
+              icon={EllipsisHorizontal}
+              size="sm"
+            />
+          </div>
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
@@ -356,13 +370,26 @@ export const BaseCommunityPost = ({
         )}
       </div>
       {mediaUrl && !event && (
-        // FULL WIDTH, like everything else in the post. The 480px cap dated
+        // FILLS THE POST, UP TO THE READING COLUMN. The old 480px cap dated
         // from when the avatar's gutter took a chunk of the card and the media
-        // sat in what was left; with the body now starting at the card's own
-        // edge it left a third of a wide post empty while the text beside it
-        // ran the full width. The `aspect-video` box still fixes the height, so
-        // filling the column changes what you see, not how tall the card is.
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+        // sat in what was left; with the body starting at the card's own edge it
+        // left a third of a wide post empty while the text beside it ran full
+        // width. But uncapped is the other mistake — `aspect-video` means every
+        // pixel of extra width buys 9/16 of a pixel of height, so on a wide
+        // surface the picture simply swallows the post.
+        //
+        // `max-w-content` (712px) is f0's reading column — the measure the Home
+        // layout gives its main column and the chat gives its messages — so the
+        // media stops where the text would.
+        //
+        // The cap only applies once there is enough room for it to READ as a
+        // cap. Between 712 and 744px it would leave a sliver of empty card
+        // beside the picture, which looks like a bug rather than a decision, so
+        // below 744 (the column plus 32px) the media simply fills the width.
+        // A CONTAINER query, not a viewport one: what the media has to fit is
+        // the post's own box — a card in a rail, a dialog, a feed — and the
+        // window's width says nothing about it.
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl @[744px]:max-w-content">
           {isVideo(mediaUrl) ? (
             <video
               controls
@@ -385,7 +412,7 @@ export const BaseCommunityPost = ({
         </div>
       )}
       {event && (
-        <div className="w-full">
+        <div className="w-full @[744px]:max-w-content">
           <PostEvent {...event} />
         </div>
       )}
