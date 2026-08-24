@@ -1534,6 +1534,27 @@ describe("TableCollection", () => {
         />
       )
 
+    it("uses the normalized sticky count when every managed column is requested", async () => {
+      renderTable({
+        lockedColumnIds: ["name", "email", "display"],
+        onLockedColumnIdsChange: vi.fn(),
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(screen.getByRole("columnheader", { name: "Name" })).toHaveClass(
+        "sticky"
+      )
+      expect(screen.getByRole("columnheader", { name: "Email" })).toHaveClass(
+        "sticky"
+      )
+      expect(
+        screen.getByRole("columnheader", { name: "Display" })
+      ).not.toHaveClass("sticky")
+    })
+
     it("renders no toggle for groups without collapsedColumns", async () => {
       renderTable({ headerGroups: { contact: "Contact" } })
 
@@ -1652,6 +1673,83 @@ describe("TableCollection", () => {
       expect(
         screen.queryByText(testData[0].displayName)
       ).not.toBeInTheDocument()
+    })
+
+    it("keeps locked group columns sticky and retains a scrollable column when collapsed", async () => {
+      renderTable({
+        columns: [
+          {
+            label: "Email",
+            id: "email",
+            headerGroupId: "contact",
+            render: (item: Person) => item.email,
+          },
+          {
+            label: "Display",
+            id: "display",
+            headerGroupId: "contact",
+            render: (item: Person) => item.displayName,
+          },
+          {
+            label: "Detail",
+            id: "detail",
+            headerGroupId: "contact",
+            render: () => "Contact detail",
+          },
+          {
+            label: "Name",
+            id: "name",
+            headerGroupId: "contact",
+            render: (item: Person) => item.name,
+          },
+        ],
+        lockedColumnIds: ["email", "display"],
+        onLockedColumnIdsChange: vi.fn(),
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      expect(screen.queryByText("Contact detail")).not.toBeInTheDocument()
+
+      const emailHeader = screen.getByRole("columnheader", { name: "Email" })
+      const displayHeader = screen.getByRole("columnheader", {
+        name: "Display",
+      })
+      const nameHeader = screen.getByRole("columnheader", { name: "Name" })
+      expect(emailHeader).toHaveClass("sticky")
+      expect(displayHeader).toHaveClass("sticky")
+      expect(nameHeader).not.toHaveClass("sticky")
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+      await waitFor(() => {
+        expect(screen.getAllByText("Contact detail")).toHaveLength(
+          testData.length
+        )
+      })
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+      await waitFor(() => {
+        expect(screen.queryAllByText("Contact detail")).toHaveLength(0)
+      })
+      expect(screen.getByRole("columnheader", { name: "Email" })).toHaveClass(
+        "sticky"
+      )
+      expect(screen.getByRole("columnheader", { name: "Display" })).toHaveClass(
+        "sticky"
+      )
+      expect(
+        screen.getByRole("columnheader", { name: "Name" })
+      ).not.toHaveClass("sticky")
     })
 
     it("renders no group header row when headerGroups is omitted", async () => {

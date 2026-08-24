@@ -115,6 +115,18 @@ type TableVisualizationOptions<T> = {
    */
   onRemoveColumn?: (columnId: string) => void
 
+  /**
+   * The user-managed frozen columns. They move into a sticky group on the left
+   * in the order listed here.
+   */
+  lockedColumnIds?: readonly string[]
+
+  /**
+   * Enables lock/unlock actions in the settings popover. Receives the complete
+   * set of locked column ids after each change.
+   */
+  onLockedColumnIdsChange?: (columnIds: string[]) => void
+
   /** Wraps the table in a rounded border container. */
   bordered?: boolean
 
@@ -410,6 +422,78 @@ Allow users to show/hide columns using column settings:
 
 <Canvas of={TableStories.TableColumnOrderingAndHidden} meta={TableStories} />
 
+### User-managed Frozen Columns
+
+Use `lockedColumnIds` with `onLockedColumnIdsChange` when users need to choose
+which columns remain visible while scrolling horizontally. Locked columns move
+into a sticky group on the left and cannot be hidden, reordered, or removed.
+When at least one column exists outside the permanent `frozenColumns` group,
+the table keeps one of those columns visible and unlocked as its scrollable
+region. The final such column cannot be hidden or locked, and an externally
+controlled set that requests every managed column is normalized to the same
+invariant.
+The order of `lockedColumnIds` is the order of the frozen group, so newly locked
+columns append beside the existing locks. Unlocking removes only that column
+and returns it to its saved table position. Its closed-lock button removes the
+lock; hovering or keyboard-focusing an unlocked settings row reveals a
+closed-lock action that adds it without changing the other locks.
+
+Columns covered by `frozenColumns` remain permanently locked before the
+user-managed group. Omit `onLockedColumnIdsChange` when the locked set is fixed
+and should not expose controls.
+
+The review story renders 15 columns in a 720 px container and scrolls to the
+right after locking Name and Role. This keeps the sticky pair visible beside
+the far-right columns and makes horizontal freeze behavior directly
+reviewable.
+
+<Canvas
+  of={TableStories.WithLockableColumns}
+  meta={TableStories}
+  story={{ autoplay: true }}
+/>
+
+Locked columns also survive a collapse of their header group, even when they
+are not listed in the group's `collapsedColumns`. Collapse can remove unlocked
+detail columns, but it does not alter the frozen count or sticky offsets. The
+story below starts with Email and Role locked inside a collapsed Employment
+details group; Department is hidden while both locks and the scrollable Name
+column remain visible.
+
+<Canvas
+  of={TableStories.WithLockableColumnsAndCollapsedGroup}
+  meta={TableStories}
+  story={{ autoplay: true }}
+/>
+
+```tsx
+const [lockedColumnIds, setLockedColumnIds] = useState<string[]>(["name"])
+
+<OneDataCollection
+  source={source}
+  visualizations={[
+    {
+      type: "table",
+      options: {
+        columns,
+        frozenColumns: 0,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+        lockedColumnIds,
+        onLockedColumnIdsChange: setLockedColumnIds,
+        onRemoveColumn: removeColumn,
+      },
+    },
+  ]}
+/>
+```
+
+Keyboard users can tab to the visible lock button or the focus-revealed row
+actions and activate them with <kbd>Enter</kbd> or <kbd>Space</kbd>. The icon
+buttons include the target label in their accessible name, for example “Lock
+column: Email.” Pointer activation does not leave the row actions visually
+stuck; keyboard activation keeps focus on the corresponding control.
+
 ### Reference Rows
 
 Use `referenceRowType` to highlight one or more rows as reference rows. This is
@@ -541,6 +625,10 @@ Notes:
   ordering and hiding.
 - A collapsed group always keeps at least one column visible. Passing `[]`, or
   only ids that don't belong to the group, leaves the group's first column.
+- Frozen and user-locked columns stay visible regardless of
+  `collapsedColumns`. When a column exists outside the permanent
+  `frozenColumns` group, collapsing also retains one such unlocked column if it
+  would otherwise leave only sticky columns.
 - `defaultCollapsed` is read once on mount. Afterwards the collapsed state
   belongs to the table; use `onHeaderGroupCollapsedChange` to observe it.
 - The group label takes the alignment of the columns under it, and the toggle

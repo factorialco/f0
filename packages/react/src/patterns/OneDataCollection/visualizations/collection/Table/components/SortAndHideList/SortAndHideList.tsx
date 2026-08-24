@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react"
+
 import { Reorder, useDragControls } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -11,10 +13,36 @@ import { cn } from "@/lib/utils"
 
 import { SortAndHideListItem } from "./types"
 
+const isLocked = (item: SortAndHideListItem) =>
+  item.locked ?? (!item.sortable && !item.canHide && !item.disabledReason)
+
+const isSortable = (item: SortAndHideListItem) =>
+  !!item.sortable && !isLocked(item)
+
+export const mergeReorderedItems = (
+  currentItems: SortAndHideListItem[],
+  reorderedItems: SortAndHideListItem[]
+) => {
+  const reorderedSortableItems = reorderedItems.filter(isSortable)
+  const sortableCount = currentItems.filter(isSortable).length
+
+  // Motion only reports its registered Reorder.Item values. Abort rather than
+  // persist a partial order if a drag frame ever omits a sortable row.
+  if (reorderedSortableItems.length !== sortableCount) {
+    return currentItems
+  }
+
+  let sortableIndex = 0
+  return currentItems.map((item) =>
+    isSortable(item) ? reorderedSortableItems[sortableIndex++]! : item
+  )
+}
+
 type ItemProps = {
   item: SortAndHideListItem
   onChangeVisibility: (item: SortAndHideListItem) => void
   onRemove?: (item: SortAndHideListItem) => void
+  onLockedChange?: (item: SortAndHideListItem, locked: boolean) => void
   allowSorting: boolean
   allowHiding: boolean
   isFirst: boolean
@@ -25,6 +53,7 @@ const Item = ({
   item,
   onChangeVisibility,
   onRemove,
+  onLockedChange,
   allowSorting,
   allowHiding,
   isFirst,
@@ -40,25 +69,85 @@ const Item = ({
     isLast && "pb-1"
   )
   const controls = useDragControls()
-  const showRemove = !!item.removable && !!onRemove
+  const locked = isLocked(item)
+  const sortable = isSortable(item)
+  const showRemove = !!item.removable && !locked && !!onRemove
+  const showLock = !!item.lockable && !locked && !!onLockedChange
+  const showUnlock = !!item.lockable && locked && !!onLockedChange
+  const lockButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null)
+  const unlockButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null)
+  const pendingLockFocusRef = useRef<"lock" | "unlock" | null>(null)
+  const keyboardActivationRef = useRef(false)
+
+  const shouldRestoreFocus = (event: React.MouseEvent<HTMLElement>) => {
+    const shouldRestore = keyboardActivationRef.current || event.detail === 0
+    keyboardActivationRef.current = false
+    return shouldRestore
+  }
+
+  const trackKeyboardActivation = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      keyboardActivationRef.current = true
+    }
+  }
+
+  useEffect(() => {
+    const pendingFocus = pendingLockFocusRef.current
+    const target =
+      pendingFocus === "lock" && showLock
+        ? lockButtonRef.current
+        : pendingFocus === "unlock" && showUnlock
+          ? unlockButtonRef.current
+          : null
+
+    if (target) {
+      pendingLockFocusRef.current = null
+      target.focus()
+    }
+  }, [showLock, showUnlock])
 
   const content = (
     <div className={classes}>
-      {allowSorting && (
+      {(allowSorting || item.showLockState) && (
         <div
           className={cn(
             "flex shrink-0 items-center justify-center text-f1-icon",
-            item.sortable && "cursor-grab"
+            sortable && "cursor-grab"
           )}
-          style={{ width: "20px" }}
+          style={{ width: showUnlock ? "28px" : "20px" }}
           onPointerDown={(e) => {
-            if (item.sortable) {
+            if (sortable) {
               controls.start(e)
             }
           }}
         >
-          {item.sortable ? (
+          {sortable ? (
             <F0Icon icon={Handle} size="xs" />
+          ) : showUnlock ? (
+            <span
+              onKeyDown={trackKeyboardActivation}
+              onPointerDown={() => {
+                keyboardActivationRef.current = false
+              }}
+            >
+              <ButtonInternal
+                variant="ghost"
+                size="sm"
+                compact
+                hideLabel
+                icon={LockLocked}
+                label={i18n.t("collections.table.settings.unlockColumn", {
+                  label: item.label,
+                })}
+                ref={unlockButtonRef}
+                onClick={(event) => {
+                  pendingLockFocusRef.current = shouldRestoreFocus(event)
+                    ? "lock"
+                    : null
+                  onLockedChange?.(item, false)
+                }}
+              />
+            </span>
           ) : item.disabledReason ? null : (
             <F0Icon icon={LockLocked} size="sm" />
           )}
@@ -67,22 +156,55 @@ const Item = ({
       <span
         className={cn(
           "flex-1 min-w-0",
-          item.sortable ? "text-f1-foreground" : "text-f1-foreground-secondary"
+          sortable ? "text-f1-foreground" : "text-f1-foreground-secondary"
         )}
       >
         <OneEllipsis>{item.label}</OneEllipsis>
       </span>
-      {showRemove && (
-        <div className="shrink-0 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
-          <ButtonInternal
-            variant="ghost"
-            size="sm"
-            compact
-            hideLabel
-            icon={Delete}
-            label={i18n.collections.table.settings.removeColumn}
-            onClick={() => onRemove?.(item)}
-          />
+      {(showLock || showRemove) && (
+        <div
+          data-column-actions
+          className="shrink-0 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
+        >
+          <div className="flex items-center">
+            {showLock && (
+              <span
+                onKeyDown={trackKeyboardActivation}
+                onPointerDown={() => {
+                  keyboardActivationRef.current = false
+                }}
+              >
+                <ButtonInternal
+                  variant="ghost"
+                  size="sm"
+                  compact
+                  hideLabel
+                  icon={LockLocked}
+                  label={i18n.t("collections.table.settings.lockColumn", {
+                    label: item.label,
+                  })}
+                  ref={lockButtonRef}
+                  onClick={(event) => {
+                    pendingLockFocusRef.current = shouldRestoreFocus(event)
+                      ? "unlock"
+                      : null
+                    onLockedChange?.(item, true)
+                  }}
+                />
+              </span>
+            )}
+            {showRemove && (
+              <ButtonInternal
+                variant="ghost"
+                size="sm"
+                compact
+                hideLabel
+                icon={Delete}
+                label={i18n.collections.table.settings.removeColumn}
+                onClick={() => onRemove?.(item)}
+              />
+            )}
+          </div>
         </div>
       )}
       {allowHiding &&
@@ -107,13 +229,13 @@ const Item = ({
             }}
             title={item.label}
             hideLabel
-            disabled={!item.canHide}
+            disabled={!item.canHide || locked}
           />
         ))}
     </div>
   )
 
-  return item.sortable ? (
+  return sortable ? (
     <Reorder.Item
       value={item}
       drag="y"
@@ -140,6 +262,8 @@ export type SortAndHideListProps = {
    * hiding: the caller is expected to drop the entry from its source.
    */
   onRemove?: (item: SortAndHideListItem) => void
+  /** Called when the user locks or unlocks an item. */
+  onLockedChange?: (item: SortAndHideListItem, locked: boolean) => void
   allowSorting: boolean
   allowHiding: boolean
 }
@@ -148,6 +272,7 @@ export const SortAndHideList = ({
   items,
   onChange,
   onRemove,
+  onLockedChange,
   allowSorting,
   allowHiding,
 }: SortAndHideListProps) => {
@@ -155,8 +280,8 @@ export const SortAndHideList = ({
     onChange?.(items.map((i) => (i.id === item.id ? item : i)))
   }
 
-  const handleOnChange = (items: SortAndHideListItem[]) => {
-    onChange?.(items)
+  const handleOnChange = (reorderedItems: SortAndHideListItem[]) => {
+    onChange?.(mergeReorderedItems(items, reorderedItems))
   }
 
   return (
@@ -173,6 +298,7 @@ export const SortAndHideList = ({
           key={item.id}
           onChangeVisibility={onChangeVisibility}
           onRemove={onRemove}
+          onLockedChange={onLockedChange}
           allowSorting={allowSorting}
           allowHiding={allowHiding}
           isFirst={index === 0}
