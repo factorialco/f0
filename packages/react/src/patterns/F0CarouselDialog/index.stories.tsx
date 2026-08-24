@@ -86,23 +86,31 @@ const ITEMS: F0CarouselDialogItem[] = POSTS.map((post) => ({
   ),
 }))
 
-const Demo = ({ loop }: { loop?: boolean }) => {
+const Demo = ({
+  loop,
+  items = ITEMS,
+}: {
+  loop?: boolean
+  items?: F0CarouselDialogItem[]
+}) => {
   const [openId, setOpenId] = useState<string | null>(null)
 
   return (
     <div className="flex flex-col items-start gap-2 p-4">
-      {POSTS.map((post) => (
-        <F0Button
-          key={post.id}
-          variant="outline"
-          label={post.title}
-          onClick={() => setOpenId(post.id)}
-        />
-      ))}
+      {POSTS.filter((post) => items.some((item) => item.id === post.id)).map(
+        (post) => (
+          <F0Button
+            key={post.id}
+            variant="outline"
+            label={post.title}
+            onClick={() => setOpenId(post.id)}
+          />
+        )
+      )}
       <F0CarouselDialog
         isOpen={openId !== null}
         onClose={() => setOpenId(null)}
-        items={ITEMS}
+        items={items}
         currentId={openId ?? ITEMS[0].id}
         onNavigate={setOpenId}
         loop={loop}
@@ -167,3 +175,15 @@ export const Default: Story = {
  * without noticing you have.
  */
 export const Looping: Story = { render: () => <Demo loop /> }
+
+/**
+ * ONE ITEM, and so not a carousel at all: no arrows and no "1 of 1" — a reading
+ * nobody needs, on a dialog with nowhere to go.
+ *
+ * Worth knowing because a set's length is usually data: a feed filtered down to a
+ * single post should quietly become an ordinary dialog rather than growing two
+ * dead controls, and it does.
+ */
+export const SingleItem: Story = {
+  render: () => <Demo items={ITEMS.slice(0, 1)} />,
+}

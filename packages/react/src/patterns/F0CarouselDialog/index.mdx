@@ -74,9 +74,14 @@ name.
 
 ### When not to use
 
-Not for a single item — with one page there are no arrows and no position, and a
-plain `F0Dialog` says so more directly. Not for steps of one task. And not where
-the reader needs to compare pages side by side, since only one is ever visible.
+Not for steps of one task, and not where the reader needs to compare pages side by
+side, since only one is ever visible.
+
+A set that happens to hold **one** item is fine, though — it quietly becomes an
+ordinary dialog rather than growing two dead controls, so you don't have to branch
+on the length of your own data.
+
+<Canvas of={Stories.SingleItem} />
 
 ## Accessibility
 
