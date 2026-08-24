@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.47.0](https://github.com/factorialco/f0/compare/f0-react-v6.46.1...f0-react-v6.47.0) (2026-08-24)
+
+
+### Features
+
+* **CardSelectable:** add an opt-in compact density ([#5193](https://github.com/factorialco/f0/issues/5193)) ([c6b7495](https://github.com/factorialco/f0/commit/c6b7495062968da01d263f78c6c780af901fc553))
+
 ## [6.46.1](https://github.com/factorialco/f0/compare/f0-react-v6.46.0...f0-react-v6.46.1) (2026-08-22)
 
 
