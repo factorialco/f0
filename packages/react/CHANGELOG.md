@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.47.1](https://github.com/factorialco/f0/compare/f0-react-v6.47.0...f0-react-v6.47.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **EditableTable:** hide select chevron on disabled cells ([#5187](https://github.com/factorialco/f0/issues/5187)) ([a025406](https://github.com/factorialco/f0/commit/a025406f2119852392673a3e1539468151df46c9))
+* **F0Graph:** frame the entry target (initialFocusNodeId) reliably on arrival ([#5183](https://github.com/factorialco/f0/issues/5183)) ([7270f8a](https://github.com/factorialco/f0/commit/7270f8a9fbfefe4db0d481a282c79593e062cf2c))
+
 ## [6.47.0](https://github.com/factorialco/f0/compare/f0-react-v6.46.1...f0-react-v6.47.0) (2026-08-24)
 
 
