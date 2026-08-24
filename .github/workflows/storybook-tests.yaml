@@ -146,6 +146,18 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
+      # The aria surface (role + accessible-name pairs per story), captured in
+      # the same postVisit pass. Sharded exactly like the a11y artifact above;
+      # the aria-baseline / aria-diff jobs below stitch the shards together.
+      - name: Upload aria snapshots
+        if: always() && steps.run_tests.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: aria-snapshots-${{ matrix.shard }}
+          path: packages/react/aria-snapshots.jsonl
+          if-no-files-found: ignore
+          retention-days: 1
+
   # Single job to gate the branch on, so protection rules do not have to list
   # every shard, and does not need editing when SHARD_TOTAL changes. Named to
   # match the "✅ …" gate every other PR workflow now exposes.
@@ -248,3 +260,187 @@ jobs:
           comment-type: a11y_axe
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-body: ${{ steps.a11y_comment.outputs.body }}
+
+  # Publish the aria surface of `main` — the role + accessible-name pairs every
+  # story renders — so PRs have something to diff against.
+  #
+  # This is the whole reason the check needs no second Storybook build: the
+  # workflow already visits all ~2.3k stories on every push to main, so the
+  # baseline costs one artifact merge. The PR side compares against it directly.
+  #
+  # Deliberately gated on `needs.test.result == 'success'`: a run where a shard
+  # failed produced a *partial* snapshot set, and publishing that as the
+  # baseline would make the next PR report every unrun story as deleted. A
+  # slightly stale but complete baseline beats a fresh broken one.
+  aria-baseline:
+    needs: [detect-changes, test]
+    name: "[⚛️ REACT] aria baseline (main)"
+    if: >
+      needs.test.result == 'success' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # No `merge-multiple` — every shard names its file `aria-snapshots.jsonl`,
+      # so merging would have them overwrite each other. Same pattern as the
+      # a11y artifacts above.
+      - name: Download aria snapshots from all shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: aria-snapshots-*
+          path: /tmp/aria-shards
+      - name: Merge shard artifacts
+        run: |
+          shopt -s nullglob
+          files=(/tmp/aria-shards/*/aria-snapshots.jsonl)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::warning::No aria snapshots produced — baseline left unchanged."
+            exit 0
+          fi
+          mkdir -p /tmp/aria-baseline
+          cat "${files[@]}" > /tmp/aria-baseline/aria-snapshots.jsonl
+          echo "Merged ${#files[@]} shard(s), $(wc -l < /tmp/aria-baseline/aria-snapshots.jsonl) stories."
+      # 90 days, unlike the 1-day PR artifacts: this one has to still be there
+      # for whatever PR opens next. The lookup below walks back through recent
+      # main runs, so an occasional gap is survivable.
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: aria-baseline
+          path: /tmp/aria-baseline/aria-snapshots.jsonl
+          if-no-files-found: ignore
+          retention-days: 90
+
+  # Diff this PR's aria surface against the main baseline and comment.
+  #
+  # Advisory by design — it posts a comment and never fails. The point of
+  # starting non-blocking is to see how much real churn these role/name diffs
+  # carry before anyone's merge depends on them.
+  #
+  # Not gated on by "✅ Storybook Tests" for the same reason the a11y comment
+  # isn't: a best-effort PR comment is not worth blocking a merge over.
+  aria-diff:
+    needs: [detect-changes, test]
+    name: "[⚛️ REACT] aria surface diff"
+    if: >
+      always() && needs.test.result != 'skipped' &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      # Required to list and download an artifact belonging to a *different*
+      # workflow run (the main baseline).
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      # Walk recent successful main runs newest-first and take the first that
+      # actually carries a non-expired baseline. A single lookup at the latest
+      # run would come up empty whenever that run predates this feature, failed,
+      # or had its artifact expire.
+      - name: Find the latest main baseline
+        id: baseline_run
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner, repo,
+              workflow_id: 'storybook-tests.yaml',
+              branch: 'main',
+              event: 'push',
+              status: 'success',
+              per_page: 20,
+            });
+            for (const run of runs.data.workflow_runs) {
+              const arts = await github.rest.actions.listWorkflowRunArtifacts({
+                owner, repo, run_id: run.id, per_page: 100,
+              });
+              const hit = arts.data.artifacts.find(
+                (a) => a.name === 'aria-baseline' && !a.expired
+              );
+              if (hit) {
+                core.info(`Baseline from run ${run.id} (${run.head_sha.slice(0, 7)})`);
+                core.setOutput('run_id', String(run.id));
+                return;
+              }
+            }
+            core.warning('No aria-baseline artifact found on main yet — the first main run after this lands will create one.');
+            core.setOutput('run_id', '');
+
+      - name: Download main baseline
+        if: steps.baseline_run.outputs.run_id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: aria-baseline
+          path: /tmp/aria-base
+          run-id: ${{ steps.baseline_run.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download this PR's aria snapshots
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: aria-snapshots-*
+          path: /tmp/aria-shards
+
+      - name: Merge shard artifacts
+        run: |
+          shopt -s nullglob
+          mkdir -p /tmp/aria-head
+          files=(/tmp/aria-shards/*/aria-snapshots.jsonl)
+          if [ ${#files[@]} -gt 0 ]; then
+            cat "${files[@]}" > /tmp/aria-head/aria-snapshots.jsonl
+            echo "Merged ${#files[@]} shard(s), $(wc -l < /tmp/aria-head/aria-snapshots.jsonl) stories."
+          else
+            echo "No aria snapshots from this run."
+          fi
+
+      - name: Diff the aria surface
+        id: aria_diff
+        continue-on-error: true
+        env:
+          # A failed shard means whole story files are missing from the head
+          # side; the script then suppresses its "deleted story" findings rather
+          # than blame the PR for stories that simply never ran.
+          PARTIAL: ${{ needs.test.result != 'success' && '--partial' || '' }}
+        run: |
+          npx --yes tsx@4 packages/react/.scripts/check-aria-surface.ts \
+            --base /tmp/aria-base \
+            --head /tmp/aria-head \
+            $PARTIAL > /tmp/aria-output.txt 2>&1 || true
+          LAST_JSON_LINE=$(grep -n '^{' /tmp/aria-output.txt | tail -n 1 | cut -d: -f1)
+          if [ -z "$LAST_JSON_LINE" ]; then
+            echo "No JSON output from the aria surface check:"
+            cat /tmp/aria-output.txt
+            exit 0
+          fi
+          sed -n "${LAST_JSON_LINE},\$p" /tmp/aria-output.txt > /tmp/aria-data.json
+          jq -r '.commentMarkdown // ""' /tmp/aria-data.json > /tmp/aria-comment.md || true
+          BREAKING=$(jq -r '.breakingTotal // 0' /tmp/aria-data.json)
+          if [ "$BREAKING" != "0" ]; then
+            echo "::warning::$BREAKING accessible name/role change(s) vs main could break an existing getByRole query — see the PR comment."
+          fi
+          {
+            echo "body<<ARIA_COMMENT_EOF"
+            cat /tmp/aria-comment.md
+            echo "ARIA_COMMENT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post aria surface PR comment
+        if: always() && steps.aria_diff.outputs.body != ''
+        continue-on-error: true
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: aria_surface
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.aria_diff.outputs.body }}
