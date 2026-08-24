@@ -354,10 +354,6 @@ const F0CarouselDialogComponent = ({
     ]
   )
 
-  // Nothing to show and nothing promised: neither items nor a placeholder means
-  // there is no dialog to draw.
-  if (!current && !placeholder) return null
-
   // `+` when the set continues past a count nobody has told us: "3 of 4" would
   // be a number that silently grows every time another page lands.
   const openEnded = hasMore && pagination?.total === undefined
@@ -365,28 +361,59 @@ const F0CarouselDialogComponent = ({
     labels?.position ??
     ((n: number, of: number) => `${n} of ${of}${openEnded ? "+" : ""}`)
 
+  const live = {
+    title: waiting ? placeholder?.title : current?.title,
+    content: waiting ? placeholder?.content : current?.content,
+    status:
+      !waiting && (loaded > 1 || hasMore)
+        ? position(index + 1, total)
+        : undefined,
+  }
+
+  /**
+   * WHAT THE READER LAST SAW, held for the length of the closing animation.
+   *
+   * A dialog does not vanish when you close it, it FADES — and Radix keeps it
+   * mounted the whole way out. By then the app has usually let go of the thing
+   * that was open: `currentId` is cleared, or falls back to the first item. So
+   * the dialog spent its fade re-rendering as some other page, and closing it
+   * from page seven flashed page one on the way out.
+   *
+   * Freezing the last open render is the fix, and it belongs HERE rather than in
+   * every caller: "keep showing what I was showing while you disappear" is not a
+   * thing an app should have to know to ask for.
+   *
+   * NOT UNIT-TESTED, deliberately: jsdom runs no CSS animation, so Radix drops
+   * the content the instant `isOpen` goes false and there is no fade in which to
+   * observe this. It is verified in the browser — closing from "3 of 3" holds
+   * that title and that position all the way out.
+   */
+  const lastOpen = useRef(live)
+  if (isOpen) lastOpen.current = live
+  const shown = isOpen ? live : lastOpen.current
+
+  // Nothing to show and nothing promised: neither items nor a placeholder means
+  // there is no dialog to draw.
+  if (!shown.content && !shown.title) return null
+
   return (
     <F0Dialog
       {...dialogProps}
       isOpen={isOpen}
       onClose={onClose}
-      title={waiting ? placeholder?.title : current?.title}
+      title={shown.title}
       // Only worth saying when there is more than one: "1 of 1" is a reading
       // nobody needs and a dialog that isn't really a carousel.
       //
       // And nothing at all while WAITING: the page's number is exactly what is
       // not known yet, and a number that appears and then corrects itself is
       // worse than no number.
-      headerStatus={
-        !waiting && (loaded > 1 || hasMore)
-          ? position(index + 1, total)
-          : undefined
-      }
+      headerStatus={shown.status}
       // The arrows STAY, held: a row of controls that disappears for the length
       // of a fetch and comes back is the dialog flinching.
       sideControls={waiting || loaded > 1 || hasMore ? sideControls : undefined}
     >
-      {waiting ? placeholder?.content : current?.content}
+      {shown.content}
     </F0Dialog>
   )
 }

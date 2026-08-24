@@ -117,7 +117,10 @@ const Demo = ({
         isOpen={openId !== null}
         onClose={() => setOpenId(null)}
         items={items}
-        currentId={openId ?? ITEMS[0].id}
+        // Not `?? ITEMS[0].id`: nothing is open, and naming the first item as
+        // if it were is how a dialog ends up flashing page one on its way out.
+        // (The component holds its last page through the fade regardless.)
+        currentId={openId ?? ""}
         onNavigate={setOpenId}
         loop={loop}
         width="lg"
