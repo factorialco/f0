@@ -356,7 +356,13 @@ export const BaseCommunityPost = ({
         )}
       </div>
       {mediaUrl && !event && (
-        <div className="relative aspect-video overflow-hidden rounded-xl md:max-w-[480px]">
+        // FULL WIDTH, like everything else in the post. The 480px cap dated
+        // from when the avatar's gutter took a chunk of the card and the media
+        // sat in what was left; with the body now starting at the card's own
+        // edge it left a third of a wide post empty while the text beside it
+        // ran the full width. The `aspect-video` box still fixes the height, so
+        // filling the column changes what you see, not how tall the card is.
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
           {isVideo(mediaUrl) ? (
             <video
               controls
@@ -379,7 +385,7 @@ export const BaseCommunityPost = ({
         </div>
       )}
       {event && (
-        <div className="w-full md:max-w-[480px]">
+        <div className="w-full">
           <PostEvent {...event} />
         </div>
       )}
