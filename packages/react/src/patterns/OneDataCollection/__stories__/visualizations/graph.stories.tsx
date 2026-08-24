@@ -711,12 +711,15 @@ const DetailField = ({ label, value }: { label: string; value: string }) => (
 const OrgChartExample = ({
   defaultExpandDepth,
   focusOnEntry,
+  initialSelectedNodeId,
   graphLabel,
   tableLabel,
   lockedTagTypes,
 }: {
   defaultExpandDepth: number
   focusOnEntry?: string
+  /** Node marked as selected (the click ring) on entry — see the graph options. */
+  initialSelectedNodeId?: string
   /** Custom label for the graph chip; falls back to the localized "Graph". */
   graphLabel?: string
   /** Custom label for the table chip; falls back to the localized "Table". */
@@ -742,6 +745,7 @@ const OrgChartExample = ({
               defaultExpandDepth,
               revealNodeId: revealId,
               focusOnEntry,
+              initialSelectedNodeId,
               lockedTagTypes,
             },
           },
@@ -1119,6 +1123,23 @@ export const LiveUpdate: Story = {
  */
 export const FocusOnRoot: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} focusOnEntry="ceo-a" />,
+}
+
+/**
+ * Arrives with a node already **selected** (`initialSelectedNodeId: "ceo-a"`),
+ * paired with `focusOnEntry` on the same node so its branch is expanded and
+ * framed — the graph opens looking exactly the way a user click leaves it
+ * (selection ring + node actions), not just centered. Clicking any other node
+ * moves the selection normally.
+ */
+export const SelectedOnEntry: Story = {
+  render: () => (
+    <OrgChartExample
+      defaultExpandDepth={2}
+      focusOnEntry="ceo-a"
+      initialSelectedNodeId="ceo-a"
+    />
+  ),
 }
 
 /**
