@@ -22,11 +22,20 @@ export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
   dot: 0,
 }
 
+/**
+ * Vertical lane between a node's bottom and its children's top: the layout
+ * engine's default `rankSep`, and the lane the expand/collapse affordance is
+ * centred in. One definition on purpose — it used to be declared twice, in the
+ * engine and again in the React Flow adapters, kept in step by a comment, while
+ * the stacked lane and the affordance offsets were derived from the copy.
+ */
+export const NODE_RANK_SEP = 130
+
 // Canvas background dot spacing. Shared with the layout engine so node
 // columns/rows snap onto the dot grid (nodes "squared" with the dots).
 export const BACKGROUND_DOT_GAP = 32
 
-// ─── Stacked children (`GraphNode.stackChildren`) ──────────────
+// ─── Stacked nodes (`GraphNode.stackNodes`) ──────────────
 // Geometry of a stacked row. The avatar sits the same distance from all four
 // edges, so the inset is one number rather than a set that can drift apart.
 //

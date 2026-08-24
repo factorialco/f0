@@ -1325,10 +1325,10 @@ export const StagedLoadingError: Story = {
   },
 }
 
-// ─── Stacked children ──────────────────────────────────────────
+// ─── Stacked nodes ──────────────────────────────────────────
 
 /**
- * Roles whose children are job levels. Each role sets `stackChildren`, so its
+ * Roles whose children are job levels. Each role sets `stackNodes`, so its
  * levels render as a tight column of compact rows under it instead of fanning
  * out — and the column costs no horizontal space, so the roles sit as close
  * together as they would with no children at all.
@@ -1362,7 +1362,7 @@ const CATALOG_NODES: GraphNode<CatalogNode>[] = [
         data: { name: role, kind: "role" as const },
         childrenCount: levels.length,
         // The opt-in: this role's children render as a stacked column.
-        stackChildren: true,
+        stackNodes: true,
       },
       ...levels.map((level, levelIndex) => ({
         id: `${roleId}-level-${levelIndex}`,
@@ -1441,7 +1441,7 @@ function catalogLevelTags(node: CatalogNode): F0GraphNodeTag[] {
   ]
 }
 
-const StackedChildrenDemo = () => {
+const StackedNodesDemo = () => {
   return (
     <F0Graph<CatalogNode>
       nodes={CATALOG_NODES}
@@ -1514,7 +1514,7 @@ const LEVELS_BY_ROLE = CATALOG_NODES.reduce<Record<string, CatalogNode[]>>(
   {}
 )
 
-const StackedChildrenWithTagsDemo = () => {
+const StackedNodesWithTagsDemo = () => {
   return (
     <F0Graph<CatalogNode>
       nodes={CATALOG_NODES}
@@ -1546,19 +1546,19 @@ const StackedChildrenWithTagsDemo = () => {
   )
 }
 
-export const StackedChildren: Story = {
+export const StackedNodes: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "A parent that sets `stackChildren` renders its (leaf) children as a vertical column of compact `F0GraphNode` rows sharing its x, connected by a single trunk edge. Groups with an expandable child fall back to the normal fan-out.",
+          "A parent that sets `stackNodes` renders its (leaf) children as a vertical column of compact `F0GraphNode` rows sharing its x, connected by a single trunk edge. Groups with an expandable child fall back to the normal fan-out.",
       },
     },
   },
-  render: () => <StackedChildrenDemo />,
+  render: () => <StackedNodesDemo />,
 }
 
-export const StackedChildrenWithTags: Story = {
+export const StackedNodesWithTags: Story = {
   parameters: {
     docs: {
       description: {
@@ -1567,7 +1567,7 @@ export const StackedChildrenWithTags: Story = {
       },
     },
   },
-  render: () => <StackedChildrenWithTagsDemo />,
+  render: () => <StackedNodesWithTagsDemo />,
 }
 
 export const Snapshot: Story = {

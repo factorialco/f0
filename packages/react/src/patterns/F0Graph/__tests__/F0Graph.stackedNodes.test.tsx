@@ -21,7 +21,7 @@ function makeStackedNodes(): GraphNode<string>[] {
       parentId: "root",
       data: "Role A",
       childrenCount: 3,
-      stackChildren: true,
+      stackNodes: true,
     },
     { id: "roleB", parentId: "root", data: "Role B", childrenCount: 0 },
     { id: "lvl1", parentId: "roleA", data: "Junior", childrenCount: 0 },
@@ -74,16 +74,16 @@ beforeAll(() => {
 describe("resolveStackedParents", () => {
   it("stacks a group whose children are all leaves", () => {
     const kids = [makeTreeNode("a"), makeTreeNode("b")]
-    const parent = makeTreeNode("p", kids, { stackChildren: true })
+    const parent = makeTreeNode("p", kids, { stackNodes: true })
 
-    const { stackedParentIds, stackedChildIndex } = resolveStackedParents([
+    const { stackedParentIds, stackedNodeIndex } = resolveStackedParents([
       parent,
       ...kids,
     ])
 
     expect(stackedParentIds).toEqual(new Set(["p"]))
-    expect(stackedChildIndex.get("a")).toBe(0)
-    expect(stackedChildIndex.get("b")).toBe(1)
+    expect(stackedNodeIndex.get("a")).toBe(0)
+    expect(stackedNodeIndex.get("b")).toBe(1)
   })
 
   it("falls back to the fan-out when a child can expand", () => {
@@ -93,20 +93,39 @@ describe("resolveStackedParents", () => {
       makeTreeNode("a"),
       makeTreeNode("b", [], { childrenCount: 4 }),
     ]
-    const parent = makeTreeNode("p", kids, { stackChildren: true })
+    const parent = makeTreeNode("p", kids, { stackNodes: true })
 
-    const { stackedParentIds, stackedChildIndex } = resolveStackedParents([
+    const { stackedParentIds, stackedNodeIndex } = resolveStackedParents([
       parent,
       ...kids,
     ])
 
     expect(stackedParentIds.size).toBe(0)
-    expect(stackedChildIndex.size).toBe(0)
+    expect(stackedNodeIndex.size).toBe(0)
+  })
+
+  it("falls back to the fan-out when a child already has children", () => {
+    // `childrenCount` is optional on the public `GraphNode` and the tree builder
+    // defaults it to 0, so a consumer can hand over a fully linked tree without
+    // ever declaring a count. The guard has to see the children themselves, or
+    // the column is built over a node whose own subtree the layout never visits.
+    const grandchild = makeTreeNode("gc")
+    const kids = [makeTreeNode("a"), makeTreeNode("b", [grandchild])]
+    const parent = makeTreeNode("p", kids, { stackNodes: true })
+
+    const { stackedParentIds, stackedNodeIndex } = resolveStackedParents([
+      parent,
+      ...kids,
+      grandchild,
+    ])
+
+    expect(stackedParentIds.size).toBe(0)
+    expect(stackedNodeIndex.size).toBe(0)
   })
 
   it("ignores a stacked parent whose children are not loaded yet", () => {
     const parent = makeTreeNode("p", [], {
-      stackChildren: true,
+      stackNodes: true,
       childrenCount: 3,
     })
 
@@ -125,7 +144,7 @@ describe("resolveStackedParents", () => {
 
 // ─── Layout ────────────────────────────────────────────────────
 
-describe("useLayoutEngine — stacked children", () => {
+describe("useLayoutEngine — stacked nodes", () => {
   const stackedTree = () => {
     const levels = [
       makeTreeNode("l1", [], { parentId: "roleA", depth: 2 }),
@@ -135,7 +154,7 @@ describe("useLayoutEngine — stacked children", () => {
     const roleA = makeTreeNode("roleA", levels, {
       parentId: "root",
       depth: 1,
-      stackChildren: true,
+      stackNodes: true,
     })
     const roleB = makeTreeNode("roleB", [], { parentId: "root", depth: 1 })
     const root = makeTreeNode("root", [roleA, roleB])
@@ -186,6 +205,34 @@ describe("useLayoutEngine — stacked children", () => {
     expect(l1.y - (roleA.y + roleA.height)).toBe(rankSep / 2)
   })
 
+  it("grows the column away from the parent in BT too", () => {
+    // BT flips the main axis, so the column has to run UPWARD from the parent
+    // while keeping its row order and its half-rank gap. The flip has its own
+    // arithmetic branch in the engine (`flipMain`), so TB coverage says nothing
+    // about it.
+    const rankSep = 130
+    const { result } = zeroRenderHook(() =>
+      useLayoutEngine({ rankSep, stackedNodeHeight: 40, stackedNodeGap: 8 })
+    )
+    const { nodes, edges } = stackedTree()
+
+    const layout = result.current.computeLayout(nodes, edges, "BT")
+
+    const roleA = byId(layout, "roleA")
+    const [l1, l2, l3] = ["l1", "l2", "l3"].map((id) => byId(layout, id))
+
+    // Still one column on the parent's axis.
+    expect(l1.x).toBe(roleA.x)
+    expect(l2.x).toBe(roleA.x)
+    expect(l3.x).toBe(roleA.x)
+    // Order preserved, running upward: each row sits above the previous one by
+    // the same step TB uses downward.
+    expect(l1.y - l2.y).toBe(48)
+    expect(l2.y - l3.y).toBe(48)
+    // And the column still hangs half a rank off the parent, on the other side.
+    expect(roleA.y - (l1.y + l1.height)).toBe(rankSep / 2)
+  })
+
   it("reserves no horizontal space for the column", () => {
     const { result } = zeroRenderHook(() => useLayoutEngine())
     const { nodes, edges } = stackedTree()
@@ -194,7 +241,7 @@ describe("useLayoutEngine — stacked children", () => {
 
     // Same tree without the flag: the three levels fan out and push roleB away.
     const plain = stackedTree()
-    plain.nodes[1] = { ...plain.nodes[1], stackChildren: false }
+    plain.nodes[1] = { ...plain.nodes[1], stackNodes: false }
     const fannedOut = result.current.computeLayout(
       plain.nodes,
       plain.edges,
@@ -210,7 +257,7 @@ describe("useLayoutEngine — stacked children", () => {
     // The engine trusts its input: `useGraphRenderModel` resolves the flag
     // first. With no children in the adjacency there is simply nothing to stack.
     const { result } = zeroRenderHook(() => useLayoutEngine())
-    const lonely = makeTreeNode("p", [], { stackChildren: true })
+    const lonely = makeTreeNode("p", [], { stackNodes: true })
 
     const layout = result.current.computeLayout([lonely], [], "TB")
 
@@ -221,7 +268,7 @@ describe("useLayoutEngine — stacked children", () => {
 
 // ─── Rendering ─────────────────────────────────────────────────
 
-describe("F0Graph — stacked children", () => {
+describe("F0Graph — stacked nodes", () => {
   it("marks the rows as stacked on the render context", async () => {
     zeroRender(
       <div style={{ width: 800, height: 600 }}>

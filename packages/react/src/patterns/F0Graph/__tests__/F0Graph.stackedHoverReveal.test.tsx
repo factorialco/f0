@@ -35,7 +35,7 @@ function makeStackedNodes(): GraphNode<string>[] {
       parentId: "root",
       data: "Role A",
       childrenCount: 2,
-      stackChildren: true,
+      stackNodes: true,
     },
     { id: "lvl1", parentId: "roleA", data: "Junior", childrenCount: 0 },
     { id: "lvl2", parentId: "roleA", data: "Mid", childrenCount: 0 },

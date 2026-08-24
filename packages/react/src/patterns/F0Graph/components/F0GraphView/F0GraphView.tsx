@@ -216,6 +216,13 @@ export function F0GraphView<T = unknown>(
     string | null
   >(null)
   const hoveredStackRef = useRef<string | null>(null)
+  // Last known pointer position, so a camera move can re-run the same test from
+  // where the pointer already is. Cleared when the pointer leaves the canvas.
+  const lastPointerRef = useRef<{
+    x: number
+    y: number
+    pointerType?: string
+  } | null>(null)
 
   // Direction is hardcoded to TB; the layout engine still supports other values.
   const direction = "TB" as LayoutDirection
@@ -494,23 +501,37 @@ export function F0GraphView<T = unknown>(
 
   const handleCanvasPointerMove = useCallback(
     (e: React.PointerEvent) => {
+      lastPointerRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        pointerType: e.pointerType,
+      }
       resolveStackHover(e.clientX, e.clientY, e.pointerType)
     },
     [resolveStackHover]
   )
 
-  // Zooming with a stationary pointer moves the graph under it, so re-resolve on
-  // wheel too — otherwise the reveal is one gesture stale.
-  const handleCanvasWheel = useCallback(
-    (e: React.WheelEvent) => {
-      resolveStackHover(e.clientX, e.clientY)
+  // A camera move slides the graph under a stationary pointer, so the same
+  // screen position now maps to a different flow point and the revealed column
+  // is stale. Re-resolving here covers every path that moves the camera —
+  // wheel, the zoom buttons, keyboard zoom and panning, fit-view and fly-to —
+  // rather than only the one (wheel) that is an event on this element. React
+  // Flow calls this on every camera frame, so the resolve is deliberately cheap:
+  // it bails before any measurement when there are no stacked columns, and the
+  // ref gate means a frame that does not change the answer does no React work.
+  const handleViewportChangeWithHover = useCallback(
+    (viewport: Parameters<typeof handleViewportChange>[0]) => {
+      handleViewportChange(viewport)
+      const last = lastPointerRef.current
+      if (last) resolveStackHover(last.x, last.y, last.pointerType)
     },
-    [resolveStackHover]
+    [handleViewportChange, resolveStackHover]
   )
 
   // Fires only when the pointer genuinely leaves the canvas: `pointerleave` does
   // not fire when moving between children.
   const handleCanvasPointerLeave = useCallback(() => {
+    lastPointerRef.current = null
     if (hoveredStackRef.current === null) return
     hoveredStackRef.current = null
     setHoveredStackParentId(null)
@@ -833,7 +854,6 @@ export function F0GraphView<T = unknown>(
                         onKeyDown={handleTreeKeyDown}
                         onPointerMove={handleCanvasPointerMove}
                         onPointerLeave={handleCanvasPointerLeave}
-                        onWheel={handleCanvasWheel}
                         onPointerDown={(e) => {
                           pointerDownRef.current = {
                             x: e.clientX,
@@ -884,7 +904,7 @@ export function F0GraphView<T = unknown>(
                           minZoom={minZoom}
                           maxZoom={maxZoom}
                           defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
-                          onViewportChange={handleViewportChange}
+                          onViewportChange={handleViewportChangeWithHover}
                           onPaneClick={handlePaneClick}
                           onEdgeMouseEnter={(_, edge) => {
                             const ge = (edge.data as GraphEdgeData | undefined)

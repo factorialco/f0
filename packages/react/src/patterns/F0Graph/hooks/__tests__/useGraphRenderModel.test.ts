@@ -348,7 +348,7 @@ describe("useGraphRenderModel — anchor viewport compensation", () => {
   })
 })
 
-describe("useGraphRenderModel — stacked children", () => {
+describe("useGraphRenderModel — stacked nodes", () => {
   const stackedRole = () => {
     const levels = [
       treeNode("l1", "role", 0, [], 2),
@@ -357,7 +357,7 @@ describe("useGraphRenderModel — stacked children", () => {
     ]
     const role: TreeNode<null> = {
       ...treeNode("role", "root", 3, levels, 1),
-      stackChildren: true,
+      stackNodes: true,
     }
     return { root: treeNode("root", null, 1, [role]), role, levels }
   }
@@ -394,7 +394,10 @@ describe("useGraphRenderModel — stacked children", () => {
     )
     for (const row of rows) {
       expect(row.parentId).toBe("stack-role")
-      expect(row.extent).toBe("parent")
+      // No `extent`, on purpose: nothing can drag these nodes, so the only thing
+      // it would constrain is a row taller than its reserved band — and it does
+      // that by clamping the row's position, which jumps it onto the row above.
+      expect(row.extent).toBeUndefined()
     }
   })
 
@@ -422,7 +425,7 @@ describe("useGraphRenderModel — stacked children", () => {
 
   it("publishes no hover zone when the group is not stacked", () => {
     const { root, role } = stackedRole()
-    role.stackChildren = false
+    role.stackNodes = false
     const { result } = renderModel(baseOptions([root], ["root", "role"]))
 
     expect(result.current.stackHoverZones).toEqual([])
@@ -439,6 +442,44 @@ describe("useGraphRenderModel — stacked children", () => {
     // The pointer handler reads these through a ref, so a re-render that changes
     // nothing must not hand it a fresh array.
     expect(result.current.stackHoverZones).toBe(first)
+  })
+
+  it("keeps a windowed row's spine neighbour so its connector still renders", () => {
+    const { root } = stackedRole()
+    // First pass without windowing, to learn where the built-in engine put the
+    // rows (a fixed layout engine cannot be used here: a custom engine turns
+    // stacking off, since only the built-in one can produce a column).
+    const probe = renderModel(baseOptions([root], ["root", "role"]))
+    const last = probe.result.current.getNodePosition("l3")!
+
+    // A window covering only the LAST row: the two rows above it fall outside,
+    // and neither the ancestry walk (they are siblings, not ancestors) nor the
+    // edge-crossing pass (the parent card is off-viewport too) would rescue them.
+    mockViewportRect = {
+      minX: last.x - 5,
+      minY: last.y - 5,
+      maxX: last.x + last.width + 5,
+      maxY: last.y + last.height + 5,
+    }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "role"]),
+      enableNodeWindowing: true,
+    })
+    const ids = new Set(result.current.rfNodes.map((n) => n.id))
+
+    // The invariant: React Flow can route every edge it is handed. An edge whose
+    // source is missing from the store is dropped silently, which is what made
+    // the connector into the topmost visible row disappear.
+    for (const edge of result.current.rfEdges) {
+      expect(ids.has(edge.source)).toBe(true)
+      expect(ids.has(edge.target)).toBe(true)
+    }
+    // And specifically: l3 hangs off l2, so l2 had to come along.
+    expect(ids.has("l2")).toBe(true)
+    expect(result.current.rfEdges.find((e) => e.target === "l3")?.source).toBe(
+      "l2"
+    )
+    mockViewportRect = null
   })
 
   it("pads the wrapper by 8px around the rows it holds", () => {
@@ -471,7 +512,7 @@ describe("useGraphRenderModel — stacked children", () => {
 
   it("keeps an edge per child when the group is not stacked", () => {
     const { root, role } = stackedRole()
-    role.stackChildren = false
+    role.stackNodes = false
     const { result } = renderModel(baseOptions([root], ["root", "role"]))
 
     expect(
@@ -494,6 +535,10 @@ describe("useGraphRenderModel — stacked children", () => {
 
   it("gives the rows the layout's shorter box, not the node card's", () => {
     const { root } = stackedRole()
+    // Windowing only seeds dimensions when a viewport has been measured, so the
+    // rect has to cover the tree — without it the model leaves sizing to the DOM
+    // and there is nothing to assert.
+    mockViewportRect = { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000 }
     const { result } = renderModel({
       ...baseOptions([root], ["root", "role"]),
       enableNodeWindowing: true,
@@ -502,10 +547,8 @@ describe("useGraphRenderModel — stacked children", () => {
     const row = result.current.rfNodes.find((n) => n.id === "l1")
     const card = result.current.rfNodes.find((n) => n.id === "role")
 
-    // Only asserted when windowing seeds dimensions; without a measured
-    // viewport the model renders everything and leaves sizing to the DOM.
-    if (row?.height !== undefined) {
-      expect(row.height).toBeLessThan(card?.height ?? Infinity)
-    }
+    expect(row?.height).toBeDefined()
+    expect(card?.height).toBeDefined()
+    expect(row!.height!).toBeLessThan(card!.height!)
   })
 })

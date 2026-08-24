@@ -77,7 +77,7 @@ export type GraphVisualizationOptions<
    * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
    * `avatar` / `subtitle` / `tags` do not apply to them.
    */
-  stackChildren?: (record: R) => boolean
+  stackNodes?: (record: R) => boolean
   /**
    * Trailing content for a stacked row — a count or a small icon button.
    * Rendered at the row's trailing edge; clicks inside it do not select the

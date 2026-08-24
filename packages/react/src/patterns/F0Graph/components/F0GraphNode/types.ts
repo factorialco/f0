@@ -124,7 +124,7 @@ export interface F0GraphNodeProps {
   ariaOwns?: string
   /**
    * Render as one row of a stacked column instead of as a pill, because the
-   * parent set `stackChildren` (job levels under a role, plan tiers under a
+   * parent set `stackNodes` (job levels under a role, plan tiers under a
    * product). `<F0Graph>` decides this and passes it through the render
    * context, so a `renderNode` that spreads `{...ctx}` gets the right shape
    * without branching.

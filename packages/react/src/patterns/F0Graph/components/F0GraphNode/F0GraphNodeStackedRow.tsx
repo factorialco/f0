@@ -32,7 +32,7 @@ interface F0GraphNodeStackedRowProps {
 
 /**
  * One row of a stacked column — what [[F0GraphNode]] renders when the graph
- * passes `stacked`, because this node's parent set `stackChildren`.
+ * passes `stacked`, because this node's parent set `stackNodes`.
  *
  * It mirrors the card's anatomy (leading avatar, same title type scale per zoom,
  * tags underneath) so a column reads as a continuation of the parent above it,

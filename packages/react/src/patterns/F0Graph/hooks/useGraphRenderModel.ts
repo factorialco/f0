@@ -27,10 +27,7 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-  NODE_BOX_INSET,
-  STACKED_GROUP_PADDING,
   STACKED_NODE_HEIGHT,
-  STACKED_NODE_WIDTH_INSET,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
@@ -43,6 +40,7 @@ import {
 import {
   collectVisibleNodes,
   computeLayoutBounds,
+  computeStackGroups,
   deriveEdgesFromTree,
   nodeIntersectsRect,
   resolveStackedParents,
@@ -67,16 +65,6 @@ const TAG_LINE_GAP = 4
 const ESTIMATED_TAGS_PER_ROW = 2
 
 /** Geometry of one stacked column's group node, plus its rows' offsets in it. */
-interface StackGroupBox {
-  id: string
-  x: number
-  y: number
-  width: number
-  height: number
-  /** Row boxes relative to the group's own origin, keyed by row id. */
-  rows: Map<string, { x: number; y: number; width: number; height: number }>
-}
-
 interface UseGraphRenderModelOptions<T> {
   roots: TreeNode<T>[]
   nodeMap: Map<string, TreeNode<T>>
@@ -237,9 +225,19 @@ export function useGraphRenderModel<T>({
 
   // ── Stacked groups ── Single source of truth for "does this group stack?",
   // shared by the layout input, the edge pass and the node render context.
-  const { stackedParentIds, stackedChildIndex } = useMemo(
-    () => resolveStackedParents(visibleTreeNodes),
-    [visibleTreeNodes]
+  //
+  // Only the built-in engine can produce a column: `LayoutResult` has no way to
+  // express one, so a custom engine fans the rows out horizontally instead. The
+  // group box would then span that whole fan and the hover zones derived from it
+  // would swallow the neighbouring parents' cards, breaking the "zones cannot
+  // overlap" invariant they are looked up under. A consumer who supplies their
+  // own engine gets the plain fan-out rather than a broken column.
+  const { stackedParentIds, stackedNodeIndex } = useMemo(
+    () =>
+      layoutEngineProp
+        ? { stackedParentIds: new Set<string>(), stackedNodeIndex: new Map() }
+        : resolveStackedParents(visibleTreeNodes),
+    [visibleTreeNodes, layoutEngineProp]
   )
 
   // ── Edges ──
@@ -308,14 +306,14 @@ export function useGraphRenderModel<T>({
     }))
     // Hand the engine the RESOLVED flag, never the raw request: a group whose
     // children can expand falls back to the normal fan-out, and the engine must
-    // not see `stackChildren` on it (it would lay the children out as a column
+    // not see `stackNodes` on it (it would lay the children out as a column
     // with nowhere to hang their subtrees). Copies are made only for the nodes
     // whose flag actually changes, so identity — and the layout memo — holds for
     // every other node.
     const treeNodes = visibleTreeNodes.map((node) => {
       const stacked = stackedParentIds.has(node.id)
-      if (Boolean(node.stackChildren) === stacked) return node
-      return { ...node, stackChildren: stacked }
+      if (Boolean(node.stackNodes) === stacked) return node
+      return { ...node, stackNodes: stacked }
     })
     return [...treeNodes, ...expanderTreeNodes]
   }, [visibleTreeNodes, expanderNodes, stackedParentIds])
@@ -378,84 +376,17 @@ export function useGraphRenderModel<T>({
   )
 
   // ── Stacked columns as React Flow sub-flows ──
-  // A stacked column is a group node with the rows as its children (see
-  // https://reactflow.dev/learn/layouting/sub-flows): the rows are positioned
-  // relative to the group and move with it, and the parent card's edge lands on
-  // the group rather than on a row.
-  //
-  // The group's box is the union of its rows grown by `STACKED_GROUP_PADDING`,
-  // so the padding is real geometry rather than CSS — the rows sit inside it at
-  // exactly that offset. The rows are narrowed off the layout box by the same
-  // cross-axis inset the card wrapper used to apply in CSS, which keeps a row's
-  // CENTER on the parent's axis (the inset comes off both edges) while making
-  // its box the width it actually paints.
-  const stackGroups = useMemo(() => {
-    const rowsByParent = new Map<string, string[]>()
-    for (const node of visibleTreeNodes) {
-      if (!stackedChildIndex.has(node.id) || node.parentId === null) continue
-      const siblings = rowsByParent.get(node.parentId)
-      if (siblings) siblings.push(node.id)
-      else rowsByParent.set(node.parentId, [node.id])
-    }
-
-    const isHorizontal = direction === "LR" || direction === "RL"
-    const inset = NODE_BOX_INSET + STACKED_NODE_WIDTH_INSET
-    const groups = new Map<string, StackGroupBox>()
-    const groupOf = new Map<string, string>()
-    // Row id → the row above it, which is where its connector starts.
-    const previousRow = new Map<string, string>()
-
-    for (const [parentId, rowIds] of rowsByParent) {
-      const boxes = rowIds.map((id) => positionMap.get(id))
-      if (boxes.some((box) => box === undefined)) continue
-
-      // Absolute row boxes: the layout box, less the cross-axis inset.
-      const absolute = boxes.map((box) => {
-        const b = box as PositionedNode
-        return isHorizontal
-          ? {
-              x: b.x,
-              y: b.y + inset / 2,
-              width: b.width,
-              height: Math.max(0, b.height - inset),
-            }
-          : {
-              x: b.x + inset / 2,
-              y: b.y,
-              width: Math.max(0, b.width - inset),
-              height: b.height,
-            }
-      })
-
-      const minX = Math.min(...absolute.map((r) => r.x))
-      const minY = Math.min(...absolute.map((r) => r.y))
-      const maxX = Math.max(...absolute.map((r) => r.x + r.width))
-      const maxY = Math.max(...absolute.map((r) => r.y + r.height))
-      const pad = STACKED_GROUP_PADDING
-      const group: StackGroupBox = {
-        id: `stack-${parentId}`,
-        x: minX - pad,
-        y: minY - pad,
-        width: maxX - minX + 2 * pad,
-        height: maxY - minY + 2 * pad,
-        rows: new Map(),
-      }
-      rowIds.forEach((id, index) => {
-        const r = absolute[index]!
-        group.rows.set(id, {
-          x: r.x - group.x,
-          y: r.y - group.y,
-          width: r.width,
-          height: r.height,
-        })
-        groupOf.set(id, group.id)
-        if (index > 0) previousRow.set(id, rowIds[index - 1]!)
-      })
-      groups.set(parentId, group)
-    }
-
-    return { groups, groupOf, previousRow }
-  }, [visibleTreeNodes, stackedChildIndex, positionMap, direction])
+  // The geometry itself lives in `computeStackGroups`; this only memoizes it.
+  const stackGroups = useMemo(
+    () =>
+      computeStackGroups(
+        visibleTreeNodes,
+        stackedNodeIndex,
+        positionMap,
+        direction
+      ),
+    [visibleTreeNodes, stackedNodeIndex, positionMap, direction]
+  )
 
   // One region per stacked parent: its card unioned with its column, which makes
   // the lane between them part of the same rect. Whoever owns the pointer uses
@@ -643,6 +574,17 @@ export function useGraphRenderModel<T>({
         ids.add(edge.target)
       }
     }
+
+    // A stacked row's connector comes from the row ABOVE it, not from the parent
+    // card (see the chain in `rfEdges`), and a sibling row is not on anyone's
+    // ancestry path — so neither pass above rescues it. Without this, scrolling a
+    // long column so its middle is on screen leaves the topmost visible row's
+    // connector pointing at a row React Flow never received, and the segment
+    // silently disappears. Bounded by one extra row per windowed row.
+    for (const id of Array.from(ids)) {
+      const above = stackGroups.previousRow.get(id)
+      if (above) ids.add(above)
+    }
     return ids
   }, [
     enableNodeWindowing,
@@ -652,6 +594,7 @@ export function useGraphRenderModel<T>({
     nodeWidthProp,
     effectiveNodeHeight,
     nodeMap,
+    stackGroups,
   ])
 
   // Identity-stable projections of tree nodes into the shape node wrappers
@@ -814,7 +757,7 @@ export function useGraphRenderModel<T>({
       // A stacked row carries its own (shorter) box from the layout; every
       // other node uses the shared card size. As a sub-flow child its box is
       // the group-relative one, already narrowed to the width it paints.
-      const isStacked = stackedChildIndex.has(treeNode.id)
+      const isStacked = stackedNodeIndex.has(treeNode.id)
       const groupId = stackGroups.groupOf.get(treeNode.id)
       const rowBox = groupId
         ? stackGroups.groups.get(treeNode.parentId ?? "")?.rows.get(treeNode.id)
@@ -834,11 +777,16 @@ export function useGraphRenderModel<T>({
         id: treeNode.id,
         type: "graphNode",
         // A sub-flow child's position is relative to its group's top-left; every
-        // other node is absolute. `extent: "parent"` keeps a row inside the
-        // wrapper it belongs to.
-        ...(rowBox && groupId
-          ? { parentId: groupId, extent: "parent" as const }
-          : null),
+        // other node is absolute.
+        //
+        // Deliberately no `extent: "parent"`. It would keep a row inside its
+        // wrapper, but nothing can move these nodes (`nodesDraggable={false}`),
+        // so the only thing it constrains is a row that paints TALLER than the
+        // band the layout reserved — and it constrains it by clamping the row's
+        // position back inside the box, which jumps the row up onto the one above
+        // it. Overflowing past the band is the same failure mode a card already
+        // has, and it stays local to the row instead of moving it.
+        ...(rowBox && groupId ? { parentId: groupId } : null),
         position: rowBox
           ? { x: rowBox.x, y: rowBox.y }
           : {
@@ -970,7 +918,7 @@ export function useGraphRenderModel<T>({
     effectiveNodeHeight,
     direction,
     ariaTreeInfo,
-    stackedChildIndex,
+    stackedNodeIndex,
     controlLabels?.collapseChildren,
   ])
 
@@ -990,21 +938,27 @@ export function useGraphRenderModel<T>({
         .map((n) => n.id)
     )
 
+    // A stacked column is chained rather than fanned out: the parent's edge lands
+    // on the first row, and every row after it hangs off the row above instead of
+    // drawing its own line back to the parent. Re-sourced HERE rather than in
+    // `visibleEdges` — the layout engine derives its parent→child adjacency from
+    // that same list, so rewriting it earlier would orphan every row below the
+    // first and scatter it as its own root.
+    const sourceOf = (edge: GraphEdge): string =>
+      stackGroups.previousRow.get(edge.target) ?? edge.source
+
     // When windowing, drop edges whose endpoints aren't both materialized —
-    // React Flow can't route an edge to a node that isn't in its store.
+    // React Flow can't route an edge to a node that isn't in its store. Tested
+    // against the REWRITTEN source: the original parent card is always pulled in
+    // by the ancestry walk, so testing that instead would wave through an edge
+    // whose actual source is a row that never arrived.
     const inWindow = (edge: GraphEdge): boolean =>
       !windowedIds ||
-      (windowedIds.has(edge.source) && windowedIds.has(edge.target))
+      (windowedIds.has(sourceOf(edge)) && windowedIds.has(edge.target))
 
     return visibleEdges.filter(inWindow).map((edge): RFEdge => {
-      // A stacked column is chained rather than fanned out: the parent's edge
-      // lands on the first row, and every row after it hangs off the row above
-      // instead of drawing its own line back to the parent. Re-sourced HERE
-      // rather than in `visibleEdges` — the layout engine derives its
-      // parent→child adjacency from that same list, so rewriting it earlier
-      // would orphan every row below the first and scatter it as its own root.
       const above = stackGroups.previousRow.get(edge.target)
-      const source = above ?? edge.source
+      const source = sourceOf(edge)
       const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
       const isHovered = isInteractive && edge.id === hoveredEdgeId
       const baseData = edge.data as Record<string, unknown> | undefined
@@ -1035,7 +989,7 @@ export function useGraphRenderModel<T>({
     expandedNodes,
     hoveredEdgeId,
     windowedIds,
-    stackedChildIndex,
+    stackedNodeIndex,
     stackGroups,
   ])
 

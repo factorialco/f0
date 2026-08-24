@@ -21,6 +21,7 @@ import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
   NODE_BOX_INSET,
+  NODE_RANK_SEP,
   STACKED_RANK_SEP_RATIO,
 } from "../constants"
 
@@ -153,10 +154,6 @@ export type StackGroupRFNode = RFNode<StackGroupData>
  * itself on the lane properly at both sizes it uses.
  */
 const EXPANDER_SIZE = 32
-
-// Vertical lane between a node's bottom and its children's top. Matches
-// `DEFAULT_RANK_SEP` in useLayoutEngine — keep them in sync.
-const NODE_RANK_SEP = 130
 
 // Place the expander/collapser button so it sits exactly in the middle of the
 // lane between a node and its children: the button (anchored at the top of its

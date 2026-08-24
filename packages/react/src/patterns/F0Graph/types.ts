@@ -36,7 +36,7 @@ export interface GraphNode<T = unknown> {
    * with an expandable child falls back to the normal fan-out, because a stacked
    * row has nowhere to hang a subtree.
    */
-  stackChildren?: boolean
+  stackNodes?: boolean
 }
 
 // Edge between nodes
@@ -75,12 +75,12 @@ export interface TreeNode<T = unknown> {
   /** Mirrors `GraphNode.dataLoaded` for viewport-driven data loading. */
   dataLoaded?: boolean
   /**
-   * Mirrors `GraphNode.stackChildren`. The layout engine reads it to lay this
+   * Mirrors `GraphNode.stackNodes`. The layout engine reads it to lay this
    * node's children out as a vertical stack instead of a horizontal fan-out.
    * `useGraphRenderModel` normalizes it first — see `resolveStackedParents` —
    * so by the time the engine sees it, the leaf-children precondition holds.
    */
-  stackChildren?: boolean
+  stackNodes?: boolean
   /**
    * Present when a node has multiple parents in a DAG. Lists all logical
    * parent IDs. The canonical layout parent (`parentId`) is the first entry.
