@@ -24,22 +24,24 @@ already been given.
 <Controls of={Stories.Default} />
 
 Five faces from `pulses`, in scale order, drawn by `F0ButtonToggleGroup` as one
-single-select group. A face carries no text: its `label` is the accessible name
-**and** the tooltip, so it has to read as the answer being given ("Very bad"),
-never as a number or a position. The default copy comes from `i18n.enps.scale`;
-`labels` replaces it for one face or all five, and `icons` does the same for the
-glyphs when the question isn't about mood.
+single-select group.
+
+`labels` is required, and required in full: a face carries no text, so its label
+is the accessible name **and** the tooltip, and it has to read as the answer
+being given ("Very bad"), never as a number or a position. The component holds no
+copy of its own — the wording belongs to the question, so pass it already
+translated. `icons` is the same override for the glyphs, and defaults to the mood
+faces.
 
 The face is sized past `F0Icon`'s scale — 28px at `lg`, 24px at `md` — because
 it **is** the control: there is no label beside it to carry the meaning, so it
 takes the button, leaving 4px of room around it (6px at `lg`).
 
-Only the answered face is coloured, and it takes its own mood
-(`--mood-super-negative` through `--mood-super-positive`): a 0.1 fill, the same
-weight F0 gives any selected control, over a heavier 0.6 border — five bordered
-faces sit side by side, so the answered one needs to win the row. Five coloured
-faces at once would be decoration; one coloured face is an answer you can read
-from across the page.
+Only the answered face is coloured, through `F0ButtonToggle`'s `color`: each face
+asks for its own mood (`mood-super-negative` through `mood-super-positive`) and
+the toggle draws what that colour means — a 0.1 fill, a 0.6 border, the glyph,
+and a muted glyph on the faces not chosen. Five coloured faces at once would be
+decoration; one coloured face is an answer you can read from across the page.
 
 <Canvas of={Stories.Answered} />
 
@@ -79,7 +81,16 @@ from across the page.
     children: (
       <I18nProvider translations={defaultTranslations}>
         <div className="w-[360px]">
-          <F0ENPSButton value="positive" />
+          <F0ENPSButton
+            value="positive"
+            labels={{
+              superNegative: "Very bad",
+              negative: "Bad",
+              neutral: "Okay",
+              positive: "Good",
+              superPositive: "Very good",
+            }}
+          />
         </div>
       </I18nProvider>
     ),
@@ -115,7 +126,7 @@ from across the page.
 
 A recommendation question brings its own wording:
 
-<Canvas of={Stories.CustomLabels} />
+<Canvas of={Stories.Recommendation} />
 
 And a question that isn't about mood brings its own glyphs — a set that still
 reads worst-to-best:

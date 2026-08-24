@@ -11,11 +11,19 @@ import {
 
 import { F0ENPSButton } from "../index"
 
+const LABELS = {
+  superNegative: "Very bad",
+  negative: "Bad",
+  neutral: "Okay",
+  positive: "Good",
+  superPositive: "Very good",
+}
+
 const face = (name: string) => screen.getByRole("radio", { name })
 
 describe("F0ENPSButton", () => {
   it("renders the five faces of the eNPS scale, worst to best", () => {
-    zeroRender(<F0ENPSButton />)
+    zeroRender(<F0ENPSButton labels={LABELS} />)
 
     expect(
       screen
@@ -26,14 +34,16 @@ describe("F0ENPSButton", () => {
 
   it("does not report an answer on mount", () => {
     const onChange = vi.fn()
-    zeroRender(<F0ENPSButton value="negative" onChange={onChange} />)
+    zeroRender(
+      <F0ENPSButton labels={LABELS} value="negative" onChange={onChange} />
+    )
 
     expect(onChange).not.toHaveBeenCalled()
   })
 
   it("reports the pressed face as the answer", async () => {
     const onChange = vi.fn()
-    zeroRender(<F0ENPSButton onChange={onChange} />)
+    zeroRender(<F0ENPSButton labels={LABELS} onChange={onChange} />)
 
     await userEvent.click(face("Very good"))
 
@@ -44,7 +54,9 @@ describe("F0ENPSButton", () => {
 
   it("clears the answer when the answered face is pressed again", async () => {
     const onChange = vi.fn()
-    zeroRender(<F0ENPSButton value="neutral" onChange={onChange} />)
+    zeroRender(
+      <F0ENPSButton labels={LABELS} value="neutral" onChange={onChange} />
+    )
 
     await userEvent.click(face("Okay"))
 
@@ -53,7 +65,14 @@ describe("F0ENPSButton", () => {
 
   it("keeps the answer when required and the answered face is pressed again", async () => {
     const onChange = vi.fn()
-    zeroRender(<F0ENPSButton value="neutral" onChange={onChange} required />)
+    zeroRender(
+      <F0ENPSButton
+        labels={LABELS}
+        value="neutral"
+        onChange={onChange}
+        required
+      />
+    )
 
     await userEvent.click(face("Okay"))
 
@@ -62,7 +81,7 @@ describe("F0ENPSButton", () => {
   })
 
   it("colours only the answered face with its own mood", async () => {
-    zeroRender(<F0ENPSButton value="negative" />)
+    zeroRender(<F0ENPSButton labels={LABELS} value="negative" />)
 
     expect(face("Bad")).toHaveClass("text-f1-icon-mood-negative")
     expect(face("Very good")).not.toHaveClass(
@@ -84,7 +103,7 @@ describe("F0ENPSButton", () => {
   it("names the hovered face without a wait", () => {
     vi.useFakeTimers()
     try {
-      zeroRender(<F0ENPSButton />)
+      zeroRender(<F0ENPSButton labels={LABELS} />)
 
       // `fireEvent`, not `userEvent`: the tooltip is a TIMER, and userEvent's
       // own waiting deadlocks against fake ones.
@@ -98,17 +117,35 @@ describe("F0ENPSButton", () => {
     }
   })
 
-  it("takes the question's own wording through labels", () => {
+  /**
+   * The component holds no copy: the same five faces answer a mood question and
+   * a likelihood one, and only the labels say which.
+   */
+  it("names the faces from labels alone", () => {
     zeroRender(
       <F0ENPSButton
         value="superNegative"
-        labels={{ superNegative: "Not at all likely" }}
+        labels={{
+          superNegative: "Not at all likely",
+          negative: "Unlikely",
+          neutral: "Neither",
+          positive: "Likely",
+          superPositive: "Extremely likely",
+        }}
       />
     )
 
-    expect(face("Not at all likely")).toBeInTheDocument()
-    // The faces left alone keep the default scale copy.
-    expect(face("Okay")).toBeInTheDocument()
+    expect(
+      screen
+        .getAllByRole("radio")
+        .map((button) => button.getAttribute("aria-label"))
+    ).toEqual([
+      "Not at all likely",
+      "Unlikely",
+      "Neither",
+      "Likely",
+      "Extremely likely",
+    ])
   })
 
   it("takes the question's own glyphs through icons", () => {
@@ -117,7 +154,9 @@ describe("F0ENPSButton", () => {
     ))
     Thumb.displayName = "Thumb"
 
-    zeroRender(<F0ENPSButton icons={{ superPositive: Thumb }} />)
+    zeroRender(
+      <F0ENPSButton labels={LABELS} icons={{ superPositive: Thumb }} />
+    )
 
     expect(
       face("Very good").querySelector("[data-testid=thumb]")
@@ -131,16 +170,16 @@ describe("F0ENPSButton", () => {
    * on the svg itself. jsdom applies no Tailwind, so the class is the assertion.
    */
   it("scales the face with the size of the button", () => {
-    const { unmount } = zeroRender(<F0ENPSButton />)
+    const { unmount } = zeroRender(<F0ENPSButton labels={LABELS} />)
     expect(face("Okay")).toHaveClass("[&_svg]:w-7")
     unmount()
 
-    zeroRender(<F0ENPSButton size="md" />)
+    zeroRender(<F0ENPSButton labels={LABELS} size="md" />)
     expect(face("Okay")).toHaveClass("[&_svg]:w-6")
   })
 
   it("disables every face", () => {
-    zeroRender(<F0ENPSButton disabled />)
+    zeroRender(<F0ENPSButton labels={LABELS} disabled />)
 
     screen
       .getAllByRole("radio")

@@ -1,59 +1,29 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { type ButtonToggleColor } from "@/components/F0ButtonToggle"
 import {
   type ButtonToggleGroupSize,
   F0ButtonToggleGroup,
   type F0ButtonToggleGroupItem,
 } from "@/components/F0ButtonToggleGroup"
 import { pulseIcon, pulses, type Pulse } from "@/lib/mood"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import type { F0ENPSButtonProps } from "./types"
 
 /**
- * The answered face takes the colour of the mood it stands for, so the scale
- * reads as a scale: the answer is recognisable from across the page, before any
- * of the copy is. Every other face stays neutral — five coloured faces at once
- * would be decoration, not an answer.
- *
- * The classes are written out per mood rather than composed from the token name
- * because Tailwind only generates the utilities it can see as literal strings.
- * The fill follows `f1-background-selected` (0.1, and 0.2 under the pointer) so a
- * mood answer sits at the same weight as any other selected control in F0. The
- * border goes heavier than `f1-border-selected`, at 0.6: five bordered faces sit
- * side by side here, and at 0.4 the answered one didn't win the row.
+ * Each face answers in the colour of the mood it stands for, so the scale reads
+ * as a scale: the answer is recognisable from across the page, before any of the
+ * copy is. `F0ButtonToggle` owns what a colour looks like — the fill, the border
+ * and the glyph, and the muted glyph on the faces not chosen.
  */
-const selectedAccent: Record<Pulse, string> = {
-  superNegative: cn(
-    "bg-[hsl(var(--mood-super-negative)/0.1)] hover:bg-[hsl(var(--mood-super-negative)/0.2)]",
-    "border-[hsl(var(--mood-super-negative)/0.6)]",
-    "text-f1-icon-mood-super-negative hover:text-f1-icon-mood-super-negative"
-  ),
-  negative: cn(
-    "bg-[hsl(var(--mood-negative)/0.1)] hover:bg-[hsl(var(--mood-negative)/0.2)]",
-    "border-[hsl(var(--mood-negative)/0.6)]",
-    "text-f1-icon-mood-negative hover:text-f1-icon-mood-negative"
-  ),
-  neutral: cn(
-    "bg-[hsl(var(--mood-neutral)/0.1)] hover:bg-[hsl(var(--mood-neutral)/0.2)]",
-    "border-[hsl(var(--mood-neutral)/0.6)]",
-    "text-f1-icon-mood-neutral hover:text-f1-icon-mood-neutral"
-  ),
-  positive: cn(
-    "bg-[hsl(var(--mood-positive)/0.1)] hover:bg-[hsl(var(--mood-positive)/0.2)]",
-    "border-[hsl(var(--mood-positive)/0.6)]",
-    "text-f1-icon-mood-positive hover:text-f1-icon-mood-positive"
-  ),
-  superPositive: cn(
-    "bg-[hsl(var(--mood-super-positive)/0.1)] hover:bg-[hsl(var(--mood-super-positive)/0.2)]",
-    "border-[hsl(var(--mood-super-positive)/0.6)]",
-    "text-f1-icon-mood-super-positive hover:text-f1-icon-mood-super-positive"
-  ),
+const moodColor: Record<Pulse, ButtonToggleColor> = {
+  superNegative: "mood-super-negative",
+  negative: "mood-negative",
+  neutral: "mood-neutral",
+  positive: "mood-positive",
+  superPositive: "mood-super-positive",
 }
-
-/** An unanswered face is a muted glyph, not a heading. */
-const unansweredFace = "text-f1-icon"
 
 /**
  * The face IS the control here — there is no label beside it to carry the
@@ -83,8 +53,6 @@ export const F0ENPSButton = ({
   disabled = false,
   required = false,
 }: F0ENPSButtonProps) => {
-  const i18n = useI18n()
-
   /**
    * Mirrors `value` so the accent follows the press even when the consumer
    * doesn't feed the answer back — the group keeps its own selection either way,
@@ -98,25 +66,20 @@ export const F0ENPSButton = ({
 
   const items = useMemo(
     () =>
-      pulses.map((pulse): F0ButtonToggleGroupItem => {
-        const label = labels?.[pulse] ?? i18n.enps.scale[pulse]
-
-        return {
+      pulses.map(
+        (pulse): F0ButtonToggleGroupItem => ({
           value: pulse,
           icon: icons?.[pulse] ?? pulseIcon[pulse],
-          label,
+          label: labels[pulse],
+          color: moodColor[pulse],
           // `instant`: the face is the whole control and this tooltip is the
           // only place its name is written, so a 700ms wait withholds the scale
           // from someone reading along it — the same call the Home rail makes.
-          tooltip: { description: label, instant: true },
-          className: cn(
-            unansweredFace,
-            faceSize[size],
-            answer === pulse && selectedAccent[pulse]
-          ),
-        }
-      }),
-    [answer, labels, icons, size, i18n]
+          tooltip: { description: labels[pulse], instant: true },
+          className: cn(faceSize[size]),
+        })
+      ),
+    [labels, icons, size]
   )
 
   const handleChange = (next: string) => {

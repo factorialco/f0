@@ -16,6 +16,18 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0ENPSButton } from "../index"
 import type { F0ENPSButtonProps } from "../types"
 
+/**
+ * A mood question's own wording. The component holds no copy — every scale
+ * brings its five labels, already translated, so these stand in for a product's.
+ */
+const MOOD_LABELS: F0ENPSButtonProps["labels"] = {
+  superNegative: "Very bad",
+  negative: "Bad",
+  neutral: "Okay",
+  positive: "Good",
+  superPositive: "Very good",
+}
+
 const meta = {
   component: F0ENPSButton,
   title: "Home/ENPSButton",
@@ -25,6 +37,7 @@ const meta = {
   },
   // `!autodocs` because F0ENPSButton.mdx is the docs page.
   tags: ["experimental", "!autodocs"],
+  args: { labels: MOOD_LABELS },
   argTypes: {
     value: {
       control: "select",
@@ -84,13 +97,14 @@ export const Answered: Story = {
   render: (args) => <Interactive {...args} />,
 }
 
-export const CustomLabels: Story = {
+export const Recommendation: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "A recommendation question answers on a likelihood scale, so the copy " +
-          "changes with it. The labels are the accessible names and the tooltips.",
+          "The same five faces answering a likelihood question instead of a mood " +
+          "one — only the copy changes. The labels are the accessible names and " +
+          "the tooltips.",
       },
     },
   },
@@ -156,7 +170,7 @@ export const Sizes: Story = {
       {(["sm", "md", "lg"] as const).map((size) => (
         <section key={size} className="flex flex-col gap-2">
           <h4 className="font-semibold">{size}</h4>
-          <F0ENPSButton size={size} value="neutral" />
+          <F0ENPSButton labels={MOOD_LABELS} size={size} value="neutral" />
         </section>
       ))}
     </div>
@@ -202,21 +216,21 @@ export const Snapshot: Story = {
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-2">
         <h4 className="font-semibold">Unanswered</h4>
-        <F0ENPSButton />
+        <F0ENPSButton labels={MOOD_LABELS} />
       </section>
       {pulses.map((pulse) => (
         <section key={pulse} className="flex flex-col gap-2">
           <h4 className="font-semibold">{pulse}</h4>
-          <F0ENPSButton value={pulse} />
+          <F0ENPSButton labels={MOOD_LABELS} value={pulse} />
         </section>
       ))}
       <section className="flex flex-col gap-2">
         <h4 className="font-semibold">Disabled</h4>
-        <F0ENPSButton value="positive" disabled />
+        <F0ENPSButton labels={MOOD_LABELS} value="positive" disabled />
       </section>
       <section className="flex flex-col gap-2">
         <h4 className="font-semibold">Not full width</h4>
-        <F0ENPSButton value="neutral" fullWidth={false} />
+        <F0ENPSButton labels={MOOD_LABELS} value="neutral" fullWidth={false} />
       </section>
     </div>
   ),

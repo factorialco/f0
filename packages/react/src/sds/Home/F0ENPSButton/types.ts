@@ -15,15 +15,16 @@ export type F0ENPSButtonProps = {
   onChange?: (value: Pulse | undefined) => void
 
   /**
-   * Override the copy for one or more faces. A face carries no visible text, so
-   * its label is both the accessible name and the tooltip: word it as the answer
-   * the person is giving ("Very bad"), never as a number or a position.
+   * What each face means, worst to best. A face carries no visible text, so its
+   * label is both the accessible name and the tooltip: word it as the answer the
+   * person is giving ("Very bad"), never as a number or a position.
    *
-   * Defaults to the built-in eNPS scale (`i18n.enps.scale`). Reach for this when
-   * the question needs its own wording — a recommendation question answers
-   * "Not at all likely", a mood check answers "Terrible".
+   * Required, and required in full — the wording belongs to the question, so the
+   * component holds no copy of its own: a mood check answers "Terrible", a
+   * recommendation question answers "Not at all likely". Pass it already
+   * translated.
    */
-  labels?: Partial<Record<Pulse, string>>
+  labels: Record<Pulse, string>
 
   /**
    * Override the face drawn for one or more points of the scale. Defaults to the
