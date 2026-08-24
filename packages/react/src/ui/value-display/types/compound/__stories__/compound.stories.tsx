@@ -170,7 +170,7 @@ export const NameWithSubordinateContext: Story = {
               type: "text",
               value: "Backend Engineer",
               tone: "secondary",
-              size: "sm",
+              weight: "light",
             },
           ],
         },

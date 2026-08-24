@@ -94,6 +94,30 @@ describe("CompoundCell", () => {
     expect(screen.getByText("Junior")).not.toHaveClass("text-sm")
   })
 
+  it("applies the font weight per segment, inheriting when unset", () => {
+    const args: CompoundCellValue = {
+      separator: " ",
+      segments: [
+        { type: "text", value: "Junior" },
+        {
+          type: "text",
+          value: "Backend Engineer",
+          tone: "secondary",
+          weight: "light",
+        },
+      ],
+    }
+
+    render(CompoundCell(args, tableMeta))
+
+    expect(screen.getByText("Backend Engineer")).toHaveClass("font-light")
+    const inheriting = screen.getByText("Junior")
+    expect(inheriting).not.toHaveClass("font-light")
+    expect(inheriting).not.toHaveClass("font-normal")
+    expect(inheriting).not.toHaveClass("font-medium")
+    expect(inheriting).not.toHaveClass("font-semibold")
+  })
+
   it("formats number and amount segments", () => {
     const args: CompoundCellValue = {
       segments: [

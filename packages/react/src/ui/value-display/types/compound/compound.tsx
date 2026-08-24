@@ -39,6 +39,20 @@ export const compoundSizes = ["md", "sm"] as const
  */
 export type CompoundSize = (typeof compoundSizes)[number]
 
+export const compoundWeights = [
+  "light",
+  "normal",
+  "medium",
+  "semibold",
+] as const
+
+/**
+ * Font weight of a single segment. Defaults to inheriting the cell's weight;
+ * set it to make one segment lighter or heavier than the ones beside it — e.g.
+ * a name at the inherited weight followed by lighter context.
+ */
+export type CompoundWeight = (typeof compoundWeights)[number]
+
 type UnitsPosition = "left" | "right"
 
 export interface CompoundTextSegment extends WithPlaceholder {
@@ -46,6 +60,7 @@ export interface CompoundTextSegment extends WithPlaceholder {
   value: string | number | undefined
   tone?: CompoundTone
   size?: CompoundSize
+  weight?: CompoundWeight
 }
 
 export interface CompoundNumberSegment extends WithPlaceholder {
@@ -56,6 +71,7 @@ export interface CompoundNumberSegment extends WithPlaceholder {
   decimalPlaces?: number
   tone?: CompoundTone
   size?: CompoundSize
+  weight?: CompoundWeight
 }
 
 export interface CompoundPercentageSegment extends WithPlaceholder {
@@ -64,6 +80,7 @@ export interface CompoundPercentageSegment extends WithPlaceholder {
   decimalPlaces?: number
   tone?: CompoundTone
   size?: CompoundSize
+  weight?: CompoundWeight
 }
 
 export interface CompoundAmountSegment extends WithPlaceholder {
@@ -72,6 +89,7 @@ export interface CompoundAmountSegment extends WithPlaceholder {
   currency?: CurrencyDef
   tone?: CompoundTone
   size?: CompoundSize
+  weight?: CompoundWeight
 }
 
 export type CompoundSegment =
@@ -102,6 +120,13 @@ const toneClassByValue: Record<CompoundTone, string> = {
 const sizeClassByValue: Record<CompoundSize, string> = {
   md: "",
   sm: "text-sm",
+}
+
+const weightClassByValue: Record<CompoundWeight, string> = {
+  light: "font-light",
+  normal: "font-normal",
+  medium: "font-medium",
+  semibold: "font-semibold",
 }
 
 const resolveCompoundTextValue = (
@@ -313,6 +338,7 @@ export const CompoundCell = (
               className={cn(
                 toneClassByValue[tone],
                 sizeClassByValue[segment.size ?? "md"],
+                segment.weight && weightClassByValue[segment.weight],
                 resolvedSegment.kind === "formatted" &&
                   "inline-flex items-center gap-1"
               )}
