@@ -1064,9 +1064,10 @@ const CommunityPostDetail = ({ post }: { post: CommunityPostSummary }) => (
       views: post.counters?.visits,
       comments: post.counters?.comments ?? "",
     }}
+    // No `onClick`: the post is already open. In the feed the card is a way in
+    // and wears the affordances to say so; here there is nowhere further to go.
     inLabel="in"
     comment={{ label: "Comment", onClick: () => {} }}
-    onClick={() => {}}
   />
 )
 

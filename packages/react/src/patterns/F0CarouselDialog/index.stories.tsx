@@ -87,7 +87,6 @@ const ITEMS: F0CarouselDialogItem[] = POSTS.map((post) => ({
       group={{ title: "All company", onClick: () => {} }}
       inLabel="in"
       comment={{ label: "Comment", onClick: () => {} }}
-      onClick={() => {}}
     />
   ),
 }))
@@ -278,7 +277,6 @@ const OneSourceDemo = () => {
               group={{ title: "All company", onClick: () => {} }}
               inLabel="in"
               comment={{ label: "Comment", onClick: () => {} }}
-              onClick={() => {}}
             />
           ),
         }))}

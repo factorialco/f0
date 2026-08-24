@@ -97,7 +97,16 @@ export type CommunityPostProps = {
 
   noVideoPreload?: boolean
 
-  onClick: (id: string) => void
+  /**
+   * WHAT CLICKING THE POST DOES — and whether it does anything.
+   *
+   * OMIT IT once the post is the destination. In a feed the card is a way in, so
+   * it takes a pointer cursor, a hover tint and a focus ring. Opened in a dialog
+   * it is already what you came for, and every one of those says there is
+   * somewhere further to go when there isn't: the tint follows the mouse across
+   * a page you are reading, and clicking does nothing.
+   */
+  onClick?: (id: string) => void
 
   noReactionsButton?: boolean
 
@@ -159,9 +168,8 @@ export const BaseCommunityPost = ({
   const descriptionCollapsed = !descriptionExpanded
   const date = getDisplayDateBasedOnDuration(createdAt, { locale })
 
-  const handleClick = () => {
-    onClick(id)
-  }
+  const isClickable = Boolean(onClick)
+  const handleClick = onClick ? () => onClick(id) : undefined
 
   const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
     event.stopPropagation()
@@ -216,7 +224,12 @@ export const BaseCommunityPost = ({
 
   return (
     <div
-      className="@container flex w-full cursor-pointer flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
+      className={cn(
+        "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 md:pb-4 md:pt-3",
+        // The affordances belong to the click, so they come and go with it.
+        isClickable &&
+          "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"
+      )}
       onClick={handleClick}
       id={`community-post-${id}`}
     >
