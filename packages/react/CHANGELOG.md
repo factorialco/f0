@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.49.0](https://github.com/factorialco/f0/compare/f0-react-v6.48.0...f0-react-v6.49.0) (2026-08-24)
+
+
+### Features
+
+* **OneDataCollection:** freeze table columns from settings ([#5188](https://github.com/factorialco/f0/issues/5188)) ([ece5e67](https://github.com/factorialco/f0/commit/ece5e6796f5a9f32466e4465ef575a0f57027a92))
+
 ## [6.48.0](https://github.com/factorialco/f0/compare/f0-react-v6.47.2...f0-react-v6.48.0) (2026-08-24)
 
 
