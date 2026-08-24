@@ -57,7 +57,10 @@ export function ReadOnlyCellContent<R extends RecordType>({
       ? getFieldInputIcon("date")
       : resolveTextCellIcon(editableColumn.textConfig)
     : undefined
-  const isSelect = showFieldAffordances && !!editableColumn.selectConfig
+  const isSelect =
+    showFieldAffordances &&
+    !editableColumn.disabledConfig?.hideSelectChevron &&
+    !!editableColumn.selectConfig
   const alignRight = editableColumn.align === "right"
 
   // Date cells store an ISO string; format it here so a read-only date cell
