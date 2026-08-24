@@ -1536,6 +1536,9 @@ const Home = () => {
         currentId={openPostId ?? ""}
         onNavigate={setOpenPostId}
         labels={{ previous: "Previous post", next: "Next post" }}
+        // The post brings its own padding; a second gutter from the frame just
+        // holds its cover off an edge it wants.
+        disableContentPadding
       />
     </div>
   )

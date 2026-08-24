@@ -123,6 +123,9 @@ const Demo = ({
         onNavigate={setOpenId}
         loop={loop}
         width="lg"
+        // `CommunityPost` brings its own padding — the frame adding a second
+        // gutter just pushes the post's cover in from an edge it wants.
+        disableContentPadding
         labels={{ previous: "Previous post", next: "Next post" }}
       />
     </div>
@@ -283,6 +286,7 @@ const OneSourceDemo = () => {
         currentId={openId ?? ""}
         onNavigate={setOpenId}
         labels={{ previous: "Previous post", next: "Next post" }}
+        disableContentPadding
         pagination={paging}
       />
     </div>

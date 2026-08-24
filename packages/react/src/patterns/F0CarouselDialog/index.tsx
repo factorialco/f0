@@ -420,13 +420,6 @@ const F0CarouselDialogComponent = ({
       width={isSmallScreen ? undefined : dialogProps.width}
       position={isSmallScreen ? "fullscreen" : dialogProps.position}
       asBottomSheetInMobile={false}
-      // FLUSH TO THE EDGES on a phone. The dialog IS the screen there, so the
-      // frame's own reading gutter is the second one the content sits behind —
-      // and a post's cover, which wants the full width, would stop short of it
-      // for no reason. The page it holds brings whatever padding it needs.
-      disableContentPadding={
-        isSmallScreen ? true : dialogProps.disableContentPadding
-      }
       isOpen={isOpen}
       onClose={onClose}
       title={shown.title}
