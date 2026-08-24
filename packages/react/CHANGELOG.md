@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.47.2](https://github.com/factorialco/f0/compare/f0-react-v6.47.1...f0-react-v6.47.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **F0Avatar:** forward pending to the person avatar ([#5195](https://github.com/factorialco/f0/issues/5195)) ([f47a8df](https://github.com/factorialco/f0/commit/f47a8df7d37098f6e4e411d2272236dceb33550a))
+
 ## [6.47.1](https://github.com/factorialco/f0/compare/f0-react-v6.47.0...f0-react-v6.47.1) (2026-08-24)
 
 
