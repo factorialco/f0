@@ -142,23 +142,21 @@ describe("F0CommunityPostsCarousel", () => {
       expect(seats()).toHaveLength(2)
     })
 
-    test("is kept for a later page when the feed has pictures", () => {
+    test("is kept on a refresh when the posts in hand have pictures", () => {
       render({
         posts: [{ ...POSTS[0], imageUrl: "/landscape01.jpg" }, POSTS[1]],
-        pagination: { hasMore: true, isLoading: true, onLoadMore: vi.fn() },
+        loading: true,
+        expectedItemsCount: 2,
       })
 
-      expect(seats()).toHaveLength(1)
+      expect(seats()).toHaveLength(2)
     })
 
-    test("is dropped for a later page when no loaded post has one", () => {
-      render({
-        posts: POSTS,
-        pagination: { hasMore: true, isLoading: true, onLoadMore: vi.fn() },
-      })
+    test("is dropped on a refresh when none of them do", () => {
+      render({ posts: POSTS, loading: true, expectedItemsCount: 2 })
 
-      // A feed of text posts should not flash an image-shaped hole every time it
-      // fetches.
+      // A feed of text posts should not flash an image-shaped hole while it
+      // reloads.
       expect(seats()).toHaveLength(0)
     })
   })
@@ -202,15 +200,17 @@ describe("F0CommunityPostsCarousel", () => {
       expect(onLoadMore).not.toHaveBeenCalled()
     })
 
-    test("a page in flight shows a tile to scroll onto, not a blank card", () => {
+    test("a page in flight is not announced — the row is left alone", () => {
       render({
         pagination: { hasMore: true, isLoading: true, onLoadMore: vi.fn() },
       })
 
-      // The posts you were reading STAY: three slides now — the two real tiles
-      // and the one being fetched.
+      // MOST FETCHES HERE ARE PREFETCHES, asked for by nobody. A placeholder
+      // tile made every one of them visible, which is the opposite of the point:
+      // the posts you were reading stay, and the row does not grow a grey
+      // rectangle to say that work is happening ahead of you.
       expect(screen.getByText("Yusuf Adeyemi")).toBeInTheDocument()
-      expect(screen.getAllByRole("group")).toHaveLength(3)
+      expect(screen.getAllByRole("group")).toHaveLength(POSTS.length)
       // And nothing is asked for twice while the first ask is outstanding.
       expect(screen.getByRole("button", { name: "More posts" })).toBeDisabled()
     })

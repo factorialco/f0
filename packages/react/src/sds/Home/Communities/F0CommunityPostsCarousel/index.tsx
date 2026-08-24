@@ -335,27 +335,25 @@ export const F0CommunityPostsCarousel = ({
   expectedItemsCount = 2,
   pagination,
 }: F0CommunityPostsCarouselProps) => {
-  const withImage = reservesImageSeat(posts)
-
   const items = loading
     ? Array.from({ length: expectedItemsCount }, (_, index) => (
-        <CommunityPostCardSkeleton key={index} withImage={withImage} />
+        <CommunityPostCardSkeleton
+          key={index}
+          withImage={reservesImageSeat(posts)}
+        />
       ))
-    : [
-        ...posts.map((post) => <CommunityPostCard key={post.id} post={post} />),
-        // THE PAGE THAT IS COMING, as a tile at the end. It is a slide like any
-        // other, which is the point: it gives the carousel somewhere to scroll
-        // to while the fetch is in flight, so pressing Next moves rather than
-        // doing nothing until the response lands.
-        ...(pagination?.isLoading
-          ? [
-              <CommunityPostCardSkeleton
-                key="loading-more"
-                withImage={withImage}
-              />,
-            ]
-          : []),
-      ]
+    : // NO TILE FOR THE PAGE IN FLIGHT. There used to be one, to give the
+      // carousel somewhere to scroll to while a fetch ran — but most fetches
+      // here are PREFETCHES, pulled in when the reader reaches the last page and
+      // asked for by nobody. A placeholder tile made every one of them visible,
+      // which is the opposite of the point: work done ahead of the reader should
+      // pass unnoticed.
+      //
+      // A press that genuinely has to wait is answered instead by the arrow
+      // (`isAwaitingPage` puts the spinner there) and by the row moving on its
+      // own the moment the page lands, onto real posts rather than onto a grey
+      // rectangle that then becomes them.
+      posts.map((post) => <CommunityPostCard key={post.id} post={post} />)
 
   return (
     <Carousel

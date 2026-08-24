@@ -2,7 +2,7 @@ import { useMemo } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, fn, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -103,9 +103,18 @@ type Story = StoryObj<typeof F0CommunityPostsCarousel>
  * anywhere to go — disabled rather than gone, so the row keeps its shape.
  */
 export const Default: Story = {
-  // A PAGE AT A TIME is the behaviour worth pinning: scrolling by one tile would
-  // leave the post you just read sitting in the row you turned to, so half of
-  // every "next" would be something already seen.
+  /**
+   * That the row MOVES, and that the arrows describe where it is.
+   *
+   * Deliberately says nothing about how many pages there are: tiles-per-view is
+   * a container query (`@lg`), so a narrower runner viewport turns four posts
+   * from two pages into four. Asserting "one press exhausts the feed" pinned a
+   * layout rather than a behaviour, and duly passed locally and failed in CI.
+   *
+   * `waitFor` because embla settles its own scroll — reading the arrows on the
+   * tick after the click is a race, and the fast machine is the one that hides
+   * it.
+   */
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
@@ -115,13 +124,12 @@ export const Default: Story = {
     // Both arrows are there from the start; only the one with nowhere to go is
     // disabled — an arrow that vanishes takes the reader's aim with it.
     await expect(previous).toBeDisabled()
-    await expect(next).toBeEnabled()
+    await waitFor(() => expect(next).toBeEnabled())
 
     await userEvent.click(next)
 
-    // Four posts, two to a page: one press exhausts the feed.
-    await expect(next).toBeDisabled()
-    await expect(previous).toBeEnabled()
+    // The row moved: there is now something behind us, whatever the width.
+    await waitFor(() => expect(previous).toBeEnabled())
   },
 }
 

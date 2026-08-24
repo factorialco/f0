@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
@@ -207,7 +214,7 @@ const F0CarouselDialogComponent = ({
    * remembered and finished when the page lands. Without it Next at the boundary
    * looks like it did nothing, and the reader presses twice to advance once.
    */
-  const owedAdvance = useRef(false)
+  const [owedAdvance, setOwedAdvance] = useState(false)
 
   /**
    * The item count the next page was last asked for at. Both the press and the
@@ -239,16 +246,24 @@ const F0CarouselDialogComponent = ({
     // asking again would be a second request for the same records, and treating
     // the press as nothing would lose the move the reader just made. So the
     // intent is remembered here, and the asking is left to the one guard.
-    owedAdvance.current = true
+    setOwedAdvance(true)
     askForNextPage()
   }, [nextId, onNavigate, waiting, hasMore, pagination, askForNextPage])
 
-  // The page landed: finish the move.
+  // The page landed: finish the move. And if the fetch settled without one, stop
+  // waiting rather than holding a spinner over nothing.
+  const wasLoadingMore = useRef(isLoadingMore)
   useEffect(() => {
-    if (!owedAdvance.current || !nextId) return
-    owedAdvance.current = false
-    onNavigate(nextId)
-  }, [nextId, onNavigate])
+    const settled = wasLoadingMore.current && !isLoadingMore
+    wasLoadingMore.current = isLoadingMore
+    if (!owedAdvance) return
+    if (nextId) {
+      setOwedAdvance(false)
+      onNavigate(nextId)
+      return
+    }
+    if (settled) setOwedAdvance(false)
+  }, [owedAdvance, nextId, isLoadingMore, onNavigate])
 
   /**
    * PREFETCH on arrival at the last loaded item, so the next press usually just
@@ -314,10 +329,11 @@ const F0CarouselDialogComponent = ({
           label={labels?.next ?? "Next"}
           hideLabel
           className={ARROW_CLASS}
-          // The spinner sits on the control that caused the wait, and only at
-          // the boundary: a page fetched while there is still somewhere to go is
-          // a prefetch the reader never asked about.
-          loading={!nextId && isLoadingMore}
+          // ONLY WHEN SOMEBODY IS WAITING. A page pulled in ahead of the
+          // reader — the prefetch on arriving at the last item — is work nobody
+          // asked about, and a spinner over it invites them to wait for
+          // something that was never in their way.
+          loading={owedAdvance}
           // Live past the last loaded item whenever the set continues — the
           // carousel's own arrow answers the same way.
           disabled={!nextId && !(hasMore && !isLoadingMore)}
@@ -332,6 +348,7 @@ const F0CarouselDialogComponent = ({
       nextId,
       hasMore,
       isLoadingMore,
+      owedAdvance,
       goPrevious,
       goNext,
     ]

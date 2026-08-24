@@ -498,11 +498,53 @@ const useCarouselPaging = (paging?: CarouselPaging) => {
     }
   }, [api])
 
+  /**
+   * THE MOVE THE READER ASKED FOR, still owed — and the only reason to show that
+   * anything is loading at all.
+   *
+   * Pressing Next at the end of a page cannot scroll yet, because the slides do
+   * not exist. So the press is remembered and finished the moment there is
+   * somewhere to go: without it the carousel fetches, fills, and then just sits
+   * there, having moved nothing in answer to an arrow.
+   *
+   * It is STATE rather than a ref because it is also the answer to "is anybody
+   * waiting on this fetch". A page pulled in ahead of the reader — the prefetch
+   * on arriving at the last page — is work nobody asked about, and announcing it
+   * with a spinner invites them to wait for something that was never in their
+   * way. Only a fetch somebody is standing on says so.
+   */
+  const [owedNext, setOwedNext] = React.useState(false)
+  // Whether the load in flight is the one that just finished, so an owed move
+  // that turned out to have nowhere to go stops waiting instead of hanging.
+  const wasLoading = React.useRef(isLoading)
+
+  React.useEffect(() => {
+    const settled = wasLoading.current && !isLoading
+    wasLoading.current = isLoading
+    if (!owedNext) return
+    if (canScrollNext) {
+      setOwedNext(false)
+      scrollNext()
+      return
+    }
+    if (settled) setOwedNext(false)
+  }, [owedNext, canScrollNext, isLoading, scrollNext])
+
   return {
     canGoNext: canScrollNext || (hasMore && !isLoading),
+    /** A fetch the reader is actually standing on. */
+    isAwaitingPage: owedNext,
     goNext: () => {
-      if (canScrollNext) scrollNext()
-      else if (hasMore && !isLoading) onLoadMore?.()
+      if (canScrollNext) {
+        scrollNext()
+        return
+      }
+      if (!hasMore) return
+      // Recorded whether or not we are the ones who ask: a press landing while a
+      // page is already in flight must still move the row when it lands, and
+      // asking twice for the same records is not the way to make that happen.
+      setOwedNext(true)
+      if (!isLoading) onLoadMore?.()
     },
   }
 }
@@ -544,7 +586,7 @@ const CarouselControls = React.forwardRef<
   }
 >(({ className, labels, showDots = true, paging, ...props }, ref) => {
   const { scrollPrev, canScrollPrev } = useCarousel()
-  const { canGoNext, goNext } = useCarouselPaging(paging)
+  const { canGoNext, goNext, isAwaitingPage } = useCarouselPaging(paging)
 
   return (
     <div
@@ -575,8 +617,10 @@ const CarouselControls = React.forwardRef<
         label={labels?.next ?? "Next"}
         hideLabel
         // The spinner sits on the control that caused the wait, rather than on
-        // the slides: the row you are looking at has not gone anywhere.
-        loading={paging?.isLoading}
+        // the slides: the row you are looking at has not gone anywhere. And ONLY
+        // when somebody is waiting — a page pulled in ahead of the reader should
+        // pass unnoticed, not advertise itself.
+        loading={isAwaitingPage}
         disabled={!canGoNext}
         onClick={goNext}
       />
