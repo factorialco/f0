@@ -88,8 +88,11 @@ accessible names and their tooltips. Both stay in the row at the ends and go
 pointer. The dots come from `CarouselDots` unchanged.
 
 While `loading`, the carousel is `aria-busy` and its placeholder tiles are
-skeletons — including a seat for the cover image, so the row does not lurch taller
-when the posts land.
+skeletons. Whether a placeholder keeps room for a cover depends on what is
+already known: on the **first** page nothing is loaded yet, so the seat is
+reserved — a card that starts short and grows moves everything under it. On a
+**later** page the loaded posts are asked, so a feed of text posts stops flashing
+an image-shaped hole every time it fetches.
 
 <Canvas of={Stories.Loading} />
 

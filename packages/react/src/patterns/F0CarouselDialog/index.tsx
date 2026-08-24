@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, type ReactNode } from "react"
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+
+import type { CarouselPaging } from "@/ui/carousel"
 
 import { F0Dialog } from "../F0Dialog"
 import type { F0DialogInternalProps } from "../F0Dialog/internal-types"
@@ -65,6 +67,26 @@ export interface F0CarouselDialogProps extends Pick<
    * the top is how you read the same thing twice without noticing.
    */
   loop?: boolean
+  /**
+   * THE ITEMS ARE A PAGE of a longer set. Next then stays live past the last one
+   * loaded: pressing it fetches, and the walk CONTINUES onto the new page as
+   * soon as it lands, so the reader presses once rather than pressing, waiting,
+   * and pressing again.
+   *
+   * It is the same {@link CarouselPaging} the carousel takes, on purpose. A post
+   * opened from a feed is the same query as the feed it came from, so one
+   * `useData` feeds both: the same records, the same `loadMore`. Walk past the
+   * end in the dialog and the carousel behind it grows too, because there is one
+   * list and both are looking at it.
+   *
+   * Arriving at the last loaded item ALSO asks for the next page, once per
+   * position — so a source that answers `hasMore: true` with no new records
+   * stalls instead of looping.
+   *
+   * `loop` is ignored while `hasMore`: an end that hasn't been reached yet is not
+   * an end to join up.
+   */
+  pagination?: CarouselPaging
 }
 
 const ARROW = "Previous"
@@ -115,6 +137,7 @@ const F0CarouselDialogComponent = ({
   onNavigate,
   labels,
   loop = false,
+  pagination,
   isOpen,
   onClose,
   ...dialogProps
@@ -124,19 +147,89 @@ const F0CarouselDialogComponent = ({
     items.findIndex((item) => item.id === currentId)
   )
   const current = items[index]
-  const total = items.length
+  /** How many are MOUNTED — one page's worth, when the set is paged. */
+  const loaded = items.length
+  /**
+   * How many there ARE. The source's own count when it reports one, else what is
+   * loaded — which is the truth for an unpaged set and an understatement for a
+   * paged one, hence the `+` the default label adds when more is coming.
+   */
+  const total = pagination?.total ?? loaded
 
-  const previousId = loop
-    ? items[(index - 1 + total) % total]?.id
+  const hasMore = pagination?.hasMore ?? false
+  const isLoadingMore = pagination?.isLoading ?? false
+  // A set whose end has not been reached yet is not an end to join up.
+  const wraps = loop && !hasMore
+
+  const previousId = wraps
+    ? items[(index - 1 + loaded) % loaded]?.id
     : items[index - 1]?.id
-  const nextId = loop ? items[(index + 1) % total]?.id : items[index + 1]?.id
+  const nextId = wraps ? items[(index + 1) % loaded]?.id : items[index + 1]?.id
 
   const goPrevious = useCallback(() => {
     if (previousId) onNavigate(previousId)
   }, [previousId, onNavigate])
+
+  /**
+   * THE MOVE THE READER ASKED FOR, still owed. Pressing Next at the end of a
+   * page cannot navigate yet — the item does not exist — so the press is
+   * remembered and finished when the page lands. Without it Next at the boundary
+   * looks like it did nothing, and the reader presses twice to advance once.
+   */
+  const owedAdvance = useRef(false)
+
+  /**
+   * The item count the next page was last asked for at. Both the press and the
+   * prefetch go through it, so one position produces one request however they
+   * interleave — a source that reports `isLoading` a tick late cannot be asked
+   * twice for the same records.
+   *
+   * A fetch that FAILS therefore isn't retried by pressing Next again: the count
+   * has not moved, so the position still counts as asked. Surfacing and retrying
+   * a failed page is the app's job, and it holds the source.
+   */
+  const askedAtCount = useRef(-1)
+
+  const askForNextPage = useCallback(() => {
+    if (!pagination || isLoadingMore) return
+    if (askedAtCount.current === loaded) return
+    askedAtCount.current = loaded
+    pagination.onLoadMore()
+  }, [pagination, isLoadingMore, loaded])
+
   const goNext = useCallback(() => {
-    if (nextId) onNavigate(nextId)
+    if (nextId) {
+      onNavigate(nextId)
+      return
+    }
+    if (!hasMore || !pagination) return
+    // THE PRESS IS RECORDED EITHER WAY. The prefetch has usually already asked
+    // for this page, so a press at the boundary lands while it is in flight —
+    // asking again would be a second request for the same records, and treating
+    // the press as nothing would lose the move the reader just made. So the
+    // intent is remembered here, and the asking is left to the one guard.
+    owedAdvance.current = true
+    askForNextPage()
+  }, [nextId, onNavigate, hasMore, pagination, askForNextPage])
+
+  // The page landed: finish the move.
+  useEffect(() => {
+    if (!owedAdvance.current || !nextId) return
+    owedAdvance.current = false
+    onNavigate(nextId)
   }, [nextId, onNavigate])
+
+  /**
+   * PREFETCH on arrival at the last loaded item, so the next press usually just
+   * navigates. The count guard is what makes this safe to run from an effect: a
+   * source answering `hasMore: true` with no new records leaves the count where
+   * it was, so nothing asks again — without it, `isLoading` cycling
+   * false→true→false would re-enter this on every response.
+   */
+  useEffect(() => {
+    if (!isOpen || nextId || !hasMore) return
+    askForNextPage()
+  }, [isOpen, nextId, hasMore, askForNextPage])
 
   // THE ARROW KEYS, on the document while the dialog is open. A modal dialog owns
   // the keyboard, and left/right is how anyone who has used a photo viewer
@@ -187,18 +280,37 @@ const F0CarouselDialogComponent = ({
           label={labels?.next ?? "Next"}
           hideLabel
           className={ARROW_CLASS}
-          disabled={!nextId}
+          // The spinner sits on the control that caused the wait, and only at
+          // the boundary: a page fetched while there is still somewhere to go is
+          // a prefetch the reader never asked about.
+          loading={!nextId && isLoadingMore}
+          // Live past the last loaded item whenever the set continues — the
+          // carousel's own arrow answers the same way.
+          disabled={!nextId && !(hasMore && !isLoadingMore)}
           onClick={goNext}
         />
       ),
     }),
-    [labels?.previous, labels?.next, previousId, nextId, goPrevious, goNext]
+    [
+      labels?.previous,
+      labels?.next,
+      previousId,
+      nextId,
+      hasMore,
+      isLoadingMore,
+      goPrevious,
+      goNext,
+    ]
   )
 
   if (!current) return null
 
+  // `+` when the set continues past a count nobody has told us: "3 of 4" would
+  // be a number that silently grows every time another page lands.
+  const openEnded = hasMore && pagination?.total === undefined
   const position =
-    labels?.position ?? ((n: number, of: number) => `${n} of ${of}`)
+    labels?.position ??
+    ((n: number, of: number) => `${n} of ${of}${openEnded ? "+" : ""}`)
 
   return (
     <F0Dialog
@@ -208,8 +320,10 @@ const F0CarouselDialogComponent = ({
       title={current.title}
       // Only worth saying when there is more than one: "1 of 1" is a reading
       // nobody needs and a dialog that isn't really a carousel.
-      headerStatus={total > 1 ? position(index + 1, total) : undefined}
-      sideControls={total > 1 ? sideControls : undefined}
+      headerStatus={
+        loaded > 1 || hasMore ? position(index + 1, total) : undefined
+      }
+      sideControls={loaded > 1 || hasMore ? sideControls : undefined}
     >
       {current.content}
     </F0Dialog>

@@ -113,6 +113,42 @@ describe("F0CommunityPostsCarousel", () => {
     expect(screen.getAllByRole("group")).toHaveLength(3)
   })
 
+  describe("the cover's seat in a placeholder tile", () => {
+    /** The 2:1 box a placeholder keeps for a cover, if it keeps one. */
+    const seats = () =>
+      screen
+        .getAllByTestId("skeleton")
+        .filter((el) => el.className.includes("aspect-[2/1]"))
+
+    test("is kept while the FIRST page loads, when nothing is known yet", () => {
+      render({ posts: [], loading: true, expectedItemsCount: 2 })
+
+      // A card that starts short and grows moves everything under it; one that
+      // starts tall and settles only gives room back.
+      expect(seats()).toHaveLength(2)
+    })
+
+    test("is kept for a later page when the feed has pictures", () => {
+      render({
+        posts: [{ ...POSTS[0], imageUrl: "/landscape01.jpg" }, POSTS[1]],
+        pagination: { hasMore: true, isLoading: true, onLoadMore: vi.fn() },
+      })
+
+      expect(seats()).toHaveLength(1)
+    })
+
+    test("is dropped for a later page when no loaded post has one", () => {
+      render({
+        posts: POSTS,
+        pagination: { hasMore: true, isLoading: true, onLoadMore: vi.fn() },
+      })
+
+      // A feed of text posts should not flash an image-shaped hole every time it
+      // fetches.
+      expect(seats()).toHaveLength(0)
+    })
+  })
+
   describe("when the posts are a PAGE of a longer feed", () => {
     test("Next stays live past the last mounted tile", () => {
       render({

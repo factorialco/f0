@@ -1,11 +1,17 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
+import {
+  createDataSourceDefinition,
+  useData,
+  useDataSource,
+} from "@/hooks/datasource"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { F0CommunityPostsCarousel } from "@/sds/Home/Communities/F0CommunityPostsCarousel"
 import { CommunityPost } from "@/sds/Home/Communities/Post/CommunityPost"
 
 import { F0CarouselDialog, type F0CarouselDialogItem } from "./index"
@@ -175,6 +181,124 @@ export const Default: Story = {
  * without noticing you have.
  */
 export const Looping: Story = { render: () => <Demo loop /> }
+
+/* ------------------------ one source, both surfaces ------------------------ */
+
+/** A page's worth. */
+const POSTS_PER_PAGE = 2
+
+/** Enough posts that the set is worth paging through. */
+const FEED = Array.from({ length: 12 }, (_, index) => {
+  const post = POSTS[index % POSTS.length]
+  return {
+    ...post,
+    id: `${post.id}-${index}`,
+    title: `${post.title} (#${index + 1})`,
+  }
+})
+
+type PostRecord = (typeof FEED)[number] & Record<string, unknown>
+
+/** A cursor-paged source: an offset in, a slice out, `hasMore` on the end. */
+const pagedPosts = () =>
+  createDataSourceDefinition<PostRecord>({
+    dataAdapter: {
+      paginationType: "infinite-scroll",
+      perPage: POSTS_PER_PAGE,
+      fetchData: async ({ pagination }) => {
+        const from = Number(pagination?.cursor ?? 0)
+        await new Promise((resolve) => setTimeout(resolve, 700))
+        const records = FEED.slice(from, from + POSTS_PER_PAGE) as PostRecord[]
+        const next = from + records.length
+        return {
+          type: "infinite-scroll" as const,
+          records,
+          cursor: String(next),
+          hasMore: next < FEED.length,
+          total: FEED.length,
+          perPage: POSTS_PER_PAGE,
+        }
+      },
+    },
+  })
+
+/**
+ * ONE `useData`, TWO SURFACES. The carousel and the dialog are handed the same
+ * records and the same `loadMore`, so they are two views of one query rather
+ * than two lists that have to be kept in step: walk past the end in the dialog
+ * and the carousel behind it has the new posts too, because there is only one
+ * list and both are looking at it.
+ */
+const OneSourceDemo = () => {
+  const source = useDataSource(useMemo(pagedPosts, []))
+  const { data, isInitialLoading, isLoadingMore, paginationInfo, loadMore } =
+    useData(source)
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  const posts = data.type === "flat" ? data.records : []
+
+  // The three fields both surfaces take, built once.
+  const paging = {
+    hasMore:
+      paginationInfo?.type === "infinite-scroll"
+        ? paginationInfo.hasMore
+        : false,
+    isLoading: isLoadingMore,
+    onLoadMore: loadMore,
+    total: paginationInfo?.total,
+  }
+
+  return (
+    <div className="w-full max-w-content p-4">
+      <F0CommunityPostsCarousel
+        posts={posts.map((post) => ({
+          ...post,
+          href: undefined,
+          onClick: () => setOpenId(post.id),
+        }))}
+        labels={{ previous: "Previous posts", next: "More posts" }}
+        loading={isInitialLoading}
+        expectedItemsCount={POSTS_PER_PAGE}
+        pagination={paging}
+      />
+      <F0CarouselDialog
+        isOpen={openId !== null}
+        onClose={() => setOpenId(null)}
+        width="lg"
+        items={posts.map((post) => ({
+          id: post.id,
+          title: post.title,
+          content: (
+            <CommunityPost
+              {...post}
+              hideTitle
+              group={{ title: "All company", onClick: () => {} }}
+              inLabel="in"
+              comment={{ label: "Comment", onClick: () => {} }}
+              onClick={() => {}}
+            />
+          ),
+        }))}
+        currentId={openId ?? ""}
+        onNavigate={setOpenId}
+        labels={{ previous: "Previous post", next: "Next post" }}
+        pagination={paging}
+      />
+    </div>
+  )
+}
+
+/**
+ * PAGED, FROM THE SAME SOURCE AS THE CAROUSEL — twelve posts fetched two at a
+ * time. Open any tile and walk: Next past the last loaded post fetches the next
+ * page and CONTINUES onto it, so one press advances once even at the boundary.
+ * Arriving at the last loaded post also prefetches, so most presses just move.
+ *
+ * The header counts against the source's own total ("3 of 12"), not against how
+ * many happen to be loaded — pass `total` and the number stops moving under the
+ * reader. Without it the count is open-ended ("3 of 4+").
+ */
+export const PagedFromDataSource: Story = { render: () => <OneSourceDemo /> }
 
 /**
  * ONE ITEM, and so not a carousel at all: no arrows and no "1 of 1" — a reading

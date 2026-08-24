@@ -53,6 +53,23 @@ name.
 
 <Canvas of={Stories.Looping} />
 
+### Paged sets
+
+Pass `pagination` — the same `{ hasMore, isLoading, onLoadMore, total }` the
+carousel takes — and the dialog walks past the last loaded item: Next fetches and
+**continues** onto the new page as soon as it lands, so one press advances once
+even at the boundary. Arriving at the last loaded item prefetches, once per
+position, so most presses simply move.
+
+One `useData` can feed both surfaces, which is the point: a post opened from a
+feed is the same query as the feed it came from, so the carousel and the dialog
+are two views of one list rather than two lists to keep in step.
+
+Pass `total` (`useData`'s `totalItems`) or the header counts only what is loaded —
+it says `3 of 4+` rather than pretending to know.
+
+<Canvas of={Stories.PagedFromDataSource} />
+
 <DoDonts
   do={{
     description: "Give every page a title and let the app own the position.",

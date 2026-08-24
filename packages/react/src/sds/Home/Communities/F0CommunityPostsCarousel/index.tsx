@@ -206,16 +206,20 @@ const CommunityPostCard = ({ post }: { post: CommunityPostSummary }) => {
   )
 }
 
-/** A tile's placeholder: the same box, the same floor, nothing written on it. */
-const CommunityPostCardSkeleton = () => (
+/**
+ * A tile's placeholder: the same box, the same floor, nothing written on it.
+ *
+ * `withImage` reserves the cover's seat. Its 2:1 box is most of a tile's height,
+ * so getting this wrong shows: reserve it for a feed with no pictures and the row
+ * shrinks when the posts land; skip it for a feed that has them and the row
+ * lurches taller instead. What decides it is {@link reservesImageSeat}.
+ */
+const CommunityPostCardSkeleton = ({ withImage }: { withImage: boolean }) => (
   <div className="flex h-full flex-col gap-3 rounded-xl border border-solid border-f1-border-secondary p-4">
-    {/* THE COVER'S SEAT, kept even though we don't yet know whether this post has
-        one. Its 2:1 box is most of the tile's height, so a placeholder without it
-        is a card that lurches taller the moment the posts land — and a carousel
-        does that to every tile in the row at once. Reserving it costs a picture
-        that never arrives; not reserving it costs the whole row jumping. Same
-        bleed as the real one, so the two are the same shape. */}
-    <Skeleton className={cn("-mx-3 -mt-3 rounded-lg", POST_IMAGE_RATIO)} />
+    {withImage ? (
+      // Same bleed as the real cover, so the two are the same shape.
+      <Skeleton className={cn("-mx-3 -mt-3 rounded-lg", POST_IMAGE_RATIO)} />
+    ) : null}
     <Skeleton className="h-5 w-3/4 rounded-2xs" />
     <Skeleton className="h-3 w-full rounded-2xs" />
     <Skeleton className="h-3 w-5/6 rounded-2xs" />
@@ -229,6 +233,18 @@ const CommunityPostCardSkeleton = () => (
     </div>
   </div>
 )
+
+/**
+ * Whether a placeholder tile should keep room for a cover.
+ *
+ * ASK THE POSTS YOU ALREADY HAVE. A feed whose posts carry no pictures should not
+ * flash an image-shaped hole every time it fetches — but with nothing loaded yet
+ * there is nothing to ask, and reserving the space is the better guess: a card
+ * that starts short and grows moves everything under it, while one that starts
+ * tall and settles only gives room back.
+ */
+const reservesImageSeat = (posts: CommunityPostSummary[]) =>
+  posts.length === 0 || posts.some((post) => post.imageUrl)
 
 export interface F0CommunityPostsCarouselProps {
   posts: CommunityPostSummary[]
@@ -301,9 +317,11 @@ export const F0CommunityPostsCarousel = ({
   expectedItemsCount = 2,
   pagination,
 }: F0CommunityPostsCarouselProps) => {
+  const withImage = reservesImageSeat(posts)
+
   const items = loading
     ? Array.from({ length: expectedItemsCount }, (_, index) => (
-        <CommunityPostCardSkeleton key={index} />
+        <CommunityPostCardSkeleton key={index} withImage={withImage} />
       ))
     : [
         ...posts.map((post) => <CommunityPostCard key={post.id} post={post} />),
@@ -312,7 +330,12 @@ export const F0CommunityPostsCarousel = ({
         // to while the fetch is in flight, so pressing Next moves rather than
         // doing nothing until the response lands.
         ...(pagination?.isLoading
-          ? [<CommunityPostCardSkeleton key="loading-more" />]
+          ? [
+              <CommunityPostCardSkeleton
+                key="loading-more"
+                withImage={withImage}
+              />,
+            ]
           : []),
       ]
 

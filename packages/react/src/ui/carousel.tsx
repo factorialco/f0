@@ -433,6 +433,17 @@ export type CarouselPaging = {
   isLoading?: boolean
   /** Fetch the next page and APPEND it to the slides. */
   onLoadMore: () => void
+  /**
+   * How many records the source holds ALTOGETHER, when it says — `useData`'s
+   * `totalItems`. For anything that reports a position out loud ("3 of 11"):
+   * without it the only number available is how many have been loaded, which
+   * moves every time another page arrives.
+   *
+   * The carousel itself ignores it. Its dots describe the slides that exist, and
+   * a dot for a page nobody has fetched would be a control that cannot be
+   * pressed.
+   */
+  total?: number
 }
 
 /**
