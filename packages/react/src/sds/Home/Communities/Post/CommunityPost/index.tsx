@@ -216,11 +216,19 @@ export const BaseCommunityPost = ({
 
   return (
     <div
-      className="flex w-full cursor-pointer flex-row gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
+      className="flex w-full cursor-pointer flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
       onClick={handleClick}
       id={`community-post-${id}`}
     >
-      <div className="hidden md:block">
+      {/* THE HEADER, and the avatar belongs to IT. It used to be a column of
+          its own with everything else beside it, which indented the post's whole
+          body — title, text, media — past a 40px gutter that only these two
+          lines ever needed.
+
+          One avatar at one size for every screen, too: the old markup carried a
+          `md`-and-up one in that gutter and a separate `xs` one inline for
+          phones, which is two things to keep in step for one picture. */}
+      <div className="flex min-w-0 flex-row items-center gap-3">
         {author ? (
           <F0Link
             href={author.url || "#"}
@@ -236,42 +244,21 @@ export const BaseCommunityPost = ({
         ) : (
           <F0AvatarIcon icon={PersonIcon} />
         )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div className="flex min-w-0 flex-col gap-2">
+        {/* No gap: the name and the date are one two-line block, and the
+            avatar beside them is centred on the pair (`items-center` above). */}
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-row justify-between">
             <div className="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
               {author ? (
-                <>
-                  <F0Link
-                    href={author.url}
-                    className="block md:hidden"
-                    title={authorFullName}
-                    stopPropagation
-                  >
-                    <span className="flex items-center">
-                      <F0AvatarPerson
-                        firstName={author.firstName}
-                        lastName={author.lastName}
-                        src={author.avatarUrl}
-                        size="xs"
-                      />
-                    </span>
-                  </F0Link>
-                  <F0Link
-                    href={author.url}
-                    title={authorFullName}
-                    className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
-                    stopPropagation
-                  >
-                    {authorFullName}
-                  </F0Link>
-                </>
-              ) : (
-                <div className="block md:hidden">
-                  <F0AvatarIcon icon={PersonIcon} size="sm" />
-                </div>
-              )}
+                <F0Link
+                  href={author.url}
+                  title={authorFullName}
+                  className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
+                  stopPropagation
+                >
+                  {authorFullName}
+                </F0Link>
+              ) : null}
               <span
                 className={cn(
                   "text-f1-foreground-secondary",
@@ -328,88 +315,86 @@ export const BaseCommunityPost = ({
               </div>
             </div>
           </div>
-          {/* `text-base`, like the author line above it: the two are one header,
-              and a smaller size here made the date read as a footnote to a line
-              it sits directly under. */}
-          <span className="-mt-3 text-base text-f1-foreground-secondary">
-            {date}
-          </span>
-          <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
-            <p
-              id={titleId}
-              className={cn(
-                hideTitle
-                  ? "sr-only"
-                  : cn("text-xl font-semibold", "line-clamp-2 break-words")
-              )}
-            >
-              {title}
-            </p>
-            {description && (
-              <>
-                <PostDescription
-                  ref={descriptionRef}
-                  id={descriptionId}
-                  content={description}
-                  collapsed={descriptionCollapsed}
-                  tabIndex={descriptionExpanded ? -1 : undefined}
-                  className={cn(descriptionExpanded && focusRing())}
-                />
-                {descriptionExpandable &&
-                  isDescriptionOverflowing &&
-                  !descriptionExpanded && (
-                    <ExpandDescriptionButton
-                      describedBy={titleId}
-                      controls={descriptionId}
-                      expanded={descriptionExpanded}
-                      onClick={handleExpandDescription}
-                    />
-                  )}
-              </>
-            )}
-          </div>
+          {/* `text-base`, like the author line above it: the two are one
+              header, and a smaller size made the date read as a footnote to the
+              line it sits under. */}
+          <span className="text-base text-f1-foreground-secondary">{date}</span>
         </div>
-        {mediaUrl && !event && (
-          <div className="relative aspect-video overflow-hidden rounded-xl md:max-w-[480px]">
-            {isVideo(mediaUrl) ? (
-              <video
-                controls
-                className="aspect-video h-full w-full bg-f1-background-secondary object-cover"
-                onClick={handleVideoClick}
-              >
-                <source src={mediaUrl} />
-              </video>
-            ) : (
-              <>
-                <img
-                  src={mediaUrl}
-                  role="presentation"
-                  loading="lazy"
-                  className="aspect-video h-full w-full object-cover"
+      </div>
+      <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
+        <p
+          id={titleId}
+          className={cn(
+            hideTitle
+              ? "sr-only"
+              : cn("text-xl font-semibold", "line-clamp-2 break-words")
+          )}
+        >
+          {title}
+        </p>
+        {description && (
+          <>
+            <PostDescription
+              ref={descriptionRef}
+              id={descriptionId}
+              content={description}
+              collapsed={descriptionCollapsed}
+              tabIndex={descriptionExpanded ? -1 : undefined}
+              className={cn(descriptionExpanded && focusRing())}
+            />
+            {descriptionExpandable &&
+              isDescriptionOverflowing &&
+              !descriptionExpanded && (
+                <ExpandDescriptionButton
+                  describedBy={titleId}
+                  controls={descriptionId}
+                  expanded={descriptionExpanded}
+                  onClick={handleExpandDescription}
                 />
-                <Skeleton className="absolute inset-0 -z-10 h-full w-full" />
-              </>
-            )}
-          </div>
-        )}
-        {event && (
-          <div className="w-full md:max-w-[480px]">
-            <PostEvent {...event} />
-          </div>
-        )}
-        <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        {!noReactionsButton && (
-          <Reactions
-            items={reactions?.items ?? []}
-            onInteraction={reactions?.onInteraction}
-            action={{
-              label: comment.label,
-              onClick: comment.onClick,
-              icon: CommentIcon,
-            }}
-          />
+              )}
+          </>
         )}
       </div>
+      {mediaUrl && !event && (
+        <div className="relative aspect-video overflow-hidden rounded-xl md:max-w-[480px]">
+          {isVideo(mediaUrl) ? (
+            <video
+              controls
+              className="aspect-video h-full w-full bg-f1-background-secondary object-cover"
+              onClick={handleVideoClick}
+            >
+              <source src={mediaUrl} />
+            </video>
+          ) : (
+            <>
+              <img
+                src={mediaUrl}
+                role="presentation"
+                loading="lazy"
+                className="aspect-video h-full w-full object-cover"
+              />
+              <Skeleton className="absolute inset-0 -z-10 h-full w-full" />
+            </>
+          )}
+        </div>
+      )}
+      {event && (
+        <div className="w-full md:max-w-[480px]">
+          <PostEvent {...event} />
+        </div>
+      )}
+      <p className="text-f1-foreground-secondary">{countersDisplay}</p>
+      {!noReactionsButton && (
+        <Reactions
+          items={reactions?.items ?? []}
+          onInteraction={reactions?.onInteraction}
+          action={{
+            label: comment.label,
+            onClick: comment.onClick,
+            icon: CommentIcon,
+          }}
+        />
+      )}
     </div>
   )
 }
