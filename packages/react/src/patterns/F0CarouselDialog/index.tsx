@@ -1,0 +1,224 @@
+import { useCallback, useEffect, useMemo, type ReactNode } from "react"
+
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
+
+import { F0Dialog } from "../F0Dialog"
+import type { F0DialogInternalProps } from "../F0Dialog/internal-types"
+
+/** One page of the dialog. */
+export interface F0CarouselDialogItem {
+  id: string
+  /**
+   * The dialog's title while this page is showing. The header therefore changes
+   * with the content, which is what makes this ONE dialog moving rather than a
+   * frame with something loaded into it.
+   *
+   * GIVE EVERY PAGE ONE: it is the dialog's accessible name as well as the words
+   * in the header, and a dialog without one is announced as nothing at all. If
+   * the content already shows the title itself, hide it THERE — `CommunityPost`
+   * has `hideTitle` for exactly this — rather than leaving the header blank.
+   */
+  title?: string
+  content: ReactNode
+}
+
+export interface F0CarouselDialogProps extends Pick<
+  F0DialogInternalProps,
+  | "isOpen"
+  | "onClose"
+  | "width"
+  | "primaryAction"
+  | "secondaryAction"
+  | "otherActions"
+  | "disableContentPadding"
+  | "container"
+> {
+  /** The pages, in the order they are walked. */
+  items: F0CarouselDialogItem[]
+  /**
+   * WHICH PAGE IS SHOWING. Controlled, deliberately: the thing you opened the
+   * dialog on is already state the app holds — the post you clicked in a feed —
+   * and a dialog keeping its own copy of it is two answers to one question.
+   *
+   * An id that names nothing shows the first item, so a page that disappears
+   * underneath you (a post deleted, a filter changed) leaves the dialog on
+   * something rather than empty.
+   */
+  currentId: string
+  onNavigate: (id: string) => void
+  /**
+   * The controls' words. There is no visible text on the arrows, so `previous`
+   * and `next` are what a screen reader reads and what the tooltips say;
+   * `position` writes the header's reading ("3 of 11").
+   */
+  labels?: {
+    previous?: string
+    next?: string
+    position?: (current: number, total: number) => string
+  }
+  /**
+   * The ends JOIN UP: Next on the last page goes to the first. Off by default —
+   * a list of eleven posts has an end, and an arrow that silently returns you to
+   * the top is how you read the same thing twice without noticing.
+   */
+  loop?: boolean
+}
+
+const ARROW = "Previous"
+
+/**
+ * SOLID, because these float on the overlay rather than sitting on a card.
+ *
+ * `outline`'s resting fill is 60% opaque — right on a white surface, where the
+ * 40% showing through is more white. Over the dimmed page behind a dialog it
+ * lets that dimming through instead, and the button reads as greyed out: the
+ * same look a DISABLED control has, on the two controls whose whole job is to
+ * say whether you can keep going.
+ *
+ * Only the RESTING fill is replaced. Hover, press and disabled set their own
+ * backgrounds and are left exactly as they are — a disabled arrow should look
+ * faded, and that difference is the whole point of making the live one solid.
+ *
+ * `ButtonInternal` rather than `F0Button` because `F0Button` deliberately drops
+ * `className`; `F0DialogHeader`'s own controls reach for the same escape hatch.
+ */
+const ARROW_CLASS = "bg-f1-background"
+
+/**
+ * F0CarouselDialog — one dialog you WALK THROUGH: an arrow on each side of the
+ * panel, the position in the header, and the content swapped underneath without
+ * the dialog ever closing.
+ *
+ * For a set of things a reader moves between — a post opened from a feed, one
+ * photo of many, a record and the next record. Not for a wizard: those steps are
+ * one task with a beginning and an end, and belong in `F0Wizard`, which knows
+ * about progress and about not letting you skip.
+ *
+ * THE ARROWS ARE OUTSIDE THE PANEL, which is the whole reason this is a
+ * component rather than two buttons in someone's `children`. Inside, they would
+ * compete with the content for the reader's attention and for its width; beside
+ * it, they are unmistakably chrome. They are still rendered within the dialog's
+ * own element, so the focus trap holds and the keyboard reaches them — and the
+ * left/right arrow keys drive them directly.
+ *
+ * The content is MOUNTED ONE AT A TIME. Walking to the next page unmounts the
+ * last one, so a dialog over a hundred posts costs one post — and anything a page
+ * needs to keep across a walk (a video's position, a draft reply) has to live
+ * with the caller, not in the page.
+ */
+const F0CarouselDialogComponent = ({
+  items,
+  currentId,
+  onNavigate,
+  labels,
+  loop = false,
+  isOpen,
+  onClose,
+  ...dialogProps
+}: F0CarouselDialogProps) => {
+  const index = Math.max(
+    0,
+    items.findIndex((item) => item.id === currentId)
+  )
+  const current = items[index]
+  const total = items.length
+
+  const previousId = loop
+    ? items[(index - 1 + total) % total]?.id
+    : items[index - 1]?.id
+  const nextId = loop ? items[(index + 1) % total]?.id : items[index + 1]?.id
+
+  const goPrevious = useCallback(() => {
+    if (previousId) onNavigate(previousId)
+  }, [previousId, onNavigate])
+  const goNext = useCallback(() => {
+    if (nextId) onNavigate(nextId)
+  }, [nextId, onNavigate])
+
+  // THE ARROW KEYS, on the document while the dialog is open. A modal dialog owns
+  // the keyboard, and left/right is how anyone who has used a photo viewer
+  // expects to move — asking them to tab to a button first is asking them to
+  // find it. Bound to the document rather than to the panel because focus starts
+  // nowhere in particular (`onOpenAutoFocus` is prevented).
+  useEffect(() => {
+    if (!isOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      // Not while someone is typing: a text field's own caret movement is the
+      // more specific claim on these keys.
+      const target = event.target as HTMLElement | null
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      )
+        return
+      if (event.key === "ArrowLeft") goPrevious()
+      if (event.key === "ArrowRight") goNext()
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [isOpen, goPrevious, goNext])
+
+  const sideControls = useMemo(
+    () => ({
+      // BOTH ARROWS ALWAYS, disabled at the ends rather than removed: an arrow
+      // that vanishes takes the reader's aim with it, and on the first page the
+      // one that vanished is the one they are about to want.
+      previous: (
+        <ButtonInternal
+          variant="outline"
+          size="md"
+          icon={ChevronLeft}
+          label={labels?.previous ?? ARROW}
+          hideLabel
+          className={ARROW_CLASS}
+          disabled={!previousId}
+          onClick={goPrevious}
+        />
+      ),
+      next: (
+        <ButtonInternal
+          variant="outline"
+          size="md"
+          icon={ChevronRight}
+          label={labels?.next ?? "Next"}
+          hideLabel
+          className={ARROW_CLASS}
+          disabled={!nextId}
+          onClick={goNext}
+        />
+      ),
+    }),
+    [labels?.previous, labels?.next, previousId, nextId, goPrevious, goNext]
+  )
+
+  if (!current) return null
+
+  const position =
+    labels?.position ?? ((n: number, of: number) => `${n} of ${of}`)
+
+  return (
+    <F0Dialog
+      {...dialogProps}
+      isOpen={isOpen}
+      onClose={onClose}
+      title={current.title}
+      // Only worth saying when there is more than one: "1 of 1" is a reading
+      // nobody needs and a dialog that isn't really a carousel.
+      headerStatus={total > 1 ? position(index + 1, total) : undefined}
+      sideControls={total > 1 ? sideControls : undefined}
+    >
+      {current.content}
+    </F0Dialog>
+  )
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const F0CarouselDialog = withDataTestId(
+  experimentalComponent("F0CarouselDialog", F0CarouselDialogComponent)
+)

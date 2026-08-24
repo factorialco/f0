@@ -19,7 +19,21 @@ import {
   type SlotRenderers,
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
+import type { WidgetContainerSide } from "../WidgetContainer"
 import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
+
+/**
+ * The width each area gives a widget, used to cap the preview when the picker is
+ * opened for one. The rail is the layout's `asideWidth` and the main column is
+ * its `mainWidth` — f0's `max-w-content` reading column — so a widget previews at
+ * the width the column it is headed for will really give it.
+ *
+ * Override either with `previewWidth` when the app's own columns differ.
+ */
+const AREA_PREVIEW_WIDTH: Record<WidgetContainerSide, number> = {
+  main: 712,
+  right: 396,
+}
 
 /** One entry in the widget catalog dialog. */
 export interface WidgetCatalogItem {
@@ -59,6 +73,21 @@ export interface WidgetCatalogItem {
    * nothing recommended there is no section.
    */
   recommended?: boolean
+  /**
+   * WHICH COLUMNS this widget may be added to — the same two sides the layout
+   * hands back from `onClickAddNewWidget`. The picker then shows it only when it
+   * was opened for one of them (see `area`).
+   *
+   * OMIT IT for a widget that belongs in either, which is most of them: a
+   * `list`-shaped card reads the same in a 396px rail and in the main column,
+   * and saying so twice is how the two lists drift apart. Name the sides for the
+   * widgets that genuinely cannot travel — a carousel of post cards needs the
+   * main column's width, a 40px clock tile is built for the rail.
+   *
+   * A widget listed for NEITHER side (`[]`) is offered nowhere, which is a way to
+   * retire an entry without deleting it.
+   */
+  areas?: WidgetContainerSide[]
 }
 
 /**
@@ -89,8 +118,21 @@ export interface WidgetCatalogProps {
    */
   groups?: WidgetCatalogGroup[]
   /**
+   * WHICH COLUMN the picker was opened for — pass the side `onClickAddNewWidget`
+   * handed you. It does two things: widgets that declare `areas` are filtered
+   * down to the ones this column can hold, and the preview is capped to that
+   * column's width by default (see {@link AREA_PREVIEW_WIDTH}).
+   *
+   * Omit it and the picker is what it has always been: every widget, previewed
+   * at `previewWidth`. That is right for a Home with ONE place to put a widget;
+   * a layout with two columns should say which one it is filling, or it will
+   * offer the rail's clock for the main column and preview it at the wrong width.
+   */
+  area?: WidgetContainerSide
+  /**
    * Content width of the column this was opened from — the preview is capped
-   * to it, so a rail-bound widget previews at rail width.
+   * to it, so a rail-bound widget previews at rail width. Defaults to the
+   * `area`'s own width, and to the rail's when there is no `area`.
    */
   previewWidth?: number
   /**
@@ -183,6 +225,12 @@ const SectionHeader = ({ label, icon }: { label: string; icon?: IconType }) => (
  * Selection follows the filter: if the selected row is filtered out, the first
  * remaining row takes over, so the preview always shows something the CTA can
  * actually add.
+ *
+ * ONE CATALOG, TWO COLUMNS. Pass the `area` the picker was opened for and the
+ * same `widgets` list serves both: entries that declare `areas` are shown only
+ * where they fit, entries that declare none are shown in both, and the preview
+ * takes that column's width. So a Home keeps one list — the widgets it offers —
+ * rather than two that have to be kept in step.
  */
 export function WidgetCatalog({
   isOpen,
@@ -190,7 +238,8 @@ export function WidgetCatalog({
   widgets,
   onAdd,
   groups,
-  previewWidth = 396,
+  area,
+  previewWidth,
   slotRenderers,
   title = "Add widget",
 }: WidgetCatalogProps) {
@@ -201,6 +250,10 @@ export function WidgetCatalog({
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const needle = query.trim().toLowerCase()
+  // The column decides the preview's width unless the app overrides it — a rail
+  // widget previewed at the main column's width is a different card.
+  const resolvedPreviewWidth =
+    previewWidth ?? (area ? AREA_PREVIEW_WIDTH[area] : AREA_PREVIEW_WIDTH.right)
 
   /**
    * THE LIST AS IT IS READ: recommended first, then each declared domain that has
@@ -209,9 +262,16 @@ export function WidgetCatalog({
    * leaving an empty heading behind.
    */
   const sections = useMemo(() => {
-    const shown = needle
-      ? widgets.filter((w) => w.title.toLowerCase().includes(needle))
+    // THE AREA FILTER COMES FIRST, before the search: a widget this column can't
+    // hold isn't a widget the search should be able to surface. A widget that
+    // declares no `areas` belongs to every column — the common case, and the one
+    // that stays common by saying nothing.
+    const offered = area
+      ? widgets.filter((w) => !w.areas || w.areas.includes(area))
       : widgets
+    const shown = needle
+      ? offered.filter((w) => w.title.toLowerCase().includes(needle))
+      : offered
     const recommended = shown.filter((w) => w.recommended)
     // Recommended widgets are LIFTED out of their group, not copied into two
     // places: the same row twice reads as two different widgets.
@@ -246,7 +306,7 @@ export function WidgetCatalog({
       icon?: IconType
       items: WidgetCatalogItem[]
     }>
-  }, [widgets, groups, needle, t])
+  }, [widgets, groups, needle, area, t])
 
   // Selection follows the ORDER THE LIST IS IN, so "the first one" is the first
   // one you can see — and never a row the search has filtered out.
@@ -305,7 +365,12 @@ export function WidgetCatalog({
             ))}
             {ordered.length === 0 ? (
               <div className="p-2 text-f1-foreground-secondary">
-                No widgets match your search.
+                {/* Two ways to end up with nothing, and they are not the same
+                    problem: a search that matched none can be cleared, while a
+                    column with nothing left to offer cannot. */}
+                {needle
+                  ? "No widgets match your search."
+                  : "No widgets to add here."}
               </div>
             ) : null}
           </div>
@@ -316,7 +381,7 @@ export function WidgetCatalog({
         <WidgetPreviewPane
           previewKey={selected?.id}
           info={selected ? previewInfo(selected) : undefined}
-          previewWidth={previewWidth}
+          previewWidth={resolvedPreviewWidth}
         >
           {selected ? (
             <CatalogPreview

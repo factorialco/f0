@@ -977,4 +977,30 @@ describe("SlotWidget chrome", () => {
     // The dropdown defers its items' onClick past its own close animation.
     await waitFor(() => expect(onClick).toHaveBeenCalled())
   })
+
+  test("forwards the widget's own header controls to the frame", () => {
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Communities" }}
+        headerControls={<button type="button">New Post</button>}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "New Post" })).toBeInTheDocument()
+  })
+
+  test("header controls alone are enough to earn a header row", () => {
+    // The regression this guards: the frame draws no header at all when the
+    // header object is empty, so a widget whose header is nothing BUT its own
+    // controls used to lose them silently.
+    zeroRender(
+      <SlotWidget
+        headerControls={<button type="button">New Post</button>}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "New Post" })).toBeInTheDocument()
+  })
 })

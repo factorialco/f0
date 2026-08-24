@@ -1,6 +1,8 @@
 import { cva } from "cva"
 import { FC, useCallback, useMemo, useState } from "react"
 
+import { cn } from "@/lib/utils"
+
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
@@ -81,6 +83,8 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   navigation,
   resourceHeader,
   controls,
+  headerStatus,
+  sideControls,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -161,10 +165,54 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     navigation,
     resourceHeader,
     controls,
+    headerStatus,
     tabs,
     activeTabId,
     setActiveTabId,
   }
+
+  /**
+   * The flanking controls. They are children of the PANEL — which is already
+   * `relative` and `pointer-events-auto` — and merely positioned outside its
+   * box, so they sit inside Radix's focus trap and are reachable by keyboard.
+   * Rendered next to the dialog instead they would be `aria-hidden` and inert.
+   *
+   * `-left-14`/`-right-14` clears the panel by 56px on a screen with room for
+   * it. A BOTTOM SHEET has no such room — it is the width of the phone — so
+   * there they come back onto the panel's own edges and float over the content,
+   * which is where a gallery has always put them.
+   */
+  // AN ELEMENT, NOT A COMPONENT. Declared as a local function component and
+  // rendered as a tag, it would be a brand-new component TYPE on every render,
+  // so React would tear the arrows down and rebuild them each time — losing
+  // focus mid-interaction, and dropping a click between its own pointerdown and
+  // mouseup because the node the press started on no longer exists.
+  const sideControlsSeat = "absolute top-1/2 z-10 -translate-y-1/2"
+  const sideControlsOnPanel = variant === "bottomSheet"
+  const renderedSideControls = sideControls ? (
+    <>
+      {sideControls.previous ? (
+        <div
+          className={cn(
+            sideControlsSeat,
+            sideControlsOnPanel ? "left-2" : "-left-14"
+          )}
+        >
+          {sideControls.previous}
+        </div>
+      ) : null}
+      {sideControls.next ? (
+        <div
+          className={cn(
+            sideControlsSeat,
+            sideControlsOnPanel ? "right-2" : "-right-14"
+          )}
+        >
+          {sideControls.next}
+        </div>
+      ) : null}
+    </>
+  ) : null
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
@@ -178,6 +226,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
+            {renderedSideControls}
             <F0DialogHeader {...headerProps} />
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}
@@ -216,6 +265,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           container={containerProp}
           defaultContainerId={defaultContainerId}
         >
+          {renderedSideControls}
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>
             {children}

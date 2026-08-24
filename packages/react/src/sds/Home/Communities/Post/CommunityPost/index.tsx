@@ -104,6 +104,18 @@ export type CommunityPostProps = {
   dropdownItems?: DropdownItem[]
 
   descriptionExpandable?: boolean
+
+  /**
+   * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
+   * for a container that already shows it, like a dialog carrying the post's
+   * title in its own header. Without this the same words appear twice, an inch
+   * apart.
+   *
+   * The title element stays in the DOM, `sr-only`: it is what the expanded
+   * description points at (`aria-describedby`), so removing it would quietly
+   * break that as well as the post's name.
+   */
+  hideTitle?: boolean
 }
 
 export const BaseCommunityPost = ({
@@ -124,6 +136,7 @@ export const BaseCommunityPost = ({
   dropdownItems,
   noReactionsButton = false,
   descriptionExpandable = false,
+  hideTitle = false,
 }: CommunityPostProps) => {
   const titleId = useId()
   const descriptionId = useId()
@@ -315,15 +328,19 @@ export const BaseCommunityPost = ({
               </div>
             </div>
           </div>
-          <span className="-mt-3 text-sm text-f1-foreground-secondary">
+          {/* `text-base`, like the author line above it: the two are one header,
+              and a smaller size here made the date read as a footnote to a line
+              it sits directly under. */}
+          <span className="-mt-3 text-base text-f1-foreground-secondary">
             {date}
           </span>
           <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
             <p
               id={titleId}
               className={cn(
-                "text-xl font-semibold",
-                "line-clamp-2 break-words"
+                hideTitle
+                  ? "sr-only"
+                  : cn("text-xl font-semibold", "line-clamp-2 break-words")
               )}
             >
               {title}

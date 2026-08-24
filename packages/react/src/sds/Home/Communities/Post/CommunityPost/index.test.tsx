@@ -171,3 +171,21 @@ test("renders English for an unsupported locale", () => {
 
   expect(screen.getByText("3 hours ago")).toBeInTheDocument()
 })
+
+// A container that already shows the post's title — a dialog carrying it in its
+// own header — asks the card not to repeat it an inch below.
+test("hideTitle keeps the title as the accessible name, out of the card", () => {
+  render(<BaseCommunityPost {...defaultProps} hideTitle />)
+
+  const title = screen.getByText("Post title")
+  // Still in the DOM, and still `aria-describedby`'s target: removing it would
+  // break the post's name and the expanded description's wiring both.
+  expect(title).toBeInTheDocument()
+  expect(title).toHaveClass("sr-only")
+})
+
+test("without it the title is the card's own heading", () => {
+  render(<BaseCommunityPost {...defaultProps} />)
+
+  expect(screen.getByText("Post title")).not.toHaveClass("sr-only")
+})

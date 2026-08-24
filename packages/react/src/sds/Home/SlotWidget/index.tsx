@@ -188,6 +188,7 @@ export function SlotWidget({
   fullHeight,
   action,
   summaries,
+  headerControls,
   alert,
   status,
   slots,
@@ -225,9 +226,13 @@ export function SlotWidget({
   const { info, ...headerRest } = resolveWidgetHeader(header, params) ?? {}
   // Dropping `info` can leave the header with nothing in it — then there is no
   // header row to draw, unless the overflow menu needs one to sit in.
+  // `headerControls` counts too: a widget whose header is nothing but its own
+  // controls (a carousel with a scope switcher and no title) still needs the row
+  // they sit in — without it the frame draws no header at all and they vanish.
   const headerProps =
     Object.values(headerRest).some((value) => value !== undefined) ||
-    (actions && actions.length > 0)
+    (actions && actions.length > 0) ||
+    headerControls
       ? headerRest
       : undefined
 
@@ -238,6 +243,7 @@ export function SlotWidget({
       action={action}
       footerClassName={FOOTER_CLASS}
       actions={actions}
+      headerControls={headerControls}
       summaries={summaries}
       {...(alert ? { alert } : { status })}
       isDragging={isDragging}
