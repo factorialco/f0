@@ -155,6 +155,30 @@ export const WithCustomSeparator: Story = {
   },
 }
 
+export const NameWithSubordinateContext: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Name / context",
+      render: () => ({
+        type: "compound",
+        value: {
+          separator: " ",
+          segments: [
+            { type: "text", value: "Junior" },
+            {
+              type: "text",
+              value: "Backend Engineer",
+              tone: "secondary",
+              size: "sm",
+            },
+          ],
+        },
+      }),
+    },
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {

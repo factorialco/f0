@@ -30,12 +30,22 @@ export const compoundTones = [
 
 export type CompoundTone = (typeof compoundTones)[number]
 
+export const compoundSizes = ["md", "sm"] as const
+
+/**
+ * Type scale of a single segment. Defaults to `"md"` (the cell's base size);
+ * `"sm"` renders one step down, for subordinating a segment to the ones beside
+ * it — e.g. a name in `"md"` followed by its context in `"sm"`.
+ */
+export type CompoundSize = (typeof compoundSizes)[number]
+
 type UnitsPosition = "left" | "right"
 
 export interface CompoundTextSegment extends WithPlaceholder {
   type: "text"
   value: string | number | undefined
   tone?: CompoundTone
+  size?: CompoundSize
 }
 
 export interface CompoundNumberSegment extends WithPlaceholder {
@@ -45,6 +55,7 @@ export interface CompoundNumberSegment extends WithPlaceholder {
   unitsPosition?: UnitsPosition
   decimalPlaces?: number
   tone?: CompoundTone
+  size?: CompoundSize
 }
 
 export interface CompoundPercentageSegment extends WithPlaceholder {
@@ -52,6 +63,7 @@ export interface CompoundPercentageSegment extends WithPlaceholder {
   value: number | undefined
   decimalPlaces?: number
   tone?: CompoundTone
+  size?: CompoundSize
 }
 
 export interface CompoundAmountSegment extends WithPlaceholder {
@@ -59,6 +71,7 @@ export interface CompoundAmountSegment extends WithPlaceholder {
   value: number | undefined
   currency?: CurrencyDef
   tone?: CompoundTone
+  size?: CompoundSize
 }
 
 export type CompoundSegment =
@@ -83,6 +96,12 @@ const toneClassByValue: Record<CompoundTone, string> = {
   warning: "text-f1-foreground-warning",
   info: "text-f1-foreground-info",
   selected: "text-f1-foreground-selected",
+}
+
+// "md" is the cell's base size, so it needs no class.
+const sizeClassByValue: Record<CompoundSize, string> = {
+  md: "",
+  sm: "text-sm",
 }
 
 const resolveCompoundTextValue = (
@@ -293,6 +312,7 @@ export const CompoundCell = (
             <span
               className={cn(
                 toneClassByValue[tone],
+                sizeClassByValue[segment.size ?? "md"],
                 resolvedSegment.kind === "formatted" &&
                   "inline-flex items-center gap-1"
               )}

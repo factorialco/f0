@@ -74,6 +74,26 @@ describe("CompoundCell", () => {
     expect(screen.getByText("Neutral")).toHaveClass("text-f1-foreground")
   })
 
+  it("renders a segment one step down when size is sm, base otherwise", () => {
+    const args: CompoundCellValue = {
+      separator: " ",
+      segments: [
+        { type: "text", value: "Junior" },
+        {
+          type: "text",
+          value: "Backend Engineer",
+          tone: "secondary",
+          size: "sm",
+        },
+      ],
+    }
+
+    render(CompoundCell(args, tableMeta))
+
+    expect(screen.getByText("Backend Engineer")).toHaveClass("text-sm")
+    expect(screen.getByText("Junior")).not.toHaveClass("text-sm")
+  })
+
   it("formats number and amount segments", () => {
     const args: CompoundCellValue = {
       segments: [
