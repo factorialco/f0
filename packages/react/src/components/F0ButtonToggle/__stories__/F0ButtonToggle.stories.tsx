@@ -7,7 +7,11 @@ import { Microphone, MicrophoneNegative } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { buttonToggleSizes, buttonToggleVariants } from "../"
+import {
+  buttonToggleColors,
+  buttonToggleSizes,
+  buttonToggleVariants,
+} from "../"
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
 const meta = {
@@ -88,6 +92,17 @@ const meta = {
         },
       },
     },
+    color: {
+      control: "select",
+      options: [undefined, ...buttonToggleColors],
+      description:
+        "The colour the toggle wears when selected — for a set whose members mean different things. Muted glyph when unselected.",
+      table: {
+        type: {
+          summary: buttonToggleColors.join(" | "),
+        },
+      },
+    },
     ...dataTestIdArgs,
   },
 } satisfies Meta<typeof F0ButtonToggle>
@@ -116,6 +131,48 @@ export const WithDataTestId: Story = {
       canvas.getByTestId("my-test-button-toggle")
     ).toBeInTheDocument()
   },
+}
+
+export const Colors: Story = {
+  args: {
+    label: "Toggle me",
+    icon: Microphone,
+  },
+  parameters: {
+    ...withSnapshot({}),
+    docs: {
+      description: {
+        story:
+          "`color` makes the toggle a member of a coloured set: it wears the " +
+          "colour when selected and stays a muted glyph when it isn't. For a set " +
+          "whose members mean different things — a mood scale, a status picker — " +
+          "not for a lone toggle.",
+      },
+    },
+  },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {buttonToggleColors.map((color) => (
+        <div key={color} className="flex items-center gap-3">
+          <F0ButtonToggle
+            label={color}
+            icon={Microphone}
+            color={color}
+            selected
+            onSelectedChange={() => {}}
+          />
+          <F0ButtonToggle
+            label={color}
+            icon={Microphone}
+            color={color}
+            selected={false}
+            onSelectedChange={() => {}}
+          />
+          <span className="text-f1-foreground-secondary">{color}</span>
+        </div>
+      ))}
+    </div>
+  ),
 }
 
 export const WithTooltip: Story = {

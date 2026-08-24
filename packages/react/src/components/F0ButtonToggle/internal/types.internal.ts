@@ -1,6 +1,10 @@
 import { IconType } from "@/components/F0Icon"
 
-import { ButtonToggleSize, ButtonToggleVariant } from "../types"
+import {
+  ButtonToggleColor,
+  ButtonToggleSize,
+  ButtonToggleVariant,
+} from "../types"
 
 export type F0ButtonToggleInternalProps = {
   /**
@@ -45,6 +49,18 @@ export type F0ButtonToggleInternalProps = {
    * a bare glyph it withholds the whole thing.
    */
   tooltip?: string | { label?: string; description: string; instant?: boolean }
+
+  /**
+   * Makes the toggle a member of a COLOURED SET: it wears this colour when
+   * selected — fill, border and glyph — and stays a muted glyph when it isn't,
+   * so one answer out of several is readable at a glance. Without it the toggle
+   * uses F0's selected teal, like any other selected control.
+   *
+   * Only for a set whose members mean different things (a mood scale, a status
+   * picker). A lone toggle, or a group where every item is the same kind of
+   * thing, should stay on the default.
+   */
+  color?: ButtonToggleColor
 
   /**
    * @private

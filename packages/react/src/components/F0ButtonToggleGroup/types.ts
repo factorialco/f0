@@ -2,7 +2,7 @@ import { ButtonToggleVariant, F0ButtonToggleProps } from "../F0ButtonToggle"
 
 export type F0ButtonToggleGroupItem = Pick<
   F0ButtonToggleProps,
-  "label" | "icon" | "disabled" | "tooltip" | "className"
+  "label" | "icon" | "disabled" | "tooltip" | "color" | "className"
 > & {
   value: string
 }

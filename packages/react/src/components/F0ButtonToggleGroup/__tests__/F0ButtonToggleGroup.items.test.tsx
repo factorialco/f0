@@ -18,9 +18,10 @@ const items = [
     label: "Keep",
     icon: MockIcon,
     tooltip: "Keep this file",
-    className: "text-f1-icon-positive",
+    color: "positive" as const,
+    className: "[&_svg]:w-7",
   },
-  { value: "drop", label: "Drop", icon: MockIcon },
+  { value: "drop", label: "Drop", icon: MockIcon, color: "critical" as const },
 ]
 
 describe("F0ButtonToggleGroup per-item options", () => {
@@ -44,8 +45,23 @@ describe("F0ButtonToggleGroup per-item options", () => {
     zeroRender(<F0ButtonToggleGroup items={items} value="keep" fullWidth />)
 
     const keep = screen.getByRole("radio", { name: "Keep" })
-    expect(keep).toHaveClass("text-f1-icon-positive")
+    expect(keep).toHaveClass("[&_svg]:w-7")
     expect(keep).toHaveClass("w-full")
+  })
+
+  /**
+   * A per-item `color` is what makes a group of items that mean different things
+   * readable: the selected one wears its colour, the rest stay muted.
+   */
+  it("gives each item its own colour, and only once selected", () => {
+    zeroRender(<F0ButtonToggleGroup items={items} value="keep" />)
+
+    expect(screen.getByRole("radio", { name: "Keep" })).toHaveClass(
+      "text-f1-icon-positive"
+    )
+    const drop = screen.getByRole("radio", { name: "Drop" })
+    expect(drop).not.toHaveClass("text-f1-icon-critical")
+    expect(drop).toHaveClass("text-f1-icon")
   })
 
   it("keeps the selected item's data-state when it also has a tooltip", () => {

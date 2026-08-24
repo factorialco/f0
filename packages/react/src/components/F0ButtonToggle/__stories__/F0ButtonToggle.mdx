@@ -69,6 +69,19 @@ on/off, visibility toggle).
 
 <Canvas of={F0ButtonToggleStories.Default} />
 
+### Colours
+
+`color` makes the toggle a member of a **coloured set**: it wears that colour
+when selected — fill, border and glyph — and stays a muted glyph when it isn't,
+so one choice out of several is readable at a glance. Without it the toggle uses
+F0's selected teal, like any other selected control.
+
+Reach for it only when the members of a set mean **different things** (a mood
+scale, a status picker). A lone toggle, or a group where every item is the same
+kind of thing, should stay on the default.
+
+<Canvas of={F0ButtonToggleStories.Colors} />
+
 ### Size Variants
 
 <Canvas of={F0ButtonToggleStories.Snapshot} />
