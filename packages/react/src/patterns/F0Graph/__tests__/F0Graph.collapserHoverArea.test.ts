@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM } from "../constants"
+import {
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  STACKED_GROUP_PADDING,
+} from "../constants"
 import {
   COLLAPSER_HOVER_HEIGHT,
   EXPANDER_Y_OFFSET_STACKED_BY_ZOOM,
@@ -43,6 +46,23 @@ describe("collapser hover area over a stacked column", () => {
       expect(collapserHoverHeightStacked(zoom)).toBeGreaterThan(
         EXPANDER_Y_OFFSET_STACKED_BY_ZOOM[zoom]
       )
+    }
+  )
+
+  it.each(VISIBLE_ZOOMS)(
+    "overlaps the column's own hover zone, so there is no dead stripe (%s)",
+    (zoom) => {
+      // Two mechanisms reveal the affordance: this band's CSS hover, and the
+      // geometric zone that starts at the group's top edge. They have to meet,
+      // or a retune of the clamp would open a stripe where hovering reveals
+      // nothing and the button blinks as the pointer crosses it.
+      const bandBottom =
+        EXPANDER_Y_OFFSET_STACKED_BY_ZOOM[zoom] +
+        COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM[zoom] +
+        collapserHoverHeightStacked(zoom)
+      const zoneTop = STACKED_RANK_SEP - STACKED_GROUP_PADDING
+
+      expect(bandBottom).toBeGreaterThanOrEqual(zoneTop)
     }
   )
 

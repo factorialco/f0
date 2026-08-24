@@ -46,6 +46,7 @@ import {
   deriveEdgesFromTree,
   nodeIntersectsRect,
   resolveStackedParents,
+  type StackHoverZone,
 } from "../utils"
 import { useLayoutEngine } from "./useLayoutEngine"
 import { useViewportGeometry } from "./useViewportGeometry"
@@ -133,6 +134,13 @@ export interface UseGraphRenderModelResult<T> {
   contentBounds: { x: number; y: number; width: number; height: number } | null
   /** Layout position of a node id, regardless of whether it is windowed out. */
   getNodePosition: (id: string) => PositionedNode | undefined
+  /**
+   * One region per stacked parent, covering its card, the lane and its column.
+   * Feeds the pointer test that reveals that parent's collapse affordance from
+   * anywhere inside the column. Not filtered by windowing: a column whose
+   * affordance is windowed out has nothing to reveal.
+   */
+  stackHoverZones: StackHoverZone[]
 }
 
 /**
@@ -448,6 +456,36 @@ export function useGraphRenderModel<T>({
 
     return { groups, groupOf, previousRow }
   }, [visibleTreeNodes, stackedChildIndex, positionMap, direction])
+
+  // One region per stacked parent: its card unioned with its column, which makes
+  // the lane between them part of the same rect. Whoever owns the pointer uses
+  // this to reveal that parent's collapse affordance while the pointer is
+  // anywhere inside — the card, the lane, a row, a gap between rows or the
+  // group's padding all answer with the same id, so crossing between them is not
+  // a state change (see [[findStackHoverZoneAt]] for why this is geometry rather
+  // than a CSS hover).
+  //
+  // The group's y is used raw, matching how `rfNodes` places the group node at
+  // `group.y * yStretch` with `yStretch` fixed at 1. If that ever becomes a real
+  // scale, apply it here too.
+  const stackHoverZones = useMemo((): StackHoverZone[] => {
+    const zones: StackHoverZone[] = []
+    for (const [parentId, group] of stackGroups.groups) {
+      const parent = positionMap.get(parentId)
+      if (!parent) continue
+      const minX = Math.min(parent.x, group.x)
+      const minY = Math.min(parent.y, group.y)
+      zones.push({
+        parentId,
+        x: minX,
+        y: minY,
+        width: Math.max(parent.x + parent.width, group.x + group.width) - minX,
+        height:
+          Math.max(parent.y + parent.height, group.y + group.height) - minY,
+      })
+    }
+    return zones
+  }, [stackGroups, positionMap])
 
   // Bounding box of the whole layout, so fit-view / fly-to can target the full
   // graph even when windowing has removed off-screen nodes from React Flow.
@@ -1011,5 +1049,6 @@ export function useGraphRenderModel<T>({
     renderedNodeIds,
     contentBounds,
     getNodePosition,
+    stackHoverZones,
   }
 }

@@ -398,6 +398,49 @@ describe("useGraphRenderModel — stacked children", () => {
     }
   })
 
+  it("publishes one hover zone per stacked parent, spanning card to column", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const zones = result.current.stackHoverZones
+    const nodes = result.current.rfNodes
+    const group = nodes.find((n) => n.id === "stack-role")!
+    const card = nodes.find((n) => n.id === "role")!
+
+    // Keyed by the parent itself, not by the group node's synthetic id: the
+    // affordance that reads this knows only its parent.
+    expect(zones).toHaveLength(1)
+    expect(zones[0].parentId).toBe("role")
+    // Asserted against the emitted group node rather than against constants, so
+    // the zone cannot silently drift from the box it is meant to cover.
+    expect(zones[0].y).toBe(Math.min(card.position.y, group.position.y))
+    expect(zones[0].y + zones[0].height).toBe(
+      group.position.y + (group.height ?? 0)
+    )
+    expect(zones[0].width).toBeGreaterThanOrEqual(group.width ?? 0)
+  })
+
+  it("publishes no hover zone when the group is not stacked", () => {
+    const { root, role } = stackedRole()
+    role.stackChildren = false
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    expect(result.current.stackHoverZones).toEqual([])
+  })
+
+  it("keeps the hover zones referentially stable across a re-render", () => {
+    const { root } = stackedRole()
+    const options = baseOptions([root], ["root", "role"])
+    const { result, rerender } = renderModel(options)
+
+    const first = result.current.stackHoverZones
+    rerender(options)
+
+    // The pointer handler reads these through a ref, so a re-render that changes
+    // nothing must not hand it a fresh array.
+    expect(result.current.stackHoverZones).toBe(first)
+  })
+
   it("pads the wrapper by 8px around the rows it holds", () => {
     const { root } = stackedRole()
     const { result } = renderModel(baseOptions([root], ["root", "role"]))

@@ -8,8 +8,10 @@ import {
   computeExpandedByDepth,
   computeLayoutBounds,
   deriveEdgesFromTree,
+  findStackHoverZoneAt,
   nodeIntersectsRect,
   resolveInitialFitViewNodes,
+  type StackHoverZone,
   type ViewportRect,
 } from "../utils"
 
@@ -166,5 +168,69 @@ describe("resolveInitialFitViewNodes", () => {
 
   it("falls back to fit-all when the target isn't present (never a blank frame)", () => {
     expect(resolveInitialFitViewNodes("ghost", ["c1"], present)).toBeUndefined()
+  })
+})
+
+describe("findStackHoverZoneAt", () => {
+  // One column: a 256x118 card at (0, 0), then a 228x252 group from y=175, so
+  // the zone runs from the card's top to the group's bottom.
+  const zone: StackHoverZone = {
+    parentId: "role-0",
+    x: 0,
+    y: 0,
+    width: 256,
+    height: 427,
+  }
+  const zones = [zone]
+
+  it("matches a point on the parent card", () => {
+    expect(findStackHoverZoneAt(zones, 128, 60)).toBe("role-0")
+  })
+
+  it("matches a point in the lane between the card and the column", () => {
+    expect(findStackHoverZoneAt(zones, 128, 150)).toBe("role-0")
+  })
+
+  it("matches a point on a row", () => {
+    expect(findStackHoverZoneAt(zones, 128, 240)).toBe("role-0")
+  })
+
+  it("matches a point in the gap between two rows", () => {
+    // The reason this helper exists: crossing the gap must not read as leaving
+    // the column, or the affordance would blink on every row-to-row move.
+    expect(findStackHoverZoneAt(zones, 128, 300)).toBe("role-0")
+  })
+
+  it("matches a point in the group's own padding", () => {
+    expect(findStackHoverZoneAt(zones, 20, 420)).toBe("role-0")
+  })
+
+  it.each([
+    ["top-left", 0, 0],
+    ["top-right", 256, 0],
+    ["bottom-left", 0, 427],
+    ["bottom-right", 256, 427],
+  ])("is inclusive on the %s corner", (_corner, x, y) => {
+    expect(findStackHoverZoneAt(zones, x, y)).toBe("role-0")
+  })
+
+  it.each([
+    ["above", 128, -1],
+    ["below", 128, 428],
+    ["left", -1, 200],
+    ["right", 257, 200],
+  ])("returns null just %s the zone", (_side, x, y) => {
+    expect(findStackHoverZoneAt(zones, x, y)).toBeNull()
+  })
+
+  it("returns null for no zones at all", () => {
+    expect(findStackHoverZoneAt([], 128, 200)).toBeNull()
+  })
+
+  it("picks the zone the point is actually in", () => {
+    const sibling: StackHoverZone = { ...zone, parentId: "role-1", x: 300 }
+    expect(findStackHoverZoneAt([zone, sibling], 400, 200)).toBe("role-1")
+    expect(findStackHoverZoneAt([zone, sibling], 128, 200)).toBe("role-0")
+    expect(findStackHoverZoneAt([zone, sibling], 280, 200)).toBeNull()
   })
 })

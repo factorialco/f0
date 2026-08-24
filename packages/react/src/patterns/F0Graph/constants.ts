@@ -5,6 +5,12 @@ import type { ZoomLevel } from "./types"
 // re-render every node wrapper.
 export const EMPTY_HIGHLIGHTED_NODES: Set<string> = new Set<string>()
 
+// Same reason, for the tag-column list: a fresh `[]` fallback per render rebuilt
+// the visible-tag-types Set, which re-created the render-config context value
+// that EVERY node wrapper subscribes to. Any state change in the view then
+// re-rendered every node in the graph.
+export const EMPTY_TAG_COLUMNS: readonly string[] = []
+
 // The collapser is an F0Button inside a top-aligned box with `pt-2`, whereas the
 // expander is a bare pill placed straight at the lane offset. Both are the same
 // 32px button now, so the nudge is just that padding back off — the two land on

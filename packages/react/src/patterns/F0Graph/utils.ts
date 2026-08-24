@@ -52,6 +52,52 @@ export function nodeIntersectsRect(
 }
 
 /**
+ * The region that belongs to one stacked parent: its card, the lane under it and
+ * the whole column below that, as one rect in flow coordinates.
+ */
+export interface StackHoverZone {
+  parentId: string
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * Which stacked parent's region contains a point, or `null` for none.
+ *
+ * Point-in-rect rather than the rect-vs-rect [[nodeIntersectsRect]] above, and
+ * answered geometrically rather than by hit-testing, for two reasons. React Flow
+ * renders every node flat as siblings, so a sub-flow's rows are not DOM children
+ * of their group and no `group-hover` variant can connect the rows, the group and
+ * the collapse affordance. And making the group hit-testable instead would break
+ * selection: the canvas `onPointerUp` handler resolves
+ * `target.closest(".react-flow__node")` and selects whatever it finds, so a click
+ * in the gap between two rows would select the group node and report that to the
+ * consumer, besides suppressing `onPaneClick` over every column.
+ *
+ * Inclusive on all four edges. Zones cannot overlap (one per stacked parent, each
+ * inside its parent's own lane), so the first match wins.
+ */
+export function findStackHoverZoneAt(
+  zones: readonly StackHoverZone[],
+  x: number,
+  y: number
+): string | null {
+  for (const zone of zones) {
+    if (
+      x >= zone.x &&
+      x <= zone.x + zone.width &&
+      y >= zone.y &&
+      y <= zone.y + zone.height
+    ) {
+      return zone.parentId
+    }
+  }
+  return null
+}
+
+/**
  * Bounding box of every positioned node, as an `{ x, y, width, height }` rect
  * suitable for `reactFlow.fitBounds`. Returns `null` for an empty layout.
  * Lets navigation (fit-view, fly-to) target the full graph even when node-array

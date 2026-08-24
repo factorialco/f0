@@ -1,7 +1,6 @@
 import {
   Handle,
   Position,
-  useStore,
   type Node as RFNode,
   type NodeProps,
 } from "@xyflow/react"
@@ -54,15 +53,6 @@ const HANDLE_HALF = 3
  * Read off React Flow's own measurement, so no second layout pass is needed —
  * and applied as a transform, which cannot feed back into the graph's geometry.
  */
-function useBoxSlackShift(
-  parentId: string,
-  parentBoxHeight: number | undefined
-): number {
-  const measured = useStore((s) => s.nodeLookup.get(parentId)?.measured?.height)
-  if (!parentBoxHeight || !measured) return 0
-  return (measured - parentBoxHeight) / 2
-}
-
 /** Pins a vertical handle so its endpoint sits on the node's edge, not past it. */
 const flushHandleStyle = (
   position: Position
@@ -95,6 +85,7 @@ import {
   useF0GraphActionsInternal,
   useF0GraphFocusInternal,
   useF0GraphRenderConfigInternal,
+  useF0GraphStackHoverInternal,
 } from "../contexts"
 import { F0GraphExpander } from "../components/F0GraphExpander"
 
@@ -117,11 +108,6 @@ export interface GraphNodeData extends Record<string, unknown> {
 export type GraphRFNode = RFNode<GraphNodeData>
 
 export interface ExpanderNodeData {
-  /**
-   * Height of the layout box reserved for the parent, so the button can correct
-   * for the part of it the parent does not paint. See `useBoxSlackShift`.
-   */
-  parentBoxHeight?: number
   [key: string]: unknown
   count: number
   expanded: boolean
@@ -138,14 +124,6 @@ export interface ExpanderNodeData {
 export type ExpanderRFNode = RFNode<ExpanderNodeData>
 
 export interface CollapserNodeData {
-  /**
-   * Height of the layout box reserved for the parent. The button is placed from
-   * that box's bottom edge, but a node paints only as tall as its content — a
-   * card whose tags wrap to fewer lines than the reserved maximum leaves the
-   * difference empty under itself. Passing the box height lets the button
-   * correct for that and sit on the lane the eye sees. See `boxSlackShift`.
-   */
-  parentBoxHeight?: number
   [key: string]: unknown
   parentId: string
   parentWidth: number
@@ -366,10 +344,7 @@ export const F0GraphNodeWrapper = memo(
 // ─── F0GraphExpanderWrapper ────────────────────────────────────
 
 function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
-  const { count, parentId, parentWidth, parentBoxHeight, loading } =
-    data as ExpanderNodeData
-  // Same correction as the collapser, so the two never sit in different places.
-  const boxSlackShift = useBoxSlackShift(parentId, parentBoxHeight)
+  const { count, parentId, parentWidth, loading } = data as ExpanderNodeData
   const zoomCtx = useF0GraphZoomInternal()
   const expandCtx = useF0GraphExpandInternal()
   const actionsCtx = useF0GraphActionsInternal()
@@ -408,13 +383,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
           "pointer-events-auto flex items-start justify-center",
           focusRing()
         )}
-        style={{
-          width: parentWidth,
-          height: 80,
-          transform: boxSlackShift
-            ? `translateY(${boxSlackShift}px)`
-            : undefined,
-        }}
+        style={{ width: parentWidth, height: 80 }}
       >
         <F0GraphExpander
           count={count}
@@ -458,6 +427,7 @@ function F0GraphCollapserWrapperInner({
   const zoomCtx = useF0GraphZoomInternal()
   const actionsCtx = useF0GraphActionsInternal()
   const focusCtx = useF0GraphFocusInternal()
+  const stackHoverCtx = useF0GraphStackHoverInternal()
   const i18n = useI18n()
   if (!zoomCtx || !actionsCtx) return null
   if (zoomCtx.zoomLevel === "dot") return null
@@ -471,6 +441,13 @@ function F0GraphCollapserWrapperInner({
     : undefined
 
   const ariaLabel = collapseLabel ?? i18n.actions.collapse
+
+  // The band's own CSS hover only covers the strip directly under the card. A
+  // stacked parent is revealed while the pointer is anywhere in its column too,
+  // so there is still an indicator once you have moved into the rows.
+  const revealed =
+    isFocused ||
+    (stacked === true && stackHoverCtx?.hoveredStackParentId === parentId)
 
   return (
     <>
@@ -499,10 +476,13 @@ function F0GraphCollapserWrapperInner({
         }}
       >
         <div
+          data-revealed={revealed ? "true" : "false"}
           className={cn(
             "backdrop-blur-[120px]",
-            !isFocused && "invisible group-hover:visible",
-            isFocused && "visible"
+            // Exactly one of these, never both: `invisible` and `visible` carry
+            // the same specificity, so emitting the pair would leave the winner
+            // to Tailwind's stylesheet order rather than to this branch.
+            revealed ? "visible" : "invisible group-hover:visible"
           )}
         >
           <F0Button
