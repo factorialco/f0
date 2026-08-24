@@ -85,6 +85,24 @@ export interface CommunityPostSummary {
  */
 const POST_IMAGE_RATIO = "aspect-[2/1]"
 
+/**
+ * THE WHOLE TILE AS ONE TARGET: an overlay on the title's own anchor, covering
+ * the card.
+ *
+ * `z-[1]` is the part that is easy to leave out and hard to spot. An overlay with
+ * `z-index: auto` paints in the same layer as every other positioned descendant
+ * of the card, so whichever comes LAST in the DOM wins — and two things after the
+ * title are positioned: the author avatar (`relative`, from `F0AvatarPerson`) and
+ * the rich-text body. Both sat on top of the overlay, which took the pointer
+ * cursor away and, worse, the click with it. One layer up and the overlay is
+ * above its siblings again.
+ *
+ * The card is `isolate`, so this z-index cannot climb out of the tile it belongs
+ * to and interfere with the carousel's own controls.
+ */
+const STRETCH =
+  "after:absolute after:inset-0 after:z-[1] after:rounded-xl after:content-['']"
+
 const CommunityPostCard = ({ post }: { post: CommunityPostSummary }) => {
   const locale = useDateFnsLocale()
   // "Jul 16" — the day, and only the day. A tile carries three or four of these
@@ -102,7 +120,7 @@ const CommunityPostCard = ({ post }: { post: CommunityPostSummary }) => {
         "no-underline visited:text-f1-foreground",
         // THE STRETCH: the anchor's own box is the title, its hit area is the
         // whole card.
-        "after:absolute after:inset-0 after:rounded-xl after:content-['']",
+        STRETCH,
         focusRing()
       )}
       {...(isExternalHref(post.href)
@@ -119,7 +137,7 @@ const CommunityPostCard = ({ post }: { post: CommunityPostSummary }) => {
       onClick={post.onClick}
       className={cn(
         "cursor-pointer border-none bg-transparent p-0 text-left",
-        "after:absolute after:inset-0 after:rounded-xl after:content-['']",
+        STRETCH,
         focusRing()
       )}
     >

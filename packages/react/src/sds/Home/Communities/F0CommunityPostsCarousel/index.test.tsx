@@ -56,6 +56,20 @@ describe("F0CommunityPostsCarousel", () => {
     expect(screen.getAllByRole("link")).toHaveLength(2)
   })
 
+  test("the stretched hit area sits above the tile's positioned content", () => {
+    render()
+
+    // THE REGRESSION: the overlay had `z-index: auto`, so it shared a layer with
+    // every other positioned descendant of the card and lost to whichever came
+    // last in the DOM — the author avatar (`relative`) and the rich-text body
+    // both sat on top of it. Hovering either showed no pointer and clicking
+    // either did nothing. Asserted as a class because jsdom has no painting, so
+    // there is no hit-test to make here; the browser check is the story.
+    expect(
+      screen.getByRole("link", { name: POSTS[0].title }).className
+    ).toContain("after:z-[1]")
+  })
+
   test("a post with no href is a button, and it still reports the click", async () => {
     const onClick = vi.fn()
     render({
