@@ -50,9 +50,9 @@ import {
 } from "../ClockIn/ClockInControls"
 import { type ClockInStatus } from "../ClockIn/ClockInGraph"
 import {
-  CommunityPostsCarousel,
+  F0CommunityPostsCarousel,
   type CommunityPostSummary,
-} from "../Communities/CommunityPostsCarousel"
+} from "../Communities/F0CommunityPostsCarousel"
 import { CommunityPost } from "../Communities/Post/CommunityPost"
 import {
   fromParams,
@@ -882,7 +882,7 @@ const SLOT_RENDERERS: SlotRenderers = {
   },
   "community-posts": {
     render: (params) => (
-      <CommunityPostsCarousel
+      <F0CommunityPostsCarousel
         posts={(params as CommunityPostsParams).posts}
         labels={COMMUNITY_CAROUSEL_LABELS}
       />
@@ -890,7 +890,7 @@ const SLOT_RENDERERS: SlotRenderers = {
     // The skeleton draws as many tiles as the slot said were coming, so the
     // loading card is the height of the loaded one.
     skeleton: (_, { expectedItemsCount }) => (
-      <CommunityPostsCarousel
+      <F0CommunityPostsCarousel
         posts={[]}
         labels={COMMUNITY_CAROUSEL_LABELS}
         loading

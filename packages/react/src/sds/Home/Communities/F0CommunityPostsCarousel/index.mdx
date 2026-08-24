@@ -1,0 +1,96 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./index.stories"
+
+<Meta of={Stories} />
+
+# F0CommunityPostsCarousel
+
+The Communities widget's content: the latest posts as **tiles you page through**,
+two at a time on a main-column card and one in anything narrower.
+
+---
+
+## Anatomy
+
+A row of post tiles over a paging row. Each tile is a cover image, a title, the
+opening of the post and its author; the row underneath is an arrow on each end
+with the pagination dots between them.
+
+<Canvas of={Stories.Default} />
+
+| Element    | Description                                                         | Required |
+| ---------- | ------------------------------------------------------------------- | -------- |
+| Cover      | The post's image, always in a 2:1 box sized from the column's width | No       |
+| Title      | The post's name, and the tile's only click target                   | Yes      |
+| Body       | The opening of the post, clamped to five lines                      | No       |
+| Author     | Avatar, name, and the date and counters on one line                 | No       |
+| Paging row | Previous / Next and the dots, always present, disabled at the ends  | Yes      |
+
+<Controls of={Stories.Default} />
+
+## Guidelines
+
+**It is a wide-column widget.** Two tiles side by side is the whole reason it
+exists rather than a `list` slot — a post needs a title, four lines of its body
+and its author to be worth previewing, and that does not fit a 396px rail. In the
+`WidgetCatalog`, give it `areas: ["main"]`.
+
+**Covers are cropped, never fitted.** Every image is drawn at 2:1 (1200×600, the
+size these are authored at) with the height taken from the column's width. A tile
+that sized itself to its own image would put every title in the row on a different
+line and move them all when the page turned.
+
+**It pages, it does not virtualize.** Embla lays its slides out in a flex row and
+measures them, so every mounted tile stays in the DOM. What keeps that bounded is
+`pagination` — the carousel holds a page and asks for the next one when the reader
+reaches the end, so the DOM follows how far they actually walked.
+
+<Canvas of={Stories.WithImages} />
+
+<DoDonts
+  do={{
+    description: "Put it in the main column and let it page.",
+    guidelines: [
+      'Catalogue it with `areas: ["main"]` so it can\'t be dropped into the rail.',
+      "Wire `pagination` to your data source for a feed of any real length.",
+      "Pass `loading` with `expectedItemsCount` so the card is its final height while it waits.",
+    ],
+  }}
+  dont={{
+    description: "Hand it the whole feed and hope.",
+    guidelines: [
+      "Don't pass two hundred posts as one array — that is two hundred tiles in the DOM.",
+      "Don't crop covers yourself; the tile's 2:1 box already does it.",
+      "Don't use it in the rail, where a single tile is cramped and the point is lost.",
+    ],
+  }}
+/>
+
+### When not to use
+
+Reach for a `list` slot instead when the rows are one line each, when the widget
+lives in the rail, or when the reader is scanning for one item rather than reading
+a few. A carousel hides everything but the current page, which is the wrong trade
+when the whole set needs to be seen at once.
+
+## Accessibility
+
+Each tile has exactly **one** target: the title, an anchor whose hit area is
+stretched over the whole card with an `::after` overlay. The card is clickable
+anywhere, and a screen reader announces one link per tile rather than a link plus
+a wrapper. Rich text inside the body is deliberately not interactive — a link
+inside a link is neither valid nor operable.
+
+The arrows carry no visible text, so `labels.previous` and `labels.next` are their
+accessible names and their tooltips. Both stay in the row at the ends and go
+`disabled` rather than disappearing, so their position never shifts under the
+pointer. The dots come from `CarouselDots` unchanged.
+
+While `loading`, the carousel is `aria-busy` and its placeholder tiles are
+skeletons — including a seat for the cover image, so the row does not lurch taller
+when the posts land.
+
+<Canvas of={Stories.Loading} />
+
+<Canvas of={Stories.PagedFromDataSource} />

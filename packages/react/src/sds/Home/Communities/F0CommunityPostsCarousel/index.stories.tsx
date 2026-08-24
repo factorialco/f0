@@ -2,7 +2,9 @@ import { useMemo } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -14,7 +16,7 @@ import {
 import { Plus } from "@/icons/app"
 
 import { SlotWidget } from "../../SlotWidget"
-import { CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
 
 const POSTS: CommunityPostSummary[] = [
   {
@@ -71,11 +73,14 @@ const POSTS: CommunityPostSummary[] = [
 
 const LABELS = { previous: "Previous posts", next: "More posts" }
 
-const meta: Meta<typeof CommunityPostsCarousel> = {
-  component: CommunityPostsCarousel,
-  title: "Home/Communities/CommunityPostsCarousel",
+const meta: Meta<typeof F0CommunityPostsCarousel> = {
+  component: F0CommunityPostsCarousel,
+  title: "Home/Communities/F0CommunityPostsCarousel",
   tags: ["autodocs", "experimental"],
-  parameters: { layout: "centered" },
+  // Axe BLOCKS here rather than warning: the tiles are links with stretched hit
+  // areas and the paging row is two icon-only buttons, which is exactly the
+  // shape that loses its accessible names without anyone noticing.
+  parameters: withSnapshot({ layout: "centered", a11y: { test: "error" } }),
   args: { posts: POSTS, labels: LABELS },
   // A MAIN-COLUMN width, since that is the only place this belongs: two tiles
   // side by side is the whole point, and it needs the room to have two.
@@ -90,14 +95,35 @@ const meta: Meta<typeof CommunityPostsCarousel> = {
 
 export default meta
 
-type Story = StoryObj<typeof CommunityPostsCarousel>
+type Story = StoryObj<typeof F0CommunityPostsCarousel>
 
 /**
  * The posts as tiles, two at a time, with the paging row under them: an arrow on
  * each end and the dots between. Both arrows stay put whether or not there is
  * anywhere to go — disabled rather than gone, so the row keeps its shape.
  */
-export const Default: Story = {}
+export const Default: Story = {
+  // A PAGE AT A TIME is the behaviour worth pinning: scrolling by one tile would
+  // leave the post you just read sitting in the row you turned to, so half of
+  // every "next" would be something already seen.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const next = canvas.getByRole("button", { name: LABELS.next })
+    const previous = canvas.getByRole("button", { name: LABELS.previous })
+
+    // Both arrows are there from the start; only the one with nowhere to go is
+    // disabled — an arrow that vanishes takes the reader's aim with it.
+    await expect(previous).toBeDisabled()
+    await expect(next).toBeEnabled()
+
+    await userEvent.click(next)
+
+    // Four posts, two to a page: one press exhausts the feed.
+    await expect(next).toBeDisabled()
+    await expect(previous).toBeEnabled()
+  },
+}
 
 /**
  * Waiting on the posts. The same carousel with placeholder tiles in it, as many
@@ -189,7 +215,7 @@ const PagedCarousel = () => {
   const posts: CommunityPostSummary[] = data.type === "flat" ? data.records : []
 
   return (
-    <CommunityPostsCarousel
+    <F0CommunityPostsCarousel
       posts={posts}
       labels={LABELS}
       loading={isInitialLoading}
@@ -265,8 +291,10 @@ export const InsideAWidget: Story = {
       slots={[{ visualization: "community-posts", params: args }]}
       slotRenderers={{
         "community-posts": (params) => (
-          <CommunityPostsCarousel
-            {...(params as React.ComponentProps<typeof CommunityPostsCarousel>)}
+          <F0CommunityPostsCarousel
+            {...(params as React.ComponentProps<
+              typeof F0CommunityPostsCarousel
+            >)}
           />
         ),
       }}

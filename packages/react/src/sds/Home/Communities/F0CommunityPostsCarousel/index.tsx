@@ -230,7 +230,7 @@ const CommunityPostCardSkeleton = () => (
   </div>
 )
 
-export interface CommunityPostsCarouselProps {
+export interface F0CommunityPostsCarouselProps {
   posts: CommunityPostSummary[]
   /**
    * The controls' words — the two arrows' accessible names. There is no visible
@@ -269,7 +269,7 @@ export interface CommunityPostsCarouselProps {
 }
 
 /**
- * CommunityPostsCarousel — the Communities widget's content: the latest posts as
+ * F0CommunityPostsCarousel — the Communities widget's content: the latest posts as
  * TILES you page through, two at a time on a main-column card and one in
  * anything narrower.
  *
@@ -294,13 +294,13 @@ export interface CommunityPostsCarouselProps {
  * one when you reach the end — so what is mounted is bounded by how far the
  * reader actually walked rather than by how much the server has.
  */
-export const CommunityPostsCarousel = ({
+export const F0CommunityPostsCarousel = ({
   posts,
   labels,
   loading = false,
   expectedItemsCount = 2,
   pagination,
-}: CommunityPostsCarouselProps) => {
+}: F0CommunityPostsCarouselProps) => {
   const items = loading
     ? Array.from({ length: expectedItemsCount }, (_, index) => (
         <CommunityPostCardSkeleton key={index} />

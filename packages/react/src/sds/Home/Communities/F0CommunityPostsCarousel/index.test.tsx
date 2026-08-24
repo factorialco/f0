@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
-import { CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
 
 const LABELS = { previous: "Previous posts", next: "More posts" }
 
@@ -28,10 +28,10 @@ const POSTS: CommunityPostSummary[] = [
 
 const render = (props = {}) =>
   zeroRender(
-    <CommunityPostsCarousel posts={POSTS} labels={LABELS} {...props} />
+    <F0CommunityPostsCarousel posts={POSTS} labels={LABELS} {...props} />
   )
 
-describe("CommunityPostsCarousel", () => {
+describe("F0CommunityPostsCarousel", () => {
   test("draws a tile per post: its title, its body, its author and its counters", () => {
     render()
 
@@ -142,7 +142,7 @@ describe("CommunityPostsCarousel", () => {
       // changing. That is also what makes a source answering `hasMore: true`
       // with no new records stall rather than loop.
       rerender(
-        <CommunityPostsCarousel
+        <F0CommunityPostsCarousel
           posts={POSTS}
           labels={LABELS}
           pagination={{ hasMore: true, onLoadMore }}

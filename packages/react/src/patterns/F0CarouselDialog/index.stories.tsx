@@ -2,7 +2,10 @@ import { useState } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, userEvent, within } from "storybook/test"
+
 import { F0Button } from "@/components/F0Button"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { CommunityPost } from "@/sds/Home/Communities/Post/CommunityPost"
 
 import { F0CarouselDialog, type F0CarouselDialogItem } from "./index"
@@ -114,7 +117,9 @@ const meta: Meta<typeof F0CarouselDialog> = {
   component: F0CarouselDialog,
   title: "Patterns/F0CarouselDialog",
   tags: ["autodocs", "experimental"],
-  parameters: { layout: "fullscreen" },
+  // Axe BLOCKS: a dialog's accessible name, its focus trap and two icon-only
+  // arrows are the things this component is FOR, and all three fail silently.
+  parameters: withSnapshot({ layout: "fullscreen", a11y: { test: "error" } }),
 }
 
 export default meta
@@ -130,7 +135,28 @@ type Story = StoryObj<typeof F0CarouselDialog>
  * try first. Both arrows keep their places at the ends and go disabled, so the
  * one you are about to want has not moved.
  */
-export const Default: Story = { render: () => <Demo /> }
+export const Default: Story = {
+  render: () => <Demo />,
+  // Opening on the SECOND post and walking back to the first: the page you open
+  // on has to be the one you clicked, and the position has to follow.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(canvas.getByRole("button", { name: POSTS[1].title }))
+
+    // The dialog portals out of the story root, so it is found on the document.
+    const dialog = within(document.body)
+    await expect(await dialog.findByText("2 of 3")).toBeInTheDocument()
+
+    await userEvent.click(dialog.getByRole("button", { name: "Previous post" }))
+
+    await expect(await dialog.findByText("1 of 3")).toBeInTheDocument()
+    // First page: nowhere further back, and the arrow says so rather than going.
+    await expect(
+      dialog.getByRole("button", { name: "Previous post" })
+    ).toBeDisabled()
+  },
+}
 
 /**
  * `loop` joins the ends up — Next on the last post returns to the first, and
