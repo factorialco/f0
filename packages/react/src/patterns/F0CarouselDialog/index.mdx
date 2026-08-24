@@ -53,6 +53,29 @@ name.
 
 <Canvas of={Stories.Looping} />
 
+### Driven by the URL
+
+The index being controlled is what makes a **params-only activity** work: put the
+open page in the location (`#core.activity1?postId=b`), have `onNavigate` write
+the param, and read it back into `currentId`. Prev/next then move the URL and the
+dialog follows — back and forward buttons included, and the link is shareable.
+
+Changing the param does **not** remount the dialog. It is the same element with
+different content, so there is no reopen animation and focus and scroll position
+survive the walk.
+
+The one thing to get right is that **the URL moves before the data does**. An id
+`items` has never heard of renders the `placeholder`, never some other page — a
+dialog that answered an unknown id with `items[0]` would put a post nobody asked
+for under the id they did ask for. While waiting, the arrows stay in place but
+held, and the header shows no position, because the page's number is exactly what
+isn't known yet.
+
+Better still, avoid the gap: put an item in `items` for the id you are navigating
+to, with skeleton `content` while its body loads. Then the id is always found, its
+title comes with it, and the position stays honest. `placeholder` is the net for
+when you genuinely cannot.
+
 ### Paged sets
 
 Pass `pagination` — the same `{ hasMore, isLoading, onLoadMore, total }` the

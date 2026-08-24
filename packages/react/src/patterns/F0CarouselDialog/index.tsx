@@ -42,15 +42,35 @@ export interface F0CarouselDialogProps extends Pick<
   items: F0CarouselDialogItem[]
   /**
    * WHICH PAGE IS SHOWING. Controlled, deliberately: the thing you opened the
-   * dialog on is already state the app holds — the post you clicked in a feed —
-   * and a dialog keeping its own copy of it is two answers to one question.
+   * dialog on is already state the app holds — the post you clicked in a feed,
+   * a param in the URL — and a dialog keeping its own copy of it is two answers
+   * to one question.
    *
-   * An id that names nothing shows the first item, so a page that disappears
-   * underneath you (a post deleted, a filter changed) leaves the dialog on
-   * something rather than empty.
+   * An id that names nothing in `items` shows the {@link placeholder}, NOT some
+   * other page. In a params-driven app the URL moves before the data does, and
+   * "the id I asked for isn't here yet" must never render as "here is a
+   * different post".
    */
   currentId: string
   onNavigate: (id: string) => void
+  /**
+   * WHAT TO SHOW WHILE `currentId` NAMES SOMETHING THE DIALOG DOESN'T HAVE — the
+   * gap between the URL changing and the data arriving.
+   *
+   * The dialog stays open and stays put: same element, no reopen animation, the
+   * arrows held until it knows where it is. Give it a `title` so the dialog keeps
+   * an accessible name across the gap; a feed usually knows a post's title long
+   * before its body.
+   *
+   * PREFER NOT TO NEED IT. If you can put an item in `items` for the id you are
+   * navigating to — with skeleton `content` while its body loads — do that
+   * instead: the id is always found, the title comes with it, and the position in
+   * the header stays honest. This is the net for when you genuinely cannot.
+   */
+  placeholder?: {
+    title?: string
+    content: ReactNode
+  }
   /**
    * The controls' words. There is no visible text on the arrows, so `previous`
    * and `next` are what a screen reader reads and what the tooltips say;
@@ -138,14 +158,16 @@ const F0CarouselDialogComponent = ({
   labels,
   loop = false,
   pagination,
+  placeholder,
   isOpen,
   onClose,
   ...dialogProps
 }: F0CarouselDialogProps) => {
-  const index = Math.max(
-    0,
-    items.findIndex((item) => item.id === currentId)
-  )
+  const foundIndex = items.findIndex((item) => item.id === currentId)
+  // NOT clamped to 0. An id the dialog has never heard of is a page still on its
+  // way, and answering it with `items[0]` shows a post nobody asked for.
+  const waiting = foundIndex < 0
+  const index = waiting ? 0 : foundIndex
   const current = items[index]
   /** How many are MOUNTED — one page's worth, when the set is paged. */
   const loaded = items.length
@@ -161,10 +183,19 @@ const F0CarouselDialogComponent = ({
   // A set whose end has not been reached yet is not an end to join up.
   const wraps = loop && !hasMore
 
-  const previousId = wraps
-    ? items[(index - 1 + loaded) % loaded]?.id
-    : items[index - 1]?.id
-  const nextId = wraps ? items[(index + 1) % loaded]?.id : items[index + 1]?.id
+  // Nowhere to step while the dialog doesn't know where it is standing: `index`
+  // is 0 in that state purely so the arithmetic below has something to work
+  // with, and stepping from a position you don't hold would land anywhere.
+  const previousId = waiting
+    ? undefined
+    : wraps
+      ? items[(index - 1 + loaded) % loaded]?.id
+      : items[index - 1]?.id
+  const nextId = waiting
+    ? undefined
+    : wraps
+      ? items[(index + 1) % loaded]?.id
+      : items[index + 1]?.id
 
   const goPrevious = useCallback(() => {
     if (previousId) onNavigate(previousId)
@@ -202,7 +233,7 @@ const F0CarouselDialogComponent = ({
       onNavigate(nextId)
       return
     }
-    if (!hasMore || !pagination) return
+    if (waiting || !hasMore || !pagination) return
     // THE PRESS IS RECORDED EITHER WAY. The prefetch has usually already asked
     // for this page, so a press at the boundary lands while it is in flight —
     // asking again would be a second request for the same records, and treating
@@ -210,7 +241,7 @@ const F0CarouselDialogComponent = ({
     // intent is remembered here, and the asking is left to the one guard.
     owedAdvance.current = true
     askForNextPage()
-  }, [nextId, onNavigate, hasMore, pagination, askForNextPage])
+  }, [nextId, onNavigate, waiting, hasMore, pagination, askForNextPage])
 
   // The page landed: finish the move.
   useEffect(() => {
@@ -227,9 +258,12 @@ const F0CarouselDialogComponent = ({
    * false→true→false would re-enter this on every response.
    */
   useEffect(() => {
-    if (!isOpen || nextId || !hasMore) return
+    // Not while waiting: "there is no next item" means "we don't know yet", not
+    // "we have reached the end", and fetching on it would page the set forward
+    // every time the URL moved ahead of the data.
+    if (!isOpen || waiting || nextId || !hasMore) return
     askForNextPage()
-  }, [isOpen, nextId, hasMore, askForNextPage])
+  }, [isOpen, waiting, nextId, hasMore, askForNextPage])
 
   // THE ARROW KEYS, on the document while the dialog is open. A modal dialog owns
   // the keyboard, and left/right is how anyone who has used a photo viewer
@@ -303,7 +337,9 @@ const F0CarouselDialogComponent = ({
     ]
   )
 
-  if (!current) return null
+  // Nothing to show and nothing promised: neither items nor a placeholder means
+  // there is no dialog to draw.
+  if (!current && !placeholder) return null
 
   // `+` when the set continues past a count nobody has told us: "3 of 4" would
   // be a number that silently grows every time another page lands.
@@ -317,15 +353,23 @@ const F0CarouselDialogComponent = ({
       {...dialogProps}
       isOpen={isOpen}
       onClose={onClose}
-      title={current.title}
+      title={waiting ? placeholder?.title : current?.title}
       // Only worth saying when there is more than one: "1 of 1" is a reading
       // nobody needs and a dialog that isn't really a carousel.
+      //
+      // And nothing at all while WAITING: the page's number is exactly what is
+      // not known yet, and a number that appears and then corrects itself is
+      // worse than no number.
       headerStatus={
-        loaded > 1 || hasMore ? position(index + 1, total) : undefined
+        !waiting && (loaded > 1 || hasMore)
+          ? position(index + 1, total)
+          : undefined
       }
-      sideControls={loaded > 1 || hasMore ? sideControls : undefined}
+      // The arrows STAY, held: a row of controls that disappears for the length
+      // of a fetch and comes back is the dialog flinching.
+      sideControls={waiting || loaded > 1 || hasMore ? sideControls : undefined}
     >
-      {current.content}
+      {waiting ? placeholder?.content : current?.content}
     </F0Dialog>
   )
 }

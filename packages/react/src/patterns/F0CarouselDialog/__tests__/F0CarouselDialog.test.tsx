@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { describe, expect, test, vi } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
@@ -21,6 +23,42 @@ const render = (props = {}) =>
       {...props}
     />
   )
+
+/**
+ * A URL-DRIVEN HARNESS, the way an "activity" route would drive it: the open page
+ * is a param in the location, prev/next write the param, and the dialog reads it
+ * back. Nothing is held in the dialog.
+ */
+const UrlDriven = ({
+  available = ITEMS,
+  start = "b",
+  withPlaceholder = false,
+}: {
+  available?: F0CarouselDialogItem[]
+  start?: string
+  withPlaceholder?: boolean
+}) => {
+  const [hash, setHash] = useState(`#core.activity1?postId=${start}`)
+  const postId = new URLSearchParams(hash.split("?")[1]).get("postId") ?? ""
+
+  return (
+    <>
+      <span data-testid="location">{hash}</span>
+      <F0CarouselDialog
+        isOpen
+        onClose={() => {}}
+        items={available}
+        currentId={postId}
+        onNavigate={(id) => setHash(`#core.activity1?postId=${id}`)}
+        placeholder={
+          withPlaceholder
+            ? { title: "Loading post", content: <p>loading…</p> }
+            : undefined
+        }
+      />
+    </>
+  )
+}
 
 describe("F0CarouselDialog", () => {
   test("shows the page it was opened on, and only that one", () => {
@@ -198,6 +236,96 @@ describe("F0CarouselDialog", () => {
     })
   })
 
+  describe("driven by the URL, as a params-only activity would", () => {
+    test("prev/next write the param, and the dialog reads it back", async () => {
+      zeroRender(<UrlDriven />)
+
+      expect(screen.getByTestId("location")).toHaveTextContent("postId=b")
+      expect(screen.getByText("body b")).toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole("button", { name: "Next" }))
+
+      expect(screen.getByTestId("location")).toHaveTextContent("postId=c")
+      expect(screen.getByText("body c")).toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole("button", { name: "Previous" }))
+      await userEvent.click(screen.getByRole("button", { name: "Previous" }))
+
+      expect(screen.getByTestId("location")).toHaveTextContent("postId=a")
+      expect(screen.getByText("body a")).toBeInTheDocument()
+    })
+
+    test("the dialog is not remounted by a param change", async () => {
+      zeroRender(<UrlDriven />)
+
+      const before = screen.getByRole("dialog")
+      await userEvent.click(screen.getByRole("button", { name: "Next" }))
+
+      // Same element: changing the param swaps the CONTENT, it does not tear the
+      // dialog down and open a new one — so no reopen animation, and focus and
+      // scroll position survive the walk.
+      expect(screen.getByRole("dialog")).toBe(before)
+    })
+
+    test("a param naming an item that has not loaded shows NO other page", () => {
+      // THE PARAMS-DRIVEN TRAP: the URL moves before the data does. Answering
+      // that with `items[0]` would put a post nobody asked for under the id they
+      // did ask for.
+      zeroRender(<UrlDriven available={ITEMS.slice(0, 2)} start="c" />)
+
+      expect(screen.getByTestId("location")).toHaveTextContent("postId=c")
+      expect(screen.queryByText("body a")).not.toBeInTheDocument()
+      expect(screen.queryByText("body b")).not.toBeInTheDocument()
+    })
+
+    test("it waits on the placeholder, keeping its name and its arrows", () => {
+      zeroRender(
+        <UrlDriven available={ITEMS.slice(0, 2)} start="c" withPlaceholder />
+      )
+
+      expect(screen.getByText("loading…")).toBeInTheDocument()
+      // The dialog keeps an accessible name across the gap.
+      expect(
+        screen.getByRole("dialog", { name: "Loading post" })
+      ).toBeInTheDocument()
+      // The arrows stay in place, held — a row that vanishes for the length of a
+      // fetch and comes back is the dialog flinching.
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
+      expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled()
+      // And no position: the page's number is exactly what isn't known yet.
+      expect(screen.queryByText(/of 2/)).not.toBeInTheDocument()
+    })
+
+    test("the data arrives and the dialog lands on it, still the same dialog", () => {
+      const { rerender } = zeroRender(
+        <F0CarouselDialog
+          isOpen
+          onClose={() => {}}
+          items={ITEMS.slice(0, 2)}
+          currentId="c"
+          onNavigate={() => {}}
+          placeholder={{ title: "Loading post", content: <p>loading…</p> }}
+        />
+      )
+      const before = screen.getByRole("dialog")
+
+      rerender(
+        <F0CarouselDialog
+          isOpen
+          onClose={() => {}}
+          items={ITEMS}
+          currentId="c"
+          onNavigate={() => {}}
+          placeholder={{ title: "Loading post", content: <p>loading…</p> }}
+        />
+      )
+
+      expect(screen.getByText("body c")).toBeInTheDocument()
+      expect(screen.getByText("3 of 3")).toBeInTheDocument()
+      expect(screen.getByRole("dialog")).toBe(before)
+    })
+  })
+
   test("a lone item is not a carousel", () => {
     render({ items: [ITEMS[0]], currentId: "a" })
 
@@ -209,12 +337,12 @@ describe("F0CarouselDialog", () => {
     expect(screen.queryByText("1 of 1")).not.toBeInTheDocument()
   })
 
-  test("an id that names nothing falls back to the first page", () => {
-    // A post deleted underneath you, a filter changed: the dialog stays on
-    // something rather than going blank.
+  test("an id that names nothing never renders a different page", () => {
+    // Deleted underneath you, or simply not fetched yet — either way the honest
+    // answer is "not this one", never "here is post A instead".
     render({ currentId: "gone" })
 
-    expect(screen.getByText("body a")).toBeInTheDocument()
+    expect(screen.queryByText("body a")).not.toBeInTheDocument()
   })
 
   test("the arrows are inside the dialog, so the focus trap can reach them", () => {
