@@ -1003,6 +1003,20 @@ export const defaultTranslations = {
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
     cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
+  enps: {
+    /**
+     * The five points of the eNPS scale, worst to best. Each one names a face
+     * that carries no text of its own: it is the button's accessible name and
+     * its tooltip, so it has to read as an answer ("Very bad"), not a number.
+     */
+    scale: {
+      superNegative: "Very bad",
+      negative: "Bad",
+      neutral: "Okay",
+      positive: "Good",
+      superPositive: "Very good",
+    },
+  },
   pdfViewer: {
     toolbar: "Document toolbar",
     previousPage: "Previous page",

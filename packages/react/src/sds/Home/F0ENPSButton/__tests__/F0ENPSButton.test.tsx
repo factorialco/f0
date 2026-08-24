@@ -1,0 +1,102 @@
+import { describe, expect, it, vi } from "vitest"
+
+import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
+
+import { F0ENPSButton } from "../index"
+
+const face = (name: string) => screen.getByRole("radio", { name })
+
+describe("F0ENPSButton", () => {
+  it("renders the five faces of the eNPS scale, worst to best", () => {
+    zeroRender(<F0ENPSButton />)
+
+    expect(
+      screen
+        .getAllByRole("radio")
+        .map((button) => button.getAttribute("aria-label"))
+    ).toEqual(["Very bad", "Bad", "Okay", "Good", "Very good"])
+  })
+
+  it("does not report an answer on mount", () => {
+    const onChange = vi.fn()
+    zeroRender(<F0ENPSButton value="negative" onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("reports the pressed face as the answer", async () => {
+    const onChange = vi.fn()
+    zeroRender(<F0ENPSButton onChange={onChange} />)
+
+    await userEvent.click(face("Very good"))
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith("superPositive")
+    expect(face("Very good")).toHaveAttribute("aria-checked", "true")
+  })
+
+  it("clears the answer when the answered face is pressed again", async () => {
+    const onChange = vi.fn()
+    zeroRender(<F0ENPSButton value="neutral" onChange={onChange} />)
+
+    await userEvent.click(face("Okay"))
+
+    expect(onChange).toHaveBeenCalledWith(undefined)
+  })
+
+  it("keeps the answer when required and the answered face is pressed again", async () => {
+    const onChange = vi.fn()
+    zeroRender(<F0ENPSButton value="neutral" onChange={onChange} required />)
+
+    await userEvent.click(face("Okay"))
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(face("Okay")).toHaveAttribute("aria-checked", "true")
+  })
+
+  it("colours only the answered face with its own mood", async () => {
+    zeroRender(<F0ENPSButton value="negative" />)
+
+    expect(face("Bad")).toHaveClass("text-f1-icon-mood-negative")
+    expect(face("Very good")).not.toHaveClass(
+      "text-f1-icon-mood-super-positive"
+    )
+
+    // The colour follows the press, not just the incoming prop.
+    await userEvent.click(face("Very good"))
+
+    expect(face("Very good")).toHaveClass("text-f1-icon-mood-super-positive")
+    expect(face("Bad")).not.toHaveClass("text-f1-icon-mood-negative")
+  })
+
+  it("names the hovered face in a tooltip", async () => {
+    zeroRender(<F0ENPSButton />)
+
+    await userEvent.hover(face("Very bad"))
+
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toHaveTextContent("Very bad")
+    })
+  })
+
+  it("takes the question's own wording through labels", () => {
+    zeroRender(
+      <F0ENPSButton
+        value="superNegative"
+        labels={{ superNegative: "Not at all likely" }}
+      />
+    )
+
+    expect(face("Not at all likely")).toBeInTheDocument()
+    // The faces left alone keep the default scale copy.
+    expect(face("Okay")).toBeInTheDocument()
+  })
+
+  it("disables every face", () => {
+    zeroRender(<F0ENPSButton disabled />)
+
+    screen
+      .getAllByRole("radio")
+      .forEach((button) => expect(button).toBeDisabled())
+  })
+})

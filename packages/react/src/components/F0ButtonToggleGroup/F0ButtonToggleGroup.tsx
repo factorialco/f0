@@ -88,7 +88,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
             size={size}
             withBorder={withBorder}
             variant={variant}
-            className={cn(fullWidth && "w-full")}
+            className={cn(fullWidth && "w-full", item.className)}
             selected={!!selectedValues?.includes(item.value)}
             // Intentionally pass a no-op function to satisfy type requirements.
             // The group manages selection state in a controlled manner.

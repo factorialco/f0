@@ -118,6 +118,24 @@ export const WithDataTestId: Story = {
   },
 }
 
+export const WithTooltip: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A compact toggle shows no text of its own, so `tooltip` is what says " +
+          "what it does. It replaces the native browser tooltip, and the object " +
+          "form adds a line of explanation under the name.",
+      },
+    },
+  },
+  args: {
+    label: ["Unmute", "Mute"],
+    icon: [MicrophoneNegative, Microphone],
+    tooltip: { label: "Microphone", description: "Nobody will hear you" },
+  },
+}
+
 export const SingleIcon: Story = {
   args: {
     label: "Single Icon Toggle",

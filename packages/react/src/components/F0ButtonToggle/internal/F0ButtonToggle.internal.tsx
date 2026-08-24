@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, useMemo, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
@@ -73,6 +74,7 @@ export const F0ButtonToggleInternal = forwardRef<
       icon,
       size = "md",
       variant = "compact",
+      tooltip,
       withBorder = false,
       className: externalClassName,
       defaultSelected = false,
@@ -122,7 +124,15 @@ export const F0ButtonToggleInternal = forwardRef<
       return size
     }, [size, variant])
 
-    return (
+    // Same shape `Action` accepts: a bare string is the description on its own.
+    const tooltipProps =
+      typeof tooltip === "object"
+        ? tooltip
+        : tooltip
+          ? { description: tooltip }
+          : undefined
+
+    const root = (
       <TogglePrimitive.Root
         ref={ref}
         pressed={state.selected}
@@ -145,6 +155,11 @@ export const F0ButtonToggleInternal = forwardRef<
           externalClassName
         )}
         {...props}
+        // Deliberately after the spread: when a tooltip wraps this button, Radix
+        // hands the trigger's own open/closed `data-state` down through
+        // `asChild`, which would otherwise overwrite the pressed state that
+        // consumers and tests read off the button.
+        data-state={state.selected ? "on" : "off"}
       >
         <AnimatePresence initial={false}>
           <div className="main relative flex flex-col items-center justify-center">
@@ -182,6 +197,14 @@ export const F0ButtonToggleInternal = forwardRef<
         )}
       </TogglePrimitive.Root>
     )
+
+    if (!tooltipProps) {
+      return root
+    }
+
+    // `TooltipInternal` strips the native `title` off the button so the browser
+    // doesn't draw its own bubble next to this one; `aria-label` keeps the name.
+    return <TooltipInternal {...tooltipProps}>{root}</TooltipInternal>
   }
 )
 

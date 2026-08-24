@@ -41,6 +41,9 @@ The F0ButtonToggle consists of:
    screen readers)
 4. **State Indicator**: Visual feedback showing current selected/unselected
    state
+5. **Tooltip** (optional): `tooltip` names the toggle on hover and on keyboard
+   focus, in place of the native browser one. A compact toggle shows no text of
+   its own, so this is where a glyph gets explained
 
 ### Interactive States
 
@@ -81,6 +84,9 @@ Available sizes:
 ### Content best practices
 
 - Labels should clearly describe the action or state
+- Reach for `tooltip` whenever the glyph alone would be a guess — it takes the
+  same string as the label, or a `{ label, description }` pair when the toggle
+  needs a line of explanation under its name
 - Use consistent icon metaphors that users understand
 - Provide immediate visual feedback when state changes
 - Ensure the purpose is clear from context

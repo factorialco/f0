@@ -30,6 +30,18 @@ export type F0ButtonToggleInternalProps = {
   variant?: ButtonToggleVariant
 
   /**
+   * Tooltip shown on hover and on keyboard focus. A string is the description
+   * on its own; the object form adds a bold first line above it — the same
+   * shape `Action` takes.
+   *
+   * A compact toggle is a glyph with no visible text, so the tooltip is what
+   * says out loud what it does. Setting it drops the native `title` (the
+   * browser would otherwise draw its own bubble beside this one) and keeps the
+   * accessible name.
+   */
+  tooltip?: string | { label?: string; description: string }
+
+  /**
    * @private
    * Whether to show a border around the button toggle.
    */
