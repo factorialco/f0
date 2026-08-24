@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.49.1](https://github.com/factorialco/f0/compare/f0-react-v6.49.0...f0-react-v6.49.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **SidebarTabs:** re-measure when labels outgrow the row ([#5198](https://github.com/factorialco/f0/issues/5198)) ([20e8baf](https://github.com/factorialco/f0/commit/20e8bafe3d88332ddc3834a1042dcc923043071c))
+
 ## [6.49.0](https://github.com/factorialco/f0/compare/f0-react-v6.48.0...f0-react-v6.49.0) (2026-08-24)
 
 
