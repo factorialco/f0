@@ -87,6 +87,9 @@ Available sizes:
 - Reach for `tooltip` whenever the glyph alone would be a guess — it takes the
   same string as the label, or a `{ label, description }` pair when the toggle
   needs a line of explanation under its name
+- Add `instant` to that object when the tooltip is the **only** place the
+  toggle's name is written: it opens on 100ms instead of 700ms, because the
+  default wait is meant for a label that confirms text you can already read
 - Use consistent icon metaphors that users understand
 - Provide immediate visual feedback when state changes
 - Ensure the purpose is clear from context

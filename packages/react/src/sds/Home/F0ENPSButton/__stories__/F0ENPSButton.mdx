@@ -122,7 +122,10 @@ An answer that has been sent stays coloured and stops being pressable:
   `aria-checked` and named by its label — a screen reader announces "Bad, radio
   button, not checked", not a glyph.
 - The tooltip repeats that name for sighted pointer users and opens on keyboard
-  focus too; it never carries information the label doesn't already have.
+  focus too; it never carries information the label doesn't already have. It is
+  `instant` (100ms, not the default 700ms) — it is the only place a face's name
+  is written, and a wait per face makes the scale something you have to stop and
+  ask for.
 - The faces share one roving tab stop: `Tab` reaches the scale, the arrow keys
   move along it, `Space` answers.
 - Colour is never the only signal — the answer carries `aria-checked`, and the

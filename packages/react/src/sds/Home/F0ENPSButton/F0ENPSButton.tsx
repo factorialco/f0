@@ -88,7 +88,10 @@ export const F0ENPSButton = ({
           value: pulse,
           icon: pulseIcon[pulse],
           label,
-          tooltip: label,
+          // `instant`: the face is the whole control and this tooltip is the
+          // only place its name is written, so a 700ms wait withholds the scale
+          // from someone reading along it — the same call the Home rail makes.
+          tooltip: { description: label, instant: true },
           className: cn(
             unansweredFace,
             answer === pulse && selectedAccent[pulse]

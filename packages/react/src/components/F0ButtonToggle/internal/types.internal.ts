@@ -38,8 +38,13 @@ export type F0ButtonToggleInternalProps = {
    * says out loud what it does. Setting it drops the native `title` (the
    * browser would otherwise draw its own bubble beside this one) and keeps the
    * accessible name.
+   *
+   * `instant` opens it on 100ms instead of the default 700ms. Reach for it when
+   * the tooltip is the ONLY place the toggle's name is written — the default
+   * wait is for a label that merely confirms what you can already read, and on
+   * a bare glyph it withholds the whole thing.
    */
-  tooltip?: string | { label?: string; description: string }
+  tooltip?: string | { label?: string; description: string; instant?: boolean }
 
   /**
    * @private

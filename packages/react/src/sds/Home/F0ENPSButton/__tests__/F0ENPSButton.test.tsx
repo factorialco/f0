@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
+import {
+  act,
+  fireEvent,
+  screen,
+  userEvent,
+  zeroRender,
+} from "@/testing/test-utils"
 
 import { F0ENPSButton } from "../index"
 
@@ -69,14 +75,26 @@ describe("F0ENPSButton", () => {
     expect(face("Bad")).not.toHaveClass("text-f1-icon-mood-negative")
   })
 
-  it("names the hovered face in a tooltip", async () => {
-    zeroRender(<F0ENPSButton />)
+  /**
+   * The tooltip is the only place a face's name is written, so it opens without
+   * a wait — on the default 700ms it was a name you had to stop and ask for,
+   * five times over, to read the scale.
+   */
+  it("names the hovered face without a wait", () => {
+    vi.useFakeTimers()
+    try {
+      zeroRender(<F0ENPSButton />)
 
-    await userEvent.hover(face("Very bad"))
+      // `fireEvent`, not `userEvent`: the tooltip is a TIMER, and userEvent's
+      // own waiting deadlocks against fake ones.
+      fireEvent.pointerEnter(face("Very bad"), { pointerType: "mouse" })
+      // Well past the instant 100ms, and well inside the default 700ms.
+      act(() => vi.advanceTimersByTime(200))
 
-    await waitFor(() => {
       expect(screen.getByRole("tooltip")).toHaveTextContent("Very bad")
-    })
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it("takes the question's own wording through labels", () => {
