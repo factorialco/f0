@@ -469,6 +469,13 @@ export type CarouselPaging = {
  * arrive at, so its second page waits for the arrow. That is one press, and it
  * beats a fetch on mount that the reader never asked for.
  */
+/**
+ * How many slides are IN THE DOM right now — React's view, not the carousel's
+ * cached one, which lags a re-measure behind.
+ */
+const countSlides = (api: CarouselApi) =>
+  api?.containerNode()?.childElementCount ?? 0
+
 const useCarouselPaging = (paging?: CarouselPaging) => {
   const { api, canScrollNext, scrollNext } = useCarousel()
   const hasMore = paging?.hasMore ?? false
@@ -517,6 +524,8 @@ const useCarouselPaging = (paging?: CarouselPaging) => {
   // Whether the load in flight is the one that just finished, so an owed move
   // that turned out to have nowhere to go stops waiting instead of hanging.
   const wasLoading = React.useRef(isLoading)
+  /** How many slides there were when the move was asked for. */
+  const slidesAtAsk = React.useRef(0)
 
   React.useEffect(() => {
     const settled = wasLoading.current && !isLoading
@@ -527,8 +536,25 @@ const useCarouselPaging = (paging?: CarouselPaging) => {
       scrollNext()
       return
     }
-    if (settled) setOwedNext(false)
-  }, [owedNext, canScrollNext, isLoading, scrollNext])
+    /**
+     * THE FETCH IS DONE, AND THE CAROUSEL HAS NOT CAUGHT UP.
+     *
+     * `isLoading` going false and the new slides arriving happen in one React
+     * commit, but `canScrollNext` does not: it comes from the carousel
+     * re-measuring itself, which is asynchronous. Clearing the owed move on
+     * `settled` alone therefore cancelled it a beat before there was anywhere to
+     * go — the page loaded, the arrow stopped spinning, and the row sat still.
+     *
+     * So the slide count decides. More slides than when we asked means the move
+     * is still coming and this is just the gap before the measurement; the same
+     * number means the fetch brought nothing and nobody should keep waiting.
+     *
+     * Counted off the DOM rather than asked of the carousel: at this exact
+     * moment the carousel's own list is the stale thing being worked around, so
+     * consulting it answers "still two" and cancels the move all over again.
+     */
+    if (settled && countSlides(api) <= slidesAtAsk.current) setOwedNext(false)
+  }, [owedNext, canScrollNext, isLoading, scrollNext, api])
 
   return {
     canGoNext: canScrollNext || (hasMore && !isLoading),
@@ -543,6 +569,7 @@ const useCarouselPaging = (paging?: CarouselPaging) => {
       // Recorded whether or not we are the ones who ask: a press landing while a
       // page is already in flight must still move the row when it lands, and
       // asking twice for the same records is not the way to make that happen.
+      slidesAtAsk.current = countSlides(api)
       setOwedNext(true)
       if (!isLoading) onLoadMore?.()
     },
