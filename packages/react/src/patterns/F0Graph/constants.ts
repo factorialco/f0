@@ -5,13 +5,14 @@ import type { ZoomLevel } from "./types"
 // re-render every node wrapper.
 export const EMPTY_HIGHLIGHTED_NODES: Set<string> = new Set<string>()
 
-// The collapser is an F0Button (md/lg) inside a top-aligned box with `pt-2`,
-// whereas the expander is a bare pill of `EXPANDER_SIZE`. These per-zoom nudges
-// account for that difference so the collapser lands on the same lane center as
-// the expander. `dot` is unused (the collapser is hidden at dot zoom).
+// The collapser is an F0Button inside a top-aligned box with `pt-2`, whereas the
+// expander is a bare pill placed straight at the lane offset. Both are the same
+// 32px button now, so the nudge is just that padding back off — the two land on
+// the same lane centre AND the same top edge, at every zoom.
+// `dot` is unused (the collapser is hidden at dot zoom).
 export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
   detail: -8,
-  compact: -4,
+  compact: -8,
   dot: 0,
 }
 
@@ -49,13 +50,33 @@ export const STACKED_NODE_TITLE_GAP = 8
  */
 export const STACKED_NODE_WIDTH_INSET = 24
 
+/**
+ * Horizontal room the node wrapper leaves around a node's layout box, so two
+ * adjacent cards never touch. Subtracted from the box to get the width a node
+ * actually paints.
+ */
+export const NODE_BOX_INSET = 20
+
+/**
+ * A stacked column is a React Flow sub-flow: the rows are child nodes of a
+ * group node that wraps them (see
+ * https://reactflow.dev/learn/layouting/sub-flows). This is the room that group
+ * keeps between its edge and the rows inside it. Real geometry, not CSS: the
+ * group's box is the union of its rows grown by this much, and each row's
+ * position inside the group starts at it.
+ */
+export const STACKED_GROUP_PADDING = 8
+
 // Height of one stacked row and the gap between two of them. Shared by the
 // layout engine (which reserves the space) and F0GraphNode's stacked row (which
 // fills it) — the row must render exactly as tall as the layout believes it is,
 // or the column drifts out of its reserved band.
 export const STACKED_NODE_HEIGHT =
   STACKED_NODE_AVATAR + 2 * (STACKED_NODE_PADDING + STACKED_NODE_BORDER)
-export const STACKED_NODE_GAP = 8
+// The gap is also the connector: rows are chained to each other, so the line
+// from one row to the next spans exactly this much. Keep it long enough to read
+// as a line rather than a tick.
+export const STACKED_NODE_GAP = 16
 
 /**
  * The row's title type scale per zoom variant, mirroring the node card's own

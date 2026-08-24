@@ -10,6 +10,7 @@ import type {
 } from "../../internal/ReactFlowAdapters"
 import type { LayoutEngine, TreeNode } from "../../types"
 import type { ViewportRect } from "../../utils"
+import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import { useGraphRenderModel } from "../useGraphRenderModel"
 
 // Stub the viewport rect so windowing is deterministic without a real canvas.
@@ -361,14 +362,68 @@ describe("useGraphRenderModel — stacked children", () => {
     return { root: treeNode("root", null, 1, [role]), role, levels }
   }
 
-  it("draws one trunk into the column instead of an edge per row", () => {
+  it("chains the rows to each other instead of fanning out from the parent", () => {
     const { root } = stackedRole()
     const { result } = renderModel(baseOptions([root], ["root", "role"]))
 
-    const intoStack = result.current.rfEdges.filter((e) => e.source === "role")
+    const edges = result.current.rfEdges
 
-    expect(intoStack).toHaveLength(1)
-    expect(intoStack[0].target).toBe("l1")
+    // One line from the parent into the first row, then row to row.
+    const fromParent = edges.filter((e) => e.source === "role")
+    expect(fromParent).toHaveLength(1)
+    expect(fromParent[0].target).toBe("l1")
+    expect(edges.find((e) => e.target === "l2")?.source).toBe("l1")
+    expect(edges.find((e) => e.target === "l3")?.source).toBe("l2")
+    // The spine carries no midpoint dots — those mark a relationship, and a
+    // row-to-row link is not one.
+    expect(edges.find((e) => e.target === "l2")?.data?.showDot).toBe(false)
+  })
+
+  it("wraps the rows in a group node they are children of", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const nodes = result.current.rfNodes
+    const group = nodes.find((n) => n.id === "stack-role")
+    const rows = nodes.filter((n) => ["l1", "l2", "l3"].includes(n.id))
+
+    expect(group?.type).toBe("stackGroup")
+    // React Flow requires a parent to precede its children in the array.
+    expect(nodes.findIndex((n) => n.id === "stack-role")).toBeLessThan(
+      Math.min(...rows.map((r) => nodes.findIndex((n) => n.id === r.id)))
+    )
+    for (const row of rows) {
+      expect(row.parentId).toBe("stack-role")
+      expect(row.extent).toBe("parent")
+    }
+  })
+
+  it("pads the wrapper by 8px around the rows it holds", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const nodes = result.current.rfNodes
+    const group = nodes.find((n) => n.id === "stack-role")!
+    const rows = nodes
+      .filter((n) => ["l1", "l2", "l3"].includes(n.id))
+      .sort((a, b) => a.position.y - b.position.y)
+
+    // Positions are relative to the group, so the first row starts at the
+    // padding on both axes and the last one ends a padding short of the box.
+    expect(rows[0].position).toEqual({
+      x: STACKED_GROUP_PADDING,
+      y: STACKED_GROUP_PADDING,
+    })
+    // Row height is not seeded on the node (React Flow measures it), so read it
+    // back off the row-to-row spacing, which is one row plus the gap.
+    const rowHeight = rows[1].position.y - rows[0].position.y - STACKED_NODE_GAP
+    const last = rows[rows.length - 1]
+    expect(group.height).toBe(
+      last.position.y + rowHeight + STACKED_GROUP_PADDING
+    )
+    expect((group.width ?? 0) - (rows[0].width ?? 0)).toBe(
+      2 * STACKED_GROUP_PADDING
+    )
   })
 
   it("keeps an edge per child when the group is not stacked", () => {

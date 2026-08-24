@@ -68,6 +68,7 @@ import {
   F0GraphCollapserWrapper,
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
+  F0GraphStackGroupWrapper,
 } from "../../internal/ReactFlowAdapters"
 import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
@@ -123,6 +124,7 @@ const nodeTypes: NodeTypes = {
   graphNode: F0GraphNodeWrapper as unknown as NodeTypes[string],
   expanderNode: F0GraphExpanderWrapper as unknown as NodeTypes[string],
   collapserNode: F0GraphCollapserWrapper as unknown as NodeTypes[string],
+  stackGroup: F0GraphStackGroupWrapper as unknown as NodeTypes[string],
 }
 
 const defaultEdgeTypes: EdgeTypes = {

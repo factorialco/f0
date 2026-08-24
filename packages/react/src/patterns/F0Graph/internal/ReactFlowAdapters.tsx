@@ -1,6 +1,7 @@
 import {
   Handle,
   Position,
+  useStore,
   type Node as RFNode,
   type NodeProps,
 } from "@xyflow/react"
@@ -20,15 +21,55 @@ import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
 import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-  STACKED_NODE_WIDTH_INSET,
+  NODE_BOX_INSET,
   STACKED_RANK_SEP_RATIO,
 } from "../constants"
 
 /**
- * Horizontal inset of a node's visible box inside the layout box the engine
- * reserved for it, so adjacent nodes never touch.
+ * Half a React Flow handle (its default box is 6px square).
+ *
+ * React Flow derives an edge endpoint from the FAR edge of the handle box — the
+ * bottom edge for a `Bottom` handle, the top edge for a `Top` one — and its
+ * default handle straddles the node's edge, so each endpoint lands half a handle
+ * into the gap beyond it. Across a full rank lane that is invisible. Across the
+ * 8px gap between two stacked rows it eats three quarters of the connector,
+ * leaving a 2px stub. Pinning the box just inside the node's edge puts the
+ * endpoint exactly on it, so the line spans the whole gap.
  */
-const NODE_BOX_INSET = 20
+const HANDLE_HALF = 3
+
+/**
+ * How far the expand/collapse affordance has to move to sit on the lane the eye
+ * sees rather than the one the layout reserved.
+ *
+ * Both buttons are placed from the bottom of the parent's layout box, but a node
+ * paints only as tall as its content, and the box carries the tag reservation
+ * whether or not this particular node fills it — a card whose tags wrap to fewer
+ * lines than the reserved maximum leaves the difference empty beneath itself,
+ * and at compact/dot zoom the tags are hidden altogether. Correcting by half of
+ * whatever the parent left empty puts the button back on the visual midpoint,
+ * and applying it to BOTH buttons is what keeps them in one place across a
+ * collapse/expand at every zoom level.
+ *
+ * Read off React Flow's own measurement, so no second layout pass is needed —
+ * and applied as a transform, which cannot feed back into the graph's geometry.
+ */
+function useBoxSlackShift(
+  parentId: string,
+  parentBoxHeight: number | undefined
+): number {
+  const measured = useStore((s) => s.nodeLookup.get(parentId)?.measured?.height)
+  if (!parentBoxHeight || !measured) return 0
+  return (measured - parentBoxHeight) / 2
+}
+
+/** Pins a vertical handle so its endpoint sits on the node's edge, not past it. */
+const flushHandleStyle = (
+  position: Position
+): { transform: string } | undefined =>
+  position === Position.Bottom || position === Position.Top
+    ? { transform: `translate(-${HANDLE_HALF}px, 0px)` }
+    : undefined
 
 function handlePositions(direction: LayoutDirection): {
   source: Position
@@ -76,6 +117,11 @@ export interface GraphNodeData extends Record<string, unknown> {
 export type GraphRFNode = RFNode<GraphNodeData>
 
 export interface ExpanderNodeData {
+  /**
+   * Height of the layout box reserved for the parent, so the button can correct
+   * for the part of it the parent does not paint. See `useBoxSlackShift`.
+   */
+  parentBoxHeight?: number
   [key: string]: unknown
   count: number
   expanded: boolean
@@ -92,6 +138,14 @@ export interface ExpanderNodeData {
 export type ExpanderRFNode = RFNode<ExpanderNodeData>
 
 export interface CollapserNodeData {
+  /**
+   * Height of the layout box reserved for the parent. The button is placed from
+   * that box's bottom edge, but a node paints only as tall as its content — a
+   * card whose tags wrap to fewer lines than the reserved maximum leaves the
+   * difference empty under itself. Passing the box height lets the button
+   * correct for that and sit on the lane the eye sees. See `boxSlackShift`.
+   */
+  parentBoxHeight?: number
   [key: string]: unknown
   parentId: string
   parentWidth: number
@@ -102,13 +156,25 @@ export interface CollapserNodeData {
 
 export type CollapserRFNode = RFNode<CollapserNodeData>
 
+/** Data for the group node behind a stacked column. */
+export interface StackGroupData extends Record<string, unknown> {
+  /** Which side the parent card's edge arrives from. */
+  direction: LayoutDirection
+}
+
+export type StackGroupRFNode = RFNode<StackGroupData>
+
 // ─── Constants ─────────────────────────────────────────────────
 
-const EXPANDER_SIZE: Record<ZoomLevel, number> = {
-  detail: 32,
-  compact: 48,
-  dot: 72,
-}
+/**
+ * Height of the expander pill. It is an `md` F0Button at every zoom level (see
+ * F0GraphExpander), so this is one number rather than a per-zoom set — a
+ * per-zoom guess is what put the expander and the collapser in different places
+ * at compact zoom: the offset centred a 48px pill in the lane while the pill
+ * being drawn was 32px, lifting it 8px above the collapser, which centres
+ * itself on the lane properly at both sizes it uses.
+ */
+const EXPANDER_SIZE = 32
 
 // Vertical lane between a node's bottom and its children's top. Matches
 // `DEFAULT_RANK_SEP` in useLayoutEngine — keep them in sync.
@@ -119,18 +185,18 @@ const NODE_RANK_SEP = 130
 // wrapper box) is pushed down by half the leftover space. Measured from the
 // node's bottom edge.
 export const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
-  detail: (NODE_RANK_SEP - EXPANDER_SIZE.detail) / 2,
-  compact: (NODE_RANK_SEP - EXPANDER_SIZE.compact) / 2,
-  dot: (NODE_RANK_SEP - EXPANDER_SIZE.dot) / 2,
+  detail: (NODE_RANK_SEP - EXPANDER_SIZE) / 2,
+  compact: (NODE_RANK_SEP - EXPANDER_SIZE) / 2,
+  dot: (NODE_RANK_SEP - EXPANDER_SIZE) / 2,
 }
 
 // Same centering, for the shortened lane above a stacked column. Without it the
 // affordance would keep the full-lane offset and overlap the first row.
 export const STACKED_RANK_SEP = NODE_RANK_SEP * STACKED_RANK_SEP_RATIO
 export const EXPANDER_Y_OFFSET_STACKED_BY_ZOOM: Record<ZoomLevel, number> = {
-  detail: (STACKED_RANK_SEP - EXPANDER_SIZE.detail) / 2,
-  compact: (STACKED_RANK_SEP - EXPANDER_SIZE.compact) / 2,
-  dot: (STACKED_RANK_SEP - EXPANDER_SIZE.dot) / 2,
+  detail: (STACKED_RANK_SEP - EXPANDER_SIZE) / 2,
+  compact: (STACKED_RANK_SEP - EXPANDER_SIZE) / 2,
+  dot: (STACKED_RANK_SEP - EXPANDER_SIZE) / 2,
 }
 
 /**
@@ -237,7 +303,14 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
 
   return (
     <>
-      <Handle type="target" position={targetPos} className="!invisible" />
+      <Handle
+        type="target"
+        position={targetPos}
+        className="!invisible"
+        // Rows are chained to each other over an 8px gap, so their endpoints
+        // have to sit exactly on the box edge to leave a visible line.
+        style={stacked ? flushHandleStyle(targetPos) : undefined}
+      />
       <div
         className="pointer-events-none flex items-start justify-center"
         style={{ width: "100%" }}
@@ -245,21 +318,23 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
         <div
           className="pointer-events-auto"
           // A card is content-sized inside the inset layout box. A stacked row
-          // is width-driven instead: it fills that same inset box, less
-          // STACKED_NODE_WIDTH_INSET so the column sits narrower than the card
-          // above it. The wrapper centres it, so the narrowing comes off both
-          // edges and the column stays on the parent's axis.
+          // is width-driven instead — and since it became a sub-flow child its
+          // box is already exactly the width it paints (the inset is applied
+          // once, when the group box is derived), so it just fills it.
           style={{
-            width: stacked
-              ? `calc(100% - ${NODE_BOX_INSET + STACKED_NODE_WIDTH_INSET}px)`
-              : undefined,
-            maxWidth: `calc(100% - ${NODE_BOX_INSET}px)`,
+            width: stacked ? "100%" : undefined,
+            maxWidth: stacked ? undefined : `calc(100% - ${NODE_BOX_INSET}px)`,
           }}
         >
           {renderNode(graphNode, ctx)}
         </div>
       </div>
-      <Handle type="source" position={sourcePos} className="!invisible" />
+      <Handle
+        type="source"
+        position={sourcePos}
+        className="!invisible"
+        style={stacked ? flushHandleStyle(sourcePos) : undefined}
+      />
     </>
   )
 }
@@ -291,6 +366,10 @@ export const F0GraphNodeWrapper = memo(
 // ─── F0GraphExpanderWrapper ────────────────────────────────────
 
 function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
+  const { count, parentId, parentWidth, parentBoxHeight, loading } =
+    data as ExpanderNodeData
+  // Same correction as the collapser, so the two never sit in different places.
+  const boxSlackShift = useBoxSlackShift(parentId, parentBoxHeight)
   const zoomCtx = useF0GraphZoomInternal()
   const expandCtx = useF0GraphExpandInternal()
   const actionsCtx = useF0GraphActionsInternal()
@@ -298,8 +377,6 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const renderCfg = useF0GraphRenderConfigInternal()
   const i18n = useI18n()
   if (!zoomCtx || !expandCtx || !actionsCtx) return null
-
-  const { count, parentId, parentWidth, loading } = data as ExpanderNodeData
   const expanded = expandCtx.expandedNodes.has(parentId)
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -331,7 +408,13 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
           "pointer-events-auto flex items-start justify-center",
           focusRing()
         )}
-        style={{ width: parentWidth, height: 80 }}
+        style={{
+          width: parentWidth,
+          height: 80,
+          transform: boxSlackShift
+            ? `translateY(${boxSlackShift}px)`
+            : undefined,
+        }}
       >
         <F0GraphExpander
           count={count}
@@ -370,14 +453,13 @@ function F0GraphCollapserWrapperInner({
   data,
   id,
 }: NodeProps<CollapserRFNode>) {
+  const { parentId, parentWidth, collapseLabel, stacked } =
+    data as CollapserNodeData
   const zoomCtx = useF0GraphZoomInternal()
   const actionsCtx = useF0GraphActionsInternal()
   const focusCtx = useF0GraphFocusInternal()
   const i18n = useI18n()
   if (!zoomCtx || !actionsCtx) return null
-
-  const { parentId, parentWidth, collapseLabel, stacked } =
-    data as CollapserNodeData
   if (zoomCtx.zoomLevel === "dot") return null
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -425,7 +507,10 @@ function F0GraphCollapserWrapperInner({
         >
           <F0Button
             variant="neutral"
-            size={zoomCtx.zoomLevel === "compact" ? "lg" : "md"}
+            // Same size as the expander pill at every zoom. A larger button at
+            // compact left the two affordances sharing a centre but not a top
+            // edge, which reads as the collapsed state sitting lower.
+            size="md"
             icon={Minimize}
             hideLabel
             label={ariaLabel}
@@ -437,6 +522,27 @@ function F0GraphCollapserWrapperInner({
     </>
   )
 }
+
+/**
+ * The group node a stacked column's rows belong to (see
+ * https://reactflow.dev/learn/layouting/sub-flows): they are its children, so
+ * they are positioned relative to it and travel with it. It paints nothing —
+ * the column reads as a group because the rows are connected to each other, not
+ * because a surface sits behind them. What it still carries is the geometry:
+ * its box is the rows grown by `STACKED_GROUP_PADDING`, which is where each
+ * row's offset inside it comes from.
+ *
+ * Decorative on every axis: no semantics (the rows keep the `treeitem` roles)
+ * and `pointer-events-none`, so the gaps between rows stay click-through
+ * instead of swallowing canvas pans.
+ */
+function F0GraphStackGroupWrapperInner(_: NodeProps<RFNode<StackGroupData>>) {
+  return <div aria-hidden className="pointer-events-none h-full w-full" />
+}
+
+F0GraphStackGroupWrapperInner.displayName = "F0GraphStackGroupWrapper"
+
+export const F0GraphStackGroupWrapper = memo(F0GraphStackGroupWrapperInner)
 
 F0GraphCollapserWrapperInner.displayName = "F0GraphCollapserWrapper"
 

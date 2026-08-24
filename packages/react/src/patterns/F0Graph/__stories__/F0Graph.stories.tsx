@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
+import { Laptop, Money, People, Star } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { DeferredNodesPayload, GraphNode } from "../types"
@@ -1336,6 +1337,12 @@ interface CatalogNode {
   name: string
   kind: "root" | "role" | "level"
   headcount?: number
+  /** Bottom of the level's salary band, in thousands. */
+  salaryFrom?: number
+  /** How many competencies the level expects. */
+  competencies?: number
+  /** How many devices the level's standard kit includes. */
+  devices?: number
 }
 
 const CATALOG_NODES: GraphNode<CatalogNode>[] = [
@@ -1364,12 +1371,75 @@ const CATALOG_NODES: GraphNode<CatalogNode>[] = [
           name: `${level} ${role}`,
           kind: "level" as const,
           headcount: 2 + levelIndex * 3,
+          salaryFrom: 30 + levelIndex * 12,
+          competencies: 4 + levelIndex * 2,
+          devices: levelIndex < 2 ? 1 : 2,
         },
         childrenCount: 0,
       })),
     ]
   }),
 ]
+
+/**
+ * What a catalog owner reads off a job level: its salary band, how many people
+ * sit in it, how many competencies it expects, and how many devices its kit
+ * includes. All four are `raw` pills, so each declares its own `column` to get
+ * an independent toggle, label and reservation slot.
+ */
+const LEVEL_TAG_COLUMNS = [
+  "salary",
+  "headcount",
+  "competencies",
+  "devices",
+] as const
+
+const LEVEL_TAG_LABELS = {
+  salary: "Salary band",
+  headcount: "People",
+  competencies: "Competencies",
+  devices: "Devices",
+}
+
+/**
+ * The copy is deliberately terse. A row's tag area is the row width minus its
+ * indent (~227px) and the layout reserves `ceil(columns / 2)` rows of height,
+ * so the four pills have to pack into two lines: any wider and they wrap past
+ * the room reserved for them, and the next row lands on top. The icon carries
+ * what the shortened text drops, and `tagLabels` spells it out again in the
+ * hover card.
+ */
+function catalogLevelTags(node: CatalogNode): F0GraphNodeTag[] {
+  const { headcount, salaryFrom, competencies, devices } = node
+  if (salaryFrom === undefined) return []
+  return [
+    {
+      type: "raw",
+      icon: Money,
+      text: `€${salaryFrom}k - ${salaryFrom + 10}k`,
+      column: "salary",
+    },
+    {
+      type: "raw",
+      icon: People,
+      text: `${headcount} people`,
+      column: "headcount",
+    },
+    {
+      type: "raw",
+      icon: Star,
+      text: `${competencies} competencies`,
+      column: "competencies",
+    },
+    {
+      type: "raw",
+      icon: Laptop,
+      text: `${devices}`,
+      additionalAccessibleText: `${devices} devices`,
+      column: "devices",
+    },
+  ]
+}
 
 const StackedChildrenDemo = () => {
   return (
@@ -1392,21 +1462,57 @@ const StackedChildrenDemo = () => {
 }
 
 /**
- * Six tag types on one row, so the wrap behaviour and the mixed tag heights are
- * visible rather than implied. Each type is its own show/hide column, so the
- * controls popover can toggle them independently.
+ * A role card carries the same four columns as the levels under it, rolled up:
+ * the band runs from the bottom of its lowest level to the top of its highest,
+ * the people add up, and competencies and devices take the top level's figure
+ * (a senior level's framework and kit contain the ones below it).
  */
-function levelTags(node: CatalogNode): F0GraphNodeTag[] {
-  const { headcount = 0, name } = node
+function catalogRoleTags(
+  role: string,
+  levels: CatalogNode[]
+): F0GraphNodeTag[] {
+  if (levels.length === 0) return []
+  const from = Math.min(...levels.map((l) => l.salaryFrom ?? 0))
+  const to = Math.max(...levels.map((l) => (l.salaryFrom ?? 0) + 10))
   return [
-    { type: "raw", text: `${headcount} people` },
-    { type: "status", text: "Open", variant: "positive" },
-    { type: "team", name: name.split(" ")[1] ?? "Platform" },
-    { type: "person", name: "Bob Smith" },
-    { type: "company", name: "Acme" },
-    { type: "alert", text: "Review due", level: "warning" },
+    {
+      type: "raw",
+      icon: Money,
+      text: `€${from}k - ${to}k`,
+      column: "salary",
+    },
+    {
+      type: "raw",
+      icon: People,
+      text: `${levels.reduce((sum, l) => sum + (l.headcount ?? 0), 0)} people`,
+      column: "headcount",
+    },
+    {
+      type: "raw",
+      icon: Star,
+      text: `${Math.max(...levels.map((l) => l.competencies ?? 0))} competencies`,
+      column: "competencies",
+    },
+    {
+      type: "raw",
+      icon: Laptop,
+      text: `${Math.max(...levels.map((l) => l.devices ?? 0))}`,
+      additionalAccessibleText: `devices for the ${role} role`,
+      column: "devices",
+    },
   ]
 }
+
+/** The levels under each role, so a role card can roll their metadata up. */
+const LEVELS_BY_ROLE = CATALOG_NODES.reduce<Record<string, CatalogNode[]>>(
+  (acc, node) => {
+    if (node.data.kind !== "level") return acc
+    const role = node.data.name.split(" ").slice(1).join(" ")
+    acc[role] = [...(acc[role] ?? []), node.data]
+    return acc
+  },
+  {}
+)
 
 const StackedChildrenWithTagsDemo = () => {
   return (
@@ -1418,14 +1524,22 @@ const StackedChildrenWithTagsDemo = () => {
       // sizes the tag area from how many tag types are visible. Passing only
       // `reserveTagRow` would reserve a single row no matter how many tags
       // render, and the wrapped rows would collide with the row below.
-      nodeTagTypes={["raw", "status", "team", "person", "company", "alert"]}
+      nodeTagTypes={LEVEL_TAG_COLUMNS}
       renderNode={(node, ctx) => (
         <F0GraphNode
           {...ctx}
           avatar={{ type: "team", name: node.data.name }}
           title={node.data.name}
           subtitle={node.data.kind === "role" ? "Role" : undefined}
-          tags={node.data.headcount ? levelTags(node.data) : undefined}
+          tags={
+            node.data.kind === "role"
+              ? catalogRoleTags(
+                  node.data.name,
+                  LEVELS_BY_ROLE[node.data.name] ?? []
+                )
+              : catalogLevelTags(node.data)
+          }
+          tagLabels={LEVEL_TAG_LABELS}
         />
       )}
     />
