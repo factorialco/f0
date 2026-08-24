@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.50.0](https://github.com/factorialco/f0/compare/f0-react-v6.49.1...f0-react-v6.50.0) (2026-08-24)
+
+
+### Features
+
+* **F0ENPSButton:** add experimental eNPS scale to Home ([#5215](https://github.com/factorialco/f0/issues/5215)) ([8e2d9cf](https://github.com/factorialco/f0/commit/8e2d9cfbb772dcdb633d478ab693b497a1fe1070))
+
 ## [6.49.1](https://github.com/factorialco/f0/compare/f0-react-v6.49.0...f0-react-v6.49.1) (2026-08-24)
 
 
