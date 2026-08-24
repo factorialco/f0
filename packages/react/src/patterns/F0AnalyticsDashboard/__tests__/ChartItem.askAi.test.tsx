@@ -9,6 +9,8 @@ import {
 } from "@/testing/test-utils"
 
 import type {
+  F0DataChartAreaSelection,
+  F0DataChartAreaSelectionConfig,
   F0DataChartPointClick,
   F0DataChartProps,
 } from "@/kits/F0DataChart"
@@ -21,12 +23,39 @@ import type { DashboardChartItem } from "../types"
 import type { F0AnalyticsDashboardPointClick } from "../types"
 
 import {
+  buildAreaQuoteText,
+  buildAccessibleAreaSelectionActions,
   buildPointQuoteText,
   buildAccessibleChartPoints,
   buildChartProps,
   ChartItem,
   hasAccessibleChartPoint,
 } from "../components/ChartItem/ChartItem"
+
+const AREA_SELECTION: F0DataChartAreaSelection = {
+  source: "pointer",
+  totalPointCount: 2,
+  points: [
+    {
+      seriesName: "Male",
+      category: "Barcelona office",
+      value: 18,
+      values: [18],
+      series: [{ name: "Male", seriesIndex: 0, value: 18 }],
+      dataIndex: 0,
+      seriesIndex: 0,
+    },
+    {
+      seriesName: "Female",
+      category: "Barcelona office",
+      value: 22,
+      values: [22],
+      series: [{ name: "Female", seriesIndex: 1, value: 22 }],
+      dataIndex: 0,
+      seriesIndex: 1,
+    },
+  ],
+}
 
 /** The mark a click lands on, as `usePointClick` would report it. */
 const POINT: F0DataChartPointClick = {
@@ -50,12 +79,41 @@ vi.mock("@/kits/F0DataChart", async (importOriginal) => {
     ...actual,
     F0DataChart: ({
       onPointClick,
+      areaSelection,
     }: {
       onPointClick?: (point: F0DataChartPointClick) => void
+      areaSelection?: F0DataChartAreaSelectionConfig
     }) => (
-      <button type="button" onClick={() => onPointClick?.(POINT)}>
-        mark
-      </button>
+      <>
+        <button type="button" onClick={() => onPointClick?.(POINT)}>
+          mark
+        </button>
+        {areaSelection && (
+          <>
+            <button
+              type="button"
+              onClick={() => areaSelection.onSelect(AREA_SELECTION)}
+            >
+              draw area
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                areaSelection.onSelect({
+                  source: "pointer",
+                  points: [],
+                  totalPointCount: 0,
+                })
+              }
+            >
+              draw empty area
+            </button>
+            <button type="button" onClick={areaSelection.onCancel}>
+              cancel drawing
+            </button>
+          </>
+        )}
+      </>
     ),
   }
 })
@@ -602,6 +660,165 @@ describe("ChartItem — asking about a mark", () => {
         screen.queryByRole("button", { name: "Ask One" })
       ).not.toBeInTheDocument()
     )
+  })
+})
+
+describe("ChartItem — asking about a drawn area", () => {
+  const startDrawing = async () => {
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Select chart area" })
+    )
+  }
+
+  it("hands the host the bounded data selection", async () => {
+    const onAskAi = vi.fn()
+    render(<ChartItem item={item} filters={{}} onAskAi={onAskAi} />)
+
+    await startDrawing()
+    expect(
+      screen.getByRole("button", { name: "Select chart area" })
+    ).toHaveAttribute("aria-pressed", "true")
+    await userEvent.click(screen.getByRole("button", { name: "draw area" }))
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by workplace",
+      selection: AREA_SELECTION,
+    })
+    expect(
+      screen.getByRole("button", { name: "Select chart area" })
+    ).toHaveAttribute("aria-pressed", "false")
+  })
+
+  it("quotes selected values in the built-in composer without sending", async () => {
+    const onFullscreenChange = vi.fn()
+    render(
+      <AiChatStateProvider enabled>
+        <ChatProbe />
+        <ChartItem
+          item={item}
+          filters={{}}
+          isFullscreen
+          onFullscreenChange={onFullscreenChange}
+        />
+      </AiChatStateProvider>
+    )
+
+    await startDrawing()
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Draw around data, or choose data points. Press Esc to cancel."
+    )
+    await userEvent.click(screen.getByRole("button", { name: "draw area" }))
+
+    expect(screen.getByTestId("probe")).toHaveAttribute(
+      "data-quote",
+      "Headcount by workplace — Selected chart area\nBarcelona office — Male: 18\nBarcelona office — Female: 22"
+    )
+    expect(screen.getByTestId("probe")).toHaveAttribute("data-open", "true")
+    expect(screen.getByRole("textbox", { name: "Chat question" })).toHaveFocus()
+    expect(onFullscreenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("keeps selection mode active when the drawing contains no points", async () => {
+    render(
+      <AiChatStateProvider enabled>
+        <ChartItem item={item} filters={{}} />
+      </AiChatStateProvider>
+    )
+
+    await startDrawing()
+    await userEvent.click(
+      screen.getByRole("button", { name: "draw empty area" })
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "No data points selected. Draw around at least one point."
+    )
+    expect(
+      screen.getByRole("button", { name: "Select chart area" })
+    ).toBeInTheDocument()
+  })
+
+  it("offers a non-drag multi-select path with the same host contract", async () => {
+    const onAskAi = vi.fn()
+    render(<ChartItem item={item} filters={{}} onAskAi={onAskAi} />)
+
+    await startDrawing()
+    await userEvent.click(
+      screen.getByRole("button", { name: "Choose data points" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitemcheckbox", {
+        name: "Headcount by workplace — Barcelona office, Male: 18",
+      })
+    )
+    await userEvent.click(
+      screen.getByRole("menuitem", {
+        name: "Use selected data points (1)",
+      })
+    )
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by workplace",
+      selection: {
+        source: "control",
+        totalPointCount: 1,
+        points: [AREA_SELECTION.points[0]],
+      },
+    })
+  })
+
+  it("expands line categories into the same per-series area points as drawing", () => {
+    expect(
+      buildAccessibleAreaSelectionActions("Revenue", {
+        type: "line",
+        categories: ["Jan"],
+        series: [
+          { name: "Actual", data: [10] },
+          { name: "Target", data: [12] },
+        ],
+      }).map(({ point }) => point)
+    ).toEqual([
+      expect.objectContaining({
+        seriesName: "Actual",
+        seriesIndex: 0,
+        value: 10,
+      }),
+      expect.objectContaining({
+        seriesName: "Target",
+        seriesIndex: 1,
+        value: 12,
+      }),
+    ])
+  })
+
+  it("bounds the composer quote independently from the selection payload", () => {
+    const selection: F0DataChartAreaSelection = {
+      ...AREA_SELECTION,
+      points: Array.from({ length: 20 }, (_, index) => ({
+        ...AREA_SELECTION.points[0],
+        category: `Office ${index + 1}`,
+        dataIndex: index,
+      })),
+      totalPointCount: 27,
+    }
+
+    expect(
+      buildAreaQuoteText(
+        item.title,
+        {
+          type: "bar",
+          categories: [],
+          series: [],
+        },
+        selection,
+        {
+          heading: "Selected chart area",
+          more: "{{count}} more selected values",
+        }
+      )
+    ).toContain("7 more selected values")
   })
 })
 

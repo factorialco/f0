@@ -19,6 +19,11 @@ import {
   tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
+import {
+  barMainSeriesId,
+  barStackTotalSeriesId,
+  barTargetSeriesId,
+} from "../../utils/seriesIds"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useFontsReady } from "../../utils/useFontsReady"
@@ -516,6 +521,7 @@ function buildSeriesEntries(
   const borderRadius = barCornerRadius(isVertical, false)
 
   const mainSeries: echarts.BarSeriesOption = {
+    id: barMainSeriesId(index),
     name: series.name,
     type: "bar",
     data: mainData,
@@ -605,6 +611,7 @@ function buildSeriesEntries(
   })
 
   const targetSeries: echarts.BarSeriesOption = {
+    id: barTargetSeriesId(index),
     name: `${series.name} (target)`,
     type: "bar",
     data: targetData,
@@ -773,6 +780,7 @@ function buildStackTotalSeries(
   valueFormatter?: (value: number) => string
 ): echarts.BarSeriesOption {
   return {
+    id: barStackTotalSeriesId,
     name: STACK_TOTAL_SERIES_NAME,
     type: "bar",
     stack: "stacked",

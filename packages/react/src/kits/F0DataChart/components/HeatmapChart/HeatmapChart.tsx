@@ -6,6 +6,7 @@ import type { F0DataChartHeatmapProps } from "../../types"
 
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
+import { useAreaSelection } from "../../utils/useAreaSelection"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
@@ -19,7 +20,11 @@ export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
   const size = resolveChartSize(width)
   const options = useHeatmapChartOptions(ref, props, size)
   const chartRef = useEChartsInstance(ref, options)
-  usePointClick(chartRef, props.onPointClick)
+  useAreaSelection(chartRef, props, options)
+  usePointClick(
+    chartRef,
+    props.areaSelection?.active ? undefined : props.onPointClick
+  )
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
 

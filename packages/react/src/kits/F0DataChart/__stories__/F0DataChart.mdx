@@ -10,6 +10,7 @@ import * as ScatterStories from "./Scatter.stories"
 import * as SkeletonsStories from "./Skeletons.stories"
 import * as EmptyStatesStories from "./EmptyStates.stories"
 import * as PointClickStories from "./PointClick.stories"
+import * as AreaSelectionStories from "./AreaSelection.stories"
 
 <Meta title="F0DataChart/Overview" />
 
@@ -441,6 +442,69 @@ no legend, and heatmap uses a visual scale rather than an interactive legend,
 so neither variant accepts this prop.
 
 <Canvas of={PointClickStories.LegendSelectionChanges} />
+
+### Area selection
+
+Bar, line, heatmap, and scatter charts accept a controlled `areaSelection`
+configuration. Set `active` after a host action, then handle the real chart
+data contained by the completed polygon in `onSelect`. A polygon is a path
+gesture, so every integration must render
+`F0DataChartAccessibleAreaSelectionActions` while the mode is active. That
+companion checkbox menu provides the equivalent keyboard, touch, and
+single-pointer path and submits the same point contract with `source: "control"`.
+
+```tsx
+<div className="relative">
+  <F0DataChart
+    type="bar"
+    categories={categories}
+    series={series}
+    areaSelection={{
+      active: isSelecting,
+      onSelect: ({ points, totalPointCount }) => {
+        attachChartSelection({ points, totalPointCount })
+        setIsSelecting(false)
+      },
+      onCancel: () => setIsSelecting(false),
+    }}
+  />
+  {isSelecting && (
+    <F0DataChartAccessibleAreaSelectionActions
+      actions={accessibleActions}
+      label="Choose data points"
+      submitLabel="Use selected data points ({{count}})"
+      previousLabel="Previous data points"
+      nextLabel="Next data points"
+      resetOn={data}
+      onSubmit={(points) => {
+        attachChartSelection({
+          source: "control",
+          points: points.slice(0, 100),
+          totalPointCount: points.length,
+        })
+        setIsSelecting(false)
+      }}
+    />
+  )}
+</div>
+```
+
+The payload carries at most 100 points and reports the uncapped
+`totalPointCount`, so consumers can disclose truncation without creating an
+unbounded prompt or analytics event. F0 uses ECharts coordinates and selected
+series indexes; it does not infer values from canvas pixels or surrounding DOM
+text. Hidden legend series are excluded. Pressing <kbd>Escape</kbd> calls
+`onCancel`.
+
+<Canvas of={AreaSelectionStories.PolygonSelection} />
+
+- WHEN `active` is false or `areaSelection` is omitted → THEN ordinary chart pointer interactions remain unchanged.
+- WHEN the reader completes a polygon → THEN `onSelect` receives only real data points contained by that polygon.
+- WHEN the reader cannot or does not want to draw a path → THEN the companion checkbox menu selects and submits the same data points without a drag gesture.
+- WHEN the polygon contains no points → THEN the callback receives an empty `points` array and the host decides whether selection remains active.
+- WHEN more than 100 points are selected → THEN `points` is capped at 100 and `totalPointCount` reports the full count.
+- WHEN the reader presses <kbd>Escape</kbd> → THEN `onCancel` is called.
+- WHEN a chart uses a non-cartesian coordinate system → THEN area selection is not exposed on that variant.
 
 ### Value & Category Formatters
 

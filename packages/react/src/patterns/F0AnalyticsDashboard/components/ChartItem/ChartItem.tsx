@@ -3,7 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { IconType } from "@/components/F0Icon"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
-import type { F0DataChartProps } from "@/kits/F0DataChart"
+import type {
+  F0DataChartAccessibleAreaSelectionAction,
+  F0DataChartAreaSelection,
+  F0DataChartAreaSelectionPoint,
+  F0DataChartProps,
+} from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -15,9 +20,14 @@ import {
   ChartLine,
   ChartPie,
   ChartVerticalBars,
+  Pencil,
   Table as TableIcon,
 } from "@/icons/app"
-import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
+import {
+  DataChartEmptyStateView,
+  F0DataChart,
+  F0DataChartAccessibleAreaSelectionActions,
+} from "@/kits/F0DataChart"
 import { tooltipValueFormat } from "@/kits/F0DataChart/utils/options"
 import {
   BarChartSkeleton,
@@ -194,6 +204,71 @@ export function buildPointQuoteText(
   const label = point.seriesName ? `${point.seriesName}: ` : ""
 
   return `${heading}\n${label}${formatPointValue(chart, point.value)}`
+}
+
+const MAX_QUOTED_SELECTION_POINTS = 20
+
+function buildAreaPointQuoteText(
+  chart: F0DataChartProps,
+  point: F0DataChartAreaSelectionPoint
+): string {
+  if (chart.type === "scatter" && point.values.length >= 2) {
+    const xLabel = chart.xAxisName ?? "X"
+    const yLabel = chart.yAxisName ?? "Y"
+    const identity = [point.category, point.seriesName]
+      .filter(Boolean)
+      .join(" — ")
+    const values = `${xLabel}: ${formatPointValue(chart, point.values[0], "x")}; ${yLabel}: ${formatPointValue(chart, point.values[1])}`
+    return identity ? `${identity} — ${values}` : values
+  }
+
+  if (chart.type === "heatmap" && point.values.length >= 3) {
+    const xCategory = chart.xCategories[point.values[0]]
+    const yCategory = chart.yCategories[point.values[1]]
+    const identity = [yCategory, xCategory].filter(Boolean).join(" — ")
+    const value = formatPointValue(chart, point.value)
+    return identity ? `${identity}: ${value}` : value
+  }
+
+  const category =
+    "categoryFormatter" in chart && chart.categoryFormatter
+      ? chart.categoryFormatter(point.category)
+      : point.category
+  const identity = [category, point.seriesName].filter(Boolean).join(" — ")
+  const value = formatPointValue(chart, point.value)
+  return identity ? `${identity}: ${value}` : value
+}
+
+/** @internal Exported for focused quote-contract tests. */
+export function buildAreaQuoteText(
+  title: string,
+  chart: F0DataChartProps,
+  selection: F0DataChartAreaSelection,
+  labels: { heading: string; more: string }
+): string {
+  const rows = selection.points
+    .slice(0, MAX_QUOTED_SELECTION_POINTS)
+    .map((point) => buildAreaPointQuoteText(chart, point))
+  const hiddenCount = Math.max(
+    0,
+    selection.totalPointCount - MAX_QUOTED_SELECTION_POINTS
+  )
+  if (hiddenCount > 0) {
+    rows.push(labels.more.replace("{{count}}", String(hiddenCount)))
+  }
+
+  return `${title} — ${labels.heading}\n${rows.join("\n")}`
+}
+
+type AreaSelectableChartProps = Extract<
+  F0DataChartProps,
+  { type: "bar" | "line" | "heatmap" | "scatter" }
+>
+
+function isAreaSelectableChart(
+  chart: F0DataChartProps
+): chart is AreaSelectableChartProps {
+  return ["bar", "line", "heatmap", "scatter"].includes(chart.type)
 }
 
 type AccessibleChartPoint = {
@@ -381,6 +456,44 @@ export function buildAccessibleChartPoints(
         })
       })
   }
+}
+
+/** @internal Exported for the non-drag selection contract tests. */
+export function buildAccessibleAreaSelectionActions(
+  title: string,
+  chart: AreaSelectableChartProps,
+  selected: Record<string, boolean> = {}
+): F0DataChartAccessibleAreaSelectionAction[] {
+  return buildAccessibleChartPoints(chart, selected).flatMap(({ key, point }) =>
+    point.series.map((series) => {
+      const areaPoint: F0DataChartAreaSelectionPoint = {
+        seriesName: series.name,
+        category: point.category,
+        value: series.value,
+        values:
+          chart.type === "scatter" || chart.type === "heatmap"
+            ? point.values
+            : [series.value],
+        series: [series],
+        dataIndex: point.dataIndex,
+        seriesIndex: series.seriesIndex,
+      }
+      const pointForLabel: F0AnalyticsDashboardPointClick = {
+        ...areaPoint,
+        source: "keyboard",
+        clientX: 0,
+        clientY: 0,
+      }
+
+      return {
+        key: `${key}-${series.seriesIndex}`,
+        label: buildPointQuoteText(title, chart, pointForLabel)
+          .split("\n")
+          .join(", "),
+        point: areaPoint,
+      }
+    })
+  )
 }
 
 /** @internal Exported for keyboard-surface contract tests. */
@@ -847,6 +960,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
    */
   const [pickedPoint, setPickedPoint] =
     useState<F0AnalyticsDashboardPointClick | null>(null)
+  const [isAreaSelectionActive, setIsAreaSelectionActive] = useState(false)
+  const [areaSelectionMessage, setAreaSelectionMessage] = useState(
+    translations.ai.dashboardItem.chartAreaSelectionHint
+  )
   const [legendSelection, setLegendSelection] = useState<
     Record<string, boolean> | undefined
   >()
@@ -876,8 +993,18 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // rebuilt on every parent render even when their semantics are unchanged.
   useEffect(() => {
     setPickedPoint(null)
+    setIsAreaSelectionActive(false)
+    setAreaSelectionMessage(
+      translations.ai.dashboardItem.chartAreaSelectionHint
+    )
     setLegendSelection(undefined)
-  }, [data, isLoading, safeChart.type])
+  }, [
+    data,
+    isLoading,
+    safeChart.type,
+    viewMode,
+    translations.ai.dashboardItem.chartAreaSelectionHint,
+  ])
 
   const pointAskOwner = onAskAi ? "host" : aiEnabled ? "chat" : "none"
   const canAskAboutPoint =
@@ -888,6 +1015,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // or leave a dead popover behind.
   useEffect(() => {
     setPickedPoint(null)
+    setIsAreaSelectionActive(false)
   }, [pointAskOwner])
 
   const handleAskAboutPoint = useCallback(
@@ -935,6 +1063,54 @@ export function ChartItem<Filters extends FiltersDefinition>({
     ]
   )
 
+  const handleAreaSelection = useCallback(
+    (selection: F0DataChartAreaSelection) => {
+      if (!chartProps || !isAreaSelectableChart(chartProps)) return
+      if (selection.totalPointCount === 0) {
+        setAreaSelectionMessage(
+          translations.ai.dashboardItem.emptyChartAreaSelection
+        )
+        return
+      }
+
+      if (onAskAi) {
+        onAskAi({ id: item.id, title: item.title, selection })
+        setIsAreaSelectionActive(false)
+        return
+      }
+
+      setPendingQuote({
+        text: buildAreaQuoteText(item.title, chartProps, selection, {
+          heading: translations.ai.dashboardItem.selectedChartArea,
+          more: translations.ai.dashboardItem.moreSelectedValues,
+        }),
+      })
+      if (isFullscreen) onFullscreenChange?.(false)
+      setAiChatOpen(true)
+      focusChatInput()
+      setIsAreaSelectionActive(false)
+    },
+    [
+      chartProps,
+      translations,
+      onAskAi,
+      item,
+      setPendingQuote,
+      isFullscreen,
+      onFullscreenChange,
+      setAiChatOpen,
+      focusChatInput,
+    ]
+  )
+
+  const toggleAreaSelection = useCallback(() => {
+    setPickedPoint(null)
+    setAreaSelectionMessage(
+      translations.ai.dashboardItem.chartAreaSelectionHint
+    )
+    setIsAreaSelectionActive((active) => !active)
+  }, [translations.ai.dashboardItem.chartAreaSelectionHint])
+
   const CHART_TYPE_OPTIONS = useMemo(
     () => buildChartTypeOptions(translations),
     [translations]
@@ -975,6 +1151,20 @@ export function ChartItem<Filters extends FiltersDefinition>({
           )
         : [],
     [chartProps, item.title, legendSelection, handleAskAboutPoint]
+  )
+
+  const accessibleAreaSelectionActions = useMemo<
+    F0DataChartAccessibleAreaSelectionAction[]
+  >(
+    () =>
+      chartProps && isAreaSelectableChart(chartProps)
+        ? buildAccessibleAreaSelectionActions(
+            item.title,
+            chartProps,
+            legendSelection
+          )
+        : [],
+    [chartProps, item.title, legendSelection]
   )
 
   const dismissPointAction = useCallback(
@@ -1149,6 +1339,19 @@ export function ChartItem<Filters extends FiltersDefinition>({
       isFullscreen={isFullscreen}
       fitContent={fitContent}
       onFullscreenChange={onFullscreenChange}
+      headerAction={
+        chartProps &&
+        isAreaSelectableChart(chartProps) &&
+        canAskAboutPoint &&
+        viewMode === "chart"
+          ? {
+              label: translations.ai.dashboardItem.selectChartArea,
+              icon: Pencil,
+              pressed: isAreaSelectionActive,
+              onClick: toggleAreaSelection,
+            }
+          : undefined
+      }
     >
       {data && chartProps ? (
         viewMode === "table" ? (
@@ -1160,13 +1363,24 @@ export function ChartItem<Filters extends FiltersDefinition>({
           >
             <F0DataChart
               {...chartProps}
+              {...(isAreaSelectableChart(chartProps)
+                ? {
+                    areaSelection: {
+                      active: isAreaSelectionActive,
+                      onSelect: handleAreaSelection,
+                      onCancel: () => setIsAreaSelectionActive(false),
+                    },
+                  }
+                : {})}
               {...(chartProps.type !== "gauge" && chartProps.type !== "heatmap"
                 ? { onLegendSelectionChange: setLegendSelection }
                 : {})}
               // Something has to be able to answer the click: the host, or
               // failing that a mounted chat.
               onPointClick={
-                canAskAboutPoint ? (point) => setPickedPoint(point) : undefined
+                canAskAboutPoint && !isAreaSelectionActive
+                  ? (point) => setPickedPoint(point)
+                  : undefined
               }
               // Windowing rows is only offered where the reader can get them
               // back: this widget puts the count and a "show all" link in its
@@ -1186,8 +1400,39 @@ export function ChartItem<Filters extends FiltersDefinition>({
               // category at a fixed row height, growing the widget.
               {...(fitContent ? { showAllCategories: true } : {})}
             />
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className={
+                isAreaSelectionActive
+                  ? "pointer-events-none absolute left-6 top-5 z-10 max-w-[calc(100%-3rem)] rounded bg-f1-background-inverse px-2 py-1 text-sm font-medium text-f1-foreground-inverse shadow-sm"
+                  : "sr-only"
+              }
+            >
+              {isAreaSelectionActive ? areaSelectionMessage : ""}
+            </div>
+            {isAreaSelectionActive && (
+              <F0DataChartAccessibleAreaSelectionActions
+                actions={accessibleAreaSelectionActions}
+                label={translations.ai.dashboardItem.chooseChartDataPoints}
+                submitLabel={
+                  translations.ai.dashboardItem.useSelectedChartDataPoints
+                }
+                previousLabel={translations.navigation.previous}
+                nextLabel={translations.navigation.next}
+                resetOn={data}
+                onSubmit={(points) =>
+                  handleAreaSelection({
+                    source: "control",
+                    points: points.slice(0, 100),
+                    totalPointCount: points.length,
+                  })
+                }
+              />
+            )}
             <AccessiblePointActions
-              hasActions={hasAccessiblePointActions}
+              hasActions={hasAccessiblePointActions && !isAreaSelectionActive}
               getActions={getAccessiblePointActions}
               resetOn={{
                 data,
@@ -1196,6 +1441,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
                 legendSelection,
                 owner: pointAskOwner,
                 title: item.title,
+                areaSelectionActive: isAreaSelectionActive,
               }}
               label={translations.ai.dashboardItem.askOne}
               triggerLabel={`${translations.ai.dashboardItem.askOne}: ${item.title}`}

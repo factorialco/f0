@@ -216,6 +216,46 @@ no pointer position to anchor to.
 - WHEN the chart moves because of scrolling or resizing, or the reader presses <kbd>Escape</kbd> or clicks elsewhere → THEN the anchored action closes.
 - WHEN a screen reader reaches the point action → THEN its trigger is named **Ask One: _chart title_** and each menu item exposes the complete formatted point context.
 
+### Ask One from a chart area
+
+Bar, line, heatmap, and scatter widgets add **Select chart area** when an AI
+chat or host `onAskAi` handler is available. Activating it lets the reader
+either draw around chart data or choose exact data points from a checkbox menu.
+Both paths attach the selected values to the composer; neither sends a message,
+so the reader can add a question such as “What happened here?” first.
+
+<Canvas of={AskOneStories.ChartAreaSelectionMode} />
+
+For keyboard, touch, or single-pointer selection without dragging, choose
+**Choose data points**, toggle one or more values, then choose **Use selected
+data points**.
+
+<Canvas of={AskOneStories.ChartAreaSelectionControls} />
+
+The host-owned callback receives the bounded raw selection as `selection`.
+`selection.points` contains at most 100 real chart data points and
+`selection.totalPointCount` carries the uncapped count. `point` and `selection`
+are mutually exclusive. `selection.source` is `"pointer"` for a drawing and
+`"control"` for the checkbox path.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAi={({ id, title, selection }) => {
+    openProductChat({ widgetId: id, quote: title, selection })
+  }}
+/>
+```
+
+- WHEN selection mode starts → THEN the stable toggle name announces its pressed state and a persistent live region explains the drawing, checkbox, and cancellation paths.
+- WHEN the completed polygon contains data → THEN the built-in behavior exits fullscreen, attaches a bounded formatted quote, opens chat, and focuses the composer without sending.
+- WHEN one or more values are confirmed through **Choose data points** → THEN the same bounded quote or host callback runs without requiring a dragging gesture.
+- WHEN `onAskAi` owns the action → THEN it receives the widget identity and raw selection without changing built-in chat state.
+- WHEN the completed polygon contains no data → THEN selection remains active and the status asks the reader to draw around at least one point.
+- WHEN the reader presses <kbd>Escape</kbd> or chooses the active toggle → THEN selection mode closes without attaching anything.
+- WHEN data, loading state, chart type, or responder ownership changes → THEN any in-progress drawing is cancelled so it cannot resolve against stale data.
+- WHEN a widget uses pie, funnel, radar, or gauge → THEN no area-selection action is shown because those coordinate systems cannot produce the same exact data contract.
+
 ### Report filters
 
 Report filters are one applied state shared by every participating item. Pass `filtersValue` with `onFiltersChange` to own that state — for example to hydrate a saved report and persist each committed change — or pass only `defaultFilters` to let the dashboard own it.
@@ -308,13 +348,20 @@ The filter bar remains usable when valid report filters return empty chart data.
         <td>
           <kbd>Enter</kbd> / <kbd>Space</kbd>
         </td>
-        <td>Opens controls and activates focused filter options or actions.</td>
+        <td>
+          Opens controls, activates focused filter options or actions, toggles a
+          **Choose data points** checkbox, and confirms **Use selected data
+          points**.
+        </td>
       </tr>
       <tr>
         <td>
           <kbd>Escape</kbd>
         </td>
-        <td>Closes the filter dialog or an anchored chart-point action.</td>
+        <td>
+          Closes the filter dialog, an anchored chart-point action, or active
+          chart-area selection.
+        </td>
       </tr>
       <tr>
         <td>

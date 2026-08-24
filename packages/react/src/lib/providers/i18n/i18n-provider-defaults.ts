@@ -462,6 +462,15 @@ export const defaultTranslations = {
        * out, so it owns its own key.
        */
       askOne: "Ask One",
+      selectChartArea: "Select chart area",
+      chartAreaSelectionHint:
+        "Draw around data, or choose data points. Press Esc to cancel.",
+      emptyChartAreaSelection:
+        "No data points selected. Draw around at least one point.",
+      chooseChartDataPoints: "Choose data points",
+      useSelectedChartDataPoints: "Use selected data points ({{count}})",
+      selectedChartArea: "Selected chart area",
+      moreSelectedValues: "{{count}} more selected values",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",

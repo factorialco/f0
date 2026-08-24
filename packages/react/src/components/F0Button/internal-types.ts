@@ -27,6 +27,8 @@ export type ButtonInternalProps = Pick<
      * The aria-label of the button if not provided title or label will be used.
      */
     "aria-label"?: string
+    /** Announces the state of a toggle button. */
+    "aria-pressed"?: React.AriaAttributes["aria-pressed"]
     /**
      * Forwarded to the underlying button. Useful for buttons that toggle an
      * expandable region (e.g. a tree/graph expander).

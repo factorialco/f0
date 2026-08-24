@@ -99,6 +99,13 @@ interface DashboardItemProps {
   fitContent?: boolean
   /** Called when the user toggles fullscreen from the dropdown */
   onFullscreenChange?: (fullscreen: boolean) => void
+  /** Optional context-specific action rendered before the fullscreen control. */
+  headerAction?: {
+    label: string
+    icon: IconType
+    pressed?: boolean
+    onClick: () => void
+  }
 }
 
 /**
@@ -129,6 +136,7 @@ export function DashboardItem({
   descriptionAction,
   fitContent = false,
   onFullscreenChange,
+  headerAction,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const shouldFocusChatAfterMenuRef = useRef(false)
@@ -359,6 +367,19 @@ export function DashboardItem({
               `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`
           )}
         >
+          {headerAction && (
+            <ButtonInternal
+              label={headerAction.label}
+              icon={headerAction.icon}
+              variant="ghost"
+              size="md"
+              hideLabel
+              compact
+              pressed={headerAction.pressed}
+              aria-pressed={headerAction.pressed}
+              onClick={headerAction.onClick}
+            />
+          )}
           {hasFullscreen && (
             <ButtonInternal
               label={

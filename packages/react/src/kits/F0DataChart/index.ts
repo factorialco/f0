@@ -2,10 +2,17 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { F0DataChart as _F0DataChart } from "./F0DataChart"
 
+export {
+  F0DataChartAccessibleAreaSelectionActions,
+  type F0DataChartAccessibleAreaSelectionAction,
+} from "./components/AccessibleAreaSelectionActions"
 export type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
   F0DataChartBarSeries,
+  F0DataChartAreaSelection,
+  F0DataChartAreaSelectionConfig,
+  F0DataChartAreaSelectionPoint,
   F0DataChartEmptyStateProps,
   F0DataChartFunnelDataPoint,
   F0DataChartFunnelProps,

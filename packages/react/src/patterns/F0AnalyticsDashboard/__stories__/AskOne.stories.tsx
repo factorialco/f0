@@ -103,7 +103,6 @@ type Story = StoryObj<typeof meta>
  */
 export const WidgetMenuAction: Story = {
   render: () => <AskOneLayout />,
-  parameters: withSnapshot({}),
   play: async ({ canvasElement, step }) => {
     await step("Open the widget actions menu", async () => {
       const { menu } = await openAskOneMenu(canvasElement)
@@ -206,5 +205,126 @@ export const ChartPointFlow: Story = {
         await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
       }
     )
+  },
+}
+
+/**
+ * The chart-area action switches the chart into polygon drawing mode without
+ * opening or sending chat. Draw around one or more bars by hand to complete
+ * the flow and attach those exact values to the composer.
+ */
+export const ChartAreaSelectionMode: Story = {
+  tags: ["chart-area-selection"],
+  render: () => <AskOneLayout items={pointWidget} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Choose Select chart area, then draw around one or more bars. A completed non-empty selection appears as a quote in the focused composer, ready for the user's question.",
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Activate chart-area selection", async () => {
+      await userEvent.click(
+        await canvas.findByRole("button", { name: "Select chart area" })
+      )
+      await expect(
+        canvas.getByRole("button", { name: "Select chart area" })
+      ).toHaveAttribute("aria-pressed", "true")
+      await expect(canvas.getByRole("status")).toHaveTextContent(
+        "Draw around data, or choose data points. Press Esc to cancel."
+      )
+    })
+
+    await step("Draw around the bar and attach the exact value", async () => {
+      const chartCanvas = canvasElement.querySelector("canvas")
+      await expect(chartCanvas).toBeInTheDocument()
+      const { left, top, width, height } = chartCanvas!.getBoundingClientRect()
+      const point = (x: number, y: number) => {
+        const clientX = left + width * x
+        const clientY = top + height * y
+        return {
+          target: chartCanvas!,
+          coords: {
+            x: clientX,
+            y: clientY,
+            clientX,
+            clientY,
+            offsetX: width * x,
+            offsetY: height * y,
+          },
+        }
+      }
+
+      await userEvent.pointer([
+        { ...point(0.05, 0.05), keys: "[MouseLeft>]" },
+        point(0.95, 0.05),
+        point(0.95, 0.95),
+        point(0.05, 0.95),
+        { ...point(0.05, 0.05), keys: "[/MouseLeft]" },
+      ])
+
+      await expect(
+        await canvas.findByRole("button", { name: "Remove quote" })
+      ).toBeInTheDocument()
+      await expect(
+        canvas.getByText(
+          "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
+        )
+      ).toBeInTheDocument()
+      await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
+      await expect(
+        canvas.getByRole("button", { name: "Select chart area" })
+      ).toHaveAttribute("aria-pressed", "false")
+    })
+  },
+}
+
+/**
+ * Checkbox selection is the keyboard, touch, and single-pointer equivalent of
+ * drawing a polygon. It resolves through the same quote contract.
+ */
+export const ChartAreaSelectionControls: Story = {
+  tags: ["chart-area-selection"],
+  render: () => <AskOneLayout items={pointWidget} />,
+  parameters: withSnapshot({}),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Open the non-drag data-point selector", async () => {
+      await userEvent.click(
+        await canvas.findByRole("button", { name: "Select chart area" })
+      )
+      await userEvent.click(
+        await canvas.findByRole("button", { name: "Choose data points" })
+      )
+    })
+
+    await step("Choose one point and attach it to chat", async () => {
+      const page = within(canvasElement.ownerDocument.body)
+      await userEvent.click(
+        await page.findByRole("menuitemcheckbox", {
+          name: "Headcount by Department — Engineering, Headcount: 145 people",
+        })
+      )
+      await userEvent.click(
+        page.getByRole("menuitem", {
+          name: "Use selected data points (1)",
+        })
+      )
+
+      await expect(
+        await canvas.findByRole("button", { name: "Remove quote" })
+      ).toBeInTheDocument()
+      await expect(
+        canvas.getByText(
+          "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
+        )
+      ).toBeInTheDocument()
+      await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
+    })
   },
 }
