@@ -16,6 +16,7 @@ import type { CarouselPaging } from "@/ui/carousel"
 
 import { F0Dialog } from "../F0Dialog"
 import type { F0DialogInternalProps } from "../F0Dialog/internal-types"
+import { useIsSmallScreen } from "../F0Dialog/utils"
 
 /** One page of the dialog. */
 export interface F0CarouselDialogItem {
@@ -39,6 +40,7 @@ export interface F0CarouselDialogProps extends Pick<
   | "isOpen"
   | "onClose"
   | "width"
+  | "position"
   | "primaryAction"
   | "secondaryAction"
   | "otherActions"
@@ -170,6 +172,20 @@ const F0CarouselDialogComponent = ({
   onClose,
   ...dialogProps
 }: F0CarouselDialogProps) => {
+  /**
+   * FULLSCREEN ON A PHONE, not a bottom sheet.
+   *
+   * A sheet is for a short, self-contained thing you dismiss by flicking down —
+   * a picker, a confirmation. This is a set you WALK, one whole page at a time,
+   * and each page is a post: half a screen of it under a drag handle turns
+   * reading into scrolling inside a scroll. Taking the whole screen also gives
+   * the paging bar somewhere to live that isn't on top of the content.
+   *
+   * The sheet's own gesture would fight the walk, too: a downward swipe on a
+   * page you are reading closes the dialog rather than moving through it.
+   */
+  const isSmallScreen = useIsSmallScreen()
+
   const foundIndex = items.findIndex((item) => item.id === currentId)
   // NOT clamped to 0. An id the dialog has never heard of is a page still on its
   // way, and answering it with `items[0]` shows a post nobody asked for.
@@ -399,6 +415,18 @@ const F0CarouselDialogComponent = ({
   return (
     <F0Dialog
       {...dialogProps}
+      // `width` only means anything to a centered or side dialog, and F0Dialog
+      // warns when it is handed one it cannot use.
+      width={isSmallScreen ? undefined : dialogProps.width}
+      position={isSmallScreen ? "fullscreen" : dialogProps.position}
+      asBottomSheetInMobile={false}
+      // FLUSH TO THE EDGES on a phone. The dialog IS the screen there, so the
+      // frame's own reading gutter is the second one the content sits behind —
+      // and a post's cover, which wants the full width, would stop short of it
+      // for no reason. The page it holds brings whatever padding it needs.
+      disableContentPadding={
+        isSmallScreen ? true : dialogProps.disableContentPadding
+      }
       isOpen={isOpen}
       onClose={onClose}
       title={shown.title}

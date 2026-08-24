@@ -25,7 +25,11 @@ const dialogWrapperClassName = cva({
       right: "left-auto right-0 items-end p-3",
       left: "left-0 items-start p-3",
       center: "",
-      fullscreen: "inset-6",
+      // NO INSET ON A PHONE. A fullscreen dialog inset by 24px is a card with
+      // the page showing round it; at 560px wide that gutter is most of what is
+      // left of the margins. `560px` is `useIsSmallScreen`'s own breakpoint, so
+      // the frame and the components inside it change over together.
+      fullscreen: "inset-6 max-[560px]:inset-0",
     },
   },
   defaultVariants: {
@@ -40,7 +44,8 @@ const dialogContentClassName = cva({
       sidePosition:
         "flex h-full w-full flex-col rounded-md border border-solid border-f1-border-secondary",
       center: "flex max-h-[95vh] flex-1 flex-col rounded-xl",
-      fullscreen: "h-full w-full rounded-xl",
+      // ...and no rounded corners with nothing to round them against.
+      fullscreen: "h-full w-full rounded-xl max-[560px]:rounded-none",
     },
     position: {
       left: "",
@@ -187,32 +192,47 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   // so React would tear the arrows down and rebuild them each time — losing
   // focus mid-interaction, and dropping a click between its own pointerdown and
   // mouseup because the node the press started on no longer exists.
+  /**
+   * ON A PHONE THE CONTROLS COME DOWN, into a bar across the bottom of the
+   * panel, rather than flanking it.
+   *
+   * There is nothing to flank: the dialog is the width of the screen, so
+   * "outside the panel" is off it. Floating them over the content instead —
+   * where a gallery puts them — costs the content two thumb-sized holes and puts
+   * the controls exactly where a thumb rests by accident. A bar is the phone
+   * idiom: fixed, reachable, and out of the reading.
+   *
+   * `sticky` rather than `absolute`, so it sits under the content in the flow
+   * and holds the bottom of a panel that scrolls.
+   */
+  const controlsInBar = isSmallScreen
+  const isFullscreenOnPhone = isSmallScreen && position === "fullscreen"
   const sideControlsSeat = "absolute top-1/2 z-10 -translate-y-1/2"
-  const sideControlsOnPanel = variant === "bottomSheet"
-  const renderedSideControls = sideControls ? (
+  const renderedSideControls = !sideControls ? null : controlsInBar ? (
+    <div
+      className={cn(
+        "sticky bottom-0 z-10 flex shrink-0 flex-row items-center justify-between gap-2",
+        "border border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
+        "bg-f1-background px-4 py-3"
+      )}
+    >
+      {sideControls.previous}
+      {sideControls.next}
+    </div>
+  ) : (
     <>
       {sideControls.previous ? (
-        <div
-          className={cn(
-            sideControlsSeat,
-            sideControlsOnPanel ? "left-2" : "-left-14"
-          )}
-        >
+        <div className={cn(sideControlsSeat, "-left-14")}>
           {sideControls.previous}
         </div>
       ) : null}
       {sideControls.next ? (
-        <div
-          className={cn(
-            sideControlsSeat,
-            sideControlsOnPanel ? "right-2" : "-right-14"
-          )}
-        >
+        <div className={cn(sideControlsSeat, "-right-14")}>
           {sideControls.next}
         </div>
       ) : null}
     </>
-  ) : null
+  )
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
@@ -226,11 +246,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
-            {renderedSideControls}
             <F0DialogHeader {...headerProps} />
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}
             </F0DialogContent>
+            {renderedSideControls}
             <F0DialogFooter
               primaryAction={primaryAction}
               secondaryAction={secondaryAction}
@@ -256,6 +276,18 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         <DialogContent
           ref={setContentRef}
           withTranslateAnimation={!isSidePosition}
+          // A PLAIN FADE once the dialog is the whole screen. The default entry
+          // zooms from 95% and slides down — motion that reads as a card
+          // arriving over a page, which is what it is on a desktop. On a phone
+          // the "card" is the screen, so the zoom is the screen itself lurching,
+          // and the bigger the surface the more that costs.
+          animation={isFullscreenOnPhone ? "fade" : "scale"}
+          // NOTHING LEFT TO DIM. The panel already covers the screen, so the
+          // only moment the overlay is ever visible is the fade itself — showing
+          // through a panel that is briefly semi-transparent, as a grey flash on
+          // the way in and again on the way out. It still mounts, because Radix
+          // hangs dismissal and the scroll lock off it; it just stops painting.
+          overlayClassName={isFullscreenOnPhone ? "bg-transparent" : undefined}
           wrapperClassName={dialogWrapperClassName({
             variant,
             position,
@@ -265,11 +297,12 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           container={containerProp}
           defaultContainerId={defaultContainerId}
         >
-          {renderedSideControls}
+          {controlsInBar ? null : renderedSideControls}
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>
             {children}
           </F0DialogContent>
+          {controlsInBar ? renderedSideControls : null}
           <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}
