@@ -16,6 +16,13 @@ import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
+import ApplicationFrameStories from "@/patterns/ApplicationFrame/index.stories"
+import {
   Building,
   Calendar,
   ChartVerticalBars,
@@ -1567,20 +1574,38 @@ const meta = {
   parameters: { layout: "fullscreen", docsFullWidth: true },
   decorators: [
     (Story, { parameters }) => (
-      <ApplicationFrame
-        // The frame's top row, outside the layout entirely: it takes real height
-        // off the content area, which is what the height probe is testing.
-        banner={parameters.frameBanner ? <FrameBanner /> : undefined}
-        sidebar={
-          <Sidebar
-            header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
-            body={<SidebarMenu {...SidebarMenuStories.Default.args} />}
-            footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
-          />
-        }
-      >
-        <Story />
-      </ApplicationFrame>
+      // The AI chat's own mock runtime, exactly as `ApplicationFrame`'s stories
+      // wire it: the panel the One switch opens has to hold A CHAT, and its
+      // header, transcript and composer are slots the app fills.
+      <MockAiChatRuntimeProvider>
+        <ApplicationFrame
+          // The frame's top row, outside the layout entirely: it takes real height
+          // off the content area, which is what the height probe is testing.
+          banner={parameters.frameBanner ? <FrameBanner /> : undefined}
+          // The One switch in the layout's top-right draws NOTHING unless the
+          // frame's AI chat is enabled — same as `DaytimePage`'s story. THE ONE
+          // THING IT OPENS is this chat: no panel content is ever pushed here,
+          // so the switch has nothing else to swap with.
+          ai={{
+            // THE SAME CHAT the frame's own story gives `HomeLayout` — its
+            // args, not a second configuration that can drift from them — with
+            // the mock header/transcript/composer filling the panel's slots.
+            ...ApplicationFrameStories.args.ai,
+            chatHeader: <MockConnectedChatHeader />,
+            chatMessages: <MockConnectedMessagesContainer />,
+            chatInput: <MockConnectedChatInput />,
+          }}
+          sidebar={
+            <Sidebar
+              header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
+              body={<SidebarMenu {...SidebarMenuStories.Default.args} />}
+              footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
+            />
+          }
+        >
+          <Story />
+        </ApplicationFrame>
+      </MockAiChatRuntimeProvider>
     ),
   ],
 } satisfies Meta<typeof NewHomeLayout>

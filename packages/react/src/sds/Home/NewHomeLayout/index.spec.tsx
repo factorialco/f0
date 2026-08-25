@@ -192,6 +192,24 @@ describe("NewHomeLayout", () => {
       expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
     })
 
+    test("names the collapse toggle with f0's tooltip, not a native title", async () => {
+      renderLayout(1400)
+
+      const toggle = screen.getByLabelText("Collapse widgets panel")
+      // The browser's own late, unstyled tooltip is gone — f0's is the name.
+      expect(toggle).not.toHaveAttribute("title")
+
+      await userEvent.hover(toggle)
+
+      expect(
+        await screen.findByRole(
+          "tooltip",
+          { name: /Collapse widgets panel/ },
+          { timeout: 3000 }
+        )
+      ).toBeInTheDocument()
+    })
+
     /**
      * Arranging is always available, so the chrome for it is on the widgets
      * themselves: the unlocked one carries a menu, the pinned one carries none.
