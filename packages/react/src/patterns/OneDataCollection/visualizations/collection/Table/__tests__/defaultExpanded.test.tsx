@@ -417,6 +417,100 @@ describe("TableCollection defaultExpanded", () => {
       )
       expect(screen.getByText("Junior")).toBeInTheDocument()
     })
+
+    it("re-fetches the full child set after a filter is applied then cleared", async () => {
+      const kids: Node[] = [
+        { id: "bcn", name: "Sales Barcelona", kind: "role" },
+        { id: "online", name: "Sales Online", kind: "role" },
+        { id: "reps", name: "Sales Representatives", kind: "role" },
+        { id: "valencia", name: "Sales Valencia", kind: "role" },
+      ]
+      const sales: Node = { id: "sales", name: "Sales", kind: "category" }
+      // A leaf team before Sales, filtered out when a filter is active — so the
+      // matching-only view shifts Sales' row index, exactly like the real list.
+      const design: Node = { id: "design", name: "Design", kind: "category" }
+
+      const hasFilter = (filters?: Record<string, unknown>) =>
+        !!filters && Object.keys(filters).length > 0
+
+      // Root and children both depend on the active filter, async like GraphQL.
+      const fetchChildren = vi.fn(
+        ({
+          item,
+          filters,
+        }: {
+          item: Node
+          filters?: Record<string, unknown>
+        }) =>
+          item.id === "sales"
+            ? Promise.resolve({
+                records: hasFilter(filters) ? [kids[2]] : kids,
+              })
+            : Promise.resolve({ records: [] })
+      )
+      const source = {
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+        itemsWithChildren: (item: Node) => item.id === "sales",
+        fetchChildren,
+        dataAdapter: {
+          paginationType: "pages",
+          fetchData: async ({
+            filters,
+          }: {
+            filters?: Record<string, unknown>
+          }) => {
+            const records = hasFilter(filters) ? [sales] : [design, sales]
+            return {
+              records,
+              type: "pages",
+              total: records.length,
+              perPage: 20,
+              currentPage: 1,
+              pagesCount: 1,
+            }
+          },
+        },
+      } as unknown as TestSource
+
+      const { rerender } = render(element(source))
+
+      await waitFor(() =>
+        expect(screen.getByText("Sales Valencia")).toBeInTheDocument()
+      )
+
+      // Apply a filter → only the matching sub-team remains, Sales moves up.
+      rerender(
+        element({
+          ...source,
+          currentFilters: { name: ["Samantha"] },
+        } as TestSource)
+      )
+      await waitFor(() =>
+        expect(screen.getByText("Sales Representatives")).toBeInTheDocument()
+      )
+      expect(screen.queryByText("Sales Valencia")).toBeNull()
+
+      // Clear the filter → the full set must come back, not the filtered subset.
+      rerender(element({ ...source, currentFilters: {} } as TestSource))
+      await waitFor(() =>
+        expect(screen.getByText("Sales Valencia")).toBeInTheDocument()
+      )
+      expect(screen.getByText("Sales Barcelona")).toBeInTheDocument()
+      expect(screen.getByText("Sales Online")).toBeInTheDocument()
+    })
   })
 
   /**

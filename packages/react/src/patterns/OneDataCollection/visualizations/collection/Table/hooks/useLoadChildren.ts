@@ -91,7 +91,7 @@ export const useLoadChildren = <
   const {
     fetchedData: nestedFetchedData,
     updateFetchedData,
-    clearFetchedData,
+    resetGeneration,
   } = useNestedDataContext<R>()
   const [children, setChildren] = useState<R[]>(
     getChildren(nestedFetchedData?.[rowId])
@@ -104,37 +104,21 @@ export const useLoadChildren = <
     getChildrenType(nestedFetchedData?.[rowId])
   )
 
-  const previousFiltersRef = useRef(source.currentFilters)
-  const previousSortingsRef = useRef(source.currentSortings)
-  const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
-
+  // The tree reset (filter/sorting/navigation change) is detected once, in the
+  // NestedDataProvider — which survives rows unmounting and remounting as the
+  // list re-renders, unlike a per-row comparison that re-seeds on remount and
+  // would leave a fresh row showing the previous filter's cached children. Here
+  // we only drop this row's local state when the generation moves, so the still
+  // open row re-fetches (NestedRow re-arms its default-children request on the
+  // same generation) instead of keeping the stale children.
+  const previousResetGenerationRef = useRef(resetGeneration)
   useEffect(() => {
-    const filtersChanged = previousFiltersRef.current !== source.currentFilters
-    const sortingsChanged =
-      previousSortingsRef.current !== source.currentSortings
-    const navigationFiltersChanged =
-      previousNavigationFiltersRef.current !== source.currentNavigationFilters
-
-    if (filtersChanged || sortingsChanged || navigationFiltersChanged) {
-      setChildren([])
-      setPaginationInfo(undefined)
-      setChildrenType("basic")
-      // Returns every row to "undecided" (and bumps the reset generation) so the
-      // default-expansion policy applies again — see `clearFetchedData`. The row
-      // is deliberately not force-collapsed here: that is what used to defeat the
-      // policy on a filter/sorting change.
-      clearFetchedData()
-
-      previousFiltersRef.current = source.currentFilters
-      previousSortingsRef.current = source.currentSortings
-      previousNavigationFiltersRef.current = source.currentNavigationFilters
-    }
-  }, [
-    source.currentFilters,
-    source.currentSortings,
-    source.currentNavigationFilters,
-    clearFetchedData,
-  ])
+    if (previousResetGenerationRef.current === resetGeneration) return
+    previousResetGenerationRef.current = resetGeneration
+    setChildren([])
+    setPaginationInfo(undefined)
+    setChildrenType("basic")
+  }, [resetGeneration])
 
   const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()
 
