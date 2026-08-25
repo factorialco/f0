@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
 import {
+  DatePeriodsDefinition,
   GranularityDefinition,
   GranularityDefinitionKey,
   GranularityDefinitionSimple,
@@ -27,7 +28,7 @@ import {
   CalendarHeaderDropdowns,
   getYearBounds,
 } from "./components/CalendarHeaderDropdowns"
-import { isActiveDate, toDateRange } from "./utils"
+import { earliestDate, isActiveDate, latestDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
 
@@ -45,6 +46,8 @@ interface OneCalendarInternalProps {
   weekStartsOn?: WeekStartsOn
   /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
   selectOnCellOnly?: boolean
+  /** Consumer-defined ranges rendered by the `periods` view. */
+  periods?: DatePeriodsDefinition
 }
 
 export type OneCalendarProps = Omit<
@@ -90,6 +93,7 @@ const OneCalendarInternal = ({
   compact = false,
   weekStartsOn,
   selectOnCellOnly = false,
+  periods,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
@@ -118,9 +122,12 @@ const OneCalendarInternal = ({
   const [motionDirection, setMotionDirection] = useState(1)
 
   const granularity = useMemo(() => {
-    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    const definitions = getGranularityDefinitions({
+      weekStartsOn: effectiveWeekStartsOn,
+      periods,
+    })
     return definitions[view]
-  }, [view, effectiveWeekStartsOn])
+  }, [view, effectiveWeekStartsOn, periods])
 
   const setSelected = useCallback(
     (date: Date | DateRange | null) => {
@@ -152,14 +159,22 @@ const OneCalendarInternal = ({
   const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
 
   // The day/week views span a month, so they get both month and year
-  // dropdowns; the month view spans a year, so it gets a year dropdown only.
-  // Every other view keeps its plain label.
+  // dropdowns; the month and periods views span a year, so they get a year
+  // dropdown only. Every other view keeps its plain label.
   const headerDropdowns =
     granularity.calendarView === "day" || granularity.calendarView === "week"
       ? "month-year"
-      : granularity.calendarView === "month"
+      : granularity.calendarView === "month" ||
+          granularity.calendarView === "periods"
         ? "year"
         : null
+
+  // A view that owns a finite set of dates (the periods list) narrows the
+  // header to the years it can actually show, so the dropdown never offers a
+  // year with nothing in it. Consumer bounds still apply on top.
+  const viewDateBounds = granularity.getViewDateBounds?.()
+  const headerMinDate = latestDate(minDate, viewDateBounds?.min)
+  const headerMaxDate = earliestDate(maxDate, viewDateBounds?.max)
 
   // Views with header dropdowns clamp arrow navigation to the year dropdown's
   // range, so the view can never land on a year the dropdown can't display.
@@ -169,8 +184,8 @@ const OneCalendarInternal = ({
   const yearBounds = headerDropdowns
     ? getYearBounds(
         new Date().getFullYear(),
-        minDate,
-        maxDate,
+        headerMinDate,
+        headerMaxDate,
         viewDate.getFullYear()
       )
     : null
@@ -311,7 +326,7 @@ const OneCalendarInternal = ({
 
   return (
     <div className="flex flex-col">
-      {showInput && (
+      {showInput && !granularity.hideDateInput && (
         <div className="mb-2 flex gap-2">
           <Input
             label={i18n.date.from}
@@ -366,8 +381,8 @@ const OneCalendarInternal = ({
               onViewDateChange={handleHeaderDateChange}
               showMonth={headerDropdowns === "month-year"}
               locale={l10n.locale}
-              minDate={minDate}
-              maxDate={maxDate}
+              minDate={headerMinDate}
+              maxDate={headerMaxDate}
               compact={compact}
             />
           ) : (

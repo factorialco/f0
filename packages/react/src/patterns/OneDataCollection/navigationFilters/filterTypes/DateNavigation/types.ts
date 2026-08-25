@@ -1,5 +1,8 @@
 import { DateRange, DateRangeComplete } from "@/components/OneCalendar"
-import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities/index"
+import {
+  DatePeriodsDefinition,
+  GranularityDefinitionKey,
+} from "@/components/OneCalendar/granularities/index"
 import { DatePreset } from "@/ui/DatePickerPopup"
 
 import {
@@ -13,6 +16,11 @@ export type DateNavigationOptions = {
   max?: Date
   presets?: DatePreset[]
   hideGoToCurrent?: boolean
+  /**
+   * Consumer-defined ranges (payroll cycles, academic terms…) navigable as an
+   * extra entry in the granularity selector, named by its `label`.
+   */
+  periods?: DatePeriodsDefinition
 }
 
 export type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<
