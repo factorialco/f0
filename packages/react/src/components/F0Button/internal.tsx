@@ -172,7 +172,15 @@ const ButtonInternal = forwardRef<
         {iconPosition === "right" && iconNode}
         {append}{" "}
         {counterValue && (
-          <span className="ml-1 inline-flex items-center">
+          <span
+            className={cn(
+              "ml-1 inline-flex items-center",
+              // The default (primary) button is a solid dark-red field, so the
+              // light counter would wash out. Forcing the dark theme onto just
+              // the counter gives it a dark pill regardless of the app theme.
+              variant === "default" && "dark"
+            )}
+          >
             <Counter value={counterValue} size="sm" type="default" />
           </span>
         )}
