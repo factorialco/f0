@@ -9,11 +9,11 @@ import { f0FormField } from "@/patterns/F0Form"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Card } from "@/components/F0Card"
 import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { One } from "@/icons/ai"
 import {
   MockAiChatRuntimeProvider,
@@ -27,6 +27,7 @@ import {
   Calendar,
   ChartVerticalBars,
   Check,
+  ChevronDown,
   ChevronRight,
   Clock,
   Comment,
@@ -1082,10 +1083,12 @@ const CommunityPostDetail = ({ post }: { post: CommunityPostSummary }) => (
  * The Communities widget as DATA, built for the scope it is currently showing.
  *
  * Its two controls sit in the header (`headerControls`): the SCOPE SWITCHER —
- * `F0ButtonDropdown` in `dropdown` mode, so the trigger names what is selected
- * and the whole button opens the menu — and "New post", the one thing you can do
- * from the card without leaving the page. The way OUT of the widget is still the
- * title ("Go to Communities"), and the three-dots menu is still the column's.
+ * a GHOST `F0Button` naming what is selected, wrapped in `Dropdown` so pressing
+ * it opens the scopes — and "New post", the one thing you can do from the card
+ * without leaving the page. Both are ghosts: this row sits beside the widget's
+ * own title, and two filled buttons there read as the card's subject rather than
+ * as its controls. The way OUT of the widget is still the title ("Go to
+ * Communities"), and the three-dots menu is still the column's.
  */
 const communitiesWidget = ({
   scope,
@@ -1117,15 +1120,25 @@ const communitiesWidget = ({
           label="New Post"
           onClick={onNewPost}
         />
-        <F0ButtonDropdown
-          mode="dropdown"
-          variant="neutral"
-          size="sm"
-          tooltip="Show"
-          value={scope}
-          items={COMMUNITY_SCOPES.map((option) => ({ ...option }))}
-          onClick={(value) => onChangeScope(value as CommunityScope)}
-        />
+        <Dropdown
+          items={COMMUNITY_SCOPES.map((option) => ({
+            label: option.label,
+            // The menu says which one you are on: a trigger that names the scope
+            // still leaves the list itself unmarked.
+            ...(option.value === scope ? { icon: Check } : {}),
+            onClick: () => onChangeScope(option.value),
+          }))}
+        >
+          <F0Button
+            variant="ghost"
+            size="sm"
+            icon={ChevronDown}
+            label={
+              COMMUNITY_SCOPES.find((option) => option.value === scope)
+                ?.label ?? "Show"
+            }
+          />
+        </Dropdown>
       </>
     ),
     actions: [
