@@ -24,18 +24,16 @@ const meta = {
   decorators: [
     // A bare `role="treeitem"` (what F0GraphNode renders) needs a `tree`/`group`
     // owner or axe fails `aria-required-parent`. In the real graph the
-    // `role="tree"` container provides it; here we wrap every node story the same
-    // way. Stories that embed the node inside a nested `<ReactFlow>` (whose
-    // hardcoded `role="application"` div blocks DOM ownership) set a `treeOwns`
-    // parameter with the node's DOM id so the tree re-owns it via `aria-owns`,
-    // exactly as F0GraphView does — see WithToolbar.
-    (Story, context) => (
+    // `role="tree"` container provides it; here a `role="group"` wrapper does —
+    // a valid treeitem parent (axe requiredContext is `group`/`tree`) that, being
+    // `group`, has no required children of its own, so a story that can't reach
+    // its node through the DOM (the node sits behind a nested `<ReactFlow>`'s
+    // `role="application"`) doesn't make this wrapper fail `aria-required-children`.
+    // Those stories provide their own `role="tree"` with `aria-owns` instead —
+    // see WithToolbar / ToolbarDemo.
+    (Story) => (
       <ReactFlowProvider>
-        <div
-          role="tree"
-          aria-label="Graph node preview"
-          aria-owns={context.parameters.treeOwns as string | undefined}
-        >
+        <div role="group" aria-label="Graph node preview">
           <Story />
         </div>
       </ReactFlowProvider>
@@ -361,7 +359,17 @@ const toolbarDemoNodes: Node[] = [
 
 function ToolbarDemo() {
   return (
-    <div style={{ width: 480, height: 240 }}>
+    // The node renders inside React Flow's hardcoded `role="application"` div,
+    // which severs the DOM tree→treeitem relationship. Mirror F0GraphView: a
+    // `role="tree"` directly wrapping React Flow re-owns the node via `aria-owns`
+    // (`ToolbarDemoNode` sets nodeId="toolbar-demo" → DOM id below), so the lone
+    // treeitem has a valid, owning parent.
+    <div
+      role="tree"
+      aria-label="Graph node preview"
+      aria-owns="f0-graph-node-toolbar-demo"
+      style={{ width: 480, height: 240 }}
+    >
       <ReactFlow
         nodes={toolbarDemoNodes}
         nodeTypes={toolbarNodeTypes}
@@ -383,10 +391,6 @@ function ToolbarDemo() {
 export const WithToolbar: Story = {
   render: () => <ToolbarDemo />,
   parameters: {
-    // The node is inside a nested <ReactFlow> (role="application"), so the tree
-    // decorator can't own it through the DOM — hand it the node's id to own via
-    // aria-owns instead (`ToolbarDemoNode` sets nodeId="toolbar-demo").
-    treeOwns: "f0-graph-node-toolbar-demo",
     docs: {
       description: {
         story:
