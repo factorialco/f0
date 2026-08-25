@@ -800,11 +800,14 @@ export declare const aiTranslations: {
         };
         readonly dashboardItem: {
             readonly askOne: "Ask One";
-            readonly selectChartArea: "Select chart area";
-            readonly chartAreaSelectionHint: "Draw around data, or choose data points. Press Esc to cancel.";
+            readonly selectChartArea: "Draw to ask One";
+            readonly cancelChartAreaSelection: "Cancel selection";
+            readonly clearChartAreaSelection: "Clear selection";
+            readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.";
             readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point.";
-            readonly chooseChartDataPoints: "Choose data points";
-            readonly useSelectedChartDataPoints: "Use selected data points ({{count}})";
+            readonly chartAreaSelectionUnavailable: "Drawing isn't available for this widget";
+            readonly selectChartDataPoints: "Select chart values without drawing";
+            readonly useSelectedChartDataPoints: "Ask One about selected values ({{count}})";
             readonly selectedChartArea: "Selected chart area";
             readonly moreSelectedValues: "{{count}} more selected values";
             readonly chartType: "Chart type";
@@ -2608,11 +2611,14 @@ export declare const defaultTranslations: {
              * out, so it owns its own key.
              */
             readonly askOne: "Ask One";
-            readonly selectChartArea: "Select chart area";
-            readonly chartAreaSelectionHint: "Draw around data, or choose data points. Press Esc to cancel.";
+            readonly selectChartArea: "Draw to ask One";
+            readonly cancelChartAreaSelection: "Cancel selection";
+            readonly clearChartAreaSelection: "Clear selection";
+            readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.";
             readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point.";
-            readonly chooseChartDataPoints: "Choose data points";
-            readonly useSelectedChartDataPoints: "Use selected data points ({{count}})";
+            readonly chartAreaSelectionUnavailable: "Drawing isn't available for this widget";
+            readonly selectChartDataPoints: "Select chart values without drawing";
+            readonly useSelectedChartDataPoints: "Ask One about selected values ({{count}})";
             readonly selectedChartArea: "Selected chart area";
             readonly moreSelectedValues: "{{count}} more selected values";
             readonly chartType: "Chart type";
@@ -5728,16 +5734,6 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -5750,10 +5746,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -5764,6 +5759,17 @@ declare module "@tiptap/core" {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

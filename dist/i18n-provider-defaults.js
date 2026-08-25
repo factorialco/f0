@@ -705,11 +705,14 @@ const e = {
        * out, so it owns its own key.
        */
       askOne: "Ask One",
-      selectChartArea: "Select chart area",
-      chartAreaSelectionHint: "Draw around data, or choose data points. Press Esc to cancel.",
+      selectChartArea: "Draw to ask One",
+      cancelChartAreaSelection: "Cancel selection",
+      clearChartAreaSelection: "Clear selection",
+      chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.",
       emptyChartAreaSelection: "No data points selected. Draw around at least one point.",
-      chooseChartDataPoints: "Choose data points",
-      useSelectedChartDataPoints: "Use selected data points ({{count}})",
+      chartAreaSelectionUnavailable: "Drawing isn't available for this widget",
+      selectChartDataPoints: "Select chart values without drawing",
+      useSelectedChartDataPoints: "Ask One about selected values ({{count}})",
       selectedChartArea: "Selected chart area",
       moreSelectedValues: "{{count}} more selected values",
       chartType: "Chart type",

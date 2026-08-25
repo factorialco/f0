@@ -1094,11 +1094,14 @@ export declare const aiTranslations: {
         };
         readonly dashboardItem: {
             readonly askOne: "Ask One";
-            readonly selectChartArea: "Select chart area";
-            readonly chartAreaSelectionHint: "Draw around data, or choose data points. Press Esc to cancel.";
+            readonly selectChartArea: "Draw to ask One";
+            readonly cancelChartAreaSelection: "Cancel selection";
+            readonly clearChartAreaSelection: "Clear selection";
+            readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.";
             readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point.";
-            readonly chooseChartDataPoints: "Choose data points";
-            readonly useSelectedChartDataPoints: "Use selected data points ({{count}})";
+            readonly chartAreaSelectionUnavailable: "Drawing isn't available for this widget";
+            readonly selectChartDataPoints: "Select chart values without drawing";
+            readonly useSelectedChartDataPoints: "Ask One about selected values ({{count}})";
             readonly selectedChartArea: "Selected chart area";
             readonly moreSelectedValues: "{{count}} more selected values";
             readonly chartType: "Chart type";
@@ -5319,11 +5322,14 @@ export declare const defaultTranslations: {
              * out, so it owns its own key.
              */
             readonly askOne: "Ask One";
-            readonly selectChartArea: "Select chart area";
-            readonly chartAreaSelectionHint: "Draw around data, or choose data points. Press Esc to cancel.";
+            readonly selectChartArea: "Draw to ask One";
+            readonly cancelChartAreaSelection: "Cancel selection";
+            readonly clearChartAreaSelection: "Clear selection";
+            readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.";
             readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point.";
-            readonly chooseChartDataPoints: "Choose data points";
-            readonly useSelectedChartDataPoints: "Use selected data points ({{count}})";
+            readonly chartAreaSelectionUnavailable: "Drawing isn't available for this widget";
+            readonly selectChartDataPoints: "Select chart values without drawing";
+            readonly useSelectedChartDataPoints: "Ask One about selected values ({{count}})";
             readonly selectedChartArea: "Selected chart area";
             readonly moreSelectedValues: "{{count}} more selected values";
             readonly chartType: "Chart type";
@@ -7568,7 +7574,7 @@ export declare interface F0AlertProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AnalyticsDashboard: {
-    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
+    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, onAskAiTarget, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
     displayName: string;
 };
 
@@ -7598,6 +7604,17 @@ declare interface F0AnalyticsDashboardAskAiTargetBase {
     id: string;
     title: string;
 }
+
+/**
+ * A built-in Ask One interaction together with the exact quote F0 staged.
+ *
+ * The quote object is kept by the chat composer until it is submitted or
+ * dismissed. Hosts can therefore associate hidden analytical context with
+ * this exact interaction without replacing F0's quote/open/focus behavior.
+ */
+export declare type F0AnalyticsDashboardAskAiTargetWithQuote = F0AnalyticsDashboardAskAiTarget & {
+    quote: PendingQuote;
+};
 
 /** A point selected from either the chart canvas or its keyboard companion. */
 export declare type F0AnalyticsDashboardPointClick = Omit<F0DataChartPointClick, "source"> & {
@@ -7701,6 +7718,19 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      * by checking those mutually exclusive fields.
      */
     onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void;
+    /**
+     * Observes built-in Ask One interactions without replacing them.
+     *
+     * Called immediately before F0 stages the quoted widget, point, or drawn
+     * area in the mounted chat. `quote` is the same object the composer later
+     * submits or dismisses, so a host can bind structured analytical context to
+     * the exact pending interaction and clean it up by quote identity.
+     *
+     * This observer does not make Ask One available by itself. A mounted,
+     * enabled AI chat still owns the built-in behavior; use `onAskAi` instead
+     * when the host must replace that behavior entirely.
+     */
+    onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void;
     /**
      * Navigation filter definitions (e.g. date-navigator).
      * Rendered above the grid alongside the regular filter bar.
@@ -8938,7 +8968,7 @@ export declare type F0DataChartAccessibleAreaSelectionAction = {
 
 /**
  * Keyboard, touch, and single-pointer equivalent for polygon selection.
- * Pair it with `areaSelection` and submit the same bounded data contract.
+ * Its compact icon-only trigger submits the same bounded data contract.
  */
 export declare function F0DataChartAccessibleAreaSelectionActions({ actions, label, submitLabel, previousLabel, nextLabel, resetOn, onSubmit, }: F0DataChartAccessibleAreaSelectionActionsProps): JSX_2.Element;
 
@@ -8965,6 +8995,20 @@ export declare interface F0DataChartAreaSelection {
     totalPointCount: number;
 }
 
+/** The completed ECharts polygon needed to keep a controlled selection visible. */
+export declare interface F0DataChartAreaSelectionArea {
+    brushType: "polygon";
+    /** Polygon vertices in chart coordinates so ECharts can reproject on resize. */
+    coordRange: [number, number][];
+    /** Stable ECharts coordinate-system panel identifier, when supplied. */
+    panelId?: string;
+    /** Category-axis correction needed to preserve the drawn polygon's shape. */
+    rangeOffset?: {
+        offset: [number, number][];
+        xyMinMax: [number, number][];
+    };
+}
+
 /**
  * Opt-in area-selection behavior for cartesian chart variants.
  *
@@ -8974,7 +9018,17 @@ export declare interface F0DataChartAreaSelection {
  */
 export declare interface F0DataChartAreaSelectionConfig {
     active: boolean;
-    onSelect: (selection: F0DataChartAreaSelection) => void;
+    /**
+     * Keeps the completed brush visible while drawing is inactive. Set this
+     * until the downstream action that owns the selection is completed or
+     * dismissed.
+     */
+    selected?: boolean;
+    /** Replays a completed polygon after chart option updates or remounts. */
+    selectedArea?: F0DataChartAreaSelectionArea;
+    onSelect: (selection: F0DataChartAreaSelection, area: F0DataChartAreaSelectionArea) => void;
+    /** Reports the retained polygon in current chart-surface pixels. */
+    onSelectedAreaPositionChange?: (range: [number, number][] | null) => void;
     onCancel?: () => void;
 }
 
@@ -20256,16 +20310,6 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -20278,10 +20322,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -20292,6 +20335,17 @@ declare module "@tiptap/core" {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
