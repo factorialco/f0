@@ -422,7 +422,8 @@ export function useSelectable<
             const shouldSyncChecked =
               existingItem.checked !== itemState.checked &&
               (!isMultiSelection || itemState.checked)
-            const needsItem = existingItem.item === undefined && item !== undefined
+            const needsItem =
+              existingItem.item === undefined && item !== undefined
 
             // Only clone when something actually changes; otherwise keep the
             // same reference to avoid spurious re-renders / re-emits in
