@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.52.0](https://github.com/factorialco/f0/compare/f0-react-v6.51.1...f0-react-v6.52.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** add F0OneSwitch to the top-right controls ([#5224](https://github.com/factorialco/f0/issues/5224)) ([ce02a35](https://github.com/factorialco/f0/commit/ce02a35f4f08e16b3b4ef3b0d3cfb8514849954b))
+
 ## [6.51.1](https://github.com/factorialco/f0/compare/f0-react-v6.51.0...f0-react-v6.51.1) (2026-08-25)
 
 
