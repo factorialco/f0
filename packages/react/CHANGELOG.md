@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.51.0](https://github.com/factorialco/f0/compare/f0-react-v6.50.0...f0-react-v6.51.0) (2026-08-25)
+
+
+### Features
+
+* **Home:** area-specific widgets, Communities carousel, F0CarouselDialog ([#5214](https://github.com/factorialco/f0/issues/5214)) ([80bd511](https://github.com/factorialco/f0/commit/80bd511f2aaf1235ee1aa46ddec84110aa72a8df))
+
 ## [6.50.0](https://github.com/factorialco/f0/compare/f0-react-v6.49.1...f0-react-v6.50.0) (2026-08-24)
 
 
