@@ -458,6 +458,21 @@ declare type AiChatProviderReturnValue = {
      */
     resetChatWidth: () => void;
     /**
+     * True while the user is dragging the chat's resize handle. Broadcast here
+     * because everything laid out against the chat's edge has to follow the drag
+     * 1:1 — an eased width leaves the seam trailing the cursor.
+     *
+     * OPTIONAL on purpose: the provider always supplies both, but a required
+     * addition to this return type reads as a breaking change to the public API
+     * check even though callers only ever read it.
+     *
+     * The window that renders the handle keeps its own local drag state and
+     * mirrors it here; it does not read this back as the gate for its listener,
+     * since a split layout has two windows and only one is being dragged.
+     */
+    isResizing?: boolean;
+    setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>;
+    /**
      * The current visualization mode of the chat
      */
     visualizationMode: VisualizationMode;
@@ -512,6 +527,12 @@ declare type AiChatProviderReturnValue = {
      */
     processDroppedFiles: (files: File[]) => void;
     /* Excluded from this release type: setProcessDroppedFilesFunction */
+    /**
+     * Move focus into the mounted chat composer, or queue it until mount.
+     * Returns whether focus moved synchronously.
+     */
+    focusChatInput: () => boolean;
+    /* Excluded from this release type: setFocusChatInputFunction */
     /**
      * Pre-loaded context shown as an empty state in the chat.
      * Prepended to the first user message as `<pending-context>`.
@@ -776,6 +797,7 @@ export declare const aiTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -808,6 +830,7 @@ export declare const aiTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -1133,6 +1156,21 @@ export declare type CanvasContentBase = {
     title: string;
     description?: string;
     toolCallId?: string;
+    /**
+     * Render this content across the whole frame, covering the docked chat
+     * instead of hugging a seam beside it. For content that is a step of its own
+     * rather than something you work through while talking — picking a template,
+     * say. The chat is only covered, never closed, so the conversation is exactly
+     * where it was when the canvas is dismissed.
+     *
+     * Deliberately NOT called `fullscreen`: the chat's own
+     * `visualizationMode: "fullscreen"` means the opposite arrangement (chat full
+     * width, no canvas), and going back to it is how a covering canvas is
+     * dismissed.
+     *
+     * Defaults to the docked split.
+     */
+    coversChat?: boolean;
 };
 
 /**
@@ -2347,6 +2385,8 @@ export declare const defaultTranslations: {
                 readonly hideAllColumns: "Hide all";
                 readonly addColumn: "Add column";
                 readonly removeColumn: "Remove column";
+                readonly lockColumn: "Lock column: {{label}}";
+                readonly unlockColumn: "Unlock column: {{label}}";
             };
         };
         readonly editableTable: {
@@ -2552,6 +2592,13 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            /**
+             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+             * override it — factorial renders it as plain "Ask" for the widget and
+             * insight-card buttons). This menu entry needs the product name spelled
+             * out, so it owns its own key.
+             */
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -2584,6 +2631,7 @@ export declare const defaultTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -3180,11 +3228,17 @@ declare type DropdownItemSeparator = {
     type: "separator";
 };
 
-export declare const DropOverlay: ({ visible, onFilesDropped }: DropOverlayProps) => JSX_2.Element;
+export declare const DropOverlay: ({ visible, onFilesDropped, mode, }: DropOverlayProps) => JSX_2.Element;
 
 declare interface DropOverlayProps {
     visible: boolean;
-    onFilesDropped: (files: File[]) => void;
+    /**
+     * Handles a native file drop. Omit for `mode="discuss"`, where the drag is a
+     * pointer gesture and carries no `dataTransfer`.
+     */
+    onFilesDropped?: (files: File[]) => void;
+    /** Which drop the overlay is inviting. */
+    mode?: "files" | "discuss";
 }
 
 /**
@@ -3432,7 +3486,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -3562,6 +3616,25 @@ export declare type F0AiChatTextAreaProps = {
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     /**
+     * The composer's own inset against whatever contains it.
+     *
+     * - `"default"` — the gutter the chat layouts expect (16px sides, 8px top,
+     *   12px bottom). It is what keeps the field off the chat window's edges and
+     *   leaves room for the focus glow, which bleeds a few pixels outside the
+     *   field's border box.
+     *
+     * - `"none"` — no inset, for hosts that place the composer inside a container
+     *   that already owns the spacing (a landing/home hero, a card). The host then
+     *   owns BOTH sides of that bargain: give the composer some room of your own,
+     *   and don't clip overflow around it, or the focus glow gets cut at the edge.
+     *
+     * Only the outer inset changes; the gap between the composer and the blocks
+     * below it (suggestions, cards, footer, disclaimer) is unaffected.
+     *
+     * @default "default"
+     */
+    padding?: "default" | "none";
+    /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
      * rises toward the vertical center) and the welcome cards render below it.
@@ -3686,6 +3759,9 @@ export declare type F0AiMessagesContainerProps = {
     initialMessageCaption?: string;
     /** Smaller secondary line below the welcome phrase. */
     initialMessageSubtitle?: string;
+    /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+     *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+    initialMessageCta?: WelcomeScreenCta;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -4034,8 +4110,20 @@ declare type F0AvatarPersonProps = {
     badge?: AvatarBadge;
     /**
      * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     *
+     * Mutually exclusive with `pending`: they represent opposite ends of the
+     * employee lifecycle. If both are set, `deactivated` takes precedence.
      */
     deactivated?: boolean;
+    /**
+     * Whether the position is still to be filled — a person who is planned but
+     * not hired yet (e.g. an open role in headcount planning). If true, the
+     * avatar will display a search-person icon instead of the person's name or
+     * picture.
+     *
+     * Mutually exclusive with `deactivated`.
+     */
+    pending?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare type F0AvatarTeamProps = {
@@ -5522,6 +5610,17 @@ declare interface WeekdaysProps {
 }
 
 /**
+ * Optional call-to-action rendered as a pill above the welcome phrase (e.g. a
+ * "How to use One" shortcut). The host owns `onClick`; f0 owns the pill styling
+ * so it stays consistent with the rest of the welcome screen.
+ */
+export declare type WelcomeScreenCta = {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+};
+
+/**
  * A welcome-screen group rendered as an outline button in the welcome row.
  * Clicking the group opens a popover listing its `items`. The number of groups
  * is not capped yet (unlike welcome cards, which top out at 4).
@@ -5623,9 +5722,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -5633,11 +5734,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }

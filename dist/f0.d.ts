@@ -752,6 +752,21 @@ declare type AiChatProviderReturnValue = {
      */
     resetChatWidth: () => void;
     /**
+     * True while the user is dragging the chat's resize handle. Broadcast here
+     * because everything laid out against the chat's edge has to follow the drag
+     * 1:1 — an eased width leaves the seam trailing the cursor.
+     *
+     * OPTIONAL on purpose: the provider always supplies both, but a required
+     * addition to this return type reads as a breaking change to the public API
+     * check even though callers only ever read it.
+     *
+     * The window that renders the handle keeps its own local drag state and
+     * mirrors it here; it does not read this back as the gate for its listener,
+     * since a split layout has two windows and only one is being dragged.
+     */
+    isResizing?: boolean;
+    setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>;
+    /**
      * The current visualization mode of the chat
      */
     visualizationMode: VisualizationMode;
@@ -806,6 +821,12 @@ declare type AiChatProviderReturnValue = {
      */
     processDroppedFiles: (files: File[]) => void;
     /* Excluded from this release type: setProcessDroppedFilesFunction */
+    /**
+     * Move focus into the mounted chat composer, or queue it until mount.
+     * Returns whether focus moved synchronously.
+     */
+    focusChatInput: () => boolean;
+    /* Excluded from this release type: setFocusChatInputFunction */
     /**
      * Pre-loaded context shown as an empty state in the chat.
      * Prepended to the first user message as `<pending-context>`.
@@ -1070,6 +1091,7 @@ export declare const aiTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -1102,6 +1124,7 @@ export declare const aiTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -2123,6 +2146,16 @@ export declare type ButtonSize = (typeof buttonSizes)[number];
 
 export declare const buttonSizes: readonly ["sm", "md", "lg"];
 
+export declare type ButtonToggleColor = (typeof buttonToggleColors)[number];
+
+/**
+ * The colours a toggle can wear when selected, beyond F0's own selected teal.
+ * Each one is an F0 semantic colour — the six statuses, then the five points of
+ * the mood scale — so a coloured toggle carries the same meaning here as the
+ * same colour does anywhere else in the product.
+ */
+export declare const buttonToggleColors: readonly ["accent", "critical", "warning", "promote", "info", "positive", "mood-super-negative", "mood-negative", "mood-neutral", "mood-positive", "mood-super-positive"];
+
 export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
 
 export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
@@ -2211,6 +2244,21 @@ export declare type CanvasContentBase = {
     title: string;
     description?: string;
     toolCallId?: string;
+    /**
+     * Render this content across the whole frame, covering the docked chat
+     * instead of hugging a seam beside it. For content that is a step of its own
+     * rather than something you work through while talking — picking a template,
+     * say. The chat is only covered, never closed, so the conversation is exactly
+     * where it was when the canvas is dismissed.
+     *
+     * Deliberately NOT called `fullscreen`: the chat's own
+     * `visualizationMode: "fullscreen"` means the opposite arrangement (chat full
+     * width, no canvas), and going back to it is how a covering canvas is
+     * dismissed.
+     *
+     * Defaults to the docked split.
+     */
+    coversChat?: boolean;
 };
 
 /**
@@ -2654,6 +2702,9 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
+    compact?: boolean;
 }
 
 export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
@@ -2675,6 +2726,9 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
+    compact?: boolean;
 }
 
 export declare type CardSelectableValue = string | number;
@@ -3380,12 +3434,14 @@ export declare const ComboChart: WithDataTestIdReturnType_5<ForwardRefExoticComp
 label?: boolean;
 legend?: boolean;
 showValueUnderLabel?: boolean;
-bar?: {
+bar?: ({
 categories: string | string[];
 axisLabel?: string;
 hideAxis?: boolean;
 axisPosition?: "left" | "right";
-} | undefined;
+} & {
+type?: "simple" | "stacked" | "stacked-by-sign";
+}) | undefined;
 line?: ({
 categories: string | string[];
 axisLabel?: string;
@@ -3793,6 +3849,17 @@ export declare interface DashboardItemBase {
     title: string;
     /** Optional description below the title */
     description?: string;
+    /**
+     * Optional help copy for what the widget measures, revealed by an ⓘ icon
+     * beside the title. A string renders a plain tooltip; the structured form
+     * renders a hoverable card that can carry a link — the same affordance a
+     * table column header offers, so a figure explains itself the same way
+     * wherever it is read.
+     *
+     * Distinct from `description` (which states what this widget shows) and from
+     * `explanation` (how it is computed, behind the menu).
+     */
+    info?: string | InfoHintContent;
     /**
      * Optional markdown explanation of how this item's data is calculated.
      * When set, the per-item dropdown menu shows a "Where does this data come
@@ -4517,6 +4584,23 @@ declare type DateValue = {
 
 declare type DefaultAction = BannerAction;
 
+/**
+ * How rows start out when the user has not touched them yet.
+ *
+ * - `true` / `false` — every row, or none (the default).
+ * - a number — expand rows shallower than that depth, so `1` opens the
+ *   top-level rows and reveals depth 1.
+ * - a predicate — anything else, e.g. `(node) => node.type !== "role"`.
+ *
+ * The policy is re-evaluated per row rather than resolved into a set of ids up
+ * front: rows evaluate it as they mount, so an expanded row's children evaluate
+ * it in turn and the cascade falls out of the component tree. That works the
+ * same whether the tree is already in memory or fetched lazily.
+ */
+declare type DefaultExpandedPolicy<R extends RecordType> = boolean | number | ((record: R, context: {
+    depth: number;
+}) => boolean);
+
 export declare const defaultTranslations: {
     readonly common: {
         readonly selectPlaceholder: "Select";
@@ -5010,6 +5094,8 @@ export declare const defaultTranslations: {
                 readonly hideAllColumns: "Hide all";
                 readonly addColumn: "Add column";
                 readonly removeColumn: "Remove column";
+                readonly lockColumn: "Lock column: {{label}}";
+                readonly unlockColumn: "Unlock column: {{label}}";
             };
         };
         readonly editableTable: {
@@ -5215,6 +5301,13 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            /**
+             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+             * override it — factorial renders it as plain "Ask" for the widget and
+             * insight-card buttons). This menu entry needs the product name spelled
+             * out, so it owns its own key.
+             */
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -5247,6 +5340,7 @@ export declare const defaultTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -6160,11 +6254,17 @@ export declare type DropIntent = {
     type: "cancel";
 };
 
-export declare const DropOverlay: ({ visible, onFilesDropped }: DropOverlayProps) => JSX_2.Element;
+export declare const DropOverlay: ({ visible, onFilesDropped, mode, }: DropOverlayProps) => JSX_2.Element;
 
 declare interface DropOverlayProps {
     visible: boolean;
-    onFilesDropped: (files: File[]) => void;
+    /**
+     * Handles a native file drop. Omit for `mode="discuss"`, where the drag is a
+     * pointer gesture and carries no `dataTransfer`.
+     */
+    onFilesDropped?: (files: File[]) => void;
+    /** Which drop the overlay is inviting. */
+    mode?: "files" | "discuss";
 }
 
 export declare interface DurationFieldConfig {
@@ -6255,6 +6355,18 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * opens the calendar on that date.
      */
     dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
+    /**
+     * Configuration for `"disabled"` cells.
+     *
+     * By default a disabled cell keeps the same affordances as its editable
+     * counterpart (leading icon, units, select chevron) so the column still
+     * reads as its field type. Set `hideSelectChevron` when the column also
+     * uses `editType: "select"` for other rows but the chevron shouldn't
+     * appear here since the cell isn't interactive.
+     */
+    disabledConfig?: {
+        hideSelectChevron?: boolean;
+    };
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -6837,7 +6949,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -6966,6 +7078,25 @@ export declare type F0AiChatTextAreaProps = {
      * dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
+     * The composer's own inset against whatever contains it.
+     *
+     * - `"default"` — the gutter the chat layouts expect (16px sides, 8px top,
+     *   12px bottom). It is what keeps the field off the chat window's edges and
+     *   leaves room for the focus glow, which bleeds a few pixels outside the
+     *   field's border box.
+     *
+     * - `"none"` — no inset, for hosts that place the composer inside a container
+     *   that already owns the spacing (a landing/home hero, a card). The host then
+     *   owns BOTH sides of that bargain: give the composer some room of your own,
+     *   and don't clip overflow around it, or the focus glow gets cut at the edge.
+     *
+     * Only the outer inset changes; the gap between the composer and the blocks
+     * below it (suggestions, cards, footer, disclaimer) is unaffected.
+     *
+     * @default "default"
+     */
+    padding?: "default" | "none";
     /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
@@ -7223,6 +7354,9 @@ export declare type F0AiMessagesContainerProps = {
     initialMessageCaption?: string;
     /** Smaller secondary line below the welcome phrase. */
     initialMessageSubtitle?: string;
+    /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+     *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+    initialMessageCta?: WelcomeScreenCta;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -7416,8 +7550,26 @@ export declare interface F0AlertProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AnalyticsDashboard: {
-    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
+    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
     displayName: string;
+};
+
+/**
+ * What the user asked about: a whole widget, or one mark inside it.
+ *
+ * `point` is absent when the ask came from the widget's ⋯ menu and present
+ * when it came from clicking a mark, which is the only thing that tells the
+ * two apart.
+ */
+export declare interface F0AnalyticsDashboardAskAiTarget {
+    id: string;
+    title: string;
+    point?: F0AnalyticsDashboardPointClick;
+}
+
+/** A point selected from either the chart canvas or its keyboard companion. */
+export declare type F0AnalyticsDashboardPointClick = Omit<F0DataChartPointClick, "source"> & {
+    source: "pointer" | "keyboard";
 };
 
 /**
@@ -7499,6 +7651,24 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
     resetKey?: number;
     /** Called when a chart item's type is changed (e.g. bar → line) */
     onTransformChart?: (itemId: string, newType: string, orientation?: "vertical" | "horizontal") => void;
+    /**
+     * Called when the user picks "Ask One" on a widget, replacing what the entry
+     * does by default (quote the widget in the mounted AI chat, then open it).
+     *
+     * Pass this to own the action — send the widget somewhere else, add
+     * tracking, ask for confirmation first. The entry then appears whether or
+     * not an AI chat is mounted, since the host is answering it. Its label stays
+     * `ai.dashboardItem.askOne`, which hosts already override, so the copy is
+     * yours either way.
+     *
+     * Without it the entry appears only where an AI chat is mounted and enabled,
+     * and drives that chat directly.
+     *
+     * `point` is set when the ask came from a clicked mark rather than the
+     * widget menu, so one handler answers both without the host having to tell
+     * them apart by anything other than its presence.
+     */
+    onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void;
     /**
      * Navigation filter definitions (e.g. date-navigator).
      * Rendered above the grid alongside the regular filter bar.
@@ -7897,7 +8067,7 @@ export declare type F0AvatarModuleProps = VariantProps<typeof moduleAvatarVarian
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 export declare const F0AvatarPerson: WithDataTestIdReturnType_4<    {
-({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: F0AvatarPersonProps_2): JSX_2.Element;
+({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, pending, }: F0AvatarPersonProps_2): JSX_2.Element;
 displayName: string;
 }>;
 
@@ -7924,8 +8094,20 @@ export declare type F0AvatarPersonProps = {
     badge?: AvatarBadge;
     /**
      * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     *
+     * Mutually exclusive with `pending`: they represent opposite ends of the
+     * employee lifecycle. If both are set, `deactivated` takes precedence.
      */
     deactivated?: boolean;
+    /**
+     * Whether the position is still to be filled — a person who is planned but
+     * not hired yet (e.g. an open role in headcount planning). If true, the
+     * avatar will display a search-person icon instead of the person's name or
+     * picture.
+     *
+     * Mutually exclusive with `deactivated`.
+     */
+    pending?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 export declare const F0AvatarTeam: WithDataTestIdReturnType_4<    {
@@ -8275,6 +8457,37 @@ declare type F0ButtonToggleInternalProps = {
      * "expanded" - The button will show the icon and the label.
      */
     variant?: ButtonToggleVariant;
+    /**
+     * Tooltip shown on hover and on keyboard focus. A string is the description
+     * on its own; the object form adds a bold first line above it — the same
+     * shape `Action` takes.
+     *
+     * A compact toggle is a glyph with no visible text, so the tooltip is what
+     * says out loud what it does. Setting it drops the native `title` (the
+     * browser would otherwise draw its own bubble beside this one) and keeps the
+     * accessible name.
+     *
+     * `instant` opens it on 100ms instead of the default 700ms. Reach for it when
+     * the tooltip is the ONLY place the toggle's name is written — the default
+     * wait is for a label that merely confirms what you can already read, and on
+     * a bare glyph it withholds the whole thing.
+     */
+    tooltip?: string | {
+        label?: string;
+        description: string;
+        instant?: boolean;
+    };
+    /**
+     * Makes the toggle a member of a COLOURED SET: it wears this colour when
+     * selected — fill, border and glyph — and stays a muted glyph when it isn't,
+     * so one answer out of several is readable at a glance. Without it the toggle
+     * uses F0's selected teal, like any other selected control.
+     *
+     * Only for a set whose members mean different things (a mood scale, a status
+     * picker). A lone toggle, or a group where every item is the same kind of
+     * thing, should stay on the default.
+     */
+    color?: ButtonToggleColor;
     /**
      * @private
      * Whether to show a border around the button toggle.
@@ -8801,7 +9014,7 @@ export declare interface F0DataChartBarSeries {
     color?: ChartColorToken;
 }
 
-declare interface F0DataChartBaseProps extends F0DataChartCommonProps {
+declare interface F0DataChartBaseProps extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
     /** Labels for the category axis (one per data point) */
     categories: string[];
     /** Show the legend below the chart. @default true */
@@ -8824,6 +9037,16 @@ declare interface F0DataChartBaseProps extends F0DataChartCommonProps {
 declare interface F0DataChartCommonProps {
     /** Customize or opt out of the empty state shown when data is empty. */
     emptyState?: F0DataChartEmptyStateProps;
+    /**
+     * Called when the user clicks a single mark (bar segment, slice, point).
+     * Omit to leave clicks inert, which is the default for every chart.
+     *
+     * Line charts accept a click anywhere in the plot area, since a line is too
+     * thin to hit — the same allowance their axis-triggered tooltip already
+     * makes — and answer with the whole category in
+     * {@link F0DataChartPointClick.series}, matching what the tooltip showed.
+     */
+    onPointClick?: (point: F0DataChartPointClick) => void;
 }
 
 /**
@@ -8870,7 +9093,7 @@ export declare interface F0DataChartFunnelDataPoint {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export declare interface F0DataChartFunnelProps extends F0DataChartCommonProps {
+export declare interface F0DataChartFunnelProps extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
     /** Chart type */
     type: "funnel";
     /** The funnel series to render */
@@ -8992,6 +9215,16 @@ export declare interface F0DataChartHeatmapProps extends F0DataChartCommonProps 
     echartsOptions?: Partial<echarts_2.EChartsOption>;
 }
 
+/** Props shared only by variants with an interactive legend. */
+declare interface F0DataChartLegendInteractionProps {
+    /**
+     * Reports the chart's live legend visibility after an interactive toggle.
+     * Primarily used by accessible companion surfaces that must expose the same
+     * data currently shown on the canvas.
+     */
+    onLegendSelectionChange?: (selected: Record<string, boolean>) => void;
+}
+
 /**
  * A single data point in a line chart series.
  * Can be a simple number or an object with a value.
@@ -9063,7 +9296,7 @@ export declare interface F0DataChartPieDataPoint {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export declare interface F0DataChartPieProps extends F0DataChartCommonProps {
+export declare interface F0DataChartPieProps extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
     /** Chart type */
     type: "pie";
     /** The pie series to render */
@@ -9102,6 +9335,73 @@ export declare interface F0DataChartPieSeries {
 }
 
 /**
+ * What a click resolved to — one bar segment, one slice, one point, or (for a
+ * line, where the click can land anywhere in the plot area) a whole category.
+ *
+ * The top-level fields always name a single series, so a consumer that wants
+ * one number has one. {@link F0DataChartPointClick.series} carries everything
+ * the click resolved, which for a line is every series at that category — the
+ * same rows its tooltip shows.
+ */
+export declare interface F0DataChartPointClick {
+    /** Interaction surface that resolved the point. */
+    source: "pointer";
+    /** Configured series name for the mark. Empty when ECharts does not report one. */
+    seriesName: string;
+    /**
+     * Mark name reported by ECharts: an axis category, pie slice, funnel stage,
+     * scatter label, or gauge/radar item name. Empty when the mark has no name.
+     */
+    category: string;
+    /** Raw, unformatted value. Consumers apply their own formatting. */
+    value: number;
+    /**
+     * Every number the mark carries, in series order: `[42]` for a bar or a
+     * slice, `[x, y]` for a scatter point, `[xIndex, yIndex, value]` for a
+     * heatmap cell.
+     *
+     * {@link value} is the last entry, which is the measure for every type
+     * except scatter — there both entries are measures, and quoting only the
+     * last one drops half the point. Read this when the chart type has more
+     * than one number to say.
+     */
+    values: number[];
+    /**
+     * Every series the click resolved, in the order they are configured.
+     *
+     * A line chart accepts a click anywhere in its plot area, so this is the
+     * whole category — one entry per series that has a value there and is
+     * switched on in the legend, exactly the rows its axis tooltip shows.
+     * Everywhere else a click identifies one mark and this holds that one entry,
+     * matching {@link seriesName} and {@link value}.
+     */
+    series: F0DataChartPointClickSeries[];
+    /** Index of the clicked mark within its series. */
+    dataIndex: number;
+    /** Index of the series the mark belongs to. */
+    seriesIndex: number;
+    /**
+     * Where a pointer click landed, in viewport coordinates — enough to anchor a
+     * floating element without the consumer having to reach for the chart's own
+     * geometry. Taken from the touch on a touch device, where the event itself
+     * carries no coordinates. Both are 0 if the pointer event carried no
+     * coordinates.
+     */
+    clientX: number;
+    clientY: number;
+}
+
+/** One series' value at the category a click resolved to. */
+export declare interface F0DataChartPointClickSeries {
+    /** Configured series name. Empty when ECharts does not report one. */
+    name: string;
+    /** Index of the series in the chart's own series list. */
+    seriesIndex: number;
+    /** Raw, unformatted value at this category. */
+    value: number;
+}
+
+/**
  * Props for the F0DataChart component.
  *
  * A unified chart component that supports bar, line, funnel, pie, radar,
@@ -9124,7 +9424,7 @@ export declare interface F0DataChartRadarIndicator {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export declare interface F0DataChartRadarProps extends F0DataChartCommonProps {
+export declare interface F0DataChartRadarProps extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
     /** Chart type */
     type: "radar";
     /** Axes of the radar — defines the dimensions to compare */
@@ -9188,7 +9488,7 @@ export declare type F0DataChartScatterDataPoint = [number, number] | {
  * continuous — so this interface is separate from `F0DataChartBaseProps`.
  * Pass multiple `series` to color-split the points by a group dimension.
  */
-export declare interface F0DataChartScatterProps extends F0DataChartCommonProps {
+export declare interface F0DataChartScatterProps extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
     /** Chart type */
     type: "scatter";
     /** One or more point groups. Multiple series render as a color split. */
@@ -11765,6 +12065,13 @@ export declare const F0Provider: React.FC<{
     layout?: Omit<ComponentProps<typeof LayoutProvider>, "children">;
     i18n: Omit<I18nProviderProps, "children">;
     l10n: Omit<L10nProviderProps, "children">;
+    /**
+     * Global user preference for how times are displayed and edited (12h/24h).
+     * When set, F0 time fields render/parse in this hour cycle so the app can
+     * honor the user's preference instead of the browser locale. When omitted,
+     * time fields use the native browser-locale input.
+     */
+    hourCycle?: HourCycle;
     isDev?: boolean;
     showExperimentalWarnings?: boolean;
     dataCollectionStorageHandler?: DataCollectionStorageHandler;
@@ -11885,6 +12192,8 @@ export declare interface F0QuestionCardStep {
     question: string;
     options: F0QuestionCardOption[];
 }
+
+declare type F0ResourceHeaderProps = Props_4;
 
 /**
  * F0 config options specific to rich text fields
@@ -12722,7 +13031,7 @@ export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
     icon?: IconType;
     /** Description text (e.g., "Completed on 20/2025") */
     description?: string;
-    /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as ResourceHeader */
+    /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as F0ResourceHeader */
     metadata?: (MetadataItem | undefined | boolean)[];
     /** Primary action button (displayed on the right after a divider) */
     primaryAction?: F0TimelineRowAction;
@@ -13674,6 +13983,15 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     /** Tag columns that are always visible and cannot be hidden in the settings. */
     pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
+     * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+     * still listed in the settings but with its toggle forced OFF and disabled,
+     * and the given (already-translated) text shown in a tooltip. Unlike
+     * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+     * icon — the disabled switch + tooltip is the affordance. The caller should
+     * also omit these columns' tags from `tags(record)`.
+     */
+    lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
      */
@@ -13710,6 +14028,18 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      * the default entry view (roots expanded to `defaultExpandDepth`).
      */
     focusOnEntry?: string;
+    /**
+     * Id of a node to mark as **selected on entry** — the click-selection ring, so
+     * a deep link lands on the graph looking the way a user's own click leaves it,
+     * not just framed. Seeded on the first render; the selection then follows
+     * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+     * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+     * branch is expanded and framed — otherwise the ring isn't visible until its
+     * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+     * the reveal highlight. Providing it puts the graph's selection in controlled
+     * mode; omitting it leaves selection uncontrolled (the default).
+     */
+    initialSelectedNodeId?: string;
     /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
@@ -14062,6 +14392,9 @@ widgets?: ReactNode[];
 children?: ReactNode;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+/** How times are displayed and edited: 12-hour (AM/PM) or 24-hour. */
+declare type HourCycle = "12h" | "24h";
+
 export declare interface HourDistributionCellValue {
     dataPoints: HourDistributionDataPoint[];
     /** Label for worked time in tooltips. Defaults to "Worked". */
@@ -14234,6 +14567,27 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
      * Used to determine if additional requests should be made for pagination.
      */
     hasMore: boolean;
+};
+
+/**
+ * Structured help copy for a labelled thing — a table column, a dashboard
+ * widget. `link` is for what the description implies but cannot do: opening the
+ * catalog entry the copy came from.
+ */
+export declare type InfoHintContent = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the icon trigger. Falls back to `label` on the host
+     * and then to a generic "More information", so the trigger is never named
+     * after the thing it describes alone — a name identical to the heading
+     * beside it says nothing about what the control does.
+     */
+    label?: string;
 };
 
 /**
@@ -16727,8 +17081,6 @@ export declare function resolveWindowNeighbors<R extends RecordType>({ records, 
     idProvider: (item: R, index?: number) => DataSourceItemId;
 }): NeighborResolution<R>;
 
-declare type ResourceHeaderProps = Props_4;
-
 /** All styling props that can be overridden per breakpoint */
 export declare interface ResponsiveStyleProps {
     display?: DisplayToken;
@@ -17321,7 +17673,7 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
 declare interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
     inline: true;
     /**
-     * Hide the built-in ResourceHeader (title + description). Useful when the
+     * Hide the built-in F0ResourceHeader (title + description). Useful when the
      * embedding page already renders its own resource header above the form.
      */
     hideResourceHeader?: boolean;
@@ -17359,7 +17711,7 @@ declare interface SurveyAnsweringFormSharedProps {
     elements: SurveyFormBuilderElement[];
     title: string;
     description?: string;
-    resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">;
+    resourceHeader?: Omit<F0ResourceHeaderProps, "title" | "description">;
     defaultValues?: Partial<SurveyAnswers>;
     loading?: boolean;
     datasets?: SurveyDatasets;
@@ -17567,19 +17919,16 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, highlighted, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
-declare type TableHeaderInfo = {
-    title: string;
-    description: string;
-    link?: {
-        label: string;
-        onClick: () => void;
-    };
-    /**
-     * Accessible name for the info-icon trigger. Defaults to the column label
-     * when the header's children are a string.
-     */
-    label?: string;
-};
+/**
+ * Structured help copy for a column header. The same shape every other
+ * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
+ * the column label when the header's children are a string.
+ *
+ * A table-specific name for a shape that is no longer table-specific: the
+ * canonical export is `InfoHintContent`, and this stays as an alias so
+ * existing imports keep working.
+ */
+declare type TableHeaderInfo = InfoHintContent;
 
 declare interface TableHeadProps {
     children: React.ReactNode;
@@ -17678,6 +18027,27 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      */
     frozenColumns?: 0 | 1 | 2;
     /**
+     * For nested tables, which rows start out expanded before the user touches
+     * anything. Pass `true` for the whole tree, a depth, or a predicate:
+     *
+     * ```ts
+     * defaultExpanded: true                            // everything
+     * defaultExpanded: 2                               // down to depth 2
+     * defaultExpanded: (node) => node.type !== "role"  // stop at roles
+     * ```
+     *
+     * Once the user expands or collapses a row their choice wins for that row and
+     * the policy no longer applies to it. Changing filters, sortings or
+     * navigation filters resets the tree, so the policy applies again and a
+     * filtered view comes back expanded.
+     *
+     * Expanding a row loads its children, so a policy that opens a large tree
+     * costs one `fetchChildren` per opened row on first paint.
+     *
+     * @default false
+     */
+    defaultExpanded?: DefaultExpandedPolicy<R>;
+    /**
      * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
      */
     allowColumnReordering?: boolean;
@@ -17699,8 +18069,32 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * `noRemoving` are never removable.
      */
     onRemoveColumn?: (columnId: ColId) => void;
+    /**
+     * The user-managed frozen columns in the column-settings popover. Locked
+     * columns move into a sticky group on the left, stay visible, and cannot be
+     * reordered or removed. Their array order controls their order in that group.
+     * One visible managed column always remains unlocked as the table's
+     * scrollable region; an all-locked input is normalized accordingly.
+     *
+     * Unlocking a column returns it to its saved position. Columns covered by
+     * `frozenColumns` remain permanently locked before this managed group.
+     */
+    lockedColumnIds?: readonly ColId[];
+    /**
+     * Called with the complete set of user-managed locked column ids whenever a
+     * user locks or unlocks a column. Passing this callback enables the lock
+     * controls in the column-settings popover.
+     */
+    onLockedColumnIdsChange?: (columnIds: ColId[]) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
+    /**
+     * In a table with nested rows, renders the cell text of the root rows
+     * (depth 0) in bold so aggregate rows stand out from their children.
+     * Cells that fix their own weight (tags, deltas) keep it.
+     * @default false
+     */
+    boldRootRows?: boolean;
     /**
      * Header group configuration. Keys are the `headerGroupId` values used in
      * column definitions. Pass a string for a plain spanning label, or a
@@ -19580,6 +19974,17 @@ export declare const WeekStartDay: {
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
 /**
+ * Optional call-to-action rendered as a pill above the welcome phrase (e.g. a
+ * "How to use One" shortcut). The host owns `onClick`; f0 owns the pill styling
+ * so it stays consistent with the rest of the welcome screen.
+ */
+export declare type WelcomeScreenCta = {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+};
+
+/**
  * A welcome-screen group rendered as an outline button in the welcome row.
  * Clicking the group opens a popover listing its `items`. The number of groups
  * is not capped yet (unlike welcome cards, which top out at 4).
@@ -19770,9 +20175,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -19780,11 +20187,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }

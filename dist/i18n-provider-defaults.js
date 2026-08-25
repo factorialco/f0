@@ -490,7 +490,9 @@ const e = {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
         addColumn: "Add column",
-        removeColumn: "Remove column"
+        removeColumn: "Remove column",
+        lockColumn: "Lock column: {{label}}",
+        unlockColumn: "Unlock column: {{label}}"
       }
     },
     editableTable: {
@@ -696,6 +698,13 @@ const e = {
       exporting: "Exporting…"
     },
     dashboardItem: {
+      /**
+       * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+       * override it — factorial renders it as plain "Ask" for the widget and
+       * insight-card buttons). This menu entry needs the product name spelled
+       * out, so it owns its own key.
+       */
+      askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",
@@ -728,6 +737,7 @@ const e = {
     fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    dropWidgetToDiscuss: "Drop here to discuss with One",
     reply: "Reply",
     removeQuote: "Remove quote",
     clarifyingQuestion: {
