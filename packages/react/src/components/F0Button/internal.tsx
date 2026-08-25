@@ -172,7 +172,9 @@ const ButtonInternal = forwardRef<
         {iconPosition === "right" && iconNode}
         {append}{" "}
         {counterValue && (
-          <Counter value={counterValue} size="sm" type="default" />
+          <span className="ml-0.5">
+            <Counter value={counterValue} size="sm" type="default" />
+          </span>
         )}
       </div>
     </Action>
