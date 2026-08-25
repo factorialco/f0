@@ -282,12 +282,11 @@ export const ChartAreaSelectionMode: Story = {
 
     await step("Activate chart-area selection", async () => {
       await canvas.findByText("Headcount by Department", { exact: true })
+      const drawToAskOne = await canvas.findByRole("button", {
+        name: "Draw to ask One",
+      })
       compactChartTop = getChartFrame()!.getBoundingClientRect().top
-      await userEvent.click(
-        await canvas.findByRole("button", {
-          name: "Draw to ask One",
-        })
-      )
+      await userEvent.click(drawToAskOne)
       await expect(
         canvas.getByRole("button", { name: "Cancel selection" })
       ).toBeInTheDocument()
