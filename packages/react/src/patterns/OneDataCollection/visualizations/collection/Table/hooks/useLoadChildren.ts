@@ -41,7 +41,6 @@ interface UseLoadChildrenProps<
     NavigationFilters,
     Grouping
   >
-  onClearFetchedData: () => void
 }
 
 const isDetailed = <R extends RecordType>(
@@ -80,7 +79,6 @@ export const useLoadChildren = <
   rowId,
   item,
   source,
-  onClearFetchedData,
 }: UseLoadChildrenProps<
   R,
   Filters,
@@ -121,8 +119,11 @@ export const useLoadChildren = <
       setChildren([])
       setPaginationInfo(undefined)
       setChildrenType("basic")
+      // Returns every row to "undecided" (and bumps the reset generation) so the
+      // default-expansion policy applies again — see `clearFetchedData`. The row
+      // is deliberately not force-collapsed here: that is what used to defeat the
+      // policy on a filter/sorting change.
       clearFetchedData()
-      onClearFetchedData()
 
       previousFiltersRef.current = source.currentFilters
       previousSortingsRef.current = source.currentSortings
@@ -133,7 +134,6 @@ export const useLoadChildren = <
     source.currentSortings,
     source.currentNavigationFilters,
     clearFetchedData,
-    onClearFetchedData,
   ])
 
   const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()

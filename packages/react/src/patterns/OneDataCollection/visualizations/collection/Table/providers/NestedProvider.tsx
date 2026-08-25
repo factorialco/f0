@@ -44,6 +44,13 @@ interface NestedDataContextValue<R extends RecordType> {
   expandedRowIds: Record<string, boolean>
   setRowExpanded: (rowId: string, expanded: boolean) => void
   isExpandedByDefault: (record: R, depth: number) => boolean
+  /**
+   * Bumped every time the tree is reset (a filter/sorting/navigation change).
+   * Rows key their "already asked for my default children" flag on it, so a
+   * reset re-arms the default-expansion request instead of leaving an opened
+   * row stuck with the children that `clearFetchedData` just wiped.
+   */
+  resetGeneration: number
 }
 
 const NestedDataContext = createContext<
@@ -75,9 +82,15 @@ export const NestedDataProvider = <R extends RecordType>({
     Record<string, boolean>
   >({})
 
+  const [resetGeneration, setResetGeneration] = useState(0)
+
+  // Wiping `expandedRowIds` returns every row to "undecided" so the policy
+  // applies again; bumping the generation re-arms each row's default-children
+  // request. Both together bring a policy-expanded tree back after a reset.
   const clearFetchedData = useCallback(() => {
     setFetchedData({})
     setExpandedRowIdsState({})
+    setResetGeneration((generation) => generation + 1)
   }, [])
 
   // Records the `false` rather than dropping the entry — see `expandedRowIds`.
@@ -105,6 +118,7 @@ export const NestedDataProvider = <R extends RecordType>({
           expandedRowIds,
           setRowExpanded,
           isExpandedByDefault,
+          resetGeneration,
         } as NestedDataContextValue<RecordType>
       }
     >
