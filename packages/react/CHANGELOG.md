@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.54.0](https://github.com/factorialco/f0/compare/f0-react-v6.53.0...f0-react-v6.54.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** withdraw the add offer per column ([#5230](https://github.com/factorialco/f0/issues/5230)) ([d1a5f0d](https://github.com/factorialco/f0/commit/d1a5f0d6159746320bbef8b028257fd05e11d7a7))
+
 ## [6.53.0](https://github.com/factorialco/f0/compare/f0-react-v6.52.0...f0-react-v6.53.0) (2026-08-25)
 
 
