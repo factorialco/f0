@@ -402,6 +402,7 @@ export function F0GraphView<T = unknown>(
     reservedTagHeight,
     renderedNodeCount,
     renderedNodeIds,
+    treeRootNodeIds,
     contentBounds,
     getNodePosition,
   } = useGraphRenderModel<T>({
@@ -700,6 +701,24 @@ export function F0GraphView<T = unknown>(
     [focusedNodeId, setFocusedNodeId, registerNodeRef]
   )
 
+  // React Flow wraps its content in a hardcoded `role="application"` div, which
+  // sits between this `role="tree"` container and the `role="treeitem"` nodes
+  // and severs the ARIA tree relationship. Reconnect it with `aria-owns`: the
+  // tree owns the rendered forest-root treeitems (`treeRootNodeIds`), and each
+  // in-window parent node re-owns its own children (see `visibleChildIds`), so
+  // every rendered treeitem has exactly one owner. While the tree renders no
+  // treeitems (deferred / staged / viewport data loading, or an empty graph),
+  // `aria-busy` keeps the empty tree valid instead of failing
+  // `aria-required-children`.
+  const treeIsEmpty = treeRootNodeIds.length === 0
+  const treeAriaOwns = useMemo(
+    () =>
+      treeRootNodeIds.length > 0
+        ? treeRootNodeIds.map((id) => `f0-graph-node-${id}`).join(" ")
+        : undefined,
+    [treeRootNodeIds]
+  )
+
   return (
     <F0GraphActionsContext.Provider value={actionsContextValue}>
       <F0GraphRenderConfigContext.Provider value={renderConfigContextValue}>
@@ -726,6 +745,8 @@ export function F0GraphView<T = unknown>(
                       ref={containerRef}
                       role="tree"
                       aria-label={controlLabels?.graphView ?? i18n.graph.view}
+                      aria-owns={treeAriaOwns}
+                      aria-busy={treeIsEmpty || undefined}
                       onKeyDown={handleTreeKeyDown}
                       onPointerDown={(e) => {
                         pointerDownRef.current = {

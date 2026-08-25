@@ -22,9 +22,20 @@ const meta = {
     layout: "centered",
   },
   decorators: [
+    // A bare `role="treeitem"` (what F0GraphNode renders) needs a `tree`/`group`
+    // owner or axe fails `aria-required-parent`. In the real graph the
+    // `role="tree"` container provides it; here a `role="group"` wrapper does —
+    // a valid treeitem parent (axe requiredContext is `group`/`tree`) that, being
+    // `group`, has no required children of its own, so a story that can't reach
+    // its node through the DOM (the node sits behind a nested `<ReactFlow>`'s
+    // `role="application"`) doesn't make this wrapper fail `aria-required-children`.
+    // Those stories provide their own `role="tree"` with `aria-owns` instead —
+    // see WithToolbar / ToolbarDemo.
     (Story) => (
       <ReactFlowProvider>
-        <Story />
+        <div role="group" aria-label="Graph node preview">
+          <Story />
+        </div>
       </ReactFlowProvider>
     ),
   ],
@@ -348,7 +359,17 @@ const toolbarDemoNodes: Node[] = [
 
 function ToolbarDemo() {
   return (
-    <div style={{ width: 480, height: 240 }}>
+    // The node renders inside React Flow's hardcoded `role="application"` div,
+    // which severs the DOM tree→treeitem relationship. Mirror F0GraphView: a
+    // `role="tree"` directly wrapping React Flow re-owns the node via `aria-owns`
+    // (`ToolbarDemoNode` sets nodeId="toolbar-demo" → DOM id below), so the lone
+    // treeitem has a valid, owning parent.
+    <div
+      role="tree"
+      aria-label="Graph node preview"
+      aria-owns="f0-graph-node-toolbar-demo"
+      style={{ width: 480, height: 240 }}
+    >
       <ReactFlow
         nodes={toolbarDemoNodes}
         nodeTypes={toolbarNodeTypes}

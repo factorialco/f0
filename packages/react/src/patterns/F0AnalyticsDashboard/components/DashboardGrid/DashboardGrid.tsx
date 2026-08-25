@@ -430,7 +430,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           if (title) {
             window.dispatchEvent(
               new CustomEvent(WIDGET_DRAG_START, {
-                detail: { id, title, onAskAi },
+                detail: { id, title, onAskAi, onAskAiTarget },
               })
             )
           }
@@ -495,7 +495,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       document.addEventListener("pointerup", up)
       document.addEventListener("pointercancel", cancel)
     },
-    [commitDrop, onAskAi, resolveDropTarget]
+    [commitDrop, onAskAi, onAskAiTarget, resolveDropTarget]
   )
 
   // A drag in flight when this unmounts (navigating away, switching

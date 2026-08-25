@@ -1,5 +1,47 @@
 # Changelog
 
+## [6.54.1](https://github.com/factorialco/f0/compare/f0-react-v6.54.0...f0-react-v6.54.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **F0Graph:** restore ARIA tree semantics flagged by axe ([#5228](https://github.com/factorialco/f0/issues/5228)) ([0f4e24b](https://github.com/factorialco/f0/commit/0f4e24b8d3b89f36d642964d619d55f1aa79c3cc))
+
+## [6.54.0](https://github.com/factorialco/f0/compare/f0-react-v6.53.0...f0-react-v6.54.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** withdraw the add offer per column ([#5230](https://github.com/factorialco/f0/issues/5230)) ([d1a5f0d](https://github.com/factorialco/f0/commit/d1a5f0d6159746320bbef8b028257fd05e11d7a7))
+
+## [6.53.0](https://github.com/factorialco/f0/compare/f0-react-v6.52.0...f0-react-v6.53.0) (2026-08-25)
+
+
+### Features
+
+* **DateNavigator:** select consumer-defined periods ([#5161](https://github.com/factorialco/f0/issues/5161)) ([3a8246f](https://github.com/factorialco/f0/commit/3a8246f2f89735416922cdb3a4060e169bd29534))
+
+## [6.52.0](https://github.com/factorialco/f0/compare/f0-react-v6.51.1...f0-react-v6.52.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** add F0OneSwitch to the top-right controls ([#5224](https://github.com/factorialco/f0/issues/5224)) ([ce02a35](https://github.com/factorialco/f0/commit/ce02a35f4f08e16b3b4ef3b0d3cfb8514849954b))
+
+## [6.51.1](https://github.com/factorialco/f0/compare/f0-react-v6.51.0...f0-react-v6.51.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **api-surface:** compare wrapped components structurally, not as text ([#5219](https://github.com/factorialco/f0/issues/5219)) ([6e3e958](https://github.com/factorialco/f0/commit/6e3e95884827365e5f5b772e25d4d3ddd90204f9))
+
+## [6.51.0](https://github.com/factorialco/f0/compare/f0-react-v6.50.0...f0-react-v6.51.0) (2026-08-25)
+
+
+### Features
+
+* **Home:** area-specific widgets, Communities carousel, F0CarouselDialog ([#5214](https://github.com/factorialco/f0/issues/5214)) ([80bd511](https://github.com/factorialco/f0/commit/80bd511f2aaf1235ee1aa46ddec84110aa72a8df))
+
 ## [6.50.0](https://github.com/factorialco/f0/compare/f0-react-v6.49.1...f0-react-v6.50.0) (2026-08-24)
 
 

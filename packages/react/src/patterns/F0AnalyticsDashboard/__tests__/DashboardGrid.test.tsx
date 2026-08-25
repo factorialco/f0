@@ -371,6 +371,58 @@ describe("DashboardGrid", () => {
       expect(grip.getAttribute("draggable")).toBeNull()
     })
 
+    it("announces the exact target observer to the chat drop path", () => {
+      const onAskAiTarget = vi.fn()
+      const onStart = vi.fn<(event: Event) => void>()
+      window.addEventListener(WIDGET_DRAG_START, onStart)
+
+      try {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+            onAskAiTarget={onAskAiTarget}
+          />
+        )
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+
+        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 10,
+            bubbles: true,
+          })
+        )
+
+        expect(onStart).toHaveBeenCalledTimes(1)
+        const event = onStart.mock
+          .calls[0][0] as CustomEvent<WidgetDragStartDetail>
+        expect(event.detail).toEqual({
+          id: "expenses",
+          title: "Expenses",
+          onAskAi: undefined,
+          onAskAiTarget,
+        })
+
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 10,
+            clientY: 10,
+            bubbles: true,
+          })
+        )
+      } finally {
+        window.removeEventListener(WIDGET_DRAG_START, onStart)
+      }
+    })
+
     it("reorders a widget via a pointerdown-on-grip → move → up gesture (no native drag)", () => {
       const { container } = render(
         <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />

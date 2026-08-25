@@ -19,6 +19,7 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 // No `Pencil`/`Check`: there is no edit mode to toggle any more.
 import { Plus } from "@/icons/app"
 import Menu from "@/icons/app/Menu"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -520,6 +521,18 @@ export interface NewHomeLayoutProps {
    */
   editableWidgetContainers?: WidgetContainerSide[]
   /**
+   * Which containers may still be ADDED TO. Narrower than
+   * `editableWidgetContainers`, which it is a subset of: a column not named here
+   * keeps its dragging and its "Remove widget" and only loses the offer to add.
+   *
+   * Defaults to every editable container — the common case, where the catalog
+   * always has something for every column. Name the sides once a column's
+   * catalog can run out: a main column that only ever holds one kind of widget
+   * has nothing to offer the moment that widget is on it, and a "+" that opens
+   * an empty picker is an offer the app cannot keep.
+   */
+  addableWidgetContainers?: WidgetContainerSide[]
+  /**
    * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
    * default: for a Home of a dozen widgets, mounting them all is what keeps a
    * card's data, clock and animation alive across everything this layout does to
@@ -578,7 +591,10 @@ export interface NewHomeLayoutProps {
     widget: HomeWidgetItem,
     params: WidgetParams
   ) => ReactNode
-  /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+  /**
+   * When set, renders a "+ Add widget" affordance at the bottom of each column
+   * that takes widgets — see `addableWidgetContainers`.
+   */
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
   onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
@@ -607,6 +623,15 @@ export interface NewHomeLayoutProps {
   stackedPinsAfter?: number
   ctx?: HomeRenderCtx
   className?: string
+  /** Tooltip copy for the One switch, forwarded to `F0OneSwitch`. */
+  oneSwitchTooltip?: { whenDisabled?: string; whenEnabled?: string }
+  /** Opens the One switch's tooltip for 3s on mount. */
+  oneSwitchAutoOpen?: boolean
+  /**
+   * Hides the One AI toggle in the controls row. Use when One is reached
+   * elsewhere (e.g. a sidebar tab) so Home doesn't show a redundant switch.
+   */
+  hideOneSwitch?: boolean
 }
 
 /**
@@ -635,6 +660,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       slotRenderers,
       renderWidget,
       editableWidgetContainers = ["main", "right"],
+      addableWidgetContainers,
       virtualizedWidgetContainers = [],
       virtualization,
       onRemoveWidget,
@@ -650,6 +676,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       stackedPinsAfter = 2,
       ctx = {},
       className,
+      oneSwitchTooltip,
+      oneSwitchAutoOpen,
+      hideOneSwitch = false,
     },
     ref
   ) {
@@ -692,6 +721,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
       editableWidgetContainers.includes(side)
+    // ADDING is a narrowing of arranging: a column you cannot arrange is not one
+    // you can add to, and an omitted `addableWidgetContainers` means every
+    // arrangeable column takes new widgets.
+    const canAddToSide = (side: WidgetContainerSide) =>
+      canEditSide(side) && (addableWidgetContainers?.includes(side) ?? true)
 
     const render = (widget: HomeWidgetItem) => {
       const node = renderWidget ? (
@@ -740,7 +774,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         : false
 
     const hasSide =
-      aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
+      aside != null ||
+      rightWidgets.length > 0 ||
+      (onClickAddNewWidget != null && canAddToSide("right"))
     // Two reasons the rail collapses, and they don't compete: there ISN'T ROOM
     // for both columns, or you ASKED for the space. Narrowness always wins —
     // expanding by hand can't conjure room the layout doesn't have — so the
@@ -752,6 +788,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       rightWidgets.length > 0 &&
       (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
+    // ONE string for the rail toggle: its accessible name AND what the tooltip
+    // says. A control whose tooltip and label can drift is two controls.
+    const railToggleLabel = collapsed
+      ? "Expand widgets panel"
+      : "Collapse widgets panel"
     // NOTHING ON THE RIGHT UNTIL THE BOX HAS BEEN MEASURED. Which presentation the
     // rail is in — column, strip, or nothing at all — is decided entirely by the
     // width, so drawn before there is one its first state is a guess the next
@@ -1022,23 +1063,33 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 is collapsed regardless, so a toggle there would be a control
                 that does nothing. */}
             {hasSide && rightWidgets.length > 0 && !autoCollapsed ? (
-              <Action
-                variant="ghost"
-                size="md"
-                compact
-                onClick={() => setManualCollapsed(!collapsed)}
-                title={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-                aria-label={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-              >
-                {/* The sidebar's own collapse glyph, so collapsing the rail and
-                    collapsing the sidebar read as the same gesture. */}
-                <SidebarIconSvg isExpanded={!collapsed} />
-              </Action>
+              // f0's own tooltip rather than the browser's `title`: an
+              // icon-only control needs its name on hover, and the native one
+              // arrives late, unstyled, and never for a keyboard.
+              <Tooltip label={railToggleLabel}>
+                <Action
+                  variant="ghost"
+                  size="md"
+                  compact
+                  onClick={() => setManualCollapsed(!collapsed)}
+                  aria-label={railToggleLabel}
+                >
+                  {/* The sidebar's own collapse glyph, so collapsing the rail and
+                      collapsing the sidebar read as the same gesture. */}
+                  <SidebarIconSvg isExpanded={!collapsed} />
+                </Action>
+              </Tooltip>
             ) : null}
+            {/* The One toggle sits where it sits on every other layout — last in
+                the top-right controls, after the rail's own collapse button. It
+                draws NOTHING unless the AI chat context is enabled, so a Home
+                without One keeps the row it had. */}
+            {!hideOneSwitch && (
+              <F0OneSwitch
+                tooltip={oneSwitchTooltip}
+                autoOpen={oneSwitchAutoOpen}
+              />
+            )}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should
@@ -1103,7 +1154,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             renderWidgetPreview={renderWidgetPreview}
             paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
-              onClickAddNewWidget
+              onClickAddNewWidget && canAddToSide("main")
                 ? () => onClickAddNewWidget("main")
                 : undefined
             }
@@ -1196,7 +1247,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               {/* Always offered, not only in edit mode: collapsed, the strip has
                     no edit affordance of its own, and adding a widget is the one
                     thing you would still want from it. */}
-              {canEditSide("right") && onClickAddNewWidget ? (
+              {canAddToSide("right") && onClickAddNewWidget ? (
                 // The same control the column's placeholder is — a dashed box
                 // around one glyph, named only on hover — at the strip's size.
                 <Tooltip label={t.widgets.addWidget}>
@@ -1324,7 +1375,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.
               onClickAddNewWidget={
-                onClickAddNewWidget && !collapsed
+                onClickAddNewWidget && canAddToSide("right") && !collapsed
                   ? () => onClickAddNewWidget("right")
                   : undefined
               }

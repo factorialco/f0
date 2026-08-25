@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import type {
   F0DataChartAreaSelection,
@@ -188,15 +188,58 @@ const ChatProbe = ({
         </button>
       )}
       <textarea ref={inputRef} aria-label="Chat question" />
+      {onCapture && (
+        <button type="button" onClick={() => onCapture(pendingQuote)}>
+          Capture pending quote
+        </button>
+      )}
     </>
   )
 }
 
 describe("ChartItem — asking about a mark", () => {
+  beforeEach(() => localStorage.clear())
+
+  it.each([
+    { type: "bar" },
+    { type: "line" },
+    { type: "funnel" },
+    { type: "pie" },
+    { type: "radar" },
+    { type: "gauge" },
+    { type: "heatmap" },
+    { type: "scatter" },
+  ] satisfies DashboardChartConfig[])(
+    "observes built-in point asks for $type charts",
+    async (chart) => {
+      const onAskAiTarget = vi.fn()
+      render(
+        <AiChatStateProvider enabled>
+          <ChatProbe />
+          <ChartItem
+            item={{ ...item, chart }}
+            filters={{}}
+            onAskAiTarget={onAskAiTarget}
+          />
+        </AiChatStateProvider>
+      )
+
+      await pickAMark()
+
+      expect(onAskAiTarget).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+        point: POINT,
+        quote: { text: expect.any(String) },
+      })
+    }
+  )
+
   it("hands the host the mark, not a sentence built from it", async () => {
     const onAskAi = vi.fn(() =>
       screen.getByRole("button", { name: "Host chat" }).focus()
     )
+    const onAskAiTarget = vi.fn()
     const onFullscreenChange = vi.fn()
     render(
       <AiChatStateProvider enabled>
@@ -206,6 +249,7 @@ describe("ChartItem — asking about a mark", () => {
           item={item}
           filters={{}}
           onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           isFullscreen
           onFullscreenChange={onFullscreenChange}
         />
@@ -221,6 +265,7 @@ describe("ChartItem — asking about a mark", () => {
       title: "Headcount by workplace",
       point: POINT,
     })
+    expect(onAskAiTarget).not.toHaveBeenCalled()
     expect(screen.getByTestId("probe")).toHaveAttribute("data-quote", "")
     expect(screen.getByTestId("probe")).toHaveAttribute("data-open", "false")
     expect(
@@ -1275,6 +1320,26 @@ describe("buildAccessibleChartPoints", () => {
     expected: F0AnalyticsDashboardPointClick[]
   }> = [
     {
+      name: "finite bar marks",
+      chart: {
+        type: "bar",
+        categories: ["Engineering"],
+        series: [{ name: "Headcount", data: [145] }],
+      },
+      expected: [
+        {
+          ...keyboardPosition,
+          seriesName: "Headcount",
+          category: "Engineering",
+          value: 145,
+          values: [145],
+          series: [{ name: "Headcount", seriesIndex: 0, value: 145 }],
+          dataIndex: 0,
+          seriesIndex: 0,
+        },
+      ],
+    },
+    {
       name: "line categories with their complete finite series column",
       chart: {
         type: "line",
@@ -1371,6 +1436,26 @@ describe("buildAccessibleChartPoints", () => {
           value: 72,
           values: [72],
           series: [{ name: "", seriesIndex: 0, value: 72 }],
+          dataIndex: 0,
+          seriesIndex: 0,
+        },
+      ],
+    },
+    {
+      name: "complete finite radar series",
+      chart: {
+        type: "radar",
+        indicators: [{ name: "Performance" }, { name: "Engagement" }],
+        series: [{ name: "Team A", data: [8, 7] }],
+      },
+      expected: [
+        {
+          ...keyboardPosition,
+          seriesName: "",
+          category: "Team A",
+          value: 7,
+          values: [8, 7],
+          series: [{ name: "", seriesIndex: 0, value: 7 }],
           dataIndex: 0,
           seriesIndex: 0,
         },

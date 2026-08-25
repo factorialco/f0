@@ -281,6 +281,7 @@ describe("DashboardItem — description action", () => {
 
     it("hands the widget to the host instead, when it takes the action", async () => {
       const onAskAi = vi.fn()
+      const onAskAiTarget = vi.fn()
       const onFullscreenChange = vi.fn()
       render(
         <AiChatStateProvider enabled>
@@ -291,6 +292,7 @@ describe("DashboardItem — description action", () => {
             isLoading={false}
             isFullscreen
             onAskAi={onAskAi}
+            onAskAiTarget={onAskAiTarget}
             onFullscreenChange={onFullscreenChange}
           >
             <div>Content</div>
@@ -305,6 +307,7 @@ describe("DashboardItem — description action", () => {
         id: "headcount",
         title: "Headcount by workplace",
       })
+      expect(onAskAiTarget).not.toHaveBeenCalled()
       // The chat is left alone entirely — the host may not even be sending the
       // widget there, so quoting into it would be a second, unasked-for action.
       const probe = screen.getByTestId("probe")
