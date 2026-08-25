@@ -493,7 +493,10 @@ export const listSlot = <const S extends ListSchema>(
  * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
  * type says so rather than leaving it to blow up at runtime.
  */
-export type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> &
+export type HomeWidgetChrome = Pick<
+  WidgetProps,
+  "action" | "summaries" | "headerControls"
+> &
   (
     | { alert?: WidgetProps["alert"]; status?: never }
     | { status?: WidgetProps["status"]; alert?: never }
@@ -783,11 +786,13 @@ export const widgetChrome = (widget: HomeWidgetItem): HomeWidgetChrome =>
     ? {
         action: widget.action,
         summaries: widget.summaries,
+        headerControls: widget.headerControls,
         alert: widget.alert,
       }
     : {
         action: widget.action,
         summaries: widget.summaries,
+        headerControls: widget.headerControls,
         status: "status" in widget ? widget.status : undefined,
       }) as HomeWidgetChrome
 

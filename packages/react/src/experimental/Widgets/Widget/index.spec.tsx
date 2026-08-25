@@ -189,3 +189,46 @@ describe("a wider card speaks up", () => {
     ).toContain("[&_.main]:h-6")
   })
 })
+
+describe("the widget's own controls", () => {
+  test("headerControls land in the header, left of the overflow menu", () => {
+    zeroRender(
+      <Widget
+        header={{ title: "Communities" }}
+        headerControls={<button type="button">New Post</button>}
+        actions={[{ label: "Mark all as read", onClick: () => {} }]}
+      >
+        <p>body</p>
+      </Widget>
+    )
+
+    const controls = screen.getByRole("button", { name: "New Post" })
+    const menu = screen.getByRole("button", { name: "Actions" })
+
+    expect(controls).toBeInTheDocument()
+    // The menu KEEPS THE CORNER: a control that moved depending on whether the
+    // card had a menu would be a different control on every card.
+    expect(
+      controls.compareDocumentPosition(menu) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  test("they are not the footer's call to action", () => {
+    zeroRender(
+      <Widget
+        header={{ title: "Communities" }}
+        headerControls={<button type="button">New Post</button>}
+        action={{ label: "Go to Communities", onClick: () => {} }}
+      >
+        <p>body</p>
+      </Widget>
+    )
+
+    // Two different controls in two different places — the header's is the
+    // widget's own, the footer's is the way out of it.
+    expect(screen.getByRole("button", { name: "New Post" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Go to Communities" })
+    ).toBeInTheDocument()
+  })
+})
