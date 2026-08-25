@@ -34,6 +34,7 @@ import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPa
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
+import { tableCellContentClassName } from "@/ui/value-display/const"
 
 import type {
   TableCustomizationProps,
@@ -104,12 +105,16 @@ export const TableCollection = <
   columns: originalColumns,
   source,
   frozenColumns = 0,
+  defaultExpanded,
   onSelectItems,
   onLoadData,
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  lockedColumnIds,
+  onLockedColumnIdsChange,
   referenceRowType,
+  boldRootRows,
   headerGroups: headerGroupsOption,
   onHeaderGroupCollapsedChange,
   bordered,
@@ -148,14 +153,22 @@ export const TableCollection = <
   )
 
   const { settings } = useDataCollectionSettings()
+  const usesExplicitColumnLocking =
+    lockedColumnIds !== undefined || !!onLockedColumnIdsChange
 
   // Sorted and hidden columns
-  const { columns: orderedColumns } = useColumns(
+  const { columns: orderedColumns, stickyColumnIds } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
-    allowColumnHiding
+    allowColumnHiding,
+    lockedColumnIds,
+    usesExplicitColumnLocking
+  )
+  const stickyColumnIdSet = useMemo(
+    () => new Set(stickyColumnIds),
+    [stickyColumnIds]
   )
 
   // Header groups own the collapsed state and drop the columns hidden by a
@@ -170,6 +183,7 @@ export const TableCollection = <
   } = useHeaderGroups(orderedColumns, {
     headerGroups: headerGroupsOption,
     onCollapsedChange: onHeaderGroupCollapsedChange,
+    preservedColumnIds: stickyColumnIdSet,
   })
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -187,6 +201,7 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
+    committedQuery,
   } = useDataCollectionData<
     R,
     Filters,
@@ -240,7 +255,7 @@ export const TableCollection = <
     // eslint-disable-next-line react-hooks/exhaustive-deps --  we don't want to re-run this effect when the filters change, just when the data changes
   }, [paginationInfo?.total, data.records])
 
-  const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
+  const frozenColumnsLeft = stickyColumnIds.length
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return `id:${String(item.id)}`
@@ -254,16 +269,10 @@ export const TableCollection = <
     data?.type === "flat"
       ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
       : []
-  // Identity of the current pagination position. When it changes the row set is
-  // swapped by navigation (paging / loading more), not by an insert, so the
-  // flash must be suppressed for that render.
-  const paginationResetKey =
-    paginationInfo?.type === "pages"
-      ? paginationInfo.currentPage
-      : paginationInfo?.type === "infinite-scroll"
-        ? paginationInfo.cursor
-        : undefined
-  const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
+  // Keyed on the query these records answer, not the one the user has
+  // selected: the latter changes a render before its data arrives, and reseeding
+  // the flash baseline there memorises the previous query's rows.
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, committedQuery)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
@@ -432,11 +441,14 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
-
+  // Mounted unconditionally rather than swapped for a `Fragment` on flat
+  // tables: it only holds nested state that flat tables never read, and
+  // choosing the wrapper by branch made it impossible to pass it props without
+  // rebuilding the component type — which would remount the whole table
+  // whenever a consumer passed an inline `defaultExpanded` predicate.
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <TableWrapper>
+      <NestedDataProvider defaultExpanded={defaultExpanded}>
         <div
           ref={tableContainerRef}
           className={cn(
@@ -485,6 +497,9 @@ export const TableCollection = <
                         align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
+                        highlighted={entry.columnIndices.some(
+                          (columnIndex) => columns[columnIndex].highlighted
+                        )}
                         // The toggle lives on the cell, not on the button, so
                         // the whole header is the hit area. The button keeps
                         // the focus ring and `aria-expanded` and lets its click
@@ -548,6 +563,9 @@ export const TableCollection = <
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}
+                        highlighted={
+                          !!columns[entry.columnIndices[0]].highlighted
+                        }
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
@@ -877,6 +895,7 @@ export const TableCollection = <
                       checkColumnWidth={checkColumnWidth}
                       tableWithChildren={tableWithChildren}
                       referenceRowType={referenceRowType}
+                      boldRootRows={boldRootRows}
                       rowWrapper={RowWrapper}
                       cellRenderer={cellRenderer}
                       fromVisualization={fromVisualization}
@@ -962,6 +981,7 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          highlighted={!!column.highlighted}
                           className={cn(
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||
@@ -980,7 +1000,8 @@ export const TableCollection = <
                             <div
                               className={cn(
                                 column.align === "right" ? "justify-end" : "",
-                                "flex"
+                                "flex",
+                                tableCellContentClassName
                               )}
                             >
                               {(() => {
@@ -1125,7 +1146,7 @@ export const TableCollection = <
           setPage={setPage}
           className="pb-4"
         />
-      </TableWrapper>
+      </NestedDataProvider>
     </div>
   )
 }

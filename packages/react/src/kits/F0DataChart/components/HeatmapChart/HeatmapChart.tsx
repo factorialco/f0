@@ -9,6 +9,7 @@ import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
+import { usePointClick } from "../../utils/usePointClick"
 import { useHeatmapChartOptions } from "./useHeatmapChartOptions"
 
 export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
@@ -18,6 +19,7 @@ export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
   const size = resolveChartSize(width)
   const options = useHeatmapChartOptions(ref, props, size)
   const chartRef = useEChartsInstance(ref, options)
+  usePointClick(chartRef, props.onPointClick)
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
 

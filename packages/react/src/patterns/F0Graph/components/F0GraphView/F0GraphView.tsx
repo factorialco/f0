@@ -434,6 +434,7 @@ export function F0GraphView<T = unknown>(
     reservedTagHeight,
     renderedNodeCount,
     renderedNodeIds,
+    treeRootNodeIds,
     contentBounds,
     getNodePosition,
     stackHoverZones,
@@ -581,59 +582,6 @@ export function F0GraphView<T = unknown>(
     enabled: !enableNodeWindowing || viewportReady,
   })
 
-  // Initial frame: when `initialFocusNodeId` is set, open framed on that node
-  // AND its direct children (capped zoom) so the first level is visible —
-  // instead of fit-to-all, and without zooming in on the single node. Frozen at
-  // the first render with nodes present so the fit reads a stable value; falls
-  // back to fit-all when the target isn't present.
-  const initialFitRef = useRef<
-    { nodes: Array<{ id: string }>; maxZoom: number } | undefined
-  >(undefined)
-  const initialFitResolvedRef = useRef(false)
-  if (!initialFitResolvedRef.current && renderedNodeIds.length > 0) {
-    initialFitResolvedRef.current = true
-    const childIds = initialFocusNodeId
-      ? (nodeMap.get(initialFocusNodeId)?.children.map((c) => c.id) ?? [])
-      : []
-    const nodes = resolveInitialFitViewNodes(
-      initialFocusNodeId,
-      childIds,
-      new Set(renderedNodeIds)
-    )
-    initialFitRef.current = nodes
-      ? { nodes, maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom) }
-      : undefined
-  }
-  const initialFitViewOptions = initialFitRef.current
-
-  // Apply the initial frame exactly once, imperatively — never via React Flow's
-  // `fitView` prop. That prop queues a fit deferred until the container/nodes
-  // are measured, and once it fires it clears `fitViewOptions`; a later layout
-  // change (the first collapse/expand) then re-fires it as a fit-all, snapping
-  // the focused node away. Fitting ourselves, guarded by a ref, guarantees a
-  // single fit framed on `initialFitViewOptions` and no re-fit on any later
-  // layout change. Consumer-driven reveals still fly via the effect below.
-  const didInitialFitRef = useRef(false)
-  useEffect(() => {
-    if (didInitialFitRef.current || renderedNodeIds.length === 0) return
-    didInitialFitRef.current = true
-    // Honor the inset on the first frame too, so an already-open panel never
-    // opens the graph with the focus target behind it. When there's no inset the
-    // options are passed through untouched (identical to before).
-    reactFlow.fitView(
-      hasViewportInset
-        ? {
-            ...initialFitViewOptions,
-            // Base matches React Flow's own default fitView padding (0.1), so
-            // with no inset this stays byte-identical to the untouched call.
-            padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
-          }
-        : initialFitViewOptions
-    )
-    // Guarded by `didInitialFitRef` so it runs once; `hasViewportInset` /
-    // `getFitPadding` are read fresh at that point and intentionally omitted.
-  }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
-
   // ── Fly to the consumer-controlled focused node ──
   // Latest fly-to logic, read via a ref so the effect below depends ONLY on
   // `focusedNode`. Otherwise the effect would re-run on every layout-affecting
@@ -739,6 +687,52 @@ export function F0GraphView<T = unknown>(
     return () => clearTimeout(timer)
   }, [focusedNode])
 
+  // ── Initial frame (entry) ──
+  // When `initialFocusNodeId` is set, arrive framed on that node in the same
+  // state a node click leaves: fly to it via the click path (`flyToNodeClickRef`,
+  // centered at the node-click zoom, `viewportInset`-aware). The fly is DEFERRED
+  // by the same settle delay the click/focused paths use — an immediate fly runs
+  // before React Flow has measured its container and never takes (which is why a
+  // mount-time frame missed while re-clicking the node worked). With no focus
+  // target it is a plain whole-graph fit (unchanged), applied immediately.
+  //
+  // The deferred fly is scheduled ONCE (ref-guarded) and is NOT torn down on
+  // re-render: the first renders after mount churn `renderedNodeIds` (two-phase
+  // hydration, an entry side panel opening), and an effect cleanup keyed on that
+  // would clear the pending timer while the ref-guard blocks re-scheduling — so
+  // the fly would silently never run. The timer is cleared only on unmount.
+  const initialFrameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const didInitialFrameRef = useRef(false)
+  useEffect(() => {
+    if (didInitialFrameRef.current || renderedNodeIds.length === 0) return
+    didInitialFrameRef.current = true
+    if (!initialFocusNodeId) {
+      reactFlow.fitView(
+        hasViewportInset
+          ? { padding: getFitPadding(FIT_VIEW_PADDING_TIGHT) }
+          : undefined
+      )
+      return
+    }
+    const target = initialFocusNodeId
+    initialFrameTimerRef.current = setTimeout(
+      () => flyToNodeClickRef.current(target),
+      FOCUS_SETTLE_DELAY_MS
+    )
+    // One-shot (ref-guarded); `hasViewportInset` / `getFitPadding` are read fresh
+    // and the timer is torn down on unmount (below), so deps stay minimal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderedNodeIds.length, initialFocusNodeId, reactFlow])
+  useEffect(
+    () => () => {
+      if (initialFrameTimerRef.current)
+        clearTimeout(initialFrameTimerRef.current)
+    },
+    []
+  )
+
   // Imperative API: `focusNode` fires on every call, independent of prop
   // values, so a consumer's search can re-center on the same node the user
   // picks twice (the `focusedNode` prop can't — an unchanged value never
@@ -820,6 +814,24 @@ export function F0GraphView<T = unknown>(
     [focusedNodeId, setFocusedNodeId, registerNodeRef]
   )
 
+  // React Flow wraps its content in a hardcoded `role="application"` div, which
+  // sits between this `role="tree"` container and the `role="treeitem"` nodes
+  // and severs the ARIA tree relationship. Reconnect it with `aria-owns`: the
+  // tree owns the rendered forest-root treeitems (`treeRootNodeIds`), and each
+  // in-window parent node re-owns its own children (see `visibleChildIds`), so
+  // every rendered treeitem has exactly one owner. While the tree renders no
+  // treeitems (deferred / staged / viewport data loading, or an empty graph),
+  // `aria-busy` keeps the empty tree valid instead of failing
+  // `aria-required-children`.
+  const treeIsEmpty = treeRootNodeIds.length === 0
+  const treeAriaOwns = useMemo(
+    () =>
+      treeRootNodeIds.length > 0
+        ? treeRootNodeIds.map((id) => `f0-graph-node-${id}`).join(" ")
+        : undefined,
+    [treeRootNodeIds]
+  )
+
   return (
     <F0GraphActionsContext.Provider value={actionsContextValue}>
       <F0GraphRenderConfigContext.Provider value={renderConfigContextValue}>
@@ -851,6 +863,8 @@ export function F0GraphView<T = unknown>(
                         ref={containerRef}
                         role="tree"
                         aria-label={controlLabels?.graphView ?? i18n.graph.view}
+                        aria-owns={treeAriaOwns}
+                        aria-busy={treeIsEmpty || undefined}
                         onKeyDown={handleTreeKeyDown}
                         onPointerMove={handleCanvasPointerMove}
                         onPointerLeave={handleCanvasPointerLeave}

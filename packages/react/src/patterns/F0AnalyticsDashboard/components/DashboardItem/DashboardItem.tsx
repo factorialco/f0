@@ -1,4 +1,6 @@
-import { useState, type ReactNode } from "react"
+import { useRef, useState, type ReactNode } from "react"
+
+import type { F0AnalyticsDashboardAskAiTarget } from "../../types"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
@@ -17,6 +19,9 @@ import {
   Minimize,
   InfoCircleLine,
 } from "@/icons/app"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
+import { One as OneIcon } from "@/icons/ai"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -35,6 +40,12 @@ import {
 interface DashboardItemProps {
   title: string
   description?: string
+  /**
+   * Help copy for what this widget measures, revealed by an ⓘ icon beside the
+   * title. See `DashboardItemBase.info` for how it differs from `description`
+   * and `explanation`.
+   */
+  info?: string | InfoHintContent
   isLoading: boolean
   error?: Error
   onRetry?: () => void
@@ -47,6 +58,12 @@ interface DashboardItemProps {
   editMode?: boolean
   /** Called when the user clicks the delete action */
   handleDelete?: (itemId: string) => void
+  /**
+   * Overrides the built-in "Ask One" action. Given it, this component stops
+   * touching the chat and the host answers instead — and the entry no longer
+   * needs a chat to be mounted at all.
+   */
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
   /** Chart type transform options — rendered as a toggle group in the dropdown */
@@ -95,6 +112,7 @@ interface DashboardItemProps {
 export function DashboardItem({
   title,
   description,
+  info,
   isLoading,
   error,
   onRetry,
@@ -103,6 +121,7 @@ export function DashboardItem({
   actions = [],
   editMode,
   handleDelete,
+  onAskAi,
   itemId,
   chartTypeOptions,
   explanation,
@@ -112,6 +131,7 @@ export function DashboardItem({
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const shouldFocusChatAfterMenuRef = useRef(false)
   /**
    * When true, the dropdown menu's content is swapped from the action list
    * to a markdown rendering of `explanation`. The dropdown trigger stays
@@ -122,6 +142,12 @@ export function DashboardItem({
    */
   const [isExplanationView, setIsExplanationView] = useState(false)
   const translations = useI18n()
+  const {
+    enabled: aiEnabled,
+    setPendingQuote,
+    setOpen: setAiChatOpen,
+    focusChatInput,
+  } = useAiChat()
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
@@ -138,17 +164,103 @@ export function DashboardItem({
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
   const hasFullscreen = !!onFullscreenChange
-  const showMenu = hasDownloads || hasDelete || hasChartTypes || hasExplanation
+  // Keyboard-reachable twin of dragging the widget onto the chat. Gated on
+  // something being able to answer it: a host handler, or failing that a
+  // mounted chat — with no provider `useAiChat()` returns an inert context
+  // whose setters are no-ops, so offering the action would do nothing.
+  const hasAskOne = title.trim().length > 0 && (onAskAi ? !!itemId : aiEnabled)
+  const showMenu =
+    hasAskOne || hasDownloads || hasDelete || hasChartTypes || hasExplanation
+
+  const handleAskOne = () => {
+    if (onAskAi) {
+      // The host answers this one. Nothing else here applies: it may not open
+      // the chat at all, so leaving fullscreen would be a guess. `hasAskOne`
+      // guarantees the public payload has a real widget ID.
+      if (!itemId) return
+      onAskAi({ id: itemId, title })
+      return
+    }
+
+    // Fullscreen covers the chat, so step out of it before handing the widget
+    // over — same reason the delete action does.
+    if (isFullscreen) onFullscreenChange?.(false)
+    shouldFocusChatAfterMenuRef.current = true
+    setPendingQuote({ text: title })
+    setAiChatOpen(true)
+  }
+
+  const handleAskOneMenuCloseAutoFocus = (event: Event) => {
+    if (!shouldFocusChatAfterMenuRef.current) return
+    shouldFocusChatAfterMenuRef.current = false
+
+    // Keep Radix's normal trigger restoration while the composer is still
+    // mounting. The buffered request moves focus once registration completes.
+    if (focusChatInput()) event.preventDefault()
+  }
+
+  const askOneMenuItem = hasAskOne ? (
+    <DropdownMenuGroup>
+      <DropdownMenuItem onClick={handleAskOne}>
+        <div className="flex w-full flex-row items-center gap-2">
+          <F0Icon icon={OneIcon} />
+          <span className="flex-1">{translations.ai.dashboardItem.askOne}</span>
+        </div>
+      </DropdownMenuItem>
+    </DropdownMenuGroup>
+  ) : null
 
   if (error) {
     return (
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
-        <div className="flex shrink-0 flex-col p-4">
-          <h3 className="text-base font-medium text-f1-foreground">{title}</h3>
-          {description && (
-            <p className="text-base text-f1-foreground-secondary">
-              {description}
-            </p>
+        <div className="flex shrink-0 items-start gap-2 p-4">
+          {/* The help copy survives the failure: a reader looking at an error
+              is exactly the one asking what the widget was meant to show.
+              `items-start`, not `items-center`: this heading doesn't truncate,
+              so a long title wraps and centring would float the ⓘ against the
+              middle of the block instead of its first line. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex min-w-0 items-start gap-1">
+              <h3 className="text-base font-medium text-f1-foreground">
+                {title}
+              </h3>
+              {info && (
+                <div className="flex shrink-0 items-center text-f1-foreground-secondary">
+                  <InfoHint info={info} />
+                </div>
+              )}
+            </div>
+            {description && (
+              <p className="text-base text-f1-foreground-secondary">
+                {description}
+              </p>
+            )}
+          </div>
+          {hasAskOne && (
+            <DropdownMenu
+              open={isDropdownOpen}
+              onOpenChange={handleDropdownOpenChange}
+            >
+              <DropdownMenuTrigger asChild>
+                <ButtonInternal
+                  label={translations.actions.other}
+                  icon={Ellipsis}
+                  variant="ghost"
+                  size="md"
+                  hideLabel
+                  pressed={isDropdownOpen}
+                  compact
+                  onClick={(event: React.MouseEvent) => event.stopPropagation()}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="py-1"
+                onCloseAutoFocus={handleAskOneMenuCloseAutoFocus}
+              >
+                {askOneMenuItem}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
@@ -191,12 +303,21 @@ export function DashboardItem({
     >
       <div className="flex items-start px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-col">
-          <OneEllipsis
-            tag="h3"
-            className="text-base font-semibold text-f1-foreground"
-          >
-            {title}
-          </OneEllipsis>
+          {/* The icon never shrinks, so a long title truncates around it rather
+              than squeezing it out of the row. */}
+          <div className="flex min-w-0 items-center gap-1">
+            <OneEllipsis
+              tag="h3"
+              className="text-base font-semibold text-f1-foreground"
+            >
+              {title}
+            </OneEllipsis>
+            {info && (
+              <div className="flex shrink-0 items-center text-f1-foreground-secondary">
+                <InfoHint info={info} />
+              </div>
+            )}
+          </div>
           {(description || descriptionAction) && (
             // Baseline-aligned row so the link sits on the description's own
             // line; the text keeps its own truncation, the link never shrinks.
@@ -273,6 +394,7 @@ export function DashboardItem({
               <DropdownMenuContent
                 align="end"
                 className={cn("py-1", isExplanationView && "w-96 max-w-[90vw]")}
+                onCloseAutoFocus={handleAskOneMenuCloseAutoFocus}
               >
                 {isExplanationView && hasExplanation ? (
                   <div className="px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2">
@@ -326,6 +448,8 @@ export function DashboardItem({
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     )}
+
+                    {askOneMenuItem}
 
                     {hasDownloads && (
                       <DropdownMenuGroup>

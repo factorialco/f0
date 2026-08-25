@@ -2,14 +2,15 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import "@xyflow/react/dist/style.css"
 import { useRef, useState } from "react"
 
+import type { F0GraphNodeTag } from "@/patterns/F0Graph"
+
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
+import { Calendar, Office } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
-import type { F0GraphNodeTag } from "@/patterns/F0Graph"
 
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../index"
-import { Calendar, Office } from "@/icons/app"
 
 type Employee = {
   id: string
@@ -710,15 +711,21 @@ const DetailField = ({ label, value }: { label: string; value: string }) => (
 const OrgChartExample = ({
   defaultExpandDepth,
   focusOnEntry,
+  initialSelectedNodeId,
   graphLabel,
   tableLabel,
+  lockedTagTypes,
 }: {
   defaultExpandDepth: number
   focusOnEntry?: string
+  /** Node marked as selected (the click ring) on entry — see the graph options. */
+  initialSelectedNodeId?: string
   /** Custom label for the graph chip; falls back to the localized "Graph". */
   graphLabel?: string
   /** Custom label for the table chip; falls back to the localized "Table". */
   tableLabel?: string
+  /** Tag columns locked (OFF + disabled + tooltip) in the settings, per reason. */
+  lockedTagTypes?: Partial<Record<(typeof NODE_TAG_TYPES)[number], string>>
 }) => {
   const [selected, setSelected] = useState<EmployeeNode | null>(null)
   const [revealId, setRevealId] = useState<string | undefined>(undefined)
@@ -738,6 +745,8 @@ const OrgChartExample = ({
               defaultExpandDepth,
               revealNodeId: revealId,
               focusOnEntry,
+              initialSelectedNodeId,
+              lockedTagTypes,
             },
           },
           { ...tableVisualization, label: tableLabel },
@@ -800,6 +809,24 @@ export const OrgChart: Story = {
  */
 export const PreExpanded: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} />,
+}
+
+/**
+ * A metadata column the viewer isn't allowed to see is **locked** rather than
+ * dropped: open the settings and the "Legal entity" toggle is still listed, but
+ * switched off and disabled, with a tooltip explaining why. It never renders on
+ * a node (the consumer omits its tag). Unlike a pinned column, there is no lock
+ * icon — the disabled switch + tooltip is the affordance.
+ */
+export const LockedMetadata: Story = {
+  render: () => (
+    <OrgChartExample
+      defaultExpandDepth={1}
+      lockedTagTypes={{
+        legalEntity: "You don't have permission to see this metadata",
+      }}
+    />
+  ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1096,6 +1123,23 @@ export const LiveUpdate: Story = {
  */
 export const FocusOnRoot: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} focusOnEntry="ceo-a" />,
+}
+
+/**
+ * Arrives with a node already **selected** (`initialSelectedNodeId: "ceo-a"`),
+ * paired with `focusOnEntry` on the same node so its branch is expanded and
+ * framed — the graph opens looking exactly the way a user click leaves it
+ * (selection ring + node actions), not just centered. Clicking any other node
+ * moves the selection normally.
+ */
+export const SelectedOnEntry: Story = {
+  render: () => (
+    <OrgChartExample
+      defaultExpandDepth={2}
+      focusOnEntry="ceo-a"
+      initialSelectedNodeId="ceo-a"
+    />
+  ),
 }
 
 /**

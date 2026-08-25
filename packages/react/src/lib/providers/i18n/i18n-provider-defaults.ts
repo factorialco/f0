@@ -100,6 +100,10 @@ export const defaultTranslations = {
     join: "Join",
     summary: "Summary",
   },
+  coachmark: {
+    next: "Next",
+    done: "Got it",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -243,6 +247,8 @@ export const defaultTranslations = {
         hideAllColumns: "Hide all",
         addColumn: "Add column",
         removeColumn: "Remove column",
+        lockColumn: "Lock column: {{label}}",
+        unlockColumn: "Unlock column: {{label}}",
       },
     },
     editableTable: {
@@ -342,6 +348,11 @@ export const defaultTranslations = {
       range: {
         currentDate: "Today",
         label: "Range",
+      },
+      periods: {
+        currentDate: "Current period",
+        label: "Periods",
+        empty: "No periods available",
       },
     },
     month: {
@@ -449,6 +460,13 @@ export const defaultTranslations = {
       exporting: "Exporting…",
     },
     dashboardItem: {
+      /**
+       * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+       * override it — factorial renders it as plain "Ask" for the widget and
+       * insight-card buttons). This menu entry needs the product name spelled
+       * out, so it owns its own key.
+       */
+      askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",
@@ -483,6 +501,7 @@ export const defaultTranslations = {
       "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    dropWidgetToDiscuss: "Drop here to discuss with One",
     reply: "Reply",
     removeQuote: "Remove quote",
     clarifyingQuestion: {
@@ -529,6 +548,7 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
@@ -654,6 +674,14 @@ export const defaultTranslations = {
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread",
+    },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above",
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below",
     },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
@@ -940,11 +968,45 @@ export const defaultTranslations = {
       navigation: "Graph navigation",
     },
   },
+  map: {
+    region: "Map",
+    navigation: "Map navigation",
+    listLabel: "Locations",
+    location: "location",
+    locations: "locations",
+    unnamedLocation: "Location",
+    cluster: "Cluster of {{count}} locations",
+    skipToList: "Skip to location list",
+    loadError: "Couldn't load the map.",
+    retry: "Retry",
+    currentLocation: "Your location",
+    controls: {
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fit: "Fit to markers",
+      locate: "My location",
+    },
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  widgets: {
+    /** Turns a widget over to read what it is telling you (Home's `info`). */
+    whatThisMeans: "What this info means?",
+    /** The button on that other side, which turns it back. */
+    gotIt: "Got it",
+    /** The widget menu's own items, and the dialogs they open. */
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    /** Heads the widgets a Home suggests, at the top of the picker. */
+    recommended: "Recommended",
+    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {
     toolbar: "Document toolbar",

@@ -1,8 +1,13 @@
 import { userEvent } from "@testing-library/user-event"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { MicrophoneNegative, PalmTree } from "@/icons/app"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { BellOff, Clock, PalmTree } from "@/icons/app"
+import {
+  act,
+  waitFor,
+  zeroRender as render,
+  screen,
+} from "@/testing/test-utils"
 
 import { SidebarChatList } from "../SidebarChatList"
 import {
@@ -207,7 +212,7 @@ describe("SidebarChatList", () => {
     expect(screen.getByText("All quiet")).toBeInTheDocument()
   })
 
-  it("shows a status icon for people but not for groups", () => {
+  it("shows multiple consumer-provided status icons on the same chat", () => {
     const { container } = render(
       <SidebarChatProvider
         initialGroups={[
@@ -219,7 +224,13 @@ describe("SidebarChatList", () => {
                 id: "p",
                 label: "Person",
                 avatar: { type: "person", firstName: "P", lastName: "X" },
-                status: { icon: PalmTree, label: "On holidays" },
+                presence: "online",
+                unreadCount: 4,
+                status: { icon: Clock, label: "Ignored fallback" },
+                statuses: [
+                  { icon: PalmTree, label: "On holidays" },
+                  { icon: BellOff, label: "Muted" },
+                ],
               },
             ],
           },
@@ -231,7 +242,7 @@ describe("SidebarChatList", () => {
                 id: "c",
                 label: "Company",
                 avatar: { type: "company", name: "Co" },
-                status: { icon: MicrophoneNegative, label: "Muted" },
+                status: { icon: Clock, label: "Away" },
               },
             ],
           },
@@ -243,8 +254,15 @@ describe("SidebarChatList", () => {
     expect(
       container.querySelector('[aria-label="On holidays"]')
     ).toBeInTheDocument()
-    // Groups never show the status, even if one is set.
-    expect(container.querySelector('[aria-label="Muted"]')).toBeNull()
+    expect(container.querySelector('[aria-label="Muted"]')).toBeInTheDocument()
+    expect(container.querySelector('[aria-label="Online"]')).toBeInTheDocument()
+    expect(
+      container.querySelector('[aria-label="4 unread"]')
+    ).toBeInTheDocument()
+    expect(container.querySelector('[aria-label="Away"]')).toBeInTheDocument()
+    expect(
+      container.querySelector('[aria-label="Ignored fallback"]')
+    ).not.toBeInTheDocument()
   })
 
   it("renders top actions as ghost buttons and fires their onClick", async () => {
@@ -526,5 +544,646 @@ describe("SidebarChatList", () => {
       expect(screen.queryByText("Direct messages")).not.toBeInTheDocument()
       expect(screen.queryByText("Groups")).not.toBeInTheDocument()
     })
+  })
+})
+
+type MockIntersection = {
+  target: Element
+  isIntersecting: boolean
+  top: number
+  bottom: number
+}
+
+class MockIntersectionObserver implements IntersectionObserver {
+  static instances: MockIntersectionObserver[] = []
+
+  readonly root: Element | Document | null
+  readonly rootMargin = "0px"
+  readonly scrollMargin = "0px"
+  readonly thresholds = [0]
+  readonly observed = new Set<Element>()
+
+  constructor(
+    private readonly callback: IntersectionObserverCallback,
+    options?: IntersectionObserverInit
+  ) {
+    this.root = options?.root ?? null
+    MockIntersectionObserver.instances.push(this)
+  }
+
+  observe = (target: Element) => {
+    this.observed.add(target)
+  }
+
+  unobserve = (target: Element) => {
+    this.observed.delete(target)
+  }
+
+  disconnect = () => {
+    this.observed.clear()
+  }
+
+  takeRecords = () => []
+
+  emit(entries: MockIntersection[]) {
+    const rootBounds = {
+      top: 0,
+      bottom: 100,
+      left: 0,
+      right: 300,
+      width: 300,
+      height: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    }
+    this.callback(
+      entries.map(({ target, isIntersecting, top, bottom }) => ({
+        target,
+        isIntersecting,
+        intersectionRatio: isIntersecting ? 0.5 : 0,
+        boundingClientRect: {
+          ...rootBounds,
+          top,
+          bottom,
+          height: bottom - top,
+          y: top,
+        },
+        intersectionRect: isIntersecting
+          ? {
+              ...rootBounds,
+              top: Math.max(top, 0),
+              bottom: Math.min(bottom, 100),
+            }
+          : {
+              ...rootBounds,
+              top: 0,
+              bottom: 0,
+              height: 0,
+              y: 0,
+            },
+        rootBounds,
+        time: 0,
+      })),
+      this
+    )
+  }
+}
+
+const unreadNavigationGroups: SidebarChatGroup[] = [
+  {
+    id: "navigation",
+    title: "Navigation",
+    chats: ["a", "b", "c", "d", "e"].map((id) => ({
+      id,
+      label: `Chat ${id.toUpperCase()}`,
+      unreadCount: 3,
+      onClick: vi.fn(),
+    })),
+  },
+]
+
+const renderInScrollViewport = (
+  testGroups: SidebarChatGroup[] = unreadNavigationGroups
+) =>
+  render(
+    <div data-testid="scroll-area-root">
+      <div data-scroll-container>
+        <SidebarChatProvider initialGroups={testGroups}>
+          <SidebarChatList emptyState={defaultEmptyState} />
+        </SidebarChatProvider>
+      </div>
+    </div>
+  )
+
+const latestObserver = () =>
+  MockIntersectionObserver.instances[
+    MockIntersectionObserver.instances.length - 1
+  ]
+
+const waitForInitialObserver = async () => {
+  await waitFor(() => {
+    expect(MockIntersectionObserver.instances.length).toBeGreaterThan(0)
+  })
+  return latestObserver()
+}
+
+const observedChat = (observer: MockIntersectionObserver, id: string) => {
+  const target = Array.from(observer.observed).find(
+    (element) => (element as HTMLElement).dataset.sidebarChatId === id
+  )
+  if (!target) throw new Error(`Chat ${id} is not observed`)
+  return target
+}
+
+describe("SidebarChatList unread navigation", () => {
+  const originalIntersectionObserver = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "IntersectionObserver"
+  )
+  const originalScrollIntoView = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    "scrollIntoView"
+  )
+
+  beforeEach(() => {
+    MockIntersectionObserver.instances = []
+    Object.defineProperty(globalThis, "IntersectionObserver", {
+      configurable: true,
+      value: MockIntersectionObserver,
+    })
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: vi.fn(),
+    })
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    if (originalIntersectionObserver) {
+      Object.defineProperty(
+        globalThis,
+        "IntersectionObserver",
+        originalIntersectionObserver
+      )
+    } else {
+      delete globalThis.IntersectionObserver
+    }
+    if (originalScrollIntoView) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "scrollIntoView",
+        originalScrollIntoView
+      )
+    } else {
+      delete HTMLElement.prototype.scrollIntoView
+    }
+  })
+
+  it("counts hidden unread chats independently and jumps to the nearest one", async () => {
+    renderInScrollViewport()
+    const observer = await waitForInitialObserver()
+    const geometryReads = Array.from(observer.observed).map((target) =>
+      vi.spyOn(target, "getBoundingClientRect")
+    )
+
+    act(() => {
+      observer.emit([
+        {
+          target: observedChat(observer, "a"),
+          isIntersecting: false,
+          top: -60,
+          bottom: -40,
+        },
+        {
+          target: observedChat(observer, "b"),
+          isIntersecting: false,
+          top: -20,
+          bottom: -2,
+        },
+        {
+          // Any intersection, including a partial one, makes the row visible.
+          target: observedChat(observer, "c"),
+          isIntersecting: true,
+          top: 90,
+          bottom: 110,
+        },
+        {
+          target: observedChat(observer, "d"),
+          isIntersecting: false,
+          top: 120,
+          bottom: 140,
+        },
+        {
+          target: observedChat(observer, "e"),
+          isIntersecting: false,
+          top: 160,
+          bottom: 180,
+        },
+      ])
+    })
+
+    expect(
+      screen.getByRole("button", { name: "2 unread chats above" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "2 unread chats below" })
+    ).toBeInTheDocument()
+    expect(
+      screen
+        .getByRole("button", { name: "2 unread chats above" })
+        .closest('[data-testid="scroll-area-root"]')
+    ).toBe(screen.getByTestId("scroll-area-root"))
+    geometryReads.forEach((readGeometry) => {
+      expect(readGeometry).not.toHaveBeenCalled()
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "2 unread chats above" })
+    )
+    const nearestAbove = observedChat(observer, "b") as HTMLElement
+    expect(nearestAbove.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "center",
+    })
+    act(() => {
+      observer.emit([
+        {
+          target: nearestAbove,
+          isIntersecting: true,
+          top: 40,
+          bottom: 60,
+        },
+      ])
+    })
+    expect(screen.getByRole("button", { name: /Chat B/ })).toHaveFocus()
+    expect(unreadNavigationGroups[0].chats[1].onClick).not.toHaveBeenCalled()
+    expect(screen.getByRole("button", { name: /Chat B/ })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    )
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "2 unread chats below" })
+    )
+    const nearestBelow = observedChat(observer, "d") as HTMLElement
+    expect(nearestBelow.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "center",
+    })
+    act(() => {
+      observer.emit([
+        {
+          target: nearestBelow,
+          isIntersecting: true,
+          top: 40,
+          bottom: 60,
+        },
+      ])
+    })
+    expect(screen.getByRole("button", { name: /Chat D/ })).toHaveFocus()
+  })
+
+  it("represents every unread chat in a collapsed group with its header", async () => {
+    renderInScrollViewport([
+      {
+        id: "dms",
+        title: "Direct messages",
+        isOpen: false,
+        chats: [
+          { id: "a", label: "A", unreadCount: 2 },
+          { id: "b", label: "B", unreadCount: 5 },
+        ],
+      },
+    ])
+    const observer = await waitForInitialObserver()
+    const groupTarget = Array.from(observer.observed).find(
+      (element) =>
+        (element as HTMLElement).dataset.sidebarPanelGroupId === "dms"
+    )
+    if (!groupTarget) throw new Error("Collapsed group is not observed")
+    expect(observer.observed.size).toBe(1)
+
+    act(() => {
+      observer.emit([
+        {
+          target: groupTarget,
+          isIntersecting: false,
+          top: 120,
+          bottom: 150,
+        },
+      ])
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "2 unread chats below" })
+    )
+    expect(groupTarget.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "center",
+    })
+    act(() => {
+      observer.emit([
+        {
+          target: groupTarget,
+          isIntersecting: true,
+          top: 20,
+          bottom: 50,
+        },
+      ])
+    })
+    const groupHeader = screen
+      .getByText("Direct messages")
+      .closest("[tabindex='0']")
+    expect(groupHeader).toHaveFocus()
+    expect(groupHeader?.tagName).toBe("BUTTON")
+    expect(groupHeader).toHaveAttribute("aria-expanded", "false")
+    expect(
+      groupTarget.querySelector("[data-sidebar-collapsible-open='false']")
+    ).toBeInTheDocument()
+
+    expect(
+      screen.queryByRole("button", { name: "2 unread chats below" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("switches observation between unread rows and the header as a group collapses", async () => {
+    renderInScrollViewport([
+      {
+        id: "dms",
+        title: "Direct messages",
+        isOpen: true,
+        chats: [
+          { id: "a", label: "A", unreadCount: 2 },
+          { id: "b", label: "B", unreadCount: 5 },
+        ],
+      },
+    ])
+    let observer = await waitForInitialObserver()
+    expect(Array.from(observer.observed)).toEqual(
+      expect.arrayContaining([
+        observedChat(observer, "a"),
+        observedChat(observer, "b"),
+      ])
+    )
+
+    const header = screen
+      .getByText("Direct messages")
+      .closest<HTMLElement>("[tabindex='0']")
+    if (!header) throw new Error("Group header is not focusable")
+    const observersBeforeCollapse = MockIntersectionObserver.instances.length
+    await userEvent.click(header)
+    await waitFor(() => {
+      expect(MockIntersectionObserver.instances.length).toBeGreaterThan(
+        observersBeforeCollapse
+      )
+    })
+
+    observer = latestObserver()
+    expect(observer.observed.size).toBe(1)
+    const collapsedTarget = Array.from(observer.observed)[0]
+    expect((collapsedTarget as HTMLElement).dataset.sidebarPanelGroupId).toBe(
+      "dms"
+    )
+    act(() => {
+      observer.emit([
+        {
+          target: collapsedTarget,
+          isIntersecting: false,
+          top: 120,
+          bottom: 150,
+        },
+      ])
+    })
+    expect(
+      screen.getByRole("button", { name: "2 unread chats below" })
+    ).toBeInTheDocument()
+
+    const observersBeforeExpand = MockIntersectionObserver.instances.length
+    await userEvent.click(header)
+    await waitFor(() => {
+      expect(MockIntersectionObserver.instances.length).toBeGreaterThan(
+        observersBeforeExpand
+      )
+    })
+    observer = latestObserver()
+    expect(Array.from(observer.observed)).toEqual(
+      expect.arrayContaining([
+        observedChat(observer, "a"),
+        observedChat(observer, "b"),
+      ])
+    )
+  })
+
+  it("waits for unread loading rows to resolve before making them targets", async () => {
+    renderInScrollViewport([
+      {
+        id: "dms",
+        title: "Direct messages",
+        chats: [
+          { id: "loading", label: "Loading", unreadCount: 1, loading: true },
+          { id: "ready", label: "Ready", unreadCount: 1 },
+        ],
+      },
+    ])
+    const observer = await waitForInitialObserver()
+    expect(
+      Array.from(observer.observed).some(
+        (element) =>
+          (element as HTMLElement).dataset.sidebarChatId === "loading"
+      )
+    ).toBe(false)
+    expect(observedChat(observer, "ready")).toBeInTheDocument()
+  })
+
+  it("hides the controls while searching and outside a scroll viewport", async () => {
+    renderInScrollViewport()
+    const observer = await waitForInitialObserver()
+    act(() => {
+      observer.emit([
+        {
+          target: observedChat(observer, "a"),
+          isIntersecting: false,
+          top: 120,
+          bottom: 140,
+        },
+      ])
+    })
+    expect(
+      screen.getByRole("button", { name: "1 unread chat below" })
+    ).toBeInTheDocument()
+
+    await userEvent.type(screen.getByRole("searchbox"), "chat")
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: /unread chats? below/ })
+      ).not.toBeInTheDocument()
+    })
+
+    const observersBeforeClear = MockIntersectionObserver.instances.length
+    await userEvent.clear(screen.getByRole("searchbox"))
+    await waitFor(() => {
+      expect(MockIntersectionObserver.instances.length).toBeGreaterThan(
+        observersBeforeClear
+      )
+    })
+    const reboundObserver = latestObserver()
+    act(() => {
+      reboundObserver.emit([
+        {
+          target: observedChat(reboundObserver, "a"),
+          isIntersecting: false,
+          top: 120,
+          bottom: 140,
+        },
+      ])
+    })
+    expect(
+      screen.getByRole("button", { name: "1 unread chat below" })
+    ).toBeInTheDocument()
+
+    const observersBeforeStandalone = MockIntersectionObserver.instances.length
+    render(
+      <SidebarChatProvider initialGroups={unreadNavigationGroups}>
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+    expect(
+      screen.queryByRole("button", { name: /unread chats? above/ })
+    ).not.toBeInTheDocument()
+    expect(MockIntersectionObserver.instances.length).toBe(
+      observersBeforeStandalone
+    )
+  })
+
+  it("rebinds targets when unread state and pinned ordering change", async () => {
+    const initialGroups: SidebarChatGroup[] = [
+      {
+        id: "conversations",
+        title: "Conversations",
+        chats: [
+          { id: "a", label: "Chat A", unreadCount: 1 },
+          { id: "b", label: "Chat B" },
+        ],
+      },
+    ]
+    const StoreControls = () => {
+      const { setUnread, setGroups } = useSidebarChatActions()
+      return (
+        <>
+          <button type="button" onClick={() => setUnread("a", 0)}>
+            Mark A read
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setGroups([
+                {
+                  id: "pinned",
+                  title: "Pinned",
+                  chats: [
+                    { id: "b", label: "Chat B", unreadCount: 1, pinned: true },
+                  ],
+                },
+                {
+                  id: "conversations",
+                  title: "Conversations",
+                  chats: [{ id: "a", label: "Chat A" }],
+                },
+              ])
+            }
+          >
+            Pin B with unread
+          </button>
+        </>
+      )
+    }
+
+    render(
+      <div>
+        <div data-scroll-container>
+          <SidebarChatProvider initialGroups={initialGroups}>
+            <StoreControls />
+            <SidebarChatList emptyState={defaultEmptyState} />
+          </SidebarChatProvider>
+        </div>
+      </div>
+    )
+    let observer = await waitForInitialObserver()
+    act(() => {
+      observer.emit([
+        {
+          target: observedChat(observer, "a"),
+          isIntersecting: false,
+          top: 120,
+          bottom: 140,
+        },
+      ])
+    })
+    expect(
+      screen.getByRole("button", { name: "1 unread chat below" })
+    ).toBeInTheDocument()
+
+    const observerCountBeforeRead = MockIntersectionObserver.instances.length
+    await userEvent.click(screen.getByRole("button", { name: "Mark A read" }))
+    await waitFor(() => {
+      expect(MockIntersectionObserver.instances.length).toBeGreaterThan(
+        observerCountBeforeRead
+      )
+      expect(
+        screen.queryByRole("button", { name: "1 unread chat below" })
+      ).not.toBeInTheDocument()
+    })
+
+    const observerCountBeforePin = MockIntersectionObserver.instances.length
+    await userEvent.click(
+      screen.getByRole("button", { name: "Pin B with unread" })
+    )
+    await waitFor(() => {
+      expect(MockIntersectionObserver.instances.length).toBeGreaterThan(
+        observerCountBeforePin
+      )
+    })
+    observer = latestObserver()
+    act(() => {
+      observer.emit([
+        {
+          target: observedChat(observer, "b"),
+          isIntersecting: false,
+          top: -30,
+          bottom: -10,
+        },
+      ])
+    })
+    expect(
+      screen.getByRole("button", { name: "1 unread chat above" })
+    ).toBeInTheDocument()
+  })
+
+  it("scrolls immediately when reduced motion is active", async () => {
+    vi.spyOn(window, "matchMedia").mockImplementation((query) => ({
+      matches: query === "(prefers-reduced-motion: reduce)",
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+    renderInScrollViewport()
+    const observer = await waitForInitialObserver()
+    const target = observedChat(observer, "e") as HTMLElement
+    act(() => {
+      observer.emit([{ target, isIntersecting: false, top: 120, bottom: 140 }])
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "1 unread chat below" })
+    )
+    expect(target.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "auto",
+      block: "center",
+    })
+  })
+
+  it("does not steal focus after the user interrupts a smooth jump", async () => {
+    renderInScrollViewport()
+    const observer = await waitForInitialObserver()
+    const target = observedChat(observer, "e") as HTMLElement
+    act(() => {
+      observer.emit([{ target, isIntersecting: false, top: 120, bottom: 140 }])
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "1 unread chat below" })
+    )
+    const search = screen.getByRole("searchbox")
+    act(() => search.focus())
+    act(() => {
+      observer.emit([{ target, isIntersecting: true, top: 40, bottom: 60 }])
+    })
+
+    expect(search).toHaveFocus()
   })
 })

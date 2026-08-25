@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
 
-import { Platform } from "./types"
+import { HourCycle, Platform } from "./types"
 import { detectPlatform } from "./user-platform"
 
 type Context = {
@@ -8,6 +8,12 @@ type Context = {
   isDev: boolean
   showExperimentalWarnings: boolean
   renderDataTestIdAttribute: boolean
+  /**
+   * Global user preference for how times are displayed and edited (12h/24h).
+   * Left `undefined` when the app doesn't set it, in which case time fields
+   * fall back to the native browser-locale input.
+   */
+  hourCycle?: HourCycle
 }
 
 const PlatformContext = createContext<Context | null>(null)
@@ -22,6 +28,7 @@ export const UserPlatformProvider = ({
   isDev = false,
   showExperimentalWarnings = false,
   renderDataTestIdAttribute = false,
+  hourCycle,
 }: UserPlatformProviderProps) => {
   const [userPlatform, setUserPlatform] = useState<Platform>(
     platform ?? "unknown"
@@ -40,6 +47,7 @@ export const UserPlatformProvider = ({
         isDev,
         showExperimentalWarnings,
         renderDataTestIdAttribute,
+        hourCycle,
       }}
     >
       {children}
@@ -89,4 +97,14 @@ export function useShowExperimentalWarnings(): boolean {
   }
 
   return context.showExperimentalWarnings
+}
+
+/**
+ * Returns the app's global hour-cycle preference (12h/24h), or `undefined`
+ * when it isn't set — in which case time fields use the native browser-locale
+ * input. Set it via the `hourCycle` prop on `F0Provider`.
+ */
+export function useHourCycle(): HourCycle | undefined {
+  const context = useContext(PlatformContext)
+  return context?.hourCycle
 }

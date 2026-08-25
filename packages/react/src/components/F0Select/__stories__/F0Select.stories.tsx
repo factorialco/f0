@@ -183,6 +183,11 @@ const meta: Meta = {
       description:
         "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
     },
+    applySelectionLabel: {
+      description:
+        'Custom label for the apply button in the apply-selection footer. Defaults to the translated "Apply selection". Only has an effect when `withApplySelection` is enabled.',
+      control: "text",
+    },
     actions: {
       description:
         "<p>List of action buttons that will be displayed at the bottom of the select dropdown. Each action should have a label, onClick handler, optional icon, and variant.</p>" +
@@ -1134,6 +1139,31 @@ export const MultipleWithApply: Story = {
 }
 
 /**
+ * Apply-selection footer with a custom apply-button label. Consumers pass an
+ * already-translated string; the default is "Apply selection". Clicking Cancel
+ * closes the dropdown and discards the staged selection.
+ */
+export const MultipleWithApplyCustomLabel: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["2", "5"],
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    withApplySelection: true,
+    applySelectionLabel: "Add to schedule",
+  },
+}
+
+/**
  * Multiple selection with paginated data (2,847 employees).
  * Use `defaultItem` to provide labels for pre-selected values not in the first page.
  * Try the "Select All" to select all employees - the checkbox will show indeterminate state
@@ -1381,6 +1411,52 @@ export const WithCustomTrigger: Story = {
       </div>
     </F0Select>
   ),
+}
+
+export const CustomTriggerFillsContainerHeight: Story = {
+  // A regression guard, not documentation
+  tags: ["!dev"],
+  args: {
+    label: "Choose a color",
+    onChange: fn(),
+    value: "red",
+    options: [
+      { value: "red", label: "Red" },
+      { value: "green", label: "Green" },
+    ],
+  },
+  render: ({ value, options, onChange, ...args }) => (
+    <div className="flex h-10 items-center" data-testid="fixed-height-field">
+      <div className="h-full shrink-0">
+        <F0Select
+          label="Choose a color"
+          value={value}
+          options={options}
+          onChange={onChange}
+          {...args}
+        >
+          <span className="flex h-full items-center px-2">Red</span>
+        </F0Select>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    /*
+     * A custom trigger sizes its content against the consumer's container, so
+     * every wrapper F0Select renders in between has to pass that height
+     * through — a wrapper that swallows it still renders a valid DOM, so this
+     * has to be real pixels. 1px tolerance for subpixel display scaling.
+     */
+    const trigger = canvas.getByRole("combobox")
+    const fieldHeight = canvas
+      .getByTestId("fixed-height-field")
+      .getBoundingClientRect().height
+    // Without layout (0 vs 0) the comparison below would pass vacuously
+    await expect(fieldHeight).toBeGreaterThan(0)
+    const drift = Math.abs(trigger.getBoundingClientRect().height - fieldHeight)
+    await expect(drift).toBeLessThanOrEqual(1)
+  },
 }
 
 export const WithOnCreate: Story = {

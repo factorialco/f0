@@ -56,6 +56,15 @@ export type GraphVisualizationOptions<
   /** Tag columns that are always visible and cannot be hidden in the settings. */
   pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
+   * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+   * still listed in the settings but with its toggle forced OFF and disabled,
+   * and the given (already-translated) text shown in a tooltip. Unlike
+   * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+   * icon — the disabled switch + tooltip is the affordance. The caller should
+   * also omit these columns' tags from `tags(record)`.
+   */
+  lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>
+  /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
    */
@@ -115,6 +124,18 @@ export type GraphVisualizationOptions<
    * the default entry view (roots expanded to `defaultExpandDepth`).
    */
   focusOnEntry?: string
+  /**
+   * Id of a node to mark as **selected on entry** — the click-selection ring, so
+   * a deep link lands on the graph looking the way a user's own click leaves it,
+   * not just framed. Seeded on the first render; the selection then follows
+   * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+   * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+   * branch is expanded and framed — otherwise the ring isn't visible until its
+   * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+   * the reveal highlight. Providing it puts the graph's selection in controlled
+   * mode; omitting it leaves selection uncontrolled (the default).
+   */
+  initialSelectedNodeId?: string
   /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for

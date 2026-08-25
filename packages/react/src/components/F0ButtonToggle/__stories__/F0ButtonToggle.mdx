@@ -41,6 +41,9 @@ The F0ButtonToggle consists of:
    screen readers)
 4. **State Indicator**: Visual feedback showing current selected/unselected
    state
+5. **Tooltip** (optional): `tooltip` names the toggle on hover and on keyboard
+   focus, in place of the native browser one. A compact toggle shows no text of
+   its own, so this is where a glyph gets explained
 
 ### Interactive States
 
@@ -66,6 +69,19 @@ on/off, visibility toggle).
 
 <Canvas of={F0ButtonToggleStories.Default} />
 
+### Colours
+
+`color` makes the toggle a member of a **coloured set**: it wears that colour
+when selected — fill, border and glyph — and stays a muted glyph when it isn't,
+so one choice out of several is readable at a glance. Without it the toggle uses
+F0's selected teal, like any other selected control.
+
+Reach for it only when the members of a set mean **different things** (a mood
+scale, a status picker). A lone toggle, or a group where every item is the same
+kind of thing, should stay on the default.
+
+<Canvas of={F0ButtonToggleStories.Colors} />
+
 ### Size Variants
 
 <Canvas of={F0ButtonToggleStories.Snapshot} />
@@ -81,6 +97,12 @@ Available sizes:
 ### Content best practices
 
 - Labels should clearly describe the action or state
+- Reach for `tooltip` whenever the glyph alone would be a guess — it takes the
+  same string as the label, or a `{ label, description }` pair when the toggle
+  needs a line of explanation under its name
+- Add `instant` to that object when the tooltip is the **only** place the
+  toggle's name is written: it opens on 100ms instead of 700ms, because the
+  default wait is meant for a label that confirms text you can already read
 - Use consistent icon metaphors that users understand
 - Provide immediate visual feedback when state changes
 - Ensure the purpose is clear from context

@@ -31,6 +31,7 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
  */
 type F0SelectBaseProps<T extends string, R = unknown> = {
   withApplySelection?: boolean
+  applySelectionLabel?: string
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean
@@ -217,6 +218,15 @@ export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
   value: T
   label: string
+  /**
+   * What the TRIGGER shows once this item is selected, when that has to differ
+   * from the row's own `label`. The row is read in the context the list gives it
+   * — under a group header, beside its siblings — and the trigger has none of
+   * that, so a label that is clear in the list can be ambiguous on its own
+   * ("Tokens", once the "Design system" header is gone). Give the trigger the
+   * full path there and leave the row short. Defaults to `label`.
+   */
+  selectedLabel?: string
   description?: string
   /** Short token shown next to the label (e.g. a dial code) */
   metadata?: F0SelectItemMetadata

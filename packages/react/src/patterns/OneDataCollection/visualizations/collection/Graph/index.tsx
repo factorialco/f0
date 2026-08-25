@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import {
   GroupingDefinition,
@@ -62,6 +62,7 @@ export const GraphCollection = <
   nodeTagTypes,
   defaultVisibleTagTypes,
   pinnedTagTypes,
+  lockedTagTypes,
   currentUserNodeId,
   getNodeId,
   getChildrenCount,
@@ -72,6 +73,7 @@ export const GraphCollection = <
   revealNodeId,
   searchSelectionNonce,
   focusOnEntry,
+  initialSelectedNodeId,
   loadNodePath,
   getParentId,
   loadNodeData,
@@ -145,6 +147,18 @@ export const GraphCollection = <
   // selection when a reveal marks a node via `highlightedNodes` instead.
   const graphRef = useRef<F0GraphHandle>(null)
 
+  // Entry selection. When `initialSelectedNodeId` is set we run F0Graph's
+  // selection in CONTROLLED mode, seeded with that node so a deep link arrives
+  // already marked (the click-selection ring), and mirror every later change
+  // back into this state so clicks/keyboard keep moving the selection normally.
+  // The control mode is decided ONCE at mount (a stable boolean) so we never
+  // flip controlled/uncontrolled; consumers that omit the option keep the
+  // previous uncontrolled behavior (`selectedNodes` stays `undefined`).
+  const [controlSelection] = useState(() => initialSelectedNodeId !== undefined)
+  const [selectedNodes, setSelectedNodes] = useState<Set<string>>(() =>
+    initialSelectedNodeId ? new Set([initialSelectedNodeId]) : new Set()
+  )
+
   // Reveal + focus a node: load/expand it (declarative `focusedNode` handles
   // the first fly, with the right async + settle timing), then imperatively
   // re-center — so re-searching the SAME node after panning still flies — and
@@ -203,6 +217,9 @@ export const GraphCollection = <
   const allTagTypes = nodeTagTypes ? [...nodeTagTypes] : []
   const defaultVisibleSet = new Set(defaultVisibleTagTypes ?? allTagTypes)
   const pinnedSet = new Set<string>(pinnedTagTypes ?? [])
+  // Columns the actor can't see: never rendered on a node, whatever the saved
+  // visibility says (their settings toggle is locked OFF + disabled too).
+  const lockedSet = new Set<string>(Object.keys(lockedTagTypes ?? {}))
   const hiddenSet = new Set(
     graphSettings?.hidden ??
       allTagTypes.filter((type) => !defaultVisibleSet.has(type))
@@ -214,7 +231,8 @@ export const GraphCollection = <
       (order.indexOf(b) === -1 ? Infinity : order.indexOf(b))
   )
   const visibleTagTypes = orderedTagTypes.filter(
-    (type) => pinnedSet.has(type) || !hiddenSet.has(type)
+    (type) =>
+      !lockedSet.has(type) && (pinnedSet.has(type) || !hiddenSet.has(type))
   )
 
   // Reorder each node's tags to match the configured metadata order.
@@ -247,14 +265,20 @@ export const GraphCollection = <
           initialFocusNodeId={focusOnEntry}
           highlightedNodes={highlightedNodes}
           selectionMode="single"
-          // Selecting a node marks it via the internal selection ring; drop the
-          // reveal highlight (search / "Find me") so only one node stays marked.
-          // Fires with the new set — a non-empty set means a real selection (an
-          // empty set is a pane click or our own `clearSelection()` on reveal,
-          // which must NOT wipe the highlight we just set). Centering lives on
-          // the node's own click (below) so a click on the empty canvas never
-          // re-centers.
+          // Controlled only when an entry selection was requested (see
+          // `controlSelection`); otherwise `undefined` keeps F0Graph's own
+          // uncontrolled selection, unchanged for existing consumers.
+          selectedNodes={controlSelection ? selectedNodes : undefined}
+          // Selecting a node marks it via the selection ring; drop the reveal
+          // highlight (search / "Find me") so only one node stays marked. Fires
+          // with the new set — a non-empty set means a real selection (an empty
+          // set is a pane click or our own `clearSelection()` on reveal, which
+          // must NOT wipe the highlight we just set). Centering lives on the
+          // node's own click (below) so a click on the empty canvas never
+          // re-centers. When controlled we also mirror the set so clicks keep
+          // moving the ring past the seeded entry selection.
           onSelectedNodesChange={(next) => {
+            if (controlSelection) setSelectedNodes(next)
             if (next.size > 0) clearFocus()
           }}
           showControls={showControls ?? true}

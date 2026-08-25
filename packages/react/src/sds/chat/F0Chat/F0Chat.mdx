@@ -14,7 +14,77 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 <Controls of={Stories.Default} />
 
-### Receipt, reaction, and upload contracts
+### Props
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>isFullscreen</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Controls which fullscreen toggle icon the header displays.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onToggleFullscreen</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Shows the fullscreen control and handles toggling the hosting panel.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onClose</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Shows the close control and closes the hosting panel.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>headerActions</code>
+        </td>
+        <td>
+          <code>
+            F0ChatHeaderAction[] | ((channel) =&gt; F0ChatHeaderAction[])
+          </code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Additional host-provided channel actions. Search remains built in.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Participant, receipt, reaction, and upload contracts
 
 <Unstyled>
   <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
@@ -28,6 +98,30 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
       </tr>
     </thead>
     <tbody>
+      <tr>
+        <td>
+          <code>user.avatarColor</code>
+        </td>
+        <td>
+          <code>F0ChatSenderColor</code>
+        </td>
+        <td>Name-derived</td>
+        <td>—</td>
+        <td>
+          Stable accent shared by the sender name, incoming bubble, and inline
+          media and document surfaces. Link previews and file items use neutral
+          grey surfaces, and the current user&apos;s surfaces stay neutral. For
+          a photo avatar, choose the palette hue closest to the image&apos;s
+          dominant colour. Generated person avatars can omit it and use their
+          existing name-derived colour. Allowed values are exported as{" "}
+          <code>f0ChatSenderColors</code>: <code>viridian</code>,{" "}
+          <code>malibu</code>, <code>yellow</code>, <code>purple</code>,{" "}
+          <code>lilac</code>, <code>barbie</code>, <code>smoke</code>,{" "}
+          <code>army</code>, <code>flubber</code>, <code>indigo</code>,{" "}
+          <code>camel</code>, <code>radical</code>, <code>orange</code>,{" "}
+          <code>red</code>, and <code>grass</code>.
+        </td>
+      </tr>
       <tr>
         <td>
           <code>channel.memberCount</code>
@@ -178,6 +272,15 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 ### Behavior
 
+- WHEN a user provides <code>avatarColor</code> → THEN incoming bubbles, the
+  sender name, and inline media and document surfaces share that stable accent.
+  Link previews, file items, and failed-preview file fallbacks use neutral grey
+  surfaces. When omitted, generated person avatars use their existing
+  name-derived colour. Own-message surfaces remain neutral.
+- WHEN sender colour is applied to an image, video, document, or location →
+  THEN it colours only the inline card chrome, placeholder, or letterbox; media
+  pixels, rendered document content, maps, composer previews, reply quotes, and
+  fullscreen viewers remain neutral.
 - WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
 - WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
@@ -204,10 +307,21 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the same compact square footprint with a file-type icon.
 - WHEN a pending composer attachment is removed or its upload fails → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
 - WHEN several previews exceed the composer width → THEN F0 keeps them in one focusable horizontal strip instead of growing the composer through the transcript.
+- WHEN the transcript scrolls → THEN the composer remains floating above it with a subtle shadow and translucent backdrop blur, messages pass behind its surface, and a measured footer keeps the final message fully reachable.
+- WHEN the composer changes height because of text, reply or edit context, errors, or attachments → THEN the transcript footer and jump-to-bottom control follow its measured edge without shifting the visible messages.
 - WHEN a completed file has a video MIME type or browser video extension → THEN F0 renders it as an inline F0VideoPlayer with playback and fullscreen controls.
 - WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
 - WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
 - WHEN a bubble attachment has an inline or document preview → THEN F0 omits the redundant download action from the bubble; download remains available inside the document viewer or video-player controls, while files without a preview and failed previews keep their downloadable file chip.
+- WHEN a video, map, document, or voice attachment is rendered only by transcript overscan → THEN its stable placeholder remains mounted and its expensive implementation remains unmounted without starting media or parsing work.
+- WHEN a heavy attachment becomes partially or fully visible → THEN it joins the transcript queue; after readiness and 250 ms without scrolling, F0 prepares and mounts one preview per paint turn.
+- WHEN scrolling resumes → THEN pending heavy previews pause, while previews that already mounted remain available until their virtual row leaves the window.
+- WHEN a video player initializes → THEN its 16:9 poster or placeholder keeps the final player dimensions until media data is ready, while the player controls remain available for browsers that require a user gesture to load video.
+- WHEN a conversation or replaced message window enters → THEN F0 keeps a neutral surface while Virtuoso hides its provisional list and reveals the transcript only after the viewport is stable for two paint frames.
+- WHEN an older page is prepended → THEN F0 keeps the same Virtuoso instance and changes only `firstItemIndex`, leaving measured-anchor retention to Virtuoso.
+- WHEN the reader scrolls within a few viewports of the oldest loaded message → THEN F0 requests the previous page ahead of the edge (one request per attempt), so the prepend lands and is measured far above the visible rows.
+- WHEN the transcript would reveal while the Inter webfont is still loading → THEN F0 briefly holds the reveal for the font swap (bounded, never past the readiness fallback) so measured rows don't rewrap mid-entry.
+- WHEN Virtuoso reports several height corrections in one task → THEN F0 coalesces them into one measure-strip write in a microtask before the next paint.
 - WHEN a voice attachment is narrower than its waveform → THEN the bars compress and any residual excess is clipped inside the seek area, preserving the fixed time/speed slot.
 - WHEN the reader wheels toward older messages → THEN F0 pauses bottom following immediately and keeps it paused through asynchronous attachment growth until the reader returns to the true bottom edge, explicitly jumps to the bottom, or sends a new message.
 
@@ -252,7 +366,7 @@ playback-speed slot can overflow.
 
 ### Keyboard interaction
 
-The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is also focusable, supports horizontal keyboard scrolling, and receives focus after removing an attachment. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is focusable and supports horizontal keyboard scrolling. After removing an attachment, focus stays on the strip when previews remain; removing the final preview returns focus to the composer textarea. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
 
 ### Screen reader behavior
 

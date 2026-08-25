@@ -247,6 +247,7 @@ const F0AiChatComponent = ({
           : undefined
       }
       exitStyle={splitPanel && open ? "hold" : "shrink"}
+      acceptsWidgetDrop={viewKey === "chat" && !overlay}
     >
       {/* Simultaneous crossfade: the outgoing view fades out while the next
           fades in (both briefly mounted, stacked via `absolute inset-0` over the

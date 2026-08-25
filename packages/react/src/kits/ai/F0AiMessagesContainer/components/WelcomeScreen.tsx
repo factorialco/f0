@@ -1,7 +1,20 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { type IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
+
+/**
+ * Optional call-to-action rendered as a pill above the welcome phrase (e.g. a
+ * "How to use One" shortcut). The host owns `onClick`; f0 owns the pill styling
+ * so it stays consistent with the rest of the welcome screen.
+ */
+export type WelcomeScreenCta = {
+  label: string
+  icon?: IconType
+  onClick: () => void
+}
 
 const CHAR_IN_MS = 35
 const CHAR_OUT_MS = 22
@@ -22,6 +35,8 @@ export interface WelcomeScreenProps {
   caption?: string
   /** Smaller secondary line below the phrase (e.g. available data areas). */
   subtitle?: string
+  /** Optional call-to-action pill rendered above the caption/phrase. */
+  cta?: WelcomeScreenCta
   /**
    * Optional click handler on the phrase itself. When set, the phrase becomes
    * keyboard-activatable (Enter / Space) and gets a subtle hover hint. Used by
@@ -40,6 +55,7 @@ export const WelcomeScreen = ({
   messages,
   caption,
   subtitle,
+  cta,
   onClick,
   fullscreen = false,
 }: WelcomeScreenProps) => {
@@ -120,6 +136,16 @@ export const WelcomeScreen = ({
       )}
     >
       <div className="flex flex-col items-center">
+        {cta && (
+          <ButtonInternal
+            variant="neutral"
+            size="sm"
+            className="mb-4"
+            label={cta.label}
+            icon={cta.icon}
+            onClick={cta.onClick}
+          />
+        )}
         {caption && (
           <p className="animate-in fade-in-0 text-center text-2xl font-semibold leading-[28px] text-f1-foreground-secondary duration-500">
             {caption}

@@ -3,22 +3,13 @@ import { type ReactNode } from "react"
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import { useChatImagePreview } from "../providers/ChatUIProvider"
-import {
-  type F0ChatFileAttachment,
-  type F0ChatImageAttachment,
-  type F0ChatLocationAttachment,
-  type F0ChatMessage,
-  type F0ChatVoiceAttachment,
-} from "../types"
-import {
-  documentPreviewKind,
-  isVideoFileAttachment,
-  withinPreviewSizeLimit,
-} from "../utils/attachments"
+import { type F0ChatMessage } from "../types"
+import { partitionChatAttachments } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
+import { messageSurfaceColorClass } from "../utils/sender-color"
 import { bubbleCornerClass } from "./ChatBubble"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
@@ -52,36 +43,17 @@ export const ChatMessageAttachments = ({
   const { openImagePreview } = useChatImagePreview()
   const attachments = message.attachments
   if (!attachments || attachments.length === 0) return null
+  const surfaceClassName = messageSurfaceColorClass(message.author, isMine)
 
-  const images = attachments.filter(
-    (a): a is F0ChatImageAttachment => a.kind === "image"
-  )
-  const files = attachments.filter(
-    (a): a is F0ChatFileAttachment => a.kind === "file"
-  )
-  // A completed browser-compatible video becomes an inline player. While it is
-  // uploading it intentionally stays a file chip, keeping progress feedback.
-  const videoFiles = files.filter(
-    (file) => file.progress === undefined && isVideoFileAttachment(file)
-  )
-  const nonVideoFiles = files.filter((file) => !videoFiles.includes(file))
-  // Previewable documents get the Slack-style snapshot card (a document still
-  // uploading, or too big to parse client-side, keeps the plain chip).
-  const documentFiles = nonVideoFiles.flatMap((file) => {
-    if (file.progress !== undefined) return []
-    const docKind = documentPreviewKind(file)
-    if (!docKind || !withinPreviewSizeLimit(file, docKind)) return []
-    return [{ file, docKind }]
-  })
-  const plainFiles = nonVideoFiles.filter(
-    (file) => !documentFiles.some((entry) => entry.file === file)
-  )
-  const locations = attachments.filter(
-    (a): a is F0ChatLocationAttachment => a.kind === "location"
-  )
-  const voices = attachments.filter(
-    (a): a is F0ChatVoiceAttachment => a.kind === "voice"
-  )
+  const {
+    images,
+    videos: videoFiles,
+    documents: documentFiles,
+    files: plainFiles,
+    locations,
+    voices,
+  } = partitionChatAttachments(attachments)
+  const nonVideoFileCount = documentFiles.length + plainFiles.length
   // A lone image gets full size; several flow side by side (wrap) as thumbnails
   // so the message doesn't grow tall.
   const singleImage = images.length === 1
@@ -92,63 +64,67 @@ export const ChatMessageAttachments = ({
   const captionBelow =
     message.body.trim().length > 0 || Boolean(message.replyTo)
   const belowImages =
-    files.length > 0 || voices.length > 0 || captionBelow || !isLastOfRun
-  const imageCorners = bubbleCornerClass(
+    videoFiles.length > 0 ||
+    nonVideoFileCount > 0 ||
+    voices.length > 0 ||
+    captionBelow ||
+    !isLastOfRun
+  const imageCorners = bubbleCornerClass({
     isMine,
     isFirstOfRun,
-    locations.length === 0 && !belowImages
-  )
+    isLastOfRun: locations.length === 0 && !belowImages,
+  })
   const belowVideos =
     locations.length > 0 ||
     voices.length > 0 ||
-    nonVideoFiles.length > 0 ||
+    nonVideoFileCount > 0 ||
     captionBelow ||
     !isLastOfRun
   const videoCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun && images.length === 0 && index === 0,
-      index === videoFiles.length - 1 && !belowVideos
-    )
+      isFirstOfRun: isFirstOfRun && images.length === 0 && index === 0,
+      isLastOfRun: index === videoFiles.length - 1 && !belowVideos,
+    })
   const belowLocations =
-    voices.length > 0 ||
-    nonVideoFiles.length > 0 ||
-    captionBelow ||
-    !isLastOfRun
+    voices.length > 0 || nonVideoFileCount > 0 || captionBelow || !isLastOfRun
   const locationCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun &&
+      isFirstOfRun:
+        isFirstOfRun &&
         images.length === 0 &&
         videoFiles.length === 0 &&
         index === 0,
-      index === locations.length - 1 && !belowLocations
-    )
+      isLastOfRun: index === locations.length - 1 && !belowLocations,
+    })
   // Voice notes stack after the locations, before the files/caption.
-  const belowVoices = nonVideoFiles.length > 0 || captionBelow || !isLastOfRun
+  const belowVoices = nonVideoFileCount > 0 || captionBelow || !isLastOfRun
   const voiceCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun &&
+      isFirstOfRun:
+        isFirstOfRun &&
         images.length === 0 &&
         videoFiles.length === 0 &&
         locations.length === 0 &&
         index === 0,
-      index === voices.length - 1 && !belowVoices
-    )
+      isLastOfRun: index === voices.length - 1 && !belowVoices,
+    })
   // Document cards stack after the voices, before the plain files/caption.
   const belowDocuments = plainFiles.length > 0 || captionBelow || !isLastOfRun
   const documentCorners = (index: number): string =>
-    bubbleCornerClass(
+    bubbleCornerClass({
       isMine,
-      isFirstOfRun &&
+      isFirstOfRun:
+        isFirstOfRun &&
         images.length === 0 &&
         videoFiles.length === 0 &&
         locations.length === 0 &&
         voices.length === 0 &&
         index === 0,
-      index === documentFiles.length - 1 && !belowDocuments
-    )
+      isLastOfRun: index === documentFiles.length - 1 && !belowDocuments,
+    })
 
   return (
     <div
@@ -169,9 +145,12 @@ export const ChatMessageAttachments = ({
               onClick={() => openImagePreview(images, i)}
               className={cn(
                 "flex overflow-hidden transition-opacity hover:opacity-90",
-                singleImage ? imageCorners : "rounded-xl"
+                focusRing("focus-visible:ring-inset"),
+                singleImage ? imageCorners : "rounded-xl",
+                surfaceClassName
               )}
               aria-label={i18n.chat.openImage}
+              data-testid="chat-image-attachment"
             >
               <FadeInImage
                 src={image.thumbnailUrl ?? image.url}
@@ -179,20 +158,21 @@ export const ChatMessageAttachments = ({
                 // Native width/height reserve the box via aspect-ratio BEFORE
                 // the image loads — no late re-measure shifting the transcript
                 // (adapters should populate the dimensions; Stream sends
-                // original_width/height). Without them, min-h keeps the jump
-                // bounded.
+                // original_width/height). Without both, a fixed fallback box
+                // avoids a late Virtuoso height correction.
                 width={singleImage ? image.width : undefined}
                 height={singleImage ? image.height : undefined}
                 className={cn(
                   "border border-solid border-f1-border-secondary object-cover",
-                  "bg-f1-background-secondary",
+                  surfaceClassName,
                   // A lone image follows the bubble's chained corners; grid
                   // thumbnails keep the uniform radius.
                   singleImage
                     ? cn(
                         imageCorners,
                         "h-auto max-h-60 w-auto max-w-full",
-                        image.width == null && "min-h-28"
+                        (image.width == null || image.height == null) &&
+                          "h-60 w-80"
                       )
                     : "h-28 w-28 rounded-xl"
                 )}
@@ -206,6 +186,7 @@ export const ChatMessageAttachments = ({
           key={`${file.url}-${i}`}
           file={file}
           cornerClass={videoCorners(i)}
+          surfaceClassName={surfaceClassName}
         />
       ))}
       {locations.map((location, i) => (
@@ -213,6 +194,7 @@ export const ChatMessageAttachments = ({
           key={`${location.latitude},${location.longitude}-${i}`}
           location={location}
           cornerClass={locationCorners(i)}
+          surfaceClassName={surfaceClassName}
         />
       ))}
       {voices.map((voice, i) => (
@@ -221,14 +203,16 @@ export const ChatMessageAttachments = ({
           voice={voice}
           isMine={isMine}
           cornerClass={voiceCorners(i)}
+          surfaceClassName={surfaceClassName}
         />
       ))}
-      {documentFiles.map(({ file, docKind }, i) => (
+      {documentFiles.map(({ file, kind }, i) => (
         <ChatDocumentAttachmentCard
           key={`${file.url}-${i}`}
           file={file}
-          kind={docKind}
+          kind={kind}
           cornerClass={documentCorners(i)}
+          surfaceClassName={surfaceClassName}
         />
       ))}
       {plainFiles.length > 0 && (

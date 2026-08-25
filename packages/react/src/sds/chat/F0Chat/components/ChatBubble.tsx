@@ -1,17 +1,43 @@
+import { motion } from "motion/react"
 import { memo, type ReactNode, useMemo, useRef } from "react"
 
-import { motion } from "motion/react"
-
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
-import { senderNameColorClass } from "../utils/sender-color"
+import {
+  messageSurfaceColorClass,
+  senderNameColorClass,
+} from "../utils/sender-color"
 import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
+
+type BubbleCornerLayer = "inner" | "outer"
+
+interface BubbleCornerOptions {
+  isMine: boolean
+  isFirstOfRun: boolean
+  isLastOfRun: boolean
+  layer?: BubbleCornerLayer
+}
+
+const bubbleCornerClasses = {
+  inner: {
+    base: "rounded-2xl",
+    left: ["rounded-tl-sm", "rounded-bl-sm"],
+    right: ["rounded-tr-sm", "rounded-br-sm"],
+  },
+  outer: {
+    // The interaction surface wraps the bubble with 2px of padding. Adding
+    // those 2px to both inner radii (20px/8px) keeps the curves concentric.
+    base: "rounded-[22px]",
+    left: ["rounded-tl-[10px]", "rounded-bl-[10px]"],
+    right: ["rounded-tr-[10px]", "rounded-br-[10px]"],
+  },
+} as const
 
 /**
  * Border-radius classes for a chat bubble given its position in a same-author
@@ -20,18 +46,24 @@ import { ReplyQuote } from "./ReplyQuote"
  * Exported so the highlight ring / hover surface in `ChatMessageItem` can follow
  * the exact same shape as the bubble it wraps.
  */
-export const bubbleCornerClass = (
-  isMine: boolean,
-  isFirstOfRun: boolean,
-  isLastOfRun: boolean
-): string =>
-  cn(
+export const bubbleCornerClass = ({
+  isMine,
+  isFirstOfRun,
+  isLastOfRun,
+  layer = "inner",
+}: BubbleCornerOptions): string => {
+  const profile = bubbleCornerClasses[layer]
+  const [topTailCorner, bottomTailCorner] = profile[isMine ? "right" : "left"]
+
+  return cn(
     // The radius transitions because extending a run flips the previous
     // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
-    "rounded-2xl transition-[border-radius] duration-150",
-    !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
-    !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
+    profile.base,
+    "transition-[border-radius] duration-150 motion-reduce:transition-none",
+    !isFirstOfRun && topTailCorner,
+    !isLastOfRun && bottomTailCorner
   )
+}
 
 /** A single message bubble. In groups the sender's name is the first line
  * (hover-carded); a reply quote, when present, is nested above the body.
@@ -61,7 +93,7 @@ const ChatBubbleImpl = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   // Whether the message was ALREADY deleted when this row mounted (history, or
   // a tombstone scrolled back into the window): render it in place. Only a
   // live delete fades the tombstone in.
@@ -106,7 +138,11 @@ const ChatBubbleImpl = ({
     [message.body, mentionTokens, message.linkPreviews]
   )
 
-  const corners = bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun)
+  const corners = bubbleCornerClass({
+    isMine,
+    isFirstOfRun,
+    isLastOfRun,
+  })
 
   if (message.deleted) {
     // The branch switch remounts this root, so `initial` applies on a live
@@ -122,8 +158,7 @@ const ChatBubbleImpl = ({
           corners,
           "w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
-          "border border-solid border-f1-border-secondary",
-          isMine ? "bg-f1-background-tertiary" : "bg-f1-background"
+          messageSurfaceColorClass(message.author, isMine)
         )}
       >
         {i18n.chat.deletedMessage}
@@ -136,15 +171,11 @@ const ChatBubbleImpl = ({
       <div
         className={cn(
           corners,
-          // One property list (tailwind-merge collapses `transition-*`): the
-          // run-corner animation from `corners` plus the dim when a send fails.
-          "transition-[border-radius,opacity] duration-150",
           "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
-          "border border-solid border-f1-border-secondary",
-          // Mine: grey. Others: white with a subtle border (matches the design).
-          isMine ? "bg-f1-background-tertiary" : "bg-transparent",
-          message.status === "failed" && "opacity-60"
+          // Incoming bubbles share the author's hue at a quiet tint, while the
+          // current user's bubble remains clearly neutral.
+          messageSurfaceColorClass(message.author, isMine)
         )}
       >
         {message.replyTo && (
@@ -181,7 +212,7 @@ const ChatBubbleImpl = ({
           {message.editedAt && (
             // WhatsApp-style "edited" marker; sits at the end of the body (the
             // bubble shows no timestamp, so there's no time to pair it with).
-            <span className="ml-1 align-baseline text-sm text-f1-foreground-tertiary">
+            <span className="ml-1 align-baseline text-sm text-f1-foreground-secondary">
               {i18n.chat.edited}
             </span>
           )}

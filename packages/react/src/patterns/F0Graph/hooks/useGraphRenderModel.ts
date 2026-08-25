@@ -118,6 +118,13 @@ export interface UseGraphRenderModelResult<T> {
   renderedNodeCount: number
   /** Ids of those `graphNode`s — for viewport-driven data loading. */
   renderedNodeIds: string[]
+  /**
+   * Ids of the rendered `graphNode`s with no rendered parent (roots, plus nodes
+   * whose parent is windowed out). The `role="tree"` container `aria-owns` these
+   * so every rendered `role="treeitem"` has exactly one owner across React
+   * Flow's `role="application"` wrapper.
+   */
+  treeRootNodeIds: string[]
   /** Bounding box of the full layout (`null` when empty), for fit-view. */
   contentBounds: { x: number; y: number; width: number; height: number } | null
   /** Layout position of a node id, regardless of whether it is windowed out. */
@@ -929,6 +936,25 @@ export function useGraphRenderModel<T>({
     [rfNodes]
   )
 
+  // Forest roots among the rendered treeitems: a rendered node whose parent is
+  // not itself rendered — either it has no parent, or the parent is windowed
+  // out. React Flow wraps its nodes in a `role="application"` div, so the
+  // `role="tree"` container can't reach any `role="treeitem"` through the DOM;
+  // it re-owns these ids via `aria-owns` instead. In-window parents already
+  // re-own their in-window children (`visibleChildIds` above), so owning the
+  // forest roots here gives every rendered treeitem exactly one owner and leaves
+  // none orphaned under windowing.
+  const treeRootNodeIds = useMemo(() => {
+    const rendered = new Set(renderedNodeIds)
+    return rfNodes
+      .filter((n) => n.type === "graphNode")
+      .filter((n) => {
+        const { parentId } = (n.data as GraphNodeData).graphNode
+        return parentId == null || !rendered.has(parentId)
+      })
+      .map((n) => n.id)
+  }, [rfNodes, renderedNodeIds])
+
   // ── Build React Flow edges ──
   const rfEdges = useMemo((): RFEdge[] => {
     // Parents that have a collapser button sitting on their outgoing edges
@@ -1001,6 +1027,7 @@ export function useGraphRenderModel<T>({
     tagsAffectLayout,
     renderedNodeCount: renderedNodeIds.length,
     renderedNodeIds,
+    treeRootNodeIds,
     contentBounds,
     getNodePosition,
     stackHoverZones,

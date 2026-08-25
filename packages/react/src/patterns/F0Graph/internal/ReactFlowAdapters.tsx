@@ -9,7 +9,7 @@ import { type ReactNode, memo } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
@@ -355,8 +355,10 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   )
 
   const isFocused = focusCtx?.focusedNodeId === id
-  const wrapperRefCallback = focusCtx
-    ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
+  // Register the focusable button itself (not the layout wrapper) so the graph's
+  // roving-tabindex focus system moves focus onto the single interactive control.
+  const buttonRefCallback = focusCtx
+    ? (el: HTMLElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
   const ariaLabel = i18n.t("actions.expand")
@@ -364,28 +366,20 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   return (
     <>
       <Handle type="target" position={targetPos} className="!invisible" />
+      {/* Plain layout box — the interactive control is the native button inside
+          F0GraphExpander. A role="button" here would nest interactive controls
+          (axe nested-interactive). The button carries the roving tabIndex,
+          aria-expanded, aria-label, and native Enter/Space activation. */}
       <div
-        ref={wrapperRefCallback}
-        role="button"
-        tabIndex={isFocused ? 0 : -1}
-        aria-label={ariaLabel}
-        aria-expanded={expanded}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault()
-            actionsCtx.toggleExpand(parentId)
-          }
-        }}
-        className={cn(
-          "pointer-events-auto flex items-start justify-center",
-          focusRing()
-        )}
+        className="pointer-events-auto flex items-start justify-center"
         style={{ width: parentWidth, height: 80 }}
       >
         <F0GraphExpander
+          ref={buttonRefCallback}
           count={count}
           expanded={expanded}
-          tabIndex={-1}
+          tabIndex={isFocused ? 0 : -1}
+          ariaLabel={ariaLabel}
           onClick={() => actionsCtx.toggleExpand(parentId)}
           loading={loading || renderCfg?.deferredLoading}
         />
@@ -433,8 +427,10 @@ function F0GraphCollapserWrapperInner({
   )
 
   const isFocused = focusCtx?.focusedNodeId === id
-  const wrapperRefCallback = focusCtx
-    ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
+  // Register the focusable button itself (not the layout wrapper) so the graph's
+  // roving-tabindex focus system moves focus onto the single interactive control.
+  const buttonRefCallback = focusCtx
+    ? (el: HTMLElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
   const ariaLabel = collapseLabel ?? i18n.actions.collapse
@@ -449,22 +445,17 @@ function F0GraphCollapserWrapperInner({
   return (
     <>
       <Handle type="target" position={targetPos} className="!invisible" />
+      {/* Plain layout box — the interactive control is the native F0Button. A
+          role="button" here would nest interactive controls (axe
+          nested-interactive). The button carries the roving tabIndex,
+          aria-expanded, aria-label, and native Enter/Space activation. `group`
+          stays here so the hover-reveal below still keys off it. */}
       <div
-        ref={wrapperRefCallback}
-        role="button"
-        tabIndex={isFocused ? 0 : -1}
-        aria-label={ariaLabel}
-        aria-expanded={true}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault()
-            actionsCtx.toggleExpand(parentId)
-          }
-        }}
-        className={cn(
-          "group pointer-events-auto flex items-start justify-center pt-2",
-          focusRing()
-        )}
+        className="group pointer-events-auto flex items-start justify-center pt-2"
+        // The band is `pointer-events-auto` and sits above the nodes, so over a
+        // stacked column — where the lane is halved — the full-height band would
+        // cover the first row and swallow its clicks. Clamped to what the
+        // shortened lane has left.
         style={{
           width: parentWidth,
           height: stacked
@@ -483,6 +474,7 @@ function F0GraphCollapserWrapperInner({
           )}
         >
           <F0Button
+            ref={buttonRefCallback}
             variant="neutral"
             // Same size as the expander pill at every zoom. A larger button at
             // compact left the two affordances sharing a centre but not a top
@@ -491,6 +483,9 @@ function F0GraphCollapserWrapperInner({
             icon={Minimize}
             hideLabel
             label={ariaLabel}
+            aria-label={ariaLabel}
+            aria-expanded={true}
+            tabIndex={isFocused ? 0 : -1}
             onClick={() => actionsCtx.toggleExpand(parentId)}
           />
         </div>

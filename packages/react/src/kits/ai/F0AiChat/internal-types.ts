@@ -115,6 +115,21 @@ export type AiChatProviderReturnValue = {
    */
   resetChatWidth: () => void
   /**
+   * True while the user is dragging the chat's resize handle. Broadcast here
+   * because everything laid out against the chat's edge has to follow the drag
+   * 1:1 — an eased width leaves the seam trailing the cursor.
+   *
+   * OPTIONAL on purpose: the provider always supplies both, but a required
+   * addition to this return type reads as a breaking change to the public API
+   * check even though callers only ever read it.
+   *
+   * The window that renders the handle keeps its own local drag state and
+   * mirrors it here; it does not read this back as the gate for its listener,
+   * since a split layout has two windows and only one is being dragged.
+   */
+  isResizing?: boolean
+  setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
+  /**
    * The current visualization mode of the chat
    */
   visualizationMode: VisualizationMode
@@ -171,6 +186,13 @@ export type AiChatProviderReturnValue = {
   processDroppedFiles: (files: File[]) => void
   /** @internal Registers the processFiles callback owned by ChatTextarea */
   setProcessDroppedFilesFunction: (fn: ((files: File[]) => void) | null) => void
+  /**
+   * Move focus into the mounted chat composer, or queue it until mount.
+   * Returns whether focus moved synchronously.
+   */
+  focusChatInput: () => boolean
+  /** @internal Registers the focus callback owned by ChatTextarea. */
+  setFocusChatInputFunction: (fn: (() => void) | null) => void
   /**
    * Pre-loaded context shown as an empty state in the chat.
    * Prepended to the first user message as `<pending-context>`.

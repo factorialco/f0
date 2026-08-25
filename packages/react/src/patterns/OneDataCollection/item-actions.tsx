@@ -6,8 +6,21 @@ import { RecordType } from "@/hooks/datasource"
 
 export type ActionDefinition =
   | DropdownItemSeparator
-  | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
+  | (Pick<
+      DropdownItemObject,
+      | "label"
+      | "icon"
+      | "description"
+      | "critical"
+      | "disabled"
+      | "disabledTooltip"
+    > & {
       onClick: () => void
+      /**
+       * `false` REMOVES the action from the menu (see `filterItemActions`). To
+       * instead keep it VISIBLE but greyed-out and non-interactive, leave
+       * `enabled` unset and use `disabled` (+ `disabledTooltip` to explain why).
+       */
       enabled?: boolean
       type?: "primary" | "secondary" | "other"
       hideLabel?: boolean

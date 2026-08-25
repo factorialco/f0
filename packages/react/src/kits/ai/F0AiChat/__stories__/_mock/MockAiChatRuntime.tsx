@@ -37,10 +37,23 @@ import { pickRandomResponse, pickRandomThinkingSteps } from "./mockPhrases"
 /** A single step within a (possibly multi-step) clarifying flow. */
 export type ClarifyingStep = {
   question: string
-  options: ClarifyingOption[]
+  /**
+   * The options to offer. Pass a function instead of a list for a step whose
+   * choices depend on an earlier answer: it receives the option ids picked in
+   * every step BEFORE this one, in order, and is re-read as those change (so
+   * going back and picking differently re-derives what follows).
+   */
+  options:
+    | ClarifyingOption[]
+    | ((previousAnswerIdsByStep: string[][]) => ClarifyingOption[])
   selectionMode?: ClarifyingSelectionMode
   optional?: boolean
   allowCustomAnswer?: boolean
+}
+
+/** A `ClarifyingStep` with its options resolved to a concrete list. */
+type ResolvedClarifyingStep = Omit<ClarifyingStep, "options"> & {
+  options: ClarifyingOption[]
 }
 
 /**
@@ -648,16 +661,46 @@ export const MockAiChatRuntimeProvider = ({
   // one, fires `onConfirm` with the picked labels + ids for every step in order.
   const clarifyingQuestion: ClarifyingQuestionState | null = (() => {
     if (!clarifyingConfig) return null
-    const steps = clarifyingConfig.steps
+    // Resolve the steps in order so a step deriving its options from an earlier
+    // answer sees the ids picked before it. Rebuilt every render alongside the
+    // rest of this state, so going back and changing an answer re-derives the
+    // steps that follow. Selected ids are enough for the derivation — a custom
+    // answer carries no option id, and `buildAnswers` handles it separately.
+    //
+    // Each step's stored ids are filtered against the options it just resolved
+    // to before being carried forward. Going back and changing an answer can
+    // re-derive a later step into a different list, stranding a selection it no
+    // longer offers; a stale id would otherwise keep Submit enabled while
+    // nothing is highlighted, resolve to an option that isn't there, and (in a
+    // chain of three or more) derive everything after it from an answer the
+    // user can no longer see selected.
+    const steps: ResolvedClarifyingStep[] = []
+    const selectedIdsByStep: string[][] = []
+    clarifyingConfig.steps.forEach((step, i) => {
+      const options =
+        typeof step.options === "function"
+          ? step.options([...selectedIdsByStep])
+          : step.options
+      steps.push({ ...step, options })
+      selectedIdsByStep.push(
+        getClarifyingInteraction(clarifyingInteractions, i).selectedIds.filter(
+          (id) => options.some((option) => option.id === id)
+        )
+      )
+    })
     const stepIndex = clarifyingStepIndex
     const step = steps[stepIndex]
     if (!step) return null
 
     const mode = step.selectionMode ?? "single"
-    const interaction = getClarifyingInteraction(
+    const storedInteraction = getClarifyingInteraction(
       clarifyingInteractions,
       stepIndex
     )
+    const interaction: ClarifyingInteraction = {
+      ...storedInteraction,
+      selectedIds: selectedIdsByStep[stepIndex] ?? [],
+    }
 
     const updateInteraction = (patch: Partial<ClarifyingInteraction>) =>
       setClarifyingInteractions((prev) => ({
@@ -673,14 +716,15 @@ export const MockAiChatRuntimeProvider = ({
     const buildAnswers = (): { labels: string[][]; ids: string[][] } => {
       const perStep = steps.map((s, i) => {
         const inter = getClarifyingInteraction(clarifyingInteractions, i)
-        const selected = s.options.filter((o) =>
-          inter.selectedIds.includes(o.id)
-        )
+        // Same sanitized ids the panel rendered as selected, so what the user
+        // saw highlighted is exactly what gets resolved.
+        const validIds = selectedIdsByStep[i] ?? []
+        const selected = s.options.filter((o) => validIds.includes(o.id))
         const labels = selected.map((o) => o.label)
         const ids = selected.map((o) => o.id)
         const isSingle = (s.selectionMode ?? "single") === "single"
         const includeCustom = isSingle
-          ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
+          ? validIds.length === 0 && inter.customText.trim().length > 0
           : inter.isCustomActive && inter.customText.trim().length > 0
         if (includeCustom) {
           labels.push(inter.customText.trim())

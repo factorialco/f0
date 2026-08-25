@@ -9,7 +9,7 @@ import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
-import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 
@@ -64,7 +64,7 @@ function ResourcePageView({ resourcePage }: { resourcePage: Resource }) {
               module={CRUD_MODULE}
               breadcrumbs={[{ id: resourcePage.id, label: resourcePage.name }]}
             />
-            <ResourceHeader
+            <F0ResourceHeader
               title={resourcePage.name}
               description={resourcePage.summary}
               status={{

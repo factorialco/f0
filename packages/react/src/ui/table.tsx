@@ -97,8 +97,12 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "relative min-h-[48px] whitespace-nowrap px-3 py-2 align-top first:pl-6 last:pr-6",
-      "[&:has([role=checkbox])]:px-2 [&:has([role=checkbox])]:py-2",
+      // `pb` is 1px larger than `pt` on purpose: the row paints its separator on
+      // its own last pixel (`after:bottom-0` on TableRow), so a symmetric `py`
+      // leaves content looking 1px high — the gap below it is a pixel shorter
+      // than the gap above once the rule is drawn over it.
+      "relative min-h-[48px] whitespace-nowrap px-3 pb-[9px] pt-2 align-top first:pl-6 last:pr-6",
+      "[&:has([role=checkbox])]:px-2",
       className
     )}
     {...props}

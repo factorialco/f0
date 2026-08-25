@@ -19,7 +19,7 @@ export const WALKTHROUGH_FLOW_FEATURES: FeatureCardProps[] = [
     icon: Comment,
     title: "Guided Chat · Triage",
     description:
-      "One clarifying question up front that triages the survey type, then a type-scoped template gallery. Uses the Training data.",
+      "One clarifying question up front that triages the survey type, then the entry actions scoped to it. Uses the Training data.",
     href: "/?path=/story/patterns-ai-cocreation-walkthrough--guided-chat-triage",
   },
   {

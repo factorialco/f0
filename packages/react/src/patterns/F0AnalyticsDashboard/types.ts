@@ -4,16 +4,23 @@ import type {
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
+  F0DataChartPointClick,
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
+import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
+
+// Re-exported under its own name: the same shape types a table column header
+// and a widget header, and a host typing a widget's `info` shouldn't have to
+// reach for the table's `TableHeaderInfo` alias to do it.
+export type { InfoHintContent }
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -246,6 +253,17 @@ export interface DashboardItemBase {
   /** Optional description below the title */
   description?: string
   /**
+   * Optional help copy for what the widget measures, revealed by an ⓘ icon
+   * beside the title. A string renders a plain tooltip; the structured form
+   * renders a hoverable card that can carry a link — the same affordance a
+   * table column header offers, so a figure explains itself the same way
+   * wherever it is read.
+   *
+   * Distinct from `description` (which states what this widget shows) and from
+   * `explanation` (how it is computed, behind the menu).
+   */
+  info?: string | InfoHintContent
+  /**
    * Optional markdown explanation of how this item's data is calculated.
    * When set, the per-item dropdown menu shows a "Where does this data come
    * from?" entry that opens a dialog rendering this content as markdown.
@@ -425,6 +443,27 @@ export type DashboardItemLayout = {
 // Root component props
 // ---------------------------------------------------------------------------
 
+/** A point selected from either the chart canvas or its keyboard companion. */
+export type F0AnalyticsDashboardPointClick = Omit<
+  F0DataChartPointClick,
+  "source"
+> & {
+  source: "pointer" | "keyboard"
+}
+
+/**
+ * What the user asked about: a whole widget, or one mark inside it.
+ *
+ * `point` is absent when the ask came from the widget's ⋯ menu and present
+ * when it came from clicking a mark, which is the only thing that tells the
+ * two apart.
+ */
+export interface F0AnalyticsDashboardAskAiTarget {
+  id: string
+  title: string
+  point?: F0AnalyticsDashboardPointClick
+}
+
 /**
  * Props for the F0AnalyticsDashboard component.
  *
@@ -510,6 +549,24 @@ export interface F0AnalyticsDashboardProps<
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  /**
+   * Called when the user picks "Ask One" on a widget, replacing what the entry
+   * does by default (quote the widget in the mounted AI chat, then open it).
+   *
+   * Pass this to own the action — send the widget somewhere else, add
+   * tracking, ask for confirmation first. The entry then appears whether or
+   * not an AI chat is mounted, since the host is answering it. Its label stays
+   * `ai.dashboardItem.askOne`, which hosts already override, so the copy is
+   * yours either way.
+   *
+   * Without it the entry appears only where an AI chat is mounted and enabled,
+   * and drives that chat directly.
+   *
+   * `point` is set when the ask came from a clicked mark rather than the
+   * widget menu, so one handler answers both without the host having to tell
+   * them apart by anything other than its presence.
+   */
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   /**
    * Navigation filter definitions (e.g. date-navigator).
    * Rendered above the grid alongside the regular filter bar.

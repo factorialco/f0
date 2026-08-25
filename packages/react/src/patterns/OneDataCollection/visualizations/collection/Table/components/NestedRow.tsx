@@ -16,7 +16,7 @@
  *
  */
 
-import { forwardRef, useCallback, useRef } from "react"
+import { forwardRef, useCallback, useEffect, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -94,6 +94,8 @@ export type RowProps<
   nestedRowProps?: NestedRowProps
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => "none" | "striped" | "striked"
+  /** In a table with nested rows, renders root rows (depth 0) in bold. */
+  boldRootRows?: boolean
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
@@ -135,8 +137,14 @@ const NestedRowContent = <
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
-  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
-  const open = expandedRowIds[rowId] ?? false
+  const { expandedRowIds, setRowExpanded, isExpandedByDefault } =
+    useNestedDataContext()
+  // An absent entry means the user has not decided for this row, and only then
+  // does the default policy apply. `??` is deliberate over `||`: a recorded
+  // `false` is a deliberate collapse and must win over an opening policy.
+  const open =
+    expandedRowIds[rowId] ??
+    isExpandedByDefault(props.item, props.nestedRowProps?.depth ?? 0)
 
   /**
    * useLoadChildren hook manages:
@@ -212,6 +220,17 @@ const NestedRowContent = <
       loadChildren()
     }
   }
+
+  // A row the default policy opens never went through `handleExpand`, so it has
+  // to ask for its children itself. Guarded by a ref rather than by
+  // `children.length`, which stays 0 for a parent whose fetch comes back empty
+  // and would otherwise re-request on every render.
+  const requestedDefaultChildrenRef = useRef(false)
+  useEffect(() => {
+    if (!open || requestedDefaultChildrenRef.current || children.length) return
+    requestedDefaultChildrenRef.current = true
+    loadChildren()
+  }, [open, children.length, loadChildren])
 
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,

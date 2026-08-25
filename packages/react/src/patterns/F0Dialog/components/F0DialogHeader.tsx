@@ -26,6 +26,7 @@ export const F0DialogHeader = ({
   navigation,
   resourceHeader,
   controls,
+  headerStatus,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -89,6 +90,14 @@ export const F0DialogHeader = ({
     )
   }
 
+  /** "3 of 11" — which of several things this dialog is currently showing. */
+  const Status = () =>
+    headerStatus ? (
+      <span className="whitespace-nowrap text-f1-foreground-secondary">
+        {headerStatus}
+      </span>
+    ) : null
+
   const CloseButton = () => (
     <ButtonInternal
       variant="outline"
@@ -101,7 +110,7 @@ export const F0DialogHeader = ({
 
   const TabsStrip = () =>
     tabs ? (
-      <div className="overflow-hidden">
+      <div className="shrink-0 overflow-hidden">
         <div className="-mx-2">
           <Tabs
             tabs={tabs}
@@ -159,6 +168,7 @@ export const F0DialogHeader = ({
             <Controls />
           </div>
           <div className="flex flex-row items-center gap-2">
+            <Status />
             <Actions />
             <CloseButton />
           </div>
@@ -212,6 +222,7 @@ export const F0DialogHeader = ({
         </div>
         <div className="flex flex-row items-center gap-2">
           {navigation && <PageNavigation {...navigation} />}
+          <Status />
           <Actions />
           {(navigation || otherActions) && <Divider />}
           <CloseButton />

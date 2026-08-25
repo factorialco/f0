@@ -12,6 +12,31 @@ export const DialogContent = forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     wrapperClassName?: string
     withTranslateAnimation?: boolean
+    /**
+     * HOW IT ARRIVES.
+     *
+     * - `"scale"` (the default) — fades while zooming from 95% and sliding down,
+     *   which reads as a card arriving over the page. Right when the dialog is
+     *   a card on a page.
+     * - `"fade"` — opacity only. For a dialog that is already the whole screen,
+     *   where a zoom is the screen itself lurching and there is nothing behind
+     *   it for the card to arrive over.
+     *
+     * A prop rather than classes layered on top: the zoom is applied under a
+     * `data-[state]` selector, so an override has to win a specificity fight it
+     * has no business being in. Not emitting it is the honest way to not have
+     * it.
+     */
+    animation?: "scale" | "fade"
+    /**
+     * Extra classes for the dimming layer behind the dialog.
+     *
+     * Mostly for taking the dim AWAY — `bg-transparent` — when the dialog covers
+     * the whole screen and there is nothing left to dim. The overlay still
+     * mounts: Radix hangs the dismiss-on-outside-press and the scroll lock off
+     * it, so removing it would take real behaviour with it.
+     */
+    overlayClassName?: string
     container?: HTMLElement | null
     /**
      * Id of the element to portal into when no explicit `container` is given.
@@ -28,6 +53,8 @@ export const DialogContent = forwardRef<
       className,
       children,
       withTranslateAnimation = true,
+      animation = "scale",
+      overlayClassName,
       container: propContainer,
       defaultContainerId = "content",
       ...props
@@ -56,13 +83,16 @@ export const DialogContent = forwardRef<
 
     return (
       <DialogPortal container={container}>
-        <DialogOverlay />
+        <DialogOverlay className={overlayClassName} />
         <DialogPrimitive.Content
           ref={ref}
           className={cn(
             "fixed inset-0 z-50 flex items-center justify-center",
-            "pointer-events-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-            withTranslateAnimation &&
+            "pointer-events-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            animation === "scale" &&
+              "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            animation === "scale" &&
+              withTranslateAnimation &&
               "data-[state=closed]:slide-out-to-top-[10%] data-[state=open]:slide-in-from-top-[10%]",
             wrapperClassName
           )}

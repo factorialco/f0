@@ -822,6 +822,17 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     y: 0,
     rowSpan: 3,
     format: { type: "currency", currency: "EUR" },
+    // A KPI takes the same ⓘ as a chart title and a column header: the copy for
+    // the one measure its number is read from.
+    info: {
+      title: "Average base salary",
+      description:
+        "Mean annual gross base salary across the employees in scope, before bonuses.",
+      link: {
+        label: "Learn more",
+        onClick: () => {},
+      },
+    },
     fetchData: fetchAvgSalary,
   },
   {
@@ -867,6 +878,18 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     id: "headcount",
     title: "Headcount by Department",
     description: "Current headcount and open positions",
+    // The ⓘ beside the title explains the figure being plotted — here the
+    // measure a semantic dashboard would read from its catalog, with a link
+    // through to the full entry.
+    info: {
+      title: "Active headcount",
+      description:
+        "Distinct employees with an active contract on the selected date.",
+      link: {
+        label: "Learn more",
+        onClick: () => {},
+      },
+    },
     explanation:
       "Active employees grouped by **department**, sorted from largest to smallest.\n\n- Only employees with an active contract today are counted.\n- The **target** value overlaid on each bar comes from the company's current hiring plan for that department.",
     type: "chart",
