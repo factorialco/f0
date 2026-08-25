@@ -429,9 +429,10 @@ export type DashboardItemFiltersState<
 /**
  * Per-widget filter configuration resolved by the host.
  *
- * Every item type shows the same filter control in its header. Applied filters
- * are always signalled by the trigger counter; wider widgets progressively
- * reveal up to three editable chips without changing the data contract.
+ * Every item type shows the same filter control in its header on hover or
+ * keyboard focus, while touch-only devices keep it available without hover.
+ * Applied filters are signalled by the trigger counter without exposing their
+ * selected values in the widget header.
  *
  * The picker holds a draft state; `onChange` fires only when the user applies,
  * with cleared or incomplete entries stripped from the emitted state.

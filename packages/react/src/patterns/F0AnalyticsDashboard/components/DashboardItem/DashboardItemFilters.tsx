@@ -13,10 +13,8 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowLeft, Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0DialogContext } from "@/patterns/F0Dialog"
-import { FilterChipButton } from "@/patterns/OneFilterPicker/components/FilterChipButton"
 import { FilterContent } from "@/patterns/OneFilterPicker/components/FilterContent"
 import { FilterList } from "@/patterns/OneFilterPicker/components/FilterList"
-import { collectNestedFilterKeys } from "@/patterns/OneFilterPicker/filterTypes/InFilter/components/option-utils"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "@/patterns/OneFilterPicker/internal/getActiveFiltersValue"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -53,6 +51,7 @@ export function DashboardItemFilters<
   const id = useId()
   const contentRef = useRef<HTMLDivElement>(null)
   const returnFocusLabelRef = useRef<string | undefined>(undefined)
+  const onOpenChangeRef = useRef(onOpenChange)
 
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFilterKey, setSelectedFilterKey] = useState<
@@ -60,6 +59,17 @@ export function DashboardItemFilters<
   >(null)
   const [draftValue, setDraftValue] =
     useState<DashboardItemFiltersState<ItemFilters>>(value)
+
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange
+  }, [onOpenChange])
+
+  useEffect(
+    () => () => {
+      onOpenChangeRef.current?.(false)
+    },
+    []
+  )
 
   const selectedDefinition = selectedFilterKey
     ? filters[selectedFilterKey]
@@ -177,65 +187,29 @@ export function DashboardItemFilters<
     setDraftValue((current) => ({ ...current, [key]: newValue }))
   }
 
-  const openAppliedFilter = (key: keyof ItemFilters) => {
-    selectFilter(key)
-    setIsOpen(true)
-    onOpenChange?.(true)
-  }
-
-  const removeAppliedFilter = (key: keyof ItemFilters) => {
-    const nextValue = { ...value }
-    delete nextValue[key]
-
-    const definition = filters[key]
-    if (definition?.type === "in" && definition.options) {
-      for (const nestedKey of collectNestedFilterKeys(definition.options)) {
-        delete nextValue[nestedKey as keyof ItemFilters]
-      }
-    }
-
-    onChange(getActiveFiltersValue(filters, nextValue, i18n))
-  }
-
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange} modal={false}>
-      <div className="flex min-w-0 shrink-0 items-center gap-1">
-        {activeFilterKeys.slice(0, 3).map((key, index) => (
-          <div
-            key={String(key)}
-            className={
-              index === 0
-                ? "hidden min-w-0 max-w-40 @md:block"
-                : index === 1
-                  ? "hidden min-w-0 max-w-40 @2xl:block"
-                  : "hidden min-w-0 max-w-40 @5xl:block"
-            }
-          >
-            <FilterChipButton
-              filter={filters[key]}
-              filterKey={String(key)}
-              value={value[key]}
-              onSelect={() => openAppliedFilter(key)}
-              onRemove={() => removeAppliedFilter(key)}
-            />
-          </div>
-        ))}
-        <PopoverTrigger asChild>
-          <ButtonInternal
-            label={i18n.filters.label}
-            icon={Filter}
-            variant="ghost"
-            size="md"
-            hideLabel
-            compact
-            pressed={isOpen}
-            counterValue={appliedCount}
-            aria-label={appliedFilterLabel}
-            aria-controls={isOpen ? id : undefined}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          />
-        </PopoverTrigger>
-      </div>
+      <PopoverTrigger asChild>
+        <ButtonInternal
+          label={i18n.filters.label}
+          icon={Filter}
+          variant="ghost"
+          size="md"
+          hideLabel
+          compact
+          pressed={isOpen}
+          counterValue={appliedCount}
+          aria-label={i18n.filters.label}
+          aria-describedby={appliedCount ? `${id}-status` : undefined}
+          aria-controls={isOpen ? id : undefined}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        />
+      </PopoverTrigger>
+      {appliedCount && (
+        <span id={`${id}-status`} className="sr-only">
+          {appliedFilterLabel} ({appliedCount})
+        </span>
+      )}
       <PopoverContent
         ref={contentRef}
         aria-label={i18n.filters.label}

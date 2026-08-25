@@ -6,6 +6,10 @@ import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
 import type { DashboardItemFiltersConfig } from "../types"
 
+vi.mock("@/patterns/OneFilterPicker/components/FilterChipButton", () => ({
+  FilterChipButton: () => <span data-testid="filter-chip-sentinel" />,
+}))
+
 const makeItemFilters = (
   overrides: Partial<DashboardItemFiltersConfig> = {}
 ): DashboardItemFiltersConfig => ({
@@ -26,13 +30,6 @@ const makeItemFilters = (
   onChange: vi.fn(),
   ...overrides,
 })
-
-const appliedDefinitions = {
-  first: { type: "search" as const, label: "First" },
-  second: { type: "search" as const, label: "Second" },
-  third: { type: "search" as const, label: "Third" },
-  fourth: { type: "search" as const, label: "Fourth" },
-}
 
 describe("DashboardItem with itemFilters", () => {
   it("does not render a filter button without itemFilters", () => {
@@ -156,7 +153,7 @@ describe("DashboardItem with itemFilters", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it("keeps the filter signal visible and progressively reveals its chip", async () => {
+  it("shows only the applied count in the hover action group", () => {
     render(
       <DashboardItem
         title="Revenue"
@@ -167,34 +164,27 @@ describe("DashboardItem with itemFilters", () => {
       </DashboardItem>
     )
 
-    const trigger = screen.getByRole("button", {
-      name: "Active filters: Name",
-    })
+    const trigger = screen.getByRole("button", { name: "Filters" })
     expect(trigger).toHaveTextContent("1")
-
-    const chip = await screen.findByText("Name: Bob")
-    let responsiveWrapper: HTMLElement | null = chip
-    while (
-      responsiveWrapper &&
-      !responsiveWrapper.className.includes("@md:block")
-    ) {
-      responsiveWrapper = responsiveWrapper.parentElement
-    }
-    expect(responsiveWrapper).toBeTruthy()
+    expect(trigger).toHaveAccessibleDescription("Active filters: Name (1)")
+    expect(screen.queryByText("Name: Bob")).toBeNull()
+    expect(screen.queryByTestId("filter-chip-sentinel")).toBeNull()
+    expect(trigger.parentElement).toHaveClass(
+      "sm:[@media(hover:hover)]:opacity-0",
+      "focus-within:sm:opacity-100",
+      "group-hover/dashitem:sm:opacity-100"
+    )
   })
 
-  it("reveals at most three chips at progressive container widths", async () => {
+  it("counts every applied filter without rendering selected values", () => {
     render(
       <DashboardItem
         title="Revenue"
         isLoading={false}
         itemFilters={makeItemFilters({
-          filters: appliedDefinitions,
           value: {
-            first: "A",
-            second: "B",
-            third: "C",
-            fourth: "D",
+            name: "Bob",
+            country: ["ES"],
           },
         })}
       >
@@ -202,30 +192,36 @@ describe("DashboardItem with itemFilters", () => {
       </DashboardItem>
     )
 
-    const chips = await Promise.all(
-      ["First: A", "Second: B", "Third: C"].map((label) =>
-        screen.findByText(label)
-      )
+    const trigger = screen.getByRole("button", { name: "Filters" })
+    expect(trigger).toHaveTextContent("2")
+    expect(trigger).toHaveAccessibleDescription(
+      "Active filters: Name, Country (2)"
     )
-    expect(screen.queryByText("Fourth: D")).toBeNull()
-    expect(
-      screen.getByRole("button", {
-        name: "Active filters: First, Second, Third, Fourth",
-      })
-    ).toHaveTextContent("4")
+    expect(screen.queryByText("Name: Bob")).toBeNull()
+    expect(screen.queryByText("Country: Spain")).toBeNull()
+    expect(screen.queryByTestId("filter-chip-sentinel")).toBeNull()
+  })
 
-    const classes = chips.map((chip) => {
-      let wrapper: HTMLElement | null = chip
-      while (wrapper && !wrapper.className.includes("hidden")) {
-        wrapper = wrapper.parentElement
-      }
-      return wrapper?.className
-    })
-    expect(classes).toEqual([
-      expect.stringContaining("@md:block"),
-      expect.stringContaining("@2xl:block"),
-      expect.stringContaining("@5xl:block"),
-    ])
+  it("keeps the hover action group visible while the picker is open", async () => {
+    const user = userEvent.setup()
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemFilters={makeItemFilters()}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    const trigger = screen.getByRole("button", { name: "Filters" })
+    const actionGroup = trigger.parentElement
+
+    await user.click(trigger)
+    expect(actionGroup).toHaveClass("delay-0", "!opacity-100")
+
+    await user.keyboard("{Escape}")
+    await waitFor(() => expect(actionGroup).not.toHaveClass("delay-0"))
   })
 
   it("does not treat an incomplete condition as applied", () => {
@@ -245,23 +241,31 @@ describe("DashboardItem with itemFilters", () => {
     expect(button).not.toHaveTextContent("1")
   })
 
-  it("removes an applied chip immediately", async () => {
+  it("clears an applied filter through the picker", async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
     render(
       <DashboardItem
         title="Revenue"
         isLoading={false}
-        itemFilters={makeItemFilters({ value: { name: "Bob" }, onChange })}
+        itemFilters={makeItemFilters({
+          value: { country: ["ES"] },
+          onChange,
+        })}
       >
         <div>Content</div>
       </DashboardItem>
     )
 
-    await screen.findByText("Name: Bob")
-    await user.click(screen.getByRole("button", { name: /Close/ }))
+    await user.click(screen.getByRole("button", { name: "Filters" }))
+    await user.click(screen.getByRole("button", { name: "Country" }))
+    const spain = await screen.findByRole("checkbox", { name: "Spain" })
+    expect(spain).toBeChecked()
+    await user.click(spain)
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+    await user.click(screen.getByRole("button", { name: "Apply filters" }))
 
-    expect(onChange).toHaveBeenCalledWith({})
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith({}))
   })
 
   it("announces active draft rows without changing their accessible name", async () => {
@@ -276,9 +280,9 @@ describe("DashboardItem with itemFilters", () => {
       </DashboardItem>
     )
 
-    await user.click(
-      screen.getByRole("button", { name: "Active filters: Name" })
-    )
+    const trigger = screen.getByRole("button", { name: "Filters" })
+    expect(trigger).toHaveAccessibleDescription("Active filters: Name (1)")
+    await user.click(trigger)
 
     expect(
       screen.getByRole("button", { name: "Name" })
@@ -337,7 +341,20 @@ describe("DashboardItem with itemFilters", () => {
       </DashboardItem>
     )
 
-    await user.click(screen.getByRole("button", { name: "Filters" }))
+    const trigger = screen.getByRole("button", { name: "Filters" })
+    const actionGroup = trigger.parentElement
+    const errorCard = actionGroup?.parentElement?.parentElement
+
+    expect(errorCard).toHaveClass("group/dashitem")
+    expect(actionGroup).toHaveClass(
+      "sm:[@media(hover:hover)]:opacity-0",
+      "focus-within:sm:opacity-100",
+      "group-hover/dashitem:sm:opacity-100"
+    )
+
+    await user.tab()
+    expect(trigger).toHaveFocus()
+    await user.click(trigger)
     expect(await screen.findByRole("button", { name: "Name" })).toBeVisible()
   })
 

@@ -535,6 +535,13 @@ export const Snapshot: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const title = canvas.getAllByText("Headcount by Department").at(-1)
+    const filteredWidget = title?.closest("[class*='dashitem']")
+    if (!filteredWidget) throw new Error("The filtered widget did not render")
+    await userEvent.hover(filteredWidget)
+  },
 }
 // ---------------------------------------------------------------------------
 // A real One-authored report
@@ -811,8 +818,10 @@ const ItemFiltersDemo = ({
  *   compact anchored popover:
  *   a list of this widget's fields, then the same catalog-backed enum and date
  *   controls used by report-level filters.
- * - Applied filters always produce a count on the icon. As the widget grows,
- *   it progressively reveals up to three editable chips in the same header.
+ * - Applied filters produce only a count on the icon; selected values stay in
+ *   the picker instead of consuming widget-header space.
+ * - The filter icon follows the other widget actions: visible on hover or
+ *   keyboard focus, and while its popover is open.
  *
  * Applying emits `onChange` for that widget only. The last metric's resolver
  * returns `undefined`, so it has no filter control at all.
@@ -919,17 +928,17 @@ export const WithItemFilters: Story = {
       })
     )
 
-    // The applied filter renders as a responsive chip in the table header.
+    await expect(tableTrigger).toHaveTextContent("1")
     await expect(
-      await within(widgetOf("Employee Directory")).findByText(/Germany/)
-    ).toBeInTheDocument()
+      within(widgetOf("Employee Directory")).queryByText("Country: Germany")
+    ).toBeNull()
   },
 }
 
 /**
- * Widgets with filters already applied: every filter icon shows the applied
- * count and wider widgets reveal filter chips. Dismissing the popover without
- * applying keeps the value intact.
+ * Widgets with filters already applied: every filter icon shows only the
+ * applied count. Dismissing the popover without applying keeps the value
+ * intact.
  */
 export const ItemFiltersApplied: Story = {
   render: () => (
@@ -947,12 +956,20 @@ export const ItemFiltersApplied: Story = {
       .getByText("Headcount by Department")
       .closest("[class*='dashitem']") as HTMLElement
     const filtered = within(chart).getByRole("button", {
-      name: "Active filters: Country",
+      name: "Filters",
+      description: "Active filters: Country (1)",
     })
     await expect(filtered).toHaveTextContent("1")
 
-    // The table's pre-applied filter is represented by the same header chip.
-    await expect(await page.findByText(/Spain \+1/)).toBeInTheDocument()
+    const table = page
+      .getByText("Employee Directory")
+      .closest("[class*='dashitem']") as HTMLElement
+    const tableFilter = within(table).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country (1)",
+    })
+    await expect(tableFilter).toHaveTextContent("1")
+    await expect(within(table).queryByText(/Spain \+1/)).toBeNull()
 
     // Open and dismiss without applying — the counter must not change.
     await userEvent.click(filtered)
@@ -986,25 +1003,15 @@ export const ItemFiltersApplied: Story = {
   },
 }
 
-const responsiveItem = (id: string, title: string): DashboardItem => ({
+const hoverItem = (id: string, title: string): DashboardItem => ({
   id,
   title,
   type: "metric",
   fetchData: async () => ({ value: 145 }),
 })
 
-const responsiveFilterValues: ItemFilterStatesByItem = {
-  narrow: {
-    country: ["ES"],
-    agreementType: ["indefinite"],
-    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
-  },
-  medium: {
-    country: ["ES"],
-    agreementType: ["indefinite"],
-    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
-  },
-  wide: {
+const hoverFilterValues: ItemFilterStatesByItem = {
+  hover: {
     country: ["ES"],
     agreementType: ["indefinite"],
     startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
@@ -1012,69 +1019,56 @@ const responsiveFilterValues: ItemFilterStatesByItem = {
 }
 
 /**
- * Container-query coverage for the compact count and the progressive one,
- * two, and three-chip header states.
+ * On hover-capable devices, the filter action stays out of the way until the
+ * widget is hovered or the control receives keyboard focus. Touch-only devices
+ * keep it available. Applied values remain represented only by the icon
+ * counter.
  */
-export const ResponsiveItemFilterSignals: Story = {
-  tags: ["no-sidebar"],
+export const HoverItemFilterSignal: Story = {
+  tags: ["no-sidebar", "widget-filters"],
   render: () => (
-    <div className="flex flex-col gap-6 overflow-x-auto p-4">
-      <div className="w-[380px]">
-        <ItemFiltersDemo
-          items={[responsiveItem("narrow", "Narrow widget") as never]}
-          initialValues={responsiveFilterValues}
-        />
-      </div>
-      <div className="w-[760px]">
-        <ItemFiltersDemo
-          items={[responsiveItem("medium", "Medium widget") as never]}
-          initialValues={responsiveFilterValues}
-        />
-      </div>
-      <div className="w-[1100px]">
-        <ItemFiltersDemo
-          items={[responsiveItem("wide", "Wide widget") as never]}
-          initialValues={responsiveFilterValues}
-        />
-      </div>
+    <div className="w-[760px] p-4">
+      <ItemFiltersDemo
+        items={[
+          hoverItem("hover", "Hover widget") as never,
+          hoverItem("attrition-rate", "Unfiltered companion") as never,
+        ]}
+        initialValues={hoverFilterValues}
+      />
     </div>
   ),
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const widget = (title: string) =>
-      canvas.getByText(title).closest("[class*='dashitem']") as HTMLElement
+    const widget = canvas
+      .getByText("Hover widget")
+      .closest("[class*='dashitem']") as HTMLElement
+    const trigger = within(widget).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country, Agreement type, Start date (3)",
+    })
+    const supportsHover =
+      canvasElement.ownerDocument.defaultView?.matchMedia("(hover: hover)")
+        .matches ?? true
 
-    await step(
-      "The narrow widget keeps only the filter count visible",
-      async () => {
-        const narrow = within(widget("Narrow widget"))
-        await expect(
-          narrow.getByRole("button", {
-            name: "Active filters: Country, Agreement type, Start date",
-          })
-        ).toHaveTextContent("3")
-        await expect(
-          await narrow.findByText("Country: Spain")
-        ).not.toBeVisible()
-      }
-    )
-
-    await step("The medium widget reveals two applied chips", async () => {
-      const medium = within(widget("Medium widget"))
-      await expect(await medium.findByText("Country: Spain")).toBeVisible()
-      await expect(
-        await medium.findByText("Agreement type: Indefinite")
-      ).toBeVisible()
-      await expect(await medium.findByText(/Start date:/)).not.toBeVisible()
+    await step("Only the counter represents applied filters", async () => {
+      await expect(trigger).toHaveTextContent("3")
+      await expect(within(widget).queryByText("Country: Spain")).toBeNull()
+      if (supportsHover) await expect(trigger).not.toBeVisible()
+      else await expect(trigger).toBeVisible()
     })
 
-    await step("The wide widget reveals all three applied chips", async () => {
-      const wide = within(widget("Wide widget"))
-      await expect(await wide.findByText("Country: Spain")).toBeVisible()
-      await expect(
-        await wide.findByText("Agreement type: Indefinite")
-      ).toBeVisible()
-      await expect(await wide.findByText(/Start date:/)).toBeVisible()
+    await step("Hover reveals the filter action", async () => {
+      await userEvent.hover(widget)
+      await expect(trigger.parentElement).toHaveClass(
+        "group-hover/dashitem:sm:opacity-100"
+      )
+    })
+
+    await step("Keyboard focus keeps the filter action visible", async () => {
+      await userEvent.unhover(widget)
+      await userEvent.tab()
+      await expect(trigger).toHaveFocus()
+      await waitFor(() => expect(trigger).toBeVisible())
     })
   },
 }

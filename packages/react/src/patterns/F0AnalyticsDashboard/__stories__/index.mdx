@@ -290,8 +290,8 @@ The filter bar remains usable when valid report filters return empty chart data.
 
 Use `itemFilters` when a filter is scoped to exactly one widget. The prop is a
 resolver, so the host can enable it only for supported items and return
-`undefined` everywhere else. F0 owns the picker draft and responsive header;
-the host owns the applied state, data refetch, and persistence.
+`undefined` everywhere else. F0 owns the picker draft and the hover/focus
+header action; the host owns the applied state, data refetch, and persistence.
 
 ```tsx
 <F0AnalyticsDashboard
@@ -314,7 +314,8 @@ the host owns the applied state, data refetch, and persistence.
 - WHEN a draft is dismissed → THEN the applied widget query remains unchanged.
 - WHEN Apply commits a draft → THEN only that widget's callback runs; F0 does not merge it into report filters.
 - WHEN report and widget filters both exist → THEN the host composes them in the data-source query according to its own semantics.
-- WHEN space is constrained → THEN the icon's count remains visible; wider widgets progressively reveal up to three editable chips.
+- WHEN filters are applied → THEN the trigger counter reports how many filter fields are active without rendering their selected values in the widget header.
+- WHEN a hover-capable widget is hovered or the trigger receives keyboard focus → THEN the filter icon appears with the other widget actions and remains visible while its popover is open; touch-only devices keep it visible.
 
 **Complete interaction**
 
@@ -327,12 +328,12 @@ and verifies that a resolver returning `undefined` leaves a widget untouched.
 
 <Canvas of={Stories.ItemFiltersApplied} />
 
-**Responsive filter signals**
+**Hover and keyboard filter signal**
 
-The three fixed-width widgets exercise the count-only, two-chip, and
-three-chip states with browser-visible assertions.
+This story verifies the count-only header, hover reveal, and keyboard-focus
+fallback without exposing selected values in the widget.
 
-<Canvas of={Stories.ResponsiveItemFilterSignals} />
+<Canvas of={Stories.HoverItemFilterSignal} />
 
 ## Accessibility
 
