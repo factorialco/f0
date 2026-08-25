@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.54.3](https://github.com/factorialco/f0/compare/f0-react-v6.54.2...f0-react-v6.54.3) (2026-08-25)
+
+
+### Bug Fixes
+
+* **useSelectable:** keep pre-selected multi-select values checked when their option loads first ([#4933](https://github.com/factorialco/f0/issues/4933)) ([861614f](https://github.com/factorialco/f0/commit/861614fc78cd7b0548f37cbe3e2f7526ee4cc141))
+
 ## [6.54.2](https://github.com/factorialco/f0/compare/f0-react-v6.54.1...f0-react-v6.54.2) (2026-08-25)
 
 
