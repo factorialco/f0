@@ -22,9 +22,22 @@ const meta = {
     layout: "centered",
   },
   decorators: [
-    (Story) => (
+    // A bare `role="treeitem"` (what F0GraphNode renders) needs a `tree`/`group`
+    // owner or axe fails `aria-required-parent`. In the real graph the
+    // `role="tree"` container provides it; here we wrap every node story the same
+    // way. Stories that embed the node inside a nested `<ReactFlow>` (whose
+    // hardcoded `role="application"` div blocks DOM ownership) set a `treeOwns`
+    // parameter with the node's DOM id so the tree re-owns it via `aria-owns`,
+    // exactly as F0GraphView does — see WithToolbar.
+    (Story, context) => (
       <ReactFlowProvider>
-        <Story />
+        <div
+          role="tree"
+          aria-label="Graph node preview"
+          aria-owns={context.parameters.treeOwns as string | undefined}
+        >
+          <Story />
+        </div>
       </ReactFlowProvider>
     ),
   ],
@@ -370,6 +383,10 @@ function ToolbarDemo() {
 export const WithToolbar: Story = {
   render: () => <ToolbarDemo />,
   parameters: {
+    // The node is inside a nested <ReactFlow> (role="application"), so the tree
+    // decorator can't own it through the DOM — hand it the node's id to own via
+    // aria-owns instead (`ToolbarDemoNode` sets nodeId="toolbar-demo").
+    treeOwns: "f0-graph-node-toolbar-demo",
     docs: {
       description: {
         story:

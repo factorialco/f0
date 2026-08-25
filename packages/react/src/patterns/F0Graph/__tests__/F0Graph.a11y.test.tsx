@@ -377,6 +377,30 @@ describe("F0Graph a11y — tree structure roles", () => {
     expect(tree.getAttribute("aria-label")).toBe("Graph view")
   })
 
+  it("marks the tree aria-busy while it renders no treeitems", () => {
+    // React Flow renders 0 nodes in jsdom, so the tree owns nothing. Without a
+    // treeitem child a `role="tree"` fails axe `aria-required-children`; the
+    // empty tree is instead marked `aria-busy` so it stays valid (this is also
+    // the deferred / staged / viewport-data-loading state in the browser).
+    zeroRender(
+      <div style={{ width: 800, height: 600 }}>
+        <F0Graph nodes={makeNodes()} renderNode={renderNodeFn} />
+      </div>
+    )
+
+    const tree = screen.getByRole("tree", { name: "Graph view" })
+    if (tree.querySelectorAll("[role='treeitem']").length === 0) {
+      expect(tree.getAttribute("aria-busy")).toBe("true")
+      // No forest-root ids to own while empty.
+      expect(tree.getAttribute("aria-owns")).toBeNull()
+    } else {
+      // If React Flow ever does render nodes here, the invariant flips: the tree
+      // owns its forest roots and is no longer busy.
+      expect(tree.getAttribute("aria-busy")).not.toBe("true")
+      expect(tree.getAttribute("aria-owns")).toBeTruthy()
+    }
+  })
+
   it("visible nodes have role=treeitem via render context", () => {
     const spyRenderNode = (
       node: GraphNode<string>,
