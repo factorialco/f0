@@ -40,6 +40,7 @@ import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
+import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -1073,7 +1074,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1539,6 +1540,20 @@ declare type ButtonSize = (typeof buttonSizes)[number];
 
 declare const buttonSizes: readonly ["sm", "md", "lg"];
 
+export declare type ButtonToggleColor = (typeof buttonToggleColors)[number];
+
+/**
+ * The colours a toggle can wear when selected, beyond F0's own selected teal.
+ * Each one is an F0 semantic colour — the six statuses, then the five points of
+ * the mood scale — so a coloured toggle carries the same meaning here as the
+ * same colour does anywhere else in the product.
+ */
+export declare const buttonToggleColors: readonly ["accent", "critical", "warning", "promote", "info", "positive", "mood-super-negative", "mood-negative", "mood-neutral", "mood-positive", "mood-super-positive"];
+
+declare type ButtonToggleGroupSize = (typeof buttonToggleGroupSizes)[number];
+
+declare const buttonToggleGroupSizes: readonly ["sm", "md", "lg"];
+
 export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
 
 export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
@@ -1565,6 +1580,10 @@ export declare const CalendarEventList: FC<CalendarEventListProps>;
 
 export declare interface CalendarEventListProps {
     events: CalendarEventProps[];
+    /**
+     * The space between events, in px. Applies to BOTH paths — the overflow list
+     * and `showAllItems` — so a list that stops overflowing keeps its rhythm.
+     */
     gap?: number;
     showAllItems?: boolean;
     minSize?: number;
@@ -1640,6 +1659,21 @@ declare type CanvasContentBase = {
     title: string;
     description?: string;
     toolCallId?: string;
+    /**
+     * Render this content across the whole frame, covering the docked chat
+     * instead of hugging a seam beside it. For content that is a step of its own
+     * rather than something you work through while talking — picking a template,
+     * say. The chat is only covered, never closed, so the conversation is exactly
+     * where it was when the canvas is dismissed.
+     *
+     * Deliberately NOT called `fullscreen`: the chat's own
+     * `visualizationMode: "fullscreen"` means the opposite arrangement (chat full
+     * width, no canvas), and going back to it is how a covering canvas is
+     * dismissed.
+     *
+     * Defaults to the docked split.
+     */
+    coversChat?: boolean;
 };
 
 /**
@@ -1942,6 +1976,9 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
+    compact?: boolean;
 }
 
 export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
@@ -1963,6 +2000,9 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
+    compact?: boolean;
 }
 
 export declare type CardSelectableValue = string | number;
@@ -1983,7 +2023,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_3.JSX.Element>;
+export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, arrowsPlacement, arrowLabels, paging, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_3.JSX.Element>;
 
 declare interface CarouselBreakpoints {
     default?: ColumnNumber;
@@ -1994,10 +2034,70 @@ declare interface CarouselBreakpoints {
     xl?: ColumnNumber;
 }
 
+/**
+ * A carousel whose slides are ONE PAGE of a longer list.
+ *
+ * A carousel can only reason about the slides it holds, so on its own it says
+ * "there is no next one" the moment it reaches the last one it was given — which
+ * is wrong when the list continues on the server. This is the missing half of
+ * that answer, and it is deliberately the shape `useData` already returns for an
+ * infinite-scroll source (`paginationInfo.hasMore`, `isLoadingMore`, `loadMore`),
+ * so wiring one to the other is passing three fields across.
+ */
+declare type CarouselPaging = {
+    /** Whether the source has records past the slides currently mounted. */
+    hasMore: boolean;
+    /** A fetch for the next page is in flight. */
+    isLoading?: boolean;
+    /** Fetch the next page and APPEND it to the slides. */
+    onLoadMore: () => void;
+    /**
+     * How many records the source holds ALTOGETHER, when it says — `useData`'s
+     * `totalItems`. For anything that reports a position out loud ("3 of 11"):
+     * without it the only number available is how many have been loaded, which
+     * moves every time another page arrives.
+     *
+     * The carousel itself ignores it. Its dots describe the slides that exist, and
+     * a dot for a page nobody has fetched would be a control that cannot be
+     * pressed.
+     */
+    total?: number;
+};
+
 declare interface CarouselProps {
     children: default_3.ReactNode;
     showArrows?: boolean;
     showDots?: boolean;
+    /**
+     * WHERE THE ARROWS GO.
+     *
+     * - `"overlay"` (the default) — pinned to the carousel's sides and revealed on
+     *   hover. Right for a full-bleed gallery, where the slides are the page.
+     * - `"bottom"` — a row UNDER the slides, an arrow on each end with the dots
+     *   between them, always visible and always the same width. Use it whenever
+     *   the carousel sits inside something else — a widget, a card, a panel: side
+     *   overlays hang over whatever is beside the container, and a hover-only
+     *   control is one a touch user never finds.
+     *
+     * `"bottom"` puts the dots in that row, so `showDots` still decides whether
+     * there are any.
+     */
+    arrowsPlacement?: "overlay" | "bottom";
+    /** The arrows' accessible names. Defaults to "Previous" / "Next". */
+    arrowLabels?: {
+        previous?: string;
+        next?: string;
+    };
+    /**
+     * The slides are ONE PAGE of a longer list. Next then stays live at the end
+     * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
+     * append the new records to `children` as they arrive.
+     *
+     * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
+     * over the slides, and a fetch you can't see you triggered is worse than no
+     * fetch at all.
+     */
+    paging?: CarouselPaging;
     autoplay?: boolean;
     delay?: number;
     columns?: CarouselBreakpoints;
@@ -2809,12 +2909,14 @@ export declare const ComboChart: WithDataTestIdReturnType_5<ForwardRefExoticComp
 label?: boolean;
 legend?: boolean;
 showValueUnderLabel?: boolean;
-bar?: {
+bar?: ({
 categories: string | string[];
 axisLabel?: string;
 hideAxis?: boolean;
 axisPosition?: "left" | "right";
-} | undefined;
+} & {
+type?: "simple" | "stacked" | "stacked-by-sign";
+}) | undefined;
 line?: ({
 categories: string | string[];
 axisLabel?: string;
@@ -2838,7 +2940,7 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -2877,10 +2979,30 @@ export declare type CommunityPostProps = {
     };
     actions?: CommunityPostAction[];
     noVideoPreload?: boolean;
-    onClick: (id: string) => void;
+    /**
+     * WHAT CLICKING THE POST DOES — and whether it does anything.
+     *
+     * OMIT IT once the post is the destination. In a feed the card is a way in, so
+     * it takes a pointer cursor, a hover tint and a focus ring. Opened in a dialog
+     * it is already what you came for, and every one of those says there is
+     * somewhere further to go when there isn't: the tint follows the mouse across
+     * a page you are reading, and clicking does nothing.
+     */
+    onClick?: (id: string) => void;
     noReactionsButton?: boolean;
     dropdownItems?: DropdownItem[];
     descriptionExpandable?: boolean;
+    /**
+     * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
+     * for a container that already shows it, like a dialog carrying the post's
+     * title in its own header. Without this the same words appear twice, an inch
+     * apart.
+     *
+     * The title element stays in the DOM, `sr-only`: it is what the expanded
+     * description points at (`aria-describedby`), so removing it would quietly
+     * break that as well as the post's name.
+     */
+    hideTitle?: boolean;
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -2889,6 +3011,56 @@ export declare type CommunityPostSkeletonProps = {
     withEvent?: boolean;
     withImage?: boolean;
 };
+
+/**
+ * ONE POST as the Home card shows it — the shape a feed row keeps when it is
+ * given a whole tile instead of a line.
+ *
+ * Deliberately NOT `CommunityPostProps`: that is the post as the Communities
+ * page renders it, with its media, its reactions, its comment button and its own
+ * overflow menu. Here the post is a PREVIEW you click through — anything you
+ * can do to it, you do on the other side.
+ */
+export declare interface CommunityPostSummary {
+    id: string;
+    title: string;
+    /**
+     * The post's body as the editor stored it (an HTML string), clamped to the
+     * first few lines. Whatever links it contains are NOT clickable here: the
+     * whole tile is one target (see {@link CommunityPostCard}), and a link inside
+     * a link is neither valid nor operable.
+     */
+    description?: string;
+    /**
+     * The post's cover image, above the title.
+     *
+     * ALWAYS DRAWN AT {@link POST_IMAGE_RATIO} — the tile gives it the full width
+     * of its column and takes its height from that ratio, cropping (`object-cover`)
+     * whatever doesn't fit. A carousel is a ROW: a tile that sized itself to its
+     * own image would put every title on a different line and move them all when
+     * the page turned. So the frame is fixed and the picture fits into it.
+     */
+    imageUrl?: string;
+    author?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
+    createdAt: Date;
+    /**
+     * The counters under the author, ALREADY IN WORDS — "742 visits", "23
+     * comments". Strings rather than numbers because the plural, the thousands
+     * separator and the noun are all the app's locale, not this component's; the
+     * same reason `CommunityPost` takes them this way.
+     */
+    counters?: {
+        visits?: string;
+        comments?: string;
+    };
+    /** Where the post lives. A `url` makes the tile a real anchor. */
+    href?: string;
+    onClick?: () => void;
+}
 
 declare interface Company {
     id: string;
@@ -3531,6 +3703,23 @@ declare const daytimePageVariants: (props?: ({
 export declare const DEFAULT_EXPECTED_ITEMS_COUNT = 3;
 
 /**
+ * How rows start out when the user has not touched them yet.
+ *
+ * - `true` / `false` — every row, or none (the default).
+ * - a number — expand rows shallower than that depth, so `1` opens the
+ *   top-level rows and reveals depth 1.
+ * - a predicate — anything else, e.g. `(node) => node.type !== "role"`.
+ *
+ * The policy is re-evaluated per row rather than resolved into a set of ids up
+ * front: rows evaluate it as they mount, so an expanded row's children evaluate
+ * it in turn and the cascade falls out of the component tree. That works the
+ * same whether the tree is already in memory or fetched lazily.
+ */
+declare type DefaultExpandedPolicy<R extends RecordType> = boolean | number | ((record: R, context: {
+    depth: number;
+}) => boolean);
+
+/**
  * Built-in renderers for the standard visualizations. `list` covers every
  * row-based slot through its schema; `event-list` and `indicators` spread
  * their params onto the matching f0 content component. Bespoke visualizations
@@ -4042,6 +4231,8 @@ declare const defaultTranslations: {
                 readonly hideAllColumns: "Hide all";
                 readonly addColumn: "Add column";
                 readonly removeColumn: "Remove column";
+                readonly lockColumn: "Lock column: {{label}}";
+                readonly unlockColumn: "Unlock column: {{label}}";
             };
         };
         readonly editableTable: {
@@ -4247,6 +4438,13 @@ declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            /**
+             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+             * override it — factorial renders it as plain "Ask" for the widget and
+             * insight-card buttons). This menu entry needs the product name spelled
+             * out, so it owns its own key.
+             */
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -4279,6 +4477,7 @@ declare const defaultTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -5036,6 +5235,18 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      */
     dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
+     * Configuration for `"disabled"` cells.
+     *
+     * By default a disabled cell keeps the same affordances as its editable
+     * counterpart (leading icon, units, select chevron) so the column still
+     * reads as its field type. Set `hideSelectChevron` when the column also
+     * uses `editType: "select"` for other rows but the chevron shouldn't
+     * appear here since the cell isn't interactive.
+     */
+    disabledConfig?: {
+        hideSelectChevron?: boolean;
+    };
+    /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
      *
@@ -5600,8 +5811,20 @@ declare type F0AvatarPersonProps = {
     badge?: AvatarBadge;
     /**
      * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     *
+     * Mutually exclusive with `pending`: they represent opposite ends of the
+     * employee lifecycle. If both are set, `deactivated` takes precedence.
      */
     deactivated?: boolean;
+    /**
+     * Whether the position is still to be filled — a person who is planned but
+     * not hired yet (e.g. an open role in headcount planning). If true, the
+     * avatar will display a search-person icon instead of the person's name or
+     * picture.
+     *
+     * Mutually exclusive with `deactivated`.
+     */
+    pending?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare const F0AvatarPulse: {
@@ -5682,6 +5905,37 @@ declare type F0ButtonToggleInternalProps = {
      * "expanded" - The button will show the icon and the label.
      */
     variant?: ButtonToggleVariant;
+    /**
+     * Tooltip shown on hover and on keyboard focus. A string is the description
+     * on its own; the object form adds a bold first line above it — the same
+     * shape `Action` takes.
+     *
+     * A compact toggle is a glyph with no visible text, so the tooltip is what
+     * says out loud what it does. Setting it drops the native `title` (the
+     * browser would otherwise draw its own bubble beside this one) and keeps the
+     * accessible name.
+     *
+     * `instant` opens it on 100ms instead of the default 700ms. Reach for it when
+     * the tooltip is the ONLY place the toggle's name is written — the default
+     * wait is for a label that merely confirms what you can already read, and on
+     * a bare glyph it withholds the whole thing.
+     */
+    tooltip?: string | {
+        label?: string;
+        description: string;
+        instant?: boolean;
+    };
+    /**
+     * Makes the toggle a member of a COLOURED SET: it wears this colour when
+     * selected — fill, border and glyph — and stays a muted glyph when it isn't,
+     * so one answer out of several is readable at a glance. Without it the toggle
+     * uses F0's selected teal, like any other selected control.
+     *
+     * Only for a set whose members mean different things (a mood scale, a status
+     * picker). A lone toggle, or a group where every item is the same kind of
+     * thing, should stay on the default.
+     */
+    color?: ButtonToggleColor;
     /**
      * @private
      * Whether to show a border around the button toggle.
@@ -6430,6 +6684,72 @@ export declare type F0ChatVoiceAttachment = {
 };
 
 /**
+ * F0CommunityPostsCarousel — the Communities widget's content: the latest posts as
+ * TILES you page through, two at a time on a main-column card and one in
+ * anything narrower.
+ *
+ * A WIDE-COLUMN WIDGET. Two tiles side by side is the whole reason this exists
+ * rather than a `list` slot — a post needs a title, four lines of its body and
+ * its author to be worth previewing at all, and that does not fit a 396px rail.
+ * Put it in the main column (`areas: ["main"]` in the catalog).
+ *
+ * THE PAGING IS UNDER THE TILES, not floating over them — `CarouselControls`,
+ * the shared row: an arrow on each end, the dots between, its own `pt-4` above
+ * it. Nothing about that row is this widget's, which is why it lives in
+ * `ui/carousel` beside the overlay arrows rather than here.
+ *
+ * EVERY POST IT HOLDS IS IN THE DOM. Embla lays its slides out in a flex row and
+ * transforms the track, so the slides off-screen are mounted and measured like
+ * the ones you can see — there is no windowing here, and adding it would mean
+ * the carousel could no longer measure its own snaps. That is the right trade
+ * for what this shows: a handful of tiles, each one a title and four lines.
+ *
+ * It is `pagination` that keeps it a handful. A feed of two hundred posts is not
+ * a longer carousel, it is a carousel that holds a PAGE and asks for the next
+ * one when you reach the end — so what is mounted is bounded by how far the
+ * reader actually walked rather than by how much the server has.
+ */
+export declare const F0CommunityPostsCarousel: ({ posts, labels, loading, expectedItemsCount, pagination, }: F0CommunityPostsCarouselProps) => JSX_2.Element;
+
+export declare interface F0CommunityPostsCarouselProps {
+    posts: CommunityPostSummary[];
+    /**
+     * The controls' words — the two arrows' accessible names. There is no visible
+     * text in this component's chrome, so these are what a screen reader reads and
+     * what the tooltips say.
+     */
+    labels: {
+        previous: string;
+        next: string;
+    };
+    /**
+     * Waiting on the FIRST posts: the same carousel with placeholder tiles in it,
+     * so the widget is the height it will be once they land. How MANY it draws is
+     * `expectedItemsCount`.
+     *
+     * This is the initial load only. A LATER page is `pagination`, and it does not
+     * blank the tiles you are already reading.
+     */
+    loading?: boolean;
+    /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+    expectedItemsCount?: number;
+    /**
+     * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
+     * live past the last mounted tile: reaching the end asks for the next page, and
+     * the new posts are appended to `posts` by whoever owns them.
+     *
+     * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
+     * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
+     * posts come from in an app. The component itself stays ignorant of data
+     * sources: it takes posts and a way to ask for more.
+     *
+     * Omit it for a feed you already hold in full, which is what the widget's
+     * "latest five" is.
+     */
+    pagination?: CarouselPaging;
+}
+
+/**
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0EmojiPicker: WithDataTestIdReturnType_3<    {
@@ -6475,6 +6795,69 @@ export declare interface F0EmojiPickerProps {
 export declare type F0EmojiPickerSize = (typeof f0EmojiPickerSizes)[number];
 
 export declare const f0EmojiPickerSizes: readonly ["sm", "md", "lg"];
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0ENPSButton: WithDataTestIdReturnType_3<    {
+({ value, onChange, labels, icons, size, fullWidth, disabled, required, }: F0ENPSButtonProps_2): JSX_2.Element;
+displayName: string;
+}>;
+
+export declare type F0ENPSButtonProps = {
+    /**
+     * The face that is answered, or `undefined` while the question is unanswered.
+     */
+    value?: Pulse;
+    /**
+     * Called with the answered face — or `undefined` when the answer is cleared,
+     * which only `required: false` allows. Never called on mount.
+     */
+    onChange?: (value: Pulse | undefined) => void;
+    /**
+     * What each face means, worst to best. A face carries no visible text, so its
+     * label is both the accessible name and the tooltip: word it as the answer the
+     * person is giving ("Very bad"), never as a number or a position.
+     *
+     * Required, and required in full — the wording belongs to the question, so the
+     * component holds no copy of its own: a mood check answers "Terrible", a
+     * recommendation question answers "Not at all likely". Pass it already
+     * translated.
+     */
+    labels: Record<Pulse, string>;
+    /**
+     * Override the face drawn for one or more points of the scale. Defaults to the
+     * five `Face*` icons from `lib/mood` — the same ones `F0AvatarPulse` shows, so
+     * an answer looks the same wherever it turns up.
+     *
+     * Swap them only when the question isn't about mood: a thumbs pair, a set of
+     * stars. Keep the replacements a *set* that reads worst-to-best on its own —
+     * five unrelated glyphs stop being a scale.
+     */
+    icons?: Partial<Record<Pulse, IconType>>;
+    /**
+     * The size of each face.
+     * @default "lg"
+     */
+    size?: ButtonToggleGroupSize;
+    /**
+     * Whether the five faces stretch to fill the container. A widget's eNPS row
+     * usually should — an equal split reads as one scale rather than five buttons.
+     * @default true
+     */
+    fullWidth?: boolean;
+    /**
+     * Whether every face is disabled — a submitted answer, or a question that is
+     * closed.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Whether an answer, once given, can be taken back by pressing it again.
+     * @default false
+     */
+    required?: boolean;
+};
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -7299,6 +7682,18 @@ export declare interface F0ProgressSeriesProps extends F0ProgressSeriesOptions, 
 export declare type F0ProgressSeriesSize = (typeof f0ProgressSeriesSizes)[number];
 
 export declare const f0ProgressSeriesSizes: readonly ["sm", "md", "lg"];
+
+/**
+ * Header for a resource detail page: avatar, title, description, status,
+ * metadata and its primary, secondary and overflow actions.
+ */
+declare const F0ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
+export { F0ResourceHeader }
+export { F0ResourceHeader as ResourceHeader }
+
+declare type F0ResourceHeaderProps = Props;
+export { F0ResourceHeaderProps }
+export { F0ResourceHeaderProps as ResourceHeaderProps }
 
 /**
  * @experimental This is an experimental component, use it at your own risk
@@ -8204,6 +8599,15 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
     /** Tag columns that are always visible and cannot be hidden in the settings. */
     pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
+     * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+     * still listed in the settings but with its toggle forced OFF and disabled,
+     * and the given (already-translated) text shown in a tooltip. Unlike
+     * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+     * icon — the disabled switch + tooltip is the affordance. The caller should
+     * also omit these columns' tags from `tags(record)`.
+     */
+    lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
      */
@@ -8240,6 +8644,18 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
      * the default entry view (roots expanded to `defaultExpandDepth`).
      */
     focusOnEntry?: string;
+    /**
+     * Id of a node to mark as **selected on entry** — the click-selection ring, so
+     * a deep link lands on the graph looking the way a user's own click leaves it,
+     * not just framed. Seeded on the first render; the selection then follows
+     * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+     * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+     * branch is expanded and framed — otherwise the ring isn't visible until its
+     * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+     * the reveal highlight. Providing it puts the graph's selection in controlled
+     * mode; omitting it leaves selection uncontrolled (the default).
+     */
+    initialSelectedNodeId?: string;
     /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
@@ -8644,7 +9060,7 @@ export declare interface HomeSlotParamsMap {
  * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
  * type says so rather than leaving it to blow up at runtime.
  */
-export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> & ({
+export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries" | "headerControls"> & ({
     alert?: WidgetProps["alert"];
     status?: never;
 } | {
@@ -8700,6 +9116,11 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      */
     icon?: IconType;
     /**
+     * The one thing the widget can do FROM THE COLLAPSED RAIL, drawn on its glyph
+     * instead of the catalog `icon`. See `HomeWidgetRailAction`.
+     */
+    railAction?: HomeWidgetRailAction;
+    /**
      * PINNED: the widget stays put. It offers no "Remove widget" in its menu, it
      * cannot be dragged, and no other widget can displace it — for widgets a user
      * must always have, like Clock in.
@@ -8716,6 +9137,86 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/**
+ * A DIRECT ACTION on a widget's collapsed glyph: the one thing the widget can be
+ * told to do without being opened — resume a paused timer, clock out, join the
+ * call that starts now.
+ *
+ * The glyph BECOMES the button, because 40px is one control's worth of room. So
+ * the widget is still one hover away (hovering or focusing the glyph floats it
+ * over the feed, as any glyph does) and the CLICK is the action's rather than the
+ * panel's.
+ *
+ * Only the COLLAPSED rail draws it. Expanded, the card's own footer button
+ * (`action`) is where a widget's call to action belongs, and stacked (below `md`)
+ * there is no glyph to put it on.
+ */
+export declare type HomeWidgetRailAction = {
+    /** The action's own glyph — `Play` to resume, `Pause` for a running timer. */
+    icon: IconType;
+    /**
+     * What it does, in the imperative ("Resume"): the glyph's tooltip, and half of
+     * its accessible name — the widget's title is the other half, since "Resume"
+     * alone says nothing about which of the strip's glyphs it is.
+     */
+    label: string;
+    onClick: () => void;
+    /**
+     * WHAT COLOUR THE STATE IS. One tone paints the whole chip — the pill behind
+     * the reading and the button at the end of it — because they are one object,
+     * and two colours picked separately is how you end up with a red button on an
+     * amber pill.
+     *
+     * - `"neutral"` (the default) — the dark slab, with the accent button on it.
+     *   Nothing about the state is remarkable; it is simply running.
+     * - `"accent"`, `"critical"`, `"warning"`, `"promote"`, `"positive"` — the pill
+     *   takes that colour and the button becomes a plain chip carrying it in its
+     *   icon, so the two never fight over the same hue.
+     *
+     * Without a `text` there is no pill, and the tone paints the button itself.
+     *
+     * PICK THE ONE THE WIDGET ALREADY USES. A rail action stands in for a state the
+     * card is also showing, and the semantic tones are the same values that state
+     * is drawn with elsewhere — a clock-in tile pulses `--positive-50` while it
+     * runs and `--promote-50` on a break, which is exactly `"positive"` and
+     * `"promote"` here. Two names for one state is how a glyph ends up a different
+     * green from the card it came out of.
+     */
+    tone?: RailActionTone;
+    /**
+     * A READING to put beside the button — a clock's running total or the break
+     * you are on today, but any short string the state can be summed up in. The
+     * glyph grows into a dark PILL to hold it, overflowing its 40px column
+     * leftwards, and the whole strip right-aligns behind it.
+     *
+     * It is only drawn while the widget is STOWED. Hovering floats the card, which
+     * says the same thing in full context, so the pill gives its width back and
+     * leaves the button — the one part of it you can act on.
+     *
+     * Keep it SHORT — "7:12", "0:20", "3 left". This is a glyph, not a status bar,
+     * and anything that has to be read twice does not belong on one.
+     */
+    text?: string;
+    /**
+     * The reading is COUNTING: the separators in `text` blink once a second, the
+     * way a clock does, so a stowed timer is visibly running rather than merely
+     * displayed. Reduced motion holds them lit, and a `text` with nothing to
+     * separate simply stands still.
+     */
+    ticking?: boolean;
+    /**
+     * THE STATE IS ASKING TO BE ACTED ON — a timer left on a break, a shift you
+     * never clocked out of. The glyph alternates once a second between the
+     * widget's own icon and the action's, so the strip can say which module wants
+     * something AND what it wants without growing a second control.
+     *
+     * It settles on the action's icon while the widget is floating, so what you
+     * click is never the face that happened to be up. Reduced motion is honoured:
+     * the glyph simply stays the button.
+     */
+    flashing?: boolean;
 };
 
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
@@ -8878,6 +9379,27 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
      * Used to determine if additional requests should be made for pagination.
      */
     hasMore: boolean;
+};
+
+/**
+ * Structured help copy for a labelled thing — a table column, a dashboard
+ * widget. `link` is for what the description implies but cannot do: opening the
+ * catalog entry the copy came from.
+ */
+declare type InfoHintContent = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the icon trigger. Falls back to `label` on the host
+     * and then to a generic "More information", so the trigger is never named
+     * after the thing it describes alone — a name identical to the heading
+     * beside it says nothing about what the control does.
+     */
+    label?: string;
 };
 
 /**
@@ -9861,10 +10383,19 @@ export declare interface NewHomeLayoutProps {
      */
     onChangeWidgetParams?: (id: string, params: WidgetParams) => void;
     /**
-     * Draws a widget for params being tried out in that dialog, before they are
-     * saved. Defaults to the widget with those params swapped in — which is
-     * already live for everything they derive (title, info); supply this to
-     * rebuild its slots as well.
+     * REBUILDS a widget for params being tried out in that dialog, before they are
+     * saved — the same widget with slots that follow the new params, which only
+     * the app can produce. It hands back DATA, and f0 draws it through the same
+     * `SlotWidget` the column uses, so the preview cannot drift from the card.
+     *
+     * Without it the preview is the widget with those params swapped in — already
+     * live for everything they derive (title, info), just not for its slots.
+     */
+    rebuildWidget?: (widget: HomeWidgetItem, params: WidgetParams) => HomeWidgetItem;
+    /**
+     * @deprecated Use `rebuildWidget`. A preview the app renders has to reproduce
+     * `SlotWidget` by hand and drifts from the column the moment either side
+     * changes. Ignored when `rebuildWidget` is given.
      */
     renderWidgetPreview?: (widget: HomeWidgetItem, params: WidgetParams) => ReactNode;
     /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
@@ -9875,7 +10406,11 @@ export declare interface NewHomeLayoutProps {
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
     asideWidth?: number;
-    /** Max px width of the (centered) main-column content. */
+    /**
+     * Max px width of the (centered) main-column content. Defaults to
+     * `max-w-content` (712px), so a composer or a message list in the main column
+     * lines up with the same reading column the chat uses.
+     */
     mainWidth?: number;
     /**
      * How far the page surface reaches past this layout's box, in px — set it to
@@ -11103,6 +11638,15 @@ declare interface RadarComputation {
     sortOrder?: "asc" | "desc";
 }
 
+export declare type RailActionTone = (typeof railActionTones)[number];
+
+/**
+ * The colours a rail action's chip can take, by what the state MEANS rather than
+ * by hue: the same five a tag or a banner picks from, so a red pill in the rail
+ * is red for the same reason a red tag is.
+ */
+export declare const railActionTones: readonly ["neutral", "accent", "critical", "warning", "promote", "positive"];
+
 export declare const rangeSeparator = "\u2192";
 
 declare interface ReactionProps {
@@ -11203,14 +11747,6 @@ export declare const resolveSlotRenderer: (entry: SlotRendererEntry | undefined)
 
 /** Resolves a header's params-driven parts against the params in hand. */
 export declare const resolveWidgetHeader: (header: HomeWidgetHeader | undefined, params?: WidgetParams) => WidgetProps["header"];
-
-/**
- * Header for a resource detail page: avatar, title, description, status,
- * metadata and its primary, secondary and overflow actions.
- */
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
-
-export declare type ResourceHeaderProps = Props;
 
 declare type RestrictComponentProps = {
     identifier: string;
@@ -11961,6 +12497,81 @@ export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
  */
 export declare type SlotSkeletonRenderer<P = unknown> = (params: P, ctx: HomeSkeletonCtx) => ReactNode;
 
+export declare function SlotWidget({ header, params, fullHeight, action, summaries, headerControls, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
+
+/**
+ * A widget's CONTENT: the slot stack, with the dividers between slots and the
+ * skeletons while it loads — everything `SlotWidget` draws, minus the card.
+ *
+ * Public because the frame is not always wanted. A surface that drills into a
+ * widget (an overlay listing the tasks one of its grouped rows summarises) is
+ * already a surface: wrapped in a `Widget` it would be a card inside a card,
+ * with two borders and two paddings. Rendering the slots here keeps the rows
+ * IDENTICAL to the widget's — same slots, same renderers — which composing them
+ * by hand would not.
+ *
+ * Inside a card, prefer `SlotWidget`: it is this plus the frame.
+ */
+export declare function SlotWidgetContent({ slots, loading, slotRenderers, ctx, }: Pick<SlotWidgetProps, "slots" | "loading" | "slotRenderers" | "ctx">): JSX_2.Element;
+
+/**
+ * SlotWidget — one Home widget rendered from data: the f0 `Widget` frame (the
+ * only allowed widget wrapper) with an ordered list of SLOTS stacked below the
+ * header, a DASHED divider between consecutive slots.
+ *
+ * Each slot is `{ visualization, params }`; how a visualization is drawn comes
+ * from the merged renderer map (`defaultSlotRenderers` + the `slotRenderers`
+ * prop). Bespoke visualizations (e.g. `clock-in`) have no default and must be
+ * supplied via `slotRenderers`.
+ *
+ * `loading` swaps every slot's content for that visualization's SKELETON,
+ * keeping the frame, the chrome and the seams — the card doesn't change shape
+ * when the data lands, it fills in.
+ *
+ * THE WAY OUT IS A FOOTER BUTTON. `header.link` is still how a widget declares
+ * it, but it lands under the content as a named button rather than as an
+ * icon in the header's top-right: that corner belongs to the overflow menu
+ * (`actions`), and a button that says "Go to Calendar" needs no tooltip to say
+ * where it goes.
+ *
+ * A CONFIGURABLE widget's `header.title` and `header.info` may be functions of
+ * its `params` — "Hours · Design team" rather than "Hours" — so the card says
+ * what it is currently showing.
+ *
+ * `header.info` is NOT an icon in the header: it is the widget's OTHER SIDE. The
+ * card turns over to show it (see `flipped`), which is room enough to explain
+ * itself in a sentence instead of a tooltip cramped beside the title.
+ */
+export declare type SlotWidgetProps = HomeWidgetChrome & {
+    header?: HomeWidgetHeader;
+    /** The params `header.title` / `header.info` are computed from, if they are. */
+    params?: WidgetParams;
+    /**
+     * Shows the widget's BACK — `header.info`, centered — by turning the card
+     * over. The column drives it from the widget's own menu (`WidgetContainer`).
+     */
+    flipped?: boolean;
+    /** Turns it back. Called when the back face is clicked. */
+    onFlipBack?: () => void;
+    fullHeight?: boolean;
+    slots: HomeWidgetSlot[];
+    /**
+     * Draws each slot's SKELETON instead of its content. How many placeholder
+     * items each one draws is the slot's own `expectedItemsCount`.
+     */
+    loading?: boolean;
+    /** Per-visualization renderers, MERGED OVER `defaultSlotRenderers`. */
+    slotRenderers?: SlotRenderers;
+    /**
+     * The header's overflow menu — the three dots at its top-right. This is where
+     * a column's "Remove widget" lands (see `WidgetContainer`).
+     */
+    actions?: WidgetProps["actions"];
+    /** Forwarded to the f0 `Widget`: the lifted look while the card is dragged. */
+    isDragging?: boolean;
+    ctx?: HomeRenderCtx;
+};
+
 /**
  * Type helper to extract keys from a SortingsDefinition
  */
@@ -12219,19 +12830,16 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, highlighted, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
-declare type TableHeaderInfo = {
-    title: string;
-    description: string;
-    link?: {
-        label: string;
-        onClick: () => void;
-    };
-    /**
-     * Accessible name for the info-icon trigger. Defaults to the column label
-     * when the header's children are a string.
-     */
-    label?: string;
-};
+/**
+ * Structured help copy for a column header. The same shape every other
+ * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
+ * the column label when the header's children are a string.
+ *
+ * A table-specific name for a shape that is no longer table-specific: the
+ * canonical export is `InfoHintContent`, and this stays as an alias so
+ * existing imports keep working.
+ */
+declare type TableHeaderInfo = InfoHintContent;
 
 declare interface TableHeadProps {
     children: React.ReactNode;
@@ -12328,6 +12936,27 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      */
     frozenColumns?: 0 | 1 | 2;
     /**
+     * For nested tables, which rows start out expanded before the user touches
+     * anything. Pass `true` for the whole tree, a depth, or a predicate:
+     *
+     * ```ts
+     * defaultExpanded: true                            // everything
+     * defaultExpanded: 2                               // down to depth 2
+     * defaultExpanded: (node) => node.type !== "role"  // stop at roles
+     * ```
+     *
+     * Once the user expands or collapses a row their choice wins for that row and
+     * the policy no longer applies to it. Changing filters, sortings or
+     * navigation filters resets the tree, so the policy applies again and a
+     * filtered view comes back expanded.
+     *
+     * Expanding a row loads its children, so a policy that opens a large tree
+     * costs one `fetchChildren` per opened row on first paint.
+     *
+     * @default false
+     */
+    defaultExpanded?: DefaultExpandedPolicy<R>;
+    /**
      * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
      */
     allowColumnReordering?: boolean;
@@ -12349,8 +12978,32 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * `noRemoving` are never removable.
      */
     onRemoveColumn?: (columnId: ColId) => void;
+    /**
+     * The user-managed frozen columns in the column-settings popover. Locked
+     * columns move into a sticky group on the left, stay visible, and cannot be
+     * reordered or removed. Their array order controls their order in that group.
+     * One visible managed column always remains unlocked as the table's
+     * scrollable region; an all-locked input is normalized accordingly.
+     *
+     * Unlocking a column returns it to its saved position. Columns covered by
+     * `frozenColumns` remain permanently locked before this managed group.
+     */
+    lockedColumnIds?: readonly ColId[];
+    /**
+     * Called with the complete set of user-managed locked column ids whenever a
+     * user locks or unlocks a column. Passing this callback enables the lock
+     * controls in the column-settings popover.
+     */
+    onLockedColumnIdsChange?: (columnIds: ColId[]) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
+    /**
+     * In a table with nested rows, renders the cell text of the root rows
+     * (depth 0) in bold so aggregate rows stand out from their children.
+     * Cells that fix their own weight (tags, deltas) keep it.
+     * @default false
+     */
+    boldRootRows?: boolean;
     /**
      * Header group configuration. Keys are the `headerGroupId` values used in
      * column definitions. Pass a string for a plain spanning label, or a
@@ -13474,8 +14127,14 @@ export declare type WidgetAvatarsListItemProps = {
  * Selection follows the filter: if the selected row is filtered out, the first
  * remaining row takes over, so the preview always shows something the CTA can
  * actually add.
+ *
+ * ONE CATALOG, TWO COLUMNS. Pass the `area` the picker was opened for and the
+ * same `widgets` list serves both: entries that declare `areas` are shown only
+ * where they fit, entries that declare none are shown in both, and the preview
+ * takes that column's width. So a Home keeps one list — the widgets it offers —
+ * rather than two that have to be kept in step.
  */
-export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, previewWidth, title, }: WidgetCatalogProps): JSX_2.Element;
+export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, area, previewWidth, slotRenderers, title, }: WidgetCatalogProps): JSX_2.Element;
 
 /**
  * One DOMAIN in the picker: a heading the widgets under it belong to.
@@ -13498,14 +14157,25 @@ export declare interface WidgetCatalogItem {
     title: string;
     icon: IconType;
     /**
-     * The LIVE PREVIEW of the widget — the same node the Home renders (e.g. a
-     * `SlotWidget`), so the preview can't drift from what gets added.
+     * The LIVE PREVIEW of the widget.
+     *
+     * GIVE IT THE WIDGET ITSELF — the same `HomeWidgetItem` the layout would be
+     * handed — and the catalog draws it through `SlotWidget`, exactly as the
+     * column will. That is the only form that cannot drift: a preview assembled
+     * out of content components reproduces the frame, the seams and the spacing
+     * by hand, and the first of those to fall out of step is silent.
+     *
+     * A `ReactNode` is still accepted, for a widget the app draws its own way
+     * (`renderWidget`) or for something that isn't a widget at all.
      */
-    preview: ReactNode;
+    preview: HomeWidgetItem | ReactNode;
     /**
      * What this widget is telling you — the widget's own `header.info`, shown under
      * the preview. Deciding whether to add a widget is exactly the moment that
      * sentence is worth reading, so the picker says it without being asked.
+     *
+     * Taken from the widget's own header when `preview` is a `HomeWidgetItem`, so
+     * for those it is usually nothing to pass.
      */
     info?: string;
     /**
@@ -13519,6 +14189,21 @@ export declare interface WidgetCatalogItem {
      * nothing recommended there is no section.
      */
     recommended?: boolean;
+    /**
+     * WHICH COLUMNS this widget may be added to — the same two sides the layout
+     * hands back from `onClickAddNewWidget`. The picker then shows it only when it
+     * was opened for one of them (see `area`).
+     *
+     * OMIT IT for a widget that belongs in either, which is most of them: a
+     * `list`-shaped card reads the same in a 396px rail and in the main column,
+     * and saying so twice is how the two lists drift apart. Name the sides for the
+     * widgets that genuinely cannot travel — a carousel of post cards needs the
+     * main column's width, a 40px clock tile is built for the rail.
+     *
+     * A widget listed for NEITHER side (`[]`) is offered nowhere, which is a way to
+     * retire an entry without deleting it.
+     */
+    areas?: WidgetContainerSide[];
 }
 
 export declare interface WidgetCatalogProps {
@@ -13534,12 +14219,44 @@ export declare interface WidgetCatalogProps {
      */
     groups?: WidgetCatalogGroup[];
     /**
+     * WHICH COLUMN the picker was opened for — pass the side `onClickAddNewWidget`
+     * handed you. It does two things: widgets that declare `areas` are filtered
+     * down to the ones this column can hold, and the preview is capped to that
+     * column's width by default (see {@link AREA_PREVIEW_WIDTH}).
+     *
+     * Omit it and the picker is what it has always been: every widget, previewed
+     * at `previewWidth`. That is right for a Home with ONE place to put a widget;
+     * a layout with two columns should say which one it is filling, or it will
+     * offer the rail's clock for the main column and preview it at the wrong width.
+     */
+    area?: WidgetContainerSide;
+    /**
      * Content width of the column this was opened from — the preview is capped
-     * to it, so a rail-bound widget previews at rail width.
+     * to it, so a rail-bound widget previews at rail width. Defaults to the
+     * `area`'s own width, and to the rail's when there is no `area`.
      */
     previewWidth?: number;
+    /**
+     * Per-visualization renderers for the previews this dialog draws itself,
+     * MERGED OVER the kit's `defaultSlotRenderers`. Pass the SAME map the layout
+     * gets: a widget whose visualization is bespoke would otherwise preview as
+     * "No renderer for slot …" and then render properly once added.
+     */
+    slotRenderers?: SlotRenderers;
     title?: string;
 }
+
+/**
+ * The `Widget` chrome an item carries, ready to spread onto `SlotWidget`.
+ *
+ * `alert` and `status` are mutually exclusive on the frame, and which one an
+ * item means is decided by whether it declares an `alert` at all — so the two
+ * are never handed over together.
+ *
+ * Public because drawing a `HomeWidgetItem` yourself is public (`SlotWidget`),
+ * and this is the one part of that spread with a rule in it.
+ */
+export declare const widgetChrome: (widget: HomeWidgetItem) => HomeWidgetChrome;
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export declare type WidgetContainerSide = "main" | "right";
@@ -13672,6 +14389,23 @@ export declare interface WidgetProps {
     AIButton?: () => void;
     /** An overflow menu at the header's right, beside `link`. */
     actions?: DropdownItem[];
+    /**
+     * THE WIDGET'S OWN CONTROLS, in the header's top-right: what the card is
+     * currently showing (a scope switcher), or what you can do from it without
+     * leaving the page ("New post"). They act on the WIDGET.
+     *
+     * They sit to the LEFT of the overflow menu, which keeps its corner — the menu
+     * is where every widget's items live, and a control that moved depending on
+     * whether a card had a menu would be a different control each time.
+     *
+     * Keep it to one or two `sm` controls. This row is the TITLE'S first, and the
+     * title gives up its width to whatever is put beside it: three buttons here
+     * and a narrow card has no name left.
+     *
+     * NOT the way out of the widget — that is `header.link`, drawn as the title
+     * itself — and NOT its call to action, which is `action`, in the footer.
+     */
+    headerControls?: ReactNode;
 }
 
 /**
@@ -13915,9 +14649,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -13925,11 +14661,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
