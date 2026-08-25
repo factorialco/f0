@@ -47,6 +47,7 @@
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
+    "perf-metrics": "tsx .scripts/perf-metrics.ts",
     "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",
