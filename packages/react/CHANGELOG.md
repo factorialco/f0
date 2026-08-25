@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.54.2](https://github.com/factorialco/f0/compare/f0-react-v6.54.1...f0-react-v6.54.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* **Home:** the drag ghost is a copy of the card, not a second render ([#5237](https://github.com/factorialco/f0/issues/5237)) ([9cda20a](https://github.com/factorialco/f0/commit/9cda20abaddc39aba7b7257bc207033e00f02a99))
+
 ## [6.54.1](https://github.com/factorialco/f0/compare/f0-react-v6.54.0...f0-react-v6.54.1) (2026-08-25)
 
 
