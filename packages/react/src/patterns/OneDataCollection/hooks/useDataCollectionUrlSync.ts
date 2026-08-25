@@ -38,6 +38,13 @@ type UseDataCollectionUrlSyncOptions = {
   filters: FiltersState<FiltersDefinition>
   search: string | undefined
   sortings: SortingsState<SortingsDefinition>
+  /**
+   * The collection's default sortings. While the current sorting still equals
+   * it, `dc_sort` is left out of the URL, so a collection that starts already
+   * sorted (a `defaultSortings` was configured) does not stamp the param on the
+   * first paint with no user interaction.
+   */
+  defaultSortings?: SortingsState<SortingsDefinition>
   /** Index of the active visualization. */
   visualization: number
   /**
@@ -78,6 +85,7 @@ export const useDataCollectionUrlSync = ({
   filters,
   search,
   sortings,
+  defaultSortings = null,
   visualization,
   visualizationKeys,
   selectedPresetId,
@@ -143,7 +151,14 @@ export const useDataCollectionUrlSync = ({
     debouncedSync({
       filters,
       search,
-      sortings,
+      // Leave `dc_sort` out while the sorting still equals the default: a
+      // collection with `defaultSortings` would otherwise stamp it on first
+      // paint with nothing clicked (and, re-read next entry, reset the nested
+      // tree). A real change away from the default writes it as before.
+      sortings:
+        JSON.stringify(sortings) === JSON.stringify(defaultSortings)
+          ? null
+          : sortings,
       // Omit the default (first) view; reflect others by their type/key.
       visualization:
         syncVisualization && visualization > 0
@@ -162,6 +177,7 @@ export const useDataCollectionUrlSync = ({
     filters,
     search,
     sortings,
+    defaultSortings,
     visualization,
     visualizationKeys,
     syncVisualization,

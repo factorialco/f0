@@ -141,6 +141,46 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
   })
 })
 
+describe("useDataCollectionUrlSync — default sortings", () => {
+  const asc = { field: "name", order: "asc" } as const
+  const desc = { field: "name", order: "desc" } as const
+
+  it("does not write dc_sort while the sorting still equals the default", () => {
+    window.history.replaceState(null, "", "/people")
+
+    setup({ sortings: asc, defaultSortings: asc })
+    flushUrlSync()
+
+    // A collection that starts already sorted must not stamp the param on first
+    // paint with nothing clicked.
+    expect(currentParams().has("dc_sort")).toBe(false)
+  })
+
+  it("writes dc_sort once the sorting moves away from the default", () => {
+    window.history.replaceState(null, "", "/people")
+
+    const { rerender } = setup({ sortings: asc, defaultSortings: asc })
+    flushUrlSync()
+    expect(currentParams().has("dc_sort")).toBe(false)
+
+    rerender({ sortings: desc })
+    flushUrlSync()
+    expect(currentParams().get("dc_sort")).toBe("name-desc")
+  })
+
+  it("drops dc_sort again when the sorting returns to the default", () => {
+    window.history.replaceState(null, "", "/people")
+
+    const { rerender } = setup({ sortings: desc, defaultSortings: asc })
+    flushUrlSync()
+    expect(currentParams().get("dc_sort")).toBe("name-desc")
+
+    rerender({ sortings: asc })
+    flushUrlSync()
+    expect(currentParams().has("dc_sort")).toBe(false)
+  })
+})
+
 describe("useDataCollectionUrlSync — visualization", () => {
   it("maps a view key from the URL back to its index", () => {
     window.history.replaceState(null, "", `/?dc_visualization=list`)
