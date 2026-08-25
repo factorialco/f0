@@ -199,7 +199,9 @@ export const SidebarWindow = ({
     if (detail.onAskAi) {
       detail.onAskAi({ id: detail.id, title: detail.title })
     } else {
-      setPendingQuote({ text: detail.title })
+      const quote = { text: detail.title }
+      detail.onAskAiTarget?.({ id: detail.id, title: detail.title, quote })
+      setPendingQuote(quote)
       focusChatInput()
     }
   }, [canAcceptWidgetDrop, focusChatInput, setDragQuoteBoth, setPendingQuote])

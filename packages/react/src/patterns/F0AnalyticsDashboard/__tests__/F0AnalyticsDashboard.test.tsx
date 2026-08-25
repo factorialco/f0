@@ -11,6 +11,10 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 import type { DashboardMetricItem } from "../types"
@@ -57,6 +61,11 @@ function metricItem(
     type: "metric",
     fetchData,
   }
+}
+
+function QuoteProbe() {
+  const { pendingQuote } = useAiChat()
+  return <span data-testid="pending-quote">{pendingQuote?.text ?? ""}</span>
 }
 
 describe("F0AnalyticsDashboard report filters", () => {
@@ -243,6 +252,87 @@ describe("F0AnalyticsDashboard Ask One", () => {
       id: "headcount",
       title: "Headcount",
     })
+  })
+
+  it("passes the public target observer without replacing built-in chat behavior", async () => {
+    const user = userEvent.setup()
+    const onAskAiTarget = vi.fn()
+
+    render(
+      <AiChatStateProvider enabled>
+        <QuoteProbe />
+        <F0AnalyticsDashboard
+          items={[metricItem(vi.fn().mockResolvedValue({ value: 42 }))]}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+
+    await user.click(
+      await screen.findByRole("button", { name: "Other actions" })
+    )
+    await user.click(screen.getByRole("menuitem", { name: "Ask One" }))
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount",
+      quote: { text: "Headcount" },
+    })
+    expect(screen.getByTestId("pending-quote")).toHaveTextContent("Headcount")
+  })
+
+  it("passes a chart point through the public target observer and built-in chat", async () => {
+    const user = userEvent.setup()
+    const onAskAiTarget = vi.fn()
+
+    render(
+      <AiChatStateProvider enabled>
+        <QuoteProbe />
+        <F0AnalyticsDashboard
+          items={[
+            {
+              id: "headcount-chart",
+              title: "Headcount by department",
+              type: "chart",
+              chart: { type: "bar" },
+              fetchData: () =>
+                Promise.resolve({
+                  categories: ["Engineering"],
+                  series: [{ name: "Headcount", data: [145] }],
+                }),
+            },
+          ]}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+
+    const trigger = await screen.findByRole("button", {
+      name: "Ask One: Headcount by department",
+    })
+    trigger.focus()
+    await user.keyboard("{Enter}")
+    await user.click(
+      await screen.findByRole("menuitem", {
+        name: "Headcount by department — Engineering, Headcount: 145",
+      })
+    )
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount-chart",
+      title: "Headcount by department",
+      point: expect.objectContaining({
+        source: "keyboard",
+        category: "Engineering",
+        value: 145,
+      }),
+      quote: {
+        text: "Headcount by department — Engineering\nHeadcount: 145",
+      },
+    })
+    expect(screen.getByTestId("pending-quote")).toHaveTextContent(
+      "Headcount by department — Engineering Headcount: 145"
+    )
   })
 
   it("passes a keyboard-selected chart point through the public handler", async () => {

@@ -18,7 +18,11 @@ import {
   useAiChat,
 } from "../providers/AiChatStateProvider"
 
-const Probe = () => {
+const Probe = ({
+  onCaptureQuote,
+}: {
+  onCaptureQuote?: (quote: ReturnType<typeof useAiChat>["pendingQuote"]) => void
+}) => {
   const {
     setOpen,
     pendingQuote,
@@ -54,6 +58,11 @@ const Probe = () => {
         Start Pong
       </button>
       <span data-testid="quote">{pendingQuote?.text ?? ""}</span>
+      {onCaptureQuote && (
+        <button type="button" onClick={() => onCaptureQuote(pendingQuote)}>
+          Capture pending quote
+        </button>
+      )}
     </>
   )
 }
@@ -74,7 +83,13 @@ const TestChatInput = () => {
  * No `fileAttachments`, so the file-drop path is off throughout — these tests
  * also cover that the widget overlay isn't gated behind an upload handler.
  */
-const renderChat = ({ overlay }: { overlay?: ReactNode } = {}) =>
+const renderChat = ({
+  overlay,
+  onCaptureQuote,
+}: {
+  overlay?: ReactNode
+  onCaptureQuote?: (quote: ReturnType<typeof useAiChat>["pendingQuote"]) => void
+} = {}) =>
   render(
     <AiChatStateProvider
       enabled
@@ -83,17 +98,23 @@ const renderChat = ({ overlay }: { overlay?: ReactNode } = {}) =>
       chatInput={<TestChatInput />}
       VoiceMode={() => <div>Voice content</div>}
     >
-      <Probe />
+      <Probe onCaptureQuote={onCaptureQuote} />
       <F0AiChat overlay={overlay} />
     </AiChatStateProvider>
   )
 
 /** Stands in for the dashboard grid announcing a drag. */
-const startWidgetDrag = (title: string) =>
+const startWidgetDrag = (
+  title: string,
+  callbacks: Pick<
+    import("@/lib/dnd/widgetDragEvents").WidgetDragStartDetail,
+    "onAskAi" | "onAskAiTarget"
+  > = {}
+) =>
   act(() => {
     window.dispatchEvent(
       new CustomEvent(WIDGET_DRAG_START, {
-        detail: { id: "headcount", title },
+        detail: { id: "headcount", title, ...callbacks },
       })
     )
   })
@@ -148,11 +169,35 @@ describe("F0AiChat widget drop", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("observes the dropped widget with the exact built-in quote", async () => {
+    const onAskAiTarget = vi.fn()
+    const capturePendingQuote = vi.fn()
+    renderChat({ onCaptureQuote: capturePendingQuote })
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    startWidgetDrag("Headcount by department", { onAskAiTarget })
+    fireEvent.pointerUp(dropZone())
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by department",
+      quote: { text: "Headcount by department" },
+    })
+    expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
+    await userEvent.click(
+      screen.getByRole("button", { name: "Capture pending quote" })
+    )
+    expect(capturePendingQuote.mock.calls[0][0]).toBe(
+      onAskAiTarget.mock.calls[0][0].quote
+    )
+  })
+
   it("withdraws the invitation when the drag ends away from the chat", async () => {
+    const onAskAiTarget = vi.fn()
     renderChat()
     await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
 
-    startWidgetDrag("Headcount by department")
+    startWidgetDrag("Headcount by department", { onAskAiTarget })
     endWidgetDrag()
 
     expect(
@@ -162,6 +207,7 @@ describe("F0AiChat widget drop", () => {
     // A later stray release must not retroactively quote the widget.
     fireEvent.pointerUp(dropZone())
     expect(screen.getByTestId("quote")).toHaveTextContent("")
+    expect(onAskAiTarget).not.toHaveBeenCalled()
   })
 
   it("stops accepting widget drops as soon as the chat starts closing", async () => {
@@ -312,6 +358,7 @@ describe("F0AiChat widget drop", () => {
 
   it("hands a dropped widget to the host without mutating the built-in quote", async () => {
     const onAskAi = vi.fn()
+    const onAskAiTarget = vi.fn()
     renderChat()
     await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
 
@@ -322,6 +369,7 @@ describe("F0AiChat widget drop", () => {
             id: "headcount",
             title: "Headcount by department",
             onAskAi,
+            onAskAiTarget,
           },
         })
       )
@@ -332,6 +380,7 @@ describe("F0AiChat widget drop", () => {
       id: "headcount",
       title: "Headcount by department",
     })
+    expect(onAskAiTarget).not.toHaveBeenCalled()
     expect(screen.getByTestId("quote")).toHaveTextContent("")
   })
 })
