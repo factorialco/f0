@@ -121,12 +121,8 @@ export function getGranularityDefinitions(
           week: createWeekGranularity(effectiveWeekStartsOn),
         }
 
-  if (!periods) {
-    return definitions
-  }
-
   return {
     ...definitions,
-    periods: getPeriodsGranularity(periods),
+    periods: periods ? getPeriodsGranularity(periods) : periodsGranularity,
   }
 }

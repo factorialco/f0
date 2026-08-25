@@ -115,3 +115,25 @@ describe("DatePickerPopup with periods", () => {
     expect(screen.queryByText("January 2026")).toBeNull()
   })
 })
+
+describe("DatePickerPopup with a periods value and no periods", () => {
+  it("renders the empty periods state instead of throwing", async () => {
+    const user = userEvent.setup()
+    render(
+      <DatePickerPopup
+        onSelect={vi.fn()}
+        value={{
+          granularity: "periods",
+          value: { from: new Date(2026, 0, 25), to: new Date(2026, 1, 24) },
+        }}
+        asChild
+      >
+        <button>Trigger</button>
+      </DatePickerPopup>
+    )
+
+    await user.click(screen.getByRole("button", { name: "Trigger" }))
+
+    expect(await screen.findByText("No periods available")).toBeInTheDocument()
+  })
+})

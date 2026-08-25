@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { granularityDefinitions, resolveGranularityDefinition } from "../index"
+import {
+  getGranularityDefinitions,
+  granularityDefinitions,
+  resolveGranularityDefinition,
+} from "../index"
 
 describe("granularityDefinitions", () => {
   // `periods` has no definition until a consumer supplies its ranges. Keeping it out of
@@ -31,5 +35,15 @@ describe("resolveGranularityDefinition", () => {
   // periods definition renders the "no periods" state instead of throwing.
   it("resolves periods to the empty definition", () => {
     expect(resolveGranularityDefinition("periods").calendarView).toBe("periods")
+  })
+})
+
+describe("getGranularityDefinitions", () => {
+  // The picker, the calendar and the navigator index this record with whatever
+  // key their value carries, and a value can carry `periods` while the consumer
+  // supplies none. The entry has to be there for that render not to throw.
+  it("carries the empty periods definition when no periods are supplied", () => {
+    expect(getGranularityDefinitions().periods.calendarView).toBe("periods")
+    expect(getGranularityDefinitions().month).toBe(granularityDefinitions.month)
   })
 })
