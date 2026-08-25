@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.51.1](https://github.com/factorialco/f0/compare/f0-react-v6.51.0...f0-react-v6.51.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **api-surface:** compare wrapped components structurally, not as text ([#5219](https://github.com/factorialco/f0/issues/5219)) ([6e3e958](https://github.com/factorialco/f0/commit/6e3e95884827365e5f5b772e25d4d3ddd90204f9))
+
 ## [6.51.0](https://github.com/factorialco/f0/compare/f0-react-v6.50.0...f0-react-v6.51.0) (2026-08-25)
 
 
