@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.54.1](https://github.com/factorialco/f0/compare/f0-react-v6.54.0...f0-react-v6.54.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **F0Graph:** restore ARIA tree semantics flagged by axe ([#5228](https://github.com/factorialco/f0/issues/5228)) ([0f4e24b](https://github.com/factorialco/f0/commit/0f4e24b8d3b89f36d642964d619d55f1aa79c3cc))
+
 ## [6.54.0](https://github.com/factorialco/f0/compare/f0-react-v6.53.0...f0-react-v6.54.0) (2026-08-25)
 
 
