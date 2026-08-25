@@ -2,10 +2,12 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
-import { GranularityDefinitionKey, OneCalendar } from "@/components/OneCalendar"
+import { OneCalendar } from "@/components/OneCalendar"
 import {
   DatePeriodsDefinition,
   getGranularityDefinitions,
+  GranularityDefinitionKey,
+  NavigationGranularityKey,
 } from "@/components/OneCalendar/granularities"
 import {
   DateRange,
@@ -35,7 +37,7 @@ export type CompareToDef = {
 }
 
 export type DatePickerCompareTo = Partial<
-  Record<GranularityDefinitionKey, CompareToDef[]>
+  Record<NavigationGranularityKey, CompareToDef[]>
 >
 
 export interface DatePickerPopupProps {
@@ -43,7 +45,7 @@ export interface DatePickerPopupProps {
   value?: DatePickerValue
   defaultValue?: DatePickerValue
   presets?: DatePreset[]
-  granularities?: GranularityDefinitionKey[]
+  granularities?: NavigationGranularityKey[]
   minDate?: Date
   maxDate?: Date
   disabled?: boolean
@@ -194,7 +196,7 @@ export function DatePickerPopup({
 
   const [customRangeMode, setCustomRangeMode] = useState(false)
 
-  const handleSelectGranularity = (granularity: GranularityDefinitionKey) => {
+  const handleSelectGranularity = (granularity: NavigationGranularityKey) => {
     // View-only: switch granularity without emitting or closing.
     if (selectOnCellOnly) {
       setLocalValue((prev) =>

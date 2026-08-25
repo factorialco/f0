@@ -1,7 +1,7 @@
 import { DateRange, DateRangeComplete } from "@/components/OneCalendar"
 import {
   DatePeriodsDefinition,
-  GranularityDefinitionKey,
+  NavigationGranularityKey,
 } from "@/components/OneCalendar/granularities/index"
 import { DatePreset } from "@/ui/DatePickerPopup"
 
@@ -10,8 +10,8 @@ import {
   NavigationFilterDefinitionBase,
 } from "../../types"
 export type DateNavigationOptions = {
-  granularity?: GranularityDefinitionKey[] | GranularityDefinitionKey
-  defaultGranularity?: GranularityDefinitionKey
+  granularity?: NavigationGranularityKey[] | NavigationGranularityKey
+  defaultGranularity?: NavigationGranularityKey
   min?: Date
   max?: Date
   presets?: DatePreset[]
@@ -34,7 +34,7 @@ export type DateValue = {
   value: DateRangeComplete
   // Represents the selected value in a date-time range, e.g  for a day "2021-01-01"
   valueString: string
-  granularity: GranularityDefinitionKey
+  granularity: NavigationGranularityKey
 }
 
 export type DateNavigationProps = NavigationFilterComponentProps<DateValue>
