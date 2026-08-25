@@ -529,10 +529,8 @@ export const Snapshot: Story = {
       <ItemFiltersDemo
         items={mixedItems}
         initialValues={{
-          headcount: { country: { operator: "not_set", values: [] } },
-          "employee-table": {
-            country: { operator: "in", values: ["ES", "FR"] },
-          },
+          headcount: { country: ["ES"] },
+          "employee-table": { country: ["ES", "FR"] },
         }}
       />
     </div>
@@ -738,50 +736,33 @@ const itemFilterItems = itemFilterIds.flatMap((id, index) => {
   ]
 })
 
-/**
- * Operator-based filter definitions, mimicking a cube/semantic catalog where
- * each field advertises the operators it supports.
- */
+/** Report-style definitions using values supplied by a semantic catalog. */
 const itemFilterDefinitions = {
   country: {
-    type: "operator" as const,
+    type: "in" as const,
     label: "Country",
     options: {
-      operators: [
-        { value: "equals", label: "Is" },
-        { value: "not_equals", label: "Is not" },
-        { value: "in", label: "Is one of", valueMode: "multiple" as const },
-        { value: "contains", label: "Contains" },
-        { value: "set", label: "Has any value", valueMode: "none" as const },
-        { value: "not_set", label: "Has no value", valueMode: "none" as const },
+      options: [
+        { value: "ES", label: "Spain" },
+        { value: "FR", label: "France" },
+        { value: "DE", label: "Germany" },
       ],
-      valueType: "string" as const,
-      suggestions: ["Spain", "France", "Germany"],
     },
   },
-  headcount: {
-    type: "operator" as const,
-    label: "Headcount",
+  agreementType: {
+    type: "in" as const,
+    label: "Agreement type",
     options: {
-      operators: [
-        { value: "equals", label: "Equals" },
-        { value: "gt", label: "Greater than" },
-        { value: "lt", label: "Less than" },
-        { value: "between", label: "Between", valueMode: "range" as const },
+      options: [
+        { value: "indefinite", label: "Indefinite" },
+        { value: "temporary", label: "Temporary" },
       ],
-      valueType: "number" as const,
     },
   },
-  active: {
-    type: "operator" as const,
-    label: "Active",
-    options: {
-      operators: [
-        { value: "equals", label: "Is" },
-        { value: "not_equals", label: "Is not" },
-      ],
-      valueType: "boolean" as const,
-    },
+  startDate: {
+    type: "date" as const,
+    label: "Start date",
+    options: { mode: "range" as const },
   },
 }
 
@@ -828,8 +809,8 @@ const ItemFiltersDemo = ({
  *
  * - **Metric, chart, and collection** widgets get a filter icon opening a
  *   compact anchored popover:
- *   a list of this widget's fields, then per-field an operator selector plus
- *   the value inputs that operator needs (single, multiple, range, or none).
+ *   a list of this widget's fields, then the same catalog-backed enum and date
+ *   controls used by report-level filters.
  * - Applied filters always produce a count on the icon. As the widget grows,
  *   it progressively reveals up to three editable chips in the same header.
  *
@@ -872,11 +853,12 @@ export const WithItemFilters: Story = {
     ).toBeNull()
 
     // — Metric: header icon → compact popover → drill in → apply —
-    let metricDialog = await openFilterDialog(metricTrigger)
+    const metricDialog = await openFilterDialog(metricTrigger)
     await userEvent.click(metricDialog.getByRole("button", { name: "Country" }))
 
-    const input = await metricDialog.findByRole("textbox")
-    await userEvent.type(input, "Spain")
+    await userEvent.click(
+      await metricDialog.findByRole("checkbox", { name: "Spain" })
+    )
     await userEvent.click(
       metricDialog.getByRole("button", { name: "Apply selection" })
     )
@@ -886,7 +868,7 @@ export const WithItemFilters: Story = {
 
     await waitFor(() =>
       expect(onItemFiltersChange).toHaveBeenCalledWith("total-headcount", {
-        country: { operator: "equals", values: ["Spain"] },
+        country: ["ES"],
       })
     )
     await expect(onItemFiltersChange).toHaveBeenCalledOnce()
@@ -895,40 +877,13 @@ export const WithItemFilters: Story = {
     await waitFor(() => expect(metricTrigger).toHaveTextContent("1"))
     await expect(chartTrigger).not.toHaveTextContent("1")
 
-    // — Reopen: the operator select must render its options after a previous
-    // popover session (regression guard: the dropdown used to collapse when
-    // the popover was modal) —
-    metricDialog = await openFilterDialog(metricTrigger)
-    await userEvent.click(metricDialog.getByRole("button", { name: "Country" }))
-    const operatorTrigger = await metricDialog.findByRole("combobox")
-    await userEvent.click(operatorTrigger)
-    await userEvent.click(
-      await page.findByRole("option", { name: "Is one of" })
-    )
-    // Switching to a multiple-value operator swaps the form to the values
-    // input with the comma hint.
-    await expect(
-      await metricDialog.findByText("Separate multiple values with commas")
-    ).toBeInTheDocument()
-    const valuesInput = await metricDialog.findByRole("textbox")
-    await userEvent.type(valuesInput, "Spain, France")
-    await userEvent.click(
-      metricDialog.getByRole("button", { name: "Apply selection" })
-    )
-    await userEvent.click(
-      metricDialog.getByRole("button", { name: "Apply filters" })
-    )
-    await waitFor(() =>
-      expect(onItemFiltersChange).toHaveBeenCalledWith("total-headcount", {
-        country: { operator: "in", values: ["Spain", "France"] },
-      })
-    )
-
     // — Chart: the same header flow remains isolated to the chart widget —
     onItemFiltersChange.mockClear()
     const chartDialog = await openFilterDialog(chartTrigger)
     await userEvent.click(chartDialog.getByRole("button", { name: "Country" }))
-    await userEvent.type(await chartDialog.findByRole("textbox"), "France")
+    await userEvent.click(
+      await chartDialog.findByRole("checkbox", { name: "France" })
+    )
     await userEvent.click(
       chartDialog.getByRole("button", { name: "Apply selection" })
     )
@@ -937,7 +892,7 @@ export const WithItemFilters: Story = {
     )
     await waitFor(() =>
       expect(onItemFiltersChange).toHaveBeenCalledWith("headcount", {
-        country: { operator: "equals", values: ["France"] },
+        country: ["FR"],
       })
     )
     await expect(onItemFiltersChange).toHaveBeenCalledOnce()
@@ -948,8 +903,9 @@ export const WithItemFilters: Story = {
     onItemFiltersChange.mockClear()
     const tableDialog = await openFilterDialog(tableTrigger)
     await userEvent.click(tableDialog.getByRole("button", { name: "Country" }))
-    const tableInput = await tableDialog.findByRole("textbox")
-    await userEvent.type(tableInput, "Germany")
+    await userEvent.click(
+      await tableDialog.findByRole("checkbox", { name: "Germany" })
+    )
     await userEvent.click(
       tableDialog.getByRole("button", { name: "Apply selection" })
     )
@@ -959,117 +915,14 @@ export const WithItemFilters: Story = {
 
     await waitFor(() =>
       expect(onItemFiltersChange).toHaveBeenCalledWith("employee-table", {
-        country: { operator: "equals", values: ["Germany"] },
+        country: ["DE"],
       })
     )
 
     // The applied filter renders as a responsive chip in the table header.
     await expect(
-      await within(widgetOf("Employee Directory")).findByText(/Is Germany/)
+      await within(widgetOf("Employee Directory")).findByText(/Germany/)
     ).toBeInTheDocument()
-  },
-}
-
-/**
- * Interaction coverage for the remaining operator value modes: numeric range,
- * boolean enum, and a valueless condition. Each apply keeps the other active
- * conditions and emits one controlled state for the selected widget.
- */
-export const ItemFilterValueVariants: Story = {
-  render: () => <ItemFiltersDemo />,
-  play: async ({ canvasElement, step }) => {
-    onItemFiltersChange.mockClear()
-    const page = within(canvasElement.closest("body")!)
-    const metric = page
-      .getByText("Total Headcount")
-      .closest("[class*='dashitem']") as HTMLElement
-    const trigger = within(metric).getByRole("button", { name: "Filters" })
-    const openFilterDialog = async () => {
-      await userEvent.click(trigger)
-      await waitFor(() => expect(trigger).toHaveAttribute("aria-controls"))
-      const dialogId = trigger.getAttribute("aria-controls")
-      const dialog = dialogId
-        ? canvasElement.ownerDocument.getElementById(dialogId)
-        : null
-      if (!dialog) throw new Error("The item filter dialog did not open")
-      return within(dialog)
-    }
-
-    await step("Apply a numeric range", async () => {
-      const dialog = await openFilterDialog()
-      await userEvent.click(dialog.getByRole("button", { name: "Headcount" }))
-      await userEvent.click(dialog.getByRole("combobox", { name: "Condition" }))
-      await userEvent.click(
-        await page.findByRole("option", { name: "Between" })
-      )
-      await userEvent.type(dialog.getByRole("textbox", { name: "From" }), "10")
-      await userEvent.type(dialog.getByRole("textbox", { name: "To" }), "20")
-      await userEvent.click(
-        dialog.getByRole("button", { name: "Apply selection" })
-      )
-      await userEvent.click(
-        dialog.getByRole("button", { name: "Apply filters" })
-      )
-
-      await waitFor(() =>
-        expect(onItemFiltersChange).toHaveBeenLastCalledWith(
-          "total-headcount",
-          { headcount: { operator: "between", values: [10, 20] } }
-        )
-      )
-    })
-
-    await step("Apply a boolean value", async () => {
-      const dialog = await openFilterDialog()
-      await userEvent.click(dialog.getByRole("button", { name: "Active" }))
-      await userEvent.click(dialog.getByRole("combobox", { name: "Value" }))
-      await userEvent.click(await page.findByRole("option", { name: "False" }))
-      await userEvent.click(
-        dialog.getByRole("button", { name: "Apply selection" })
-      )
-      await userEvent.click(
-        dialog.getByRole("button", { name: "Apply filters" })
-      )
-
-      await waitFor(() =>
-        expect(onItemFiltersChange).toHaveBeenLastCalledWith(
-          "total-headcount",
-          {
-            headcount: { operator: "between", values: [10, 20] },
-            active: { operator: "equals", values: [false] },
-          }
-        )
-      )
-    })
-
-    await step("Apply a valueless condition", async () => {
-      const dialog = await openFilterDialog()
-      await userEvent.click(dialog.getByRole("button", { name: "Country" }))
-      await userEvent.click(dialog.getByRole("combobox", { name: "Condition" }))
-      await userEvent.click(
-        await page.findByRole("option", { name: "Has no value" })
-      )
-      await expect(
-        dialog.getByText("This condition doesn't need a value")
-      ).toBeInTheDocument()
-      await userEvent.click(
-        dialog.getByRole("button", { name: "Apply selection" })
-      )
-      await userEvent.click(
-        dialog.getByRole("button", { name: "Apply filters" })
-      )
-
-      await waitFor(() =>
-        expect(onItemFiltersChange).toHaveBeenLastCalledWith(
-          "total-headcount",
-          {
-            headcount: { operator: "between", values: [10, 20] },
-            active: { operator: "equals", values: [false] },
-            country: { operator: "not_set", values: [] },
-          }
-        )
-      )
-    })
   },
 }
 
@@ -1082,10 +935,8 @@ export const ItemFiltersApplied: Story = {
   render: () => (
     <ItemFiltersDemo
       initialValues={{
-        headcount: { country: { operator: "not_set", values: [] } },
-        "employee-table": {
-          country: { operator: "in", values: ["ES", "FR"] },
-        },
+        headcount: { country: ["ES"] },
+        "employee-table": { country: ["ES", "FR"] },
       }}
     />
   ),
@@ -1101,7 +952,7 @@ export const ItemFiltersApplied: Story = {
     await expect(filtered).toHaveTextContent("1")
 
     // The table's pre-applied filter is represented by the same header chip.
-    await expect(await page.findByText(/Is one of ES, FR/)).toBeInTheDocument()
+    await expect(await page.findByText(/Spain \+1/)).toBeInTheDocument()
 
     // Open and dismiss without applying — the counter must not change.
     await userEvent.click(filtered)
@@ -1113,9 +964,7 @@ export const ItemFiltersApplied: Story = {
     if (!popover) throw new Error("The item filter dialog did not open")
     const dialog = within(popover)
     await userEvent.click(dialog.getByRole("button", { name: "Country" }))
-    await expect(
-      dialog.getByRole("combobox", { name: "Condition" })
-    ).toHaveTextContent("Has no value")
+    await expect(dialog.getByRole("checkbox", { name: "Spain" })).toBeChecked()
     await userEvent.keyboard("{Escape}")
     await waitFor(() => expect(filtered).toHaveTextContent("1"))
     await expect(onItemFiltersChange).not.toHaveBeenCalled()
@@ -1131,8 +980,8 @@ export const ItemFiltersApplied: Story = {
       reopenedDialog.getByRole("button", { name: "Country" })
     )
     await expect(
-      reopenedDialog.getByRole("combobox", { name: "Condition" })
-    ).toHaveTextContent("Has no value")
+      reopenedDialog.getByRole("checkbox", { name: "Spain" })
+    ).toBeChecked()
     await userEvent.keyboard("{Escape}")
   },
 }
@@ -1146,19 +995,19 @@ const responsiveItem = (id: string, title: string): DashboardItem => ({
 
 const responsiveFilterValues: ItemFilterStatesByItem = {
   narrow: {
-    country: { operator: "equals", values: ["Spain"] },
-    headcount: { operator: "gt", values: [100] },
-    active: { operator: "equals", values: [true] },
+    country: ["ES"],
+    agreementType: ["indefinite"],
+    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
   },
   medium: {
-    country: { operator: "equals", values: ["Spain"] },
-    headcount: { operator: "gt", values: [100] },
-    active: { operator: "equals", values: [true] },
+    country: ["ES"],
+    agreementType: ["indefinite"],
+    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
   },
   wide: {
-    country: { operator: "equals", values: ["Spain"] },
-    headcount: { operator: "gt", values: [100] },
-    active: { operator: "equals", values: [true] },
+    country: ["ES"],
+    agreementType: ["indefinite"],
+    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
   },
 }
 
@@ -1201,31 +1050,31 @@ export const ResponsiveItemFilterSignals: Story = {
         const narrow = within(widget("Narrow widget"))
         await expect(
           narrow.getByRole("button", {
-            name: "Active filters: Country, Headcount, Active",
+            name: "Active filters: Country, Agreement type, Start date",
           })
         ).toHaveTextContent("3")
         await expect(
-          await narrow.findByText("Country: Is Spain")
+          await narrow.findByText("Country: Spain")
         ).not.toBeVisible()
       }
     )
 
     await step("The medium widget reveals two applied chips", async () => {
       const medium = within(widget("Medium widget"))
-      await expect(await medium.findByText("Country: Is Spain")).toBeVisible()
+      await expect(await medium.findByText("Country: Spain")).toBeVisible()
       await expect(
-        await medium.findByText("Headcount: Greater than 100")
+        await medium.findByText("Agreement type: Indefinite")
       ).toBeVisible()
-      await expect(await medium.findByText("Active: Is True")).not.toBeVisible()
+      await expect(await medium.findByText(/Start date:/)).not.toBeVisible()
     })
 
     await step("The wide widget reveals all three applied chips", async () => {
       const wide = within(widget("Wide widget"))
-      await expect(await wide.findByText("Country: Is Spain")).toBeVisible()
+      await expect(await wide.findByText("Country: Spain")).toBeVisible()
       await expect(
-        await wide.findByText("Headcount: Greater than 100")
+        await wide.findByText("Agreement type: Indefinite")
       ).toBeVisible()
-      await expect(await wide.findByText("Active: Is True")).toBeVisible()
+      await expect(await wide.findByText(/Start date:/)).toBeVisible()
     })
   },
 }

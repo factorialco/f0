@@ -1,8 +1,4 @@
-import type { FiltersDefinition } from "../OneFilterPicker/types"
-import type {
-  RegisteredFiltersDefinition,
-  RegisteredFiltersState,
-} from "../OneFilterPicker/filterTypes"
+import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
 
 /**
  * Shared styling and behavior props used by both public and internal components.
@@ -27,20 +23,10 @@ export interface FilterPickerBaseProps<Filters extends FiltersDefinition> {
  * This is an internal component used by both F0FilterPickerContent and FiltersControls.
  */
 export interface FilterPickerInternalProps<
-  Filters extends RegisteredFiltersDefinition,
-> {
-  /** The schema defining available filters and their configurations. */
-  filters: Filters
-  /** Height of the content panel. */
-  height?: number
-  /** Optional className for the container. */
-  className?: string
-  /** Whether to show the apply button (default: true). */
-  showApplyButton?: boolean
-  /** Custom label for the apply button. */
-  applyButtonLabel?: string
+  Filters extends FiltersDefinition,
+> extends FilterPickerBaseProps<Filters> {
   /** Current temporary state of filters being configured */
-  tempFilters: RegisteredFiltersState<Filters>
+  tempFilters: FiltersState<Filters>
   /** Currently selected filter key */
   selectedFilterKey: keyof Filters | null
   /** Callback when a filter is selected */

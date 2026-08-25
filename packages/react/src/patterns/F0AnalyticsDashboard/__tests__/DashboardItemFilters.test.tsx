@@ -12,14 +12,13 @@ const makeItemFilters = (
   filters: {
     name: { type: "search", label: "Name" },
     country: {
-      type: "operator",
+      type: "in",
       label: "Country",
       options: {
-        operators: [
-          { value: "equals", label: "Is" },
-          { value: "not_set", label: "Has no value", valueMode: "none" },
+        options: [
+          { value: "ES", label: "Spain" },
+          { value: "FR", label: "France" },
         ],
-        valueType: "string",
       },
     },
   },
@@ -104,6 +103,30 @@ describe("DashboardItem with itemFilters", () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({ name: "Bob" })
     })
+  })
+
+  it("uses the standard selectable-value control for widget filters", async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemFilters={makeItemFilters({ onChange })}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await user.click(screen.getByRole("button", { name: "Filters" }))
+    await user.click(await screen.findByRole("button", { name: "Country" }))
+    await user.click(await screen.findByRole("checkbox", { name: "Spain" }))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+    await user.click(screen.getByRole("button", { name: "Apply filters" }))
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith({ country: ["ES"] })
+    )
   })
 
   it("discards the draft when the popover is dismissed", async () => {
@@ -211,7 +234,7 @@ describe("DashboardItem with itemFilters", () => {
         title="Revenue"
         isLoading={false}
         itemFilters={makeItemFilters({
-          value: { country: { operator: "equals", values: [] } },
+          value: { country: [] },
         })}
       >
         <div>Content</div>
@@ -301,44 +324,6 @@ describe("DashboardItem with itemFilters", () => {
     expect(screen.getByRole("button", { name: "Name" })).toHaveFocus()
   })
 
-  it("identifies invalid numeric input and keeps the editor open", async () => {
-    const user = userEvent.setup()
-    const onChange = vi.fn()
-    render(
-      <DashboardItem
-        title="Revenue"
-        isLoading={false}
-        itemFilters={makeItemFilters({
-          filters: {
-            amount: {
-              type: "operator",
-              label: "Amount",
-              options: {
-                operators: [{ value: "equals", label: "Equals" }],
-                valueType: "number",
-              },
-            },
-          },
-          onChange,
-        })}
-      >
-        <div>Content</div>
-      </DashboardItem>
-    )
-
-    await user.click(screen.getByRole("button", { name: "Filters" }))
-    await user.click(screen.getByRole("button", { name: "Amount" }))
-    const input = screen.getByRole("textbox", { name: "Value" })
-    await user.type(input, "not-a-number")
-    await user.click(screen.getByRole("button", { name: "Apply selection" }))
-
-    expect(input).toHaveAttribute("aria-invalid", "true")
-    expect(screen.getByText("Enter a valid number")).toBeVisible()
-    expect(input).toHaveFocus()
-    expect(screen.queryByRole("button", { name: "Apply filters" })).toBeNull()
-    expect(onChange).not.toHaveBeenCalled()
-  })
-
   it("keeps item filters available in the widget error state", async () => {
     const user = userEvent.setup()
     render(
@@ -366,9 +351,11 @@ describe("DashboardItem with itemFilters", () => {
           filters: {
             name: { type: "search", label: "Name", hideSelector: true },
             country: {
-              type: "operator",
+              type: "in",
               label: "Country",
-              options: { operators: [{ value: "equals", label: "Is" }] },
+              options: {
+                options: [{ value: "ES", label: "Spain" }],
+              },
             },
           },
         })}

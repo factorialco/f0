@@ -8,19 +8,14 @@ import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { useReducedMotion } from "@/lib/a11y"
 import { Skeleton } from "@/ui/skeleton"
 
-import {
-  type ChipLabel,
-  getFilterType,
-  type RegisteredFiltersDefinition,
-  type RegisteredFilterValue,
-} from "../filterTypes"
+import type { FilterValue, FiltersDefinition } from "../types"
+
+import { type ChipLabel, getFilterType } from "../filterTypes"
 
 /**
  * Animated chip component that displays an active filter with its current value.
  */
-export function FilterChipButton<
-  Definition extends RegisteredFiltersDefinition,
->({
+export function FilterChipButton<Definition extends FiltersDefinition>({
   filter,
   filterKey,
   value,
@@ -29,7 +24,7 @@ export function FilterChipButton<
 }: {
   filter: Definition[keyof Definition]
   filterKey?: string
-  value: RegisteredFilterValue<Definition[keyof Definition]> | undefined
+  value: FilterValue<Definition[keyof Definition]> | undefined
   onSelect: () => void
   onRemove: () => void
 }): ReactElement {
@@ -51,7 +46,7 @@ export function FilterChipButton<
       }
       setIsLoading(true)
       const labelRenderer = filterType.chipLabel as unknown as (
-        value: RegisteredFilterValue<Definition[keyof Definition]>,
+        value: FilterValue<Definition[keyof Definition]>,
         context: {
           schema: Definition[keyof Definition]
           i18n: I18nContextType

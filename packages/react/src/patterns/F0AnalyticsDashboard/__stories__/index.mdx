@@ -268,7 +268,7 @@ Review search text, one selected option, a single date, and a single number.
 
 **Collection and range values**
 
-Review multiple selected options, a date range, and a numeric range. Boolean and valueless conditions are intentionally not part of the shared report-filter contract; an opt-in widget operator filter can represent them when its data source supports those operators.
+Review multiple selected options, a date range, and a numeric range.
 
 <Canvas of={Stories.ReportFilterRangeAndMultipleValues} />
 
@@ -310,11 +310,11 @@ the host owns the applied state, data refetch, and persistence.
 
 - WHEN the resolver returns `undefined` → THEN the widget is unchanged and has no filter control.
 - WHEN it returns a configuration → THEN metric, chart, collection, and error-state headers expose the same anchored filter picker.
+- WHEN the host supplies catalog-backed `in` or `date` definitions → THEN widget filters use the same selectable values and date controls as report filters.
 - WHEN a draft is dismissed → THEN the applied widget query remains unchanged.
 - WHEN Apply commits a draft → THEN only that widget's callback runs; F0 does not merge it into report filters.
 - WHEN report and widget filters both exist → THEN the host composes them in the data-source query according to its own semantics.
 - WHEN space is constrained → THEN the icon's count remains visible; wider widgets progressively reveal up to three editable chips.
-- WHEN a numeric condition is invalid → THEN its inline error is announced and the picker keeps focus in the editor until it is corrected.
 
 **Complete interaction**
 

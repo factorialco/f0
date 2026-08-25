@@ -14,26 +14,20 @@ import type {
   FilterTypeDefinition,
   FilterTypeSchema,
 } from "../filterTypes/types"
-import {
-  getFilterType,
-  RegisteredFilterDefinition,
-  RegisteredFilterDefinitionsByType,
-  RegisteredFiltersState,
-  RegisteredFilterValue,
-} from "../filterTypes"
-import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
+import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
 
-type RenderableFiltersDefinition = Record<string, RegisteredFilterDefinition>
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 
 /**
  * Props for the FilterList component.
  * @template Definition - The type defining the structure of available filters
  */
-interface FilterListProps<Definition extends RenderableFiltersDefinition> {
+interface FilterListProps<Definition extends FiltersDefinition> {
   /** The schema defining available filters and their configurations */
   definition: Definition
   /** Current temporary state of filters being configured */
-  tempFilters: RegisteredFiltersState<Definition>
+  tempFilters: FiltersState<Definition>
   /** The currently selected filter key, if any */
   selectedFilterKey: keyof Definition | null
   /** Callback fired when a filter is selected from the list */
@@ -57,7 +51,7 @@ interface FilterListProps<Definition extends RenderableFiltersDefinition> {
  *
  * @template Definition - The type defining the structure of available filters
  */
-export function FilterList<Definition extends RenderableFiltersDefinition>({
+export function FilterList<Definition extends FiltersDefinition>({
   definition,
   tempFilters,
   selectedFilterKey,
@@ -104,14 +98,11 @@ export function FilterList<Definition extends RenderableFiltersDefinition>({
             {Object.entries(definition).map(([key, filter]) => {
               const filterType = getFilterType(filter.type)
 
-              type FilterType =
-                RegisteredFilterDefinitionsByType[typeof filter.type]
-              const currentValue = tempFilters[
-                key
-              ] as RegisteredFilterValue<FilterType>
+              type FilterType = FilterDefinitionsByType[typeof filter.type]
+              const currentValue = tempFilters[key] as FilterValue<FilterType>
               const typedFilterType =
                 filterType as unknown as FilterTypeDefinition<
-                  RegisteredFilterValue<FilterType>
+                  FilterValue<FilterType>
                 >
 
               const ownValueActive = !typedFilterType.isEmpty(currentValue, {

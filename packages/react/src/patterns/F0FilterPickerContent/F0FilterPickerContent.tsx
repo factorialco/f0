@@ -17,10 +17,7 @@ import type {
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
 import type { F0FilterPickerContentProps } from "./types"
 
-import {
-  getFilterType,
-  type RegisteredFiltersState,
-} from "../OneFilterPicker/filterTypes"
+import { getFilterType } from "../OneFilterPicker/filterTypes"
 import { FilterPickerInternal } from "./internal"
 
 const DEFAULT_FORM_HEIGHT = 388
@@ -164,9 +161,7 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
       >
         <FilterPickerInternal
           filters={filters}
-          tempFilters={
-            localFiltersValue as unknown as RegisteredFiltersState<Filters>
-          }
+          tempFilters={localFiltersValue}
           selectedFilterKey={selectedFilterKey}
           onFilterSelect={setSelectedFilterKey}
           onFilterChange={updateFilterValue}

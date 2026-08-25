@@ -31,7 +31,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
-import type { RegisteredFiltersState } from "@/patterns/OneFilterPicker/filterTypes"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { Spinner } from "@/ui/Spinner"
 
@@ -922,11 +921,7 @@ const OneDataCollectionComp = <
     // is not a filter, so an empty result with no active filters is "no-data",
     // not "no-results".
     const hasActiveFilters = effectiveFilters
-      ? getActiveFilterKeys(
-          effectiveFilters,
-          filters as unknown as RegisteredFiltersState<Filters>,
-          i18n
-        ).length > 0
+      ? getActiveFilterKeys(effectiveFilters, filters, i18n).length > 0
       : false
     return hasActiveFilters || search ? "no-results" : "no-data"
   }

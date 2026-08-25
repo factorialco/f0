@@ -10,8 +10,6 @@ export type {
   DashboardCollectionItem,
   DashboardItem,
   DashboardItemBase,
-  DashboardItemFilterDefinition,
-  DashboardItemFilterValue,
   DashboardItemFiltersConfig,
   DashboardItemFiltersDefinition,
   DashboardItemFiltersState,
@@ -29,12 +27,6 @@ export type {
   PieChartConfig,
   RadarChartConfig,
   ScatterChartConfig,
-  OperatorFilterCopy,
-  OperatorFilterDefinition,
-  OperatorFilterOperator,
-  OperatorFilterOptions,
-  OperatorFilterValue,
-  OperatorFilterValueMode,
 } from "./types"
 
 /**

@@ -12,21 +12,10 @@ import type {
 import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
-  FilterDefinition,
-  FilterValue,
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-import type {
-  OperatorFilterCopy,
-  OperatorFilterDefinition,
-  OperatorFilterOperator,
-  OperatorFilterOptions,
-  OperatorFilterValue,
-  OperatorFilterValueMode,
-} from "@/patterns/OneFilterPicker/filterTypes/OperatorFilter"
-import type { RegisteredFiltersState } from "@/patterns/OneFilterPicker/filterTypes"
 
 // Re-exported under its own name: the same shape types a table column header
 // and a widget header, and a host typing a widget's `info` shouldn't have to
@@ -428,43 +417,14 @@ export type DashboardItem<
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
 
-/** Filter types supported by the per-widget condition editor. */
-export type DashboardItemFilterDefinition =
-  | FilterDefinition
-  | OperatorFilterDefinition
-
-/**
- * Definitions accepted by a dashboard item's filter control.
- *
- * This opt-in type keeps the operator condition scoped to dashboard widgets;
- * the default `FiltersDefinition` union used by existing collections remains
- * unchanged.
- */
+/** Report-style definitions accepted by a dashboard item's filter control. */
 export type DashboardItemFiltersDefinition<Keys extends string = string> =
-  Record<Keys, DashboardItemFilterDefinition>
-
-/** Value mapping for a dashboard item's opt-in condition definitions. */
-export type DashboardItemFilterValue<
-  Definition extends DashboardItemFilterDefinition,
-> = Definition extends OperatorFilterDefinition
-  ? OperatorFilterValue | undefined
-  : Definition extends FilterDefinition
-    ? FilterValue<Definition>
-    : never
+  FiltersDefinition<Keys>
 
 /** Controlled state emitted by a dashboard item's filter control. */
 export type DashboardItemFiltersState<
   Definitions extends DashboardItemFiltersDefinition,
-> = RegisteredFiltersState<Definitions>
-
-export type {
-  OperatorFilterCopy,
-  OperatorFilterDefinition,
-  OperatorFilterOperator,
-  OperatorFilterOptions,
-  OperatorFilterValue,
-  OperatorFilterValueMode,
-}
+> = FiltersState<Definitions>
 
 /**
  * Per-widget filter configuration resolved by the host.

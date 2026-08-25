@@ -1,9 +1,6 @@
 import { I18nContextType } from "@/lib/providers/i18n"
 
-import {
-  RegisteredFilterDefinition,
-  RegisteredFiltersState,
-} from "../filterTypes"
+import { FiltersDefinition, FiltersState } from "../types"
 
 import { getActiveFilterKeys } from "./getActiveFilterKeys"
 
@@ -16,14 +13,12 @@ import { getActiveFilterKeys } from "./getActiveFilterKeys"
  * data source, where a consumer can read an empty `in` array as "match none" and
  * wrongly return zero results (showing the empty state instead of the full list).
  */
-export const getActiveFiltersValue = <
-  Filters extends Record<string, RegisteredFilterDefinition>,
->(
+export const getActiveFiltersValue = <Filters extends FiltersDefinition>(
   filters: Filters,
-  value: RegisteredFiltersState<Filters>,
+  value: FiltersState<Filters>,
   i18n: I18nContextType
-): RegisteredFiltersState<Filters> => {
-  const active = {} as RegisteredFiltersState<Filters>
+): FiltersState<Filters> => {
+  const active = {} as FiltersState<Filters>
   for (const key of getActiveFilterKeys(filters, value, i18n)) {
     active[key] = value[key]
   }

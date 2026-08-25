@@ -1,20 +1,11 @@
 import { I18nContextType } from "@/lib/providers/i18n"
 
-import {
-  FilterTypeContext,
-  FilterTypeSchema,
-  getFilterType,
-  RegisteredFilterDefinition,
-  RegisteredFiltersState,
-} from "../filterTypes"
+import { FilterTypeSchema, getFilterType } from "../filterTypes"
+import { FiltersDefinition, FiltersState } from "../types"
 
-type RenderableFiltersDefinition = Record<string, RegisteredFilterDefinition>
-
-export const getActiveFilterKeys = <
-  Filters extends RenderableFiltersDefinition,
->(
+export const getActiveFilterKeys = <Filters extends FiltersDefinition>(
   filters: Filters,
-  value: RegisteredFiltersState<Filters>,
+  value: FiltersState<Filters>,
   i18n: I18nContextType
 ) =>
   Object.keys(filters).filter((key) => {
@@ -23,12 +14,8 @@ export const getActiveFilterKeys = <
 
     const filterType = getFilterType(filterSchema.type)
 
-    const isEmpty = (
-      filterType.isEmpty as (
-        value: unknown,
-        context: FilterTypeContext
-      ) => boolean
-    )(filterValue, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- We need to pass the filter value as any to the isEmpty function
+    const isEmpty = filterType.isEmpty(filterValue as any, {
       schema: filterSchema as unknown as FilterTypeSchema,
       i18n,
     })
