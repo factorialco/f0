@@ -12,6 +12,7 @@ import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useD
 
 import type {
   DashboardCollectionItem,
+  DashboardItemFiltersConfig,
   F0AnalyticsDashboardAskAiTarget,
 } from "../../types"
 
@@ -22,6 +23,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
@@ -34,13 +36,15 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
  *
  * Calls `item.createSource(filters)` to produce a DataCollectionSourceDefinition,
  * then feeds it to `useDataCollectionSource` which manages the full lifecycle.
- * The collection renders without its own filter bar — dashboard-level filters
- * are already baked into the source definition.
+ * Dashboard-level filters are already baked into the source definition.
+ * Opt-in per-widget filters render in the shared widget header, consistently
+ * with chart and metric items.
  */
 export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   handleDelete,
   onAskAi,
@@ -51,17 +55,16 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
 
   // Memoize the source definition to avoid re-creating on every render.
-  // Re-creates when filters change (JSON key).
   const filtersKey = JSON.stringify(effectiveFilters)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const sourceDefinition = useMemo(
     () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey]
+    [filtersKey, itemFiltersKey]
   )
-
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
+    itemFiltersKey,
   ])
 
   // We capture the current table visualization settings (hidden columns +
@@ -128,6 +131,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       explanation={item.explanation}
       isLoading={false}
       actions={allActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       onAskAi={onAskAi}

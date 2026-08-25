@@ -222,6 +222,83 @@ describe("F0AnalyticsDashboard report filters", () => {
   })
 })
 
+describe("F0AnalyticsDashboard item filters", () => {
+  it("resolves controls in normal, fullscreen, and single-item layouts while preserving undefined opt-out", async () => {
+    const user = userEvent.setup()
+    const headcount = metricItem(vi.fn().mockResolvedValue({ value: 42 }))
+    const turnover: DashboardMetricItem<typeof filters> = {
+      ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
+      id: "turnover",
+      title: "Turnover",
+    }
+    const resolver = vi.fn((item: DashboardMetricItem<typeof filters>) =>
+      item.id === "headcount"
+        ? {
+            filters: {
+              employee: { type: "search" as const, label: "Employee" },
+            },
+            value: {},
+            onChange: vi.fn(),
+          }
+        : undefined
+    )
+
+    const view = render(
+      <F0AnalyticsDashboard
+        items={[headcount, turnover]}
+        itemFilters={resolver as never}
+      />
+    )
+
+    const headcountCard = screen
+      .getByText("Headcount")
+      .closest("[class*='dashitem']") as HTMLElement
+    const turnoverCard = screen
+      .getByText("Turnover")
+      .closest("[class*='dashitem']") as HTMLElement
+    expect(
+      within(headcountCard).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+    expect(
+      within(turnoverCard).queryByRole("button", { name: "Filters" })
+    ).toBeNull()
+
+    await user.click(
+      within(headcountCard).getByRole("button", { name: "Expand" })
+    )
+    await waitFor(() =>
+      expect(screen.queryByText("Turnover")).not.toBeInTheDocument()
+    )
+    expect(
+      within(
+        screen
+          .getByText("Headcount")
+          .closest("[class*='dashitem']") as HTMLElement
+      ).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+
+    view.rerender(
+      <F0AnalyticsDashboard
+        items={[headcount]}
+        itemFilters={resolver as never}
+      />
+    )
+    expect(
+      within(
+        screen
+          .getByText("Headcount")
+          .closest("[class*='dashitem']") as HTMLElement
+      ).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+    expect(resolver).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "headcount" })
+    )
+    expect(resolver).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "turnover" })
+    )
+  })
+})
+
 describe("F0AnalyticsDashboard Ask One", () => {
   it("passes the public host handler through to a rendered widget", async () => {
     const user = userEvent.setup()

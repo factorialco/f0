@@ -1,32 +1,39 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useMemo } from "react"
+import { useId, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronRight } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
+import { NonFocusableScrollArea, ScrollArea } from "@/ui/scrollarea"
 
 import type {
   FilterTypeDefinition,
   FilterTypeSchema,
 } from "../filterTypes/types"
-import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
-
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+import {
+  getFilterType,
+  RegisteredFilterDefinition,
+  RegisteredFilterDefinitionsByType,
+  RegisteredFiltersState,
+  RegisteredFilterValue,
+} from "../filterTypes"
 import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
+
+type RenderableFiltersDefinition = Record<string, RegisteredFilterDefinition>
 
 /**
  * Props for the FilterList component.
  * @template Definition - The type defining the structure of available filters
  */
-interface FilterListProps<Definition extends FiltersDefinition> {
+interface FilterListProps<Definition extends RenderableFiltersDefinition> {
   /** The schema defining available filters and their configurations */
   definition: Definition
   /** Current temporary state of filters being configured */
-  tempFilters: FiltersState<Definition>
+  tempFilters: RegisteredFiltersState<Definition>
   /** The currently selected filter key, if any */
   selectedFilterKey: keyof Definition | null
   /** Callback fired when a filter is selected from the list */
@@ -50,7 +57,7 @@ interface FilterListProps<Definition extends FiltersDefinition> {
  *
  * @template Definition - The type defining the structure of available filters
  */
-export function FilterList<Definition extends FiltersDefinition>({
+export function FilterList<Definition extends RenderableFiltersDefinition>({
   definition,
   tempFilters,
   selectedFilterKey,
@@ -59,6 +66,9 @@ export function FilterList<Definition extends FiltersDefinition>({
   onClickApplyFilters,
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
+  const activeDescriptionId = useId()
+  const shouldReduceMotion = useReducedMotion()
+  const ListScrollArea = isCompactMode ? NonFocusableScrollArea : ScrollArea
 
   const nestedKeysMap = useMemo(() => {
     const map = new Map<string, string[]>()
@@ -89,16 +99,19 @@ export function FilterList<Definition extends FiltersDefinition>({
         {isCompactMode && (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
         )}
-        <ScrollArea className="flex-1 min-h-0 max-h-full">
+        <ListScrollArea className="flex-1 min-h-0 max-h-full">
           <div className="flex flex-col gap-1">
             {Object.entries(definition).map(([key, filter]) => {
               const filterType = getFilterType(filter.type)
 
-              type FilterType = FilterDefinitionsByType[typeof filter.type]
-              const currentValue = tempFilters[key] as FilterValue<FilterType>
+              type FilterType =
+                RegisteredFilterDefinitionsByType[typeof filter.type]
+              const currentValue = tempFilters[
+                key
+              ] as RegisteredFilterValue<FilterType>
               const typedFilterType =
                 filterType as unknown as FilterTypeDefinition<
-                  FilterValue<FilterType>
+                  RegisteredFilterValue<FilterType>
                 >
 
               const ownValueActive = !typedFilterType.isEmpty(currentValue, {
@@ -126,6 +139,10 @@ export function FilterList<Definition extends FiltersDefinition>({
                     focusRing()
                   )}
                   onClick={() => onFilterSelect(key as keyof Definition)}
+                  aria-label={filter.label}
+                  aria-describedby={
+                    isActive ? `${activeDescriptionId}-${key}` : undefined
+                  }
                 >
                   <div className="flex w-full items-center justify-start gap-2.5 overflow-hidden">
                     <OneEllipsis className="flex-1 text-left text-f1-foreground">
@@ -133,21 +150,39 @@ export function FilterList<Definition extends FiltersDefinition>({
                     </OneEllipsis>
                     <AnimatePresence>
                       {isActive && (
-                        <motion.div
+                        <motion.span
                           className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
-                          initial={{ opacity: 0, scale: 0.7 }}
+                          initial={
+                            shouldReduceMotion
+                              ? false
+                              : { opacity: 0, scale: 0.7 }
+                          }
                           animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.7 }}
+                          exit={
+                            shouldReduceMotion
+                              ? undefined
+                              : { opacity: 0, scale: 0.7 }
+                          }
                         />
                       )}
                     </AnimatePresence>
                     {isCompactMode && <F0Icon icon={ChevronRight} />}
                   </div>
+                  {isActive && (
+                    <span
+                      id={`${activeDescriptionId}-${key}`}
+                      className="sr-only"
+                    >
+                      {i18n.t("filters.activeFilters", {
+                        filters: filter.label,
+                      })}
+                    </span>
+                  )}
                 </button>
               )
             })}
           </div>
-        </ScrollArea>
+        </ListScrollArea>
         {isCompactMode && (
           <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
             <F0Button

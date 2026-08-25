@@ -71,7 +71,10 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
       </tr>
       <tr>
         <td>A control affects only one visualization</td>
-        <td>An item-specific control owned by that visualization.</td>
+        <td>
+          The opt-in <code>itemFilters</code> resolver, or a control owned by
+          that visualization when it is not a filter.
+        </td>
       </tr>
       <tr>
         <td>Information is a transient summary</td>
@@ -85,17 +88,18 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
 
 <DoDonts
   do={{
-    description: "Keep report filters global and predictable.",
+    description: "Make report and widget scope explicit.",
     guidelines: [
       "Use one applied filter state for every participating item",
+      "Use itemFilters only for conditions that intentionally affect one widget",
       "Keep filter labels consistent with the report's data vocabulary",
       "Persist only committed values",
     ],
   }}
   dont={{
-    description: "Avoid mixing report and item scope.",
+    description: "Avoid ambiguous filter scope.",
     guidelines: [
-      "Don't present a dashboard filter when it changes only one item",
+      "Don't present a report filter when it changes only one item",
       "Don't persist temporary picker selections before Apply",
       "Don't silently retain values for removed filter definitions",
     ],
@@ -264,7 +268,7 @@ Review search text, one selected option, a single date, and a single number.
 
 **Collection and range values**
 
-Review multiple selected options, a date range, and a numeric range. Boolean and valueless filters are not native `OneFilterPicker` filter types, and are intentionally not represented as supported dashboard controls.
+Review multiple selected options, a date range, and a numeric range. Boolean and valueless conditions are intentionally not part of the shared report-filter contract; an opt-in widget operator filter can represent them when its data source supports those operators.
 
 <Canvas of={Stories.ReportFilterRangeAndMultipleValues} />
 
@@ -281,6 +285,54 @@ object, matching their on-screen fetch behavior.
 The filter bar remains usable when valid report filters return empty chart data.
 
 <Canvas of={Stories.EmptyDashboard} />
+
+### Widget filters
+
+Use `itemFilters` when a filter is scoped to exactly one widget. The prop is a
+resolver, so the host can enable it only for supported items and return
+`undefined` everywhere else. F0 owns the picker draft and responsive header;
+the host owns the applied state, data refetch, and persistence.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  itemFilters={(item) => {
+    if (!canFilterWidget(item)) return undefined
+
+    return {
+      filters: definitionsFor(item),
+      value: savedFiltersByItem[item.id] ?? {},
+      onChange: (value) => updateWidgetFilters(item.id, value),
+    }
+  }}
+/>
+```
+
+- WHEN the resolver returns `undefined` → THEN the widget is unchanged and has no filter control.
+- WHEN it returns a configuration → THEN metric, chart, collection, and error-state headers expose the same anchored filter picker.
+- WHEN a draft is dismissed → THEN the applied widget query remains unchanged.
+- WHEN Apply commits a draft → THEN only that widget's callback runs; F0 does not merge it into report filters.
+- WHEN report and widget filters both exist → THEN the host composes them in the data-source query according to its own semantics.
+- WHEN space is constrained → THEN the icon's count remains visible; wider widgets progressively reveal up to three editable chips.
+- WHEN a numeric condition is invalid → THEN its inline error is announced and the picker keeps focus in the editor until it is corrected.
+
+**Complete interaction**
+
+The story applies filters independently to a metric, chart, and collection,
+and verifies that a resolver returning `undefined` leaves a widget untouched.
+
+<Canvas of={Stories.WithItemFilters} />
+
+**Applied and dismissed state**
+
+<Canvas of={Stories.ItemFiltersApplied} />
+
+**Responsive filter signals**
+
+The three fixed-width widgets exercise the count-only, two-chip, and
+three-chip states with browser-visible assertions.
+
+<Canvas of={Stories.ResponsiveItemFilterSignals} />
 
 ## Accessibility
 
@@ -340,3 +392,4 @@ The filter bar remains usable when valid report filters return empty chart data.
 - The filter trigger keeps the stable name "Filters"; applied filter labels are exposed as its accessible description, while a visible counter shows how many report filters are active.
 - The filter popover has a dialog name, and filter options expose native checkbox semantics.
 - Applied filter removal buttons keep the stable name "Close"; the filter label and selected value are exposed as their accessible descriptions.
+- Widget filter rows announce whether their draft is active, the compact list moves focus to its first control when opened, and returning from an editor restores focus to its row (or the next available row if the definition disappeared).

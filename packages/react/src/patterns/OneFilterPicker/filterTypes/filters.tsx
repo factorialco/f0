@@ -5,6 +5,8 @@ import dateFilter, { DateFilterDefinition } from "./DateFilter"
 import inFilter, { InFilterDefinition } from "./InFilter"
 import { numberFilter, NumberFilterDefinition } from "./NumberFilter"
 import { NumberFilterValue } from "./NumberFilter/NumberFilter"
+import operatorFilter, { OperatorFilterDefinition } from "./OperatorFilter"
+import { OperatorFilterValue } from "./OperatorFilter/OperatorFilter"
 import searchFilter, { SearchFilterDefinition } from "./SearchFilter"
 import { FilterTypeDefinition } from "./types"
 
@@ -28,11 +30,31 @@ export type FilterDefinitionsByType<
   number: NumberFilterDefinition
 }
 
+/**
+ * Filter definitions registered internally with the picker renderer.
+ *
+ * `FilterDefinition` deliberately remains the stable, public built-in union.
+ * Dashboard item filters can opt into the operator definition without widening
+ * the default union used by every existing data-source consumer.
+ */
+export type RegisteredFilterDefinitionsByType<
+  T = unknown,
+  R extends RecordType = RecordType,
+> = FilterDefinitionsByType<T, R> & {
+  operator: OperatorFilterDefinition
+}
+
 export const filterTypes = {
   in: inFilter,
   search: searchFilter,
   date: dateFilter,
   number: numberFilter,
+} as const
+
+/** Internal registry used by the dashboard's opt-in condition editor. */
+export const registeredFilterTypes = {
+  ...filterTypes,
+  operator: operatorFilter,
 } as const
 
 /**
@@ -53,6 +75,20 @@ export type FilterValue<T extends FilterDefinition> =
         : T extends NumberFilterDefinition
           ? NumberFilterValue | undefined
           : never
+
+/** Value mapping for definitions understood by the internal renderer. */
+export type RegisteredFilterValue<T extends RegisteredFilterDefinition> =
+  T extends InFilterDefinition<infer U>
+    ? U[]
+    : T extends SearchFilterDefinition
+      ? string
+      : T extends DateFilterDefinition
+        ? DateRange | Date | undefined
+        : T extends OperatorFilterDefinition
+          ? OperatorFilterValue | undefined
+          : T extends NumberFilterDefinition
+            ? NumberFilterValue | undefined
+            : never
 
 /**
  * Base definition for all filter types.
@@ -77,6 +113,21 @@ export type BaseFilterDefinition<T extends FilterTypeKey> = {
 export type FilterDefinition =
   FilterDefinitionsByType[keyof FilterDefinitionsByType]
 
+/** All definitions understood by the internal renderer registry. */
+export type RegisteredFilterDefinition =
+  RegisteredFilterDefinitionsByType[keyof RegisteredFilterDefinitionsByType]
+
+export type RegisteredFiltersDefinition = Record<
+  string,
+  RegisteredFilterDefinition
+>
+
+export type RegisteredFiltersState<
+  Definition extends RegisteredFiltersDefinition,
+> = {
+  [K in keyof Definition]?: RegisteredFilterValue<Definition[K]>
+}
+
 // This type ensures each filter follows FilterTypeDefinition while preserving its specific type
 type ValidateFilterType<T> = T extends {
   [K: string]: FilterTypeDefinition<unknown>
@@ -86,3 +137,5 @@ type ValidateFilterType<T> = T extends {
 export type FilterTypesValidated = ValidateFilterType<typeof filterTypes>
 export type FilterTypes = typeof filterTypes
 export type FilterTypeKey = keyof typeof filterTypes
+export type RegisteredFilterTypes = typeof registeredFilterTypes
+export type RegisteredFilterTypeKey = keyof RegisteredFilterTypes

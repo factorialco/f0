@@ -11,6 +11,8 @@ import {
   FilterTypeDefinition,
   FilterTypeSchema,
   getFilterType,
+  RegisteredFilterValue,
+  RegisteredFiltersState,
 } from "../filterTypes"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import { FilterChipButton } from "./FilterChipButton"
@@ -38,7 +40,11 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
 }: FiltersChipsListProps<Filters>) {
   const i18n = useI18n()
 
-  const activeFilterKeys = getActiveFilterKeys(filters, value, i18n)
+  const activeFilterKeys = getActiveFilterKeys(
+    filters,
+    value as unknown as RegisteredFiltersState<Filters>,
+    i18n
+  )
   const hasVisibleChips = !hideChips && activeFilterKeys.length > 0
 
   // The "Save view" action lives in the presets row (the dashed save chip), not
@@ -94,7 +100,11 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
                   key={`filter-${String(key)}`}
                   filter={filterSchema}
                   filterKey={String(key)}
-                  value={currentValue}
+                  value={
+                    currentValue as RegisteredFilterValue<
+                      Filters[keyof Filters]
+                    >
+                  }
                   onSelect={() => onFilterSelect(key)}
                   onRemove={() => onFilterRemove(key)}
                 />

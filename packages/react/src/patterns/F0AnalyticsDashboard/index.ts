@@ -10,6 +10,11 @@ export type {
   DashboardCollectionItem,
   DashboardItem,
   DashboardItemBase,
+  DashboardItemFilterDefinition,
+  DashboardItemFilterValue,
+  DashboardItemFiltersConfig,
+  DashboardItemFiltersDefinition,
+  DashboardItemFiltersState,
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
@@ -24,6 +29,12 @@ export type {
   PieChartConfig,
   RadarChartConfig,
   ScatterChartConfig,
+  OperatorFilterCopy,
+  OperatorFilterDefinition,
+  OperatorFilterOperator,
+  OperatorFilterOptions,
+  OperatorFilterValue,
+  OperatorFilterValueMode,
 } from "./types"
 
 /**

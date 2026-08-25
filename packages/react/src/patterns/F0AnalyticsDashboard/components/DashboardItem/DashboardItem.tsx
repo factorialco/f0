@@ -37,6 +37,10 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import type { DashboardItemFiltersConfig } from "../../types"
+
+import { DashboardItemFilters } from "./DashboardItemFilters"
+
 interface DashboardItemProps {
   title: string
   description?: string
@@ -54,6 +58,12 @@ interface DashboardItemProps {
   children: ReactNode
   /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
+  /**
+   * Per-widget filter configuration. When set, a filter icon is rendered in
+   * the header (next to the fullscreen and menu buttons) opening a compact
+   * anchored filter popover.
+   */
+  itemFilters?: DashboardItemFiltersConfig
   /** When true, adds a "Delete" option to the dropdown menu */
   editMode?: boolean
   /** Called when the user clicks the delete action */
@@ -119,6 +129,7 @@ export function DashboardItem({
   skeleton,
   children,
   actions = [],
+  itemFilters,
   editMode,
   handleDelete,
   onAskAi,
@@ -212,7 +223,7 @@ export function DashboardItem({
 
   if (error) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
+      <div className="@container flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex shrink-0 items-start gap-2 p-4">
           {/* The help copy survives the failure: a reader looking at an error
               is exactly the one asking what the widget was meant to show.
@@ -236,6 +247,7 @@ export function DashboardItem({
               </p>
             )}
           </div>
+          {itemFilters && <DashboardItemFilters {...itemFilters} />}
           {hasAskOne && (
             <DropdownMenu
               open={isDropdownOpen}
@@ -288,7 +300,7 @@ export function DashboardItem({
   return (
     <div
       className={cn(
-        "group/dashitem flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
+        "group/dashitem @container flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
         // `min-h-full` still fills the space when the content is shorter, but
         // lets a taller intrinsic height win instead of being clipped to it.
         // `shrink-0` is what makes that stick: as a flex item this card would
@@ -352,6 +364,7 @@ export function DashboardItem({
             </div>
           )}
         </div>
+        {itemFilters && <DashboardItemFilters {...itemFilters} />}
         <div
           className={cn(
             "flex flex-shrink-0 gap-0.5",

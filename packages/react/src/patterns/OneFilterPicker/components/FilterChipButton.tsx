@@ -5,16 +5,22 @@ import { ReactElement, useEffect, useState } from "react"
 
 import { Chip } from "@/components/OneChip"
 import { I18nContextType, useI18n } from "@/lib/providers/i18n"
+import { useReducedMotion } from "@/lib/a11y"
 import { Skeleton } from "@/ui/skeleton"
 
-import type { FilterValue, FiltersDefinition } from "../types"
-
-import { ChipLabel, getFilterType } from "../filterTypes"
+import {
+  type ChipLabel,
+  getFilterType,
+  type RegisteredFiltersDefinition,
+  type RegisteredFilterValue,
+} from "../filterTypes"
 
 /**
  * Animated chip component that displays an active filter with its current value.
  */
-export function FilterChipButton<Definition extends FiltersDefinition>({
+export function FilterChipButton<
+  Definition extends RegisteredFiltersDefinition,
+>({
   filter,
   filterKey,
   value,
@@ -23,11 +29,12 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
 }: {
   filter: Definition[keyof Definition]
   filterKey?: string
-  value: FilterValue<Definition[keyof Definition]> | undefined
+  value: RegisteredFilterValue<Definition[keyof Definition]> | undefined
   onSelect: () => void
   onRemove: () => void
 }): ReactElement {
   const [isLoading, setIsLoading] = useState(true)
+  const shouldReduceMotion = useReducedMotion()
 
   const filterType = getFilterType(filter.type)
 
@@ -44,7 +51,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
       }
       setIsLoading(true)
       const labelRenderer = filterType.chipLabel as unknown as (
-        value: FilterValue<Definition[keyof Definition]>,
+        value: RegisteredFilterValue<Definition[keyof Definition]>,
         context: {
           schema: Definition[keyof Definition]
           i18n: I18nContextType
@@ -78,10 +85,12 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.8 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ type: "spring", duration: 0.2 }}
+      exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.8 }}
+      transition={
+        shouldReduceMotion ? { duration: 0 } : { type: "spring", duration: 0.2 }
+      }
     >
       {isLoading ? (
         <Skeleton className="h-5 w-[100px]" />

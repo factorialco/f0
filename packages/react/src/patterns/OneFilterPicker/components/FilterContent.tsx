@@ -1,25 +1,26 @@
 "use client"
 
-import type {
-  FilterDefinition,
-  FiltersDefinition,
-  FiltersState,
-  FilterValue,
-} from "../types"
+import {
+  getFilterType,
+  RegisteredFilterDefinition,
+  RegisteredFilterDefinitionsByType,
+  RegisteredFiltersState,
+  RegisteredFilterValue,
+} from "../filterTypes"
 
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+type RenderableFiltersDefinition = Record<string, RegisteredFilterDefinition>
 
 /**
  * Props for the FilterContent component.
  * @template Definition - The type defining the structure of available filters
  */
-type FilterContentProps<Definition extends FiltersDefinition> = {
+type FilterContentProps<Definition extends RenderableFiltersDefinition> = {
   /** The currently selected filter key, if any */
   selectedFilterKey: keyof Definition | null
   /** The schema defining available filters and their configurations */
   definition: Definition
   /** Current temporary state of filters being configured */
-  tempFilters: FiltersState<Definition>
+  tempFilters: RegisteredFiltersState<Definition>
   /** Callback fired when a filter value changes */
   onFilterChange: (key: keyof Definition, value: unknown) => void
   /** Tells us if we are in compact mode */
@@ -42,7 +43,7 @@ type FilterContentProps<Definition extends FiltersDefinition> = {
  *
  * @template Definition - The type defining the structure of available filters
  */
-export function FilterContent<Definition extends FiltersDefinition>({
+export function FilterContent<Definition extends RenderableFiltersDefinition>({
   selectedFilterKey,
   definition,
   tempFilters,
@@ -60,30 +61,30 @@ export function FilterContent<Definition extends FiltersDefinition>({
   }
   // TODO Find a way to avoid 'as'
   // Type assertion to ensure the renderer function is typed correctly as typescript can't infer the type correctly
-  type FilterType = FilterDefinitionsByType[typeof filter.type]
+  type FilterType = RegisteredFilterDefinitionsByType[typeof filter.type]
   const currentValue = (tempFilters[selectedFilterKey] ||
-    filterType.emptyValue) as FilterValue<FilterType>
+    filterType.emptyValue) as RegisteredFilterValue<FilterType>
 
   const handleSiblingFilterChange = (key: string, value: unknown) => {
     onFilterChange(key as keyof Definition, value)
   }
 
-  function renderFilterForm<T extends FilterDefinition>({
+  function renderFilterForm<T extends RegisteredFilterDefinition>({
     schema,
     value,
     onChange,
   }: {
     schema: T
-    value: FilterValue<T>
-    onChange: (v: FilterValue<T>) => void
+    value: RegisteredFilterValue<T>
+    onChange: (v: RegisteredFilterValue<T>) => void
   }): React.ReactNode {
     // double-cast to resolve overload union into a single callable signature
     const filterType = getFilterType(schema.type)
     return (
       filterType.render as unknown as (props: {
         schema: T
-        value: FilterValue<T>
-        onChange: (v: FilterValue<T>) => void
+        value: RegisteredFilterValue<T>
+        onChange: (v: RegisteredFilterValue<T>) => void
         isCompactMode?: boolean
         onFilterChange?: (key: string, value: unknown) => void
         allFiltersValue?: Record<string, unknown>

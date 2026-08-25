@@ -4,7 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import type { FiltersDefinition } from "../OneFilterPicker/types"
+import type { RegisteredFiltersDefinition } from "../OneFilterPicker/filterTypes"
 import type { FilterPickerInternalProps } from "./internal-types"
 
 import { FilterContent } from "../OneFilterPicker/components/FilterContent"
@@ -14,7 +14,9 @@ import { FilterList } from "../OneFilterPicker/components/FilterList"
  * Internal component that renders the filter picker content.
  * Used by both F0FilterPickerContent and FiltersControls to avoid code duplication.
  */
-export function FilterPickerInternal<Filters extends FiltersDefinition>({
+export function FilterPickerInternal<
+  Filters extends RegisteredFiltersDefinition,
+>({
   filters,
   tempFilters,
   selectedFilterKey,
