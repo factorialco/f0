@@ -127,6 +127,10 @@ export type ApiItem =
         params: Array<{ name: string; optional: boolean; type: ApiItem }>
         ret: ApiItem
       }>
+      members?: Record<
+        string,
+        { optional: boolean; readonly: boolean; type: ApiItem }
+      >
     }
   | { k: "union"; members: ApiItem[] }
   | { k: "array"; element: ApiItem }
@@ -664,16 +668,11 @@ function buildApiItem(
     }
   }
 
-  // Intersections of plain object shapes fall through to the object branch
-  // as one merged member set (the checker's getProperties() combines the
-  // constituents). Anything else — branded primitives, callable
-  // constituents — stays an opaque leaf, compared by text as before.
-  if (
-    type.isIntersection() &&
-    (!isPlainObjectIntersection(type) ||
-      type.getCallSignatures().length > 0 ||
-      type.getConstructSignatures().length > 0)
-  ) {
+  // Intersections of plain object shapes fall through to the object branch as
+  // one merged member set (the checker's getProperties() combines the
+  // constituents). Non-object constituents stay an opaque leaf, compared by
+  // text as before.
+  if (type.isIntersection() && !isPlainObjectIntersection(type)) {
     return opaque()
   }
 
@@ -714,6 +713,7 @@ function buildApiItem(
           next
         ),
       })),
+      members: collectStatics(type, checker, dirAbsolute, depth, next),
     }
   }
 
@@ -807,6 +807,42 @@ function buildApiItem(
   }
 
   return opaque()
+}
+
+const REACT_COMPONENT_INTERNALS = new Set([
+  "$$typeof",
+  "displayName",
+  "defaultProps",
+  "propTypes",
+])
+
+function collectStatics(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  dirAbsolute: string,
+  depth: number,
+  visited: Set<ts.Type>
+):
+  | Record<string, { optional: boolean; readonly: boolean; type: ApiItem }>
+  | undefined {
+  const members: Record<
+    string,
+    { optional: boolean; readonly: boolean; type: ApiItem }
+  > = {}
+  for (const p of type.getProperties()) {
+    const name = p.getName()
+    if (REACT_COMPONENT_INTERNALS.has(name)) continue
+    const decl = p.valueDeclaration ?? p.declarations?.[0]
+    const pt = decl
+      ? checker.getTypeOfSymbolAtLocation(p, decl)
+      : checker.getDeclaredTypeOfSymbol(p)
+    members[normalize(name)] = {
+      optional: !!(p.flags & ts.SymbolFlags.Optional),
+      readonly: isReadonlySymbol(p),
+      type: buildApiItem(pt, checker, dirAbsolute, depth - 1, visited),
+    }
+  }
+  return Object.keys(members).length > 0 ? members : undefined
 }
 
 function isReadonlySymbol(sym: ts.Symbol): boolean {
@@ -943,15 +979,26 @@ export function itemSignature(item: ApiItem): string {
       return `U:[${item.members.map(itemSignature).sort().join("|")}]`
     case "array":
       return `A:${itemSignature(item.element)}`
-    case "callable":
-      return `C:[${item.sigs
+    case "callable": {
+      const sigs = item.sigs
         .map(
           (s) =>
             `(${s.params
               .map((p) => `${p.optional ? "?" : ""}${itemSignature(p.type)}`)
               .join(",")})=>${itemSignature(s.ret)}`
         )
-        .join(";")}]`
+        .join(";")
+      const statics = item.members
+        ? Object.keys(item.members)
+            .sort()
+            .map((name) => {
+              const m = item.members![name]
+              return `${name}${m.optional ? "?" : ""}${m.readonly ? "R" : ""}:${itemSignature(m.type)}`
+            })
+            .join(",")
+        : ""
+      return `C:[${sigs}]${statics ? `{${statics}}` : ""}`
+    }
     case "object": {
       const members = Object.keys(item.members)
         .sort()
@@ -1138,6 +1185,23 @@ function classifyItem(
       }
     }
     reasons.push(...classifyItem(bs.ret, as.ret, at(path, "return"), tx))
+    const bm = before.members ?? {}
+    const am = after.members ?? {}
+    for (const name of Object.keys(bm)) {
+      const b = bm[name]
+      const a = am[name]
+      if (!a) {
+        reasons.push(`\`${at(path, name)}\` was removed`)
+        continue
+      }
+      if (b.optional && !a.optional)
+        reasons.push(`\`${at(path, name)}\` became required`)
+      reasons.push(...classifyItem(b.type, a.type, at(path, name), tx))
+    }
+    for (const name of Object.keys(am)) {
+      if (!bm[name] && !am[name].optional)
+        reasons.push(`required \`${at(path, name)}\` was added`)
+    }
     return reasons
   }
 
