@@ -255,9 +255,11 @@ export const PointTargetObserver: Story = {
     })
 
     await step("Verify raw target and formatted built-in quote", async () => {
-      await expect(
-        canvas.getByText(/point-headcount: point=Engineering\/145/)
-      ).toHaveTextContent("point-headcount: point=Engineering/145")
+      await waitFor(() =>
+        expect(
+          canvas.getByText(/point-headcount: point=Engineering\/145/)
+        ).toHaveTextContent("point-headcount: point=Engineering/145")
+      )
       const removeQuote = await canvas.findByRole("button", {
         name: "Remove quote",
       })
