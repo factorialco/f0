@@ -4,6 +4,7 @@ import { addDays } from "date-fns"
 import { granularityDefinitions } from "@/components/OneCalendar/granularities/index"
 
 import { ExampleComponent } from "../mockData"
+import { payrollPeriods } from "@/lib/storybook-utils/payrollPeriods"
 
 const meta = {
   title: "Data Collection/Navigation Filters",
@@ -122,6 +123,24 @@ export const MultipleGranularities: Story = {
         granularity: ["day", "week", "month", "year", "range"],
         min: new Date(2025, 6, 30),
         max: addDays(new Date(2025, 6, 30), 100),
+      },
+    },
+  },
+}
+
+export const WithPeriods: Story = {
+  args: {
+    navigationFilters: {
+      date: {
+        type: "date-navigator",
+        defaultValue: new Date(2025, 6, 30),
+        defaultGranularity: "periods",
+        granularity: ["day", "week", "month"],
+        periods: {
+          label: "Payroll",
+          header: "Spain — Iberia Workforce SL",
+          periods: payrollPeriods([2025, 2026]),
+        },
       },
     },
   },

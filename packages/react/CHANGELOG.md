@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.53.0](https://github.com/factorialco/f0/compare/f0-react-v6.52.0...f0-react-v6.53.0) (2026-08-25)
+
+
+### Features
+
+* **DateNavigator:** select consumer-defined periods ([#5161](https://github.com/factorialco/f0/issues/5161)) ([3a8246f](https://github.com/factorialco/f0/commit/3a8246f2f89735416922cdb3a4060e169bd29534))
+
 ## [6.52.0](https://github.com/factorialco/f0/compare/f0-react-v6.51.1...f0-react-v6.52.0) (2026-08-25)
 
 

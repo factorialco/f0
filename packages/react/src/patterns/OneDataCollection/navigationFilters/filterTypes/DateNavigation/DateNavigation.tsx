@@ -1,4 +1,4 @@
-import { getGranularityDefinition } from "@/components/OneCalendar/OneCalendar"
+import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
 import { OneDateNavigator } from "@/patterns/OneDateNavigator"
 import { useI18n } from "@/lib/providers/i18n"
 import { type DatePickerValue } from "@/ui/DatePickerPopup"
@@ -20,9 +20,9 @@ export function DateNavigation({
     ? options.granularity
     : [options.granularity]
 
-  const granularityDefinition = getGranularityDefinition(
-    value?.granularity || availableGranularities[0]
-  )
+  const granularityDefinition = getGranularityDefinitions({
+    periods: options.periods,
+  })[value?.granularity || availableGranularities[0]]
 
   const handleChange = (newDateRange: DatePickerValue | undefined) => {
     if (!newDateRange || !newDateRange.value) {
@@ -45,6 +45,7 @@ export function DateNavigation({
         minDate={options.min}
         maxDate={options.max}
         presets={options.presets}
+        periods={options.periods}
         hideGoToCurrent={options.hideGoToCurrent}
       />
     </div>
