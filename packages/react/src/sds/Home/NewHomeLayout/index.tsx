@@ -19,6 +19,7 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 // No `Pencil`/`Check`: there is no edit mode to toggle any more.
 import { Plus } from "@/icons/app"
 import Menu from "@/icons/app/Menu"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -607,6 +608,15 @@ export interface NewHomeLayoutProps {
   stackedPinsAfter?: number
   ctx?: HomeRenderCtx
   className?: string
+  /** Tooltip copy for the One switch, forwarded to `F0OneSwitch`. */
+  oneSwitchTooltip?: { whenDisabled?: string; whenEnabled?: string }
+  /** Opens the One switch's tooltip for 3s on mount. */
+  oneSwitchAutoOpen?: boolean
+  /**
+   * Hides the One AI toggle in the controls row. Use when One is reached
+   * elsewhere (e.g. a sidebar tab) so Home doesn't show a redundant switch.
+   */
+  hideOneSwitch?: boolean
 }
 
 /**
@@ -650,6 +660,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       stackedPinsAfter = 2,
       ctx = {},
       className,
+      oneSwitchTooltip,
+      oneSwitchAutoOpen,
+      hideOneSwitch = false,
     },
     ref
   ) {
@@ -752,6 +765,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       rightWidgets.length > 0 &&
       (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
+    // ONE string for the rail toggle: its accessible name AND what the tooltip
+    // says. A control whose tooltip and label can drift is two controls.
+    const railToggleLabel = collapsed
+      ? "Expand widgets panel"
+      : "Collapse widgets panel"
     // NOTHING ON THE RIGHT UNTIL THE BOX HAS BEEN MEASURED. Which presentation the
     // rail is in — column, strip, or nothing at all — is decided entirely by the
     // width, so drawn before there is one its first state is a guess the next
@@ -1022,23 +1040,33 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 is collapsed regardless, so a toggle there would be a control
                 that does nothing. */}
             {hasSide && rightWidgets.length > 0 && !autoCollapsed ? (
-              <Action
-                variant="ghost"
-                size="md"
-                compact
-                onClick={() => setManualCollapsed(!collapsed)}
-                title={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-                aria-label={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-              >
-                {/* The sidebar's own collapse glyph, so collapsing the rail and
-                    collapsing the sidebar read as the same gesture. */}
-                <SidebarIconSvg isExpanded={!collapsed} />
-              </Action>
+              // f0's own tooltip rather than the browser's `title`: an
+              // icon-only control needs its name on hover, and the native one
+              // arrives late, unstyled, and never for a keyboard.
+              <Tooltip label={railToggleLabel}>
+                <Action
+                  variant="ghost"
+                  size="md"
+                  compact
+                  onClick={() => setManualCollapsed(!collapsed)}
+                  aria-label={railToggleLabel}
+                >
+                  {/* The sidebar's own collapse glyph, so collapsing the rail and
+                      collapsing the sidebar read as the same gesture. */}
+                  <SidebarIconSvg isExpanded={!collapsed} />
+                </Action>
+              </Tooltip>
             ) : null}
+            {/* The One toggle sits where it sits on every other layout — last in
+                the top-right controls, after the rail's own collapse button. It
+                draws NOTHING unless the AI chat context is enabled, so a Home
+                without One keeps the row it had. */}
+            {!hideOneSwitch && (
+              <F0OneSwitch
+                tooltip={oneSwitchTooltip}
+                autoOpen={oneSwitchAutoOpen}
+              />
+            )}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should
