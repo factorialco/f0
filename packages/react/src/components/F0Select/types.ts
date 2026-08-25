@@ -200,12 +200,13 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
   R
 > &
   F0SelectSingleSelectionProps<T, R> &
-  Pick<InputFieldProps<T>, "label" | "size" | "placeholder" | "disabled"> & {
+  Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
     /**
      * Compact borderless presentation for single-value controls embedded in rows.
      * The required label is used as the accessible name and is not shown visually.
      */
     variant: "inline"
+    size?: never
     disableSelectAll?: never
     withApplySelection?: never
     applySelectionLabel?: never

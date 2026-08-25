@@ -53,7 +53,6 @@ type InlineRoleSelectProps = {
   options?: F0SelectItemProps<Role>[]
   label?: string
   placeholder?: string
-  size?: "sm" | "md"
   disabled?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -126,16 +125,10 @@ const meta = {
   args: {
     label: "Access level",
     placeholder: "Select role",
-    size: "sm",
     onChange: fn(),
     actions: [removeAccessAction],
   },
   argTypes: {
-    size: {
-      control: "radio",
-      options: selectSizes,
-      table: { type: { summary: selectSizes.join(" | ") } },
-    },
     fitContentWidth: {
       control: "boolean",
       description:
@@ -251,23 +244,6 @@ export const LongLabel: Story = {
       </div>
     ),
   ],
-}
-
-export const Sizes: Story = {
-  args: {},
-  render: (args) => (
-    <div className="flex items-center gap-4">
-      {selectSizes.map((size) => (
-        <InlineRoleSelect
-          {...args}
-          key={size}
-          size={size}
-          value="viewer"
-          label={`Access level ${size}`}
-        />
-      ))}
-    </div>
-  ),
 }
 
 export const ConciseRoleLabels: Story = {
@@ -395,8 +371,7 @@ export const Snapshot: Story = {
 
       <section className="flex min-w-[360px] flex-col gap-4">
         <h4 className="text-lg font-semibold">Inline</h4>
-        <InlineRoleSelect value="viewer" size="sm" />
-        <InlineRoleSelect value="viewer" size="md" />
+        <InlineRoleSelect value="viewer" />
         <InlineRoleSelect />
         <InlineRoleSelect value="viewer" disabled />
         <div className="w-48">

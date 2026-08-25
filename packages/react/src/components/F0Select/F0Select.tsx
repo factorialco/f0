@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
+import { textVariants } from "@/ui/Text"
 
 import type {
   F0SelectItemObject,
@@ -111,39 +112,30 @@ const asListContainerVariants = cva({
   },
 })
 
-const inlineSelectTriggerVariants = cva({
-  base: "group inline-flex w-fit max-w-full items-center gap-1 rounded-sm border-0 bg-transparent text-sm font-medium shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
-  variants: {
-    size: {
-      sm: "h-7 pl-3 pr-1",
-      md: "h-8 pl-3 pr-2",
-    },
-  },
-  defaultVariants: {
-    size: "sm",
-  },
-})
+const inlineSelectTriggerClassName = cn(
+  "group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  textVariants({ variant: "label" })
+)
 
 type InlineSelectTriggerProps = {
   label: string
   placeholder?: string
   selection: F0SelectItemObject<string>[]
   hasValue: boolean
-  size: "sm" | "md"
 }
 
 const InlineSelectTrigger = forwardRef<
   HTMLButtonElement,
   InlineSelectTriggerProps
 >(function InlineSelectTrigger(
-  { label, placeholder, selection, hasValue, size },
+  { label, placeholder, selection, hasValue },
   ref
 ) {
   return (
     <SelectTrigger
       ref={ref}
       aria-label={label}
-      className={cn(inlineSelectTriggerVariants({ size }), focusRing())}
+      className={cn(inlineSelectTriggerClassName, focusRing())}
     >
       <span className="flex min-w-0 max-w-full items-center">
         {hasValue ? (
@@ -155,7 +147,7 @@ const InlineSelectTrigger = forwardRef<
         )}
       </span>
       <span
-        className="flex size-4 shrink-0 items-center justify-center text-f1-icon-secondary"
+        className="flex size-4 shrink-0 items-center justify-center text-f1-icon"
         aria-hidden="true"
       >
         <F0Icon icon={ChevronDown} size="sm" />
@@ -189,7 +181,7 @@ const F0SelectComponent = forwardRef(function Select<
     onSearchChange,
     searchBoxPlaceholder,
     searchEmptyMessage,
-    size = "sm",
+    size: sizeProp,
     actions,
     onCreate,
     onFiltersChange,
@@ -216,6 +208,7 @@ const F0SelectComponent = forwardRef(function Select<
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   const id = useId()
+  const size = sizeProp ?? "sm"
 
   // If inside a OneDialog and no portalContainer is provided, use the dialog's container
   // only for center/fullscreen dialogs (which have focus trap).
@@ -1364,7 +1357,6 @@ const F0SelectComponent = forwardRef(function Select<
           placeholder={placeholder}
           selection={getDisplayItemsForSelection}
           hasValue={!!localValue[0]}
-          size={size}
         />
       ) : (
         <SelectTrigger ref={composedTriggerRef} asChild>

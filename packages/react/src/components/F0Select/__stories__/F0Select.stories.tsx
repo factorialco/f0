@@ -94,8 +94,10 @@ const meta: Meta = {
     size: {
       control: "select",
       options: selectSizes,
-      defaultValue: "sm",
-      description: "Size of the select",
+      if: { arg: "variant", neq: "inline" },
+      description:
+        "Size of the field select. Inline selects use a fixed 32px trigger.",
+      table: { defaultValue: { summary: "sm" } },
     },
     disabled: {
       control: "boolean",

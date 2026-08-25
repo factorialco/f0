@@ -81,7 +81,7 @@ values embedded in desktop rows.
         <td><code>"sm" | "md"</code></td>
         <td><code>"sm"</code></td>
         <td>—</td>
-        <td>Controls trigger density. Inline heights are 28px and 32px.</td>
+        <td>Field only. Controls the field trigger density.</td>
       </tr>
       <tr>
         <td><code>placeholder</code></td>
@@ -417,30 +417,23 @@ values embedded in desktop rows.
   </table>
 </Unstyled>
 
-### Inline sizes
-
-<Canvas of={InlineStories.Sizes} />
+### Inline trigger
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
-        <th className="text-left">Size</th>
+        <th className="text-left">Height</th>
         <th className="text-left">Description</th>
       </tr>
     </thead>
     <tbody>
       <tr>
+        <td>32px</td>
         <td>
-          <code>sm</code> (default)
+          Fixed trigger size with a 10px radius, 12px left padding, and 8px
+          right padding. Uses the 14px label typography.
         </td>
-        <td>28px trigger with 12px left and 4px right padding.</td>
-      </tr>
-      <tr>
-        <td>
-          <code>md</code>
-        </td>
-        <td>32px trigger with 12px left and 8px right padding.</td>
       </tr>
     </tbody>
   </table>

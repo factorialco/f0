@@ -311,18 +311,19 @@ describe("Select", () => {
     expect(getSelectContent().className).toContain("min-w-80")
   })
 
-  it("keeps the field presentation when variant is omitted", () => {
-    const { container } = render(
+  it("keeps the field presentation and sm default when variant is omitted", () => {
+    render(
       <F0Select
-        {...defaultSelectProps}
+        label="Pick an option"
         options={mockOptions}
         onChange={() => {}}
       />
     )
 
-    expect(
-      container.querySelector("[data-testid='input-field-wrapper']")
-    ).toBeInTheDocument()
+    const fieldWrapper = screen.getByTestId("input-field-wrapper")
+
+    expect(fieldWrapper).toHaveClass("h-[32px]", "rounded")
+    expect(fieldWrapper).not.toHaveClass("h-[40px]", "rounded-md")
     expect(screen.getByRole("combobox").className).not.toContain("h-7")
   })
 
@@ -343,6 +344,7 @@ describe("Select", () => {
       >().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["loading"]>().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["error"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["size"]>().toEqualTypeOf<undefined>()
     })
 
     const roleOptions = [
@@ -410,64 +412,28 @@ describe("Select", () => {
       })
     })
 
-    it("uses compact sm and md trigger dimensions", () => {
-      const { rerender } = render(
+    it("uses fixed md dimensions, label typography, and the default icon color", () => {
+      render(
         <F0Select
           variant="inline"
           label="Access level"
           options={roleOptions}
           value="viewer"
-          size="sm"
           onChange={() => {}}
         />
       )
 
       const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(trigger.className).toContain("h-7")
-      expect(trigger.className).toContain("pl-3")
-      expect(trigger.className).toContain("pr-1")
-
-      rerender(
-        <F0Select
-          variant="inline"
-          label="Access level"
-          options={roleOptions}
-          value="viewer"
-          size="md"
-          onChange={() => {}}
-        />
-      )
+      const chevron = trigger.querySelector("[aria-hidden='true']")
 
       expect(trigger.className).toContain("h-8")
       expect(trigger.className).toContain("pl-3")
       expect(trigger.className).toContain("pr-2")
-    })
-
-    it("keeps the requested sm size when an option uses a status tag", () => {
-      render(
-        <F0Select
-          variant="inline"
-          label="Approval status"
-          options={[
-            {
-              value: "approved",
-              label: "Approved",
-              tag: {
-                type: "status",
-                text: "Approved",
-                variant: "positive",
-              },
-            },
-          ]}
-          value="approved"
-          size="sm"
-          onChange={() => {}}
-        />
-      )
-
-      expect(
-        screen.getByRole("combobox", { name: "Approval status" }).className
-      ).toContain("h-7")
+      expect(trigger.className).toContain("text-base")
+      expect(trigger.className).toContain("font-medium")
+      expect(trigger.className).not.toContain("text-sm")
+      expect(chevron).toHaveClass("text-f1-icon")
+      expect(chevron).not.toHaveClass("text-f1-icon-secondary")
     })
 
     it("uses defaultItem while a data source is loading", () => {
@@ -522,7 +488,9 @@ describe("Select", () => {
       const trigger = screen.getByRole("combobox", { name: "Access level" })
       expect(trigger.className).toContain("w-fit")
       expect(trigger.className).toContain("gap-1")
-      expect(trigger.className).toContain("rounded-sm")
+      expect(trigger).toHaveClass("rounded")
+      expect(trigger).not.toHaveClass("rounded-sm")
+      expect(trigger).not.toHaveClass("rounded-md")
       expect(trigger.className).toContain("border-0")
       expect(trigger.className).toContain("bg-transparent")
       expect(trigger.className).toContain("shadow-none")
