@@ -14,6 +14,7 @@ import type {
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
   MetricFormat,
 } from "../../types"
 
@@ -28,6 +29,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -190,6 +192,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
   editMode,
   handleDelete,
   onAskAi,
+  onAskAiTarget,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -213,6 +216,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       editMode={editMode}
       handleDelete={handleDelete}
       onAskAi={onAskAi}
+      onAskAiTarget={onAskAiTarget}
       itemId={item.id}
     >
       {data && (

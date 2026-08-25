@@ -5,8 +5,8 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 
 import type {
-  F0DataChartAccessibleAreaSelectionAction,
   F0DataChartAreaSelection,
+  F0DataChartAreaSelectionArea,
 } from "../index"
 
 import {
@@ -33,45 +33,49 @@ const series = [
   { name: "Women", data: [21, 19, 12, 7] },
   { name: "Men", data: [18, 24, 9, 6] },
 ]
-const accessibleActions: F0DataChartAccessibleAreaSelectionAction[] =
-  series.flatMap((entry, seriesIndex) =>
-    entry.data.map((value, dataIndex) => ({
+const accessibleActions = categories.flatMap((category, dataIndex) =>
+  series.map((item, seriesIndex) => {
+    const value = item.data[dataIndex]
+    return {
       key: `${seriesIndex}-${dataIndex}`,
-      label: `${categories[dataIndex]} — ${entry.name}: ${value}`,
+      label: `${category} — ${item.name}: ${value}`,
       point: {
-        seriesName: entry.name,
-        category: categories[dataIndex],
+        seriesName: item.name,
+        category,
         value,
         values: [value],
-        series: [{ name: entry.name, seriesIndex, value }],
+        series: [{ name: item.name, seriesIndex, value }],
         dataIndex,
         seriesIndex,
       },
-    }))
-  )
-
+    }
+  })
+)
 const AreaSelectionDemo = () => {
   const [active, setActive] = useState(false)
   const [selection, setSelection] = useState<F0DataChartAreaSelection | null>(
     null
   )
+  const [selectedArea, setSelectedArea] =
+    useState<F0DataChartAreaSelectionArea | null>(null)
 
   return (
     <div className="flex w-[680px] flex-col gap-3">
       <div>
         <F0Button
-          label="Select chart area"
+          label="Draw around chart data"
           variant="outline"
           aria-pressed={active}
           onClick={() => {
             setSelection(null)
+            setSelectedArea(null)
             setActive((current) => !current)
           }}
         />
       </div>
       <p className="text-sm text-f1-foreground-secondary">
         {active
-          ? "Draw around bars, or choose data points. Press Esc to cancel."
+          ? "Draw around bars. Press Esc to cancel."
           : "Start selection to draw a polygon around chart data."}
       </p>
       <div className="relative h-[360px] rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-3">
@@ -81,8 +85,11 @@ const AreaSelectionDemo = () => {
           series={series}
           areaSelection={{
             active,
-            onSelect: (nextSelection) => {
+            selected: selection !== null,
+            selectedArea: selectedArea ?? undefined,
+            onSelect: (nextSelection, area) => {
               setSelection(nextSelection)
+              setSelectedArea(area)
               if (nextSelection.totalPointCount > 0) setActive(false)
             },
             onCancel: () => setActive(false),
@@ -91,17 +98,19 @@ const AreaSelectionDemo = () => {
         {active && (
           <F0DataChartAccessibleAreaSelectionActions
             actions={accessibleActions}
-            label="Choose data points"
-            submitLabel="Use selected data points ({{count}})"
+            label="Select chart values without drawing"
+            submitLabel="Use selected chart values ({{count}})"
             previousLabel="Previous data points"
             nextLabel="Next data points"
-            resetOn={active}
+            resetOn={series}
             onSubmit={(points) => {
+              if (points.length === 0) return
               setSelection({
                 source: "control",
                 points: points.slice(0, 100),
                 totalPointCount: points.length,
               })
+              setSelectedArea(null)
               setActive(false)
             }}
           />

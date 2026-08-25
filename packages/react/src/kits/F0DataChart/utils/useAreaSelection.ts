@@ -1,9 +1,10 @@
-import * as echarts from "echarts"
 import { colord } from "colord"
+import * as echarts from "echarts"
 import { type RefObject, useEffect, useRef } from "react"
 
 import type {
   F0DataChartAreaSelection,
+  F0DataChartAreaSelectionArea,
   F0DataChartAreaSelectionPoint,
   F0DataChartBarProps,
   F0DataChartHeatmapProps,
@@ -12,7 +13,7 @@ import type {
 } from "../types"
 
 import { resolveChartColorToken } from "./colors"
-import { barSourceSeriesIndex } from "./seriesIds"
+import { barMainSeriesId, barSourceSeriesIndex } from "./seriesIds"
 
 const MAX_SELECTION_POINTS = 100
 
@@ -25,6 +26,12 @@ type AreaSelectableChartProps =
 type BrushArea = {
   brushType?: string
   range?: unknown
+  coordRange?: unknown
+  panelId?: string
+  __rangeOffset?: {
+    offset?: unknown
+    xyMinMax?: unknown
+  }
 }
 
 type BrushSelectedEvent = {
@@ -42,10 +49,13 @@ type BrushEndEvent = {
   areas?: BrushArea[]
 }
 
-function isPolygonRange(value: unknown): value is [number, number][] {
+function isCoordinatePairs(
+  value: unknown,
+  minimumLength: number
+): value is [number, number][] {
   return (
     Array.isArray(value) &&
-    value.length >= 3 &&
+    value.length >= minimumLength &&
     value.every(
       (point) =>
         Array.isArray(point) &&
@@ -54,6 +64,10 @@ function isPolygonRange(value: unknown): value is [number, number][] {
         typeof point[1] === "number"
     )
   )
+}
+
+function isPolygonRange(value: unknown): value is [number, number][] {
+  return isCoordinatePairs(value, 3)
 }
 
 /** Ray-casting containment against the completed ECharts brush polygon. */
@@ -116,6 +130,94 @@ function polygonFromAreas(areas: BrushArea[] | undefined) {
   return isPolygonRange(range) ? range : null
 }
 
+function retainedAreaFromAreas(
+  areas: BrushArea[] | undefined,
+  polygon: [number, number][]
+): F0DataChartAreaSelectionArea | null {
+  const area = areas?.find(
+    (candidate) =>
+      candidate.brushType === "polygon" &&
+      isPolygonRange(candidate.range) &&
+      polygonsMatch(candidate.range, polygon) &&
+      isPolygonRange(candidate.coordRange)
+  )
+  if (!area || !isPolygonRange(area.coordRange)) return null
+
+  const rangeOffset =
+    isPolygonRange(area.__rangeOffset?.offset) &&
+    isCoordinatePairs(area.__rangeOffset?.xyMinMax, 2)
+      ? {
+          offset: area.__rangeOffset.offset.map(([x, y]): [number, number] => [
+            x,
+            y,
+          ]),
+          xyMinMax: area.__rangeOffset.xyMinMax.map(
+            ([x, y]): [number, number] => [x, y]
+          ),
+        }
+      : undefined
+
+  return {
+    brushType: "polygon",
+    coordRange: area.coordRange.map(([x, y]): [number, number] => [x, y]),
+    ...(area.panelId ? { panelId: area.panelId } : {}),
+    ...(rangeOffset ? { rangeOffset } : {}),
+  }
+}
+
+function replayArea(area: F0DataChartAreaSelectionArea): BrushArea {
+  const { brushType, coordRange, panelId, rangeOffset } = area
+  return {
+    brushType,
+    coordRange,
+    ...(panelId ? { panelId } : {}),
+    ...(rangeOffset ? { __rangeOffset: rangeOffset } : {}),
+  }
+}
+
+/** @internal Projects retained chart coordinates using ECharts' live grid. */
+export function projectAreaRange(
+  chart: echarts.ECharts,
+  area: F0DataChartAreaSelectionArea
+): [number, number][] | null {
+  const projected = area.coordRange.map((point) =>
+    chart.convertToPixel({ gridIndex: 0 }, point)
+  )
+  if (!isPolygonRange(projected)) return null
+
+  const rangeOffset = area.rangeOffset
+  if (
+    !rangeOffset ||
+    rangeOffset.offset.length !== projected.length ||
+    !isCoordinatePairs(rangeOffset.offset, projected.length) ||
+    !isCoordinatePairs(rangeOffset.xyMinMax, 2)
+  ) {
+    return projected
+  }
+
+  const xyMinMax: [[number, number], [number, number]] = [
+    [Infinity, -Infinity],
+    [Infinity, -Infinity],
+  ]
+  for (const [x, y] of projected) {
+    xyMinMax[0][0] = Math.min(xyMinMax[0][0], x)
+    xyMinMax[0][1] = Math.max(xyMinMax[0][1], x)
+    xyMinMax[1][0] = Math.min(xyMinMax[1][0], y)
+    xyMinMax[1][1] = Math.max(xyMinMax[1][1], y)
+  }
+  const scale = ([min, max]: [number, number], originalAxis: number) => {
+    const [originalMin, originalMax] = rangeOffset.xyMinMax[originalAxis]
+    const value = (max - min) / (originalMax - originalMin)
+    return Number.isFinite(value) ? value : 1
+  }
+  const scales = [scale(xyMinMax[0], 0), scale(xyMinMax[1], 1)]
+
+  return projected.map(([x, y], index): [number, number] => [
+    x - scales[0] * rangeOffset.offset[index][0],
+    y - scales[1] * rangeOffset.offset[index][1],
+  ])
+}
+
 function polygonsMatch(
   left: [number, number][],
   right: [number, number][]
@@ -128,6 +230,14 @@ function polygonsMatch(
         Math.abs(point[1] - right[index][1]) < 0.5
     )
   )
+}
+
+function areaPositionsMatch(
+  left: [number, number][] | null | undefined,
+  right: [number, number][] | null
+): boolean {
+  if (!left || !right) return left === right
+  return polygonsMatch(left, right)
 }
 
 function eventMatchesPolygon(
@@ -151,10 +261,10 @@ function pointIsVisible(chart: echarts.ECharts, seriesName: string): boolean {
 
 function cartesianPixel(
   chart: echarts.ECharts,
-  seriesIndex: number,
-  value: [string | number, number]
+  finder: { seriesIndex?: number; seriesId?: string },
+  value: [string | number, string | number]
 ): [number, number] | null {
-  const pixel = chart.convertToPixel({ seriesIndex }, value)
+  const pixel = chart.convertToPixel(finder, value)
   return Array.isArray(pixel) &&
     typeof pixel[0] === "number" &&
     typeof pixel[1] === "number" &&
@@ -233,7 +343,7 @@ function linePointsInPolygon(
       const category = props.categories[dataIndex]
       if (category === undefined) return
       const value = numericValue(datum)
-      const pixel = cartesianPixel(chart, seriesIndex, [category, value])
+      const pixel = cartesianPixel(chart, { seriesIndex }, [category, value])
       if (!pixel || !isPointInPolygon(pixel, polygon)) return
       const point = pointForIndex(props, seriesIndex, dataIndex)
       if (point) result.push(point)
@@ -249,10 +359,59 @@ function heatmapPointsInPolygon(
   polygon: [number, number][]
 ): F0DataChartAreaSelectionPoint[] {
   return props.data.flatMap((datum, dataIndex) => {
-    const pixel = cartesianPixel(chart, 0, [datum[0], datum[1]])
+    const pixel = cartesianPixel(chart, { seriesIndex: 0 }, [
+      datum[0],
+      datum[1],
+    ])
     if (!pixel || !isPointInPolygon(pixel, polygon)) return []
     const point = pointForIndex(props, 0, dataIndex)
     return point ? [point] : []
+  })
+}
+
+function barPointsInPolygon(
+  chart: echarts.ECharts,
+  props: F0DataChartBarProps,
+  polygon: [number, number][]
+): F0DataChartAreaSelectionPoint[] {
+  return props.series.flatMap((series, seriesIndex) => {
+    if (!pointIsVisible(chart, series.name)) return []
+
+    return series.data.flatMap((datum, dataIndex) => {
+      const category = props.categories[dataIndex]
+      if (category === undefined) return []
+      const value = numericValue(datum)
+      const axisValue: [string | number, string | number] =
+        props.orientation === "horizontal"
+          ? [value, category]
+          : [category, value]
+      const pixel = cartesianPixel(
+        chart,
+        { seriesId: barMainSeriesId(seriesIndex) },
+        axisValue
+      )
+      if (!pixel || !isPointInPolygon(pixel, polygon)) return []
+      const point = pointForIndex(props, seriesIndex, dataIndex)
+      return point ? [point] : []
+    })
+  })
+}
+
+function scatterPointsInPolygon(
+  chart: echarts.ECharts,
+  props: F0DataChartScatterProps,
+  polygon: [number, number][]
+): F0DataChartAreaSelectionPoint[] {
+  return props.series.flatMap((series, seriesIndex) => {
+    if (!pointIsVisible(chart, series.name)) return []
+
+    return series.data.flatMap((datum, dataIndex) => {
+      const [x, y] = Array.isArray(datum) ? datum : [datum.x, datum.y]
+      const pixel = cartesianPixel(chart, { seriesIndex }, [x, y])
+      if (!pixel || !isPointInPolygon(pixel, polygon)) return []
+      const point = pointForIndex(props, seriesIndex, dataIndex)
+      return point ? [point] : []
+    })
   })
 }
 
@@ -269,6 +428,10 @@ export function resolveAreaSelection(
     points = linePointsInPolygon(chart, props, polygon)
   } else if (props.type === "heatmap") {
     points = heatmapPointsInPolygon(chart, props, polygon)
+  } else if (!event && props.type === "bar") {
+    points = barPointsInPolygon(chart, props, polygon)
+  } else if (!event && props.type === "scatter") {
+    points = scatterPointsInPolygon(chart, props, polygon)
   } else {
     points = []
     for (const [seriesIndex, dataIndexes] of selectedIndexes(props, event)) {
@@ -311,11 +474,30 @@ export function useAreaSelection(
   const propsRef = useRef(props)
   const latestSelectedEvent = useRef<BrushSelectedEvent | null>(null)
   const pendingPolygon = useRef<[number, number][] | null>(null)
+  const pendingArea = useRef<F0DataChartAreaSelectionArea | null>(null)
   const pendingTimer = useRef<number | null>(null)
+  const reportedAreaPosition = useRef<[number, number][] | null | undefined>(
+    undefined
+  )
   const wasControlled = useRef(false)
   const hasAreaSelection = props.areaSelection !== undefined
+  const hasAreaPositionCallback =
+    props.areaSelection?.onSelectedAreaPositionChange !== undefined
   configRef.current = props.areaSelection
   propsRef.current = props
+
+  const reportAreaPosition = (range: [number, number][] | null) => {
+    const callback = configRef.current?.onSelectedAreaPositionChange
+    if (!callback) {
+      reportedAreaPosition.current = undefined
+      return
+    }
+    if (areaPositionsMatch(reportedAreaPosition.current, range)) return
+
+    const nextRange = range?.map(([x, y]): [number, number] => [x, y]) ?? null
+    reportedAreaPosition.current = nextRange
+    callback(nextRange)
+  }
 
   useEffect(() => {
     if (!hasAreaSelection) return
@@ -324,6 +506,7 @@ export function useAreaSelection(
 
     const clearPending = () => {
       pendingPolygon.current = null
+      pendingArea.current = null
       if (pendingTimer.current !== null) {
         window.clearTimeout(pendingTimer.current)
         pendingTimer.current = null
@@ -331,13 +514,16 @@ export function useAreaSelection(
     }
     const completeSelection = (
       polygon: [number, number][],
-      selectedEvent: BrushSelectedEvent | null
+      selectedEvent: BrushSelectedEvent | null,
+      area: F0DataChartAreaSelectionArea
     ) => {
       clearPending()
       latestSelectedEvent.current = null
       if (!configRef.current?.active) return
+      reportAreaPosition(polygon)
       configRef.current.onSelect(
-        resolveAreaSelection(chart, propsRef.current, selectedEvent, polygon)
+        resolveAreaSelection(chart, propsRef.current, selectedEvent, polygon),
+        area
       )
     }
 
@@ -349,29 +535,36 @@ export function useAreaSelection(
       const selectedEvent = event as BrushSelectedEvent
       latestSelectedEvent.current = selectedEvent
       const polygon = pendingPolygon.current
-      if (polygon && eventMatchesPolygon(selectedEvent, polygon)) {
-        completeSelection(polygon, selectedEvent)
+      const area = pendingArea.current
+      if (polygon && area && eventMatchesPolygon(selectedEvent, polygon)) {
+        completeSelection(polygon, selectedEvent, area)
       }
     }
     const handleBrushEnd = (event: unknown) => {
       const polygon = polygonFromAreas((event as BrushEndEvent).areas)
       if (!polygon || !configRef.current?.active) return
+      const area = retainedAreaFromAreas(
+        (event as BrushEndEvent).areas,
+        polygon
+      )
+      if (!area) return
 
       if (
         propsRef.current.type === "line" ||
         propsRef.current.type === "heatmap"
       ) {
-        completeSelection(polygon, null)
+        completeSelection(polygon, null, area)
         return
       }
 
       if (eventMatchesPolygon(latestSelectedEvent.current, polygon)) {
-        completeSelection(polygon, latestSelectedEvent.current)
+        completeSelection(polygon, latestSelectedEvent.current, area)
         return
       }
 
       clearPending()
       pendingPolygon.current = polygon
+      pendingArea.current = area
       // ECharts intentionally skips the final brush action at drag end. Replay
       // the completed public brush payload so brushSelected is calculated from
       // this exact polygon instead of the previous pointer-move geometry.
@@ -391,7 +584,7 @@ export function useAreaSelection(
         )
           ? latestSelectedEvent.current
           : null
-        completeSelection(polygon, selectedEvent)
+        completeSelection(polygon, selectedEvent, area)
       }, 0)
     }
 
@@ -414,6 +607,8 @@ export function useAreaSelection(
     if (!props.areaSelection) {
       latestSelectedEvent.current = null
       pendingPolygon.current = null
+      pendingArea.current = null
+      reportedAreaPosition.current = undefined
       if (wasControlled.current) {
         chart.dispatchAction({
           type: "takeGlobalCursor",
@@ -427,21 +622,11 @@ export function useAreaSelection(
     }
 
     wasControlled.current = true
-    if (!props.areaSelection.active) {
-      latestSelectedEvent.current = null
-      pendingPolygon.current = null
-      chart.dispatchAction({
-        type: "takeGlobalCursor",
-        key: "brush",
-        brushOption: { brushType: false },
-      })
-      chart.dispatchAction({ type: "brush", areas: [] })
-      return
-    }
-
     const color = resolveChartColorToken("purple")
     chart.setOption({
       brush: {
+        xAxisIndex: 0,
+        yAxisIndex: 0,
         brushMode: "single",
         transformable: false,
         removeOnClick: true,
@@ -452,6 +637,31 @@ export function useAreaSelection(
         },
       },
     })
+    if (!props.areaSelection.active) {
+      latestSelectedEvent.current = null
+      pendingPolygon.current = null
+      chart.dispatchAction({
+        type: "takeGlobalCursor",
+        key: "brush",
+        brushOption: { brushType: false },
+      })
+      if (!props.areaSelection.selected) {
+        chart.dispatchAction({ type: "brush", areas: [] })
+        reportAreaPosition(null)
+      } else if (props.areaSelection.selectedArea) {
+        chart.dispatchAction({
+          type: "brush",
+          areas: [replayArea(props.areaSelection.selectedArea)],
+        })
+        if (hasAreaPositionCallback) {
+          reportAreaPosition(
+            projectAreaRange(chart, props.areaSelection.selectedArea)
+          )
+        }
+      }
+      return
+    }
+
     chart.dispatchAction({
       type: "takeGlobalCursor",
       key: "brush",
@@ -470,6 +680,9 @@ export function useAreaSelection(
     chartRef,
     optionsRevision,
     props.areaSelection?.active,
+    props.areaSelection?.selected,
+    props.areaSelection?.selectedArea,
+    hasAreaPositionCallback,
     props.type,
     props.type === "heatmap" ? props.data : props.series,
   ])

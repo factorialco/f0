@@ -447,11 +447,14 @@ so neither variant accepts this prop.
 
 Bar, line, heatmap, and scatter charts accept a controlled `areaSelection`
 configuration. Set `active` after a host action, then handle the real chart
-data contained by the completed polygon in `onSelect`. A polygon is a path
-gesture, so every integration must render
-`F0DataChartAccessibleAreaSelectionActions` while the mode is active. That
-companion checkbox menu provides the equivalent keyboard, touch, and
-single-pointer path and submits the same point contract with `source: "control"`.
+data contained by the completed polygon in `onSelect`. Set `selected` after a
+successful selection to keep its polygon visible while `active` is false, then
+clear `selected` when the downstream quote or action is dismissed or completed.
+Every integration must also render
+`F0DataChartAccessibleAreaSelectionActions` while selection is active. Its
+compact icon-only checkbox menu is the keyboard, touch, and single-pointer
+companion to the path gesture and submits the same point contract with
+`source: "control"`.
 
 ```tsx
 <div className="relative">
@@ -461,8 +464,10 @@ single-pointer path and submits the same point contract with `source: "control"`
     series={series}
     areaSelection={{
       active: isSelecting,
-      onSelect: ({ points, totalPointCount }) => {
-        attachChartSelection({ points, totalPointCount })
+      selected: selectedArea !== null,
+      selectedArea: selectedArea ?? undefined,
+      onSelect: (_selection, area) => {
+        setSelectedArea(area)
         setIsSelecting(false)
       },
       onCancel: () => setIsSelecting(false),
@@ -471,8 +476,8 @@ single-pointer path and submits the same point contract with `source: "control"`
   {isSelecting && (
     <F0DataChartAccessibleAreaSelectionActions
       actions={accessibleActions}
-      label="Choose data points"
-      submitLabel="Use selected data points ({{count}})"
+      label="Select chart values without drawing"
+      submitLabel="Ask One about selected values ({{count}})"
       previousLabel="Previous data points"
       nextLabel="Next data points"
       resetOn={data}
@@ -489,6 +494,13 @@ single-pointer path and submits the same point contract with `source: "control"`
 </div>
 ```
 
+The second `onSelect` argument is the exact ECharts brush geometry. Retain that
+area and pass it back as `selectedArea` whenever `selected` is true so the same
+polygon can be replayed after an option update, resize, or chart remount. Use
+`onSelectedAreaPositionChange` when a companion control needs the retained
+polygon's current chart-surface pixels; F0 reports them again after ECharts
+reprojects the area for a changed chart layout.
+
 The payload carries at most 100 points and reports the uncapped
 `totalPointCount`, so consumers can disclose truncation without creating an
 unbounded prompt or analytics event. F0 uses ECharts coordinates and selected
@@ -500,7 +512,9 @@ text. Hidden legend series are excluded. Pressing <kbd>Escape</kbd> calls
 
 - WHEN `active` is false or `areaSelection` is omitted → THEN ordinary chart pointer interactions remain unchanged.
 - WHEN the reader completes a polygon → THEN `onSelect` receives only real data points contained by that polygon.
-- WHEN the reader cannot or does not want to draw a path → THEN the companion checkbox menu selects and submits the same data points without a drag gesture.
+- WHEN the reader cannot or does not want to draw a path → THEN the companion checkbox menu selects and submits the same data points without dragging.
+- WHEN `selected` remains true after completion → THEN the completed polygon remains visible without keeping drawing active.
+- WHEN `selected` becomes false → THEN the completed polygon is cleared.
 - WHEN the polygon contains no points → THEN the callback receives an empty `points` array and the host decides whether selection remains active.
 - WHEN more than 100 points are selected → THEN `points` is capped at 100 and `totalPointCount` reports the full count.
 - WHEN the reader presses <kbd>Escape</kbd> → THEN `onCancel` is called.

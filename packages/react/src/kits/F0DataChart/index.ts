@@ -11,6 +11,7 @@ export type {
   F0DataChartBarProps,
   F0DataChartBarSeries,
   F0DataChartAreaSelection,
+  F0DataChartAreaSelectionArea,
   F0DataChartAreaSelectionConfig,
   F0DataChartAreaSelectionPoint,
   F0DataChartEmptyStateProps,

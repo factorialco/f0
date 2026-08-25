@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, zeroRender as render, waitFor } from "@/testing/test-utils"
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import type { DashboardItem } from "../types"
 
@@ -151,6 +159,36 @@ describe("DashboardGrid", () => {
 
     await waitFor(() => {
       expect(collectionRow.style.height).toBe("960px")
+    })
+  })
+
+  it("forwards a collection widget's built-in Ask One target", async () => {
+    const onAskAiTarget = vi.fn()
+    const { container } = render(
+      <AiChatStateProvider enabled>
+        <DashboardGrid
+          items={makeCollectionItems(480)}
+          filters={{}}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+    const card = container.querySelector('[data-card-id="expenses"]')
+    if (!(card instanceof HTMLElement)) {
+      throw new Error("Expected collection item to be rendered")
+    }
+
+    await userEvent.click(
+      within(card).getByRole("button", { name: "Other actions" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Ask One" })
+    )
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "expenses",
+      title: "Expenses",
+      quote: { text: "Expenses" },
     })
   })
 

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useState } from "react"
+
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0AiChat, F0AiChatProvider } from "@/kits/ai/F0AiChat"
@@ -11,8 +13,9 @@ import {
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0AnalyticsDashboard } from "../index"
 import type { DashboardItem } from "../types"
+
+import { F0AnalyticsDashboard } from "../index"
 import { mixedItems } from "./mockDataMixed"
 
 const widget = mixedItems.filter((item) => item.id === "headcount")
@@ -32,12 +35,52 @@ const pointWidget = [
     }),
   },
 ] satisfies DashboardItem[]
+const areaSelectionItems = [
+  ...pointWidget,
+  {
+    id: "total-headcount",
+    title: "Total Headcount",
+    type: "metric",
+    fetchData: async () => ({ value: 145 }),
+  },
+] satisfies DashboardItem[]
 
 const AskOneLayout = ({ items = widget }: { items?: DashboardItem[] }) => {
   return (
     <div className="flex h-full w-full gap-2 overflow-hidden">
       <div className="min-h-0 min-w-0 flex-1 overflow-auto">
         <F0AnalyticsDashboard items={items} />
+      </div>
+      <div className="flex min-h-0 w-[420px] shrink-0">
+        <F0AiChat
+          header={<MockConnectedChatHeader />}
+          messages={<MockConnectedMessagesContainer />}
+          input={<MockConnectedChatInput />}
+        />
+      </div>
+    </div>
+  )
+}
+
+const AreaSelectionTargetLayout = () => {
+  const [observedTarget, setObservedTarget] = useState("No target observed")
+
+  return (
+    <div className="flex h-full w-full gap-2 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-auto">
+        <output className="text-sm" data-ask-one-target>
+          {observedTarget}
+        </output>
+        <F0AnalyticsDashboard
+          items={areaSelectionItems}
+          onAskAiTarget={(target) => {
+            setObservedTarget(
+              target.selection
+                ? `${target.id}: ${target.selection.source}, ${target.selection.totalPointCount} selected`
+                : `${target.id}: widget`
+            )
+          }}
+        />
       </div>
       <div className="flex min-h-0 w-[420px] shrink-0">
         <F0AiChat
@@ -209,122 +252,232 @@ export const ChartPointFlow: Story = {
 }
 
 /**
- * The chart-area action switches the chart into polygon drawing mode without
- * opening or sending chat. Draw around one or more bars by hand to complete
- * the flow and attach those exact values to the composer.
+ * The dashboard area-selection action enables polygon drawing on every
+ * compatible chart without opening or sending chat. Draw around one or more
+ * bars by hand to attach those exact values to the composer.
  */
 export const ChartAreaSelectionMode: Story = {
   tags: ["chart-area-selection"],
-  render: () => <AskOneLayout items={pointWidget} />,
+  render: () => <AskOneLayout items={areaSelectionItems} />,
   parameters: {
+    ...withSnapshot({}),
     docs: {
       description: {
         story:
-          "Choose Select chart area, then draw around one or more bars. A completed non-empty selection appears as a quote in the focused composer, ready for the user's question.",
+          "Choose Draw to ask One, then draw around one or more bars. A completed non-empty selection appears as a quote in the focused composer, ready for the user's question.",
       },
     },
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
+    let compactChartWidth = 0
+    let compactChartTop = 0
+
+    const getChartFrame = () =>
+      canvas
+        .getByText("Headcount by Department", { exact: true })
+        .closest<HTMLElement>("[data-dashboard-item-frame]")
+
+    const getChartCanvas = () => getChartFrame()?.querySelector("canvas")
 
     await step("Activate chart-area selection", async () => {
+      await canvas.findByText("Headcount by Department", { exact: true })
+      compactChartTop = getChartFrame()!.getBoundingClientRect().top
       await userEvent.click(
-        await canvas.findByRole("button", { name: "Select chart area" })
+        await canvas.findByRole("button", {
+          name: "Draw to ask One",
+        })
       )
       await expect(
-        canvas.getByRole("button", { name: "Select chart area" })
-      ).toHaveAttribute("aria-pressed", "true")
+        canvas.getByRole("button", { name: "Cancel selection" })
+      ).toBeInTheDocument()
       await expect(canvas.getByRole("status")).toHaveTextContent(
-        "Draw around data, or choose data points. Press Esc to cancel."
+        "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel."
+      )
+      await expect(
+        canvas.getByText("Drawing isn't available for this widget")
+      ).toBeInTheDocument()
+      await expect(
+        canvas.queryByText("Choose data points")
+      ).not.toBeInTheDocument()
+      await expect(
+        canvasElement.querySelector("[data-dashboard-area-selection-status]")
+      ).toHaveClass(
+        "absolute",
+        "left-1/2",
+        "rounded-full",
+        "pointer-events-none"
+      )
+      await expect(getChartFrame()!.getBoundingClientRect().top).toBe(
+        compactChartTop
       )
     })
 
-    await step("Draw around the bar and attach the exact value", async () => {
-      const chartCanvas = canvasElement.querySelector("canvas")
+    await step("Expand the chart before drawing", async () => {
+      const chartFrame = getChartFrame()
+      const chartCanvas = getChartCanvas()
+      await expect(chartFrame).toBeInTheDocument()
       await expect(chartCanvas).toBeInTheDocument()
-      const { left, top, width, height } = chartCanvas!.getBoundingClientRect()
-      const point = (x: number, y: number) => {
-        const clientX = left + width * x
-        const clientY = top + height * y
-        return {
-          target: chartCanvas!,
-          coords: {
-            x: clientX,
-            y: clientY,
-            clientX,
-            clientY,
-            offsetX: width * x,
-            offsetY: height * y,
-          },
-        }
-      }
+      compactChartWidth = chartCanvas!.getBoundingClientRect().width
 
-      await userEvent.pointer([
-        { ...point(0.05, 0.05), keys: "[MouseLeft>]" },
-        point(0.95, 0.05),
-        point(0.95, 0.95),
-        point(0.05, 0.95),
-        { ...point(0.05, 0.05), keys: "[/MouseLeft]" },
-      ])
-
-      await expect(
-        await canvas.findByRole("button", { name: "Remove quote" })
-      ).toBeInTheDocument()
-      await expect(
-        canvas.getByText(
-          "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
+      await userEvent.click(
+        within(chartFrame!).getByRole("button", { name: "Expand" })
+      )
+      await waitFor(() =>
+        expect(getChartCanvas()!.getBoundingClientRect().width).toBeGreaterThan(
+          compactChartWidth
         )
-      ).toBeInTheDocument()
-      await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
-      await expect(
-        canvas.getByRole("button", { name: "Select chart area" })
-      ).toHaveAttribute("aria-pressed", "false")
+      )
     })
+
+    await step(
+      "Draw, collapse, and retain the polygon with its exact value",
+      async () => {
+        const chartCanvas = getChartCanvas()
+        await expect(chartCanvas).toBeInTheDocument()
+        const { left, top, width, height } =
+          chartCanvas!.getBoundingClientRect()
+        const point = (x: number, y: number) => {
+          const clientX = left + width * x
+          const clientY = top + height * y
+          return {
+            target: chartCanvas!,
+            coords: {
+              x: clientX,
+              y: clientY,
+              clientX,
+              clientY,
+              offsetX: width * x,
+              offsetY: height * y,
+            },
+          }
+        }
+
+        await userEvent.pointer([
+          { ...point(0.35, 0.05), keys: "[MouseLeft>]" },
+          point(0.65, 0.05),
+          point(0.65, 0.95),
+          point(0.35, 0.95),
+          { ...point(0.35, 0.05), keys: "[/MouseLeft]" },
+        ])
+
+        await expect(
+          await canvas.findByRole("button", { name: "Remove quote" })
+        ).toBeInTheDocument()
+        await expect(
+          canvas.getByText(
+            "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
+          )
+        ).toBeInTheDocument()
+        await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
+        await expect(
+          canvas.getByRole("button", { name: "Draw to ask One" })
+        ).toBeInTheDocument()
+        await expect(
+          within(getChartFrame()!).getByRole("button", {
+            name: "Clear selection",
+          })
+        ).toHaveAttribute("data-dashboard-area-selection-clear")
+        await expect(
+          canvasElement.querySelector(
+            '[data-dashboard-area-selection-mode="selected"]'
+          )
+        ).toBeInTheDocument()
+        await expect(
+          canvas.queryByText("Drawing isn't available for this widget")
+        ).not.toBeInTheDocument()
+        await waitFor(() =>
+          expect(getChartCanvas()!.getBoundingClientRect().width).toBe(
+            compactChartWidth
+          )
+        )
+        const compactCanvasRect = getChartCanvas()!.getBoundingClientRect()
+        const clearButton = within(getChartFrame()!).getByRole("button", {
+          name: "Clear selection",
+        })
+        await waitFor(() =>
+          expect(
+            clearButton.closest("[data-dashboard-area-selection-clear-anchor]")
+          ).toHaveAttribute(
+            "data-dashboard-area-selection-clear-anchor",
+            "selection"
+          )
+        )
+        const clearButtonRect = clearButton.getBoundingClientRect()
+        await expect(clearButtonRect.left).toBeGreaterThanOrEqual(
+          compactCanvasRect.left
+        )
+        await expect(clearButtonRect.top).toBeGreaterThanOrEqual(
+          compactCanvasRect.top
+        )
+        await expect(clearButtonRect.right).toBeLessThanOrEqual(
+          compactCanvasRect.right
+        )
+        await expect(clearButtonRect.bottom).toBeLessThanOrEqual(
+          compactCanvasRect.bottom
+        )
+      }
+    )
   },
 }
 
 /**
- * Checkbox selection is the keyboard, touch, and single-pointer equivalent of
- * drawing a polygon. It resolves through the same quote contract.
+ * The compact chart control is the non-drag equivalent of polygon selection.
+ * It emits the same bounded selection target without replacing built-in chat.
  */
-export const ChartAreaSelectionControls: Story = {
+export const ChartAreaSelectionWithoutDrag: Story = {
   tags: ["chart-area-selection"],
-  render: () => <AskOneLayout items={pointWidget} />,
-  parameters: withSnapshot({}),
+  render: () => <AreaSelectionTargetLayout />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
 
-    await step("Open the non-drag data-point selector", async () => {
+    await step("Activate dashboard selection", async () => {
       await userEvent.click(
-        await canvas.findByRole("button", { name: "Select chart area" })
-      )
-      await userEvent.click(
-        await canvas.findByRole("button", { name: "Choose data points" })
+        await canvas.findByRole("button", { name: "Draw to ask One" })
       )
     })
 
-    await step("Choose one point and attach it to chat", async () => {
-      const page = within(canvasElement.ownerDocument.body)
+    await step("Select one chart value without dragging", async () => {
+      const trigger = await canvas.findByRole("button", {
+        name: "Select chart values without drawing: Headcount by Department",
+      })
+      await userEvent.click(trigger)
+      const menuId = trigger.getAttribute("aria-controls")
+      if (!menuId)
+        throw new Error("The no-drag selection trigger has no aria-controls")
+      const menu = await waitFor(() => {
+        const element = canvasElement.ownerDocument.getElementById(menuId)
+        expect(element).toBeInTheDocument()
+        return within(element!)
+      })
       await userEvent.click(
-        await page.findByRole("menuitemcheckbox", {
+        await menu.findByRole("menuitemcheckbox", {
           name: "Headcount by Department — Engineering, Headcount: 145 people",
         })
       )
       await userEvent.click(
-        page.getByRole("menuitem", {
-          name: "Use selected data points (1)",
+        menu.getByRole("menuitem", {
+          name: "Ask One about selected values (1)",
         })
       )
-
-      await expect(
-        await canvas.findByRole("button", { name: "Remove quote" })
-      ).toBeInTheDocument()
-      await expect(
-        canvas.getByText(
-          "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
-        )
-      ).toBeInTheDocument()
-      await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
     })
+
+    await step(
+      "Verify the exact observed target and built-in quote",
+      async () => {
+        await expect(
+          canvas.getByText("point-headcount: control, 1 selected")
+        ).toBeInTheDocument()
+        await expect(
+          await canvas.findByText(
+            "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
+          )
+        ).toBeInTheDocument()
+        await expect(
+          canvas.getByRole("button", { name: "Clear selection" })
+        ).toBeInTheDocument()
+        await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
+      }
+    )
   },
 }

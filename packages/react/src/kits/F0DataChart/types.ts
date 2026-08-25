@@ -118,6 +118,20 @@ export interface F0DataChartAreaSelection {
   totalPointCount: number
 }
 
+/** The completed ECharts polygon needed to keep a controlled selection visible. */
+export interface F0DataChartAreaSelectionArea {
+  brushType: "polygon"
+  /** Polygon vertices in chart coordinates so ECharts can reproject on resize. */
+  coordRange: [number, number][]
+  /** Stable ECharts coordinate-system panel identifier, when supplied. */
+  panelId?: string
+  /** Category-axis correction needed to preserve the drawn polygon's shape. */
+  rangeOffset?: {
+    offset: [number, number][]
+    xyMinMax: [number, number][]
+  }
+}
+
 /**
  * Opt-in area-selection behavior for cartesian chart variants.
  *
@@ -127,7 +141,20 @@ export interface F0DataChartAreaSelection {
  */
 export interface F0DataChartAreaSelectionConfig {
   active: boolean
-  onSelect: (selection: F0DataChartAreaSelection) => void
+  /**
+   * Keeps the completed brush visible while drawing is inactive. Set this
+   * until the downstream action that owns the selection is completed or
+   * dismissed.
+   */
+  selected?: boolean
+  /** Replays a completed polygon after chart option updates or remounts. */
+  selectedArea?: F0DataChartAreaSelectionArea
+  onSelect: (
+    selection: F0DataChartAreaSelection,
+    area: F0DataChartAreaSelectionArea
+  ) => void
+  /** Reports the retained polygon in current chart-surface pixels. */
+  onSelectedAreaPositionChange?: (range: [number, number][] | null) => void
   onCancel?: () => void
 }
 

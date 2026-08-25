@@ -1,12 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import {
-  fireEvent,
-  zeroRender as render,
-  screen,
-  waitFor,
-} from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 interface TextareaFieldMockProps {
   inputValue: string
@@ -43,7 +38,7 @@ describe("F0AiChatTextArea before-submit hook", () => {
       <F0AiChatTextArea onSubmit={onSubmit} onBeforeSubmit={onBeforeSubmit} />
     )
 
-    fireEvent.click(screen.getByRole("button", { name: "Fill message" }))
+    await user.click(screen.getByRole("button", { name: "Fill message" }))
     await waitFor(() =>
       expect(screen.getByRole("textbox", { name: "Message" })).toHaveValue(
         "Show me my time off"
@@ -56,5 +51,27 @@ describe("F0AiChatTextArea before-submit hook", () => {
     expect(screen.getByRole("textbox", { name: "Message" })).toHaveValue(
       "Show me my time off"
     )
+  })
+
+  it("submits the exact pending quote object before consuming it", async () => {
+    const quote = { text: "Headcount by workplace — Barcelona office: 8" }
+    const onSubmit = vi.fn()
+    const onPendingQuoteChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0AiChatTextArea
+        onSubmit={onSubmit}
+        pendingQuote={quote}
+        onPendingQuoteChange={onPendingQuoteChange}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: "Fill message" }))
+    await user.click(screen.getByRole("button", { name: /send message/i }))
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce())
+    expect(onSubmit.mock.calls[0][0].quote).toBe(quote)
+    expect(onPendingQuoteChange).toHaveBeenCalledWith(null)
   })
 })

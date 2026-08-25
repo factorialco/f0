@@ -10,6 +10,7 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
@@ -483,6 +484,18 @@ export type F0AnalyticsDashboardAskAiTarget =
     )
 
 /**
+ * A built-in Ask One interaction together with the exact quote F0 staged.
+ *
+ * The quote object is kept by the chat composer until it is submitted or
+ * dismissed. Hosts can therefore associate hidden analytical context with
+ * this exact interaction without replacing F0's quote/open/focus behavior.
+ */
+export type F0AnalyticsDashboardAskAiTargetWithQuote =
+  F0AnalyticsDashboardAskAiTarget & {
+    quote: PendingQuote
+  }
+
+/**
  * Props for the F0AnalyticsDashboard component.
  *
  * The entire dashboard is defined declaratively via `filters` (optional shared
@@ -585,6 +598,19 @@ export interface F0AnalyticsDashboardProps<
    * by checking those mutually exclusive fields.
    */
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  /**
+   * Observes built-in Ask One interactions without replacing them.
+   *
+   * Called immediately before F0 stages the quoted widget, point, or drawn
+   * area in the mounted chat. `quote` is the same object the composer later
+   * submits or dismisses, so a host can bind structured analytical context to
+   * the exact pending interaction and clean it up by quote identity.
+   *
+   * This observer does not make Ask One available by itself. A mounted,
+   * enabled AI chat still owns the built-in behavior; use `onAskAi` instead
+   * when the host must replace that behavior entirely.
+   */
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   /**
    * Navigation filter definitions (e.g. date-navigator).
    * Rendered above the grid alongside the regular filter bar.

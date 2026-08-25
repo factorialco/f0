@@ -27,7 +27,7 @@ type AccessiblePointActionsProps = {
     legendSelection: Record<string, boolean> | undefined
     owner: "host" | "chat" | "none"
     title: string
-    areaSelectionActive?: boolean
+    areaSelectionMode?: "idle" | "drawing" | "selected" | "unavailable"
   }
   label: string
   triggerLabel: string
@@ -75,7 +75,7 @@ export function AccessiblePointActions({
     legendSelection,
     owner,
     title,
-    areaSelectionActive,
+    areaSelectionMode,
   } = resetOn
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export function AccessiblePointActions({
     legendSelection,
     owner,
     title,
-    areaSelectionActive,
+    areaSelectionMode,
   ])
 
   useEffect(() => {

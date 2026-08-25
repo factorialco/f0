@@ -1,5 +1,6 @@
 import type * as echarts from "echarts"
-import { useRef } from "react"
+
+import { useRef, useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { act, zeroRender as render } from "@/testing/test-utils"
@@ -10,6 +11,7 @@ import type {
   F0DataChartLineProps,
   F0DataChartScatterProps,
 } from "../types"
+
 import {
   barMainSeriesId,
   barStackTotalSeriesId,
@@ -17,6 +19,7 @@ import {
 } from "../utils/seriesIds"
 import {
   isPointInPolygon,
+  projectAreaRange,
   resolveAreaSelection,
   useAreaSelection,
 } from "../utils/useAreaSelection"
@@ -27,6 +30,36 @@ const POLYGON: [number, number][] = [
   [100, 100],
   [0, 100],
 ]
+
+const RANGE_OFFSET = {
+  offset: POLYGON,
+  xyMinMax: [
+    [0, 100],
+    [0, 100],
+  ] as [number, number][],
+}
+
+const BRUSH_AREA = {
+  brushType: "polygon" as const,
+  range: POLYGON,
+  coordRange: POLYGON,
+  panelId: "grid--0",
+  __rangeOffset: RANGE_OFFSET,
+}
+
+const RETAINED_AREA = {
+  brushType: "polygon" as const,
+  coordRange: POLYGON,
+  panelId: "grid--0",
+  rangeOffset: RANGE_OFFSET,
+}
+
+const REPLAYED_AREA = {
+  brushType: "polygon" as const,
+  coordRange: POLYGON,
+  panelId: "grid--0",
+  __rangeOffset: RANGE_OFFSET,
+}
 
 function chartDouble({
   convertToPixel = () => [50, 50],
@@ -47,7 +80,11 @@ const AreaSelectionHarness = ({
   optionsRevision = 1,
 }: {
   chart: echarts.ECharts
-  props: F0DataChartBarProps
+  props:
+    | F0DataChartBarProps
+    | F0DataChartLineProps
+    | F0DataChartHeatmapProps
+    | F0DataChartScatterProps
   optionsRevision?: number
 }) => {
   const chartRef = useRef(chart)
@@ -59,6 +96,34 @@ describe("chart area selection", () => {
   it("uses the completed polygon as the containment boundary", () => {
     expect(isPointInPolygon([50, 50], POLYGON)).toBe(true)
     expect(isPointInPolygon([150, 50], POLYGON)).toBe(false)
+  })
+
+  it("projects a retained polygon through the live grid and range offset", () => {
+    const chart = {
+      convertToPixel: vi.fn((_finder: unknown, [x, y]: [number, number]) => [
+        40 + x * 3,
+        20 + y * 2,
+      ]),
+    } as unknown as echarts.ECharts
+
+    expect(
+      projectAreaRange(chart, {
+        brushType: "polygon",
+        coordRange: POLYGON,
+        rangeOffset: {
+          offset: POLYGON.map(() => [5, 10]),
+          xyMinMax: [
+            [0, 100],
+            [0, 100],
+          ],
+        },
+      })
+    ).toEqual([
+      [25, 0],
+      [325, 0],
+      [325, 200],
+      [25, 200],
+    ])
   })
 
   it("maps ECharts bar indexes back to real chart data", () => {
@@ -101,6 +166,52 @@ describe("chart area selection", () => {
         },
       ],
     })
+  })
+
+  it("falls back to completed polygon geometry when ECharts omits bar indexes", () => {
+    const props: F0DataChartBarProps = {
+      type: "bar",
+      categories: ["Barcelona"],
+      series: [{ name: "Headcount", data: [18] }],
+    }
+    const chart = chartDouble({ convertToPixel: () => [50, 50] })
+
+    const selection = resolveAreaSelection(chart, props, null, POLYGON)
+
+    expect(selection.points).toEqual([
+      expect.objectContaining({
+        seriesName: "Headcount",
+        category: "Barcelona",
+        value: 18,
+      }),
+    ])
+    expect(chart.convertToPixel).toHaveBeenCalledWith(
+      { seriesId: barMainSeriesId(0) },
+      ["Barcelona", 18]
+    )
+  })
+
+  it("uses horizontal bar coordinates and excludes hidden series in geometry fallback", () => {
+    const props: F0DataChartBarProps = {
+      type: "bar",
+      orientation: "horizontal",
+      categories: ["Barcelona"],
+      series: [
+        { name: "Visible", data: [18] },
+        { name: "Hidden", data: [22] },
+      ],
+    }
+    const chart = chartDouble({ selected: { Hidden: false } })
+
+    const selection = resolveAreaSelection(chart, props, null, POLYGON)
+
+    expect(selection.points.map((point) => point.seriesName)).toEqual([
+      "Visible",
+    ])
+    expect(chart.convertToPixel).toHaveBeenCalledWith(
+      { seriesId: barMainSeriesId(0) },
+      [18, "Barcelona"]
+    )
   })
 
   it("ignores generated bar series and keeps exact source-series indexes", () => {
@@ -241,6 +352,31 @@ describe("chart area selection", () => {
     ])
   })
 
+  it("falls back to scatter geometry when ECharts omits selected indexes", () => {
+    const props: F0DataChartScatterProps = {
+      type: "scatter",
+      series: [
+        {
+          name: "Visible",
+          data: [[8, 2], { x: 3, y: 4, label: "Roser" }],
+        },
+        { name: "Hidden", data: [[1, 9]] },
+      ],
+    }
+    const chart = chartDouble({ selected: { Hidden: false } })
+
+    const selection = resolveAreaSelection(chart, props, null, POLYGON)
+
+    expect(selection.points).toEqual([
+      expect.objectContaining({ values: [8, 2], dataIndex: 0 }),
+      expect.objectContaining({ category: "Roser", dataIndex: 1 }),
+    ])
+    expect(chart.convertToPixel).toHaveBeenCalledWith(
+      { seriesIndex: 0 },
+      [8, 2]
+    )
+  })
+
   it("controls the ECharts brush lifecycle and supports Escape", () => {
     const handlers: Record<string, ((event: unknown) => void)[]> = {}
     const dispatchAction = vi.fn()
@@ -279,18 +415,17 @@ describe("chart area selection", () => {
       handler({
         batch: [
           {
-            areas: [{ brushType: "polygon", range: POLYGON }],
+            areas: [BRUSH_AREA],
             selected: [{ seriesId: barMainSeriesId(0), dataIndex: [0] }],
           },
         ],
       })
     )
-    handlers.brushEnd?.forEach((handler) =>
-      handler({ areas: [{ brushType: "polygon", range: POLYGON }] })
-    )
+    handlers.brushEnd?.forEach((handler) => handler({ areas: [BRUSH_AREA] }))
 
     expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ totalPointCount: 1 })
+      expect.objectContaining({ totalPointCount: 1 }),
+      RETAINED_AREA
     )
 
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
@@ -306,6 +441,395 @@ describe("chart area selection", () => {
       />
     )
     expect(dispatchAction).toHaveBeenCalledWith({ type: "brush", areas: [] })
+
+    dispatchAction.mockClear()
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          type: "bar",
+          categories: ["Barcelona"],
+          series: [{ name: "Headcount", data: [18] }],
+        }}
+      />
+    )
+    expect(dispatchAction).toHaveBeenCalledWith({
+      type: "takeGlobalCursor",
+      key: "brush",
+      brushOption: { brushType: false },
+    })
+    expect(dispatchAction).toHaveBeenCalledWith({ type: "brush", areas: [] })
+  })
+
+  it.each([
+    {
+      name: "line",
+      props: {
+        type: "line" as const,
+        categories: ["2021", "2022"],
+        series: [{ name: "Headcount", data: [3, 4] }],
+      },
+      totalPointCount: 2,
+    },
+    {
+      name: "heatmap",
+      props: {
+        type: "heatmap" as const,
+        xCategories: ["Barcelona"],
+        yCategories: ["Female"],
+        data: [[0, 0, 8] as [number, number, number]],
+      },
+      totalPointCount: 1,
+    },
+  ])(
+    "completes a $name selection directly from brushEnd",
+    ({ props: chartProps, totalPointCount }) => {
+      const handlers: Record<string, ((event: unknown) => void)[]> = {}
+      const chart = {
+        on: (event: string, handler: (value: unknown) => void) => {
+          handlers[event] = [...(handlers[event] ?? []), handler]
+        },
+        off: vi.fn(),
+        dispatchAction: vi.fn(),
+        setOption: vi.fn(),
+        isDisposed: () => false,
+        getOption: () => ({ legend: [] }),
+        convertToPixel: vi.fn(() => [50, 50]),
+      } as unknown as echarts.ECharts
+      const onSelect = vi.fn()
+      const onSelectedAreaPositionChange = vi.fn()
+
+      render(
+        <AreaSelectionHarness
+          chart={chart}
+          props={{
+            ...chartProps,
+            areaSelection: {
+              active: true,
+              onSelect,
+              onSelectedAreaPositionChange,
+            },
+          }}
+        />
+      )
+      handlers.brushEnd?.forEach((handler) => handler({ areas: [BRUSH_AREA] }))
+
+      expect(onSelect).toHaveBeenCalledOnce()
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ totalPointCount }),
+        RETAINED_AREA
+      )
+      expect(onSelectedAreaPositionChange).toHaveBeenCalledWith(POLYGON)
+    }
+  )
+
+  it("ignores a completed brush without retained chart coordinates", () => {
+    const handlers: Record<string, ((event: unknown) => void)[]> = {}
+    const dispatchAction = vi.fn()
+    const onSelect = vi.fn()
+    const chart = {
+      on: (event: string, handler: (value: unknown) => void) => {
+        handlers[event] = [...(handlers[event] ?? []), handler]
+      },
+      off: vi.fn(),
+      dispatchAction,
+      setOption: vi.fn(),
+      isDisposed: () => false,
+      getOption: () => ({ legend: [] }),
+    } as unknown as echarts.ECharts
+
+    render(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          type: "bar",
+          categories: ["Barcelona"],
+          series: [{ name: "Headcount", data: [18] }],
+          areaSelection: { active: true, onSelect },
+        }}
+      />
+    )
+    dispatchAction.mockClear()
+
+    handlers.brushEnd?.forEach((handler) =>
+      handler({ areas: [{ ...BRUSH_AREA, coordRange: undefined }] })
+    )
+
+    expect(onSelect).not.toHaveBeenCalled()
+    expect(dispatchAction).not.toHaveBeenCalled()
+  })
+
+  it("keeps a completed brush until the selected state is cleared", () => {
+    const dispatchAction = vi.fn()
+    const chart = {
+      on: vi.fn(),
+      off: vi.fn(),
+      dispatchAction,
+      setOption: vi.fn(),
+      isDisposed: () => false,
+    } as unknown as echarts.ECharts
+    const onSelect = vi.fn()
+    const props: F0DataChartBarProps = {
+      type: "bar",
+      categories: ["Barcelona"],
+      series: [{ name: "Headcount", data: [18] }],
+      areaSelection: { active: true, onSelect },
+    }
+    const view = render(<AreaSelectionHarness chart={chart} props={props} />)
+
+    dispatchAction.mockClear()
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          ...props,
+          areaSelection: {
+            active: false,
+            selected: true,
+            selectedArea: RETAINED_AREA,
+            onSelect,
+          },
+        }}
+      />
+    )
+
+    expect(dispatchAction).toHaveBeenCalledWith({
+      type: "brush",
+      areas: [REPLAYED_AREA],
+    })
+
+    dispatchAction.mockClear()
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        optionsRevision={2}
+        props={{
+          ...props,
+          areaSelection: {
+            active: false,
+            selected: true,
+            selectedArea: RETAINED_AREA,
+            onSelect,
+          },
+        }}
+      />
+    )
+    expect(dispatchAction).toHaveBeenCalledWith({
+      type: "brush",
+      areas: [REPLAYED_AREA],
+    })
+
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          ...props,
+          areaSelection: { active: false, selected: false, onSelect },
+        }}
+      />
+    )
+
+    expect(dispatchAction).toHaveBeenCalledWith({ type: "brush", areas: [] })
+  })
+
+  it("reports a null area position exactly once when selection is cleared", () => {
+    const chart = {
+      on: vi.fn(),
+      off: vi.fn(),
+      dispatchAction: vi.fn(),
+      setOption: vi.fn(),
+      isDisposed: () => false,
+      convertToPixel: vi.fn(
+        (_finder: unknown, point: [number, number]) => point
+      ),
+    } as unknown as echarts.ECharts
+    const onSelectedAreaPositionChange = vi.fn()
+    const onSelect = vi.fn()
+    const props: F0DataChartBarProps = {
+      type: "bar",
+      categories: ["Barcelona"],
+      series: [{ name: "Headcount", data: [18] }],
+      areaSelection: {
+        active: false,
+        selected: true,
+        selectedArea: RETAINED_AREA,
+        onSelect,
+        onSelectedAreaPositionChange,
+      },
+    }
+    const view = render(<AreaSelectionHarness chart={chart} props={props} />)
+    onSelectedAreaPositionChange.mockClear()
+
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          ...props,
+          areaSelection: {
+            active: false,
+            selected: false,
+            onSelect,
+            onSelectedAreaPositionChange,
+          },
+        }}
+      />
+    )
+
+    expect(onSelectedAreaPositionChange).toHaveBeenCalledOnce()
+    expect(onSelectedAreaPositionChange).toHaveBeenCalledWith(null)
+  })
+
+  it("reports the live replayed polygon after a chart layout update", () => {
+    let layout = { left: 40, top: 20, xScale: 3, yScale: 2 }
+    const chart = {
+      on: vi.fn(),
+      off: vi.fn(),
+      dispatchAction: vi.fn(),
+      setOption: vi.fn(),
+      isDisposed: () => false,
+      convertToPixel: vi.fn((_finder: unknown, [x, y]: [number, number]) => [
+        layout.left + x * layout.xScale,
+        layout.top + y * layout.yScale,
+      ]),
+    } as unknown as echarts.ECharts
+    const onSelectedAreaPositionChange = vi.fn()
+    const selectedArea = {
+      brushType: "polygon" as const,
+      coordRange: POLYGON,
+      panelId: "grid--0",
+    }
+    const props: F0DataChartBarProps = {
+      type: "bar",
+      categories: ["Barcelona"],
+      series: [{ name: "Headcount", data: [18] }],
+      areaSelection: {
+        active: false,
+        selected: true,
+        selectedArea,
+        onSelect: vi.fn(),
+        onSelectedAreaPositionChange,
+      },
+    }
+    const view = render(
+      <AreaSelectionHarness chart={chart} props={props} optionsRevision={1} />
+    )
+
+    expect(onSelectedAreaPositionChange).toHaveBeenLastCalledWith([
+      [40, 20],
+      [340, 20],
+      [340, 220],
+      [40, 220],
+    ])
+
+    layout = { left: 70, top: 35, xScale: 2, yScale: 1.5 }
+    view.rerender(
+      <AreaSelectionHarness chart={chart} props={props} optionsRevision={2} />
+    )
+    expect(onSelectedAreaPositionChange).toHaveBeenLastCalledWith([
+      [70, 35],
+      [270, 35],
+      [270, 185],
+      [70, 185],
+    ])
+  })
+
+  it("does not re-report unchanged geometry through recreated host identities", () => {
+    let layoutLeft = 40
+    const chart = {
+      on: vi.fn(),
+      off: vi.fn(),
+      dispatchAction: vi.fn(),
+      setOption: vi.fn(),
+      isDisposed: () => false,
+      convertToPixel: vi.fn((_finder: unknown, [x, y]: [number, number]) => [
+        layoutLeft + x,
+        20 + y,
+      ]),
+    } as unknown as echarts.ECharts
+    const onPosition = vi.fn()
+
+    const StateUpdatingHarness = ({ revision }: { revision: number }) => {
+      const chartRef = useRef(chart)
+      const [range, setRange] = useState<[number, number][] | null>(null)
+      useAreaSelection(
+        chartRef,
+        {
+          type: "bar",
+          categories: ["Barcelona"],
+          series: [{ name: "Headcount", data: [18] }],
+          areaSelection: {
+            active: false,
+            selected: true,
+            selectedArea: {
+              brushType: "polygon",
+              coordRange: POLYGON,
+              panelId: "grid--0",
+            },
+            onSelect: vi.fn(),
+            onSelectedAreaPositionChange: (nextRange) => {
+              onPosition(nextRange)
+              setRange(nextRange)
+            },
+          },
+        },
+        { revision }
+      )
+      return <output>{range?.[0]?.join(",")}</output>
+    }
+
+    const view = render(<StateUpdatingHarness revision={1} />)
+    expect(onPosition).toHaveBeenCalledOnce()
+
+    layoutLeft = 70
+    view.rerender(<StateUpdatingHarness revision={2} />)
+    expect(onPosition).toHaveBeenCalledTimes(2)
+    expect(onPosition).toHaveBeenLastCalledWith([
+      [70, 20],
+      [170, 20],
+      [170, 120],
+      [70, 120],
+    ])
+  })
+
+  it("replays a selected brush when a chart remounts", () => {
+    const firstDispatch = vi.fn()
+    const secondDispatch = vi.fn()
+    const makeChart = (dispatchAction: ReturnType<typeof vi.fn>) =>
+      ({
+        on: vi.fn(),
+        off: vi.fn(),
+        dispatchAction,
+        setOption: vi.fn(),
+        isDisposed: () => false,
+      }) as unknown as echarts.ECharts
+    const props: F0DataChartBarProps = {
+      type: "bar",
+      categories: ["Barcelona"],
+      series: [{ name: "Headcount", data: [18] }],
+      areaSelection: {
+        active: false,
+        selected: true,
+        selectedArea: RETAINED_AREA,
+        onSelect: vi.fn(),
+      },
+    }
+
+    const first = render(
+      <AreaSelectionHarness chart={makeChart(firstDispatch)} props={props} />
+    )
+    expect(firstDispatch).toHaveBeenCalledWith({
+      type: "brush",
+      areas: [REPLAYED_AREA],
+    })
+    first.unmount()
+
+    render(
+      <AreaSelectionHarness chart={makeChart(secondDispatch)} props={props} />
+    )
+    expect(secondDispatch).toHaveBeenCalledWith({
+      type: "brush",
+      areas: [REPLAYED_AREA],
+    })
   })
 
   it("waits for a matching selection event when brushEnd arrives first", () => {
@@ -330,18 +854,16 @@ describe("chart area selection", () => {
     }
 
     render(<AreaSelectionHarness chart={chart} props={props} />)
-    handlers.brushEnd?.forEach((handler) =>
-      handler({ areas: [{ brushType: "polygon", range: POLYGON }] })
-    )
+    handlers.brushEnd?.forEach((handler) => handler({ areas: [BRUSH_AREA] }))
     expect(dispatchAction).toHaveBeenCalledWith({
       type: "brush",
-      areas: [{ brushType: "polygon", range: POLYGON }],
+      areas: [BRUSH_AREA],
     })
     handlers.brushSelected?.forEach((handler) =>
       handler({
         batch: [
           {
-            areas: [{ brushType: "polygon", range: POLYGON }],
+            areas: [BRUSH_AREA],
             selected: [{ seriesId: barMainSeriesId(0), dataIndex: [0] }],
           },
         ],
@@ -350,7 +872,8 @@ describe("chart area selection", () => {
 
     expect(onSelect).toHaveBeenCalledTimes(1)
     expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ totalPointCount: 1 })
+      expect.objectContaining({ totalPointCount: 1 }),
+      RETAINED_AREA
     )
   })
 
@@ -364,7 +887,7 @@ describe("chart area selection", () => {
           handler({
             batch: [
               {
-                areas: [{ brushType: "polygon", range: POLYGON }],
+                areas: [BRUSH_AREA],
                 selected: [{ seriesId: barMainSeriesId(0), dataIndex: [0] }],
               },
             ],
@@ -380,6 +903,7 @@ describe("chart area selection", () => {
         setOption: vi.fn(),
         isDisposed: () => false,
         getOption: () => ({ legend: [] }),
+        convertToPixel: () => [150, 150],
       } as unknown as echarts.ECharts
       const onSelect = vi.fn()
 
@@ -394,14 +918,13 @@ describe("chart area selection", () => {
           }}
         />
       )
-      handlers.brushEnd?.forEach((handler) =>
-        handler({ areas: [{ brushType: "polygon", range: POLYGON }] })
-      )
+      handlers.brushEnd?.forEach((handler) => handler({ areas: [BRUSH_AREA] }))
       act(() => vi.runAllTimers())
 
       expect(onSelect).toHaveBeenCalledTimes(1)
       expect(onSelect).toHaveBeenCalledWith(
-        expect.objectContaining({ totalPointCount: 1 })
+        expect.objectContaining({ totalPointCount: 1 }),
+        RETAINED_AREA
       )
     } finally {
       vi.useRealTimers()
@@ -421,6 +944,7 @@ describe("chart area selection", () => {
         setOption: vi.fn(),
         isDisposed: () => false,
         getOption: () => ({ legend: [] }),
+        convertToPixel: () => [150, 150],
       } as unknown as echarts.ECharts
       const onSelect = vi.fn()
 
@@ -435,18 +959,19 @@ describe("chart area selection", () => {
           }}
         />
       )
-      handlers.brushEnd?.forEach((handler) =>
-        handler({ areas: [{ brushType: "polygon", range: POLYGON }] })
-      )
+      handlers.brushEnd?.forEach((handler) => handler({ areas: [BRUSH_AREA] }))
 
       expect(onSelect).not.toHaveBeenCalled()
       act(() => vi.runAllTimers())
       expect(onSelect).toHaveBeenCalledTimes(1)
-      expect(onSelect).toHaveBeenCalledWith({
-        source: "pointer",
-        points: [],
-        totalPointCount: 0,
-      })
+      expect(onSelect).toHaveBeenCalledWith(
+        {
+          source: "pointer",
+          points: [],
+          totalPointCount: 0,
+        },
+        RETAINED_AREA
+      )
     } finally {
       vi.useRealTimers()
     }
@@ -477,9 +1002,7 @@ describe("chart area selection", () => {
         <AreaSelectionHarness chart={chart} props={activeProps} />
       )
 
-      handlers.brushEnd?.forEach((handler) =>
-        handler({ areas: [{ brushType: "polygon", range: POLYGON }] })
-      )
+      handlers.brushEnd?.forEach((handler) => handler({ areas: [BRUSH_AREA] }))
       view.rerender(
         <AreaSelectionHarness
           chart={chart}
