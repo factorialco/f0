@@ -226,6 +226,11 @@ renderers) imports the same constant.
 - `useI18n()` from `@/lib/providers/i18n` — returns direct property access and `t()` for dot-notation keys with `{{placeholder}}` interpolation
 - Translation keys: camelCase, domain-namespaced (`actions.save`), `one`/`other` sub-keys for plurals
 - Missing keys: log `console.warn` and return the key string
+- **Never hardcode user-visible copy.** A string literal is untranslatable by construction — no consumer dictionary can reach it, so every locale renders English. This includes defaults: `label = "Actions"` and `{ label: "Today" }` in a lookup table are the same bug as `<span>Save</span>`.
+- `pnpm check:untranslated-copy` enforces this, and blocks CI on copy a PR **adds**. Existing debt is baselined in `.scripts/untranslated-copy-debt.json`; the list may only shrink.
+  - `--report` — the full inventory across `src/`
+  - `--update` — rewrite the baseline (after translating something, to lock the win in)
+  - Genuinely untranslatable literal (brand name, keyboard key)? Put `i18n-exempt` in a comment on that line.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
 
