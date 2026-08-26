@@ -798,6 +798,42 @@ type ChildrenPaginationInfo = {
 }
 ```
 
+### Default expanded rows
+
+By default every row starts collapsed. Pass `defaultExpanded` in the table
+visualization `options` to open rows before the user touches anything:
+
+```tsx
+visualizations={[
+  {
+    type: "table",
+    options: {
+      columns: [
+        // ... your columns
+      ],
+      // true = the whole tree · a number = down to that depth ·
+      // a predicate = decide per row
+      defaultExpanded: (node) => node.type !== "role",
+    },
+  },
+]}
+```
+
+- `true` opens the whole tree, a **number** opens rows shallower than that depth
+  (`2` opens depths 0 and 1), and a **predicate**
+  `(record, { depth }) => boolean` decides per row.
+- The policy is evaluated per row as rows mount, so an opened row's children
+  evaluate it in turn — the cascade needs no traversal on your side.
+- Once the user expands or collapses a row, that choice wins for that row and the
+  policy no longer applies to it.
+- Changing filters, sortings, or navigation filters **resets the tree**, so the
+  policy applies again and a filtered view comes back expanded, with each opened
+  row's children re-fetched for the new query.
+- Opening a row loads its children, so a policy that opens a large tree costs one
+  `fetchChildren` per opened row on first paint.
+
+See the **Default expanded** stories for `true`, a depth, and a predicate.
+
 ### Response Types: `basic` vs `detailed`
 
 The `type` field in the `fetchChildren` response controls the visual layout of
