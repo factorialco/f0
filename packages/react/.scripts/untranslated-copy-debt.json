@@ -1,6 +1,6 @@
 {
   "note": "Untranslated user-visible copy in packages/react/src — string literals that should come from the i18n layer (src/lib/providers/i18n) instead. Enforced by .scripts/check-untranslated-copy.ts. This list may only shrink: translate a string and remove it from here (or run \"--update\"), never add one.",
-  "total": 133,
+  "total": 128,
   "files": {
     "src/components/F0Card/components/CardMetadata.tsx": [
       "Unsupported property type:"
@@ -12,10 +12,6 @@
       "Increase"
     ],
     "src/components/F0Slider/F0SliderSkeleton.tsx": ["Loading slider"],
-    "src/components/F0VideoPlayer/components/AudioDescriptionToggleIcons.tsx": [
-      "AD",
-      "AD"
-    ],
     "src/components/OneChip/index.tsx": ["Close"],
     "src/components/RichText/F0NotesTextEditor/F0NotesTextEditor.tsx": [
       "Add paragraph"
@@ -103,7 +99,6 @@
     "src/kits/ai/F0AiChat/components/markdownRenderers/components/Image.tsx": [
       "Download"
     ],
-    "src/kits/ai/F0AiChatTextArea/F0AiChatTextArea.tsx": ["Enter", "Esc"],
     "src/kits/Charts/CategoryBarChart/index.tsx": ["Category bar chart"],
     "src/kits/surveys/SurveyAnsweringForm/SurveyAnsweringForm.tsx": ["Value"],
     "src/kits/surveys/SurveyFormBuilder/lib.ts": ["New option 1"],
@@ -111,7 +106,6 @@
       "Emojis"
     ],
     "src/lib/F0GridStack/components/grid-stack-provider.tsx": ["No content"],
-    "src/lib/xray.tsx": ["XRay"],
     "src/patterns/F0AnalyticsDashboard/components/DashboardGrid/DashboardGrid.tsx": [
       "Drag to reorder"
     ],
