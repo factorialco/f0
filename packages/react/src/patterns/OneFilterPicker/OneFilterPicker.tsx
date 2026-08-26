@@ -162,7 +162,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     // Also clear nested child filter keys to avoid orphaned values
     const filterDef = filters?.[key]
     if (filterDef?.type === "in" && filterDef.options) {
-      const nestedKeys = collectNestedFilterKeys(filterDef.options)
+      const nestedKeys = collectNestedFilterKeys(filterDef)
       nestedKeys.forEach((nestedKey) => {
         delete newFilters[nestedKey as keyof Definition]
       })

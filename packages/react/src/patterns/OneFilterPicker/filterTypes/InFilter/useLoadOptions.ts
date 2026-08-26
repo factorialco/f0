@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 
 import { RecordType, useData, useDataSource } from "@/hooks/datasource"
 
-import { InFilterDefinition } from "."
+import type { InFilterDefinition } from "."
 import { FilterTypeSchema } from "../types"
 import { InFilterOptionItem, InFilterOptions } from "./types"
 
@@ -20,6 +20,17 @@ export function getCacheKey<T, R extends RecordType = RecordType>(
   schema: FilterTypeSchema<InFilterOptions<T, R>>
 ): string {
   return JSON.stringify(schema)
+}
+
+/**
+ * Resolved options for a schema, if they have been loaded at least once.
+ * Lets callers outside the filter body (filter list, chip removal) inspect the
+ * option tree without triggering a load.
+ */
+export function getCachedOptions<T>(
+  cacheKey: string
+): InFilterOptionItem<T>[] | undefined {
+  return optionsCache.get(cacheKey) as InFilterOptionItem<T>[] | undefined
 }
 
 /**

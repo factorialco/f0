@@ -69,7 +69,7 @@ export function FilterList<Definition extends FiltersDefinition>({
     for (const [key, filter] of Object.entries(definition)) {
       if (filter.type === "in" && "options" in filter) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing nested options generically
-        const nested = collectNestedFilterKeys((filter as any).options)
+        const nested = collectNestedFilterKeys(filter as any)
         if (nested.length > 0) map.set(key, nested)
       }
     }

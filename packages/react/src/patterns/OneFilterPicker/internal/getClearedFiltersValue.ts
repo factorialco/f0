@@ -18,7 +18,7 @@ export function getClearedFiltersValue<Filters extends FiltersDefinition>(
       continue
     }
 
-    for (const nestedKey of collectNestedFilterKeys(filter.options)) {
+    for (const nestedKey of collectNestedFilterKeys(filter)) {
       clearedFilters[nestedKey as keyof Filters] =
         [] as unknown as FiltersState<Filters>[keyof Filters]
     }

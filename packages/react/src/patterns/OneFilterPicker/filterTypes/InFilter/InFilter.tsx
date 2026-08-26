@@ -16,6 +16,7 @@ import { InFilterFlatOption } from "./components/InFilterFlatOption"
 import { InFilterOptionRow } from "./components/InFilterOptionRow"
 import {
   collectNestedFilterKeys,
+  collectNestedFilterKeysFromOptions,
   optionMatchesSearch,
 } from "./components/option-utils"
 import { InFilterOptionItem, InFilterOptions } from "./types"
@@ -167,9 +168,16 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     [hasSource, options, searchTermLower]
   )
 
+  // The schema alone only knows the nested keys it declares or lists literally;
+  // the loaded options add the ones that were still unresolved at that point.
   const nestedFilterKeys = useMemo(
-    () => collectNestedFilterKeys(schema.options),
-    [schema.options]
+    () => [
+      ...new Set([
+        ...collectNestedFilterKeys(schema),
+        ...collectNestedFilterKeysFromOptions(options),
+      ]),
+    ],
+    [schema, options]
   )
 
   const nestedSelectionsCount = useMemo(
