@@ -1,14 +1,14 @@
 import {
   GranularityDefinition,
-  GranularityDefinitionKey,
+  NavigationGranularityKey,
 } from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { Select, SelectContent, SelectItem } from "@/ui/Select"
 
 interface GranularitySelectorProps {
-  granularities: GranularityDefinitionKey[]
-  value?: GranularityDefinitionKey
-  onChange: (granularity: GranularityDefinitionKey) => void
+  granularities: NavigationGranularityKey[]
+  value?: NavigationGranularityKey
+  onChange: (granularity: NavigationGranularityKey) => void
   /** Definitions in play, so a data-driven granularity can name itself. */
   definitions?: Record<string, GranularityDefinition>
 }
@@ -21,15 +21,15 @@ export function GranularitySelector({
 }: GranularitySelectorProps) {
   const i18n = useI18n()
 
-  const handleChange = (granularity: GranularityDefinitionKey) => {
+  const handleChange = (granularity: NavigationGranularityKey) => {
     onChange(granularity)
   }
 
-  const labelOf = (granularity: GranularityDefinitionKey) =>
+  const labelOf = (granularity: NavigationGranularityKey) =>
     definitions?.[granularity]?.selectorLabel ||
     (
       i18n.date.granularities as Record<
-        GranularityDefinitionKey,
+        NavigationGranularityKey,
         { label: string }
       >
     )[granularity]?.label ||
