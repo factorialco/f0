@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.60.0](https://github.com/factorialco/f0/compare/f0-react-v6.59.0...f0-react-v6.60.0) (2026-08-26)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add per-widget filters ([#5246](https://github.com/factorialco/f0/issues/5246)) ([e0daec0](https://github.com/factorialco/f0/commit/e0daec008213fd19643aaeeae00a9bc61418d1b1))
+
 ## [6.59.0](https://github.com/factorialco/f0/compare/f0-react-v6.58.0...f0-react-v6.59.0) (2026-08-26)
 
 
