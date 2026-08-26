@@ -238,7 +238,7 @@ export function DashboardItem({
 
   if (error) {
     return (
-      <div className="group/dashitem @container flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
+      <div className="group/dashitem flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex shrink-0 items-start gap-2 p-4">
           {/* The help copy survives the failure: a reader looking at an error
               is exactly the one asking what the widget was meant to show.
@@ -326,7 +326,7 @@ export function DashboardItem({
   return (
     <div
       className={cn(
-        "group/dashitem @container flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
+        "group/dashitem flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
         // `min-h-full` still fills the space when the content is shorter, but
         // lets a taller intrinsic height win instead of being clipped to it.
         // `shrink-0` is what makes that stick: as a flex item this card would

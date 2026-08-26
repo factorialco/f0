@@ -196,8 +196,6 @@ export function MetricItem<Filters extends FiltersDefinition>({
   handleDelete,
   onAskAi,
   onAskAiTarget,
-  isFullscreen,
-  onFullscreenChange,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
@@ -225,8 +223,6 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onAskAi={onAskAi}
       onAskAiTarget={onAskAiTarget}
       itemId={item.id}
-      isFullscreen={isFullscreen}
-      onFullscreenChange={onFullscreenChange}
     >
       {data && (
         <MetricValue

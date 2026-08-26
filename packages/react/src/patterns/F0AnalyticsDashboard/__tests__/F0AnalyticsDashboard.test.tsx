@@ -17,7 +17,11 @@ import {
 } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
-import type { DashboardMetricItem } from "../types"
+import type {
+  DashboardChartItem,
+  DashboardItem,
+  DashboardMetricItem,
+} from "../types"
 
 // Keep this dashboard integration test at the chart boundary: jsdom has no
 // canvas context, while ChartItem's keyboard point surface is ordinary DOM.
@@ -59,6 +63,18 @@ function metricItem(
     id: "headcount",
     title: "Headcount",
     type: "metric",
+    fetchData,
+  }
+}
+
+function chartItem(
+  fetchData: DashboardChartItem<typeof filters>["fetchData"]
+): DashboardChartItem<typeof filters> {
+  return {
+    id: "headcount-chart",
+    title: "Headcount by department",
+    type: "chart",
+    chart: { type: "bar" },
     fetchData,
   }
 }
@@ -232,15 +248,14 @@ describe("F0AnalyticsDashboard report filters", () => {
 })
 
 describe("F0AnalyticsDashboard item filters", () => {
-  it("resolves controls in normal, fullscreen, and single-item layouts while preserving undefined opt-out", async () => {
-    const user = userEvent.setup()
+  it("resolves metric controls without enabling fullscreen and preserves single-item and undefined opt-outs", () => {
     const headcount = metricItem(vi.fn().mockResolvedValue({ value: 42 }))
     const turnover: DashboardMetricItem<typeof filters> = {
       ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
       id: "turnover",
       title: "Turnover",
     }
-    const resolver = vi.fn((item: DashboardMetricItem<typeof filters>) =>
+    const resolver = vi.fn((item: DashboardItem<typeof filters>) =>
       item.id === "headcount"
         ? {
             filters: {
@@ -255,7 +270,7 @@ describe("F0AnalyticsDashboard item filters", () => {
     const view = render(
       <F0AnalyticsDashboard
         items={[headcount, turnover]}
-        itemFilters={resolver as never}
+        itemFilters={resolver}
       />
     )
 
@@ -271,26 +286,15 @@ describe("F0AnalyticsDashboard item filters", () => {
     expect(
       within(turnoverCard).queryByRole("button", { name: "Filters" })
     ).toBeNull()
-
-    await user.click(
-      within(headcountCard).getByRole("button", { name: "Expand" })
-    )
-    await waitFor(() =>
-      expect(screen.queryByText("Turnover")).not.toBeInTheDocument()
-    )
     expect(
-      within(
-        screen
-          .getByText("Headcount")
-          .closest("[class*='dashitem']") as HTMLElement
-      ).getByRole("button", { name: "Filters" })
-    ).toBeVisible()
+      within(headcountCard).queryByRole("button", { name: "Expand" })
+    ).toBeNull()
+    expect(
+      within(turnoverCard).queryByRole("button", { name: "Expand" })
+    ).toBeNull()
 
     view.rerender(
-      <F0AnalyticsDashboard
-        items={[headcount]}
-        itemFilters={resolver as never}
-      />
+      <F0AnalyticsDashboard items={[headcount]} itemFilters={resolver} />
     )
     expect(
       within(
@@ -305,6 +309,59 @@ describe("F0AnalyticsDashboard item filters", () => {
     expect(resolver).toHaveBeenCalledWith(
       expect.objectContaining({ id: "turnover" })
     )
+  })
+
+  it("keeps filters available when an existing fullscreen-capable chart is expanded", async () => {
+    const user = userEvent.setup()
+    const headcountChart = chartItem(
+      vi.fn().mockResolvedValue({
+        categories: ["Engineering"],
+        series: [{ name: "Headcount", data: [42] }],
+      })
+    )
+    const turnover = {
+      ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
+      id: "turnover",
+      title: "Turnover",
+    }
+    const resolver = vi.fn((item: DashboardItem<typeof filters>) =>
+      item.id === "headcount-chart"
+        ? {
+            filters: {
+              employee: { type: "search" as const, label: "Employee" },
+            },
+            value: {},
+            onChange: vi.fn(),
+          }
+        : undefined
+    )
+
+    render(
+      <F0AnalyticsDashboard
+        items={[headcountChart, turnover]}
+        itemFilters={resolver}
+      />
+    )
+
+    const chartCard = screen
+      .getByText("Headcount by department")
+      .closest("[class*='dashitem']") as HTMLElement
+    expect(
+      within(chartCard).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+
+    await user.click(within(chartCard).getByRole("button", { name: "Expand" }))
+
+    await waitFor(() =>
+      expect(screen.queryByText("Turnover")).not.toBeInTheDocument()
+    )
+    expect(
+      within(
+        screen
+          .getByText("Headcount by department")
+          .closest("[class*='dashitem']") as HTMLElement
+      ).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
   })
 
   it("keeps metric refresh and Ask One observation active together", async () => {
