@@ -88,6 +88,13 @@ const EXCLUDED_PATHS: RegExp[] = [
   // Sample data, harnesses and Storybook helpers.
   /(^|\/)(mocks|testing|examples)\//,
   /(^|\/)lib\/storybook-utils\//,
+  // The component-maturity dashboard. It ships (component-status is a build
+  // entry) but its audience is f0 contributors reading the Storybook docs, not
+  // end users of a product built on f0 — "Has unit tests", "Maturity level",
+  // "DoDont examples with realistic Factorial copy". Excluded as a module
+  // rather than line by line: the audience is a property of the whole
+  // dashboard, so a per-line marker would just get re-litigated on every edit.
+  /^component-status\//,
   // The dictionary itself: these literals ARE the translations.
   /(^|\/)lib\/providers\/i18n\//,
 ]
