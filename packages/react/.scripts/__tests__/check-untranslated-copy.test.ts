@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   annotations,
   attachExistingKeys,
@@ -201,6 +200,31 @@ describe("findInSource", () => {
     expect(
       scanTsx('const A = () => <a rel="noopener noreferrer" target="_blank" />')
     ).toEqual([])
+  })
+
+  it("ignores a key cap, but not the sentence it sits in", () => {
+    // The pattern in F0AiChatTextArea: the cap reads what is printed on the
+    // key, the surrounding sentence is translated separately.
+    expect(
+      scanTsx(
+        "const A = () => <p><kbd>Enter</kbd> to select, or press <kbd>Esc</kbd></p>"
+      )
+    ).toEqual(['<jsx-text> = "to select, or press"'])
+  })
+
+  it.each(["code", "pre", "samp", "var"])(
+    "ignores machine text inside <%s>",
+    (tag) => {
+      expect(
+        scanTsx(`const A = () => <${tag}>Delete the row</${tag}>`)
+      ).toEqual([])
+    }
+  )
+
+  it("still flags prose in an element that merely contains a kbd", () => {
+    expect(
+      scanTsx("const A = () => <div>Press this key<kbd>Enter</kbd></div>")
+    ).toEqual(['<jsx-text> = "Press this key"'])
   })
 
   it("does not look for JSX text in a .ts file", () => {

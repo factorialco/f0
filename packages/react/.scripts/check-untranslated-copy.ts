@@ -53,10 +53,8 @@ import { spawnSync } from "node:child_process"
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import consola from "consola"
 import ts from "typescript"
-
 import { defaultTranslations } from "../src/lib/providers/i18n/i18n-provider-defaults"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -215,6 +213,17 @@ const STYLE_CONTAINERS = new Set([
   "whileDrag",
   "whileInView",
 ])
+
+/**
+ * Elements whose text is machine or device text rather than product copy, so
+ * their children are skipped.
+ *
+ * `<kbd>` is the one that actually comes up: a key cap reads what is printed on
+ * the key, and the sentence around it is translated separately —
+ * `<kbd>Enter</kbd> {i18n.…navHint.select}`. The rest hold code, sample output
+ * and variable names, which are never translated either.
+ */
+const NON_COPY_ELEMENTS = new Set(["kbd", "code", "pre", "samp", "var"])
 
 export type FindingKind =
   | "jsx-text"
@@ -404,6 +413,19 @@ export function findInSource(filePath: string, source: string): Finding[] {
     }
   }
 
+  /**
+   * Is this text a direct child of a `<kbd>`, `<code>`, … element? Only the
+   * immediate parent counts: a `<kbd>` inside a translated sentence must not
+   * silence the sentence, and prose nested under a `<pre>` would be a bug in
+   * the markup rather than something to hide.
+   */
+  const inNonCopyElement = (node: ts.Node): boolean => {
+    const parent = node.parent
+    if (!parent || !ts.isJsxElement(parent)) return false
+    const tag = parent.openingElement.tagName.getText(sourceFile)
+    return NON_COPY_ELEMENTS.has(tag)
+  }
+
   const visit = (node: ts.Node): void => {
     if (ts.isJsxAttribute(node) && node.initializer) {
       const attrName = node.name.getText(sourceFile)
@@ -443,7 +465,12 @@ export function findInSource(filePath: string, source: string): Finding[] {
       }
     }
 
-    if (isTsx && ts.isJsxText(node) && readsAsCopy(node.text)) {
+    if (
+      isTsx &&
+      ts.isJsxText(node) &&
+      !inNonCopyElement(node) &&
+      readsAsCopy(node.text)
+    ) {
       record(node, "<jsx-text>", node.text, "jsx-text")
     }
 
