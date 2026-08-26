@@ -42,6 +42,7 @@ export const F0AnalyticsDashboard = <
   filtersValue,
   onFiltersChange,
   items,
+  itemFilters,
   editMode,
   onLayoutChange,
   enableExport,
@@ -165,6 +166,7 @@ export const F0AnalyticsDashboard = <
       >
         <DashboardGrid
           items={items}
+          itemFilters={itemFilters}
           filters={
             {
               ...currentFilters,
