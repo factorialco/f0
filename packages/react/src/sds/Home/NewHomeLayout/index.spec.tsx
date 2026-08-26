@@ -231,6 +231,65 @@ describe("NewHomeLayout", () => {
     })
   })
 
+  /**
+   * A column's catalog can RUN OUT — a main column that only takes one kind of
+   * widget has nothing left to offer once that widget is on it — and a "+" that
+   * opens an empty picker is an offer the app cannot keep. Naming the sides that
+   * still take widgets withdraws the offer without withdrawing the arranging.
+   */
+  describe("addableWidgetContainers", () => {
+    /** Both columns' add affordances, by the name the provider gives them. */
+    const addOffers = () => screen.queryAllByLabelText("Add widget")
+
+    test("offers both columns when it is not given", () => {
+      renderLayout(1400, { leftWidgets: [widget("communities")] })
+
+      expect(addOffers()).toHaveLength(2)
+    })
+
+    test("withdraws the offer from a column it leaves out", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("communities")],
+        addableWidgetContainers: ["right"],
+      })
+
+      expect(addOffers()).toHaveLength(1)
+    })
+
+    test("leaves that column arrangeable — only the offer goes", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("communities")],
+        addableWidgetContainers: ["right"],
+        onRemoveWidget: () => {},
+      })
+
+      // The main widget keeps its own menu (where "Remove widget" lives), as
+      // does the rail's unlocked one: two menus, one add offer.
+      expect(screen.getAllByRole("button", { name: "Actions" })).toHaveLength(2)
+    })
+
+    test("withdraws it from the collapsed strip too", async () => {
+      renderLayout(1400, { addableWidgetContainers: ["main"] })
+
+      await userEvent.click(screen.getByLabelText("Collapse widgets panel"))
+
+      // The strip carries the rail's only add affordance while collapsed, and
+      // the rail is not addable — so the one left is the main column's.
+      expect(addOffers()).toHaveLength(1)
+    })
+
+    test("is a NARROWING of editableWidgetContainers, never a widening", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("communities")],
+        editableWidgetContainers: ["right"],
+        addableWidgetContainers: ["main", "right"],
+      })
+
+      // Main is not arrangeable, so naming it addable cannot conjure the offer.
+      expect(addOffers()).toHaveLength(1)
+    })
+  })
+
   describe("too narrow for both columns, but wide enough for the strip", () => {
     test("collapses the rail on its own", () => {
       renderLayout(1000)

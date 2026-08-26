@@ -521,6 +521,18 @@ export interface NewHomeLayoutProps {
    */
   editableWidgetContainers?: WidgetContainerSide[]
   /**
+   * Which containers may still be ADDED TO. Narrower than
+   * `editableWidgetContainers`, which it is a subset of: a column not named here
+   * keeps its dragging and its "Remove widget" and only loses the offer to add.
+   *
+   * Defaults to every editable container — the common case, where the catalog
+   * always has something for every column. Name the sides once a column's
+   * catalog can run out: a main column that only ever holds one kind of widget
+   * has nothing to offer the moment that widget is on it, and a "+" that opens
+   * an empty picker is an offer the app cannot keep.
+   */
+  addableWidgetContainers?: WidgetContainerSide[]
+  /**
    * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
    * default: for a Home of a dozen widgets, mounting them all is what keeps a
    * card's data, clock and animation alive across everything this layout does to
@@ -579,7 +591,10 @@ export interface NewHomeLayoutProps {
     widget: HomeWidgetItem,
     params: WidgetParams
   ) => ReactNode
-  /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+  /**
+   * When set, renders a "+ Add widget" affordance at the bottom of each column
+   * that takes widgets — see `addableWidgetContainers`.
+   */
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
   onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
@@ -645,6 +660,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       slotRenderers,
       renderWidget,
       editableWidgetContainers = ["main", "right"],
+      addableWidgetContainers,
       virtualizedWidgetContainers = [],
       virtualization,
       onRemoveWidget,
@@ -705,6 +721,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
       editableWidgetContainers.includes(side)
+    // ADDING is a narrowing of arranging: a column you cannot arrange is not one
+    // you can add to, and an omitted `addableWidgetContainers` means every
+    // arrangeable column takes new widgets.
+    const canAddToSide = (side: WidgetContainerSide) =>
+      canEditSide(side) && (addableWidgetContainers?.includes(side) ?? true)
 
     const render = (widget: HomeWidgetItem) => {
       const node = renderWidget ? (
@@ -753,7 +774,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         : false
 
     const hasSide =
-      aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
+      aside != null ||
+      rightWidgets.length > 0 ||
+      (onClickAddNewWidget != null && canAddToSide("right"))
     // Two reasons the rail collapses, and they don't compete: there ISN'T ROOM
     // for both columns, or you ASKED for the space. Narrowness always wins —
     // expanding by hand can't conjure room the layout doesn't have — so the
@@ -1131,7 +1154,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             renderWidgetPreview={renderWidgetPreview}
             paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
-              onClickAddNewWidget
+              onClickAddNewWidget && canAddToSide("main")
                 ? () => onClickAddNewWidget("main")
                 : undefined
             }
@@ -1224,7 +1247,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               {/* Always offered, not only in edit mode: collapsed, the strip has
                     no edit affordance of its own, and adding a widget is the one
                     thing you would still want from it. */}
-              {canEditSide("right") && onClickAddNewWidget ? (
+              {canAddToSide("right") && onClickAddNewWidget ? (
                 // The same control the column's placeholder is — a dashed box
                 // around one glyph, named only on hover — at the strip's size.
                 <Tooltip label={t.widgets.addWidget}>
@@ -1352,7 +1375,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.
               onClickAddNewWidget={
-                onClickAddNewWidget && !collapsed
+                onClickAddNewWidget && canAddToSide("right") && !collapsed
                   ? () => onClickAddNewWidget("right")
                   : undefined
               }

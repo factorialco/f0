@@ -279,6 +279,62 @@ describe("useGraphRenderModel — node windowing", () => {
   })
 })
 
+describe("useGraphRenderModel — tree forest roots (aria-owns)", () => {
+  beforeEach(() => {
+    mockViewportRect = null
+  })
+
+  it("returns only the parentless root; nested children are owned by their parent", () => {
+    // root → child → grandchild, all expanded and on-window. The `role="tree"`
+    // container owns just the forest root; child/grandchild are re-owned by their
+    // in-window parent node's own aria-owns (visibleChildIds).
+    const grandchild = treeNode("grandchild", "child", 0, [], 2)
+    const child = treeNode("child", "root", 1, [grandchild], 1)
+    const root = treeNode("root", null, 1, [child])
+    const { result } = renderModel(baseOptions([root], ["root", "child"]))
+
+    expect(result.current.treeRootNodeIds).toEqual(["root"])
+  })
+
+  it("returns every top-level root of a multi-root forest", () => {
+    const a = treeNode("a", null, 0)
+    const b = treeNode("b", null, 0)
+    const c = treeNode("c", null, 0)
+    const { result } = renderModel(baseOptions([a, b, c], []))
+
+    expect([...result.current.treeRootNodeIds].sort()).toEqual(["a", "b", "c"])
+  })
+
+  it("gives every rendered treeitem exactly one owner under windowing", () => {
+    // Only `leaf` is inside the viewport; its ancestors are materialized to keep
+    // the reporting line connected. Each rendered node is a forest root iff its
+    // parent is not itself rendered — so no treeitem is left orphaned and none is
+    // double-owned.
+    const leaf = treeNode("leaf", "mid", 0, [], 2)
+    const mid = treeNode("mid", "root", 1, [leaf], 1)
+    const root = treeNode("root", null, 1, [mid])
+    mockViewportRect = { minX: -10, minY: 4900, maxX: 200, maxY: 5200 }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "mid"]),
+      enableNodeWindowing: true,
+      layoutEngineProp: fixedLayout({
+        root: { x: 0, y: 0 },
+        mid: { x: 0, y: 2500 },
+        leaf: { x: 0, y: 5000 },
+      }),
+    })
+
+    const rendered = new Set(result.current.renderedNodeIds)
+    for (const id of result.current.renderedNodeIds) {
+      const parentId = graphNodeData(result.current.rfNodes, id)?.graphNode
+        .parentId
+      const ownedByTree = result.current.treeRootNodeIds.includes(id)
+      expect(ownedByTree).toBe(parentId == null || !rendered.has(parentId))
+    }
+    expect(result.current.treeRootNodeIds).toContain("root")
+  })
+})
+
 describe("useGraphRenderModel — anchor viewport compensation", () => {
   beforeEach(() => {
     mockViewportRect = null

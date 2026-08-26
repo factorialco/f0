@@ -1,5 +1,68 @@
 # Changelog
 
+## [6.57.1](https://github.com/factorialco/f0/compare/f0-react-v6.57.0...f0-react-v6.57.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **DateNavigator:** keep periods out of the shared granularity key ([#5241](https://github.com/factorialco/f0/issues/5241)) ([095c5d1](https://github.com/factorialco/f0/commit/095c5d13a2520d92b24dd073dae5a26892ca8ef6))
+
+## [6.57.0](https://github.com/factorialco/f0/compare/f0-react-v6.56.0...f0-react-v6.57.0) (2026-08-26)
+
+
+### Features
+
+* **Home:** a widget's header controls, as data ([#5244](https://github.com/factorialco/f0/issues/5244)) ([118bca7](https://github.com/factorialco/f0/commit/118bca7cee7057cc293d83d2aaedf2e33125843d))
+
+## [6.56.0](https://github.com/factorialco/f0/compare/f0-react-v6.55.0...f0-react-v6.56.0) (2026-08-26)
+
+
+### Features
+
+* **OneDataCollection:** keep every loaded children page live and replaceable ([#5245](https://github.com/factorialco/f0/issues/5245)) ([5d81b32](https://github.com/factorialco/f0/commit/5d81b32b4e55b5dd548d9f648994b22cd39d1116))
+
+## [6.55.0](https://github.com/factorialco/f0/compare/f0-react-v6.54.3...f0-react-v6.55.0) (2026-08-26)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** expose widget, point, and drag Ask One targets ([#5239](https://github.com/factorialco/f0/issues/5239)) ([bb1b0ab](https://github.com/factorialco/f0/commit/bb1b0ab8bb39808c3897ba151794ae27e56187f1))
+
+## [6.54.3](https://github.com/factorialco/f0/compare/f0-react-v6.54.2...f0-react-v6.54.3) (2026-08-25)
+
+
+### Bug Fixes
+
+* **useSelectable:** keep pre-selected multi-select values checked when their option loads first ([#4933](https://github.com/factorialco/f0/issues/4933)) ([861614f](https://github.com/factorialco/f0/commit/861614fc78cd7b0548f37cbe3e2f7526ee4cc141))
+
+## [6.54.2](https://github.com/factorialco/f0/compare/f0-react-v6.54.1...f0-react-v6.54.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* **Home:** the drag ghost is a copy of the card, not a second render ([#5237](https://github.com/factorialco/f0/issues/5237)) ([9cda20a](https://github.com/factorialco/f0/commit/9cda20abaddc39aba7b7257bc207033e00f02a99))
+
+## [6.54.1](https://github.com/factorialco/f0/compare/f0-react-v6.54.0...f0-react-v6.54.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **F0Graph:** restore ARIA tree semantics flagged by axe ([#5228](https://github.com/factorialco/f0/issues/5228)) ([0f4e24b](https://github.com/factorialco/f0/commit/0f4e24b8d3b89f36d642964d619d55f1aa79c3cc))
+
+## [6.54.0](https://github.com/factorialco/f0/compare/f0-react-v6.53.0...f0-react-v6.54.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** withdraw the add offer per column ([#5230](https://github.com/factorialco/f0/issues/5230)) ([d1a5f0d](https://github.com/factorialco/f0/commit/d1a5f0d6159746320bbef8b028257fd05e11d7a7))
+
+## [6.53.0](https://github.com/factorialco/f0/compare/f0-react-v6.52.0...f0-react-v6.53.0) (2026-08-25)
+
+
+### Features
+
+* **DateNavigator:** select consumer-defined periods ([#5161](https://github.com/factorialco/f0/issues/5161)) ([3a8246f](https://github.com/factorialco/f0/commit/3a8246f2f89735416922cdb3a4060e169bd29534))
+
 ## [6.52.0](https://github.com/factorialco/f0/compare/f0-react-v6.51.1...f0-react-v6.52.0) (2026-08-25)
 
 

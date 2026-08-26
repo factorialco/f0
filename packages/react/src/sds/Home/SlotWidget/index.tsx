@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { Check, ChevronDown } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -189,6 +191,8 @@ export function SlotWidget({
   action,
   summaries,
   headerControls,
+  headerActions,
+  headerSelect,
   alert,
   status,
   slots,
@@ -223,6 +227,67 @@ export function SlotWidget({
   // frame draws it as the title itself.
   // `info` comes OUT: it is not a tooltip beside the title, it is what the card
   // shows when it is turned over.
+  /**
+   * WHAT THE CARD IS SHOWING, when its header carries a select. It lives HERE
+   * rather than in the host: a widget declared as data has nowhere to keep a
+   * live choice — params would persist it into a setting, and page state means
+   * the page knowing about one particular card — so the card keeps it and hands
+   * it to its slots (`ctx.selection`).
+   *
+   * A SESSION choice, deliberately: the card starts at `headerSelect.value`
+   * every time it mounts. Something that should outlive the visit is a param.
+   */
+  const [picked, setPicked] = useState<string | undefined>(undefined)
+  const selection = headerSelect
+    ? (picked ?? headerSelect.value ?? headerSelect.options[0]?.value)
+    : undefined
+  const selected = headerSelect?.options.find(
+    (option) => option.value === selection
+  )
+
+  const pick = (value: string) => {
+    setPicked(value)
+    headerSelect?.onChange?.(value)
+  }
+
+  // The card's own controls, in the order the header reads: what you can DO,
+  // then what it is SHOWING, then whatever the host drew itself.
+  const controls =
+    headerActions?.length || headerSelect ? (
+      <>
+        {headerActions?.map((button, index) => (
+          <F0Button key={index} variant="ghost" size="sm" {...button} />
+        ))}
+        {headerSelect ? (
+          <Dropdown
+            items={headerSelect.options.map((option) => ({
+              label: option.label,
+              // The menu says which one you are on; the trigger only names it.
+              ...(option.value === selection
+                ? { icon: Check }
+                : option.icon
+                  ? { icon: option.icon }
+                  : {}),
+              onClick: () => pick(option.value),
+            }))}
+          >
+            <F0Button
+              variant="ghost"
+              size="sm"
+              icon={ChevronDown}
+              label={selected?.label ?? headerSelect.tooltip ?? ""}
+              {...(headerSelect.tooltip
+                ? { tooltip: headerSelect.tooltip }
+                : {})}
+            />
+          </Dropdown>
+        ) : null}
+        {headerControls}
+      </>
+    ) : (
+      headerControls
+    )
+
   const { info, ...headerRest } = resolveWidgetHeader(header, params) ?? {}
   // Dropping `info` can leave the header with nothing in it — then there is no
   // header row to draw, unless the overflow menu needs one to sit in.
@@ -232,7 +297,7 @@ export function SlotWidget({
   const headerProps =
     Object.values(headerRest).some((value) => value !== undefined) ||
     (actions && actions.length > 0) ||
-    headerControls
+    controls
       ? headerRest
       : undefined
 
@@ -243,13 +308,15 @@ export function SlotWidget({
       action={action}
       footerClassName={FOOTER_CLASS}
       actions={actions}
-      headerControls={headerControls}
+      headerControls={controls}
       summaries={summaries}
       {...(alert ? { alert } : { status })}
       isDragging={isDragging}
     >
       <SlotWidgetContent
-        ctx={ctx}
+        // The selection goes DOWN, so a slot that owns its data fetches for
+        // whatever the header is showing.
+        ctx={selection === undefined ? ctx : { ...ctx, selection }}
         loading={loading}
         slotRenderers={slotRenderers}
         slots={slots}

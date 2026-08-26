@@ -29,10 +29,13 @@ GITHUB_API="https://api.github.com"
 # GitHub masks secrets in logs but not in API-posted comments.
 redact_secrets() {
 	local text="$1"
-	# Redact GitHub tokens
-	text=$(printf '%s' "${text}" | sed -E 's/ghp_[A-Za-z0-9]{36}/[REDACTED]/g')
-	text=$(printf '%s' "${text}" | sed -E 's/gho_[A-Za-z0-9]{36}/[REDACTED]/g')
-	text=$(printf '%s' "${text}" | sed -E 's/ghs_[A-Za-z0-9]{36}/[REDACTED]/g')
+	# Redact GitHub tokens. Patterns must be open-ended: an exact-length
+	# quantifier redacts only the head of a longer token and leaks the tail.
+	# Stateless ghs_ installation tokens are JWT-like (dots, dashes,
+	# underscores, hundreds of chars), so ghs_ needs the wider charset.
+	text=$(printf '%s' "${text}" | sed -E 's/ghp_[A-Za-z0-9]{36,}/[REDACTED]/g')
+	text=$(printf '%s' "${text}" | sed -E 's/gho_[A-Za-z0-9]{36,}/[REDACTED]/g')
+	text=$(printf '%s' "${text}" | sed -E 's/ghs_[A-Za-z0-9._-]{36,}/[REDACTED]/g')
 	text=$(printf '%s' "${text}" | sed -E 's/github_pat_[A-Za-z0-9_]{80,}/[REDACTED]/g')
 	# Redact generic API key patterns (long hex/base64 strings after common key labels)
 	text=$(printf '%s' "${text}" | sed -E 's/(api[_-]?key|token|secret|password|credential)["\x27]?\s*[:=]\s*["\x27]?[A-Za-z0-9+\/\-_]{20,}/\1=[REDACTED]/gi')

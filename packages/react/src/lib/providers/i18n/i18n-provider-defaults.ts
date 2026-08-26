@@ -242,6 +242,7 @@ export const defaultTranslations = {
       viewSelectorLabel: "Select view",
     },
     table: {
+      seeMoreChildren: "See more",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
@@ -348,6 +349,11 @@ export const defaultTranslations = {
       range: {
         currentDate: "Today",
         label: "Range",
+      },
+      periods: {
+        currentDate: "Current period",
+        label: "Periods",
+        empty: "No periods available",
       },
     },
     month: {

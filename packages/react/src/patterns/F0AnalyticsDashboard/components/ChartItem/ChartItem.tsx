@@ -39,6 +39,7 @@ import type {
   DashboardChartData,
   DashboardChartItem,
   F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,
 } from "../../types"
 
@@ -802,6 +803,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   onTransformChart?: (
     itemId: string,
     newType: string,
@@ -818,6 +820,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   editMode,
   handleDelete,
   onAskAi,
+  onAskAiTarget,
   onTransformChart,
   isFullscreen,
   onFullscreenChange,
@@ -913,9 +916,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
 
       if (!chartProps) return
 
-      setPendingQuote({
+      const quote = {
         text: buildPointQuoteText(item.title, chartProps, point),
-      })
+      }
+      onAskAiTarget?.({ id: item.id, title: item.title, point, quote })
+      setPendingQuote(quote)
       // Fullscreen covers the chat, matching the widget-level Ask One action.
       if (isFullscreen) onFullscreenChange?.(false)
       // Without this the quote would land in a panel the user cannot see.
@@ -927,6 +932,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       item,
       chartProps,
       onAskAi,
+      onAskAiTarget,
       isFullscreen,
       onFullscreenChange,
       setPendingQuote,
@@ -1144,6 +1150,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       editMode={editMode}
       handleDelete={handleDelete}
       onAskAi={onAskAi}
+      onAskAiTarget={onAskAiTarget}
       itemId={item.id}
       chartTypeOptions={chartTypeOptions}
       isFullscreen={isFullscreen}

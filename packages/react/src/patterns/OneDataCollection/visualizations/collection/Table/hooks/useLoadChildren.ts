@@ -93,15 +93,42 @@ export const useLoadChildren = <
     updateFetchedData,
     resetGeneration,
   } = useNestedDataContext<R>()
-  const [children, setChildren] = useState<R[]>(
-    getChildren(nestedFetchedData?.[rowId])
-  )
+
+  const restoredData = nestedFetchedData?.[rowId]
+  const restoredChildren = getChildren(restoredData)
+
+  const [children, setChildren] = useState<R[]>(restoredChildren)
   const [paginationInfo, setPaginationInfo] = useState<
     ChildrenPaginationInfo | undefined
-  >(nestedFetchedData?.[rowId]?.paginationInfo)
+  >(restoredData?.paginationInfo)
   const [isLoading, setIsLoading] = useState(false)
   const [childrenType, setChildrenType] = useState<NestedVariant>(
-    getChildrenType(nestedFetchedData?.[rowId])
+    getChildrenType(restoredData)
+  )
+
+  // Children kept per requested page, so a page that re-emits REPLACES its own
+  // slice: one flat list made a re-emission append to whatever it held when that
+  // page subscribed, freezing earlier rows and duplicating reordered ones.
+  // Page 0 is the cache restored on remount — nothing live can re-emit it.
+  const pagesRef = useRef<Map<number, R[]>>(
+    new Map(restoredChildren.length > 0 ? [[0, restoredChildren]] : [])
+  )
+  // Only the highest page loaded owns `hasMore`/`currentPage`, so an earlier page
+  // re-emitting cannot rewind the cursor.
+  const frontierRef = useRef<{
+    page: number
+    type: NestedVariant
+    paginationInfo?: ChildrenPaginationInfo
+  }>({
+    page: restoredData?.paginationInfo?.currentPage ?? 0,
+    type: getChildrenType(restoredData),
+    paginationInfo: restoredData?.paginationInfo,
+  })
+
+  // One subscription per page: loading the next page must not silence the earlier
+  // ones, which are how the consumer pushes updates for rows still on screen.
+  const subscriptionsRef = useRef<Map<number, ZenObservable.Subscription>>(
+    new Map()
   )
 
   // The tree reset (filter/sorting/navigation change) is detected once, in the
@@ -115,39 +142,67 @@ export const useLoadChildren = <
   useEffect(() => {
     if (previousResetGenerationRef.current === resetGeneration) return
     previousResetGenerationRef.current = resetGeneration
+
+    // Drop every live page: their subscriptions belong to the previous query and
+    // must not re-emit into the reset tree (see the per-page notes above).
+    subscriptionsRef.current.forEach((subscription) =>
+      subscription.unsubscribe()
+    )
+    subscriptionsRef.current.clear()
+    pagesRef.current.clear()
+    frontierRef.current = {
+      page: 0,
+      type: "basic",
+      paginationInfo: undefined,
+    }
+
     setChildren([])
     setPaginationInfo(undefined)
     setChildrenType("basic")
   }, [resetGeneration])
 
-  const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()
-
   const processChildrenData = useCallback(
-    (data: ChildrenResponse<R> | undefined) => {
+    (page: number, data: ChildrenResponse<R> | undefined) => {
       const loadedChildren = getChildren(data)
-      const updatedChildren = [...children, ...loadedChildren]
+      pagesRef.current.set(page, loadedChildren)
+
+      const updatedChildren = [...pagesRef.current.entries()]
+        .sort(([a], [b]) => a - b)
+        .flatMap(([, records]) => records)
       setChildren(updatedChildren)
+
+      if (page >= frontierRef.current.page) {
+        frontierRef.current = {
+          page,
+          type: getChildrenType(data),
+          paginationInfo: data?.paginationInfo,
+        }
+        setChildrenType(frontierRef.current.type)
+        setPaginationInfo(frontierRef.current.paginationInfo)
+      }
 
       const updatedData: ChildrenResponse<R> = {
         records: updatedChildren,
-        type: data?.type,
-        paginationInfo: data?.paginationInfo,
+        type: frontierRef.current.type,
+        paginationInfo: frontierRef.current.paginationInfo,
       }
 
       updateFetchedData(rowId, updatedData)
-      setChildrenType(getChildrenType(data))
-      setPaginationInfo(data?.paginationInfo)
 
       return loadedChildren
     },
-    [children, rowId, updateFetchedData]
+    [rowId, updateFetchedData]
   )
 
   const loadChildren = useCallback(() => {
     if (children.length > 0 && !paginationInfo?.hasMore) return children
 
-    // Cancel any existing subscription
-    subscriptionRef.current?.unsubscribe()
+    // The page about to be requested — the same cursor handed to the consumer.
+    const page = (paginationInfo?.currentPage ?? 0) + 1
+
+    // Replace only THIS page's subscription, so earlier pages keep listening.
+    subscriptionsRef.current.get(page)?.unsubscribe()
+    subscriptionsRef.current.delete(page)
 
     setIsLoading(true)
 
@@ -166,7 +221,7 @@ export const useLoadChildren = <
 
     // Handle synchronous data (not a Promise or Observable)
     if (!("then" in result) && !("subscribe" in result)) {
-      const loadedChildren = processChildrenData(result)
+      const loadedChildren = processChildrenData(page, result)
       setIsLoading(false)
       return loadedChildren
     }
@@ -175,33 +230,38 @@ export const useLoadChildren = <
     const observable: Observable<PromiseState<ChildrenResponse<R>>> =
       "subscribe" in result ? result : promiseToObservable(result)
 
-    subscriptionRef.current = observable.subscribe({
-      next: (state) => {
-        if (state.loading) {
-          setIsLoading(true)
-        } else if (state.error) {
+    subscriptionsRef.current.set(
+      page,
+      observable.subscribe({
+        next: (state) => {
+          if (state.loading) {
+            setIsLoading(true)
+          } else if (state.error) {
+            setIsLoading(false)
+          } else if (state.data) {
+            processChildrenData(page, state.data)
+            setIsLoading(false)
+          }
+        },
+        error: (error) => {
           setIsLoading(false)
-        } else if (state.data) {
-          processChildrenData(state.data)
-          setIsLoading(false)
-        }
-      },
-      error: (error) => {
-        setIsLoading(false)
-        console.error("Error loading children:", error)
-      },
-      complete: () => {
-        subscriptionRef.current = undefined
-      },
-    })
+          console.error("Error loading children:", error)
+        },
+        complete: () => {
+          subscriptionsRef.current.delete(page)
+        },
+      })
+    )
 
     return []
   }, [children, item, source, paginationInfo, processChildrenData])
 
-  // Cleanup subscription on unmount
+  // Cleanup subscriptions on unmount
   useEffect(() => {
+    const subscriptions = subscriptionsRef.current
     return () => {
-      subscriptionRef.current?.unsubscribe()
+      subscriptions.forEach((subscription) => subscription.unsubscribe())
+      subscriptions.clear()
     }
   }, [])
 

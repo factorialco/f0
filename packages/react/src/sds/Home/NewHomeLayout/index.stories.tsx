@@ -9,7 +9,6 @@ import { f0FormField } from "@/patterns/F0Form"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Card } from "@/components/F0Card"
 import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -888,9 +887,14 @@ const SLOT_RENDERERS: SlotRenderers = {
     skeleton: () => <ClockInTile loading />,
   },
   "community-posts": {
-    render: (params) => (
+    render: (params, ctx) => (
       <F0CommunityPostsCarousel
-        posts={(params as CommunityPostsParams).posts}
+        posts={postsForScope((ctx.selection ?? "all") as CommunityScope).map(
+          (post) => ({
+            ...post,
+            onClick: () => (params as CommunityPostsParams).onOpenPost(post.id),
+          })
+        )}
         labels={COMMUNITY_CAROUSEL_LABELS}
       />
     ),
@@ -1081,11 +1085,18 @@ const CommunityPostDetail = ({ post }: { post: CommunityPostSummary }) => (
 /**
  * The Communities widget as DATA, built for the scope it is currently showing.
  *
- * Its two controls sit in the header (`headerControls`): the SCOPE SWITCHER —
- * `F0ButtonDropdown` in `dropdown` mode, so the trigger names what is selected
- * and the whole button opens the menu — and "New post", the one thing you can do
- * from the card without leaving the page. The way OUT of the widget is still the
- * title ("Go to Communities"), and the three-dots menu is still the column's.
+ * Its two controls sit in the header AS DATA — `headerActions` for "New post",
+ * the one thing you can do from the card without leaving the page, and
+ * `headerSelect` for the SCOPE SWITCHER. Neither is a React node: the card draws
+ * them both as ghosts (this row sits beside the widget's own title, and a filled
+ * button there reads as the card's subject rather than as something you press),
+ * and it KEEPS the scope, handing it to the slots as `ctx.selection`.
+ *
+ * Which is why this widget is built from no scope of its own. The story still
+ * hears about it — `onChange` mirrors it into state — but only because its
+ * carousel DIALOG walks the same set of posts; the card itself needs nobody to
+ * hold the value. The way OUT of the widget is still the title ("Go to
+ * Communities"), and the three-dots menu is still the column's.
  */
 const communitiesWidget = ({
   scope,
@@ -1108,26 +1119,13 @@ const communitiesWidget = ({
       info: "The latest posts from the spaces you follow.",
       link: { title: "Go to Communities", url: "/communities" },
     },
-    headerControls: (
-      <>
-        <F0Button
-          variant="ghost"
-          size="sm"
-          icon={Plus}
-          label="New Post"
-          onClick={onNewPost}
-        />
-        <F0ButtonDropdown
-          mode="dropdown"
-          variant="neutral"
-          size="sm"
-          tooltip="Show"
-          value={scope}
-          items={COMMUNITY_SCOPES.map((option) => ({ ...option }))}
-          onClick={(value) => onChangeScope(value as CommunityScope)}
-        />
-      </>
-    ),
+    headerActions: [{ icon: Plus, label: "New Post", onClick: onNewPost }],
+    headerSelect: {
+      tooltip: "Show",
+      value: scope,
+      options: COMMUNITY_SCOPES.map((option) => ({ ...option })),
+      onChange: (value) => onChangeScope(value as CommunityScope),
+    },
     actions: [
       { label: "Mark all as read", icon: Check, onClick: () => {} },
       { label: "Notification settings", icon: Settings, onClick: () => {} },
@@ -1138,22 +1136,22 @@ const communitiesWidget = ({
     slots: [
       {
         visualization: "community-posts",
+        // NO POSTS HERE. Which ones to draw is the scope the card is showing,
+        // and the card hands that to the renderer (`ctx.selection`) — so the
+        // slot carries only what the renderer cannot work out for itself.
         params: {
-          posts: postsForScope(scope).map((post) => ({
-            ...post,
-            // No `href`: the post opens OVER the Home rather than navigating away
-            // from it, so the feed you were reading is still behind the dialog and
-            // still where you left it.
-            onClick: () => onOpenPost(post.id),
-          })),
+          // No `href`: a post opens OVER the Home rather than navigating away
+          // from it, so the feed you were reading is still behind the dialog and
+          // still where you left it.
+          onOpenPost,
         },
       },
     ],
   })
 
-/** What the bespoke `community-posts` slot carries. */
+/** What the bespoke `community-posts` slot carries — which posts is `ctx`'s. */
 interface CommunityPostsParams {
-  posts: CommunityPostSummary[]
+  onOpenPost: (id: string) => void
 }
 
 /* ============================ add-widget catalog ============================ */

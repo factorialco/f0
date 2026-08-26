@@ -13,6 +13,7 @@ import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useD
 import type {
   DashboardCollectionItem,
   F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
@@ -25,6 +26,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -44,6 +46,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   editMode,
   handleDelete,
   onAskAi,
+  onAskAiTarget,
   isFullscreen,
   onFullscreenChange,
 }: CollectionItemProps<Filters>) {
@@ -131,6 +134,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       editMode={editMode}
       handleDelete={handleDelete}
       onAskAi={onAskAi}
+      onAskAiTarget={onAskAiTarget}
       itemId={item.id}
       isFullscreen={isFullscreen}
       onFullscreenChange={onFullscreenChange}
