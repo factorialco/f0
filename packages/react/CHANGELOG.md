@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.59.0](https://github.com/factorialco/f0/compare/f0-react-v6.58.0...f0-react-v6.59.0) (2026-08-26)
+
+
+### Features
+
+* **F0CarouselDialog:** export it ([#5256](https://github.com/factorialco/f0/issues/5256)) ([8c6bda4](https://github.com/factorialco/f0/commit/8c6bda49fb62742a509b27ef7ffe5225f0c0c9dc))
+
 ## [6.58.0](https://github.com/factorialco/f0/compare/f0-react-v6.57.2...f0-react-v6.58.0) (2026-08-26)
 
 
