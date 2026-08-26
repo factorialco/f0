@@ -3,15 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
-import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import {
-  F0Select,
-  type F0SelectItemProps,
-  type F0SelectProps,
-  selectSizes,
-} from "../index"
+import { F0Select, type F0SelectItemProps, type F0SelectProps } from "../index"
 
 type Role = "owner" | "editor" | "viewer"
 
@@ -41,12 +35,6 @@ const longRoleOptions: F0SelectItemProps<Role>[] = roleOptions.map((option) =>
         label: "Viewer with a deliberately long access-level label",
       }
 )
-
-const verboseRoleOptions: F0SelectItemProps<Role>[] = [
-  { value: "owner", label: "Can manage access and change every role" },
-  { value: "editor", label: "Can view and edit this policy" },
-  { value: "viewer", label: "This person can only view this policy" },
-]
 
 type InlineRoleSelectProps = {
   value?: Role
@@ -141,26 +129,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Variants: Story = {
-  tags: ["no-sidebar"],
-  args: {},
-  render: () => (
-    <div className="flex w-[330px] flex-col gap-6">
-      <F0Select
-        variant="field"
-        label="Policy access level"
-        options={roleOptions}
-        value="viewer"
-        onChange={fn()}
-      />
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm">Policy access level</span>
-        <InlineRoleSelect value="viewer" />
-      </div>
-    </div>
-  ),
-}
-
 export const ViewerSelected: Story = {
   args: {
     value: "viewer",
@@ -246,21 +214,6 @@ export const LongLabel: Story = {
   ],
 }
 
-export const ConciseRoleLabels: Story = {
-  tags: ["no-sidebar"],
-  args: {
-    value: "viewer",
-  },
-}
-
-export const VerboseRoleLabels: Story = {
-  tags: ["no-sidebar"],
-  args: {
-    value: "viewer",
-    options: verboseRoleOptions,
-  },
-}
-
 export const Open: Story = {
   args: {
     value: "viewer",
@@ -296,107 +249,28 @@ export const Snapshot: Story = {
   args: {},
   parameters: withSnapshot({ a11y: { test: "todo" } }),
   render: () => (
-    <div className="flex items-start gap-10 p-4">
-      <section className="flex w-[330px] flex-col gap-4">
-        <h4 className="text-lg font-semibold">Field</h4>
-        {selectSizes.map((size) => (
-          <div key={size} className="flex flex-col gap-4">
-            <F0Select
-              size={size}
-              label={`Field ${size}`}
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Disabled field ${size}`}
-              disabled
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Required field ${size}`}
-              required
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Error field ${size}`}
-              error="Error message"
-              icon={Placeholder}
-              labelIcon={Placeholder}
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Warning field ${size}`}
-              status={{ type: "warning", message: "Warning message" }}
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Info field ${size}`}
-              status={{ type: "info", message: "Info message" }}
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Status error field ${size}`}
-              status={{ type: "error", message: "Error message" }}
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Hidden label field ${size}`}
-              hideLabel
-              onChange={fn()}
-              options={[]}
-            />
-            <F0Select
-              size={size}
-              label={`Hint field ${size}`}
-              hint="Hint message"
-              onChange={fn()}
-              options={[]}
-            />
-          </div>
-        ))}
-      </section>
-
-      <section className="flex min-w-[360px] flex-col gap-4">
-        <h4 className="text-lg font-semibold">Inline</h4>
-        <InlineRoleSelect value="viewer" />
-        <InlineRoleSelect />
-        <InlineRoleSelect value="viewer" disabled />
-        <div className="w-48">
-          <InlineRoleSelect value="viewer" options={longRoleOptions} />
+    <div className="flex min-w-[360px] flex-col gap-4 p-4">
+      <InlineRoleSelect value="viewer" />
+      <InlineRoleSelect />
+      <InlineRoleSelect value="viewer" disabled />
+      <div className="w-48">
+        <InlineRoleSelect value="viewer" options={longRoleOptions} />
+      </div>
+      <div className="dark flex items-center gap-4 rounded-md bg-f1-background p-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-f1-foreground-secondary">Enabled</span>
+          <InlineRoleSelect value="viewer" label="Enabled access level" />
         </div>
-        <div className="dark flex items-center gap-4 rounded-md bg-f1-background p-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-f1-foreground-secondary">
-              Enabled
-            </span>
-            <InlineRoleSelect value="viewer" label="Enabled access level" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-f1-foreground-secondary">
-              Disabled
-            </span>
-            <InlineRoleSelect
-              value="viewer"
-              label="Disabled access level"
-              disabled
-            />
-          </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-f1-foreground-secondary">Disabled</span>
+          <InlineRoleSelect
+            value="viewer"
+            label="Disabled access level"
+            disabled
+          />
         </div>
-        <OpenInlineRoleSelect value="viewer" actions={[removeAccessAction]} />
-      </section>
+      </div>
+      <OpenInlineRoleSelect value="viewer" actions={[removeAccessAction]} />
     </div>
   ),
 }

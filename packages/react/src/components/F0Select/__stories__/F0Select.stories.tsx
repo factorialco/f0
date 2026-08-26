@@ -11,8 +11,9 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
-import { Appearance, Circle, Desktop, Plus } from "@/icons/app"
+import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Select, selectSizes, selectVariants } from "../index"
 import {
@@ -55,13 +56,13 @@ const meta: Meta = {
   component: F0Select,
   parameters: {
     a11y: {
-      skipCi: true,
+      test: "todo",
     },
     docs: {
       description: {
         component:
-          "<p>Renders an select input field with a list of options to choose from.</p>" +
-          "<p>The list is virtualized so can handle large amount of items</p>" +
+          "<p>Renders a select input field with a list of options to choose from.</p>" +
+          "<p>The list is virtualized so it can handle a large number of items.</p>" +
           '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> is accessible but visually hidden.</p>' +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
@@ -343,7 +344,7 @@ const meta: Meta = {
       </div>
     ),
   ],
-  tags: ["!autodocs", "experimental"],
+  tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof F0Select>
 
 export default meta
@@ -1492,5 +1493,81 @@ export const WithOnCreate: Story = {
         }, 500)
       })
     },
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({
+    a11y: {
+      test: "error",
+    },
+  }),
+  args: {
+    label: "Label text here",
+  },
+  render: () => {
+    const base = {
+      multiple: false as const,
+      clearable: true,
+      icon: Placeholder,
+      labelIcon: Placeholder,
+      label: "Label text here",
+    }
+    const snapshotVariants = [
+      { name: "Default", props: { ...base } },
+      { name: "Disabled", props: { ...base, disabled: true } },
+      { name: "Required", props: { ...base, required: true } },
+      { name: "Hidden label", props: { ...base, hideLabel: true } },
+      { name: "Legacy error", props: { ...base, error: "Error message" } },
+      {
+        name: "Error status",
+        props: {
+          ...base,
+          status: { type: "error" as const, message: "Error message" },
+        },
+      },
+      {
+        name: "Warning status",
+        props: {
+          ...base,
+          status: { type: "warning" as const, message: "Warning message" },
+        },
+      },
+      {
+        name: "Info status",
+        props: {
+          ...base,
+          status: { type: "info" as const, message: "Info message" },
+        },
+      },
+      { name: "Hint", props: { ...base, hint: "Hint message" } },
+    ]
+    return (
+      <div className="flex flex-col gap-4">
+        {selectSizes.map((size) => (
+          <section key={size}>
+            <h2 className="mb-3 text-lg font-semibold">Size: {size}</h2>
+            <div className="flex flex-col gap-4">
+              <F0Select
+                size={size}
+                label={`Empty select, ${size}`}
+                onChange={fn()}
+                options={[]}
+              />
+              {snapshotVariants.map((variant) => (
+                <F0Select
+                  key={`${size}-${variant.name}`}
+                  size={size}
+                  {...variant.props}
+                  label={`${variant.name} select, ${size}`}
+                  onChange={fn()}
+                  options={[]}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
   },
 }
