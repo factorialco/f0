@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.60.1](https://github.com/factorialco/f0/compare/f0-react-v6.60.0...f0-react-v6.60.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **one-data-collection:** keep defaultExpanded across revisits and tree resets ([#5231](https://github.com/factorialco/f0/issues/5231)) ([9d093e7](https://github.com/factorialco/f0/commit/9d093e7171e11a52805f8438bbd4fc78ff948def))
+
 ## [6.60.0](https://github.com/factorialco/f0/compare/f0-react-v6.59.0...f0-react-v6.60.0) (2026-08-26)
 
 
