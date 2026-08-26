@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.57.1](https://github.com/factorialco/f0/compare/f0-react-v6.57.0...f0-react-v6.57.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **DateNavigator:** keep periods out of the shared granularity key ([#5241](https://github.com/factorialco/f0/issues/5241)) ([095c5d1](https://github.com/factorialco/f0/commit/095c5d13a2520d92b24dd073dae5a26892ca8ef6))
+
 ## [6.57.0](https://github.com/factorialco/f0/compare/f0-react-v6.56.0...f0-react-v6.57.0) (2026-08-26)
 
 
