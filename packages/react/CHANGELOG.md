@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.56.0](https://github.com/factorialco/f0/compare/f0-react-v6.55.0...f0-react-v6.56.0) (2026-08-26)
+
+
+### Features
+
+* **OneDataCollection:** keep every loaded children page live and replaceable ([#5245](https://github.com/factorialco/f0/issues/5245)) ([5d81b32](https://github.com/factorialco/f0/commit/5d81b32b4e55b5dd548d9f648994b22cd39d1116))
+
 ## [6.55.0](https://github.com/factorialco/f0/compare/f0-react-v6.54.3...f0-react-v6.55.0) (2026-08-26)
 
 
