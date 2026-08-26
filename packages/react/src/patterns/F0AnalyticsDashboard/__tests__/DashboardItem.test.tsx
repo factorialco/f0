@@ -10,6 +10,7 @@ import {
   AiChatStateProvider,
   useAiChat,
 } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
@@ -184,14 +185,25 @@ describe("DashboardItem — description action", () => {
     // stops meaning anything.
     beforeEach(() => localStorage.clear())
 
-    const QuoteProbe = () => {
+    const QuoteProbe = ({
+      onCapture,
+    }: {
+      onCapture?: (quote: PendingQuote | null) => void
+    } = {}) => {
       const { pendingQuote, open } = useAiChat()
       return (
-        <span
-          data-testid="probe"
-          data-quote={pendingQuote?.text ?? ""}
-          data-open={String(open)}
-        />
+        <>
+          <span
+            data-testid="probe"
+            data-quote={pendingQuote?.text ?? ""}
+            data-open={String(open)}
+          />
+          {onCapture && (
+            <button type="button" onClick={() => onCapture(pendingQuote)}>
+              Capture pending quote
+            </button>
+          )}
+        </>
       )
     }
 
@@ -202,14 +214,18 @@ describe("DashboardItem — description action", () => {
     }
 
     it("offers the action and hands the widget to the chat", async () => {
+      const onAskAiTarget = vi.fn()
+      const capturePendingQuote = vi.fn()
       const onFullscreenChange = vi.fn()
       render(
         <AiChatStateProvider enabled>
-          <QuoteProbe />
+          <QuoteProbe onCapture={capturePendingQuote} />
           <DashboardItem
             title="Headcount by workplace"
+            itemId="headcount"
             isLoading={false}
             isFullscreen
+            onAskAiTarget={onAskAiTarget}
             onFullscreenChange={onFullscreenChange}
           >
             <div>Content</div>
@@ -224,11 +240,22 @@ describe("DashboardItem — description action", () => {
       expect(probe).toHaveAttribute("data-quote", "Headcount by workplace")
       // Opens the chat too — otherwise the quote lands somewhere unseen.
       expect(probe).toHaveAttribute("data-open", "true")
-      expect(onFullscreenChange).toHaveBeenCalledWith(false)
+      expect(onAskAiTarget).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+        quote: { text: "Headcount by workplace" },
+      })
       // The composer is not mounted in this harness. Radix must keep its
       // normal restoration instead of dropping focus on document.body while
       // the provider buffers the request.
       await waitFor(() => expect(trigger).toHaveFocus())
+      await userEvent.click(
+        screen.getByRole("button", { name: "Capture pending quote" })
+      )
+      expect(capturePendingQuote.mock.calls[0][0]).toBe(
+        onAskAiTarget.mock.calls[0][0].quote
+      )
+      expect(onFullscreenChange).toHaveBeenCalledWith(false)
     })
 
     it("is absent without a chat provider, where the setters are inert", async () => {
@@ -251,6 +278,7 @@ describe("DashboardItem — description action", () => {
 
     it("hands the widget to the host instead, when it takes the action", async () => {
       const onAskAi = vi.fn()
+      const onAskAiTarget = vi.fn()
       const onFullscreenChange = vi.fn()
       render(
         <AiChatStateProvider enabled>
@@ -261,6 +289,7 @@ describe("DashboardItem — description action", () => {
             isLoading={false}
             isFullscreen
             onAskAi={onAskAi}
+            onAskAiTarget={onAskAiTarget}
             onFullscreenChange={onFullscreenChange}
           >
             <div>Content</div>
@@ -275,6 +304,7 @@ describe("DashboardItem — description action", () => {
         id: "headcount",
         title: "Headcount by workplace",
       })
+      expect(onAskAiTarget).not.toHaveBeenCalled()
       // The chat is left alone entirely — the host may not even be sending the
       // widget there, so quoting into it would be a second, unasked-for action.
       const probe = screen.getByTestId("probe")

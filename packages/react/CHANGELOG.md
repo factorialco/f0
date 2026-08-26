@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.55.0](https://github.com/factorialco/f0/compare/f0-react-v6.54.3...f0-react-v6.55.0) (2026-08-26)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** expose widget, point, and drag Ask One targets ([#5239](https://github.com/factorialco/f0/issues/5239)) ([bb1b0ab](https://github.com/factorialco/f0/commit/bb1b0ab8bb39808c3897ba151794ae27e56187f1))
+
+## [6.54.3](https://github.com/factorialco/f0/compare/f0-react-v6.54.2...f0-react-v6.54.3) (2026-08-25)
+
+
+### Bug Fixes
+
+* **useSelectable:** keep pre-selected multi-select values checked when their option loads first ([#4933](https://github.com/factorialco/f0/issues/4933)) ([861614f](https://github.com/factorialco/f0/commit/861614fc78cd7b0548f37cbe3e2f7526ee4cc141))
+
 ## [6.54.2](https://github.com/factorialco/f0/compare/f0-react-v6.54.1...f0-react-v6.54.2) (2026-08-25)
 
 

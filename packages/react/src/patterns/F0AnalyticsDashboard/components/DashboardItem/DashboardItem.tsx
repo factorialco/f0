@@ -1,6 +1,9 @@
 import { useRef, useState, type ReactNode } from "react"
 
-import type { F0AnalyticsDashboardAskAiTarget } from "../../types"
+import type {
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+} from "../../types"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
@@ -64,6 +67,8 @@ interface DashboardItemProps {
    * needs a chat to be mounted at all.
    */
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  /** Observes the built-in chat action without replacing it. */
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
   /** Chart type transform options — rendered as a toggle group in the dropdown */
@@ -122,6 +127,7 @@ export function DashboardItem({
   editMode,
   handleDelete,
   onAskAi,
+  onAskAiTarget,
   itemId,
   chartTypeOptions,
   explanation,
@@ -186,7 +192,9 @@ export function DashboardItem({
     // over — same reason the delete action does.
     if (isFullscreen) onFullscreenChange?.(false)
     shouldFocusChatAfterMenuRef.current = true
-    setPendingQuote({ text: title })
+    const quote = { text: title }
+    if (itemId) onAskAiTarget?.({ id: itemId, title, quote })
+    setPendingQuote(quote)
     setAiChatOpen(true)
   }
 
