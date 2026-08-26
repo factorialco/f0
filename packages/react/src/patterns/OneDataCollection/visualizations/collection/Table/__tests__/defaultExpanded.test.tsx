@@ -358,6 +358,162 @@ describe("TableCollection defaultExpanded", () => {
   })
 
   /**
+   * A filter/sorting/navigation change resets the tree (see `useLoadChildren`),
+   * so the policy must apply again and the new view come back expanded — the
+   * behaviour `defaultExpanded`'s own docstring promises. The regression this
+   * guards: the reset wiped the children but left the row open and, because its
+   * "already asked for default children" flag was a one-shot boolean, the row
+   * never re-fetched — an open row with nothing under it, rendering as collapsed.
+   */
+  describe("re-applies the policy on a tree reset", () => {
+    const element = (source: TestSource) => (
+      <TableCollection<
+        Node,
+        FiltersDefinition,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Node>,
+        NavigationFiltersDefinition,
+        GroupingDefinition<Node>
+      >
+        columns={columns}
+        source={source}
+        defaultExpanded
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    it("re-fetches children and stays expanded after a sorting change", async () => {
+      const byId = indexTree(TREE)
+      const fetchChildren = vi.fn(({ item }: { item: Node }) => ({
+        records: byId.get(item.id)?.children ?? [],
+      }))
+      const base = createSource(TREE, fetchChildren)
+
+      const { rerender } = render(element(base))
+
+      await waitFor(() =>
+        expect(screen.getByText("Junior")).toBeInTheDocument()
+      )
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      // One fetch per opened parent (Engineering, Backend, Backend Engineer).
+      expect(fetchChildren).toHaveBeenCalledTimes(3)
+
+      // A genuine sorting change: same source, a new `currentSortings` identity,
+      // with filters and navigation kept as the same references so sorting is
+      // the only thing that changed.
+      const sorted = {
+        ...base,
+        currentSortings: { field: "name", order: "asc" },
+      } as unknown as TestSource
+      rerender(element(sorted))
+
+      // The reset wiped the children; the policy re-applies and the opened rows
+      // re-fetch, so the deepest level is visible again.
+      await waitFor(() =>
+        expect(fetchChildren.mock.calls.length).toBeGreaterThan(3)
+      )
+      expect(screen.getByText("Junior")).toBeInTheDocument()
+    })
+
+    it("re-fetches the full child set after a filter is applied then cleared", async () => {
+      const kids: Node[] = [
+        { id: "bcn", name: "Sales Barcelona", kind: "role" },
+        { id: "online", name: "Sales Online", kind: "role" },
+        { id: "reps", name: "Sales Representatives", kind: "role" },
+        { id: "valencia", name: "Sales Valencia", kind: "role" },
+      ]
+      const sales: Node = { id: "sales", name: "Sales", kind: "category" }
+      // A leaf team before Sales, filtered out when a filter is active — so the
+      // matching-only view shifts Sales' row index, exactly like the real list.
+      const design: Node = { id: "design", name: "Design", kind: "category" }
+
+      const hasFilter = (filters?: Record<string, unknown>) =>
+        !!filters && Object.keys(filters).length > 0
+
+      // Root and children both depend on the active filter, async like GraphQL.
+      const fetchChildren = vi.fn(
+        ({
+          item,
+          filters,
+        }: {
+          item: Node
+          filters?: Record<string, unknown>
+        }) =>
+          item.id === "sales"
+            ? Promise.resolve({
+                records: hasFilter(filters) ? [kids[2]] : kids,
+              })
+            : Promise.resolve({ records: [] })
+      )
+      const source = {
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+        itemsWithChildren: (item: Node) => item.id === "sales",
+        fetchChildren,
+        dataAdapter: {
+          paginationType: "pages",
+          fetchData: async ({
+            filters,
+          }: {
+            filters?: Record<string, unknown>
+          }) => {
+            const records = hasFilter(filters) ? [sales] : [design, sales]
+            return {
+              records,
+              type: "pages",
+              total: records.length,
+              perPage: 20,
+              currentPage: 1,
+              pagesCount: 1,
+            }
+          },
+        },
+      } as unknown as TestSource
+
+      const { rerender } = render(element(source))
+
+      await waitFor(() =>
+        expect(screen.getByText("Sales Valencia")).toBeInTheDocument()
+      )
+
+      // Apply a filter → only the matching sub-team remains, Sales moves up.
+      rerender(
+        element({
+          ...source,
+          currentFilters: { name: ["Samantha"] },
+        } as TestSource)
+      )
+      await waitFor(() =>
+        expect(screen.getByText("Sales Representatives")).toBeInTheDocument()
+      )
+      expect(screen.queryByText("Sales Valencia")).toBeNull()
+
+      // Clear the filter → the full set must come back, not the filtered subset.
+      rerender(element({ ...source, currentFilters: {} } as TestSource))
+      await waitFor(() =>
+        expect(screen.getByText("Sales Valencia")).toBeInTheDocument()
+      )
+      expect(screen.getByText("Sales Barcelona")).toBeInTheDocument()
+      expect(screen.getByText("Sales Online")).toBeInTheDocument()
+    })
+  })
+
+  /**
    * The provider used to be swapped for a `Fragment` on flat tables; it is now
    * mounted unconditionally so it can take the policy as a prop.
    */

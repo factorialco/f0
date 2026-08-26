@@ -98,8 +98,19 @@ const makeSource = (perPage: number) => {
   }
 }
 
+// The provider owns reset detection now, so a test triggers a tree reset by
+// changing the filters the provider sees here (which bumps its reset
+// generation) — mirroring how the table wires the live filters into it.
+let providerFilters: object = {}
+
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <NestedDataProvider>{children}</NestedDataProvider>
+  <NestedDataProvider
+    currentFilters={providerFilters}
+    currentSortings={undefined}
+    currentNavigationFilters={undefined}
+  >
+    {children}
+  </NestedDataProvider>
 )
 
 const renderLoadChildren = (
@@ -111,7 +122,6 @@ const renderLoadChildren = (
         rowId: "row-0",
         item: PARENT,
         source: currentSource,
-        onClearFetchedData: () => {},
       }),
     { initialProps: { source }, wrapper }
   )
@@ -122,6 +132,7 @@ describe("useLoadChildren", () => {
   beforeEach(() => {
     fake = makeSource(2)
     fake.setChildren([row("a"), row("b"), row("c"), row("d"), row("e")])
+    providerFilters = {}
   })
 
   const ids = (children: Row[]) => children.map((child) => child.id)
@@ -220,6 +231,8 @@ describe("useLoadChildren", () => {
     await act(async () => void result.current.loadChildren())
     await act(async () => void result.current.loadChildren())
 
+    // The provider detects the filter change and bumps its reset generation.
+    providerFilters = { team: ["a"] }
     await act(async () =>
       rerender({ source: fake.source({ team: ["a"] }, {}) })
     )

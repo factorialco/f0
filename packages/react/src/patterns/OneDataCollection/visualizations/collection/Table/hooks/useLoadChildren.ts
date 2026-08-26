@@ -41,7 +41,6 @@ interface UseLoadChildrenProps<
     NavigationFilters,
     Grouping
   >
-  onClearFetchedData: () => void
 }
 
 const isDetailed = <R extends RecordType>(
@@ -80,7 +79,6 @@ export const useLoadChildren = <
   rowId,
   item,
   source,
-  onClearFetchedData,
 }: UseLoadChildrenProps<
   R,
   Filters,
@@ -93,7 +91,7 @@ export const useLoadChildren = <
   const {
     fetchedData: nestedFetchedData,
     updateFetchedData,
-    clearFetchedData,
+    resetGeneration,
   } = useNestedDataContext<R>()
 
   const restoredData = nestedFetchedData?.[rowId]
@@ -133,46 +131,35 @@ export const useLoadChildren = <
     new Map()
   )
 
-  const previousFiltersRef = useRef(source.currentFilters)
-  const previousSortingsRef = useRef(source.currentSortings)
-  const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
-
+  // The tree reset (filter/sorting/navigation change) is detected once, in the
+  // NestedDataProvider — which survives rows unmounting and remounting as the
+  // list re-renders, unlike a per-row comparison that re-seeds on remount and
+  // would leave a fresh row showing the previous filter's cached children. Here
+  // we only drop this row's local state when the generation moves, so the still
+  // open row re-fetches (NestedRow re-arms its default-children request on the
+  // same generation) instead of keeping the stale children.
+  const previousResetGenerationRef = useRef(resetGeneration)
   useEffect(() => {
-    const filtersChanged = previousFiltersRef.current !== source.currentFilters
-    const sortingsChanged =
-      previousSortingsRef.current !== source.currentSortings
-    const navigationFiltersChanged =
-      previousNavigationFiltersRef.current !== source.currentNavigationFilters
+    if (previousResetGenerationRef.current === resetGeneration) return
+    previousResetGenerationRef.current = resetGeneration
 
-    if (filtersChanged || sortingsChanged || navigationFiltersChanged) {
-      subscriptionsRef.current.forEach((subscription) =>
-        subscription.unsubscribe()
-      )
-      subscriptionsRef.current.clear()
-      pagesRef.current.clear()
-      frontierRef.current = {
-        page: 0,
-        type: "basic",
-        paginationInfo: undefined,
-      }
-
-      setChildren([])
-      setPaginationInfo(undefined)
-      setChildrenType("basic")
-      clearFetchedData()
-      onClearFetchedData()
-
-      previousFiltersRef.current = source.currentFilters
-      previousSortingsRef.current = source.currentSortings
-      previousNavigationFiltersRef.current = source.currentNavigationFilters
+    // Drop every live page: their subscriptions belong to the previous query and
+    // must not re-emit into the reset tree (see the per-page notes above).
+    subscriptionsRef.current.forEach((subscription) =>
+      subscription.unsubscribe()
+    )
+    subscriptionsRef.current.clear()
+    pagesRef.current.clear()
+    frontierRef.current = {
+      page: 0,
+      type: "basic",
+      paginationInfo: undefined,
     }
-  }, [
-    source.currentFilters,
-    source.currentSortings,
-    source.currentNavigationFilters,
-    clearFetchedData,
-    onClearFetchedData,
-  ])
+
+    setChildren([])
+    setPaginationInfo(undefined)
+    setChildrenType("basic")
+  }, [resetGeneration])
 
   const processChildrenData = useCallback(
     (page: number, data: ChildrenResponse<R> | undefined) => {
