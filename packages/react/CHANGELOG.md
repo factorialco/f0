@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.55.0](https://github.com/factorialco/f0/compare/f0-react-v6.54.3...f0-react-v6.55.0) (2026-08-26)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** expose widget, point, and drag Ask One targets ([#5239](https://github.com/factorialco/f0/issues/5239)) ([bb1b0ab](https://github.com/factorialco/f0/commit/bb1b0ab8bb39808c3897ba151794ae27e56187f1))
+
 ## [6.54.3](https://github.com/factorialco/f0/compare/f0-react-v6.54.2...f0-react-v6.54.3) (2026-08-25)
 
 
