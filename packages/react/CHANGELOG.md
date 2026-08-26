@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.61.0](https://github.com/factorialco/f0/compare/f0-react-v6.60.1...f0-react-v6.61.0) (2026-08-26)
+
+
+### Features
+
+* **ComboChart:** fade the legend swatch of projected series ([#5264](https://github.com/factorialco/f0/issues/5264)) ([0c3d5f1](https://github.com/factorialco/f0/commit/0c3d5f1be10de672497b28482751f62c3a2531d1))
+
 ## [6.60.1](https://github.com/factorialco/f0/compare/f0-react-v6.60.0...f0-react-v6.60.1) (2026-08-26)
 
 
