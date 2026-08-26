@@ -1,36 +1,7 @@
 {
   "note": "Untranslated user-visible copy in packages/react/src — string literals that should come from the i18n layer (src/lib/providers/i18n) instead. Enforced by .scripts/check-untranslated-copy.ts. This list may only shrink: translate a string and remove it from here (or run \"--update\"), never add one.",
-  "total": 158,
+  "total": 133,
   "files": {
-    "src/component-status/A11yRow.tsx": [
-      "Accessibility",
-      "Accessibility",
-      "Accessibility",
-      "Check the rendered stories",
-      "Checked in each story’s default state — violations behind interactions (open menus, dialogs) aren’t shown here. CI enforces the full set, including play-function states.",
-      "Checking the rendered stories…",
-      "Live results are available on the Storybook docs page. See the story’s",
-      "No violations in the stories’ default state.",
-      "tab for per-element detail.",
-      "· WCAG"
-    ],
-    "src/component-status/component-status.ts": [
-      "A \"when not to use\" section",
-      "A Storybook play function (interaction test) covering the primary user flow.",
-      "Accessibility enforced",
-      "At least three named example stories",
-      "DoDont examples with realistic Factorial copy",
-      "Docs at the Good tier build on the Acceptable base and add:",
-      "Has MDX documentation",
-      "Has Storybook stories",
-      "Has a play function",
-      "Has a visual snapshot story",
-      "Has unit tests",
-      "Named with the \"F0\" prefix",
-      "No tag",
-      "Required sections (Anatomy, Guidelines, Accessibility) and a props table"
-    ],
-    "src/component-status/ComponentStability.tsx": ["Maturity level"],
     "src/components/F0Card/components/CardMetadata.tsx": [
       "Unsupported property type:"
     ],
