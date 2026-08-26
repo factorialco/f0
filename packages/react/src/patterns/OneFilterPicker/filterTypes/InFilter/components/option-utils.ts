@@ -37,9 +37,7 @@ export function hasSelectedDescendant<T>(
   return false
 }
 
-/**
- * Collects the nested child filter keys reachable from an option tree.
- */
+/** Nested child filter keys reachable from an option tree. */
 export function collectNestedFilterKeysFromOptions<T>(
   options: InFilterOptionItem<T>[] | undefined
 ): string[] {
@@ -60,14 +58,10 @@ export function collectNestedFilterKeysFromOptions<T>(
 }
 
 /**
- * All nested child filter keys of an InFilter, used to decide whether a parent
- * filter holds selections through its children (active indicator, selected
- * count, clearing).
- *
- * The keys must be knowable without the options at hand, because the filter
- * list and the chips render before the filter is ever opened. Three sources,
- * in decreasing reliability: the `nestedFilterKeys` declared in the schema,
- * literal option arrays, and the options resolved by a previous load.
+ * Nested child filter keys of an InFilter. The filter list and the chips render
+ * before the filter is ever opened, so the keys have to be resolvable without
+ * the options: declared in the schema, listed literally, or left over in the
+ * cache from a previous load.
  */
 export function collectNestedFilterKeys<T>(
   schema: FilterTypeSchema<InFilterOptions<T>>

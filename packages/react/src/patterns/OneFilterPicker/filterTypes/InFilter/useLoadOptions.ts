@@ -22,11 +22,7 @@ export function getCacheKey<T, R extends RecordType = RecordType>(
   return JSON.stringify(schema)
 }
 
-/**
- * Resolved options for a schema, if they have been loaded at least once.
- * Lets callers outside the filter body (filter list, chip removal) inspect the
- * option tree without triggering a load.
- */
+/** Options a previous load resolved for a schema, without triggering one. */
 export function getCachedOptions<T>(
   cacheKey: string
 ): InFilterOptionItem<T>[] | undefined {

@@ -168,8 +168,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     [hasSource, options, searchTermLower]
   )
 
-  // The schema alone only knows the nested keys it declares or lists literally;
-  // the loaded options add the ones that were still unresolved at that point.
   const nestedFilterKeys = useMemo(
     () => [
       ...new Set([

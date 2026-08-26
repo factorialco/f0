@@ -37,10 +37,8 @@ export type InFilterOptionItem<T = unknown> = {
 export type InFilterOptions<T, _R extends RecordType = RecordType> = {
   cache?: boolean
   /**
-   * Filter keys where nested child selections are stored, declared up front.
-   * Only needed when `options` is async or comes from a `source`: the picker
-   * has to know the nested keys to track child selections (active dot, counts,
-   * clearing) before — or without ever — loading the options.
+   * Filter keys holding nested child selections. Only needed for async or
+   * `source` options, which the picker can't walk to discover them.
    */
   nestedFilterKeys?: string[]
   /**

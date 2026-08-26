@@ -9,13 +9,9 @@ import type { FiltersDefinition } from "../types"
 import { OneFilterPicker } from "../index"
 
 /**
- * A nested ("in" filter with children) filter whose options arrive from an async
- * loader can't have its nested child keys read off the definition. Without them
- * the picker treats the parent as empty: no active dot, no count, nothing to
- * clear or to drop along with the chip — even though the child key holds values.
- *
- * `nestedFilterKeys` declares those keys up front so every one of those branches
- * works before (and without) the options ever being loaded.
+ * With async options the picker can't walk the tree to find the nested child
+ * keys, so it used to treat the parent as empty: no active dot, no count,
+ * nothing to clear or to drop with the chip. `nestedFilterKeys` declares them.
  */
 const officeOptions = [
   {
@@ -114,7 +110,6 @@ describe("OneFilterPicker - nested filters with async options", () => {
     await openPicker(user)
     await user.click(screen.getByRole("button", { name: "Office" }))
 
-    // With a nested selection the toggle is indeterminate, so it clears.
     await user.click(
       await screen.findByRole("checkbox", { name: /select all/i })
     )
