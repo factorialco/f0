@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  annotations,
   buildDebtFile,
   check,
+  commentMarkdown,
   type DebtFile,
   type Finding,
   findInSource,
+  fixHint,
   isExcludedPath,
   isTextBearingName,
   readsAsCopy,
   readsAsProse,
+  scan,
+  suggestKey,
 } from "../check-untranslated-copy"
 
 /** Shorthand: scan a .tsx snippet and return `name = "value"` strings. */
@@ -350,5 +355,106 @@ describe("buildDebtFile", () => {
     const findings = [finding(), finding({ value: "Discard", line: 2 })]
 
     expect(check(findings, buildDebtFile(findings)).added).toEqual([])
+  })
+})
+
+describe("suggesting an existing key", () => {
+  const index = new Map([
+    ["close", ["actions.close", "chat.closePreview"]],
+    ["last 7 days", ["date.presets.last7Days"]],
+    ["next", ["navigation.next", "ai.clarifyingQuestion.next"]],
+  ])
+
+  it("finds a key whose English matches, case-insensitively", () => {
+    expect(suggestKey("Close", index)).toBe("actions.close")
+    expect(suggestKey("last 7 DAYS", index)).toBe("date.presets.last7Days")
+  })
+
+  it("prefers the shallowest key when several hold the same English", () => {
+    expect(suggestKey("Next", index)).toBe("navigation.next")
+  })
+
+  it("returns nothing for a string the dictionary has never seen", () => {
+    expect(suggestKey("Nothing here yet", index)).toBeUndefined()
+  })
+
+  it("attaches real keys from the shipped dictionary during a scan", () => {
+    // Guards the wiring, not any specific key.
+    const withKeys = scan().filter((f) => f.existingKey)
+
+    expect(withKeys.length).toBeGreaterThan(0)
+    for (const f of withKeys) expect(f.existingKey).toMatch(/^[a-zA-Z]+\./)
+  })
+})
+
+describe("CI surfaces", () => {
+  const added = (over: Partial<Finding> = {}): Finding =>
+    finding({ file: "src/ui/Lane/Lane.tsx", line: 19, ...over })
+
+  it("anchors the annotation to the repo-relative path and line", () => {
+    const [line] = annotations([added()])
+
+    expect(line).toContain("::error file=packages/react/src/ui/Lane/Lane.tsx,")
+    expect(line).toContain("line=19,")
+    expect(line).toContain("title=Untranslated copy::")
+  })
+
+  // A newline mid-annotation would truncate it and GitHub would drop the rest,
+  // so wrapped JSX text has to survive capture as a single line.
+  it("stays on one line even when the source string spans several", () => {
+    const wrapped = findInSource(
+      "src/probe.tsx",
+      "const A = () => <p>\n  A sentence that the formatter\n  wrapped over lines.\n</p>"
+    )
+
+    expect(wrapped).toHaveLength(1)
+    expect(annotations(wrapped)[0].split("\n")).toHaveLength(1)
+  })
+
+  it("names the existing key in the annotation when there is one", () => {
+    const [line] = annotations([
+      added({ value: "Close", existingKey: "actions.close" }),
+    ])
+
+    expect(line).toContain("actions.close")
+    expect(line).toContain("A key for this already exists")
+  })
+
+  it("tells you to write a key when none exists", () => {
+    expect(fixHint(added({ value: "Nothing here yet" }))).toContain("Add a key")
+  })
+
+  it("splits the comment into swap-a-key and write-a-key", () => {
+    const md = commentMarkdown({
+      added: [
+        added({ value: "Close", existingKey: "actions.close" }),
+        added({ value: "Nothing here yet", name: "emptyMessage", line: 18 }),
+      ],
+      fixed: {},
+      staleFiles: [],
+      total: 160,
+      baselineTotal: 158,
+    })
+
+    expect(md).toContain("2 untranslated strings added")
+    expect(md).toContain("1 already have a key")
+    expect(md).toContain("`actions.close`")
+    expect(md).toContain("1 needs a new key")
+    expect(md).toContain("`emptyMessage`")
+    // The escape hatch must be discoverable from the comment alone.
+    expect(md).toContain("i18n-exempt")
+  })
+
+  it("posts a passing comment when the PR adds nothing", () => {
+    const md = commentMarkdown({
+      added: [],
+      fixed: {},
+      staleFiles: [],
+      total: 158,
+      baselineTotal: 158,
+    })
+
+    expect(md).toContain("No untranslated copy added")
+    expect(md).not.toContain("|")
   })
 })

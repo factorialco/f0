@@ -154,12 +154,41 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     name: "[⚛️ REACT] Untranslated copy"
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node-pnpm
       # Pure AST scan of src/ — no build or Storybook needed.
+      #
+      # The script emits `::error file=,line=` annotations, which is what puts
+      # each offending string inline on the Files tab. `continue-on-error` lets
+      # the comment step run on failure; the gate step below restores the
+      # failure, so the job still blocks.
       - name: Check the PR adds no untranslated copy
+        id: check
+        continue-on-error: true
         run: pnpm --filter @factorialco/f0-react run check:untranslated-copy
+      - name: Build the PR comment
+        id: comment
+        run: |
+          {
+            echo "body<<COMMENT_BODY_EOF"
+            pnpm --filter @factorialco/f0-react --silent run check:untranslated-copy --comment
+            echo "COMMENT_BODY_EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Comment on the PR
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: untranslated_copy
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.comment.outputs.body }}
+      - name: Fail if untranslated copy was added
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "::error::This PR adds untranslated copy — see the annotations on the Files tab and the PR comment."
+          exit 1
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch

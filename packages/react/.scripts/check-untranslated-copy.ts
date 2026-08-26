@@ -44,6 +44,10 @@
  *   tsx .scripts/check-untranslated-copy.ts --report     # full inventory, exit 0
  *   tsx .scripts/check-untranslated-copy.ts --json       # machine-readable
  *   tsx .scripts/check-untranslated-copy.ts --update     # rewrite the baseline
+ *   tsx .scripts/check-untranslated-copy.ts --comment   # PR-comment markdown
+ *
+ * Under GitHub Actions it also emits `::error file=,line=` annotations, which
+ * is what puts each offending string inline on the PR's Files tab.
  */
 import { spawnSync } from "node:child_process"
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
@@ -52,6 +56,8 @@ import { fileURLToPath } from "node:url"
 
 import consola from "consola"
 import ts from "typescript"
+
+import { defaultTranslations } from "../src/lib/providers/i18n/i18n-provider-defaults"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const SRC_DIR = resolve(PKG_DIR, "src")
@@ -217,6 +223,48 @@ export interface Finding {
   name: string
   value: string
   kind: FindingKind
+  /**
+   * A dictionary key whose English value is exactly this string, when one
+   * already exists. Roughly 40% of findings have one: the key was written, then
+   * a later call site hardcoded the English instead of reading it. Naming it
+   * turns "go write a key" into a one-line swap.
+   */
+  existingKey?: string
+}
+
+/** English value (lowercased) → dot-notation keys that already hold it. */
+function buildKeyIndex(
+  dictionary: Record<string, unknown> = defaultTranslations
+): Map<string, string[]> {
+  const index = new Map<string, string[]>()
+  const walk = (node: Record<string, unknown>, path: string[]): void => {
+    for (const [key, value] of Object.entries(node)) {
+      if (typeof value === "string") {
+        const k = value.toLowerCase()
+        index.set(k, [...(index.get(k) ?? []), [...path, key].join(".")])
+      } else if (value && typeof value === "object" && !Array.isArray(value)) {
+        walk(value as Record<string, unknown>, [...path, key])
+      }
+    }
+  }
+  walk(dictionary, [])
+  return index
+}
+
+/**
+ * Pick the key to suggest when several hold the same English. Prefer the
+ * shallowest, then the shortest — `actions.close` reads as the reusable one,
+ * `chat.closePreview` as a local coincidence.
+ */
+export function suggestKey(
+  value: string,
+  index: Map<string, string[]>
+): string | undefined {
+  const candidates = index.get(value.toLowerCase())
+  if (!candidates?.length) return undefined
+  return [...candidates].sort(
+    (a, b) => a.split(".").length - b.split(".").length || a.length - b.length
+  )[0]
 }
 
 /** Strip HTML entities so `&nbsp;` does not read as a word. */
@@ -403,9 +451,15 @@ export function scan(srcDir = SRC_DIR): Finding[] {
   const files = walk(srcDir).filter(
     (file) => !isExcludedPath(relative(srcDir, file))
   )
-  return files.flatMap((file) =>
-    findInSource(relative(PKG_DIR, file), readFileSync(file, "utf-8"))
-  )
+  const keyIndex = buildKeyIndex()
+  return files
+    .flatMap((file) =>
+      findInSource(relative(PKG_DIR, file), readFileSync(file, "utf-8"))
+    )
+    .map((finding) => {
+      const existingKey = suggestKey(finding.value, keyIndex)
+      return existingKey ? { ...finding, existingKey } : finding
+    })
 }
 
 export interface DebtFile {
@@ -530,6 +584,97 @@ function printInventory(findings: Finding[]): void {
   }
 }
 
+/** Repo-root-relative path, which is what GitHub annotations need. */
+const repoPath = (f: Finding) => `packages/react/${f.file}`
+
+/** The one-line "what to do about it" for a single finding. */
+export function fixHint(finding: Finding): string {
+  return finding.existingKey
+    ? `A key for this already exists — read \`${finding.existingKey}\` instead of hardcoding it.`
+    : "Add a key to `i18n-provider-defaults.ts` and read it with `useI18n()`/`t()`."
+}
+
+/**
+ * Workflow-command annotations, so each offending line is flagged inline on the
+ * PR's Files tab instead of only inside the job log. Newlines must be encoded
+ * as `%0A`, and the file path must be relative to the repo root.
+ */
+export function annotations(added: Finding[]): string[] {
+  return added.map((f) => {
+    const message =
+      `Untranslated copy: ${f.name} = ${JSON.stringify(f.value)}. ` +
+      `${fixHint(f)} ` +
+      `If it must stay a literal, add an "${EXEMPT_MARKER}" comment on this line.`
+    return (
+      `::error file=${repoPath(f)},line=${f.line},` +
+      `title=Untranslated copy::${message.replace(/\r?\n/g, "%0A")}`
+    )
+  })
+}
+
+/**
+ * Markdown for the PR comment. Leads with the reusable-key cases, because those
+ * are a one-line swap rather than a copywriting decision.
+ */
+export function commentMarkdown(result: CheckResult): string {
+  const { added } = result
+  if (added.length === 0) {
+    return [
+      "## ✅ No untranslated copy added",
+      "",
+      `Every user-visible string in this PR comes from the i18n layer. Codebase total unchanged at **${result.total}**.`,
+    ].join("\n")
+  }
+
+  const reusable = added.filter((f) => f.existingKey)
+  const fresh = added.filter((f) => !f.existingKey)
+  const lines = [
+    `## ❌ ${added.length} untranslated string${added.length === 1 ? "" : "s"} added`,
+    "",
+    "A string literal cannot be translated: no consumer dictionary can reach it, so every locale renders English.",
+    "",
+  ]
+
+  if (reusable.length > 0) {
+    lines.push(
+      `### ${reusable.length} already have a key — swap, don't write`,
+      "",
+      "| Where | String | Read this instead |",
+      "| --- | --- | --- |",
+      ...reusable.map(
+        (f) =>
+          `| \`${f.file}:${f.line}\` | \`${f.value}\` | \`${f.existingKey}\` |`
+      ),
+      ""
+    )
+  }
+
+  if (fresh.length > 0) {
+    lines.push(
+      `### ${fresh.length} need${fresh.length === 1 ? "s" : ""} a new key`,
+      "",
+      "| Where | Bound to | String |",
+      "| --- | --- | --- |",
+      ...fresh.map(
+        (f) => `| \`${f.file}:${f.line}\` | \`${f.name}\` | \`${f.value}\` |`
+      ),
+      "",
+      "Add each to `src/lib/providers/i18n/i18n-provider-defaults.ts` (camelCase, domain-namespaced — `actions.save`) and read it with `useI18n()`/`t()`.",
+      ""
+    )
+  }
+
+  lines.push(
+    "<details><summary>If a string genuinely must not be translated</summary>",
+    "",
+    `Brand names, keyboard keys and the like are fine as literals. Put \`${EXEMPT_MARKER}\` in a comment on that line — it lands in the diff, so a reviewer can judge the claim.`,
+    "</details>",
+    "",
+    `<sub>Each line is also annotated inline on the Files tab. Full inventory: \`pnpm --filter @factorialco/f0-react run check:untranslated-copy --report\`</sub>`
+  )
+  return lines.join("\n")
+}
+
 function main(): void {
   const args = process.argv.slice(2)
   const wants = (flag: string) => args.includes(flag)
@@ -574,6 +719,13 @@ function main(): void {
     process.exit(result.added.length > 0 ? 1 : 0)
   }
 
+  // Plain stdout, not consola: the workflow captures this verbatim as the
+  // comment body.
+  if (wants("--comment")) {
+    process.stdout.write(`${commentMarkdown(result)}\n`)
+    process.exit(0)
+  }
+
   if (wants("--verbose")) {
     consola.log(
       `Untranslated copy: ${result.total} (baseline ${result.baselineTotal})\n`
@@ -597,21 +749,42 @@ export function reportResult(result: CheckResult): boolean {
 
   if (result.added.length > 0) {
     failed = true
+
+    // Inline annotations first, so GitHub attaches them to the diff even if
+    // nobody reads the rest of the log.
+    // Raw stdout, not consola: a workflow command must start the line exactly,
+    // with no prefix or colour codes, or GitHub ignores it.
+    if (process.env.GITHUB_ACTIONS === "true") {
+      for (const line of annotations(result.added)) {
+        process.stdout.write(`${line}\n`)
+      }
+    }
+
     consola.log("")
     consola.error(
       `${result.added.length} new untranslated string(s) — copy must come from ` +
         "the i18n layer, not a literal:"
     )
+    const reusable = result.added.filter((f) => f.existingKey)
     for (const finding of result.added) {
       consola.log(
         `    ${finding.file}:${finding.line} — ${finding.name} = ` +
           `${JSON.stringify(finding.value)} (${KIND_LABEL[finding.kind]})`
       )
+      if (finding.existingKey) {
+        consola.log(`      ↳ already translated as "${finding.existingKey}"`)
+      }
     }
     consola.log("")
+    if (reusable.length > 0) {
+      consola.log(
+        `  ${reusable.length} of these already have a key (marked ↳ above) — ` +
+          "read that key instead of hardcoding the English."
+      )
+    }
     consola.log(
-      "  Add the key to src/lib/providers/i18n/i18n-provider-defaults.ts and read " +
-        "it with useI18n()/t()."
+      "  For the rest: add a key to src/lib/providers/i18n/i18n-provider-defaults.ts " +
+        "and read it with useI18n()/t()."
     )
     consola.log(
       `  If the string genuinely must not be translated, put "${EXEMPT_MARKER}" ` +
