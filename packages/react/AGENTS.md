@@ -239,6 +239,36 @@ See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`,
 - Delegate complex widgets (dialogs, selects, toggles) to Radix via `@/ui/`
 - Load the `a11y` skill for detailed WCAG patterns and decision trees
 
+### Accessible names are a public API
+
+Roles and accessible names are what consumers query — `getByRole("button", {
+name: "Clear" })` in unit tests, `cy.findByRole(...)` in Cypress. Changing one
+breaks them, and neither of the other checks notices: the public API check
+diffs `.d.ts` files (names are values, not types) and axe only asks whether a
+name *exists*, not whether it changed.
+
+The **aria surface** check covers this. Every story's role + accessible-name
+pairs are captured in the Storybook test-runner and diffed against the baseline
+from the latest `main` run, then reported as a PR comment. It is **advisory** —
+it never blocks a merge.
+
+- Treat a rename in that comment as a breaking change: it needs the same
+  deliberation as removing a prop.
+- Hardcoded `aria-label`s in component bodies are the usual source. i18n-ing one
+  changes the name in every non-English locale.
+- A story with nondeterministic content can opt out with
+  `parameters: { ariaSnapshot: { skip: true } }` rather than emit a diff on
+  every run.
+- **It only sees what a story actually renders.** F0InputField's clear button
+  is a live example: it mounts only once the field has a value, so renaming its
+  `aria-label` shows up in the one story with a filled input and nowhere else.
+  A conditional element with no story covering that state is invisible to this
+  check — which is one more reason to give new states their own story.
+
+```bash
+pnpm check:aria-surface --base <dir|file> --head <dir|file>
+```
+
 ## Code Quality
 
 - Comments answer "Why?", not "What?" — keep them rare
