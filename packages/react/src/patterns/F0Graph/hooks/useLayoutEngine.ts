@@ -1,5 +1,11 @@
 import { useMemo } from "react"
 
+import {
+  NODE_RANK_SEP,
+  STACKED_NODE_GAP,
+  STACKED_NODE_HEIGHT,
+  STACKED_RANK_SEP_RATIO,
+} from "../constants"
 import type {
   GraphEdge,
   LayoutDirection,
@@ -41,7 +47,7 @@ const DEFAULT_NODE_WIDTH = 256
 const DEFAULT_NODE_HEIGHT = 56
 const DEFAULT_EXPANDER_WIDTH = 120
 const DEFAULT_EXPANDER_HEIGHT = 36
-const DEFAULT_RANK_SEP = 130
+const DEFAULT_RANK_SEP = NODE_RANK_SEP
 const DEFAULT_NODE_SEP = 40
 const DEFAULT_ROOT_SEP = 80
 
@@ -52,11 +58,32 @@ interface UseLayoutEngineOptions {
   nodeSep?: number
   rootSep?: number
   /**
+   * Main-axis size of a stacked node — its height in the default `TB`
+   * direction. A stacked row inherits the card's width but not its height: it
+   * is a compact strip, so it sizes independently of `nodeHeight`. Defaults
+   * to 44 (`STACKED_NODE_HEIGHT`).
+   */
+  stackedNodeHeight?: number
+  /** Gap between two consecutive stacked nodes. Defaults to 16. */
+  stackedNodeGap?: number
+  /**
    * When > 0, node centers are snapped to this pixel grid so columns/rows line
    * up with the canvas background dots and edges stay crisp. `0` only rounds to
    * integers. Defaults to `0`.
    */
   snapGrid?: number
+}
+
+/** Fully resolved layout configuration (no optionals) used internally. */
+interface LayoutConfig {
+  nodeWidth: number
+  nodeHeight: number
+  rankSep: number
+  nodeSep: number
+  rootSep: number
+  stackedNodeHeight: number
+  stackedNodeGap: number
+  snapGrid: number
 }
 
 /**
@@ -81,6 +108,8 @@ export function useLayoutEngine(
   const rankSep = options?.rankSep ?? DEFAULT_RANK_SEP
   const nodeSep = options?.nodeSep ?? DEFAULT_NODE_SEP
   const rootSep = options?.rootSep ?? DEFAULT_ROOT_SEP
+  const stackedNodeHeight = options?.stackedNodeHeight ?? STACKED_NODE_HEIGHT
+  const stackedNodeGap = options?.stackedNodeGap ?? STACKED_NODE_GAP
   const snapGrid = options?.snapGrid ?? 0
 
   return useMemo(
@@ -90,20 +119,28 @@ export function useLayoutEngine(
         edges: GraphEdge[],
         dir: LayoutDirection
       ): LayoutResult {
-        return computeTreeLayout(
-          nodes,
-          edges,
-          dir,
+        return computeTreeLayout(nodes, edges, dir, {
           nodeWidth,
           nodeHeight,
           rankSep,
           nodeSep,
           rootSep,
-          snapGrid
-        )
+          stackedNodeHeight,
+          stackedNodeGap,
+          snapGrid,
+        })
       },
     }),
-    [nodeWidth, nodeHeight, rankSep, nodeSep, rootSep, snapGrid]
+    [
+      nodeWidth,
+      nodeHeight,
+      rankSep,
+      nodeSep,
+      rootSep,
+      stackedNodeHeight,
+      stackedNodeGap,
+      snapGrid,
+    ]
   )
 }
 
@@ -132,6 +169,14 @@ export function useLayoutEngine(
  *     manually using parent coords, so the layout output is just a
  *     placeholder).
  *
+ *  Stacked groups: a node flagged `stackNodes` is laid out as a LEAF in
+ *  steps 1–3, so its children reserve no cross-axis space and its siblings
+ *  close in around it. The children are then placed as a column sharing the
+ *  parent's cross center, running down the main axis from the start of the
+ *  next rank in `stackedNodeHeight + stackedNodeGap` steps (see
+ *  `placeStackedNodes`). Callers normalize the flag beforehand — by the
+ *  time it reaches here, every child of a stacked parent is a leaf.
+ *
  *  DAG note: When nodes have `dagParentIds`, this function positions them
  *  under the canonical parent only. DAG-aware engines should receive the
  *  original `nodes` + `edges` (not the tree projection) and compute their
@@ -141,13 +186,19 @@ function computeTreeLayout(
   treeNodes: TreeNode[],
   edges: GraphEdge[],
   direction: LayoutDirection,
-  nodeWidth: number,
-  nodeHeight: number,
-  rankSep: number,
-  nodeSep: number,
-  rootSep: number,
-  snapGrid: number
+  config: LayoutConfig
 ): LayoutResult {
+  const {
+    nodeWidth,
+    nodeHeight,
+    rankSep,
+    nodeSep,
+    rootSep,
+    stackedNodeHeight,
+    stackedNodeGap,
+    snapGrid,
+  } = config
+
   if (treeNodes.length === 0) {
     return { nodes: [], edges: [], width: 0, height: 0 }
   }
@@ -172,6 +223,13 @@ function computeTreeLayout(
     if (!parentOf.has(node.id)) roots.push(node.id)
   }
 
+  // 2b. Parents whose children render as a stack. They are laid out as leaves
+  //     below, so the stack costs no cross-axis space at all.
+  const stackParents = new Set<string>()
+  for (const node of treeNodes) {
+    if (node.stackNodes) stackParents.add(node.id)
+  }
+
   const isHorizontal = direction === "LR" || direction === "RL"
   const flipMain = direction === "BT" || direction === "RL"
 
@@ -182,8 +240,15 @@ function computeTreeLayout(
   const mainStep = mainSize + rankSep // distance between rank centers
   const subtreeGap = nodeSep * 2 // gap between subtrees of different parents
 
-  type LayoutPos = { cross: number; depth: number }
+  // `stackIndex` marks a stacked node: its main-axis offset within the column
+  // hanging under its parent, instead of the plain rank position from `depth`.
+  type LayoutPos = { cross: number; depth: number; stackIndex?: number }
   const positions = new Map<string, LayoutPos>()
+
+  // Children that take part in the cross-axis cursor. A stacked group hangs
+  // under its parent rather than beside it, so such a parent is a leaf here.
+  const layoutChildrenOf = (nodeId: string): string[] =>
+    stackParents.has(nodeId) ? [] : (childrenMap.get(nodeId) ?? [])
 
   // Returns the cross-axis end of the laid-out subtree (exclusive of trailing
   // separation) and the cross-axis center of the root node.
@@ -192,7 +257,7 @@ function computeTreeLayout(
     crossStart: number,
     depth: number
   ): { crossEnd: number; centerCross: number } {
-    const children = childrenMap.get(nodeId) ?? []
+    const children = layoutChildrenOf(nodeId)
 
     if (children.length === 0) {
       const center = crossStart + crossSize / 2
@@ -208,11 +273,11 @@ function computeTreeLayout(
       if (idx === 0) firstCenter = result.centerCross
       lastCenter = result.centerCross
       // Use larger gap after branch children (their kids are "siblings of different parents")
-      const isBranch = (childrenMap.get(childId)?.length ?? 0) > 0
+      const isBranch = layoutChildrenOf(childId).length > 0
       cursor = result.crossEnd + (isBranch ? subtreeGap : nodeSep)
     })
     const lastChild = children[children.length - 1]
-    const lastIsBranch = (childrenMap.get(lastChild)?.length ?? 0) > 0
+    const lastIsBranch = layoutChildrenOf(lastChild).length > 0
     const subtreeEnd = cursor - (lastIsBranch ? subtreeGap : nodeSep)
 
     let center = (firstCenter + lastCenter) / 2
@@ -290,6 +355,23 @@ function computeTreeLayout(
     crossCursor += maxCross - minCross + rootSep
   }
 
+  // 3b. Place stacked groups. Run after every cross-axis shift has settled, so
+  //     each column simply inherits its parent's final center. Each child keeps
+  //     the normal `depth + 1` rank — that is where the column starts — and
+  //     carries a `stackIndex` for its offset down the main axis from there.
+  for (const parentId of stackParents) {
+    const parentPos = positions.get(parentId)
+    if (!parentPos) continue
+    const children = childrenMap.get(parentId) ?? []
+    children.forEach((childId, index) => {
+      positions.set(childId, {
+        cross: parentPos.cross,
+        depth: parentPos.depth + 1,
+        stackIndex: index,
+      })
+    })
+  }
+
   // 4. Compute total main-axis extent for BT/RL flipping.
   let maxDepth = 0
   for (const pos of positions.values()) {
@@ -314,8 +396,6 @@ function computeTreeLayout(
 
   const positionedNodes: PositionedNode[] = treeNodes.map((node) => {
     const isExpander = node.id.startsWith("expander-")
-    const width = isExpander ? DEFAULT_EXPANDER_WIDTH : nodeWidth
-    const height = isExpander ? DEFAULT_EXPANDER_HEIGHT : nodeHeight
 
     let pos: LayoutPos | undefined = positions.get(node.id)
     if (!pos && isExpander && node.parentId) {
@@ -323,11 +403,42 @@ function computeTreeLayout(
     }
     const cross = pos?.cross ?? 0
     const depth = pos?.depth ?? 0
+    const stackIndex = pos?.stackIndex
 
-    let mainCenter = depth * mainStep + mainSize / 2
-    if (flipMain) {
-      mainCenter = (maxDepth - depth) * mainStep + mainSize / 2
-    }
+    // A stacked node is a compact strip: full node size across the cross axis,
+    // its own (smaller) size along the main one — height in `TB`, width in `LR`.
+    const isStacked = stackIndex !== undefined
+    const width = isExpander
+      ? DEFAULT_EXPANDER_WIDTH
+      : isStacked && isHorizontal
+        ? stackedNodeHeight
+        : nodeWidth
+    const height = isExpander
+      ? DEFAULT_EXPANDER_HEIGHT
+      : isStacked && !isHorizontal
+        ? stackedNodeHeight
+        : nodeHeight
+
+    // Rank start along the main axis, then — for a stacked node — the offset
+    // of its slot inside the column. `flipMain` runs the column back from the
+    // far edge of the rank so it still grows away from the parent.
+    const rankStart = (flipMain ? maxDepth - depth : depth) * mainStep
+    const stackOffset = isStacked
+      ? stackIndex * (stackedNodeHeight + stackedNodeGap)
+      : 0
+    // A stacked column reads as part of its parent, not as the next rank, so it
+    // hangs closer than a full `rankSep` lane — see `STACKED_RANK_SEP_RATIO`.
+    // The pull is toward the parent in both main-axis directions.
+    const stackedPull = rankSep * (1 - STACKED_RANK_SEP_RATIO)
+    const mainCenter = isStacked
+      ? flipMain
+        ? rankStart +
+          mainSize -
+          stackedNodeHeight / 2 -
+          stackOffset +
+          stackedPull
+        : rankStart + stackedNodeHeight / 2 + stackOffset - stackedPull
+      : rankStart + mainSize / 2
 
     // Snap the cross axis to the grid; round the main (depth) axis only.
     // Expanders inherit their parent's position in F0Graph, so leave them raw.

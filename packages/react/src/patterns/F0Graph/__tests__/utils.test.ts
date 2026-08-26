@@ -4,12 +4,15 @@ import type { TreeNode } from "../types"
 import type { PositionedNode } from "../types"
 import {
   collectExpandableNodeIds,
+  computeStackGroups,
   collectVisibleNodes,
   computeExpandedByDepth,
   computeLayoutBounds,
   deriveEdgesFromTree,
+  findStackHoverZoneAt,
   nodeIntersectsRect,
   resolveInitialFitViewNodes,
+  type StackHoverZone,
   type ViewportRect,
 } from "../utils"
 
@@ -166,5 +169,138 @@ describe("resolveInitialFitViewNodes", () => {
 
   it("falls back to fit-all when the target isn't present (never a blank frame)", () => {
     expect(resolveInitialFitViewNodes("ghost", ["c1"], present)).toBeUndefined()
+  })
+})
+
+describe("findStackHoverZoneAt", () => {
+  // One column: a 256x118 card at (0, 0), then a 228x252 group from y=175, so
+  // the zone runs from the card's top to the group's bottom.
+  const zone: StackHoverZone = {
+    parentId: "role-0",
+    x: 0,
+    y: 0,
+    width: 256,
+    height: 427,
+  }
+  const zones = [zone]
+
+  it("matches a point on the parent card", () => {
+    expect(findStackHoverZoneAt(zones, 128, 60)).toBe("role-0")
+  })
+
+  it("matches a point in the lane between the card and the column", () => {
+    expect(findStackHoverZoneAt(zones, 128, 150)).toBe("role-0")
+  })
+
+  it("matches a point on a row", () => {
+    expect(findStackHoverZoneAt(zones, 128, 240)).toBe("role-0")
+  })
+
+  it("matches a point in the gap between two rows", () => {
+    // The reason this helper exists: crossing the gap must not read as leaving
+    // the column, or the affordance would blink on every row-to-row move.
+    expect(findStackHoverZoneAt(zones, 128, 300)).toBe("role-0")
+  })
+
+  it("matches a point in the group's own padding", () => {
+    expect(findStackHoverZoneAt(zones, 20, 420)).toBe("role-0")
+  })
+
+  it.each([
+    ["top-left", 0, 0],
+    ["top-right", 256, 0],
+    ["bottom-left", 0, 427],
+    ["bottom-right", 256, 427],
+  ])("is inclusive on the %s corner", (_corner, x, y) => {
+    expect(findStackHoverZoneAt(zones, x, y)).toBe("role-0")
+  })
+
+  it.each([
+    ["above", 128, -1],
+    ["below", 128, 428],
+    ["left", -1, 200],
+    ["right", 257, 200],
+  ])("returns null just %s the zone", (_side, x, y) => {
+    expect(findStackHoverZoneAt(zones, x, y)).toBeNull()
+  })
+
+  it("returns null for no zones at all", () => {
+    expect(findStackHoverZoneAt([], 128, 200)).toBeNull()
+  })
+
+  it("picks the zone the point is actually in", () => {
+    const sibling: StackHoverZone = { ...zone, parentId: "role-1", x: 300 }
+    expect(findStackHoverZoneAt([zone, sibling], 400, 200)).toBe("role-1")
+    expect(findStackHoverZoneAt([zone, sibling], 128, 200)).toBe("role-0")
+    expect(findStackHoverZoneAt([zone, sibling], 280, 200)).toBeNull()
+  })
+})
+
+describe("computeStackGroups", () => {
+  // A column of three 256x44 rows on the same x, 16px apart, under a parent.
+  const rows = ["r0", "r1", "r2"]
+  const rowNodes = rows.map((id) => ({
+    ...node(id),
+    parentId: "role",
+  })) as TreeNode<null>[]
+  const positions = new Map<string, PositionedNode>([
+    ["role", { id: "role", x: 0, y: 0, width: 256, height: 56 }],
+    ["r0", { id: "r0", x: 0, y: 100, width: 256, height: 44 }],
+    ["r1", { id: "r1", x: 0, y: 160, width: 256, height: 44 }],
+    ["r2", { id: "r2", x: 0, y: 220, width: 256, height: 44 }],
+  ])
+  const index = new Map(rows.map((id, i) => [id, i]))
+
+  it("wraps the rows in a box padded by 8px on every side", () => {
+    const { groups } = computeStackGroups(rowNodes, index, positions, "TB")
+    const group = groups.get("role")!
+
+    // Rows paint narrower than their layout box (the inset comes off both
+    // edges), so the box hugs what is painted, not the reserved lane.
+    const row = group.rows.get("r0")!
+    expect(row.x).toBe(8)
+    expect(row.y).toBe(8)
+    expect(group.width).toBe(row.width + 16)
+    // Top of the first row to the bottom of the last, plus padding both ends.
+    expect(group.height).toBe(220 + 44 - 100 + 16)
+  })
+
+  it("keeps a row's centre on the parent's axis", () => {
+    const { groups } = computeStackGroups(rowNodes, index, positions, "TB")
+    const group = groups.get("role")!
+    const row = group.rows.get("r0")!
+
+    const rowCentre = group.x + row.x + row.width / 2
+    expect(rowCentre).toBe(0 + 256 / 2)
+  })
+
+  it("chains each row to the one above it", () => {
+    const { previousRow, groupOf } = computeStackGroups(
+      rowNodes,
+      index,
+      positions,
+      "TB"
+    )
+
+    expect(previousRow.get("r0")).toBeUndefined()
+    expect(previousRow.get("r1")).toBe("r0")
+    expect(previousRow.get("r2")).toBe("r1")
+    expect(groupOf.get("r1")).toBe("stack-role")
+  })
+
+  it("chains by position, not by the order the rows arrive in", () => {
+    // The vertical slot comes from the edge list while this walk follows tree
+    // children, so the two can disagree. Chaining in arrival order would then
+    // connect rows that are not vertically adjacent.
+    const shuffled = [rowNodes[2]!, rowNodes[0]!, rowNodes[1]!]
+    const { previousRow } = computeStackGroups(shuffled, index, positions, "TB")
+
+    expect(previousRow.get("r1")).toBe("r0")
+    expect(previousRow.get("r2")).toBe("r1")
+  })
+
+  it("skips a column whose rows have no position yet", () => {
+    const { groups } = computeStackGroups(rowNodes, index, new Map(), "TB")
+    expect(groups.size).toBe(0)
   })
 })

@@ -175,6 +175,13 @@ export interface F0GraphRenderConfigContextValue {
    */
   tagRowHeight?: number
   /**
+   * Height of one stacked row as reserved by the layout engine. Used by the node
+   * wrapper to set `stackedHeight` on the render context, so a row always fills
+   * exactly its band — otherwise a custom `stackedNodeHeight` would move the
+   * layout while the row kept the default height, and the column would drift.
+   */
+  stackedNodeHeight?: number
+  /**
    * `true` when the graph has more rendered nodes than the snap threshold.
    * F0GraphNode uses this to disable variant transitions (chrome opacity,
    * avatar transform, text reveal) so changing zoomLevel snaps instantly
@@ -191,6 +198,32 @@ F0GraphRenderConfigContext.displayName = "F0GraphRenderConfigContext"
 /** Non-throwing variant for internal edge wrapper */
 export function useF0GraphRenderConfigInternal(): F0GraphRenderConfigContextValue | null {
   return useContext(F0GraphRenderConfigContext)
+}
+
+// ─── Stacked-column hover ──────────────────────────────────────
+
+/**
+ * Which stacked parent the pointer is currently inside, so that parent's collapse
+ * affordance can reveal itself from anywhere in its column rather than only from
+ * the narrow band under the card.
+ *
+ * This value changes as the pointer moves, so it is read by
+ * `F0GraphCollapserWrapper` **only**. Reading it from `F0GraphNodeWrapper` would
+ * re-render every node in the graph on pointer movement, and `memo` cannot stop a
+ * context change (see the warning at the top of this file). There is no throwing
+ * variant because nothing public needs it.
+ */
+export interface F0GraphStackHoverContextValue {
+  hoveredStackParentId: string | null
+}
+
+export const F0GraphStackHoverContext =
+  createContext<F0GraphStackHoverContextValue | null>(null)
+
+F0GraphStackHoverContext.displayName = "F0GraphStackHoverContext"
+
+export function useF0GraphStackHoverInternal(): F0GraphStackHoverContextValue | null {
+  return useContext(F0GraphStackHoverContext)
 }
 
 // ─── Focus (roving tabindex) ───────────────────────────────────
