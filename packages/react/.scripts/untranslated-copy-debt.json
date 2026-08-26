@@ -1,11 +1,10 @@
 {
   "note": "Untranslated user-visible copy in packages/react/src — string literals that should come from the i18n layer (src/lib/providers/i18n) instead. Enforced by .scripts/check-untranslated-copy.ts. This list may only shrink: translate a string and remove it from here (or run \"--update\"), never add one.",
-  "total": 133,
+  "total": 106,
   "files": {
     "src/components/F0Card/components/CardMetadata.tsx": [
       "Unsupported property type:"
     ],
-    "src/components/F0InputField/F0InputField.tsx": ["Clear"],
     "src/components/F0Link/F0Link.tsx": ["(opens in new tab)"],
     "src/components/F0NumberInput/components/Arrows.tsx": [
       "Decrease",
@@ -16,12 +15,10 @@
       "AD",
       "AD"
     ],
-    "src/components/OneChip/index.tsx": ["Close"],
     "src/components/RichText/F0NotesTextEditor/F0NotesTextEditor.tsx": [
       "Add paragraph"
     ],
     "src/components/RichText/F0RichTextEditor/components/FileList/index.tsx": [
-      "Delete",
       "Upload file"
     ],
     "src/components/RichText/F0RichTextEditor/components/Footer/index.tsx": [
@@ -63,13 +60,7 @@
       "Link popup"
     ],
     "src/deprecated/EntitySelect/Content/MainContent/index.tsx": ["Group"],
-    "src/experimental/Forms/F0PhoneInput/F0PhoneInput.tsx": ["Clear"],
     "src/experimental/Lists/OnePersonListItem/index.tsx": ["Secondary"],
-    "src/experimental/Navigation/Carousel/DynamicCarousel/index.tsx": [
-      "Next",
-      "Previous"
-    ],
-    "src/experimental/Navigation/Dropdown/index.tsx": ["Other actions"],
     "src/experimental/Navigation/F0TableOfContent/index.tsx": ["Drop here"],
     "src/experimental/Navigation/F0TableOfContent/Item/ItemDropDown.tsx": [
       "Actions"
@@ -81,11 +72,6 @@
       "Back",
       "Open main menu"
     ],
-    "src/experimental/Navigation/Header/PageNavigation/index.tsx": [
-      "Next",
-      "Previous"
-    ],
-    "src/experimental/Navigation/Header/ProductUpdates/index.tsx": ["Close"],
     "src/experimental/OneTable/TableHead/index.tsx": ["Sort"],
     "src/experimental/Widgets/Widget/index.tsx": ["Actions"],
     "src/hooks/datasource/itemNeighbors/useItemNeighbors.ts": [
@@ -96,9 +82,6 @@
       "Error fetching data",
       "Error fetching data"
     ],
-    "src/kits/ai/Banners/BaseBanner/index.tsx": ["Close"],
-    "src/kits/ai/Banners/F0AiBanner/AiBannerInternal.tsx": ["Close"],
-    "src/kits/ai/Banners/F0Callout/CalloutInternal.tsx": ["Close"],
     "src/kits/ai/F0ActionItem/components/ChatSpinner.tsx": ["Loading"],
     "src/kits/ai/F0AiChat/components/markdownRenderers/components/Image.tsx": [
       "Download"
@@ -145,14 +128,7 @@
     "src/patterns/OneDataCollection/visualizations/collection/Graph/useDataCollectionTreeData.ts": [
       "Error fetching data"
     ],
-    "src/patterns/OneDateNavigator/components/DateNavigatorTrigger.tsx": [
-      "Next",
-      "Previous"
-    ],
     "src/patterns/OneFilterPicker/components/FiltersControls.tsx": ["Back"],
-    "src/patterns/OneFilterPicker/filterTypes/DateFilter/DateFilter.tsx": [
-      "Clear"
-    ],
     "src/patterns/OneFilterPicker/filterTypes/InFilter/InFilter.tsx": [
       "No options available"
     ],
@@ -168,21 +144,13 @@
       "Search widgets"
     ],
     "src/sds/Home/WidgetContainer/index.tsx": ["Actions"],
-    "src/sds/Home/WidgetUpdateDialog/index.tsx": ["Save"],
     "src/sds/Profile/TasksList/index.tsx": ["No tasks assigned"],
     "src/sds/social/Reactions/Picker/index.tsx": ["Add reaction"],
-    "src/sds/UpsellingKit/ai/F0QuestionCard/F0QuestionCard.tsx": [
-      "Next",
-      "Previous"
-    ],
-    "src/sds/UpsellingKit/ProductCard/index.tsx": ["Close"],
     "src/sds/UpsellingKit/ProductModal/components/CustomModal.tsx": [
       "Close modal"
     ],
-    "src/sds/UpsellingKit/ProductWidget/index.tsx": ["Close"],
     "src/ui/Action/Action.tsx": ["Loading..."],
-    "src/ui/breadcrumb.tsx": ["More"],
-    "src/ui/carousel.tsx": ["Carousel pagination", "Next", "Previous"],
+    "src/ui/carousel.tsx": ["Carousel pagination"],
     "src/ui/DatePickerPopup/components/PresetList.tsx": ["Custom"],
     "src/ui/DatePickerPopup/DatePickerPopup.tsx": ["Back"],
     "src/ui/DatePickerPopup/presets.ts": [
@@ -203,9 +171,6 @@
       "Yesterday"
     ],
     "src/ui/F0Wizard/components/WizardSteps.tsx": ["Wizard steps"],
-    "src/ui/GroupHeader/GroupHeader.tsx": ["Select all"],
-    "src/ui/Lane/components/LaneHeader.tsx": ["Add"],
-    "src/ui/Lane/Lane.tsx": ["Add"],
     "src/ui/OnePagination/index.tsx": ["Page navigation"],
     "src/ui/pagination.tsx": ["Go to next page", "Go to previous page"],
     "src/ui/Select/components/SelectItem.tsx": ["Select item"],

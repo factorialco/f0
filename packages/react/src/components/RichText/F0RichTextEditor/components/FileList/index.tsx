@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { F0FileItem } from "@/components/F0FileItem"
+import { useI18n } from "@/lib/providers/i18n"
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import {
   getAcceptFileTypeString,
@@ -23,6 +24,8 @@ const FileList = ({
   disabled,
   fileInputRef,
 }: FileListProps) => {
+  const i18n = useI18n()
+
   if (!filesConfig) {
     return null
   }
@@ -71,7 +74,7 @@ const FileList = ({
                   file={file}
                   actions={[
                     {
-                      label: "Delete",
+                      label: i18n.actions.delete,
                       onClick: () =>
                         handleRemoveFile(index, files, filesConfig, setFiles),
                     },

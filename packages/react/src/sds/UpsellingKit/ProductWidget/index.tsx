@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import CrossIcon from "@/icons/app/Cross"
 import { withDataTestId } from "@/lib/data-testid"
+import { useI18n } from "@/lib/providers/i18n"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
 import { Label } from "@/ui/label"
 import { LoadingStateProps, UpsellingButton } from "../UpsellingButton"
@@ -57,6 +58,7 @@ function _ProductWidget({
   actions,
   showConfirmation = true,
 }: ProductWidgetProps) {
+  const i18n = useI18n()
   const [isDismissed, setIsDismissed] = useState(false)
 
   const handleClose = () => {
@@ -87,7 +89,7 @@ function _ProductWidget({
                   size="sm"
                   hideLabel
                   onClick={handleClose}
-                  label="Close"
+                  label={i18n.actions.close}
                 />
               </div>
             ) : null}

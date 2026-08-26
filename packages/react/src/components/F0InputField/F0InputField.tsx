@@ -16,6 +16,7 @@ import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Spinner } from "@/ui/Spinner"
 import { AppendTag } from "./AppendTag"
@@ -282,6 +283,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }: InputFieldProps<string>,
     ref
   ) => {
+    const i18n = useI18n()
     const generatedId = useId()
     const id = props.id ?? generatedId
 
@@ -583,7 +585,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
-                        aria-label="Clear"
+                        aria-label={i18n.actions.clear}
                         type="button"
                         tabIndex={0}
                         data-testid="clear-button"

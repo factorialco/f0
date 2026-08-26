@@ -4,6 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { CheckCircle, Cross, InfoCircle, Warning } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { CalloutInternalProps } from "./types"
 export const calloutVariants = cva({
@@ -39,6 +40,8 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
     { title, onClose, children, actions = [], variant },
     ref
   ) {
+    const i18n = useI18n()
+
     // Validate actions limit
     if (actions.length > 2) {
       throw new Error(
@@ -76,7 +79,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
               size="sm"
               hideLabel
               onClick={onClose}
-              label="Close"
+              label={i18n.actions.close}
             />
           ) : null}
         </div>

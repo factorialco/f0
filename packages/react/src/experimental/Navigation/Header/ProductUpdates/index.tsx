@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
+import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 type ProductUpdate = {
@@ -437,6 +438,7 @@ const DiscoverMoreProducts = ({
   crossSelling: ProductUpdatesProp["crossSelling"]
   onDropdownClose: () => void
 }) => {
+  const i18n = useI18n()
   const [open, setOpen] = useState(isVisible)
 
   useEffect(() => {
@@ -476,7 +478,7 @@ const DiscoverMoreProducts = ({
                   size="sm"
                   hideLabel
                   onClick={handleClose}
-                  label="Close"
+                  label={i18n.actions.close}
                 />
               </div>
             ) : null}
