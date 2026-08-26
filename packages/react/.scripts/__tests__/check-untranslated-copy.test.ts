@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import {
   annotations,
+  attachExistingKeys,
+  buildKeyIndex,
   buildDebtFile,
   check,
   commentMarkdown,
@@ -13,7 +15,6 @@ import {
   isTextBearingName,
   readsAsCopy,
   readsAsProse,
-  scan,
   suggestKey,
 } from "../check-untranslated-copy"
 
@@ -378,12 +379,25 @@ describe("suggesting an existing key", () => {
     expect(suggestKey("Nothing here yet", index)).toBeUndefined()
   })
 
-  it("attaches real keys from the shipped dictionary during a scan", () => {
-    // Guards the wiring, not any specific key.
-    const withKeys = scan().filter((f) => f.existingKey)
+  // Reads the real dictionary but not the source tree: buildKeyIndex only walks
+  // a plain object, so this stays in the millisecond range. Scanning src/ here
+  // instead cost ~1.6s locally and timed out under CI's coverage run.
+  it("attaches keys from the shipped dictionary", () => {
+    const [close, novel] = attachExistingKeys([
+      finding({ value: "Close" }),
+      finding({ value: "Nothing here yet" }),
+    ])
 
-    expect(withKeys.length).toBeGreaterThan(0)
-    for (const f of withKeys) expect(f.existingKey).toMatch(/^[a-zA-Z]+\./)
+    expect(close.existingKey).toBe("actions.close")
+    expect(novel.existingKey).toBeUndefined()
+  })
+
+  it("indexes the shipped dictionary by English value", () => {
+    const real = buildKeyIndex()
+
+    expect(real.get("save")).toContain("actions.save")
+    // Nested and pluralised keys must be reachable too.
+    expect(real.get("last 7 days")).toContain("date.presets.last7Days")
   })
 })
 

@@ -233,7 +233,7 @@ export interface Finding {
 }
 
 /** English value (lowercased) → dot-notation keys that already hold it. */
-function buildKeyIndex(
+export function buildKeyIndex(
   dictionary: Record<string, unknown> = defaultTranslations
 ): Map<string, string[]> {
   const index = new Map<string, string[]>()
@@ -447,19 +447,30 @@ export function findInSource(filePath: string, source: string): Finding[] {
   return findings
 }
 
+/**
+ * Tag each finding with the dictionary key that already holds its English, if
+ * there is one. Split out from `scan` so it can be exercised without walking
+ * the source tree.
+ */
+export function attachExistingKeys(
+  findings: Finding[],
+  index: Map<string, string[]> = buildKeyIndex()
+): Finding[] {
+  return findings.map((finding) => {
+    const existingKey = suggestKey(finding.value, index)
+    return existingKey ? { ...finding, existingKey } : finding
+  })
+}
+
 export function scan(srcDir = SRC_DIR): Finding[] {
   const files = walk(srcDir).filter(
     (file) => !isExcludedPath(relative(srcDir, file))
   )
-  const keyIndex = buildKeyIndex()
-  return files
-    .flatMap((file) =>
+  return attachExistingKeys(
+    files.flatMap((file) =>
       findInSource(relative(PKG_DIR, file), readFileSync(file, "utf-8"))
     )
-    .map((finding) => {
-      const existingKey = suggestKey(finding.value, keyIndex)
-      return existingKey ? { ...finding, existingKey } : finding
-    })
+  )
 }
 
 export interface DebtFile {
