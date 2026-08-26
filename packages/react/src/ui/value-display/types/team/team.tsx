@@ -3,6 +3,7 @@
  * Shows team name alongside a team avatar with optional badge.
  */
 import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 import { tableDisplayClassNames } from "../../const"
@@ -21,7 +22,7 @@ export const TeamCell = (
 ) => (
   <div
     className={cn(
-      "flex items-center gap-2",
+      "flex min-w-0 flex-1 items-center gap-2",
       meta.visualization === "table" && tableDisplayClassNames.avatar
     )}
   >
@@ -33,6 +34,8 @@ export const TeamCell = (
       }}
       size="xs"
     />
-    <span className="text-f1-foreground">{args.name.toString()}</span>
+    <OneEllipsis className="min-w-0 flex-1 text-f1-foreground" tag="span">
+      {args.name.toString()}
+    </OneEllipsis>
   </div>
 )

@@ -9,8 +9,7 @@ const meta = {
     layout: "padded",
     docs: {
       description: {
-        component:
-          "Renders a company avatar with name. Supports the same badge system as the person type.",
+        component: "Renders a company avatar with name.",
       },
       source: {
         code: null,
@@ -34,6 +33,38 @@ export const CompanyType: Story = {
           src: item.companyLogo,
         },
       }),
+    },
+  },
+}
+
+export const CompanyTypeWithLongName: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      companyName: "Factorial AI handles the paperwork, you handle the people.",
+    },
+    property: {
+      label: "Company",
+      render: (item) => ({
+        type: "company",
+        value: {
+          name: item.companyName,
+          src: item.companyLogo,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Inside a fixed-width column, a name wider than the cell truncates with an ellipsis and shows the full name in a tooltip on hover, instead of clipping mid-character.",
+      },
     },
   },
 }
