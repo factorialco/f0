@@ -10,9 +10,9 @@ import { type AiChatCreditWarning } from "../../F0AiChat/types"
 const creditWarningConfig = {
   soft: {
     text: "" as string,
-    bg: "bg-f1-background-info",
-    fontColor: "text-f1-foreground-info",
-    formBorder: "[&_form]:border-f1-border-info",
+    bg: "bg-f1-background-secondary",
+    fontColor: "text-f1-foreground-secondary",
+    formBorder: "[&_form]:border-f1-border",
   },
 }
 
@@ -50,6 +50,7 @@ export const CreditWarningWrapper = ({
               label={translation.ai.creditWarning.getCredits ?? ""}
               size="sm"
               variant="outline"
+              icon={creditWarning.getCreditsIcon}
               tooltip={translation.ai.creditWarning.getCredits ?? ""}
               onClick={creditWarning.onGetCredits}
             />

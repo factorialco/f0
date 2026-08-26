@@ -31,6 +31,7 @@ import {
   Pencil,
   Settings,
   SolidPlay,
+  Upsell,
 } from "@/icons/app"
 import { F0Alert } from "@/components/F0Alert"
 import { F0Button } from "@/components/F0Button"
@@ -3104,6 +3105,7 @@ function CreationWithAIFlow({
                 title: "Redirecting you to billing to top up credits…",
                 variant: "default",
               }),
+            getCreditsIcon: Upsell,
             onDismiss: () => setCreditWarningDismissed(true),
           }
         : undefined,
