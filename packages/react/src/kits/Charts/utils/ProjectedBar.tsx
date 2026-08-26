@@ -1,6 +1,8 @@
 import { useId } from "react"
 import { Bar, BarProps, Rectangle, RectangleProps } from "recharts"
 
+import { projectedFade } from "@/ui/chart"
+
 type GradientSign = "positive" | "negative"
 
 type BarShapeProps = RectangleProps & {
@@ -67,12 +69,16 @@ const ProjectedBarComponent = ({
             <stop
               offset="0%"
               stopColor={barProps.fill}
-              stopOpacity={sign === "positive" ? 0.4 : 0.05}
+              stopOpacity={
+                sign === "positive" ? projectedFade.strong : projectedFade.faint
+              }
             />
             <stop
               offset="100%"
               stopColor={barProps.fill}
-              stopOpacity={sign === "positive" ? 0.05 : 0.4}
+              stopOpacity={
+                sign === "positive" ? projectedFade.faint : projectedFade.strong
+              }
             />
           </linearGradient>
         ))}
