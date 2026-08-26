@@ -140,6 +140,55 @@ jobs:
         run: pnpm --filter @factorialco/f0-react run check:new-component-dod
         env:
           BASE_REF: origin/${{ github.base_ref }}
+  # User-visible copy must come from the i18n layer, not a string literal — a
+  # literal is untranslatable by construction. Existing debt is baselined in
+  # .scripts/untranslated-copy-debt.json, so this only blocks copy the PR ADDS.
+  # Escape hatch is the inline `i18n-exempt` comment rather than a label: it
+  # lands in the diff, so a reviewer sees the claim and can judge it.
+  untranslated-copy:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Untranslated copy"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      # Pure AST scan of src/ — no build or Storybook needed.
+      #
+      # The script emits `::error file=,line=` annotations, which is what puts
+      # each offending string inline on the Files tab. `continue-on-error` lets
+      # the comment step run on failure; the gate step below restores the
+      # failure, so the job still blocks.
+      - name: Check the PR adds no untranslated copy
+        id: check
+        continue-on-error: true
+        run: pnpm --filter @factorialco/f0-react run check:untranslated-copy
+      - name: Build the PR comment
+        id: comment
+        run: |
+          {
+            echo "body<<COMMENT_BODY_EOF"
+            pnpm --filter @factorialco/f0-react --silent run check:untranslated-copy --comment
+            echo "COMMENT_BODY_EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Comment on the PR
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: untranslated_copy
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.comment.outputs.body }}
+      - name: Fail if untranslated copy was added
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "::error::This PR adds untranslated copy — see the annotations on the Files tab and the PR comment."
+          exit 1
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -305,7 +354,7 @@ jobs:
   # `skipped` is accepted on purpose: detect-changes skips the jobs for a
   # package that this PR did not touch. Only failure/cancellation is fatal.
   quality-passed:
-    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, cycle-dependencies]
+    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, untranslated-copy, cycle-dependencies]
     name: "✅ Quality"
     if: always()
     runs-on: ubuntu-latest

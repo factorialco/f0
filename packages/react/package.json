@@ -52,6 +52,7 @@
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",
     "check:stable-dod": "tsx .scripts/check-stable-dod.ts",
+    "check:untranslated-copy": "tsx .scripts/check-untranslated-copy.ts",
     "preflight": "tsx .scripts/pre-push-preflight.ts",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
