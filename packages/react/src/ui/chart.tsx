@@ -335,6 +335,13 @@ const ChartTooltipContent = React.forwardRef<
 
 ChartTooltipContent.displayName = "ChartTooltip"
 
+/**
+ * Opacity ramp shared by everything that renders a projected series: bars
+ * fade from `strong` at the tip to `faint` at the zero line, and the legend
+ * swatch mirrors the same gradient.
+ */
+const projectedFade = { strong: 0.4, faint: 0.05 } as const
+
 const ChartLegend = RechartsPrimitive.Legend
 
 const ChartLegendContent = React.forwardRef<
@@ -397,9 +404,13 @@ const ChartLegendContent = React.forwardRef<
                 itemConfig && (
                   <div
                     className="h-2 w-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: item.color,
-                    }}
+                    style={
+                      itemConfig.projected
+                        ? {
+                            background: `linear-gradient(to bottom, color-mix(in srgb, ${item.color} ${projectedFade.strong * 100}%, transparent), color-mix(in srgb, ${item.color} ${projectedFade.faint * 100}%, transparent))`,
+                          }
+                        : { backgroundColor: item.color }
+                    }
                   />
                 )
               )}
@@ -464,4 +475,5 @@ export {
   ChartStyle,
   ChartTooltip,
   ChartTooltipContent,
+  projectedFade,
 }
