@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.57.0](https://github.com/factorialco/f0/compare/f0-react-v6.56.0...f0-react-v6.57.0) (2026-08-26)
+
+
+### Features
+
+* **Home:** a widget's header controls, as data ([#5244](https://github.com/factorialco/f0/issues/5244)) ([118bca7](https://github.com/factorialco/f0/commit/118bca7cee7057cc293d83d2aaedf2e33125843d))
+
 ## [6.56.0](https://github.com/factorialco/f0/compare/f0-react-v6.55.0...f0-react-v6.56.0) (2026-08-26)
 
 
