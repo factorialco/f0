@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.58.0](https://github.com/factorialco/f0/compare/f0-react-v6.57.2...f0-react-v6.58.0) (2026-08-26)
+
+
+### Features
+
+* **F0Graph:** opt-in stacked child nodes ([#5051](https://github.com/factorialco/f0/issues/5051)) ([55700d9](https://github.com/factorialco/f0/commit/55700d92e042976c01ab9eebb4b0601c102e3991))
+
 ## [6.57.2](https://github.com/factorialco/f0/compare/f0-react-v6.57.1...f0-react-v6.57.2) (2026-08-26)
 
 
