@@ -112,3 +112,32 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Run tests
         run: pnpm --filter @factorialco/f0-react-native run test:ci
+
+  # Single check to gate the branch on. It collapses this workflow's jobs into
+  # one status, so branch protection lists one stable name and never needs
+  # editing when jobs are added, removed, renamed or sharded.
+  #
+  # `if: always()` is load-bearing. Without it a failing dependency leaves this
+  # job *skipped* rather than *failed*, and GitHub counts a skipped required
+  # check as satisfied — the gate would go green over a red build.
+  #
+  # `skipped` is accepted on purpose: detect-changes skips the jobs for a
+  # package that this PR did not touch. Only failure/cancellation is fatal.
+  unit-tests-passed:
+    needs: [detect-changes, test, bugfix-red-green, test-react-native]
+    name: "✅ Unit Tests"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every Unit Tests check passed
+        run: |
+          echo "Dependency results: ${{ join(needs.*.result, ' ') }}"
+          if ${{ contains(needs.*.result, 'failure') }}; then
+            echo "::error::A Unit Tests check failed."
+            exit 1
+          fi
+          if ${{ contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::A Unit Tests check was cancelled."
+            exit 1
+          fi
+          echo "All Unit Tests checks passed (or were skipped as not applicable)."

@@ -63,7 +63,6 @@ import { useLazyTree } from "../../hooks/useLazyTree"
 import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
 import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
-import { ClickSpark } from "../../internal/ClickSpark"
 import {
   F0GraphCollapserWrapper,
   F0GraphExpanderWrapper,
@@ -402,6 +401,7 @@ export function F0GraphView<T = unknown>(
     reservedTagHeight,
     renderedNodeCount,
     renderedNodeIds,
+    treeRootNodeIds,
     contentBounds,
     getNodePosition,
   } = useGraphRenderModel<T>({
@@ -475,59 +475,6 @@ export function F0GraphView<T = unknown>(
     debounceMs: visibleDataDebounceMs,
     enabled: !enableNodeWindowing || viewportReady,
   })
-
-  // Initial frame: when `initialFocusNodeId` is set, open framed on that node
-  // AND its direct children (capped zoom) so the first level is visible —
-  // instead of fit-to-all, and without zooming in on the single node. Frozen at
-  // the first render with nodes present so the fit reads a stable value; falls
-  // back to fit-all when the target isn't present.
-  const initialFitRef = useRef<
-    { nodes: Array<{ id: string }>; maxZoom: number } | undefined
-  >(undefined)
-  const initialFitResolvedRef = useRef(false)
-  if (!initialFitResolvedRef.current && renderedNodeIds.length > 0) {
-    initialFitResolvedRef.current = true
-    const childIds = initialFocusNodeId
-      ? (nodeMap.get(initialFocusNodeId)?.children.map((c) => c.id) ?? [])
-      : []
-    const nodes = resolveInitialFitViewNodes(
-      initialFocusNodeId,
-      childIds,
-      new Set(renderedNodeIds)
-    )
-    initialFitRef.current = nodes
-      ? { nodes, maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom) }
-      : undefined
-  }
-  const initialFitViewOptions = initialFitRef.current
-
-  // Apply the initial frame exactly once, imperatively — never via React Flow's
-  // `fitView` prop. That prop queues a fit deferred until the container/nodes
-  // are measured, and once it fires it clears `fitViewOptions`; a later layout
-  // change (the first collapse/expand) then re-fires it as a fit-all, snapping
-  // the focused node away. Fitting ourselves, guarded by a ref, guarantees a
-  // single fit framed on `initialFitViewOptions` and no re-fit on any later
-  // layout change. Consumer-driven reveals still fly via the effect below.
-  const didInitialFitRef = useRef(false)
-  useEffect(() => {
-    if (didInitialFitRef.current || renderedNodeIds.length === 0) return
-    didInitialFitRef.current = true
-    // Honor the inset on the first frame too, so an already-open panel never
-    // opens the graph with the focus target behind it. When there's no inset the
-    // options are passed through untouched (identical to before).
-    reactFlow.fitView(
-      hasViewportInset
-        ? {
-            ...initialFitViewOptions,
-            // Base matches React Flow's own default fitView padding (0.1), so
-            // with no inset this stays byte-identical to the untouched call.
-            padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
-          }
-        : initialFitViewOptions
-    )
-    // Guarded by `didInitialFitRef` so it runs once; `hasViewportInset` /
-    // `getFitPadding` are read fresh at that point and intentionally omitted.
-  }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
 
   // ── Fly to the consumer-controlled focused node ──
   // Latest fly-to logic, read via a ref so the effect below depends ONLY on
@@ -634,6 +581,52 @@ export function F0GraphView<T = unknown>(
     return () => clearTimeout(timer)
   }, [focusedNode])
 
+  // ── Initial frame (entry) ──
+  // When `initialFocusNodeId` is set, arrive framed on that node in the same
+  // state a node click leaves: fly to it via the click path (`flyToNodeClickRef`,
+  // centered at the node-click zoom, `viewportInset`-aware). The fly is DEFERRED
+  // by the same settle delay the click/focused paths use — an immediate fly runs
+  // before React Flow has measured its container and never takes (which is why a
+  // mount-time frame missed while re-clicking the node worked). With no focus
+  // target it is a plain whole-graph fit (unchanged), applied immediately.
+  //
+  // The deferred fly is scheduled ONCE (ref-guarded) and is NOT torn down on
+  // re-render: the first renders after mount churn `renderedNodeIds` (two-phase
+  // hydration, an entry side panel opening), and an effect cleanup keyed on that
+  // would clear the pending timer while the ref-guard blocks re-scheduling — so
+  // the fly would silently never run. The timer is cleared only on unmount.
+  const initialFrameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const didInitialFrameRef = useRef(false)
+  useEffect(() => {
+    if (didInitialFrameRef.current || renderedNodeIds.length === 0) return
+    didInitialFrameRef.current = true
+    if (!initialFocusNodeId) {
+      reactFlow.fitView(
+        hasViewportInset
+          ? { padding: getFitPadding(FIT_VIEW_PADDING_TIGHT) }
+          : undefined
+      )
+      return
+    }
+    const target = initialFocusNodeId
+    initialFrameTimerRef.current = setTimeout(
+      () => flyToNodeClickRef.current(target),
+      FOCUS_SETTLE_DELAY_MS
+    )
+    // One-shot (ref-guarded); `hasViewportInset` / `getFitPadding` are read fresh
+    // and the timer is torn down on unmount (below), so deps stay minimal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderedNodeIds.length, initialFocusNodeId, reactFlow])
+  useEffect(
+    () => () => {
+      if (initialFrameTimerRef.current)
+        clearTimeout(initialFrameTimerRef.current)
+    },
+    []
+  )
+
   // Imperative API: `focusNode` fires on every call, independent of prop
   // values, so a consumer's search can re-center on the same node the user
   // picks twice (the `focusedNode` prop can't — an unchanged value never
@@ -707,6 +700,24 @@ export function F0GraphView<T = unknown>(
     [focusedNodeId, setFocusedNodeId, registerNodeRef]
   )
 
+  // React Flow wraps its content in a hardcoded `role="application"` div, which
+  // sits between this `role="tree"` container and the `role="treeitem"` nodes
+  // and severs the ARIA tree relationship. Reconnect it with `aria-owns`: the
+  // tree owns the rendered forest-root treeitems (`treeRootNodeIds`), and each
+  // in-window parent node re-owns its own children (see `visibleChildIds`), so
+  // every rendered treeitem has exactly one owner. While the tree renders no
+  // treeitems (deferred / staged / viewport data loading, or an empty graph),
+  // `aria-busy` keeps the empty tree valid instead of failing
+  // `aria-required-children`.
+  const treeIsEmpty = treeRootNodeIds.length === 0
+  const treeAriaOwns = useMemo(
+    () =>
+      treeRootNodeIds.length > 0
+        ? treeRootNodeIds.map((id) => `f0-graph-node-${id}`).join(" ")
+        : undefined,
+    [treeRootNodeIds]
+  )
+
   return (
     <F0GraphActionsContext.Provider value={actionsContextValue}>
       <F0GraphRenderConfigContext.Provider value={renderConfigContextValue}>
@@ -714,166 +725,151 @@ export function F0GraphView<T = unknown>(
           <F0GraphZoomContext.Provider value={zoomContextValue}>
             <F0GraphExpandContext.Provider value={expandContextValue}>
               <F0GraphSelectionContext.Provider value={selectionContextValue}>
-                <ClickSpark
-                  sparkColor="var(--f0-graph-spark)"
-                  sparkSize={10}
-                  sparkRadius={15}
-                  sparkCount={8}
-                  duration={400}
+                <div
+                  ref={canvasRef}
+                  tabIndex={0}
+                  aria-label={controlLabels?.graphCanvas ?? i18n.graph.canvas}
+                  onKeyDown={handleCanvasKeyDown}
+                  data-zoom-level={zoomLevel}
+                  className="f0-graph relative h-full w-full outline-none"
                 >
                   <div
-                    ref={canvasRef}
-                    tabIndex={0}
-                    aria-label={controlLabels?.graphCanvas ?? i18n.graph.canvas}
-                    onKeyDown={handleCanvasKeyDown}
-                    data-zoom-level={zoomLevel}
-                    className="f0-graph relative h-full w-full outline-none"
+                    ref={containerRef}
+                    role="tree"
+                    aria-label={controlLabels?.graphView ?? i18n.graph.view}
+                    aria-owns={treeAriaOwns}
+                    aria-busy={treeIsEmpty || undefined}
+                    onKeyDown={handleTreeKeyDown}
+                    onPointerDown={(e) => {
+                      pointerDownRef.current = {
+                        x: e.clientX,
+                        y: e.clientY,
+                        id: e.pointerId,
+                      }
+                    }}
+                    onPointerUp={(e) => {
+                      // Select node on mouseup only if the pointer barely
+                      // moved (i.e. it was a click, not a pan drag).
+                      const start = pointerDownRef.current
+                      pointerDownRef.current = null
+                      if (!start || start.id !== e.pointerId) return
+                      const dx = e.clientX - start.x
+                      const dy = e.clientY - start.y
+                      if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
+                      const target = e.target as HTMLElement | null
+                      // Opt-out affordances inside a node (e.g. the tag row)
+                      // are marked `data-no-node-select`: a pointerup on one
+                      // must not select the node. Checked before the node
+                      // lookup because this fires regardless of any inner
+                      // `onClick` stopPropagation.
+                      if (target?.closest("[data-no-node-select]")) return
+                      const nodeEl =
+                        target?.closest<HTMLElement>(".react-flow__node")
+                      if (!nodeEl) return
+                      const id = nodeEl.getAttribute("data-id")
+                      // select + fly-to (the fly is opt-out via
+                      // `centerOnNodeClick`). This is the click-only path;
+                      // keyboard selection goes through `selectNode` directly.
+                      if (id) handleNodeClick(id)
+                    }}
+                    className="h-full w-full"
                   >
-                    <div
-                      ref={containerRef}
-                      role="tree"
-                      aria-label={controlLabels?.graphView ?? i18n.graph.view}
-                      onKeyDown={handleTreeKeyDown}
-                      onPointerDown={(e) => {
-                        pointerDownRef.current = {
-                          x: e.clientX,
-                          y: e.clientY,
-                          id: e.pointerId,
-                        }
+                    <ReactFlow
+                      nodes={rfNodes}
+                      edges={rfEdges}
+                      nodeTypes={nodeTypes}
+                      edgeTypes={edgeTypes}
+                      // With F0 node windowing active, F0 already limits the
+                      // node array to the padded viewport, so React Flow must
+                      // render everything it is handed — a second, tighter
+                      // viewport cull here would drop the padding band and the
+                      // edges crossing the viewport edge (vanishing nodes/lines
+                      // on pan). Keep React Flow's own culling only when F0 is
+                      // NOT windowing (the original large-graph safeguard).
+                      onlyRenderVisibleElements={!nodeWindowingActive}
+                      minZoom={minZoom}
+                      maxZoom={maxZoom}
+                      defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
+                      onViewportChange={handleViewportChange}
+                      onPaneClick={handlePaneClick}
+                      onEdgeMouseEnter={(_, edge) => {
+                        const ge = (edge.data as GraphEdgeData | undefined)
+                          ?.graphEdge
+                        if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
+                        setHoveredEdgeId(edge.id)
+                        ge.onEdgeHover?.(ge)
                       }}
-                      onPointerUp={(e) => {
-                        // Select node on mouseup only if the pointer barely
-                        // moved (i.e. it was a click, not a pan drag).
-                        const start = pointerDownRef.current
-                        pointerDownRef.current = null
-                        if (!start || start.id !== e.pointerId) return
-                        const dx = e.clientX - start.x
-                        const dy = e.clientY - start.y
-                        if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
-                        const target = e.target as HTMLElement | null
-                        // Opt-out affordances inside a node (e.g. the tag row)
-                        // are marked `data-no-node-select`: a pointerup on one
-                        // must not select the node. Checked before the node
-                        // lookup because this fires regardless of any inner
-                        // `onClick` stopPropagation.
-                        if (target?.closest("[data-no-node-select]")) return
-                        const nodeEl =
-                          target?.closest<HTMLElement>(".react-flow__node")
-                        if (!nodeEl) return
-                        const id = nodeEl.getAttribute("data-id")
-                        // select + fly-to (the fly is opt-out via
-                        // `centerOnNodeClick`). This is the click-only path;
-                        // keyboard selection goes through `selectNode` directly.
-                        if (id) handleNodeClick(id)
+                      onEdgeMouseLeave={(_, edge) => {
+                        const ge = (edge.data as GraphEdgeData | undefined)
+                          ?.graphEdge
+                        if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
+                        setHoveredEdgeId((current) =>
+                          current === edge.id ? null : current
+                        )
+                        ge.onEdgeHover?.(null)
                       }}
-                      className="h-full w-full"
+                      onEdgeClick={(_, edge) => {
+                        const ge = (edge.data as GraphEdgeData | undefined)
+                          ?.graphEdge
+                        ge?.onEdgeClick?.(ge)
+                      }}
+                      proOptions={{ hideAttribution: true }}
+                      // No `fitView` prop: the initial frame is applied once,
+                      // imperatively (see `didInitialFitRef` above), so a later
+                      // layout change can never re-fire React Flow's queued fit.
+                      nodesDraggable={false}
+                      nodesConnectable={false}
+                      elementsSelectable={false}
+                      nodeClickDistance={4}
+                      panOnDrag
+                      zoomOnScroll
+                      zoomOnPinch
                     >
-                      <ReactFlow
-                        nodes={rfNodes}
-                        edges={rfEdges}
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        // With F0 node windowing active, F0 already limits the
-                        // node array to the padded viewport, so React Flow must
-                        // render everything it is handed — a second, tighter
-                        // viewport cull here would drop the padding band and the
-                        // edges crossing the viewport edge (vanishing nodes/lines
-                        // on pan). Keep React Flow's own culling only when F0 is
-                        // NOT windowing (the original large-graph safeguard).
-                        onlyRenderVisibleElements={!nodeWindowingActive}
-                        minZoom={minZoom}
-                        maxZoom={maxZoom}
-                        defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
-                        onViewportChange={handleViewportChange}
-                        onPaneClick={handlePaneClick}
-                        onEdgeMouseEnter={(_, edge) => {
-                          const ge = (edge.data as GraphEdgeData | undefined)
-                            ?.graphEdge
-                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
-                          setHoveredEdgeId(edge.id)
-                          ge.onEdgeHover?.(ge)
-                        }}
-                        onEdgeMouseLeave={(_, edge) => {
-                          const ge = (edge.data as GraphEdgeData | undefined)
-                            ?.graphEdge
-                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
-                          setHoveredEdgeId((current) =>
-                            current === edge.id ? null : current
-                          )
-                          ge.onEdgeHover?.(null)
-                        }}
-                        onEdgeClick={(_, edge) => {
-                          const ge = (edge.data as GraphEdgeData | undefined)
-                            ?.graphEdge
-                          ge?.onEdgeClick?.(ge)
-                        }}
-                        proOptions={{ hideAttribution: true }}
-                        // No `fitView` prop: the initial frame is applied once,
-                        // imperatively (see `didInitialFitRef` above), so a later
-                        // layout change can never re-fire React Flow's queued fit.
-                        nodesDraggable={false}
-                        nodesConnectable={false}
-                        elementsSelectable={false}
-                        nodeClickDistance={4}
-                        panOnDrag
-                        zoomOnScroll
-                        zoomOnPinch
-                      >
-                        <Background
-                          id="f0-graph-bg"
-                          variant={BackgroundVariant.Dots}
-                          gap={BACKGROUND_DOT_GAP}
-                          size={4}
-                          color="var(--f0-graph-bg-dot)"
-                        />
-                      </ReactFlow>
-                    </div>
-
-                    {canvasActions && (
-                      <div
-                        className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]"
-                        data-no-spark
-                      >
-                        {canvasActions}
-                      </div>
-                    )}
-
-                    {canvasFooterActions && (
-                      <div
-                        className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2"
-                        data-no-spark
-                      >
-                        {canvasFooterActions}
-                      </div>
-                    )}
-
-                    {showControls && (
-                      <div
-                        className="absolute bottom-6 left-6 z-10"
-                        data-no-spark
-                      >
-                        <F0GraphControls
-                          onZoomIn={handleZoomIn}
-                          onZoomOut={handleZoomOut}
-                          onFitView={handleFitView}
-                          onFocusUser={
-                            !currentUserNodeId
-                              ? undefined
-                              : // A consumer handler can reveal a collapsed /
-                                // not-yet-loaded node, so keep the button enabled
-                                // even when it isn't on screen. Without one, fall
-                                // back to fitView, which needs a visible node.
-                                (onFocusUserProp ??
-                                (nodeMap.has(currentUserNodeId)
-                                  ? handleFocusUser
-                                  : undefined))
-                          }
-                          labels={controlLabels}
-                        />
-                      </div>
-                    )}
+                      <Background
+                        id="f0-graph-bg"
+                        variant={BackgroundVariant.Dots}
+                        gap={BACKGROUND_DOT_GAP}
+                        size={4}
+                        color="var(--f0-graph-bg-dot)"
+                      />
+                    </ReactFlow>
                   </div>
-                </ClickSpark>
+
+                  {canvasActions && (
+                    <div className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]">
+                      {canvasActions}
+                    </div>
+                  )}
+
+                  {canvasFooterActions && (
+                    <div className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2">
+                      {canvasFooterActions}
+                    </div>
+                  )}
+
+                  {showControls && (
+                    <div className="absolute bottom-6 left-6 z-10">
+                      <F0GraphControls
+                        onZoomIn={handleZoomIn}
+                        onZoomOut={handleZoomOut}
+                        onFitView={handleFitView}
+                        onFocusUser={
+                          !currentUserNodeId
+                            ? undefined
+                            : // A consumer handler can reveal a collapsed /
+                              // not-yet-loaded node, so keep the button enabled
+                              // even when it isn't on screen. Without one, fall
+                              // back to fitView, which needs a visible node.
+                              (onFocusUserProp ??
+                              (nodeMap.has(currentUserNodeId)
+                                ? handleFocusUser
+                                : undefined))
+                        }
+                        labels={controlLabels}
+                      />
+                    </div>
+                  )}
+                </div>
               </F0GraphSelectionContext.Provider>
             </F0GraphExpandContext.Provider>
           </F0GraphZoomContext.Provider>

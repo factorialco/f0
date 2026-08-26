@@ -93,6 +93,33 @@ describe("DisabledCell", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
+  it("shows the select chevron when the column has a selectConfig", () => {
+    const { container } = render(
+      <DisabledCell
+        {...defaultProps}
+        editableColumn={makeEditableColumn({
+          selectConfig: { options: [] },
+        })}
+      />
+    )
+
+    expect(container.querySelector("svg")).toBeInTheDocument()
+  })
+
+  it("hides the select chevron when disabledConfig.hideSelectChevron is set", () => {
+    const { container } = render(
+      <DisabledCell
+        {...defaultProps}
+        editableColumn={makeEditableColumn({
+          selectConfig: { options: [] },
+          disabledConfig: { hideSelectChevron: true },
+        })}
+      />
+    )
+
+    expect(container.querySelector("svg")).not.toBeInTheDocument()
+  })
+
   it("shows the hint tooltip on hover", async () => {
     const user = userEvent.setup()
 

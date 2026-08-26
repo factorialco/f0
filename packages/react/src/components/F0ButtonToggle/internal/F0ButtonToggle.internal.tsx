@@ -4,9 +4,11 @@ import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, useMemo, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
+import { ButtonToggleColor } from "../types"
 import { F0ButtonToggleInternalProps } from "./types.internal"
 
 const buttonToggleVariants = cva({
@@ -50,6 +52,82 @@ const buttonToggleVariants = cva({
   defaultVariants: { size: "md", variant: "compact" },
 })
 
+/**
+ * What `color` looks like once the toggle is SELECTED: the colour's own fill and
+ * glyph, over a border strong enough to hold the row when several coloured
+ * toggles sit side by side. The fill follows `f1-background-selected` (0.1, 0.2
+ * under the pointer) so a coloured answer sits at the weight F0 gives any
+ * selected control; the border goes to 0.6, where `f1-border-selected` sits at
+ * 0.4, because here it has to separate one answer from its neighbours.
+ *
+ * Written out per colour because Tailwind only generates the utilities it can
+ * see as literal strings — the classes can't be composed from the token name.
+ */
+const selectedColorClasses: Record<ButtonToggleColor, string> = {
+  accent: cn(
+    "bg-[hsl(var(--accent-50)/0.1)] hover:bg-[hsl(var(--accent-50)/0.2)]",
+    "border-[hsl(var(--accent-50)/0.6)]",
+    "text-f1-icon-accent hover:text-f1-icon-accent"
+  ),
+  critical: cn(
+    "bg-[hsl(var(--critical-50)/0.1)] hover:bg-[hsl(var(--critical-50)/0.2)]",
+    "border-[hsl(var(--critical-50)/0.6)]",
+    "text-f1-icon-critical hover:text-f1-icon-critical"
+  ),
+  warning: cn(
+    "bg-[hsl(var(--warning-50)/0.1)] hover:bg-[hsl(var(--warning-50)/0.2)]",
+    "border-[hsl(var(--warning-50)/0.6)]",
+    "text-f1-icon-warning hover:text-f1-icon-warning"
+  ),
+  promote: cn(
+    "bg-[hsl(var(--promote-50)/0.1)] hover:bg-[hsl(var(--promote-50)/0.2)]",
+    "border-[hsl(var(--promote-50)/0.6)]",
+    "text-f1-icon-promote hover:text-f1-icon-promote"
+  ),
+  info: cn(
+    "bg-[hsl(var(--info-50)/0.1)] hover:bg-[hsl(var(--info-50)/0.2)]",
+    "border-[hsl(var(--info-50)/0.6)]",
+    "text-f1-icon-info hover:text-f1-icon-info"
+  ),
+  positive: cn(
+    "bg-[hsl(var(--positive-50)/0.1)] hover:bg-[hsl(var(--positive-50)/0.2)]",
+    "border-[hsl(var(--positive-50)/0.6)]",
+    "text-f1-icon-positive hover:text-f1-icon-positive"
+  ),
+  "mood-super-negative": cn(
+    "bg-[hsl(var(--mood-super-negative)/0.1)] hover:bg-[hsl(var(--mood-super-negative)/0.2)]",
+    "border-[hsl(var(--mood-super-negative)/0.6)]",
+    "text-f1-icon-mood-super-negative hover:text-f1-icon-mood-super-negative"
+  ),
+  "mood-negative": cn(
+    "bg-[hsl(var(--mood-negative)/0.1)] hover:bg-[hsl(var(--mood-negative)/0.2)]",
+    "border-[hsl(var(--mood-negative)/0.6)]",
+    "text-f1-icon-mood-negative hover:text-f1-icon-mood-negative"
+  ),
+  "mood-neutral": cn(
+    "bg-[hsl(var(--mood-neutral)/0.1)] hover:bg-[hsl(var(--mood-neutral)/0.2)]",
+    "border-[hsl(var(--mood-neutral)/0.6)]",
+    "text-f1-icon-mood-neutral hover:text-f1-icon-mood-neutral"
+  ),
+  "mood-positive": cn(
+    "bg-[hsl(var(--mood-positive)/0.1)] hover:bg-[hsl(var(--mood-positive)/0.2)]",
+    "border-[hsl(var(--mood-positive)/0.6)]",
+    "text-f1-icon-mood-positive hover:text-f1-icon-mood-positive"
+  ),
+  "mood-super-positive": cn(
+    "bg-[hsl(var(--mood-super-positive)/0.1)] hover:bg-[hsl(var(--mood-super-positive)/0.2)]",
+    "border-[hsl(var(--mood-super-positive)/0.6)]",
+    "text-f1-icon-mood-super-positive hover:text-f1-icon-mood-super-positive"
+  ),
+}
+
+/**
+ * And what it looks like UNSELECTED: a muted glyph rather than the default
+ * near-black one. A coloured toggle only speaks up once it is chosen — five
+ * coloured glyphs at once would be decoration, not an answer.
+ */
+const unselectedColorClasses = "text-f1-icon"
+
 const labelSizeVariants = cva({
   variants: {
     size: {
@@ -73,6 +151,8 @@ export const F0ButtonToggleInternal = forwardRef<
       icon,
       size = "md",
       variant = "compact",
+      tooltip,
+      color,
       withBorder = false,
       className: externalClassName,
       defaultSelected = false,
@@ -122,7 +202,15 @@ export const F0ButtonToggleInternal = forwardRef<
       return size
     }, [size, variant])
 
-    return (
+    // Same shape `Action` accepts: a bare string is the description on its own.
+    const tooltipProps =
+      typeof tooltip === "object"
+        ? tooltip
+        : tooltip
+          ? { description: tooltip }
+          : undefined
+
+    const root = (
       <TogglePrimitive.Root
         ref={ref}
         pressed={state.selected}
@@ -142,9 +230,20 @@ export const F0ButtonToggleInternal = forwardRef<
             withBorder,
             selected: state.selected,
           }),
+          // After the variants, whose selected teal it replaces; before the
+          // consumer's own class, which still has the last word.
+          color &&
+            (state.selected
+              ? selectedColorClasses[color]
+              : unselectedColorClasses),
           externalClassName
         )}
         {...props}
+        // Deliberately after the spread: when a tooltip wraps this button, Radix
+        // hands the trigger's own open/closed `data-state` down through
+        // `asChild`, which would otherwise overwrite the pressed state that
+        // consumers and tests read off the button.
+        data-state={state.selected ? "on" : "off"}
       >
         <AnimatePresence initial={false}>
           <div className="main relative flex flex-col items-center justify-center">
@@ -182,6 +281,14 @@ export const F0ButtonToggleInternal = forwardRef<
         )}
       </TogglePrimitive.Root>
     )
+
+    if (!tooltipProps) {
+      return root
+    }
+
+    // `TooltipInternal` strips the native `title` off the button so the browser
+    // doesn't draw its own bubble next to this one; `aria-label` keeps the name.
+    return <TooltipInternal {...tooltipProps}>{root}</TooltipInternal>
   }
 )
 

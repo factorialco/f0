@@ -117,6 +117,74 @@ describe("WidgetCatalog", () => {
     expect(onAdd).toHaveBeenCalledWith("time-off")
   })
 
+  describe("one catalog, two columns", () => {
+    // The same list a two-column Home would keep: two widgets that can only go
+    // in one column each, and two that go in either.
+    const byArea = [
+      { ...WIDGETS[0], areas: ["right"] as const },
+      { ...WIDGETS[1] },
+      { ...WIDGETS[2], areas: ["main"] as const },
+      { ...WIDGETS[3], areas: ["main", "right"] as const },
+    ]
+
+    test("offers a column only what it can hold", () => {
+      const { unmount } = render({
+        widgets: byArea,
+        groups: undefined,
+        area: "main",
+      })
+
+      // Clock in is rail-only, so it isn't on offer here at all. Time off
+      // declares nothing and belongs to both.
+      expect(listed()).toEqual(["Time off", "Documents", "Events"])
+      unmount()
+
+      render({ widgets: byArea, groups: undefined, area: "right" })
+      expect(listed()).toEqual(["Clock in", "Time off", "Events"])
+    })
+
+    test("without an area it is every widget, as it always was", () => {
+      render({ widgets: byArea, groups: undefined })
+
+      expect(listed()).toEqual(TITLES)
+    })
+
+    test("the area filter is not searchable around", async () => {
+      render({ widgets: byArea, groups: undefined, area: "main" })
+
+      // Searching for a rail-only widget by name finds nothing: a column can't
+      // hold it, so no amount of typing should surface it.
+      await userEvent.type(screen.getByRole("searchbox"), "clock")
+
+      expect(listed()).toEqual([])
+      expect(screen.getByText(/No widgets match/)).toBeInTheDocument()
+    })
+
+    test("a column with nothing to offer says that, not 'no match'", () => {
+      render({
+        widgets: [{ ...WIDGETS[0], areas: ["right"] as const }],
+        groups: undefined,
+        area: "main",
+      })
+
+      // Two different dead ends: a search you can clear, and a column that has
+      // nothing for you.
+      expect(screen.getByText("No widgets to add here.")).toBeInTheDocument()
+      expect(screen.queryByText(/No widgets match/)).not.toBeInTheDocument()
+    })
+
+    test("the CTA adds a widget the column can actually hold", async () => {
+      const onAdd = vi.fn()
+      render({ widgets: byArea, groups: undefined, area: "main", onAdd })
+
+      // Selection follows what is SHOWN, so the first row is the first one this
+      // column offers — never the rail-only widget that leads the raw list.
+      await userEvent.click(screen.getByRole("button", { name: "Add widget" }))
+
+      expect(onAdd).toHaveBeenCalledWith("time-off")
+    })
+  })
+
   describe("a preview handed over as DATA", () => {
     const eventsWidget: HomeWidgetItem = {
       id: "events",

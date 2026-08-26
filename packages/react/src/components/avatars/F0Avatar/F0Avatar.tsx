@@ -41,6 +41,7 @@ export const F0Avatar = ({
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
           deactivated={avatar.deactivated}
+          pending={avatar.pending}
           dataTestId={dataTestId}
         />
       )

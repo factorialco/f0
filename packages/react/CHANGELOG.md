@@ -1,5 +1,266 @@
 # Changelog
 
+## [6.57.1](https://github.com/factorialco/f0/compare/f0-react-v6.57.0...f0-react-v6.57.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **DateNavigator:** keep periods out of the shared granularity key ([#5241](https://github.com/factorialco/f0/issues/5241)) ([095c5d1](https://github.com/factorialco/f0/commit/095c5d13a2520d92b24dd073dae5a26892ca8ef6))
+
+## [6.57.0](https://github.com/factorialco/f0/compare/f0-react-v6.56.0...f0-react-v6.57.0) (2026-08-26)
+
+
+### Features
+
+* **Home:** a widget's header controls, as data ([#5244](https://github.com/factorialco/f0/issues/5244)) ([118bca7](https://github.com/factorialco/f0/commit/118bca7cee7057cc293d83d2aaedf2e33125843d))
+
+## [6.56.0](https://github.com/factorialco/f0/compare/f0-react-v6.55.0...f0-react-v6.56.0) (2026-08-26)
+
+
+### Features
+
+* **OneDataCollection:** keep every loaded children page live and replaceable ([#5245](https://github.com/factorialco/f0/issues/5245)) ([5d81b32](https://github.com/factorialco/f0/commit/5d81b32b4e55b5dd548d9f648994b22cd39d1116))
+
+## [6.55.0](https://github.com/factorialco/f0/compare/f0-react-v6.54.3...f0-react-v6.55.0) (2026-08-26)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** expose widget, point, and drag Ask One targets ([#5239](https://github.com/factorialco/f0/issues/5239)) ([bb1b0ab](https://github.com/factorialco/f0/commit/bb1b0ab8bb39808c3897ba151794ae27e56187f1))
+
+## [6.54.3](https://github.com/factorialco/f0/compare/f0-react-v6.54.2...f0-react-v6.54.3) (2026-08-25)
+
+
+### Bug Fixes
+
+* **useSelectable:** keep pre-selected multi-select values checked when their option loads first ([#4933](https://github.com/factorialco/f0/issues/4933)) ([861614f](https://github.com/factorialco/f0/commit/861614fc78cd7b0548f37cbe3e2f7526ee4cc141))
+
+## [6.54.2](https://github.com/factorialco/f0/compare/f0-react-v6.54.1...f0-react-v6.54.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* **Home:** the drag ghost is a copy of the card, not a second render ([#5237](https://github.com/factorialco/f0/issues/5237)) ([9cda20a](https://github.com/factorialco/f0/commit/9cda20abaddc39aba7b7257bc207033e00f02a99))
+
+## [6.54.1](https://github.com/factorialco/f0/compare/f0-react-v6.54.0...f0-react-v6.54.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **F0Graph:** restore ARIA tree semantics flagged by axe ([#5228](https://github.com/factorialco/f0/issues/5228)) ([0f4e24b](https://github.com/factorialco/f0/commit/0f4e24b8d3b89f36d642964d619d55f1aa79c3cc))
+
+## [6.54.0](https://github.com/factorialco/f0/compare/f0-react-v6.53.0...f0-react-v6.54.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** withdraw the add offer per column ([#5230](https://github.com/factorialco/f0/issues/5230)) ([d1a5f0d](https://github.com/factorialco/f0/commit/d1a5f0d6159746320bbef8b028257fd05e11d7a7))
+
+## [6.53.0](https://github.com/factorialco/f0/compare/f0-react-v6.52.0...f0-react-v6.53.0) (2026-08-25)
+
+
+### Features
+
+* **DateNavigator:** select consumer-defined periods ([#5161](https://github.com/factorialco/f0/issues/5161)) ([3a8246f](https://github.com/factorialco/f0/commit/3a8246f2f89735416922cdb3a4060e169bd29534))
+
+## [6.52.0](https://github.com/factorialco/f0/compare/f0-react-v6.51.1...f0-react-v6.52.0) (2026-08-25)
+
+
+### Features
+
+* **NewHomeLayout:** add F0OneSwitch to the top-right controls ([#5224](https://github.com/factorialco/f0/issues/5224)) ([ce02a35](https://github.com/factorialco/f0/commit/ce02a35f4f08e16b3b4ef3b0d3cfb8514849954b))
+
+## [6.51.1](https://github.com/factorialco/f0/compare/f0-react-v6.51.0...f0-react-v6.51.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **api-surface:** compare wrapped components structurally, not as text ([#5219](https://github.com/factorialco/f0/issues/5219)) ([6e3e958](https://github.com/factorialco/f0/commit/6e3e95884827365e5f5b772e25d4d3ddd90204f9))
+
+## [6.51.0](https://github.com/factorialco/f0/compare/f0-react-v6.50.0...f0-react-v6.51.0) (2026-08-25)
+
+
+### Features
+
+* **Home:** area-specific widgets, Communities carousel, F0CarouselDialog ([#5214](https://github.com/factorialco/f0/issues/5214)) ([80bd511](https://github.com/factorialco/f0/commit/80bd511f2aaf1235ee1aa46ddec84110aa72a8df))
+
+## [6.50.0](https://github.com/factorialco/f0/compare/f0-react-v6.49.1...f0-react-v6.50.0) (2026-08-24)
+
+
+### Features
+
+* **F0ENPSButton:** add experimental eNPS scale to Home ([#5215](https://github.com/factorialco/f0/issues/5215)) ([8e2d9cf](https://github.com/factorialco/f0/commit/8e2d9cfbb772dcdb633d478ab693b497a1fe1070))
+
+## [6.49.1](https://github.com/factorialco/f0/compare/f0-react-v6.49.0...f0-react-v6.49.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **SidebarTabs:** re-measure when labels outgrow the row ([#5198](https://github.com/factorialco/f0/issues/5198)) ([20e8baf](https://github.com/factorialco/f0/commit/20e8bafe3d88332ddc3834a1042dcc923043071c))
+
+## [6.49.0](https://github.com/factorialco/f0/compare/f0-react-v6.48.0...f0-react-v6.49.0) (2026-08-24)
+
+
+### Features
+
+* **OneDataCollection:** freeze table columns from settings ([#5188](https://github.com/factorialco/f0/issues/5188)) ([ece5e67](https://github.com/factorialco/f0/commit/ece5e6796f5a9f32466e4465ef575a0f57027a92))
+
+## [6.48.0](https://github.com/factorialco/f0/compare/f0-react-v6.47.2...f0-react-v6.48.0) (2026-08-24)
+
+
+### Features
+
+* **OneDataCollection:** select a node on graph entry via initialSelectedNodeId ([#5169](https://github.com/factorialco/f0/issues/5169)) ([762bff2](https://github.com/factorialco/f0/commit/762bff25094f9cad254cf08982ae7c62ca003606))
+
+## [6.47.2](https://github.com/factorialco/f0/compare/f0-react-v6.47.1...f0-react-v6.47.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **F0Avatar:** forward pending to the person avatar ([#5195](https://github.com/factorialco/f0/issues/5195)) ([f47a8df](https://github.com/factorialco/f0/commit/f47a8df7d37098f6e4e411d2272236dceb33550a))
+
+## [6.47.1](https://github.com/factorialco/f0/compare/f0-react-v6.47.0...f0-react-v6.47.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **EditableTable:** hide select chevron on disabled cells ([#5187](https://github.com/factorialco/f0/issues/5187)) ([a025406](https://github.com/factorialco/f0/commit/a025406f2119852392673a3e1539468151df46c9))
+* **F0Graph:** frame the entry target (initialFocusNodeId) reliably on arrival ([#5183](https://github.com/factorialco/f0/issues/5183)) ([7270f8a](https://github.com/factorialco/f0/commit/7270f8a9fbfefe4db0d481a282c79593e062cf2c))
+
+## [6.47.0](https://github.com/factorialco/f0/compare/f0-react-v6.46.1...f0-react-v6.47.0) (2026-08-24)
+
+
+### Features
+
+* **CardSelectable:** add an opt-in compact density ([#5193](https://github.com/factorialco/f0/issues/5193)) ([c6b7495](https://github.com/factorialco/f0/commit/c6b7495062968da01d263f78c6c780af901fc553))
+
+## [6.46.1](https://github.com/factorialco/f0/compare/f0-react-v6.46.0...f0-react-v6.46.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **F0Chat:** pin composer text metrics to the textarea ([#5199](https://github.com/factorialco/f0/issues/5199)) ([a9bf9ce](https://github.com/factorialco/f0/commit/a9bf9ce82568ad59541c9ae1a5b04d004050e385))
+
+## [6.46.0](https://github.com/factorialco/f0/compare/f0-react-v6.45.0...f0-react-v6.46.0) (2026-08-21)
+
+
+### Features
+
+* **ai:** drop a dashboard widget into the chat to quote it ([#5126](https://github.com/factorialco/f0/issues/5126)) ([42ca2cf](https://github.com/factorialco/f0/commit/42ca2cf032fead144f86f896ff085d81d9f88c40))
+
+## [6.45.0](https://github.com/factorialco/f0/compare/f0-react-v6.44.0...f0-react-v6.45.0) (2026-08-21)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** offer Ask One on a clicked chart mark ([#5125](https://github.com/factorialco/f0/issues/5125)) ([db1b8c6](https://github.com/factorialco/f0/commit/db1b8c6610adacf2f381c6ef98d2541e3c7b47cd))
+
+## [6.44.0](https://github.com/factorialco/f0/compare/f0-react-v6.43.0...f0-react-v6.44.0) (2026-08-21)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** offer Ask One in the widget menu ([#5124](https://github.com/factorialco/f0/issues/5124)) ([9893196](https://github.com/factorialco/f0/commit/98931967a5df4dec2b4da0ee0b524d9ab9615d34))
+
+## [6.43.0](https://github.com/factorialco/f0/compare/f0-react-v6.42.3...f0-react-v6.43.0) (2026-08-21)
+
+
+### Features
+
+* **F0DataChart:** report the clicked mark via onPointClick ([#5123](https://github.com/factorialco/f0/issues/5123)) ([0c95895](https://github.com/factorialco/f0/commit/0c958951223d525396ac8e6d565606e915dc13a4))
+
+## [6.42.3](https://github.com/factorialco/f0/compare/f0-react-v6.42.2...f0-react-v6.42.3) (2026-08-20)
+
+
+### Bug Fixes
+
+* **F0Dialog:** stop scrollable content from squeezing the tabs strip ([#5160](https://github.com/factorialco/f0/issues/5160)) ([9ab3145](https://github.com/factorialco/f0/commit/9ab314563e99fe4b19e036794515508d538cee15))
+
+## [6.42.2](https://github.com/factorialco/f0/compare/f0-react-v6.42.1...f0-react-v6.42.2) (2026-08-19)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** make the all-items-selected label visible on the dark action bar ([#5180](https://github.com/factorialco/f0/issues/5180)) ([2091615](https://github.com/factorialco/f0/commit/2091615b3c8b66a0322753f25b2624c0bc2766a9))
+
+## [6.42.1](https://github.com/factorialco/f0/compare/f0-react-v6.42.0...f0-react-v6.42.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **ui/switch:** meet the WCAG 2.2 target-size floor ([#5173](https://github.com/factorialco/f0/issues/5173)) ([c67e39c](https://github.com/factorialco/f0/commit/c67e39c1a0cf25ae43232fdba21bccc3de820c42))
+
+## [6.42.0](https://github.com/factorialco/f0/compare/f0-react-v6.41.1...f0-react-v6.42.0) (2026-08-19)
+
+
+### Features
+
+* **SlotWidget:** export its content, frameless ([#5179](https://github.com/factorialco/f0/issues/5179)) ([2252dfd](https://github.com/factorialco/f0/commit/2252dfd3cb03d6022545f2e114b789d36c144a01))
+
+## [6.41.1](https://github.com/factorialco/f0/compare/f0-react-v6.41.0...f0-react-v6.41.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **F0ResourceHeader:** rename to clear stable DoD name-prefix check ([#5171](https://github.com/factorialco/f0/issues/5171)) ([de75230](https://github.com/factorialco/f0/commit/de75230fc458569df84c8cfce5a96e62e1bf8508))
+
+## [6.41.0](https://github.com/factorialco/f0/compare/f0-react-v6.40.0...f0-react-v6.41.0) (2026-08-19)
+
+
+### Features
+
+* **valueDisplay:** add neutral variant to tag cell ([#5081](https://github.com/factorialco/f0/issues/5081)) ([19e2da4](https://github.com/factorialco/f0/commit/19e2da4bb9d5bc24d6e623221cb54c9175418bf4))
+
+## [6.40.0](https://github.com/factorialco/f0/compare/f0-react-v6.39.0...f0-react-v6.40.0) (2026-08-19)
+
+
+### Features
+
+* **ComboChart:** add projected bars for provisional data ([#5153](https://github.com/factorialco/f0/issues/5153)) ([c8c2eb6](https://github.com/factorialco/f0/commit/c8c2eb6d1cf1643944905486bee6556f51cf4e80))
+
+## [6.39.0](https://github.com/factorialco/f0/compare/f0-react-v6.38.1...f0-react-v6.39.0) (2026-08-19)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add info hint to widget headers ([#5103](https://github.com/factorialco/f0/issues/5103)) ([2ada46d](https://github.com/factorialco/f0/commit/2ada46d3b286e235f2d3c9f231ed344caa7bc508))
+
+## [6.38.1](https://github.com/factorialco/f0/compare/f0-react-v6.38.0...f0-react-v6.38.1) (2026-08-19)
+
+
+### Performance Improvements
+
+* **storybook:** shrink the 45MB sample video and guard against regressions ([#5165](https://github.com/factorialco/f0/issues/5165)) ([9b63bf3](https://github.com/factorialco/f0/commit/9b63bf328daa97187a9074cab7ce9b0c79e414fa))
+
+## [6.38.0](https://github.com/factorialco/f0/compare/f0-react-v6.37.2...f0-react-v6.38.0) (2026-08-18)
+
+
+### Features
+
+* **NewHomeLayout:** add rail actions to collapsed widget glyphs ([#5159](https://github.com/factorialco/f0/issues/5159)) ([569e698](https://github.com/factorialco/f0/commit/569e698f6ed4fbe334028d013d4ad07395ce4298))
+
+## [6.37.2](https://github.com/factorialco/f0/compare/f0-react-v6.37.1...f0-react-v6.37.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** center table cell content in a 24px band ([#5154](https://github.com/factorialco/f0/issues/5154)) ([bc06d99](https://github.com/factorialco/f0/commit/bc06d99a47a24d9bc30284350b6f7767b6ca99f7))
+
+## [6.37.1](https://github.com/factorialco/f0/compare/f0-react-v6.37.0...f0-react-v6.37.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **F0Select:** keep one trigger node across selection changes ([#5152](https://github.com/factorialco/f0/issues/5152)) ([abb61b7](https://github.com/factorialco/f0/commit/abb61b7db849cde8447aa2593347ca5456700fe5))
+
+## [6.37.0](https://github.com/factorialco/f0/compare/f0-react-v6.36.0...f0-react-v6.37.0) (2026-08-18)
+
+
+### Features
+
+* **Cocreation:** make template selection its own step ([#5094](https://github.com/factorialco/f0/issues/5094)) ([d132d66](https://github.com/factorialco/f0/commit/d132d6652b2a74a62fa9c5e9a59dddbd05b72699))
+* **F0AvatarPerson:** add pending state for roles to be filled ([#5148](https://github.com/factorialco/f0/issues/5148)) ([28638d8](https://github.com/factorialco/f0/commit/28638d842a3dfeb3e6f5c03c0a07d24c8d893df2))
+
 ## [6.36.0](https://github.com/factorialco/f0/compare/f0-react-v6.35.0...f0-react-v6.36.0) (2026-08-17)
 
 

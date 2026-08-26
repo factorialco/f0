@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useState } from "react"
 
 import type {
   GranularityDefinition,
-  GranularityDefinitionKey,
+  NavigationGranularityKey,
 } from "@/components/OneCalendar"
 
 import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
@@ -20,7 +20,7 @@ type DateInputProps = {
   className?: string
   onDateChange?: (date: DatePickerValue | undefined) => void
   onClick?: () => void
-  granularity: GranularityDefinition & { key: GranularityDefinitionKey }
+  granularity: GranularityDefinition & { key: NavigationGranularityKey }
   onOpenChange?: (open: boolean) => void
   onClear?: () => void
   minDate?: Date
@@ -64,7 +64,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 
     const handleNewValue = (
       inputValue: string,
-      granularity: GranularityDefinition & { key: GranularityDefinitionKey }
+      granularity: GranularityDefinition & { key: NavigationGranularityKey }
     ) => {
       if (inputValue === "") {
         onDateChange?.({

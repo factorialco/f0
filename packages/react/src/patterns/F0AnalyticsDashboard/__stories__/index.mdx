@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./index.stories"
+import * as AskOneStories from "./AskOne.stories"
+import * as WidgetDropStories from "@/kits/ai/F0AiChat/__stories__/F0AiChatWidgetDrop.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
@@ -100,6 +102,148 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
   }}
 />
 
+### Widget information hints
+
+Use `info` for the definition of the figure itself. A string reveals a short
+tooltip; structured content reveals a titled card with an optional link to the
+definition's source. Keep this separate from `description`, which states what
+the widget shows, and `explanation`, which documents how the result was
+calculated.
+
+In the story below, hover or focus the information icons beside **Headcount by
+Department** and **Avg. Salary**. The other widgets intentionally omit `info`,
+so the new affordance can be compared with the unchanged header.
+
+<Canvas of={Stories.MixedDashboard} />
+
+- WHEN an item provides `info` → THEN an information trigger appears beside its title on chart, metric, and collection widgets.
+- WHEN `info` is omitted → THEN the header layout and interaction remain unchanged.
+- WHEN the widget is in an error state → THEN the information trigger remains available to explain what the failed widget was meant to measure.
+- WHEN the title is long → THEN it truncates around the fixed-size trigger instead of pushing the trigger out of the header.
+
+### Ask One from a widget
+
+When an enabled AI chat is mounted, each titled widget adds **Ask One** to its
+actions menu. Choosing it opens the chat and places the widget title in the
+composer's quote chip, ready for a question.
+
+**Menu action**
+
+The story leaves the widget menu open so the action, icon, and placement can be
+reviewed directly.
+
+<Canvas of={AskOneStories.WidgetMenuAction} />
+
+**Quoted in the chat**
+
+This story completes the action and leaves the resulting quote visible in the
+real chat composer.
+
+<Canvas of={AskOneStories.WidgetQuotedInChat} />
+
+**Drag shortcut in edit mode**
+
+On a multi-item editable dashboard, dragging a titled widget into the visible
+chat is a pointer shortcut for the same action. The automated story finishes
+with the quote visible and the dashboard order unchanged.
+
+<Canvas of={WidgetDropStories.DragWidgetToQuote} />
+
+Pass `onAskAi` when the host needs to own the action instead of sending it to
+the mounted chat:
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAi={({ id, title }) => {
+    openProductChat({ widgetId: id, quote: title })
+  }}
+/>
+```
+
+Pass `onAskAiTarget` when the mounted chat should keep the built-in quote,
+open, and focus behavior while the host attaches structured analytical
+context. The observer receives the widget identity plus the exact `quote`
+object staged in the composer. Point asks also include the raw `point`.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAiTarget={({ id, point, quote }) => {
+    attachAnalyticalContext({ widgetId: id, point, quote })
+  }}
+/>
+```
+
+<Canvas of={AskOneStories.TargetObserver} />
+
+If both callbacks are supplied, `onAskAi` owns the interaction:
+`onAskAiTarget` is not invoked and F0 does not stage a built-in quote.
+
+- WHEN an enabled AI chat is mounted and a widget has a title → THEN its actions menu includes **Ask One**.
+- WHEN a widget is in an error state but still has a title → THEN **Ask One** remains available from its error header.
+- WHEN no chat is available and `onAskAi` is omitted → THEN the action is hidden instead of offering a dead command.
+- WHEN **Ask One** uses the built-in behavior → THEN the dashboard exits widget fullscreen, quotes the title, and opens the chat.
+- WHEN `onAskAi` is provided → THEN the action calls the host with the widget `id` and `title` without changing chat or fullscreen state.
+- WHEN `onAskAiTarget` observes the built-in behavior → THEN it receives the widget `id`, `title`, and exact pending `quote` before F0 stages that quote, without replacing any chat behavior.
+- WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
+- WHEN a widget is dropped on chat → THEN it follows the same built-in,
+  observed, or host-owned behavior as the menu action.
+- WHEN the reorder grip is only clicked → THEN no drag invitation appears and
+  no widget action runs.
+- WHEN the pointer drag is cancelled or ends outside chat → THEN no quote or
+  host action is created.
+- WHEN a widget has no title → THEN the action is hidden because there is nothing to quote.
+
+### Ask One from a chart point
+
+Charts with an available chat or `onAskAi` handler let the reader click a mark
+before choosing **Ask One**. The intermediate action is intentional: ordinary
+chart exploration must not open the chat on every click.
+
+**Interactive point flow**
+
+In this story, click the Engineering bar to reveal the anchored action. Choose
+**Ask One** to review the category, series, and formatted value in the focused
+chat composer.
+
+<Canvas of={AskOneStories.ChartPointFlow} />
+
+**Observed point target**
+
+This story keeps the built-in formatted quote while exposing the raw point to
+the non-overriding observer.
+
+<Canvas of={AskOneStories.PointTargetObserver} />
+
+The host-owned callback receives the raw point as `point`, in addition to the
+widget `id` and `title`. `point.values` preserves every measure carried by one
+mark, while `point.series` preserves every visible series resolved by a line
+chart click. `point.source` distinguishes `"pointer"` from `"keyboard"`;
+keyboard-resolved points use `0` for both viewport coordinates because there is
+no pointer position to anchor to.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAi={({ id, title, point }) => {
+    openProductChat({ widgetId: id, quote: title, point })
+  }}
+/>
+```
+
+- WHEN a pointer user clicks a chart mark → THEN **Ask One** appears beside that mark without opening the chat yet.
+- WHEN a keyboard user tabs to the chart's point action → THEN a visible **Ask One** trigger opens a menu containing every currently visible point, with the same formatted context as pointer selection.
+- WHEN a chart contains more than 100 points → THEN the keyboard menu pages them with **Previous** and **Next** actions instead of mounting the entire dataset at once.
+- WHEN the built-in action is chosen → THEN the quote keeps the chart title, visible point context, and tooltip-formatted values, opens the chat, and focuses its composer.
+- WHEN a scatter point is quoted → THEN both the X and Y measures are included with their axis names and formatters.
+- WHEN a line category is quoted → THEN every visible series at that category is included, matching the axis tooltip.
+- WHEN `onAskAi` owns the action → THEN it receives the raw point and the built-in chat state remains unchanged.
+- WHEN `onAskAiTarget` observes the built-in action → THEN it receives that exact pending quote together with the raw point.
+- WHEN the chart has no title → THEN pointer and keyboard point actions are hidden because there is no widget context to quote.
+- WHEN the chart moves because of scrolling or resizing, or the reader presses <kbd>Escape</kbd> or clicks elsewhere → THEN the anchored action closes.
+- WHEN a screen reader reaches the point action → THEN its trigger is named **Ask One: _chart title_** and each menu item exposes the complete formatted point context.
+
 ### Report filters
 
 Report filters are one applied state shared by every participating item. Pass `filtersValue` with `onFiltersChange` to own that state — for example to hydrate a saved report and persist each committed change — or pass only `defaultFilters` to let the dashboard own it.
@@ -198,7 +342,22 @@ The filter bar remains usable when valid report filters return empty chart data.
         <td>
           <kbd>Escape</kbd>
         </td>
-        <td>Closes the filter dialog and rolls back temporary selections.</td>
+        <td>Closes the filter dialog or an anchored chart-point action.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>, then <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>
+          Reaches and reveals the chart's <strong>Ask One</strong> trigger, then
+          opens its keyboard-accessible data-point menu.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd>
+        </td>
+        <td>Moves through data points in the open chart action menu.</td>
       </tr>
     </tbody>
   </table>

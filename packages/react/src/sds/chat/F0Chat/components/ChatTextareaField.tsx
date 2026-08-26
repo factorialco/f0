@@ -28,7 +28,16 @@ type ChatTextareaFieldProps = {
 
 // Shared text-box metrics — applied identically to the invisible sizer, the
 // highlight overlay and the textarea so caret and highlight align to the pixel.
-const BOX = "whitespace-pre-wrap break-words p-3 text-md leading-5"
+//
+// `text-base` is load-bearing, not decoration: it pins letter-spacing on all
+// three layers. `body` sets -0.005em (packages/core/base.css), which the two
+// divs inherit but a `<textarea>` never does — the UA stylesheet declares
+// `letter-spacing: normal` directly on form controls, and a declaration on the
+// element beats an inherited value. Leave it unpinned and the overlay runs
+// ~0.07px/char tighter than the textarea: the caret drifts away from the
+// painted glyphs and the two layers wrap at different characters. (This read
+// `text-md` before, which is not in F0's font scale and emitted no CSS at all.)
+const BOX = "whitespace-pre-wrap break-words p-3 text-base leading-5"
 const HEIGHT = "min-h-[44px] max-h-[140px]"
 
 /**

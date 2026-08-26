@@ -10,7 +10,11 @@ import type { RecordType } from "@/hooks/datasource"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
-import type { DashboardCollectionItem } from "../../types"
+import type {
+  DashboardCollectionItem,
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+} from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
@@ -21,6 +25,8 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   actions?: DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -39,6 +45,8 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   actions,
   editMode,
   handleDelete,
+  onAskAi,
+  onAskAiTarget,
   isFullscreen,
   onFullscreenChange,
 }: CollectionItemProps<Filters>) {
@@ -119,11 +127,14 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     <DashboardItem
       title={item.title}
       description={item.description}
+      info={item.info}
       explanation={item.explanation}
       isLoading={false}
       actions={allActions}
       editMode={editMode}
       handleDelete={handleDelete}
+      onAskAi={onAskAi}
+      onAskAiTarget={onAskAiTarget}
       itemId={item.id}
       isFullscreen={isFullscreen}
       onFullscreenChange={onFullscreenChange}

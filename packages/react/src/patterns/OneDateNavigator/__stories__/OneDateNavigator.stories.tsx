@@ -5,15 +5,13 @@ import { useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { granularityDefinitions } from "@/components/OneCalendar"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 
-import {
-  CalendarView,
-  DateRange,
-  WeekStartDay,
-} from "@/components/OneCalendar/types"
+import { DateRange, WeekStartDay } from "@/components/OneCalendar/types"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"
+import { payrollPeriods } from "@/lib/storybook-utils/payrollPeriods"
 
 const meta = {
   title: "Filters/DateNavigator",
@@ -79,6 +77,17 @@ const meta = {
           summary: "DatePreset[]",
           detail:
             "type DatePreset = { label: string, granularity: GranularityDefinitionKey, value: DateRange }",
+        },
+      },
+    },
+    periods: {
+      description:
+        "Consumer-defined ranges (payroll cycles, academic terms, …) offered as an extra entry in the granularity selector, named by its `label`. Each period is listed with its own label and date range, and the navigation arrows step from one period to the next.",
+      table: {
+        type: {
+          summary: "DatePeriodsDefinition",
+          detail:
+            "type DatePeriodsDefinition = { label?: string, header?: string, periods: { label: string, description?: string, from: Date, to: Date }[] }",
         },
       },
     },
@@ -226,7 +235,7 @@ const presets = [
   predefinedPresets.lastYear,
   {
     label: "Last 7 days",
-    granularity: "day" as CalendarView,
+    granularity: "day" as GranularityDefinitionKey,
     value: {
       from: subDays(today, 7),
       to: today,
@@ -510,5 +519,28 @@ export const WithDefaultCompareTo: Story = {
   args: {
     ...WithCompareTo.args,
     defaultCompareTo: "1",
+  },
+}
+
+export const WithPeriods: Story = {
+  args: {
+    defaultValue: {
+      value: {
+        from: new Date(2026, 6, 25),
+        to: new Date(2026, 7, 24),
+      },
+      granularity: "periods",
+    } as DatePickerValue,
+    granularities: ["day", "week", "month"],
+    periods: {
+      label: "Payroll",
+      header: "Spain — Iberia Workforce SL",
+      periods: payrollPeriods([2025, 2026]),
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The trigger shows the period's own label, not a formatted date range
+    expect(canvas.getByText("August 2026")).toBeInTheDocument()
   },
 }

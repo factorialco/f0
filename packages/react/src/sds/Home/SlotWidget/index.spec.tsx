@@ -8,6 +8,8 @@ import {
   LIST_COMPACT_AFTER,
   listSlot,
   SLOT_SKELETON_ITEM_TESTID,
+  type SlotRenderers,
+  widgetChrome,
 } from "../slotRenderers"
 import { SlotWidget } from "./index"
 
@@ -976,5 +978,182 @@ describe("SlotWidget chrome", () => {
 
     // The dropdown defers its items' onClick past its own close animation.
     await waitFor(() => expect(onClick).toHaveBeenCalled())
+  })
+
+  test("forwards the widget's own header controls to the frame", () => {
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Communities" }}
+        headerControls={<button type="button">New Post</button>}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "New Post" })).toBeInTheDocument()
+  })
+
+  test("header controls alone are enough to earn a header row", () => {
+    // The regression this guards: the frame draws no header at all when the
+    // header object is empty, so a widget whose header is nothing BUT its own
+    // controls used to lose them silently.
+    zeroRender(
+      <SlotWidget
+        headerControls={<button type="button">New Post</button>}
+        slots={slots}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "New Post" })).toBeInTheDocument()
+  })
+})
+
+/* --------------------- the card's own header controls --------------------- */
+
+/**
+ * A widget declared as DATA still needs the two things a Home card offers in
+ * its header: what you can DO from it, and what it is SHOWING. Neither used to
+ * be expressible without handing f0 a React node — which a host that builds its
+ * widgets as data has nowhere to build.
+ */
+describe("headerActions", () => {
+  test("draws the card's own buttons in the header", () => {
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Community posts" }}
+        headerActions={[{ label: "Write post", href: "/dashboard/post/new" }]}
+        slots={[]}
+      />
+    )
+
+    // A route, so it is a real link — right-clickable, openable in a new tab.
+    expect(screen.getByRole("link", { name: "Write post" })).toHaveAttribute(
+      "href",
+      "/dashboard/post/new"
+    )
+  })
+
+  test("draws the header row for them even when there is no title", () => {
+    zeroRender(
+      <SlotWidget
+        headerActions={[{ label: "Write post", onClick: () => {} }]}
+        slots={[]}
+      />
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Write post" })
+    ).toBeInTheDocument()
+  })
+})
+
+describe("headerSelect", () => {
+  /** A slot that reports what the card told it it is showing. */
+  const showsSelection: SlotRenderers = {
+    scope: (_params, ctx) => <span>showing {ctx.selection ?? "nothing"}</span>,
+  }
+
+  const withSelect = (props = {}) =>
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Community posts" }}
+        headerSelect={{
+          tooltip: "Show",
+          options: [
+            { value: "all", label: "All communities" },
+            { value: "design", label: "Design" },
+          ],
+          ...props,
+        }}
+        slotRenderers={showsSelection}
+        slots={[{ visualization: "scope", params: {} }]}
+      />
+    )
+
+  test("starts on the first option, and tells the slots which", () => {
+    withSelect()
+
+    expect(
+      screen.getByRole("button", { name: /All communities/ })
+    ).toBeInTheDocument()
+    expect(screen.getByText("showing all")).toBeInTheDocument()
+  })
+
+  test("starts on the option it was given", () => {
+    withSelect({ value: "design" })
+
+    expect(screen.getByText("showing design")).toBeInTheDocument()
+  })
+
+  /**
+   * THE POINT OF IT. The choice lives in the card, so a widget the host built as
+   * data can be switched without the host holding the value — and the slot that
+   * owns the data hears about it.
+   */
+  test("switching redraws the slots for the new option", async () => {
+    const onChange = vi.fn()
+    withSelect({ onChange })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /All communities/ })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Design" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("showing design")).toBeInTheDocument()
+    })
+    expect(screen.getByRole("button", { name: /Design/ })).toBeInTheDocument()
+    expect(onChange).toHaveBeenCalledWith("design")
+  })
+
+  test("leaves the slots alone when the header has no select", () => {
+    zeroRender(
+      <SlotWidget
+        header={{ title: "Community posts" }}
+        slotRenderers={showsSelection}
+        slots={[{ visualization: "scope", params: {} }]}
+      />
+    )
+
+    expect(screen.getByText("showing nothing")).toBeInTheDocument()
+  })
+})
+
+/**
+ * The chrome a widget declares has to SURVIVE the trip from the item to the
+ * card. `widgetChrome` hand-copies those fields, so one left out of it is a
+ * prop that type-checks, reads well, and draws nothing — which is exactly what
+ * happened to these two the first time.
+ */
+describe("widgetChrome", () => {
+  test("carries every chrome field the item declares", () => {
+    const select = { options: [{ value: "all", label: "All communities" }] }
+    const chrome = widgetChrome({
+      id: "communities",
+      slots: [],
+      action: { label: "Go to Communities" },
+      headerControls: <span>host's own</span>,
+      headerActions: [{ label: "Write post" }],
+      headerSelect: select,
+      status: undefined,
+    })
+
+    expect(chrome.headerActions).toEqual([{ label: "Write post" }])
+    expect(chrome.headerSelect).toBe(select)
+    expect(chrome.action).toEqual({ label: "Go to Communities" })
+    expect(chrome.headerControls).toBeDefined()
+  })
+
+  test("carries them on an alerting widget too", () => {
+    const chrome = widgetChrome({
+      id: "communities",
+      slots: [],
+      alert: "Something to know",
+      headerActions: [{ label: "Write post" }],
+    })
+
+    expect(chrome.headerActions).toEqual([{ label: "Write post" }])
+    expect("alert" in chrome && chrome.alert).toBeTruthy()
   })
 })

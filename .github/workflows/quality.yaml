@@ -9,6 +9,20 @@ jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
+  # Intentionally NOT gated on detect-changes: a big file can land anywhere in
+  # the repo, including paths no package filter watches, and this check is a
+  # couple of seconds. It needs no pnpm install either — just git and tsx.
+  file-sizes:
+    name: "File sizes"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Check no tracked file is oversized
+        run: npx --yes tsx@4 scripts/check-file-sizes.ts
+
   format:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -279,3 +293,32 @@ jobs:
           comment-type: cycle_dependency
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-body: ${{ steps.comment.outputs.body }}
+
+  # Single check to gate the branch on. It collapses this workflow's jobs into
+  # one status, so branch protection lists one stable name and never needs
+  # editing when jobs are added, removed, renamed or sharded.
+  #
+  # `if: always()` is load-bearing. Without it a failing dependency leaves this
+  # job *skipped* rather than *failed*, and GitHub counts a skipped required
+  # check as satisfied — the gate would go green over a red build.
+  #
+  # `skipped` is accepted on purpose: detect-changes skips the jobs for a
+  # package that this PR did not touch. Only failure/cancellation is fatal.
+  quality-passed:
+    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, cycle-dependencies]
+    name: "✅ Quality"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every Quality check passed
+        run: |
+          echo "Dependency results: ${{ join(needs.*.result, ' ') }}"
+          if ${{ contains(needs.*.result, 'failure') }}; then
+            echo "::error::A Quality check failed."
+            exit 1
+          fi
+          if ${{ contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::A Quality check was cancelled."
+            exit 1
+          fi
+          echo "All Quality checks passed (or were skipped as not applicable)."

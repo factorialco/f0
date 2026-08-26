@@ -12,13 +12,22 @@ const tabs: SidebarTab[] = [
   { id: "messages", label: "Messages", icon: Messages },
 ]
 
+/** The product's French strings: a little wider than the 216px row. */
+const borderlineTabs: SidebarTab[] = [
+  { id: "main", label: "Menu", icon: Menu },
+  { id: "messages", label: "Discussions", icon: Messages },
+]
+
 const meta = {
   title: "Navigation/Sidebar/Tabs",
   component: SidebarTabs,
   parameters: { layout: "centered" },
   decorators: [
     (Story) => (
-      <div className="w-fit bg-f1-background-tertiary py-3">
+      // The real sidebar width. A `w-fit` wrapper hugs the *collapsed* row, so
+      // the probe can never fit and every story is pinned to the icon-only
+      // state — the one thing the product does not render.
+      <div className="w-[var(--ds-sidebar-width)] bg-f1-background-tertiary py-3">
         <Story />
       </div>
     ),
@@ -29,9 +38,15 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const Interactive = ({ initial = "main" }: { initial?: string }) => {
+const Interactive = ({
+  initial = "main",
+  items = tabs,
+}: {
+  initial?: string
+  items?: SidebarTab[]
+}) => {
   const [active, setActive] = useState(initial)
-  return <SidebarTabs tabs={tabs} activeTab={active} onTabChange={setActive} />
+  return <SidebarTabs tabs={items} activeTab={active} onTabChange={setActive} />
 }
 
 export const Default: Story = {
@@ -63,4 +78,15 @@ export const WithBadges: Story = {
       />
     )
   },
+}
+
+/**
+ * The product's French pair at the real sidebar width: the labels need a few
+ * pixels more than the row has, so they must collapse to icons. A fixture for
+ * that margin rather than a reproduction — the bug needs a measure taken before
+ * the labels reach their final width, which a page load does not produce.
+ */
+export const LabelsJustOverTheRow: Story = {
+  ...Default,
+  render: () => <Interactive items={borderlineTabs} />,
 }

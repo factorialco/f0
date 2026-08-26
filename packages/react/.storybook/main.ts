@@ -121,6 +121,10 @@ const config: StorybookConfig = {
 
     // ── Resources · hooks, utilities, examples ───────────────────
     { directory: "../src/lib/F0Box", titlePrefix: "Components" }, // layout primitive → Components
+    {
+      directory: "../src/lib/InfoHint",
+      titlePrefix: "Components/Primitives",
+    }, // shared ⓘ chrome behind table headers and widget titles → Primitives
     { directory: "../src/lib/Await", titlePrefix: "Resources" },
     { directory: "../src/lib/F0GridStack", titlePrefix: "Resources" },
     { directory: "../src/lib/OneEllipsis", titlePrefix: "Resources" },
@@ -205,6 +209,17 @@ const config: StorybookConfig = {
     },
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-vitest"),
+    // Performance panel: frame timing, input latency, layout shift and React
+    // render profiling. Collectors only run while the panel is open (the preview
+    // core starts them on PANEL_VISIBILITY), so it is inert for Chromatic,
+    // addon-vitest and the test-runner. Opt a story out with
+    // `parameters: { performancePanel: { disable: true } }`.
+    // Registered by bare specifier, NOT getAbsolutePath(): the decorator ships as
+    // the package's `./preview` export, and Storybook only auto-discovers it when
+    // the addon is named by package specifier so the exports map is consulted. An
+    // absolute path resolves the manager panel but silently drops the decorator,
+    // leaving the panel stuck on "Performance monitoring not active for this story".
+    "@github-ui/storybook-addon-performance-panel",
     // MCP server: exposes component docs/stories to AI agents via the MCP protocol.
     // In public (static) builds only the docs toolset is useful; dev and test require
     // a running Storybook server.

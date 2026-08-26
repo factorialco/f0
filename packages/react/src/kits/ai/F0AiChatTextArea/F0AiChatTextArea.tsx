@@ -111,7 +111,7 @@ export const F0AiChatTextArea = ({
   // hosts only need to wire the `onSuggestionClick` business action.
   // When the textarea is rendered outside an `F0AiChatProvider` the
   // tracking ref resolves to a no-op via the provider fallback.
-  const { tracking } = useAiChat()
+  const { tracking, setFocusChatInputFunction } = useAiChat()
   const handleSuggestionClick = useCallback(
     (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
       tracking?.onWelcomeSuggestionClick?.({
@@ -187,6 +187,18 @@ export const F0AiChatTextArea = ({
       textareaRef.current?.focus()
     }
   }, [])
+
+  useEffect(() => {
+    if (isClarifying) {
+      setFocusChatInputFunction(null)
+      return
+    }
+
+    setFocusChatInputFunction(() => {
+      textareaRef.current?.focus()
+    })
+    return () => setFocusChatInputFunction(null)
+  }, [isClarifying, setFocusChatInputFunction])
 
   // Expose the file-drop handler to parents that own a wider drop zone
   // (e.g. the whole chat window). The handler is stable for the lifetime

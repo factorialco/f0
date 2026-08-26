@@ -1177,7 +1177,7 @@ const F0SelectComponent = forwardRef(function Select<
    * selection lists what is chosen, which is what the trigger's "N selected"
    * cannot.
    *
-   * Nothing selected, nothing to explain: no tooltip at all.
+   * Nothing selected, nothing to explain: empty, and nothing opens on hover.
    */
   const selectedTooltipText = getDisplayItemsForSelection
     .map((item) => item.selectedLabel ?? item.label)
@@ -1208,15 +1208,18 @@ const F0SelectComponent = forwardRef(function Select<
       </div>
     )
 
-    return selectedTooltipText ? (
+    /**
+     * Always mounted, empty description and all: wrapping the trigger only once
+     * there was something to say remounted it on the first selection, dropping
+     * its focus mid-interaction. An empty tooltip opens nothing.
+     */
+    return (
       <TooltipInternal
         label={hideLabel ? label : undefined}
         description={selectedTooltipText}
       >
         {box}
       </TooltipInternal>
-    ) : (
-      box
     )
   }
 

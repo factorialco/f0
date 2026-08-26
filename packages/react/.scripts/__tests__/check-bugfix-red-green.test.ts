@@ -46,6 +46,23 @@ describe("overlayFilesFrom", () => {
     })
   })
 
+  it("collects tests for the repo's own scripts", () => {
+    const diff = [
+      "M\tpackages/react/.scripts/__tests__/check-api-surface.test.ts",
+      "M\tpackages/react/.scripts/check-api-surface.ts",
+    ].join("\n")
+
+    expect(overlayFilesFrom(diff).testFiles).toEqual([
+      "packages/react/.scripts/__tests__/check-api-surface.test.ts",
+    ])
+  })
+
+  it("ignores files outside the tested roots", () => {
+    const diff = "M\tpackages/react/vite.config.ts"
+
+    expect(overlayFilesFrom(diff).testFiles).toEqual([])
+  })
+
   it("ignores deleted files", () => {
     const diff =
       "D\tpackages/react/src/components/F0Old/__tests__/F0Old.test.tsx"

@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
 import { F0Button } from "@/components/F0Button"
-import { ResourceHeader } from "@/patterns/ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/patterns/ResourceHeader/index.stories"
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
+import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/index.stories"
 import {
   OnePersonListItem,
   OnePersonListItemProps,
@@ -233,9 +233,9 @@ export const WithResourceHeader: Story = {
       href: "/timeoff",
     },
     children: (
-      <ResourceHeader
+      <F0ResourceHeader
         {...(ResourceHeaderDefault.args as ComponentProps<
-          typeof ResourceHeader
+          typeof F0ResourceHeader
         >)}
         primaryAction={undefined}
         secondaryActions={undefined}

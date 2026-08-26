@@ -2,7 +2,7 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { F0FormErrorTriggerMode } from "@/patterns/F0Form/types"
-import type { ResourceHeaderProps } from "@/patterns/ResourceHeader"
+import type { F0ResourceHeaderProps } from "@/patterns/F0ResourceHeader"
 
 import type {
   SurveyDatasets,
@@ -47,7 +47,7 @@ interface SurveyAnsweringFormSharedProps {
   elements: SurveyFormBuilderElement[]
   title: string
   description?: string
-  resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">
+  resourceHeader?: Omit<F0ResourceHeaderProps, "title" | "description">
   defaultValues?: Partial<SurveyAnswers>
   loading?: boolean
   datasets?: SurveyDatasets
@@ -76,7 +76,7 @@ interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps 
 interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
   inline: true
   /**
-   * Hide the built-in ResourceHeader (title + description). Useful when the
+   * Hide the built-in F0ResourceHeader (title + description). Useful when the
    * embedding page already renders its own resource header above the form.
    */
   hideResourceHeader?: boolean
