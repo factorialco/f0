@@ -1,6 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, zeroRender as render, waitFor } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+  zeroRender as render,
+} from "@/testing/test-utils"
+
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import {
+  WIDGET_DRAG_START,
+  type WidgetDragStartDetail,
+} from "@/lib/dnd/widgetDragEvents"
 
 import type { DashboardItem } from "../types"
 
@@ -151,6 +164,36 @@ describe("DashboardGrid", () => {
 
     await waitFor(() => {
       expect(collectionRow.style.height).toBe("960px")
+    })
+  })
+
+  it("forwards a collection widget's built-in Ask One target", async () => {
+    const onAskAiTarget = vi.fn()
+    const { container } = render(
+      <AiChatStateProvider enabled>
+        <DashboardGrid
+          items={makeCollectionItems(480)}
+          filters={{}}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+    const card = container.querySelector('[data-card-id="expenses"]')
+    if (!(card instanceof HTMLElement)) {
+      throw new Error("Expected collection item to be rendered")
+    }
+
+    await userEvent.click(
+      within(card).getByRole("button", { name: "Other actions" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Ask One" })
+    )
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "expenses",
+      title: "Expenses",
+      quote: { text: "Expenses" },
     })
   })
 
@@ -331,6 +374,58 @@ describe("DashboardGrid", () => {
       // `draggable`. The grip drives a pointer gesture instead.
       expect(card.getAttribute("draggable")).toBeNull()
       expect(grip.getAttribute("draggable")).toBeNull()
+    })
+
+    it("announces the exact target observer to the chat drop path", () => {
+      const onAskAiTarget = vi.fn()
+      const onStart = vi.fn<(event: Event) => void>()
+      window.addEventListener(WIDGET_DRAG_START, onStart)
+
+      try {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+            onAskAiTarget={onAskAiTarget}
+          />
+        )
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+
+        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 10,
+            bubbles: true,
+          })
+        )
+
+        expect(onStart).toHaveBeenCalledTimes(1)
+        const event = onStart.mock
+          .calls[0][0] as CustomEvent<WidgetDragStartDetail>
+        expect(event.detail).toEqual({
+          id: "expenses",
+          title: "Expenses",
+          onAskAi: undefined,
+          onAskAiTarget,
+        })
+
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 10,
+            clientY: 10,
+            bubbles: true,
+          })
+        )
+      } finally {
+        window.removeEventListener(WIDGET_DRAG_START, onStart)
+      }
     })
 
     it("reorders a widget via a pointerdown-on-grip → move → up gesture (no native drag)", () => {

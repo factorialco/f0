@@ -165,14 +165,34 @@ the mounted chat:
 />
 ```
 
+Pass `onAskAiTarget` when the mounted chat should keep the built-in quote,
+open, and focus behavior while the host attaches structured analytical
+context. The observer receives the widget identity plus the exact `quote`
+object staged in the composer. Point asks also include the raw `point`.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAiTarget={({ id, point, quote }) => {
+    attachAnalyticalContext({ widgetId: id, point, quote })
+  }}
+/>
+```
+
+<Canvas of={AskOneStories.TargetObserver} />
+
+If both callbacks are supplied, `onAskAi` owns the interaction:
+`onAskAiTarget` is not invoked and F0 does not stage a built-in quote.
+
 - WHEN an enabled AI chat is mounted and a widget has a title → THEN its actions menu includes **Ask One**.
 - WHEN a widget is in an error state but still has a title → THEN **Ask One** remains available from its error header.
 - WHEN no chat is available and `onAskAi` is omitted → THEN the action is hidden instead of offering a dead command.
 - WHEN **Ask One** uses the built-in behavior → THEN the dashboard exits widget fullscreen, quotes the title, and opens the chat.
 - WHEN `onAskAi` is provided → THEN the action calls the host with the widget `id` and `title` without changing chat or fullscreen state.
+- WHEN `onAskAiTarget` observes the built-in behavior → THEN it receives the widget `id`, `title`, and exact pending `quote` before F0 stages that quote, without replacing any chat behavior.
 - WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
-- WHEN a widget is dropped on chat → THEN it follows the same built-in or
-  host-owned behavior as the menu action.
+- WHEN a widget is dropped on chat → THEN it follows the same built-in,
+  observed, or host-owned behavior as the menu action.
 - WHEN the reorder grip is only clicked → THEN no drag invitation appears and
   no widget action runs.
 - WHEN the pointer drag is cancelled or ends outside chat → THEN no quote or
@@ -192,6 +212,13 @@ In this story, click the Engineering bar to reveal the anchored action. Choose
 chat composer.
 
 <Canvas of={AskOneStories.ChartPointFlow} />
+
+**Observed point target**
+
+This story keeps the built-in formatted quote while exposing the raw point to
+the non-overriding observer.
+
+<Canvas of={AskOneStories.PointTargetObserver} />
 
 The host-owned callback receives the raw point as `point`, in addition to the
 widget `id` and `title`. `point.values` preserves every measure carried by one
@@ -216,6 +243,7 @@ no pointer position to anchor to.
 - WHEN a scatter point is quoted → THEN both the X and Y measures are included with their axis names and formatters.
 - WHEN a line category is quoted → THEN every visible series at that category is included, matching the axis tooltip.
 - WHEN `onAskAi` owns the action → THEN it receives the raw point and the built-in chat state remains unchanged.
+- WHEN `onAskAiTarget` observes the built-in action → THEN it receives that exact pending quote together with the raw point.
 - WHEN the chart has no title → THEN pointer and keyboard point actions are hidden because there is no widget context to quote.
 - WHEN the chart moves because of scrolling or resizing, or the reader presses <kbd>Escape</kbd> or clicks elsewhere → THEN the anchored action closes.
 - WHEN a screen reader reaches the point action → THEN its trigger is named **Ask One: _chart title_** and each menu item exposes the complete formatted point context.

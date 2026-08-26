@@ -51,6 +51,7 @@ export const F0AnalyticsDashboard = <
   resetKey,
   onTransformChart,
   onAskAi,
+  onAskAiTarget,
   navigationFilters,
   filtersLoading,
 }: F0AnalyticsDashboardProps<Filters>) => {
@@ -176,6 +177,7 @@ export const F0AnalyticsDashboard = <
           onLayoutChange={onLayoutChange}
           onTransformChart={onTransformChart}
           onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           resetKey={resetKey}
           onFullscreenChange={setIsItemFullscreen}
         />

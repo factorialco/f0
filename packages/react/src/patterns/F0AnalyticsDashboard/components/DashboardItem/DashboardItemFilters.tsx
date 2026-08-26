@@ -213,7 +213,7 @@ export function DashboardItemFilters<
       <PopoverContent
         ref={contentRef}
         aria-label={i18n.filters.label}
-        className="w-[380px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
+        className="w-[380px] max-w-[calc(100vw-1rem)] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
         align="end"
         side="bottom"
         id={id}
