@@ -1,6 +1,7 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 /**
  * One prev/next target. Carry a `url` for full-page detail navigation
@@ -69,6 +70,8 @@ function PageNavigationLink({
 }
 
 export function PageNavigation({ previous, next, counter }: NavigationProps) {
+  const i18n = useI18n()
+
   return (
     <div className="flex items-center gap-3">
       {counter && (
@@ -80,12 +83,12 @@ export function PageNavigation({ previous, next, counter }: NavigationProps) {
         <PageNavigationLink
           icon={ChevronLeft}
           target={previous}
-          fallbackLabel="Previous"
+          fallbackLabel={i18n.navigation.previous}
         />
         <PageNavigationLink
           icon={ChevronRight}
           target={next}
-          fallbackLabel="Next"
+          fallbackLabel={i18n.navigation.next}
         />
       </div>
     </div>

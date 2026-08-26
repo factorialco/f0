@@ -6,6 +6,7 @@ import CrossIcon from "@/icons/app/Cross"
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 export type BannerAction = {
@@ -42,6 +43,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
     },
     ref
   ) {
+    const i18n = useI18n()
     const isVideo = mediaUrl?.includes(".mp4")
     const [isDismissed, setIsDismissed] = useState(false)
 
@@ -129,7 +131,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
               size="sm"
               hideLabel
               onClick={handleClose}
-              label="Close"
+              label={i18n.actions.close}
             />
           </div>
         )}

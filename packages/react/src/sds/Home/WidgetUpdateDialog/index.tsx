@@ -56,6 +56,7 @@ export interface WidgetUpdateDialogProps {
   previewWidth?: number
   /** Defaults to the provider's `t.widgets.editParamsTitle`. */
   title?: string
+  /** Defaults to the provider's `t.actions.save`. */
   saveLabel?: string
 }
 
@@ -84,7 +85,7 @@ export function WidgetUpdateDialog({
   onSave,
   previewWidth = 396,
   title,
-  saveLabel = "Save",
+  saveLabel,
 }: WidgetUpdateDialogProps) {
   const t = useI18n()
   const { position, width, bodyClassName, asideClassName } =
@@ -112,7 +113,7 @@ export function WidgetUpdateDialog({
       position={position}
       width={width}
       primaryAction={{
-        label: saveLabel,
+        label: saveLabel ?? t.actions.save,
         // Validation before saving is the FORM's, not ours: `trigger` surfaces
         // the same errors the fields would show, and a schema that says a param
         // is required is the only place "you must set this" is written down.

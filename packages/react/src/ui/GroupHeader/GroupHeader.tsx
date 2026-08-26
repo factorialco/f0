@@ -6,6 +6,7 @@ import { Counter } from "@/ui/Counter"
 import { cn, focusRing } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
 import { Skeleton } from "@/ui/skeleton"
+import { useI18n } from "@/lib/providers/i18n"
 
 type GroupHeaderProps = {
   label: string | Promise<string>
@@ -36,6 +37,7 @@ export const GroupHeader = ({
   closedRotation,
   openRotation,
 }: GroupHeaderProps) => {
+  const i18n = useI18n()
   const [isOpen, setIsOpen] = useState(open)
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export const GroupHeader = ({
         <F0Checkbox
           checked={!!select}
           indeterminate={select === "indeterminate"}
-          title="Select all"
+          title={i18n.actions.selectAll}
           hideLabel
           onCheckedChange={(checked) => onSelectChange?.(checked)}
           stopPropagation

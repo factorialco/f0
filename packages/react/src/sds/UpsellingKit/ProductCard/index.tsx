@@ -6,6 +6,7 @@ import { F0Icon } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { One } from "@/icons/special"
 import { withDataTestId } from "@/lib/data-testid"
+import { useI18n } from "@/lib/providers/i18n"
 
 export type ProductCardProps = {
   title: string
@@ -37,6 +38,7 @@ function _ProductCard({
   type,
   ...props
 }: ProductCardProps) {
+  const i18n = useI18n()
   const [open, setOpen] = useState(isVisible)
 
   useEffect(() => {
@@ -124,7 +126,7 @@ function _ProductCard({
                     size="sm"
                     hideLabel
                     onClick={handleClose}
-                    label="Close"
+                    label={i18n.actions.close}
                   />
                 </div>
               )}

@@ -5,6 +5,7 @@ import { ComponentProps, forwardRef, useId } from "react"
 
 import { Link } from "../lib/linkHandler"
 import { cn } from "../lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 
 const Breadcrumb = forwardRef<
   HTMLElement,
@@ -101,17 +102,21 @@ BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
 const BreadcrumbEllipsis = ({
   className,
   ...props
-}: React.ComponentProps<"span">) => (
-  <span
-    role="presentation"
-    aria-hidden="true"
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
-    {...props}
-  >
-    <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">More</span>
-  </span>
-)
+}: React.ComponentProps<"span">) => {
+  const i18n = useI18n()
+
+  return (
+    <span
+      role="presentation"
+      aria-hidden="true"
+      className={cn("flex h-9 w-9 items-center justify-center", className)}
+      {...props}
+    >
+      <MoreHorizontal className="h-4 w-4" />
+      <span className="sr-only">{i18n.actions.more}</span>
+    </span>
+  )
+}
 BreadcrumbEllipsis.displayName = "BreadcrumbElipssis"
 
 export {

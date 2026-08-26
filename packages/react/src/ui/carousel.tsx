@@ -9,6 +9,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 
 /**
  * THE SHADOW BLEED, as classes.
@@ -451,6 +452,7 @@ const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
   ButtonInternalProps
 >(({ className, variant = "outline", ...props }, ref) => {
+  const i18n = useI18n()
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
   return (
@@ -472,7 +474,7 @@ const CarouselPrevious = React.forwardRef<
         disabled={!canScrollPrev}
         onClick={scrollPrev}
         {...props}
-        label="Previous"
+        label={i18n.navigation.previous}
         icon={ArrowLeft}
         hideLabel
       />
@@ -483,6 +485,7 @@ CarouselPrevious.displayName = "CarouselPrevious"
 
 const CarouselNext = React.forwardRef<HTMLButtonElement, ButtonInternalProps>(
   ({ className, variant = "outline", ...props }, ref) => {
+    const i18n = useI18n()
     const { orientation, scrollNext, canScrollNext } = useCarousel()
 
     return (
@@ -504,7 +507,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, ButtonInternalProps>(
           disabled={!canScrollNext}
           onClick={scrollNext}
           {...props}
-          label="Next"
+          label={i18n.navigation.next}
           icon={ArrowRight}
           hideLabel
         />
