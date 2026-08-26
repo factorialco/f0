@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useState } from "react"
+
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0AiChat, F0AiChatProvider } from "@/kits/ai/F0AiChat"
@@ -38,6 +40,39 @@ const AskOneLayout = ({ items = widget }: { items?: DashboardItem[] }) => {
     <div className="flex h-full w-full gap-2 overflow-hidden">
       <div className="min-h-0 min-w-0 flex-1 overflow-auto">
         <F0AnalyticsDashboard items={items} />
+      </div>
+      <div className="flex min-h-0 w-[420px] shrink-0">
+        <F0AiChat
+          header={<MockConnectedChatHeader />}
+          messages={<MockConnectedMessagesContainer />}
+          input={<MockConnectedChatInput />}
+        />
+      </div>
+    </div>
+  )
+}
+
+const TargetObserverLayout = ({
+  items = widget,
+}: {
+  items?: DashboardItem[]
+}) => {
+  const [observedTarget, setObservedTarget] = useState("No target observed")
+
+  return (
+    <div className="flex h-full w-full gap-2 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-auto">
+        <output className="text-sm" data-ask-one-target>
+          {observedTarget}
+        </output>
+        <F0AnalyticsDashboard
+          items={items}
+          onAskAiTarget={({ id, point, quote }) => {
+            setObservedTarget(
+              `${id}: ${point ? `point=${point.category}/${point.value}` : "widget"}; quote=${quote.text}`
+            )
+          }}
+        />
       </div>
       <div className="flex min-h-0 w-[420px] shrink-0">
         <F0AiChat
@@ -150,6 +185,87 @@ export const WidgetQuotedInChat: Story = {
       )
       const textbox = await canvas.findByRole("textbox")
       await waitFor(() => expect(textbox).toHaveFocus())
+    })
+  },
+}
+
+/**
+ * A host can observe the exact built-in Ask One target and quote without
+ * replacing F0's chat behavior.
+ */
+export const TargetObserver: Story = {
+  tags: ["ask-one-target-observer"],
+  render: () => <TargetObserverLayout />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    let menu: ReturnType<typeof within> | undefined
+
+    await step("Open the widget actions menu", async () => {
+      menu = (await openAskOneMenu(canvasElement)).menu
+    })
+
+    if (!menu) throw new Error("The widget actions menu did not open")
+
+    await step("Ask One about the widget", async () => {
+      await userEvent.click(
+        await menu.findByRole("menuitem", { name: "Ask One" })
+      )
+    })
+
+    await step("Verify the observer and built-in quote", async () => {
+      await expect(
+        canvas.getByText(/headcount: widget; quote=/)
+      ).toHaveTextContent("headcount: widget; quote=Headcount by Department")
+      const removeQuote = await canvas.findByRole("button", {
+        name: "Remove quote",
+      })
+      await expect(removeQuote.parentElement).toHaveTextContent(
+        "Headcount by Department"
+      )
+    })
+  },
+}
+
+/** The point observer receives raw identity while the composer keeps its quote. */
+export const PointTargetObserver: Story = {
+  tags: ["ask-one-target-observer"],
+  render: () => <TargetObserverLayout items={pointWidget} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Choose a chart point with the keyboard action", async () => {
+      const trigger = await canvas.findByRole("button", {
+        name: "Ask One: Headcount by Department",
+      })
+      trigger.focus()
+      await userEvent.keyboard("{Enter}")
+      const menuId = trigger.getAttribute("aria-controls")
+      if (!menuId)
+        throw new Error("The point menu trigger has no aria-controls")
+      const menu = await waitFor(() => {
+        const element = canvasElement.ownerDocument.getElementById(menuId)
+        expect(element).toBeInTheDocument()
+        return within(element!)
+      })
+      await userEvent.click(
+        await menu.findByRole("menuitem", {
+          name: "Headcount by Department — Engineering, Headcount: 145 people",
+        })
+      )
+    })
+
+    await step("Verify raw target and formatted built-in quote", async () => {
+      await waitFor(() =>
+        expect(
+          canvas.getByText(/point-headcount: point=Engineering\/145/)
+        ).toHaveTextContent("point-headcount: point=Engineering/145")
+      )
+      const removeQuote = await canvas.findByRole("button", {
+        name: "Remove quote",
+      })
+      await expect(removeQuote.parentElement).toHaveTextContent(
+        "Headcount by Department — Engineering Headcount: 145 people"
+      )
     })
   },
 }
