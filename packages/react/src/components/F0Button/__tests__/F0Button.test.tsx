@@ -97,4 +97,21 @@ describe("F0Button", () => {
     expect(button).not.toBeDisabled()
     expect(onError).toHaveBeenCalled()
   })
+
+  describe("counter", () => {
+    it("renders the counter value", () => {
+      render(<F0Button label="To review" counterValue={3} />)
+      expect(screen.getByText("3")).toBeInTheDocument()
+    })
+
+    it("tightens the button's right padding when a counter is present", () => {
+      render(<F0Button label="To review" size="md" counterValue={3} />)
+      expect(screen.getByRole("button").className).toContain("[&_.main]:!pr-2")
+    })
+
+    it("keeps padding symmetric when there is no counter", () => {
+      render(<F0Button label="Review" size="md" />)
+      expect(screen.getByRole("button").className).not.toContain("!pr-2")
+    })
+  })
 })
