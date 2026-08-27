@@ -19,9 +19,10 @@ import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
+import { useChatComposeTarget } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
+import { canEditChatMessage } from "../utils/message-permissions"
 import { formatClock } from "../utils/natural-time"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
@@ -86,29 +87,16 @@ export const ChatMessageActions = ({
     retryMessage,
     capabilities,
   } = useF0ChatStable()
-  const { setReplyTo } = useChatReply()
-  const { setEditingMessage } = useChatEdit()
+  const { startReply, startEdit } = useChatComposeTarget()
   const [view, setView] = useState<"menu" | "info">("menu")
 
-  // Editing is offered on non-deleted messages while the host allows it
-  // (provides `editMessage`). The POLICY (whose messages, for how long) comes
-  // from `capabilities.canEditMessage` when provided, else the default: own
-  // messages within the edit window.
-  // `Date.now()` here is fine: the popover content only mounts when open.
-  const withinEditWindow =
-    editWindowMs == null ||
-    Date.now() - new Date(message.createdAt).getTime() <= editWindowMs
-  // Voice notes can't be edited (there's no text to change) — only deleted.
-  const isVoiceNote = (message.attachments ?? []).some(
-    (attachment) => attachment.kind === "voice"
-  )
-  const canEdit =
-    !message.deleted &&
-    !isVoiceNote &&
-    !!editMessage &&
-    (capabilities?.canEditMessage
-      ? capabilities.canEditMessage(message)
-      : isMine && withinEditWindow)
+  // Same policy the composer's edit-last shortcut uses — see canEditChatMessage.
+  // Its `Date.now()` is fine here: the popover content only mounts when open.
+  const canEdit = canEditChatMessage(message, {
+    hasEditMessage: !!editMessage,
+    capabilities,
+    editWindowMs,
+  })
   // Delete policy: capability override, else own messages only.
   const canDelete = capabilities?.canDeleteMessage
     ? capabilities.canDeleteMessage(message)
@@ -241,10 +229,7 @@ export const ChatMessageActions = ({
               <MenuItem
                 icon={Reply}
                 label={i18n.chat.reply}
-                onClick={runAndClose(() => {
-                  setEditingMessage(null)
-                  setReplyTo(message)
-                })}
+                onClick={runAndClose(() => startReply(message))}
               />
               <MenuItem
                 icon={Files}
@@ -262,10 +247,7 @@ export const ChatMessageActions = ({
                     <MenuItem
                       icon={Pencil}
                       label={i18n.chat.edit}
-                      onClick={runAndClose(() => {
-                        setReplyTo(null)
-                        setEditingMessage(message)
-                      })}
+                      onClick={runAndClose(() => startEdit(message))}
                     />
                   )}
                   {canDelete && (

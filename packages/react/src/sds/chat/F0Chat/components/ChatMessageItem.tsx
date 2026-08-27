@@ -14,7 +14,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useChatHighlightedId } from "../providers/ChatUIProvider"
+import {
+  useChatComposeTarget,
+  useChatHighlightedId,
+} from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
@@ -27,6 +30,12 @@ import { SendingClock } from "./ChatMessageStatusIcon"
 /** See armActionsSoon: long enough for a click burst on the placeholder to
  * finish, well under the pointer travel time from row edge to the ellipsis. */
 const ARM_ACTIONS_ON_HOVER_MS = 150
+
+/** Descendants that own their own activation, so a double-click landing on one
+ * must not also quote the message: the image lightbox, a file download, the
+ * reply-quote jump, an autolinked URL. */
+const INTERACTIVE_DESCENDANTS =
+  'a, button, input, textarea, select, [role="button"], [role="link"]'
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -99,6 +108,9 @@ export const ChatMessageItem = ({
     actionsWrapperRef.current?.querySelector("button")?.focus()
   }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
+  // Stable API (never re-renders this row when the target changes) — unlike the
+  // reply/edit VALUE contexts, which rows must stay out of.
+  const { startReply } = useChatComposeTarget()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
   const { currentUserId } = useF0ChatStable()
@@ -124,6 +136,28 @@ export const ChatMessageItem = ({
     message.body.trim().length > 0 ||
     Boolean(message.replyTo)
   const hasContent = hasBubble || hasAttachments
+  // A tombstone has nothing to quote, and an unsettled message has no
+  // server-side id to point a reply at — the same rows that get no actions menu.
+  const canQuote =
+    !message.deleted &&
+    message.status !== "sending" &&
+    message.status !== "failed"
+
+  // Double-clicking a message quotes it in the composer — a shortcut for the
+  // menu's Reply, on anyone's message including your own. The word selection
+  // the double-click makes is dropped when the composer takes focus.
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!canQuote) return
+      if (!(event.target instanceof Element)) return
+      // Only a match INSIDE the message counts — `closest` would otherwise
+      // climb past this row into whatever chrome hosts the transcript.
+      const interactive = event.target.closest(INTERACTIVE_DESCENDANTS)
+      if (interactive && event.currentTarget.contains(interactive)) return
+      startReply(message)
+    },
+    [canQuote, message, startReply]
+  )
 
   return (
     <div
@@ -180,6 +214,7 @@ export const ChatMessageItem = ({
                   "group-hover:bg-f1-background-secondary focus-within:bg-f1-background-secondary",
                 actionsOpen && "bg-f1-background-hover"
               )}
+              onDoubleClick={handleDoubleClick}
             >
               {hasAttachments && (
                 <ChatMessageAttachments

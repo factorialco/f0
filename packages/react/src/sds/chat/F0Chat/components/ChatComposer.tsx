@@ -37,17 +37,20 @@ import {
 import { useTransientError } from "../hooks/useTransientError"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
+  useChatComposeTarget,
   useChatDrop,
   useChatEdit,
   useChatReply,
 } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import {
+  isUserMessage,
   type F0ChatAttachment,
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
 } from "../types"
 import { formatFileSize } from "../utils/attachments"
+import { canEditChatMessage } from "../utils/message-permissions"
 import {
   EASE_OUT_SWIFT,
   layoutTransition,
@@ -102,8 +105,10 @@ const localAttachmentFromFile = (
 export const ChatComposer = (): ReactNode => {
   const i18n = useI18n()
   const {
+    messages,
     sendMessage,
     editMessage,
+    editWindowMs,
     onInputActivity,
     stopTyping,
     uploadFiles,
@@ -120,6 +125,7 @@ export const ChatComposer = (): ReactNode => {
   const canUpload = !!uploadFiles && capabilities?.canUpload !== false
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
+  const { startEdit } = useChatComposeTarget()
   const { registerFileDropHandler } = useChatDrop()
   const { reducedMotion: shouldReduceMotion } = useChatRenderConfig()
 
@@ -563,6 +569,45 @@ export const ChatComposer = (): ReactNode => {
     releaseUploadingPreviews,
   ])
 
+  // A new reply target (the actions menu, or a double-click on a message) hands
+  // focus to the composer — a quote is only useful with the caret ready to
+  // type. One frame later, so the chip has grown the composer first.
+  useEffect(() => {
+    if (!replyTo) return
+    const frame = requestAnimationFrame(() => {
+      const node = textareaRef.current
+      if (!node) return
+      node.focus()
+      const end = node.value.length
+      node.setSelectionRange(end, end)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [replyTo])
+
+  // Reopen your newest still-editable message. The transcript runs oldest →
+  // newest, so scan backwards; skip messages that can no longer be edited (a
+  // voice note, one past the edit window) and take the next one down. Own
+  // messages only, even where a host capability allows editing other people's:
+  // a shortcut fires blind, and must never open someone else's message.
+  const startEditingLastOwnMessage = useCallback(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const item = messages[i]
+      if (!isUserMessage(item) || !item.isMine) continue
+      if (
+        !canEditChatMessage(item, {
+          hasEditMessage: !!editMessage,
+          capabilities,
+          editWindowMs,
+        })
+      ) {
+        continue
+      }
+      startEdit(item)
+      return true
+    }
+    return false
+  }, [messages, editMessage, capabilities, editWindowMs, startEdit])
+
   const handleSend = useCallback(() => {
     if (!canSend) return
     // Typing stopped by definition — the message is out (or the edit saved).
@@ -650,6 +695,28 @@ export const ChatComposer = (): ReactNode => {
         cancelEdit()
         return
       }
+      // ↑ on an idle, empty composer reopens your last message for editing.
+      // Anything else in the composer keeps ↑ meaning "move the caret": text,
+      // an attachment, a pending quote (the user is mid-reply), a live
+      // recording. A modifier is a text-selection/navigation gesture, never
+      // this shortcut. When there is nothing editable left, ↑ falls through.
+      if (
+        e.key === "ArrowUp" &&
+        !e.shiftKey &&
+        !e.altKey &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !isEditing &&
+        !replyTo &&
+        value === "" &&
+        attachments.length === 0 &&
+        !isRecording &&
+        !isTranscribing &&
+        startEditingLastOwnMessage()
+      ) {
+        e.preventDefault()
+        return
+      }
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault()
         handleSend()
@@ -661,6 +728,12 @@ export const ChatComposer = (): ReactNode => {
       mentions,
       isEditing,
       cancelEdit,
+      replyTo,
+      value,
+      attachments.length,
+      isRecording,
+      isTranscribing,
+      startEditingLastOwnMessage,
     ]
   )
 

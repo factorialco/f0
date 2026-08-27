@@ -296,6 +296,15 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN `maxFileSizeBytes` is omitted → THEN F0 does not impose a file-size limit.
 - WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
 - WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
+- WHEN Arrow Up is pressed in an empty, idle composer → THEN F0 reopens the newest of your own messages that is still editable, prefilling the composer exactly as the Edit action does.
+- WHEN none of your own messages is editable any more → THEN Arrow Up does nothing and the composer stays empty.
+- WHEN the composer holds text, an attachment, a pending reply quote, an edit in progress, or a live recording → THEN Arrow Up keeps its ordinary caret behavior and never reopens a message.
+- WHEN Arrow Up carries Shift, Alt, Cmd, or Ctrl → THEN F0 treats it as a text-selection gesture and never reopens a message.
+- WHEN a message is double-clicked → THEN F0 quotes it in the composer and moves focus there — anyone's message, including your own.
+- WHEN a double-click lands on an interactive part of a message, such as an image, a file, a reply quote, or a link → THEN that element performs its own action and no quote is created.
+- WHEN the double-clicked message is a deleted tombstone, still sending, or failed → THEN F0 creates no quote, matching the rows that offer no actions menu.
+- WHEN a reply quote is set by any route → THEN F0 drops any edit in progress, and starting an edit drops any pending quote.
+- WHEN a reply quote appears in the composer → THEN F0 focuses the textarea and places the caret at the end of the current draft.
 - WHEN `:` starts a token in the composer → THEN F0 opens a caret-anchored emoji list and filters it by shortcode, alias, keyword, or name as the query grows.
 - WHEN the emoji autocomplete is open → THEN Arrow Up and Arrow Down move through its options, Enter or Tab inserts the active emoji, and Escape dismisses the current trigger without sending.
 - WHEN an emoji autocomplete option is selected → THEN F0 replaces only the active `:query`, preserves surrounding message text, inserts one separating space, and restores the textarea focus and caret.
@@ -366,7 +375,7 @@ playback-speed slot can overflow.
 
 ### Keyboard interaction
 
-The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is focusable and supports horizontal keyboard scrolling. After removing an attachment, focus stays on the strip when previews remain; removing the final preview returns focus to the composer textarea. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. Arrow Up on an empty, idle composer reopens your last editable message; with any composer content, a pending quote, or a modifier held it keeps its ordinary caret meaning. Double-click to reply is a pointer shortcut for the menu's Reply action, which remains the keyboard path. The composer attachment strip is focusable and supports horizontal keyboard scrolling. After removing an attachment, focus stays on the strip when previews remain; removing the final preview returns focus to the composer textarea. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
 
 ### Screen reader behavior
 

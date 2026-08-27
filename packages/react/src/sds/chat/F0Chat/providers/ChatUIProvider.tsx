@@ -59,6 +59,19 @@ type ChatEditContextValue = {
   setEditingMessage: (message: F0ChatMessage | null) => void
 }
 
+/**
+ * Setting the composer's target. Split from the reply/edit VALUE contexts and
+ * identity-stable for the provider's whole lifetime, so per-message rows can
+ * start a reply or an edit without subscribing to — and re-rendering on — the
+ * current target. Both entry points enforce the exclusivity rule.
+ */
+type ChatComposeTargetContextValue = {
+  /** Quote a message in the composer, dropping any edit in progress. */
+  startReply: (message: F0ChatMessage) => void
+  /** Reload a message into the composer for editing, dropping any reply quote. */
+  startEdit: (message: F0ChatMessage) => void
+}
+
 type ChatDropContextValue = {
   /** The composer registers how to attach dropped files (window-wide drop). */
   registerFileDropHandler: (fn: (files: File[]) => void) => void
@@ -107,6 +120,8 @@ const ChatHighlightedIdContext =
   createContext<ChatHighlightedIdContextValue | null>(null)
 const ChatReplyContext = createContext<ChatReplyContextValue | null>(null)
 const ChatEditContext = createContext<ChatEditContextValue | null>(null)
+const ChatComposeTargetContext =
+  createContext<ChatComposeTargetContextValue | null>(null)
 const ChatDropContext = createContext<ChatDropContextValue | null>(null)
 const ChatImagePreviewContext =
   createContext<ChatImagePreviewContextValue | null>(null)
@@ -201,6 +216,17 @@ export const ChatUIProvider = ({
     if (kind) setDocumentPreview({ file, kind })
   }, [])
   const closeDocumentPreview = useCallback(() => setDocumentPreview(null), [])
+
+  // Replying and editing are mutually exclusive; the rule lives HERE rather
+  // than at every call site (actions menu, double-click, composer shortcut).
+  const startReply = useCallback((message: F0ChatMessage) => {
+    setEditingMessage(null)
+    setReplyTo(message)
+  }, [])
+  const startEdit = useCallback((message: F0ChatMessage) => {
+    setReplyTo(null)
+    setEditingMessage(message)
+  }, [])
 
   /** Scroll to a message and highlight it; `persist` keeps the ring (search). */
   const scrollAndHighlight = useCallback((id: string, persist: boolean) => {
@@ -343,6 +369,12 @@ export const ChatUIProvider = ({
     () => ({ editingMessage, setEditingMessage }),
     [editingMessage]
   )
+  // Stable for the provider's lifetime (state setters never change identity),
+  // so consuming it from a message row costs no extra render.
+  const composeTargetValue = useMemo<ChatComposeTargetContextValue>(
+    () => ({ startReply, startEdit }),
+    [startReply, startEdit]
+  )
   const dropValue = useMemo<ChatDropContextValue>(
     () => ({ registerFileDropHandler, dropFiles }),
     [registerFileDropHandler, dropFiles]
@@ -387,25 +419,27 @@ export const ChatUIProvider = ({
   )
 
   return (
-    <ChatJumpContext.Provider value={jumpValue}>
-      <ChatHighlightedIdContext.Provider value={highlightedIdValue}>
-        <ChatReplyContext.Provider value={replyValue}>
-          <ChatEditContext.Provider value={editValue}>
-            <ChatDropContext.Provider value={dropValue}>
-              <ChatImagePreviewContext.Provider value={imagePreviewValue}>
-                <ChatDocumentPreviewContext.Provider
-                  value={documentPreviewValue}
-                >
-                  <ChatSearchContext.Provider value={searchValue}>
-                    {children}
-                  </ChatSearchContext.Provider>
-                </ChatDocumentPreviewContext.Provider>
-              </ChatImagePreviewContext.Provider>
-            </ChatDropContext.Provider>
-          </ChatEditContext.Provider>
-        </ChatReplyContext.Provider>
-      </ChatHighlightedIdContext.Provider>
-    </ChatJumpContext.Provider>
+    <ChatComposeTargetContext.Provider value={composeTargetValue}>
+      <ChatJumpContext.Provider value={jumpValue}>
+        <ChatHighlightedIdContext.Provider value={highlightedIdValue}>
+          <ChatReplyContext.Provider value={replyValue}>
+            <ChatEditContext.Provider value={editValue}>
+              <ChatDropContext.Provider value={dropValue}>
+                <ChatImagePreviewContext.Provider value={imagePreviewValue}>
+                  <ChatDocumentPreviewContext.Provider
+                    value={documentPreviewValue}
+                  >
+                    <ChatSearchContext.Provider value={searchValue}>
+                      {children}
+                    </ChatSearchContext.Provider>
+                  </ChatDocumentPreviewContext.Provider>
+                </ChatImagePreviewContext.Provider>
+              </ChatDropContext.Provider>
+            </ChatEditContext.Provider>
+          </ChatReplyContext.Provider>
+        </ChatHighlightedIdContext.Provider>
+      </ChatJumpContext.Provider>
+    </ChatComposeTargetContext.Provider>
   )
 }
 
@@ -436,6 +470,11 @@ export const useChatReply = (): ChatReplyContextValue =>
  * the other. */
 export const useChatEdit = (): ChatEditContextValue =>
   useCtx(ChatEditContext, "useChatEdit")
+
+/** Start a reply / an edit. Stable identity — consumed by message rows and the
+ * actions menu, neither of which should re-render when the target changes. */
+export const useChatComposeTarget = (): ChatComposeTargetContextValue =>
+  useCtx(ChatComposeTargetContext, "useChatComposeTarget")
 
 /** Window-wide file-drop routing. Consumed by the shell and composer. */
 export const useChatDrop = (): ChatDropContextValue =>
