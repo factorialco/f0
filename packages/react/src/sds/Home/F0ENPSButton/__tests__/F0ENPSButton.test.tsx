@@ -96,6 +96,49 @@ describe("F0ENPSButton", () => {
   })
 
   /**
+   * An unanswered row reads as a scale rather than five buttons, so every face
+   * is already in its own colour — the glyph only, and only until an answer
+   * makes one face the coloured one.
+   */
+  it("colours every face while the question is unanswered", () => {
+    zeroRender(<F0ENPSButton labels={LABELS} />)
+
+    expect(face("Very bad")).toHaveClass("text-f1-icon-mood-super-negative")
+    expect(face("Bad")).toHaveClass("text-f1-icon-mood-negative")
+    expect(face("Okay")).toHaveClass("text-f1-icon-mood-neutral")
+    expect(face("Good")).toHaveClass("text-f1-icon-mood-positive")
+    expect(face("Very good")).toHaveClass("text-f1-icon-mood-super-positive")
+  })
+
+  it("colours the glyph only — no fill and no border — while unanswered", () => {
+    zeroRender(<F0ENPSButton labels={LABELS} />)
+
+    // The fill and border are how an ANSWERED face is drawn; the class an
+    // answered face would carry is the assertion (jsdom applies no Tailwind).
+    expect(face("Bad").className).not.toContain("bg-[hsl(var(--mood-negative)")
+    expect(face("Bad").className).not.toContain(
+      "border-[hsl(var(--mood-negative)"
+    )
+    // Still the plain unselected chrome, which is what leaves an answer
+    // something to stand out against.
+    expect(face("Bad")).toHaveClass("bg-transparent")
+    expect(face("Bad")).toHaveClass("border-f1-border")
+  })
+
+  it("hands the colour back once a face is answered", async () => {
+    zeroRender(<F0ENPSButton labels={LABELS} />)
+
+    await userEvent.click(face("Good"))
+
+    expect(face("Good")).toHaveClass("text-f1-icon-mood-positive")
+    // The four not chosen mute, so the answer is the coloured one.
+    expect(face("Bad")).not.toHaveClass("text-f1-icon-mood-negative")
+    expect(face("Very good")).not.toHaveClass(
+      "text-f1-icon-mood-super-positive"
+    )
+  })
+
+  /**
    * The tooltip is the only place a face's name is written, so it opens without
    * a wait — on the default 700ms it was a name you had to stop and ask for,
    * five times over, to read the scale.
