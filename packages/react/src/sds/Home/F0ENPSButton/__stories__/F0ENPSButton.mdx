@@ -9,8 +9,8 @@ import * as Stories from "./F0ENPSButton.stories"
 # ENPSButton
 
 Asks one eNPS question and takes the answer in a single press: five faces,
-worst to best, and the one that is pressed takes the colour of the mood it
-stands for.
+worst to best, each already in the colour of the mood it stands for — and once
+one is pressed, it is the only one that keeps it.
 
 It is the answer control for Home's engagement widgets — the pulse check, the
 recommendation question — and a sibling of
@@ -37,11 +37,23 @@ The face is sized past `F0Icon`'s scale — 28px at `lg`, 24px at `md` — becau
 it **is** the control: there is no label beside it to carry the meaning, so it
 takes the button, leaving 4px of room around it (6px at `lg`).
 
-Only the answered face is coloured, through `F0ButtonToggle`'s `color`: each face
-asks for its own mood (`mood-super-negative` through `mood-super-positive`) and
-the toggle draws what that colour means — a 0.1 fill, a 0.6 border, the glyph,
-and a muted glyph on the faces not chosen. Five coloured faces at once would be
-decoration; one coloured face is an answer you can read from across the page.
+Colour arrives in two steps, through `F0ButtonToggle`'s `color`: each face asks
+for its own mood (`mood-super-negative` through `mood-super-positive`) and the
+toggle draws what that colour means — a 0.1 fill, a 0.6 border and the glyph on
+the face that is chosen, a muted glyph on the ones that are not.
+
+**While the question is unanswered the row overrides the muting and colours every
+glyph** — the glyph only, never the fill or the border. Read cold, five grey
+faces are five buttons; in colour they are a scale, and the answer you are
+looking for is findable by its colour before its shape resolves. Fills and
+borders stay off because those are how a _chosen_ answer is drawn, and five
+tinted boxes would leave nothing for the answer to stand out against.
+
+The moment there is an answer the answered face keeps its fill, border and
+glyph, and the other four step back to `f1-icon-secondary` — one stop further
+than `F0ButtonToggle`'s own muting, because coming off five coloured glyphs that
+stop is not far enough for the answer to be the obvious one. They stay legible,
+though: any of them can still be pressed to change the answer.
 
 <Canvas of={Stories.Answered} />
 
