@@ -1,5 +1,5 @@
 import { jsx as r } from "react/jsx-runtime";
-import { D as l, P as d, e as s } from "./pdfWorker-ChlTlK90.js";
+import { D as l, P as d, e as s } from "./pdfWorker-Bc1Ngw-z.js";
 s();
 const f = ({
   url: n,

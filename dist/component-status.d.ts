@@ -328,10 +328,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -339,8 +337,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -377,5 +377,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }

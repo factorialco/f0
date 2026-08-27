@@ -31,8 +31,8 @@ import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
-import { default as default_2 } from 'maplibre-gl';
-import { default as default_3 } from 'react';
+import { default as default_2 } from 'react';
+import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
@@ -251,8 +251,6 @@ declare interface ActionCommonProps {
      * The aria label of the action.
      */
     "aria-label"?: string;
-    /** Announces the state of a toggle action. */
-    "aria-pressed"?: React.AriaAttributes["aria-pressed"];
     /**
      * The tab index of the action.
      */
@@ -386,8 +384,8 @@ declare const actionVariants: readonly ["default", "outline", "critical", "neutr
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_3.JSX.Element) & {
-    Skeleton: () => default_3.JSX.Element;
+export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element) & {
+    Skeleton: () => default_2.JSX.Element;
 };
 
 export declare type ActivityItemListProps = Pick<SectionProps, "items" | "onClickItem"> & {
@@ -396,7 +394,7 @@ export declare type ActivityItemListProps = Pick<SectionProps, "items" | "onClic
     loadingMoreItems?: boolean;
 };
 
-export declare const ActivityItemListSkeleton: () => default_3.JSX.Element;
+export declare const ActivityItemListSkeleton: () => default_2.JSX.Element;
 
 declare type ActivityItemProps = {
     id: string;
@@ -992,7 +990,7 @@ chart: BarChartProps;
 
 declare type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">;
 
-export declare const BaseActivityItemList: ({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_3.JSX.Element;
+export declare const BaseActivityItemList: ({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element;
 
 declare const BaseAvatar: ForwardRefExoticComponent<BaseAvatarProps & RefAttributes<HTMLDivElement>>;
 
@@ -1076,7 +1074,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1416,8 +1414,6 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The aria-label of the button if not provided title or label will be used.
      */
     "aria-label"?: string;
-    /** Announces the state of a toggle button. */
-    "aria-pressed"?: React.AriaAttributes["aria-pressed"];
     /**
      * Forwarded to the underlying button. Useful for buttons that toggle an
      * expandable region (e.g. a tree/graph expander).
@@ -1609,7 +1605,7 @@ export declare interface CalendarEventProps {
 
 export declare type CalendarMode = "single" | "range";
 
-export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
+export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 declare type CalloutAction = {
     label: string;
@@ -1892,22 +1888,22 @@ declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
 };
 
 declare const cardPropertyRenderers: {
-    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly status: (args: StatusCellValue_2) => default_3.JSX.Element;
-    readonly tag: (args: TagCellValue_2) => default_3.JSX.Element;
-    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly tagList: (args: TagListCellValue_2) => default_3.JSX.Element;
-    readonly alertTag: (args: AlertTagCellValue_2) => default_3.JSX.Element;
-    readonly dotTag: (args: DotTagCellValue_2) => default_3.JSX.Element;
-    readonly file: (args: FileCellValue_2) => default_3.JSX.Element;
-    readonly folder: (args: FolderCellValue_2) => default_3.JSX.Element;
-    readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => default_3.JSX.Element | null;
+    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly status: (args: StatusCellValue_2) => default_2.JSX.Element;
+    readonly tag: (args: TagCellValue_2) => default_2.JSX.Element;
+    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly tagList: (args: TagListCellValue_2) => default_2.JSX.Element;
+    readonly alertTag: (args: AlertTagCellValue_2) => default_2.JSX.Element;
+    readonly dotTag: (args: DotTagCellValue_2) => default_2.JSX.Element;
+    readonly file: (args: FileCellValue_2) => default_2.JSX.Element;
+    readonly folder: (args: FolderCellValue_2) => default_2.JSX.Element;
+    readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => default_2.JSX.Element | null;
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
@@ -2027,7 +2023,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_3.JSX.Element>;
+export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, arrowsPlacement, arrowLabels, paging, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
 
 declare interface CarouselBreakpoints {
     default?: ColumnNumber;
@@ -2038,10 +2034,70 @@ declare interface CarouselBreakpoints {
     xl?: ColumnNumber;
 }
 
+/**
+ * A carousel whose slides are ONE PAGE of a longer list.
+ *
+ * A carousel can only reason about the slides it holds, so on its own it says
+ * "there is no next one" the moment it reaches the last one it was given — which
+ * is wrong when the list continues on the server. This is the missing half of
+ * that answer, and it is deliberately the shape `useData` already returns for an
+ * infinite-scroll source (`paginationInfo.hasMore`, `isLoadingMore`, `loadMore`),
+ * so wiring one to the other is passing three fields across.
+ */
+declare type CarouselPaging = {
+    /** Whether the source has records past the slides currently mounted. */
+    hasMore: boolean;
+    /** A fetch for the next page is in flight. */
+    isLoading?: boolean;
+    /** Fetch the next page and APPEND it to the slides. */
+    onLoadMore: () => void;
+    /**
+     * How many records the source holds ALTOGETHER, when it says — `useData`'s
+     * `totalItems`. For anything that reports a position out loud ("3 of 11"):
+     * without it the only number available is how many have been loaded, which
+     * moves every time another page arrives.
+     *
+     * The carousel itself ignores it. Its dots describe the slides that exist, and
+     * a dot for a page nobody has fetched would be a control that cannot be
+     * pressed.
+     */
+    total?: number;
+};
+
 declare interface CarouselProps {
-    children: default_3.ReactNode;
+    children: default_2.ReactNode;
     showArrows?: boolean;
     showDots?: boolean;
+    /**
+     * WHERE THE ARROWS GO.
+     *
+     * - `"overlay"` (the default) — pinned to the carousel's sides and revealed on
+     *   hover. Right for a full-bleed gallery, where the slides are the page.
+     * - `"bottom"` — a row UNDER the slides, an arrow on each end with the dots
+     *   between them, always visible and always the same width. Use it whenever
+     *   the carousel sits inside something else — a widget, a card, a panel: side
+     *   overlays hang over whatever is beside the container, and a hover-only
+     *   control is one a touch user never finds.
+     *
+     * `"bottom"` puts the dots in that row, so `showDots` still decides whether
+     * there are any.
+     */
+    arrowsPlacement?: "overlay" | "bottom";
+    /** The arrows' accessible names. Defaults to "Previous" / "Next". */
+    arrowLabels?: {
+        previous?: string;
+        next?: string;
+    };
+    /**
+     * The slides are ONE PAGE of a longer list. Next then stays live at the end
+     * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
+     * append the new records to `children` as they arrive.
+     *
+     * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
+     * over the slides, and a fetch you can't see you triggered is worse than no
+     * fetch at all.
+     */
+    paging?: CarouselPaging;
     autoplay?: boolean;
     delay?: number;
     columns?: CarouselBreakpoints;
@@ -2884,7 +2940,7 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -2923,10 +2979,30 @@ export declare type CommunityPostProps = {
     };
     actions?: CommunityPostAction[];
     noVideoPreload?: boolean;
-    onClick: (id: string) => void;
+    /**
+     * WHAT CLICKING THE POST DOES — and whether it does anything.
+     *
+     * OMIT IT once the post is the destination. In a feed the card is a way in, so
+     * it takes a pointer cursor, a hover tint and a focus ring. Opened in a dialog
+     * it is already what you came for, and every one of those says there is
+     * somewhere further to go when there isn't: the tint follows the mouse across
+     * a page you are reading, and clicking does nothing.
+     */
+    onClick?: (id: string) => void;
     noReactionsButton?: boolean;
     dropdownItems?: DropdownItem[];
     descriptionExpandable?: boolean;
+    /**
+     * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
+     * for a container that already shows it, like a dialog carrying the post's
+     * title in its own header. Without this the same words appear twice, an inch
+     * apart.
+     *
+     * The title element stays in the DOM, `sr-only`: it is what the expanded
+     * description points at (`aria-describedby`), so removing it would quietly
+     * break that as well as the post's name.
+     */
+    hideTitle?: boolean;
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -2935,6 +3011,56 @@ export declare type CommunityPostSkeletonProps = {
     withEvent?: boolean;
     withImage?: boolean;
 };
+
+/**
+ * ONE POST as the Home card shows it — the shape a feed row keeps when it is
+ * given a whole tile instead of a line.
+ *
+ * Deliberately NOT `CommunityPostProps`: that is the post as the Communities
+ * page renders it, with its media, its reactions, its comment button and its own
+ * overflow menu. Here the post is a PREVIEW you click through — anything you
+ * can do to it, you do on the other side.
+ */
+export declare interface CommunityPostSummary {
+    id: string;
+    title: string;
+    /**
+     * The post's body as the editor stored it (an HTML string), clamped to the
+     * first few lines. Whatever links it contains are NOT clickable here: the
+     * whole tile is one target (see {@link CommunityPostCard}), and a link inside
+     * a link is neither valid nor operable.
+     */
+    description?: string;
+    /**
+     * The post's cover image, above the title.
+     *
+     * ALWAYS DRAWN AT {@link POST_IMAGE_RATIO} — the tile gives it the full width
+     * of its column and takes its height from that ratio, cropping (`object-cover`)
+     * whatever doesn't fit. A carousel is a ROW: a tile that sized itself to its
+     * own image would put every title on a different line and move them all when
+     * the page turned. So the frame is fixed and the picture fits into it.
+     */
+    imageUrl?: string;
+    author?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
+    createdAt: Date;
+    /**
+     * The counters under the author, ALREADY IN WORDS — "742 visits", "23
+     * comments". Strings rather than numbers because the plural, the thousands
+     * separator and the noun are all the app's locale, not this component's; the
+     * same reason `CommunityPost` takes them this way.
+     */
+    counters?: {
+        visits?: string;
+        comments?: string;
+    };
+    /** Where the post lives. A `url` makes the tile a real anchor. */
+    href?: string;
+    onClick?: () => void;
+}
 
 declare interface Company {
     id: string;
@@ -3169,7 +3295,7 @@ declare type DataCollectionSettings = {
 };
 
 declare interface DataCollectionSettingsContextType {
-    setSettings: default_3.Dispatch<default_3.SetStateAction<DataCollectionSettings>>;
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
     settings: DataCollectionSettings;
     setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
 }
@@ -3456,26 +3582,48 @@ export declare type DateNavigationOptions = {
 };
 
 declare type DateNavigationOptions_2 = {
-    granularity?: GranularityDefinitionKey[] | GranularityDefinitionKey;
-    defaultGranularity?: GranularityDefinitionKey;
+    granularity?: NavigationGranularityKey[] | NavigationGranularityKey;
+    defaultGranularity?: NavigationGranularityKey;
     min?: Date;
     max?: Date;
     presets?: DatePreset[];
     hideGoToCurrent?: boolean;
+    /**
+     * Consumer-defined ranges (payroll cycles, academic terms…) navigable as an
+     * extra entry in the granularity selector, named by its `label`.
+     */
+    periods?: DatePeriodsDefinition;
 };
 
 declare type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<Date | DateRange | DateValue> & {
     type: "date-navigator";
 } & DateNavigationOptions_2;
 
-declare type DatePickerCompareTo = Partial<Record<GranularityDefinitionKey, CompareToDef[]>>;
+export declare type DatePeriod = {
+    /** Title of the period, e.g. "January 2026" */
+    label: string;
+    /** Overrides the date range rendered under the label */
+    description?: string;
+    from: Date;
+    to: Date;
+};
+
+export declare type DatePeriodsDefinition = {
+    /** Label of the entry in the granularity selector, e.g. "Payroll" */
+    label?: string;
+    /** Heading rendered above the period list, e.g. the legal entity the periods belong to */
+    header?: string;
+    periods: DatePeriod[];
+};
+
+declare type DatePickerCompareTo = Partial<Record<NavigationGranularityKey, CompareToDef[]>>;
 
 declare interface DatePickerPopupProps {
     onSelect?: (value: DatePickerValue | undefined) => void;
     value?: DatePickerValue;
     defaultValue?: DatePickerValue;
     presets?: DatePreset[];
-    granularities?: GranularityDefinitionKey[];
+    granularities?: NavigationGranularityKey[];
     minDate?: Date;
     maxDate?: Date;
     disabled?: boolean;
@@ -3491,11 +3639,16 @@ declare interface DatePickerPopupProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
     selectOnCellOnly?: boolean;
+    /**
+     * Consumer-defined ranges (payroll cycles, academic terms…) offered as an
+     * extra entry in the granularity selector. Its `label` names that entry.
+     */
+    periods?: DatePeriodsDefinition;
 }
 
 export declare type DatePickerValue = {
     value: DateRangeComplete | undefined;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 export declare interface DatePreset {
@@ -3526,7 +3679,7 @@ export declare type DateStringFormat = "default" | "long";
 declare type DateValue = {
     value: DateRangeComplete;
     valueString: string;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 /**
@@ -4100,6 +4253,7 @@ declare const defaultTranslations: {
             readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
+            readonly seeMoreChildren: "See more";
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
@@ -4206,6 +4360,11 @@ declare const defaultTranslations: {
             readonly range: {
                 readonly currentDate: "Today";
                 readonly label: "Range";
+            };
+            readonly periods: {
+                readonly currentDate: "Current period";
+                readonly label: "Periods";
+                readonly empty: "No periods available";
             };
         };
         readonly month: {
@@ -4930,7 +5089,7 @@ export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> &
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItemsList: default_3.ForwardRefExoticComponent<DetailsItemsListProps & default_3.RefAttributes<HTMLDivElement>>;
+export declare const DetailsItemsList: default_2.ForwardRefExoticComponent<DetailsItemsListProps & default_2.RefAttributes<HTMLDivElement>>;
 
 declare interface DetailsItemsListProps extends WithDataTestIdProps {
     title?: string;
@@ -4955,6 +5114,31 @@ export declare interface DetailsItemType {
 
 export declare const Dialog: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+declare type DialogControls = {
+    kind: "resource";
+    /**
+     * "Open detail" affordance. Provide `url` to render a link to the
+     * resource's full-page view (routed through the app's `LinkProvider`,
+     * so it is cmd/middle-clickable) — typically the active item's
+     * `itemUrl` from `useDataCollectionItemNavigation`. Provide `onClick`
+     * for imperative expansion. `url` wins when both are set.
+     */
+    expand?: {
+        label: string;
+        url?: string;
+        onClick?: () => void;
+    };
+    navigation?: NavigationProps;
+} | {
+    kind: "back";
+    label: string;
+    onClick: () => void;
+};
+
+declare type DialogPosition = (typeof dialogPositions)[number];
+
+declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
+
 declare type DialogProps = {
     header: {
         type: AlertAvatarProps["type"];
@@ -4968,6 +5152,10 @@ declare type DialogProps = {
     open?: boolean;
     onClose?: () => void;
 };
+
+declare type DialogWidth = (typeof dialogWidths)[number];
+
+declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
 
 /**
  * Remove a property from a union of objects.
@@ -4996,7 +5184,7 @@ declare type DropdownInternalProps = {
     items: DropdownItem[];
     icon?: IconType;
     size?: F0ButtonProps["size"];
-    children?: default_3.ReactNode;
+    children?: default_2.ReactNode;
     align?: "start" | "end" | "center";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -5957,6 +6145,100 @@ export declare interface F0CardHorizontalProps {
 }
 
 /**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0CarouselDialog: WithDataTestIdReturnType_2<({ items, currentId, onNavigate, labels, loop, pagination, placeholder, isOpen, onClose, ...dialogProps }: F0CarouselDialogProps) => JSX_2.Element | null>;
+
+/** One page of the dialog. */
+export declare interface F0CarouselDialogItem {
+    id: string;
+    /**
+     * The dialog's title while this page is showing. The header therefore changes
+     * with the content, which is what makes this ONE dialog moving rather than a
+     * frame with something loaded into it.
+     *
+     * GIVE EVERY PAGE ONE: it is the dialog's accessible name as well as the words
+     * in the header, and a dialog without one is announced as nothing at all. If
+     * the content already shows the title itself, hide it THERE — `CommunityPost`
+     * has `hideTitle` for exactly this — rather than leaving the header blank.
+     */
+    title?: string;
+    content: ReactNode;
+}
+
+export declare interface F0CarouselDialogProps extends Pick<F0DialogInternalProps, "isOpen" | "onClose" | "width" | "position" | "primaryAction" | "secondaryAction" | "otherActions" | "disableContentPadding" | "container"> {
+    /** The pages, in the order they are walked. */
+    items: F0CarouselDialogItem[];
+    /**
+     * WHICH PAGE IS SHOWING. Controlled, deliberately: the thing you opened the
+     * dialog on is already state the app holds — the post you clicked in a feed,
+     * a param in the URL — and a dialog keeping its own copy of it is two answers
+     * to one question.
+     *
+     * An id that names nothing in `items` shows the {@link placeholder}, NOT some
+     * other page. In a params-driven app the URL moves before the data does, and
+     * "the id I asked for isn't here yet" must never render as "here is a
+     * different post".
+     */
+    currentId: string;
+    onNavigate: (id: string) => void;
+    /**
+     * WHAT TO SHOW WHILE `currentId` NAMES SOMETHING THE DIALOG DOESN'T HAVE — the
+     * gap between the URL changing and the data arriving.
+     *
+     * The dialog stays open and stays put: same element, no reopen animation, the
+     * arrows held until it knows where it is. Give it a `title` so the dialog keeps
+     * an accessible name across the gap; a feed usually knows a post's title long
+     * before its body.
+     *
+     * PREFER NOT TO NEED IT. If you can put an item in `items` for the id you are
+     * navigating to — with skeleton `content` while its body loads — do that
+     * instead: the id is always found, the title comes with it, and the position in
+     * the header stays honest. This is the net for when you genuinely cannot.
+     */
+    placeholder?: {
+        title?: string;
+        content: ReactNode;
+    };
+    /**
+     * The controls' words. There is no visible text on the arrows, so `previous`
+     * and `next` are what a screen reader reads and what the tooltips say;
+     * `position` writes the header's reading ("3 of 11").
+     */
+    labels?: {
+        previous?: string;
+        next?: string;
+        position?: (current: number, total: number) => string;
+    };
+    /**
+     * The ends JOIN UP: Next on the last page goes to the first. Off by default —
+     * a list of eleven posts has an end, and an arrow that silently returns you to
+     * the top is how you read the same thing twice without noticing.
+     */
+    loop?: boolean;
+    /**
+     * THE ITEMS ARE A PAGE of a longer set. Next then stays live past the last one
+     * loaded: pressing it fetches, and the walk CONTINUES onto the new page as
+     * soon as it lands, so the reader presses once rather than pressing, waiting,
+     * and pressing again.
+     *
+     * It is the same {@link CarouselPaging} the carousel takes, on purpose. A post
+     * opened from a feed is the same query as the feed it came from, so one
+     * `useData` feeds both: the same records, the same `loadMore`. Walk past the
+     * end in the dialog and the carousel behind it grows too, because there is one
+     * list and both are looking at it.
+     *
+     * Arriving at the last loaded item ALSO asks for the next page, once per
+     * position — so a source that answers `hasMore: true` with no new records
+     * stalls instead of looping.
+     *
+     * `loop` is ignored while `hasMore`: an end that hasn't been reached yet is not
+     * an end to join up.
+     */
+    pagination?: CarouselPaging;
+}
+
+/**
  * Headless chat surface — header, transcript and composer — driven entirely by
  * the {@link F0ChatRuntime} from a surrounding `F0ChatProvider`. Panel controls
  * (fullscreen / close) are wired by the host so F0Chat stays transport-agnostic.
@@ -6568,6 +6850,167 @@ export declare type F0ChatVoiceAttachment = {
 };
 
 /**
+ * F0CommunityPostsCarousel — the Communities widget's content: the latest posts as
+ * TILES you page through, two at a time on a main-column card and one in
+ * anything narrower.
+ *
+ * A WIDE-COLUMN WIDGET. Two tiles side by side is the whole reason this exists
+ * rather than a `list` slot — a post needs a title, four lines of its body and
+ * its author to be worth previewing at all, and that does not fit a 396px rail.
+ * Put it in the main column (`areas: ["main"]` in the catalog).
+ *
+ * THE PAGING IS UNDER THE TILES, not floating over them — `CarouselControls`,
+ * the shared row: an arrow on each end, the dots between, its own `pt-4` above
+ * it. Nothing about that row is this widget's, which is why it lives in
+ * `ui/carousel` beside the overlay arrows rather than here.
+ *
+ * EVERY POST IT HOLDS IS IN THE DOM. Embla lays its slides out in a flex row and
+ * transforms the track, so the slides off-screen are mounted and measured like
+ * the ones you can see — there is no windowing here, and adding it would mean
+ * the carousel could no longer measure its own snaps. That is the right trade
+ * for what this shows: a handful of tiles, each one a title and four lines.
+ *
+ * It is `pagination` that keeps it a handful. A feed of two hundred posts is not
+ * a longer carousel, it is a carousel that holds a PAGE and asks for the next
+ * one when you reach the end — so what is mounted is bounded by how far the
+ * reader actually walked rather than by how much the server has.
+ */
+export declare const F0CommunityPostsCarousel: ({ posts, labels, loading, expectedItemsCount, pagination, }: F0CommunityPostsCarouselProps) => JSX_2.Element;
+
+export declare interface F0CommunityPostsCarouselProps {
+    posts: CommunityPostSummary[];
+    /**
+     * The controls' words — the two arrows' accessible names. There is no visible
+     * text in this component's chrome, so these are what a screen reader reads and
+     * what the tooltips say.
+     */
+    labels: {
+        previous: string;
+        next: string;
+    };
+    /**
+     * Waiting on the FIRST posts: the same carousel with placeholder tiles in it,
+     * so the widget is the height it will be once they land. How MANY it draws is
+     * `expectedItemsCount`.
+     *
+     * This is the initial load only. A LATER page is `pagination`, and it does not
+     * blank the tiles you are already reading.
+     */
+    loading?: boolean;
+    /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+    expectedItemsCount?: number;
+    /**
+     * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
+     * live past the last mounted tile: reaching the end asks for the next page, and
+     * the new posts are appended to `posts` by whoever owns them.
+     *
+     * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
+     * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
+     * posts come from in an app. The component itself stays ignorant of data
+     * sources: it takes posts and a way to ask for more.
+     *
+     * Omit it for a feed you already hold in full, which is what the widget's
+     * "latest five" is.
+     */
+    pagination?: CarouselPaging;
+}
+
+declare type F0DialogActionItem = {
+    value: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type F0DialogHeaderProps = {
+    title?: string;
+    description?: string;
+    module?: {
+        id: ModuleId;
+        label: string;
+        href: string;
+    };
+    otherActions?: DropdownInternalProps["items"];
+    navigation?: NavigationProps;
+    resourceHeader?: F0ResourceHeaderProps;
+    controls?: DialogControls;
+    headerStatus?: string;
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
+
+declare type F0DialogInternalProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    asBottomSheetInMobile?: boolean;
+    position?: DialogPosition;
+    width?: DialogWidth;
+    primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[];
+    secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[];
+    title?: string;
+    description?: string;
+    module?: F0DialogHeaderProps["module"];
+    otherActions?: F0DialogHeaderProps["otherActions"];
+    navigation?: F0DialogHeaderProps["navigation"];
+    resourceHeader?: F0DialogHeaderProps["resourceHeader"];
+    controls?: F0DialogHeaderProps["controls"];
+    /**
+     * A short reading beside the close button — "3 of 11". Where the dialog says
+     * WHICH of several things it is currently showing.
+     *
+     * Not `navigation`: that draws its own arrows in the header. This is the label
+     * alone, for a dialog whose arrows are somewhere else (`sideControls`).
+     */
+    headerStatus?: F0DialogHeaderProps["headerStatus"];
+    /**
+     * Controls flanking the panel — see {@link F0DialogSideControls}. On a phone
+     * (where the dialog is a bottom sheet and there is no room beside it) they move
+     * ONTO the panel's own edges instead, which is where a gallery puts them.
+     */
+    sideControls?: F0DialogSideControls;
+    children: ReactNode;
+    disableContentPadding?: boolean;
+    container?: HTMLElement | null;
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
+
+declare type F0DialogPrimaryAction = {
+    label: string;
+    icon?: IconType;
+    iconPosition?: "left" | "right";
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type F0DialogPrimaryActionItem = F0DialogActionItem;
+
+declare type F0DialogSecondaryAction = {
+    label: string;
+    icon?: IconType;
+    iconPosition?: "left" | "right";
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type F0DialogSecondaryActionItem = F0DialogActionItem;
+
+/**
+ * Controls FLANKING the panel rather than inside it — the affordance for a
+ * dialog whose content can be changed without closing it (see
+ * `F0CarouselDialog`).
+ *
+ * They are rendered INSIDE the Radix content, so they are inside the focus trap
+ * and reachable by keyboard, and merely positioned outside its box. Anything
+ * portalled next to the dialog instead would be `aria-hidden` and inert, which
+ * is exactly the trap a modal is supposed to set.
+ */
+declare type F0DialogSideControls = {
+    previous?: ReactNode;
+    next?: ReactNode;
+};
+
+/**
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0EmojiPicker: WithDataTestIdReturnType_3<    {
@@ -6946,7 +7389,7 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
     /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-    getMap: () => default_2.Map | null;
+    getMap: () => default_3.Map | null;
     /** Center on a marker (and select it). Always animates unless reduced-motion. */
     focusMarker: (id: string) => void;
     /** Frame all markers in view. */
@@ -8299,15 +8742,21 @@ export declare function generateCSVContent<R extends RecordType, Filters extends
  */
 export declare function getAutoPerPageMinHeight(rowHeight?: number): number;
 
-export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
+export declare const getGranularityDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinition;
 
 /**
  * Get granularity definitions with week granularity configured with the specified weekStartsOn.
  * The week granularity is only created when needed (lazy creation).
+ *
+ * The `periods` granularity is only selectable once the consumer supplies its
+ * periods; without them it renders an empty list.
+ *
+ * Accepts a bare `weekStartsOn` for the original call style, or an options
+ * object when more than the week start is configured.
  */
-export declare function getGranularityDefinitions(weekStartsOn?: WeekStartsOn): Record<string, GranularityDefinition>;
+export declare function getGranularityDefinitions(options?: WeekStartsOn | GranularityDefinitionsOptions): Record<string, GranularityDefinition>;
 
-export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
+export declare const getGranularitySimpleDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinitionSimple;
 
 /**
  * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
@@ -8335,6 +8784,12 @@ export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
+    selectorLabel?: string;
+    hideDateInput?: boolean;
+    getViewDateBounds?: () => {
+        min?: Date;
+        max?: Date;
+    } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
@@ -8376,6 +8831,11 @@ export declare const granularityDefinitions: {
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+export declare type GranularityDefinitionsOptions = {
+    weekStartsOn?: WeekStartsOn;
+    periods?: DatePeriodsDefinition;
+};
 
 declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -8434,6 +8894,29 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
     getNodeId?: (record: R) => string;
     /** Number of children a node has. A node is expandable when this is `> 0`. */
     getChildrenCount: (record: R) => number;
+    /**
+     * Whether this record's children render as a vertical stack of compact rows
+     * directly under it, instead of the default horizontal fan-out. Use it for
+     * children that read as a list belonging to the record rather than as
+     * branches in their own right — job levels under a role, plan tiers under a
+     * product. A stacked group reserves no horizontal space, so the record's
+     * siblings close in around it.
+     *
+     * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+     * all of them); a group with an expandable child keeps the normal fan-out.
+     * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+     * `avatar` / `subtitle` / `tags` do not apply to them.
+     */
+    stackNodes?: (record: R) => boolean;
+    /**
+     * Trailing content for a stacked row — a count or a small icon button.
+     * Rendered at the row's trailing edge; clicks inside it do not select the
+     * node. Ignored for records that are not rendered as stacked rows.
+     *
+     * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+     * would promise a behaviour the graph does not have.
+     */
+    stackedTrailing?: (record: R) => ReactNode;
     /**
      * Returns the filters that, applied to the source `dataAdapter`, fetch the
      * direct children of `parentId`. `parentId === null` must return the roots.
@@ -8813,6 +9296,13 @@ export declare interface HomeRenderCtx {
      * { slotRowBleed}).
      */
     isLastSlot?: boolean;
+    /**
+     * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
+     * option the reader is on. A slot renderer that owns its own data reads this
+     * to fetch for it — the switcher is in the header, the fetching is here, and
+     * neither needs the host to hold the value.
+     */
+    selection?: string;
 }
 
 /**
@@ -8878,7 +9368,29 @@ export declare interface HomeSlotParamsMap {
  * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
  * type says so rather than leaving it to blow up at runtime.
  */
-export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> & ({
+export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries" | "headerControls"> & {
+    /**
+     * THE CARD'S OWN BUTTONS, in the header's top-right — as DATA, so a host that
+     * builds its widgets as data ("Write post", pointing at a route) can put one
+     * there without handing over a React node.
+     *
+     * `F0ButtonProps`, the same shape `action` takes, so a button can carry an
+     * `href` and be a real link. Drawn `ghost`/`sm` unless they say otherwise:
+     * this row is the TITLE's, and a filled button beside a title reads as the
+     * card's subject rather than as something you press.
+     *
+     * Keep it to one or two. What the card can do that needs no button belongs in
+     * `actions`, the overflow menu.
+     */
+    headerActions?: F0ButtonProps[];
+    /**
+     * WHAT THE CARD IS SHOWING, as a select in the same row — a scope switcher, as
+     * data. See {@link WidgetHeaderSelect}: `SlotWidget` keeps the choice and
+     * hands it to the slots as `ctx.selection`, so a widget declared as data can
+     * still be switched without its host holding the value.
+     */
+    headerSelect?: WidgetHeaderSelect;
+} & ({
     alert?: WidgetProps["alert"];
     status?: never;
 } | {
@@ -10079,6 +10591,16 @@ export declare type NavigationFiltersState<Definition extends Record<string, Nav
  */
 export declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition ? DateValue : T extends undefined ? undefined : never;
 
+/**
+ * The keys a date navigation can be set to. `periods` is not a member of the
+ * static record — it has no definition until a consumer supplies its ranges —
+ * so it widens only the types that can actually render it. Keeping it out of
+ * `GranularityDefinitionKey` is what stops it leaking into every exhaustive map
+ * over that key, in places (form-field presets, compare-to) where it can do
+ * nothing.
+ */
+export declare type NavigationGranularityKey = GranularityDefinitionKey | "periods";
+
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
 } & DataAttributes_2;
@@ -10164,6 +10686,18 @@ export declare interface NewHomeLayoutProps {
      */
     editableWidgetContainers?: WidgetContainerSide[];
     /**
+     * Which containers may still be ADDED TO. Narrower than
+     * `editableWidgetContainers`, which it is a subset of: a column not named here
+     * keeps its dragging and its "Remove widget" and only loses the offer to add.
+     *
+     * Defaults to every editable container — the common case, where the catalog
+     * always has something for every column. Name the sides once a column's
+     * catalog can run out: a main column that only ever holds one kind of widget
+     * has nothing to offer the moment that widget is on it, and a "+" that opens
+     * an empty picker is an offer the app cannot keep.
+     */
+    addableWidgetContainers?: WidgetContainerSide[];
+    /**
      * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
      * default: for a Home of a dozen widgets, mounting them all is what keeps a
      * card's data, clock and animation alive across everything this layout does to
@@ -10216,7 +10750,10 @@ export declare interface NewHomeLayoutProps {
      * changes. Ignored when `rebuildWidget` is given.
      */
     renderWidgetPreview?: (widget: HomeWidgetItem, params: WidgetParams) => ReactNode;
-    /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+    /**
+     * When set, renders a "+ Add widget" affordance at the bottom of each column
+     * that takes widgets — see `addableWidgetContainers`.
+     */
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
@@ -10245,6 +10782,18 @@ export declare interface NewHomeLayoutProps {
     stackedPinsAfter?: number;
     ctx?: HomeRenderCtx;
     className?: string;
+    /** Tooltip copy for the One switch, forwarded to `F0OneSwitch`. */
+    oneSwitchTooltip?: {
+        whenDisabled?: string;
+        whenEnabled?: string;
+    };
+    /** Opens the One switch's tooltip for 3s on mount. */
+    oneSwitchAutoOpen?: boolean;
+    /**
+     * Hides the One AI toggle in the controls row. Use when One is reached
+     * elsewhere (e.g. a sidebar tab) so Home doesn't show a redundant switch.
+     */
+    hideOneSwitch?: boolean;
 }
 
 declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
@@ -10532,7 +11081,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_2<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, periods, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -10548,6 +11097,8 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
     selectOnCellOnly?: boolean;
+    /** Consumer-defined ranges rendered by the `periods` view. */
+    periods?: DatePeriodsDefinition;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
@@ -10681,7 +11232,7 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
 
 export declare const OneDateNavigator: typeof _OneDateNavigator;
 
-declare function _OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, dataTestId, ...props }: OneDatePickerProps): JSX_2.Element;
+declare function _OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, dataTestId, periods, ...props }: OneDatePickerProps): JSX_2.Element;
 
 export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children">, WithDataTestIdProps {
     hideNavigation?: boolean;
@@ -10828,8 +11379,8 @@ declare interface OnePaginationProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_3.ForwardRefExoticComponent<OnePersonListItemProps & default_3.RefAttributes<HTMLDivElement>> & {
-Skeleton: () => default_3.JSX.Element;
+export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
+Skeleton: () => default_2.JSX.Element;
 }>;
 
 export declare type OnePersonListItemProps = {
@@ -11556,6 +12107,13 @@ declare type RequisitionProfile = {
 };
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
+
+/**
+ * The definition behind a key with no consumer data to build it from. Only
+ * `periods` has one: its empty definition renders the "no periods" state, which
+ * is what a periods value without periods means.
+ */
+export declare const resolveGranularityDefinition: (key: NavigationGranularityKey) => GranularityDefinition;
 
 /** A renderer entry in its full form — a bare function is just its `render`. */
 export declare const resolveSlotRenderer: (entry: SlotRendererEntry | undefined) => {
@@ -12315,7 +12873,7 @@ export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
  */
 export declare type SlotSkeletonRenderer<P = unknown> = (params: P, ctx: HomeSkeletonCtx) => ReactNode;
 
-export declare function SlotWidget({ header, params, fullHeight, action, summaries, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
+export declare function SlotWidget({ header, params, fullHeight, action, summaries, headerControls, headerActions, headerSelect, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
 
 /**
  * A widget's CONTENT: the slot stack, with the dividers between slots and the
@@ -13126,10 +13684,10 @@ export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<Tog
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tooltip: WithDataTestIdReturnType_3<(props: TooltipProps) => default_3.JSX.Element>;
+export declare const Tooltip: WithDataTestIdReturnType_3<(props: TooltipProps) => default_2.JSX.Element>;
 
 declare type TooltipInternalProps = {
-    children: default_3.ReactNode;
+    children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
     delay?: number;
     instant?: boolean;
@@ -13736,7 +14294,7 @@ export declare interface ViewportInset {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const VirtualList: default_3.ForwardRefExoticComponent<VirtualListProps & default_3.RefAttributes<HTMLDivElement>>;
+export declare const VirtualList: default_2.ForwardRefExoticComponent<VirtualListProps & default_2.RefAttributes<HTMLDivElement>>;
 
 declare type VirtualListProps = {
     height: number;
@@ -13912,10 +14470,10 @@ declare type WelcomeSuggestionClickEvent = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Widget: WithDataTestIdReturnType_3<default_3.ForwardRefExoticComponent<WidgetProps & {
+export declare const Widget: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<WidgetProps & {
 children: ReactNode;
-} & default_3.RefAttributes<HTMLDivElement>> & {
-Skeleton: default_3.ForwardRefExoticComponent<WidgetSkeletonProps & default_3.RefAttributes<HTMLDivElement>>;
+} & default_2.RefAttributes<HTMLDivElement>> & {
+Skeleton: default_2.ForwardRefExoticComponent<WidgetSkeletonProps & default_2.RefAttributes<HTMLDivElement>>;
 }>;
 
 export declare function WidgetAvatarsListItem({ id, title, subtitle, avatars, remainingCount, withPointerCursor, onClick, ...props }: WidgetAvatarsListItemProps): JSX_2.Element;
@@ -13945,8 +14503,14 @@ export declare type WidgetAvatarsListItemProps = {
  * Selection follows the filter: if the selected row is filtered out, the first
  * remaining row takes over, so the preview always shows something the CTA can
  * actually add.
+ *
+ * ONE CATALOG, TWO COLUMNS. Pass the `area` the picker was opened for and the
+ * same `widgets` list serves both: entries that declare `areas` are shown only
+ * where they fit, entries that declare none are shown in both, and the preview
+ * takes that column's width. So a Home keeps one list — the widgets it offers —
+ * rather than two that have to be kept in step.
  */
-export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, previewWidth, slotRenderers, title, }: WidgetCatalogProps): JSX_2.Element;
+export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, area, previewWidth, slotRenderers, title, }: WidgetCatalogProps): JSX_2.Element;
 
 /**
  * One DOMAIN in the picker: a heading the widgets under it belong to.
@@ -14001,6 +14565,21 @@ export declare interface WidgetCatalogItem {
      * nothing recommended there is no section.
      */
     recommended?: boolean;
+    /**
+     * WHICH COLUMNS this widget may be added to — the same two sides the layout
+     * hands back from `onClickAddNewWidget`. The picker then shows it only when it
+     * was opened for one of them (see `area`).
+     *
+     * OMIT IT for a widget that belongs in either, which is most of them: a
+     * `list`-shaped card reads the same in a 396px rail and in the main column,
+     * and saying so twice is how the two lists drift apart. Name the sides for the
+     * widgets that genuinely cannot travel — a carousel of post cards needs the
+     * main column's width, a 40px clock tile is built for the rail.
+     *
+     * A widget listed for NEITHER side (`[]`) is offered nowhere, which is a way to
+     * retire an entry without deleting it.
+     */
+    areas?: WidgetContainerSide[];
 }
 
 export declare interface WidgetCatalogProps {
@@ -14016,8 +14595,21 @@ export declare interface WidgetCatalogProps {
      */
     groups?: WidgetCatalogGroup[];
     /**
+     * WHICH COLUMN the picker was opened for — pass the side `onClickAddNewWidget`
+     * handed you. It does two things: widgets that declare `areas` are filtered
+     * down to the ones this column can hold, and the preview is capped to that
+     * column's width by default (see {@link AREA_PREVIEW_WIDTH}).
+     *
+     * Omit it and the picker is what it has always been: every widget, previewed
+     * at `previewWidth`. That is right for a Home with ONE place to put a widget;
+     * a layout with two columns should say which one it is filling, or it will
+     * offer the rail's clock for the main column and preview it at the wrong width.
+     */
+    area?: WidgetContainerSide;
+    /**
      * Content width of the column this was opened from — the preview is capped
-     * to it, so a rail-bound widget previews at rail width.
+     * to it, so a rail-bound widget previews at rail width. Defaults to the
+     * `area`'s own width, and to the rail's when there is no `area`.
      */
     previewWidth?: number;
     /**
@@ -14058,6 +14650,34 @@ export declare type WidgetEmptyStateProps = {
     emoji?: string;
     actions?: Action_2[];
 };
+
+/**
+ * A SELECT IN THE WIDGET'S HEADER: which of several things the card is showing.
+ *
+ * The value lives in `SlotWidget`, not in the host — that is the point of it.
+ * A host that builds its widgets as plain data has nowhere to keep a live
+ * choice: params persist (and turn a switcher into a saved setting), and page
+ * state means the page knowing about one particular widget. So the card keeps
+ * it, hands it down to its slots (`ctx.selection`), and tells the host through
+ * `onChange` if it wants to know.
+ *
+ * It is therefore a SESSION choice: the card starts at `value` every time it
+ * mounts. A choice that should outlive the visit is a param, not this.
+ */
+export declare interface WidgetHeaderSelect {
+    /** What the reader can switch between. The first one is the default. */
+    options: Array<{
+        value: string;
+        label: string;
+        icon?: IconType;
+    }>;
+    /** Which one the card starts on. Defaults to the first option. */
+    value?: string;
+    /** The trigger names the selection, so this is what says what KIND it is. */
+    tooltip?: string;
+    /** Told when the reader picks another one. The card switches either way. */
+    onChange?: (value: string) => void;
+}
 
 export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_7): JSX_2.Element;
 
@@ -14173,6 +14793,23 @@ export declare interface WidgetProps {
     AIButton?: () => void;
     /** An overflow menu at the header's right, beside `link`. */
     actions?: DropdownItem[];
+    /**
+     * THE WIDGET'S OWN CONTROLS, in the header's top-right: what the card is
+     * currently showing (a scope switcher), or what you can do from it without
+     * leaving the page ("New post"). They act on the WIDGET.
+     *
+     * They sit to the LEFT of the overflow menu, which keeps its corner — the menu
+     * is where every widget's items live, and a control that moved depending on
+     * whether a card had a menu would be a different control each time.
+     *
+     * Keep it to one or two `sm` controls. This row is the TITLE'S first, and the
+     * title gives up its width to whatever is put beside it: three buttons here
+     * and a narrow card has no name left.
+     *
+     * NOT the way out of the widget — that is `header.link`, drawn as the title
+     * itself — and NOT its call to action, which is `action`, in the footer.
+     */
+    headerControls?: ReactNode;
 }
 
 /**
@@ -14438,10 +15075,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -14449,8 +15084,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -14487,5 +15124,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }

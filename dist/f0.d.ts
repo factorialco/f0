@@ -298,8 +298,6 @@ declare interface ActionCommonProps {
      * The aria label of the action.
      */
     "aria-label"?: string;
-    /** Announces the state of a toggle action. */
-    "aria-pressed"?: React.AriaAttributes["aria-pressed"];
     /**
      * The tab index of the action.
      */
@@ -2032,8 +2030,6 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The aria-label of the button if not provided title or label will be used.
      */
     "aria-label"?: string;
-    /** Announces the state of a toggle button. */
-    "aria-pressed"?: React.AriaAttributes["aria-pressed"];
     /**
      * Forwarded to the underlying button. Useful for buttons that toggle an
      * expandable region (e.g. a tree/graph expander).
@@ -2194,7 +2190,7 @@ export declare type CalendarDate = {
 
 export declare type CalendarMode = "single" | "range";
 
-export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
+export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 /**
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
@@ -3917,6 +3913,35 @@ export declare interface DashboardItemBase {
 }
 
 /**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * Every item type shows the same filter control in its header on hover or
+ * keyboard focus, while touch-only devices keep it available without hover.
+ * Applied filters are signalled by the trigger counter without exposing their
+ * selected values in the widget header.
+ *
+ * The picker holds a draft state; `onChange` fires only when the user applies,
+ * with cleared or incomplete entries stripped from the emitted state.
+ *
+ * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
+ * definition — so dashboard configs remain JSON-compatible.
+ */
+export declare interface DashboardItemFiltersConfig<ItemFilters extends DashboardItemFiltersDefinition = DashboardItemFiltersDefinition> {
+    /** Filter definitions available for this widget. */
+    filters: ItemFilters;
+    /** Currently applied filter state for this widget. */
+    value: DashboardItemFiltersState<ItemFilters>;
+    /** Called with the new state when the user applies changes. */
+    onChange: (value: DashboardItemFiltersState<ItemFilters>) => void;
+}
+
+/** Report-style definitions accepted by a dashboard item's filter control. */
+export declare type DashboardItemFiltersDefinition<Keys extends string = string> = FiltersDefinition<Keys>;
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export declare type DashboardItemFiltersState<Definitions extends DashboardItemFiltersDefinition> = FiltersState<Definitions>;
+
+/**
  * Minimal descriptor of a dashboard item's position and size.
  * Used by `onLayoutChange` so the consumer can reconcile layout
  * edits against its own source-of-truth config items.
@@ -4462,26 +4487,48 @@ export declare type DateNavigationOptions = {
 };
 
 declare type DateNavigationOptions_2 = {
-    granularity?: GranularityDefinitionKey[] | GranularityDefinitionKey;
-    defaultGranularity?: GranularityDefinitionKey;
+    granularity?: NavigationGranularityKey[] | NavigationGranularityKey;
+    defaultGranularity?: NavigationGranularityKey;
     min?: Date;
     max?: Date;
     presets?: DatePreset[];
     hideGoToCurrent?: boolean;
+    /**
+     * Consumer-defined ranges (payroll cycles, academic terms…) navigable as an
+     * extra entry in the granularity selector, named by its `label`.
+     */
+    periods?: DatePeriodsDefinition;
 };
 
 declare type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<Date | DateRange | DateValue> & {
     type: "date-navigator";
 } & DateNavigationOptions_2;
 
-declare type DatePickerCompareTo = Partial<Record<GranularityDefinitionKey, CompareToDef[]>>;
+export declare type DatePeriod = {
+    /** Title of the period, e.g. "January 2026" */
+    label: string;
+    /** Overrides the date range rendered under the label */
+    description?: string;
+    from: Date;
+    to: Date;
+};
+
+export declare type DatePeriodsDefinition = {
+    /** Label of the entry in the granularity selector, e.g. "Payroll" */
+    label?: string;
+    /** Heading rendered above the period list, e.g. the legal entity the periods belong to */
+    header?: string;
+    periods: DatePeriod[];
+};
+
+declare type DatePickerCompareTo = Partial<Record<NavigationGranularityKey, CompareToDef[]>>;
 
 declare interface DatePickerPopupProps {
     onSelect?: (value: DatePickerValue_2 | undefined) => void;
     value?: DatePickerValue_2;
     defaultValue?: DatePickerValue_2;
     presets?: DatePreset[];
-    granularities?: GranularityDefinitionKey[];
+    granularities?: NavigationGranularityKey[];
     minDate?: Date;
     maxDate?: Date;
     disabled?: boolean;
@@ -4497,6 +4544,11 @@ declare interface DatePickerPopupProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
     selectOnCellOnly?: boolean;
+    /**
+     * Consumer-defined ranges (payroll cycles, academic terms…) offered as an
+     * extra entry in the granularity selector. Its `label` names that entry.
+     */
+    periods?: DatePeriodsDefinition;
 }
 
 export declare const datepickerSizes: readonly ["sm", "md"];
@@ -4505,7 +4557,7 @@ export declare type DatePickerValue = DatePickerValue_2;
 
 declare type DatePickerValue_2 = {
     value: DateRangeComplete | undefined;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 export declare interface DatePreset {
@@ -4593,7 +4645,7 @@ export declare type DateStringFormat = "default" | "long";
 declare type DateValue = {
     value: DateRangeComplete;
     valueString: string;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 declare type DefaultAction = BannerAction;
@@ -5103,6 +5155,7 @@ export declare const defaultTranslations: {
             readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
+            readonly seeMoreChildren: "See more";
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
@@ -5209,6 +5262,11 @@ export declare const defaultTranslations: {
             readonly range: {
                 readonly currentDate: "Today";
                 readonly label: "Range";
+            };
+            readonly periods: {
+                readonly currentDate: "Current period";
+                readonly label: "Periods";
+                readonly empty: "No periods available";
             };
         };
         readonly month: {
@@ -6973,7 +7031,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenSuggestionsCollapsedByDefault, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -7073,26 +7131,59 @@ export declare type F0AiChatTextAreaProps = {
      *   single bar about two lines tall. Its popover opens downward, because up is
      *   now the text you are about to type.
      *
-     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. It also moves the
-     * send button onto the textarea's own line (at `sm`, centred on the text) and
-     * puts One's mark in front of the text. Neither is a feature bolted onto this
-     * prop — they are what make the placement possible and legible. The action row
-     * is full-width, so a chips row plus an action row inside one field is three
-     * stacked bands and the "single bar" is gone; with send trailing the text there
-     * are two, text then suggestions. The attachment, host (`toolbarStart`) and
-     * dictation controls keep their own row when the host enables them; with none
-     * of them the field is just the two bands.
+     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. The chips do not get
+     * a band of their own: they take the middle of the ACTION row, between the
+     * attachment/host controls and the dictation · send pair, and One's mark goes
+     * in front of the text. That is what keeps the field two bands tall — text,
+     * then one row of controls — instead of three. Because the chips share that
+     * line, they scroll sideways rather than wrapping, with the overflowing ends
+     * faded: ten groups cost the same height as three.
      *
-     * THE INLINE SEND FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
+     * THE SHAPE FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
      * themselves are welcome-screen-only as they always were, but a composer that
-     * put send back in the action row the moment the first message landed would
-     * change shape under the reader mid-conversation. `"inside"` therefore keeps
-     * the two-band bar for the whole thread; after the welcome screen it is simply
-     * a bar with no chips in it.
+     * dropped One's mark the moment the first message landed would change shape
+     * under the reader mid-conversation. `"inside"` therefore keeps the bar for the
+     * whole thread; after the welcome screen it is simply a bar with no chips in
+     * it.
      *
      * @default "above"
      */
     welcomeScreenSuggestionsPlacement?: "above" | "inside";
+    /**
+     * Start closed, and open when the reader focuses the input — with a motion
+     * reveal, the row growing into place.
+     *
+     * For hosts where the composer is not the thing the reader came for — a Home
+     * hero, say — so the bar sits quiet until it is addressed, and the starter
+     * prompts arrive at the moment they are useful.
+     *
+     * ⚠️ WITH `"inside"` THIS COLLAPSES THE WHOLE CONTROL ROW, not just the chips:
+     * the field becomes ONE LINE — One's mark, the text, then dictation and send
+     * trailing it at `sm` — and the chips, attachment and host controls arrive with
+     * the row on focus. A row emptied of its chips would still be 56px of padding
+     * around two buttons, which is not a quiet bar; it is the same two-band field
+     * with a hole in it. Send comes along because a bar you cannot send from is not
+     * a composer, and dictation because talking is a way to start a prompt without
+     * typing one. With the row `"above"`, only that row collapses — the field below
+     * it is a plain composer and does not change shape.
+     *
+     * FOCUS IS TRACKED ON THE WHOLE COMPOSER, not on the textarea: it closes when
+     * focus leaves the field AND everything in it, including the suggestion panel
+     * (which Radix portals outside the form). Closing on the textarea's own blur
+     * would close the row the moment a chip took focus, which is every way of
+     * picking one. Three things hold it open regardless of focus: anything already
+     * typed or attached (a half-written prompt with no visible way to send it would
+     * be a trap — and a host that forwards a dropped file can put one there without
+     * the textarea ever being focused), and a recording in flight (its cancel ·
+     * confirm pair lives in the row).
+     *
+     * ⚠️ It also suppresses the composer's own autofocus-on-mount, which would
+     * otherwise open everything before the reader had touched anything and make
+     * this prop a no-op. A collapsed composer starts unfocused.
+     *
+     * @default false
+     */
+    welcomeScreenSuggestionsCollapsedByDefault?: boolean;
     /**
      * Cards rendered as a grid below the composer on the fullscreen welcome
      * screen. Each card carries its own `onClick`; the host decides the behavior.
@@ -7574,7 +7665,7 @@ export declare interface F0AlertProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AnalyticsDashboard: {
-    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, onAskAiTarget, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
+    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, itemFilters, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, onAskAiTarget, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
     displayName: string;
 };
 
@@ -7670,6 +7761,14 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      * Each item declares its type, visual config, grid span, and data fetcher.
      */
     items: DashboardItem<Filters>[];
+    /**
+     * Resolve the per-widget filter configuration for each dashboard item.
+     *
+     * Return a config to show a filter icon in that widget's header (next to
+     * the fullscreen and menu buttons) opening a compact filter popover; return
+     * `undefined` to hide the control for that item.
+     */
+    itemFilters?: (item: DashboardItem<Filters>) => DashboardItemFiltersConfig | undefined;
     /**
      * When true, enables drag-and-drop reordering, resize, and delete controls.
      */
@@ -8960,28 +9059,6 @@ declare type F0CustomFieldConfigWithConfig<TValue = unknown, TConfig = unknown> 
  */
 export declare const F0DataChart: (props: F0DataChartProps_2) => JSX_2.Element;
 
-export declare type F0DataChartAccessibleAreaSelectionAction = {
-    key: string;
-    label: string;
-    point: F0DataChartAreaSelectionPoint;
-};
-
-/**
- * Keyboard, touch, and single-pointer equivalent for polygon selection.
- * Its compact icon-only trigger submits the same bounded data contract.
- */
-export declare function F0DataChartAccessibleAreaSelectionActions({ actions, label, submitLabel, previousLabel, nextLabel, resetOn, onSubmit, }: F0DataChartAccessibleAreaSelectionActionsProps): JSX_2.Element;
-
-declare type F0DataChartAccessibleAreaSelectionActionsProps = {
-    actions: F0DataChartAccessibleAreaSelectionAction[];
-    label: string;
-    submitLabel: string;
-    previousLabel: string;
-    nextLabel: string;
-    resetOn: unknown;
-    onSubmit: (points: F0DataChartAreaSelectionPoint[]) => void;
-};
-
 /** The bounded set of chart data resolved from one completed area drawing. */
 export declare interface F0DataChartAreaSelection {
     /** Interaction surface that created the selection. */
@@ -9787,7 +9864,9 @@ export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicke
 
 declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, selectOnCellOnly, ...inputProps }: F0DatePickerProps): JSX_2.Element;
 
-export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
+export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
+    /** The picker has no `periods` prop, so it can only offer the calendar granularities. */
+    granularities?: GranularityDefinitionKey[];
     showIcon?: boolean;
     /** Controls how the selected date is displayed in the input. Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy. */
     displayFormat?: DateStringFormat;
@@ -14022,15 +14101,21 @@ export declare function getEmojiLabel(emoji: string): string;
  */
 export declare function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefined;
 
-export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
+export declare const getGranularityDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinition;
 
 /**
  * Get granularity definitions with week granularity configured with the specified weekStartsOn.
  * The week granularity is only created when needed (lazy creation).
+ *
+ * The `periods` granularity is only selectable once the consumer supplies its
+ * periods; without them it renders an empty list.
+ *
+ * Accepts a bare `weekStartsOn` for the original call style, or an options
+ * object when more than the week start is configured.
  */
-export declare function getGranularityDefinitions(weekStartsOn?: WeekStartsOn): Record<string, GranularityDefinition>;
+export declare function getGranularityDefinitions(options?: WeekStartsOn | GranularityDefinitionsOptions): Record<string, GranularityDefinition>;
 
-export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
+export declare const getGranularitySimpleDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinitionSimple;
 
 /**
  * Non-hook version for extracting definition outside of React components.
@@ -14046,6 +14131,12 @@ export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
+    selectorLabel?: string;
+    hideDateInput?: boolean;
+    getViewDateBounds?: () => {
+        min?: Date;
+        max?: Date;
+    } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
@@ -14087,6 +14178,11 @@ export declare const granularityDefinitions: {
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+export declare type GranularityDefinitionsOptions = {
+    weekStartsOn?: WeekStartsOn;
+    periods?: DatePeriodsDefinition;
+};
 
 declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -14145,6 +14241,29 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     getNodeId?: (record: R) => string;
     /** Number of children a node has. A node is expandable when this is `> 0`. */
     getChildrenCount: (record: R) => number;
+    /**
+     * Whether this record's children render as a vertical stack of compact rows
+     * directly under it, instead of the default horizontal fan-out. Use it for
+     * children that read as a list belonging to the record rather than as
+     * branches in their own right — job levels under a role, plan tiers under a
+     * product. A stacked group reserves no horizontal space, so the record's
+     * siblings close in around it.
+     *
+     * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+     * all of them); a group with an expandable child keeps the normal fan-out.
+     * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+     * `avatar` / `subtitle` / `tags` do not apply to them.
+     */
+    stackNodes?: (record: R) => boolean;
+    /**
+     * Trailing content for a stacked row — a count or a small icon button.
+     * Rendered at the row's trailing edge; clicks inside it do not select the
+     * node. Ignored for records that are not rendered as stacked rows.
+     *
+     * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+     * would promise a behaviour the graph does not have.
+     */
+    stackedTrailing?: (record: R) => ReactNode;
     /**
      * Returns the filters that, applied to the source `dataAdapter`, fetch the
      * direct children of `parentId`. `parentId === null` must return the roots.
@@ -15604,6 +15723,16 @@ declare type NavigationFiltersState<Definition extends Record<string, Navigation
  */
 declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition ? DateValue : T extends undefined ? undefined : never;
 
+/**
+ * The keys a date navigation can be set to. `periods` is not a member of the
+ * static record — it has no definition until a consumer supplies its ranges —
+ * so it widens only the types that can actually render it. Keeping it out of
+ * `GranularityDefinitionKey` is what stops it leaking into every exhaustive map
+ * over that key, in places (form-field presets, compare-to) where it can do
+ * nothing.
+ */
+export declare type NavigationGranularityKey = GranularityDefinitionKey | "periods";
+
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
 } & DataAttributes_2;
@@ -16050,7 +16179,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_3<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, periods, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -16066,6 +16195,8 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
     selectOnCellOnly?: boolean;
+    /** Consumer-defined ranges rendered by the `periods` view. */
+    periods?: DatePeriodsDefinition;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
@@ -17197,6 +17328,13 @@ export declare interface ResolvedStepAnswer {
      */
     cancelled?: boolean;
 }
+
+/**
+ * The definition behind a key with no consumer data to build it from. Only
+ * `periods` has one: its empty definition renders the "no periods" state, which
+ * is what a periods value without periods means.
+ */
+export declare const resolveGranularityDefinition: (key: NavigationGranularityKey) => GranularityDefinition;
 
 /**
  * Normalizes the three `fetchItemNeighbors` return channels (sync value,
@@ -20342,10 +20480,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -20353,8 +20489,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -20391,5 +20529,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }
