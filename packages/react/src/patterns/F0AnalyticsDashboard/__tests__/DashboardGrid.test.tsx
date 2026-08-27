@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { ChartLine } from "@/icons/app"
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import {
+  WIDGET_DRAG_START,
+  type WidgetDragStartDetail,
+} from "@/lib/dnd/widgetDragEvents"
 import {
   act,
   fireEvent,
@@ -10,13 +16,6 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-import {
-  WIDGET_DRAG_START,
-  type WidgetDragStartDetail,
-} from "@/lib/dnd/widgetDragEvents"
-import { ChartLine } from "@/icons/app"
-
 import type { DashboardItem, DashboardLocationItem } from "../types"
 
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
@@ -24,6 +23,11 @@ import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
 vi.mock("@/patterns/F0Map", () => ({
   f0MapDensityColors: { low: "red", medium: "red", high: "red" },
   f0MapDensityColorSteps: { low: 10, medium: 50, high: 70 },
+  f0MapDensityPalette: {
+    low: { color: "red", colorStep: 10 },
+    medium: { color: "red", colorStep: 50 },
+    high: { color: "red", colorStep: 70 },
+  },
   f0MapStyles: {
     light: { version: 8, sources: {}, layers: [] },
     dark: { version: 8, sources: {}, layers: [] },
@@ -119,6 +123,13 @@ function makeLocationItem(
       viewLocationDetailsLabel: (name) => `View ${name}`,
       closeLocationDetailsLabel: "Close details",
       noDataLabel: "No data",
+      exportLabels: {
+        location: "Location",
+        density: "Density",
+        details: "Details",
+        item: "Item",
+        description: "Description",
+      },
     },
     fetchData: () => new Promise(() => {}),
     ...overrides,

@@ -23,10 +23,17 @@ export {
   f0MapDensityColorSteps,
   f0MapDensityColors,
   f0MapDensityLevels,
+  f0MapDensityPalette,
+  f0MapDensitySurfaceStyle,
   f0MapMarkerVariants,
+  resolveF0MapDensityStyle,
 } from "./components/F0MapMarker"
 export type {
+  F0MapDensityColor,
+  F0MapDensityColorStep,
   F0MapDensityLevel,
+  F0MapDensityPalette,
+  F0MapDensityStyle,
   F0MapMarkerVariant,
   F0MapMarkerVariantProps,
 } from "./components/F0MapMarker"

@@ -1,3 +1,4 @@
+import { baseColors } from "@factorialco/f0-core"
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -10,31 +11,58 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
-import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
-import { LocationVisualization } from "../components/LocationItem/LocationVisualization"
 import type {
   DashboardLocationConfig,
   DashboardLocationData,
   DashboardLocationItem,
 } from "../types"
 
+import { LocationVisualization } from "../components/LocationItem/LocationVisualization"
+import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
+
 vi.mock("@/patterns/F0Map", () => ({
   f0MapDensityColors: { low: "red", medium: "red", high: "red" },
   f0MapDensityColorSteps: { low: 10, medium: 50, high: 70 },
+  f0MapDensityPalette: {
+    low: { color: "red", colorStep: 10 },
+    medium: { color: "red", colorStep: 50 },
+    high: { color: "red", colorStep: 70 },
+  },
   f0MapStyles: {
     light: { version: 8, sources: {}, layers: [] },
     dark: { version: 8, sources: {}, layers: [] },
   },
+  resolveF0MapDensityStyle: (style: { color: string; colorStep: number }) =>
+    style.color === "malibu" && style.colorStep === 60
+      ? { ...style, colorStep: 70 }
+      : style,
+  f0MapDensitySurfaceStyle: (style: {
+    color: keyof typeof baseColors
+    colorStep: 10 | 50 | 60 | 70
+  }) =>
+    style.colorStep === 10
+      ? {
+          backgroundColor: "hsl(var(--neutral-0))",
+          boxShadow: `inset 0 0 0 999px hsl(${baseColors[style.color][50]} / 0.1)`,
+        }
+      : { backgroundColor: `hsl(${baseColors[style.color][style.colorStep]})` },
   F0Map: ({
     markers,
     onMarkerSelect,
     onFallbackChange,
     ariaLabel,
+    selectedMarkerId,
   }: {
-    markers: Array<{ id: string; ariaLabel?: string; level?: string }>
+    markers: Array<{
+      id: string
+      ariaLabel?: string
+      level?: string
+      style?: { color: string; colorStep: number }
+    }>
     onMarkerSelect?: (id: string) => void
     onFallbackChange?: (visible: boolean) => void
     ariaLabel?: string
+    selectedMarkerId?: string | null
   }) => (
     <nav aria-label="Locations" data-map-label={ariaLabel}>
       {markers.map((marker) => (
@@ -42,6 +70,9 @@ vi.mock("@/patterns/F0Map", () => ({
           key={marker.id}
           type="button"
           data-density-level={marker.level}
+          data-density-color={marker.style?.color}
+          data-density-color-step={marker.style?.colorStep}
+          aria-current={selectedMarkerId === marker.id || undefined}
           onClick={() => onMarkerSelect?.(marker.id)}
         >
           {marker.ariaLabel}
@@ -90,6 +121,13 @@ const config: DashboardLocationConfig = {
   viewLocationDetailsLabel: (name) => `View activity for ${name}`,
   closeLocationDetailsLabel: "Close location activity",
   noDataLabel: "No activity",
+  exportLabels: {
+    location: "Location",
+    density: "Density",
+    details: "Details",
+    item: "Employee",
+    description: "Workplace",
+  },
 }
 
 const data: DashboardLocationData = {
@@ -221,7 +259,9 @@ describe("F0AnalyticsDashboard location item", () => {
       })
     ).not.toBeInTheDocument()
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
-    expect(screen.queryByText("Select a location")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Select a location" })
+    ).not.toBeInTheDocument()
 
     await userEvent.click(location)
 
@@ -300,6 +340,240 @@ describe("F0AnalyticsDashboard location item", () => {
     ).toHaveAttribute("data-density-level", "low")
   })
 
+  it("uses one partially overridden F0 palette for markers and the legend", async () => {
+    const paletteData: DashboardLocationData = {
+      ...data,
+      locations: [
+        { ...data.locations[0], density: 3 },
+        { ...data.locations[1], density: 10 },
+        {
+          ...data.locations[1],
+          id: "paris-high",
+          name: "Paris · Bastille",
+          density: 30,
+        },
+      ],
+    }
+    const { container } = render(
+      <LocationVisualization
+        data={paletteData}
+        config={{
+          ...config,
+          densityPalette: {
+            medium: { color: "malibu", colorStep: 60 },
+          },
+        }}
+      />
+    )
+
+    expect(
+      await screen.findByRole("button", { name: /Barcelona · HQ · Density: 3/ })
+    ).toHaveAttribute("data-density-color", "red")
+    expect(
+      screen.getByRole("button", { name: /Paris · République · Density: 10/ })
+    ).toHaveAttribute("data-density-color", "malibu")
+    expect(
+      screen.getByRole("button", { name: /Paris · République · Density: 10/ })
+    ).toHaveAttribute("data-density-color-step", "70")
+    expect(
+      screen.getByRole("button", { name: /Paris · Bastille · Density: 30/ })
+    ).toHaveAttribute("data-density-color-step", "70")
+
+    const legend = container.querySelector("[data-location-density-legend]")
+    expect(legend?.querySelector('[data-density-level="low"]')).toHaveStyle({
+      backgroundColor: "hsl(var(--neutral-0))",
+    })
+    expect(legend?.querySelector('[data-density-level="medium"]')).toHaveStyle({
+      backgroundColor: "hsl(216 48% 44%)",
+    })
+    expect(legend?.querySelector('[data-density-level="high"]')).toHaveStyle({
+      backgroundColor: "hsl(3 71% 41%)",
+    })
+  })
+
+  it("independently hides summary, legend, and an absent timeline", async () => {
+    const { container } = render(
+      <LocationVisualization
+        data={{ summary: data.summary, locations: data.locations }}
+        config={{
+          ...config,
+          sections: {
+            summary: false,
+            densityLegend: false,
+          },
+        }}
+      />
+    )
+
+    await screen.findByRole("navigation", { name: "Locations" })
+    expect(container.querySelector("[data-location-summary]")).toBeNull()
+    expect(container.querySelector("[data-location-density-legend]")).toBeNull()
+    expect(container.querySelector("[data-location-timeline]")).toBeNull()
+    expect(screen.queryByTestId("location-timeline-chart")).toBeNull()
+  })
+
+  it("hides an existing timeline when its section is disabled", async () => {
+    const { container } = render(
+      <LocationVisualization
+        data={data}
+        config={{
+          ...config,
+          sections: { timeline: false },
+        }}
+      />
+    )
+
+    await screen.findByRole("button", {
+      name: /Barcelona · HQ · Density: 39/,
+    })
+    expect(container.querySelector("[data-location-timeline]")).toBeNull()
+  })
+
+  it("keeps location selection operable when details are disabled", async () => {
+    const onLocationSelect = vi.fn()
+    render(
+      <LocationVisualization
+        data={data}
+        config={{
+          ...config,
+          sections: { locationDetails: false },
+        }}
+        onLocationSelect={onLocationSelect}
+      />
+    )
+
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: /Paris · République · Density: 18/,
+      })
+    )
+    expect(onLocationSelect).toHaveBeenCalledWith("paris")
+    expect(screen.queryByRole("complementary")).toBeNull()
+    expect(
+      screen.queryByRole("button", { name: /View activity for/ })
+    ).toBeNull()
+  })
+
+  it("renders a map-only configuration in both map and fallback modes", async () => {
+    const { container } = render(
+      <LocationVisualization
+        data={{ summary: data.summary, locations: data.locations }}
+        config={{
+          ...config,
+          sections: {
+            summary: false,
+            locationDetails: false,
+            densityLegend: false,
+            timeline: false,
+          },
+        }}
+      />
+    )
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Use map fallback" })
+    )
+    expect(
+      screen.getByRole("region", { name: "Activity by location" })
+    ).toBeInTheDocument()
+    for (const selector of [
+      "[data-location-summary]",
+      "[data-location-details]",
+      "[data-location-details-trigger]",
+      "[data-location-density-legend]",
+      "[data-location-timeline]",
+    ]) {
+      expect(container.querySelector(selector)).toBeNull()
+    }
+  })
+
+  it("restores focus before disabling location details at runtime", async () => {
+    const { rerender } = render(
+      <LocationVisualization data={data} config={config} />
+    )
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "View activity for Barcelona · HQ",
+      })
+    )
+    const close = await screen.findByRole("button", {
+      name: "Close location activity",
+    })
+    close.focus()
+
+    rerender(
+      <LocationVisualization
+        data={data}
+        config={{
+          ...config,
+          sections: { locationDetails: false },
+        }}
+      />
+    )
+
+    const selectedLocation = screen.getByRole("button", {
+      name: /Barcelona · HQ · Density: 39/,
+    })
+    await waitFor(() => expect(selectedLocation).toHaveFocus())
+    expect(screen.queryByRole("complementary")).toBeNull()
+  })
+
+  it("restores focus before disabling a focused timeline at runtime", async () => {
+    const { container, rerender } = render(
+      <LocationVisualization data={data} config={config} />
+    )
+    const legend = await screen.findByRole("list", {
+      name: "Clock ins, Clock outs",
+    })
+    legend.tabIndex = 0
+    legend.focus()
+
+    rerender(
+      <LocationVisualization
+        data={data}
+        config={{
+          ...config,
+          sections: { timeline: false },
+        }}
+      />
+    )
+
+    const selectedLocation = screen.getByRole("button", {
+      name: /Barcelona · HQ · Density: 39/,
+    })
+    await waitFor(() => expect(selectedLocation).toHaveFocus())
+    expect(container.querySelector("[data-location-timeline]")).toBeNull()
+  })
+
+  it("restores timeline focus to the widget when no location is selected", async () => {
+    const { container, rerender } = render(
+      <LocationVisualization
+        data={data}
+        config={config}
+        defaultSelectedLocationId={null}
+      />
+    )
+    const legend = await screen.findByRole("list", {
+      name: "Clock ins, Clock outs",
+    })
+    legend.tabIndex = 0
+    legend.focus()
+
+    rerender(
+      <LocationVisualization
+        data={data}
+        config={{ ...config, sections: { timeline: false } }}
+        defaultSelectedLocationId={null}
+      />
+    )
+
+    const widget = container.querySelector<HTMLElement>(
+      "[data-location-visualization]"
+    )
+    await waitFor(() => expect(widget).toHaveFocus())
+    expect(container.querySelector("[data-location-timeline]")).toBeNull()
+  })
+
   it("exposes timeline summaries and preserves disclosure focus by input modality", async () => {
     render(
       <F0AnalyticsDashboard
@@ -324,6 +598,11 @@ describe("F0AnalyticsDashboard location item", () => {
     expect(
       await screen.findByText("Noon has twenty events")
     ).toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "View activity for Barcelona · HQ",
+      })
+    )
     const close = screen.getByRole("button", {
       name: "Close location activity",
     })
@@ -363,7 +642,7 @@ describe("F0AnalyticsDashboard location item", () => {
     )
   })
 
-  it("resolves its responsive disclosure once instead of hiding focused content on resize", async () => {
+  it("adapts its responsive disclosure as the widget width changes", async () => {
     const OriginalResizeObserver = globalThis.ResizeObserver
     const callbacks: ResizeObserverCallback[] = []
     globalThis.ResizeObserver = class {
@@ -384,6 +663,24 @@ describe("F0AnalyticsDashboard location item", () => {
           callback(
             [
               {
+                contentRect: { width: 900 },
+              } as ResizeObserverEntry,
+            ],
+            {} as ResizeObserver
+          )
+        }
+      })
+
+      const close = await screen.findByRole("button", {
+        name: "Close location activity",
+      })
+      close.focus()
+
+      act(() => {
+        for (const callback of callbacks) {
+          callback(
+            [
+              {
                 contentRect: { width: 680 },
               } as ResizeObserverEntry,
             ],
@@ -391,6 +688,12 @@ describe("F0AnalyticsDashboard location item", () => {
           )
         }
       })
+      expect(close).toHaveFocus()
+      expect(close).toBeInTheDocument()
+
+      screen
+        .getByRole("button", { name: /Barcelona · HQ · Density: 39/ })
+        .focus()
       await waitFor(() =>
         expect(
           screen.queryByRole("button", { name: "Close location activity" })
@@ -409,11 +712,11 @@ describe("F0AnalyticsDashboard location item", () => {
           )
         }
       })
-      expect(
-        screen.getByRole("button", {
-          name: "View activity for Barcelona · HQ",
-        })
-      ).toBeInTheDocument()
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Close location activity" })
+        ).toBeInTheDocument()
+      )
     } finally {
       globalThis.ResizeObserver = OriginalResizeObserver
     }
@@ -477,10 +780,47 @@ describe("F0AnalyticsDashboard location item", () => {
       <F0AnalyticsDashboard items={[makeItem({ fetchData })]} />
     )
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument()
+    expect(
+      container.querySelector("[data-location-summary-skeleton]")
+    ).toBeInTheDocument()
 
     await act(async () => resolveData?.(data))
     expect(await screen.findByText("Alex Rivera")).toBeInTheDocument()
     expect(container.querySelector('[aria-busy="true"]')).toBeNull()
+  })
+
+  it("keeps disabled location sections out of the loading skeleton", () => {
+    const fetchData = () => new Promise<DashboardLocationData>(() => undefined)
+    const item = makeItem({ fetchData })
+
+    const { container } = render(
+      <F0AnalyticsDashboard
+        items={[
+          {
+            ...item,
+            location: {
+              ...item.location,
+              sections: {
+                summary: false,
+                locationDetails: false,
+                timeline: false,
+              },
+            },
+          },
+        ]}
+      />
+    )
+
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument()
+    expect(
+      container.querySelector("[data-location-summary-skeleton]")
+    ).toBeNull()
+    expect(
+      container.querySelector("[data-location-details-skeleton]")
+    ).toBeNull()
+    expect(
+      container.querySelector("[data-location-timeline-skeleton]")
+    ).toBeNull()
   })
 
   it("renders an unrelated IT inventory dataset through the same item type", async () => {

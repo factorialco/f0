@@ -6,6 +6,7 @@ import {
   F0MapMarker,
   f0MapDensityColors,
   f0MapDensityColorSteps,
+  f0MapDensityPalette,
 } from "../F0MapMarker"
 
 describe("F0MapMarker", () => {
@@ -40,15 +41,20 @@ describe("F0MapMarker", () => {
       high: "red",
     })
     expect(f0MapDensityColorSteps).toEqual({ low: 10, medium: 50, high: 70 })
+    expect(f0MapDensityPalette).toEqual({
+      low: { color: "red", colorStep: 10 },
+      medium: { color: "red", colorStep: 50 },
+      high: { color: "red", colorStep: 70 },
+    })
 
     const { rerender } = render(
       <F0MapMarker variant="density" value={4} level="low" />
     )
     expect(screen.getByText("4").parentElement).toHaveStyle({
-      backgroundColor: "hsl(5 100% 65% / 0.1)",
+      backgroundColor: "hsl(var(--neutral-0))",
     })
     expect(screen.getByText("4")).toHaveStyle({
-      color: "hsl(var(--neutral-90))",
+      color: "hsl(var(--neutral-100))",
     })
 
     rerender(<F0MapMarker variant="density" value={9} level="medium" />)
@@ -56,7 +62,7 @@ describe("F0MapMarker", () => {
       backgroundColor: "hsl(5 100% 65%)",
     })
     expect(screen.getByText("9")).toHaveStyle({
-      color: "hsl(219 88% 6% / 0.92)",
+      color: "hsl(218 48% 10%)",
     })
 
     rerender(<F0MapMarker variant="density" value={22} level="high" />)
@@ -64,6 +70,24 @@ describe("F0MapMarker", () => {
       backgroundColor: "hsl(3 71% 41%)",
     })
     expect(screen.getByText("22")).toHaveStyle({
+      color: "hsl(var(--white-100))",
+    })
+  })
+
+  it("normalizes an inaccessible composing density step within its F0 hue", () => {
+    render(
+      <F0MapMarker
+        variant="density"
+        value={18}
+        level="medium"
+        style={{ color: "malibu", colorStep: 60 }}
+      />
+    )
+
+    expect(screen.getByText("18").parentElement).toHaveStyle({
+      backgroundColor: "hsl(216 48% 44%)",
+    })
+    expect(screen.getByText("18")).toHaveStyle({
       color: "hsl(var(--white-100))",
     })
   })

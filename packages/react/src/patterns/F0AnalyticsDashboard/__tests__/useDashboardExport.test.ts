@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { act, zeroRenderHook } from "@/testing/test-utils"
-import { ChartLine } from "@/icons/app"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
 
-import { useDashboardExport } from "../hooks/useDashboardExport"
+import { ChartLine } from "@/icons/app"
+import { act, zeroRenderHook } from "@/testing/test-utils"
+
 import type { DashboardItem, DashboardLocationConfig } from "../types"
+
+import { useDashboardExport } from "../hooks/useDashboardExport"
 import * as downloadHelpers from "../utils/downloadHelpers"
 
 const filtersDefinition = {
@@ -44,6 +46,13 @@ const locationConfig: DashboardLocationConfig = {
   viewLocationDetailsLabel: (name) => `View ${name}`,
   closeLocationDetailsLabel: "Close",
   noDataLabel: "No inventory",
+  exportLabels: {
+    location: "Location",
+    density: "Devices",
+    details: "Inventory",
+    item: "Item",
+    description: "Owner",
+  },
 }
 
 async function runExport(items: DashboardItem<typeof filtersDefinition>[]) {
@@ -206,20 +215,28 @@ describe("useDashboardExport", () => {
           name: "IT inventory by location",
           columns: [
             "Location",
-            "Density",
-            "Details",
+            "Devices",
+            "Inventory",
             "Item",
-            "Description",
+            "Owner",
             "Status",
+          ],
+          keys: [
+            "location:name",
+            "location:density",
+            "location:details",
+            "location:item",
+            "location:description",
+            "location:value:Status",
           ],
           rows: [
             {
-              Location: "Barcelona · HQ",
-              Density: 39,
-              Details: "1 device",
-              Item: "MacBook Pro · IT-1842",
-              Description: "Alex Rivera",
-              Status: "Healthy",
+              "location:name": "Barcelona · HQ",
+              "location:density": 39,
+              "location:details": "1 device",
+              "location:item": "MacBook Pro · IT-1842",
+              "location:description": "Alex Rivera",
+              "location:value:Status": "Healthy",
             },
           ],
         }),
@@ -274,18 +291,26 @@ describe("useDashboardExport", () => {
     expect(downloadHelpers.downloadMultiSheetExcel).toHaveBeenCalledWith(
       [
         expect.objectContaining({
+          columns: ["Location", "Devices", "Inventory", "Item", "Status"],
+          keys: [
+            "location:name",
+            "location:density",
+            "location:details",
+            "location:item",
+            "location:value:Status",
+          ],
           rows: [
             {
-              Location: "Madrid · Castellana",
-              Density: 4,
-              Details: "No assigned devices",
+              "location:name": "Madrid · Castellana",
+              "location:density": 4,
+              "location:details": "No assigned devices",
             },
             {
-              Location: "Paris · République",
-              Density: 1,
-              Details: "1 device",
-              Item: "MacBook Air · IT-0091",
-              Status: "Healthy",
+              "location:name": "Paris · République",
+              "location:density": 1,
+              "location:details": "1 device",
+              "location:item": "MacBook Air · IT-0091",
+              "location:value:Status": "Healthy",
             },
           ],
         }),
@@ -310,6 +335,72 @@ describe("useDashboardExport", () => {
     ])
 
     expect(downloadHelpers.downloadMultiSheetExcel).not.toHaveBeenCalled()
+  })
+
+  it("preserves location values when localized export labels are identical", async () => {
+    await runExport([
+      {
+        id: "duplicate-location-labels",
+        title: "Duplicate labels",
+        type: "location",
+        location: {
+          ...locationConfig,
+          exportLabels: {
+            location: "Value",
+            density: "Value",
+            details: "Value",
+            item: "Value",
+            description: "Value",
+          },
+        },
+        fetchData: async () => ({
+          summary: {},
+          locations: [
+            {
+              id: "barcelona",
+              name: "Barcelona · HQ",
+              coordinates: [2.17, 41.38],
+              density: 39,
+              detailsLabel: "1 person",
+              details: [
+                {
+                  id: "alex",
+                  title: "Alex Rivera",
+                  description: "Workplace",
+                  avatar: { type: "icon", icon: ChartLine },
+                  values: [],
+                },
+              ],
+            },
+          ],
+        }),
+      },
+    ])
+
+    expect(downloadHelpers.downloadMultiSheetExcel).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          columns: ["Value", "Value", "Value", "Value", "Value"],
+          keys: [
+            "location:name",
+            "location:density",
+            "location:details",
+            "location:item",
+            "location:description",
+          ],
+          rows: [
+            {
+              "location:name": "Barcelona · HQ",
+              "location:density": 39,
+              "location:details": "1 person",
+              "location:item": "Alex Rivera",
+              "location:description": "Workplace",
+            },
+          ],
+        }),
+      ],
+      "test-dashboard"
+    )
   })
 
   it("warns and skips a rejected location export", async () => {

@@ -1,6 +1,6 @@
 import { baseColors } from "@factorialco/f0-core"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { forwardRef } from "react"
+import { forwardRef, type CSSProperties } from "react"
 
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
@@ -68,6 +68,168 @@ const hslOf = (c: BaseMapMarkerColor, step: BaseMapMarkerColorStep = 50) => {
   if (c === "neutral" || c === "grey") return `hsl(${HUE[c]})`
   if (step === 10) return `hsl(${baseColors[c][50]} / 0.1)`
   return `hsl(${baseColors[c][step]})`
+}
+
+/**
+ * Opaque F0 marker surface. The light density tint is composited over the
+ * theme surface instead of the map, so its count contrast is tile-independent.
+ */
+export const markerFillStyle = (
+  color: BaseMapMarkerColor,
+  colorStep: BaseMapMarkerColorStep = 50
+): CSSProperties =>
+  colorStep === 10
+    ? {
+        backgroundColor: "hsl(var(--neutral-0))",
+        boxShadow: `inset 0 0 0 999px ${hslOf(color, colorStep)}`,
+      }
+    : { backgroundColor: hslOf(color, colorStep) }
+
+const hslToLuminance = (triplet: string) => {
+  const [hue = 0, saturation = 0, lightness = 0] = triplet
+    .split("/")[0]
+    .trim()
+    .split(/\s+/)
+    .map((part) => Number.parseFloat(part))
+  const saturationRatio = saturation / 100
+  const lightnessRatio = lightness / 100
+  const chroma = (1 - Math.abs(2 * lightnessRatio - 1)) * saturationRatio
+  const hueSection = (((hue % 360) + 360) % 360) / 60
+  const intermediate = chroma * (1 - Math.abs((hueSection % 2) - 1))
+  const [red, green, blue] =
+    hueSection < 1
+      ? [chroma, intermediate, 0]
+      : hueSection < 2
+        ? [intermediate, chroma, 0]
+        : hueSection < 3
+          ? [0, chroma, intermediate]
+          : hueSection < 4
+            ? [0, intermediate, chroma]
+            : hueSection < 5
+              ? [intermediate, 0, chroma]
+              : [chroma, 0, intermediate]
+  const match = lightnessRatio - chroma / 2
+  const linearize = (channel: number) => {
+    const value = channel + match
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  }
+  return (
+    0.2126 * linearize(red) +
+    0.7152 * linearize(green) +
+    0.0722 * linearize(blue)
+  )
+}
+
+const contrastRatio = (first: string, second: string) => {
+  const lighter = Math.max(hslToLuminance(first), hslToLuminance(second))
+  const darker = Math.min(hslToLuminance(first), hslToLuminance(second))
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+const hslToRgb = (triplet: string): [number, number, number] => {
+  const [hue = 0, saturation = 0, lightness = 0] = triplet
+    .split("/")[0]
+    .trim()
+    .split(/\s+/)
+    .map((part) => Number.parseFloat(part))
+  const saturationRatio = saturation / 100
+  const lightnessRatio = lightness / 100
+  const chroma = (1 - Math.abs(2 * lightnessRatio - 1)) * saturationRatio
+  const hueSection = (((hue % 360) + 360) % 360) / 60
+  const intermediate = chroma * (1 - Math.abs((hueSection % 2) - 1))
+  const channels: [number, number, number] =
+    hueSection < 1
+      ? [chroma, intermediate, 0]
+      : hueSection < 2
+        ? [intermediate, chroma, 0]
+        : hueSection < 3
+          ? [0, chroma, intermediate]
+          : hueSection < 4
+            ? [0, intermediate, chroma]
+            : hueSection < 5
+              ? [intermediate, 0, chroma]
+              : [chroma, 0, intermediate]
+  const match = lightnessRatio - chroma / 2
+  return channels.map((channel) => channel + match) as [number, number, number]
+}
+
+const rgbToLuminance = ([red, green, blue]: [number, number, number]) => {
+  const linearize = (value: number) =>
+    value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  return (
+    0.2126 * linearize(red) +
+    0.7152 * linearize(green) +
+    0.0722 * linearize(blue)
+  )
+}
+
+const composite = (
+  foreground: [number, number, number],
+  background: [number, number, number],
+  opacity: number
+): [number, number, number] =>
+  foreground.map(
+    (channel, index) => channel * opacity + background[index] * (1 - opacity)
+  ) as [number, number, number]
+
+const rgbContrastRatio = (
+  first: [number, number, number],
+  second: [number, number, number]
+) => {
+  const lighter = Math.max(rgbToLuminance(first), rgbToLuminance(second))
+  const darker = Math.min(rgbToLuminance(first), rgbToLuminance(second))
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+/** Best contrast available from the sanctioned F0 count-marker inks. */
+export const countForegroundContrast = (
+  color: BaseMapMarkerColor,
+  colorStep: BaseMapMarkerColorStep
+) => {
+  if (colorStep === 10) {
+    const tint = hslToRgb(
+      color === "neutral" || color === "grey"
+        ? HUE[color]
+        : baseColors[color][50]
+    )
+    return Math.min(
+      rgbContrastRatio(
+        composite(tint, hslToRgb(baseColors.white[100]), 0.1),
+        hslToRgb(baseColors.grey[100])
+      ),
+      rgbContrastRatio(
+        composite(tint, hslToRgb(baseColors.grey[100]), 0.1),
+        hslToRgb(baseColors.white[100])
+      )
+    )
+  }
+  const background =
+    color === "neutral" || color === "grey"
+      ? HUE[color]
+      : baseColors[color][colorStep]
+  return Math.max(
+    contrastRatio(background, baseColors.white[100]),
+    contrastRatio(background, baseColors.grey[100])
+  )
+}
+
+/** Selects the higher-contrast F0 ink for an opaque count-marker fill. */
+export const countForegroundColor = (
+  color: BaseMapMarkerColor,
+  colorStep: BaseMapMarkerColorStep
+) => {
+  if (colorStep === 10) return "hsl(var(--neutral-100))"
+  const background =
+    color === "neutral" || color === "grey"
+      ? HUE[color]
+      : baseColors[color][colorStep]
+  const dark = baseColors.grey[100]
+  const light = baseColors.white[100]
+  const lightContrast = contrastRatio(background, light)
+  const darkContrast = contrastRatio(background, dark)
+  return lightContrast >= darkContrast
+    ? "hsl(var(--white-100))"
+    : `hsl(${dark})`
 }
 
 // Darkest step of each hue (`<hue>.70`) — used for the label text. The greys
@@ -379,12 +541,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           aria-hidden
           className="font-semibold leading-none"
           style={{
-            color:
-              colorStep === 70
-                ? WHITE
-                : colorStep === 10
-                  ? "hsl(var(--neutral-90))"
-                  : `hsl(${baseColors.grey[90]})`,
+            color: countForegroundColor(accentColor, colorStep),
             fontSize: Math.round(
               iconPx *
                 (props.count.length > 2
@@ -452,7 +609,9 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           borderRadius: squircle ? Math.round(m.d * 0.3) : 9999,
           borderWidth: m.border,
           borderColor: WHITE,
-          backgroundColor: colored ? hslOf(accentColor, colorStep) : WHITE,
+          ...(colored
+            ? markerFillStyle(accentColor, colorStep)
+            : { backgroundColor: WHITE }),
         }}
       >
         {variant === "color" ? (

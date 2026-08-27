@@ -1,5 +1,7 @@
 export {
   BaseMapMarker,
+  countForegroundContrast,
+  countForegroundColor,
   getMarkerMetrics,
   getSelectedHeadGroupY,
   markerSizes,
@@ -8,6 +10,7 @@ export {
   markerVariants,
   markerLabelPlacements,
   markerColorTriplet,
+  markerFillStyle,
   MARKER_SHADOW_HSL,
   SELECTED_DOT_R,
   SELECTED_DOT_GAP,

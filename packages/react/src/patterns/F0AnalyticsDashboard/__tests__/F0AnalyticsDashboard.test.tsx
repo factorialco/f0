@@ -1,22 +1,22 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   screen,
   waitFor,
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-import {
-  AiChatStateProvider,
-  useAiChat,
-} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 
-import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 import type {
   DashboardChartItem,
   DashboardCustomItem,
@@ -24,11 +24,18 @@ import type {
   DashboardMetricItem,
 } from "../types"
 
+import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
+
 // Keep this dashboard integration test at the map boundary: jsdom has no
 // browser Worker, while location behavior has its own focused test suite.
 vi.mock("@/patterns/F0Map", () => ({
   f0MapDensityColors: { low: "red", medium: "red", high: "red" },
   f0MapDensityColorSteps: { low: 10, medium: 50, high: 70 },
+  f0MapDensityPalette: {
+    low: { color: "red", colorStep: 10 },
+    medium: { color: "red", colorStep: 50 },
+    high: { color: "red", colorStep: 70 },
+  },
   f0MapStyles: {
     light: { version: 8, sources: {}, layers: [] },
     dark: { version: 8, sources: {}, layers: [] },

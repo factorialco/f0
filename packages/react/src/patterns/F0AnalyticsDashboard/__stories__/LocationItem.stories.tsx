@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useEffect, useRef, type ReactNode } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
+
+import type { F0MapStylePair } from "@/patterns/F0Map"
 
 import {
   AlertCircle,
@@ -13,9 +16,7 @@ import {
 } from "@/icons/app"
 import { ClockIn } from "@/icons/modules"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import type { F0MapStylePair } from "@/patterns/F0Map"
 
-import { F0AnalyticsDashboard } from "../index"
 import type {
   DashboardChartItem,
   DashboardItem,
@@ -25,8 +26,11 @@ import type {
   DashboardLocationItem,
 } from "../types"
 
+import { F0AnalyticsDashboard } from "../index"
+
 const handleAskAi = fn()
 const handleLayoutChange = fn()
+const handleLocationSelectWithoutDetails = fn()
 
 const personDetail = (
   id: string,
@@ -113,6 +117,13 @@ const clockActivityConfig: DashboardLocationConfig = {
   viewLocationDetailsLabel: (name) => `View activity for ${name}`,
   closeLocationDetailsLabel: "Close location activity",
   noDataLabel: "No clock activity for this period",
+  exportLabels: {
+    location: "Location",
+    density: "Density",
+    details: "Details",
+    item: "Employee",
+    description: "Workplace",
+  },
 }
 
 const clockActivityData: DashboardLocationData = {
@@ -247,6 +258,13 @@ const itInventoryConfig: DashboardLocationConfig = {
   viewLocationDetailsLabel: (name) => `View inventory for ${name}`,
   closeLocationDetailsLabel: "Close location inventory",
   noDataLabel: "No inventory for this period",
+  exportLabels: {
+    location: "Location",
+    density: "Devices",
+    details: "Inventory",
+    item: "Device",
+    description: "Owner",
+  },
 }
 
 const itInventoryData: DashboardLocationData = {
@@ -523,6 +541,77 @@ const noSelectionLocationItem = locationItem(
   }
 )
 
+const customDensityItem = locationItem(
+  clockActivityData,
+  {
+    ...clockActivityConfig,
+    densityPalette: {
+      low: { color: "malibu", colorStep: 10 },
+      medium: { color: "indigo", colorStep: 60 },
+      high: { color: "purple", colorStep: 70 },
+    },
+  },
+  { id: "custom-density-palette" }
+)
+
+const withoutSummaryItem = locationItem(
+  clockActivityData,
+  {
+    ...clockActivityConfig,
+    sections: { summary: false },
+  },
+  { id: "without-location-summary" }
+)
+
+const withoutDetailsItem = locationItem(
+  clockActivityData,
+  {
+    ...clockActivityConfig,
+    sections: { locationDetails: false },
+  },
+  {
+    id: "without-location-details",
+    onLocationSelect: handleLocationSelectWithoutDetails,
+  }
+)
+
+const withoutLegendItem = locationItem(
+  clockActivityData,
+  {
+    ...clockActivityConfig,
+    sections: { densityLegend: false },
+  },
+  { id: "without-density-legend" }
+)
+
+const clockActivityWithoutTimeline: DashboardLocationData = {
+  summary: clockActivityData.summary,
+  locations: clockActivityData.locations,
+}
+
+const withoutTimelineItem = locationItem(
+  clockActivityData,
+  {
+    ...clockActivityConfig,
+    sections: { timeline: false },
+  },
+  { id: "without-location-timeline" }
+)
+
+const mapOnlyItem = locationItem(
+  clockActivityWithoutTimeline,
+  {
+    ...clockActivityConfig,
+    sections: {
+      summary: false,
+      locationDetails: false,
+      densityLegend: false,
+      timeline: false,
+    },
+  },
+  { id: "map-only-location" }
+)
+
 const loadingLocationItem = locationItem(
   clockActivityData,
   clockActivityConfig,
@@ -563,12 +652,13 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  tags: ["no-sidebar"],
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     const page = within(canvasElement.closest("body")!)
 
     await step("Use the spacious details layout", async () => {
-      const panel = canvas.getByRole("complementary", {
+      const panel = await canvas.findByRole("complementary", {
         name: "Barcelona · HQ",
       })
       const detailValues = panel.querySelector<HTMLElement>(
@@ -623,12 +713,121 @@ export const ITInventory: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByText("Assigned")).toBeInTheDocument()
+    await expect(await canvas.findByText("Assigned")).toBeInTheDocument()
     await expect(canvas.getAllByText("116 devices")).not.toHaveLength(0)
     await expect(
       canvas.getByText('MacBook Pro 14" · IT-1842')
     ).toBeInTheDocument()
     await expect(canvas.getByText("24-hour asset movement")).toBeInTheDocument()
+  },
+}
+
+/** Hosts can replace the default red heat scale with F0 palette tokens. */
+export const CustomDensityPalette: Story = {
+  tags: ["no-sidebar"],
+  args: { items: [customDensityItem] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const legend = await waitFor(() => {
+      const element = canvasElement.querySelector<HTMLElement>(
+        "[data-location-density-legend]"
+      )
+      if (!element) throw new globalThis.Error("Expected the density legend")
+      return element
+    })
+    await expect(
+      legend.querySelector<HTMLElement>('[data-density-level="low"]')?.style
+        .backgroundColor
+    ).toBe("hsl(var(--neutral-0))")
+    await expect(
+      legend.querySelector('[data-density-level="medium"]')
+    ).toHaveStyle({ backgroundColor: "hsl(239 59% 54%)" })
+    await expect(
+      legend.querySelector('[data-density-level="high"]')
+    ).toHaveStyle({ backgroundColor: "hsl(258 43% 46%)" })
+    await expect(
+      await canvas.findByRole("button", {
+        name: /Barcelona · HQ · Density: 39/,
+      })
+    ).toBeInTheDocument()
+  },
+}
+
+export const WithoutSummary: Story = {
+  tags: ["no-sidebar"],
+  args: { items: [withoutSummaryItem] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByRole("navigation", { name: "Locations" })
+    await expect(
+      canvasElement.querySelector("[data-location-summary]")
+    ).not.toBeInTheDocument()
+  },
+}
+
+export const WithoutDetails: Story = {
+  tags: ["no-sidebar"],
+  args: { items: [withoutDetailsItem] },
+  play: async ({ canvasElement }) => {
+    handleLocationSelectWithoutDetails.mockClear()
+    const canvas = within(canvasElement)
+    const locations = await canvas.findByRole("navigation", {
+      name: "Locations",
+    })
+    await userEvent.click(
+      within(locations).getByRole("button", { name: /Paris · République/ })
+    )
+    await expect(handleLocationSelectWithoutDetails).toHaveBeenCalledWith(
+      "paris"
+    )
+    await expect(canvas.queryByRole("complementary")).not.toBeInTheDocument()
+    await expect(
+      canvas.queryByRole("button", { name: /View activity for/ })
+    ).not.toBeInTheDocument()
+  },
+}
+
+export const WithoutDensityLegend: Story = {
+  tags: ["no-sidebar"],
+  args: { items: [withoutLegendItem] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByRole("navigation", { name: "Locations" })
+    await expect(
+      canvasElement.querySelector("[data-location-density-legend]")
+    ).not.toBeInTheDocument()
+  },
+}
+
+export const WithoutTimeline: Story = {
+  tags: ["no-sidebar"],
+  args: { items: [withoutTimelineItem] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByRole("navigation", { name: "Locations" })
+    await expect(
+      canvasElement.querySelector("[data-location-timeline]")
+    ).not.toBeInTheDocument()
+  },
+}
+
+export const MapOnly: Story = {
+  tags: ["no-sidebar"],
+  args: { items: [mapOnlyItem] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByRole("navigation", { name: "Locations" })
+    for (const selector of [
+      "[data-location-summary]",
+      "[data-location-details]",
+      "[data-location-details-trigger]",
+      "[data-location-density-legend]",
+      "[data-location-timeline]",
+    ]) {
+      await expect(
+        canvasElement.querySelector(selector)
+      ).not.toBeInTheDocument()
+    }
   },
 }
 
@@ -661,6 +860,9 @@ export const SideBySide: Story = {
       '[data-card-id="location-activity"]'
     )
     if (!locationCard) throw new globalThis.Error("Expected the location item")
+    await within(locationCard).findByRole("complementary", {
+      name: "Barcelona · HQ",
+    })
     const summary = locationCard.querySelector<HTMLElement>(
       "[data-location-summary]"
     )
@@ -774,7 +976,7 @@ export const IntermediateWidth: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const trigger = canvas.getByRole("button", {
+    const trigger = await canvas.findByRole("button", {
       name: /View activity for Barcelona · Headquarters/,
     })
     const summary = canvasElement.querySelector<HTMLElement>(
@@ -789,7 +991,7 @@ export const IntermediateWidth: Story = {
       summary.getBoundingClientRect().bottom
     )
     await userEvent.click(trigger)
-    const panel = canvas.getByRole("complementary", {
+    const panel = await canvas.findByRole("complementary", {
       name: "Barcelona · Headquarters and Innovation Campus",
     })
     await expect(panel.getBoundingClientRect().bottom).toBeLessThanOrEqual(
@@ -880,7 +1082,7 @@ export const CrowdedDetails: Story = {
   tags: ["no-sidebar"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const list = canvas.getByRole("list", { name: "18 people" })
+    const list = await canvas.findByRole("list", { name: "18 people" })
     await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight)
     list.focus()
     await expect(list).toHaveFocus()
@@ -906,7 +1108,7 @@ export const Narrow: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const trigger = canvas.getByRole("button", {
+    const trigger = await canvas.findByRole("button", {
       name: "View activity for Barcelona · HQ",
     })
     await expect(trigger).toBeVisible()
@@ -1039,6 +1241,24 @@ export const Snapshot: Story = {
         defaultSelectedLocationId: null,
       }
     )
+    const customPaletteSnapshotItem = locationItem(
+      clockActivityData,
+      {
+        ...clockActivityConfig,
+        mapStyle: snapshotMapStyle,
+        densityPalette: customDensityItem.location.densityPalette,
+      },
+      { id: "snapshot-custom-density" }
+    )
+    const mapOnlySnapshotItem = locationItem(
+      clockActivityWithoutTimeline,
+      {
+        ...clockActivityConfig,
+        mapStyle: snapshotMapStyle,
+        sections: mapOnlyItem.location.sections,
+      },
+      { id: "snapshot-map-only" }
+    )
     return (
       <div className="mx-auto grid w-[1200px] max-w-full gap-6">
         <section aria-label="Clock activity snapshot">
@@ -1052,6 +1272,12 @@ export const Snapshot: Story = {
         </section>
         <section aria-label="No location selected snapshot">
           <DashboardFrame items={[noSelectionItem]} />
+        </section>
+        <section aria-label="Custom density palette snapshot">
+          <DashboardFrame items={[customPaletteSnapshotItem]} />
+        </section>
+        <section aria-label="Map only snapshot">
+          <DashboardFrame items={[mapOnlySnapshotItem]} />
         </section>
         <section aria-label="Shared row designer snapshot">
           <DashboardFrame

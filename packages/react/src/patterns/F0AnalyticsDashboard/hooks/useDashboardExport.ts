@@ -26,6 +26,15 @@ type SheetData = {
   keys?: string[]
 }
 
+const LOCATION_EXPORT_KEYS = {
+  location: "location:name",
+  density: "location:density",
+  details: "location:details",
+  item: "location:item",
+  description: "location:description",
+} as const
+const LOCATION_DETAIL_VALUE_PREFIX = "location:value:"
+
 interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
   items: DashboardItem<Filters>[]
   filters: FiltersState<Filters>
@@ -160,6 +169,7 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
 
       if (item.type === "location") {
         try {
+          const labels = item.location.exportLabels
           const data: DashboardLocationData = await item.fetchData(
             getItemFilters(item, filters)
           )
@@ -167,31 +177,53 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
             if (location.details.length === 0) {
               return [
                 {
-                  Location: location.name,
-                  Density: location.density,
-                  Details: location.detailsLabel,
+                  [LOCATION_EXPORT_KEYS.location]: location.name,
+                  [LOCATION_EXPORT_KEYS.density]: location.density,
+                  [LOCATION_EXPORT_KEYS.details]: location.detailsLabel,
                 },
               ]
             }
 
             return location.details.map((detail) => {
               const row: Record<string, unknown> = {
-                Location: location.name,
-                Density: location.density,
-                Details: location.detailsLabel,
-                Item: detail.title,
+                [LOCATION_EXPORT_KEYS.location]: location.name,
+                [LOCATION_EXPORT_KEYS.density]: location.density,
+                [LOCATION_EXPORT_KEYS.details]: location.detailsLabel,
+                [LOCATION_EXPORT_KEYS.item]: detail.title,
               }
-              if (detail.description) row.Description = detail.description
+              if (detail.description) {
+                row[LOCATION_EXPORT_KEYS.description] = detail.description
+              }
               for (const value of detail.values) {
-                row[value.label] = value.value
+                row[`${LOCATION_DETAIL_VALUE_PREFIX}${value.label}`] =
+                  value.value
               }
               return row
             })
           })
           if (rows.length === 0) return null
+          const keys = Array.from(
+            new Set(
+              rows.flatMap((row) =>
+                Object.keys(row).filter((key) => !key.startsWith("_"))
+              )
+            )
+          )
+          const headersByKey: Record<string, string> = {
+            [LOCATION_EXPORT_KEYS.location]: labels.location,
+            [LOCATION_EXPORT_KEYS.density]: labels.density,
+            [LOCATION_EXPORT_KEYS.details]: labels.details,
+            [LOCATION_EXPORT_KEYS.item]: labels.item,
+            [LOCATION_EXPORT_KEYS.description]: labels.description,
+          }
           return {
             name: item.title,
-            columns: extractColumns(rows),
+            columns: keys.map(
+              (key) =>
+                headersByKey[key] ??
+                key.slice(LOCATION_DETAIL_VALUE_PREFIX.length)
+            ),
+            keys,
             rows,
           }
         } catch (err) {

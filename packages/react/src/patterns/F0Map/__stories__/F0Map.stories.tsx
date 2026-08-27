@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { expect, userEvent, within } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0Map } from "../F0Map"
-import { F0MapMarker } from "../components/F0MapMarker"
 import type { F0MapPoint } from "../types"
+
+import { F0MapMarker } from "../components/F0MapMarker"
+import { F0Map } from "../F0Map"
 
 // Barcelona-area points: the four product-semantic marker variants.
 const BARCELONA: F0MapPoint[] = [
@@ -187,12 +189,22 @@ const ALL_VARIANTS: F0MapPoint[] = [
     level: "high",
     label: "High density",
   },
+  {
+    id: "density-custom",
+    coordinates: [-3.7, 40.42],
+    variant: "density",
+    value: 28,
+    level: "high",
+    style: { color: "purple", colorStep: 70 },
+    label: "Custom density palette",
+  },
 ]
 
 /**
  * Every product-semantic marker variant on one map: `default`, `workplace`,
- * `employee`, `company`, `stop` and `density`. Workplace and company render as
- * rounded squares (the entity shape); the remaining variants stay circular.
+ * `employee`, `company`, `stop` and default/custom `density`. Workplace and
+ * company render as rounded squares (the entity shape); the remaining
+ * variants stay circular.
  */
 export const MarkerVariants: Story = {
   args: { markers: ALL_VARIANTS },
@@ -421,6 +433,13 @@ export const Snapshot: Story = {
           label="Medium"
         />
         <F0MapMarker variant="density" value={42} level="high" label="High" />
+        <F0MapMarker
+          variant="density"
+          value={28}
+          level="high"
+          style={{ color: "purple", colorStep: 70 }}
+          label="Custom"
+        />
       </div>
       <div className="dark flex shrink-0 items-center gap-8 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4">
         <F0MapMarker variant="density" value={4} level="low" label="Low" />
@@ -431,6 +450,13 @@ export const Snapshot: Story = {
           label="Medium"
         />
         <F0MapMarker variant="density" value={42} level="high" label="High" />
+        <F0MapMarker
+          variant="density"
+          value={28}
+          level="high"
+          style={{ color: "purple", colorStep: 70 }}
+          label="Custom"
+        />
       </div>
       <div className="min-h-0 flex-1">
         <F0Map {...args} />

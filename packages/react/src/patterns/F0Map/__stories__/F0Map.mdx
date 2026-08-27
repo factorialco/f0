@@ -100,8 +100,12 @@ size, label placement, selection) stays uniform across the map.
 - **`density`** - an aggregate marker that requires a numeric `value` and a
   `level` of `low`, `medium`, or `high` for the Factorial heat scale. The
   levels use one sequential red scale: the Factorial critical tint, `red.50`,
-  and `red.70`. The lightest tint uses theme-aware count ink, the middle step
-  uses dark ink, and the high step uses white ink to preserve contrast.
+  and `red.70`. Composing analytical patterns may pass a `style` with an F0
+  `color` and `colorStep`; raw CSS colors are not accepted. Count ink is
+  resolved from the actual opaque palette tone. If the requested step cannot
+  reach AA contrast with sanctioned F0 ink, it resolves to the nearest
+  accessible step of the same hue. Use that resolved palette for markers and
+  any accompanying legend.
   Values are rounded, negative or non-finite values become `0`, and visible
   counts above 99 are capped at `99+`. Keep `label` concise for the map and use
   `ariaLabel` when the operable list needs richer location-and-count context.

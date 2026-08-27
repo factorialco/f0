@@ -3,14 +3,17 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
+
 import { Skeleton } from "@/ui/skeleton"
 
 import type {
   DashboardItemFiltersConfig,
+  DashboardLocationConfig,
   DashboardLocationItem,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
+
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { LocationVisualization } from "./LocationVisualization"
@@ -28,12 +31,31 @@ interface LocationItemProps<Filters extends FiltersDefinition> {
   onFullscreenChange?: (fullscreen: boolean) => void
 }
 
-function LocationItemSkeleton() {
+function LocationItemSkeleton({ config }: { config: DashboardLocationConfig }) {
+  const summaryVisible = config.sections?.summary !== false
+  const detailsVisible = config.sections?.locationDetails !== false
+  const timelineVisible = config.sections?.timeline !== false
+
   return (
     <div className="relative h-full min-h-[560px] overflow-hidden bg-f1-background-secondary p-4">
-      <Skeleton className="h-[60px] w-[400px] max-w-[calc(50%_-_4px)] rounded-lg" />
-      <Skeleton className="absolute right-4 top-4 h-[60px] w-[320px] max-w-[calc(50%_-_4px)] rounded-xl" />
-      <Skeleton className="absolute bottom-4 left-4 right-4 h-[126px] rounded-xl" />
+      {summaryVisible ? (
+        <Skeleton
+          data-location-summary-skeleton=""
+          className="h-[60px] w-[400px] max-w-[calc(50%_-_4px)] rounded-lg"
+        />
+      ) : null}
+      {detailsVisible ? (
+        <Skeleton
+          data-location-details-skeleton=""
+          className="absolute right-4 top-4 h-[60px] w-[320px] max-w-[calc(50%_-_4px)] rounded-xl"
+        />
+      ) : null}
+      {timelineVisible ? (
+        <Skeleton
+          data-location-timeline-skeleton=""
+          className="absolute bottom-4 left-4 right-4 h-[126px] rounded-xl"
+        />
+      ) : null}
     </div>
   )
 }
@@ -67,7 +89,7 @@ export function LocationItem<Filters extends FiltersDefinition>({
       isLoading={isLoading}
       error={error}
       onRetry={retry}
-      skeleton={<LocationItemSkeleton />}
+      skeleton={<LocationItemSkeleton config={item.location} />}
       actions={actions}
       itemFilters={itemFilters}
       editMode={editMode}

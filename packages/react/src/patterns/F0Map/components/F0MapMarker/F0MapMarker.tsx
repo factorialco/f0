@@ -1,11 +1,14 @@
 import { forwardRef } from "react"
 
-import { Office } from "@/icons/app"
 import type { WithDataTestIdProps } from "@/lib/data-testid"
+
+import { Office } from "@/icons/app"
 
 import {
   BaseMapMarker,
+  countForegroundContrast,
   markerLabelPlacements,
+  markerFillStyle,
   markerSizes,
   type BaseMapMarkerColor,
   type BaseMapMarkerColorStep,
@@ -16,9 +19,10 @@ import {
 
 /**
  * Product-semantic marker variants. Unlike the internal `BaseMapMarker` engine
- * (which exposes every knob), each of these fixes its own color and rendering
- * so a given concept looks and behaves the same everywhere on the map. Callers
- * pick a variant and pass only its data.
+ * (which exposes every knob), each of these owns its rendering so a given
+ * concept looks and behaves consistently. Callers pick a variant and pass its
+ * data; composing analytical patterns may override the density heat palette
+ * with F0 color tokens.
  */
 export const f0MapMarkerVariants = [
   "default",
@@ -32,16 +36,66 @@ export type F0MapMarkerVariant = (typeof f0MapMarkerVariants)[number]
 
 export const f0MapDensityLevels = ["low", "medium", "high"] as const
 export type F0MapDensityLevel = (typeof f0MapDensityLevels)[number]
+/** F0 categorical hues available to density markers. */
+export type F0MapDensityColor = Exclude<BaseMapMarkerColor, "neutral" | "grey">
+/** F0 token steps available to density markers. */
+export type F0MapDensityColorStep = BaseMapMarkerColorStep
+/** One token-constrained density-marker appearance. */
+export interface F0MapDensityStyle {
+  color: F0MapDensityColor
+  colorStep: F0MapDensityColorStep
+}
+/** Low, medium, and high appearances shared by markers and their legend. */
+export type F0MapDensityPalette = Record<F0MapDensityLevel, F0MapDensityStyle>
+/** Default sequential Factorial red density palette. */
+export const f0MapDensityPalette = {
+  low: { color: "red", colorStep: 10 },
+  medium: { color: "red", colorStep: 50 },
+  high: { color: "red", colorStep: 70 },
+} as const satisfies F0MapDensityPalette
 export const f0MapDensityColors = {
-  low: "red",
-  medium: "red",
-  high: "red",
+  low: f0MapDensityPalette.low.color,
+  medium: f0MapDensityPalette.medium.color,
+  high: f0MapDensityPalette.high.color,
 } as const satisfies Record<F0MapDensityLevel, BaseMapMarkerColor>
 export const f0MapDensityColorSteps = {
-  low: 10,
-  medium: 50,
-  high: 70,
+  low: f0MapDensityPalette.low.colorStep,
+  medium: f0MapDensityPalette.medium.colorStep,
+  high: f0MapDensityPalette.high.colorStep,
 } as const satisfies Record<F0MapDensityLevel, BaseMapMarkerColorStep>
+
+/** CSS surface shared by density markers and their legends. */
+export const f0MapDensitySurfaceStyle = (style: F0MapDensityStyle) =>
+  markerFillStyle(style.color, style.colorStep)
+
+const OPAQUE_DENSITY_STEPS = [50, 60, 70] as const
+
+/**
+ * Keeps a requested F0 density style token-only and readable. Opaque steps
+ * whose fill cannot reach AA with either sanctioned F0 ink resolve to the
+ * nearest accessible step of the same hue (preferring the darker step on a
+ * tie). The theme-backed low-density tint is preserved as requested.
+ */
+export const resolveF0MapDensityStyle = (
+  style: F0MapDensityStyle
+): F0MapDensityStyle => {
+  if (
+    style.colorStep === 10 ||
+    countForegroundContrast(style.color, style.colorStep) >= 4.5
+  ) {
+    return style
+  }
+
+  const colorStep = OPAQUE_DENSITY_STEPS.filter(
+    (step) => countForegroundContrast(style.color, step) >= 4.5
+  ).sort(
+    (first, second) =>
+      Math.abs(first - style.colorStep) - Math.abs(second - style.colorStep) ||
+      second - first
+  )[0]
+
+  return { ...style, colorStep: colorStep ?? 70 }
+}
 
 // Public aliases for the engine types the props reference, so consumers can
 // name them from the F0Map barrel (bundled d.ts generation breaks on types
@@ -92,7 +146,8 @@ interface F0MapMarkerBaseProps extends WithDataTestIdProps {
  *    (grey when a photo replaces the colored chip).
  *  - `stop`: a route stop - a single letter (A, B, C...) on the same fixed
  *    hue as the route/arc lines it punctuates.
- *  - `density`: an aggregated location count on a stepped Factorial heat scale.
+ *  - `density`: an aggregated location count on a stepped Factorial heat scale;
+ *    a composing pattern may supply another F0 palette style.
  */
 export type F0MapMarkerVariantProps =
   | { variant: "default" }
@@ -100,7 +155,13 @@ export type F0MapMarkerVariantProps =
   | { variant: "employee"; firstName: string; lastName: string; src?: string }
   | { variant: "company"; name: string; src?: string }
   | { variant: "stop"; letter: string }
-  | { variant: "density"; value: number; level: F0MapDensityLevel }
+  | {
+      variant: "density"
+      value: number
+      level: F0MapDensityLevel
+      /** Optional F0 palette style supplied by a composing pattern. */
+      style?: F0MapDensityStyle
+    }
 
 export type F0MapMarkerProps = F0MapMarkerBaseProps & F0MapMarkerVariantProps
 
@@ -120,13 +181,16 @@ const toBase = (
 } => {
   switch (props.variant) {
     case "density": {
+      const style = resolveF0MapDensityStyle(
+        props.style ?? f0MapDensityPalette[props.level]
+      )
       return {
         variant: {
           variant: "count",
           count: formatF0MapDensityValue(props.value),
         },
-        color: f0MapDensityColors[props.level],
-        colorStep: f0MapDensityColorSteps[props.level],
+        color: style.color,
+        colorStep: style.colorStep,
       }
     }
     case "employee":

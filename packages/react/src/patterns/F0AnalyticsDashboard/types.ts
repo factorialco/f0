@@ -1,3 +1,8 @@
+import type { ReactNode } from "react"
+
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
+import type { F0IconProps, IconType } from "@/components/F0Icon"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
@@ -9,18 +14,14 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
-import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
-import type { AvatarVariant } from "@/components/avatars/F0Avatar"
-import type { F0IconProps, IconType } from "@/components/F0Icon"
 import type { InfoHintContent } from "@/lib/InfoHint"
-import type { F0MapStylePair } from "@/patterns/F0Map"
+import type { F0MapDensityPalette, F0MapStylePair } from "@/patterns/F0Map"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-import type { ReactNode } from "react"
 
 // Re-exported under its own name: the same shape types a table column header
 // and a widget header, and a host typing a widget's `info` shouldn't have to
@@ -493,7 +494,34 @@ export interface DashboardLocationData {
   /** Values keyed by `DashboardLocationSummaryMetric.id`. */
   summary: Readonly<Record<string, string | number>>
   locations: readonly DashboardLocationPoint[]
-  timeline: DashboardLocationTimelineData
+  /** Omit when this dataset has no meaningful timeline. */
+  timeline?: DashboardLocationTimelineData
+}
+
+/** Optional surfaces within the map-led location visualization. */
+export interface DashboardLocationSections {
+  /** Show the three-metric summary strip. @default true */
+  summary?: boolean
+  /** Show the selected-location details panel and disclosure. @default true */
+  locationDetails?: boolean
+  /** Show the density scale legend. @default true */
+  densityLegend?: boolean
+  /** Show the timeline when timeline data also exists. @default true */
+  timeline?: boolean
+}
+
+/** Host-localized spreadsheet column labels for a location item export. */
+export interface DashboardLocationExportLabels {
+  /** Location-name column. */
+  location: string
+  /** Density-value column. */
+  density: string
+  /** Location summary column. */
+  details: string
+  /** Detail-row title column. */
+  item: string
+  /** Detail-row description column. */
+  description: string
 }
 
 /** Labels and visual policy shared by every response for one location item. */
@@ -515,10 +543,18 @@ export interface DashboardLocationConfig {
   viewLocationDetailsLabel: (locationName: string) => string
   closeLocationDetailsLabel: string
   noDataLabel: string
+  exportLabels: DashboardLocationExportLabels
+  /** Surface visibility. @default all sections visible */
+  sections?: DashboardLocationSections
   densityScale?: {
     mediumAt: number
     highAt: number
   }
+  /**
+   * Optional F0 palette overrides by density level. Missing levels keep the
+   * default red heat scale. @default f0MapDensityPalette
+   */
+  densityPalette?: Partial<F0MapDensityPalette>
   /** Formats density values in marker accessibility labels and fallback rows. */
   formatDensity?: (value: number) => string
   /** Formats numeric summary values. String values are displayed unchanged. */

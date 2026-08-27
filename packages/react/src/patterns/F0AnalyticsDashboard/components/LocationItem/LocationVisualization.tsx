@@ -1,11 +1,12 @@
-import { useControllableState } from "@radix-ui/react-use-controllable-state"
-import { baseColors } from "@factorialco/f0-core"
 import type { ExpressionSpecification } from "maplibre-gl"
+
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import {
   type MouseEvent,
   type Ref,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -26,10 +27,12 @@ import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn, focusRing } from "@/lib/utils"
 import {
   F0Map,
-  f0MapDensityColorSteps,
-  f0MapDensityColors,
+  f0MapDensityPalette,
+  f0MapDensitySurfaceStyle,
   f0MapStyles,
+  resolveF0MapDensityStyle,
   type F0MapDensityLevel,
+  type F0MapDensityPalette,
   type F0MapPoint,
   type F0MapStylePair,
 } from "@/patterns/F0Map"
@@ -40,24 +43,13 @@ import type {
   DashboardLocationData,
   DashboardLocationPoint,
   DashboardLocationSummaryTone,
+  DashboardLocationTimelineData,
 } from "../../types"
 
 const DEFAULT_DENSITY_SCALE = { mediumAt: 6, highAt: 16 }
 const DEFAULT_FORMAT_COUNT = (value: number) => value.toLocaleString()
 const normalizeCount = (value: number) =>
   Number.isFinite(value) ? Math.max(0, value) : 0
-const densityColor = (level: F0MapDensityLevel) => {
-  const color = f0MapDensityColors[level]
-  const step = f0MapDensityColorSteps[level]
-  return step === 10
-    ? `hsl(${baseColors[color][50]} / 0.1)`
-    : `hsl(${baseColors[color][step]})`
-}
-const DENSITY_COLORS: Record<F0MapDensityLevel, string> = {
-  low: densityColor("low"),
-  medium: densityColor("medium"),
-  high: densityColor("high"),
-}
 const TIMELINE_GRID_LINES = [0, 25, 50, 75] as const
 const TIMELINE_GRID_BACKGROUND =
   "repeating-linear-gradient(to right, hsl(var(--neutral-30)) 0, hsl(var(--neutral-30)) 1px, transparent 1px, transparent 11px)"
@@ -172,18 +164,31 @@ const Summary = ({
 const DensityLegend = ({
   config,
   scale,
+  palette,
   embedded = false,
+  timelineVisible = true,
+  detailsSpaceReserved = true,
 }: {
   config: DashboardLocationConfig
   scale: NonNullable<DashboardLocationConfig["densityScale"]>
+  palette: F0MapDensityPalette
   embedded?: boolean
+  timelineVisible?: boolean
+  detailsSpaceReserved?: boolean
 }) => (
   <div
+    data-location-density-legend=""
     className={cn(
       "pointer-events-none items-center gap-3 rounded-lg border border-solid border-f1-border bg-f1-background px-3 py-2 shadow-sm",
       embedded
         ? "relative flex flex-wrap"
-        : "relative z-20 flex max-w-full shrink-0 self-start flex-wrap gap-x-2.5 gap-y-1 px-2.5 py-1.5 @[640px]:absolute @[640px]:bottom-[154px] @[640px]:left-4 @[640px]:max-w-[calc(100%_-_408px)]"
+        : cn(
+            "relative z-20 flex max-w-full shrink-0 self-start flex-wrap gap-x-2.5 gap-y-1 px-2.5 py-1.5 @[640px]:absolute @[640px]:left-4",
+            timelineVisible ? "@[640px]:bottom-[154px]" : "@[640px]:bottom-4",
+            detailsSpaceReserved
+              ? "@[640px]:max-w-[calc(100%_-_408px)]"
+              : "@[640px]:max-w-[calc(100%_-_32px)]"
+          )
     )}
   >
     <span className="text-xs font-medium text-f1-foreground">
@@ -191,26 +196,30 @@ const DensityLegend = ({
     </span>
     {[
       {
+        level: "low",
         label: config.densityLowLabel(scale.mediumAt),
-        color: DENSITY_COLORS.low,
+        style: palette.low,
       },
       {
+        level: "medium",
         label: config.densityMediumLabel(scale.mediumAt, scale.highAt),
-        color: DENSITY_COLORS.medium,
+        style: palette.medium,
       },
       {
+        level: "high",
         label: config.densityHighLabel(scale.highAt),
-        color: DENSITY_COLORS.high,
+        style: palette.high,
       },
     ].map((item) => (
       <span
-        key={item.label}
+        key={item.level}
         className="flex items-center gap-1 text-xs text-f1-foreground-secondary"
       >
         <span
           aria-hidden="true"
+          data-density-level={item.level}
           className="h-2 w-2 rounded-full"
-          style={{ backgroundColor: item.color }}
+          style={f0MapDensitySurfaceStyle(item.style)}
         />
         {item.label}
       </span>
@@ -224,6 +233,8 @@ const LocationDetailsPanel = ({
   id,
   embedded = false,
   panelState = "responsive",
+  summaryVisible = true,
+  timelineVisible = true,
   onDismiss,
   dismissRef,
 }: {
@@ -232,6 +243,8 @@ const LocationDetailsPanel = ({
   id?: string
   embedded?: boolean
   panelState?: DetailsPanelState
+  summaryVisible?: boolean
+  timelineVisible?: boolean
   onDismiss?: (event: MouseEvent<HTMLElement>) => void
   dismissRef?: Ref<HTMLButtonElement | HTMLAnchorElement>
 }) => (
@@ -244,7 +257,18 @@ const LocationDetailsPanel = ({
       embedded
         ? "relative flex max-h-[368px] self-start"
         : cn(
-            "relative z-20 max-h-full w-full flex-initial @[480px]:w-[320px] @[640px]:absolute @[640px]:right-4 @[640px]:top-[96px] @[640px]:max-h-[calc(100%_-_250px)] @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[720px]:max-h-[calc(100%_-_170px)] @[896px]:w-[400px]",
+            "relative z-20 max-h-full w-full flex-initial @[480px]:w-[320px] @[640px]:absolute @[640px]:right-4 @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[896px]:w-[400px]",
+            summaryVisible ? "@[640px]:top-[96px]" : "@[640px]:top-4",
+            summaryVisible && timelineVisible
+              ? "@[640px]:max-h-[calc(100%_-_250px)]"
+              : summaryVisible
+                ? "@[640px]:max-h-[calc(100%_-_112px)]"
+                : timelineVisible
+                  ? "@[640px]:max-h-[calc(100%_-_170px)]"
+                  : "@[640px]:max-h-[calc(100%_-_32px)]",
+            timelineVisible
+              ? "@[720px]:max-h-[calc(100%_-_170px)]"
+              : "@[720px]:max-h-[calc(100%_-_32px)]",
             panelState === "open"
               ? "flex"
               : panelState === "closed"
@@ -298,11 +322,6 @@ const LocationDetailsPanel = ({
           </span>
         )}
       </div>
-      <span className="sr-only" aria-live="polite">
-        {location
-          ? `${location.name}, ${location.detailsLabel}`
-          : config.selectLocationLabel}
-      </span>
     </div>
 
     <ul
@@ -376,14 +395,16 @@ const LocationDetailsTrigger = ({
   controlsId,
   onOpen,
   triggerRef,
-  responsiveDefault,
+  summaryVisible = true,
+  responsiveUnmeasured = false,
 }: {
   location: DashboardLocationPoint
   config: DashboardLocationConfig
   controlsId: string
   onOpen: (event: MouseEvent<HTMLButtonElement>) => void
   triggerRef: Ref<HTMLButtonElement>
-  responsiveDefault: boolean
+  summaryVisible?: boolean
+  responsiveUnmeasured?: boolean
 }) => (
   <button
     ref={triggerRef}
@@ -395,8 +416,9 @@ const LocationDetailsTrigger = ({
     aria-expanded={false}
     onClick={onOpen}
     className={cn(
-      "pointer-events-auto absolute right-4 top-[84px] z-20 flex h-[64px] max-w-[calc(100%_-_32px)] items-center gap-2.5 rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[720px]:max-w-none @[896px]:w-[400px]",
-      responsiveDefault && "@[720px]:hidden",
+      "pointer-events-auto absolute right-4 z-20 flex h-[64px] max-w-[calc(100%_-_32px)] items-center gap-2.5 rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[720px]:max-w-none @[896px]:w-[400px]",
+      summaryVisible ? "top-[84px]" : "top-4",
+      responsiveUnmeasured && "@[720px]:hidden",
       focusRing()
     )}
   >
@@ -430,7 +452,7 @@ const LocationTimeline = ({
   config,
   embedded = false,
 }: {
-  timeline: DashboardLocationData["timeline"]
+  timeline: DashboardLocationTimelineData
   config: DashboardLocationConfig
   embedded?: boolean
 }) => {
@@ -443,11 +465,22 @@ const LocationTimeline = ({
   const fineStep = Math.max(1, Math.ceil(lastIndex / 12))
   const mediumStep = Math.max(fineStep, Math.ceil(lastIndex / 6))
   const coarseStep = Math.max(mediumStep, Math.ceil(lastIndex / 4))
+  const legendRef = useRef<HTMLUListElement>(null)
+  const { width: legendWidth } = useContainerSize(legendRef)
+  const [legendScrollable, setLegendScrollable] = useState(false)
+  const legendContentKey = series.map((item) => item.name).join("\u0000")
   const axisIndexes = categories
     .map((_, index) => index)
     .filter(
       (index) => index === 0 || index === lastIndex || index % fineStep === 0
     )
+
+  useLayoutEffect(() => {
+    const legend = legendRef.current
+    setLegendScrollable(
+      legend !== null && legend.scrollWidth > legend.clientWidth
+    )
+  }, [legendContentKey, legendWidth])
 
   return (
     <figure
@@ -459,22 +492,39 @@ const LocationTimeline = ({
           : "absolute bottom-4 left-4 right-4 z-20 h-[126px]"
       )}
     >
-      <figcaption className="flex items-center justify-between gap-3">
-        <F0Text
-          content={config.timelineTitle}
-          variant="label"
-          markdown={false}
-        />
+      <figcaption className="flex items-center justify-between gap-x-3">
+        <span
+          className="min-w-0 max-w-[50%] shrink"
+          title={config.timelineTitle}
+        >
+          <F0Text
+            content={config.timelineTitle}
+            variant="label"
+            ellipsis
+            markdown={false}
+          />
+        </span>
         <ul
+          ref={legendRef}
           aria-label={series.map((item) => item.name).join(", ")}
-          className="flex shrink-0 list-none items-center gap-3"
+          tabIndex={legendScrollable ? 0 : undefined}
+          className={cn(
+            "flex min-w-0 flex-1 flex-nowrap items-center justify-end gap-x-3 overflow-x-auto",
+            legendScrollable &&
+              focusRing(
+                "rounded-sm focus-visible:ring-inset focus-visible:ring-offset-0"
+              )
+          )}
         >
           {series.map((item, index) => {
             const color = item.color
               ? resolveChartColorToken(item.color)
               : paletteColor(index)
             return (
-              <li key={item.name} className="flex items-center gap-1.5">
+              <li
+                key={item.name}
+                className="flex shrink-0 items-center gap-1.5"
+              >
                 <span
                   aria-hidden="true"
                   className={cn(
@@ -587,6 +637,8 @@ const MapFallback = ({
   config,
   formatCount,
   densityScale,
+  densityPalette,
+  showDensityLegend,
 }: {
   locations: readonly DashboardLocationPoint[]
   selectedLocationId: string | null
@@ -594,11 +646,13 @@ const MapFallback = ({
   config: DashboardLocationConfig
   formatCount: (value: number) => string
   densityScale: NonNullable<DashboardLocationConfig["densityScale"]>
+  densityPalette: F0MapDensityPalette
+  showDensityLegend: boolean
 }) => (
   <section
     role="region"
     aria-label={config.mapAriaLabel}
-    className="flex h-[368px] min-h-0 flex-col overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background shadow-sm"
+    className="shadow-sm flex h-[368px] min-h-0 flex-col overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background"
   >
     <div className="border-0 border-b border-solid border-f1-border-secondary px-4 py-3">
       <F0Heading
@@ -643,9 +697,14 @@ const MapFallback = ({
         {config.noDataLabel}
       </p>
     )}
-    {locations.length > 0 && (
+    {locations.length > 0 && showDensityLegend && (
       <div className="border-0 border-t border-solid border-f1-border-secondary p-3">
-        <DensityLegend config={config} scale={densityScale} embedded />
+        <DensityLegend
+          config={config}
+          scale={densityScale}
+          palette={densityPalette}
+          embedded
+        />
       </div>
     )}
   </section>
@@ -672,6 +731,11 @@ export function LocationVisualization({
     formatDensity = DEFAULT_FORMAT_COUNT,
     formatSummaryValue = DEFAULT_FORMAT_COUNT,
   } = config
+  const summaryVisible = config.sections?.summary !== false
+  const requestedDetailsVisible = config.sections?.locationDetails !== false
+  const densityLegendVisible = config.sections?.densityLegend !== false
+  const requestedTimeline =
+    config.sections?.timeline !== false ? timeline : undefined
   const hasExplicitDefault = defaultSelectedLocationId !== undefined
   const [selection, setSelection] = useControllableState<string | null>({
     prop: selectedLocationId,
@@ -684,19 +748,102 @@ export function LocationVisualization({
   const [mapFallbackVisible, setMapFallbackVisible] = useState(false)
   const [detailsPanelState, setDetailsPanelState] =
     useState<DetailsPanelState>("responsive")
+  const [responsiveDetailsOpen, setResponsiveDetailsOpen] = useState<
+    boolean | null
+  >(null)
+  const [detailsVisible, setDetailsVisible] = useState(requestedDetailsVisible)
+  const [renderedTimeline, setRenderedTimeline] = useState(requestedTimeline)
   const widgetRef = useRef<HTMLElement>(null)
   const detailsTriggerRef = useRef<HTMLButtonElement>(null)
   const detailsDismissRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null)
   const detailsPanelId = useId()
   const { width: widgetWidth } = useContainerSize(widgetRef)
 
-  useEffect(() => {
-    if (detailsPanelState !== "responsive" || widgetWidth <= 0) return
-    setDetailsPanelState(widgetWidth >= 720 ? "open" : "closed")
-  }, [detailsPanelState, widgetWidth])
+  useEffect(
+    function updateResponsiveDetails() {
+      if (detailsPanelState !== "responsive" || widgetWidth <= 0) return
+      const nextOpen = widgetWidth >= 720
+      if (nextOpen === responsiveDetailsOpen) return
+
+      const activeElement = document.activeElement
+      const panel = widgetRef.current?.querySelector("[data-location-details]")
+      const trigger = widgetRef.current?.querySelector(
+        "[data-location-details-trigger]"
+      )
+      const wouldHideFocusedSurface = nextOpen
+        ? trigger?.contains(activeElement)
+        : panel?.contains(activeElement)
+      if (!wouldHideFocusedSurface) {
+        setResponsiveDetailsOpen(nextOpen)
+        return
+      }
+
+      const focusedSurface = nextOpen ? trigger : panel
+      let animationFrame = 0
+      const retryAfterFocusLeaves = () => {
+        cancelAnimationFrame(animationFrame)
+        animationFrame = requestAnimationFrame(() => {
+          if (!focusedSurface?.contains(document.activeElement)) {
+            setResponsiveDetailsOpen(nextOpen)
+          }
+        })
+      }
+      focusedSurface?.addEventListener("focusout", retryAfterFocusLeaves)
+      return () => {
+        cancelAnimationFrame(animationFrame)
+        focusedSurface?.removeEventListener("focusout", retryAfterFocusLeaves)
+      }
+    },
+    [detailsPanelState, responsiveDetailsOpen, widgetWidth]
+  )
+
+  useEffect(
+    function updateDetailsVisibility() {
+      if (requestedDetailsVisible === detailsVisible) return
+      if (!requestedDetailsVisible) {
+        const activeElement = document.activeElement
+        const detailsSurface = widgetRef.current?.querySelector(
+          "[data-location-details], [data-location-details-trigger]"
+        )
+        if (detailsSurface?.contains(activeElement)) {
+          widgetRef.current
+            ?.querySelector<HTMLElement>(
+              '[aria-current="true"], [aria-pressed="true"]'
+            )
+            ?.focus()
+        }
+      }
+      setDetailsVisible(requestedDetailsVisible)
+    },
+    [detailsVisible, requestedDetailsVisible]
+  )
+
+  useEffect(
+    function updateTimelineVisibility() {
+      if (requestedTimeline === renderedTimeline) return
+      if (!requestedTimeline) {
+        const activeElement = document.activeElement
+        const timelineSurface = widgetRef.current?.querySelector(
+          "[data-location-timeline]"
+        )
+        if (timelineSurface?.contains(activeElement)) {
+          const focusTarget =
+            widgetRef.current?.querySelector<HTMLElement>(
+              '[aria-current="true"], [aria-pressed="true"]'
+            ) ?? widgetRef.current
+          focusTarget?.focus()
+        }
+      }
+      setRenderedTimeline(requestedTimeline)
+    },
+    [renderedTimeline, requestedTimeline]
+  )
 
   useEffect(() => {
-    if (locations.length === 0) setDetailsPanelState("responsive")
+    if (locations.length === 0) {
+      setDetailsPanelState("responsive")
+      setResponsiveDetailsOpen(false)
+    }
   }, [locations.length])
 
   useEffect(() => {
@@ -737,6 +884,21 @@ export function LocationVisualization({
     return DEFAULT_DENSITY_SCALE
   }, [densityScale])
 
+  const resolvedDensityPalette = useMemo<F0MapDensityPalette>(
+    () => ({
+      low: resolveF0MapDensityStyle(
+        config.densityPalette?.low ?? f0MapDensityPalette.low
+      ),
+      medium: resolveF0MapDensityStyle(
+        config.densityPalette?.medium ?? f0MapDensityPalette.medium
+      ),
+      high: resolveF0MapDensityStyle(
+        config.densityPalette?.high ?? f0MapDensityPalette.high
+      ),
+    }),
+    [config.densityPalette]
+  )
+
   const selectedLocation = locations.find(
     (location) => location.id === selection
   )
@@ -752,9 +914,17 @@ export function LocationVisualization({
           variant: "density",
           value: density,
           level: densityLevel(density, resolvedDensityScale),
+          style:
+            resolvedDensityPalette[densityLevel(density, resolvedDensityScale)],
         }
       }),
-    [config.densityLabel, formatDensity, locations, resolvedDensityScale]
+    [
+      config.densityLabel,
+      formatDensity,
+      locations,
+      resolvedDensityPalette,
+      resolvedDensityScale,
+    ]
   )
   const resolvedMapStyle = useMemo(
     () => locationMapStyle(config.mapStyle ?? f0MapStyles),
@@ -762,7 +932,9 @@ export function LocationVisualization({
   )
   const handleLocationSelect = (locationId: string | null) => {
     setSelection(locationId)
-    setDetailsPanelState(locationId === null ? "responsive" : "open")
+    if (detailsVisible) {
+      setDetailsPanelState(locationId === null ? "responsive" : "open")
+    }
   }
   const openDetails = (event: MouseEvent<HTMLButtonElement>) => {
     setDetailsPanelState("open")
@@ -777,6 +949,12 @@ export function LocationVisualization({
     }
   }
   const summaryDensity = mapFallbackVisible ? "regular" : "responsive"
+  const detailsPanelOpen =
+    detailsPanelState === "open" ||
+    (detailsPanelState === "responsive" && responsiveDetailsOpen === true)
+  const responsiveDetailsUnmeasured =
+    detailsPanelState === "responsive" && responsiveDetailsOpen === null
+  const timelineVisible = Boolean(renderedTimeline)
   const formatSummary = (value: string | number | undefined) =>
     typeof value === "number"
       ? formatSummaryValue(value)
@@ -787,32 +965,40 @@ export function LocationVisualization({
   return (
     <section
       ref={widgetRef}
+      tabIndex={-1}
       data-location-visualization=""
       className={cn(
         "@container relative h-full min-h-[560px] w-full bg-f1-background-secondary",
         mapFallbackVisible ? "overflow-auto p-4" : "overflow-hidden"
       )}
     >
-      <dl
-        data-location-summary=""
-        className={cn(
-          "grid grid-cols-3 divide-x divide-f1-border-secondary overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background shadow-sm @[896px]:grid-cols-[120px_120px_160px]",
-          mapFallbackVisible
-            ? "relative mt-3 w-full @4xl:w-[400px]"
-            : "absolute left-4 top-4 z-20 h-[64px] w-[calc(100%_-_32px)] @[720px]:w-[calc(50%_-_20px)] @[896px]:w-[400px]"
-        )}
-      >
-        {config.summaryMetrics.map((metric) => (
-          <Summary
-            key={metric.id}
-            label={metric.label}
-            value={formatSummary(summary[metric.id])}
-            icon={metric.icon}
-            tone={metric.tone ?? "default"}
-            density={summaryDensity}
-          />
-        ))}
-      </dl>
+      <span className="sr-only" aria-live="polite">
+        {selectedLocation
+          ? `${selectedLocation.name}, ${selectedLocation.detailsLabel}`
+          : config.selectLocationLabel}
+      </span>
+      {summaryVisible && (
+        <dl
+          data-location-summary=""
+          className={cn(
+            "grid grid-cols-3 divide-x divide-f1-border-secondary overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background shadow-sm @[896px]:grid-cols-[120px_120px_160px]",
+            mapFallbackVisible
+              ? "relative mt-3 w-full @4xl:w-[400px]"
+              : "absolute left-4 top-4 z-20 h-[64px] w-[calc(100%_-_32px)] @[720px]:w-[calc(50%_-_20px)] @[896px]:w-[400px]"
+          )}
+        >
+          {config.summaryMetrics.map((metric) => (
+            <Summary
+              key={metric.id}
+              label={metric.label}
+              value={formatSummary(summary[metric.id])}
+              icon={metric.icon}
+              tone={metric.tone ?? "default"}
+              density={summaryDensity}
+            />
+          ))}
+        </dl>
+      )}
 
       {!mapFallbackVisible && (
         <div className="absolute inset-0">
@@ -835,8 +1021,11 @@ export function LocationVisualization({
         <div
           data-location-fallback-layout=""
           className={cn(
-            "mt-4 grid min-h-0 gap-4",
-            selectedLocation && "@4xl:grid-cols-[minmax(0,1fr)_400px]"
+            "grid min-h-0 gap-4",
+            summaryVisible ? "mt-4" : "mt-0",
+            detailsVisible &&
+              selectedLocation &&
+              "@4xl:grid-cols-[minmax(0,1fr)_400px]"
           )}
         >
           <MapFallback
@@ -846,8 +1035,10 @@ export function LocationVisualization({
             config={config}
             formatCount={formatDensity}
             densityScale={resolvedDensityScale}
+            densityPalette={resolvedDensityPalette}
+            showDensityLegend={densityLegendVisible}
           />
-          {selectedLocation && (
+          {detailsVisible && selectedLocation && (
             <LocationDetailsPanel
               location={selectedLocation}
               config={config}
@@ -855,9 +1046,19 @@ export function LocationVisualization({
               embedded
             />
           )}
-          <div className={cn(selectedLocation && "@4xl:col-span-2")}>
-            <LocationTimeline timeline={timeline} config={config} embedded />
-          </div>
+          {renderedTimeline && (
+            <div
+              className={cn(
+                detailsVisible && selectedLocation && "@4xl:col-span-2"
+              )}
+            >
+              <LocationTimeline
+                timeline={renderedTimeline}
+                config={config}
+                embedded
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -866,39 +1067,66 @@ export function LocationVisualization({
           role="status"
           className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
         >
-          <p className="rounded-md border border-solid border-f1-border-secondary bg-f1-background px-4 py-3 text-sm text-f1-foreground-secondary shadow-sm">
+          <p className="shadow-sm rounded-md border border-solid border-f1-border-secondary bg-f1-background px-4 py-3 text-sm text-f1-foreground-secondary">
             {config.noDataLabel}
           </p>
         </div>
       )}
       {!mapFallbackVisible && (
         <>
-          {selectedLocation && detailsPanelState !== "open" && (
+          {detailsVisible && selectedLocation && !detailsPanelOpen && (
             <LocationDetailsTrigger
               location={selectedLocation}
               config={config}
               controlsId={detailsPanelId}
               onOpen={openDetails}
               triggerRef={detailsTriggerRef}
-              responsiveDefault={detailsPanelState === "responsive"}
+              summaryVisible={summaryVisible}
+              responsiveUnmeasured={responsiveDetailsUnmeasured}
             />
           )}
-          <div className="pointer-events-none absolute bottom-[154px] left-4 right-4 top-[96px] z-20 flex min-h-0 flex-col items-stretch gap-2 @[480px]:items-end @[640px]:contents">
-            {selectedLocation && (
-              <LocationDetailsPanel
-                location={selectedLocation}
-                config={config}
-                id={detailsPanelId}
-                panelState={detailsPanelState}
-                onDismiss={closeDetails}
-                dismissRef={detailsDismissRef}
-              />
-            )}
-            {locations.length > 0 && (
-              <DensityLegend config={config} scale={resolvedDensityScale} />
-            )}
-          </div>
-          <LocationTimeline timeline={timeline} config={config} />
+          {(detailsVisible || densityLegendVisible) && (
+            <div
+              className={cn(
+                "pointer-events-none absolute left-4 right-4 z-20 flex min-h-0 flex-col items-stretch gap-2 @[480px]:items-end @[640px]:contents",
+                summaryVisible ? "top-[96px]" : "top-4",
+                timelineVisible ? "bottom-[154px]" : "bottom-4"
+              )}
+            >
+              {detailsVisible && selectedLocation && (
+                <LocationDetailsPanel
+                  location={selectedLocation}
+                  config={config}
+                  id={detailsPanelId}
+                  panelState={
+                    responsiveDetailsUnmeasured
+                      ? "responsive"
+                      : detailsPanelOpen
+                        ? "open"
+                        : "closed"
+                  }
+                  summaryVisible={summaryVisible}
+                  timelineVisible={timelineVisible}
+                  onDismiss={closeDetails}
+                  dismissRef={detailsDismissRef}
+                />
+              )}
+              {densityLegendVisible && locations.length > 0 && (
+                <DensityLegend
+                  config={config}
+                  scale={resolvedDensityScale}
+                  palette={resolvedDensityPalette}
+                  timelineVisible={timelineVisible}
+                  detailsSpaceReserved={
+                    detailsVisible && Boolean(selectedLocation)
+                  }
+                />
+              )}
+            </div>
+          )}
+          {renderedTimeline && (
+            <LocationTimeline timeline={renderedTimeline} config={config} />
+          )}
         </>
       )}
     </section>

@@ -1,5 +1,6 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { DocsNav } from "@/lib/storybook-utils/docs-nav"
 import * as Stories from "./LocationItem.stories"
 
 <Meta of={Stories} />
@@ -8,7 +9,146 @@ import * as Stories from "./LocationItem.stories"
 
 A built-in `F0AnalyticsDashboard` item for comparing a location-weighted dataset, inspecting rows at one selected location, and reading its timeline. The contract is domain-neutral: clock activity and IT inventory are two examples of the same dashboard item.
 
+<DocsNav />
+
+# Overview
+
 ## Anatomy
+
+<Canvas of={Stories.Default} />
+
+# Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use the location item when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Location-led analysis</td>
+        <td>
+          Coordinates, density, selected records, and a timeline answer one
+          analytical question.
+        </td>
+      </tr>
+      <tr>
+        <td>Inspectable density</td>
+        <td>
+          Every map point has domain records that belong in a bounded details
+          panel.
+        </td>
+      </tr>
+      <tr>
+        <td>Analytics dashboard authoring</td>
+        <td>
+          Loading, filters, export, Ask One, fullscreen, drag, resize, and the
+          item menu must remain dashboard-owned.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Coordinates are incidental or unavailable</td>
+        <td>A chart or collection dashboard item.</td>
+      </tr>
+      <tr>
+        <td>Records do not share one meaningful density measure</td>
+        <td>A chart dashboard item with explicit series.</td>
+      </tr>
+      <tr>
+        <td>The visualization has no reusable location contract</td>
+        <td>A custom dashboard item as the escape hatch.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Map domain data into the generic summary, locations, details, and timeline contract.",
+  }}
+  dont={{
+    description:
+      "Fork the visualization and duplicate the analytics dashboard shell in a product domain.",
+  }}
+/>
+
+### Content best practices
+
+- Name the analytical question in the item title.
+  - **Correct:** “IT inventory by location”
+  - **Incorrect:** “Map”
+- Put period and scope in the standard item description.
+  - **Correct:** “Last 30 days · Europe”
+  - **Incorrect:** “Data from multiple places and dates”
+- Make `detailsLabel` explicit and count the record type.
+  - **Correct:** “18 people”, “116 devices”
+  - **Incorrect:** “18”, “116”
+- Keep each detail value short. Additional values reflow, but one or two are easiest to scan.
+- Supply every domain label and formatter in `location`; the renderer does not invent product copy.
+
+<DoDonts
+  do={{
+    description: "Use a specific analytical title and explicit record counts.",
+  }}
+  dont={{
+    description: "Use generic labels such as “Map” or counts without units.",
+  }}
+/>
+
+### Behavior
+
+- WHEN the item shares a row → THEN it uses two dashboard slots and allows at most one peer.
+- WHEN an equal-width slot would be narrower than `minItemWidth` → THEN the dashboard stacks the row.
+- WHEN details open or close → THEN the summary strip, expanded details header, and collapsed trigger remain aligned at 64px without layout shift.
+- WHEN the item is at least 896px wide → THEN summary and details surfaces are 400px wide and short detail values remain on one row.
+- WHEN the item shares a narrower dashboard row → THEN summary and details each use the available half width and detail values may wrap.
+- WHEN the item is between 480px and 719px wide → THEN details become a bounded disclosure above the timeline.
+- WHEN the item is narrower than 480px → THEN the details surface uses the compact full-width layout.
+- WHEN `selectedLocationId` is provided → THEN selection is controlled; otherwise `defaultSelectedLocationId` seeds internal selection.
+- WHEN `defaultSelectedLocationId` is explicitly `null` → THEN no details panel or disclosure trigger appears until a map location is selected.
+- WHEN a section is set to `false` → THEN its surface and layout reservation are both removed in the live map and fallback.
+- WHEN timeline data is omitted → THEN the item behaves as if `sections.timeline` were `false`.
+- WHEN `densityPalette` overrides only some levels → THEN missing levels retain the default F0 red scale, inaccessible opaque steps normalize within the requested hue, and markers remain identical to their legend swatches.
+- WHEN map rendering is unavailable → THEN the same locations remain available through the accessible list fallback.
+- WHEN the item enters fullscreen or designer mode → THEN `F0AnalyticsDashboard` continues to own focus, Ask One, reorder, and resize behavior.
+
+# Code
+
+Import the dashboard and generic location contracts from the public F0 React barrel. Controls expose the normal dashboard props inherited by the story.
+
+```tsx
+import {
+  F0AnalyticsDashboard,
+  type DashboardLocationConfig,
+  type DashboardLocationData,
+  type DashboardLocationItem,
+} from "@factorialco/f0-react"
+```
 
 <Canvas of={Stories.Default} />
 
@@ -21,7 +161,7 @@ A built-in `F0AnalyticsDashboard` item for comparing a location-weighted dataset
 The item inherits the normal `DashboardItemBase` fields and adds the location data contract.
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Field</th>
@@ -238,7 +378,7 @@ The item inherits the normal `DashboardItemBase` fields and adds the location da
 **DashboardLocationConfig**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Field</th>
@@ -383,6 +523,48 @@ The item inherits the normal `DashboardItemBase` fields and adds the location da
       </tr>
       <tr>
         <td>
+          <code>exportLabels</code>
+        </td>
+        <td>
+          <code>DashboardLocationExportLabels</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Host-localized spreadsheet column labels.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>sections</code>
+        </td>
+        <td>
+          <code>DashboardLocationSections</code>
+        </td>
+        <td>All visible</td>
+        <td>—</td>
+        <td>
+          Independently controls <code>summary</code>,{" "}
+          <code>locationDetails</code>,<code>densityLegend</code>, and{" "}
+          <code>timeline</code>. Hidden surfaces do not reserve map space.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>densityPalette</code>
+        </td>
+        <td>
+          <code>Partial&lt;F0MapDensityPalette&gt;</code>
+        </td>
+        <td>Sequential F0 red</td>
+        <td>—</td>
+        <td>
+          Overrides low, medium, or high with F0 color tokens. Inaccessible
+          opaque steps resolve to the nearest accessible step of the same hue;
+          that resolved palette is shared by map markers, clusters, and the
+          legend.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <code>densityScale</code>
         </td>
         <td>
@@ -434,7 +616,7 @@ The item inherits the normal `DashboardItemBase` fields and adds the location da
 **Data and nested contracts**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Type</th>
@@ -448,10 +630,11 @@ The item inherits the normal `DashboardItemBase` fields and adds the location da
           <code>DashboardLocationData</code>
         </td>
         <td>
-          <code>summary</code>, <code>locations</code>, <code>timeline</code>
+          <code>summary</code>, <code>locations</code>
         </td>
         <td>
-          Summary values are strings or numbers keyed by summary metric IDs.
+          <code>timeline</code> is optional. Summary values are strings or
+          numbers keyed by summary metric IDs.
         </td>
       </tr>
       <tr>
@@ -513,134 +696,68 @@ The item inherits the normal `DashboardItemBase` fields and adds the location da
           <code>F0DataChartLineSeries</code>.
         </td>
       </tr>
-    </tbody>
-  </table>
-</Unstyled>
-
-## Guidelines
-
-### Design best practices
-
-**When to use**
-
-<Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
-    <thead>
       <tr>
-        <th className="text-left">Situation</th>
-        <th className="text-left">Use the location item when</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Location-led analysis</td>
         <td>
-          Coordinates, density, selected records, and a timeline answer one
-          analytical question.
+          <code>DashboardLocationSections</code>
+        </td>
+        <td>—</td>
+        <td>
+          <code>summary</code>, <code>locationDetails</code>,{" "}
+          <code>densityLegend</code>, and <code>timeline</code> are optional
+          booleans; each defaults to <code>true</code>.
         </td>
       </tr>
       <tr>
-        <td>Inspectable density</td>
         <td>
-          Every map point has domain records that belong in a bounded details
-          panel.
+          <code>DashboardLocationExportLabels</code>
+        </td>
+        <td>
+          <code>location</code>, <code>density</code>, <code>details</code>,{" "}
+          <code>item</code>, <code>description</code>
+        </td>
+        <td>Host-localized spreadsheet headers.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>F0MapDensityStyle</code>
+        </td>
+        <td>
+          <code>color</code>, <code>colorStep</code>
+        </td>
+        <td>
+          <code>color</code> is an F0 categorical hue (not neutral/grey);{" "}
+          <code>colorStep</code> is <code>10 | 50 | 60 | 70</code>. Inaccessible
+          opaque steps resolve within the same hue.
         </td>
       </tr>
       <tr>
-        <td>Analytics dashboard authoring</td>
         <td>
-          Loading, filters, export, Ask One, fullscreen, drag, resize, and the
-          item menu must remain dashboard-owned.
+          <code>F0MapDensityPalette</code>
         </td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
-
-**When not to use**
-
-<Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
-    <thead>
-      <tr>
-        <th className="text-left">Situation</th>
-        <th className="text-left">Use instead</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Coordinates are incidental or unavailable</td>
-        <td>A chart or collection dashboard item.</td>
-      </tr>
-      <tr>
-        <td>Records do not share one meaningful density measure</td>
-        <td>A chart dashboard item with explicit series.</td>
-      </tr>
-      <tr>
-        <td>The visualization has no reusable location contract</td>
-        <td>A custom dashboard item as the escape hatch.</td>
+        <td>
+          <code>low</code>, <code>medium</code>, <code>high</code>
+        </td>
+        <td>
+          Each level is an <code>F0MapDensityStyle</code>.
+        </td>
       </tr>
     </tbody>
   </table>
 </Unstyled>
 
-**Do's and don'ts**
-
-<DoDonts
-  do={{
-    description:
-      "Map domain data into the generic summary, locations, details, and timeline contract.",
-  }}
-  dont={{
-    description:
-      "Fork the visualization and duplicate the analytics dashboard shell in a product domain.",
-  }}
-/>
-
-### Content best practices
-
-- Name the analytical question in the item title.
-  - **Correct:** “IT inventory by location”
-  - **Incorrect:** “Map”
-- Put period and scope in the standard item description.
-  - **Correct:** “Last 30 days · Europe”
-  - **Incorrect:** “Data from multiple places and dates”
-- Make `detailsLabel` explicit and count the record type.
-  - **Correct:** “18 people”, “116 devices”
-  - **Incorrect:** “18”, “116”
-- Keep each detail value short. Additional values reflow, but one or two are easiest to scan.
-- Supply every domain label and formatter in `location`; the renderer does not invent product copy.
-
-<DoDonts
-  do={{
-    description: "Use a specific analytical title and explicit record counts.",
-  }}
-  dont={{
-    description: "Use generic labels such as “Map” or counts without units.",
-  }}
-/>
-
-### Behavior
-
-- WHEN the item shares a row → THEN it uses two dashboard slots and allows at most one peer.
-- WHEN an equal-width slot would be narrower than `minItemWidth` → THEN the dashboard stacks the row.
-- WHEN details open or close → THEN the summary strip, expanded details header, and collapsed trigger remain aligned at 64px without layout shift.
-- WHEN the item is at least 896px wide → THEN summary and details surfaces are 400px wide and short detail values remain on one row.
-- WHEN the item shares a narrower dashboard row → THEN summary and details each use the available half width and detail values may wrap.
-- WHEN the item is between 480px and 719px wide → THEN details become a bounded disclosure above the timeline.
-- WHEN the item is narrower than 480px → THEN the details surface uses the compact full-width layout.
-- WHEN `selectedLocationId` is provided → THEN selection is controlled; otherwise `defaultSelectedLocationId` seeds internal selection.
-- WHEN `defaultSelectedLocationId` is explicitly `null` → THEN no details panel or disclosure trigger appears until a map location is selected.
-- WHEN map rendering is unavailable → THEN the same locations remain available through the accessible list fallback.
-- WHEN the item enters fullscreen or designer mode → THEN `F0AnalyticsDashboard` continues to own focus, Ask One, reorder, and resize behavior.
-
-### Usage examples
+# Examples
 
 **Clock activity**
 
 Configure every domain label while keeping the renderer and dashboard behavior generic.
 
 ```tsx
+import {
+  F0AnalyticsDashboard,
+  type DashboardLocationConfig,
+  type DashboardLocationData,
+  type DashboardLocationItem,
+} from "@factorialco/f0-react"
 import { ChartLine, ClockBack } from "@factorialco/f0-react/icons/app"
 import { ClockIn } from "@factorialco/f0-react/icons/modules"
 
@@ -661,6 +778,13 @@ const location: DashboardLocationConfig = {
   viewLocationDetailsLabel: (name) => `View activity for ${name}`,
   closeLocationDetailsLabel: "Close location activity",
   noDataLabel: "No clock activity for this period",
+  exportLabels: {
+    location: "Location",
+    density: "Density",
+    details: "People",
+    item: "Employee",
+    description: "Workplace",
+  },
 }
 
 const data: DashboardLocationData = {
@@ -710,6 +834,11 @@ The same `type: "location"` item renders assets by changing only configuration a
 <Canvas of={Stories.ITInventory} />
 
 ```tsx
+import {
+  F0AnalyticsDashboard,
+  type DashboardLocationData,
+  type DashboardLocationItem,
+} from "@factorialco/f0-react"
 import {
   AlertCircle,
   CheckCircle,
@@ -778,10 +907,66 @@ const inventory: DashboardLocationItem = {
     viewLocationDetailsLabel: (name) => `View inventory for ${name}`,
     closeLocationDetailsLabel: "Close location inventory",
     noDataLabel: "No inventory for this period",
+    exportLabels: {
+      location: "Location",
+      density: "Devices",
+      details: "Inventory",
+      item: "Device",
+      description: "Owner",
+    },
   },
   fetchData: async () => inventoryData,
 }
+
+<F0AnalyticsDashboard items={[inventory]} />
 ```
+
+**Modular surfaces and density colors**
+
+Choose only the surfaces that answer the analytical question. Palette entries
+accept F0 color names and steps; raw CSS colors are intentionally unsupported.
+The following is a focused continuation of the complete `inventory` and
+`inventoryData` example above.
+
+<Canvas of={Stories.CustomDensityPalette} />
+<Canvas of={Stories.MapOnly} />
+
+```tsx
+// Continue from the complete IT inventory example above.
+const mapOnlyItem: DashboardLocationItem = {
+  ...inventory,
+  id: "map-only",
+  location: {
+    ...inventory.location,
+    sections: {
+      summary: false,
+      locationDetails: false,
+      densityLegend: false,
+      timeline: false,
+    },
+    densityPalette: {
+      low: { color: "malibu", colorStep: 10 },
+      medium: { color: "indigo", colorStep: 60 },
+      high: { color: "purple", colorStep: 70 },
+    },
+  },
+  fetchData: async () => ({
+    summary: {},
+    locations: inventoryData.locations,
+  }),
+}
+
+<F0AnalyticsDashboard items={[mapOnlyItem]} />
+```
+
+**Optional section variants**
+
+Each Canvas is a tested contract variant rather than a cosmetic demo.
+
+<Canvas of={Stories.WithoutSummary} />
+<Canvas of={Stories.WithoutDetails} />
+<Canvas of={Stories.WithoutDensityLegend} />
+<Canvas of={Stories.WithoutTimeline} />
 
 **Dashboard designer and fullscreen**
 
@@ -825,7 +1010,7 @@ Detail scrolling, no selection, empty, loading, error, dark, and map-fallback st
 ### Keyboard interaction
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Key</th>
