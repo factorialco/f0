@@ -426,111 +426,117 @@ export const ChartAreaSelectionMode: Story = {
       )
     })
 
-    await step("Expand the chart before drawing", async () => {
-      const chartFrame = getChartFrame()
+    await step("Draw and retain the polygon with its exact value", async () => {
       const chartCanvas = getChartCanvas()
-      await expect(chartFrame).toBeInTheDocument()
       await expect(chartCanvas).toBeInTheDocument()
-      compactChartWidth = chartCanvas!.getBoundingClientRect().width
+      const { left, top, width, height } = chartCanvas!.getBoundingClientRect()
+      compactChartWidth = width
+      const dispatchMouse = (
+        type: "mousedown" | "mousemove" | "mouseup",
+        x: number,
+        y: number,
+        buttons: number
+      ) => {
+        const clientX = left + width * x
+        const clientY = top + height * y
+        chartCanvas!.dispatchEvent(
+          new MouseEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            button: 0,
+            buttons,
+            clientX,
+            clientY,
+          })
+        )
+      }
+
+      // ECharts listens to its canvas mouse stream. Dispatch that native DOM
+      // sequence directly: Storybook's synthetic pointer helper does not
+      // generate the compatibility mouse events a real pointer produces.
+      dispatchMouse("mousedown", 0.15, 0.15, 1)
+      dispatchMouse("mousemove", 0.95, 0.15, 1)
+      dispatchMouse("mousemove", 0.95, 0.85, 1)
+      dispatchMouse("mousemove", 0.15, 0.85, 1)
+      dispatchMouse("mouseup", 0.15, 0.15, 0)
+
+      await expect(
+        await canvas.findByRole(
+          "button",
+          { name: "Remove quote" },
+          { timeout: 5000 }
+        )
+      ).toBeInTheDocument()
+      await expect(
+        canvas.getByText(
+          "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
+        )
+      ).toBeInTheDocument()
+      await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
+      await expect(
+        canvas.getByRole("button", { name: "Draw to ask One" })
+      ).toBeInTheDocument()
+      await expect(
+        within(getChartFrame()!).getByRole("button", {
+          name: "Clear selection",
+        })
+      ).toHaveAttribute("data-dashboard-area-selection-clear")
+      await expect(
+        canvasElement.querySelector(
+          '[data-dashboard-area-selection-mode="selected"]'
+        )
+      ).toBeInTheDocument()
 
       await userEvent.click(
-        within(chartFrame!).getByRole("button", { name: "Expand" })
+        within(getChartFrame()!).getByRole("button", { name: "Expand" })
       )
       await waitFor(() =>
         expect(getChartCanvas()!.getBoundingClientRect().width).toBeGreaterThan(
           compactChartWidth
         )
       )
+      await expect(
+        canvasElement.querySelector(
+          '[data-dashboard-area-selection-mode="selected"]'
+        )
+      ).toBeInTheDocument()
+      await userEvent.click(
+        within(getChartFrame()!).getByRole("button", { name: "Collapse" })
+      )
+      await expect(
+        canvas.queryByText("Drawing isn't available for this widget")
+      ).not.toBeInTheDocument()
+      await waitFor(() =>
+        expect(getChartCanvas()!.getBoundingClientRect().width).toBe(
+          compactChartWidth
+        )
+      )
+      const compactCanvasRect = getChartCanvas()!.getBoundingClientRect()
+      const clearButton = within(getChartFrame()!).getByRole("button", {
+        name: "Clear selection",
+      })
+      await waitFor(() =>
+        expect(
+          clearButton.closest("[data-dashboard-area-selection-clear-anchor]")
+        ).toHaveAttribute(
+          "data-dashboard-area-selection-clear-anchor",
+          "selection"
+        )
+      )
+      const clearButtonRect = clearButton.getBoundingClientRect()
+      await expect(clearButtonRect.left).toBeGreaterThanOrEqual(
+        compactCanvasRect.left
+      )
+      await expect(clearButtonRect.top).toBeGreaterThanOrEqual(
+        compactCanvasRect.top
+      )
+      await expect(clearButtonRect.right).toBeLessThanOrEqual(
+        compactCanvasRect.right
+      )
+      await expect(clearButtonRect.bottom).toBeLessThanOrEqual(
+        compactCanvasRect.bottom
+      )
     })
-
-    await step(
-      "Draw, collapse, and retain the polygon with its exact value",
-      async () => {
-        const chartCanvas = getChartCanvas()
-        await expect(chartCanvas).toBeInTheDocument()
-        const { left, top, width, height } =
-          chartCanvas!.getBoundingClientRect()
-        const point = (x: number, y: number) => {
-          const clientX = left + width * x
-          const clientY = top + height * y
-          return {
-            target: chartCanvas!,
-            coords: {
-              x: clientX,
-              y: clientY,
-              clientX,
-              clientY,
-              offsetX: width * x,
-              offsetY: height * y,
-            },
-          }
-        }
-
-        await userEvent.pointer([
-          { ...point(0.35, 0.05), keys: "[MouseLeft>]" },
-          point(0.65, 0.05),
-          point(0.65, 0.95),
-          point(0.35, 0.95),
-          { ...point(0.35, 0.05), keys: "[/MouseLeft]" },
-        ])
-
-        await expect(
-          await canvas.findByRole("button", { name: "Remove quote" })
-        ).toBeInTheDocument()
-        await expect(
-          canvas.getByText(
-            "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"
-          )
-        ).toBeInTheDocument()
-        await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
-        await expect(
-          canvas.getByRole("button", { name: "Draw to ask One" })
-        ).toBeInTheDocument()
-        await expect(
-          within(getChartFrame()!).getByRole("button", {
-            name: "Clear selection",
-          })
-        ).toHaveAttribute("data-dashboard-area-selection-clear")
-        await expect(
-          canvasElement.querySelector(
-            '[data-dashboard-area-selection-mode="selected"]'
-          )
-        ).toBeInTheDocument()
-        await expect(
-          canvas.queryByText("Drawing isn't available for this widget")
-        ).not.toBeInTheDocument()
-        await waitFor(() =>
-          expect(getChartCanvas()!.getBoundingClientRect().width).toBe(
-            compactChartWidth
-          )
-        )
-        const compactCanvasRect = getChartCanvas()!.getBoundingClientRect()
-        const clearButton = within(getChartFrame()!).getByRole("button", {
-          name: "Clear selection",
-        })
-        await waitFor(() =>
-          expect(
-            clearButton.closest("[data-dashboard-area-selection-clear-anchor]")
-          ).toHaveAttribute(
-            "data-dashboard-area-selection-clear-anchor",
-            "selection"
-          )
-        )
-        const clearButtonRect = clearButton.getBoundingClientRect()
-        await expect(clearButtonRect.left).toBeGreaterThanOrEqual(
-          compactCanvasRect.left
-        )
-        await expect(clearButtonRect.top).toBeGreaterThanOrEqual(
-          compactCanvasRect.top
-        )
-        await expect(clearButtonRect.right).toBeLessThanOrEqual(
-          compactCanvasRect.right
-        )
-        await expect(clearButtonRect.bottom).toBeLessThanOrEqual(
-          compactCanvasRect.bottom
-        )
-      }
-    )
   },
 }
 
@@ -578,9 +584,13 @@ export const ChartAreaSelectionWithoutDrag: Story = {
     await step(
       "Verify the exact observed target and built-in quote",
       async () => {
-        await expect(
-          canvas.getByText("point-headcount: control, 1 selected")
-        ).toBeInTheDocument()
+        await waitFor(
+          () =>
+            expect(
+              canvas.getByText("point-headcount: control, 1 selected")
+            ).toBeInTheDocument(),
+          { timeout: 5000 }
+        )
         await expect(
           await canvas.findByText(
             "Headcount by Department — Selected chart area Engineering — Headcount: 145 people"

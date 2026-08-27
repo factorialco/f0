@@ -247,8 +247,13 @@ export const F0AnalyticsDashboard = <
   )
 
   useEffect(() => {
-    if (areaSelection.status !== "drawing") return
+    if (areaSelection.status !== "drawing" || areaSelectableItemIds.size > 0) {
+      return
+    }
 
+    // Active charts own Escape through F0DataChart. Keep a dashboard fallback
+    // only for the transition where the last drawable chart disappears while
+    // drawing, so that mode cannot become a keyboard trap.
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented) return
       event.preventDefault()
@@ -256,7 +261,11 @@ export const F0AnalyticsDashboard = <
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [areaSelection.status, handleAreaSelectionCancel])
+  }, [
+    areaSelectableItemIds.size,
+    areaSelection.status,
+    handleAreaSelectionCancel,
+  ])
 
   useEffect(() => {
     if (

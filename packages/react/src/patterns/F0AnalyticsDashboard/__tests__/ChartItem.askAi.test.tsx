@@ -949,15 +949,17 @@ describe("ChartItem — asking about a drawn area", () => {
       })
     )
 
-    expect(onAskAi).toHaveBeenCalledWith({
-      id: "headcount",
-      title: "Headcount by workplace",
-      selection: {
-        source: "control",
-        totalPointCount: 1,
-        points: [AREA_SELECTION.points[0]],
-      },
-    })
+    await waitFor(() =>
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+        selection: {
+          source: "control",
+          totalPointCount: 1,
+          points: [AREA_SELECTION.points[0]],
+        },
+      })
+    )
   })
 
   it("bounds control selections without losing their uncapped count", () => {

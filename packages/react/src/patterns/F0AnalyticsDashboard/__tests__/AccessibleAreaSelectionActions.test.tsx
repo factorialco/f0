@@ -56,7 +56,10 @@ describe("AccessibleAreaSelectionActions", () => {
     await user.keyboard("{Enter}")
     await user.keyboard("{End}{Enter}")
 
-    expect(onSubmit).toHaveBeenCalledWith([action(0).point])
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith([action(0).point])
+    )
+    expect(screen.queryByRole("menuitemcheckbox")).not.toBeInTheDocument()
   })
 
   it("retains selections across pages and supports deselection", async () => {
@@ -97,7 +100,9 @@ describe("AccessibleAreaSelectionActions", () => {
       })
     )
 
-    expect(onSubmit).toHaveBeenCalledWith([action(100).point])
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith([action(100).point])
+    )
   })
 
   it("moves keyboard focus into each newly selected page", async () => {

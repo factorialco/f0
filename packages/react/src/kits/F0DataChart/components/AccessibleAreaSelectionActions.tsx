@@ -47,11 +47,23 @@ export function F0DataChartAccessibleAreaSelectionActions({
   const contentRef = useRef<HTMLDivElement>(null)
   const shouldFocusPageRef = useRef(false)
   const pendingSubmitRef = useRef<F0DataChartAreaSelectionPoint[] | null>(null)
+  const pendingSubmitFrameRef = useRef<number | null>(null)
 
   useEffect(() => {
+    if (pendingSubmitFrameRef.current !== null) {
+      cancelAnimationFrame(pendingSubmitFrameRef.current)
+      pendingSubmitFrameRef.current = null
+    }
+    pendingSubmitRef.current = null
     setOpen(false)
     setPage(0)
     setSelectedKeys(new Set())
+    return () => {
+      if (pendingSubmitFrameRef.current !== null) {
+        cancelAnimationFrame(pendingSubmitFrameRef.current)
+        pendingSubmitFrameRef.current = null
+      }
+    }
   }, [resetOn])
 
   useEffect(() => {
@@ -103,15 +115,7 @@ export function F0DataChartAccessibleAreaSelectionActions({
           side="top"
           className="max-h-80 max-w-[min(32rem,90vw)] overflow-y-auto"
           onCloseAutoFocus={(event) => {
-            const points = pendingSubmitRef.current
-            if (!points) return
-
-            // The dashboard replaces this per-chart trigger synchronously when
-            // the selection is accepted. Let the host move focus to its stable
-            // global action instead of asking Radix to focus an unmounting node.
-            event.preventDefault()
-            pendingSubmitRef.current = null
-            onSubmit(points)
+            if (pendingSubmitRef.current) event.preventDefault()
           }}
         >
           {hasPrevious && (
@@ -156,8 +160,16 @@ export function F0DataChartAccessibleAreaSelectionActions({
           )}
           <DropdownMenuItem
             disabled={selectedPoints.length === 0}
-            onSelect={() => {
+            onSelect={(event) => {
+              event.preventDefault()
               pendingSubmitRef.current = selectedPoints
+              setOpen(false)
+              pendingSubmitFrameRef.current = requestAnimationFrame(() => {
+                pendingSubmitFrameRef.current = null
+                const points = pendingSubmitRef.current
+                pendingSubmitRef.current = null
+                if (points) onSubmit(points)
+              })
             }}
           >
             {submitLabel.replace("{{count}}", String(selectedPoints.length))}

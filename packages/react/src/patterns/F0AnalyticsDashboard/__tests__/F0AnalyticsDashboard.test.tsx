@@ -1,3 +1,5 @@
+import { useEffect } from "react"
+
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -45,64 +47,78 @@ vi.mock("@/kits/F0DataChart", async (importOriginal) => {
       areaSelection,
     }: {
       areaSelection?: F0DataChartAreaSelectionConfig
-    }) => (
-      <div
-        aria-label="Chart"
-        role="img"
-        data-area-selection-active={areaSelection?.active}
-        data-area-selection-selected={areaSelection?.selected}
-      >
-        {areaSelection && (
-          <>
-            <button
-              type="button"
-              onClick={() =>
-                areaSelection.onSelect(
-                  {
-                    source: "pointer",
-                    totalPointCount: 1,
-                    points: [
-                      {
-                        seriesName: "Headcount",
-                        category: "Engineering",
-                        value: 145,
-                        values: [145],
-                        series: [
-                          { name: "Headcount", seriesIndex: 0, value: 145 },
-                        ],
-                        dataIndex: 0,
-                        seriesIndex: 0,
-                      },
-                    ],
-                  },
-                  AREA
-                )
-              }
-            >
-              Finish drawing
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                areaSelection.onSelect(
-                  {
-                    source: "pointer",
-                    totalPointCount: 0,
-                    points: [],
-                  },
-                  AREA
-                )
-              }
-            >
-              Finish empty drawing
-            </button>
-            <button type="button" onClick={areaSelection.onCancel}>
-              Cancel drawing
-            </button>
-          </>
-        )}
-      </div>
-    ),
+    }) => {
+      useEffect(() => {
+        if (!areaSelection?.active) return
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if (event.key !== "Escape" || event.defaultPrevented) return
+          event.preventDefault()
+          areaSelection.onCancel?.()
+        }
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+      }, [areaSelection])
+
+      return (
+        <div
+          aria-label="Chart"
+          role="img"
+          data-area-selection-active={areaSelection?.active}
+          data-area-selection-selected={areaSelection?.selected}
+        >
+          {areaSelection && (
+            <>
+              <button
+                type="button"
+                onClick={() =>
+                  areaSelection.onSelect(
+                    {
+                      source: "pointer",
+                      totalPointCount: 1,
+                      points: [
+                        {
+                          seriesName: "Headcount",
+                          category: "Engineering",
+                          value: 145,
+                          values: [145],
+                          series: [
+                            { name: "Headcount", seriesIndex: 0, value: 145 },
+                          ],
+                          dataIndex: 0,
+                          seriesIndex: 0,
+                        },
+                      ],
+                    },
+                    AREA
+                  )
+                }
+              >
+                Finish drawing
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  areaSelection.onSelect(
+                    {
+                      source: "pointer",
+                      totalPointCount: 0,
+                      points: [],
+                    },
+                    AREA
+                  )
+                }
+              >
+                Finish empty drawing
+              </button>
+              <button type="button" onClick={areaSelection.onCancel}>
+                Cancel drawing
+              </button>
+            </>
+          )}
+        </div>
+      )
+    },
   }
 })
 
@@ -911,17 +927,19 @@ describe("F0AnalyticsDashboard Ask One", () => {
       })
     )
 
-    expect(onAskAiTarget).toHaveBeenCalledWith({
-      id: "headcount-chart",
-      title: "Headcount by department",
-      selection: expect.objectContaining({
-        source: "control",
-        totalPointCount: 1,
-      }),
-      quote: {
-        text: "Headcount by department — Selected chart area\nEngineering — Headcount: 145",
-      },
-    })
+    await waitFor(() =>
+      expect(onAskAiTarget).toHaveBeenCalledWith({
+        id: "headcount-chart",
+        title: "Headcount by department",
+        selection: expect.objectContaining({
+          source: "control",
+          totalPointCount: 1,
+        }),
+        quote: {
+          text: "Headcount by department — Selected chart area\nEngineering — Headcount: 145",
+        },
+      })
+    )
     expect(screen.getByTestId("pending-quote")).toHaveTextContent(
       "Headcount by department — Selected chart area"
     )
@@ -965,11 +983,13 @@ describe("F0AnalyticsDashboard Ask One", () => {
       })
     )
 
-    expect(onAskAi).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: "headcount-chart",
-        selection: expect.objectContaining({ source: "control" }),
-      })
+    await waitFor(() =>
+      expect(onAskAi).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "headcount-chart",
+          selection: expect.objectContaining({ source: "control" }),
+        })
+      )
     )
     await waitFor(() =>
       expect(
