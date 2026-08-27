@@ -38364,18 +38364,16 @@ const gw = "dc_shared_view", jde = (e) => {
               grouping: n,
               currentGrouping: i,
               onGroupingChange: h
-            },
-            "grouping"
-          ) }),
+            }
+          ) }, "grouping"),
           v && /* @__PURE__ */ m("div", { className: "p-3", children: /* @__PURE__ */ m(
             qde,
             {
               currentSortings: s,
               onChange: l,
               sortings: y
-            },
-            "sorting"
-          ) }),
+            }
+          ) }, "sorting"),
           b && /* @__PURE__ */ P("section", { className: "p-3 pb-0", children: [
             /* @__PURE__ */ m("h3", { className: "mb-2 text-sm font-medium text-f1-foreground-secondary", children: _ }),
             x

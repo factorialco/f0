@@ -1,16 +1,16 @@
 import { h_ as GN, w as ft, e4 as $_, cs as bn, ho as HN, bX as kn, fn as AF, h$ as MF, i0 as WN, r as nr, c3 as bf, i1 as EF, i2 as Ti, i3 as LF, i4 as iS, i5 as Pr, i6 as uo, i7 as NF, u as He, bV as vp, i8 as ru, i9 as $N, bU as Cl, hl as l0, ia as IF, S as ie, s as U_, ib as kF, ic as PF, id as aS, cy as RF, ie as OF, ig as BF, ih as UN, ii as zF, t as _f, v as xf, m as lt, x as wf, y as Xr, O as VF, Q as FF, z as Va, A as Fa, ax as Ga, B as Ha, gv as u0, d3 as bt, V as ot, ah as Ol, d4 as Wa, dh as Y_, ij as GF, cl as HF, cm as oS, n as YN, o as Bl, bW as zc, cn as WF, eC as Vh, e2 as XN, ik as $F, hn as sS, d6 as UF, il as lS, dc as YF, im as XF, c0 as qN, d_ as ZN, ge as c0, dl as qF, a7 as f0, a6 as X_, gR as nu, gS as Sf, gU as jN, hu as ZF, gt as KN, d9 as QN, gs as jF, io as pp, b3 as q_, h8 as KF, c8 as JN, f$ as QF, au as JF, hV as Z_, b6 as eI, c4 as e5, c5 as t5, c6 as r5, d as n5, bB as tI, ai as xs, bH as rI, b2 as nI, ag as j_, bJ as iI, X as K_, G as Tl, H as Dl, K as Al, L as Ml, gw as Oi, $ as aI, j as i5, b0 as Fh, as as zl, J as Br, el as a5, bS as oI, b4 as d0, cp as Vc, ci as o5, aS as Cf, aq as Qa, dG as sI, dt as lI, h1 as Hr, ip as s5, iq as l5, ir as uI, is as gp, it as u5, iu as c5, cD as ai, R as cI, U as fI, ch as f5, iv as d5, ca as dI, dY as h5, dZ as v5, bP as di, da as iu, e7 as au, e_ as Tf, bK as p5, e5 as g5, br as m5, ak as hI, df as y5, aj as b5, iw as _5, aW as uS, bF as Fc, hs as x5, aO as w5, ix as S5, iy as C5, iz as T5, b as Q_, eY as J_, cg as D5, aZ as A5, l as vI, a8 as M5, a5 as E5, iA as L5, iB as N5, iC as I5, hr as k5, bj as cS, cM as P5, c2 as R5, cE as pI, iD as gI, iE as O5, iF as B5, I as z5, iG as V5, iH as F5, iI as G5, iJ as H5 } from "./F0CanvasPanel-DvVQXMJp.js";
 import { i_ as Khe, C as Qhe, D as Jhe, dA as eve, c as tve, F as rve, a as nve, iT as ive, f as ave, cw as ove, dB as sve, e9 as lve, cb as uve, cc as cve, cu as fve, c9 as dve, cv as hve, dn as vve, eh as pve, g as gve, c7 as mve, bY as yve, iO as bve, j3 as _ve, bR as xve, e as wve, d$ as Sve, k as Cve, cx as Tve, iV as Dve, dK as Ave, iW as Mve, iY as Eve, iZ as Lve, eF as Nve, j0 as Ive, ey as kve, ez as Pve, P as Rve, eD as Ove, iX as Bve, eA as zve, i$ as Vve, j4 as Fve, iL as Gve, iM as Hve, iN as Wve, iK as $ve, eB as Uve, j2 as Yve, iU as Xve, iR as qve, iQ as Zve, eE as jve, gq as Kve, h9 as Qve, j1 as Jve, dD as epe, ex as tpe, eu as rpe, ew as npe, es as ipe, iS as ape, hb as ope, h5 as spe, gV as lpe, j7 as upe, ed as cpe, ev as fpe, j6 as dpe, dS as hpe, et as vpe, ce as ppe, gp as gpe, gW as mpe, dV as ype, ht as bpe, dC as _pe, cf as xpe, iP as wpe, h7 as Spe, h6 as Cpe, j5 as Tpe } from "./F0CanvasPanel-DvVQXMJp.js";
 import { jsx as w, jsxs as B, Fragment as ut } from "react/jsx-runtime";
-import { C as W5, W as $5, G as U5, H as Y5, I as X5, J as fS, aS as q5, aT as Z5, Z as j5, K as K5, Q as Q5, U as J5, Y as eG, r as tG, a2 as mI, aU as rG, aV as nG, aW as iG, aX as aG, aY as oG, aZ as yI, a_ as sG, n as ex, a$ as co, b0 as lG, z as tx, b1 as rx, af as uG, b2 as cG, b3 as Rs, b4 as bI, b5 as fG, b6 as dG, b7 as hG, b8 as vG, b9 as pG, ba as gG, ar as mG, aH as yG, bb as bG, am as _G, E as xG, a as wG, j as mp, R as nx, k as ix, ap as _I, O as ax, bc as xI, bd as dS, be as ox, a3 as SG, bf as hS, F as CG, l as wI, av as SI, bg as TG, bh as DG, bi as AG, bj as Os, bk as MG, aI as EG, M as LG } from "./CoachmarkProvider-RVL2fSLn.js";
-import { a5 as Ape, a6 as Mpe, ag as Epe, a7 as Lpe, ac as Npe, bG as Ipe, bF as kpe, by as Ppe, bm as Rpe, bl as Ope, bn as Bpe, bo as zpe, bq as Vpe, D as Fpe, aK as Gpe, aJ as Hpe, aN as Wpe, ao as $pe, aj as Upe, aP as Ype, ak as Xpe, a8 as qpe, bH as Zpe, aL as jpe, aM as Kpe, al as Qpe, a9 as Jpe, P as ege, ab as tge, ad as rge, aO as nge, an as ige, aQ as age, aa as oge, ae as sge, bJ as lge, a1 as uge, $ as cge, a0 as fge, bx as dge, bD as hge, bD as vge, bE as pge, bt as gge, bs as mge, bI as yge, aF as bge, bv as _ge, bw as xge, ai as wge, bK as Sge, bL as Cge, X as Tge, m as Dge, bz as Age, bA as Mge, bB as Ege, bp as Lge, bu as Nge, o as Ige, bC as kge, br as Pge, bM as Rge } from "./CoachmarkProvider-RVL2fSLn.js";
+import { C as W5, W as $5, G as U5, H as Y5, I as X5, J as fS, aS as q5, aT as Z5, Z as j5, K as K5, Q as Q5, U as J5, Y as eG, r as tG, a2 as mI, aU as rG, aV as nG, aW as iG, aX as aG, aY as oG, aZ as yI, a_ as sG, n as ex, a$ as co, b0 as lG, z as tx, b1 as rx, af as uG, b2 as cG, b3 as Rs, b4 as bI, b5 as fG, b6 as dG, b7 as hG, b8 as vG, b9 as pG, ba as gG, ar as mG, aH as yG, bb as bG, am as _G, E as xG, a as wG, j as mp, R as nx, k as ix, ap as _I, O as ax, bc as xI, bd as dS, be as ox, a3 as SG, bf as hS, F as CG, l as wI, av as SI, bg as TG, bh as DG, bi as AG, bj as Os, bk as MG, aI as EG, M as LG } from "./CoachmarkProvider-Cy1gkWKz.js";
+import { a5 as Ape, a6 as Mpe, ag as Epe, a7 as Lpe, ac as Npe, bG as Ipe, bF as kpe, by as Ppe, bm as Rpe, bl as Ope, bn as Bpe, bo as zpe, bq as Vpe, D as Fpe, aK as Gpe, aJ as Hpe, aN as Wpe, ao as $pe, aj as Upe, aP as Ype, ak as Xpe, a8 as qpe, bH as Zpe, aL as jpe, aM as Kpe, al as Qpe, a9 as Jpe, P as ege, ab as tge, ad as rge, aO as nge, an as ige, aQ as age, aa as oge, ae as sge, bJ as lge, a1 as uge, $ as cge, a0 as fge, bx as dge, bD as hge, bD as vge, bE as pge, bt as gge, bs as mge, bI as yge, aF as bge, bv as _ge, bw as xge, ai as wge, bK as Sge, bL as Cge, X as Tge, m as Dge, bz as Age, bA as Mge, bB as Ege, bp as Lge, bu as Nge, o as Ige, bC as kge, br as Pge, bM as Rge } from "./CoachmarkProvider-Cy1gkWKz.js";
 import * as Dt from "react";
 import NG, { forwardRef as Nr, useRef as ee, useImperativeHandle as IG, Children as Gh, createContext as Ja, useContext as eo, useState as se, useMemo as ge, useEffect as ve, useCallback as de, useLayoutEffect as Gc, isValidElement as CI, Fragment as ou, useSyncExternalStore as Vl, useId as El, memo as kG } from "react";
 import { createPortal as Df } from "react-dom";
 import { d as oe, g as Af, h as PG, i as gl, P as Mf, u as su, j as RG, f as to } from "./tooltip-DTpaXpXW.js";
 import { l as h0, c as TI, d as Hh, r as v0 } from "./F0VideoPlayer-C67YOsz4.js";
 import { F as Bge } from "./F0VideoPlayer-C67YOsz4.js";
-import { F as Vge, p as Fge } from "./index-XeXJhL85.js";
-import { c as Hge } from "./pdfWorker-Bc1Ngw-z.js";
+import { F as Vge, p as Fge } from "./index-B5LRlDt2.js";
+import { c as Hge } from "./pdfWorker-DD2JszAn.js";
 import { D as OG, E as Wh, G as sx, H as DI, I as AI, J as BG, K as zG, L as VG, M as FG, N as GG, O as HG, F as WG } from "./F0AiProcessingOverlay-C1zOFMgx.js";
 import { A as $ge, C as Uge, t as Yge, s as Xge, v as qge, y as Zge, l as jge, i as Kge, q as Qge, z as Jge, B as eme, p as tme, r as rme, j as nme, e as ime, g as ame, k as ome, T as sme, w as lme, h as ume, a as cme, n as fme, m as dme, o as hme, b as vme, f as pme, x as gme, c as mme, d as yme, u as bme } from "./F0AiProcessingOverlay-C1zOFMgx.js";
 import { g as $G } from "./_commonjsHelpers-ByX85dGu.js";
@@ -64156,24 +64156,24 @@ function cfe({
   resetOn: a,
   onSubmit: o
 }) {
-  const [s, l] = se(!1), [u, c] = se(0), [f, d] = se(/* @__PURE__ */ new Set()), h = ee(null), v = ee(!1), p = ee(null);
-  ve(() => {
-    l(!1), c(0), d(/* @__PURE__ */ new Set());
-  }, [a]), ve(() => {
+  const [s, l] = se(!1), [u, c] = se(0), [f, d] = se(/* @__PURE__ */ new Set()), h = ee(null), v = ee(!1), p = ee(null), g = ee(null);
+  ve(() => (g.current !== null && (cancelAnimationFrame(g.current), g.current = null), p.current = null, l(!1), c(0), d(/* @__PURE__ */ new Set()), () => {
+    g.current !== null && (cancelAnimationFrame(g.current), g.current = null);
+  }), [a]), ve(() => {
     if (!v.current) return;
     v.current = !1;
-    let x = 0;
-    const C = requestAnimationFrame(() => {
-      x = requestAnimationFrame(() => {
+    let C = 0;
+    const T = requestAnimationFrame(() => {
+      C = requestAnimationFrame(() => {
         h.current?.querySelector("[data-area-selection-action]")?.focus();
       });
     });
     return () => {
-      cancelAnimationFrame(C), cancelAnimationFrame(x);
+      cancelAnimationFrame(T), cancelAnimationFrame(C);
     };
   }, [u]);
-  const g = 100, m = u * g, y = r.slice(m, m + g), b = u > 0, _ = m + g < r.length, S = ge(
-    () => r.filter((x) => f.has(x.key)).map((x) => x.point),
+  const m = 100, y = u * m, b = r.slice(y, y + m), _ = u > 0, S = y + m < r.length, x = ge(
+    () => r.filter((C) => f.has(C.key)).map((C) => C.point),
     [r, f]
   );
   return /* @__PURE__ */ w("div", { className: "absolute bottom-2 left-2 z-20", children: /* @__PURE__ */ B(Va, { open: s, onOpenChange: l, children: [
@@ -64195,41 +64195,40 @@ function cfe({
         align: "start",
         side: "top",
         className: "max-h-80 max-w-[min(32rem,90vw)] overflow-y-auto",
-        onCloseAutoFocus: (x) => {
-          const C = p.current;
-          C && (x.preventDefault(), p.current = null, o(C));
+        onCloseAutoFocus: (C) => {
+          p.current && C.preventDefault();
         },
         children: [
-          b && /* @__PURE__ */ w(
+          _ && /* @__PURE__ */ w(
             bt,
             {
-              onSelect: (x) => {
-                x.preventDefault(), v.current = !0, c((C) => C - 1);
+              onSelect: (C) => {
+                C.preventDefault(), v.current = !0, c((T) => T - 1);
               },
               children: n
             }
           ),
-          y.map((x) => /* @__PURE__ */ w(
+          b.map((C) => /* @__PURE__ */ w(
             _5,
             {
               "data-area-selection-action": "",
-              checked: f.has(x.key),
-              onCheckedChange: (C) => {
-                d((T) => {
-                  const D = new Set(T);
-                  return C ? D.add(x.key) : D.delete(x.key), D;
+              checked: f.has(C.key),
+              onCheckedChange: (T) => {
+                d((D) => {
+                  const A = new Set(D);
+                  return T ? A.add(C.key) : A.delete(C.key), A;
                 });
               },
-              onSelect: (C) => C.preventDefault(),
-              children: x.label
+              onSelect: (T) => T.preventDefault(),
+              children: C.label
             },
-            x.key
+            C.key
           )),
-          _ && /* @__PURE__ */ w(
+          S && /* @__PURE__ */ w(
             bt,
             {
-              onSelect: (x) => {
-                x.preventDefault(), v.current = !0, c((C) => C + 1);
+              onSelect: (C) => {
+                C.preventDefault(), v.current = !0, c((T) => T + 1);
               },
               children: i
             }
@@ -64237,11 +64236,15 @@ function cfe({
           /* @__PURE__ */ w(
             bt,
             {
-              disabled: S.length === 0,
-              onSelect: () => {
-                p.current = S;
+              disabled: x.length === 0,
+              onSelect: (C) => {
+                C.preventDefault(), p.current = x, l(!1), g.current = requestAnimationFrame(() => {
+                  g.current = null;
+                  const T = p.current;
+                  p.current = null, T && o(T);
+                });
               },
-              children: t.replace("{{count}}", String(S.length))
+              children: t.replace("{{count}}", String(x.length))
             }
           )
         ]
@@ -67651,12 +67654,17 @@ const yF = ({
     [re]
   );
   ve(() => {
-    if (x.status !== "drawing") return;
+    if (x.status !== "drawing" || F.size > 0)
+      return;
     const fe = (me) => {
       me.key !== "Escape" || me.defaultPrevented || (me.preventDefault(), J());
     };
     return window.addEventListener("keydown", fe), () => window.removeEventListener("keydown", fe);
-  }, [x.status, J]), ve(() => {
+  }, [
+    F.size,
+    x.status,
+    J
+  ]), ve(() => {
     x.status === "selected" && _ !== x.quote && C({ status: "idle" });
   }, [x, _]), ve(() => {
     const fe = L.current;
