@@ -7,7 +7,7 @@ import { zeroRender as render } from "@/testing/test-utils"
 import {
   F0DataChartAccessibleAreaSelectionActions,
   type F0DataChartAccessibleAreaSelectionAction,
-} from "@/kits/F0DataChart"
+} from "@/kits/F0DataChart/components/AccessibleAreaSelectionActions"
 
 const action = (index: number): F0DataChartAccessibleAreaSelectionAction => ({
   key: `series-0-point-${index}`,

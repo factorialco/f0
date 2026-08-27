@@ -45,12 +45,14 @@ import {
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
+import { takeCardGhost } from "./dragGhost"
 import { SortableWidget } from "./SortableWidget"
 import {
   useWidgetVirtualizer,
   type WidgetPlacement,
   type WidgetVirtualization,
 } from "./useWidgetVirtualizer"
+import { verticalOnly } from "./verticalOnly"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 
 export type { WidgetVirtualization } from "./useWidgetVirtualizer"
@@ -111,6 +113,12 @@ const DROP_ANIMATION = {
   duration: 450,
   easing: "cubic-bezier(0.4, 0, 0.1, 1)",
 }
+
+/**
+ * Hoisted rather than written inline: dnd-kit reads this on every pointer move,
+ * and a fresh array each render is a fresh dependency for it.
+ */
+const DRAG_MODIFIERS = [verticalOnly]
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
@@ -387,8 +395,8 @@ export function WidgetContainer({
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
   const canDrag = canEdit && onReorder != null && widgets.length > 1
-  // The widget being dragged: its in-list card hides while a clone rides the
-  // pointer in the DragOverlay (see below).
+  // The widget being dragged: its in-list card hides while a copy of it rides
+  // the pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
   // A small activation distance so a press on a widget still reads as a press
   // rather than the start of a drag — the sensor itself already refuses to
@@ -404,6 +412,19 @@ export function WidgetContainer({
   // same column is a fairground, not an explanation.
   const [flippedId, setFlippedId] = useState<string | null>(null)
   const columnRef = useRef<HTMLDivElement>(null)
+  /** The static copy of the dragged card that rides the pointer — {@link takeCardGhost}. */
+  const ghostRef = useRef<HTMLElement | null>(null)
+
+  const takeGhost = (id: string) => {
+    ghostRef.current = takeCardGhost(
+      columnRef.current?.querySelector(`[data-widget-id="${id}"]`)
+    )
+  }
+
+  /** Puts the copy in the overlay dnd-kit positions for us. */
+  const mountGhost = (host: HTMLDivElement | null) => {
+    if (host && ghostRef.current) host.replaceChildren(ghostRef.current)
+  }
   /**
    * WHICH WIDGETS ARE WORTH HAVING IN THE DOM — every one of them unless this
    * column is virtualized. See `useWidgetVirtualizer`.
@@ -762,10 +783,22 @@ export function WidgetContainer({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          onDragStart={({ active }) => setActiveId(String(active.id))}
-          onDragCancel={() => setActiveId(null)}
+          // The card the pointer carries goes up and down only, like the
+          // shuffle underneath it — see `verticalOnly`.
+          modifiers={DRAG_MODIFIERS}
+          onDragStart={({ active }) => {
+            // BEFORE the card is told it is being dragged: what the ghost
+            // should look like is what is on screen right now.
+            takeGhost(String(active.id))
+            setActiveId(String(active.id))
+          }}
+          onDragCancel={() => {
+            setActiveId(null)
+            ghostRef.current = null
+          }}
           onDragEnd={(event) => {
             setActiveId(null)
+            ghostRef.current = null
             handleDragEnd(event)
           }}
         >
@@ -780,23 +813,21 @@ export function WidgetContainer({
           >
             {list}
           </SortableContext>
-          {/* The card that follows the pointer is a CLONE in an overlay — the
-              in-list card hides meanwhile (SortableWidget). On release the
-              clone GLIDES from where it was dropped into its final slot
-              (dropAnimation), which is what makes the drop soft: without the
-              overlay, committing the reorder snaps the real card's DOM slot
-              and transform in one frame. */}
+          {/* The card that follows the pointer is a COPY of the real one's DOM
+              (`takeGhost`) in an overlay — the in-list card hides meanwhile
+              (SortableWidget). On release the copy GLIDES from where it was
+              dropped into its final slot (dropAnimation), which is what makes
+              the drop soft: without the overlay, committing the reorder snaps
+              the real card's DOM slot and transform in one frame. */}
           <DragOverlay dropAnimation={DROP_ANIMATION}>
-            {(() => {
-              const active = widgets.find((widget) => widget.id === activeId)
-              return active ? (
-                // Solid backdrop: Card's own background is translucent, and the
-                // clone rides over whatever the column shows beneath it.
-                <div className="cursor-grabbing rounded-xl bg-f1-background [&_*]:shadow-none">
-                  {render(active, { isDragging: true })}
-                </div>
-              ) : null
-            })()}
+            {activeId ? (
+              // Solid backdrop: Card's own background is translucent, and the
+              // copy rides over whatever the column shows beneath it.
+              <div
+                ref={mountGhost}
+                className="h-full w-full cursor-grabbing rounded-xl bg-f1-background [&_*]:shadow-none"
+              />
+            ) : null}
           </DragOverlay>
         </DndContext>
       ) : (

@@ -11,7 +11,8 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
 
-import { CalendarView, DateRange } from "@/components/OneCalendar/types"
+import { DateRange } from "@/components/OneCalendar/types"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { F0DatePicker } from "../index"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"
@@ -142,7 +143,7 @@ const presets = [
   predefinedPresets.lastYear,
   {
     label: "Last 7 days",
-    granularity: "day" as CalendarView,
+    granularity: "day" as GranularityDefinitionKey,
     value: {
       from: subDays(today, 7),
       to: today,

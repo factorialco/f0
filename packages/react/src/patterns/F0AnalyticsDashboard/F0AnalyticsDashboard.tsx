@@ -58,6 +58,7 @@ export const F0AnalyticsDashboard = <
   filtersValue,
   onFiltersChange,
   items,
+  itemFilters,
   editMode,
   onLayoutChange,
   enableExport,
@@ -240,9 +241,22 @@ export const F0AnalyticsDashboard = <
             }
           : { status: "idle" }
       )
+      if (!area && !quote) restoreAreaSelectionFocus()
     },
-    []
+    [restoreAreaSelectionFocus]
   )
+
+  useEffect(() => {
+    if (areaSelection.status !== "drawing") return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return
+      event.preventDefault()
+      handleAreaSelectionCancel()
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [areaSelection.status, handleAreaSelectionCancel])
 
   useEffect(() => {
     if (
@@ -400,6 +414,7 @@ export const F0AnalyticsDashboard = <
       >
         <DashboardGrid
           items={items}
+          itemFilters={itemFilters}
           filters={
             {
               ...currentFilters,

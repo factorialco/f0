@@ -18,7 +18,11 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import type { DashboardChartItem, DashboardMetricItem } from "../types"
+import type {
+  DashboardChartItem,
+  DashboardItem,
+  DashboardMetricItem,
+} from "../types"
 
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 
@@ -137,19 +141,26 @@ function metricItem(
 }
 
 function chartItem(
-  id = "headcount-chart",
+  idOrFetchData:
+    | string
+    | DashboardChartItem<typeof filters>["fetchData"] = "headcount-chart",
   chart: DashboardChartItem["chart"] = { type: "bar" }
-): DashboardChartItem {
+): DashboardChartItem<typeof filters> {
+  const fetchData =
+    typeof idOrFetchData === "function"
+      ? idOrFetchData
+      : () =>
+          Promise.resolve({
+            categories: ["Engineering"],
+            series: [{ name: "Headcount", data: [145] }],
+          })
+
   return {
-    id,
+    id: typeof idOrFetchData === "string" ? idOrFetchData : "headcount-chart",
     title: "Headcount by department",
     type: "chart",
     chart,
-    fetchData: () =>
-      Promise.resolve({
-        categories: ["Engineering"],
-        series: [{ name: "Headcount", data: [145] }],
-      }),
+    fetchData,
   }
 }
 
@@ -325,6 +336,200 @@ describe("F0AnalyticsDashboard report filters", () => {
     expect(
       screen.getByRole("button", { name: "Department: Engineering" })
     ).toBeInTheDocument()
+  })
+})
+
+describe("F0AnalyticsDashboard item filters", () => {
+  it("resolves metric controls without enabling fullscreen and preserves single-item and undefined opt-outs", () => {
+    const headcount = metricItem(vi.fn().mockResolvedValue({ value: 42 }))
+    const turnover: DashboardMetricItem<typeof filters> = {
+      ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
+      id: "turnover",
+      title: "Turnover",
+    }
+    const resolver = vi.fn((item: DashboardItem<typeof filters>) =>
+      item.id === "headcount"
+        ? {
+            filters: {
+              employee: { type: "search" as const, label: "Employee" },
+            },
+            value: {},
+            onChange: vi.fn(),
+          }
+        : undefined
+    )
+
+    const view = render(
+      <F0AnalyticsDashboard
+        items={[headcount, turnover]}
+        itemFilters={resolver}
+      />
+    )
+
+    const headcountCard = screen
+      .getByText("Headcount")
+      .closest("[class*='dashitem']") as HTMLElement
+    const turnoverCard = screen
+      .getByText("Turnover")
+      .closest("[class*='dashitem']") as HTMLElement
+    expect(
+      within(headcountCard).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+    expect(
+      within(turnoverCard).queryByRole("button", { name: "Filters" })
+    ).toBeNull()
+    expect(
+      within(headcountCard).queryByRole("button", { name: "Expand" })
+    ).toBeNull()
+    expect(
+      within(turnoverCard).queryByRole("button", { name: "Expand" })
+    ).toBeNull()
+
+    view.rerender(
+      <F0AnalyticsDashboard items={[headcount]} itemFilters={resolver} />
+    )
+    expect(
+      within(
+        screen
+          .getByText("Headcount")
+          .closest("[class*='dashitem']") as HTMLElement
+      ).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+    expect(resolver).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "headcount" })
+    )
+    expect(resolver).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "turnover" })
+    )
+  })
+
+  it("keeps filters available when an existing fullscreen-capable chart is expanded", async () => {
+    const user = userEvent.setup()
+    const headcountChart = chartItem(
+      vi.fn().mockResolvedValue({
+        categories: ["Engineering"],
+        series: [{ name: "Headcount", data: [42] }],
+      })
+    )
+    const turnover = {
+      ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
+      id: "turnover",
+      title: "Turnover",
+    }
+    const resolver = vi.fn((item: DashboardItem<typeof filters>) =>
+      item.id === "headcount-chart"
+        ? {
+            filters: {
+              employee: { type: "search" as const, label: "Employee" },
+            },
+            value: {},
+            onChange: vi.fn(),
+          }
+        : undefined
+    )
+
+    render(
+      <F0AnalyticsDashboard
+        items={[headcountChart, turnover]}
+        itemFilters={resolver}
+      />
+    )
+
+    const chartCard = screen
+      .getByText("Headcount by department")
+      .closest("[class*='dashitem']") as HTMLElement
+    expect(
+      within(chartCard).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+
+    await user.click(within(chartCard).getByRole("button", { name: "Expand" }))
+
+    await waitFor(() =>
+      expect(screen.queryByText("Turnover")).not.toBeInTheDocument()
+    )
+    expect(
+      within(
+        screen
+          .getByText("Headcount by department")
+          .closest("[class*='dashitem']") as HTMLElement
+      ).getByRole("button", { name: "Filters" })
+    ).toBeVisible()
+  })
+
+  it("keeps metric refresh and Ask One observation active together", async () => {
+    const user = userEvent.setup()
+    const fetchData = vi.fn().mockResolvedValue({ value: 42 })
+    const onItemFiltersChange = vi.fn()
+    const onAskAiTarget = vi.fn()
+    const item = metricItem(fetchData)
+    const itemFilterDefinitions = {
+      country: {
+        type: "in" as const,
+        label: "Country",
+        options: {
+          options: [{ value: "ES", label: "Spain" }],
+        },
+      },
+    }
+
+    const view = render(
+      <AiChatStateProvider enabled>
+        <QuoteProbe />
+        <F0AnalyticsDashboard
+          items={[item]}
+          itemFilters={() => ({
+            filters: itemFilterDefinitions,
+            value: {},
+            onChange: onItemFiltersChange,
+          })}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(1))
+
+    const card = screen
+      .getByText("Headcount")
+      .closest("[class*='dashitem']") as HTMLElement
+    await user.click(within(card).getByRole("button", { name: "Filters" }))
+    await user.click(await screen.findByRole("button", { name: "Country" }))
+    await user.click(await screen.findByRole("checkbox", { name: "Spain" }))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+    await user.click(screen.getByRole("button", { name: "Apply filters" }))
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith({ country: ["ES"] })
+    )
+
+    view.rerender(
+      <AiChatStateProvider enabled>
+        <QuoteProbe />
+        <F0AnalyticsDashboard
+          items={[item]}
+          itemFilters={() => ({
+            filters: itemFilterDefinitions,
+            value: { country: ["ES"] },
+            onChange: onItemFiltersChange,
+          })}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(2))
+
+    await user.click(
+      within(card).getByRole("button", { name: "Other actions" })
+    )
+    await user.click(screen.getByRole("menuitem", { name: "Ask One" }))
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount",
+      quote: { text: "Headcount" },
+    })
+    expect(screen.getByTestId("pending-quote")).toHaveTextContent("Headcount")
   })
 })
 
@@ -546,7 +751,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     expect(unavailableContent).toHaveAttribute("aria-hidden", "true")
     expect(screen.queryByText("Choose data points")).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: "Cancel selection" }))
+    await user.keyboard("{Escape}")
 
     expect(
       screen.getByRole("button", { name: "Draw to ask One" })
@@ -736,6 +941,43 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
   })
 
+  it("restores focus after a host-owned no-drag selection removes its chart control", async () => {
+    const user = userEvent.setup()
+    const onAskAi = vi.fn()
+    render(<F0AnalyticsDashboard items={[chartItem()]} onAskAi={onAskAi} />)
+
+    await user.click(
+      await screen.findByRole("button", { name: "Draw to ask One" })
+    )
+    await user.click(
+      screen.getByRole("button", {
+        name: "Select chart values without drawing: Headcount by department",
+      })
+    )
+    await user.click(
+      await screen.findByRole("menuitemcheckbox", {
+        name: "Headcount by department — Engineering, Headcount: 145",
+      })
+    )
+    await user.click(
+      screen.getByRole("menuitem", {
+        name: "Ask One about selected values (1)",
+      })
+    )
+
+    expect(onAskAi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "headcount-chart",
+        selection: expect.objectContaining({ source: "control" }),
+      })
+    )
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Draw to ask One" })
+      ).toHaveFocus()
+    )
+  })
+
   it("replaces a retained area when the dashboard action starts another drawing", async () => {
     const user = userEvent.setup()
     render(
@@ -811,7 +1053,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
         onAskAi={vi.fn()}
       />
     )
-    await user.click(screen.getByRole("button", { name: "Cancel selection" }))
+    await user.keyboard("{Escape}")
 
     await waitFor(() =>
       expect(
@@ -1077,6 +1319,60 @@ describe("F0AnalyticsDashboard Ask One", () => {
       quote: { text: "Headcount" },
     })
     expect(screen.getByTestId("pending-quote")).toHaveTextContent("Headcount")
+  })
+
+  it("passes a chart point through the public target observer and built-in chat", async () => {
+    const user = userEvent.setup()
+    const onAskAiTarget = vi.fn()
+
+    render(
+      <AiChatStateProvider enabled>
+        <QuoteProbe />
+        <F0AnalyticsDashboard
+          items={[
+            {
+              id: "headcount-chart",
+              title: "Headcount by department",
+              type: "chart",
+              chart: { type: "bar" },
+              fetchData: () =>
+                Promise.resolve({
+                  categories: ["Engineering"],
+                  series: [{ name: "Headcount", data: [145] }],
+                }),
+            },
+          ]}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+
+    const trigger = await screen.findByRole("button", {
+      name: "Ask One: Headcount by department",
+    })
+    trigger.focus()
+    await user.keyboard("{Enter}")
+    await user.click(
+      await screen.findByRole("menuitem", {
+        name: "Headcount by department — Engineering, Headcount: 145",
+      })
+    )
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount-chart",
+      title: "Headcount by department",
+      point: expect.objectContaining({
+        source: "keyboard",
+        category: "Engineering",
+        value: 145,
+      }),
+      quote: {
+        text: "Headcount by department — Engineering\nHeadcount: 145",
+      },
+    })
+    expect(screen.getByTestId("pending-quote")).toHaveTextContent(
+      "Headcount by department — Engineering Headcount: 145"
+    )
   })
 
   it("passes a keyboard-selected chart point through the public handler", async () => {

@@ -9,6 +9,10 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
+import {
+  WIDGET_DRAG_START,
+  type WidgetDragStartDetail,
+} from "@/lib/dnd/widgetDragEvents"
 
 import type { DashboardItem } from "../types"
 

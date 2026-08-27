@@ -2,17 +2,16 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { F0Button } from "@/components/F0Button"
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
+import { Pencil } from "@/icons/app"
 
 import type {
   F0DataChartAreaSelection,
   F0DataChartAreaSelectionArea,
 } from "../index"
 
-import {
-  F0DataChart,
-  F0DataChartAccessibleAreaSelectionActions,
-} from "../index"
+import { F0DataChartAccessibleAreaSelectionActions } from "../components/AccessibleAreaSelectionActions"
+import { F0DataChart } from "../index"
 
 const meta = {
   component: F0DataChart,
@@ -62,14 +61,15 @@ const AreaSelectionDemo = () => {
   return (
     <div className="flex w-[680px] flex-col gap-3">
       <div>
-        <F0Button
-          label="Draw around chart data"
-          variant="outline"
-          aria-pressed={active}
-          onClick={() => {
+        <F0ButtonToggle
+          label={["Draw around chart data", "Cancel drawing"]}
+          icon={Pencil}
+          variant="expanded"
+          selected={active}
+          onSelectedChange={(selected) => {
             setSelection(null)
             setSelectedArea(null)
-            setActive((current) => !current)
+            setActive(selected)
           }}
         />
       </div>

@@ -20,12 +20,13 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import type { DashboardChartItem } from "../types"
+import type { DashboardChartConfig, DashboardChartItem } from "../types"
 import type { F0AnalyticsDashboardPointClick } from "../types"
 
 import {
   buildAreaQuoteText,
   buildAccessibleAreaSelectionActions,
+  buildControlAreaSelection,
   buildPointQuoteText,
   buildAccessibleChartPoints,
   buildChartProps,
@@ -182,11 +183,6 @@ const ChatProbe = ({
         data-quote={pendingQuote?.text ?? ""}
         data-open={String(open)}
       />
-      {onCapture && (
-        <button type="button" onClick={() => onCapture(pendingQuote)}>
-          Capture pending quote
-        </button>
-      )}
       <textarea ref={inputRef} aria-label="Chat question" />
       {onCapture && (
         <button type="button" onClick={() => onCapture(pendingQuote)}>
@@ -961,6 +957,20 @@ describe("ChartItem — asking about a drawn area", () => {
         totalPointCount: 1,
         points: [AREA_SELECTION.points[0]],
       },
+    })
+  })
+
+  it("bounds control selections without losing their uncapped count", () => {
+    const points = Array.from({ length: 101 }, (_, dataIndex) => ({
+      ...AREA_SELECTION.points[0],
+      category: `Office ${dataIndex + 1}`,
+      dataIndex,
+    }))
+
+    expect(buildControlAreaSelection(points)).toEqual({
+      source: "control",
+      points: points.slice(0, 100),
+      totalPointCount: 101,
     })
   })
 

@@ -252,9 +252,6 @@ describe("DashboardItem — description action", () => {
       await userEvent.click(
         screen.getByRole("button", { name: "Capture pending quote" })
       )
-      expect(capturePendingQuote).toHaveBeenCalledWith(
-        onAskAiTarget.mock.calls[0][0].quote
-      )
       expect(capturePendingQuote.mock.calls[0][0]).toBe(
         onAskAiTarget.mock.calls[0][0].quote
       )

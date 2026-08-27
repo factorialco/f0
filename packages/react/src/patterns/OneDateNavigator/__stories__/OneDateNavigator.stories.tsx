@@ -5,12 +5,9 @@ import { useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { granularityDefinitions } from "@/components/OneCalendar"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 
-import {
-  CalendarView,
-  DateRange,
-  WeekStartDay,
-} from "@/components/OneCalendar/types"
+import { DateRange, WeekStartDay } from "@/components/OneCalendar/types"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"
@@ -238,7 +235,7 @@ const presets = [
   predefinedPresets.lastYear,
   {
     label: "Last 7 days",
-    granularity: "day" as CalendarView,
+    granularity: "day" as GranularityDefinitionKey,
     value: {
       from: subDays(today, 7),
       to: today,

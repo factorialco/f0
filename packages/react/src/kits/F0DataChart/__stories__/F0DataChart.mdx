@@ -450,11 +450,14 @@ configuration. Set `active` after a host action, then handle the real chart
 data contained by the completed polygon in `onSelect`. Set `selected` after a
 successful selection to keep its polygon visible while `active` is false, then
 clear `selected` when the downstream quote or action is dismissed or completed.
-Every integration must also render
-`F0DataChartAccessibleAreaSelectionActions` while selection is active. Its
-compact icon-only checkbox menu is the keyboard, touch, and single-pointer
-companion to the path gesture and submits the same point contract with
-`source: "control"`.
+Every integration must also provide a keyboard, touch, and single-pointer
+control while selection is active. That companion control must expose the
+visible chart points without requiring a path gesture and submit the same point
+contract with `source: "control"`. `F0AnalyticsDashboard` supplies this control
+internally; lower-level `F0DataChart` consumers own an equivalent control that
+fits their surface.
+
+`ChartSelectionControls` below represents that host-owned companion control:
 
 ```tsx
 <div className="relative">
@@ -474,7 +477,7 @@ companion to the path gesture and submits the same point contract with
     }}
   />
   {isSelecting && (
-    <F0DataChartAccessibleAreaSelectionActions
+    <ChartSelectionControls
       actions={accessibleActions}
       label="Select chart values without drawing"
       submitLabel="Ask One about selected values ({{count}})"

@@ -428,6 +428,14 @@ describe("chart area selection", () => {
       RETAINED_AREA
     )
 
+    const handledEscape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      cancelable: true,
+    })
+    handledEscape.preventDefault()
+    window.dispatchEvent(handledEscape)
+    expect(onCancel).not.toHaveBeenCalled()
+
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
     expect(onCancel).toHaveBeenCalledTimes(1)
 
@@ -458,6 +466,68 @@ describe("chart area selection", () => {
       key: "brush",
       brushOption: { brushType: false },
     })
+    expect(dispatchAction).toHaveBeenCalledWith({ type: "brush", areas: [] })
+  })
+
+  it("clears retained pointer geometry for a replacement drawing and control selection", () => {
+    const dispatchAction = vi.fn()
+    const chart = {
+      on: vi.fn(),
+      off: vi.fn(),
+      dispatchAction,
+      setOption: vi.fn(),
+      isDisposed: () => false,
+      convertToPixel: vi.fn(() => [50, 50]),
+    } as unknown as echarts.ECharts
+    const onSelect = vi.fn()
+    const baseProps = {
+      type: "bar" as const,
+      categories: ["Barcelona"],
+      series: [{ name: "Headcount", data: [18] }],
+    }
+    const view = render(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          ...baseProps,
+          areaSelection: {
+            active: false,
+            selected: true,
+            selectedArea: RETAINED_AREA,
+            onSelect,
+          },
+        }}
+      />
+    )
+    expect(dispatchAction).toHaveBeenCalledWith({
+      type: "brush",
+      areas: [
+        expect.objectContaining({ coordRange: RETAINED_AREA.coordRange }),
+      ],
+    })
+
+    dispatchAction.mockClear()
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          ...baseProps,
+          areaSelection: { active: true, selected: false, onSelect },
+        }}
+      />
+    )
+    expect(dispatchAction).toHaveBeenCalledWith({ type: "brush", areas: [] })
+
+    dispatchAction.mockClear()
+    view.rerender(
+      <AreaSelectionHarness
+        chart={chart}
+        props={{
+          ...baseProps,
+          areaSelection: { active: false, selected: true, onSelect },
+        }}
+      />
+    )
     expect(dispatchAction).toHaveBeenCalledWith({ type: "brush", areas: [] })
   })
 

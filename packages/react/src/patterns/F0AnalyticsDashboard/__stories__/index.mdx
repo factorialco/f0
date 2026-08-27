@@ -71,7 +71,10 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
       </tr>
       <tr>
         <td>A control affects only one visualization</td>
-        <td>An item-specific control owned by that visualization.</td>
+        <td>
+          The opt-in <code>itemFilters</code> resolver, or a control owned by
+          that visualization when it is not a filter.
+        </td>
       </tr>
       <tr>
         <td>Information is a transient summary</td>
@@ -85,17 +88,18 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
 
 <DoDonts
   do={{
-    description: "Keep report filters global and predictable.",
+    description: "Make report and widget scope explicit.",
     guidelines: [
       "Use one applied filter state for every participating item",
+      "Use itemFilters only for conditions that intentionally affect one widget",
       "Keep filter labels consistent with the report's data vocabulary",
       "Persist only committed values",
     ],
   }}
   dont={{
-    description: "Avoid mixing report and item scope.",
+    description: "Avoid ambiguous filter scope.",
     guidelines: [
-      "Don't present a dashboard filter when it changes only one item",
+      "Don't present a report filter when it changes only one item",
       "Don't persist temporary picker selections before Apply",
       "Don't silently retain values for removed filter definitions",
     ],
@@ -175,11 +179,15 @@ analytical context. The observer receives the widget identity plus the exact
 />
 ```
 
+<Canvas of={AskOneStories.TargetObserver} />
+
+If both callbacks are supplied, `onAskAi` owns the interaction:
+`onAskAiTarget` is not invoked and F0 does not stage a built-in quote.
+
 - WHEN an enabled AI chat is mounted and a widget has a title → THEN its actions menu includes **Ask One**.
 - WHEN a widget is in an error state but still has a title → THEN **Ask One** remains available from its error header.
 - WHEN no chat is available and `onAskAi` is omitted → THEN the action is hidden instead of offering a dead command.
 - WHEN **Ask One** uses the built-in behavior → THEN the dashboard exits widget fullscreen, quotes the title, and opens the chat.
-- WHEN `onAskAiTarget` observes the built-in behavior → THEN it receives the widget `id`, `title`, and exact pending `quote` before F0 stages that quote, without replacing any chat behavior.
 - WHEN `onAskAi` is provided → THEN the action calls the host with the widget `id` and `title` without changing chat or fullscreen state.
 - WHEN `onAskAiTarget` observes the built-in behavior → THEN it receives the widget `id`, `title`, and exact pending `quote` before F0 stages that quote, without replacing any chat behavior.
 - WHEN a directly rendered widget has `onAskAi` but no `itemId` → THEN the action is hidden rather than sending an empty ID.
@@ -333,7 +341,7 @@ Review search text, one selected option, a single date, and a single number.
 
 **Collection and range values**
 
-Review multiple selected options, a date range, and a numeric range. Boolean and valueless filters are not native `OneFilterPicker` filter types, and are intentionally not represented as supported dashboard controls.
+Review multiple selected options, a date range, and a numeric range.
 
 <Canvas of={Stories.ReportFilterRangeAndMultipleValues} />
 
@@ -350,6 +358,55 @@ object, matching their on-screen fetch behavior.
 The filter bar remains usable when valid report filters return empty chart data.
 
 <Canvas of={Stories.EmptyDashboard} />
+
+### Widget filters
+
+Use `itemFilters` when a filter is scoped to exactly one widget. The prop is a
+resolver, so the host can enable it only for supported items and return
+`undefined` everywhere else. F0 owns the picker draft and the hover/focus
+header action; the host owns the applied state, data refetch, and persistence.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  itemFilters={(item) => {
+    if (!canFilterWidget(item)) return undefined
+
+    return {
+      filters: definitionsFor(item),
+      value: savedFiltersByItem[item.id] ?? {},
+      onChange: (value) => updateWidgetFilters(item.id, value),
+    }
+  }}
+/>
+```
+
+- WHEN the resolver returns `undefined` → THEN the widget is unchanged and has no filter control.
+- WHEN it returns a configuration → THEN metric, chart, collection, and error-state headers expose the same anchored filter picker.
+- WHEN the host supplies catalog-backed `in` or `date` definitions → THEN widget filters use the same selectable values and date controls as report filters.
+- WHEN a draft is dismissed → THEN the applied widget query remains unchanged.
+- WHEN Apply commits a draft → THEN only that widget's callback runs; F0 does not merge it into report filters.
+- WHEN report and widget filters both exist → THEN the host composes them in the data-source query according to its own semantics.
+- WHEN filters are applied → THEN the trigger counter reports how many filter fields are active without rendering their selected values in the widget header.
+- WHEN a hover-capable widget is hovered or the trigger receives keyboard focus → THEN the filter icon appears with the other widget actions and remains visible while its popover is open; touch-only devices keep it visible.
+
+**Complete interaction**
+
+The story applies filters independently to a metric, chart, and collection,
+and verifies that a resolver returning `undefined` leaves a widget untouched.
+
+<Canvas of={Stories.WithItemFilters} />
+
+**Applied and dismissed state**
+
+<Canvas of={Stories.ItemFiltersApplied} />
+
+**Hover and keyboard filter signal**
+
+This story verifies the count-only header, hover reveal, and keyboard-focus
+fallback without exposing selected values in the widget.
+
+<Canvas of={Stories.HoverItemFilterSignal} />
 
 ## Accessibility
 
@@ -415,3 +472,4 @@ The filter bar remains usable when valid report filters return empty chart data.
 - The dashboard area-selection action changes its name from "Draw to ask One" to "Cancel selection" while drawing. After completion it returns to "Draw to ask One", and the selected chart exposes an icon-only "Clear selection" button immediately outside the retained polygon. The button flips to another edge when needed so it remains inside the chart surface.
 - A persistent polite status region announces drawing instructions and empty selections. While drawing, incompatible widgets are inert and hidden from the accessibility tree; the dashboard instruction explains that those widgets are unavailable.
 - Each compatible chart exposes a compact icon-only "Select chart values without drawing" menu while drawing is active. Its accessible name also includes the widget title so assistive-technology users can distinguish charts. Keyboard, touch, and single-pointer users can select the same bounded data-point contract without a drag gesture; the normal idle dashboard still has no per-widget drawing controls.
+- Widget filter rows announce whether their draft is active, the compact list moves focus to its first control when opened, and returning from an editor restores focus to its row (or the next available row if the definition disappeared).

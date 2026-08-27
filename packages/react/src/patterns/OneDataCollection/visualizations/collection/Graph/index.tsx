@@ -66,6 +66,8 @@ export const GraphCollection = <
   currentUserNodeId,
   getNodeId,
   getChildrenCount,
+  stackNodes,
+  stackedTrailing,
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
@@ -125,6 +127,7 @@ export const GraphCollection = <
       tags,
       getNodeId,
       getChildrenCount,
+      stackNodes,
       childrenFilters,
       defaultExpandDepth,
       loadNodePath,
@@ -310,6 +313,12 @@ export const GraphCollection = <
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
+            // One call for both shapes. When the graph sets `ctx.stacked` this
+            // renders as a row, which mirrors the card's anatomy (same box, same
+            // leading avatar, same title) so a column reads as a continuation of
+            // its parent. The card-only extras below — subtitle, tags, the
+            // selection toolbar, the hover card — are ignored for a row, where
+            // `trailing` takes their place.
             return (
               <F0GraphNode
                 {...ctx}
@@ -318,6 +327,7 @@ export const GraphCollection = <
                 loading={ctx.dataLoading}
                 avatar={avatar?.(node.data)}
                 title={title(node.data)}
+                trailing={stackedTrailing?.(node.data)}
                 subtitle={subtitle?.(node.data)}
                 tags={orderedTags?.(node.data)}
                 actions={nodeActions?.(node.data)}

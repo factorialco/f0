@@ -419,6 +419,41 @@ export type DashboardItem<
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
 
+/** Report-style definitions accepted by a dashboard item's filter control. */
+export type DashboardItemFiltersDefinition<Keys extends string = string> =
+  FiltersDefinition<Keys>
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export type DashboardItemFiltersState<
+  Definitions extends DashboardItemFiltersDefinition,
+> = FiltersState<Definitions>
+
+/**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * Every item type shows the same filter control in its header on hover or
+ * keyboard focus, while touch-only devices keep it available without hover.
+ * Applied filters are signalled by the trigger counter without exposing their
+ * selected values in the widget header.
+ *
+ * The picker holds a draft state; `onChange` fires only when the user applies,
+ * with cleared or incomplete entries stripped from the emitted state.
+ *
+ * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
+ * definition — so dashboard configs remain JSON-compatible.
+ */
+export interface DashboardItemFiltersConfig<
+  ItemFilters extends DashboardItemFiltersDefinition =
+    DashboardItemFiltersDefinition,
+> {
+  /** Filter definitions available for this widget. */
+  filters: ItemFilters
+  /** Currently applied filter state for this widget. */
+  value: DashboardItemFiltersState<ItemFilters>
+  /** Called with the new state when the user applies changes. */
+  onChange: (value: DashboardItemFiltersState<ItemFilters>) => void
+}
+
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks
 // ---------------------------------------------------------------------------
@@ -546,6 +581,16 @@ export interface F0AnalyticsDashboardProps<
    * Each item declares its type, visual config, grid span, and data fetcher.
    */
   items: DashboardItem<Filters>[]
+  /**
+   * Resolve the per-widget filter configuration for each dashboard item.
+   *
+   * Return a config to show a filter icon in that widget's header (next to
+   * the fullscreen and menu buttons) opening a compact filter popover; return
+   * `undefined` to hide the control for that item.
+   */
+  itemFilters?: (
+    item: DashboardItem<Filters>
+  ) => DashboardItemFiltersConfig | undefined
   /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */

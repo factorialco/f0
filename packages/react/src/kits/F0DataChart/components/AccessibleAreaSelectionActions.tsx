@@ -46,6 +46,7 @@ export function F0DataChartAccessibleAreaSelectionActions({
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
   const contentRef = useRef<HTMLDivElement>(null)
   const shouldFocusPageRef = useRef(false)
+  const pendingSubmitRef = useRef<F0DataChartAreaSelectionPoint[] | null>(null)
 
   useEffect(() => {
     setOpen(false)
@@ -101,6 +102,17 @@ export function F0DataChartAccessibleAreaSelectionActions({
           align="start"
           side="top"
           className="max-h-80 max-w-[min(32rem,90vw)] overflow-y-auto"
+          onCloseAutoFocus={(event) => {
+            const points = pendingSubmitRef.current
+            if (!points) return
+
+            // The dashboard replaces this per-chart trigger synchronously when
+            // the selection is accepted. Let the host move focus to its stable
+            // global action instead of asking Radix to focus an unmounting node.
+            event.preventDefault()
+            pendingSubmitRef.current = null
+            onSubmit(points)
+          }}
         >
           {hasPrevious && (
             <DropdownMenuItem
@@ -144,7 +156,9 @@ export function F0DataChartAccessibleAreaSelectionActions({
           )}
           <DropdownMenuItem
             disabled={selectedPoints.length === 0}
-            onSelect={() => onSubmit(selectedPoints)}
+            onSelect={() => {
+              pendingSubmitRef.current = selectedPoints
+            }}
           >
             {submitLabel.replace("{{count}}", String(selectedPoints.length))}
           </DropdownMenuItem>

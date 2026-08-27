@@ -640,6 +640,11 @@ export function useAreaSelection(
     if (!props.areaSelection.active) {
       latestSelectedEvent.current = null
       pendingPolygon.current = null
+      pendingArea.current = null
+      if (pendingTimer.current !== null) {
+        window.clearTimeout(pendingTimer.current)
+        pendingTimer.current = null
+      }
       chart.dispatchAction({
         type: "takeGlobalCursor",
         key: "brush",
@@ -658,10 +663,22 @@ export function useAreaSelection(
             projectAreaRange(chart, props.areaSelection.selectedArea)
           )
         }
+      } else {
+        chart.dispatchAction({ type: "brush", areas: [] })
+        reportAreaPosition(null)
       }
       return
     }
 
+    latestSelectedEvent.current = null
+    pendingPolygon.current = null
+    pendingArea.current = null
+    if (pendingTimer.current !== null) {
+      window.clearTimeout(pendingTimer.current)
+      pendingTimer.current = null
+    }
+    chart.dispatchAction({ type: "brush", areas: [] })
+    reportAreaPosition(null)
     chart.dispatchAction({
       type: "takeGlobalCursor",
       key: "brush",
@@ -669,7 +686,7 @@ export function useAreaSelection(
     })
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
+      if (event.key !== "Escape" || event.defaultPrevented) return
       event.preventDefault()
       configRef.current?.onCancel?.()
     }

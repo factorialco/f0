@@ -105,9 +105,6 @@ export interface ActionCommonProps {
    */
   "aria-label"?: string
 
-  /** Announces the state of a toggle action. */
-  "aria-pressed"?: React.AriaAttributes["aria-pressed"]
-
   /**
    * The tab index of the action.
    */

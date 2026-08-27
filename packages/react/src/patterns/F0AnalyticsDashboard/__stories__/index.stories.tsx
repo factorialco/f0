@@ -1,13 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useId, useState } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
 import type { FiltersState } from "@/patterns/OneFilterPicker/types"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { DashboardItem } from "../types"
+import type {
+  DashboardItem,
+  DashboardItemFiltersConfig,
+  DashboardItemFiltersState,
+} from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
 import {
@@ -522,10 +526,23 @@ export const Snapshot: Story = {
         filters={dashboardFilters}
         items={metricHeightItems}
       />
+      <ItemFiltersDemo
+        items={mixedItems}
+        initialValues={{
+          headcount: { country: ["ES"] },
+          "employee-table": { country: ["ES", "FR"] },
+        }}
+      />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const title = canvas.getAllByText("Headcount by Department").at(-1)
+    const filteredWidget = title?.closest("[class*='dashitem']")
+    if (!filteredWidget) throw new Error("The filtered widget did not render")
+    await userEvent.hover(filteredWidget)
+  },
 }
-
 // ---------------------------------------------------------------------------
 // A real One-authored report
 // ---------------------------------------------------------------------------
@@ -697,5 +714,361 @@ export const EmptyDashboard: Story = {
     await expect(await canvas.findAllByText("No data available")).toHaveLength(
       emptyItems.length
     )
+  },
+}
+// ─── Item filters ────────────────────────────────────────────────
+
+const itemFilterIds = [
+  "total-headcount",
+  "headcount",
+  "employee-table",
+  "attrition-rate",
+]
+
+const itemFilterItems = itemFilterIds.flatMap((id, index) => {
+  const item = mixedItems.find((candidate) => candidate.id === id)
+  if (!item) return []
+
+  return [
+    {
+      ...item,
+      x: index < 3 ? index * 4 : 0,
+      y: index < 3 ? 0 : 7,
+      colSpan: 4,
+      rowSpan: index < 3 ? 7 : 3,
+      ...(id === "attrition-rate"
+        ? { title: "No filters (undefined)", explanation: undefined }
+        : {}),
+    },
+  ]
+})
+
+/** Report-style definitions using values supplied by a semantic catalog. */
+const itemFilterDefinitions = {
+  country: {
+    type: "in" as const,
+    label: "Country",
+    options: {
+      options: [
+        { value: "ES", label: "Spain" },
+        { value: "FR", label: "France" },
+        { value: "DE", label: "Germany" },
+      ],
+    },
+  },
+  agreementType: {
+    type: "in" as const,
+    label: "Agreement type",
+    options: {
+      options: [
+        { value: "indefinite", label: "Indefinite" },
+        { value: "temporary", label: "Temporary" },
+      ],
+    },
+  },
+  startDate: {
+    type: "date" as const,
+    label: "Start date",
+    options: { mode: "range" as const },
+  },
+}
+
+const onItemFiltersChange = fn()
+
+type ItemFilterDefinitions = typeof itemFilterDefinitions
+type ItemFilterState = DashboardItemFiltersState<ItemFilterDefinitions>
+type ItemFilterStatesByItem = Record<string, ItemFilterState>
+
+const ItemFiltersDemo = ({
+  initialValues = {},
+  items = itemFilterItems,
+}: {
+  initialValues?: ItemFilterStatesByItem
+  items?: DashboardItem<typeof dashboardFilters>[]
+}) => {
+  const [valuesByItem, setValuesByItem] =
+    useState<ItemFilterStatesByItem>(initialValues)
+
+  return (
+    <F0AnalyticsDashboard
+      items={items}
+      itemFilters={(item) => {
+        if (item.id === "attrition-rate") return undefined
+        const config: DashboardItemFiltersConfig<ItemFilterDefinitions> = {
+          filters: itemFilterDefinitions,
+          value: valuesByItem[item.id] ?? {},
+          onChange: (value) => {
+            onItemFiltersChange(item.id, value)
+            setValuesByItem((prev) => ({
+              ...prev,
+              [item.id]: value,
+            }))
+          },
+        }
+        return config
+      }}
+    />
+  )
+}
+
+/**
+ * Per-widget filters, rendered consistently in every widget header:
+ *
+ * - **Metric, chart, and collection** widgets get a filter icon opening a
+ *   compact anchored popover:
+ *   a list of this widget's fields, then the same catalog-backed enum and date
+ *   controls used by report-level filters.
+ * - Applied filters produce only a count on the icon; selected values stay in
+ *   the picker instead of consuming widget-header space.
+ * - The filter icon follows the other widget actions: visible on hover or
+ *   keyboard focus, and while its popover is open.
+ *
+ * Applying emits `onChange` for that widget only. The last metric's resolver
+ * returns `undefined`, so it has no filter control at all.
+ */
+export const WithItemFilters: Story = {
+  render: () => <ItemFiltersDemo />,
+  play: async ({ canvasElement }) => {
+    onItemFiltersChange.mockClear()
+    const page = within(canvasElement.closest("body")!)
+
+    const widgetOf = (title: string) =>
+      page.getByText(title).closest("[class*='dashitem']") as HTMLElement
+
+    // Header icons appear on the metric, chart, and collection. The fourth
+    // widget's resolver returns undefined so it gets no control at all.
+    const metricTrigger = within(widgetOf("Total Headcount")).getByLabelText(
+      "Filters"
+    )
+    const chartTrigger = within(
+      widgetOf("Headcount by Department")
+    ).getByLabelText("Filters")
+    const tableTrigger = within(widgetOf("Employee Directory")).getByRole(
+      "button",
+      { name: "Filters" }
+    )
+    const openFilterDialog = async (trigger: HTMLElement) => {
+      await userEvent.click(trigger)
+      await waitFor(() => expect(trigger).toHaveAttribute("aria-controls"))
+      const dialogId = trigger.getAttribute("aria-controls")
+      const dialog = dialogId
+        ? canvasElement.ownerDocument.getElementById(dialogId)
+        : null
+      if (!dialog) throw new Error("The item filter dialog did not open")
+      return within(dialog)
+    }
+    await expect(
+      within(widgetOf("No filters (undefined)")).queryByLabelText("Filters")
+    ).toBeNull()
+
+    // — Metric: header icon → compact popover → drill in → apply —
+    const metricDialog = await openFilterDialog(metricTrigger)
+    await userEvent.click(metricDialog.getByRole("button", { name: "Country" }))
+
+    await userEvent.click(
+      await metricDialog.findByRole("checkbox", { name: "Spain" })
+    )
+    await userEvent.click(
+      metricDialog.getByRole("button", { name: "Apply selection" })
+    )
+    await userEvent.click(
+      metricDialog.getByRole("button", { name: "Apply filters" })
+    )
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("total-headcount", {
+        country: ["ES"],
+      })
+    )
+    await expect(onItemFiltersChange).toHaveBeenCalledOnce()
+
+    // The applied filter surfaces as a counter on this widget's trigger only.
+    await waitFor(() => expect(metricTrigger).toHaveTextContent("1"))
+    await expect(chartTrigger).not.toHaveTextContent("1")
+
+    // — Chart: the same header flow remains isolated to the chart widget —
+    onItemFiltersChange.mockClear()
+    const chartDialog = await openFilterDialog(chartTrigger)
+    await userEvent.click(chartDialog.getByRole("button", { name: "Country" }))
+    await userEvent.click(
+      await chartDialog.findByRole("checkbox", { name: "France" })
+    )
+    await userEvent.click(
+      chartDialog.getByRole("button", { name: "Apply selection" })
+    )
+    await userEvent.click(
+      chartDialog.getByRole("button", { name: "Apply filters" })
+    )
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("headcount", {
+        country: ["FR"],
+      })
+    )
+    await expect(onItemFiltersChange).toHaveBeenCalledOnce()
+    await waitFor(() => expect(chartTrigger).toHaveTextContent("1"))
+    await expect(metricTrigger).toHaveTextContent("1")
+
+    // — Collection: the same header picker contract —
+    onItemFiltersChange.mockClear()
+    const tableDialog = await openFilterDialog(tableTrigger)
+    await userEvent.click(tableDialog.getByRole("button", { name: "Country" }))
+    await userEvent.click(
+      await tableDialog.findByRole("checkbox", { name: "Germany" })
+    )
+    await userEvent.click(
+      tableDialog.getByRole("button", { name: "Apply selection" })
+    )
+    await userEvent.click(
+      tableDialog.getByRole("button", { name: "Apply filters" })
+    )
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("employee-table", {
+        country: ["DE"],
+      })
+    )
+
+    await expect(tableTrigger).toHaveTextContent("1")
+    await expect(
+      within(widgetOf("Employee Directory")).queryByText("Country: Germany")
+    ).toBeNull()
+  },
+}
+
+/**
+ * Widgets with filters already applied: every filter icon shows only the
+ * applied count. Dismissing the popover without applying keeps the value
+ * intact.
+ */
+export const ItemFiltersApplied: Story = {
+  render: () => (
+    <ItemFiltersDemo
+      initialValues={{
+        headcount: { country: ["ES"] },
+        "employee-table": { country: ["ES", "FR"] },
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    onItemFiltersChange.mockClear()
+    const page = within(canvasElement.closest("body")!)
+    const chart = page
+      .getByText("Headcount by Department")
+      .closest("[class*='dashitem']") as HTMLElement
+    const filtered = within(chart).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country (1)",
+    })
+    await expect(filtered).toHaveTextContent("1")
+
+    const table = page
+      .getByText("Employee Directory")
+      .closest("[class*='dashitem']") as HTMLElement
+    const tableFilter = within(table).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country (1)",
+    })
+    await expect(tableFilter).toHaveTextContent("1")
+    await expect(within(table).queryByText(/Spain \+1/)).toBeNull()
+
+    // Open and dismiss without applying — the counter must not change.
+    await userEvent.click(filtered)
+    await waitFor(() => expect(filtered).toHaveAttribute("aria-controls"))
+    const dialogId = filtered.getAttribute("aria-controls")
+    const popover = dialogId
+      ? canvasElement.ownerDocument.getElementById(dialogId)
+      : null
+    if (!popover) throw new Error("The item filter dialog did not open")
+    const dialog = within(popover)
+    await userEvent.click(dialog.getByRole("button", { name: "Country" }))
+    await expect(dialog.getByRole("checkbox", { name: "Spain" })).toBeChecked()
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(filtered).toHaveTextContent("1"))
+    await expect(onItemFiltersChange).not.toHaveBeenCalled()
+
+    await userEvent.click(filtered)
+    const reopenedId = filtered.getAttribute("aria-controls")
+    const reopened = reopenedId
+      ? canvasElement.ownerDocument.getElementById(reopenedId)
+      : null
+    if (!reopened) throw new Error("The item filter dialog did not reopen")
+    const reopenedDialog = within(reopened)
+    await userEvent.click(
+      reopenedDialog.getByRole("button", { name: "Country" })
+    )
+    await expect(
+      reopenedDialog.getByRole("checkbox", { name: "Spain" })
+    ).toBeChecked()
+    await userEvent.keyboard("{Escape}")
+  },
+}
+
+const hoverItem = (id: string, title: string): DashboardItem => ({
+  id,
+  title,
+  type: "metric",
+  fetchData: async () => ({ value: 145 }),
+})
+
+const hoverFilterValues: ItemFilterStatesByItem = {
+  hover: {
+    country: ["ES"],
+    agreementType: ["indefinite"],
+    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
+  },
+}
+
+/**
+ * On hover-capable devices, the filter action stays out of the way until the
+ * widget is hovered or the control receives keyboard focus. Touch-only devices
+ * keep it available. Applied values remain represented only by the icon
+ * counter.
+ */
+export const HoverItemFilterSignal: Story = {
+  tags: ["no-sidebar", "widget-filters"],
+  render: () => (
+    <div className="w-[760px] p-4">
+      <ItemFiltersDemo
+        items={[
+          hoverItem("hover", "Hover widget") as never,
+          hoverItem("attrition-rate", "Unfiltered companion") as never,
+        ]}
+        initialValues={hoverFilterValues}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const widget = canvas
+      .getByText("Hover widget")
+      .closest("[class*='dashitem']") as HTMLElement
+    const trigger = within(widget).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country, Agreement type, Start date (3)",
+    })
+    const supportsHover =
+      canvasElement.ownerDocument.defaultView?.matchMedia("(hover: hover)")
+        .matches ?? true
+
+    await step("Only the counter represents applied filters", async () => {
+      await expect(trigger).toHaveTextContent("3")
+      await expect(within(widget).queryByText("Country: Spain")).toBeNull()
+      if (supportsHover) await expect(trigger).not.toBeVisible()
+      else await expect(trigger).toBeVisible()
+    })
+
+    await step("Hover reveals the filter action", async () => {
+      await userEvent.hover(widget)
+      await expect(trigger.parentElement).toHaveClass(
+        "group-hover/dashitem:sm:opacity-100"
+      )
+    })
+
+    await step("Keyboard focus keeps the filter action visible", async () => {
+      await userEvent.unhover(widget)
+      await userEvent.tab()
+      await expect(trigger).toHaveFocus()
+      await waitFor(() => expect(trigger).toBeVisible())
+    })
   },
 }

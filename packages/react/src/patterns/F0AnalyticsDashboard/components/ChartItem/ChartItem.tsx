@@ -5,12 +5,12 @@ import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type {
-  F0DataChartAccessibleAreaSelectionAction,
   F0DataChartAreaSelection,
   F0DataChartAreaSelectionArea,
   F0DataChartAreaSelectionPoint,
   F0DataChartProps,
 } from "@/kits/F0DataChart"
+import type { F0DataChartAccessibleAreaSelectionAction } from "@/kits/F0DataChart/components/AccessibleAreaSelectionActions"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -27,11 +27,8 @@ import {
   Table as TableIcon,
 } from "@/icons/app"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-import {
-  DataChartEmptyStateView,
-  F0DataChart,
-  F0DataChartAccessibleAreaSelectionActions,
-} from "@/kits/F0DataChart"
+import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
+import { F0DataChartAccessibleAreaSelectionActions } from "@/kits/F0DataChart/components/AccessibleAreaSelectionActions"
 import {
   BarChartSkeleton,
   FunnelChartSkeleton,
@@ -54,6 +51,7 @@ import type {
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,
+  DashboardItemFiltersConfig,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,
@@ -214,6 +212,18 @@ export function buildPointQuoteText(
 }
 
 const MAX_QUOTED_SELECTION_POINTS = 20
+const MAX_AREA_SELECTION_POINTS = 100
+
+/** @internal Builds the same bounded payload as a completed pointer selection. */
+export function buildControlAreaSelection(
+  points: F0DataChartAreaSelectionPoint[]
+): F0DataChartAreaSelection {
+  return {
+    source: "control",
+    points: points.slice(0, MAX_AREA_SELECTION_POINTS),
+    totalPointCount: points.length,
+  }
+}
 
 function buildAreaPointQuoteText(
   chart: F0DataChartProps,
@@ -992,6 +1002,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
@@ -1022,6 +1033,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   handleDelete,
   onAskAi,
@@ -1068,10 +1080,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [number, number][] | null
   >(null)
   const enabled = item.useDashboardFilters !== false
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, filters, enabled, itemFiltersKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartSurfaceRef = useRef<HTMLDivElement>(null)
   const chartSurfaceMounted =
@@ -1505,6 +1518,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={unrenderableChart ? undefined : retry}
       skeleton={chartSkeleton(safeChart)}
       actions={allActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       onAskAi={onAskAi}
@@ -1610,11 +1624,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
                   nextLabel={translations.navigation.next}
                   resetOn={areaSelectionContract}
                   onSubmit={(points) =>
-                    handleAreaSelection({
-                      source: "control",
-                      points: points.slice(0, 100),
-                      totalPointCount: points.length,
-                    })
+                    handleAreaSelection(buildControlAreaSelection(points))
                   }
                 />
               )}

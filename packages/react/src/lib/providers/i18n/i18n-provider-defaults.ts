@@ -242,6 +242,7 @@ export const defaultTranslations = {
       viewSelectorLabel: "Select view",
     },
     table: {
+      seeMoreChildren: "See more",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
