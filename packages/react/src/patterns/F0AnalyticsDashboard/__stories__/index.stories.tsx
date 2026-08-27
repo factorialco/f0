@@ -314,6 +314,7 @@ const customItem: DashboardCustomItem<DashboardFiltersType> = {
         </p>
       </div>
       <div
+        role="img"
         aria-label="Example custom visualization"
         className="grid h-52 grid-cols-6 items-end gap-3"
       >
@@ -342,6 +343,13 @@ export const CustomItemDashboard: StoryObj<
     items: [customItem],
   },
   render: (args) => <F0AnalyticsDashboard {...args} />,
+  play: async ({ canvasElement }) => {
+    await expect(
+      await within(canvasElement).findByRole("img", {
+        name: "Example custom visualization",
+      })
+    ).toBeVisible()
+  },
 }
 
 const sharedRowItems: DashboardItem<DashboardFiltersType>[] = [

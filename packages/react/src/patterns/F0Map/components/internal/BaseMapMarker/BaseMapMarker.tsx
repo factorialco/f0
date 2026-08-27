@@ -812,6 +812,11 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
         {labelNode}
       </>
     )
+    const resolvedAriaLabel =
+      ariaLabel ??
+      (props.variant === "count"
+        ? [label, props.count].filter(Boolean).join(", ")
+        : label)
 
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
@@ -834,7 +839,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
             <button
               ref={ref}
               type="button"
-              aria-label={ariaLabel}
+              aria-label={resolvedAriaLabel}
               aria-pressed={selected}
               onClick={onClick}
               className={cn(
@@ -850,8 +855,9 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           )
         ) : (
           <span
-            role="img"
-            aria-label={ariaLabel}
+            role={resolvedAriaLabel ? "img" : undefined}
+            aria-label={resolvedAriaLabel}
+            aria-hidden={resolvedAriaLabel ? undefined : true}
             className={cn("relative inline-flex", className)}
           >
             {body}

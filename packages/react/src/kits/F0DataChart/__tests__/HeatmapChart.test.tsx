@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import "@testing-library/jest-dom/vitest"
-import { screen } from "@testing-library/react"
-import { zeroRender as render } from "@/testing/test-utils"
+import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
 
@@ -88,9 +86,9 @@ describe("HeatmapChart — responsive breakpoints", () => {
     containerSize.width = 180
     render(<F0DataChart {...heatmapProps} />)
 
-    expect(
-      screen.getByText("Heatmap not supported at this size")
-    ).toBeInTheDocument()
+    expect(screen.getByText("Heatmap not supported at this size")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
   })
 
   it("shows only the X axis at the medium breakpoint (220–519px)", () => {

@@ -149,6 +149,67 @@ describe("BaseMapMarker", () => {
     expect(label.style.textShadow).toBe("")
   })
 
+  it("uses its visible label and count as the image name", () => {
+    const { rerender } = render(
+      <BaseMapMarker
+        variant="count"
+        count="39"
+        color="red"
+        label="Barcelona HQ"
+      />
+    )
+
+    expect(screen.getByRole("img", { name: "Barcelona HQ, 39" })).toBeVisible()
+
+    rerender(<BaseMapMarker variant="count" count="39" color="red" />)
+    expect(screen.getByRole("img", { name: "39" })).toBeVisible()
+  })
+
+  it("uses an explicit accessible name in preference to visible content", () => {
+    render(
+      <BaseMapMarker
+        variant="count"
+        count="39"
+        label="Barcelona HQ"
+        ariaLabel="Barcelona headquarters, high density, 39 clock-ins"
+      />
+    )
+
+    expect(
+      screen.getByRole("img", {
+        name: "Barcelona headquarters, high density, 39 clock-ins",
+      })
+    ).toBeVisible()
+  })
+
+  it("uses the visible label for non-count markers", () => {
+    const { rerender } = render(
+      <BaseMapMarker variant="color" label="Madrid office" />
+    )
+
+    expect(screen.getByRole("img", { name: "Madrid office" })).toBeVisible()
+
+    rerender(<BaseMapMarker variant="color" />)
+    expect(screen.queryByRole("img")).not.toBeInTheDocument()
+    expect(document.querySelector("[aria-hidden='true']")).toBeVisible()
+  })
+
+  it("names an interactive marker from its visible content", () => {
+    const onClick = vi.fn()
+    render(
+      <BaseMapMarker
+        variant="count"
+        count="39"
+        label="Barcelona HQ"
+        onClick={onClick}
+      />
+    )
+
+    const marker = screen.getByRole("button", { name: "Barcelona HQ, 39" })
+    fireEvent.click(marker)
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
   it("keeps route-stop letters limited to one uppercase character", () => {
     render(<BaseMapMarker variant="letter" letter="ab" />)
     expect(screen.getByText("A")).toBeInTheDocument()

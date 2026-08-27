@@ -1,5 +1,4 @@
 import {
-  afterAll,
   afterEach,
   beforeAll,
   beforeEach,
@@ -21,6 +20,7 @@ import { resolveChartTheme } from "../utils/theme"
 // ---------------------------------------------------------------------------
 
 const setOptionMock = vi.fn()
+const chartDom = document.createElement("div")
 
 /** Handlers the chart registered, so tests can fire ECharts events at it. */
 const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
@@ -39,7 +39,7 @@ vi.mock("echarts", () => ({
     setOption: setOptionMock,
     resize: vi.fn(),
     dispose: vi.fn(),
-    getDom: vi.fn(() => document.createElement("div")),
+    getDom: vi.fn(() => chartDom),
     on: vi.fn((event: string, handler: (params: unknown) => void) => {
       ;(chartHandlers[event] ??= []).push(handler)
     }),
@@ -161,8 +161,16 @@ function getBorderRadii(seriesIndex: number) {
   )
 }
 
+beforeAll(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    measureText: (text: string) => ({ width: text.length * 8 }),
+  } as unknown as CanvasRenderingContext2D)
+})
+
 beforeEach(() => {
   setOptionMock.mockClear()
+  chartDom.removeAttribute("role")
+  chartDom.removeAttribute("aria-label")
   for (const key of Object.keys(chartHandlers)) delete chartHandlers[key]
   containerSize.width = 800
   containerSize.height = 320
@@ -753,16 +761,6 @@ describe("BarChart — value axis grid density", () => {
 // ---------------------------------------------------------------------------
 
 describe("BarChart — hideOverflowingLabels", () => {
-  // jsdom has no canvas; return a deterministic width so the measurer is stable.
-  beforeAll(() => {
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-      measureText: (text: string) => ({ width: text.length * 8 }),
-    } as unknown as CanvasRenderingContext2D)
-  })
-  afterAll(() => {
-    vi.restoreAllMocks()
-  })
-
   const base = {
     type: "bar" as const,
     categories: ["Jan", "Feb", "Mar"],
@@ -1000,6 +998,84 @@ describe("BarChart — item tooltip", () => {
     expect(html).not.toContain("K") // not the compact form
     expect(getLatestOption().aria?.enabled).toBe(true)
     expect(getLatestOption().aria?.label?.description).toContain("107,505")
+  })
+
+  it("does not expose a blank canvas as an unlabeled image", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={[]}
+        series={[]}
+        emptyState={{ disabled: true }}
+      />
+    )
+
+    expect(getLatestOption().aria).toEqual({ enabled: false })
+  })
+
+  it("clears stale image semantics when chart data becomes empty", () => {
+    const { rerender } = render(
+      <F0DataChart
+        type="bar"
+        categories={["January"]}
+        series={[{ name: "Revenue", data: [100] }]}
+        emptyState={{ disabled: true }}
+      />
+    )
+    chartDom.setAttribute("role", "img")
+    chartDom.setAttribute("aria-label", "Revenue: January, 100")
+
+    rerender(
+      <F0DataChart
+        type="bar"
+        categories={[]}
+        series={[]}
+        emptyState={{ disabled: true }}
+      />
+    )
+
+    expect(chartDom).not.toHaveAttribute("role")
+    expect(chartDom).not.toHaveAttribute("aria-label")
+  })
+
+  it("omits empty named series from the chart description", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={[]}
+        series={[{ name: "Revenue", data: [] }]}
+        emptyState={{ disabled: true }}
+      />
+    )
+
+    expect(getLatestOption().aria).toEqual({ enabled: false })
+  })
+
+  it("describes populated series without counting empty series", () => {
+    const populatedSeries = Array.from({ length: 11 }, (_, index) => ({
+      name: `Series ${index + 1}`,
+      data: [index + 1],
+    }))
+
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["January"]}
+        series={[
+          ...populatedSeries,
+          { name: "Empty revenue", data: [] },
+          { name: "Empty margin", data: [] },
+        ]}
+      />
+    )
+
+    const aria = getLatestOption().aria
+    expect(aria?.enabled).toBe(true)
+    expect(aria?.label?.description).toContain("Series 1")
+    expect(aria?.label?.description).toContain("1 more series.")
+    expect(aria?.label?.description).not.toContain("3 more series.")
+    expect(aria?.label?.description).not.toContain("Empty revenue")
+    expect(aria?.label?.description).not.toContain("Empty margin")
   })
 
   // The tooltip reads the number the way the axis does, so a unit written by
@@ -1636,8 +1712,8 @@ describe("BarChart — headroom for labels above columns", () => {
 })
 
 describe("BarChart — category label width", () => {
-  // jsdom has no canvas, so `measureTextWidth` falls back to 8px per character:
-  // every expectation below is (longest label length × 8) + 4px of slack, or the
+  // Keep measurement deterministic across jsdom/canvas implementations: every
+  // expectation below is (longest label length × 8) + 4px of slack, or the
   // container-derived cap where that is smaller.
   const long = "A very long workplace name indeed" // 33 chars → 268
   const short = "Berlin" // 6 chars → 52

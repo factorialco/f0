@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { Table as TableRoot } from "@/ui/table"
 
@@ -23,6 +23,7 @@ export interface TableProps {
 function TableBase({ children, loading = false }: TableProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isScrolledRight, setIsScrolledRight] = useState(false)
+  const [isScrollable, setIsScrollable] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -30,26 +31,48 @@ function TableBase({ children, loading = false }: TableProps) {
     const container = containerRef.current
     if (!container) return
 
-    const handleScroll = () => {
+    const updateScrollState = () => {
       setIsScrolled(container.scrollLeft > 0)
       setIsScrolledRight(
         container.scrollWidth - container.scrollLeft - container.clientWidth > 0
       )
+      setIsScrollable(
+        container.scrollWidth > container.clientWidth ||
+          container.scrollHeight > container.clientHeight
+      )
     }
 
-    handleScroll()
-    container.addEventListener("scroll", handleScroll)
+    updateScrollState()
+    container.addEventListener("scroll", updateScrollState)
+
+    const resizeObserver =
+      typeof ResizeObserver === "function"
+        ? new ResizeObserver(updateScrollState)
+        : null
+    resizeObserver?.observe(container)
+    const content = container.firstElementChild
+    if (content) resizeObserver?.observe(content)
 
     return () => {
-      container.removeEventListener("scroll", handleScroll)
+      container.removeEventListener("scroll", updateScrollState)
+      resizeObserver?.disconnect()
     }
-  }, [])
+  }, [children])
 
   return (
     <TableContext.Provider
       value={{ isScrolled, setIsScrolled, isScrolledRight, setIsScrolledRight }}
     >
-      <div ref={containerRef} className="relative h-full w-full overflow-auto">
+      <div
+        ref={containerRef}
+        tabIndex={isScrollable ? 0 : undefined}
+        className={cn(
+          "relative h-full w-full overflow-auto",
+          focusRing(
+            "rounded-sm focus-visible:ring-inset focus-visible:ring-offset-0"
+          )
+        )}
+      >
         <TableRoot
           className={cn(loading && "select-none opacity-50 transition-opacity")}
           aria-live={loading ? "polite" : undefined}
