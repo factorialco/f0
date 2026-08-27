@@ -104,7 +104,7 @@ describe("lockedCeiling", () => {
     return el
   }
 
-  test("is the bottom edge of the pinned run", () => {
+  test("is the top of the first free SLOT: the pinned run plus the gap", () => {
     mockCards({ clock: 120, payroll: 80, events: 200 })
     const widgets = [
       widget("clock", { locked: true }),
@@ -112,14 +112,23 @@ describe("lockedCeiling", () => {
       widget("events"),
     ]
 
-    expect(lockedCeiling(widgets, column(widgets))).toBe(200)
+    // The pins end at 200; the main column keeps 24px between cards.
+    expect(lockedCeiling(widgets, column(widgets), 24)).toBe(224)
+  })
+
+  test("takes the gap from the column it is measuring", () => {
+    mockCards({ clock: 120, events: 200 })
+    const widgets = [widget("clock", { locked: true }), widget("events")]
+
+    // The rail's cards sit 16px apart, not the main column's 24px.
+    expect(lockedCeiling(widgets, column(widgets), 16)).toBe(136)
   })
 
   test("is null when nothing pins the top", () => {
     mockCards({ events: 200, clock: 120 })
     const widgets = [widget("events"), widget("clock", { locked: true })]
 
-    expect(lockedCeiling(widgets, column(widgets))).toBeNull()
+    expect(lockedCeiling(widgets, column(widgets), 24)).toBeNull()
   })
 
   /** A virtualized column can have scrolled the pinned cards out of the DOM. */
@@ -127,11 +136,13 @@ describe("lockedCeiling", () => {
     mockCards({ events: 200 })
     const widgets = [widget("clock", { locked: true }), widget("events")]
 
-    expect(lockedCeiling(widgets, column([widget("events")]))).toBeNull()
+    expect(lockedCeiling(widgets, column([widget("events")]), 24)).toBeNull()
   })
 
   test("is null without a column to measure in", () => {
-    expect(lockedCeiling([widget("clock", { locked: true })], null)).toBeNull()
+    expect(
+      lockedCeiling([widget("clock", { locked: true })], null, 24)
+    ).toBeNull()
   })
 })
 
@@ -220,7 +231,8 @@ describe("a column with widgets pinned to the top", () => {
     })
 
     // The card starts at 320 (under the 120px pin and the 200px widget) and is
-    // carried 400px up: it stops with its top on the pin's bottom edge, 120.
+    // carried 400px up: it stops at the top of the first free slot — the pin's
+    // bottom edge, 120, plus the main column's 24px gap.
     const chain = (captured.modifiers ?? []).reduce(
       (transform, modifier) =>
         modifier({
@@ -230,7 +242,23 @@ describe("a column with widgets pinned to the top", () => {
       { x: 0, y: -400, scaleX: 1, scaleY: 1 }
     )
 
-    expect(chain.y).toBe(-200)
+    expect(chain.y).toBe(-176)
+  })
+
+  /**
+   * The other half of the same rule: with one free card among the pins there is
+   * a single legal order, so there is no drag to constrain in the first place.
+   */
+  test("offers no drag at all when only one card can move", () => {
+    mockCards({ clock: 120, events: 200 })
+    const { container } = zeroRender(
+      <WidgetContainer
+        widgets={[widget("clock", { locked: true }), widget("events")]}
+        onReorder={() => {}}
+      />
+    )
+
+    expect(container.querySelectorAll(".cursor-grab")).toHaveLength(0)
   })
 
   test("does not hold it back when the top is free", () => {

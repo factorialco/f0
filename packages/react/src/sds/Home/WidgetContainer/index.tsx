@@ -390,7 +390,17 @@ export function WidgetContainer({
   const canEdit = !disableEdition
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
-  const canDrag = canEdit && onReorder != null && widgets.length > 1
+  /**
+   * WHETHER THERE IS AN ARRANGEMENT TO MAKE — two widgets that can actually
+   * move, not merely two widgets. A column of one free card among pinned ones
+   * has a single legal order, so its card is given no grab cursor and no drag:
+   * offering a gesture whose every outcome is the arrangement you already have
+   * is offering a refusal.
+   */
+  const canDrag =
+    canEdit &&
+    onReorder != null &&
+    widgets.filter((widget) => !widget.locked).length > 1
   // The widget being dragged: its in-list card hides while a copy of it rides
   // the pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -812,7 +822,11 @@ export function WidgetContainer({
             // should look like — and where the pinned cards are — is what is on
             // screen right now, while nothing has moved yet.
             takeGhost(String(active.id))
-            ceilingRef.current = lockedCeiling(widgets, columnRef.current)
+            ceilingRef.current = lockedCeiling(
+              widgets,
+              columnRef.current,
+              GAP_PX[side]
+            )
             setActiveId(String(active.id))
           }}
           onDragCancel={() => {

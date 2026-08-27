@@ -17,11 +17,18 @@ export const topPins = (widgets: HomeWidgetItem[]): HomeWidgetItem[] => {
 }
 
 /**
- * HOW FAR UP A CARD MAY GO in this column: the bottom edge of that pinned run,
- * in viewport coordinates. `null` when the top isn't pinned at all — and also
- * when the pinned cards are not in the DOM to be measured, which a virtualized
- * column that has scrolled them away can do; a limit guessed from cards that
- * aren't there would be worse than no limit.
+ * HOW FAR UP A CARD MAY GO in this column: the TOP OF THE FIRST FREE SLOT, in
+ * viewport coordinates — the bottom edge of that pinned run plus the column's
+ * own `gap`. The gap is part of the answer, not a rounding error: a card held
+ * flush against a pinned one is not in a slot the column has, it is touching a
+ * widget it cannot displace, and the drop it would commit puts that same gap
+ * back anyway. Stopping at the slot means the card the pointer carries is
+ * already sitting where releasing it would leave it.
+ *
+ * `null` when the top isn't pinned at all — and also when the pinned cards are
+ * not in the DOM to be measured, which a virtualized column that has scrolled
+ * them away can do; a limit guessed from cards that aren't there would be worse
+ * than no limit.
  *
  * Measured ONCE, as the drag starts, because that is the frame of reference the
  * rest of the gesture is in: dnd-kit measures the dragged card's box then too
@@ -30,7 +37,8 @@ export const topPins = (widgets: HomeWidgetItem[]): HomeWidgetItem[] => {
  */
 export const lockedCeiling = (
   widgets: HomeWidgetItem[],
-  column: HTMLElement | null
+  column: HTMLElement | null,
+  gap: number
 ): number | null => {
   const bottoms = topPins(widgets).flatMap((widget) => {
     const box = column
@@ -39,7 +47,7 @@ export const lockedCeiling = (
     return box ? [box.bottom] : []
   })
 
-  return bottoms.length > 0 ? Math.max(...bottoms) : null
+  return bottoms.length > 0 ? Math.max(...bottoms) + gap : null
 }
 
 /**
@@ -67,8 +75,8 @@ export const noHigherThan =
 
     if (limit == null || top == null) return transform
 
-    // The card's TOP edge, not its middle: passing the pins means overlapping
-    // them at all, and a card whose top is exactly on the limit is sitting in
-    // the first slot it is allowed to have.
+    // The card's TOP edge, not its middle: passing the pins means closing the
+    // gap on them at all, and a card whose top is exactly on the limit is
+    // sitting in the first slot it is allowed to have.
     return { ...transform, y: Math.max(transform.y, limit - top) }
   }
