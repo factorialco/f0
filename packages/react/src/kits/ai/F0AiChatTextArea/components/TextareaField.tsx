@@ -70,10 +70,13 @@ export const TextareaField = ({
         >
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
-              <span
-                key={i}
-                className="font-medium text-f1-foreground-secondary"
-              >
+              // No weight change: a `<textarea>` lays its entire run out at
+              // one weight, so a heavier mention paints wider than the
+              // transparent glyphs the caret is positioned from and every
+              // character after it sits off its boundary. Colour alone carries
+              // the distinction. See the comms twin (ChatTextareaField) for the
+              // measurement.
+              <span key={i} className="text-f1-foreground-secondary">
                 {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
