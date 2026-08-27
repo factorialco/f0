@@ -802,7 +802,7 @@ export declare const aiTranslations: {
             readonly cancelChartAreaSelection: "Cancel selection";
             readonly clearChartAreaSelection: "Clear selection";
             readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.";
-            readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point.";
+            readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point";
             readonly chartAreaSelectionUnavailable: "Drawing isn't available for this widget";
             readonly selectChartDataPoints: "Select chart values without drawing";
             readonly useSelectedChartDataPoints: "Ask One about selected values ({{count}})";
@@ -2619,7 +2619,7 @@ export declare const defaultTranslations: {
             readonly cancelChartAreaSelection: "Cancel selection";
             readonly clearChartAreaSelection: "Clear selection";
             readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.";
-            readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point.";
+            readonly emptyChartAreaSelection: "No data points selected. Draw around at least one point";
             readonly chartAreaSelectionUnavailable: "Drawing isn't available for this widget";
             readonly selectChartDataPoints: "Select chart values without drawing";
             readonly useSelectedChartDataPoints: "Ask One about selected values ({{count}})";
@@ -5771,9 +5771,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -5781,11 +5783,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -5803,10 +5803,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -5814,8 +5812,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
