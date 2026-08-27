@@ -694,6 +694,15 @@ export const Default: Story = {
       await expect(
         page.getByRole("menuitem", { name: "Ask One" })
       ).toBeInTheDocument()
+
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => {
+        expect(
+          page.queryByRole("menuitem", {
+            name: "Where does this data come from?",
+          })
+        ).not.toBeInTheDocument()
+      })
     })
   },
 }
