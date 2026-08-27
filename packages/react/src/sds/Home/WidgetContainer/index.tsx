@@ -855,6 +855,31 @@ export function WidgetContainer({
           >
             {list}
           </SortableContext>
+          {/* ONE CURSOR FOR THE WHOLE GESTURE. The pointer is not always over
+              the card it is carrying: the card stops at the pinned widgets
+              (`lockedCeiling`) while the pointer keeps going, and the moment it
+              leaves the card it is over whatever lies beneath — a pinned widget,
+              a link inside it, the page — and the cursor becomes that thing's.
+              A hand that turns into an arrow reads as the drag having ended, or
+              as the pointer having lost the card; neither happened, and the drag
+              is still live and still refusing to go up.
+
+              So while a drag is in flight the pointer is over THIS: a sheet the
+              size of the viewport whose only job is to own the cursor. It sits
+              under the DragOverlay (z-999 there, so the card stays on top) and
+              over everything else, and it takes the hover states of the cards
+              beneath it out of the gesture too, which is the same argument.
+
+              dnd-kit is unaffected: its sensor listens on the document, and the
+              column's collision detection is rect-based (`closestCenter`), so
+              nothing here depends on which element the pointer is over. */}
+          {activeId ? (
+            <div
+              aria-hidden
+              data-drag-cursor
+              className="fixed inset-0 z-50 cursor-grabbing"
+            />
+          ) : null}
           {/* The card that follows the pointer is a COPY of the real one's DOM
               (`takeGhost`) in an overlay — the in-list card hides meanwhile
               (SortableWidget). On release the copy GLIDES from where it was

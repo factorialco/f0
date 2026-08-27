@@ -246,6 +246,40 @@ describe("a column with widgets pinned to the top", () => {
   })
 
   /**
+   * THE CURSOR DOES NOT REPORT THE CEILING. Once the card has stopped, the
+   * pointer carries on up and is over the pinned widget rather than the card it
+   * is dragging — and the cursor was becoming that widget's, which reads as the
+   * drag having ended when it is still live.
+   */
+  test("keeps one cursor for the gesture, wherever the pointer ends up", () => {
+    mockCards({ clock: 120, events: 200, tasks: 200 })
+    const { container } = zeroRender(
+      <WidgetContainer
+        widgets={[
+          widget("clock", { locked: true }),
+          widget("events"),
+          widget("tasks"),
+        ]}
+        onReorder={() => {}}
+      />
+    )
+
+    // Nothing owns the cursor while the column is idle.
+    expect(container.querySelector("[data-drag-cursor]")).toBeNull()
+
+    act(() => {
+      captured.onDragStart?.({
+        active: { id: "tasks" },
+      } as unknown as DragStartEvent)
+    })
+
+    const sheet = container.querySelector("[data-drag-cursor]")
+    expect(sheet).not.toBeNull()
+    // Over everything the pointer could otherwise pick a cursor up from.
+    expect(sheet).toHaveClass("fixed", "inset-0", "cursor-grabbing")
+  })
+
+  /**
    * The other half of the same rule: with one free card among the pins there is
    * a single legal order, so there is no drag to constrain in the first place.
    */
