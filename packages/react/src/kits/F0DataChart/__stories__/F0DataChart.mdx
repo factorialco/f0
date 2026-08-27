@@ -161,6 +161,16 @@ Use `dashed: true` on a series to render a target / projection line.
 
 <Canvas of={LineStories.WithDots} />
 
+### Grid lines
+
+`gridLineType` controls the value-axis grid pattern. It defaults to `"solid"`,
+accepts `"dashed"` or `"dotted"`, and accepts a numeric dash sequence such as
+`[1, 5]` when a sparser pattern is needed. `gridLineContrast="strong"` uses the
+more visible F0 border token while remaining theme-aware; the default is
+`"subtle"`.
+
+<Canvas of={LineStories.SparseGrid} />
+
 ### Responsive Snapshot
 
 The same chart rendered in every breakpoint (small / medium / large) and every series count (low / normal / large) — mirrors the AI Analytics Figma matrix.

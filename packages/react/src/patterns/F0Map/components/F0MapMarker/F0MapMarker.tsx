@@ -8,6 +8,7 @@ import {
   markerLabelPlacements,
   markerSizes,
   type BaseMapMarkerColor,
+  type BaseMapMarkerColorStep,
   type BaseMapMarkerLabelPlacement,
   type BaseMapMarkerSize,
   type BaseMapMarkerVariantProps,
@@ -25,8 +26,22 @@ export const f0MapMarkerVariants = [
   "employee",
   "company",
   "stop",
+  "density",
 ] as const
 export type F0MapMarkerVariant = (typeof f0MapMarkerVariants)[number]
+
+export const f0MapDensityLevels = ["low", "medium", "high"] as const
+export type F0MapDensityLevel = (typeof f0MapDensityLevels)[number]
+export const f0MapDensityColors = {
+  low: "red",
+  medium: "red",
+  high: "red",
+} as const satisfies Record<F0MapDensityLevel, BaseMapMarkerColor>
+export const f0MapDensityColorSteps = {
+  low: 10,
+  medium: 50,
+  high: 70,
+} as const satisfies Record<F0MapDensityLevel, BaseMapMarkerColorStep>
 
 // Public aliases for the engine types the props reference, so consumers can
 // name them from the F0Map barrel (bundled d.ts generation breaks on types
@@ -77,6 +92,7 @@ interface F0MapMarkerBaseProps extends WithDataTestIdProps {
  *    (grey when a photo replaces the colored chip).
  *  - `stop`: a route stop - a single letter (A, B, C...) on the same fixed
  *    hue as the route/arc lines it punctuates.
+ *  - `density`: an aggregated location count on a stepped Factorial heat scale.
  */
 export type F0MapMarkerVariantProps =
   | { variant: "default" }
@@ -84,14 +100,35 @@ export type F0MapMarkerVariantProps =
   | { variant: "employee"; firstName: string; lastName: string; src?: string }
   | { variant: "company"; name: string; src?: string }
   | { variant: "stop"; letter: string }
+  | { variant: "density"; value: number; level: F0MapDensityLevel }
 
 export type F0MapMarkerProps = F0MapMarkerBaseProps & F0MapMarkerVariantProps
+
+/** Keep visual and accessible density values on the same normalized scale. */
+export const formatF0MapDensityValue = (value: number): string => {
+  const normalized = Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0
+  return normalized > 99 ? "99+" : String(normalized)
+}
 
 /** Resolves a semantic variant to the engine's variant + its fixed color. */
 const toBase = (
   props: F0MapMarkerVariantProps
-): { variant: BaseMapMarkerVariantProps; color?: BaseMapMarkerColor } => {
+): {
+  variant: BaseMapMarkerVariantProps
+  color?: BaseMapMarkerColor
+  colorStep?: BaseMapMarkerColorStep
+} => {
   switch (props.variant) {
+    case "density": {
+      return {
+        variant: {
+          variant: "count",
+          count: formatF0MapDensityValue(props.value),
+        },
+        color: f0MapDensityColors[props.level],
+        colorStep: f0MapDensityColorSteps[props.level],
+      }
+    }
     case "employee":
       return {
         variant: {
@@ -124,12 +161,13 @@ const toBase = (
 
 const F0MapMarkerBase = forwardRef<HTMLButtonElement, F0MapMarkerProps>(
   function F0MapMarker(props, ref) {
-    const { variant, color } = toBase(props)
+    const { variant, color, colorStep } = toBase(props)
     return (
       <BaseMapMarker
         ref={ref}
         {...variant}
         color={color}
+        colorStep={colorStep}
         size={props.size}
         selected={props.selected}
         collapsed={props.collapsed}

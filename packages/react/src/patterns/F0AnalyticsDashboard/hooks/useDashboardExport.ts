@@ -8,6 +8,7 @@ import type {
 import type {
   DashboardChartData,
   DashboardItem,
+  DashboardLocationData,
   DashboardMetricData,
   DashboardMetricItem,
 } from "../types"
@@ -151,6 +152,51 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
         } catch (err) {
           console.warn(
             `[useDashboardExport] Failed to export collection "${item.title}":`,
+            err
+          )
+          return null
+        }
+      }
+
+      if (item.type === "location") {
+        try {
+          const data: DashboardLocationData = await item.fetchData(
+            getItemFilters(item, filters)
+          )
+          const rows = data.locations.flatMap((location) => {
+            if (location.details.length === 0) {
+              return [
+                {
+                  Location: location.name,
+                  Density: location.density,
+                  Details: location.detailsLabel,
+                },
+              ]
+            }
+
+            return location.details.map((detail) => {
+              const row: Record<string, unknown> = {
+                Location: location.name,
+                Density: location.density,
+                Details: location.detailsLabel,
+                Item: detail.title,
+              }
+              if (detail.description) row.Description = detail.description
+              for (const value of detail.values) {
+                row[value.label] = value.value
+              }
+              return row
+            })
+          })
+          if (rows.length === 0) return null
+          return {
+            name: item.title,
+            columns: extractColumns(rows),
+            rows,
+          }
+        } catch (err) {
+          console.warn(
+            `[useDashboardExport] Failed to export location item "${item.title}":`,
             err
           )
           return null

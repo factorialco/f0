@@ -15,6 +15,7 @@ export const markerVariants = [
   "color",
   "icon",
   "letter",
+  "count",
   "person",
   "team",
   "company",
@@ -44,6 +45,8 @@ export const markerColors = [
   "barbie",
 ] as const
 export type BaseMapMarkerColor = (typeof markerColors)[number]
+export const markerColorSteps = [10, 50, 60, 70] as const
+export type BaseMapMarkerColorStep = (typeof markerColorSteps)[number]
 
 // The categorical palette half of `markerColors` (everything but the two
 // neutrals), pulled from the core tokens so the values can never drift from
@@ -61,7 +64,11 @@ const HUE: Record<BaseMapMarkerColor, string> = {
     PALETTE_COLORS.map((c) => [c, baseColors[c][50]])
   ) as Record<Exclude<BaseMapMarkerColor, "neutral" | "grey">, string>),
 }
-const hslOf = (c: BaseMapMarkerColor) => `hsl(${HUE[c]})`
+const hslOf = (c: BaseMapMarkerColor, step: BaseMapMarkerColorStep = 50) => {
+  if (c === "neutral" || c === "grey") return `hsl(${HUE[c]})`
+  if (step === 10) return `hsl(${baseColors[c][50]} / 0.1)`
+  return `hsl(${baseColors[c][step]})`
+}
 
 // Darkest step of each hue (`<hue>.70`) — used for the label text. The greys
 // have no 70 step; `grey` darkens grey.solid.50 by hand.
@@ -211,12 +218,14 @@ interface BaseMapMarkerBaseProps extends WithDataTestIdProps {
   /** Defaults to `"md"`. */
   size?: BaseMapMarkerSize
   /**
-   * f0 palette hue (or `neutral` / `grey`) for the `color` / `icon` variants
-   * (default `"radical"`). Ignored for avatar/image variants: person / team /
-   * company derive their accent (label + dot) from the avatar's own color, and
-   * `image` stays neutral.
+   * f0 palette hue (or `neutral` / `grey`) for the `color` / `icon` / `letter`
+   * / `count` variants (default `"radical"`). Ignored for avatar/image variants:
+   * person / team / company derive their accent (label + dot) from the avatar's
+   * own color, and `image` stays neutral.
    */
   color?: BaseMapMarkerColor
+  /** Palette step for colored marker heads. Internal semantic variants own it. */
+  colorStep?: BaseMapMarkerColorStep
   /**
    * Active state: the marker grows to the reserved `xl` size and a white pin
    * indicator drops in underneath.
@@ -241,11 +250,10 @@ interface BaseMapMarkerBaseProps extends WithDataTestIdProps {
   onClick?: () => void
   ariaLabel?: string
   /**
-   * Render the interactive marker outside the tab order and hidden from
-   * assistive tech (`tabIndex={-1}` + `aria-hidden`) while keeping it
-   * mouse-clickable. The map uses this so its ~N canvas pins don't duplicate
-   * the operable `F0MapList` for keyboard and screen-reader users - the list is
-   * the single operable path. Defaults to `false`.
+   * Render the marker as a non-focusable pointer target hidden from assistive
+   * tech while keeping it mouse-clickable. The map uses this so its ~N canvas
+   * pins don't duplicate the operable `F0MapList` for keyboard and screen-reader
+   * users - the list is the single operable path. Defaults to `false`.
    */
   presentational?: boolean
   /** @private */
@@ -257,6 +265,7 @@ export type BaseMapMarkerVariantProps =
   | { variant?: "color" }
   | { variant: "icon"; icon: IconType }
   | { variant: "letter"; letter: string }
+  | { variant: "count"; count: string }
   | { variant: "person"; firstName: string; lastName: string; src?: string }
   | { variant: "team"; name: string; src?: string }
   | { variant: "company"; name: string; src?: string }
@@ -281,13 +290,17 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
       presentational = false,
       dataTestId,
       className,
+      colorStep = 50,
     } = props
     const variant = props.variant ?? "color"
     // Selected markers always render at the reserved `xl` size.
     const m = METRICS[selected ? "xl" : size]
     const interactive = Boolean(onClick)
     const colored =
-      variant === "color" || variant === "icon" || variant === "letter"
+      variant === "color" ||
+      variant === "icon" ||
+      variant === "letter" ||
+      variant === "count"
     // The name F0Avatar hashes into its "random" color - matched here so the
     // label + dot pick up the same hue the avatar itself shows.
     const avatarColorName =
@@ -296,8 +309,8 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
         : (variant === "team" || variant === "company") && "name" in props
           ? props.name
           : null
-    // Accent = label text + dot color (and the head fill for color/icon/letter):
-    //  - color/icon/letter: the hue prop (default radical)
+    // Accent = label text + dot color (and the head fill for colored variants):
+    //  - color/icon/letter/count: the hue prop (default radical)
     //  - person: the avatar's own color, or grey when it shows a photo instead
     //    of a colored initials chip
     //  - team/company: the avatar's own color (they always have one)
@@ -348,18 +361,44 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           }}
         />
       ) : variant === "letter" && "letter" in props ? (
-        // A single white glyph (route-stop "A" / "B" ...), sized off the same
-        // step as the icon so it animates with the head when growing to xl.
         <span
           aria-hidden
           className="font-semibold leading-none"
           style={{
             color: WHITE,
             fontSize: Math.round(iconPx * 0.78),
-            transition: "font-size 200ms ease-out",
+            transition: shouldReduceMotion
+              ? "none"
+              : "font-size 200ms ease-out",
           }}
         >
           {props.letter.charAt(0).toUpperCase()}
+        </span>
+      ) : variant === "count" && "count" in props ? (
+        <span
+          aria-hidden
+          className="font-semibold leading-none"
+          style={{
+            color:
+              colorStep === 70
+                ? WHITE
+                : colorStep === 10
+                  ? "hsl(var(--neutral-90))"
+                  : `hsl(${baseColors.grey[90]})`,
+            fontSize: Math.round(
+              iconPx *
+                (props.count.length > 2
+                  ? 0.45
+                  : props.count.length > 1
+                    ? 0.6
+                    : 0.78)
+            ),
+            transition: shouldReduceMotion
+              ? "none"
+              : "font-size 200ms ease-out",
+          }}
+        >
+          {props.count}
         </span>
       ) : variant === "person" && "firstName" in props ? (
         scaledAvatar(
@@ -413,7 +452,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           borderRadius: squircle ? Math.round(m.d * 0.3) : 9999,
           borderWidth: m.border,
           borderColor: WHITE,
-          backgroundColor: colored ? hslOf(accentColor) : WHITE,
+          backgroundColor: colored ? hslOf(accentColor, colorStep) : WHITE,
         }}
       >
         {variant === "color" ? (
@@ -521,6 +560,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
     // placement); only the collision `bottom`/`top` sides wrap up to 4 lines.
     const wraps =
       !selected && (effPlacement === "top" || effPlacement === "bottom")
+    const usesSemanticLabel = variant === "count"
     const wrapClass = wraps
       ? "line-clamp-4 text-center"
       : selected
@@ -557,12 +597,15 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
       <span
         className={cn(
           "absolute left-0 top-0 font-semibold leading-tight transition-all duration-200 ease-out",
-          wrapClass
+          wrapClass,
+          usesSemanticLabel && "text-f1-foreground"
         )}
         style={{
-          color: `hsl(${HUE_DARK[accentColor]})`,
+          color: usesSemanticLabel
+            ? undefined
+            : `hsl(${HUE_DARK[accentColor]})`,
           fontSize: base.label,
-          textShadow: haloStack,
+          textShadow: usesSemanticLabel ? undefined : haloStack,
           transform: lp.transform,
           maxWidth: wraps ? base.maxLabelW : undefined,
           ...lp.style,
@@ -585,7 +628,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           marginTop: -rDot,
           borderWidth: 1.5,
           borderColor: WHITE,
-          backgroundColor: hslOf(accentColor),
+          backgroundColor: hslOf(accentColor, colorStep),
           boxShadow: `0 1px 2px hsl(${MARKER_SHADOW_HSL} / 0.3)`,
           transform: `scale(${selected || collapsed ? 1 : 0})`,
           opacity: selected || collapsed ? 1 : 0,
@@ -614,26 +657,38 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
         {interactive ? (
-          <button
-            ref={ref}
-            type="button"
-            // Presentational pins stay mouse-clickable but leave the tab order
-            // and AT tree, so the operable `F0MapList` is the single path for
-            // keyboard / screen-reader users (no duplicated marker + list item).
-            {...(presentational
-              ? { tabIndex: -1, "aria-hidden": true }
-              : { "aria-label": ariaLabel, "aria-pressed": selected })}
-            onClick={onClick}
-            className={cn(
-              // Hover grows from the center (transform-only, no extra layout).
-              "relative inline-flex cursor-pointer border-0 bg-transparent p-0",
-              "transition-transform duration-150 hover:scale-[1.05]",
-              focusRing("rounded-full"),
-              className
-            )}
-          >
-            {body}
-          </button>
+          presentational ? (
+            <span
+              aria-hidden
+              onPointerUp={(event) => {
+                if (event.button === 0) onClick?.()
+              }}
+              className={cn(
+                "relative inline-flex cursor-pointer bg-transparent p-0",
+                "transition-transform duration-150 hover:scale-[1.05]",
+                className
+              )}
+            >
+              {body}
+            </span>
+          ) : (
+            <button
+              ref={ref}
+              type="button"
+              aria-label={ariaLabel}
+              aria-pressed={selected}
+              onClick={onClick}
+              className={cn(
+                // Hover grows from the center (transform-only, no extra layout).
+                "relative inline-flex cursor-pointer border-0 bg-transparent p-0",
+                "transition-transform duration-150 hover:scale-[1.05]",
+                focusRing("rounded-full"),
+                className
+              )}
+            >
+              {body}
+            </button>
+          )
         ) : (
           <span
             role="img"

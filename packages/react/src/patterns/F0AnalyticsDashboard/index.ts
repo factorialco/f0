@@ -8,11 +8,22 @@ export type {
   DashboardChartData,
   DashboardChartItem,
   DashboardCollectionItem,
+  DashboardCustomItem,
   DashboardItem,
   DashboardItemBase,
   DashboardItemFiltersConfig,
   DashboardItemFiltersDefinition,
   DashboardItemFiltersState,
+  DashboardLocationConfig,
+  DashboardLocationData,
+  DashboardLocationDetailRow,
+  DashboardLocationDetailValue,
+  DashboardLocationDetailValueTone,
+  DashboardLocationItem,
+  DashboardLocationPoint,
+  DashboardLocationSummaryMetric,
+  DashboardLocationSummaryTone,
+  DashboardLocationTimelineData,
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
@@ -28,6 +39,10 @@ export type {
   PieChartConfig,
   RadarChartConfig,
   ScatterChartConfig,
+} from "./types"
+export {
+  dashboardLocationDetailValueTones,
+  dashboardLocationSummaryTones,
 } from "./types"
 
 /**

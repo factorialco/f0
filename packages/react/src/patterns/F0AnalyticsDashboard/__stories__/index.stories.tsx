@@ -8,9 +8,11 @@ import type { FiltersState } from "@/patterns/OneFilterPicker/types"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type {
+  DashboardCustomItem,
   DashboardItem,
   DashboardItemFiltersConfig,
   DashboardItemFiltersState,
+  F0AnalyticsDashboardProps,
 } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
@@ -35,6 +37,40 @@ const meta = {
 
 export default meta
 type Story = StoryObj
+
+const handleLayoutStoryAskAi = fn()
+
+const layoutItems: DashboardItem[] = [
+  {
+    id: "headcount",
+    type: "metric",
+    title: "Headcount",
+    description: "Last 30 days",
+    fetchData: async () => ({ value: 420 }),
+  },
+  {
+    id: "turnover",
+    type: "metric",
+    title: "Turnover",
+    description: "Last 30 days",
+    fetchData: async () => ({ value: 18 }),
+  },
+  {
+    id: "absence-rate",
+    type: "metric",
+    title: "Absence rate",
+    description: "Last 30 days",
+    format: { type: "percent" },
+    fetchData: async () => ({ value: 4.2 }),
+  },
+  {
+    id: "open-roles",
+    type: "metric",
+    title: "Open roles",
+    description: "Today",
+    fetchData: async () => ({ value: 27 }),
+  },
+]
 
 const emptyReportFilters = {} satisfies FiltersState<DashboardFiltersType>
 
@@ -179,6 +215,172 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
  */
 export const MixedDashboard: Story = {
   render: () => <InteractiveDashboard editMode />,
+}
+
+/**
+ * Four peer widgets share one row, while fullscreen temporarily gives one
+ * widget the complete bounded dashboard canvas. The play function also proves
+ * that a host-owned Ask One action remains available while expanded.
+ */
+export const LayoutAndFullscreen: Story = {
+  tags: ["no-sidebar"],
+  render: () => (
+    <div className="h-[720px]">
+      <F0AnalyticsDashboard
+        items={layoutItems}
+        editMode
+        onAskAi={handleLayoutStoryAskAi}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    handleLayoutStoryAskAi.mockClear()
+    const page = within(canvasElement.closest("body")!)
+    const firstItem = canvasElement.querySelector<HTMLElement>(
+      '[data-card-id="headcount"]'
+    )
+    if (!firstItem) throw new Error("Expected the Headcount dashboard item")
+
+    await step("Pack four peer widgets into one row", async () => {
+      const rows = canvasElement.querySelectorAll<HTMLElement>(
+        "[data-dashboard-row]"
+      )
+      await expect(rows).toHaveLength(1)
+      await expect(rows[0].querySelectorAll("[data-card-id]")).toHaveLength(4)
+    })
+
+    await step("Expand one widget and hide its peers", async () => {
+      await userEvent.click(
+        within(firstItem).getByRole("button", { name: "Expand" })
+      )
+      await expect(
+        within(canvasElement).getByRole("button", { name: "Collapse" })
+      ).toBeInTheDocument()
+      await expect(canvasElement).not.toHaveTextContent("Turnover")
+    })
+
+    await step(
+      "Use host-owned Ask One without leaving fullscreen",
+      async () => {
+        const expandedItem = within(canvasElement)
+          .getByRole("button", { name: "Collapse" })
+          .closest<HTMLElement>('[class~="group/dashitem"]')
+        if (!expandedItem) {
+          throw new Error("Expected the expanded dashboard item")
+        }
+        await userEvent.click(
+          within(expandedItem).getByRole("button", { name: "Other actions" })
+        )
+        const askOne = await page.findByRole("menuitem", { name: "Ask One" })
+        await userEvent.click(askOne)
+        await expect(handleLayoutStoryAskAi).toHaveBeenCalledWith({
+          id: "headcount",
+          title: "Headcount",
+        })
+        await expect(
+          canvasElement.querySelector('button[aria-label="Collapse"]')
+        ).toBeInTheDocument()
+      }
+    )
+
+    await step("Collapse and restore the shared row", async () => {
+      const collapse = canvasElement.querySelector<HTMLButtonElement>(
+        'button[aria-label="Collapse"]'
+      )
+      if (!collapse) throw new Error("Expected the collapse control")
+      await userEvent.click(collapse)
+      await expect(
+        canvasElement.querySelectorAll("[data-card-id]")
+      ).toHaveLength(4)
+    })
+  },
+}
+
+const customItem: DashboardCustomItem<DashboardFiltersType> = {
+  id: "custom-domain-visualization",
+  type: "custom",
+  title: "Clock activity by location",
+  description: "Last 30 days · Europe",
+  info: "A domain visualization rendered inside the standard dashboard item shell.",
+  explanation:
+    "The host composes this body while the dashboard owns its title, description, menu, layout, and designer controls.",
+  itemHeight: 480,
+  renderContent: (filters) => (
+    <div className="flex h-full flex-col justify-between bg-f1-background-secondary p-6 text-f1-foreground">
+      <div>
+        <p className="m-0 text-lg font-semibold">Domain-owned content</p>
+        <p className="mb-0 mt-1 text-sm text-f1-foreground-secondary">
+          Applied department: {filters.department?.join(", ") ?? "All"}
+        </p>
+      </div>
+      <div
+        aria-label="Example custom visualization"
+        className="grid h-52 grid-cols-6 items-end gap-3"
+      >
+        {[42, 68, 52, 88, 64, 76].map((height, index) => (
+          <div
+            key={index}
+            className="rounded-t bg-f1-background-selected-bold"
+            style={{ height: `${height}%` }}
+          />
+        ))}
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * A host-composed visualization using the same item header, menu, filter,
+ * layout, fullscreen, and designer contracts as built-in dashboard items.
+ */
+export const CustomItemDashboard: StoryObj<
+  F0AnalyticsDashboardProps<DashboardFiltersType>
+> = {
+  args: {
+    filters: dashboardFilters,
+    defaultFilters: preAppliedReportFilters,
+    items: [customItem],
+  },
+  render: (args) => <F0AnalyticsDashboard {...args} />,
+}
+
+const sharedRowItems: DashboardItem<DashboardFiltersType>[] = [
+  {
+    ...customItem,
+    id: "responsive-domain-visualization",
+    allowRowSharing: true,
+    minItemWidth: 360,
+  },
+  {
+    id: "custom-item-peer",
+    type: "metric",
+    title: "Clock events",
+    description: "Last 30 days · Europe",
+    itemHeight: 480,
+    fetchData: async () => ({ value: 24_680 }),
+  },
+]
+
+/**
+ * A responsive custom item opts into a two-item row. The grid keeps both
+ * peers equal width and will move any third item to the next row.
+ */
+export const SharedRowCustomItem: Story = {
+  tags: ["no-sidebar"],
+  render: () => (
+    <div className="h-[560px]">
+      <F0AnalyticsDashboard filters={dashboardFilters} items={sharedRowItems} />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    await step("Share one dashboard row with one peer", async () => {
+      const rows = canvasElement.querySelectorAll<HTMLElement>(
+        "[data-dashboard-row]"
+      )
+      await expect(rows).toHaveLength(1)
+      await expect(rows[0].querySelectorAll("[data-card-id]")).toHaveLength(2)
+    })
+  },
 }
 
 /**
@@ -532,6 +734,16 @@ export const Snapshot: Story = {
           headcount: { country: ["ES"] },
           "employee-table": { country: ["ES", "FR"] },
         }}
+      />
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        defaultFilters={preAppliedReportFilters}
+        items={[customItem]}
+      />
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        defaultFilters={preAppliedReportFilters}
+        items={sharedRowItems}
       />
     </div>
   ),

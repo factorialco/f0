@@ -4,6 +4,7 @@ export {
   getSelectedHeadGroupY,
   markerSizes,
   markerColors,
+  markerColorSteps,
   markerVariants,
   markerLabelPlacements,
   markerColorTriplet,
@@ -19,6 +20,7 @@ export type {
   BaseMapMarkerEffectiveSize,
   BaseMapMarkerSize,
   BaseMapMarkerColor,
+  BaseMapMarkerColorStep,
   BaseMapMarkerVariant,
   BaseMapMarkerLabelPlacement,
 } from "./BaseMapMarker"

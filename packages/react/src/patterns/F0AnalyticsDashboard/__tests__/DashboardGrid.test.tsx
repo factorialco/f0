@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
+  act,
   fireEvent,
   screen,
   userEvent,
@@ -14,10 +15,21 @@ import {
   WIDGET_DRAG_START,
   type WidgetDragStartDetail,
 } from "@/lib/dnd/widgetDragEvents"
+import { ChartLine } from "@/icons/app"
 
-import type { DashboardItem } from "../types"
+import type { DashboardItem, DashboardLocationItem } from "../types"
 
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
+
+vi.mock("@/patterns/F0Map", () => ({
+  f0MapDensityColors: { low: "red", medium: "red", high: "red" },
+  f0MapDensityColorSteps: { low: 10, medium: 50, high: 70 },
+  f0MapStyles: {
+    light: { version: 8, sources: {}, layers: [] },
+    dark: { version: 8, sources: {}, layers: [] },
+  },
+  F0Map: () => <div>Map</div>,
+}))
 
 type ExpenseRecord = {
   employee: string
@@ -83,6 +95,36 @@ function makeCollectionItems(itemHeight: number): DashboardItem[] {
   ]
 }
 
+function makeLocationItem(
+  overrides: Partial<DashboardLocationItem> = {}
+): DashboardLocationItem {
+  return {
+    id: "locations",
+    type: "location",
+    title: "Activity by location",
+    location: {
+      summaryMetrics: [
+        { id: "one", label: "One", icon: ChartLine },
+        { id: "two", label: "Two", icon: ChartLine },
+        { id: "three", label: "Three", icon: ChartLine },
+      ],
+      densityLabel: "Density",
+      densityLowLabel: () => "Low",
+      densityMediumLabel: () => "Medium",
+      densityHighLabel: () => "High",
+      timelineTitle: "Timeline",
+      timelineAriaLabel: "Timeline data",
+      mapAriaLabel: "Locations",
+      selectLocationLabel: "Select a location",
+      viewLocationDetailsLabel: (name) => `View ${name}`,
+      closeLocationDetailsLabel: "Close details",
+      noDataLabel: "No data",
+    },
+    fetchData: () => new Promise(() => {}),
+    ...overrides,
+  }
+}
+
 function getDashboardRowHeight(container: HTMLElement): string {
   const card = container.querySelector('[data-card-id="headcount"]')
   if (!(card instanceof HTMLElement)) {
@@ -100,6 +142,317 @@ function getDashboardRowHeight(container: HTMLElement): string {
 describe("DashboardGrid", () => {
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  it("treats a location item as a built-in two-slot dashboard item", () => {
+    const items: DashboardItem[] = [
+      makeLocationItem(),
+      {
+        id: "comparison",
+        type: "chart",
+        title: "Comparison",
+        chart: { type: "bar" },
+        fetchData: async () => ({ categories: [], series: [] }),
+      },
+      {
+        id: "headcount",
+        type: "metric",
+        title: "Headcount",
+        fetchData: async () => ({ value: 42 }),
+      },
+    ]
+
+    const { container } = render(<DashboardGrid items={items} filters={{}} />)
+    const rows = container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveStyle({ height: "700px" })
+    expect(rows[0].querySelectorAll("[data-card-id]")).toHaveLength(2)
+    expect(
+      rows[0].querySelector('[data-card-id="locations"]')
+    ).toBeInTheDocument()
+    expect(
+      rows[0].querySelector('[data-card-id="comparison"]')
+    ).toBeInTheDocument()
+    expect(
+      rows[1].querySelector('[data-card-id="headcount"]')
+    ).toBeInTheDocument()
+  })
+
+  it("gives custom items a full-width dashboard row and designer controls", () => {
+    const items: DashboardItem[] = [
+      {
+        id: "clock-activity",
+        type: "custom",
+        title: "Clock activity by location",
+        renderContent: () => <div>Map content</div>,
+      },
+      {
+        id: "headcount",
+        type: "metric",
+        title: "Headcount",
+        fetchData: async () => ({ value: 42 }),
+      },
+    ]
+
+    const { container } = render(
+      <DashboardGrid items={items} filters={{}} editMode />
+    )
+    const rows = container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveStyle({ height: "700px" })
+    expect(
+      rows[0].querySelector('[data-card-id="clock-activity"]')
+    ).toHaveTextContent("Map content")
+    expect(
+      container.querySelectorAll('[aria-label="Drag to reorder"]')
+    ).toHaveLength(2)
+  })
+
+  it("lets a responsive custom item share a row with exactly one peer", () => {
+    const items: DashboardItem[] = [
+      {
+        id: "clock-activity",
+        type: "custom",
+        title: "Clock activity by location",
+        allowRowSharing: true,
+        renderContent: () => <div>Map content</div>,
+      },
+      {
+        id: "clock-events",
+        type: "chart",
+        title: "Clock events by workplace",
+        chart: { type: "bar" },
+        fetchData: async () => ({ categories: [], series: [] }),
+      },
+      {
+        id: "headcount",
+        type: "metric",
+        title: "Headcount",
+        fetchData: async () => ({ value: 42 }),
+      },
+    ]
+
+    const { container } = render(<DashboardGrid items={items} filters={{}} />)
+    const rows = container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+
+    expect(rows).toHaveLength(2)
+    expect(rows[0].querySelectorAll("[data-card-id]")).toHaveLength(2)
+    expect(
+      rows[0].querySelector('[data-card-id="clock-activity"]')
+    ).toBeInTheDocument()
+    expect(
+      rows[0].querySelector('[data-card-id="clock-events"]')
+    ).toBeInTheDocument()
+    expect(
+      rows[1].querySelector('[data-card-id="headcount"]')
+    ).toBeInTheDocument()
+  })
+
+  it("stacks a shared custom row before its item width becomes unusable", async () => {
+    const originalResizeObserver = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "ResizeObserver"
+    )
+    const observations: Array<{
+      callback: ResizeObserverCallback
+      observer: ResizeObserver
+      target?: Element
+    }> = []
+
+    class TestResizeObserver {
+      private readonly observation: (typeof observations)[number]
+
+      constructor(callback: ResizeObserverCallback) {
+        this.observation = {
+          callback,
+          observer: this as unknown as ResizeObserver,
+        }
+        observations.push(this.observation)
+      }
+
+      observe = (target: Element) => {
+        this.observation.target = target
+      }
+      unobserve = () => {}
+      disconnect = () => {}
+    }
+
+    Object.defineProperty(globalThis, "ResizeObserver", {
+      configurable: true,
+      value: TestResizeObserver,
+    })
+
+    try {
+      const items: DashboardItem[] = [
+        {
+          id: "clock-activity",
+          type: "custom",
+          title: "Clock activity by location",
+          allowRowSharing: true,
+          minItemWidth: 720,
+          renderContent: () => <div>Map content</div>,
+        },
+        {
+          id: "headcount",
+          type: "metric",
+          title: "Headcount",
+          fetchData: async () => ({ value: 42 }),
+        },
+      ]
+      const { container } = render(
+        <DashboardGrid items={items} filters={{}} editMode />
+      )
+      const gridObservation = observations.find((observation) =>
+        observation.target?.querySelector("[data-dashboard-row]")
+      )
+      if (!gridObservation?.target) {
+        throw new Error("Expected the dashboard resize observation")
+      }
+      const notifyWidth = (width: number) => {
+        act(() => {
+          gridObservation.callback(
+            [
+              {
+                target: gridObservation.target as Element,
+                contentRect: { width },
+              } as ResizeObserverEntry,
+            ],
+            gridObservation.observer
+          )
+        })
+      }
+
+      notifyWidth(1200)
+      await waitFor(() =>
+        expect(
+          container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+        ).toHaveLength(2)
+      )
+      expect(
+        container.querySelectorAll('[aria-label="Drag to reorder"]')
+      ).toHaveLength(0)
+
+      notifyWidth(1600)
+      await waitFor(() =>
+        expect(
+          container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+        ).toHaveLength(1)
+      )
+      expect(
+        container.querySelectorAll('[aria-label="Drag to reorder"]')
+      ).toHaveLength(2)
+    } finally {
+      if (originalResizeObserver) {
+        Object.defineProperty(
+          globalThis,
+          "ResizeObserver",
+          originalResizeObserver
+        )
+      } else {
+        Reflect.deleteProperty(globalThis, "ResizeObserver")
+      }
+    }
+  })
+
+  it("expands one widget into the bounded grid and restores its peers", async () => {
+    const { container } = render(
+      <div style={{ height: 720 }}>
+        <DashboardGrid items={makeMetricItems(240)} filters={{}} editMode />
+      </div>
+    )
+    const expand = container.querySelector<HTMLButtonElement>(
+      '[data-card-id="headcount"] button[aria-label="Expand"]'
+    )
+    if (!expand) throw new Error("Expected the fullscreen control")
+
+    expand.focus()
+    fireEvent.click(expand)
+
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute("aria-label", "Collapse")
+      expect(
+        container.querySelector('[data-card-id="turnover"]')
+      ).not.toBeInTheDocument()
+    })
+    const collapse = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Collapse"]'
+    )
+    if (!collapse) throw new Error("Expected the collapse control")
+
+    fireEvent.click(collapse)
+
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute("aria-label", "Expand")
+      expect(container.querySelectorAll("[data-card-id]")).toHaveLength(2)
+      expect(
+        container.querySelector('[data-card-id="turnover"]')
+      ).toBeInTheDocument()
+    })
+  })
+
+  it("repairs saved layouts that place another item beside a full-row custom item", () => {
+    const items: DashboardItem[] = [
+      {
+        id: "clock-activity",
+        type: "custom",
+        title: "Clock activity by location",
+        x: 0,
+        y: 0,
+        itemHeight: 480,
+        minItemHeight: 624,
+        renderContent: () => <div>Map content</div>,
+      },
+      {
+        id: "headcount",
+        type: "metric",
+        title: "Headcount",
+        x: 6,
+        y: 0,
+        fetchData: async () => ({ value: 42 }),
+      },
+    ]
+
+    const { container } = render(<DashboardGrid items={items} filters={{}} />)
+    const rows = container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveStyle({ height: "624px" })
+    expect(rows[0].querySelectorAll("[data-card-id]")).toHaveLength(1)
+    expect(rows[1].querySelectorAll("[data-card-id]")).toHaveLength(1)
+  })
+
+  it("restores a saved paired row for a responsive custom item", () => {
+    const items: DashboardItem[] = [
+      {
+        id: "clock-activity",
+        type: "custom",
+        title: "Clock activity by location",
+        allowRowSharing: true,
+        x: 0,
+        y: 0,
+        itemHeight: 700,
+        renderContent: () => <div>Map content</div>,
+      },
+      {
+        id: "clock-events",
+        type: "chart",
+        title: "Clock events by workplace",
+        x: 6,
+        y: 0,
+        itemHeight: 700,
+        chart: { type: "bar" },
+        fetchData: async () => ({ categories: [], series: [] }),
+      },
+    ]
+
+    const { container } = render(<DashboardGrid items={items} filters={{}} />)
+    const rows = container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+
+    expect(rows).toHaveLength(1)
+    expect(rows[0].querySelectorAll("[data-card-id]")).toHaveLength(2)
+    expect(rows[0]).toHaveStyle({ height: "700px" })
   })
 
   it("recomputes row height when itemHeight changes for existing items", async () => {
@@ -224,6 +577,61 @@ describe("DashboardGrid", () => {
       expect(getDashboardRowHeight(container)).toBe("150px")
     })
 
+    it("resizes a row with the keyboard and emits the layout", () => {
+      const onLayoutChange = vi.fn()
+      const { container } = render(
+        <DashboardGrid
+          items={makeMetricItems(200)}
+          filters={{}}
+          editMode
+          onLayoutChange={onLayoutChange}
+        />
+      )
+
+      const handle = getResizeHandle(container)
+      expect(handle).toHaveAttribute("role", "separator")
+      fireEvent.keyDown(handle, { key: "ArrowDown" })
+
+      expect(getDashboardRowHeight(container)).toBe("224px")
+      expect(onLayoutChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "headcount", itemHeight: 224 }),
+        ])
+      )
+    })
+
+    it("resizes a row with one-click decrease and increase controls", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+      const decrease = container.querySelector("[data-dashboard-row-decrease]")
+      const increase = container.querySelector("[data-dashboard-row-increase]")
+      if (
+        !(decrease instanceof HTMLButtonElement) ||
+        !(increase instanceof HTMLButtonElement)
+      ) {
+        throw new Error("Expected click resize controls")
+      }
+
+      fireEvent.click(decrease)
+      expect(getDashboardRowHeight(container)).toBe("176px")
+
+      fireEvent.click(increase)
+      expect(getDashboardRowHeight(container)).toBe("200px")
+    })
+
+    it("does not shrink a restored row that is already above the resize cap", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(2000)} filters={{}} editMode />
+      )
+      const handle = getResizeHandle(container)
+
+      fireEvent.keyDown(handle, { key: "ArrowDown" })
+
+      expect(getDashboardRowHeight(container)).toBe("2000px")
+      expect(handle).toHaveAttribute("aria-valuemax", "2000")
+    })
+
     it("shrinks a row back after growing it", () => {
       const { container } = render(
         <DashboardGrid items={makeMetricItems(144)} filters={{}} editMode />
@@ -245,6 +653,33 @@ describe("DashboardGrid", () => {
       dragResizeHandle(getResizeHandle(container), -500)
 
       expect(getDashboardRowHeight(container)).toBe("120px")
+    })
+
+    it("clamps a custom row to its item-specific minimum height", () => {
+      const items: DashboardItem[] = [
+        {
+          id: "clock-activity",
+          type: "custom",
+          title: "Clock activity by location",
+          itemHeight: 700,
+          minItemHeight: 624,
+          renderContent: () => <div>Map content</div>,
+        },
+        {
+          id: "headcount",
+          type: "metric",
+          title: "Headcount",
+          fetchData: async () => ({ value: 42 }),
+        },
+      ]
+      const { container } = render(
+        <DashboardGrid items={items} filters={{}} editMode />
+      )
+
+      dragResizeHandle(getResizeHandle(container), -500)
+
+      const row = container.querySelector<HTMLElement>("[data-dashboard-row]")
+      expect(row).toHaveStyle({ height: "624px" })
     })
 
     it("clamps shrinking to overflowing content height", () => {
@@ -463,6 +898,118 @@ describe("DashboardGrid", () => {
       )
 
       expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+    })
+
+    it("reorders a widget with arrow keys, preserves focus, and emits the layout", async () => {
+      const onLayoutChange = vi.fn()
+      const { container } = render(
+        <DashboardGrid
+          items={makeCollectionItems(480)}
+          filters={{}}
+          editMode
+          onLayoutChange={onLayoutChange}
+        />
+      )
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLButtonElement)) {
+        throw new Error("Expected an operable reorder button")
+      }
+
+      fireEvent.keyDown(grip, { key: "ArrowDown" })
+
+      expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+      expect(onLayoutChange).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "expenses", y: 10 }),
+        ])
+      )
+      await waitFor(() =>
+        expect(document.activeElement).toHaveAttribute(
+          "data-reorder-id",
+          "expenses"
+        )
+      )
+      expect(container).toHaveTextContent("Move down: Expenses.")
+    })
+
+    it("reorders with one-click controls and preserves full-row packing", () => {
+      const items: DashboardItem[] = [
+        {
+          id: "clock-activity",
+          type: "custom",
+          title: "Clock activity by location",
+          renderContent: () => <div>Map content</div>,
+        },
+        ...makeMetricItems(144),
+      ]
+      const { container } = render(
+        <DashboardGrid items={items} filters={{}} editMode />
+      )
+      const moveLater = container.querySelector(
+        '[aria-label="Move down: Clock activity by location"]'
+      )
+      if (!(moveLater instanceof HTMLButtonElement)) {
+        throw new Error("Expected a click reorder control")
+      }
+
+      fireEvent.click(moveLater)
+
+      expect(rowOrder(container)).toEqual([
+        "headcount",
+        "clock-activity",
+        "turnover",
+      ])
+      expect(rowOrder(container).every((row) => !row.includes("+"))).toBe(true)
+    })
+
+    it("keeps a full-row custom item isolated during pointer drag", () => {
+      const items: DashboardItem[] = [
+        {
+          id: "clock-activity",
+          type: "custom",
+          title: "Clock activity by location",
+          renderContent: () => <div>Map content</div>,
+        },
+        {
+          id: "headcount",
+          type: "metric",
+          title: "Headcount",
+          fetchData: async () => ({ value: 42 }),
+        },
+      ]
+      const { container } = render(
+        <DashboardGrid items={items} filters={{}} editMode />
+      )
+      const rows = container.querySelectorAll<HTMLElement>(
+        "[data-dashboard-row]"
+      )
+      rows[0].getBoundingClientRect = () =>
+        ({ top: 0, bottom: 300, height: 300 }) as DOMRect
+      rows[1].getBoundingClientRect = () =>
+        ({ top: 312, bottom: 456, height: 144 }) as DOMRect
+      const grips = container.querySelectorAll<HTMLElement>(
+        '[aria-label="Drag to reorder"]'
+      )
+
+      fireEvent.pointerDown(grips[1], { button: 0 })
+      fireEvent(
+        document,
+        new MouseEvent("pointermove", {
+          clientX: 500,
+          clientY: 150,
+          bubbles: true,
+        })
+      )
+      fireEvent(
+        document,
+        new MouseEvent("pointerup", {
+          clientX: 500,
+          clientY: 150,
+          bubbles: true,
+        })
+      )
+
+      expect(rowOrder(container)).toEqual(["clock-activity", "headcount"])
     })
 
     it("does not reorder when the gesture ends over the AI chat drop zone", () => {
