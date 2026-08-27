@@ -711,7 +711,7 @@ const e = {
        * out, so it owns its own key.
        */
       askOne: "Ask One",
-      selectChartArea: "Draw to ask One",
+      selectChartArea: "Draw to Ask One",
       cancelChartAreaSelection: "Cancel selection",
       clearChartAreaSelection: "Clear selection",
       chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Escape to cancel.",

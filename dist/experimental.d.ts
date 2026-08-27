@@ -4478,7 +4478,7 @@ declare const defaultTranslations: {
              * out, so it owns its own key.
              */
             readonly askOne: "Ask One";
-            readonly selectChartArea: "Draw to ask One";
+            readonly selectChartArea: "Draw to Ask One";
             readonly cancelChartAreaSelection: "Cancel selection";
             readonly clearChartAreaSelection: "Clear selection";
             readonly chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Escape to cancel.";
@@ -15053,11 +15053,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -15065,9 +15063,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
