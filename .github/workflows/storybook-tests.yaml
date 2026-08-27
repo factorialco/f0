@@ -52,10 +52,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node-pnpm
+      # Read the version straight off the installed package rather than parsing
+      # `pnpm why --json`: that output is not a stable contract and its shape
+      # changed in pnpm 10, which silently emptied this variable. The guard is
+      # there because an empty version is worse than a hard failure — it made
+      # the install step below fetch playwright@latest, which deleted the
+      # correctly cached browsers as "unused" before the suite ever started.
       - name: Get Playwright version
         id: playwright-version
+        working-directory: packages/react
         run: |
-          PLAYWRIGHT_VERSION=$(pnpm why @playwright/test -r --json | jq -r '.[] | select(.devDependencies["@playwright/test"]) | .devDependencies["@playwright/test"].version')
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          if [ -z "$PLAYWRIGHT_VERSION" ]; then
+            echo "::error::Could not resolve the @playwright/test version"
+            exit 1
+          fi
           echo "PLAYWRIGHT_VERSION: $PLAYWRIGHT_VERSION"
           echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
       - name: Cache Playwright browsers
@@ -85,10 +96,15 @@ jobs:
       # story ran — 4 of 8 shards in run 32230793617, then 7 of 8 in 32233463322.
       #
       # With the browser cache warm this step now touches no apt mirror at all.
+      #
+      # Installed through the workspace's own playwright binary, not
+      # `pnpx playwright@<version>`: the browser build has to match the
+      # playwright-core the test-runner loads, and going through the installed
+      # binary makes a mismatch impossible instead of merely unlikely.
       - name: Install Playwright
         timeout-minutes: 5
         run: |
-          pnpx playwright@${{ steps.playwright-version.outputs.version }} install chromium
+          pnpm --filter @factorialco/f0-react exec playwright install chromium
 
       # The font packages `--with-deps` used to pull (CJK/Thai/Cyrillic coverage
       # plus freefont), installed on their own so a slow or unreachable apt mirror

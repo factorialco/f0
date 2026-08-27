@@ -52,6 +52,7 @@ import {
   type WidgetPlacement,
   type WidgetVirtualization,
 } from "./useWidgetVirtualizer"
+import { verticalOnly } from "./verticalOnly"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 
 export type { WidgetVirtualization } from "./useWidgetVirtualizer"
@@ -112,6 +113,12 @@ const DROP_ANIMATION = {
   duration: 450,
   easing: "cubic-bezier(0.4, 0, 0.1, 1)",
 }
+
+/**
+ * Hoisted rather than written inline: dnd-kit reads this on every pointer move,
+ * and a fresh array each render is a fresh dependency for it.
+ */
+const DRAG_MODIFIERS = [verticalOnly]
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
@@ -776,6 +783,9 @@ export function WidgetContainer({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          // The card the pointer carries goes up and down only, like the
+          // shuffle underneath it — see `verticalOnly`.
+          modifiers={DRAG_MODIFIERS}
           onDragStart={({ active }) => {
             // BEFORE the card is told it is being dragged: what the ghost
             // should look like is what is on screen right now.

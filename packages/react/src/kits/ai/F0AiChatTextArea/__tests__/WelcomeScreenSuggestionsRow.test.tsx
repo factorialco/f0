@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
-import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
+import {
+  act,
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender,
+} from "@/testing/test-utils"
 
 import { type WelcomeScreenSuggestion } from "../../F0AiChat/types"
 import { WelcomeScreenSuggestionsRow } from "../components/WelcomeScreenSuggestionsRow"
@@ -472,5 +478,98 @@ describe("WelcomeScreenSuggestionsRow", () => {
 
       expect(label.style.transform).toBe("")
     })
+  })
+})
+
+describe("WelcomeScreenSuggestionsRow overflow='scroll'", () => {
+  /** jsdom has no layout, so the scroller's measurements are stubbed. */
+  const stubOverflow = (
+    el: HTMLElement,
+    { scrollWidth = 900, clientWidth = 400, scrollLeft = 0 } = {}
+  ) => {
+    Object.defineProperty(el, "scrollWidth", {
+      configurable: true,
+      value: scrollWidth,
+    })
+    Object.defineProperty(el, "clientWidth", {
+      configurable: true,
+      value: clientWidth,
+    })
+    el.scrollLeft = scrollLeft
+    act(() => {
+      el.dispatchEvent(new Event("scroll"))
+    })
+  }
+
+  const renderScroller = () => {
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+        overflow="scroll"
+        reserveTwoRows={false}
+      />
+    )
+    return screen.getByRole("button", { name: /analyze/i })
+      .parentElement as HTMLElement
+  }
+
+  it("keeps the chips on one scrollable line", () => {
+    const scroller = renderScroller()
+
+    expect(scroller.className).toMatch(/flex-nowrap/)
+    expect(scroller.className).toMatch(/overflow-x-auto/)
+    expect(scroller.className).not.toMatch(/flex-wrap/)
+    // A flex item shrinks before it overflows: without this the labels would
+    // squeeze instead of the row becoming scrollable.
+    expect(screen.getByRole("button", { name: /analyze/i }).className).toMatch(
+      /shrink-0/
+    )
+  })
+
+  it("fades only the end that has chips hidden past it", () => {
+    const scroller = renderScroller()
+
+    // At rest: more to the right, nothing to the left.
+    stubOverflow(scroller, { scrollLeft: 0 })
+    expect(scroller.style.maskImage).toBe(
+      "linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%)"
+    )
+
+    // Mid-scroll: cut off at both ends.
+    stubOverflow(scroller, { scrollLeft: 200 })
+    expect(scroller.style.maskImage).toBe(
+      "linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)"
+    )
+
+    // At the end: only the leading edge is still hiding anything.
+    stubOverflow(scroller, { scrollLeft: 500 })
+    expect(scroller.style.maskImage).toBe(
+      "linear-gradient(to right, transparent 0, black 24px, black 100%)"
+    )
+  })
+
+  it("does not fade a row that fits", () => {
+    const scroller = renderScroller()
+
+    stubOverflow(scroller, { scrollWidth: 400, clientWidth: 400 })
+
+    // A static mask would read as a visual treatment rather than as "there is
+    // more this way", so a row with nothing hidden is not masked at all.
+    expect(scroller.style.maskImage).toBe("")
+  })
+
+  it("wraps instead of scrolling by default", () => {
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    const row = screen.getByRole("button", { name: /analyze/i }).parentElement
+    expect(row?.className).toMatch(/flex-wrap/)
+    expect(row?.className).not.toMatch(/overflow-x-auto/)
+    expect(row).not.toHaveAttribute("style")
   })
 })

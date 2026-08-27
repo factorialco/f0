@@ -11,9 +11,10 @@ interface SubmitButtonProps {
   recordingStatus?: RecorderStatus
   /**
    * `md` (32px) for the action row, where the button stands in a row of its own
-   * peers. `sm` (24px) when it trails the text inline: a 32px button beside a
-   * 20px line of text cannot be centred on that line without eating the field's
-   * top inset, which is what makes it look pinned to the border.
+   * peers. `sm` (24px) when it trails the text inline — the collapsed bar, which
+   * has no action row: a 32px button beside a 20px line of text cannot be centred
+   * on that line without eating the field's top inset, which is what makes it
+   * look pinned to the border.
    *
    * @default "md"
    */
@@ -23,8 +24,8 @@ interface SubmitButtonProps {
 /**
  * The composer's send / stop control.
  *
- * Extracted from `ActionBar` because the `inside` suggestions layout moves it
- * out of the action row and onto the textarea's own line — both placements must
+ * Kept apart from `ActionBar` because the collapsed bar has no action row and
+ * puts this button on the textarea's own line instead — both placements must
  * render the exact same button (same labels, same disabled rule, same
  * stop-while-streaming swap), so there is one definition rather than two.
  */

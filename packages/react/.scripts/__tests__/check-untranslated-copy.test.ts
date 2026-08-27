@@ -243,6 +243,8 @@ describe("excluded paths", () => {
     "mocks/people.ts",
     "lib/providers/i18n/i18n-provider-defaults.ts",
     "lib/storybook-utils/do-donts.tsx",
+    "component-status/A11yRow.tsx",
+    "component-status/component-status.ts",
   ])("excludes %s", (path) => {
     expect(isExcludedPath(path)).toBe(true)
   })

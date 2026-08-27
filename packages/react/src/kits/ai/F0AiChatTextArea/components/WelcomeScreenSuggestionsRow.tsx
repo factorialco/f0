@@ -19,6 +19,7 @@ import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../../F0AiChat/types"
+import { useHorizontalScrollFade } from "../useHorizontalScrollFade"
 
 const MAX_ITEMS_PER_GROUP = 5
 
@@ -75,6 +76,20 @@ export type WelcomeScreenSuggestionsRowProps = {
    * @default true
    */
   reserveTwoRows?: boolean
+  /**
+   * What the row does when the groups do not fit its width.
+   *
+   * - `"wrap"` — they flow onto a second line. Right for the row standing above
+   *   the composer, which has the page's height to spend.
+   * - `"scroll"` — one line, scrolled sideways, with the overflowing ends faded
+   *   (see {@link useHorizontalScrollFade}). Right for the row sharing the
+   *   composer's action band with the send button: there the row is one cell of a
+   *   single-line flex row, and a second line of chips would grow the field's
+   *   whole bottom band. Ten groups then cost the same height as three.
+   *
+   * @default "wrap"
+   */
+  overflow?: "wrap" | "scroll"
 }
 
 /**
@@ -88,9 +103,12 @@ export const WelcomeScreenSuggestionsRow = ({
   onItemHover,
   side = "top",
   reserveTwoRows = true,
+  overflow = "wrap",
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
-  const rowRef = useRef<HTMLDivElement>(null)
+  const rowRef = useRef<HTMLDivElement | null>(null)
+  const scrolls = overflow === "scroll"
+  const fade = useHorizontalScrollFade()
   const lastTriggerRef = useRef<HTMLElement | null>(null)
   const shouldRestoreFocusRef = useRef(false)
   const popoverContentId = useId()
@@ -123,9 +141,35 @@ export const WelcomeScreenSuggestionsRow = ({
         )}
       >
         <PopoverAnchor asChild>
+          {/* The scroller and the popover anchor are the SAME element on
+              purpose: the panel spans the row's width
+              (`--radix-popover-trigger-width`) and opens from its leading edge,
+              which is the box the reader sees the chips in — not the wider
+              content they scroll through. Radix reads the anchor's border box,
+              so anchoring the content instead would size the panel to all ten
+              groups and hang it off the field. */}
           <div
-            ref={rowRef}
-            className="flex w-full flex-wrap items-center gap-2"
+            ref={(node) => {
+              rowRef.current = node
+              if (scrolls) fade.ref(node)
+            }}
+            style={scrolls ? fade.style : undefined}
+            className={cn(
+              "flex w-full items-center gap-2",
+              scrolls
+                ? cn(
+                    // No visible scrollbar: it would sit under the chips inside
+                    // a 32px-tall band, and the faded end is the affordance.
+                    "flex-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                    // `p-1 -m-1` is room for a focused chip's ring, which is
+                    // drawn 2px OUTSIDE its border box and would otherwise be
+                    // clipped by the scrollport (setting overflow on one axis
+                    // makes the other axis clip too). The negative margin gives
+                    // the padding back, so the chips sit exactly where they did.
+                    "p-1 -m-1"
+                  )
+                : "flex-wrap"
+            )}
           >
             {/* Plain buttons, NOT `PopoverTrigger`s: Radix registers a single
                 trigger per popover (the last one mounted), whose built-in
@@ -145,6 +189,10 @@ export const WelcomeScreenSuggestionsRow = ({
                 variant="outline"
                 label={group.label}
                 icon={group.icon}
+                // A flex item shrinks before it overflows, so without this the
+                // labels would squeeze and truncate instead of the row becoming
+                // scrollable.
+                className={scrolls ? "shrink-0" : undefined}
                 pressed={activeIdx === index}
                 aria-haspopup="dialog"
                 aria-expanded={activeIdx === index}
