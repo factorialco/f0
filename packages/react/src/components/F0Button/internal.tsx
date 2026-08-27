@@ -123,6 +123,17 @@ const ButtonInternal = forwardRef<
       className={cn(
         "max-w-full",
         block && "w-full",
+        // A trailing counter has its own bordered edge, so the button's right
+        // padding tightens 4px (Figma "ButtonCounter"); the left is unchanged.
+        // Important because the override and the size variant's `px` both target
+        // `.main` as arbitrary variants, which tailwind-merge leaves unmerged —
+        // so the cascade, not class order, has to decide, and `!` guarantees it.
+        counterValue !== undefined &&
+          {
+            sm: "[&_.main]:!pr-1",
+            md: "[&_.main]:!pr-2",
+            lg: "[&_.main]:!pr-3",
+          }[size],
         withoutDisabledAppearance &&
           disabled &&
           "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default [&[aria-disabled=true]]:opacity-100 [&[aria-disabled=true]]:cursor-default",
