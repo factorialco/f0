@@ -44,6 +44,7 @@ describe("withDataTestId", () => {
         Test Content
       </div>
     ))
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent dataTestId="test-id" />)
@@ -62,6 +63,7 @@ describe("withDataTestId", () => {
         <div {...props}>Test Content</div>
       )
     )
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     render(<WrappedComponent dataTestId="test-id" />)
@@ -127,6 +129,7 @@ describe("withDataTestId", () => {
         Test Content
       </div>
     ))
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent ref={ref} dataTestId="test-id" />)
