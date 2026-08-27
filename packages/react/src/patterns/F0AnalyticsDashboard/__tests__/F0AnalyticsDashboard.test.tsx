@@ -789,7 +789,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "No data points selected. Draw around at least one point."
+      "No data points selected. Draw around at least one point"
     )
     expect(
       screen.getByRole("button", { name: "Cancel selection" })
