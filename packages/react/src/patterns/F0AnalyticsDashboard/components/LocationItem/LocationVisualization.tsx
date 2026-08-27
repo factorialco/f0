@@ -166,6 +166,7 @@ const DensityLegend = ({
   scale,
   palette,
   embedded = false,
+  summaryVisible = true,
   timelineVisible = true,
   detailsSpaceReserved = true,
 }: {
@@ -173,6 +174,7 @@ const DensityLegend = ({
   scale: NonNullable<DashboardLocationConfig["densityScale"]>
   palette: F0MapDensityPalette
   embedded?: boolean
+  summaryVisible?: boolean
   timelineVisible?: boolean
   detailsSpaceReserved?: boolean
 }) => (
@@ -183,11 +185,12 @@ const DensityLegend = ({
       embedded
         ? "relative flex flex-wrap"
         : cn(
-            "relative z-20 flex max-w-full shrink-0 self-start flex-wrap gap-x-2.5 gap-y-1 px-2.5 py-1.5 @[640px]:absolute @[640px]:left-4",
-            timelineVisible ? "@[640px]:bottom-[154px]" : "@[640px]:bottom-4",
+            "relative z-20 flex max-w-full shrink-0 self-start flex-wrap gap-x-2.5 gap-y-1 px-2.5 py-1.5 @[480px]:absolute @[480px]:left-4 @[720px]:top-auto",
+            summaryVisible ? "@[480px]:top-[84px]" : "@[480px]:top-4",
+            timelineVisible ? "@[720px]:bottom-[154px]" : "@[720px]:bottom-4",
             detailsSpaceReserved
-              ? "@[640px]:max-w-[calc(100%_-_408px)]"
-              : "@[640px]:max-w-[calc(100%_-_32px)]"
+              ? "@[480px]:max-w-[calc(100%_-_368px)] @[720px]:max-w-[calc(50%_-_20px)] @[896px]:max-w-[calc(100%_-_440px)]"
+              : "@[480px]:max-w-[calc(100%_-_32px)]"
           )
     )}
   >
@@ -257,15 +260,15 @@ const LocationDetailsPanel = ({
       embedded
         ? "relative flex max-h-[368px] self-start"
         : cn(
-            "relative z-20 max-h-full w-full flex-initial @[480px]:w-[320px] @[640px]:absolute @[640px]:right-4 @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[896px]:w-[400px]",
-            summaryVisible ? "@[640px]:top-[96px]" : "@[640px]:top-4",
+            "relative z-20 max-h-full w-full flex-initial @[480px]:absolute @[480px]:right-4 @[480px]:w-[320px] @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[896px]:w-[400px]",
+            summaryVisible ? "@[480px]:top-[84px]" : "@[480px]:top-4",
             summaryVisible && timelineVisible
-              ? "@[640px]:max-h-[calc(100%_-_250px)]"
+              ? "@[480px]:max-h-[calc(100%_-_238px)]"
               : summaryVisible
-                ? "@[640px]:max-h-[calc(100%_-_112px)]"
+                ? "@[480px]:max-h-[calc(100%_-_100px)]"
                 : timelineVisible
-                  ? "@[640px]:max-h-[calc(100%_-_170px)]"
-                  : "@[640px]:max-h-[calc(100%_-_32px)]",
+                  ? "@[480px]:max-h-[calc(100%_-_170px)]"
+                  : "@[480px]:max-h-[calc(100%_-_32px)]",
             timelineVisible
               ? "@[720px]:max-h-[calc(100%_-_170px)]"
               : "@[720px]:max-h-[calc(100%_-_32px)]",
@@ -416,7 +419,7 @@ const LocationDetailsTrigger = ({
     aria-expanded={false}
     onClick={onOpen}
     className={cn(
-      "pointer-events-auto absolute right-4 z-20 flex h-[64px] max-w-[calc(100%_-_32px)] items-center gap-2.5 rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[720px]:max-w-none @[896px]:w-[400px]",
+      "pointer-events-auto absolute right-4 z-20 flex h-[64px] max-w-[calc(100%_-_32px)] items-center gap-2.5 rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left @[480px]:w-[320px] @[720px]:top-4 @[720px]:w-[calc(50%_-_20px)] @[720px]:max-w-none @[896px]:w-[400px]",
       summaryVisible ? "top-[84px]" : "top-4",
       responsiveUnmeasured && "@[720px]:hidden",
       focusRing()
@@ -952,6 +955,8 @@ export function LocationVisualization({
   const detailsPanelOpen =
     detailsPanelState === "open" ||
     (detailsPanelState === "responsive" && responsiveDetailsOpen === true)
+  const detailsTriggerVisible =
+    detailsVisible && Boolean(selectedLocation) && !detailsPanelOpen
   const responsiveDetailsUnmeasured =
     detailsPanelState === "responsive" && responsiveDetailsOpen === null
   const timelineVisible = Boolean(renderedTimeline)
@@ -1074,7 +1079,7 @@ export function LocationVisualization({
       )}
       {!mapFallbackVisible && (
         <>
-          {detailsVisible && selectedLocation && !detailsPanelOpen && (
+          {detailsTriggerVisible && selectedLocation && (
             <LocationDetailsTrigger
               location={selectedLocation}
               config={config}
@@ -1088,8 +1093,14 @@ export function LocationVisualization({
           {(detailsVisible || densityLegendVisible) && (
             <div
               className={cn(
-                "pointer-events-none absolute left-4 right-4 z-20 flex min-h-0 flex-col items-stretch gap-2 @[480px]:items-end @[640px]:contents",
-                summaryVisible ? "top-[96px]" : "top-4",
+                "pointer-events-none absolute left-4 right-4 z-20 flex min-h-0 flex-col items-stretch gap-2 @[480px]:contents",
+                summaryVisible
+                  ? detailsTriggerVisible
+                    ? "top-[156px] @[480px]:top-[96px]"
+                    : "top-[96px]"
+                  : detailsTriggerVisible
+                    ? "top-[88px] @[480px]:top-4"
+                    : "top-4",
                 timelineVisible ? "bottom-[154px]" : "bottom-4"
               )}
             >
@@ -1116,6 +1127,7 @@ export function LocationVisualization({
                   config={config}
                   scale={resolvedDensityScale}
                   palette={resolvedDensityPalette}
+                  summaryVisible={summaryVisible}
                   timelineVisible={timelineVisible}
                   detailsSpaceReserved={
                     detailsVisible && Boolean(selectedLocation)

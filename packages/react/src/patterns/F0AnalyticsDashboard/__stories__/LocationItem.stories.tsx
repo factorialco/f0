@@ -652,7 +652,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  tags: ["no-sidebar"],
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     const page = within(canvasElement.closest("body")!)
@@ -661,14 +660,35 @@ export const Default: Story = {
       const panel = await canvas.findByRole("complementary", {
         name: "Barcelona · HQ",
       })
+      const visualization = canvasElement.querySelector<HTMLElement>(
+        "[data-location-visualization]"
+      )
+      const legend = canvasElement.querySelector<HTMLElement>(
+        "[data-location-density-legend]"
+      )
+      const timeline = canvasElement.querySelector<HTMLElement>(
+        "[data-location-timeline]"
+      )
       const detailValues = panel.querySelector<HTMLElement>(
         "[data-location-detail-values]"
       )
-      if (!detailValues) {
-        throw new globalThis.Error("Expected location detail values")
+      if (!visualization || !legend || !timeline || !detailValues) {
+        throw new globalThis.Error(
+          "Expected visualization, legend, timeline, and location detail values"
+        )
       }
+      await expect(
+        visualization.getBoundingClientRect().width
+      ).toBeGreaterThanOrEqual(896)
       await expect(panel.getBoundingClientRect().width).toBeGreaterThanOrEqual(
         398
+      )
+      await expect(getComputedStyle(legend).maxWidth).toBe("calc(100% - 440px)")
+      await expect(legend.getBoundingClientRect().right).toBeLessThanOrEqual(
+        panel.getBoundingClientRect().left
+      )
+      await expect(legend.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        timeline.getBoundingClientRect().top
       )
       await expect(getComputedStyle(detailValues).flexWrap).toBe("nowrap")
       await expect(getComputedStyle(panel).boxShadow).toBe("none")
@@ -765,12 +785,27 @@ export const CustomDensityPalette: Story = {
 export const WithoutSummary: Story = {
   tags: ["no-sidebar"],
   args: { items: [withoutSummaryItem] },
+  render: (args) => (
+    <div className="mx-auto w-[420px] max-w-full">
+      <DashboardFrame items={args.items} />
+    </div>
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await canvas.findByRole("navigation", { name: "Locations" })
     await expect(
       canvasElement.querySelector("[data-location-summary]")
     ).not.toBeInTheDocument()
+    const trigger = canvas.getByRole("button", {
+      name: "View activity for Barcelona · HQ",
+    })
+    const legend = canvasElement.querySelector<HTMLElement>(
+      "[data-location-density-legend]"
+    )
+    if (!legend) throw new globalThis.Error("Expected the density legend")
+    await expect(legend.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      trigger.getBoundingClientRect().bottom + 8
+    )
   },
 }
 
@@ -875,11 +910,22 @@ export const SideBySide: Story = {
     const summary = locationCard.querySelector<HTMLElement>(
       "[data-location-summary]"
     )
+    const visualization = locationCard.querySelector<HTMLElement>(
+      "[data-location-visualization]"
+    )
     const openPanel = locationCard.querySelector<HTMLElement>(
       "[data-location-details]"
     )
-    if (!summary || !openPanel) {
-      throw new globalThis.Error("Expected summary and open location details")
+    const legend = locationCard.querySelector<HTMLElement>(
+      "[data-location-density-legend]"
+    )
+    const timeline = locationCard.querySelector<HTMLElement>(
+      "[data-location-timeline]"
+    )
+    if (!summary || !visualization || !openPanel || !legend || !timeline) {
+      throw new globalThis.Error(
+        "Expected summary, visualization, legend, timeline, and open location details"
+      )
     }
     const panelHeader = openPanel.firstElementChild
     if (!(panelHeader instanceof HTMLElement)) {
@@ -891,7 +937,18 @@ export const SideBySide: Story = {
     const openTitle = within(openPanel).getByText("Barcelona · HQ")
     const openTitleRect = openTitle.getBoundingClientRect()
     const openTitleStyle = getComputedStyle(openTitle)
+    await expect(
+      visualization.getBoundingClientRect().width
+    ).toBeGreaterThanOrEqual(720)
+    await expect(visualization.getBoundingClientRect().width).toBeLessThan(896)
     await expect(Math.abs(summaryBefore.top - panelBefore.top)).toBeLessThan(2)
+    await expect(getComputedStyle(legend).maxWidth).toBe("calc(50% - 20px)")
+    await expect(legend.getBoundingClientRect().right).toBeLessThanOrEqual(
+      panelBefore.left
+    )
+    await expect(legend.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      timeline.getBoundingClientRect().top
+    )
     await expect(
       Math.abs(summaryBefore.height - panelHeaderBefore.height)
     ).toBeLessThan(2)
@@ -981,7 +1038,7 @@ export const IntermediateWidth: Story = {
     ],
   },
   render: (args) => (
-    <DashboardFrame items={args.items} width={680} className="h-[780px]" />
+    <DashboardFrame items={args.items} width={650} className="h-[780px]" />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -994,15 +1051,44 @@ export const IntermediateWidth: Story = {
     const timeline = canvasElement.querySelector<HTMLElement>(
       "[data-location-timeline]"
     )
-    if (!summary || !timeline)
-      throw new globalThis.Error("Expected summary and timeline")
-    await expect(trigger.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+    const visualization = canvasElement.querySelector<HTMLElement>(
+      "[data-location-visualization]"
+    )
+    const legend = canvasElement.querySelector<HTMLElement>(
+      "[data-location-density-legend]"
+    )
+    if (!summary || !timeline || !visualization || !legend) {
+      throw new globalThis.Error(
+        "Expected summary, visualization, legend, and timeline"
+      )
+    }
+    const triggerBefore = trigger.getBoundingClientRect()
+    const legendBefore = legend.getBoundingClientRect()
+    await expect(
+      visualization.getBoundingClientRect().width
+    ).toBeGreaterThanOrEqual(480)
+    await expect(visualization.getBoundingClientRect().width).toBeLessThan(720)
+    await expect(triggerBefore.width).toBeGreaterThanOrEqual(319)
+    await expect(triggerBefore.width).toBeLessThanOrEqual(321)
+    await expect(triggerBefore.top).toBeGreaterThanOrEqual(
       summary.getBoundingClientRect().bottom
     )
+    await expect(Math.abs(legendBefore.top - triggerBefore.top)).toBeLessThan(2)
+    await expect(legendBefore.right).toBeLessThanOrEqual(triggerBefore.left)
     await userEvent.click(trigger)
     const panel = await canvas.findByRole("complementary", {
       name: "Barcelona · Headquarters and Innovation Campus",
     })
+    const legendAfter = legend.getBoundingClientRect()
+    await expect(Math.abs(legendAfter.left - legendBefore.left)).toBeLessThan(2)
+    await expect(Math.abs(legendAfter.top - legendBefore.top)).toBeLessThan(2)
+    await expect(
+      Math.abs(panel.getBoundingClientRect().top - triggerBefore.top)
+    ).toBeLessThan(2)
+    await expect(panel.getBoundingClientRect().width).toBe(triggerBefore.width)
+    await expect(legendAfter.right).toBeLessThanOrEqual(
+      panel.getBoundingClientRect().left
+    )
     await expect(panel.getBoundingClientRect().bottom).toBeLessThanOrEqual(
       timeline.getBoundingClientRect().top
     )
@@ -1120,7 +1206,22 @@ export const Narrow: Story = {
     const trigger = await canvas.findByRole("button", {
       name: "View activity for Barcelona · HQ",
     })
+    const legend = canvasElement.querySelector<HTMLElement>(
+      "[data-location-density-legend]"
+    )
+    const visualization = canvasElement.querySelector<HTMLElement>(
+      "[data-location-visualization]"
+    )
+    if (!legend || !visualization) {
+      throw new globalThis.Error(
+        "Expected the visualization and density legend"
+      )
+    }
+    await expect(visualization.getBoundingClientRect().width).toBeLessThan(480)
     await expect(trigger).toBeVisible()
+    await expect(legend.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      trigger.getBoundingClientRect().bottom
+    )
     await userEvent.click(trigger)
     await expect(
       canvas.getByRole("complementary", { name: "Barcelona · HQ" })
