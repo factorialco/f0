@@ -479,7 +479,7 @@ export const defaultTranslations = {
       selectChartDataPoints: "Select chart values without drawing",
       useSelectedChartDataPoints: "Ask One about selected values ({{count}})",
       selectedChartArea: "Selected chart area",
-      moreSelectedValues: "{{count}} more selected values",
+      moreSelectedValues: "Additional selected values: {{count}}",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",

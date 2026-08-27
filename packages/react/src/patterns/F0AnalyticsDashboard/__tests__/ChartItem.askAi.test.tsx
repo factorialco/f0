@@ -1184,10 +1184,10 @@ describe("ChartItem — asking about a drawn area", () => {
         selection,
         {
           heading: "Selected chart area",
-          more: "{{count}} more selected values",
+          more: "Additional selected values: {{count}}",
         }
       )
-    ).toContain("7 more selected values")
+    ).toContain("Additional selected values: 7")
   })
 })
 
