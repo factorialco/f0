@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.63.1](https://github.com/factorialco/f0/compare/f0-react-v6.63.0...f0-react-v6.63.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **F0Chat:** drop the mention chip's font-weight so the caret tracks the glyphs ([#5274](https://github.com/factorialco/f0/issues/5274)) ([bf41fa6](https://github.com/factorialco/f0/commit/bf41fa6e49a2c14ef123fb7d51973d2212d0a559))
+
 ## [6.63.0](https://github.com/factorialco/f0/compare/f0-react-v6.62.0...f0-react-v6.63.0) (2026-08-27)
 
 
