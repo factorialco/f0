@@ -239,14 +239,21 @@ export function useSelectable<
   const { itemsStatus, selectedIds } = useMemo(() => {
     const items = localSelectedState.items || new Map()
 
-    // In page-only selection mode, only include items from current page
-    const currentPageItemIds = isPageOnlySelection
-      ? new Set(
-          data.records
-            .map((record) => getSelectable?.(record))
-            .filter((id): id is SelectionId => id !== undefined)
-        )
-      : null
+    // In page-only selection mode, only include items from current page.
+    // A tree's `data.records` holds the ROOTS only — its nested rows arrive
+    // through `fetchChildren` and never appear there — so page-scoping the
+    // payload would drop every selected child and hand the consumer an empty
+    // `itemsStatus` (which also keeps the action bar shut). A tree has no pages
+    // to scope to, so it is exempt.
+    const isTree = source.fetchChildren !== undefined
+    const currentPageItemIds =
+      isPageOnlySelection && !isTree
+        ? new Set(
+            data.records
+              .map((record) => getSelectable?.(record))
+              .filter((id): id is SelectionId => id !== undefined)
+          )
+        : null
 
     const itemsStatus = Array.from(items.values())
       .filter((itemState) => {
@@ -276,6 +283,7 @@ export function useSelectable<
     isPageOnlySelection,
     data.records,
     getSelectable,
+    source.fetchChildren,
   ])
 
   const groupsStatus = useMemo(
