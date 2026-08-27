@@ -17,6 +17,7 @@ import {
   type CSSProperties,
   type PointerEvent,
   ReactNode,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -46,6 +47,7 @@ import {
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost } from "./dragGhost"
+import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
 import {
   useWidgetVirtualizer,
@@ -113,12 +115,6 @@ const DROP_ANIMATION = {
   duration: 450,
   easing: "cubic-bezier(0.4, 0, 0.1, 1)",
 }
-
-/**
- * Hoisted rather than written inline: dnd-kit reads this on every pointer move,
- * and a fresh array each render is a fresh dependency for it.
- */
-const DRAG_MODIFIERS = [verticalOnly]
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
@@ -414,6 +410,23 @@ export function WidgetContainer({
   const columnRef = useRef<HTMLDivElement>(null)
   /** The static copy of the dragged card that rides the pointer — {@link takeCardGhost}. */
   const ghostRef = useRef<HTMLElement | null>(null)
+  /**
+   * HOW FAR UP THE CARD BEING DRAGGED MAY GO, measured when the drag starts and
+   * null the rest of the time — see `lockedCeiling`.
+   */
+  const ceilingRef = useRef<number | null>(null)
+  /**
+   * The dragged card goes up and down only (`verticalOnly`), and no higher than
+   * the widgets pinned to the top of the column (`noHigherThan`).
+   *
+   * Built ONCE: dnd-kit reads this on every pointer move, and a fresh array each
+   * render is a fresh dependency for it — which is why the ceiling arrives
+   * through a ref instead of being baked into the modifier.
+   */
+  const modifiers = useMemo(
+    () => [verticalOnly, noHigherThan(() => ceilingRef.current)],
+    []
+  )
 
   const takeGhost = (id: string) => {
     ghostRef.current = takeCardGhost(
@@ -486,9 +499,16 @@ export function WidgetContainer({
     >
     const x = start.clientX == null ? null : start.clientX + delta.x
     const y = start.clientY == null ? null : start.clientY + delta.y
+    // THE PINS AT THE TOP WERE NEVER REACHABLE: the drag was held below them
+    // (`noHigherThan`), so the card cannot have covered one, and refusing the
+    // drop because the POINTER strayed up into one would refuse a card that is
+    // sitting in the highest slot it was allowed to reach. Only when the ceiling
+    // could not be measured at all does the card get up there, and then the
+    // refusal is again the only thing that explains the spring back.
+    const unreachable = ceilingRef.current == null ? [] : topPins(widgets)
 
     return widgets.find((widget) => {
-      if (!widget.locked) return false
+      if (!widget.locked || unreachable.includes(widget)) return false
       const box = columnRef.current
         ?.querySelector(`[data-widget-id="${widget.id}"]`)
         ?.getBoundingClientRect()
@@ -784,22 +804,30 @@ export function WidgetContainer({
           sensors={sensors}
           collisionDetection={closestCenter}
           // The card the pointer carries goes up and down only, like the
-          // shuffle underneath it — see `verticalOnly`.
-          modifiers={DRAG_MODIFIERS}
+          // shuffle underneath it, and it stops at the widgets pinned to the top
+          // of the column — see `verticalOnly` and `lockedCeiling`.
+          modifiers={modifiers}
           onDragStart={({ active }) => {
             // BEFORE the card is told it is being dragged: what the ghost
-            // should look like is what is on screen right now.
+            // should look like — and where the pinned cards are — is what is on
+            // screen right now, while nothing has moved yet.
             takeGhost(String(active.id))
+            ceilingRef.current = lockedCeiling(widgets, columnRef.current)
             setActiveId(String(active.id))
           }}
           onDragCancel={() => {
             setActiveId(null)
             ghostRef.current = null
+            ceilingRef.current = null
           }}
           onDragEnd={(event) => {
             setActiveId(null)
             ghostRef.current = null
+            // The ceiling outlives the drag by one call: whether the card was
+            // held below the pins is what decides whether a drop up there is
+            // worth refusing out loud (`lockedTargetOf`).
             handleDragEnd(event)
+            ceilingRef.current = null
           }}
         >
           {/* EVERY WIDGET'S ID, mounted or not: the order a drop commits is the

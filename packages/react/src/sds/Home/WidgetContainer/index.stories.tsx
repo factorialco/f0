@@ -70,6 +70,11 @@ export const Default: Story = {}
  * A `locked` widget (the first here) is inert: it can't be dragged, nothing can
  * displace it, and it offers no menu at all — being mandatory, removing it is
  * not a choice the user has.
+ *
+ * And because it is at the TOP of the column, a card dragged up STOPS at its
+ * bottom edge rather than sailing over it to a slot it cannot have: there is no
+ * order above a pinned widget for the drop to commit, so carrying a card up
+ * there could only end in a spring back (`lockedCeiling`).
  */
 export const WithLockedWidget: Story = {
   args: {
