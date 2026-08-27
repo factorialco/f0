@@ -78,8 +78,8 @@ describe("useGraphRenderModel — expander affordance", () => {
 
     const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander?.type).toBe("expanderNode")
-    expect((expander?.data as ExpanderNodeData).count).toBe(81)
-    expect((expander?.data as ExpanderNodeData).loading).toBe(false)
+    expect((expander!.data as ExpanderNodeData).count).toBe(81)
+    expect((expander!.data as ExpanderNodeData).loading).toBe(false)
   })
 
   it("keeps the expander with a loading flag while an expanded node waits for children", () => {
@@ -90,7 +90,7 @@ describe("useGraphRenderModel — expander affordance", () => {
 
     const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander).toBeDefined()
-    expect((expander?.data as ExpanderNodeData).loading).toBe(true)
+    expect((expander!.data as ExpanderNodeData).loading).toBe(true)
   })
 
   it("removes the expander once an expanded node's children are loaded", () => {
@@ -581,7 +581,7 @@ describe("useGraphRenderModel — stacked nodes", () => {
     const { result } = renderModel(baseOptions([root], ["root", "role"]))
 
     const stackedOf = (id: string) =>
-      (result.current.rfNodes.find((n) => n.id === id)?.data as GraphNodeData)
+      (result.current.rfNodes.find((n) => n.id === id)!.data as GraphNodeData)
         .stacked
 
     expect(stackedOf("l1")).toBe(true)
