@@ -7,11 +7,16 @@ import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import {
+  Calendar,
   ChartVerticalBars,
   File,
   Marketplace,
+  PalmTree,
   Pencil,
+  Person,
+  Receipt,
   Search,
+  Settings,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
@@ -214,6 +219,61 @@ const LONG_WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
   },
 ]
 
+// More groups than the field can show at once — the case the `inside` row's
+// sideways scroll and faded ends exist for. The items are deliberately thin:
+// what this fixture is testing is the ROW, not the panels.
+const MANY_WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  ...WELCOME_SUGGESTIONS,
+  {
+    icon: PalmTree,
+    label: "Time off",
+    items: [
+      { title: "Request time off", prompt: "Request time off for next week." },
+      { title: "My remaining leave", prompt: "How much leave do I have left?" },
+    ],
+  },
+  {
+    icon: Receipt,
+    label: "Expenses",
+    items: [
+      { title: "Submit an expense", prompt: "Submit a new expense report." },
+      { title: "Pending reimbursements", prompt: "What am I owed?" },
+    ],
+  },
+  {
+    icon: Calendar,
+    label: "Schedule",
+    items: [
+      { title: "Book a meeting room", prompt: "Book a room for tomorrow." },
+      { title: "My shifts this week", prompt: "Show my shifts this week." },
+    ],
+  },
+  {
+    icon: File,
+    label: "Documents",
+    items: [
+      { title: "My last payslip", prompt: "Open my most recent payslip." },
+      { title: "My contract", prompt: "Show my current contract." },
+    ],
+  },
+  {
+    icon: Person,
+    label: "My team",
+    items: [
+      { title: "Who reports to me?", prompt: "List my direct reports." },
+      { title: "Team headcount", prompt: "What is my team's headcount?" },
+    ],
+  },
+  {
+    icon: Settings,
+    label: "Settings",
+    items: [
+      { title: "Change my language", prompt: "Change my language to Spanish." },
+      { title: "Notification preferences", prompt: "Open my notifications." },
+    ],
+  },
+]
+
 const noop = () => {}
 
 const buildClarifyingState = (
@@ -260,6 +320,7 @@ type WrapperProps = {
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenSuggestionsPlacement?: "above" | "inside"
+  welcomeScreenSuggestionsCollapsedByDefault?: boolean
   welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
@@ -281,6 +342,7 @@ const Wrapper = ({
   footer,
   welcomeScreenSuggestions,
   welcomeScreenSuggestionsPlacement,
+  welcomeScreenSuggestionsCollapsedByDefault,
   welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
@@ -350,6 +412,9 @@ const Wrapper = ({
         footer={footer}
         welcomeScreenSuggestions={welcomeScreenSuggestions}
         welcomeScreenSuggestionsPlacement={welcomeScreenSuggestionsPlacement}
+        welcomeScreenSuggestionsCollapsedByDefault={
+          welcomeScreenSuggestionsCollapsedByDefault
+        }
         onSuggestionClick={(item) => {
           // Suggestions always send a prompt (item.prompt, falling back to its
           // title) — unlike cards, the host doesn't branch on behavior.
@@ -550,9 +615,10 @@ export const WithWelcomeSuggestions: Story = {
 }
 
 // `welcomeScreenSuggestionsPlacement: "inside"` — the suggestions move INTO the
-// field, at its foot, and the send button moves onto the textarea's own line.
-// With no attachments, dictation or `toolbarStart` the composer is exactly two
-// bands (text + send, then the chips), which is the home-page "ask" bar shape.
+// field and take the middle of its ACTION row, between the attachment/host
+// controls and the dictation · send pair. That is what keeps the field two bands
+// tall (text, then one row of controls) instead of three, and it is the home-page
+// "ask" bar shape.
 // Note there is no `fullscreen`: this placement doesn't need the welcome screen's
 // vertical room, because it isn't claiming any space above the field.
 export const WithWelcomeSuggestionsInside: Story = {
@@ -561,6 +627,8 @@ export const WithWelcomeSuggestionsInside: Story = {
     welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
     welcomeScreenSuggestionsPlacement: "inside",
     placeholders: ROTATING_PLACEHOLDERS,
+    fileAttachments: FILE_UPLOAD_CONFIG,
+    onTranscribe: mockTranscribe,
     disclaimer: DISCLAIMER,
   },
   play: async ({ canvasElement, step }) => {
@@ -582,18 +650,28 @@ export const WithWelcomeSuggestionsInside: Story = {
       ).toBeTruthy()
     })
 
-    await step("Send trails the text instead of sitting in its own row", () => {
+    await step("The chips share the action row with every button", () => {
       const textarea = canvasElement.querySelector(
         'textarea[name="one-ai-input"]'
       )!
       // The text band: TextareaField's grid, then the row that holds it.
       const textBand = textarea.parentElement!.parentElement!
-      const send = page.getByRole("button", { name: /send/i })
       const trigger = page.getByRole("button", { name: "Analyze" })
+      const send = page.getByRole("button", { name: /send/i })
+      const mic = page.getByRole("button", { name: /record/i })
+      const row = trigger.closest("form > div > div")!
 
-      expect(textBand.contains(send)).toBe(true)
-      // …and the chips are their own band under it, not in this one.
-      expect(textBand.contains(trigger)).toBe(false)
+      // Chips, dictation and send are all one row — and none of them is in the
+      // text band above it.
+      for (const control of [trigger, mic, send]) {
+        expect(row.contains(control)).toBe(true)
+        expect(textBand.contains(control)).toBe(false)
+      }
+      // Dictation sits immediately before send.
+      expect(mic.parentElement).toBe(send.parentElement)
+      expect(
+        mic.compareDocumentPosition(send) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy()
     })
 
     await step("Picking a group opens its panel", async () => {
@@ -605,6 +683,104 @@ export const WithWelcomeSuggestionsInside: Story = {
         page.getByRole("button", { name: "April leave and overtime summary" })
       ).toBeInTheDocument()
     })
+  },
+}
+
+// More groups than fit: the row keeps to ONE line and scrolls sideways, and the
+// end that has chips hidden past it is faded — that fade is the only scroll
+// affordance there is, since the scrollbar is hidden. Scroll to the end and the
+// trailing fade goes away while the leading one appears. Ten groups cost the
+// field exactly the height three do.
+export const WithManyWelcomeSuggestionsInside: Story = {
+  args: {
+    isWelcomeScreen: true,
+    welcomeScreenSuggestions: MANY_WELCOME_SUGGESTIONS,
+    welcomeScreenSuggestionsPlacement: "inside",
+    placeholders: ROTATING_PLACEHOLDERS,
+    fileAttachments: FILE_UPLOAD_CONFIG,
+    onTranscribe: mockTranscribe,
+    disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("The row scrolls instead of wrapping", () => {
+      const scroller = page.getByRole("button", {
+        name: "Analyze",
+      }).parentElement!
+
+      // One line, and wider than the box showing it.
+      expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth)
+      // Which is what the fade is drawn from: only the end with something
+      // hidden past it is masked, so at rest that is the trailing edge alone.
+      expect(scroller.style.maskImage).toContain("transparent 100%")
+      expect(scroller.style.maskImage).not.toContain("transparent 0")
+    })
+
+    await step("The last group is reachable by scrolling", async () => {
+      const scroller = page.getByRole("button", {
+        name: "Analyze",
+      }).parentElement!
+
+      scroller.scrollLeft = scroller.scrollWidth
+      await userEvent.click(page.getByRole("button", { name: "Settings" }))
+      await expect(
+        page.getByRole("dialog", { name: "Settings" })
+      ).toBeInTheDocument()
+    })
+  },
+}
+
+// `welcomeScreenSuggestionsCollapsedByDefault` — the bar is ONE LINE until it is
+// addressed: One's mark, the placeholder, and send trailing the text. The whole
+// control row is gone, not just the chips (a row emptied of its chips would still
+// be 56px of padding around two buttons). Click or tab into the input and the row
+// opens with everything in it — attachments, the starter prompts, dictation, and
+// send back among its peers at `md`.
+//
+// It stays open: every way of picking a chip takes focus off the input, so a row
+// that closed on blur would close on its way to being used.
+export const WithCollapsedWelcomeSuggestions: Story = {
+  args: {
+    isWelcomeScreen: true,
+    welcomeScreenSuggestions: MANY_WELCOME_SUGGESTIONS,
+    welcomeScreenSuggestionsPlacement: "inside",
+    welcomeScreenSuggestionsCollapsedByDefault: true,
+    placeholders: ROTATING_PLACEHOLDERS,
+    fileAttachments: FILE_UPLOAD_CONFIG,
+    onTranscribe: mockTranscribe,
+    disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+    const textarea = canvasElement.querySelector<HTMLTextAreaElement>(
+      'textarea[name="one-ai-input"]'
+    )!
+
+    await step("Collapsed: one line, dictation and send trailing it", () => {
+      // Unmounted rather than hidden: controls behind a zero height would still
+      // be in the tab order.
+      for (const name of [/analyze/i, /attach/i]) {
+        expect(page.queryByRole("button", { name })).not.toBeInTheDocument()
+      }
+      // Two controls come along: send (a bar you cannot send from is not a
+      // composer) and dictation (talking is a way to start a prompt without
+      // typing one). Both on the textarea's own line.
+      const textBand = textarea.parentElement!.parentElement!
+      for (const name of [/send/i, /record/i]) {
+        expect(textBand.contains(page.getByRole("button", { name }))).toBe(true)
+      }
+      // …and the bar does not steal focus to open itself.
+      expect(textarea).not.toHaveFocus()
+    })
+
+    // NOTHING IS CLICKED HERE, on purpose. A play function runs as soon as the
+    // story opens, so a step that focused the input to show the reveal would
+    // leave this story permanently open — the one state it exists to show would
+    // be the one you can never see. Click the field yourself to watch it open;
+    // that the focus opens the row, that the row holds every control, and that it
+    // stays open on blur are asserted in
+    // `__tests__/F0AiChatTextArea.suggestionsInside.test.tsx`.
   },
 }
 
