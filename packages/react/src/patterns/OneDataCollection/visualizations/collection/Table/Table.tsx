@@ -407,8 +407,13 @@ export const TableCollection = <
     selectionRegistry.ids.length > 0
       ? selectionRegistry.ids
       : (data?.records ?? [])
+          // Disabled rows never register, so the registry branch is already
+          // free of them; this fallback over `data.records` is not.
+          .filter((record) => !source.selectionDisabled?.(record))
           .map((record) => source.selectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)
+
+  const selectAllDisabled = source.disableSelectAll ?? false
 
   const allPageRowsSelected =
     currentPageSelectableIds.length > 0 &&
@@ -428,6 +433,7 @@ export const TableCollection = <
     allPageRowsSelected
 
   const showSelectAllOption =
+    !selectAllDisabled &&
     !!source.allPagesSelection &&
     (!allSelectedStatus.checked || allSelectedStatus.indeterminate) &&
     paginationInfo?.total !== undefined &&
@@ -617,16 +623,18 @@ export const TableCollection = <
                         : undefined
                     }
                   >
-                    <div className="ml-3.5 flex w-full items-center justify-start">
-                      <F0Checkbox
-                        checked={isAllSelected}
-                        indeterminate={hasSelection && !isAllSelected}
-                        onCheckedChange={handleSelectAll}
-                        title={i18n.actions.selectAll}
-                        hideLabel
-                        disabled={data?.records.length === 0}
-                      />
-                    </div>
+                    {!selectAllDisabled && (
+                      <div className="ml-3.5 flex w-full items-center justify-start">
+                        <F0Checkbox
+                          checked={isAllSelected}
+                          indeterminate={hasSelection && !isAllSelected}
+                          onCheckedChange={handleSelectAll}
+                          title={i18n.actions.selectAll}
+                          hideLabel
+                          disabled={data?.records.length === 0}
+                        />
+                      </div>
+                    )}
                   </TableHead>
                 )}
                 {columns.map(({ sorting, label, ...column }, index) => {
@@ -761,23 +769,26 @@ export const TableCollection = <
                             sticky={{ left: 0 }}
                           >
                             <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
-                              <F0Checkbox
-                                checked={
-                                  !!statusToChecked(
-                                    groupAllSelectedStatus[group.key]
-                                  )
-                                }
-                                indeterminate={
-                                  statusToChecked(
-                                    groupAllSelectedStatus[group.key]
-                                  ) === "indeterminate"
-                                }
-                                title={i18n.actions.selectAll}
-                                hideLabel
-                                onCheckedChange={(checked) =>
-                                  handleSelectGroupChange(group, checked)
-                                }
-                              />
+                              {/* A group checkbox selects the whole group. */}
+                              {!selectAllDisabled && (
+                                <F0Checkbox
+                                  checked={
+                                    !!statusToChecked(
+                                      groupAllSelectedStatus[group.key]
+                                    )
+                                  }
+                                  indeterminate={
+                                    statusToChecked(
+                                      groupAllSelectedStatus[group.key]
+                                    ) === "indeterminate"
+                                  }
+                                  title={i18n.actions.selectAll}
+                                  hideLabel
+                                  onCheckedChange={(checked) =>
+                                    handleSelectGroupChange(group, checked)
+                                  }
+                                />
+                              )}
                             </div>
                           </TableCell>
                         )}

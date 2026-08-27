@@ -879,6 +879,54 @@ export const WithSelectableAndBulkActions: Story = {
   ),
 }
 
+/**
+ * `selectionDisabled` greys out a row's checkbox instead of hiding it, so the
+ * row keeps its place while a consumer rule blocks it. Here the rule is
+ * "one department at a time": the first pick locks the department and every
+ * other row goes disabled until the selection is cleared. `disableSelectAll`
+ * removes the header checkbox, which would otherwise tick every department at
+ * once and break the rule before it can lock anything.
+ */
+export const WithDisabledSelection: Story = {
+  render: () => {
+    const [lockedDepartment, setLockedDepartment] = useState<string | null>(
+      null
+    )
+
+    const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
+
+    const source = useDataCollectionSource({
+      filters,
+      sortings,
+      selectable: (item) => item.id,
+      selectionDisabled: (item) =>
+        lockedDepartment !== null && item.department !== lockedDepartment,
+      disableSelectAll: true,
+      bulkActions: () => ({
+        primary: [{ label: "Move", id: "move" }],
+      }),
+      dataAdapter: createDataAdapter({
+        data: generateMockUsers(10),
+        paginationType: "pages",
+      }),
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        onSelectItems={(selectedItems) => {
+          const firstChecked = selectedItems.itemsStatus.find(
+            (status) => status.checked
+          )
+          setLockedDepartment(firstChecked?.item.department ?? null)
+        }}
+        onBulkAction={() => {}}
+        visualizations={[mockVisualizations.table]}
+      />
+    )
+  },
+}
+
 export const WithAsyncBulkActions: Story = {
   render: () => {
     const paginatedMockUsers = generateMockUsers(10)

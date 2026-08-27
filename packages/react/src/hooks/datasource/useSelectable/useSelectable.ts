@@ -36,7 +36,7 @@ export function useSelectable<
   selectionMode = "multi",
   selectedState,
   onSelectItems,
-  disableSelectAll = false,
+  disableSelectAll: disableSelectAllProp,
   isSearchActive = false,
   allPagesSelection,
   resetOnPageChange = true,
@@ -51,6 +51,11 @@ export function useSelectable<
   const isGrouped = data.type === "grouped"
   const isMultiSelection = selectionMode === "multi"
   const getSelectable = source.selectable
+  const getSelectionDisabled = source.selectionDisabled
+  // Same precedence as `allPagesSelection`: the hook prop wins, the source is
+  // the fallback.
+  const disableSelectAll =
+    disableSelectAllProp ?? source.disableSelectAll ?? false
   // Use allPagesSelection from props, falling back to source.allPagesSelection, default false
   // When allPagesSelection is false (default), selection is scoped to the current page only
   const isPageOnlySelection = !(
@@ -590,8 +595,12 @@ export function useSelectable<
   // Selectable rows a "select all" can act on: rendered-row registry when
   // present (covers nested children), else `data.records`.
   const collectSelectableEntries = useCallback((): Array<[SelectionId, R]> => {
+    const isDisabled = ([, item]: [SelectionId, R]) =>
+      getSelectionDisabled?.(item) === true
+
     const rendered = getRenderedSelectableEntries?.() ?? []
-    if (rendered.length > 0) return rendered
+    if (rendered.length > 0)
+      return rendered.filter((entry) => !isDisabled(entry))
 
     return data.records
       .map((record): [SelectionId, R] | undefined => {
@@ -599,7 +608,13 @@ export function useSelectable<
         return id === undefined ? undefined : [id, record]
       })
       .filter((entry): entry is [SelectionId, R] => entry !== undefined)
-  }, [getRenderedSelectableEntries, data.records, getSelectable])
+      .filter((entry) => !isDisabled(entry))
+  }, [
+    getRenderedSelectableEntries,
+    data.records,
+    getSelectable,
+    getSelectionDisabled,
+  ])
 
   // Public Selection Handlers
 
@@ -610,6 +625,7 @@ export function useSelectable<
   const handleSelectItemChange = useCallback(
     (itemOrId: R | SelectionId | readonly SelectionId[], checked: boolean) => {
       if (isRecordItem(itemOrId, getSelectable !== undefined)) {
+        if (getSelectionDisabled?.(itemOrId)) return
         const id = getSelectable?.(itemOrId)
         if (id !== undefined) {
           handleSelectItemChangeInternal(id, checked, false, itemOrId)
@@ -619,7 +635,7 @@ export function useSelectable<
 
       handleSelectItemChangeInternal(itemOrId, checked)
     },
-    [getSelectable, handleSelectItemChangeInternal]
+    [getSelectable, getSelectionDisabled, handleSelectItemChangeInternal]
   )
 
   /**

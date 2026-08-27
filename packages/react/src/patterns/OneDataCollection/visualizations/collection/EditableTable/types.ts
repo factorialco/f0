@@ -125,6 +125,8 @@ export type SelectCellConfig<R extends RecordType> = {
           GroupingDefinition<RecordType>
         >,
         | "selectable"
+        | "selectionDisabled"
+        | "disableSelectAll"
         | "grouping"
         | "defaultGrouping"
         | "currentGrouping"

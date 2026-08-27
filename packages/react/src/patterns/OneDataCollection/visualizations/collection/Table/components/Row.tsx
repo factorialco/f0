@@ -181,6 +181,11 @@ const RowComponentInner = <
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const id = source.selectable ? source.selectable(item) : undefined
+  // A selectable row the consumer is blocking right now: the checkbox renders
+  // disabled and the row stays out of the selection registry, so "select all"
+  // can reach a fully-checked state without it.
+  const selectionDisabled =
+    id !== undefined && source.selectionDisabled?.(item) === true
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
   const i18n = useI18n()
@@ -242,6 +247,7 @@ const RowComponentInner = <
   useEffect(() => {
     if (
       id === undefined ||
+      selectionDisabled ||
       !willRenderOwnRow ||
       !registerSelectable ||
       !isPresent
@@ -252,6 +258,7 @@ const RowComponentInner = <
   }, [
     id,
     item,
+    selectionDisabled,
     willRenderOwnRow,
     registerSelectable,
     unregisterSelectable,
@@ -337,6 +344,7 @@ const RowComponentInner = <
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
+                disabled={selectionDisabled}
                 title={`Select ${source.selectable(item)}`}
                 hideLabel
               />
