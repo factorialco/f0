@@ -748,7 +748,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel."
+      "Draw around data in one chart. Unavailable widgets are dimmed. Press Escape to cancel."
     )
     expect(
       document.querySelector("[data-dashboard-area-selection-status]")

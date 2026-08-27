@@ -75,7 +75,7 @@ const AreaSelectionDemo = () => {
       </div>
       <p className="text-sm text-f1-foreground-secondary">
         {active
-          ? "Draw around bars. Press Esc to cancel."
+          ? "Draw around bars. Press Escape to cancel."
           : "Start selection to draw a polygon around chart data."}
       </p>
       <div className="relative h-[360px] rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-3">

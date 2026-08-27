@@ -405,7 +405,7 @@ export const ChartAreaSelectionMode: Story = {
         canvas.getByRole("button", { name: "Cancel selection" })
       ).toBeInTheDocument()
       await expect(canvas.getByRole("status")).toHaveTextContent(
-        "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel."
+        "Draw around data in one chart. Unavailable widgets are dimmed. Press Escape to cancel."
       )
       await expect(
         canvas.getByText("Drawing isn't available for this widget")
