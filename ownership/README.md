@@ -24,17 +24,19 @@ enforce the policy. Rules, in order of precedence:
    `*.stories.tsx` or any file inside a `__stories__/` folder): one approval
    from `@factorialco/f0-general`.
 3. **Feature** — the PR title starts with `feat`: one approval from
-   `@factorialco/f0-devs` **and** one from `@factorialco/f0-designers`.
+   `@factorialco/f0-devs` **and** one from `@factorialco/product-designers`.
 4. **Anything else** — one approval from `@factorialco/f0-devs`.
 
 Adding the `needs-design-review` label to any PR also requires an
-`@factorialco/f0-designers` approval (opt-in by anyone).
+`@factorialco/f0-designers` approval (opt-in by anyone). That is the F0 design
+team — not `product-designers` — and it stacks on rule 3, so a labelled `feat:`
+PR needs an approval from both design teams.
 
 Creating a **new sds module** (a PR that adds a `package.yml` under `sds/`)
 additionally requires an `@factorialco/f0-general` approval, on top of
 whatever the classification requires.
 
-Membership of the three policy teams is mirrored in [`teams.yml`](teams.yml)
+Membership of the policy teams is mirrored in [`teams.yml`](teams.yml)
 (`policy_teams`) because the default Actions token cannot read org team
 membership. Keep it in sync with the GitHub org teams.
 
