@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
@@ -704,7 +704,7 @@ export const WithManyWelcomeSuggestionsInside: Story = {
   play: async ({ canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
 
-    await step("The row scrolls instead of wrapping", () => {
+    await step("The row scrolls instead of wrapping", async () => {
       const scroller = page.getByRole("button", {
         name: "Analyze",
       }).parentElement!
@@ -713,7 +713,15 @@ export const WithManyWelcomeSuggestionsInside: Story = {
       expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth)
       // Which is what the fade is drawn from: only the end with something
       // hidden past it is masked, so at rest that is the trailing edge alone.
-      expect(scroller.style.maskImage).toContain("transparent 100%")
+      //
+      // AWAITED, because the mask is measured rather than declared: the first
+      // read happens before the row has been laid out (a scroller that is 0px
+      // wide overflows by nothing), and the honest answer arrives with the
+      // ResizeObserver a frame later. Asserting straight after mount passed
+      // locally and failed in CI, which is exactly the tell.
+      await waitFor(() => {
+        expect(scroller.style.maskImage).toContain("transparent 100%")
+      })
       expect(scroller.style.maskImage).not.toContain("transparent 0")
     })
 
