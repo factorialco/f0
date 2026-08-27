@@ -8,6 +8,35 @@ import type { HomeWidgetItem } from "../slotRenderers"
 import { WidgetContainer } from "./index"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 
+/**
+ * WHAT THE COLUMN HANDED DND-KIT. There is nothing in the DOM to read a
+ * modifier list off, so the context is stubbed and asked what it was given —
+ * and its `onDragStart` is kept so a gesture can be begun without a pointer.
+ *
+ * At the top of the file because `vi.mock` and `vi.hoisted` ARE hoisted to the
+ * top whatever their position: written inside the `describe` they read as its
+ * setup, which is not when they run (oxlint's `vitest/hoisted-apis-on-top`).
+ */
+const captured = vi.hoisted(() => ({
+  modifiers: undefined as Modifier[] | undefined,
+  onDragStart: undefined as ((event: DragStartEvent) => void) | undefined,
+}))
+
+vi.mock("@dnd-kit/core", async () => {
+  const { createElement } = await import("react")
+  const actual =
+    await vi.importActual<typeof import("@dnd-kit/core")>("@dnd-kit/core")
+
+  return {
+    ...actual,
+    DndContext: (props: React.ComponentProps<typeof actual.DndContext>) => {
+      captured.modifiers = props.modifiers as Modifier[]
+      captured.onDragStart = props.onDragStart
+      return createElement(actual.DndContext, props)
+    },
+  }
+})
+
 const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) =>
   ({
     id,
@@ -188,29 +217,10 @@ describe("noHigherThan", () => {
 /**
  * The wiring, which is the part that regressed: a column with pinned widgets at
  * the top used to let the card sail over them for the whole drag and refuse the
- * drop at the end.
+ * drop at the end. Driven through the stubbed context above rather than a real
+ * pointer — jsdom has no drag.
  */
 describe("a column with widgets pinned to the top", () => {
-  const captured = vi.hoisted(() => ({
-    modifiers: undefined as Modifier[] | undefined,
-    onDragStart: undefined as ((event: DragStartEvent) => void) | undefined,
-  }))
-
-  vi.mock("@dnd-kit/core", async () => {
-    const { createElement } = await import("react")
-    const actual =
-      await vi.importActual<typeof import("@dnd-kit/core")>("@dnd-kit/core")
-
-    return {
-      ...actual,
-      DndContext: (props: React.ComponentProps<typeof actual.DndContext>) => {
-        captured.modifiers = props.modifiers as Modifier[]
-        captured.onDragStart = props.onDragStart
-        return createElement(actual.DndContext, props)
-      },
-    }
-  })
-
   test("holds a dragged card below them for the whole gesture", () => {
     mockCards({ clock: 120, events: 200, tasks: 200 })
     zeroRender(
