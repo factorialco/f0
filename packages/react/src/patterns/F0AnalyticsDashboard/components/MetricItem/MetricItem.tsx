@@ -12,6 +12,8 @@ import { cn, focusRing } from "@/lib/utils"
 
 import type {
   DashboardItemFiltersConfig,
+  DashboardItemBadge,
+  DashboardItemRenderStateChange,
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
@@ -20,6 +22,10 @@ import type {
 } from "../../types"
 
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
+import {
+  resolveDashboardItemRenderState,
+  useDashboardItemRenderState,
+} from "../../hooks/useDashboardItemRenderState"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 
@@ -28,6 +34,9 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   filters: FiltersState<Filters>
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
+  badge?: DashboardItemBadge
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
@@ -192,6 +201,9 @@ export function MetricItem<Filters extends FiltersDefinition>({
   filters,
   actions,
   itemFilters,
+  badge,
+  renderCycleKey,
+  onItemRenderStateChange,
   editMode,
   handleDelete,
   onAskAi,
@@ -199,10 +211,32 @@ export function MetricItem<Filters extends FiltersDefinition>({
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const { data, isLoading, error, retry } = useDashboardItemData<
-    Filters,
-    DashboardMetricData
-  >(item.fetchData, filters, enabled, itemFiltersKey)
+  const refreshKey = JSON.stringify([itemFiltersKey, renderCycleKey])
+  const {
+    data,
+    isLoading,
+    error,
+    requestId,
+    renderCycleKey: activeRenderCycleKey,
+    retry,
+  } = useDashboardItemData<Filters, DashboardMetricData>(
+    item.fetchData,
+    filters,
+    enabled,
+    refreshKey,
+    renderCycleKey
+  )
+
+  useDashboardItemRenderState({
+    itemId: item.id,
+    renderCycleKey: activeRenderCycleKey,
+    requestId,
+    state: resolveDashboardItemRenderState({
+      hasError: Boolean(error),
+      isLoading,
+    }),
+    onItemRenderStateChange,
+  })
 
   const trend = data ? computeTrend(data.value, data.previousValue) : undefined
 
@@ -212,6 +246,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       description={item.description}
       info={item.info}
       explanation={item.explanation}
+      badge={badge}
       isLoading={isLoading}
       error={error}
       onRetry={retry}

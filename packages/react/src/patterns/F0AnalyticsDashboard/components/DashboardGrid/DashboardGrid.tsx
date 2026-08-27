@@ -13,8 +13,10 @@ import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
+  DashboardItemBadge,
   DashboardItemFiltersConfig,
   DashboardItemLayout,
+  DashboardItemRenderStateChange,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
@@ -23,6 +25,7 @@ import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
 import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricItem } from "../MetricItem/MetricItem"
+import { useDashboardItemRenderState } from "../../hooks/useDashboardItemRenderState"
 
 const GAP = 12
 const MAX_PER_ROW = 4
@@ -57,6 +60,11 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   itemFilters?: (
     item: DashboardItemType<Filters>
   ) => DashboardItemFiltersConfig | undefined
+  itemBadge?: (
+    item: DashboardItemType<Filters>
+  ) => DashboardItemBadge | undefined
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
@@ -94,6 +102,9 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
   itemFilters,
+  itemBadge,
+  renderCycleKey,
+  onItemRenderStateChange,
   filters,
   editMode,
   onLayoutChange,
@@ -548,6 +559,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         <DashboardGridItem
           item={soleItem}
           itemFilters={itemFilters?.(soleItem)}
+          badge={itemBadge?.(soleItem)}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           filters={filters}
           editMode={editMode}
           onDelete={handleDelete}
@@ -589,6 +603,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           <DashboardGridItem
             item={fullscreenItem}
             itemFilters={itemFilters?.(fullscreenItem)}
+            badge={itemBadge?.(fullscreenItem)}
+            renderCycleKey={renderCycleKey}
+            onItemRenderStateChange={onItemRenderStateChange}
             filters={filters}
             editMode={editMode}
             onDelete={handleDelete}
@@ -678,6 +695,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     <DashboardGridItem
                       item={item}
                       itemFilters={itemFilters?.(item)}
+                      badge={itemBadge?.(item)}
+                      renderCycleKey={renderCycleKey}
+                      onItemRenderStateChange={onItemRenderStateChange}
                       filters={filters}
                       editMode={editMode}
                       onDelete={handleDelete}
@@ -1086,11 +1106,65 @@ function resolveItemHeight<Filters extends FiltersDefinition>(
 
 // ─── Item renderer ──────────────────────────────────────────────
 
+function UnsupportedDashboardGridItem<Filters extends FiltersDefinition>({
+  item,
+  badge,
+  renderCycleKey,
+  onItemRenderStateChange,
+}: {
+  item: DashboardItemType<Filters>
+  badge?: DashboardItemBadge
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
+}) {
+  const requestIdRef = useRef(0)
+  const [renderRequest, setRenderRequest] = useState<{
+    requestId?: number
+    renderCycleKey?: string
+  }>({})
+
+  useEffect(
+    function startUnsupportedItemRenderRequest() {
+      setRenderRequest({
+        requestId: ++requestIdRef.current,
+        renderCycleKey,
+      })
+    },
+    [renderCycleKey]
+  )
+
+  useDashboardItemRenderState({
+    itemId: item.id,
+    renderCycleKey: renderRequest.renderCycleKey,
+    requestId: renderRequest.requestId,
+    state: "error",
+    onItemRenderStateChange,
+  })
+
+  return (
+    <DashboardItem
+      title={item.title ?? "Unknown"}
+      badge={badge}
+      isLoading={false}
+      error={
+        new Error(
+          `Unknown dashboard item type: "${(item as { type: string }).type}"`
+        )
+      }
+    >
+      {null}
+    </DashboardItem>
+  )
+}
+
 function DashboardGridItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
   itemFilters,
+  badge,
+  renderCycleKey,
+  onItemRenderStateChange,
   editMode,
   onDelete,
   onTransformChart,
@@ -1103,6 +1177,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   filters: FiltersState<Filters>
   actions?: DropdownItemType[]
   itemFilters?: DashboardItemFiltersConfig
+  badge?: DashboardItemBadge
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -1123,6 +1200,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           filters={filters}
           actions={actions}
           itemFilters={itemFilters}
+          badge={badge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1139,6 +1219,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           filters={filters}
           actions={actions}
           itemFilters={itemFilters}
+          badge={badge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1154,6 +1237,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           filters={filters}
           actions={actions}
           itemFilters={itemFilters}
+          badge={badge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1165,17 +1251,12 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
     default: {
       const unknownItem = item as DashboardItemType<Filters>
       return (
-        <DashboardItem
-          title={unknownItem.title ?? "Unknown"}
-          isLoading={false}
-          error={
-            new Error(
-              `Unknown dashboard item type: "${(unknownItem as { type: string }).type}"`
-            )
-          }
-        >
-          {null}
-        </DashboardItem>
+        <UnsupportedDashboardGridItem
+          item={unknownItem}
+          badge={badge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
+        />
       )
     }
   }

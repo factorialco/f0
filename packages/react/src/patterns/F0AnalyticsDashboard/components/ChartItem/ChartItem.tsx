@@ -39,6 +39,8 @@ import type {
   DashboardChartData,
   DashboardChartItem,
   DashboardItemFiltersConfig,
+  DashboardItemBadge,
+  DashboardItemRenderStateChange,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,
@@ -46,6 +48,10 @@ import type {
 
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
+import {
+  resolveDashboardItemRenderState,
+  useDashboardItemRenderState,
+} from "../../hooks/useDashboardItemRenderState"
 import {
   defaultChartConfig,
   detectDataShape,
@@ -802,6 +808,9 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
+  badge?: DashboardItemBadge
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
@@ -820,6 +829,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
   filters,
   actions,
   itemFilters,
+  badge,
+  renderCycleKey,
+  onItemRenderStateChange,
   editMode,
   handleDelete,
   onAskAi,
@@ -858,10 +870,21 @@ export function ChartItem<Filters extends FiltersDefinition>({
   >()
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const { data, isLoading, error, retry } = useDashboardItemData<
-    Filters,
-    DashboardChartData
-  >(item.fetchData, filters, enabled, itemFiltersKey)
+  const refreshKey = JSON.stringify([itemFiltersKey, renderCycleKey])
+  const {
+    data,
+    isLoading,
+    error,
+    requestId,
+    renderCycleKey: activeRenderCycleKey,
+    retry,
+  } = useDashboardItemData<Filters, DashboardChartData>(
+    item.fetchData,
+    filters,
+    enabled,
+    refreshKey,
+    renderCycleKey
+  )
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const keyboardPointTriggerRef = useRef<HTMLButtonElement | null>(null)
 
@@ -875,6 +898,17 @@ export function ChartItem<Filters extends FiltersDefinition>({
         : undefined,
     [item, data, unrenderableChart]
   )
+
+  useDashboardItemRenderState({
+    itemId: item.id,
+    renderCycleKey: activeRenderCycleKey,
+    requestId,
+    state: resolveDashboardItemRenderState({
+      hasError: Boolean(error || unrenderableChart),
+      isLoading,
+    }),
+    onItemRenderStateChange,
+  })
 
   // A point belongs to one exact data render. A filter/type/refetch transition
   // can retain old data while loading; never let that stale mark reappear or
@@ -1136,6 +1170,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       info={item.info}
       {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
+      badge={badge}
       isLoading={isLoading}
       error={
         error ??

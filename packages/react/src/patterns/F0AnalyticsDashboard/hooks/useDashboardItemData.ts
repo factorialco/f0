@@ -15,6 +15,10 @@ export interface DashboardItemDataState<T> {
   isLoading: boolean
   /** The most recent error, if any */
   error: Error | undefined
+  /** Monotonic identity of the active request within this hook instance. */
+  requestId: number | undefined
+  /** Render cycle captured when the active request started. */
+  renderCycleKey: string | undefined
   /** Re-trigger the fetch with the current filters */
   retry: () => void
 }
@@ -30,11 +34,16 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   fetchData: (filters: FiltersState<Filters>) => Promise<T>,
   filters: FiltersState<Filters>,
   enabled: boolean,
-  refreshKey = ""
+  refreshKey = "",
+  renderCycleKey?: string
 ): DashboardItemDataState<T> {
   const [data, setData] = useState<T | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | undefined>(undefined)
+  const [requestId, setRequestId] = useState<number | undefined>(undefined)
+  const [activeRenderCycleKey, setActiveRenderCycleKey] = useState<
+    string | undefined
+  >(undefined)
 
   // Incrementing counter to discard stale responses
   const requestIdRef = useRef(0)
@@ -47,8 +56,13 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   const filtersRef = useRef(filters)
   filtersRef.current = filters
 
+  const renderCycleKeyRef = useRef(renderCycleKey)
+  renderCycleKeyRef.current = renderCycleKey
+
   const doFetch = useCallback(() => {
     const id = ++requestIdRef.current
+    setRequestId(id)
+    setActiveRenderCycleKey(renderCycleKeyRef.current)
     setIsLoading(true)
     setError(undefined)
 
@@ -91,5 +105,12 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
     doFetch()
   }, [doFetch])
 
-  return { data, isLoading, error, retry }
+  return {
+    data,
+    isLoading,
+    error,
+    requestId,
+    renderCycleKey: activeRenderCycleKey,
+    retry,
+  }
 }

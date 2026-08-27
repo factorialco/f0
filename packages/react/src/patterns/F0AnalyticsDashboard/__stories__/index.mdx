@@ -125,6 +125,45 @@ so the new affordance can be compared with the unchanged header.
 - WHEN the widget is in an error state → THEN the information trigger remains available to explain what the failed widget was meant to measure.
 - WHEN the title is long → THEN it truncates around the fixed-size trigger instead of pushing the trigger out of the header.
 
+### Consumer-owned badges and render lifecycle
+
+Use `itemBadge` to attach neutral, consumer-owned metadata to a widget header.
+The dashboard presents the supplied label without interpreting movement as
+positive or negative. Provide `onClick` when the badge opens a related action;
+otherwise F0 renders it as informational text.
+
+Use `renderCycleKey` and `onItemRenderStateChange` when the host needs to know
+which widgets have committed the UI for one data execution. The callback is a
+render-readiness signal, not evidence about the returned data. Aggregate the
+expected item IDs for the active cycle before acknowledging the whole
+dashboard as ready.
+
+<Canvas of={Stories.BadgeAndRenderLifecycle} />
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  itemBadge={(item) => badgesByItemId[item.id]}
+  renderCycleKey={execution.id}
+  onItemRenderStateChange={({ itemId, renderCycleKey, requestId, state }) => {
+    trackCommittedWidgetState({
+      itemId,
+      renderCycleKey,
+      requestId,
+      state,
+    })
+  }}
+/>
+```
+
+- WHEN the badge has `onClick` → THEN F0 renders a native button named by `accessibilityLabel`.
+- WHEN the badge omits `onClick` → THEN F0 renders informational text without adding a keyboard stop.
+- WHEN `renderCycleKey` changes → THEN every displayed item starts a request for the new cycle and reports the first state that commits; a synchronous collection may report `ready` directly without an intermediate `loading` event.
+- WHEN the latest request commits data, an empty result, or an error → THEN the item reports `ready` or `error` with its monotonically increasing `requestId`.
+- WHEN an older request settles after a newer request starts → THEN its terminal state is not reported.
+- WHEN either lifecycle prop is omitted → THEN the dashboard performs no lifecycle reporting.
+- WHEN the host receives a state for a superseded cycle or request → THEN it must ignore that state while aggregating dashboard readiness.
+
 ### Ask One from a widget
 
 When an enabled AI chat is mounted, each titled widget adds **Ask One** to its
@@ -382,7 +421,7 @@ fallback without exposing selected values in the widget.
         </td>
         <td>
           Moves through the filter trigger, presets, applied chips, export, and
-          item actions.
+          item badges and actions.
         </td>
       </tr>
       <tr>
@@ -419,6 +458,7 @@ fallback without exposing selected values in the widget.
 ### Screen reader behavior
 
 - The filter trigger keeps the stable name "Filters"; applied filter labels are exposed as its accessible description, while a visible counter shows how many report filters are active.
+- Actionable item badges use their consumer-provided `accessibilityLabel` as the native button name; informational badges do not add a keyboard stop.
 - The filter popover has a dialog name, and filter options expose native checkbox semantics.
 - Applied filter removal buttons keep the stable name "Close"; the filter label and selected value are exposed as their accessible descriptions.
 - Widget filter rows announce whether their draft is active, the compact list moves focus to its first control when opened, and returning from an editor restores focus to its row (or the next available row if the definition disappeared).
