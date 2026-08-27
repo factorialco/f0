@@ -714,7 +714,7 @@ const e = {
       selectChartArea: "Draw to ask One",
       cancelChartAreaSelection: "Cancel selection",
       clearChartAreaSelection: "Clear selection",
-      chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Esc to cancel.",
+      chartAreaSelectionHint: "Draw around data in one chart. Unavailable widgets are dimmed. Press Escape to cancel.",
       emptyChartAreaSelection: "No data points selected. Draw around at least one point",
       chartAreaSelectionUnavailable: "Drawing isn't available for this widget",
       selectChartDataPoints: "Select chart values without drawing",
