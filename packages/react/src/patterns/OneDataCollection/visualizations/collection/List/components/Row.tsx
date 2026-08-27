@@ -115,7 +115,12 @@ export const Row = <
       <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
         {source.selectable && id !== undefined && (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
-          <div className="pointer-events-auto z-10 hidden items-center justify-end md:flex">
+          <div
+            className={cn(
+              "pointer-events-auto z-10 hidden items-center justify-end md:flex",
+              selectionDisabled && "cursor-not-allowed"
+            )}
+          >
             <F0Checkbox
               checked={selectedItems.has(id)}
               onCheckedChange={(checked) =>

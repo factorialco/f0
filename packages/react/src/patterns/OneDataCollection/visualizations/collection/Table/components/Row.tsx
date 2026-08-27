@@ -340,7 +340,14 @@ const RowComponentInner = <
           referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-3.5 flex h-full items-center justify-start">
+            <div
+              className={cn(
+                "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
+                // The row itself is clickable, so without this the padding
+                // around a disabled checkbox still shows the row's hand cursor.
+                selectionDisabled && "cursor-not-allowed"
+              )}
+            >
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
