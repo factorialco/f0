@@ -3,6 +3,8 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from "react"
 
@@ -44,6 +46,13 @@ interface NestedDataContextValue<R extends RecordType> {
   expandedRowIds: Record<string, boolean>
   setRowExpanded: (rowId: string, expanded: boolean) => void
   isExpandedByDefault: (record: R, depth: number) => boolean
+  /**
+   * Bumped every time the tree is reset (a filter/sorting/navigation change).
+   * Rows key their "already asked for my default children" flag on it, so a
+   * reset re-arms the default-expansion request instead of leaving an opened
+   * row stuck with the children that `clearFetchedData` just wiped.
+   */
+  resetGeneration: number
 }
 
 const NestedDataContext = createContext<
@@ -53,9 +62,22 @@ const NestedDataContext = createContext<
 export const NestedDataProvider = <R extends RecordType>({
   children,
   defaultExpanded = false,
+  currentFilters,
+  currentSortings,
+  currentNavigationFilters,
 }: {
   children: ReactNode
   defaultExpanded?: DefaultExpandedPolicy<R>
+  /**
+   * The collection's current filters/sortings/navigation. Compared by identity
+   * to detect a tree reset. Detecting it here (rather than per row) is what makes
+   * the reset survive rows unmounting and remounting as the list re-renders: a
+   * per-row check re-seeds on remount and would leave a fresh row showing the
+   * previous filter's cached children.
+   */
+  currentFilters?: unknown
+  currentSortings?: unknown
+  currentNavigationFilters?: unknown
 }) => {
   const [fetchedData, setFetchedData] = useState<
     Record<string, ChildrenResponse<R>>
@@ -75,10 +97,41 @@ export const NestedDataProvider = <R extends RecordType>({
     Record<string, boolean>
   >({})
 
+  const [resetGeneration, setResetGeneration] = useState(0)
+
+  // Wiping `expandedRowIds` returns every row to "undecided" so the policy
+  // applies again; bumping the generation re-arms each row's default-children
+  // request. Both together bring a policy-expanded tree back after a reset.
   const clearFetchedData = useCallback(() => {
     setFetchedData({})
     setExpandedRowIdsState({})
+    setResetGeneration((generation) => generation + 1)
   }, [])
+
+  // A filter/sorting/navigation change resets the tree. Tracked here, in the
+  // provider, so it fires exactly once and independently of which rows happen to
+  // be mounted — the rows react to the generation bump.
+  const previousFiltersRef = useRef(currentFilters)
+  const previousSortingsRef = useRef(currentSortings)
+  const previousNavigationFiltersRef = useRef(currentNavigationFilters)
+  useEffect(() => {
+    if (
+      previousFiltersRef.current === currentFilters &&
+      previousSortingsRef.current === currentSortings &&
+      previousNavigationFiltersRef.current === currentNavigationFilters
+    ) {
+      return
+    }
+    previousFiltersRef.current = currentFilters
+    previousSortingsRef.current = currentSortings
+    previousNavigationFiltersRef.current = currentNavigationFilters
+    clearFetchedData()
+  }, [
+    currentFilters,
+    currentSortings,
+    currentNavigationFilters,
+    clearFetchedData,
+  ])
 
   // Records the `false` rather than dropping the entry — see `expandedRowIds`.
   const setRowExpanded = useCallback((rowId: string, expanded: boolean) => {
@@ -105,6 +158,7 @@ export const NestedDataProvider = <R extends RecordType>({
           expandedRowIds,
           setRowExpanded,
           isExpandedByDefault,
+          resetGeneration,
         } as NestedDataContextValue<RecordType>
       }
     >

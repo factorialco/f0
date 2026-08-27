@@ -1,5 +1,68 @@
 # Changelog
 
+## [6.61.0](https://github.com/factorialco/f0/compare/f0-react-v6.60.1...f0-react-v6.61.0) (2026-08-26)
+
+
+### Features
+
+* **ComboChart:** fade the legend swatch of projected series ([#5264](https://github.com/factorialco/f0/issues/5264)) ([0c3d5f1](https://github.com/factorialco/f0/commit/0c3d5f1be10de672497b28482751f62c3a2531d1))
+
+## [6.60.1](https://github.com/factorialco/f0/compare/f0-react-v6.60.0...f0-react-v6.60.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **one-data-collection:** keep defaultExpanded across revisits and tree resets ([#5231](https://github.com/factorialco/f0/issues/5231)) ([9d093e7](https://github.com/factorialco/f0/commit/9d093e7171e11a52805f8438bbd4fc78ff948def))
+
+## [6.60.0](https://github.com/factorialco/f0/compare/f0-react-v6.59.0...f0-react-v6.60.0) (2026-08-26)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add per-widget filters ([#5246](https://github.com/factorialco/f0/issues/5246)) ([e0daec0](https://github.com/factorialco/f0/commit/e0daec008213fd19643aaeeae00a9bc61418d1b1))
+
+## [6.59.0](https://github.com/factorialco/f0/compare/f0-react-v6.58.0...f0-react-v6.59.0) (2026-08-26)
+
+
+### Features
+
+* **F0CarouselDialog:** export it ([#5256](https://github.com/factorialco/f0/issues/5256)) ([8c6bda4](https://github.com/factorialco/f0/commit/8c6bda49fb62742a509b27ef7ffe5225f0c0c9dc))
+
+## [6.58.0](https://github.com/factorialco/f0/compare/f0-react-v6.57.2...f0-react-v6.58.0) (2026-08-26)
+
+
+### Features
+
+* **F0Graph:** opt-in stacked child nodes ([#5051](https://github.com/factorialco/f0/issues/5051)) ([55700d9](https://github.com/factorialco/f0/commit/55700d92e042976c01ab9eebb4b0601c102e3991))
+
+## [6.57.2](https://github.com/factorialco/f0/compare/f0-react-v6.57.1...f0-react-v6.57.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* **OneTable:** keep the hover background on sticky rows ([#5150](https://github.com/factorialco/f0/issues/5150)) ([bfe0e98](https://github.com/factorialco/f0/commit/bfe0e98d5ea581a2cd6ac7e22e0fc54b0e25dff7))
+
+## [6.57.1](https://github.com/factorialco/f0/compare/f0-react-v6.57.0...f0-react-v6.57.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **DateNavigator:** keep periods out of the shared granularity key ([#5241](https://github.com/factorialco/f0/issues/5241)) ([095c5d1](https://github.com/factorialco/f0/commit/095c5d13a2520d92b24dd073dae5a26892ca8ef6))
+
+## [6.57.0](https://github.com/factorialco/f0/compare/f0-react-v6.56.0...f0-react-v6.57.0) (2026-08-26)
+
+
+### Features
+
+* **Home:** a widget's header controls, as data ([#5244](https://github.com/factorialco/f0/issues/5244)) ([118bca7](https://github.com/factorialco/f0/commit/118bca7cee7057cc293d83d2aaedf2e33125843d))
+
+## [6.56.0](https://github.com/factorialco/f0/compare/f0-react-v6.55.0...f0-react-v6.56.0) (2026-08-26)
+
+
+### Features
+
+* **OneDataCollection:** keep every loaded children page live and replaceable ([#5245](https://github.com/factorialco/f0/issues/5245)) ([5d81b32](https://github.com/factorialco/f0/commit/5d81b32b4e55b5dd548d9f648994b22cd39d1116))
+
 ## [6.55.0](https://github.com/factorialco/f0/compare/f0-react-v6.54.3...f0-react-v6.55.0) (2026-08-26)
 
 

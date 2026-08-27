@@ -40,6 +40,10 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import type { DashboardItemFiltersConfig } from "../../types"
+
+import { DashboardItemFilters } from "./DashboardItemFilters"
+
 interface DashboardItemProps {
   title: string
   description?: string
@@ -57,6 +61,12 @@ interface DashboardItemProps {
   children: ReactNode
   /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
+  /**
+   * Per-widget filter configuration. When set, a filter icon appears with the
+   * other header actions on hover or keyboard focus (and remains available on
+   * touch-only devices) and opens a compact anchored filter popover.
+   */
+  itemFilters?: DashboardItemFiltersConfig
   /** When true, adds a "Delete" option to the dropdown menu */
   editMode?: boolean
   /** Called when the user clicks the delete action */
@@ -124,6 +134,7 @@ export function DashboardItem({
   skeleton,
   children,
   actions = [],
+  itemFilters,
   editMode,
   handleDelete,
   onAskAi,
@@ -137,6 +148,7 @@ export function DashboardItem({
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const shouldFocusChatAfterMenuRef = useRef(false)
   /**
    * When true, the dropdown menu's content is swapped from the action list
@@ -177,6 +189,12 @@ export function DashboardItem({
   const hasAskOne = title.trim().length > 0 && (onAskAi ? !!itemId : aiEnabled)
   const showMenu =
     hasAskOne || hasDownloads || hasDelete || hasChartTypes || hasExplanation
+  const actionsClassName = cn(
+    "flex flex-shrink-0 gap-0.5",
+    !isFullscreen &&
+      "opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:[@media(hover:hover)]:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100",
+    !isFullscreen && (isDropdownOpen || isFiltersOpen) && "delay-0 !opacity-100"
+  )
 
   const handleAskOne = () => {
     if (onAskAi) {
@@ -220,7 +238,7 @@ export function DashboardItem({
 
   if (error) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
+      <div className="group/dashitem flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex shrink-0 items-start gap-2 p-4">
           {/* The help copy survives the failure: a reader looking at an error
               is exactly the one asking what the widget was meant to show.
@@ -244,31 +262,43 @@ export function DashboardItem({
               </p>
             )}
           </div>
-          {hasAskOne && (
-            <DropdownMenu
-              open={isDropdownOpen}
-              onOpenChange={handleDropdownOpenChange}
-            >
-              <DropdownMenuTrigger asChild>
-                <ButtonInternal
-                  label={translations.actions.other}
-                  icon={Ellipsis}
-                  variant="ghost"
-                  size="md"
-                  hideLabel
-                  pressed={isDropdownOpen}
-                  compact
-                  onClick={(event: React.MouseEvent) => event.stopPropagation()}
+          {(itemFilters || hasAskOne) && (
+            <div className={actionsClassName}>
+              {itemFilters && (
+                <DashboardItemFilters
+                  {...itemFilters}
+                  onOpenChange={setIsFiltersOpen}
                 />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="py-1"
-                onCloseAutoFocus={handleAskOneMenuCloseAutoFocus}
-              >
-                {askOneMenuItem}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              )}
+              {hasAskOne && (
+                <DropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={handleDropdownOpenChange}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <ButtonInternal
+                      label={translations.actions.other}
+                      icon={Ellipsis}
+                      variant="ghost"
+                      size="md"
+                      hideLabel
+                      pressed={isDropdownOpen}
+                      compact
+                      onClick={(event: React.MouseEvent) =>
+                        event.stopPropagation()
+                      }
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="py-1"
+                    onCloseAutoFocus={handleAskOneMenuCloseAutoFocus}
+                  >
+                    {askOneMenuItem}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           )}
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
@@ -360,13 +390,13 @@ export function DashboardItem({
             </div>
           )}
         </div>
-        <div
-          className={cn(
-            "flex flex-shrink-0 gap-0.5",
-            !isFullscreen &&
-              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`
+        <div className={actionsClassName}>
+          {itemFilters && (
+            <DashboardItemFilters
+              {...itemFilters}
+              onOpenChange={setIsFiltersOpen}
+            />
           )}
-        >
           {hasFullscreen && (
             <ButtonInternal
               label={

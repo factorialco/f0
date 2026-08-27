@@ -1,6 +1,11 @@
 {
   "name": "@factorialco/f0-core",
   "version": "2.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/factorialco/f0.git",
+    "directory": "packages/core"
+  },
   "description": "Core tokens and utilities for F0 Design System",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
+  DashboardItemFiltersConfig,
   DashboardItemLayout,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
@@ -53,6 +54,9 @@ type Row = {
 
 interface DashboardGridProps<Filters extends FiltersDefinition> {
   items: DashboardItemType<Filters>[]
+  itemFilters?: (
+    item: DashboardItemType<Filters>
+  ) => DashboardItemFiltersConfig | undefined
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
@@ -89,6 +93,7 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
  */
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
+  itemFilters,
   filters,
   editMode,
   onLayoutChange,
@@ -542,6 +547,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       <div ref={containerRef} className="flex h-full min-h-0 flex-col">
         <DashboardGridItem
           item={soleItem}
+          itemFilters={itemFilters?.(soleItem)}
           filters={filters}
           editMode={editMode}
           onDelete={handleDelete}
@@ -582,6 +588,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         >
           <DashboardGridItem
             item={fullscreenItem}
+            itemFilters={itemFilters?.(fullscreenItem)}
             filters={filters}
             editMode={editMode}
             onDelete={handleDelete}
@@ -670,6 +677,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                   >
                     <DashboardGridItem
                       item={item}
+                      itemFilters={itemFilters?.(item)}
                       filters={filters}
                       editMode={editMode}
                       onDelete={handleDelete}
@@ -1082,6 +1090,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   onDelete,
   onTransformChart,
@@ -1093,6 +1102,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItemType[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -1112,6 +1122,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           actions={actions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1127,6 +1138,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           actions={actions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1141,6 +1153,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           actions={actions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}

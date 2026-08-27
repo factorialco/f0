@@ -11,10 +11,10 @@ import { Input } from "@/ui/input"
 import {
   DatePeriodsDefinition,
   GranularityDefinition,
-  GranularityDefinitionKey,
+  NavigationGranularityKey,
+  resolveGranularityDefinition,
   GranularityDefinitionSimple,
   getGranularityDefinitions,
-  granularityDefinitions,
 } from "./granularities/index"
 import {
   CalendarMode,
@@ -56,14 +56,9 @@ export type OneCalendarProps = Omit<
 >
 
 export const getGranularitySimpleDefinition = (
-  granularityKey: GranularityDefinitionKey
+  granularityKey: NavigationGranularityKey
 ): GranularityDefinitionSimple => {
-  const granularity = granularityDefinitions[granularityKey]
-  if (!granularity) {
-    throw new Error(
-      `Granularity simple definition for view ${granularityKey} not found`
-    )
-  }
+  const granularity = resolveGranularityDefinition(granularityKey)
   return {
     toRangeString: granularity.toRangeString,
     toString: granularity.toString,
@@ -71,14 +66,8 @@ export const getGranularitySimpleDefinition = (
 }
 
 export const getGranularityDefinition = (
-  granularityKey: GranularityDefinitionKey
-): GranularityDefinition => {
-  const granularity = granularityDefinitions[granularityKey]
-  if (!granularity) {
-    throw new Error(`Granularity definition ${granularityKey} not found`)
-  }
-  return granularity
-}
+  granularityKey: NavigationGranularityKey
+): GranularityDefinition => resolveGranularityDefinition(granularityKey)
 
 const OneCalendarInternal = ({
   mode = "single",

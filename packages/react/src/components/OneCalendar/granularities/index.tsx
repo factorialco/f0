@@ -24,10 +24,29 @@ export const granularityDefinitions = {
   halfyear: halfyearGranularity,
   year: yearGranularity,
   range: rangeGranularity,
-  periods: periodsGranularity,
 } as const satisfies Record<string, GranularityDefinition>
 
 export type GranularityDefinitionKey = keyof typeof granularityDefinitions
+
+/**
+ * The keys a date navigation can be set to. `periods` is not a member of the
+ * static record — it has no definition until a consumer supplies its ranges —
+ * so it widens only the types that can actually render it. Keeping it out of
+ * `GranularityDefinitionKey` is what stops it leaking into every exhaustive map
+ * over that key, in places (form-field presets, compare-to) where it can do
+ * nothing.
+ */
+export type NavigationGranularityKey = GranularityDefinitionKey | "periods"
+
+/**
+ * The definition behind a key with no consumer data to build it from. Only
+ * `periods` has one: its empty definition renders the "no periods" state, which
+ * is what a periods value without periods means.
+ */
+export const resolveGranularityDefinition = (
+  key: NavigationGranularityKey
+): GranularityDefinition =>
+  key === "periods" ? periodsGranularity : granularityDefinitions[key]
 
 export type GranularityDefinitionsOptions = {
   weekStartsOn?: WeekStartsOn
@@ -102,12 +121,8 @@ export function getGranularityDefinitions(
           week: createWeekGranularity(effectiveWeekStartsOn),
         }
 
-  if (!periods) {
-    return definitions
-  }
-
   return {
     ...definitions,
-    periods: getPeriodsGranularity(periods),
+    periods: periods ? getPeriodsGranularity(periods) : periodsGranularity,
   }
 }
