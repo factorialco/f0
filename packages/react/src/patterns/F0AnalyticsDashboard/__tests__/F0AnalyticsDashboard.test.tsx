@@ -163,7 +163,6 @@ describe("F0AnalyticsDashboard item metadata and render state", () => {
       expect(onItemRenderStateChange).toHaveBeenCalledWith({
         itemId: "headcount",
         renderCycleKey: "view-1",
-        requestId: 1,
         state: "loading",
       })
     )
@@ -181,7 +180,6 @@ describe("F0AnalyticsDashboard item metadata and render state", () => {
       expect(onItemRenderStateChange).toHaveBeenCalledWith({
         itemId: "headcount",
         renderCycleKey: "view-2",
-        requestId: 2,
         state: "loading",
       })
     )
@@ -191,7 +189,6 @@ describe("F0AnalyticsDashboard item metadata and render state", () => {
     expect(onItemRenderStateChange).not.toHaveBeenCalledWith({
       itemId: "headcount",
       renderCycleKey: "view-1",
-      requestId: 1,
       state: "ready",
     })
 
@@ -201,11 +198,82 @@ describe("F0AnalyticsDashboard item metadata and render state", () => {
       expect(onItemRenderStateChange).toHaveBeenCalledWith({
         itemId: "headcount",
         renderCycleKey: "view-2",
-        requestId: 2,
         state: "ready",
       })
     )
     expect(screen.getByText("20")).toBeInTheDocument()
+  })
+
+  it("reports loading before a fullscreen remount can become ready", async () => {
+    const user = userEvent.setup()
+    const fullscreenRequest = deferred<{
+      categories: string[]
+      series: Array<{ data: number[]; name: string }>
+    }>()
+    const fetchData = vi
+      .fn()
+      .mockResolvedValueOnce({
+        categories: ["Engineering"],
+        series: [{ data: [42], name: "Employees" }],
+      })
+      .mockImplementationOnce(() => fullscreenRequest.promise)
+    const onItemRenderStateChange = vi.fn()
+    const turnoverItem = {
+      ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
+      id: "turnover",
+      title: "Turnover",
+    }
+
+    render(
+      <F0AnalyticsDashboard
+        items={[chartItem(fetchData), turnoverItem]}
+        renderCycleKey="fullscreen-view"
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "fullscreen-view",
+        state: "ready",
+      })
+    )
+
+    onItemRenderStateChange.mockClear()
+    const card = screen
+      .getByText("Headcount by department")
+      .closest("[class*='dashitem']") as HTMLElement
+    await user.click(within(card).getByRole("button", { name: "Expand" }))
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "fullscreen-view",
+        state: "loading",
+      })
+    )
+    expect(onItemRenderStateChange).not.toHaveBeenCalledWith({
+      itemId: "headcount-chart",
+      renderCycleKey: "fullscreen-view",
+      state: "ready",
+    })
+
+    await act(async () =>
+      fullscreenRequest.resolve({
+        categories: ["Engineering"],
+        series: [{ data: [84], name: "Employees" }],
+      })
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "fullscreen-view",
+        state: "ready",
+      })
+    )
+    expect(fetchData).toHaveBeenCalledTimes(2)
   })
 
   it("reports a committed item error for a rejected active request", async () => {
@@ -232,7 +300,6 @@ describe("F0AnalyticsDashboard item metadata and render state", () => {
       expect(onItemRenderStateChange).toHaveBeenCalledWith({
         itemId: "headcount",
         renderCycleKey: "view-error",
-        requestId: 1,
         state: "error",
       })
     )
@@ -304,7 +371,6 @@ describe("F0AnalyticsDashboard item metadata and render state", () => {
       expect(onItemRenderStateChange).toHaveBeenCalledWith({
         itemId: "headcount-chart",
         renderCycleKey: "unsupported-chart",
-        requestId: 1,
         state: "error",
       })
     )

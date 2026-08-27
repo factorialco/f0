@@ -8,7 +8,6 @@ import type {
 interface UseDashboardItemRenderStateOptions {
   itemId: string
   renderCycleKey?: string
-  requestId?: number
   state: DashboardItemRenderState
   onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
 }
@@ -27,7 +26,6 @@ export function resolveDashboardItemRenderState({
 export function useDashboardItemRenderState({
   itemId,
   renderCycleKey,
-  requestId,
   state,
   onItemRenderStateChange,
 }: UseDashboardItemRenderStateOptions): void {
@@ -36,15 +34,14 @@ export function useDashboardItemRenderState({
 
   useEffect(
     function notifyCommittedItemRenderState() {
-      if (renderCycleKey === undefined || requestId === undefined) return
+      if (renderCycleKey === undefined) return
 
       onChangeRef.current?.({
         itemId,
         renderCycleKey,
-        requestId,
         state,
       })
     },
-    [itemId, renderCycleKey, requestId, state]
+    [itemId, renderCycleKey, state]
   )
 }

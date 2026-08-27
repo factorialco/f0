@@ -15,8 +15,6 @@ export interface DashboardItemDataState<T> {
   isLoading: boolean
   /** The most recent error, if any */
   error: Error | undefined
-  /** Monotonic identity of the active request within this hook instance. */
-  requestId: number | undefined
   /** Render cycle captured when the active request started. */
   renderCycleKey: string | undefined
   /** Re-trigger the fetch with the current filters */
@@ -40,7 +38,6 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   const [data, setData] = useState<T | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | undefined>(undefined)
-  const [requestId, setRequestId] = useState<number | undefined>(undefined)
   const [activeRenderCycleKey, setActiveRenderCycleKey] = useState<
     string | undefined
   >(undefined)
@@ -61,7 +58,6 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
 
   const doFetch = useCallback(() => {
     const id = ++requestIdRef.current
-    setRequestId(id)
     setActiveRenderCycleKey(renderCycleKeyRef.current)
     setIsLoading(true)
     setError(undefined)
@@ -109,7 +105,6 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
     data,
     isLoading,
     error,
-    requestId,
     renderCycleKey: activeRenderCycleKey,
     retry,
   }

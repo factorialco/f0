@@ -145,11 +145,10 @@ dashboard as ready.
   items={items}
   itemBadge={(item) => badgesByItemId[item.id]}
   renderCycleKey={execution.id}
-  onItemRenderStateChange={({ itemId, renderCycleKey, requestId, state }) => {
+  onItemRenderStateChange={({ itemId, renderCycleKey, state }) => {
     trackCommittedWidgetState({
       itemId,
       renderCycleKey,
-      requestId,
       state,
     })
   }}
@@ -158,11 +157,12 @@ dashboard as ready.
 
 - WHEN the badge has `onClick` → THEN F0 renders a native button named by `accessibilityLabel`.
 - WHEN the badge omits `onClick` → THEN F0 renders informational text without adding a keyboard stop.
-- WHEN `renderCycleKey` changes → THEN every displayed item starts a request for the new cycle and reports the first state that commits; a synchronous collection may report `ready` directly without an intermediate `loading` event.
-- WHEN the latest request commits data, an empty result, or an error → THEN the item reports `ready` or `error` with its monotonically increasing `requestId`.
+- WHEN `renderCycleKey` changes → THEN every metric and chart starts a request for the new cycle and reports the first state that commits.
+- WHEN the latest metric or chart request commits data, an empty result, or an error → THEN the item reports `ready` or `error`.
 - WHEN an older request settles after a newer request starts → THEN its terminal state is not reported.
 - WHEN either lifecycle prop is omitted → THEN the dashboard performs no lifecycle reporting.
-- WHEN the host receives a state for a superseded cycle or request → THEN it must ignore that state while aggregating dashboard readiness.
+- WHEN the dashboard contains a collection → THEN the host must treat the dashboard lifecycle as unsupported; collections do not emit render-state events.
+- WHEN the host receives a state for a superseded cycle → THEN it must ignore that state while aggregating dashboard readiness.
 
 ### Ask One from a widget
 

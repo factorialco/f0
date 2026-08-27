@@ -875,7 +875,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
     data,
     isLoading,
     error,
-    requestId,
     renderCycleKey: activeRenderCycleKey,
     retry,
   } = useDashboardItemData<Filters, DashboardChartData>(
@@ -902,7 +901,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
   useDashboardItemRenderState({
     itemId: item.id,
     renderCycleKey: activeRenderCycleKey,
-    requestId,
     state: resolveDashboardItemRenderState({
       hasError: Boolean(error || unrenderableChart),
       isLoading,

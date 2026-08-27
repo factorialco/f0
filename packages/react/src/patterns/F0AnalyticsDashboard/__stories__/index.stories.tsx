@@ -517,33 +517,9 @@ export const MetricHeightVariants: Story = {
   ),
 }
 
-const badgeCollectionItem = mixedItems.find(
-  (
-    item
-  ): item is Extract<
-    DashboardItem<DashboardFiltersType>,
-    { type: "collection" }
-  > => item.id === "employee-table" && item.type === "collection"
-)!
-
 const badgeLifecycleItems: DashboardItem<DashboardFiltersType>[] = [
   { ...mixedItems.find((item) => item.id === "total-headcount")!, x: 0, y: 0 },
   { ...mixedItems.find((item) => item.id === "headcount")!, x: 4, y: 0 },
-  {
-    ...badgeCollectionItem,
-    colSpan: 4,
-    createSource: (filters) => ({
-      ...badgeCollectionItem.createSource(filters),
-      itemActions: () => [
-        {
-          label: "View employee",
-          onClick: () => undefined,
-        },
-      ],
-    }),
-    x: 8,
-    y: 0,
-  },
 ]
 
 const BadgeAndRenderLifecycleDashboard = () => {
@@ -584,17 +560,10 @@ const BadgeAndRenderLifecycleDashboard = () => {
         }
         renderCycleKey="storybook-cycle"
         onItemRenderStateChange={(event) =>
-          setRenderStates((current) => {
-            const previous = current[event.itemId]
-            if (
-              previous?.renderCycleKey === event.renderCycleKey &&
-              previous.requestId > event.requestId
-            ) {
-              return current
-            }
-
-            return { ...current, [event.itemId]: event }
-          })
+          setRenderStates((current) => ({
+            ...current,
+            [event.itemId]: event,
+          }))
         }
       />
     </div>
@@ -610,7 +579,7 @@ export const BadgeAndRenderLifecycle: Story = {
 
     await waitFor(() =>
       expect(canvas.getByTestId("render-lifecycle-state")).toHaveTextContent(
-        "storybook-cycle: 3/3 ready"
+        "storybook-cycle: 2/2 ready"
       )
     )
 

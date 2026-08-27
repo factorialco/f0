@@ -216,7 +216,6 @@ export function MetricItem<Filters extends FiltersDefinition>({
     data,
     isLoading,
     error,
-    requestId,
     renderCycleKey: activeRenderCycleKey,
     retry,
   } = useDashboardItemData<Filters, DashboardMetricData>(
@@ -230,7 +229,6 @@ export function MetricItem<Filters extends FiltersDefinition>({
   useDashboardItemRenderState({
     itemId: item.id,
     renderCycleKey: activeRenderCycleKey,
-    requestId,
     state: resolveDashboardItemRenderState({
       hasError: Boolean(error),
       isLoading,

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 
 import type {
   FiltersDefinition,
@@ -9,23 +9,16 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import {
-  OneDataCollectionLoadStateObserver,
-  type OneDataCollectionLoadStateChange,
-} from "@/patterns/OneDataCollection/internal/LoadStateObserver"
 
 import type {
   DashboardCollectionItem,
   DashboardItemBadge,
   DashboardItemFiltersConfig,
-  DashboardItemRenderState,
-  DashboardItemRenderStateChange,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
-import { useDashboardItemRenderState } from "../../hooks/useDashboardItemRenderState"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
@@ -34,8 +27,6 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   badge?: DashboardItemBadge
-  renderCycleKey?: string
-  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
@@ -59,8 +50,6 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   actions,
   itemFilters,
   badge,
-  renderCycleKey,
-  onItemRenderStateChange,
   editMode,
   handleDelete,
   onAskAi,
@@ -74,68 +63,15 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   // Memoize the source definition to avoid re-creating on every render.
   const filtersKey = JSON.stringify(effectiveFilters)
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const dataCycleKey = JSON.stringify([
-    filtersKey,
-    itemFiltersKey,
-    renderCycleKey,
-  ])
   const sourceDefinition = useMemo(
     () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataCycleKey, renderCycleKey]
+    [filtersKey, itemFiltersKey]
   )
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
-    renderCycleKey,
   ])
-
-  const requestIdRef = useRef(0)
-  const [renderRequest, setRenderRequest] = useState<{
-    dataCycleKey?: string
-    requestId?: number
-    renderCycleKey?: string
-    state: DashboardItemRenderState
-  }>({ state: "loading" })
-
-  const handleLoadStateChange = useCallback(
-    ({
-      dataCycleKey: observedDataCycleKey,
-      state,
-    }: OneDataCollectionLoadStateChange) => {
-      if (observedDataCycleKey !== dataCycleKey) return
-
-      setRenderRequest((current) => {
-        if (current.dataCycleKey !== observedDataCycleKey) {
-          return {
-            dataCycleKey: observedDataCycleKey,
-            requestId: ++requestIdRef.current,
-            renderCycleKey,
-            state,
-          }
-        }
-
-        if (current.state === "loading") {
-          return state === "loading" ? current : { ...current, state }
-        }
-
-        return {
-          ...current,
-          requestId: ++requestIdRef.current,
-          state,
-        }
-      })
-    },
-    [dataCycleKey, renderCycleKey]
-  )
-
-  useDashboardItemRenderState({
-    itemId: item.id,
-    renderCycleKey: renderRequest.renderCycleKey,
-    requestId: renderRequest.requestId,
-    state: renderRequest.state,
-    onItemRenderStateChange,
-  })
 
   // We capture the current table visualization settings (hidden columns +
   // user-chosen order) via OneDataCollection's `onStateChange` callback so
@@ -211,40 +147,35 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       isFullscreen={isFullscreen}
       onFullscreenChange={onFullscreenChange}
     >
-      <OneDataCollectionLoadStateObserver
-        dataCycleKey={dataCycleKey}
-        onStateChange={handleLoadStateChange}
-      >
-        <OneDataCollection
-          fullHeight
-          source={source}
-          visualizations={item.visualizations}
-          // We deliberately do NOT enable `csvExport` here — the dashboard
-          // surface already exposes Excel + CSV downloads from the
-          // DashboardItem 3-dot menu (`downloadActions` above) and both
-          // paths respect the same view state. Enabling OneDataCollection's
-          // own export would create two visually identical buttons with
-          // nearly identical behaviour, which is confusing.
-          onStateChange={(state) => {
-            // Only the table viz settings matter for the download — other
-            // visualization types (card/list/kanban) don't declare hidden /
-            // order, and the download always operates on the tabular layout.
-            const vizSettings = state.settings?.visualization as
-              | Record<string, { hidden?: string[]; order?: string[] }>
-              | undefined
-            const next = vizSettings?.table
-            setTableSettings((prev) => {
-              // Shallow-compare to avoid unnecessary re-renders.
-              const sameHidden =
-                JSON.stringify(prev?.hidden) === JSON.stringify(next?.hidden)
-              const sameOrder =
-                JSON.stringify(prev?.order) === JSON.stringify(next?.order)
-              if (sameHidden && sameOrder) return prev
-              return next
-            })
-          }}
-        />
-      </OneDataCollectionLoadStateObserver>
+      <OneDataCollection
+        fullHeight
+        source={source}
+        visualizations={item.visualizations}
+        // We deliberately do NOT enable `csvExport` here — the dashboard
+        // surface already exposes Excel + CSV downloads from the
+        // DashboardItem 3-dot menu (`downloadActions` above) and both
+        // paths respect the same view state. Enabling OneDataCollection's
+        // own export would create two visually identical buttons with
+        // nearly identical behaviour, which is confusing.
+        onStateChange={(state) => {
+          // Only the table viz settings matter for the download — other
+          // visualization types (card/list/kanban) don't declare hidden /
+          // order, and the download always operates on the tabular layout.
+          const vizSettings = state.settings?.visualization as
+            | Record<string, { hidden?: string[]; order?: string[] }>
+            | undefined
+          const next = vizSettings?.table
+          setTableSettings((prev) => {
+            // Shallow-compare to avoid unnecessary re-renders.
+            const sameHidden =
+              JSON.stringify(prev?.hidden) === JSON.stringify(next?.hidden)
+            const sameOrder =
+              JSON.stringify(prev?.order) === JSON.stringify(next?.order)
+            if (sameHidden && sameOrder) return prev
+            return next
+          })
+        }}
+      />
     </DashboardItem>
   )
 }

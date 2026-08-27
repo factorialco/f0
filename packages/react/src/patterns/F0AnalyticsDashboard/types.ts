@@ -480,8 +480,6 @@ export interface DashboardItemRenderStateChange {
   itemId: string
   /** Opaque cycle identity supplied through `renderCycleKey`. */
   renderCycleKey: string
-  /** Monotonically increasing request ID within this mounted item. */
-  requestId: number
   /** State visible in the committed widget UI. */
   state: DashboardItemRenderState
 }
@@ -626,8 +624,8 @@ export interface F0AnalyticsDashboardProps<
   /**
    * Called after an item's loading, content, or error UI has committed.
    *
-   * Events carry the consumer's cycle key and an item-local request ID. Stale
-   * responses are discarded and never emit `ready` or `error`.
+   * Events carry the consumer's cycle key. Stale responses are discarded and
+   * never emit `ready` or `error`.
    */
   onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   /**

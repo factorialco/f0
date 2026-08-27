@@ -82,11 +82,6 @@ import { useExportAction } from "./hooks/useExportAction"
 import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { getDefaultDataCollectionSettings } from "./internal/isSettingsDefault"
-import {
-  type OneDataCollectionLoadStateTracker,
-  useCommittedOneDataCollectionLoadState,
-  useOneDataCollectionLoadStateObserver,
-} from "./internal/LoadStateObserver"
 import { derivePresetId } from "./internal/presetId"
 import {
   buildSharedPresetUrl,
@@ -264,32 +259,6 @@ export type OneDataCollectionProps<
   initialVisualization?: number
 }
 
-const useResolvedDataAdapter = <DataAdapter extends object>({
-  autoPerPage,
-  autoPerPageEnabled,
-  dataAdapter,
-  loadStateObserver,
-}: {
-  autoPerPage: number | undefined
-  autoPerPageEnabled: boolean
-  dataAdapter: DataAdapter
-  loadStateObserver: OneDataCollectionLoadStateTracker | undefined
-}) =>
-  useMemo(() => {
-    const resolvedDataAdapter = autoPerPageEnabled
-      ? { ...dataAdapter, perPage: autoPerPage }
-      : dataAdapter
-
-    return loadStateObserver === undefined
-      ? resolvedDataAdapter
-      : { ...resolvedDataAdapter }
-  }, [
-    autoPerPage,
-    autoPerPageEnabled,
-    dataAdapter,
-    loadStateObserver?.dataCycleKey,
-  ])
-
 const OneDataCollectionComp = <
   R extends RecordType,
   Filters extends FiltersDefinition,
@@ -324,8 +293,6 @@ const OneDataCollectionComp = <
   NavigationFilters,
   Grouping
 >): JSX.Element => {
-  const loadStateObserver = useOneDataCollectionLoadStateObserver()
-
   const {
     // Filters
     filters,
@@ -480,12 +447,12 @@ const OneDataCollectionComp = <
   // the source adapter and the resolved size so its reference only changes when
   // one of those changes — otherwise a fresh adapter object on every render of
   // effectiveSource would retrigger useData's fetch in an infinite loop.
-  const resolvedDataAdapter = useResolvedDataAdapter({
-    autoPerPage,
-    autoPerPageEnabled,
-    dataAdapter: source.dataAdapter,
-    loadStateObserver,
-  })
+  const resolvedDataAdapter = useMemo(() => {
+    if (autoPerPageEnabled) {
+      return { ...source.dataAdapter, perPage: autoPerPage }
+    }
+    return source.dataAdapter
+  }, [source.dataAdapter, autoPerPageEnabled, autoPerPage])
 
   // Patched source with per-viz currentFilters to avoid stale filters during
   // transitions, and with `perPage: "auto"` resolved to the measured value
@@ -923,10 +890,6 @@ const OneDataCollectionComp = <
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
-  const { commitLoadResult } = useCommittedOneDataCollectionLoadState({
-    isLoading: isInitialLoading || isLoading,
-    observer: loadStateObserver,
-  })
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -969,7 +932,9 @@ const OneDataCollectionComp = <
     isInitialLoading: isInitialLoadingFromCallback,
     search,
   }: Parameters<OnLoadDataCallback<R, Filters>>[0]) => {
-    if (isInitialLoadingFromCallback || !commitLoadResult("ready")) return
+    if (isInitialLoadingFromCallback) {
+      return
+    }
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
@@ -978,8 +943,6 @@ const OneDataCollectionComp = <
   }
 
   const onLoadError = (error: DataError) => {
-    if (!commitLoadResult("error")) return
-    setIsInitialLoading(false)
     setEmptyStateType(
       "error",
       error.cause instanceof Error ? error.cause.message : error.message
