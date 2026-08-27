@@ -139,6 +139,23 @@ describe("F0ENPSButton", () => {
   })
 
   /**
+   * A step back from `F0ButtonToggle`'s own `text-f1-icon`: coming off five
+   * coloured glyphs, that stop is not far enough for the answer to be the
+   * obvious one.
+   */
+  it("mutes the faces not chosen to secondary", () => {
+    zeroRender(<F0ENPSButton labels={LABELS} value="neutral" />)
+
+    expect(face("Very bad")).toHaveClass("text-f1-icon-secondary")
+    expect(face("Bad")).toHaveClass("text-f1-icon-secondary")
+    expect(face("Good")).toHaveClass("text-f1-icon-secondary")
+    expect(face("Very good")).toHaveClass("text-f1-icon-secondary")
+    // Never the answered one — its colour is the toggle's to draw.
+    expect(face("Okay")).not.toHaveClass("text-f1-icon-secondary")
+    expect(face("Okay")).toHaveClass("text-f1-icon-mood-neutral")
+  })
+
+  /**
    * The tooltip is the only place a face's name is written, so it opens without
    * a wait — on the default 700ms it was a name you had to stop and ask for,
    * five times over, to read the scale.

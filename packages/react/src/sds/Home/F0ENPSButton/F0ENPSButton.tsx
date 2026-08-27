@@ -52,9 +52,9 @@ const faceSize: Record<ButtonToggleGroupSize, string> = {
  * only: no fill, no border. Those are how a *chosen* answer is drawn, and five
  * tinted boxes would leave nothing for the answer to stand out against.
  *
- * Once an answer exists the row hands the colour back to `F0ButtonToggle`: the
- * answered face keeps its fill, border and glyph, and the four not chosen mute,
- * which is what makes the answer visible at a glance.
+ * Once an answer exists the answered face keeps its fill, border and glyph and
+ * the other four step back to {@link ANSWERED_FACE_MUTE}, which is what makes
+ * the answer visible at a glance.
  *
  * Written out per face because Tailwind only generates the utilities it can see
  * as literal strings.
@@ -66,6 +66,15 @@ const unansweredFaceColor: Record<Pulse, string> = {
   positive: "text-f1-icon-mood-positive",
   superPositive: "text-f1-icon-mood-super-positive",
 }
+
+/**
+ * The four faces that were not chosen, once one has been. A step back from
+ * `F0ButtonToggle`'s own muting (`text-f1-icon`): coming off five coloured
+ * glyphs, that stop is not far enough for the answer to be the obvious one —
+ * secondary reads as "not this one" without the faces going missing, which they
+ * must not, since any of them can still be pressed to change the answer.
+ */
+const ANSWERED_FACE_MUTE = "text-f1-icon-secondary"
 
 const isPulse = (value: string): value is Pulse =>
   (pulses as readonly string[]).includes(value)
@@ -104,10 +113,13 @@ export const F0ENPSButton = ({
           // from someone reading along it — the same call the Home rail makes.
           tooltip: { description: labels[pulse], instant: true },
           // The colour last: it has to land after `F0ButtonToggle`'s own
-          // unselected `text-f1-icon` for tailwind-merge to keep it.
+          // unselected `text-f1-icon` for tailwind-merge to keep it. Never on
+          // the ANSWERED face — that one's colour is the toggle's to draw.
           className: cn(
             faceSize[size],
-            answer === undefined && unansweredFaceColor[pulse]
+            answer === undefined
+              ? unansweredFaceColor[pulse]
+              : pulse !== answer && ANSWERED_FACE_MUTE
           ),
         })
       ),
