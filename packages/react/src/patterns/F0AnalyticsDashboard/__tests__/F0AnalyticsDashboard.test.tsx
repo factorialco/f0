@@ -562,7 +562,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     expect(
-      screen.queryByRole("button", { name: "Draw to ask One" })
+      screen.queryByRole("button", { name: "Draw to Ask One" })
     ).not.toBeInTheDocument()
 
     rerender(
@@ -574,7 +574,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     expect(
       await screen.findAllByRole("button", {
-        name: "Draw to ask One",
+        name: "Draw to Ask One",
       })
     ).toHaveLength(1)
   })
@@ -588,7 +588,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     await screen.findByRole("img", { name: "Chart" })
     expect(
-      screen.queryByRole("button", { name: "Draw to ask One" })
+      screen.queryByRole("button", { name: "Draw to Ask One" })
     ).not.toBeInTheDocument()
   })
 
@@ -602,7 +602,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     await screen.findByRole("img", { name: "Chart" })
     expect(
-      screen.queryByRole("button", { name: "Draw to ask One" })
+      screen.queryByRole("button", { name: "Draw to Ask One" })
     ).not.toBeInTheDocument()
   })
 
@@ -616,7 +616,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     await screen.findByText("Error loading data")
     expect(
-      screen.queryByRole("button", { name: "Draw to ask One" })
+      screen.queryByRole("button", { name: "Draw to Ask One" })
     ).not.toBeInTheDocument()
   })
 
@@ -630,13 +630,13 @@ describe("F0AnalyticsDashboard Ask One", () => {
       />
     )
 
-    await screen.findByRole("button", { name: "Draw to ask One" })
+    await screen.findByRole("button", { name: "Draw to Ask One" })
     await user.click(screen.getByRole("button", { name: "Other actions" }))
     await user.click(screen.getByRole("radio", { name: "Table" }))
 
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: "Draw to ask One" })
+        screen.queryByRole("button", { name: "Draw to Ask One" })
       ).not.toBeInTheDocument()
     )
   })
@@ -678,7 +678,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       expect(paddedContainer.clientWidth).toBe(224)
       expect(surface.clientWidth).toBe(188)
       expect(
-        screen.queryByRole("button", { name: "Draw to ask One" })
+        screen.queryByRole("button", { name: "Draw to Ask One" })
       ).not.toBeInTheDocument()
     } finally {
       if (clientWidth) {
@@ -719,7 +719,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
       expect(
         await screen.findByRole("button", {
-          name: "Draw to ask One",
+          name: "Draw to Ask One",
         })
       ).toBeInTheDocument()
     } finally {
@@ -744,7 +744,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
 
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -770,7 +770,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     await user.keyboard("{Escape}")
 
     expect(
-      screen.getByRole("button", { name: "Draw to ask One" })
+      screen.getByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
     expect(
       screen.queryByText("Drawing isn't available for this widget")
@@ -782,7 +782,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     render(<F0AnalyticsDashboard items={[chartItem()]} onAskAi={vi.fn()} />)
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(
       screen.getByRole("button", { name: "Finish empty drawing" })
@@ -806,7 +806,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     render(<F0AnalyticsDashboard items={[chartItem()]} onAskAi={onAskAi} />)
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -817,7 +817,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       })
     )
     expect(
-      screen.getByRole("button", { name: "Draw to ask One" })
+      screen.getByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Chart" })).toHaveAttribute(
       "data-area-selection-active",
@@ -835,7 +835,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -843,7 +843,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       "Headcount by department — Selected chart area"
     )
     expect(
-      screen.getByRole("button", { name: "Draw to ask One" })
+      screen.getByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
     const selectedChart = screen
       .getByRole("img", { name: "Chart" })
@@ -867,11 +867,11 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     expect(screen.getByTestId("pending-quote")).toBeEmptyDOMElement()
     expect(
-      screen.getByRole("button", { name: "Draw to ask One" })
+      screen.getByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "Draw to ask One" })
+        screen.getByRole("button", { name: "Draw to Ask One" })
       ).toHaveFocus()
     )
     expect(screen.getByRole("img", { name: "Chart" })).toHaveAttribute(
@@ -880,14 +880,14 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
     await user.click(screen.getByRole("button", { name: "Remove quote" }))
 
     expect(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Chart" })).toHaveAttribute(
       "data-area-selection-selected",
@@ -909,7 +909,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(
       screen.getByRole("button", {
@@ -965,7 +965,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     render(<F0AnalyticsDashboard items={[chartItem()]} onAskAi={onAskAi} />)
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(
       screen.getByRole("button", {
@@ -993,7 +993,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "Draw to ask One" })
+        screen.getByRole("button", { name: "Draw to Ask One" })
       ).toHaveFocus()
     )
   })
@@ -1008,7 +1008,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -1018,7 +1018,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       "true"
     )
 
-    await user.click(screen.getByRole("button", { name: "Draw to ask One" }))
+    await user.click(screen.getByRole("button", { name: "Draw to Ask One" }))
 
     expect(screen.getByTestId("pending-quote")).toBeEmptyDOMElement()
     expect(
@@ -1039,7 +1039,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     render(<F0AnalyticsDashboard items={[chartItem()]} onAskAi={vi.fn()} />)
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     expect(
       document.querySelector("[data-dashboard-area-selection-status]")
@@ -1065,7 +1065,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     rerender(
       <F0AnalyticsDashboard
@@ -1077,7 +1077,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: "Draw to ask One" })
+        screen.queryByRole("button", { name: "Draw to Ask One" })
       ).not.toBeInTheDocument()
     )
     await waitFor(() =>
@@ -1097,7 +1097,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
     rerender(
@@ -1118,7 +1118,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: "Draw to ask One" })
+        screen.queryByRole("button", { name: "Draw to Ask One" })
       ).not.toBeInTheDocument()
     )
     await waitFor(() =>
@@ -1138,7 +1138,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -1153,7 +1153,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       expect(screen.getByTestId("pending-quote")).toBeEmptyDOMElement()
     )
     expect(
-      screen.getByRole("button", { name: "Draw to ask One" })
+      screen.getByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
   })
 
@@ -1181,7 +1181,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -1212,7 +1212,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
     await user.click(screen.getByRole("button", { name: "Next" }))
@@ -1236,7 +1236,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -1251,7 +1251,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       expect(screen.getByTestId("pending-quote")).toBeEmptyDOMElement()
     )
     expect(
-      screen.queryByRole("button", { name: "Draw to ask One" })
+      screen.queryByRole("button", { name: "Draw to Ask One" })
     ).not.toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Chart" })).toHaveAttribute(
       "data-area-selection-selected",
@@ -1269,7 +1269,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
 
     await user.click(
-      await screen.findByRole("button", { name: "Draw to ask One" })
+      await screen.findByRole("button", { name: "Draw to Ask One" })
     )
     await user.click(screen.getByRole("button", { name: "Finish drawing" }))
 
@@ -1288,7 +1288,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
       "false"
     )
     expect(
-      screen.getByRole("button", { name: "Draw to ask One" })
+      screen.getByRole("button", { name: "Draw to Ask One" })
     ).toBeInTheDocument()
   })
 

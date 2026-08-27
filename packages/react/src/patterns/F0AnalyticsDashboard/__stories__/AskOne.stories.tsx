@@ -378,7 +378,7 @@ export const ChartAreaSelectionMode: Story = {
     docs: {
       description: {
         story:
-          "Choose Draw to ask One, then draw around one or more bars. A completed non-empty selection appears as a quote in the focused composer, ready for the user's question.",
+          "Choose Draw to Ask One, then draw around one or more bars. A completed non-empty selection appears as a quote in the focused composer, ready for the user's question.",
       },
     },
   },
@@ -397,7 +397,7 @@ export const ChartAreaSelectionMode: Story = {
     await step("Activate chart-area selection", async () => {
       await canvas.findByText("Headcount by Department", { exact: true })
       const drawToAskOne = await canvas.findByRole("button", {
-        name: "Draw to ask One",
+        name: "Draw to Ask One",
       })
       compactChartTop = getChartFrame()!.getBoundingClientRect().top
       await userEvent.click(drawToAskOne)
@@ -487,7 +487,7 @@ export const ChartAreaSelectionMode: Story = {
       ).toBeInTheDocument()
       await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
       await expect(
-        canvas.getByRole("button", { name: "Draw to ask One" })
+        canvas.getByRole("button", { name: "Draw to Ask One" })
       ).toBeInTheDocument()
       await expect(
         within(getChartFrame()!).getByRole("button", {
@@ -564,7 +564,7 @@ export const ChartAreaSelectionWithoutDrag: Story = {
 
     await step("Activate dashboard selection", async () => {
       await userEvent.click(
-        await canvas.findByRole("button", { name: "Draw to ask One" })
+        await canvas.findByRole("button", { name: "Draw to Ask One" })
       )
     })
 

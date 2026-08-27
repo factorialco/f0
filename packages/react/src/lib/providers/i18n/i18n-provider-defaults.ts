@@ -468,7 +468,7 @@ export const defaultTranslations = {
        * out, so it owns its own key.
        */
       askOne: "Ask One",
-      selectChartArea: "Draw to ask One",
+      selectChartArea: "Draw to Ask One",
       cancelChartAreaSelection: "Cancel selection",
       clearChartAreaSelection: "Clear selection",
       chartAreaSelectionHint:
