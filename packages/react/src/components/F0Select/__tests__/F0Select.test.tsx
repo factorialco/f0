@@ -412,6 +412,21 @@ describe("Select", () => {
       })
     })
 
+    it("falls back to the label when empty and no placeholder is provided", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value={undefined}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      expect(within(trigger).getByText("Access level")).toBeInTheDocument()
+    })
+
     it("uses fixed md dimensions, label typography, and the default icon color", () => {
       render(
         <F0Select

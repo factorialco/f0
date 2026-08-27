@@ -105,7 +105,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Use the inline F0Select variant for compact single-value controls embedded in desktop rows, such as roles, statuses, and access levels. It is borderless, non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label is exposed as the accessible name and is not rendered visually. The popup keeps the standard F0Select density and behavior.",
+          "Use the inline F0Select variant for compact single-value controls embedded in desktop rows, such as roles, statuses, and access levels. It is borderless, non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label provides the accessible name and becomes the visible empty-state fallback when no placeholder is provided. The popup keeps the standard F0Select density and behavior.",
       },
     },
   },

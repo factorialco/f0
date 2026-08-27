@@ -63,7 +63,7 @@ const meta: Meta = {
         component:
           "<p>Renders a select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so it can handle a large number of items.</p>" +
-          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> is accessible but visually hidden.</p>' +
+          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },

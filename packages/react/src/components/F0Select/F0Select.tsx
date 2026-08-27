@@ -142,7 +142,7 @@ const InlineSelectTrigger = forwardRef<
           <SelectedItems selection={selection} totalSelectedCount={1} />
         ) : (
           <span className="truncate text-f1-foreground-secondary">
-            {placeholder}
+            {placeholder ?? label}
           </span>
         )}
       </span>
