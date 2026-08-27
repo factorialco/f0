@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.62.0](https://github.com/factorialco/f0/compare/f0-react-v6.61.0...f0-react-v6.62.0) (2026-08-27)
+
+
+### Features
+
+* **F0AiChatTextArea:** move welcome suggestions into the action row ([#5273](https://github.com/factorialco/f0/issues/5273)) ([92fc3fa](https://github.com/factorialco/f0/commit/92fc3fa16bc94058d43c6ad1975a7afd784cbfe0))
+
 ## [6.61.0](https://github.com/factorialco/f0/compare/f0-react-v6.60.1...f0-react-v6.61.0) (2026-08-26)
 
 
