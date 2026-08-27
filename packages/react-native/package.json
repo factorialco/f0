@@ -1,6 +1,11 @@
 {
   "name": "@factorialco/f0-react-native",
   "version": "0.59.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/factorialco/f0.git",
+    "directory": "packages/react-native"
+  },
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
