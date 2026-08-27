@@ -14663,10 +14663,8 @@ declare type InFilterOptionItem<T = unknown> = {
 declare type InFilterOptions_2<T, _R extends RecordType = RecordType> = {
     cache?: boolean;
     /**
-     * Filter keys where nested child selections are stored, declared up front.
-     * Only needed when `options` is async or comes from a `source`: the picker
-     * has to know the nested keys to track child selections (active dot, counts,
-     * clearing) before — or without ever — loading the options.
+     * Filter keys holding nested child selections. Only needed for async or
+     * `source` options, which the picker can't walk to discover them.
      */
     nestedFilterKeys?: string[];
     /**
@@ -20327,9 +20325,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20337,11 +20337,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -20359,10 +20357,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -20370,8 +20366,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
