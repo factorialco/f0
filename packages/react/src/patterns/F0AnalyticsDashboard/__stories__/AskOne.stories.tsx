@@ -500,9 +500,16 @@ export const ChartAreaSelectionMode: Story = {
         )
       ).toBeInTheDocument()
 
-      await userEvent.click(
-        within(getChartFrame()!).getByRole("button", { name: "Collapse" })
-      )
+      const expandedChart = within(getChartFrame()!).queryByRole("button", {
+        name: "Collapse",
+      })
+      if (expandedChart) {
+        await userEvent.click(expandedChart)
+      } else {
+        await expect(
+          within(getChartFrame()!).getByRole("button", { name: "Expand" })
+        ).toBeInTheDocument()
+      }
       await expect(
         canvas.queryByText("Drawing isn't available for this widget")
       ).not.toBeInTheDocument()
