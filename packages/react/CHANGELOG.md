@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.63.2](https://github.com/factorialco/f0/compare/f0-react-v6.63.1...f0-react-v6.63.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* **lint:** lint the packages, and enforce correctness ruleset ([#5279](https://github.com/factorialco/f0/issues/5279)) ([a8550ab](https://github.com/factorialco/f0/commit/a8550ab2850db71fb9b6c644b23024b7ebcfe64d))
+
 ## [6.63.1](https://github.com/factorialco/f0/compare/f0-react-v6.63.0...f0-react-v6.63.1) (2026-08-27)
 
 
