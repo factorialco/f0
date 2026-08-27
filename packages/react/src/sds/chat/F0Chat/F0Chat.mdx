@@ -215,6 +215,65 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
   </table>
 </Unstyled>
 
+### Observing in-chat interactions
+
+`F0ChatProvider` takes an optional `events` object so the host can observe the
+interactions F0Chat resolves on its own. Everything in it is either invisible to
+`F0ChatRuntime` — because no runtime method is called — or carries provenance a
+runtime call cannot express.
+
+```tsx
+<F0ChatProvider
+  runtime={runtime}
+  events={{
+    onMessageCopied: () => {},
+    onReactionAdded: ({ emoji, source }) => {},
+    onFileAttached: ({ kind, source }) => {},
+  }}
+>
+  <F0Chat />
+</F0ChatProvider>
+```
+
+Every handler is optional and independent — wire only the ones you need.
+
+**Why some interactions are not here.** Sends, deletes and edits already reach
+you through `F0ChatRuntime`, and only there do you learn whether the transport
+accepted them; F0Chat fires them optimistically. Search query text is likewise
+absent — `runtime.searchMessages` receives every query, and F0Chat debounces it
+per keystroke.
+
+**What the events add that the runtime cannot give you:**
+
+- `onMessageCopied` — copying touches nothing but the clipboard.
+- `onReplyStarted` / `onReplyCancelled`, `onEditStarted` / `onEditCancelled` —
+  the runtime only ever sees replies and edits that were completed. Pair each
+  start with its cancel to measure abandonment. The cancel fires only on an
+  explicit dismissal, never when the message is sent.
+- `onReactionAdded` / `onReactionRemoved` — `toggleReaction` is one call for both
+  directions, and it is identical from all four affordances (`source`).
+- `onFileAttached` — `uploadFiles` cannot tell a button click from a drop or a
+  paste. Fires once per file, once the selection passes validation and before
+  the upload resolves, so it records the affordance even when the upload fails.
+- `onAttachmentDownloaded`, `onImageOpened`, `onDocumentOpened`,
+  `onLocationOpened`, `onLinkPreviewClicked`, `onVoiceNotePlayed` — consuming
+  shared content never calls the runtime at all.
+
+**No payload carries message content, a URL, coordinates, or a user id.**
+`onMentionInserted` reports only whether the mention was `@here`.
+
+**But eight payloads do carry `messageId`** — `onMessageCopied`,
+`onMessageInfoViewed`, `onReplyStarted`, `onReplyCancelled`, `onEditStarted`,
+`onEditCancelled`, `onReactionAdded` and `onReactionRemoved`. It is there because
+a host may legitimately need per-message context. It is an identifier for a
+specific, possibly private message, so decide deliberately whether it leaves your
+application — an analytics pipeline is usually the wrong destination for it.
+
+**Render cost is zero.** The object is held in a ref and exposed through a
+context whose value never changes identity, so wiring every handler costs the
+same as wiring none. Rebuild it inline on each render if you like — no
+memoization is required of the host.
+
 ## Guidelines
 
 ### Design best practices

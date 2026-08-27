@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 
 /** Sentinel id for the "everyone" (`@here`) option — never a real user id. */
@@ -220,6 +221,7 @@ export function useMentions({
   searchMembers,
   everyoneLabel,
 }: UseMentionsOptions): UseMentionsReturn {
+  const emit = useF0ChatEmit()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [memberResults, setMemberResults] = useState<F0ChatUser[]>([])
@@ -366,6 +368,7 @@ export function useMentions({
         return [...filtered, entry]
       })
 
+      emit.onMentionInserted({ isEveryone: candidate.kind === "everyone" })
       close()
 
       requestAnimationFrame(() => {
@@ -376,7 +379,7 @@ export function useMentions({
         }
       })
     },
-    [inputValue, cursorPosition, setInputValue, textareaRef, close]
+    [inputValue, cursorPosition, setInputValue, textareaRef, close, emit]
   )
 
   const handleKeyDown = useCallback(
