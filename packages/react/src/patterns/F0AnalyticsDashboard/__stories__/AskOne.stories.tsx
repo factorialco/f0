@@ -427,10 +427,23 @@ export const ChartAreaSelectionMode: Story = {
     })
 
     await step("Draw and retain the polygon with its exact value", async () => {
+      const compactCanvas = getChartCanvas()
+      await expect(compactCanvas).toBeInTheDocument()
+      compactChartWidth = compactCanvas!.getBoundingClientRect().width
+      await userEvent.click(
+        within(getChartFrame()!).getByRole("button", { name: "Expand" })
+      )
+      await waitFor(() =>
+        expect(getChartCanvas()!.getBoundingClientRect().width).toBeGreaterThan(
+          compactChartWidth
+        )
+      )
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      })
+
       const chartCanvas = getChartCanvas()
-      await expect(chartCanvas).toBeInTheDocument()
       const { left, top, width, height } = chartCanvas!.getBoundingClientRect()
-      compactChartWidth = width
       const dispatchMouse = (
         type: "mousedown" | "mousemove" | "mouseup",
         x: number,
@@ -488,19 +501,6 @@ export const ChartAreaSelectionMode: Story = {
       ).toBeInTheDocument()
 
       await userEvent.click(
-        within(getChartFrame()!).getByRole("button", { name: "Expand" })
-      )
-      await waitFor(() =>
-        expect(getChartCanvas()!.getBoundingClientRect().width).toBeGreaterThan(
-          compactChartWidth
-        )
-      )
-      await expect(
-        canvasElement.querySelector(
-          '[data-dashboard-area-selection-mode="selected"]'
-        )
-      ).toBeInTheDocument()
-      await userEvent.click(
         within(getChartFrame()!).getByRole("button", { name: "Collapse" })
       )
       await expect(
@@ -511,6 +511,11 @@ export const ChartAreaSelectionMode: Story = {
           compactChartWidth
         )
       )
+      await expect(
+        canvasElement.querySelector(
+          '[data-dashboard-area-selection-mode="selected"]'
+        )
+      ).toBeInTheDocument()
       const compactCanvasRect = getChartCanvas()!.getBoundingClientRect()
       const clearButton = within(getChartFrame()!).getByRole("button", {
         name: "Clear selection",
