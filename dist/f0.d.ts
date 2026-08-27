@@ -1738,6 +1738,10 @@ declare interface BaseHeaderProps_2 {
     onClose?: () => void;
 }
 
+declare type BaseMapMarkerColor = (typeof markerColors)[number];
+
+declare type BaseMapMarkerColorStep = (typeof markerColorSteps)[number];
+
 /**
  * Represents a base structure for paginated API responses, providing
  * details about the records on the current page and pagination metadata.
@@ -4013,10 +4017,18 @@ export declare interface DashboardLocationConfig {
     viewLocationDetailsLabel: (locationName: string) => string;
     closeLocationDetailsLabel: string;
     noDataLabel: string;
+    exportLabels: DashboardLocationExportLabels;
+    /** Surface visibility. @default all sections visible */
+    sections?: DashboardLocationSections;
     densityScale?: {
         mediumAt: number;
         highAt: number;
     };
+    /**
+     * Optional F0 palette overrides by density level. Missing levels keep the
+     * default red heat scale. @default f0MapDensityPalette
+     */
+    densityPalette?: Partial<F0MapDensityPalette>;
     /** Formats density values in marker accessibility labels and fallback rows. */
     formatDensity?: (value: number) => string;
     /** Formats numeric summary values. String values are displayed unchanged. */
@@ -4030,7 +4042,8 @@ export declare interface DashboardLocationData {
     /** Values keyed by `DashboardLocationSummaryMetric.id`. */
     summary: Readonly<Record<string, string | number>>;
     locations: readonly DashboardLocationPoint[];
-    timeline: DashboardLocationTimelineData;
+    /** Omit when this dataset has no meaningful timeline. */
+    timeline?: DashboardLocationTimelineData;
 }
 
 /** A domain-neutral row in the selected location panel. */
@@ -4058,6 +4071,20 @@ export declare interface DashboardLocationDetailValue {
 export declare type DashboardLocationDetailValueTone = (typeof dashboardLocationDetailValueTones)[number];
 
 export declare const dashboardLocationDetailValueTones: readonly ["default", "positive", "critical"];
+
+/** Host-localized spreadsheet column labels for a location item export. */
+export declare interface DashboardLocationExportLabels {
+    /** Location-name column. */
+    location: string;
+    /** Density-value column. */
+    density: string;
+    /** Location summary column. */
+    details: string;
+    /** Detail-row title column. */
+    item: string;
+    /** Detail-row description column. */
+    description: string;
+}
 
 /**
  * A map-led analytical widget for comparing activity or inventory by location.
@@ -4092,6 +4119,18 @@ export declare interface DashboardLocationPoint {
     /** Preformatted count or status shown below the location name. */
     detailsLabel: string;
     details: readonly DashboardLocationDetailRow[];
+}
+
+/** Optional surfaces within the map-led location visualization. */
+export declare interface DashboardLocationSections {
+    /** Show the three-metric summary strip. @default true */
+    summary?: boolean;
+    /** Show the selected-location details panel and disclosure. @default true */
+    locationDetails?: boolean;
+    /** Show the density scale legend. @default true */
+    densityLegend?: boolean;
+    /** Show the timeline when timeline data also exists. @default true */
+    timeline?: boolean;
 }
 
 /** Configuration for one metric in the location item's summary strip. */
@@ -11914,6 +11953,25 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     href?: string;
 };
 
+/** F0 categorical hues available to density markers. */
+declare type F0MapDensityColor = Exclude<BaseMapMarkerColor, "neutral" | "grey">;
+
+/** F0 token steps available to density markers. */
+declare type F0MapDensityColorStep = BaseMapMarkerColorStep;
+
+declare type F0MapDensityLevel = (typeof f0MapDensityLevels)[number];
+
+declare const f0MapDensityLevels: readonly ["low", "medium", "high"];
+
+/** Low, medium, and high appearances shared by markers and their legend. */
+declare type F0MapDensityPalette = Record<F0MapDensityLevel, F0MapDensityStyle>;
+
+/** One token-constrained density-marker appearance. */
+declare interface F0MapDensityStyle {
+    color: F0MapDensityColor;
+    colorStep: F0MapDensityColorStep;
+}
+
 /**
  * A light/dark pair of MapLibre styles. Each entry is either a hosted style
  * URL or an inline `StyleSpecification`.
@@ -15405,6 +15463,10 @@ export declare const markdownRenderers: MarkdownTagRenderers;
  * any specific markdown library.
  */
 export declare type MarkdownTagRenderers = Record<string, ComponentType<any>>;
+
+declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
+
+declare const markerColorSteps: readonly [10, 50, 60, 70];
 
 export declare type MaskOptions = {
     /**

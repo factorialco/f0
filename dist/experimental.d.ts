@@ -28,6 +28,7 @@ import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
+import { CSSProperties } from 'react';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
@@ -1165,6 +1166,8 @@ declare interface BaseHeaderProps_2 {
 }
 
 declare type BaseMapMarkerColor = (typeof markerColors)[number];
+
+declare type BaseMapMarkerColorStep = (typeof markerColorSteps)[number];
 
 /**
  * Represents a base structure for paginated API responses, providing
@@ -7376,11 +7379,17 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
     labels?: F0MapControlLabels;
 }
 
+/** F0 categorical hues available to density markers. */
+export declare type F0MapDensityColor = Exclude<BaseMapMarkerColor, "neutral" | "grey">;
+
 export declare const f0MapDensityColors: {
     readonly low: "red";
     readonly medium: "red";
     readonly high: "red";
 };
+
+/** F0 token steps available to density markers. */
+export declare type F0MapDensityColorStep = BaseMapMarkerColorStep;
 
 export declare const f0MapDensityColorSteps: {
     readonly low: 10;
@@ -7391,6 +7400,34 @@ export declare const f0MapDensityColorSteps: {
 export declare type F0MapDensityLevel = (typeof f0MapDensityLevels)[number];
 
 export declare const f0MapDensityLevels: readonly ["low", "medium", "high"];
+
+/** Low, medium, and high appearances shared by markers and their legend. */
+export declare type F0MapDensityPalette = Record<F0MapDensityLevel, F0MapDensityStyle>;
+
+/** Default sequential Factorial red density palette. */
+export declare const f0MapDensityPalette: {
+    readonly low: {
+        readonly color: "red";
+        readonly colorStep: 10;
+    };
+    readonly medium: {
+        readonly color: "red";
+        readonly colorStep: 50;
+    };
+    readonly high: {
+        readonly color: "red";
+        readonly colorStep: 70;
+    };
+};
+
+/** One token-constrained density-marker appearance. */
+export declare interface F0MapDensityStyle {
+    color: F0MapDensityColor;
+    colorStep: F0MapDensityColorStep;
+}
+
+/** CSS surface shared by density markers and their legends. */
+export declare const f0MapDensitySurfaceStyle: (style: F0MapDensityStyle) => CSSProperties;
 
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
@@ -7460,7 +7497,8 @@ export declare type F0MapMarkerVariant = (typeof f0MapMarkerVariants)[number];
  *    (grey when a photo replaces the colored chip).
  *  - `stop`: a route stop - a single letter (A, B, C...) on the same fixed
  *    hue as the route/arc lines it punctuates.
- *  - `density`: an aggregated location count on a stepped Factorial heat scale.
+ *  - `density`: an aggregated location count on a stepped Factorial heat scale;
+ *    a composing pattern may supply another F0 palette style.
  */
 export declare type F0MapMarkerVariantProps = {
     variant: "default";
@@ -7482,13 +7520,16 @@ export declare type F0MapMarkerVariantProps = {
     variant: "density";
     value: number;
     level: F0MapDensityLevel;
+    /** Optional F0 palette style supplied by a composing pattern. */
+    style?: F0MapDensityStyle;
 };
 
 /**
  * Product-semantic marker variants. Unlike the internal `BaseMapMarker` engine
- * (which exposes every knob), each of these fixes its own color and rendering
- * so a given concept looks and behaves the same everywhere on the map. Callers
- * pick a variant and pass only its data.
+ * (which exposes every knob), each of these owns its rendering so a given
+ * concept looks and behaves consistently. Callers pick a variant and pass its
+ * data; composing analytical patterns may override the density heat palette
+ * with F0 color tokens.
  */
 export declare const f0MapMarkerVariants: readonly ["default", "workplace", "employee", "company", "stop", "density"];
 
@@ -10269,6 +10310,8 @@ declare interface LocalizedOption<T> {
 
 declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
 
+declare const markerColorSteps: readonly [10, 50, 60, 70];
+
 export declare const MAX_EXPANDED_ACTIONS = 2;
 
 /**
@@ -12126,6 +12169,14 @@ declare type RequisitionProfile = {
 };
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
+
+/**
+ * Keeps a requested F0 density style token-only and readable. Opaque steps
+ * whose fill cannot reach AA with either sanctioned F0 ink resolve to the
+ * nearest accessible step of the same hue (preferring the darker step on a
+ * tie). The theme-backed low-density tint is preserved as requested.
+ */
+export declare const resolveF0MapDensityStyle: (style: F0MapDensityStyle) => F0MapDensityStyle;
 
 /**
  * The definition behind a key with no consumer data to build it from. Only
