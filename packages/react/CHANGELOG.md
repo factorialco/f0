@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.63.0](https://github.com/factorialco/f0/compare/f0-react-v6.62.0...f0-react-v6.63.0) (2026-08-27)
+
+
+### Features
+
+* **NewHomeLayout:** lock widget drag to the vertical axis ([#5275](https://github.com/factorialco/f0/issues/5275)) ([7de0488](https://github.com/factorialco/f0/commit/7de0488f79389aec4d02995246dc61b7c5a2a553))
+
 ## [6.62.0](https://github.com/factorialco/f0/compare/f0-react-v6.61.0...f0-react-v6.62.0) (2026-08-27)
 
 
