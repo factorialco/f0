@@ -23,12 +23,16 @@ export function calendarDaysApart(a: Date, b: Date): number {
   return Math.round((startOfDay(b) - startOfDay(a)) / DAY_MS)
 }
 
-/** "22:14" in the given locale. */
+/**
+ * The wall clock in the reader's own convention: "22:14" in Spanish, "10:14 PM"
+ * in US English.
+ *
+ * `timeStyle` — not `hour`/`minute` — so the locale decides everything,
+ * including whether the hour is padded. Asking for a 2-digit hour forced
+ * "01:53 PM" on a 12-hour locale, which no US reader writes.
+ */
 export function formatClock(date: Date, locale?: string): string {
-  return new Intl.DateTimeFormat(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date)
+  return new Intl.DateTimeFormat(locale, { timeStyle: "short" }).format(date)
 }
 
 /**

@@ -15,6 +15,7 @@ import {
   type F0ChatMessageStatus,
   type F0ChatRuntime,
 } from "../types"
+import { formatClock } from "../utils/natural-time"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -153,11 +154,11 @@ describe("delivery states", () => {
   // The footer reports delivery only — the time lives in the bubble. Sent and
   // delivered share "Sent"; read advances to "Read".
 
+  // Through the shared formatter, not a copy of it: the clock is written in the
+  // reader's own locale, so a hand-rolled 24-hour expectation would only hold
+  // on a 24-hour machine.
   const bareTimeOf = (message: F0ChatMessage) =>
-    new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(message.createdAt))
+    formatClock(new Date(message.createdAt))
 
   it("shows the bare time while sending, from the very first frame", () => {
     const message = mine("sending")

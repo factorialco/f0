@@ -20,6 +20,10 @@ import { formatClock } from "../utils/natural-time"
  * `edited` joins the same cluster instead of trailing the body on its own —
  * again what WhatsApp does, and it keeps a single meta group per message.
  *
+ * One type scale across all three (`text-xs`): the clock reads as the same
+ * piece of information wherever it lands, and a message with a photo above its
+ * caption showed two different sizes of the same time.
+ *
  * Always `aria-hidden`: the transcript has exactly one live region (the
  * delivery-status footer), and N announced clocks would make it unusable with a
  * screen reader. Callers that own the reading order pair this with a `sr-only`
@@ -41,7 +45,7 @@ export const ChatMessageMeta = ({
         <span aria-hidden className={CHAT_MEDIA_SCRIM_CLASS} />
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-1.5 right-2.5 text-sm leading-none text-f1-foreground-inverse [text-shadow:0_1px_2px_hsl(0_0%_0%/0.45)]"
+          className="pointer-events-none absolute bottom-1.5 right-2.5 text-xs leading-none text-f1-foreground-inverse [text-shadow:0_1px_2px_hsl(0_0%_0%/0.45)]"
           data-testid="chat-message-time"
         >
           {label}
@@ -54,7 +58,7 @@ export const ChatMessageMeta = ({
     return (
       <span
         aria-hidden
-        className="px-1 text-sm leading-none text-f1-foreground-tertiary"
+        className="px-1 text-xs leading-none text-f1-foreground-tertiary"
         data-testid="chat-message-time"
       >
         {label}
