@@ -1,4 +1,3 @@
-import * as echarts from "echarts"
 import {
   afterAll,
   afterEach,
@@ -22,6 +21,21 @@ import { resolveChartTheme } from "../utils/theme"
 // ---------------------------------------------------------------------------
 
 const setOptionMock = vi.fn()
+
+/**
+ * Stands in for the gradient constructor, so the tests that assert on a fill can
+ * read the stops it was built with. Hoisted because the `echarts` mock factory
+ * reads it as it is built, before module-level bindings exist.
+ */
+const { linearGradientMock } = vi.hoisted(() => ({
+  linearGradientMock: vi.fn(function LinearGradient(
+    this: object,
+    ..._args: unknown[]
+  ) {
+    // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
+    return this
+  }),
+}))
 
 /** Handlers the chart registered, so tests can fire ECharts events at it. */
 const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
@@ -50,10 +64,7 @@ vi.mock("echarts", () => ({
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
   graphic: {
-    LinearGradient: vi.fn(function LinearGradient(this: object) {
-      // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
-      return this
-    }),
+    LinearGradient: linearGradientMock,
   },
 }))
 
@@ -2198,13 +2209,13 @@ describe("BarChart — overachievement", () => {
    * two-stop gradients are the target ghosts.
    */
   function overachievementGradient() {
-    return vi
-      .mocked(echarts.graphic.LinearGradient)
-      .mock.calls.find((args) => (args[4] as { offset: number }[]).length === 4)
+    return linearGradientMock.mock.calls.find(
+      (args) => (args[4] as { offset: number }[]).length === 4
+    )
   }
 
   beforeEach(() => {
-    vi.mocked(echarts.graphic.LinearGradient).mockClear()
+    linearGradientMock.mockClear()
   })
 
   it("leaves the bars alone until the flag is on", () => {
