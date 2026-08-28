@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatJump } from "../providers/ChatUIProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { senderNameColorClass } from "../utils/sender-color"
 import { ClampText } from "./ClampText"
@@ -31,6 +31,7 @@ export const ReplyQuote = ({
   isFirstOfRun?: boolean
 }): ReactNode => {
   const { jumpToMessage } = useChatJump()
+  const emit = useF0ChatEmit()
   const { currentUserId } = useF0ChatStable()
   const i18n = useI18n()
   const { icon, label, thumbnailUrl } = useReplyPreview(reply)
@@ -41,7 +42,10 @@ export const ReplyQuote = ({
     <div className="p-1 pb-0">
       <button
         type="button"
-        onClick={() => jumpToMessage(reply.id)}
+        onClick={() => {
+          jumpToMessage(reply.id)
+          emit.onJumpedToQuotedMessage()
+        }}
         className={cn(
           "flex w-full items-center overflow-hidden rounded-xl text-left",
           "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",

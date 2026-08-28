@@ -20,9 +20,10 @@ import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
-import { type F0ChatMessage } from "../types"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
+import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
 import { formatClock } from "../utils/natural-time"
+import { emitReactionToggle } from "../utils/reactions"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "😮", "🙏"]
@@ -88,6 +89,7 @@ export const ChatMessageActions = ({
   } = useF0ChatStable()
   const { setReplyTo } = useChatReply()
   const { setEditingMessage } = useChatEdit()
+  const emit = useF0ChatEmit()
   const [view, setView] = useState<"menu" | "info">("menu")
 
   // Editing is offered on non-deleted messages while the host allows it
@@ -120,7 +122,8 @@ export const ChatMessageActions = ({
     if (!next) setView("menu")
   }
 
-  const react = (emoji: string) => {
+  const react = (emoji: string, source: F0ChatReactionSource) => {
+    emitReactionToggle(emit, message, emoji, source)
     toggleReaction(message.id, emoji)
     handleOpenChange(false)
   }
@@ -210,7 +213,7 @@ export const ChatMessageActions = ({
                       emoji={emoji}
                       variant="ghost"
                       aria-label={emoji}
-                      onClick={() => react(emoji)}
+                      onClick={() => react(emoji, "quickRow")}
                       className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
                     />
                   ))}
@@ -218,7 +221,7 @@ export const ChatMessageActions = ({
                     size="md"
                     variant="ghost"
                     label={i18n.chat.react}
-                    onSelect={react}
+                    onSelect={(emoji) => react(emoji, "menuPicker")}
                     icon={Plus}
                   />
                 </div>
@@ -229,7 +232,10 @@ export const ChatMessageActions = ({
               <MenuItem
                 icon={AlertCircleLine}
                 label={i18n.chat.info}
-                onClick={() => setView("info")}
+                onClick={() => {
+                  emit.onMessageInfoViewed({ messageId: message.id })
+                  setView("info")
+                }}
                 trailing={
                   <F0Icon
                     icon={ChevronRight}
@@ -244,13 +250,17 @@ export const ChatMessageActions = ({
                 onClick={runAndClose(() => {
                   setEditingMessage(null)
                   setReplyTo(message)
+                  emit.onReplyStarted({ messageId: message.id })
                 })}
               />
               <MenuItem
                 icon={Files}
                 label={i18n.actions.copy}
                 onClick={runAndClose(() => {
-                  void navigator.clipboard?.writeText(message.body)
+                  void navigator.clipboard
+                    ?.writeText(message.body)
+                    .then(() => emit.onMessageCopied({ messageId: message.id }))
+                    .catch(() => {})
                 })}
               />
             </div>
@@ -265,6 +275,7 @@ export const ChatMessageActions = ({
                       onClick={runAndClose(() => {
                         setReplyTo(null)
                         setEditingMessage(message)
+                        emit.onEditStarted({ messageId: message.id })
                       })}
                     />
                   )}

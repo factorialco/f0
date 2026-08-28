@@ -6,6 +6,7 @@ import { ArrowDown } from "@/icons/app"
 import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { DateTimeSeparator } from "./DateTimeSeparator"
@@ -34,6 +35,7 @@ export const ChatViewportOverlays = ({
   onJumpToBottom: () => void
 }): ReactNode => {
   const i18n = useI18n()
+  const emit = useF0ChatEmit()
   const transitionDuration = reducedMotion ? 0 : 0.15
 
   return (
@@ -94,7 +96,10 @@ export const ChatViewportOverlays = ({
               }}
             >
               <ButtonInternal
-                onClick={onJumpToBottom}
+                onClick={() => {
+                  onJumpToBottom()
+                  emit.onJumpedToBottom()
+                }}
                 variant="neutral"
                 icon={ArrowDown}
                 label={
