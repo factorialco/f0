@@ -1329,6 +1329,7 @@ export declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
 
 export declare type BreadcrumbSelectProps<T extends string, R = unknown> = F0SelectProps<T, R> & {
     multiple?: false;
+    variant?: "field";
 };
 
 export declare interface BreadcrumbsProps {
@@ -6240,7 +6241,16 @@ export declare interface F0CarouselDialogProps extends Pick<F0DialogInternalProp
  */
 export declare const F0Chat: (props: F0ChatProps) => ReactNode;
 
+/** Attachment family, as the transcript classifies it (see
+ * `utils/attachments.ts`). Note `video` is not an {@link F0ChatAttachment}
+ * `kind` — videos are files with a video MIME type. */
+export declare type F0ChatAttachedKind = "image" | "video" | "document" | "file";
+
 export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment;
+
+/** How files reached the composer. Same story as {@link F0ChatReactionSource}:
+ * {@link F0ChatRuntime.uploadFiles} cannot tell these apart. */
+export declare type F0ChatAttachSource = "button" | "drop" | "paste";
 
 /**
  * Per-channel permissions. Everything is optional and defaults to today's
@@ -6252,9 +6262,11 @@ export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachm
  * - `canUpload` (default: whether `uploadFiles` exists): false disables the
  *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
  * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
- *   overrides the edit policy per message. Structural gates still apply (the
- *   host must provide `editMessage`; deleted messages and voice notes are
- *   never editable).
+ *   overrides the edit policy per message, INCLUDING the edit window — a host
+ *   that supplies this and wants a time limit must apply it here. Structural
+ *   gates still apply and cannot be overridden (the host must provide
+ *   `editMessage`; deleted messages, voice notes, and messages that have not
+ *   settled server-side — `sending` / `failed` — are never editable).
  * - `canDeleteMessage` (default: own message): overrides the delete policy per
  *   message (e.g. moderators deleting others' messages). Failed local echoes
  *   are always discardable — they don't exist server-side.
@@ -6318,6 +6330,106 @@ export declare type F0ChatEditInput = {
     mentions?: F0ChatMention[];
     /** Whether the edited message mentions the whole group (`@here`). */
     mentionedEveryone?: boolean;
+};
+
+export declare type F0ChatEmojiSource = "picker" | "autocomplete";
+
+/**
+ * Interactions F0Chat resolves internally, reported so the host can observe
+ * them. Everything here is either invisible to {@link F0ChatRuntime} (it calls
+ * no runtime method) or carries provenance a runtime call cannot express.
+ *
+ * F0 has no opinion on what these are for — it reports what the user did, not
+ * what it means. Anything whose truth depends on the server (a send that may
+ * still fail, a delete that may be rejected) is deliberately absent: the host
+ * already sees those through the runtime, and only there does it learn the
+ * outcome.
+ *
+ * Every handler is optional and independent — wire only the ones you need. No
+ * payload carries message content, a URL, coordinates or a user id.
+ *
+ * Passed to `F0ChatProvider`; the provider keeps the object behind a ref, so it
+ * may be rebuilt on every render without re-rendering the transcript.
+ */
+export declare type F0ChatEvents = {
+    onMessageCopied?: (p: {
+        messageId: string;
+    }) => void;
+    onMessageInfoViewed?: (p: {
+        messageId: string;
+    }) => void;
+    /** Pressing "Reply". Pair with `onReplyCancelled` to measure abandonment —
+     * the host only sees replies that were actually sent. */
+    onReplyStarted?: (p: {
+        messageId: string;
+    }) => void;
+    /** Dismissing the reply chip. NOT fired when the reply is sent, nor when
+     * switching to editing — only an explicit give-up counts. */
+    onReplyCancelled?: (p: {
+        messageId: string;
+    }) => void;
+    onEditStarted?: (p: {
+        messageId: string;
+    }) => void;
+    /** Dismissing the edit chip. Same rule as {@link F0ChatEvents.onReplyCancelled}. */
+    onEditCancelled?: (p: {
+        messageId: string;
+    }) => void;
+    onReactionAdded?: (p: {
+        messageId: string;
+        emoji: string;
+        source: F0ChatReactionSource;
+    }) => void;
+    onReactionRemoved?: (p: {
+        messageId: string;
+        emoji: string;
+        source: F0ChatReactionSource;
+    }) => void;
+    /** Once per file, when the selection passes validation — before the upload
+     * resolves, so it measures the affordance even when the upload then fails. */
+    onFileAttached?: (p: {
+        kind: F0ChatAttachedKind;
+        source: F0ChatAttachSource;
+    }) => void;
+    onAttachmentRemoved?: (p: {
+        kind: F0ChatAttachedKind;
+    }) => void;
+    onEmojiInserted?: (p: {
+        emoji: string;
+        source: F0ChatEmojiSource;
+    }) => void;
+    /** `isEveryone` distinguishes `@here` from a person. Who was mentioned is
+     * deliberately not reported. */
+    onMentionInserted?: (p: {
+        isEveryone: boolean;
+    }) => void;
+    onVoiceRecordingStarted?: () => void;
+    onVoiceRecordingCancelled?: () => void;
+    /** First play of a voice note only — resuming after a pause does not re-fire. */
+    onVoiceNotePlayed?: (p: {
+        durationSeconds?: number;
+    }) => void;
+    onVoicePlaybackRateChanged?: (p: {
+        rate: number;
+    }) => void;
+    /** Opening the image lightbox; `count` is how many images the group holds. */
+    onImageOpened?: (p: {
+        count: number;
+    }) => void;
+    onDocumentOpened?: (p: {
+        kind: F0DocumentKind;
+    }) => void;
+    onAttachmentDownloaded?: (p: {
+        kind: F0ChatAttachedKind;
+    }) => void;
+    onLocationOpened?: () => void;
+    onLinkPreviewClicked?: () => void;
+    onSearchOpened?: () => void;
+    onSearchResultNavigated?: (p: {
+        direction: "next" | "prev";
+    }) => void;
+    onJumpedToQuotedMessage?: () => void;
+    onJumpedToBottom?: () => void;
 };
 
 export declare type F0ChatFileAttachment = {
@@ -6537,8 +6649,11 @@ export declare type F0ChatProps = {
  * Makes a chat {@link F0ChatRuntime} available to the F0Chat UI. The host owns
  * the runtime (mock in stories, GetStream adapter in factorial); F0 only reads it.
  */
-export declare const F0ChatProvider: ({ runtime, children, }: {
+export declare const F0ChatProvider: ({ runtime, events, children, }: {
     runtime: F0ChatRuntime;
+    /** Observe interactions F0Chat resolves internally — see {@link F0ChatEvents}.
+     * Rebuild it freely: it is read through a ref, never as a context value. */
+    events?: F0ChatEvents;
     children: ReactNode;
 }) => ReactNode;
 
@@ -6552,6 +6667,11 @@ export declare type F0ChatReaction = {
      */
     users?: F0ChatUser[];
 };
+
+/** Which affordance produced a reaction — the four are indistinguishable from
+ * {@link F0ChatRuntime.toggleReaction}, which receives identical arguments from
+ * all of them. */
+export declare type F0ChatReactionSource = "quickRow" | "menuPicker" | "existingPill" | "inlinePicker";
 
 /**
  * The data + actions a host provides to drive the chat UI. F0 is headless: it
@@ -7004,6 +7124,15 @@ declare type F0DialogSideControls = {
     previous?: ReactNode;
     next?: ReactNode;
 };
+
+/**
+ * Document families the viewer can render. "pdf" is the default and keeps the
+ * full toolbar (paging, zoom, print, download); the other kinds render a
+ * lazy-loaded, read-only preview: "sheet" (xlsx/xls/csv) as an Excel-style
+ * grid with one tab per sheet, "docx" through docx-preview with page layout,
+ * and "text" as a rendered markdown document (`.md`) or monospaced source.
+ */
+declare type F0DocumentKind = "pdf" | "sheet" | "docx" | "text";
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -8097,33 +8226,24 @@ export declare interface F0SegmentedControlProps {
     ariaLabelledBy?: string;
 }
 
-/**
- * Base props shared across all F0Select variants
- */
-declare type F0SelectBaseProps<T extends string, R = unknown> = {
+declare type F0SelectDataProps<T extends string, R = unknown> = {
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
+    options?: never;
+} | {
+    source?: never;
+    mapOptions?: never;
+    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T, unknown>[];
+};
+
+declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
+    /** Standard form-field presentation. This remains the default. */
+    variant?: "field";
     withApplySelection?: boolean;
     applySelectionLabel?: string;
-    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
-    open?: boolean;
-    showSearchBox?: boolean;
-    searchBoxPlaceholder?: string;
-    onSearchChange?: (value: string) => void;
-    searchValue?: string;
-    onOpenChange?: (open: boolean) => void;
-    /**
-     * Called when the user changes the in-dropdown filters (requires a `source`
-     * with filter definitions). Lets consumers keep an external context — e.g.
-     * detail-page navigation — in sync with what the dropdown is showing.
-     */
-    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
-    searchEmptyMessage?: string;
     className?: string;
-    actions?: Action[];
-    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
-    onCreate?: (value: string) => Promise<void> | void;
-    /** Container element to render the portal content into */
-    portalContainer?: HTMLElement | null;
     /**
      * When true, renders the select as a static list without the input trigger.
      * Only displays the dropdown content with max height, border and scroll.
@@ -8135,23 +8255,32 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
+} & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
     /**
-     * When true, preserves selections when the dataset changes (search, filters,
-     * or sortings). Useful for picker components where the user searches and
-     * filters to find items to add to an existing selection.
-     *
-     * @default true
+     * Compact borderless presentation for single-value controls embedded in rows.
+     * The required label is used as the accessible name and is not shown visually.
      */
-    preserveSelectionOnDatasetChange?: boolean;
-    /**
-     * When true, the dropdown sizes to its widest option (never narrower than
-     * the trigger) instead of the default 20rem minimum. Useful for compact
-     * value pickers like month/year selectors.
-     *
-     * @default false
-     */
-    fitContentWidth?: boolean;
-} & WithDataTestIdProps;
+    variant: "inline";
+    size?: never;
+    disableSelectAll?: never;
+    withApplySelection?: never;
+    applySelectionLabel?: never;
+    children?: never;
+    className?: never;
+    asList?: never;
+    showPreview?: never;
+    required?: never;
+    loading?: never;
+    hideLabel?: never;
+    labelIcon?: never;
+    icon?: never;
+    name?: never;
+    error?: never;
+    status?: never;
+    hint?: never;
+};
 
 /**
  * Short token rendered next to the option label, in secondary color, on a
@@ -8199,22 +8328,56 @@ declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R> | {
 export { F0SelectItemProps }
 export { F0SelectItemProps as SelectItemProps }
 
+/** Props shared by the field and inline select variants. */
+declare type F0SelectPopupProps<T extends string, R = unknown> = {
+    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
+    open?: boolean;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    onSearchChange?: (value: string) => void;
+    searchValue?: string;
+    onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
+    searchEmptyMessage?: string;
+    actions?: Action[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
+    /** Container element to render the portal content into */
+    portalContainer?: HTMLElement | null;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false for field selects; true for inline selects
+     */
+    fitContentWidth?: boolean;
+} & WithDataTestIdProps;
+
 /**
  * Select component for choosing from a list of options.
  *
  * @template T - The type of the emitted value
  * @template R - The type of the record/item data (used with data source)
  */
-declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T, R> & // Single select not clearable
-({
-    clearable?: false;
-    multiple?: false;
-    value?: T;
-    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
-    onSelectItems?: never;
-} | {
+declare type F0SelectProps<T extends string, R = unknown> = (F0SelectFieldProps<T, R> | F0SelectInlineProps<T, R>) & F0SelectDataProps<T, R>;
+export { F0SelectProps }
+export { F0SelectProps as SelectProps }
+
+declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSingleSelectionProps<T, R> | {
     clearable: true;
     multiple?: false;
     value?: T;
@@ -8244,18 +8407,17 @@ declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T,
      * When enabled, the allSelected state will always be false and users must select items individually.
      */
     disableSelectAll?: boolean;
-}) & ({
-    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
-    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
-    options?: never;
-} | {
-    source?: never;
-    mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
-export { F0SelectProps }
-export { F0SelectProps as SelectProps }
+};
+
+declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
+    clearable?: false;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
+    onSelectItems?: never;
+};
 
 export declare type F0SelectTagProp = string | {
     type: "dot";
@@ -8274,6 +8436,8 @@ export declare type F0SelectTagProp = string | {
     text: string;
     variant: StatusVariant;
 };
+
+export declare type F0SelectVariant = (typeof selectVariants)[number];
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -12393,6 +12557,8 @@ export declare type SelectionId = number | string;
 
 export declare const selectSizes: readonly ["sm", "md"];
 
+export declare const selectVariants: readonly ["field", "inline"];
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -15038,9 +15204,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -15048,11 +15216,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

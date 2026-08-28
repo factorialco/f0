@@ -12489,62 +12489,6 @@ export declare const F0Select: <T extends string = string, R = unknown>(props: F
 }) => React.ReactElement;
 
 /**
- * Base props shared across all F0Select variants
- */
-declare type F0SelectBaseProps<T extends string, R = unknown> = {
-    withApplySelection?: boolean;
-    applySelectionLabel?: string;
-    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
-    children?: React.ReactNode;
-    open?: boolean;
-    showSearchBox?: boolean;
-    searchBoxPlaceholder?: string;
-    onSearchChange?: (value: string) => void;
-    searchValue?: string;
-    onOpenChange?: (open: boolean) => void;
-    /**
-     * Called when the user changes the in-dropdown filters (requires a `source`
-     * with filter definitions). Lets consumers keep an external context — e.g.
-     * detail-page navigation — in sync with what the dropdown is showing.
-     */
-    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
-    searchEmptyMessage?: string;
-    className?: string;
-    actions?: Action_2[];
-    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
-    onCreate?: (value: string) => Promise<void> | void;
-    /** Container element to render the portal content into */
-    portalContainer?: HTMLElement | null;
-    /**
-     * When true, renders the select as a static list without the input trigger.
-     * Only displays the dropdown content with max height, border and scroll.
-     */
-    asList?: boolean;
-    /**
-     * When true, shows a selection preview panel on the right side of the dropdown
-     * for multi-select mode. When false and filters are present, filters use compact mode.
-     * @default false
-     */
-    showPreview?: boolean;
-    /**
-     * When true, preserves selections when the dataset changes (search, filters,
-     * or sortings). Useful for picker components where the user searches and
-     * filters to find items to add to an existing selection.
-     *
-     * @default true
-     */
-    preserveSelectionOnDatasetChange?: boolean;
-    /**
-     * When true, the dropdown sizes to its widest option (never narrower than
-     * the trigger) instead of the default 20rem minimum. Useful for compact
-     * value pickers like month/year selectors.
-     *
-     * @default false
-     */
-    fitContentWidth?: boolean;
-} & WithDataTestIdProps;
-
-/**
  * F0 config options specific to select fields
  *
  * Supports either:
@@ -12612,6 +12556,17 @@ declare interface F0SelectConfigWithSource<T extends SelectValueType = string, R
     options?: never;
 }
 
+declare type F0SelectDataProps<T extends string, R = unknown> = {
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
+    options?: never;
+} | {
+    source?: never;
+    mapOptions?: never;
+    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T, unknown>[];
+};
+
 /**
  * Select field with all properties for rendering
  * Includes properties derived from Zod schema
@@ -12622,6 +12577,51 @@ export declare type F0SelectField = F0BaseField & F0SelectConfig & {
     clearable?: boolean;
     /** Conditional rendering based on another field's value */
     renderIf?: SelectFieldRenderIf;
+};
+
+declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
+    /** Standard form-field presentation. This remains the default. */
+    variant?: "field";
+    withApplySelection?: boolean;
+    applySelectionLabel?: string;
+    children?: React.ReactNode;
+    className?: string;
+    /**
+     * When true, renders the select as a static list without the input trigger.
+     * Only displays the dropdown content with max height, border and scroll.
+     */
+    asList?: boolean;
+    /**
+     * When true, shows a selection preview panel on the right side of the dropdown
+     * for multi-select mode. When false and filters are present, filters use compact mode.
+     * @default false
+     */
+    showPreview?: boolean;
+} & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
+    /**
+     * Compact borderless presentation for single-value controls embedded in rows.
+     * The required label is used as the accessible name and is not shown visually.
+     */
+    variant: "inline";
+    size?: never;
+    disableSelectAll?: never;
+    withApplySelection?: never;
+    applySelectionLabel?: never;
+    children?: never;
+    className?: never;
+    asList?: never;
+    showPreview?: never;
+    required?: never;
+    loading?: never;
+    hideLabel?: never;
+    labelIcon?: never;
+    icon?: never;
+    name?: never;
+    error?: never;
+    status?: never;
+    hint?: never;
 };
 
 /**
@@ -12666,22 +12666,54 @@ export declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R>
     type: "separator";
 };
 
+/** Props shared by the field and inline select variants. */
+declare type F0SelectPopupProps<T extends string, R = unknown> = {
+    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
+    open?: boolean;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    onSearchChange?: (value: string) => void;
+    searchValue?: string;
+    onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
+    searchEmptyMessage?: string;
+    actions?: Action_2[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
+    /** Container element to render the portal content into */
+    portalContainer?: HTMLElement | null;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false for field selects; true for inline selects
+     */
+    fitContentWidth?: boolean;
+} & WithDataTestIdProps;
+
 /**
  * Select component for choosing from a list of options.
  *
  * @template T - The type of the emitted value
  * @template R - The type of the record/item data (used with data source)
  */
-export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T, R> & // Single select not clearable
-({
-    clearable?: false;
-    multiple?: false;
-    value?: T;
-    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
-    onSelectItems?: never;
-} | {
+export declare type F0SelectProps<T extends string, R = unknown> = (F0SelectFieldProps<T, R> | F0SelectInlineProps<T, R>) & F0SelectDataProps<T, R>;
+
+declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSingleSelectionProps<T, R> | {
     clearable: true;
     multiple?: false;
     value?: T;
@@ -12711,16 +12743,17 @@ export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseP
      * When enabled, the allSelected state will always be false and users must select items individually.
      */
     disableSelectAll?: boolean;
-}) & ({
-    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
-    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
-    options?: never;
-} | {
-    source?: never;
-    mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+};
+
+declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
+    clearable?: false;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
+    onSelectItems?: never;
+};
 
 export declare type F0SelectTagProp = string | {
     type: "dot";
@@ -12739,6 +12772,8 @@ export declare type F0SelectTagProp = string | {
     text: string;
     variant: StatusVariant;
 };
+
+export declare type F0SelectVariant = (typeof selectVariants)[number];
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -17713,6 +17748,8 @@ export declare const selectSizes: readonly ["sm", "md"];
  */
 declare type SelectValueType = string | number;
 
+export declare const selectVariants: readonly ["field", "inline"];
+
 /**
  * Writes a data collection's current state onto an existing query string,
  * preserving any unrelated params. Every `dc_`-prefixed param is rebuilt from
@@ -20358,9 +20395,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20368,11 +20407,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
