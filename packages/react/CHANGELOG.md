@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.67.0](https://github.com/factorialco/f0/compare/f0-react-v6.66.3...f0-react-v6.67.0) (2026-08-28)
+
+
+### Features
+
+* **F0Chat:** add edit-last and double-click-to-reply shortcuts ([#5285](https://github.com/factorialco/f0/issues/5285)) ([d11f192](https://github.com/factorialco/f0/commit/d11f19210b461a1d826a1d81e6dc621e40172087))
+
 ## [6.66.3](https://github.com/factorialco/f0/compare/f0-react-v6.66.2...f0-react-v6.66.3) (2026-08-28)
 
 
