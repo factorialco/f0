@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.65.0](https://github.com/factorialco/f0/compare/f0-react-v6.64.0...f0-react-v6.65.0) (2026-08-28)
+
+
+### Features
+
+* **NewHomeLayout:** stop widget drag at the pinned widgets ([#5282](https://github.com/factorialco/f0/issues/5282)) ([88a190b](https://github.com/factorialco/f0/commit/88a190b046a4806052d0227c1f6cbd4f0badfa16))
+
 ## [6.64.0](https://github.com/factorialco/f0/compare/f0-react-v6.63.2...f0-react-v6.64.0) (2026-08-28)
 
 
