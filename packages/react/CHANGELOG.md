@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.65.1](https://github.com/factorialco/f0/compare/f0-react-v6.65.0...f0-react-v6.65.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** match the composer surface to the widgets ([#5290](https://github.com/factorialco/f0/issues/5290)) ([80da4bd](https://github.com/factorialco/f0/commit/80da4bd68a7e0bff9ea5fb9380b8a84edb14faf8))
+
 ## [6.65.0](https://github.com/factorialco/f0/compare/f0-react-v6.64.0...f0-react-v6.65.0) (2026-08-28)
 
 
