@@ -35,6 +35,10 @@ pre-commit:
     cycle-dependencies:
       run: pnpm exec tsx packages/react/.scripts/check-cycle-dependencies.ts --pre-commit
 
+    animated-css-variables:
+      glob: "packages/react/src/**/*.tsx"
+      run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts --staged
+
     ownership:
       glob: "{CODEOWNERS,ownership/*,packages/react/src/sds/**}"
       run: pnpm --filter @factorialco/f0-ownership run check
