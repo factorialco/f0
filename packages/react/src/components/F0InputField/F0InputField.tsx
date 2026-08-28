@@ -514,7 +514,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 role,
                 ref: inputRef,
                 "aria-controls": ariaControls,
-                "aria-expanded": ariaExpanded,
+                // `aria-expanded` is not allowed on a textbox, only on a
+                // combobox. Radix triggers spread it onto whatever they wrap,
+                // so a plain field that happens to open a popover would render
+                // a critical axe violation the moment this stopped being
+                // dropped.
+                "aria-expanded": role === "combobox" ? ariaExpanded : undefined,
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
                 id,

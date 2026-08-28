@@ -1503,11 +1503,13 @@ export const Snapshot: Story = {
         await canvas.findByRole("region", { name: "Completed group receipts" })
       )
 
+      // Delivery only: the clock moved onto the bubble itself, so the footer no
+      // longer repeats it.
       await waitFor(() =>
-        expect(partial.getByRole("status")).toHaveTextContent(/^Sent · /i)
+        expect(partial.getByRole("status")).toHaveTextContent(/^Sent$/i)
       )
       await waitFor(() =>
-        expect(completed.getByRole("status")).toHaveTextContent(/^Read · /i)
+        expect(completed.getByRole("status")).toHaveTextContent(/^Read$/i)
       )
     })
   },
