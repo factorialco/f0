@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.70.0](https://github.com/factorialco/f0/compare/f0-react-v6.69.0...f0-react-v6.70.0) (2026-08-28)
+
+
+### Features
+
+* **F0DataChart:** show how far a bar passed its target ([#5242](https://github.com/factorialco/f0/issues/5242)) ([9e1ff18](https://github.com/factorialco/f0/commit/9e1ff18e2b7a9c0215f3fe5a85c5d8e4f21c8f59))
+
 ## [6.69.0](https://github.com/factorialco/f0/compare/f0-react-v6.68.0...f0-react-v6.69.0) (2026-08-28)
 
 
