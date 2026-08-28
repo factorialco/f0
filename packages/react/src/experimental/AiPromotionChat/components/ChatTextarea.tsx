@@ -15,23 +15,9 @@ export const ChatTextarea = () => {
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "after:transition-all after:delay-200 after:duration-300",
+        "after:[animation:rotate-gradient_6s_linear_infinite] motion-reduce:after:[animation:none]",
         "before:bg-white before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:content-['']"
       )}
-      animate={{
-        "--gradient-angle": ["0deg", "360deg"],
-      }}
-      transition={{
-        default: {
-          duration: 6,
-          ease: "linear",
-          repeat: Infinity,
-        },
-      }}
-      style={
-        {
-          "--gradient-angle": "180deg",
-        } as React.CSSProperties
-      }
     >
       <div className="grid grid-cols-1 grid-rows-1">
         <textarea
