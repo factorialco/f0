@@ -1343,7 +1343,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             className={cn(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
-              railInPanel && "absolute z-10 rounded-xl backdrop-blur-md",
+              railInPanel &&
+                "absolute z-10 rounded-xl bg-f1-background/60 backdrop-blur-md",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
               rail.mode === "retracting" && "relative z-10"
