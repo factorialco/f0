@@ -1,5 +1,6 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { type IconType } from "@/components/F0Icon"
+import { type F0DocumentKind } from "@/components/F0PdfViewer"
 import { type VideoPlayerContent } from "@/components/F0VideoPlayer"
 import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
 
@@ -439,6 +440,100 @@ export type F0ChatHeaderAction = {
   /** Restrict the action to a channel type. Omit for both. */
   channelTypes?: F0ChatChannelType[]
 }
+
+/** Which affordance produced a reaction — the four are indistinguishable from
+ * {@link F0ChatRuntime.toggleReaction}, which receives identical arguments from
+ * all of them. */
+export type F0ChatReactionSource =
+  | "quickRow"
+  | "menuPicker"
+  | "existingPill"
+  | "inlinePicker"
+
+/** How files reached the composer. Same story as {@link F0ChatReactionSource}:
+ * {@link F0ChatRuntime.uploadFiles} cannot tell these apart. */
+export type F0ChatAttachSource = "button" | "drop" | "paste"
+
+/** Attachment family, as the transcript classifies it (see
+ * `utils/attachments.ts`). Note `video` is not an {@link F0ChatAttachment}
+ * `kind` — videos are files with a video MIME type. */
+export type F0ChatAttachedKind = "image" | "video" | "document" | "file"
+
+export type F0ChatEmojiSource = "picker" | "autocomplete"
+
+/**
+ * Interactions F0Chat resolves internally, reported so the host can observe
+ * them. Everything here is either invisible to {@link F0ChatRuntime} (it calls
+ * no runtime method) or carries provenance a runtime call cannot express.
+ *
+ * F0 has no opinion on what these are for — it reports what the user did, not
+ * what it means. Anything whose truth depends on the server (a send that may
+ * still fail, a delete that may be rejected) is deliberately absent: the host
+ * already sees those through the runtime, and only there does it learn the
+ * outcome.
+ *
+ * Every handler is optional and independent — wire only the ones you need. No
+ * payload carries message content, a URL, coordinates or a user id.
+ *
+ * Passed to `F0ChatProvider`; the provider keeps the object behind a ref, so it
+ * may be rebuilt on every render without re-rendering the transcript.
+ */
+export type F0ChatEvents = {
+  onMessageCopied?: (p: { messageId: string }) => void
+  onMessageInfoViewed?: (p: { messageId: string }) => void
+  /** Pressing "Reply". Pair with `onReplyCancelled` to measure abandonment —
+   * the host only sees replies that were actually sent. */
+  onReplyStarted?: (p: { messageId: string }) => void
+  /** Dismissing the reply chip. NOT fired when the reply is sent, nor when
+   * switching to editing — only an explicit give-up counts. */
+  onReplyCancelled?: (p: { messageId: string }) => void
+  onEditStarted?: (p: { messageId: string }) => void
+  /** Dismissing the edit chip. Same rule as {@link F0ChatEvents.onReplyCancelled}. */
+  onEditCancelled?: (p: { messageId: string }) => void
+  onReactionAdded?: (p: {
+    messageId: string
+    emoji: string
+    source: F0ChatReactionSource
+  }) => void
+  onReactionRemoved?: (p: {
+    messageId: string
+    emoji: string
+    source: F0ChatReactionSource
+  }) => void
+  /** Once per file, when the selection passes validation — before the upload
+   * resolves, so it measures the affordance even when the upload then fails. */
+  onFileAttached?: (p: {
+    kind: F0ChatAttachedKind
+    source: F0ChatAttachSource
+  }) => void
+  onAttachmentRemoved?: (p: { kind: F0ChatAttachedKind }) => void
+  onEmojiInserted?: (p: { emoji: string; source: F0ChatEmojiSource }) => void
+  /** `isEveryone` distinguishes `@here` from a person. Who was mentioned is
+   * deliberately not reported. */
+  onMentionInserted?: (p: { isEveryone: boolean }) => void
+  onVoiceRecordingStarted?: () => void
+  onVoiceRecordingCancelled?: () => void
+  /** First play of a voice note only — resuming after a pause does not re-fire. */
+  onVoiceNotePlayed?: (p: { durationSeconds?: number }) => void
+  onVoicePlaybackRateChanged?: (p: { rate: number }) => void
+  /** Opening the image lightbox; `count` is how many images the group holds. */
+  onImageOpened?: (p: { count: number }) => void
+  onDocumentOpened?: (p: { kind: F0DocumentKind }) => void
+  onAttachmentDownloaded?: (p: { kind: F0ChatAttachedKind }) => void
+  onLocationOpened?: () => void
+  onLinkPreviewClicked?: () => void
+  onSearchOpened?: () => void
+  onSearchResultNavigated?: (p: { direction: "next" | "prev" }) => void
+  onJumpedToQuotedMessage?: () => void
+  onJumpedToBottom?: () => void
+}
+
+/**
+ * Always-callable mirror of {@link F0ChatEvents} — every handler present, each
+ * forwarding to the host's if it supplied that one. Call sites emit
+ * unconditionally, with no optional chaining and no presence checks.
+ */
+export type F0ChatEmit = Required<F0ChatEvents>
 
 /** Sentinel for {@link F0ChatRuntime.loadMessageContext} meaning "the live tail". */
 export const LATEST = "latest" as const

@@ -1,6 +1,7 @@
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
 
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
   getTextareaCaretCoordinates,
   type PopoverPosition,
@@ -208,6 +209,7 @@ export function useEmojiAutocomplete({
   setCursorPosition,
   textareaRef,
 }: UseEmojiAutocompleteOptions): UseEmojiAutocompleteReturn {
+  const emit = useF0ChatEmit()
   const reactId = useId()
   const listboxId = `chat-emoji-autocomplete-${reactId.replace(/:/g, "")}`
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -254,6 +256,7 @@ export function useEmojiAutocomplete({
       setInputValue(nextValue)
       setCursorPosition(nextCursorPosition)
       close()
+      emit.onEmojiInserted({ emoji: candidate.native, source: "autocomplete" })
 
       requestAnimationFrame(() => {
         const textarea = textareaRef.current
@@ -270,6 +273,7 @@ export function useEmojiAutocomplete({
       setCursorPosition,
       close,
       textareaRef,
+      emit,
     ]
   )
 

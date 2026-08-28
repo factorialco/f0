@@ -17,6 +17,7 @@ import { ChatUIProvider } from "./providers/ChatUIProvider"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
 import {
   f0ChatSenderColors,
+  type F0ChatEvents,
   type F0ChatMessage,
   type F0ChatRuntime,
   type F0ChatUser,
@@ -922,6 +923,97 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+/**
+ * Every interaction F0Chat resolves internally, logged as it happens. Reply,
+ * copy, react from any of the four affordances, attach by button/drop/paste,
+ * play a voice note, open an image — each one appears in the panel below.
+ */
+const ObservedConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 8,
+    olderPages: 1,
+    ambientEveryMs: 0,
+  })
+  const [log, setLog] = useState<string[]>([])
+
+  // Rebuilt inline on every render on purpose: the provider holds it in a ref,
+  // so this must not re-render the transcript. No useMemo, no useCallback.
+  const events: F0ChatEvents = {
+    onMessageCopied: () => setLog((l) => ["Message copied", ...l]),
+    onReplyStarted: () => setLog((l) => ["Reply started", ...l]),
+    onReplyCancelled: () => setLog((l) => ["Reply cancelled", ...l]),
+    onEditStarted: () => setLog((l) => ["Edit started", ...l]),
+    onEditCancelled: () => setLog((l) => ["Edit cancelled", ...l]),
+    onMessageInfoViewed: () => setLog((l) => ["Info viewed", ...l]),
+    onReactionAdded: ({ emoji, source }) =>
+      setLog((l) => [`Reaction added ${emoji} (${source})`, ...l]),
+    onReactionRemoved: ({ emoji, source }) =>
+      setLog((l) => [`Reaction removed ${emoji} (${source})`, ...l]),
+    onFileAttached: ({ kind, source }) =>
+      setLog((l) => [`File attached ${kind} (${source})`, ...l]),
+    onAttachmentRemoved: ({ kind }) =>
+      setLog((l) => [`Attachment removed ${kind}`, ...l]),
+    onEmojiInserted: ({ emoji, source }) =>
+      setLog((l) => [`Emoji inserted ${emoji} (${source})`, ...l]),
+    onMentionInserted: ({ isEveryone }) =>
+      setLog((l) => [
+        `Mention inserted ${isEveryone ? "@here" : "person"}`,
+        ...l,
+      ]),
+    onVoiceRecordingStarted: () =>
+      setLog((l) => ["Voice recording started", ...l]),
+    onVoiceRecordingCancelled: () =>
+      setLog((l) => ["Voice recording cancelled", ...l]),
+    onVoiceNotePlayed: () => setLog((l) => ["Voice note played", ...l]),
+    onVoicePlaybackRateChanged: ({ rate }) =>
+      setLog((l) => [`Voice rate ${rate}x`, ...l]),
+    onImageOpened: ({ count }) =>
+      setLog((l) => [`Image opened (${count})`, ...l]),
+    onDocumentOpened: ({ kind }) =>
+      setLog((l) => [`Document opened ${kind}`, ...l]),
+    onAttachmentDownloaded: ({ kind }) =>
+      setLog((l) => [`Attachment downloaded ${kind}`, ...l]),
+    onLocationOpened: () => setLog((l) => ["Location opened", ...l]),
+    onLinkPreviewClicked: () => setLog((l) => ["Link preview clicked", ...l]),
+    onSearchOpened: () => setLog((l) => ["Search opened", ...l]),
+    onSearchResultNavigated: ({ direction }) =>
+      setLog((l) => [`Search ${direction}`, ...l]),
+    onJumpedToQuotedMessage: () => setLog((l) => ["Jumped to quote", ...l]),
+    onJumpedToBottom: () => setLog((l) => ["Jumped to bottom", ...l]),
+  }
+
+  return (
+    <div className="flex gap-4">
+      <Frame>
+        <F0ChatProvider runtime={runtime} events={events}>
+          <F0Chat />
+        </F0ChatProvider>
+      </Frame>
+      <div className="flex max-h-[600px] w-64 flex-col gap-1 overflow-y-auto rounded-lg border border-solid border-f1-border-secondary p-3">
+        <h3 className="mb-1 text-lg font-medium">Events</h3>
+        {log.length === 0 ? (
+          <p className="text-f1-foreground-secondary">
+            Interact with the chat…
+          </p>
+        ) : (
+          log.map((entry, i) => (
+            <code key={`${entry}-${i}`} className="text-sm">
+              {entry}
+            </code>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const ObservedInteractions: Story = {
+  render: () => <ObservedConversation />,
+}
 
 export const Default: Story = {
   render: () => <Conversation initialCount={40} />,

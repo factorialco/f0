@@ -8,6 +8,11 @@ import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import {
+  useF0ChatEmit,
+  useF0ChatVoicePlayLog,
+} from "../providers/F0ChatProvider"
 import { type F0ChatVoiceAttachment } from "../types"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
@@ -164,6 +169,9 @@ const ChatVoiceAttachmentContent = ({
   const levels = useVoiceWaveform(voice.url)
   const [rateIndex, setRateIndex] = useState(0)
   const barsRef = useRef<HTMLDivElement>(null)
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
+  const voicePlayLog = useF0ChatVoicePlayLog()
 
   const duration =
     player.duration > 0 ? player.duration : (voice.durationSeconds ?? 0)
@@ -174,15 +182,33 @@ const ChatVoiceAttachmentContent = ({
       player.pause()
       return
     }
+    // Once per note, not once per mount: Virtuoso unmounts offscreen rows, so
+    // a component-local flag would re-report the same note on every scroll back.
+    // Resuming after a pause is the same listen. Draft notes are not consumption.
+    if (surface === "transcript" && !voicePlayLog.hasReported(voice.url)) {
+      voicePlayLog.markReported(voice.url)
+      emit.onVoiceNotePlayed({ durationSeconds: voice.durationSeconds })
+    }
     if (duration > 0 && player.currentTime >= duration) player.seek(0)
     player.play()
-  }, [player, duration])
+  }, [
+    player,
+    duration,
+    emit,
+    surface,
+    voicePlayLog,
+    voice.url,
+    voice.durationSeconds,
+  ])
 
   const handleCycleRate = useCallback(() => {
     const next = (rateIndex + 1) % PLAYBACK_RATES.length
     setRateIndex(next)
     player.setPlaybackRate(PLAYBACK_RATES[next])
-  }, [player, rateIndex])
+    if (surface === "transcript") {
+      emit.onVoicePlaybackRateChanged({ rate: PLAYBACK_RATES[next] })
+    }
+  }, [player, rateIndex, emit, surface])
 
   // Click anywhere on the waveform to seek to that point.
   const handleSeek = useCallback(

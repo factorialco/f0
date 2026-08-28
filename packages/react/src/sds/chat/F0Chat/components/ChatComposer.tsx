@@ -40,14 +40,15 @@ import {
   type ChatComposeTarget,
   type ChatComposerHandle,
 } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
+import { useF0Chat, useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
   type F0ChatAttachment,
+  type F0ChatAttachSource,
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
   type F0ChatMessage,
 } from "../types"
-import { formatFileSize } from "../utils/attachments"
+import { attachedKindOf, formatFileSize } from "../utils/attachments"
 import {
   EASE_OUT_SWIFT,
   layoutTransition,
@@ -122,6 +123,7 @@ export const ChatComposer = (): ReactNode => {
   const { clearComposeTarget, registerComposerHandle } = useChatComposeActions()
   const editLastOwnMessage = useEditLastOwnMessage()
   const { registerFileDropHandler } = useChatDrop()
+  const emit = useF0ChatEmit()
   const { reducedMotion: shouldReduceMotion } = useChatRenderConfig()
 
   const [value, setValue] = useState("")
@@ -385,7 +387,7 @@ export const ChatComposer = (): ReactNode => {
   }, [])
 
   const handleUpload = useCallback(
-    async (files: File[]) => {
+    async (files: File[], source: F0ChatAttachSource) => {
       if (files.length === 0 || !uploadFiles || !canUpload) return
       clearTransientError()
       // Reject the whole batch when it would exceed the cap — a transient banner
@@ -425,6 +427,15 @@ export const ChatComposer = (): ReactNode => {
           attachment: localAttachmentFromFile(file, url),
         }
       })
+      // One per file, and only once the batch passed validation — but BEFORE
+      // the upload resolves, so a failed upload still records which affordance
+      // the person reached for.
+      for (const item of pending) {
+        emit.onFileAttached({
+          kind: attachedKindOf(item.attachment),
+          source,
+        })
+      }
       setAttachments((prev) => [...prev, ...pending])
       const pendingIds = new Set(pending.map((p) => p.id))
       try {
@@ -464,12 +475,20 @@ export const ChatComposer = (): ReactNode => {
       i18n.chat.fileTooLargeError,
       i18n.chat.fileUploadError,
       releaseLocalPreview,
+      emit,
     ]
   )
 
   const removeAttachment = useCallback(
     (id: string) => {
       const item = attachments.find((attachment) => attachment.id === id)
+      // `F0ChatAttachedKind` has no voice/location member, so those two are not
+      // reportable. The strip does render both (ChatComposerAttachmentPreview),
+      // so this drops their removal rather than describing an impossible case.
+      const removed = item?.attachment
+      if (removed && removed.kind !== "voice" && removed.kind !== "location") {
+        emit.onAttachmentRemoved({ kind: attachedKindOf(removed) })
+      }
       const hasRemainingAttachments = attachments.some(
         (attachment) => attachment.id !== id
       )
@@ -484,7 +503,7 @@ export const ChatComposer = (): ReactNode => {
         else textareaRef.current?.focus()
       })
     },
-    [attachments, releaseLocalPreview]
+    [attachments, releaseLocalPreview, emit]
   )
 
   const releaseUploadingPreviews = useCallback(
@@ -500,7 +519,7 @@ export const ChatComposer = (): ReactNode => {
 
   // Files dropped anywhere on the panel (F0Chat owns the drop zone) land here.
   useEffect(() => {
-    registerFileDropHandler((files) => void handleUpload(files))
+    registerFileDropHandler((files) => void handleUpload(files, "drop"))
   }, [registerFileDropHandler, handleUpload])
 
   const handlePaste = useCallback(
@@ -512,7 +531,7 @@ export const ChatComposer = (): ReactNode => {
       // File pastes (Cmd/Ctrl+V) become attachments. Text-only clipboard
       // content keeps the textarea's native paste behavior.
       event.preventDefault()
-      void handleUpload(files)
+      void handleUpload(files, "paste")
     },
     [canUpload, handleUpload]
   )
@@ -679,6 +698,7 @@ export const ChatComposer = (): ReactNode => {
       setCursorPosition(caret)
       closeEmojiAutocomplete()
       onInputActivity()
+      emit.onEmojiInserted({ emoji, source: "picker" })
       requestAnimationFrame(() => {
         const node = textareaRef.current
         if (node) {
@@ -687,8 +707,21 @@ export const ChatComposer = (): ReactNode => {
         }
       })
     },
-    [closeEmojiAutocomplete, onInputActivity]
+    [closeEmojiAutocomplete, onInputActivity, emit]
   )
+
+  // The target is also cleared after a successful send, and on a channel
+  // switch — neither is an abandonment. Only Escape and the chip's X route
+  // through these, so the cancelled counts stay meaningful.
+  const dismissEdit = useCallback(() => {
+    if (editingMessage) emit.onEditCancelled({ messageId: editingMessage.id })
+    clearComposeTarget()
+  }, [clearComposeTarget, editingMessage, emit])
+
+  const dismissReply = useCallback(() => {
+    if (replyTo) emit.onReplyCancelled({ messageId: replyTo.id })
+    clearComposeTarget()
+  }, [clearComposeTarget, emit, replyTo])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -703,7 +736,7 @@ export const ChatComposer = (): ReactNode => {
       // Escape backs out of an edit (when the popover didn't claim it).
       if (e.key === "Escape" && isEditing) {
         e.preventDefault()
-        clearComposeTarget()
+        dismissEdit()
         return
       }
       // A modifier makes ↑ a selection gesture, never this shortcut; and with
@@ -730,7 +763,7 @@ export const ChatComposer = (): ReactNode => {
       handleEmojiAutocompleteKeyDown,
       mentions,
       isEditing,
-      clearComposeTarget,
+      dismissEdit,
       isComposerIdle,
       editLastOwnMessage,
     ]
@@ -754,6 +787,21 @@ export const ChatComposer = (): ReactNode => {
       }
     })()
   }, [recorder])
+
+  // Not on the button press: `recorder.start()` resolves whether or not the
+  // user granted the microphone. Only the transition into `recording` means
+  // capture actually began.
+  const reportedRecordingRef = useRef(false)
+  useEffect(
+    function reportRecordingStarted() {
+      const recording = recorder.status === "recording"
+      if (recording && !reportedRecordingRef.current) {
+        emit.onVoiceRecordingStarted()
+      }
+      reportedRecordingRef.current = recording
+    },
+    [recorder.status, emit]
+  )
 
   const placeholder = i18n.chat.placeholder
 
@@ -803,10 +851,7 @@ export const ChatComposer = (): ReactNode => {
                   ease: EASE_OUT_SWIFT,
                 }}
               >
-                <ChatEditChip
-                  message={editingMessage}
-                  onRemove={clearComposeTarget}
-                />
+                <ChatEditChip message={editingMessage} onRemove={dismissEdit} />
               </motion.div>
             ) : replyTo ? (
               <motion.div
@@ -820,10 +865,7 @@ export const ChatComposer = (): ReactNode => {
                   ease: EASE_OUT_SWIFT,
                 }}
               >
-                <ChatReplyChip
-                  message={replyTo}
-                  onRemove={clearComposeTarget}
-                />
+                <ChatReplyChip message={replyTo} onRemove={dismissReply} />
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -995,7 +1037,10 @@ export const ChatComposer = (): ReactNode => {
                       hideLabel
                       label={i18n.chat.cancelRecording}
                       icon={Cross}
-                      onClick={recorder.cancel}
+                      onClick={() => {
+                        recorder.cancel()
+                        emit.onVoiceRecordingCancelled()
+                      }}
                     />
                     <ButtonInternal
                       variant="default"
@@ -1026,7 +1071,10 @@ export const ChatComposer = (): ReactNode => {
                     multiple
                     className="hidden"
                     onChange={(e) => {
-                      void handleUpload(Array.from(e.target.files ?? []))
+                      void handleUpload(
+                        Array.from(e.target.files ?? []),
+                        "button"
+                      )
                       e.target.value = ""
                     }}
                   />

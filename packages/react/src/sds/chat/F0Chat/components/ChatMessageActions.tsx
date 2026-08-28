@@ -20,10 +20,11 @@ import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { useChatComposeActions } from "../providers/ChatUIProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
-import { type F0ChatMessage } from "../types"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
+import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
 import { canEditChatMessage } from "../utils/message-permissions"
 import { formatClock } from "../utils/natural-time"
+import { emitReactionToggle } from "../utils/reactions"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "😮", "🙏"]
@@ -88,6 +89,7 @@ export const ChatMessageActions = ({
     capabilities,
   } = useF0ChatStable()
   const { startReply, startEdit } = useChatComposeActions()
+  const emit = useF0ChatEmit()
   const [view, setView] = useState<"menu" | "info">("menu")
 
   // Same policy the composer's edit-last shortcut uses — see canEditChatMessage.
@@ -108,7 +110,8 @@ export const ChatMessageActions = ({
     if (!next) setView("menu")
   }
 
-  const react = (emoji: string) => {
+  const react = (emoji: string, source: F0ChatReactionSource) => {
+    emitReactionToggle(emit, message, emoji, source)
     toggleReaction(message.id, emoji)
     handleOpenChange(false)
   }
@@ -198,7 +201,7 @@ export const ChatMessageActions = ({
                       emoji={emoji}
                       variant="ghost"
                       aria-label={emoji}
-                      onClick={() => react(emoji)}
+                      onClick={() => react(emoji, "quickRow")}
                       className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
                     />
                   ))}
@@ -206,7 +209,7 @@ export const ChatMessageActions = ({
                     size="md"
                     variant="ghost"
                     label={i18n.chat.react}
-                    onSelect={react}
+                    onSelect={(emoji) => react(emoji, "menuPicker")}
                     icon={Plus}
                   />
                 </div>
@@ -217,7 +220,10 @@ export const ChatMessageActions = ({
               <MenuItem
                 icon={AlertCircleLine}
                 label={i18n.chat.info}
-                onClick={() => setView("info")}
+                onClick={() => {
+                  emit.onMessageInfoViewed({ messageId: message.id })
+                  setView("info")
+                }}
                 trailing={
                   <F0Icon
                     icon={ChevronRight}
@@ -235,7 +241,10 @@ export const ChatMessageActions = ({
                 icon={Files}
                 label={i18n.actions.copy}
                 onClick={runAndClose(() => {
-                  void navigator.clipboard?.writeText(message.body)
+                  void navigator.clipboard
+                    ?.writeText(message.body)
+                    .then(() => emit.onMessageCopied({ messageId: message.id }))
+                    .catch(() => {})
                 })}
               />
             </div>

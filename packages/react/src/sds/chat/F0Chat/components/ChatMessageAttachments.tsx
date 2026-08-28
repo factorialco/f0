@@ -6,8 +6,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { useChatImagePreview } from "../providers/ChatUIProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
-import { partitionChatAttachments } from "../utils/attachments"
+import { attachedKindOf, partitionChatAttachments } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
 import { messageSurfaceColorClass } from "../utils/sender-color"
 import { bubbleCornerClass } from "./ChatBubble"
@@ -41,6 +42,7 @@ export const ChatMessageAttachments = ({
 }): ReactNode => {
   const i18n = useI18n()
   const { openImagePreview } = useChatImagePreview()
+  const emit = useF0ChatEmit()
   const attachments = message.attachments
   if (!attachments || attachments.length === 0) return null
   const surfaceClassName = messageSurfaceColorClass(message.author, isMine)
@@ -146,7 +148,10 @@ export const ChatMessageAttachments = ({
             <button
               key={`${image.url}-${i}`}
               type="button"
-              onClick={() => openImagePreview(images, i)}
+              onClick={() => {
+                openImagePreview(images, i)
+                emit.onImageOpened({ count: images.length })
+              }}
               className={cn(
                 "flex overflow-hidden transition-opacity hover:opacity-90",
                 focusRing("focus-visible:ring-inset"),
@@ -231,7 +236,10 @@ export const ChatMessageAttachments = ({
                 {
                   label: i18n.chat.download,
                   icon: Download,
-                  onClick: () => triggerDownload(file.url, file.name),
+                  onClick: () => {
+                    triggerDownload(file.url, file.name)
+                    emit.onAttachmentDownloaded({ kind: attachedKindOf(file) })
+                  },
                 },
               ]}
             />

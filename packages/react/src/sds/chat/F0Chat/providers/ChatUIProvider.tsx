@@ -22,7 +22,7 @@ import {
   documentPreviewKind,
   type ChatDocumentKind,
 } from "../utils/attachments"
-import { useF0Chat } from "./F0ChatProvider"
+import { useF0Chat, useF0ChatEmit } from "./F0ChatProvider"
 
 /** Debounce before running a search as the user types. */
 const SEARCH_DEBOUNCE_MS = 200
@@ -149,6 +149,7 @@ export const ChatUIProvider = ({
     channel,
     capabilities,
   } = useF0Chat()
+  const emit = useF0ChatEmit()
 
   const [target, setTarget] = useState<ChatComposeTarget>({ kind: "none" })
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
@@ -244,12 +245,24 @@ export const ChatUIProvider = ({
   // State first: a throw inside the composer's transition must not leave the
   // two disagreeing. Both still land in one commit — a gesture's setState calls
   // flush together in a microtask at the end of the event.
-  const setComposeTarget = useCallback((next: ChatComposeTarget) => {
-    const previous = targetRef.current
-    targetRef.current = next
-    setTarget(next)
-    composerHandleRef.current?.retarget(previous, next)
-  }, [])
+  const setComposeTarget = useCallback(
+    (next: ChatComposeTarget) => {
+      const previous = targetRef.current
+      targetRef.current = next
+      setTarget(next)
+      composerHandleRef.current?.retarget(previous, next)
+      // Emitted here, so every route reports it — the actions menu, a
+      // double-click, the arrow-up shortcut. Clearing emits nothing: the
+      // cancelled events count abandonment, and this same call also runs after
+      // a successful send, so only the dismiss controls can emit those.
+      if (next.kind === "reply") {
+        emit.onReplyStarted({ messageId: next.message.id })
+      } else if (next.kind === "edit") {
+        emit.onEditStarted({ messageId: next.message.id })
+      }
+    },
+    [emit]
+  )
 
   const startReply = useCallback(
     (message: F0ChatMessage) => {
@@ -382,7 +395,10 @@ export const ChatUIProvider = ({
     return () => clearTimeout(timer)
   }, [searchQuery, searchOpen, navigateToMatch])
 
-  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const openSearch = useCallback(() => {
+    setSearchOpen(true)
+    emit.onSearchOpened()
+  }, [emit])
 
   const closeSearch = useCallback(() => {
     searchRunRef.current++ // cancel any in-flight result
@@ -397,14 +413,16 @@ export const ChatUIProvider = ({
   const goToNextMatch = useCallback(() => {
     const ids = matchIdsRef.current
     if (ids.length === 0) return
+    emit.onSearchResultNavigated({ direction: "next" })
     navigateToMatch((activeIndexRef.current + 1) % ids.length, ids)
-  }, [navigateToMatch])
+  }, [navigateToMatch, emit])
 
   const goToPrevMatch = useCallback(() => {
     const ids = matchIdsRef.current
     if (ids.length === 0) return
+    emit.onSearchResultNavigated({ direction: "prev" })
     navigateToMatch((activeIndexRef.current - 1 + ids.length) % ids.length, ids)
-  }, [navigateToMatch])
+  }, [navigateToMatch, emit])
 
   const matchTotal = matchIds.length
   const matchCurrent = activeMatchIndex >= 0 ? activeMatchIndex + 1 : 0

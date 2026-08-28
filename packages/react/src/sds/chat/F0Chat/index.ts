@@ -28,6 +28,11 @@ export type {
   F0ChatCapabilities,
   F0ChatSearchResult,
   F0ChatRuntime,
+  F0ChatEvents,
+  F0ChatReactionSource,
+  F0ChatAttachSource,
+  F0ChatAttachedKind,
+  F0ChatEmojiSource,
 } from "./types"
 export {
   f0ChatSenderColors,

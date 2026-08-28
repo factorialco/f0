@@ -1,11 +1,71 @@
-import { act, fireEvent, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import {
+  act,
+  fireEvent,
+  screen,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { F0SearchInput } from "../index"
 
 describe("F0SearchInput", () => {
   beforeEach(() => {
     vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  describe("autofocus behavior", () => {
+    it("focuses once without reclaiming focus after navigation", () => {
+      const onChange = vi.fn()
+      render(
+        <>
+          <F0SearchInput autoFocus debounceTime={400} onChange={onChange} />
+          <button type="button">Next</button>
+        </>
+      )
+
+      const input = screen.getByRole("searchbox")
+      const nextButton = screen.getByRole("button", { name: "Next" })
+
+      act(() => {
+        vi.advanceTimersByTime(50)
+      })
+      expect(input).toHaveFocus()
+
+      fireEvent.change(input, { target: { value: "query" } })
+      nextButton.focus()
+
+      act(() => {
+        vi.advanceTimersByTime(500)
+      })
+
+      expect(onChange).toHaveBeenCalledWith("query")
+      expect(nextButton).toHaveFocus()
+    })
+
+    it("cancels a pending retry after the input receives focus", () => {
+      render(
+        <>
+          <F0SearchInput autoFocus />
+          <button type="button">Next</button>
+        </>
+      )
+
+      const input = screen.getByRole("searchbox")
+      const nextButton = screen.getByRole("button", { name: "Next" })
+
+      input.focus()
+      nextButton.focus()
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+
+      expect(nextButton).toHaveFocus()
+    })
   })
 
   describe("threshold behavior", () => {
