@@ -179,10 +179,7 @@ export const ChatMessageItem = ({
                 // transcript surface — without it the gap defaults to white and
                 // reads as an aura in dark mode.
                 highlighted &&
-                  "ring-1 ring-f1-special-ring ring-offset-2 ring-offset-f1-background",
-                !message.deleted &&
-                  "group-hover:bg-f1-background-secondary focus-within:bg-f1-background-secondary",
-                actionsOpen && "bg-f1-background-hover"
+                  "ring-1 ring-f1-special-ring ring-offset-1 ring-offset-f1-background"
               )}
             >
               {hasAttachments && (

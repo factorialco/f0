@@ -12,6 +12,7 @@ import { ChatVideoAttachment } from "../components/ChatVideoAttachment"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 
 vi.mock("react-virtuoso", async (importOriginal) => {
   const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
@@ -199,7 +200,7 @@ describe("ChatVideoAttachment", () => {
     )
 
     const card = screen.getByTestId("chat-video-attachment")
-    expect(card).toHaveClass("w-[min(24rem,70%)]", "max-w-full", "aspect-video")
+    expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS, "aspect-video")
     expect(card).not.toHaveClass("w-full")
     const poster = container.querySelector<HTMLImageElement>(
       'img[src="https://cdn.example.com/poster.webp"]'
@@ -302,11 +303,7 @@ describe("ChatVideoAttachment", () => {
     const videoCards = screen.getAllByTestId("chat-video-attachment")
     expect(videoCards).toHaveLength(2)
     for (const card of videoCards) {
-      expect(card).toHaveClass(
-        "w-[min(24rem,70%)]",
-        "max-w-full",
-        "aspect-video"
-      )
+      expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS, "aspect-video")
     }
 
     expect(screen.getByText("source-deck.pptx")).toBeInTheDocument()

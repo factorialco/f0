@@ -154,9 +154,9 @@ export const ChatMessageAttachments = ({
   return (
     <div
       className={cn(
-        // w-full gives the column a definite width so the cards' `max-w-full`
-        // resolves against real space (fit-content would ignore it and lock the
-        // voice card at its 320px default even on narrow containers).
+        // w-full only spans whatever the message column already is — every card
+        // carries its own width now, so this no longer decides how wide the
+        // message gets (see CHAT_MEDIA_WIDTH_CLASS).
         "flex w-full min-w-0 flex-col gap-1",
         isMine ? "items-end" : "items-start"
       )}

@@ -7,11 +7,16 @@
  * looks like WhatsApp because of it.
  *
  * `24rem` is not a new value — it is the 384px the location card already used.
- * The 70% floor keeps media proportional to a narrow panel instead of pinning
- * it to a fixed block, which is the one place the web version has to differ
- * from mobile's constant 288.
+ *
+ * A flat width, NOT a percentage of the column: a percentage has no definite
+ * basis here (every ancestor up to the row is content-sized), so the card's
+ * intrinsic contribution fell back to the photo's own size and stretched the
+ * message column to the full width of the transcript — which parked the hover
+ * actions at the far right edge instead of beside the photo. `max-w-full` is
+ * what the percentage was really there for: media still shrinks with a narrow
+ * panel, it just no longer decides how wide the message is.
  */
-export const CHAT_MEDIA_WIDTH_CLASS = "w-[min(24rem,70%)]"
+export const CHAT_MEDIA_WIDTH_CLASS = "w-[24rem] max-w-full"
 
 /**
  * Wider variant for surfaces that are read rather than glanced at.
@@ -22,7 +27,7 @@ export const CHAT_MEDIA_WIDTH_CLASS = "w-[min(24rem,70%)]"
  * ~660px, so this caps the stretch at 512 instead of letting a single map
  * dominate the transcript.
  */
-export const CHAT_MEDIA_WIDE_WIDTH_CLASS = "w-[min(32rem,100%)]"
+export const CHAT_MEDIA_WIDE_WIDTH_CLASS = "w-[32rem] max-w-full"
 
 /** Gap between album cells. Mobile uses 2px; 4px reads as separate photos. */
 export const CHAT_ALBUM_GAP_CLASS = "gap-0.5"

@@ -9,6 +9,7 @@ import {
 
 import { ChatVoiceAttachment } from "../components/ChatVoiceAttachment"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 import { summariseAttachments } from "../utils/reply-preview"
 
 const VOICE: F0ChatVoiceAttachment = {
@@ -92,14 +93,14 @@ describe("ChatVoiceAttachment", () => {
     await waitFor(() => expect(decodeAudioData).toHaveBeenCalledTimes(2))
   })
 
-  // Stretches to the message column (mobile does the same): a wide waveform is
-  // easier to scrub, and a fixed 320px card read as a stray chip beside media
-  // that now shares one width.
-  it("fills the message column and never exceeds it", () => {
+  // Wide enough to scrub, and the same width as every other media surface so it
+  // doesn't read as a stray chip beside an album. Sizing it off the column
+  // (`w-full`) is what used to stretch the column itself.
+  it("takes the shared media width and never exceeds the column", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const card = screen.getByTestId("chat-voice-attachment")
-    expect(card.className).toContain("w-full")
-    expect(card.className).toContain("max-w-full")
+    expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS)
+    expect(card.classList.contains("w-full")).toBe(false)
     expect(card.className).toContain("min-w-0")
     expect(card.className).toContain("h-[58px]")
   })

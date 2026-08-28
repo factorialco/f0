@@ -12,6 +12,7 @@ import {
   useF0ChatVoicePlayLog,
 } from "../providers/F0ChatProvider"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
 const PLAYBACK_RATES = [1, 1.5, 2, 0.5]
@@ -257,10 +258,12 @@ const ChatVoiceAttachmentContent = ({
   return (
     <div
       className={cn(
-        // Stretches to the message column like mobile — a waveform reads better
-        // wide, and it stops the card from looking like a stray chip next to
-        // the album. The fixed height is also used by the deferred placeholder.
-        "group/voice flex h-[58px] w-full min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        // The shared media width, not `w-full`: a waveform reads better wide
+        // and shouldn't look like a stray chip next to an album, but sizing it
+        // off the column made the column stretch. The fixed height is also used
+        // by the deferred placeholder.
+        "group/voice flex h-[58px] min-w-0 items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        CHAT_MEDIA_WIDTH_CLASS,
         // Carries the message's own bubble colour, so a voice note reads as
         // part of the conversation rather than a neutral attachment.
         isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
