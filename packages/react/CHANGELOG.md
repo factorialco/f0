@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.66.0](https://github.com/factorialco/f0/compare/f0-react-v6.65.1...f0-react-v6.66.0) (2026-08-28)
+
+
+### Features
+
+* **F0Chat:** add an optional events prop for host-side analytics ([#5284](https://github.com/factorialco/f0/issues/5284)) ([bf401b7](https://github.com/factorialco/f0/commit/bf401b723bc3fbe3cd92ab04e6847a4f0355071c))
+
 ## [6.65.1](https://github.com/factorialco/f0/compare/f0-react-v6.65.0...f0-react-v6.65.1) (2026-08-28)
 
 
