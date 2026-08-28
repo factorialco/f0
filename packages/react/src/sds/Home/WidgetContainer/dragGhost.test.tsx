@@ -6,7 +6,7 @@ import { Calendar } from "@/icons/app"
 import { zeroRender } from "@/testing/test-utils"
 
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
-import { takeCardGhost } from "./dragGhost"
+import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { WidgetContainer } from "./index"
 
 /**
@@ -131,5 +131,52 @@ describe("takeCardGhost", () => {
     // longer in the DOM: no ghost rather than a crash.
     expect(takeCardGhost(null)).toBeNull()
     expect(takeCardGhost(undefined)).toBeNull()
+  })
+})
+
+describe("takePageSurface", () => {
+  const at = (node: HTMLElement, top: number, left: number) => {
+    node.getBoundingClientRect = () =>
+      ({ top, left, width: 1200, height: 800 }) as DOMRect
+    return node
+  }
+
+  const surface = () => {
+    const node = document.createElement("div")
+    node.className = "-z-10 bg-f1-special-page"
+    node.innerHTML = '<div id="wash" class="bg-gradient-to-bl"></div>'
+    return at(node, 0, 0)
+  }
+
+  test("places the copy where the page's own surface is", () => {
+    const taken = takePageSurface(surface(), at(card(""), 300, 840))
+
+    expect(taken?.offset).toEqual({
+      top: -300,
+      left: -840,
+      width: 1200,
+      height: 800,
+    })
+  })
+
+  test("fills the box it is given, whatever the original was placed by", () => {
+    const taken = takePageSurface(surface(), at(card(""), 0, 0))
+
+    expect(taken?.node.style.width).toBe("100%")
+    expect(taken?.node.style.height).toBe("100%")
+    expect(taken?.node.className).not.toContain("-z-10")
+  })
+
+  test("is a picture, not a control — and takes no ids with it", () => {
+    const taken = takePageSurface(surface(), at(card(""), 0, 0))
+
+    expect(taken?.node.querySelector("#wash")).toBeNull()
+    expect(taken?.node.getAttribute("aria-hidden")).toBe("true")
+    expect(taken?.node.hasAttribute("inert")).toBe(true)
+  })
+
+  test("has nothing to copy without both halves", () => {
+    expect(takePageSurface(null, card(""))).toBeNull()
+    expect(takePageSurface(surface(), null)).toBeNull()
   })
 })

@@ -46,7 +46,7 @@ import {
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
-import { takeCardGhost } from "./dragGhost"
+import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
 import {
@@ -114,6 +114,14 @@ class WidgetDragSensor extends PointerSensor {
 const DROP_ANIMATION = {
   duration: 450,
   easing: "cubic-bezier(0.4, 0, 0.1, 1)",
+}
+
+const findUp = (from: Element | null, selector: string): Element | null => {
+  for (let el: Element | null = from; el; el = el.parentElement) {
+    const found = el.querySelector(selector)
+    if (found) return found
+  }
+  return null
 }
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
@@ -237,6 +245,11 @@ export interface WidgetContainerProps {
   disableEdition?: boolean
   /** Disables dragging without changing the tree: the sortables stay mounted. */
   disableDrag?: boolean
+  /**
+   * Marks the element a dragged card should carry a copy of behind it — the
+   * page's own surface, so the card the pointer holds is the colour it was.
+   */
+  dragSurfaceSelector?: string
   /**
    * Called with a widget id when its "Remove widget" menu item is used. Omit it
    * and no widget offers removal.
@@ -371,6 +384,7 @@ export function WidgetContainer({
   renderWidget,
   disableEdition = false,
   disableDrag = false,
+  dragSurfaceSelector,
   onRemoveWidget,
   onClickAddNewWidget,
   onReorder,
@@ -423,6 +437,8 @@ export function WidgetContainer({
   const columnRef = useRef<HTMLDivElement>(null)
   /** The static copy of the dragged card that rides the pointer — {@link takeCardGhost}. */
   const ghostRef = useRef<HTMLElement | null>(null)
+  /** The page surface that copy sits on — {@link takePageSurface}. */
+  const surfaceRef = useRef<ReturnType<typeof takePageSurface>>(null)
   /**
    * HOW FAR UP THE CARD BEING DRAGGED MAY GO, measured when the drag starts and
    * null the rest of the time — see `lockedCeiling`.
@@ -442,14 +458,37 @@ export function WidgetContainer({
   )
 
   const takeGhost = (id: string) => {
-    ghostRef.current = takeCardGhost(
-      columnRef.current?.querySelector(`[data-widget-id="${id}"]`)
-    )
+    const card = columnRef.current?.querySelector(`[data-widget-id="${id}"]`)
+    ghostRef.current = takeCardGhost(card)
+    surfaceRef.current = dragSurfaceSelector
+      ? takePageSurface(findUp(columnRef.current, dragSurfaceSelector), card)
+      : null
   }
 
   /** Puts the copy in the overlay dnd-kit positions for us. */
   const mountGhost = (host: HTMLDivElement | null) => {
     if (host && ghostRef.current) host.replaceChildren(ghostRef.current)
+  }
+  const pinFrame = useRef(0)
+  const unpinSurface = () => cancelAnimationFrame(pinFrame.current)
+  const mountSurface = (host: HTMLDivElement | null) => {
+    unpinSurface()
+    const surface = surfaceRef.current
+    if (!host || !surface) return
+    host.replaceChildren(surface.node)
+    host.style.top = `${surface.offset.top}px`
+    host.style.left = `${surface.offset.left}px`
+    host.style.width = `${surface.offset.width}px`
+    host.style.height = `${surface.offset.height}px`
+
+    const overlay = host.parentElement?.parentElement
+    if (!overlay || typeof DOMMatrix !== "function") return
+    const pin = () => {
+      const { m41, m42 } = new DOMMatrix(getComputedStyle(overlay).transform)
+      host.style.transform = `translate3d(${-m41}px, ${-m42}px, 0)`
+      pinFrame.current = requestAnimationFrame(pin)
+    }
+    pin()
   }
   /**
    * WHICH WIDGETS ARE WORTH HAVING IN THE DOM — every one of them unless this
@@ -834,12 +873,15 @@ export function WidgetContainer({
           }}
           onDragCancel={() => {
             setActiveId(null)
+            unpinSurface()
             ghostRef.current = null
+            surfaceRef.current = null
             ceilingRef.current = null
           }}
           onDragEnd={(event) => {
             setActiveId(null)
             ghostRef.current = null
+            surfaceRef.current = null
             // The ceiling outlives the drag by one call: whether the card was
             // held below the pins is what decides whether a drop up there is
             // worth refusing out loud (`lockedTargetOf`).
@@ -891,10 +933,16 @@ export function WidgetContainer({
               the real card's DOM slot and transform in one frame. */}
           <DragOverlay dropAnimation={DROP_ANIMATION}>
             {activeId ? (
-              <div
-                ref={mountGhost}
-                className="h-full w-full cursor-grabbing rounded-xl backdrop-blur-md [&_*]:shadow-none dark:backdrop-blur-2xl"
-              />
+              <div className="relative h-full w-full cursor-grabbing overflow-hidden rounded-xl bg-f1-background">
+                <div
+                  ref={mountSurface}
+                  className="absolute isolate hidden dark:block"
+                />
+                <div
+                  ref={mountGhost}
+                  className="relative h-full w-full [&_*]:shadow-none"
+                />
+              </div>
             ) : null}
           </DragOverlay>
         </DndContext>

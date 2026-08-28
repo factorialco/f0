@@ -35,3 +35,46 @@ export const takeCardGhost = (
 
   return copy
 }
+
+export interface PageSurfaceGhost {
+  node: HTMLElement
+  offset: { top: number; left: number; width: number; height: number }
+}
+
+/** A copy of the page's own surface, placed so it lines up under `card`. */
+export const takePageSurface = (
+  surface: Element | null | undefined,
+  card: Element | null | undefined
+): PageSurfaceGhost | null => {
+  if (!surface || !card) return null
+
+  const copy = surface.cloneNode(true)
+  if (!(copy instanceof HTMLElement)) return null
+
+  copy.classList.remove("-z-10")
+  copy.style.position = "absolute"
+  copy.style.inset = "0"
+  copy.style.top = "0"
+  copy.style.left = "0"
+  copy.style.right = "auto"
+  copy.style.bottom = "auto"
+  copy.style.width = "100%"
+  copy.style.height = "100%"
+  copy.removeAttribute("id")
+  copy.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"))
+  copy.setAttribute("aria-hidden", "true")
+  copy.setAttribute("inert", "")
+
+  const from = surface.getBoundingClientRect()
+  const to = card.getBoundingClientRect()
+
+  return {
+    node: copy,
+    offset: {
+      top: from.top - to.top,
+      left: from.left - to.left,
+      width: from.width,
+      height: from.height,
+    },
+  }
+}

@@ -1067,6 +1067,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             belongs: under everything in this (isolated) layout. */}
         <div
           aria-hidden
+          data-page-surface
           className="pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page"
           style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
         >
@@ -1184,6 +1185,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             ctx={ctx}
             virtualized={virtualizationFor("main")}
             disableEdition={!canEditSide("main")}
+            dragSurfaceSelector="[data-page-surface]"
             onReorder={
               onReorderWidgets
                 ? (ids) => onReorderWidgets("main", ids)
@@ -1344,7 +1346,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
               railInPanel &&
-                "absolute z-10 rounded-xl backdrop-blur-md dark:backdrop-blur-2xl",
+                "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
               rail.mode === "retracting" && "relative z-10"
@@ -1403,6 +1405,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // exists to avoid.
               disableEdition={!canEditSide("right")}
               disableDrag={collapsed}
+              dragSurfaceSelector="[data-page-surface]"
               onReorder={
                 onReorderWidgets
                   ? (ids) => onReorderWidgets("right", ids)
