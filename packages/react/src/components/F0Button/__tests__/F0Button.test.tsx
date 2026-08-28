@@ -113,5 +113,32 @@ describe("F0Button", () => {
       render(<F0Button label="Review" size="md" />)
       expect(screen.getByRole("button").className).not.toContain("!pr-2")
     })
+
+    it("shows nothing when the count is 0 — no pill, no padding change", () => {
+      render(<F0Button label="Review" size="md" counterValue={0} />)
+      expect(screen.queryByText("0")).not.toBeInTheDocument()
+      expect(screen.getByRole("button").className).not.toContain("!pr-2")
+    })
+
+    it("uses the smaller counter on sm and the larger one on md/lg", () => {
+      const { container: sm } = render(
+        <F0Button label="To review" size="sm" counterValue={3} />
+      )
+      const { container: lg } = render(
+        <F0Button label="To review" size="lg" counterValue={3} />
+      )
+      const counterClass = (c: HTMLElement) =>
+        Array.from(c.querySelectorAll("div")).find((d) =>
+          d.className.includes("rounded")
+        )?.className ?? ""
+      expect(counterClass(sm)).toContain("min-w-4")
+      expect(counterClass(lg)).toContain("min-w-5")
+    })
+
+    it("gives the counter a dark pill on solid colour variants", () => {
+      render(<F0Button variant="critical" label="To review" counterValue={3} />)
+      const wrapper = screen.getByText("3").closest("span")
+      expect(wrapper?.className).toContain("dark")
+    })
   })
 })
