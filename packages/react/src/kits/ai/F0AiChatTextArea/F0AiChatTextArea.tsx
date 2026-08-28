@@ -574,7 +574,7 @@ export const F0AiChatTextArea = ({
           </div>
         )}
         <CreditWarningWrapper creditWarning={creditWarning}>
-          <motion.form
+          <form
             aria-busy={inProgress}
             ref={formRef}
             className={cn(
@@ -602,21 +602,14 @@ export const F0AiChatTextArea = ({
               "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
               "after:transition-opacity after:delay-200 after:duration-300",
               "has-[textarea:focus]:after:opacity-100",
+              !shouldReduceMotion &&
+                !isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_paused] has-[textarea:focus]:after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              !shouldReduceMotion &&
+                isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_running]",
               isClarifying && "after:opacity-100 border-f1-background-tertiary"
             )}
-            animate={{
-              "--gradient-angle": ["0deg", "360deg"],
-            }}
-            transition={{
-              duration: 6,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            style={
-              {
-                "--gradient-angle": "180deg",
-              } as React.CSSProperties
-            }
             onClick={() => {
               if (!isClarifying) {
                 textareaRef.current?.focus()
@@ -862,7 +855,7 @@ export const F0AiChatTextArea = ({
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.form>
+          </form>
         </CreditWarningWrapper>
       </div>
 
