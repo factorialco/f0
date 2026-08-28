@@ -21,7 +21,7 @@ import {
   documentPreviewKind,
   type ChatDocumentKind,
 } from "../utils/attachments"
-import { useF0Chat } from "./F0ChatProvider"
+import { useF0Chat, useF0ChatEmit } from "./F0ChatProvider"
 
 /** Debounce before running a search as the user types. */
 const SEARCH_DEBOUNCE_MS = 200
@@ -125,6 +125,7 @@ export const ChatUIProvider = ({
   children: ReactNode
 }): ReactNode => {
   const { messages, searchMessages, loadMessageContext } = useF0Chat()
+  const emit = useF0ChatEmit()
 
   const [replyTo, setReplyTo] = useState<F0ChatMessage | null>(null)
   const [editingMessage, setEditingMessage] = useState<F0ChatMessage | null>(
@@ -310,7 +311,10 @@ export const ChatUIProvider = ({
     return () => clearTimeout(timer)
   }, [searchQuery, searchOpen, navigateToMatch])
 
-  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const openSearch = useCallback(() => {
+    setSearchOpen(true)
+    emit.onSearchOpened()
+  }, [emit])
 
   const closeSearch = useCallback(() => {
     searchRunRef.current++ // cancel any in-flight result
@@ -325,14 +329,16 @@ export const ChatUIProvider = ({
   const goToNextMatch = useCallback(() => {
     const ids = matchIdsRef.current
     if (ids.length === 0) return
+    emit.onSearchResultNavigated({ direction: "next" })
     navigateToMatch((activeIndexRef.current + 1) % ids.length, ids)
-  }, [navigateToMatch])
+  }, [navigateToMatch, emit])
 
   const goToPrevMatch = useCallback(() => {
     const ids = matchIdsRef.current
     if (ids.length === 0) return
+    emit.onSearchResultNavigated({ direction: "prev" })
     navigateToMatch((activeIndexRef.current - 1 + ids.length) % ids.length, ids)
-  }, [navigateToMatch])
+  }, [navigateToMatch, emit])
 
   const matchTotal = matchIds.length
   const matchCurrent = activeMatchIndex >= 0 ? activeMatchIndex + 1 : 0

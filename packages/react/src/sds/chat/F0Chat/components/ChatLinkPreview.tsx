@@ -2,6 +2,7 @@ import { type ReactNode } from "react"
 
 import { cn, focusRing } from "@/lib/utils"
 
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatLinkPreview } from "../types"
 import { ClampText } from "./ClampText"
 import { FadeInImage } from "./FadeInImage"
@@ -84,6 +85,7 @@ export const ChatLinkPreview = ({
   /** Mirrors the bubble's tail-side top corner, like the reply quote. */
   isFirstOfRun?: boolean
 }): ReactNode => {
+  const emit = useF0ChatEmit()
   if (previews.length === 0) return null
   const compact = previews.length > 1
   return (
@@ -92,6 +94,7 @@ export const ChatLinkPreview = ({
         <a
           key={`${preview.url}-${index}`}
           href={preview.url}
+          onClick={() => emit.onLinkPreviewClicked()}
           target="_blank"
           rel="noopener noreferrer"
           className={cardClass(

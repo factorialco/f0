@@ -29,7 +29,6 @@ import {
   type F0ChatMessage,
   type F0ChatRuntime,
 } from "../types"
-import { formatClock } from "../utils/natural-time"
 import { messageSurfaceColorClass } from "../utils/sender-color"
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
 

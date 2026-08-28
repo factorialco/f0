@@ -361,11 +361,9 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <F0InputField
-                size={size}
-                label="Label text here"
-                children={<input type="text" className="w-full" />}
-              />
+              <F0InputField size={size} label="Label text here">
+                <input type="text" className="w-full" />
+              </F0InputField>
               {snapshotVariants.map((variant, index) => (
                 <F0InputField
                   key={`${size}-${index}`}

@@ -5,9 +5,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
-import { type F0ChatMessage } from "../types"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
+import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
 import { microEnterTransition, microExitTransition } from "../utils/chat-motion"
+import { emitReactionToggle } from "../utils/reactions"
 import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatReactionPill } from "./ChatReactionPill"
 
@@ -26,9 +27,16 @@ export const ChatMessageReactions = ({
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
   const { toggleReaction, loadReactionUsers, capabilities } = useF0ChatStable()
+  const emit = useF0ChatEmit()
   // Existing pills stay VISIBLE without the capability (the data is real) —
   // only adding/toggling is disabled.
   const canReact = capabilities?.canReact !== false
+
+  const react = (emoji: string, source: F0ChatReactionSource) => {
+    emitReactionToggle(emit, message, emoji, source)
+    void toggleReaction(message.id, emoji)
+  }
+
   if (!message.reactions || message.reactions.length === 0) return null
 
   return (
@@ -82,9 +90,7 @@ export const ChatMessageReactions = ({
                   : undefined
               }
               onInteraction={
-                canReact
-                  ? (emoji) => void toggleReaction(message.id, emoji)
-                  : undefined
+                canReact ? (emoji) => react(emoji, "existingPill") : undefined
               }
               size="sm"
             />
@@ -96,7 +102,7 @@ export const ChatMessageReactions = ({
           size="md"
           variant="outline"
           label={i18n.chat.react}
-          onSelect={(emoji) => void toggleReaction(message.id, emoji)}
+          onSelect={(emoji) => react(emoji, "inlinePicker")}
         />
       )}
     </div>

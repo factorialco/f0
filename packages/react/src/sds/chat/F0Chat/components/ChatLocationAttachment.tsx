@@ -10,6 +10,8 @@ import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useMountOnVisible } from "../hooks/useMountOnVisible"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatLocationAttachment } from "../types"
 import { CHAT_MEDIA_WIDE_WIDTH_CLASS } from "../utils/media-layout"
 
@@ -46,11 +48,16 @@ export const ChatLocationAttachment = ({
   meta?: ReactNode
 }): ReactNode => {
   const i18n = useI18n()
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
   const { ref, shouldMount } = useMountOnVisible()
   return (
     <a
       ref={ref}
       href={mapsUrl(location)}
+      onClick={() => {
+        if (surface === "transcript") emit.onLocationOpened()
+      }}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={location.name ?? i18n.chat.location}

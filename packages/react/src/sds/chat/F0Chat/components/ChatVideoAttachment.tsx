@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { formatFileSize } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
@@ -46,13 +47,17 @@ export const ChatVideoAttachment = ({
   meta?: ReactNode
 }): ReactNode => {
   const i18n = useI18n()
+  const emit = useF0ChatEmit()
   const [failed, setFailed] = useState(false)
   const [mediaReady, setMediaReady] = useState(false)
   const sizeLabel = file.size != null ? formatFileSize(file.size) : null
   const downloadAction = {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
-    onClick: () => triggerDownload(file.url, file.name),
+    onClick: () => {
+      triggerDownload(file.url, file.name)
+      emit.onAttachmentDownloaded({ kind: "video" })
+    },
   }
 
   if (failed) {

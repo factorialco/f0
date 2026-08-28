@@ -13,8 +13,10 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatDocumentPreview } from "../providers/ChatUIProvider"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
-import { type ChatDocumentKind } from "../utils/attachments"
+import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
 import { ClampText } from "./ClampText"
 
@@ -71,12 +73,17 @@ export const ChatDocumentAttachmentCard = ({
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
   const { openDocumentPreview } = useChatDocumentPreview()
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
   const [failed, setFailed] = useState(false)
   const [rendered, setRendered] = useState(false)
   const fallbackAction = action ?? {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
-    onClick: () => triggerDownload(file.url, file.name),
+    onClick: () => {
+      triggerDownload(file.url, file.name)
+      emit.onAttachmentDownloaded({ kind: attachedKindOf(file) })
+    },
   }
   const cardWidth = compact ? 64 : CARD_WIDTH
   const thumbHeight = compact ? "100%" : THUMB_HEIGHT
@@ -154,7 +161,11 @@ export const ChatDocumentAttachmentCard = ({
       )}
       <button
         type="button"
-        onClick={() => openDocumentPreview(file)}
+        onClick={() => {
+          openDocumentPreview(file)
+          // Opening your own not-yet-sent draft is not consuming shared content.
+          if (surface === "transcript") emit.onDocumentOpened({ kind })
+        }}
         disabled={previewDisabled}
         aria-busy={!rendered ? true : undefined}
         aria-label={i18n.t("chat.openNamedDocument", { name: file.name })}

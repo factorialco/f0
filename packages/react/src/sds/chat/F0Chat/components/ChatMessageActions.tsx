@@ -19,9 +19,10 @@ import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
-import { type F0ChatMessage } from "../types"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
+import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
 import { formatClock } from "../utils/natural-time"
+import { emitReactionToggle } from "../utils/reactions"
 import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
@@ -88,6 +89,7 @@ export const ChatMessageActions = ({
   } = useF0ChatStable()
   const { setReplyTo, focusComposer } = useChatReply()
   const { setEditingMessage } = useChatEdit()
+  const emit = useF0ChatEmit()
   const [view, setView] = useState<"menu" | "info">("menu")
   // Set when the menu closes because a reply started: the composer takes focus,
   // so the popover must not pull it back to the ellipsis trigger.
@@ -123,7 +125,8 @@ export const ChatMessageActions = ({
     if (!next) setView("menu")
   }
 
-  const react = (emoji: string) => {
+  const react = (emoji: string, source: F0ChatReactionSource) => {
+    emitReactionToggle(emit, message, emoji, source)
     toggleReaction(message.id, emoji)
     handleOpenChange(false)
   }
@@ -219,7 +222,7 @@ export const ChatMessageActions = ({
                       emojiMode="native"
                       variant="ghost"
                       aria-label={emoji}
-                      onClick={() => react(emoji)}
+                      onClick={() => react(emoji, "quickRow")}
                       className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
                     />
                   ))}
@@ -227,7 +230,7 @@ export const ChatMessageActions = ({
                     size="md"
                     variant="ghost"
                     label={i18n.chat.react}
-                    onSelect={react}
+                    onSelect={(emoji) => react(emoji, "menuPicker")}
                     icon={Plus}
                   />
                 </div>
@@ -238,7 +241,10 @@ export const ChatMessageActions = ({
               <MenuItem
                 icon={AlertCircleLine}
                 label={i18n.chat.info}
-                onClick={() => setView("info")}
+                onClick={() => {
+                  emit.onMessageInfoViewed({ messageId: message.id })
+                  setView("info")
+                }}
                 trailing={
                   <F0Icon
                     icon={ChevronRight}
@@ -255,13 +261,17 @@ export const ChatMessageActions = ({
                   setReplyTo(message)
                   keepComposerFocusRef.current = true
                   focusComposer()
+                  emit.onReplyStarted({ messageId: message.id })
                 })}
               />
               <MenuItem
                 icon={Files}
                 label={i18n.actions.copy}
                 onClick={runAndClose(() => {
-                  void navigator.clipboard?.writeText(message.body)
+                  void navigator.clipboard
+                    ?.writeText(message.body)
+                    .then(() => emit.onMessageCopied({ messageId: message.id }))
+                    .catch(() => {})
                 })}
               />
             </div>
@@ -276,6 +286,7 @@ export const ChatMessageActions = ({
                       onClick={runAndClose(() => {
                         setReplyTo(null)
                         setEditingMessage(message)
+                        emit.onEditStarted({ messageId: message.id })
                       })}
                     />
                   )}

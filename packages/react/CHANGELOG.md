@@ -1,5 +1,75 @@
 # Changelog
 
+## [6.66.2](https://github.com/factorialco/f0/compare/f0-react-v6.66.1...f0-react-v6.66.2) (2026-08-28)
+
+
+### Performance Improvements
+
+* **react:** spin the AI gradients in CSS, not per-frame JS ([#5296](https://github.com/factorialco/f0/issues/5296)) ([ed458c2](https://github.com/factorialco/f0/commit/ed458c26f01bdf57b0f9f0931e0f2cdc5d059d83))
+
+## [6.66.1](https://github.com/factorialco/f0/compare/f0-react-v6.66.0...f0-react-v6.66.1) (2026-08-28)
+
+
+### Performance Improvements
+
+* **F0AiChatTextArea:** spin the glow in CSS instead of per-frame JS ([#5293](https://github.com/factorialco/f0/issues/5293)) ([f2f912c](https://github.com/factorialco/f0/commit/f2f912cc3d400d29107de5a846a7f99b59688f70))
+
+## [6.66.0](https://github.com/factorialco/f0/compare/f0-react-v6.65.1...f0-react-v6.66.0) (2026-08-28)
+
+
+### Features
+
+* **F0Chat:** add an optional events prop for host-side analytics ([#5284](https://github.com/factorialco/f0/issues/5284)) ([bf401b7](https://github.com/factorialco/f0/commit/bf401b723bc3fbe3cd92ab04e6847a4f0355071c))
+
+## [6.65.1](https://github.com/factorialco/f0/compare/f0-react-v6.65.0...f0-react-v6.65.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** match the composer surface to the widgets ([#5290](https://github.com/factorialco/f0/issues/5290)) ([80da4bd](https://github.com/factorialco/f0/commit/80da4bd68a7e0bff9ea5fb9380b8a84edb14faf8))
+
+## [6.65.0](https://github.com/factorialco/f0/compare/f0-react-v6.64.0...f0-react-v6.65.0) (2026-08-28)
+
+
+### Features
+
+* **NewHomeLayout:** stop widget drag at the pinned widgets ([#5282](https://github.com/factorialco/f0/issues/5282)) ([88a190b](https://github.com/factorialco/f0/commit/88a190b046a4806052d0227c1f6cbd4f0badfa16))
+
+## [6.64.0](https://github.com/factorialco/f0/compare/f0-react-v6.63.2...f0-react-v6.64.0) (2026-08-28)
+
+
+### Features
+
+* **F0Select:** add inline variant ([#5095](https://github.com/factorialco/f0/issues/5095)) ([74f7de5](https://github.com/factorialco/f0/commit/74f7de5403d9bdb2272022bd5ba48df9325293a6))
+
+## [6.63.2](https://github.com/factorialco/f0/compare/f0-react-v6.63.1...f0-react-v6.63.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* **lint:** lint the packages, and enforce correctness ruleset ([#5279](https://github.com/factorialco/f0/issues/5279)) ([a8550ab](https://github.com/factorialco/f0/commit/a8550ab2850db71fb9b6c644b23024b7ebcfe64d))
+
+## [6.63.1](https://github.com/factorialco/f0/compare/f0-react-v6.63.0...f0-react-v6.63.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **F0Chat:** drop the mention chip's font-weight so the caret tracks the glyphs ([#5274](https://github.com/factorialco/f0/issues/5274)) ([bf41fa6](https://github.com/factorialco/f0/commit/bf41fa6e49a2c14ef123fb7d51973d2212d0a559))
+
+## [6.63.0](https://github.com/factorialco/f0/compare/f0-react-v6.62.0...f0-react-v6.63.0) (2026-08-27)
+
+
+### Features
+
+* **NewHomeLayout:** lock widget drag to the vertical axis ([#5275](https://github.com/factorialco/f0/issues/5275)) ([7de0488](https://github.com/factorialco/f0/commit/7de0488f79389aec4d02995246dc61b7c5a2a553))
+
+## [6.62.0](https://github.com/factorialco/f0/compare/f0-react-v6.61.0...f0-react-v6.62.0) (2026-08-27)
+
+
+### Features
+
+* **F0AiChatTextArea:** move welcome suggestions into the action row ([#5273](https://github.com/factorialco/f0/issues/5273)) ([92fc3fa](https://github.com/factorialco/f0/commit/92fc3fa16bc94058d43c6ad1975a7afd784cbfe0))
+
 ## [6.61.0](https://github.com/factorialco/f0/compare/f0-react-v6.60.1...f0-react-v6.61.0) (2026-08-26)
 
 

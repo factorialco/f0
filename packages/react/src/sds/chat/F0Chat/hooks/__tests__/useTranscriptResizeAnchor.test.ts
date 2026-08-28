@@ -6,17 +6,21 @@ import {
   useTranscriptResizeAnchor,
 } from "../useTranscriptResizeAnchor"
 
-let observed: { element: Element; fire: () => void }[] = []
+let observed: {
+  element: Element
+  fire: () => void
+  observer: MockResizeObserver
+}[] = []
 
 class MockResizeObserver {
   constructor(private readonly callback: () => void) {}
   observe(element: Element) {
-    observed.push({ element, fire: () => this.callback() })
+    observed.push({ element, fire: () => this.callback(), observer: this })
   }
+  // Keyed by the observer itself: an arrow function is a new value every time,
+  // so comparing the stored `fire` against a fresh one never matches.
   disconnect() {
-    observed = observed.filter(
-      (entry) => entry.fire !== (() => this.callback())
-    )
+    observed = observed.filter((entry) => entry.observer !== this)
   }
 }
 

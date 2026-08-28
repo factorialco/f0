@@ -12,6 +12,7 @@ import {
   isVideoFileAttachment,
   withinPreviewSizeLimit,
 } from "../utils/attachments"
+import { ChatSurfaceProvider } from "../providers/ChatSurfaceProvider"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
 import { ChatVoiceAttachment } from "./ChatVoiceAttachment"
@@ -32,7 +33,7 @@ const PreviewProgress = (): ReactNode => (
  * and voice/location attachments keep their native representation. Unknown
  * files use the same square footprint with their file-type avatar.
  */
-export const ChatComposerAttachmentPreview = ({
+const ChatComposerAttachmentPreviewContent = ({
   attachment,
   uploading,
   onRemove,
@@ -236,3 +237,16 @@ export const ChatComposerAttachmentPreview = ({
     </div>
   )
 }
+
+/**
+ * Draft attachments reuse the transcript's leaf components, which report
+ * consumption events. Marking the surface stops "I previewed my own unsent
+ * file" being recorded as "I opened something someone shared with me".
+ */
+export const ChatComposerAttachmentPreview = (
+  props: Parameters<typeof ChatComposerAttachmentPreviewContent>[0]
+): ReactNode => (
+  <ChatSurfaceProvider surface="composer">
+    <ChatComposerAttachmentPreviewContent {...props} />
+  </ChatSurfaceProvider>
+)

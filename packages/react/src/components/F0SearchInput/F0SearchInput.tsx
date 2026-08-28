@@ -70,28 +70,39 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
   ) => {
     const input = useRef<HTMLInputElement>(null)
 
-    const interval = useRef<NodeJS.Timeout | null>(null)
-
     useImperativeHandle(ref, () => input.current as HTMLInputElement)
 
     useEffect(() => {
-      if (!props.autoFocus) {
-        if (interval.current) {
-          clearInterval(interval.current)
-        }
+      const element = input.current
+
+      if (
+        !props.autoFocus ||
+        props.disabled ||
+        !element ||
+        document.activeElement === element
+      ) {
         return
       }
 
-      interval.current = setInterval(() => {
-        input.current?.focus()
+      let timeout: ReturnType<typeof setTimeout> | undefined
+      const stopAutoFocus = () => {
+        if (timeout !== undefined) {
+          clearTimeout(timeout)
+          timeout = undefined
+        }
+        element.removeEventListener("focus", stopAutoFocus)
+      }
+
+      element.addEventListener("focus", stopAutoFocus)
+      timeout = setTimeout(() => {
+        element.focus()
+        stopAutoFocus()
       }, 50)
 
       return () => {
-        if (interval.current) {
-          clearInterval(interval.current)
-        }
+        stopAutoFocus()
       }
-    }, [props.autoFocus])
+    }, [props.autoFocus, props.disabled])
 
     const valueToEmitRef = useRef<string | undefined>(undefined)
 
@@ -106,8 +117,12 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
           if (valueToEmitRef.current === undefined) {
             setTimeout(() => {
               if (valueToEmitRef.current !== undefined) {
+                const shouldRestoreFocus =
+                  document.activeElement === input.current
                 onChange(valueToEmitRef.current)
-                input.current?.focus()
+                if (shouldRestoreFocus) {
+                  input.current?.focus()
+                }
               }
               valueToEmitRef.current = undefined
             }, debounceTime)
@@ -138,7 +153,6 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         aria-activedescendant={ariaActiveDescendant}
         aria-autocomplete={ariaAutocomplete}
         size={size}
-        autoFocus={props.autoFocus}
         clearable={clearable}
         onBlur={onBlur}
         onFocus={onFocus}

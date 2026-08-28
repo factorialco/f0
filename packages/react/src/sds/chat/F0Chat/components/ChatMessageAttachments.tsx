@@ -6,9 +6,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatImagePreview } from "../providers/ChatUIProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { albumCells } from "../utils/album-layout"
-import { partitionChatAttachments } from "../utils/attachments"
+import { attachedKindOf, partitionChatAttachments } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
 import {
   CHAT_ALBUM_GAP_CLASS,
@@ -48,6 +49,7 @@ export const ChatMessageAttachments = ({
 }): ReactNode => {
   const i18n = useI18n()
   const { openImagePreview } = useChatImagePreview()
+  const emit = useF0ChatEmit()
   const attachments = message.attachments
   if (!attachments || attachments.length === 0) return null
   const surfaceClassName = messageSurfaceColorClass(message.author, isMine)
@@ -186,7 +188,10 @@ export const ChatMessageAttachments = ({
                 spanFull={cell.span === 2}
                 surfaceClassName={surfaceClassName}
                 label={i18n.chat.openImage}
-                onOpen={() => openImagePreview(images, cell.index)}
+                onOpen={() => {
+                  openImagePreview(images, cell.index)
+                  emit.onImageOpened({ count: images.length })
+                }}
                 overlay={
                   cell.hiddenCount > 0 ? (
                     <span
@@ -264,7 +269,10 @@ export const ChatMessageAttachments = ({
                 {
                   label: i18n.chat.download,
                   icon: Download,
-                  onClick: () => triggerDownload(file.url, file.name),
+                  onClick: () => {
+                    triggerDownload(file.url, file.name)
+                    emit.onAttachmentDownloaded({ kind: attachedKindOf(file) })
+                  },
                 },
               ]}
             />

@@ -119,7 +119,7 @@ export const ChatReactionPill = ({
       className={cn(
         "flex items-center gap-1 px-0.5 font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
         isActive &&
-          "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold",
+          "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
       )}
       aria-label={`${getEmojiLabel(emoji)}: ${count}`}
       aria-pressed={isActive}
@@ -133,7 +133,7 @@ export const ChatReactionPill = ({
         }}
         className={cn(
           "tabular-nums",
-          isActive ? "text-f1-foreground-selected" : "text-f1-foreground",
+          isActive ? "text-f1-foreground-selected" : "text-f1-foreground"
         )}
       />
     </Action>

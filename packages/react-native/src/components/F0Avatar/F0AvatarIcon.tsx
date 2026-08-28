@@ -2,7 +2,7 @@ import React from "react"
 import { View } from "react-native"
 
 import { cn } from "../../lib/utils"
-import { F0Icon, type IconType } from "../primitives/F0Icon"
+import { F0Icon } from "../primitives/F0Icon"
 
 import {
   type F0AvatarIconProps,

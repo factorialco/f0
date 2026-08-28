@@ -42,9 +42,8 @@ export const SortableWidget = ({
 
   const style: CSSProperties = {
     // VERTICAL ONLY: a column is one dimension, so the neighbours' shuffles
-    // ignore any horizontal component. dnd-kit reports both axes; dropping x
-    // here is the same thing `restrictToVerticalAxis` does, without taking on
-    // @dnd-kit/modifiers for it.
+    // ignore any horizontal component. This is the shuffle; the card under the
+    // pointer is held to the same axis by the column's `verticalOnly` modifier.
     transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
     transition: transition ?? undefined,
   }
