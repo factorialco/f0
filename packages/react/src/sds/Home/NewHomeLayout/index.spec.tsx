@@ -57,17 +57,8 @@ const RAIL = [
   widget("events", { hasUpdates: true }),
 ]
 
-/**
- * LONGER THAN THE STRIP'S HOVER INTENT (`PANEL_OPEN_MS`), which is how long a
- * pointer has to rest on a glyph before its widget floats.
- */
 const DWELL_MS = 250
 
-/**
- * Holds the hover the way a pointer that MEANS it does. Nothing is pointed at
- * here — this is only the wait — so a test that has moved the pointer on in the
- * meantime is asserting that the strip let the crossing go.
- */
 const holdHover = () =>
   act(() => new Promise<void>((resolve) => setTimeout(resolve, DWELL_MS)))
 

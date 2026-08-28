@@ -235,21 +235,7 @@ export interface WidgetContainerProps {
    * are fixed (a curated feed, say) rather than user-arranged.
    */
   disableEdition?: boolean
-  /**
-   * TAKES THE DRAG AWAY WITHOUT CHANGING THE TREE. Every widget stays the
-   * sortable it already was — so nothing in the column is rebuilt — and none of
-   * them can be picked up while this is set.
-   *
-   * `disableEdition` is the wrong tool for a column that is only TEMPORARILY not
-   * arrangeable: it decides the tree's SHAPE (a draggable column is wrapped in a
-   * DndContext, its cards in sortables), so toggling it remounts every widget in
-   * the column. This is the same refusal with nothing moving underneath it — for
-   * `NewHomeLayout`'s COLLAPSED RAIL, which is a strip of glyphs and one floating
-   * card rather than a column with an order to rearrange.
-   *
-   * The rest of the arranging stays: a widget's own menu still removes and
-   * configures it. Only the gesture that needs a column goes.
-   */
+  /** Disables dragging without changing the tree: the sortables stay mounted. */
   disableDrag?: boolean
   /**
    * Called with a widget id when its "Remove widget" menu item is used. Omit it
@@ -757,9 +743,6 @@ export function WidgetContainer({
       measureRef={virtual.measureRef}
     >
       {canDrag ? (
-        // FROZEN, NOT UNWRAPPED (`disableDrag`): the sortable stays, and with it
-        // this widget's render — a card that stopped being draggable by leaving
-        // the sortable behind would be built again from nothing.
         <SortableWidget id={widget.id} disabled={widget.locked || disableDrag}>
           {/* The arrival wrapper sits INSIDE the sortable rather than around it:
               dnd-kit measures the element it holds the ref to, and a transformed
@@ -908,15 +891,6 @@ export function WidgetContainer({
               the real card's DOM slot and transform in one frame. */}
           <DragOverlay dropAnimation={DROP_ANIMATION}>
             {activeId ? (
-              // NO BACKDROP OF ITS OWN: the copy keeps the card's translucent
-              // surface, so what the pointer carries looks like the widget rather
-              // than a solid tile of it.
-              //
-              // Frosted for the same reason the floating panel is — the card's
-              // own wash is 5%, and the card the ghost is over would otherwise
-              // read straight through it. What it is over is always another card
-              // in this column: `verticalOnly` discards the horizontal component,
-              // so the ghost never leaves the column it was picked up from.
               <div
                 ref={mountGhost}
                 className="h-full w-full cursor-grabbing rounded-xl backdrop-blur-md [&_*]:shadow-none"

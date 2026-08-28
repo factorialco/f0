@@ -7,12 +7,6 @@ import { screen, zeroRender } from "@/testing/test-utils"
 
 import { WidgetContainer } from "./index"
 
-/**
- * A COLUMN THAT IS ONLY TEMPORARILY NOT ARRANGEABLE, which is what the collapsed
- * rail is. `disableEdition` would do it by taking the sortables away — and that
- * changes the tree's shape, which rebuilds every widget in the column.
- */
-
 const widget = (id: string) => ({
   id,
   icon: id === "clock" ? Clock : Calendar,
@@ -22,13 +16,8 @@ const widget = (id: string) => ({
 
 const WIDGETS = [widget("clock"), widget("events")]
 
-/** How many times each widget's body has been built from scratch, by id. */
 let mounts: Record<string, number> = {}
 
-/**
- * A widget body that COUNTS ITS MOUNTS, so a change in the column's tree — the
- * thing that unmounts a render — is visible rather than silent.
- */
 const Counted = ({ id }: { id: string }) => {
   useEffect(() => {
     mounts[id] = (mounts[id] ?? 0) + 1
@@ -36,7 +25,6 @@ const Counted = ({ id }: { id: string }) => {
   return <span>{id} body</span>
 }
 
-/** The column, frozen or not, with every widget counting its own mounts. */
 const column = (frozen: boolean) => (
   <WidgetContainer
     widgets={WIDGETS}
@@ -61,8 +49,6 @@ describe("disableDrag", () => {
   test("leaves the sortables in place — the tree keeps its shape", () => {
     const { container } = zeroRender(column(true))
 
-    // The box a sortable marks its card with is still there: the column is
-    // frozen, not unwrapped.
     expect(
       [...container.querySelectorAll("[data-widget-id]")].map((el) =>
         el.getAttribute("data-widget-id")
@@ -77,7 +63,6 @@ describe("disableDrag", () => {
     rerender(column(true))
     rerender(column(false))
 
-    // Not one of them was built again on the way in or out.
     expect(mounts).toEqual({ clock: 1, events: 1 })
   })
 

@@ -12,26 +12,8 @@ import {
 import { type HomeWidgetItem } from "../slotRenderers"
 import { NewHomeLayout } from "./index"
 
-/**
- * WHAT THE COLLAPSED RAIL MUST NOT DO ON ITS OWN.
- *
- * Collapsed, the rail is a strip of 40px glyphs on the layout's right edge with
- * one card floating out of whichever one you point at. Both of the things tested
- * here were that presentation answering a gesture nobody made: a card you could
- * DRAG though it had no visible neighbours to reorder against, and a panel that
- * opened for a pointer merely CROSSING the strip on its way to the AI chat —
- * which docks against that same edge.
- */
-
-/** The layout decides everything responsive from its own measured width. */
 let layoutWidth = 1400
 
-/**
- * Every live ResizeObserver callback, so a test can act like the box resized.
- *
- * Not only the layout's: an arrangeable column brings dnd-kit, which observes
- * boxes of its own and reads the ENTRIES it is handed — hence the shape.
- */
 let resizeCallbacks: Array<(entries: ResizeObserverEntry[]) => void> = []
 
 const resizeLayoutTo = (width: number) => {
@@ -47,13 +29,8 @@ const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
   ...extra,
 })
 
-/** Three cards, none pinned: a rail with a real arrangement to make. */
 const RAIL = [widget("clock"), widget("events"), widget("tasks")]
 
-/**
- * A body only the FLOATING CARD can show, so "is the panel out" is a question
- * about one string. The glyphs carry the widget's title, never its body.
- */
 const renderLayout = (width: number) => {
   layoutWidth = width
   return zeroRender(
@@ -69,16 +46,9 @@ const renderLayout = (width: number) => {
 
 const glyph = (id = "clock") => screen.getByRole("button", { name: id })
 const card = (id = "clock") => screen.getByText(`${id} body`)
-/** Every card the column is offering as a drag surface. */
 const grabbable = (container: HTMLElement) =>
   container.querySelectorAll(".cursor-grab").length
 
-/**
- * LONGER THAN THE STRIP'S HOVER INTENT (`PANEL_OPEN_MS`) — how long a pointer
- * has to rest on a glyph before its widget floats. Nothing is pointed at here,
- * only waited out, so a test that has already moved the pointer on is asserting
- * that the strip let the crossing go.
- */
 const holdHover = () =>
   act(() => new Promise<void>((resolve) => setTimeout(resolve, 250)))
 
@@ -115,8 +85,6 @@ describe("the collapsed rail's hover intent", () => {
   test("floats nothing for a pointer that is only PASSING", async () => {
     renderLayout(1000)
 
-    // Entered and gone — the two events a crossing leaves behind, with no rest
-    // in between.
     fireEvent.mouseEnter(glyph())
     fireEvent.mouseLeave(glyph())
     await holdHover()
@@ -129,7 +97,6 @@ describe("the collapsed rail's hover intent", () => {
     renderLayout(1000)
 
     await userEvent.hover(glyph())
-    // On out of the strip entirely: the trip to the chat, or back from it.
     await userEvent.unhover(glyph())
     await holdHover()
 
@@ -147,7 +114,6 @@ describe("the collapsed rail's hover intent", () => {
   test("leaves one glyph's hover to that glyph", async () => {
     renderLayout(1000)
 
-    // Passed on the way down the strip, then rested on the one that was wanted.
     fireEvent.mouseEnter(glyph())
     fireEvent.mouseLeave(glyph())
     await userEvent.hover(glyph("tasks"))
@@ -172,7 +138,6 @@ describe("dragging the rail's widgets", () => {
     await userEvent.hover(glyph())
     await holdHover()
 
-    // The card is out over the feed — and there is nothing to grab on it.
     expect(card()).toBeVisible()
     expect(grabbable(container)).toBe(0)
   })
