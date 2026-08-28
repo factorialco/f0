@@ -291,7 +291,14 @@ const eventsWidget = (params: WidgetParams): HomeWidgetItem => {
 const CONFIGURABLE_CATALOG: WidgetCatalogItem[] = GROUPED_CATALOG.map((item) =>
   item.id === "events"
     ? { ...item, preview: eventsWidget({ period: "week", maxEvents: 2 }) }
-    : item
+    : item.id === "goals"
+      ? {
+          ...item,
+          paramsSchema: EVENTS_PARAMS,
+          params: { period: "month", maxEvents: 3 },
+          addWithDefaults: true,
+        }
+      : item
 )
 
 const TwoStepCatalog = () => {

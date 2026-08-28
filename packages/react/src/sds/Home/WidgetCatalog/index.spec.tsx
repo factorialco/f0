@@ -335,6 +335,44 @@ describe("WidgetCatalog", () => {
       expect(screen.getByText("Configure Events")).toBeInTheDocument()
     })
 
+    test("a widget flagged to add with its defaults skips the step", async () => {
+      const onAdd = vi.fn()
+      render({
+        widgets: [
+          { ...configurable, addWithDefaults: true, params: { rows: 4 } },
+        ],
+        groups: undefined,
+        onAdd,
+      })
+
+      expect(screen.queryByRole("button", { name: "Continue" })).toBeNull()
+      await userEvent.click(cta("Add widget"))
+
+      expect(onAdd).toHaveBeenCalledWith("events", { rows: 4 })
+    })
+
+    test("the flag decides, not whether the defaults are complete", async () => {
+      render({
+        widgets: [{ ...configurable, params: { rows: 4 } }],
+        groups: undefined,
+      })
+
+      expect(cta("Continue")).toBeInTheDocument()
+    })
+
+    test("the flag still asks when its defaults can't satisfy the schema", async () => {
+      const onAdd = vi.fn()
+      render({
+        widgets: [{ ...configurable, addWithDefaults: true, params: {} }],
+        groups: undefined,
+        onAdd,
+      })
+
+      await startConfiguring()
+
+      expect(onAdd).not.toHaveBeenCalled()
+    })
+
     test("a widget with nothing to configure is still one press", async () => {
       const onAdd = vi.fn()
       render({ widgets: withParams, groups: undefined, onAdd })

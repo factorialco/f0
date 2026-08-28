@@ -172,6 +172,16 @@ So a widget whose params are required is never on the Home half-built, and the
 app never has to open "Edit params" itself on a card the user just added. A
 widget that declares no schema is added in one press, as it always was.
 
+**Defaults**: a catalog entry's `params` — or, when `preview` is the widget
+itself, the widget's own `params` — are what that step opens with, so the fields
+and the preview say something before anything is touched.
+
+**Skipping the step**: `addWithDefaults` on the entry adds the widget straight
+from the list, handing those defaults to `onAdd`. Use it for a widget whose
+defaults are the right answer for nearly everyone. If its defaults do **not**
+satisfy the schema — a required param with nothing to fall back on — the step is
+shown anyway rather than adding a widget that cannot render.
+
 ## Previews: hand over the widget, not a render of it
 
 A widget is previewed twice — in the "Add widget" catalog and in "Edit params" —

@@ -23,6 +23,7 @@ import { F0Form, useF0Form } from "@/patterns/F0Form"
 import {
   resolveWidgetHeader,
   widgetChrome,
+  widgetParamsAreComplete,
   type HomeWidgetItem,
   type SlotRenderers,
   type WidgetParams,
@@ -100,6 +101,7 @@ export interface WidgetCatalogItem {
   areas?: WidgetContainerSide[]
   paramsSchema?: WidgetParamsSchema
   params?: WidgetParams
+  addWithDefaults?: boolean
 }
 
 /**
@@ -362,7 +364,13 @@ export function WidgetCatalog({
     ordered.find((w) => w.id === selectedId) ?? ordered[0] ?? null
 
   const schema = selected ? itemParamsSchema(selected) : undefined
-  const configuring = step === "configure" && schema !== undefined
+  const needsStep =
+    schema !== undefined &&
+    !(
+      selected?.addWithDefaults &&
+      widgetParamsAreComplete(schema, itemParams(selected))
+    )
+  const configuring = step === "configure" && needsStep
   const params =
     selected && draft?.id === selected.id
       ? draft.params
@@ -383,8 +391,8 @@ export function WidgetCatalog({
   }, [isOpen])
 
   useEffect(() => {
-    if (step === "configure" && !schema) setStep("pick")
-  }, [step, schema])
+    if (step === "configure" && !needsStep) setStep("pick")
+  }, [step, needsStep])
 
   return (
     <F0Dialog
@@ -409,11 +417,12 @@ export function WidgetCatalog({
               },
             }
           : {
-              label: schema ? t.wizard.next : "Add widget",
+              label: needsStep ? t.wizard.next : "Add widget",
               disabled: !selected,
               onClick: () => {
                 if (!selected) return
-                if (schema) goToStep("configure")
+                if (needsStep) goToStep("configure")
+                else if (schema) onAdd(selected.id, params)
                 else onAdd(selected.id)
               },
             }
