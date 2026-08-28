@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.67.1](https://github.com/factorialco/f0/compare/f0-react-v6.67.0...f0-react-v6.67.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** leave the collapsed rail alone unless you mean it ([#5301](https://github.com/factorialco/f0/issues/5301)) ([67b8bb2](https://github.com/factorialco/f0/commit/67b8bb2553e0284c7c9051bac286ce73abe529e8))
+
 ## [6.67.0](https://github.com/factorialco/f0/compare/f0-react-v6.66.3...f0-react-v6.67.0) (2026-08-28)
 
 
