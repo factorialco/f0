@@ -236,6 +236,22 @@ export interface WidgetContainerProps {
    */
   disableEdition?: boolean
   /**
+   * TAKES THE DRAG AWAY WITHOUT CHANGING THE TREE. Every widget stays the
+   * sortable it already was — so nothing in the column is rebuilt — and none of
+   * them can be picked up while this is set.
+   *
+   * `disableEdition` is the wrong tool for a column that is only TEMPORARILY not
+   * arrangeable: it decides the tree's SHAPE (a draggable column is wrapped in a
+   * DndContext, its cards in sortables), so toggling it remounts every widget in
+   * the column. This is the same refusal with nothing moving underneath it — for
+   * `NewHomeLayout`'s COLLAPSED RAIL, which is a strip of glyphs and one floating
+   * card rather than a column with an order to rearrange.
+   *
+   * The rest of the arranging stays: a widget's own menu still removes and
+   * configures it. Only the gesture that needs a column goes.
+   */
+  disableDrag?: boolean
+  /**
    * Called with a widget id when its "Remove widget" menu item is used. Omit it
    * and no widget offers removal.
    */
@@ -368,6 +384,7 @@ export function WidgetContainer({
   slotRenderers,
   renderWidget,
   disableEdition = false,
+  disableDrag = false,
   onRemoveWidget,
   onClickAddNewWidget,
   onReorder,
@@ -740,7 +757,10 @@ export function WidgetContainer({
       measureRef={virtual.measureRef}
     >
       {canDrag ? (
-        <SortableWidget id={widget.id} disabled={widget.locked}>
+        // FROZEN, NOT UNWRAPPED (`disableDrag`): the sortable stays, and with it
+        // this widget's render — a card that stopped being draggable by leaving
+        // the sortable behind would be built again from nothing.
+        <SortableWidget id={widget.id} disabled={widget.locked || disableDrag}>
           {/* The arrival wrapper sits INSIDE the sortable rather than around it:
               dnd-kit measures the element it holds the ref to, and a transformed
               ancestor would offset every rect it reads while a drag is in

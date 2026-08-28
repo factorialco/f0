@@ -292,6 +292,7 @@ const CollapsedGlyph = ({
   open,
   delayMs,
   onOpen,
+  onCancelOpen,
   onClose,
 }: {
   widget: HomeWidgetItem
@@ -300,7 +301,14 @@ const CollapsedGlyph = ({
   open: boolean
   /** When this strip's first glyph starts arriving. */
   delayMs: number
-  onOpen: (id: string, anchor: HTMLElement) => void
+  /**
+   * Asks for this widget to float. `instant` for the ways of asking that ARE the
+   * answer — a click, a focus — against a hover, which has to be held first (see
+   * `NewHomeLayout`'s `openFromAnchor`).
+   */
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  /** The pointer left this glyph before a held hover had opened anything. */
+  onCancelOpen: () => void
   onClose: () => void
 }) => {
   const reducedMotion = useReducedMotion()
@@ -396,7 +404,10 @@ const CollapsedGlyph = ({
               : "rounded-lg"
           )}
           onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
-          onFocus={(event) => onOpen(widget.id, event.currentTarget)}
+          onMouseLeave={onCancelOpen}
+          // FOCUS IS INSTANT. A hover is held first because a pointer crosses
+          // glyphs it isn't asking for; a focus lands on exactly one thing.
+          onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
           {...glyphMotion}
         >
           {text ? (
@@ -465,8 +476,9 @@ const CollapsedGlyph = ({
       aria-label={widgetTitle(widget)}
       aria-expanded={open}
       onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+      onMouseLeave={onCancelOpen}
       onClick={(event) =>
-        open ? onClose() : onOpen(widget.id, event.currentTarget)
+        open ? onClose() : onOpen(widget.id, event.currentTarget, true)
       }
       // See the strip: it takes no pointer events, so each glyph takes its own.
       className="pointer-events-auto rounded-lg"
@@ -495,6 +507,21 @@ const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
+/**
+ * HOW LONG THE POINTER HAS TO REST ON A GLYPH before its widget floats — hover
+ * intent, and the reason a pointer merely PASSING the strip leaves it alone.
+ *
+ * The strip lives on the layout's right edge, which is also the edge the AI chat
+ * docks against and the edge you cross to reach it. Opening on the first
+ * mouseenter, every trip in or out of the chat threw a card over the feed for as
+ * long as the crossing took: a widget flashed up and went again, having been
+ * asked for by nobody. Travelling DOWN the strip did the same thing to every
+ * glyph on the way to the one you wanted.
+ *
+ * So a hover is a question the pointer has to hold. The ways of asking that
+ * cannot be accidental — a click, a focus — are answered at once (`instant`).
+ */
+const PANEL_OPEN_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
 const PANEL_GAP_PX = 8
 // The add control's name comes from the PROVIDER (`t.widgets.addWidget`) — it is
@@ -691,9 +718,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [openId, setOpenId] = useState<string | null>(null)
     const [panelTop, setPanelTop] = useState(0)
     // Whether the panel should GLIDE to `panelTop` or simply be there — see
-    // `openFromAnchor`.
+    // `showFromAnchor`.
     const [panelGlide, setPanelGlide] = useState(false)
     const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    // The hover being HELD, if one is — see `PANEL_OPEN_MS`.
+    const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // The rail collapses when the grid can't give both columns their width —
     // measured (clientWidth is a layout metric), not media-queried, because
@@ -848,8 +877,22 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (!collapsed) setOpenId(null)
+      if (collapsed) return
+      // A hover still being held goes with it: whatever it was aimed at is a
+      // card in a column now, not a glyph with a panel behind it.
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+      setOpenId(null)
     }, [collapsed])
+
+    // Neither timer outlives the layout.
+    useEffect(
+      () => () => {
+        if (openTimer.current) clearTimeout(openTimer.current)
+        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      },
+      []
+    )
 
     // How the rail moves, and the one number the grid template reads. The genie
     // lives in there; the geometry it moves through stays here.
@@ -874,6 +917,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      */
     const closingId = useRef<string | null>(null)
     if (openId) closingId.current = openId
+    /**
+     * WHAT THE PANEL IS SHOWING RIGHT NOW, for handlers that run outside the
+     * render they were made in — a held hover commits from a timeout, and the
+     * `openId` it closed over is whatever the render that scheduled it saw.
+     */
+    const shownId = useRef<string | null>(null)
+    shownId.current = openId
     const panelWidgetId =
       openId ?? (rail.panelHidden ? null : closingId.current)
 
@@ -941,12 +991,20 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       if (leaveTimer.current) clearTimeout(leaveTimer.current)
       leaveTimer.current = null
     }
+    const cancelOpen = () => {
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+    }
     const scheduleLeave = () => {
       cancelLeave()
+      // Leaving the strip abandons a hover that had not opened yet — otherwise a
+      // pointer that has already gone somewhere else would still be answered.
+      cancelOpen()
       leaveTimer.current = setTimeout(() => setOpenId(null), PANEL_LEAVE_MS)
     }
-    const openFromAnchor = (id: string, anchor: HTMLElement) => {
-      cancelLeave()
+    /** Floats `id`'s widget out of the glyph at `anchor`, now. */
+    const showFromAnchor = (id: string, anchor: HTMLElement) => {
+      cancelOpen()
       const root = rootRef.current
       if (root) {
         const top =
@@ -957,8 +1015,34 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       // there before it fades in. Moving between glyphs while it is already open
       // is the opposite: there it GLIDES, and that glide is what says the panel
       // is one thing showing a different widget rather than two panels.
-      setPanelGlide(openId != null)
+      //
+      // Read off the REF, not the render's own `openId`: a held hover commits
+      // from a timeout, and the value it closed over is one the panel may have
+      // moved on from by the time it fires.
+      setPanelGlide(shownId.current != null)
       setOpenId(id)
+    }
+    const openFromAnchor = (
+      id: string,
+      anchor: HTMLElement,
+      instant = false
+    ) => {
+      cancelLeave()
+      cancelOpen()
+      // Already out. Nothing to open, nothing to measure — and re-committing it
+      // would tell the panel to glide to where it already is.
+      if (shownId.current === id) return
+      if (instant) {
+        showFromAnchor(id, anchor)
+        return
+      }
+      // HELD, NOT SCHEDULED-AND-FORGOTTEN: the anchor is measured when the hover
+      // is answered rather than when it started, so a strip that scrolled under a
+      // resting pointer still puts the panel level with its glyph.
+      openTimer.current = setTimeout(
+        () => showFromAnchor(id, anchor),
+        PANEL_OPEN_MS
+      )
     }
 
     return (
@@ -1241,6 +1325,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   open={openId === widget.id}
                   delayMs={rail.glyphDelayMs}
                   onOpen={openFromAnchor}
+                  onCancelOpen={cancelOpen}
                   onClose={() => setOpenId(null)}
                 />
               ))}
@@ -1361,6 +1446,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
+              // COLLAPSED THERE IS NO ORDER TO REARRANGE: the rail is a strip of
+              // glyphs with one card floating out of it, and that card is over the
+              // feed rather than in a column — dragging it moved a widget you
+              // could not see the neighbours of, by a gesture the strip gives no
+              // sign of offering.
+              //
+              // Frozen rather than opted out of edition, which would change the
+              // column's tree and rebuild every widget in it (see `disableDrag`).
+              disableDrag={collapsed}
               onReorder={
                 onReorderWidgets
                   ? (ids) => onReorderWidgets("right", ids)
