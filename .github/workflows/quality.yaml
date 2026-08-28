@@ -74,6 +74,8 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
+      - name: Check no CSS custom properties are animated through motion
+        run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts
   lint-react-native:
     needs: detect-changes
     # Prevents running on the release-please branch
