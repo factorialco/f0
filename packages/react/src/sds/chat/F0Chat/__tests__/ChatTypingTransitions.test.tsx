@@ -187,6 +187,20 @@ describe("typing indicator transitions", () => {
     expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
   })
 
+  // Same rule as the bubbles: the point aims at the avatar, and a DM has none.
+  it("points the dots bubble at the avatar only in a group", () => {
+    const dots = () =>
+      screen
+        .getByRole("status", { name: /writing/i })
+        .querySelector(".rounded-2xl")
+
+    const { rerender } = render(chatFor([MARIA]))
+    expect(dots()).not.toHaveClass("rounded-bl-2xs")
+
+    rerender(chatFor([MARIA], undefined, "group"))
+    expect(dots()).toHaveClass("rounded-bl-2xs")
+  })
+
   it("keeps the dots when someone ELSE's message lands while typing (group)", () => {
     const { rerender } = render(chatFor([MARIA], [HELLO], "group"))
     expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()

@@ -22,6 +22,9 @@ interface BubbleCornerOptions {
   isMine: boolean
   isFirstOfRun: boolean
   isLastOfRun: boolean
+  /** Whether an avatar sits in the gutter beside this row — see the tail
+   * corner in {@link bubbleCornerClass}. */
+  hasAvatar?: boolean
   layer?: BubbleCornerLayer
 }
 
@@ -58,6 +61,11 @@ const bubbleCornerClasses = {
  * sender's own side, which is how Telegram and Messages mark where a stack
  * ends. Only one bubble per run carries it.
  *
+ * That point only appears where an **avatar** sits in the gutter: it exists to
+ * aim at the face it belongs to. With nothing beside the bubble (a DM, or your
+ * own messages) it has nothing to point at and reads as a chipped corner, so
+ * the run simply ends on the base radius.
+ *
  * Exported so the highlight ring / hover surface in `ChatMessageItem`, and the
  * media cards in `ChatMessageAttachments`, follow the exact same shape.
  */
@@ -65,6 +73,7 @@ export const bubbleCornerClass = ({
   isMine,
   isFirstOfRun,
   isLastOfRun,
+  hasAvatar = false,
   layer = "inner",
 }: BubbleCornerOptions): string => {
   const profile = bubbleCornerClasses[layer]
@@ -77,7 +86,8 @@ export const bubbleCornerClass = ({
     profile.base,
     "transition-[border-radius] duration-150 motion-reduce:transition-none",
     !isFirstOfRun && topTailCorner,
-    isLastOfRun ? endCorner : bottomTailCorner
+    // Without an avatar the last of a run keeps the base radius: no point.
+    isLastOfRun ? hasAvatar && endCorner : bottomTailCorner
   )
 }
 
@@ -94,6 +104,7 @@ const ChatBubbleImpl = ({
   currentUserId,
   isFirstOfRun = true,
   isLastOfRun = true,
+  hasAvatar = false,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -107,6 +118,9 @@ const ChatBubbleImpl = ({
   /** Last message of a same-author run. When false, the bubble tucks in its
    * tail-side bottom corner so the run reads as one chained, stacked group. */
   isLastOfRun?: boolean
+  /** An avatar sits in the gutter beside this row — the only case where the
+   * run ends on a point (see `bubbleCornerClass`). */
+  hasAvatar?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
@@ -165,6 +179,7 @@ const ChatBubbleImpl = ({
     isMine,
     isFirstOfRun,
     isLastOfRun,
+    hasAvatar,
   })
 
   if (message.deleted) {

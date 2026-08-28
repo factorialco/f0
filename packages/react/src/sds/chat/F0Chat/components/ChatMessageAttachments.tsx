@@ -40,12 +40,15 @@ export const ChatMessageAttachments = ({
   isMine,
   isFirstOfRun = true,
   isLastOfRun = true,
+  hasAvatar = false,
 }: {
   message: F0ChatMessage
   isMine: boolean
   /** Run flags — the media cards tuck their tail-side corners like the bubble. */
   isFirstOfRun?: boolean
   isLastOfRun?: boolean
+  /** An avatar sits beside this row: only then does the run end on a point. */
+  hasAvatar?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const { openImagePreview } = useChatImagePreview()
@@ -96,6 +99,7 @@ export const ChatMessageAttachments = ({
     !isLastOfRun
   const imageCorners = bubbleCornerClass({
     isMine,
+    hasAvatar,
     isFirstOfRun,
     isLastOfRun: locations.length === 0 && !belowImages,
   })
@@ -108,6 +112,7 @@ export const ChatMessageAttachments = ({
   const videoCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
+      hasAvatar,
       isFirstOfRun: isFirstOfRun && images.length === 0 && index === 0,
       isLastOfRun: index === videoFiles.length - 1 && !belowVideos,
     })
@@ -116,6 +121,7 @@ export const ChatMessageAttachments = ({
   const locationCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
+      hasAvatar,
       isFirstOfRun:
         isFirstOfRun &&
         images.length === 0 &&
@@ -128,6 +134,7 @@ export const ChatMessageAttachments = ({
   const voiceCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
+      hasAvatar,
       isFirstOfRun:
         isFirstOfRun &&
         images.length === 0 &&
@@ -141,6 +148,7 @@ export const ChatMessageAttachments = ({
   const documentCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
+      hasAvatar,
       isFirstOfRun:
         isFirstOfRun &&
         images.length === 0 &&

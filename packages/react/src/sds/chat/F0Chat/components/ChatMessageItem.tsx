@@ -38,6 +38,7 @@ export const ChatMessageItem = ({
   belowGutter,
   isFirstOfRun = true,
   isLastOfRun = true,
+  hasAvatar = false,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -52,6 +53,9 @@ export const ChatMessageItem = ({
   isFirstOfRun?: boolean
   /** Last message of a same-author run — drives the bubble's chained corners. */
   isLastOfRun?: boolean
+  /** The gutter holds a real avatar, not a spacer: the only case where the run
+   * ends on a point (see `bubbleCornerClass`). */
+  hasAvatar?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
@@ -165,6 +169,7 @@ export const ChatMessageItem = ({
                   isMine,
                   isFirstOfRun,
                   isLastOfRun,
+                  hasAvatar,
                   layer: "outer",
                 }),
                 // Shadow AND radius transition together (single property list —
@@ -188,6 +193,7 @@ export const ChatMessageItem = ({
                   isMine={isMine}
                   isFirstOfRun={isFirstOfRun}
                   isLastOfRun={isLastOfRun}
+                  hasAvatar={hasAvatar}
                 />
               )}
               {hasBubble && (
@@ -202,6 +208,7 @@ export const ChatMessageItem = ({
                   // preview mirror the same corner).
                   isFirstOfRun={isFirstOfRun && !hasAttachments}
                   isLastOfRun={isLastOfRun}
+                  hasAvatar={hasAvatar}
                 />
               )}
             </div>

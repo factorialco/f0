@@ -149,11 +149,26 @@ describe("ChatBubble chained corners", () => {
   // A lone message is a run of one, so it ends a stack and carries the point.
   it("pulls in the bottom tail corner of a lone message (others, left)", () => {
     const { container } = render(
-      <ChatBubble message={makeMessage("hi")} isMine={false} />
+      <ChatBubble message={makeMessage("hi")} isMine={false} hasAvatar />
     )
     expect(container.querySelector(".rounded-bl-2xs")).toBeInTheDocument()
     expect(container.querySelector(".rounded-tl-sm")).not.toBeInTheDocument()
     expect(container.querySelector(".rounded-bl-sm")).not.toBeInTheDocument()
+  })
+
+  // The point aims at the face it belongs to. With an empty gutter — a DM, or
+  // your own side of any conversation — it has nothing to point at and reads
+  // as a chipped corner, so the run ends on the base radius instead.
+  it("ends the run on the base radius when no avatar sits beside it", () => {
+    const others = render(<ChatBubble message={makeMessage("hi")} isMine />)
+    expect(others.container.querySelector(".rounded-br-2xs")).toBeNull()
+    expect(others.container.querySelector(".rounded-br-sm")).toBeNull()
+
+    const mine = render(
+      <ChatBubble message={makeMessage("hi")} isMine={false} />
+    )
+    expect(mine.container.querySelector(".rounded-bl-2xs")).toBeNull()
+    expect(mine.container.querySelector(".rounded-bl-sm")).toBeNull()
   })
 
   it("tucks only the bottom for the first of a run (others, left)", () => {
@@ -191,6 +206,7 @@ describe("ChatBubble chained corners", () => {
         isMine={false}
         isFirstOfRun={false}
         isLastOfRun
+        hasAvatar
       />
     )
     expect(container.querySelector(".rounded-tl-sm")).toBeInTheDocument()
@@ -208,9 +224,15 @@ describe("ChatBubble chained corners", () => {
       first.container.querySelector(".rounded-tr-sm")
     ).not.toBeInTheDocument()
 
-    // Last of a run: top-right tucked, bottom-right squared.
+    // Last of a run: top-right tucked, bottom-right squared — the point only
+    // when something (an avatar) sits on that side.
     const last = render(
-      <ChatBubble message={makeMessage("hi")} isMine isFirstOfRun={false} />
+      <ChatBubble
+        message={makeMessage("hi")}
+        isMine
+        isFirstOfRun={false}
+        hasAvatar
+      />
     )
     expect(last.container.querySelector(".rounded-tr-sm")).toBeInTheDocument()
     expect(last.container.querySelector(".rounded-br-2xs")).toBeInTheDocument()
@@ -228,6 +250,7 @@ describe("ChatBubble chained corners", () => {
         isMine: false,
         isFirstOfRun: false,
         isLastOfRun: true,
+        hasAvatar: true,
         layer: "outer",
       }).split(" ")
     ).toEqual(expect.arrayContaining(["rounded-[22px]", "rounded-bl-2xs"]))
@@ -236,6 +259,7 @@ describe("ChatBubble chained corners", () => {
         isMine: true,
         isFirstOfRun: false,
         isLastOfRun: true,
+        hasAvatar: true,
         layer: "outer",
       }).split(" ")
     ).toEqual(expect.arrayContaining(["rounded-[22px]", "rounded-br-2xs"]))

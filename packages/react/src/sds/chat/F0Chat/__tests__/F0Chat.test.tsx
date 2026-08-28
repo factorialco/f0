@@ -543,13 +543,14 @@ describe("F0Chat", () => {
     expect(screen.getByTestId("chat-image-attachment")).not.toHaveClass(
       "rounded-bl-sm"
     )
-    // …and the caption, being the bottom of the stack AND the end of the run,
-    // is where the squared point lands.
+    // …and the caption is the bottom of the stack, so it tucks its top corner.
+    // No point on the bottom one: this is a DM, and nothing sits in the gutter
+    // for it to aim at.
     const caption = screen
       .getByText("Attachment caption")
       .closest(".rounded-2xl")
     expect(caption).toHaveClass("rounded-tl-sm")
-    expect(caption).toHaveClass("rounded-bl-2xs")
+    expect(caption).not.toHaveClass("rounded-bl-2xs")
   })
 
   it("gives a media-only message the run-end point on its card", () => {

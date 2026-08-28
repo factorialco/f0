@@ -126,7 +126,14 @@ export const ChatTypingBubble = ({
             }
           />
         ))}
-      <div className="flex w-fit items-center justify-center rounded-2xl rounded-bl-2xs border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4">
+      {/* The point only belongs where the avatar is — in a DM there's nothing
+          beside the bubble for it to aim at (see `bubbleCornerClass`). */}
+      <div
+        className={cn(
+          "flex w-fit items-center justify-center rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4",
+          isGroup && "rounded-bl-2xs"
+        )}
+      >
         <Dots animate={!reducedMotion && !leaving} />
       </div>
     </motion.div>

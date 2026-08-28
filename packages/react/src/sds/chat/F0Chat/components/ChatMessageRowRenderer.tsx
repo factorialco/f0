@@ -174,7 +174,7 @@ const ChatMessageRowRendererComponent = ({
   const bubbleGutter = showIdentity ? (
     isLastOfRun ? (
       <ChatUserHoverCard user={message.author}>
-        <span className="shrink-0 cursor-default flex items-end">
+        <span className="shrink-0 cursor-default flex items-end py-0.5">
           {avatarFor(message.author)}
         </span>
       </ChatUserHoverCard>
@@ -192,6 +192,7 @@ const ChatMessageRowRendererComponent = ({
       belowGutter={spacer}
       isFirstOfRun={isFirstOfRun}
       isLastOfRun={isLastOfRun}
+      hasAvatar={showIdentity}
     />
   )
 
