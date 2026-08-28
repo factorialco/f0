@@ -2043,7 +2043,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     variant?: ActionButtonVariant;
     /**
-     * The filters'counter value to display.
+     * A count shown in a neutral counter to the right of the label.
      */
     counterValue?: number;
     /**
@@ -3903,6 +3903,35 @@ export declare interface DashboardItemBase {
 }
 
 /**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * Every item type shows the same filter control in its header on hover or
+ * keyboard focus, while touch-only devices keep it available without hover.
+ * Applied filters are signalled by the trigger counter without exposing their
+ * selected values in the widget header.
+ *
+ * The picker holds a draft state; `onChange` fires only when the user applies,
+ * with cleared or incomplete entries stripped from the emitted state.
+ *
+ * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
+ * definition — so dashboard configs remain JSON-compatible.
+ */
+export declare interface DashboardItemFiltersConfig<ItemFilters extends DashboardItemFiltersDefinition = DashboardItemFiltersDefinition> {
+    /** Filter definitions available for this widget. */
+    filters: ItemFilters;
+    /** Currently applied filter state for this widget. */
+    value: DashboardItemFiltersState<ItemFilters>;
+    /** Called with the new state when the user applies changes. */
+    onChange: (value: DashboardItemFiltersState<ItemFilters>) => void;
+}
+
+/** Report-style definitions accepted by a dashboard item's filter control. */
+export declare type DashboardItemFiltersDefinition<Keys extends string = string> = FiltersDefinition<Keys>;
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export declare type DashboardItemFiltersState<Definitions extends DashboardItemFiltersDefinition> = FiltersState<Definitions>;
+
+/**
  * Minimal descriptor of a dashboard item's position and size.
  * Used by `onLayoutChange` so the consumer can reconcile layout
  * edits against its own source-of-truth config items.
@@ -4448,8 +4477,8 @@ export declare type DateNavigationOptions = {
 };
 
 declare type DateNavigationOptions_2 = {
-    granularity?: GranularityDefinitionKey[] | GranularityDefinitionKey;
-    defaultGranularity?: GranularityDefinitionKey;
+    granularity?: NavigationGranularityKey[] | NavigationGranularityKey;
+    defaultGranularity?: NavigationGranularityKey;
     min?: Date;
     max?: Date;
     presets?: DatePreset[];
@@ -4482,14 +4511,14 @@ export declare type DatePeriodsDefinition = {
     periods: DatePeriod[];
 };
 
-declare type DatePickerCompareTo = Partial<Record<GranularityDefinitionKey, CompareToDef[]>>;
+declare type DatePickerCompareTo = Partial<Record<NavigationGranularityKey, CompareToDef[]>>;
 
 declare interface DatePickerPopupProps {
     onSelect?: (value: DatePickerValue_2 | undefined) => void;
     value?: DatePickerValue_2;
     defaultValue?: DatePickerValue_2;
     presets?: DatePreset[];
-    granularities?: GranularityDefinitionKey[];
+    granularities?: NavigationGranularityKey[];
     minDate?: Date;
     maxDate?: Date;
     disabled?: boolean;
@@ -4518,7 +4547,7 @@ export declare type DatePickerValue = DatePickerValue_2;
 
 declare type DatePickerValue_2 = {
     value: DateRangeComplete | undefined;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 export declare interface DatePreset {
@@ -4606,7 +4635,7 @@ export declare type DateStringFormat = "default" | "long";
 declare type DateValue = {
     value: DateRangeComplete;
     valueString: string;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 declare type DefaultAction = BannerAction;
@@ -4990,6 +5019,7 @@ export declare const defaultTranslations: {
         readonly copy: "Copy";
         readonly paste: "Paste";
         readonly close: "Close";
+        readonly back: "Back";
         readonly collapse: "Collapse";
         readonly collapseItem: "Collapse {{title}}";
         readonly expand: "Expand";
@@ -5116,6 +5146,7 @@ export declare const defaultTranslations: {
             readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
+            readonly seeMoreChildren: "See more";
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
@@ -5552,6 +5583,7 @@ export declare const defaultTranslations: {
             readonly ofTotal: "of total";
             readonly total: "total";
             readonly target: "target";
+            readonly ofTarget: "of target";
             readonly ofRange: "of range";
             readonly fromPrevious: "from previous";
             readonly fromStage: "from {{stage}}";
@@ -5844,6 +5876,7 @@ export declare const defaultTranslations: {
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
+        readonly configureWidget: "Configure {{title}}";
         /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
         /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
@@ -6981,7 +7014,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenSuggestionsCollapsedByDefault, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -7081,26 +7114,59 @@ export declare type F0AiChatTextAreaProps = {
      *   single bar about two lines tall. Its popover opens downward, because up is
      *   now the text you are about to type.
      *
-     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. It also moves the
-     * send button onto the textarea's own line (at `sm`, centred on the text) and
-     * puts One's mark in front of the text. Neither is a feature bolted onto this
-     * prop — they are what make the placement possible and legible. The action row
-     * is full-width, so a chips row plus an action row inside one field is three
-     * stacked bands and the "single bar" is gone; with send trailing the text there
-     * are two, text then suggestions. The attachment, host (`toolbarStart`) and
-     * dictation controls keep their own row when the host enables them; with none
-     * of them the field is just the two bands.
+     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. The chips do not get
+     * a band of their own: they take the middle of the ACTION row, between the
+     * attachment/host controls and the dictation · send pair, and One's mark goes
+     * in front of the text. That is what keeps the field two bands tall — text,
+     * then one row of controls — instead of three. Because the chips share that
+     * line, they scroll sideways rather than wrapping, with the overflowing ends
+     * faded: ten groups cost the same height as three.
      *
-     * THE INLINE SEND FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
+     * THE SHAPE FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
      * themselves are welcome-screen-only as they always were, but a composer that
-     * put send back in the action row the moment the first message landed would
-     * change shape under the reader mid-conversation. `"inside"` therefore keeps
-     * the two-band bar for the whole thread; after the welcome screen it is simply
-     * a bar with no chips in it.
+     * dropped One's mark the moment the first message landed would change shape
+     * under the reader mid-conversation. `"inside"` therefore keeps the bar for the
+     * whole thread; after the welcome screen it is simply a bar with no chips in
+     * it.
      *
      * @default "above"
      */
     welcomeScreenSuggestionsPlacement?: "above" | "inside";
+    /**
+     * Start closed, and open when the reader focuses the input — with a motion
+     * reveal, the row growing into place.
+     *
+     * For hosts where the composer is not the thing the reader came for — a Home
+     * hero, say — so the bar sits quiet until it is addressed, and the starter
+     * prompts arrive at the moment they are useful.
+     *
+     * ⚠️ WITH `"inside"` THIS COLLAPSES THE WHOLE CONTROL ROW, not just the chips:
+     * the field becomes ONE LINE — One's mark, the text, then dictation and send
+     * trailing it at `sm` — and the chips, attachment and host controls arrive with
+     * the row on focus. A row emptied of its chips would still be 56px of padding
+     * around two buttons, which is not a quiet bar; it is the same two-band field
+     * with a hole in it. Send comes along because a bar you cannot send from is not
+     * a composer, and dictation because talking is a way to start a prompt without
+     * typing one. With the row `"above"`, only that row collapses — the field below
+     * it is a plain composer and does not change shape.
+     *
+     * FOCUS IS TRACKED ON THE WHOLE COMPOSER, not on the textarea: it closes when
+     * focus leaves the field AND everything in it, including the suggestion panel
+     * (which Radix portals outside the form). Closing on the textarea's own blur
+     * would close the row the moment a chip took focus, which is every way of
+     * picking one. Three things hold it open regardless of focus: anything already
+     * typed or attached (a half-written prompt with no visible way to send it would
+     * be a trap — and a host that forwards a dropped file can put one there without
+     * the textarea ever being focused), and a recording in flight (its cancel ·
+     * confirm pair lives in the row).
+     *
+     * ⚠️ It also suppresses the composer's own autofocus-on-mount, which would
+     * otherwise open everything before the reader had touched anything and make
+     * this prop a no-op. A collapsed composer starts unfocused.
+     *
+     * @default false
+     */
+    welcomeScreenSuggestionsCollapsedByDefault?: boolean;
     /**
      * Cards rendered as a grid below the composer on the fullscreen welcome
      * screen. Each card carries its own `onClick`; the host decides the behavior.
@@ -7582,7 +7648,7 @@ export declare interface F0AlertProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AnalyticsDashboard: {
-    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
+    <Filters extends FiltersDefinition_2 = FiltersDefinition_2>({ filters, presets, defaultFilters, filtersValue, onFiltersChange, items, itemFilters, editMode, onLayoutChange, enableExport, exportFilename, onExportReady, resetKey, onTransformChart, onAskAi, onAskAiTarget, navigationFilters, filtersLoading, }: F0AnalyticsDashboardProps_2<Filters>): JSX_2.Element;
     displayName: string;
 };
 
@@ -7598,6 +7664,17 @@ export declare interface F0AnalyticsDashboardAskAiTarget {
     title: string;
     point?: F0AnalyticsDashboardPointClick;
 }
+
+/**
+ * A built-in Ask One interaction together with the exact quote F0 staged.
+ *
+ * The quote object is kept by the chat composer until it is submitted or
+ * dismissed. Hosts can therefore associate hidden analytical context with
+ * this exact interaction without replacing F0's quote/open/focus behavior.
+ */
+export declare type F0AnalyticsDashboardAskAiTargetWithQuote = F0AnalyticsDashboardAskAiTarget & {
+    quote: PendingQuote;
+};
 
 /** A point selected from either the chart canvas or its keyboard companion. */
 export declare type F0AnalyticsDashboardPointClick = Omit<F0DataChartPointClick, "source"> & {
@@ -7654,6 +7731,14 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      */
     items: DashboardItem<Filters>[];
     /**
+     * Resolve the per-widget filter configuration for each dashboard item.
+     *
+     * Return a config to show a filter icon in that widget's header (next to
+     * the fullscreen and menu buttons) opening a compact filter popover; return
+     * `undefined` to hide the control for that item.
+     */
+    itemFilters?: (item: DashboardItem<Filters>) => DashboardItemFiltersConfig | undefined;
+    /**
      * When true, enables drag-and-drop reordering, resize, and delete controls.
      */
     editMode?: boolean;
@@ -7701,6 +7786,19 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      * them apart by anything other than its presence.
      */
     onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void;
+    /**
+     * Observes built-in Ask One interactions without replacing them.
+     *
+     * Called immediately before F0 stages the quoted widget or point in the
+     * mounted chat. `quote` is the same object the composer later submits or
+     * dismisses, so a host can bind structured analytical context to the exact
+     * pending interaction and clean it up by quote identity.
+     *
+     * This observer does not make Ask One available by itself. A mounted,
+     * enabled AI chat still owns the built-in behavior; use `onAskAi` instead
+     * when the host must replace that behavior entirely.
+     */
+    onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void;
     /**
      * Navigation filter definitions (e.g. date-navigator).
      * Rendered above the grid alongside the regular filter bar.
@@ -8955,6 +9053,33 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     /** Stack all series into a single bar per category. @default false */
     stacked?: boolean;
     /**
+     * Draw the stretch of a bar that ran past its `target` in a darker shade of
+     * the bar's own colour, split at the target.
+     *
+     * Left off, a target only shows as the faded ghost the bar has yet to reach,
+     * so a bar that beat its target looks the same as one that landed exactly on
+     * it — the reader has to eye its height against the ghosts beside it. Turn it
+     * on wherever passing the target is itself the news: attainment against a
+     * quota, a goal, a budget.
+     *
+     * Ignored by points with no target, and by negative values — "past the
+     * target" has no single reading when the bar grows downwards.
+     * @default false
+     */
+    highlightOverachievement?: boolean;
+    /**
+     * Add the share of the target the bar reached to its tooltip, under the
+     * target row (e.g. "108.1% of target").
+     *
+     * Opt-in: the percentage answers "how did this do against its target", which
+     * is the question on a quota or a goal, and noise on a chart where the target
+     * is a reference line the reader is not scoring against.
+     *
+     * The percentage is `value / target`, the same two numbers the bar draws.
+     * @default false
+     */
+    showTargetProgress?: boolean;
+    /**
      * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
      * labels if the widest value in that category doesn't fit the bar. The whole
      * category drops together (all-or-nothing), so a tight chart never shows a
@@ -9674,7 +9799,9 @@ export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicke
 
 declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, selectOnCellOnly, ...inputProps }: F0DatePickerProps): JSX_2.Element;
 
-export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
+export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
+    /** The picker has no `periods` prop, so it can only offer the calendar granularities. */
+    granularities?: GranularityDefinitionKey[];
     showIcon?: boolean;
     /** Controls how the selected date is displayed in the input. Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy. */
     displayFormat?: DateStringFormat;
@@ -12387,62 +12514,6 @@ export declare const F0Select: <T extends string = string, R = unknown>(props: F
 }) => React.ReactElement;
 
 /**
- * Base props shared across all F0Select variants
- */
-declare type F0SelectBaseProps<T extends string, R = unknown> = {
-    withApplySelection?: boolean;
-    applySelectionLabel?: string;
-    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
-    children?: React.ReactNode;
-    open?: boolean;
-    showSearchBox?: boolean;
-    searchBoxPlaceholder?: string;
-    onSearchChange?: (value: string) => void;
-    searchValue?: string;
-    onOpenChange?: (open: boolean) => void;
-    /**
-     * Called when the user changes the in-dropdown filters (requires a `source`
-     * with filter definitions). Lets consumers keep an external context — e.g.
-     * detail-page navigation — in sync with what the dropdown is showing.
-     */
-    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
-    searchEmptyMessage?: string;
-    className?: string;
-    actions?: Action_2[];
-    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
-    onCreate?: (value: string) => Promise<void> | void;
-    /** Container element to render the portal content into */
-    portalContainer?: HTMLElement | null;
-    /**
-     * When true, renders the select as a static list without the input trigger.
-     * Only displays the dropdown content with max height, border and scroll.
-     */
-    asList?: boolean;
-    /**
-     * When true, shows a selection preview panel on the right side of the dropdown
-     * for multi-select mode. When false and filters are present, filters use compact mode.
-     * @default false
-     */
-    showPreview?: boolean;
-    /**
-     * When true, preserves selections when the dataset changes (search, filters,
-     * or sortings). Useful for picker components where the user searches and
-     * filters to find items to add to an existing selection.
-     *
-     * @default true
-     */
-    preserveSelectionOnDatasetChange?: boolean;
-    /**
-     * When true, the dropdown sizes to its widest option (never narrower than
-     * the trigger) instead of the default 20rem minimum. Useful for compact
-     * value pickers like month/year selectors.
-     *
-     * @default false
-     */
-    fitContentWidth?: boolean;
-} & WithDataTestIdProps;
-
-/**
  * F0 config options specific to select fields
  *
  * Supports either:
@@ -12510,6 +12581,17 @@ declare interface F0SelectConfigWithSource<T extends SelectValueType = string, R
     options?: never;
 }
 
+declare type F0SelectDataProps<T extends string, R = unknown> = {
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
+    options?: never;
+} | {
+    source?: never;
+    mapOptions?: never;
+    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T, unknown>[];
+};
+
 /**
  * Select field with all properties for rendering
  * Includes properties derived from Zod schema
@@ -12520,6 +12602,51 @@ export declare type F0SelectField = F0BaseField & F0SelectConfig & {
     clearable?: boolean;
     /** Conditional rendering based on another field's value */
     renderIf?: SelectFieldRenderIf;
+};
+
+declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
+    /** Standard form-field presentation. This remains the default. */
+    variant?: "field";
+    withApplySelection?: boolean;
+    applySelectionLabel?: string;
+    children?: React.ReactNode;
+    className?: string;
+    /**
+     * When true, renders the select as a static list without the input trigger.
+     * Only displays the dropdown content with max height, border and scroll.
+     */
+    asList?: boolean;
+    /**
+     * When true, shows a selection preview panel on the right side of the dropdown
+     * for multi-select mode. When false and filters are present, filters use compact mode.
+     * @default false
+     */
+    showPreview?: boolean;
+} & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
+    /**
+     * Compact borderless presentation for single-value controls embedded in rows.
+     * The required label is used as the accessible name and is not shown visually.
+     */
+    variant: "inline";
+    size?: never;
+    disableSelectAll?: never;
+    withApplySelection?: never;
+    applySelectionLabel?: never;
+    children?: never;
+    className?: never;
+    asList?: never;
+    showPreview?: never;
+    required?: never;
+    loading?: never;
+    hideLabel?: never;
+    labelIcon?: never;
+    icon?: never;
+    name?: never;
+    error?: never;
+    status?: never;
+    hint?: never;
 };
 
 /**
@@ -12564,22 +12691,54 @@ export declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R>
     type: "separator";
 };
 
+/** Props shared by the field and inline select variants. */
+declare type F0SelectPopupProps<T extends string, R = unknown> = {
+    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
+    open?: boolean;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    onSearchChange?: (value: string) => void;
+    searchValue?: string;
+    onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
+    searchEmptyMessage?: string;
+    actions?: Action_2[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
+    /** Container element to render the portal content into */
+    portalContainer?: HTMLElement | null;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false for field selects; true for inline selects
+     */
+    fitContentWidth?: boolean;
+} & WithDataTestIdProps;
+
 /**
  * Select component for choosing from a list of options.
  *
  * @template T - The type of the emitted value
  * @template R - The type of the record/item data (used with data source)
  */
-export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T, R> & // Single select not clearable
-({
-    clearable?: false;
-    multiple?: false;
-    value?: T;
-    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
-    onSelectItems?: never;
-} | {
+export declare type F0SelectProps<T extends string, R = unknown> = (F0SelectFieldProps<T, R> | F0SelectInlineProps<T, R>) & F0SelectDataProps<T, R>;
+
+declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSingleSelectionProps<T, R> | {
     clearable: true;
     multiple?: false;
     value?: T;
@@ -12609,16 +12768,17 @@ export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseP
      * When enabled, the allSelected state will always be false and users must select items individually.
      */
     disableSelectAll?: boolean;
-}) & ({
-    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
-    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
-    options?: never;
-} | {
-    source?: never;
-    mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+};
+
+declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
+    clearable?: false;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
+    onSelectItems?: never;
+};
 
 export declare type F0SelectTagProp = string | {
     type: "dot";
@@ -12637,6 +12797,8 @@ export declare type F0SelectTagProp = string | {
     text: string;
     variant: StatusVariant;
 };
+
+export declare type F0SelectVariant = (typeof selectVariants)[number];
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -13909,7 +14071,7 @@ export declare function getEmojiLabel(emoji: string): string;
  */
 export declare function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefined;
 
-export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
+export declare const getGranularityDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinition;
 
 /**
  * Get granularity definitions with week granularity configured with the specified weekStartsOn.
@@ -13923,7 +14085,7 @@ export declare const getGranularityDefinition: (granularityKey: GranularityDefin
  */
 export declare function getGranularityDefinitions(options?: WeekStartsOn | GranularityDefinitionsOptions): Record<string, GranularityDefinition>;
 
-export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
+export declare const getGranularitySimpleDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinitionSimple;
 
 /**
  * Non-hook version for extracting definition outside of React components.
@@ -13983,7 +14145,6 @@ export declare const granularityDefinitions: {
     readonly halfyear: GranularityDefinition;
     readonly year: GranularityDefinition;
     readonly range: GranularityDefinition;
-    readonly periods: GranularityDefinition;
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
@@ -14050,6 +14211,29 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     getNodeId?: (record: R) => string;
     /** Number of children a node has. A node is expandable when this is `> 0`. */
     getChildrenCount: (record: R) => number;
+    /**
+     * Whether this record's children render as a vertical stack of compact rows
+     * directly under it, instead of the default horizontal fan-out. Use it for
+     * children that read as a list belonging to the record rather than as
+     * branches in their own right — job levels under a role, plan tiers under a
+     * product. A stacked group reserves no horizontal space, so the record's
+     * siblings close in around it.
+     *
+     * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+     * all of them); a group with an expandable child keeps the normal fan-out.
+     * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+     * `avatar` / `subtitle` / `tags` do not apply to them.
+     */
+    stackNodes?: (record: R) => boolean;
+    /**
+     * Trailing content for a stacked row — a count or a small icon button.
+     * Rendered at the row's trailing edge; clicks inside it do not select the
+     * node. Ignored for records that are not rendered as stacked rows.
+     *
+     * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+     * would promise a behaviour the graph does not have.
+     */
+    stackedTrailing?: (record: R) => ReactNode;
     /**
      * Returns the filters that, applied to the source `dataAdapter`, fetch the
      * direct children of `parentId`. `parentId === null` must return the roots.
@@ -15508,6 +15692,16 @@ declare type NavigationFiltersState<Definition extends Record<string, Navigation
  * @template T - The type of the filter value
  */
 declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition ? DateValue : T extends undefined ? undefined : never;
+
+/**
+ * The keys a date navigation can be set to. `periods` is not a member of the
+ * static record — it has no definition until a consumer supplies its ranges —
+ * so it widens only the types that can actually render it. Keeping it out of
+ * `GranularityDefinitionKey` is what stops it leaking into every exhaustive map
+ * over that key, in places (form-field presets, compare-to) where it can do
+ * nothing.
+ */
+export declare type NavigationGranularityKey = GranularityDefinitionKey | "periods";
 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
@@ -17106,6 +17300,13 @@ export declare interface ResolvedStepAnswer {
 }
 
 /**
+ * The definition behind a key with no consumer data to build it from. Only
+ * `periods` has one: its empty definition renders the "no periods" state, which
+ * is what a periods value without periods means.
+ */
+export declare const resolveGranularityDefinition: (key: NavigationGranularityKey) => GranularityDefinition;
+
+/**
  * Normalizes the three `fetchItemNeighbors` return channels (sync value,
  * Promise, Observable of PromiseState) into a single one-shot Promise.
  *
@@ -17571,6 +17772,8 @@ export declare const selectSizes: readonly ["sm", "md"];
  * Value types supported by select fields
  */
 declare type SelectValueType = string | number;
+
+export declare const selectVariants: readonly ["field", "inline"];
 
 /**
  * Writes a data collection's current state onto an existing query string,
@@ -20298,5 +20501,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }

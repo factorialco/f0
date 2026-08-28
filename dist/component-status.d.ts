@@ -379,3 +379,8 @@ declare namespace F0GraphExpanderWrapperInner {
 declare namespace F0GraphCollapserWrapperInner {
     var displayName: string;
 }
+
+
+declare namespace F0GraphStackGroupWrapperInner {
+    var displayName: string;
+}

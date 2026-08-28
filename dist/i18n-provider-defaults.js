@@ -360,6 +360,7 @@ const e = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -486,6 +487,7 @@ const e = {
       viewSelectorLabel: "Select view"
     },
     table: {
+      seeMoreChildren: "See more",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
@@ -945,6 +947,7 @@ const e = {
       ofTotal: "of total",
       total: "total",
       target: "target",
+      ofTarget: "of target",
       ofRange: "of range",
       fromPrevious: "from previous",
       fromStage: "from {{stage}}"
@@ -1237,6 +1240,7 @@ const e = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
+    configureWidget: "Configure {{title}}",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
