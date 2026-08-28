@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -59,6 +59,52 @@ describe("StatusCell", () => {
 
     const srText = screen.getByText(
       "The call ended before all information was collected"
+    )
+    expect(srText).toHaveClass("sr-only")
+  })
+
+  it("should render a structured tooltip with title, body and bullets", async () => {
+    const args: StatusCellValue = {
+      status: "critical",
+      label: "3",
+      tooltip: {
+        title: "3 alerts",
+        description: "This row needs a look before it can be submitted.",
+        items: [
+          { title: "Not eligible", description: "Hired after the cut-off." },
+          "Missing effective date",
+        ],
+      },
+    }
+
+    render(StatusCell(args))
+
+    await userEvent.hover(screen.getByText("3"))
+
+    const tooltip = await waitFor(() => screen.getByRole("tooltip"))
+    expect(tooltip).toHaveTextContent("3 alerts")
+    expect(tooltip).toHaveTextContent(
+      "This row needs a look before it can be submitted."
+    )
+    expect(tooltip).toHaveTextContent("Not eligible Hired after the cut-off.")
+    expect(within(tooltip).getAllByRole("listitem")).toHaveLength(2)
+  })
+
+  it("should flatten a structured tooltip for screen readers", () => {
+    const args: StatusCellValue = {
+      status: "critical",
+      label: "3",
+      tooltip: {
+        title: "3 alerts",
+        description: "Needs a look.",
+        items: [{ title: "Not eligible", description: "Hired late." }],
+      },
+    }
+
+    render(StatusCell(args))
+
+    const srText = screen.getByText(
+      "3 alerts. Needs a look. Not eligible Hired late."
     )
     expect(srText).toHaveClass("sr-only")
   })

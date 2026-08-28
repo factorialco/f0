@@ -3,7 +3,7 @@
  * Used for visual representation of status or type indicators.
  */
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { TooltipWrapper } from "@/lib/tooltip-wrapper"
+import { TooltipWrapper, type TooltipValue } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 
 import { tableDisplayClassNames } from "../../const"
@@ -12,7 +12,11 @@ import { ValueDisplayRendererContext } from "../../renderers"
 interface IconValue {
   icon: IconType
   label: string
-  tooltip?: string
+  /**
+   * A string is shown as a single title line. Pass an object for a title, a
+   * body and a bulleted list.
+   */
+  tooltip?: TooltipValue
   hideLabel?: boolean
 }
 export type IconCellValue = IconValue

@@ -20,26 +20,34 @@ import {
 import { cn } from "../../../lib/utils"
 import { Shortcut } from "@/ui/Shortcut"
 
+/**
+ * One bullet of a tooltip's list. The object form gets a semibold lead so a
+ * list of named things (alerts, broken rules) reads as a list rather than a run
+ * of sentences.
+ */
+export type TooltipListItem = string | { title: string; description?: string }
+
+/**
+ * The copy a tooltip shows. At least one of the three must be present — a
+ * tooltip with nothing to say never opens.
+ */
+export type TooltipCopyProps =
+  | { label: string; description?: string; items?: TooltipListItem[] }
+  | { label?: string; description: string; items?: TooltipListItem[] }
+  | { label?: string; description?: string; items: TooltipListItem[] }
+
 type TooltipInternalProps = {
   children: React.ReactNode
   shortcut?: ComponentProps<typeof Shortcut>["keys"]
   delay?: number
   instant?: boolean
   onOpen?: () => void
-} & (
-  | {
-      label: string
-      description?: string
-    }
-  | {
-      label?: string
-      description: string
-    }
-)
+} & TooltipCopyProps
 
 export function TooltipInternal({
   label,
   description,
+  items,
   children,
   shortcut,
   instant = false,
@@ -56,7 +64,7 @@ export function TooltipInternal({
    * whose text can be empty keep it mounted — unmounting it instead changes the
    * element type above the trigger, and React then remounts the trigger.
    */
-  const hasContent = Boolean(label || description || shortcut)
+  const hasContent = Boolean(label || description || items?.length || shortcut)
 
   const clearOpenTimeout = useCallback(() => {
     if (openTimeoutRef.current) {
@@ -138,6 +146,24 @@ export function TooltipInternal({
               </div>
               {description && (
                 <p className="font-normal">{description.toString()}</p>
+              )}
+              {items && items.length > 0 && (
+                <ul className="m-0 flex list-disc flex-col gap-0.5 pl-4 font-normal">
+                  {items.map((item, index) => (
+                    <li
+                      key={`${index}-${typeof item === "string" ? item : item.title}`}
+                    >
+                      {typeof item === "string" ? (
+                        item
+                      ) : (
+                        <>
+                          <span className="font-semibold">{item.title}</span>
+                          {item.description && <> {item.description}</>}
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </TooltipContent>
