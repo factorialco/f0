@@ -439,12 +439,37 @@ describe("WidgetContainer", () => {
     test("skips the locked widget", () => {
       const { container } = zeroRender(
         <WidgetContainer
-          widgets={[widget("clock", { locked: true }), widget("events")]}
+          widgets={[
+            widget("clock", { locked: true }),
+            widget("events"),
+            widget("tasks"),
+          ]}
           onReorder={() => {}}
         />
       )
 
-      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(1)
+      // The two free cards carry the grab cursor; the pinned one does not.
+      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(2)
+    })
+
+    /**
+     * A COLUMN WITH ONE FREE CARD HAS ONE LEGAL ORDER. Its card used to get the
+     * grab cursor and a drag that could only ever end where it began — the pins
+     * cannot give up their slots, so there was nowhere for it to go.
+     */
+    test("is not offered when only one widget can move", () => {
+      const { container } = zeroRender(
+        <WidgetContainer
+          widgets={[
+            widget("clock", { locked: true }),
+            widget("payroll", { locked: true }),
+            widget("events"),
+          ]}
+          onReorder={() => {}}
+        />
+      )
+
+      expect(container.querySelectorAll(".cursor-grab")).toHaveLength(0)
     })
 
     test("is not offered in a disableEdition column", () => {
