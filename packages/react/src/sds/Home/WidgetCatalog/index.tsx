@@ -353,6 +353,18 @@ export function WidgetCatalog({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [step, setStep] = useState<WidgetCatalogStep>("pick")
   /**
+   * WHETHER A STEP HAS BEEN TAKEN since the picker opened. The column slides
+   * when you move between the steps, and ONLY then: opening the picker is the
+   * dialog's own entrance, and a list sliding in behind it read as a second
+   * animation competing with it rather than as the list arriving.
+   */
+  const [stepped, setStepped] = useState(false)
+  /** Moving between the steps — the one thing that makes the column slide. */
+  const goToStep = (next: WidgetCatalogStep) => {
+    setStepped(true)
+    setStep(next)
+  }
+  /**
    * The params being filled in, KEPT AGAINST THE WIDGET THEY BELONG TO: stepping
    * back to the list and forward again finds the form as it was left, while
    * landing on another widget starts from that widget's own defaults rather than
@@ -460,6 +472,7 @@ export function WidgetCatalog({
   useEffect(() => {
     if (isOpen) {
       setStep("pick")
+      setStepped(false)
       setDraft(null)
     }
   }, [isOpen])
@@ -509,7 +522,7 @@ export function WidgetCatalog({
               disabled: !selected,
               onClick: () => {
                 if (!selected) return
-                if (schema) setStep("configure")
+                if (schema) goToStep("configure")
                 else onAdd(selected.id)
               },
             }
@@ -528,7 +541,7 @@ export function WidgetCatalog({
                 // widget shouldn't cost the value typed a moment before, and a
                 // half-filled form is still the form you were filling.
                 setDraft({ id: selected.id, params: getValues() })
-                setStep("pick")
+                goToStep("pick")
               },
             }
           : undefined
@@ -540,14 +553,21 @@ export function WidgetCatalog({
             from the right going forward, from the left coming back) while the
             preview beside it holds still: the widget you were looking at is the
             widget you are now configuring, and it should not have to re-arrive
-            to say so. */}
+            to say so.
+
+            The slide belongs to the STEP, not to the picker: on the way in the
+            dialog has an entrance of its own, and the list is simply already
+            there (`stepped`). */}
         <div
           key={step}
           className={cn(
             "flex min-h-0 flex-col gap-2",
             asideClassName,
-            "duration-300 ease-out animate-in fade-in motion-reduce:animate-none",
-            configuring ? "slide-in-from-right-4" : "slide-in-from-left-4"
+            stepped &&
+              cn(
+                "duration-300 ease-out animate-in fade-in motion-reduce:animate-none",
+                configuring ? "slide-in-from-right-4" : "slide-in-from-left-4"
+              )
           )}
         >
           {configuring && selected && schema ? (

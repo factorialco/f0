@@ -316,6 +316,14 @@ describe("WidgetCatalog", () => {
     /** The dialog's own CTA, which changes what it says between the steps. */
     const cta = (name: string) => screen.getByRole("button", { name })
 
+    /**
+     * THE STEP COLUMN around something in it — the box the slide is put on. The
+     * form's own scroll box shares its `min-h-0` but is not a flex column, so
+     * the pair of classes names one element either way.
+     */
+    const stepColumn = (inside: HTMLElement) =>
+      inside.closest(".min-h-0.flex-col") as HTMLElement
+
     const startConfiguring = async () => {
       await userEvent.click(cta("Continue"))
       await waitFor(() =>
@@ -384,6 +392,35 @@ describe("WidgetCatalog", () => {
       // The form refuses on the widget's OWN schema — nothing here says which
       // params are mandatory, and nothing here should.
       await waitFor(() => expect(onAdd).not.toHaveBeenCalled())
+    })
+
+    test("opening the picker doesn't slide the list in", async () => {
+      render({ widgets: withParams, groups: undefined })
+
+      // The dialog has an entrance of its own; a column sliding in behind it
+      // reads as a second animation competing with it, not as the list
+      // arriving. The slide belongs to the STEP.
+      expect(stepColumn(screen.getByRole("searchbox"))).not.toHaveClass(
+        "animate-in"
+      )
+    })
+
+    test("a step you take does slide, each way", async () => {
+      render({ widgets: withParams, groups: undefined })
+      await startConfiguring()
+
+      expect(stepColumn(screen.getByLabelText(/Rows/))).toHaveClass(
+        "animate-in",
+        "slide-in-from-right-4"
+      )
+
+      await userEvent.click(cta("Back"))
+
+      // Coming back, from the other side.
+      expect(stepColumn(screen.getByRole("searchbox"))).toHaveClass(
+        "animate-in",
+        "slide-in-from-left-4"
+      )
     })
 
     test("Back returns to the list, keeping the values you typed", async () => {
