@@ -1386,9 +1386,17 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             className={cn(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
-              // Above the feed it floats over, and opaque: the widget behind it
-              // must not read through the card.
-              railInPanel && "absolute z-10 rounded-xl bg-f1-background",
+              // Above the feed it floats over, ON ITS OWN SURFACE. The card's
+              // 5% wash is what it wears in the column, so the panel is the same
+              // object that was in the rail rather than a solid tile standing in
+              // for it — which is the whole claim the genie makes.
+              //
+              // FROSTED, not merely translucent. At 5% over live feed content the
+              // panel's rows and the shortcuts underneath were two layers of text
+              // in one place; the blur is what separates them, and it is why this
+              // can keep the card's surface at all. An opaque backdrop was the
+              // other way to make it legible, and it cost the card its own look.
+              railInPanel && "absolute z-10 rounded-xl backdrop-blur-md",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
               rail.mode === "retracting" && "relative z-10"

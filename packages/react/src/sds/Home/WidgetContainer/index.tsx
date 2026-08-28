@@ -908,11 +908,18 @@ export function WidgetContainer({
               the real card's DOM slot and transform in one frame. */}
           <DragOverlay dropAnimation={DROP_ANIMATION}>
             {activeId ? (
-              // Solid backdrop: Card's own background is translucent, and the
-              // copy rides over whatever the column shows beneath it.
+              // NO BACKDROP OF ITS OWN: the copy keeps the card's translucent
+              // surface, so what the pointer carries looks like the widget rather
+              // than a solid tile of it.
+              //
+              // Frosted for the same reason the floating panel is — the card's
+              // own wash is 5%, and the card the ghost is over would otherwise
+              // read straight through it. What it is over is always another card
+              // in this column: `verticalOnly` discards the horizontal component,
+              // so the ghost never leaves the column it was picked up from.
               <div
                 ref={mountGhost}
-                className="h-full w-full cursor-grabbing rounded-xl bg-f1-background [&_*]:shadow-none"
+                className="h-full w-full cursor-grabbing rounded-xl backdrop-blur-md [&_*]:shadow-none"
               />
             ) : null}
           </DragOverlay>
