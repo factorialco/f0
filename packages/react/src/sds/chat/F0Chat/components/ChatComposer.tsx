@@ -41,12 +41,13 @@ import {
 } from "../providers/ChatUIProvider"
 import { useF0Chat, useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
-  type F0ChatAttachment,
+  type F0ChatComposableAttachment,
   type F0ChatAttachSource,
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
 } from "../types"
 import { attachedKindOf, formatFileSize } from "../utils/attachments"
+import { chatPermission } from "../utils/capabilities"
 import {
   EASE_OUT_SWIFT,
   layoutTransition,
@@ -73,7 +74,7 @@ type UploadingAttachment = {
 /** An attachment shown immediately from a local URL while its upload resolves. */
 type PendingAttachment =
   | UploadingAttachment
-  | { id: string; status: "ready"; attachment: F0ChatAttachment }
+  | { id: string; status: "ready"; attachment: F0ChatComposableAttachment }
 
 const isImagePending = (att: PendingAttachment): boolean =>
   att.attachment.kind === "image"
@@ -117,7 +118,8 @@ export const ChatComposer = (): ReactNode => {
   } = useF0Chat()
   // Uploads need both the runtime hook AND the capability (a frozen channel
   // can forbid attachments even when the transport could upload them).
-  const canUpload = !!uploadFiles && capabilities?.canUpload !== false
+  const canUpload =
+    !!uploadFiles && chatPermission("canUpload", channel.type, capabilities)
   const { replyTo, setReplyTo, registerComposerFocus } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
@@ -562,11 +564,16 @@ export const ChatComposer = (): ReactNode => {
     setCursorPosition(editingMessage.body.length)
     setAttachments((prev) => {
       releaseUploadingPreviews(prev)
-      return (editingMessage.attachments ?? []).map((attachment) => ({
-        id: `att-${attachmentSeq.current++}`,
-        status: "ready" as const,
-        attachment,
-      }))
+      // Cards can't be composed, so they can't come back through the composer
+      // either. Unreachable in practice — a message carrying one isn't
+      // editable (see `canEditAction`) — but it keeps the state honest.
+      return (editingMessage.attachments ?? [])
+        .filter((attachment) => attachment.kind !== "card")
+        .map((attachment) => ({
+          id: `att-${attachmentSeq.current++}`,
+          status: "ready" as const,
+          attachment,
+        }))
     })
     const entries: MentionEntry[] = [
       ...(editingMessage.mentions ?? []).map((m) => ({

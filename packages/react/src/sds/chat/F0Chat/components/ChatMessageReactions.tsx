@@ -4,6 +4,7 @@ import { type ReactNode } from "react"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useChatPermission } from "../hooks/useChatPermission"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
@@ -26,11 +27,11 @@ export const ChatMessageReactions = ({
 }): ReactNode => {
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
-  const { toggleReaction, loadReactionUsers, capabilities } = useF0ChatStable()
+  const { toggleReaction, loadReactionUsers } = useF0ChatStable()
   const emit = useF0ChatEmit()
   // Existing pills stay VISIBLE without the capability (the data is real) —
   // only adding/toggling is disabled.
-  const canReact = capabilities?.canReact !== false
+  const canReact = useChatPermission("canReact")
 
   const react = (emoji: string, source: F0ChatReactionSource) => {
     emitReactionToggle(emit, message, emoji, source)

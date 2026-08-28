@@ -4,6 +4,7 @@ import { type ReactNode, memo, useEffect, useState } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 
+import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { rowEntryTransition } from "../utils/chat-motion"
 import { type ChatRow } from "../utils/grouping"
@@ -68,6 +69,7 @@ const ChatMessageRowRendererComponent = ({
   /** Typing row only: streak-start gate for the bubble's entry pop. */
   typingEntry?: TypingEntryState
 }): ReactNode => {
+  const channelType = useF0ChatChannelType()
   // No per-row bottom padding: the transcript's bottom breathing room lives on
   // the viewport (constant), so being/stopping-being the last row never
   // changes a row's height (stable measurements = no send-time churn).
@@ -108,7 +110,13 @@ const ChatMessageRowRendererComponent = ({
     // Centered, author-less rows — same fast opacity-only entry as messages.
     const inner =
       row.type === "separator" ? (
-        <DateTimeSeparator at={row.at} padded />
+        // On a noticeboard the separator is the ONLY clock: the posts are
+        // seeded, so they don't carry one of their own (see ChatMessageMeta).
+        <DateTimeSeparator
+          at={row.at}
+          padded
+          withTime={channelType === "announcement"}
+        />
       ) : (
         <ChatSystemMessage message={row.message} />
       )

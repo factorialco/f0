@@ -549,6 +549,9 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    // Shown where the composer would be on a read-only channel. Hosts that can
+    // name the poster override it per channel (`channel.readOnlyNotice`).
+    readOnly: "You can't send messages in this conversation",
     online: "Online",
     muted: "Muted",
     mute: "Mute",
