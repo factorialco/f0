@@ -31,29 +31,21 @@ import { SendingClock } from "./ChatMessageStatusIcon"
  * finish, well under the pointer travel time from row edge to the ellipsis. */
 const ARM_ACTIONS_ON_HOVER_MS = 150
 
-/** Descendants that own their own activation, so a double-click landing on one
- * must not also quote the message: attachment buttons, the reply-quote jump, an
- * autolinked URL, the voice waveform, the inline video.
- *
- * Focusability rather than an element list: anything interactive inside a
- * bubble carries a role or a tabindex, so the rule survives new attachment
- * types. The consequence, which no test can catch: putting a tabindex on the
- * ROW or the bubble (a roving-tabindex transcript) would make every message
- * unquotable — only descendants may match, which is what `stopAt` below
- * enforces. */
+/** Parts of a message that already do something when clicked, so a
+ * double-click on one must not also quote. The test is whether the element can
+ * take focus, not a list of tags, so new attachment types are covered — but a
+ * tabindex on the row or the bubble itself would stop every message quoting. */
 const SELF_HANDLING_DESCENDANTS =
   "a, button, input, textarea, select, video, audio, summary," +
   ' [role="button"], [role="link"], [role="slider"], [contenteditable="true"],' +
   ' [tabindex]:not([tabindex="-1"]), [data-chat-attachments]'
 
 /**
- * Whether a double-clicked node sits inside something that handles its own
- * activation. Walks up only as far as `stopAt` (the message's own wrapper):
- * `closest` would climb past it and match the transcript viewport, which
- * react-virtuoso renders with `tabIndex={0}` — that would make no message
- * quotable at all. A node that never reaches `stopAt` came from a portal (a
- * hover card): React routes its events here, but it is not part of this
- * message, so it never quotes.
+ * Searches up from the clicked element and stops at `stopAt`, the message's own
+ * wrapper. `closest` would keep going and match the scrolling container, which
+ * react-virtuoso gives `tabIndex={0}`, so nothing would ever quote. An element
+ * that never reaches `stopAt` is in a popover: React sends its events here, but
+ * it does not belong to this message.
  */
 const isSelfHandling = (target: Element, stopAt: Element): boolean => {
   for (let node: Element | null = target; node; node = node.parentElement) {
@@ -134,8 +126,7 @@ export const ChatMessageItem = ({
     actionsWrapperRef.current?.querySelector("button")?.focus()
   }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
-  // Stable API (never re-renders this row when the target changes) — unlike
-  // the compose-target VALUE context, which rows must stay out of.
+  // Not the VALUE context: that would re-render the row on every target change.
   const { startReply } = useChatComposeActions()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
@@ -162,17 +153,14 @@ export const ChatMessageItem = ({
     message.body.trim().length > 0 ||
     Boolean(message.replyTo)
   const hasContent = hasBubble || hasAttachments
-  // A tombstone has nothing to quote, and an unsettled message has no
-  // server-side id to point a reply at. Same rows the menu offers no Reply on —
-  // note a failed message DOES get a menu, reduced to Retry / Delete.
+  // A deleted message has nothing to quote, and one that has not been sent
+  // yet has no server id for a reply to point at.
   const canQuote =
     !message.deleted &&
     message.status !== "sending" &&
     message.status !== "failed"
 
-  // Double-clicking a message quotes it in the composer — a shortcut for the
-  // menu's Reply, on anyone's message including your own. The word selection
-  // the double-click makes is dropped when the composer takes focus.
+  // Focusing the composer clears the word the double-click selected.
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!canQuote) return

@@ -3,14 +3,14 @@ import { type F0ChatCapabilities, type F0ChatMessage } from "../types"
 /**
  * Whether a message can still be edited.
  *
- * The POLICY (whose messages, for how long) comes from
- * `capabilities.canEditMessage` when the host provides one, else the default:
- * own messages within `editWindowMs`. Independent of the policy, editing needs
- * a host `editMessage` handler, a message that still exists (not a tombstone)
- * and has settled server-side, and text to change — a voice note has none.
+ * Whose messages, and for how long, comes from `capabilities.canEditMessage`
+ * when the host provides one, else the default: own messages within
+ * `editWindowMs`. Whatever that says, editing also needs a host `editMessage`
+ * handler, a message that has not been deleted and has reached the server, and
+ * some text to change — a voice note has none.
  *
- * Shared by the actions menu and the composer's edit-last shortcut so both
- * offer editing on exactly the same messages.
+ * Shared by the actions menu and the arrow-up shortcut so both offer editing on
+ * the same messages.
  */
 export const canEditChatMessage = (
   message: F0ChatMessage,

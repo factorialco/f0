@@ -29,7 +29,7 @@ describe("canEditChatMessage", () => {
     )
   })
 
-  it("refuses a tombstone", () => {
+  it("refuses a deleted message", () => {
     expect(canEditChatMessage(message({ deleted: true }), withHandler)).toBe(
       false
     )
@@ -93,7 +93,7 @@ describe("canEditChatMessage", () => {
     ).toBe(false)
   })
 
-  it("keeps the voice-note and tombstone rules above any capability", () => {
+  it("keeps the voice-note and deleted rules above any capability", () => {
     const capabilities = { canEditMessage: () => true }
     expect(
       canEditChatMessage(message({ deleted: true }), {

@@ -169,9 +169,8 @@ describe("F0Chat arrow-up editing", () => {
     ).not.toBeInTheDocument()
   })
 
-  // The shortcut targets only the NEWEST own message: walking back to find
-  // something editable would silently open a message the user is not looking
-  // at, which a blind keystroke must never do.
+  // The shortcut targets only the newest own message. The user pressed a key
+  // without choosing one, so opening an older message would surprise them.
   it("does nothing when the newest own message is no longer editable", async () => {
     const older: F0ChatMessage = { ...mine, id: "m0", body: "Older of mine" }
     renderChat(
@@ -188,7 +187,7 @@ describe("F0Chat arrow-up editing", () => {
     ).not.toBeInTheDocument()
   })
 
-  // Discriminator: the loaded window is not always anchored to the live tail.
+  // Discriminator: the loaded messages do not always end at the newest one.
   it("does nothing while newer messages are outside the loaded window", async () => {
     renderChat(editable({ hasMoreNewer: true }))
     await pressArrowUp()

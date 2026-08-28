@@ -243,8 +243,6 @@ export const ChatComposer = (): ReactNode => {
   // Partials stream into the textarea, appended to whatever was already typed.
   // The grid sizer in ChatTextareaField auto-grows the box, so no manual height.
   const baseValueRef = useRef("")
-  // Read inside the async recorder start, which must see the latest text
-  // rather than the value captured when the mic was pressed.
   const valueRef = useRef(value)
   valueRef.current = value
   const fillFromTranscript = useCallback((text: string) => {
@@ -323,11 +321,9 @@ export const ChatComposer = (): ReactNode => {
     !isUploading &&
     !isSendingVoiceNote
 
-  // Nothing in the composer to lose and no capture in flight — the only state
-  // in which ↑ may take over the key. `value === ""` rather than a trimmed
-  // check: with any character present ↑ has a caret meaning the user may be
-  // relying on, and stealing a key that already does something is worse than a
-  // missed shortcut.
+  // `value === ""`, not trimmed: with any character present ↑ already moves the
+  // caret, and stealing a key that does something is worse than a missed
+  // shortcut.
   const isComposerIdle =
     value === "" &&
     attachments.length === 0 &&
@@ -525,8 +521,7 @@ export const ChatComposer = (): ReactNode => {
   const editingMessage = target.kind === "edit" ? target.message : null
   const replyTo = target.kind === "reply" ? target.message : null
 
-  // Empty the composer: text, attachments and seeded mentions. Does NOT touch
-  // the target — the provider owns that, and calling back into it here would
+  // Must not touch the target: the provider owns it, and calling back would
   // recurse through `retarget`.
   const discardDraft = useCallback(() => {
     mentions.close()
@@ -542,8 +537,6 @@ export const ChatComposer = (): ReactNode => {
     attachments,
   ])
 
-  // Load a message into the composer: text, existing attachments (as ready
-  // chips) and its mentions.
   const loadEditDraft = useCallback(
     (message: F0ChatMessage) => {
       setValue(message.body)
@@ -580,22 +573,17 @@ export const ChatComposer = (): ReactNode => {
   const focusComposer = useCallback(() => {
     const node = textareaRef.current
     if (!node) return
-    // `preventScroll`: the panel can sit inside a longer host page, and taking
-    // a quote should never scroll it.
+    // preventScroll: the panel can sit in a longer host page, and taking a
+    // quote must not scroll it.
     node.focus({ preventScroll: true })
     const end = node.value.length
     node.setSelectionRange(end, end)
   }, [])
 
-  // How the composer follows the target. The provider calls this inside the
-  // user's gesture, so focus reaches the textarea in the same event (iOS only
-  // opens the keyboard for a focus inside a gesture) and the draft is reset
-  // before any paint.
   const retarget = useCallback(
     (previous: ChatComposeTarget, next: ChatComposeTarget) => {
       const leavingEdit = previous.kind === "edit" && next.kind !== "edit"
-      // Re-picking Edit on the message already open must not wipe what the user
-      // has typed into it.
+      // Re-picking Edit on the message already open must not wipe the typing.
       const sameEdit =
         previous.kind === "edit" &&
         next.kind === "edit" &&
@@ -613,19 +601,24 @@ export const ChatComposer = (): ReactNode => {
     [retarget, discardDraft]
   )
 
-  // Re-registered whenever the handle's closures change (`discardDraft` reads
-  // the current attachments).
-  useEffect(() => {
-    registerComposerHandle(handle)
-    return () => registerComposerHandle(null)
-  }, [registerComposerHandle, handle])
+  // Re-registers on closure change: `discardDraft` reads the current attachments.
+  useEffect(
+    function publishComposerHandle() {
+      registerComposerHandle(handle)
+      return () => registerComposerHandle(null)
+    },
+    [registerComposerHandle, handle]
+  )
 
-  // A target only means anything while a composer exists to hold its draft.
-  // The composer is unmounted on a read-only channel (see F0Chat), and a
-  // target that outlived it would come back to a fresh, EMPTY composer showing
-  // an edit chip — one Enter from blanking the message it points at. Releasing
-  // it here is why registration can stay a record of future transitions.
-  useEffect(() => clearComposeTarget, [clearComposeTarget])
+  // A read-only channel removes the composer. A target that outlived it would
+  // come back to an empty composer still showing an edit chip, and pressing
+  // Enter would then save that empty text over the message.
+  useEffect(
+    function releaseComposeTargetOnUnmount() {
+      return clearComposeTarget
+    },
+    [clearComposeTarget]
+  )
 
   const handleSend = useCallback(() => {
     if (!canSend) return
@@ -713,10 +706,9 @@ export const ChatComposer = (): ReactNode => {
         clearComposeTarget()
         return
       }
-      // ↑ on an idle, empty composer reopens your last message for editing.
-      // A modifier makes it a text-selection/navigation gesture, never this
-      // shortcut. When there is nothing editable left, ↑ falls through to its
-      // ordinary caret meaning — hence preventDefault only on a hit.
+      // A modifier makes ↑ a selection gesture, never this shortcut; and with
+      // nothing to reopen it must keep its caret meaning, hence preventDefault
+      // only on a hit.
       const isArrowUpShortcut =
         e.key === "ArrowUp" &&
         !e.shiftKey &&
@@ -744,18 +736,16 @@ export const ChatComposer = (): ReactNode => {
     ]
   )
 
-  // `recorder.start()` only reports "recording" AFTER the getUserMedia
-  // permission prompt resolves, so the composer stays idle-looking for as long
-  // as the prompt is open. `isStartingRecording` covers that window: without
-  // it, ↑ could load a message in the meantime and the first transcript partial
-  // would overwrite its body.
+  // `recorder.start()` reports "recording" only after the permission prompt
+  // resolves, so the composer looks idle while it is open — long enough for ↑
+  // to load a message the first transcript partial would then overwrite.
   const startRecording = useCallback(() => {
     setIsStartingRecording(true)
     void (async () => {
       try {
         await recorder.start()
-        // Captured here, not at button press: the transcript is appended to
-        // whatever the textarea holds once capture really starts.
+        // Captured at capture start, not at button press: the transcript is
+        // appended to whatever the textarea holds by then.
         baseValueRef.current = valueRef.current
       } catch {
         // The recorder reports its own failures through onError.
@@ -1071,10 +1061,9 @@ export const ChatComposer = (): ReactNode => {
                         }
                         icon={Microphone}
                         onClick={startRecording}
-                        // Spins while dictation transcribes or a voice note
-                        // uploads, and while the mic permission prompt is open —
-                        // a second press there opens a second getUserMedia and
-                        // orphans the first stream.
+                        // Includes the permission prompt: a second press
+                        // there opens a second getUserMedia and orphans the
+                        // first stream.
                         loading={
                           isStartingRecording ||
                           isTranscribing ||

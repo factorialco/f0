@@ -297,7 +297,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
 - WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
 - WHEN Arrow Up is pressed in an empty, idle composer → THEN F0 reopens the viewer's newest own message, prefilled as the Edit action does.
-- WHEN that newest own message cannot be edited — past the edit window, a voice note, or attachments with no text → THEN Arrow Up does nothing. It never reaches further back: a blind keystroke must not open a message other than the one the viewer is looking at, and the Edit action remains the way to reach older ones.
+- WHEN that newest own message cannot be edited — past the edit window, a voice note, or attachments with no text → THEN Arrow Up does nothing. It never looks further back: the viewer pressed a key without choosing a message, so opening any other one would surprise them. The Edit action still reaches older messages.
 - WHEN the newest own messages are outside the loaded window, as after jumping to a search hit (`hasMoreNewer`) → THEN Arrow Up does nothing rather than reopening an older message.
 - WHEN a host capability allows editing other people's messages → THEN Arrow Up still only reopens the viewer's own; the Edit action follows the capability.
 - WHEN nothing editable remains → THEN Arrow Up does nothing and keeps its ordinary caret behavior.
@@ -306,7 +306,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN a message is double-clicked → THEN F0 quotes it in the composer and moves focus there — anyone's message, including the viewer's own. This replaces the browser's double- and triple-click text selection inside a message; the Copy action copies the whole body.
 - WHEN a double-click lands on a part of the message that handles its own activation — an image, a file, a reply quote, a link, the voice waveform, the inline video — → THEN that element performs its own action and no quote is created.
 - WHEN a double-click lands in a popover a message owns, such as a profile hover card → THEN no quote is created; the card is not part of the message.
-- WHEN the double-clicked message is a deleted tombstone, still sending, or failed → THEN F0 creates no quote, matching the rows the menu offers no Reply on.
+- WHEN the double-clicked message is deleted, still sending, or failed → THEN F0 creates no quote, matching the rows the menu offers no Reply on.
 - WHEN the channel is read-only (`canSend: false`) → THEN neither a double-click nor the menu's Reply sets a quote, because no composer is rendered to hold one.
 - WHEN a compose target is set → THEN it replaces any other: a quote drops an edit in progress AND its draft text, attachments and mentions; an edit drops a pending quote.
 - WHEN the Edit action is re-picked on the message already open for editing → THEN F0 keeps what the viewer has typed instead of reloading the original body.

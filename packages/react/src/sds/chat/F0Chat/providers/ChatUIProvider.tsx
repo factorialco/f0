@@ -48,12 +48,8 @@ type ChatHighlightedIdContextValue = {
   highlightedId: string | null
 }
 
-/**
- * What the composer is aimed at. One value rather than a reply target plus an
- * edit target: replying and editing are mutually exclusive, and as two
- * independent nullable states "both set" stays representable and has to be
- * prevented by hand at every call site.
- */
+/** One value, not a reply target plus an edit target: as two nullable states
+ * "both set" is representable and has to be prevented by hand at each caller. */
 export type ChatComposeTarget =
   | { kind: "none" }
   | { kind: "reply"; message: F0ChatMessage }
@@ -64,14 +60,9 @@ type ChatComposeTargetContextValue = {
 }
 
 /**
- * How the composer reacts to the target moving. The provider announces the
- * transition; the composer decides what happens to its draft — the provider
- * never learns what a draft is.
- *
- * Registered rather than derived because every transition originates in a user
- * gesture: doing this in an effect would run a frame late, which loses the
- * gesture (no iOS keyboard) and cannot see the PREVIOUS target, so leaving edit
- * mode could not discard the edit draft.
+ * Called on every target move, inside the user's gesture. Not an effect: an
+ * effect runs a frame late (losing the gesture, so iOS opens no keyboard) and
+ * cannot see the previous target, which is what says whether to discard.
  */
 export type ChatComposerHandle = {
   retarget: (previous: ChatComposeTarget, next: ChatComposeTarget) => void
@@ -79,11 +70,8 @@ export type ChatComposerHandle = {
   abandonDraft: () => void
 }
 
-/**
- * Moving the composer's target. Identity-stable for the provider's whole
- * lifetime, so per-message rows can start a reply or an edit without
- * subscribing to — and re-rendering on — the current target.
- */
+/** Identity-stable for the provider's lifetime, so message rows can move the
+ * target without subscribing to it and re-rendering on every change. */
 type ChatComposeActionsContextValue = {
   /** Quote a message in the composer. */
   startReply: (message: F0ChatMessage) => void
@@ -171,8 +159,8 @@ export const ChatUIProvider = ({
   const scrollFnRef = useRef<((id: string) => void) | null>(null)
   const dropFnRef = useRef<((files: File[]) => void) | null>(null)
   const composerHandleRef = useRef<ChatComposerHandle | null>(null)
-  // The transition needs the OUTGOING target, and the setters must stay
-  // dependency-free so the actions context never changes identity.
+  // Read by the setters below, which have no dependencies on purpose: a
+  // dependency here would change the actions context and re-render every row.
   const targetRef = useRef(target)
   targetRef.current = target
   const canSendRef = useRef(capabilities?.canSend)
@@ -257,10 +245,9 @@ export const ChatUIProvider = ({
     []
   )
 
-  // The single writer of the target. The provider's own state moves first, so
-  // a throw inside the composer's transition cannot leave the two disagreeing;
-  // both land in one commit either way, because a gesture's setState calls are
-  // flushed together in a microtask at the end of the event.
+  // State first: a throw inside the composer's transition must not leave the
+  // two disagreeing. Both still land in one commit — a gesture's setState calls
+  // flush together in a microtask at the end of the event.
   const setComposeTarget = useCallback((next: ChatComposeTarget) => {
     const previous = targetRef.current
     targetRef.current = next
@@ -270,9 +257,8 @@ export const ChatUIProvider = ({
 
   const startReply = useCallback(
     (message: F0ChatMessage) => {
-      // A read-only channel renders no composer (see F0Chat), so a quote there
-      // would be invisible and unclearable. Refused here rather than at each
-      // entry point, so the actions menu is covered too.
+      // A read-only channel renders no composer, so a target set there is
+      // invisible and unclearable.
       if (canSendRef.current === false) return
       setComposeTarget({ kind: "reply", message })
     },
@@ -290,12 +276,10 @@ export const ChatUIProvider = ({
     [setComposeTarget]
   )
 
-  // A draft belongs to the conversation it was written in. The transcript is
-  // keyed by channel and remounts, but this provider and the composer do not —
-  // without this, Save would edit a message in the channel you just left, and a
-  // half-typed reply would go to whoever you switched to. Layout, not passive:
-  // a passive effect can let one frame paint the old draft under the new
-  // channel.
+  // Only the transcript is keyed by channel; this provider and the composer
+  // survive the switch, so the draft has to be dropped by hand or it is sent to
+  // the next conversation. Layout, not passive: a passive effect lets a frame
+  // paint the old draft under the new channel.
   const channelIdRef = useRef(channel.id)
   useLayoutEffect(
     function abandonDraftOnChannelChange() {
@@ -444,8 +428,6 @@ export const ChatUIProvider = ({
     () => ({ target }),
     [target]
   )
-  // Stable for the provider's lifetime, so consuming it from a message row
-  // costs no extra render.
   const composeActionsValue = useMemo<ChatComposeActionsContextValue>(
     () => ({
       startReply,
@@ -539,13 +521,11 @@ export const useChatJump = (): ChatJumpContextValue =>
 export const useChatHighlightedId = (): ChatHighlightedIdContextValue =>
   useCtx(ChatHighlightedIdContext, "useChatHighlightedId")
 
-/** The current compose target. Consumed by the composer only — a row reading
- * this would re-render on every target change. */
+/** Composer only: a row reading this re-renders on every target change. */
 export const useChatComposeTarget = (): ChatComposeTargetContextValue =>
   useCtx(ChatComposeTargetContext, "useChatComposeTarget")
 
-/** Move the compose target. Stable identity — consumed by message rows and the
- * actions menu, neither of which should re-render when the target changes. */
+/** Stable identity, so message rows and the actions menu can consume it. */
 export const useChatComposeActions = (): ChatComposeActionsContextValue =>
   useCtx(ChatComposeActionsContext, "useChatComposeActions")
 

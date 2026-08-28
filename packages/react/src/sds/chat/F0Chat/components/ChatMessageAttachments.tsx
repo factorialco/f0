@@ -128,9 +128,9 @@ export const ChatMessageAttachments = ({
 
   return (
     <div
-      // Marks the whole column as owning its own clicks — see
-      // SELF_HANDLING_DESCENDANTS in ChatMessageItem. Placeholders and mounted
-      // previews must behave the same, and a placeholder is not focusable.
+      // Read by SELF_HANDLING_DESCENDANTS in ChatMessageItem: a deferred
+      // placeholder is not focusable, and must not quote where the mounted
+      // preview would not.
       data-chat-attachments=""
       className={cn(
         // w-full gives the column a definite width so the cards' `max-w-full`
