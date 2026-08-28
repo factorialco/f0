@@ -2,7 +2,10 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "vitest"],
   "categories": {
-    "correctness": "off"
+    "correctness": "error"
+  },
+  "rules": {
+    "react-hooks/exhaustive-deps": "off"
   },
   "env": {
     "builtin": true,
