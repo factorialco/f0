@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.66.3](https://github.com/factorialco/f0/compare/f0-react-v6.66.2...f0-react-v6.66.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** report selected nested rows to the selection callbacks ([#5294](https://github.com/factorialco/f0/issues/5294)) ([46a02a6](https://github.com/factorialco/f0/commit/46a02a6fcccdddf967f76c4a857f7b99fe687bf7))
+
 ## [6.66.2](https://github.com/factorialco/f0/compare/f0-react-v6.66.1...f0-react-v6.66.2) (2026-08-28)
 
 
