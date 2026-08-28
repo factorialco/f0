@@ -88,15 +88,27 @@ const CLS_HIGHLIGHT_THRESHOLD = 0.01
 
 /** A story plus the reasons it is worth mentioning. */
 type ChangedStoryReport = StoryReport & {
-  /** Story file this story came from, repo-relative. */
-  storyFile: string
-  /** Whether the story file is newly added by this PR. */
+  /** The changed file that pulled this story into the report, repo-relative. */
+  changedFile: string
+  /**
+   * How this story was selected:
+   *   "story"  — its own story file changed
+   *   "source" — a source file in its component changed; the story itself did not
+   *
+   * Worth surfacing to the agent: under "source" the author may not have looked
+   * at this story at all, so the comment should name the component rather than
+   * imply they edited the story.
+   */
+  measuredBecause: "story" | "source"
+  /** Whether this story's own file is newly added by this PR. */
   isNew: boolean
   highlights: string[]
 }
 
 /**
- * Story files added or modified versus the comparison commit.
+ * Source files under packages/react/src added or modified versus the comparison
+ * commit. Every file, not just `*.stories.tsx` — storiesForFile decides which
+ * of them map to stories and how.
  *
  * `--diff-filter=d` keeps additions and modifications while dropping deletions:
  * a deleted story cannot be measured, and its absence is not a performance
@@ -105,10 +117,13 @@ type ChangedStoryReport = StoryReport & {
  * The `:(top)` pathspec prefix anchors the glob to the repository root. Without
  * it the pathspec resolves relative to the current directory, so running this
  * from `packages/react` (which is where `pnpm --filter` puts you) silently
- * matches nothing and the script reports "no story files changed" on a PR that
+ * matches nothing and the script reports "no files changed" on a PR that
  * changed plenty.
  */
-function changedStoryFiles(compareCommit: string): {
+function changedSourceFiles(
+  compareCommit: string,
+  head: string
+): {
   file: string
   isNew: boolean
 }[] {
@@ -118,45 +133,116 @@ function changedStoryFiles(compareCommit: string): {
       .map((l) => l.trim())
       .filter(Boolean)
 
+  const SPEC = ":(top)packages/react/src/**"
+
   const changed = run([
     "diff",
     "--name-only",
     "--diff-filter=d",
-    `${compareCommit}...HEAD`,
+    `${compareCommit}...${head}`,
     "--",
-    ":(top)packages/react/src/**/*.stories.tsx",
+    SPEC,
   ])
   const added = new Set(
     run([
       "diff",
       "--name-only",
       "--diff-filter=A",
-      `${compareCommit}...HEAD`,
+      `${compareCommit}...${head}`,
       "--",
-      ":(top)packages/react/src/**/*.stories.tsx",
+      SPEC,
     ])
   )
 
-  return changed.map((file) => ({ file, isNew: added.has(file) }))
+  return changed
+    .filter((file) => !isNonRuntimeFile(file))
+    .map((file) => ({ file, isNew: added.has(file) }))
+}
+
+/** Strip the "./" and "packages/react/" prefixes so git and index paths compare. */
+function normalizePath(p: string): string {
+  return p.replace(/^\.\//, "").replace(/^packages\/react\//, "")
+}
+
+function isStoryFile(file: string): boolean {
+  return file.endsWith(".stories.tsx")
 }
 
 /**
- * Map a repo-relative story file to its stories in the index.
+ * Files that cannot change what a story renders, and so must not pull its
+ * component into the report.
  *
- * The index records `importPath` package-relative ("./src/components/F0Button/
- * index.stories.tsx") while git reports repo-relative ("packages/react/src/…"),
- * so compare on the normalized tail. Matching on the full path rather than the
- * basename matters — `index.stories.tsx` is the same basename for most
- * components in the repo.
+ * Unit tests are the reason this exists. `fix(F0Chat)` (bf41fa6e4) changed two
+ * components and two `__tests__/` files; without this filter the test files
+ * alone attributed 38 stories, so a PR that only adjusted assertions would
+ * trigger a full performance comment about code whose behaviour never moved.
+ * Docs are excluded on the same grounds.
+ */
+function isNonRuntimeFile(file: string): boolean {
+  return (
+    /(^|\/)__tests__\//.test(file) ||
+    /(^|\/)__snapshots__\//.test(file) ||
+    /\.(test|spec)\.[jt]sx?$/.test(file) ||
+    /\.mdx?$/.test(file)
+  )
+}
+
+/**
+ * Shallowest directory a source file may be attributed to, in path segments.
+ *
+ * Component directories look like `src/<zone>/<Name>` — three segments. Stopping
+ * there keeps a change to a broadly shared file from being attributed to
+ * everything below it: `src/lib/utils.ts` would otherwise walk up to `src/lib`
+ * (two segments) and drag in every story in the tree.
+ */
+const MIN_ATTRIBUTION_DEPTH = 3
+
+/**
+ * Map a changed file to the stories that render it, and say how it got there.
+ *
+ * Two different rules, because the two cases warrant different precision:
+ *
+ *   A changed **story file** maps to exactly the stories declared in it, by
+ *   comparing full normalized paths. The index records `importPath` as
+ *   "./src/components/F0Button/index.stories.tsx" while git reports
+ *   "packages/react/src/…", hence the normalization. Comparing full paths and
+ *   not basenames matters — `index.stories.tsx` is the same basename for most
+ *   components in the repo.
+ *
+ *   Any **other source file** maps to the stories of the component that owns
+ *   it. This is what makes a component-only change visible: editing
+ *   `F0Button/index.tsx` without touching a story used to measure nothing at
+ *   all. The file's directory is walked upwards until one is found that has
+ *   stories beneath it, which handles nested layouts (`F0Button/internal/
+ *   helpers.ts` attributes to `F0Button`, whose stories live at the root or
+ *   under `__stories__/`). The walk stops at MIN_ATTRIBUTION_DEPTH so a shared
+ *   utility cannot be attributed to half the library.
  */
 function storiesForFile(
   index: StoryIndexEntry[],
   repoRelativeFile: string
-): StoryIndexEntry[] {
-  const normalize = (p: string) =>
-    p.replace(/^\.\//, "").replace(/^packages\/react\//, "")
-  const target = normalize(repoRelativeFile)
-  return index.filter((e) => e.importPath && normalize(e.importPath) === target)
+): { entries: StoryIndexEntry[]; via: "story" | "source" } {
+  const target = normalizePath(repoRelativeFile)
+
+  if (isStoryFile(target)) {
+    return {
+      entries: index.filter(
+        (e) => e.importPath && normalizePath(e.importPath) === target
+      ),
+      via: "story",
+    }
+  }
+
+  let dir = target.split("/").slice(0, -1)
+  while (dir.length >= MIN_ATTRIBUTION_DEPTH) {
+    const prefix = `${dir.join("/")}/`
+    const entries = index.filter(
+      (e) => e.importPath && normalizePath(e.importPath).startsWith(prefix)
+    )
+    if (entries.length) return { entries, via: "source" }
+    dir = dir.slice(0, -1)
+  }
+  return { entries: [], via: "source" }
 }
 
 /** Reduce a measurement to the facts worth surfacing. */
@@ -215,6 +301,7 @@ function parseArgs(argv: string[]) {
   let url: string | undefined
   let settleMs = DEFAULT_SETTLE_MS
   let maxStories = 40
+  let head = "HEAD"
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -223,22 +310,25 @@ function parseArgs(argv: string[]) {
     else if (arg === "--url") url = argv[++i]
     else if (arg === "--settle") settleMs = Number(argv[++i])
     else if (arg === "--max-stories") maxStories = Number(argv[++i])
+    // --head exists so a range other than "…///HEAD" can be previewed locally:
+    // "what would this commit have reported?". CI always leaves it at HEAD.
+    else if (arg === "--head") head = argv[++i]
     else throw new Error(`Unknown argument: ${arg}`)
   }
-  return { compareCommit, out, url, settleMs, maxStories }
+  return { compareCommit, out, url, settleMs, maxStories, head }
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
 
-  const files = changedStoryFiles(args.compareCommit)
+  const files = changedSourceFiles(args.compareCommit, args.head)
   if (!files.length) {
-    note("No story files added or changed — nothing to measure.")
+    note("No source files added or changed — nothing to measure.")
     writeFileSync(
       args.out,
       JSON.stringify(
         {
-          changedStoryFiles: 0,
+          changedSourceFiles: 0,
           storiesMeasured: 0,
           truncated: false,
           stories: [],
@@ -250,7 +340,7 @@ async function main() {
     return
   }
   note(
-    `${files.length} story file${files.length === 1 ? "" : "s"} changed vs ${args.compareCommit}.`
+    `${files.length} source file${files.length === 1 ? "" : "s"} changed vs ${args.compareCommit}.`
   )
 
   const baseUrl = (
@@ -268,15 +358,42 @@ async function main() {
   const index = await fetchIndex(baseUrl)
 
   // Expand files → stories, keeping the file association for the report.
-  const targets: { entry: StoryIndexEntry; file: string; isNew: boolean }[] = []
-  for (const { file, isNew } of files) {
-    const stories = storiesForFile(index, file)
-    if (!stories.length) {
-      consola.warn(`No stories in the index for ${file} — skipping.`)
+  //
+  // Deduplicated by story id: a PR that changes a component and its story (the
+  // common case) reaches the same stories twice, and several files inside one
+  // component all attribute to the same set. First writer wins, and story files
+  // are processed first so a story-file attribution is never overwritten by the
+  // vaguer source-file one.
+  const byStory = new Map<
+    string,
+    { entry: StoryIndexEntry; file: string; isNew: boolean; via: string }
+  >()
+  const ordered = [
+    ...files.filter((f) => isStoryFile(f.file)),
+    ...files.filter((f) => !isStoryFile(f.file)),
+  ]
+  let unmapped = 0
+  for (const { file, isNew } of ordered) {
+    const { entries, via } = storiesForFile(index, file)
+    if (!entries.length) {
+      unmapped++
       continue
     }
-    for (const entry of stories) targets.push({ entry, file, isNew })
+    for (const entry of entries) {
+      if (!byStory.has(entry.id)) {
+        byStory.set(entry.id, {
+          entry,
+          file,
+          isNew: isNew && via === "story",
+          via,
+        })
+      }
+    }
   }
+  if (unmapped) {
+    note(`${unmapped} changed file(s) map to no story — skipped.`)
+  }
+  const targets = Array.from(byStory.values())
 
   // A PR that touches a very large number of stories would otherwise dominate
   // the job's runtime. Truncation is reported in the JSON so the comment can say
@@ -293,12 +410,13 @@ async function main() {
   const browser = await chromium.launch()
   const stories: ChangedStoryReport[] = []
   try {
-    for (const { entry, file, isNew } of measured) {
+    for (const { entry, file, isNew, via } of measured) {
       const report = await measure(browser, baseUrl, entry, args.settleMs)
       if (!report) continue
       stories.push({
         ...report,
-        storyFile: file,
+        changedFile: file,
+        measuredBecause: via as "story" | "source",
         isNew,
         highlights: highlightsFor(report),
       })
@@ -310,8 +428,14 @@ async function main() {
   const withHighlights = stories.filter((s) => s.highlights.length > 0)
   const output = {
     comparedAgainst: args.compareCommit,
-    changedStoryFiles: files.length,
+    changedSourceFiles: files.length,
     storiesAffected: targets.length,
+    storiesFromStoryChanges: stories.filter(
+      (s) => s.measuredBecause === "story"
+    ).length,
+    storiesFromSourceChanges: stories.filter(
+      (s) => s.measuredBecause === "source"
+    ).length,
     storiesMeasured: stories.length,
     storiesWithHighlights: withHighlights.length,
     truncated,

@@ -18,7 +18,8 @@ Turn a machine-generated performance measurement into a short, human-readable PR
 Each entry in `stories[]` has:
 
 - `id`, `title`, `name` — which story was measured
-- `storyFile` — the file it came from
+- `changedFile` — the changed file that pulled this story into the report
+- `measuredBecause` — `"story"` if the story's own file changed, `"source"` if a source file in its component changed but the story did not
 - `isNew` — whether this PR adds the story
 - `deterministic` — counts of work done: `mounts`, `renders`, `updates`, `cascades`, `slowUpdates`, `domElements`, `styleWrites`, `forcedReflows`, `layoutShifts`
 - `timing` — wall-clock samples
@@ -41,6 +42,7 @@ An empty `highlights` array means nothing crossed a threshold. That is the norma
 - **A cascade count above zero is normal here.** Every story in this library records at least one render cascade (median 3) because Storybook's own decorators and providers render around the story. The report only raises a cascade highlight well above that norm. Never tell an author to "eliminate render cascades" on the basis of a number the report did not highlight.
 - **A new story has no "before" to compare against.** The report measures this PR only; there is no baseline from `{{BASE_BRANCH}}`. So do not claim a change made something "worse", "slower", or "a regression" — you cannot know that. Describe what the numbers are, not how they moved.
 - **Do not comment on unchanged components.** Only stories this PR adds or changes are measured, and only those are in scope.
+- **Mind `measuredBecause`.** When it is `"source"` the author changed the component, not the story — they may never have opened that story file. Attribute the finding to the component ("F0Button's stories show…"), and never say or imply they edited the story. When it is `"story"` the story file itself changed and you can refer to it directly.
 - `truncated: true` means more stories were affected than were measured — mention that the report is partial.
 
 ## Writing the comment
