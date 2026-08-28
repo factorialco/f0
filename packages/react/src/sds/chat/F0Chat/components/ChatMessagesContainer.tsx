@@ -20,17 +20,13 @@ import {
   AT_BOTTOM_THRESHOLD_PX,
   useChatVirtuoso,
 } from "../hooks/useChatVirtuoso"
-import { useMicrotaskBatch } from "../hooks/useMicrotaskBatch"
-import {
-  createTranscriptHeavyPreviewStore,
-  TranscriptHeavyPreviewProvider,
-} from "../hooks/useTranscriptHeavyPreview"
 import { useTranscriptReadiness } from "../hooks/useTranscriptReadiness"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { isUserMessage, LATEST } from "../types"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
+import { deliveryState } from "../utils/delivery-status"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { type TypingEntryState } from "./ChatTypingBubble"
@@ -181,13 +177,16 @@ const CHAT_VIRTUOSO_COMPONENTS = {
 }
 
 // Keep the next rows mounted far enough ahead for Virtuoso to measure them
-// before they enter the viewport. The item-count floor matters for very tall
-// media rows, where a pixel-only buffer can contain a single item. The top
-// buffer is generous on purpose: scrolling up through never-measured history
-// is where estimate→real corrections happen, and they only stay invisible
-// when the row being measured is still well above the viewport.
+// before they enter the viewport. The top buffer is generous on purpose:
+// scrolling up through never-measured history is where estimate→real
+// corrections happen, and they only stay invisible when the row being measured
+// is still well above the viewport.
+//
+// Going down the pixel budget is smaller than a single media row, so the
+// item-count floor is the reader's whole runway there — and now that media
+// fetches on mount, that runway is what it gets to arrive in.
 const CHAT_VIEWPORT_INCREASE = { top: 1200, bottom: 200 }
-const CHAT_MIN_OVERSCAN_ITEMS = { top: 6, bottom: 3 }
+const CHAT_MIN_OVERSCAN_ITEMS = { top: 6, bottom: 5 }
 
 const chatRowKey = (index: number, row: ChatRow): string =>
   row?.key ?? `chat-gap-${index}`
@@ -375,7 +374,15 @@ export const ChatMessagesContainer = (): ReactNode => {
   }
   const displayRows = useMemo<ChatRow[]>(() => {
     const out = [...rows]
-    if (lastMessage) {
+    // Only when there is a delivery state to report — an incoming or in-flight
+    // last message would otherwise append an empty row for Virtuoso to measure.
+    if (
+      lastMessage &&
+      deliveryState(lastMessage, {
+        isGroup,
+        memberCount: channel.memberCount,
+      })
+    ) {
       out.push({ type: "footer", key: "status-footer", message: lastMessage })
     }
     if (showTypingRow) {
@@ -386,7 +393,17 @@ export const ChatMessagesContainer = (): ReactNode => {
       })
     }
     return out
-  }, [rows, lastMessage, visibleTypingUsers, typingActive, showTypingRow])
+  }, [
+    rows,
+    lastMessage,
+    isGroup,
+    channel.memberCount,
+    visibleTypingUsers,
+    typingActive,
+    showTypingRow,
+  ])
+
+  const prefetchGateRef = useRef(false)
 
   const {
     virtuosoRef,
@@ -408,6 +425,7 @@ export const ChatMessagesContainer = (): ReactNode => {
     scrollToBottom,
     scrollToMessage,
     pendBottom,
+    reassertEntry,
   } = useChatVirtuoso({
     rows,
     indexById,
@@ -421,60 +439,56 @@ export const ChatMessagesContainer = (): ReactNode => {
     loadNewer,
     conversationKey: channel.id,
     reducedMotion,
+    canPrefetchRef: prefetchGateRef,
   })
 
   const { ready, setViewport, setListVisible } = useTranscriptReadiness(listKey)
-  const previewStore = useMemo(createTranscriptHeavyPreviewStore, [listKey])
-  const previewStoreLifecycleRef = useRef({ store: previewStore, epoch: 0 })
-  previewStoreLifecycleRef.current.store = previewStore
 
+  // Readiness is keyed by `listKey`, which the hook above produces — so the
+  // prefetch gate travels through a ref instead of a prop.
   useEffect(() => {
-    previewStore.setReady(ready)
-  }, [previewStore, ready])
-  useEffect(() => {
-    const epoch = ++previewStoreLifecycleRef.current.epoch
-    return () => {
-      queueMicrotask(() => {
-        const lifecycle = previewStoreLifecycleRef.current
-        if (lifecycle.store !== previewStore || lifecycle.epoch === epoch) {
-          previewStore.dispose()
-        }
-      })
-    }
-  }, [previewStore])
+    prefetchGateRef.current = ready
+  }, [ready])
 
+  // One re-anchor per transcript session, while it is still hidden.
+  const entryAssertedRef = useRef<string | null>(null)
+  useLayoutEffect(() => {
+    if (!ready || entryAssertedRef.current === listKey) return
+    entryAssertedRef.current = listKey
+    reassertEntry()
+  }, [listKey, ready, reassertEntry])
   const setScroller = useCallback(
     (element: HTMLElement | Window | null) => {
       handleScrollerRef(element)
-      const viewport = element instanceof HTMLElement ? element : null
-      setViewport(viewport)
-      previewStore.setViewport(viewport)
+      setViewport(element instanceof HTMLElement ? element : null)
     },
-    [handleScrollerRef, previewStore, setViewport]
+    [handleScrollerRef, setViewport]
   )
 
   // Scrollbar measure strip (see ChatVirtuosoScroller): mirror Virtuoso's
-  // total list height into it. Virtuoso may report several corrections in one
-  // task; coalescing those writes in a microtask wakes Radix only once while
-  // still updating before the next paint.
+  // total list height into it.
+  //
+  // Written SYNCHRONOUSLY. Virtuoso reads this scroller's `scrollHeight` inside
+  // its own ResizeObserver, and the strip is what produces that height — so
+  // deferring the write by a microtask made Virtuoso publish the previous
+  // frame's height, and the late shrink then let the browser clamp `scrollTop`
+  // (a real scroll event, out of nowhere, mid-resize). The guard below already
+  // collapses repeated corrections within a task into a single DOM write.
   const measureStripRef = useRef<HTMLDivElement>(null)
   const scrollerContext = useMemo(
     () => ({ measureStripRef, onListVisibilityChange: setListVisible }),
     [setListVisible]
   )
-  const scheduleMeasureStripHeight = useMicrotaskBatch((height: number) => {
-    const strip = measureStripRef.current
-    const nextHeight = `${height}px`
-    if (strip && strip.style.height !== nextHeight) {
-      strip.style.height = nextHeight
-    }
-  })
   const handleListHeightChanged = useCallback(
     (height: number) => {
-      scheduleMeasureStripHeight(height)
+      const strip = measureStripRef.current
+      const nextHeight = `${height}px`
+      if (strip && strip.style.height !== nextHeight) {
+        strip.style.height = nextHeight
+      }
       handleTotalListHeightChanged(height)
     },
-    [handleTotalListHeightChanged, scheduleMeasureStripHeight]
+    [handleTotalListHeightChanged]
   )
 
   // Jump targeting (reply quotes, search hits). A jump may land on a message
@@ -541,71 +555,68 @@ export const ChatMessagesContainer = (): ReactNode => {
   const showButton = scrolledUp || Boolean(hasMoreNewer)
 
   return (
-    <TranscriptHeavyPreviewProvider store={previewStore}>
-      <div
-        {...(!ready ? ({ inert: "" } as Record<string, string>) : {})}
-        className="scrollbar-macos relative min-h-0 flex-1"
-        aria-busy={!ready}
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-      >
-        <Virtuoso<ChatRow, ChatScrollerContext>
-          key={listKey}
-          ref={virtuosoRef}
-          scrollerRef={setScroller}
-          data={displayRows}
-          // `row` CAN transiently be undefined: a mid-list shrink (hard delete)
-          // keeps the ends — and so the firstItemIndex — while the rendered
-          // range still spans the old length for one pass. Self-corrects next
-          // render; don't let it crash the frame.
-          computeItemKey={chatRowKey}
-          itemContent={renderItem}
-          firstItemIndex={firstItemIndex}
-          initialTopMostItemIndex={initialLocation}
-          followOutput={followOutput}
-          atBottomThreshold={AT_BOTTOM_THRESHOLD_PX}
-          atBottomStateChange={handleAtBottomChange}
-          atTopStateChange={handleAtTopChange}
-          startReached={handleStartReached}
-          endReached={handleEndReached}
-          itemsRendered={handleItemsRendered}
-          totalListHeightChanged={handleListHeightChanged}
-          increaseViewportBy={CHAT_VIEWPORT_INCREASE}
-          minOverscanItemCount={CHAT_MIN_OVERSCAN_ITEMS}
-          // Median measured row height in text-heavy transcripts (bubble +
-          // run spacing). Unmeasured history is estimated with this; the
-          // closer it sits to reality, the smaller the scroll correction when
-          // a row is first measured.
-          defaultItemHeight={64}
-          // Reporting measurements in the ResizeObserver callback avoids an
-          // extra provisional frame when a previously unseen row is mounted.
-          skipAnimationFrameInResizeObserver
-          context={scrollerContext}
-          components={CHAT_VIRTUOSO_COMPONENTS}
-          isScrolling={previewStore.setScrolling}
-          className={cn(
-            "size-full",
-            !reducedMotion && "transition-opacity duration-100",
-            ready ? "visible opacity-100" : "invisible opacity-0"
-          )}
-        />
-
-        {ready && (
-          <ChatViewportOverlays
-            atTop={atTop}
-            scrolledUp={scrolledUp}
-            hasMoreOlder={hasMoreOlder}
-            loadingOlder={loadingOlder}
-            stickyDate={stickyDate}
-            showJumpButton={showButton}
-            unreadCount={unreadCount}
-            hasMoreNewer={hasMoreNewer ?? false}
-            reducedMotion={reducedMotion}
-            onJumpToBottom={jumpToBottom}
-          />
+    <div
+      {...(!ready ? ({ inert: "" } as Record<string, string>) : {})}
+      className="scrollbar-macos relative min-h-0 flex-1"
+      aria-busy={!ready}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
+      <Virtuoso<ChatRow, ChatScrollerContext>
+        key={listKey}
+        ref={virtuosoRef}
+        scrollerRef={setScroller}
+        data={displayRows}
+        // `row` CAN transiently be undefined: a mid-list shrink (hard delete)
+        // keeps the ends — and so the firstItemIndex — while the rendered
+        // range still spans the old length for one pass. Self-corrects next
+        // render; don't let it crash the frame.
+        computeItemKey={chatRowKey}
+        itemContent={renderItem}
+        firstItemIndex={firstItemIndex}
+        initialTopMostItemIndex={initialLocation}
+        followOutput={followOutput}
+        atBottomThreshold={AT_BOTTOM_THRESHOLD_PX}
+        atBottomStateChange={handleAtBottomChange}
+        atTopStateChange={handleAtTopChange}
+        startReached={handleStartReached}
+        endReached={handleEndReached}
+        itemsRendered={handleItemsRendered}
+        totalListHeightChanged={handleListHeightChanged}
+        increaseViewportBy={CHAT_VIEWPORT_INCREASE}
+        minOverscanItemCount={CHAT_MIN_OVERSCAN_ITEMS}
+        // Median measured row height in text-heavy transcripts (bubble +
+        // run spacing). Unmeasured history is estimated with this; the
+        // closer it sits to reality, the smaller the scroll correction when
+        // a row is first measured.
+        defaultItemHeight={64}
+        // Reporting measurements in the ResizeObserver callback avoids an
+        // extra provisional frame when a previously unseen row is mounted.
+        skipAnimationFrameInResizeObserver
+        context={scrollerContext}
+        components={CHAT_VIRTUOSO_COMPONENTS}
+        className={cn(
+          "size-full",
+          !reducedMotion && "transition-opacity duration-100",
+          ready ? "visible opacity-100" : "invisible opacity-0"
         )}
-      </div>
-    </TranscriptHeavyPreviewProvider>
+      />
+
+      {ready && (
+        <ChatViewportOverlays
+          atTop={atTop}
+          scrolledUp={scrolledUp}
+          hasMoreOlder={hasMoreOlder}
+          loadingOlder={loadingOlder}
+          stickyDate={stickyDate}
+          showJumpButton={showButton}
+          unreadCount={unreadCount}
+          hasMoreNewer={hasMoreNewer ?? false}
+          reducedMotion={reducedMotion}
+          onJumpToBottom={jumpToBottom}
+        />
+      )}
+    </div>
   )
 }
 

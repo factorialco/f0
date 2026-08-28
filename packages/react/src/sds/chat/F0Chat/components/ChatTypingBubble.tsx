@@ -97,7 +97,9 @@ export const ChatTypingBubble = ({
     <motion.div
       role="status"
       aria-label={label}
-      className={cn("flex w-full items-end gap-0.5", spacingClass)}
+      // The full 6px in one go — unlike a message row, this one has no outer
+      // surface whose padding makes up the last 2px.
+      className={cn("flex w-full items-end gap-1 shrink-0", spacingClass)}
       initial={reducedMotion || !entryFresh ? false : { opacity: 0 }}
       animate={leaving ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.14, ease: EASE_OUT_SWIFT }}
@@ -105,30 +107,26 @@ export const ChatTypingBubble = ({
       {isGroup &&
         (users.length > 1 ? (
           // Several people typing: stacked avatar list, capped at 3 with a +N.
-          <span className="shrink-0">
-            <F0AvatarList
-              type="person"
-              size="xs"
-              max={3}
-              noTooltip
-              avatars={users.map(toPersonAvatar)}
-            />
-          </span>
+          <F0AvatarList
+            type="person"
+            size="xs"
+            max={3}
+            noTooltip
+            avatars={users.map(toPersonAvatar)}
+          />
         ) : (
-          <span className="shrink-0">
-            <F0Avatar
-              size="xs"
-              avatar={
-                users[0].avatar ?? {
-                  type: "person",
-                  firstName: users[0].name,
-                  lastName: "",
-                }
+          <F0Avatar
+            size="xs"
+            avatar={
+              users[0].avatar ?? {
+                type: "person",
+                firstName: users[0].name,
+                lastName: "",
               }
-            />
-          </span>
+            }
+          />
         ))}
-      <div className="flex w-fit items-center justify-center rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4">
+      <div className="flex w-fit items-center justify-center rounded-2xl rounded-bl-2xs border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4">
         <Dots animate={!reducedMotion && !leaving} />
       </div>
     </motion.div>

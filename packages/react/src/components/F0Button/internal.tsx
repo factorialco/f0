@@ -31,6 +31,7 @@ const ButtonInternal = forwardRef<
     icon,
     iconPosition = "left",
     emoji,
+    emojiMode,
     variant = "default",
     size = "md",
     fontSize,
@@ -152,6 +153,7 @@ const ButtonInternal = forwardRef<
         {emoji && (
           <EmojiImage
             emoji={emoji}
+            mode={emojiMode}
             size={size === "sm" ? "sm" : "md"}
             alt={""}
           />

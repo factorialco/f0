@@ -24,11 +24,20 @@ export const UNREAD_DIVIDER_TOP_GAP = 88
  *   global index and the viewport doesn't jump.
  * - `append`: tail-local change (new message, or the tail was removed) — the
  *   leading rows' indices are untouched.
- * - `replace`: both ends changed (a far jump swapped the whole window) — the
- *   list remounts and re-enters through its initial location.
+ * - `grow`: both ends changed but the windows OVERLAP (a cached head repainted
+ *   before `watch()` widened it in both directions) — rows survive, so this is
+ *   a prepend and an append at once and must NOT remount.
+ * - `replace`: both ends changed and nothing survives (a far jump swapped the
+ *   whole window) — the list remounts and re-enters through its initial location.
  * - `none`: same ends (status updates, reactions, edits — identity is by id).
  */
-export type WindowChange = "initial" | "none" | "prepend" | "append" | "replace"
+export type WindowChange =
+  | "initial"
+  | "none"
+  | "prepend"
+  | "append"
+  | "grow"
+  | "replace"
 
 export type WindowEnds = {
   firstId: string | null
@@ -46,7 +55,12 @@ export const windowEnds = (
 
 export function classifyWindowChange(
   prev: WindowEnds,
-  next: WindowEnds
+  next: WindowEnds,
+  /** Whether any message of the PREVIOUS window survives into the next one.
+   * Without it a window that merely widened at both ends reads as a far jump,
+   * which remounts the list mid-entry (the cached-then-`watch()` path every
+   * conversation takes when its panel is reopened). */
+  overlaps = false
 ): WindowChange {
   if (prev.length === 0 && next.length === 0) return "none"
   if (prev.length === 0) return "initial"
@@ -56,7 +70,7 @@ export function classifyWindowChange(
   if (!firstChanged && !lastChanged) return "none"
   if (firstChanged && !lastChanged) return "prepend"
   if (!firstChanged && lastChanged) return "append"
-  return "replace"
+  return overlaps ? "grow" : "replace"
 }
 
 /**
@@ -64,15 +78,21 @@ export function classifyWindowChange(
  * the NET flattened-ROW delta — not the message delta: merging pages can
  * remove the old head's day separator (same-day boundary), and only the row
  * delta keeps every surviving row at its exact global index.
+ *
+ * A `grow` moved BOTH ends, so the net delta would over-shift. There the caller
+ * passes `headShift` — the surviving old head's new row index, i.e. exactly how
+ * many rows landed above it.
  */
 export function nextFirstItemIndex(
   prev: number,
   change: WindowChange,
   prevRowCount: number,
-  rowCount: number
+  rowCount: number,
+  headShift = 0
 ): number {
   if (change === "initial" || change === "replace") return PREPEND_OFFSET
   if (change === "prepend") return prev - (rowCount - prevRowCount)
+  if (change === "grow") return prev - headShift
   return prev
 }
 

@@ -5,9 +5,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
 
-import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
 import { type F0ChatVoiceAttachment } from "../types"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
@@ -233,9 +231,12 @@ const ChatVoiceAttachmentContent = ({
   return (
     <div
       className={cn(
-        // 320px by default, shrinking with the column when it doesn't fit.
-        // The fixed height is also used by the deferred placeholder.
-        "group/voice flex h-[58px] w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        // Stretches to the message column like mobile — a waveform reads better
+        // wide, and it stops the card from looking like a stray chip next to
+        // the album. The fixed height is also used by the deferred placeholder.
+        "group/voice flex h-[58px] w-full min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        // Carries the message's own bubble colour, so a voice note reads as
+        // part of the conversation rather than a neutral attachment.
         isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
         cornerClass,
         className,
@@ -337,36 +338,22 @@ export const ChatVoiceAttachment = ({
   /** Sender-aware surface supplied by a transcript message. */
   surfaceClassName?: string
 }): ReactNode => {
-  const i18n = useI18n()
-  const { ref, shouldMount } = useTranscriptHeavyPreview()
-
+  // Mounts with its row. The card has no chunk to fetch — the waveform decode
+  // it used to wait for is already serialized globally and cached per URL — so
+  // deferring it only ever showed a grey bar where the player was about to be.
+  // The card's own h-[58px] is what reserves the row now.
   return (
     <div
-      ref={ref}
       data-testid="chat-voice-attachment-shell"
       className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
     >
-      {shouldMount ? (
-        <ChatVoiceAttachmentContent
-          voice={voice}
-          isMine={isMine}
-          cornerClass={cornerClass}
-          className={className}
-          surfaceClassName={surfaceClassName}
-        />
-      ) : (
-        <Skeleton
-          role="status"
-          aria-busy={true}
-          aria-label={i18n.audioPlayer.label}
-          className={cn(
-            "h-[58px] w-80 max-w-full animate-none",
-            cornerClass,
-            surfaceClassName
-          )}
-          data-testid="chat-voice-placeholder"
-        />
-      )}
+      <ChatVoiceAttachmentContent
+        voice={voice}
+        isMine={isMine}
+        cornerClass={cornerClass}
+        className={className}
+        surfaceClassName={surfaceClassName}
+      />
     </div>
   )
 }

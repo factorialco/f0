@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -13,7 +13,6 @@ import {
   Reply,
   Plus,
 } from "@/icons/app"
-import { Picker } from "@/sds/social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
@@ -23,6 +22,7 @@ import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { formatClock } from "../utils/natural-time"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "😮", "🙏"]
@@ -86,9 +86,12 @@ export const ChatMessageActions = ({
     retryMessage,
     capabilities,
   } = useF0ChatStable()
-  const { setReplyTo } = useChatReply()
+  const { setReplyTo, focusComposer } = useChatReply()
   const { setEditingMessage } = useChatEdit()
   const [view, setView] = useState<"menu" | "info">("menu")
+  // Set when the menu closes because a reply started: the composer takes focus,
+  // so the popover must not pull it back to the ellipsis trigger.
+  const keepComposerFocusRef = useRef(false)
 
   // Editing is offered on non-deleted messages while the host allows it
   // (provides `editMessage`). The POLICY (whose messages, for how long) comes
@@ -179,6 +182,11 @@ export const ChatMessageActions = ({
       <PopoverContent
         align={isMine ? "end" : "start"}
         className="w-64 rounded-lg border border-solid border-f1-border-secondary p-0"
+        onCloseAutoFocus={(event) => {
+          if (!keepComposerFocusRef.current) return
+          keepComposerFocusRef.current = false
+          event.preventDefault()
+        }}
       >
         {isFailed ? (
           <div className="flex flex-col gap-0 p-1">
@@ -208,13 +216,14 @@ export const ChatMessageActions = ({
                       key={emoji}
                       label={emoji}
                       emoji={emoji}
+                      emojiMode="native"
                       variant="ghost"
                       aria-label={emoji}
                       onClick={() => react(emoji)}
                       className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
                     />
                   ))}
-                  <Picker
+                  <ChatEmojiPickerButton
                     size="md"
                     variant="ghost"
                     label={i18n.chat.react}
@@ -244,6 +253,8 @@ export const ChatMessageActions = ({
                 onClick={runAndClose(() => {
                   setEditingMessage(null)
                   setReplyTo(message)
+                  keepComposerFocusRef.current = true
+                  focusComposer()
                 })}
               />
               <MenuItem

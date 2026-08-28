@@ -51,6 +51,10 @@ type ChatReplyContextValue = {
   /** Message being replied to (quoted in the composer), or null. */
   replyTo: F0ChatMessage | null
   setReplyTo: (message: F0ChatMessage | null) => void
+  /** The composer registers how to focus its textarea. */
+  registerComposerFocus: (fn: () => void) => void
+  /** Move focus (and the caret) to the composer — called when starting a reply. */
+  focusComposer: () => void
 }
 
 type ChatEditContextValue = {
@@ -129,6 +133,7 @@ export const ChatUIProvider = ({
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
   const scrollFnRef = useRef<((id: string) => void) | null>(null)
   const dropFnRef = useRef<((files: File[]) => void) | null>(null)
+  const composerFocusFnRef = useRef<(() => void) | null>(null)
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [imagePreview, setImagePreview] = useState<{
@@ -182,6 +187,14 @@ export const ChatUIProvider = ({
 
   const dropFiles = useCallback((files: File[]) => {
     dropFnRef.current?.(files)
+  }, [])
+
+  const registerComposerFocus = useCallback((fn: () => void) => {
+    composerFocusFnRef.current = fn
+  }, [])
+
+  const focusComposer = useCallback(() => {
+    composerFocusFnRef.current?.()
   }, [])
 
   const openImagePreview = useCallback(
@@ -336,8 +349,8 @@ export const ChatUIProvider = ({
     [highlightedId]
   )
   const replyValue = useMemo<ChatReplyContextValue>(
-    () => ({ replyTo, setReplyTo }),
-    [replyTo]
+    () => ({ replyTo, setReplyTo, registerComposerFocus, focusComposer }),
+    [replyTo, registerComposerFocus, focusComposer]
   )
   const editValue = useMemo<ChatEditContextValue>(
     () => ({ editingMessage, setEditingMessage }),

@@ -150,8 +150,9 @@ describe("connection states", () => {
 })
 
 describe("delivery states", () => {
-  // Sending and legacy messages keep the bare time. Once acknowledged, sent
-  // and delivered share "Sent · time"; read advances to "Read · time".
+  // The footer reports delivery only — the time lives in the bubble. Sent and
+  // delivered share "Sent"; read advances to "Read".
+
   const bareTimeOf = (message: F0ChatMessage) =>
     new Intl.DateTimeFormat(undefined, {
       hour: "2-digit",
@@ -161,24 +162,22 @@ describe("delivery states", () => {
   it("shows the bare time while sending, from the very first frame", () => {
     const message = mine("sending")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
+    // The bubble carries its own clock now, so the footer's bare time is no
+    // longer the only match — both must read the same.
+    expect(screen.getAllByText(bareTimeOf(message)).length).toBeGreaterThan(0)
     expect(screen.queryByText("Sending…")).not.toBeInTheDocument()
   })
 
-  it("shows sent with the time once the message is acknowledged", () => {
+  it("shows sent once the message is acknowledged", () => {
     const message = mine("sent")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(
-      screen.getByText(`Sent · ${bareTimeOf(message)}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
   })
 
   it("keeps delivered under the sent footer label", () => {
     const message = mine("delivered")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(
-      screen.getByText(`Sent · ${bareTimeOf(message)}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
     expect(screen.queryByText(/^Delivered/)).not.toBeInTheDocument()
   })
 

@@ -261,73 +261,26 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
     ).toBeInTheDocument()
   })
 
-  it("keeps an offscreen document stable until it enters the near viewport", async () => {
+  // The card no longer waits to be seen — it mounts with its row, and the
+  // skeleton under the snapshot covers pdf.js, which mounts fast but PAINTS
+  // asynchronously. What must not change is the box: 160px whether or not the
+  // page has rendered, so the row is never measured twice.
+  it("reserves the snapshot box and renders without waiting to be seen", async () => {
     pdfPageRenderControl.deferred = true
-    let callback: IntersectionObserverCallback = () => undefined
-    let observerOptions: IntersectionObserverInit | undefined
-    const observe = vi.fn()
-    const unobserve = vi.fn()
-    const disconnect = vi.fn()
-    const observer = {
-      observe,
-      unobserve,
-      disconnect,
-      takeRecords: () => [],
-      root: null,
-      rootMargin: "200px",
-      thresholds: [0],
-    } as unknown as IntersectionObserver
-
-    vi.stubGlobal(
-      "IntersectionObserver",
-      class {
-        constructor(
-          nextCallback: IntersectionObserverCallback,
-          options?: IntersectionObserverInit
-        ) {
-          callback = nextCallback
-          observerOptions = options
-        }
-        observe = observe
-        unobserve = unobserve
-        disconnect = disconnect
-        takeRecords = () => []
-      }
-    )
 
     renderChat([pdfAttachment])
 
     const openButton = screen.getByRole("button", {
       name: "Open report.pdf",
     })
-    const target = observe.mock.calls[0]?.[0] as Element
-    expect(observerOptions).toEqual({ root: expect.any(HTMLElement) })
     expect(openButton).toHaveAttribute("aria-busy", "true")
     expect(openButton).toHaveStyle({ height: "160px" })
-    expect(
-      screen.queryByTestId("chat-document-snapshot")
-    ).not.toBeInTheDocument()
-    expect(pdfDocumentRender).not.toHaveBeenCalled()
-
-    act(() => {
-      callback(
-        [{ isIntersecting: false, target } as IntersectionObserverEntry],
-        observer
-      )
-    })
-    expect(pdfDocumentRender).not.toHaveBeenCalled()
-
-    act(() => {
-      callback(
-        [{ isIntersecting: true, target } as IntersectionObserverEntry],
-        observer
-      )
-    })
 
     await waitFor(() =>
       expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument()
     )
     expect(openButton).toHaveAttribute("aria-busy", "true")
+    expect(openButton).toHaveStyle({ height: "160px" })
     expect(pdfPageRenderControl.callbacks).not.toHaveLength(0)
 
     act(() => {
@@ -336,7 +289,6 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
       })
     })
     await waitFor(() => expect(openButton).not.toHaveAttribute("aria-busy"))
-    expect(unobserve).toHaveBeenCalledWith(target)
-    expect(disconnect).not.toHaveBeenCalled()
+    expect(openButton).toHaveStyle({ height: "160px" })
   })
 })

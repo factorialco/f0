@@ -28,7 +28,7 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
  * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding). */
 const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
   if (isFirstRow) return "pt-2"
-  if (row.type === "message") return row.isFirstOfRun ? "pt-3" : "pt-0"
+  if (row.type === "message") return row.isFirstOfRun ? "pt-5" : "pt-0"
   // The status footer hugs its message (MessageStatus brings its own pt-1).
   if (row.type === "footer") return "pt-0"
   return "pt-3"
@@ -153,7 +153,7 @@ const ChatMessageRowRendererComponent = ({
     // sending a message only APPENDS rows — nothing shrinks, nothing shifts.
     const showFooterGutter = isGroup && !row.message.isMine
     return (
-      <div className={cn("flex w-full gap-2", spacing)}>
+      <div className={cn("flex w-full gap-1.5", spacing)}>
         {showFooterGutter && <span aria-hidden className="size-5 shrink-0" />}
         <div className="min-w-0 flex-1">
           <MessageStatus message={row.message} isGroup={isGroup} />
@@ -174,7 +174,7 @@ const ChatMessageRowRendererComponent = ({
   const bubbleGutter = showIdentity ? (
     isLastOfRun ? (
       <ChatUserHoverCard user={message.author}>
-        <span className="shrink-0 cursor-default pb-1 flex items-end">
+        <span className="shrink-0 cursor-default flex items-end">
           {avatarFor(message.author)}
         </span>
       </ChatUserHoverCard>

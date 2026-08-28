@@ -199,7 +199,7 @@ describe("ChatVideoAttachment", () => {
     )
 
     const card = screen.getByTestId("chat-video-attachment")
-    expect(card).toHaveClass("w-[36rem]", "max-w-full", "aspect-video")
+    expect(card).toHaveClass("w-[min(24rem,70%)]", "max-w-full", "aspect-video")
     expect(card).not.toHaveClass("w-full")
     const poster = container.querySelector<HTMLImageElement>(
       'img[src="https://cdn.example.com/poster.webp"]'
@@ -241,8 +241,14 @@ describe("ChatVideoAttachment", () => {
       />
     )
 
-    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+    // The card itself letterboxes on a neutral dark surface — the sender tint
+    // is for card chrome, never for the bars around someone's pixels. It still
+    // reaches the empty-poster skeleton, which IS chrome.
+    expect(screen.getByTestId("chat-video-attachment")).not.toHaveClass(
       surfaceClassName
+    )
+    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+      "bg-[hsl(222_31%_11%)]"
     )
     expect(screen.getByTestId("skeleton")).toHaveClass(surfaceClassName)
   })
@@ -296,7 +302,11 @@ describe("ChatVideoAttachment", () => {
     const videoCards = screen.getAllByTestId("chat-video-attachment")
     expect(videoCards).toHaveLength(2)
     for (const card of videoCards) {
-      expect(card).toHaveClass("w-[36rem]", "max-w-full", "aspect-video")
+      expect(card).toHaveClass(
+        "w-[min(24rem,70%)]",
+        "max-w-full",
+        "aspect-video"
+      )
     }
 
     expect(screen.getByText("source-deck.pptx")).toBeInTheDocument()

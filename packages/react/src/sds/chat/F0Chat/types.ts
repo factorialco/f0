@@ -100,8 +100,22 @@ export type F0ChatImageAttachment = {
   kind: "image"
   url: string
   thumbnailUrl?: string
+  /**
+   * A tiny (~40px) version of the same photo, used blurred underneath while the
+   * real one arrives. Distinct from `thumbnailUrl`, which hosts use for a
+   * display-sized derivative — this one is only ever seen out of focus, so the
+   * smaller the better.
+   *
+   * Optional: without it the tile simply shows the sender's tint until the
+   * photo paints. Hosts on a CDN that resizes on the fly can derive it from
+   * `url` (Stream, for instance, takes `?w=40&resize=clip`).
+   */
+  blurUrl?: string
   name: string
   mimeType?: string
+  /** Intrinsic size. Drives the album cell's aspect ratio, so the box is
+   * reserved before the photo arrives; without it the cell falls back to a
+   * square. */
   width?: number
   height?: number
 }

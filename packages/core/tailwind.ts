@@ -9,7 +9,7 @@ import {
   pageSpacing,
   relativeSpacing,
 } from "./src/tokens/spacing"
-import { fontSize, fontWeight } from "./src/tokens/typography"
+import { fontFamily, fontSize, fontWeight } from "./src/tokens/typography"
 
 export const baseConfig: Omit<Config, "content"> = {
   darkMode: "class",
@@ -27,7 +27,8 @@ export const baseConfig: Omit<Config, "content"> = {
     },
     colors: baseColors,
     fontFamily: {
-      sans: ["Inter", "sans-serif"],
+      sans: [...fontFamily.sans],
+      emoji: [...fontFamily.emoji],
     },
     fontWeight,
     fontSize: Object.fromEntries(

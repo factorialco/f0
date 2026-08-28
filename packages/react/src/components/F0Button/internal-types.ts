@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import { type EmojiRenderMode } from "@/lib/emojis"
 import {
   ActionButtonVariant,
   ActionProps,
@@ -83,6 +84,11 @@ export type ButtonInternalProps = Pick<
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string
+    /**
+     * How that emoji is drawn — a twemoji image by default, or the system glyph
+     * with `"native"`. See {@link EmojiRenderMode}.
+     */
+    emojiMode?: EmojiRenderMode
     /**
      * Hides the label visually (for icon-only or emoji-only buttons), but keeps it accessible for screen readers.
      */

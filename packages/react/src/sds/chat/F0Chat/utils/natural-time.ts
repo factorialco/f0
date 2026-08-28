@@ -64,18 +64,3 @@ export function formatSeparator(
 ): string {
   return `${formatRelativeDay(date, now, labels, locale)} ${formatClock(date, locale)}`
 }
-
-/**
- * Status timestamp (e.g. next to "Read"): just the clock when today, otherwise
- * the relative day + clock so old receipts still read naturally.
- */
-export function formatStatusTime(
-  date: Date,
-  now: Date,
-  labels: NaturalTimeLabels,
-  locale?: string
-): string {
-  return calendarDaysApart(date, now) <= 0
-    ? formatClock(date, locale)
-    : formatSeparator(date, now, labels, locale)
-}

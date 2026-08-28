@@ -92,12 +92,16 @@ describe("ChatVoiceAttachment", () => {
     await waitFor(() => expect(decodeAudioData).toHaveBeenCalledTimes(2))
   })
 
-  it("defaults to 320px and never exceeds its container", () => {
+  // Stretches to the message column (mobile does the same): a wide waveform is
+  // easier to scrub, and a fixed 320px card read as a stray chip beside media
+  // that now shares one width.
+  it("fills the message column and never exceeds it", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const card = screen.getByTestId("chat-voice-attachment")
-    expect(card.className).toContain("w-80")
+    expect(card.className).toContain("w-full")
     expect(card.className).toContain("max-w-full")
     expect(card.className).toContain("min-w-0")
+    expect(card.className).toContain("h-[58px]")
   })
 
   it("shows the total duration before playback starts", () => {

@@ -7,13 +7,15 @@ import { cn } from "@/lib/utils"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
-import { formatStatusTime } from "../utils/natural-time"
+import { deliveryState } from "../utils/delivery-status"
 
 /**
- * Footer under the conversation's last message. My settled messages show
- * "Sent · hh:mm" until the read state is reached; group messages only advance
- * to "Read · hh:mm" once every other channel member appears in the receipt
- * count. Reader identities and counts remain available in the Info panel.
+ * Footer under the conversation's last message: "Sent", advancing to "Read".
+ *
+ * Delivery only — no time. Every bubble carries its own clock now, so repeating
+ * it here said the same thing twice and buried the one thing this row exists
+ * for. Group messages only advance to "Read" once every other member appears in
+ * the receipt count; identities and counts stay in the Info panel.
  */
 export const MessageStatus = ({
   message,
@@ -26,33 +28,18 @@ export const MessageStatus = ({
   const { reducedMotion } = useChatRenderConfig()
   const { channel } = useF0Chat()
 
-  const time = formatStatusTime(new Date(message.createdAt), new Date(), {
-    today: i18n.date.groups.today,
-    yesterday: i18n.date.groups.yesterday,
+  const state = deliveryState(message, {
+    isGroup,
+    memberCount: channel.memberCount,
   })
+  if (!state) return null
 
-  let label = time
-  if (message.isMine) {
-    const readByCount = message.readBy?.length ?? message.readByCount
-    const expectedGroupReaders =
-      isGroup && channel.memberCount != null
-        ? Math.max(0, channel.memberCount - 1)
-        : undefined
-    const hasCompleteGroupReceipts =
-      expectedGroupReaders == null ||
-      expectedGroupReaders === 0 ||
-      (readByCount != null && readByCount >= expectedGroupReaders)
-    const isRead =
-      message.status === "read" && (!isGroup || hasCompleteGroupReceipts)
-    const isSettled =
-      message.status === "sent" ||
-      message.status === "delivered" ||
-      message.status === "read"
-
-    if (message.status === "failed") label = `${i18n.chat.notSent} · ${time}`
-    else if (isSettled)
-      label = `${isRead ? i18n.chat.read : i18n.chat.sent} · ${time}`
-  }
+  const label =
+    state === "failed"
+      ? i18n.chat.notSent
+      : state === "read"
+        ? i18n.chat.read
+        : i18n.chat.sent
 
   return (
     <div

@@ -272,6 +272,15 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 ### Behavior
 
+- WHEN consecutive messages from the same author form a run → THEN the tail-side
+  corners chain: the top corner tucks in while the run continues above, the
+  bottom corner tucks in while another message follows, and the **last** message
+  of the run pulls its bottom tail corner in to 4px so the stack ends on a point
+  aimed at the sender's own side. Exactly one message per run carries it,
+  including a run of one.
+- WHEN the last message of a run is media-only → THEN the point lands on its
+  bottom-most card (album, video, location, voice or document), because the
+  chaining is computed per stacked element rather than per message.
 - WHEN a user provides <code>avatarColor</code> → THEN incoming bubbles, the
   sender name, and inline media and document surfaces share that stable accent.
   Link previews, file items, and failed-preview file fallbacks use neutral grey
@@ -284,9 +293,9 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
 - WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
-- WHEN a sent group message is still missing readers → THEN its footer shows `Sent · time` without exposing a count.
-- WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.
-- WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent · time`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
+- WHEN a sent group message is still missing readers → THEN its footer shows `Sent` without exposing a count.
+- WHEN every other channel member has read the message → THEN its footer advances to `Read`.
+- WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
 - WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
 - WHEN reader identities appear in message Info → THEN each row displays only the reader avatar and name, without links or hover cards.
 - WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
@@ -301,6 +310,13 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN an emoji autocomplete option is selected → THEN F0 replaces only the active `:query`, preserves surrounding message text, inserts one separating space, and restores the textarea focus and caret.
 - WHEN an exact shortcode or alias is completed with a closing colon, such as `:smile:` or `:thumbsup:` → THEN F0 converts it in place without requiring the suggestion list.
 - WHEN `:` belongs to another token such as a URL or time → THEN F0 leaves the composer unchanged and does not open emoji suggestions.
+- WHEN a message, reaction, quick-reaction row, or emoji suggestion contains an emoji → THEN F0 renders the reader's own system glyph rather than substituting an image, so emoji look the same here as everywhere else on their machine. The channel icon in the header and the sidebar is not part of a conversation and keeps the shared twemoji rendering.
+- WHEN the emoji picker is opened from the composer, the message action menu, or beside the reaction pills → THEN F0 shows **F0Chat's own picker**: system glyphs, F0 tokens, no shadow DOM. The rest of the product — post reactions, surveys, the channel icon input — deliberately keeps the emoji-mart picker, so nothing outside a conversation changes. Two pickers coexist on purpose; this is not a half-finished migration.
+- WHEN the picker opens with no room below the trigger → THEN it flips above it, and when neither side fits it shrinks the emoji grid only, holding the search box and the category bar in place. Its floor is 180px.
+- WHEN the browser asks for a language emojibase ships → THEN F0 lazily loads that language's emoji names and tags and layers them over the English index, so "fuego" and "fire" both find 🔥. English is never fetched — it is already bundled — and a failed load leaves the search working in English.
+- WHEN the running platform cannot draw an emoji — a release newer than its font, or a sequence it splits into parts → THEN F0 leaves that emoji out of the picker and the `:` suggestions instead of offering a tofu box. Emoji arriving in a received message are shown as-is.
+- WHEN emoji support cannot be measured (no canvas, a sandboxed frame, server rendering) → THEN F0 offers the complete set rather than hiding emoji on the strength of a failed probe.
+- WHEN emoji are typed into the composer → THEN the highlight overlay stays off and the native textarea keeps its own text, so IME composition remains visible. Only mentions and ghost completions turn the overlay on.
 - WHEN an image, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders an image-sized square preview immediately while the upload continues.
 - WHEN a video enters the composer → THEN F0 keeps the same compact height but renders a wider 16:9 preview so its media type is visually distinct.
 - WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
@@ -313,9 +329,11 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
 - WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
 - WHEN a bubble attachment has an inline or document preview → THEN F0 omits the redundant download action from the bubble; download remains available inside the document viewer or video-player controls, while files without a preview and failed previews keep their downloadable file chip.
-- WHEN a video, map, document, or voice attachment is rendered only by transcript overscan → THEN its stable placeholder remains mounted and its expensive implementation remains unmounted without starting media or parsing work.
-- WHEN a heavy attachment becomes partially or fully visible → THEN it joins the transcript queue; after readiness and 250 ms without scrolling, F0 prepares and mounts one preview per paint turn.
-- WHEN scrolling resumes → THEN pending heavy previews pause, while previews that already mounted remain available until their virtual row leaves the window.
+- WHEN an attachment's row is rendered — including rows the transcript mounts ahead of the viewport → THEN F0 mounts the real attachment and starts fetching it, rather than holding a placeholder until it is seen. Every attachment's box is reserved by its own layout (aspect ratio or fixed height), so this never re-measures a row.
+- WHEN a photo has not arrived yet → THEN its cell shows the sender's surface, or the low-resolution `blurUrl` blurred beneath it when the host supplies one; F0 never covers a photo with a loading placeholder.
+- WHEN a row scrolls near the viewport → THEN F0 decodes the images of the rows just beyond the rendered window, biased in the direction of travel, and remembers each URL for the life of the conversation — so scrolling back over history already read shows those photos immediately even though their rows were destroyed in between.
+- WHEN a map attachment is rendered ahead of the viewport → THEN it stays unmounted until it first intersects, because each map holds a live WebGL context and browsers cap how many may exist at once. Every other attachment mounts with its row.
+- WHEN a document snapshot is mounting → THEN its skeleton stays beneath the snapshot until the renderer paints, because pdf.js, SheetJS and docx-preview mount quickly but render asynchronously.
 - WHEN a video player initializes → THEN its 16:9 poster or placeholder keeps the final player dimensions until media data is ready, while the player controls remain available for browsers that require a user gesture to load video.
 - WHEN a conversation or replaced message window enters → THEN F0 keeps a neutral surface while Virtuoso hides its provisional list and reveals the transcript only after the viewport is stable for two paint frames.
 - WHEN an older page is prepended → THEN F0 keeps the same Virtuoso instance and changes only `firstItemIndex`, leaving measured-anchor retention to Virtuoso.
@@ -370,7 +388,7 @@ The message action menu opens the Info panel with standard button navigation. It
 
 ### Screen reader behavior
 
-Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces asynchronous transitions from “Sent” to “Read” together with the message time.
+Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces the asynchronous transition from “Sent” to “Read”. It reports delivery only — the time belongs to the message itself, which carries it in its own bubble.
 
 Attachment actions include the filename in their accessible names. Each video
 player is contained in a figure named after its file and exposes a contextual

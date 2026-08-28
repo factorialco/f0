@@ -78,6 +78,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       readonly,
       buttonToggle,
       transparent,
+      // Forwarded by NAME rather than left in the spread: F0InputField clones
+      // the inner input with its own aria props, and an explicit `undefined`
+      // there overwrites whatever the spread had already set. `aria-controls`
+      // and `aria-expanded` were reaching F0InputField from nowhere for exactly
+      // that reason, so a combobox built on Input announced nothing.
+      "aria-controls": ariaControls,
+      "aria-expanded": ariaExpanded,
+      "aria-activedescendant": ariaActiveDescendant,
+      "aria-autocomplete": ariaAutocomplete,
       ...props
     },
     ref
@@ -100,6 +109,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         placeholder={placeholder || ""}
         size={size}
         role={role}
+        aria-controls={ariaControls}
+        aria-expanded={ariaExpanded}
+        aria-activedescendant={ariaActiveDescendant}
+        aria-autocomplete={ariaAutocomplete}
         isEmpty={isEmpty}
         emptyValue={emptyValue as string}
         maxLength={maxLength}

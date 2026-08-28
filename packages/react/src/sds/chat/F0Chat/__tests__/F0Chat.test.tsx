@@ -170,12 +170,12 @@ describe("F0Chat", () => {
   it("shows the read status under the last message (mine)", () => {
     renderChat(makeRuntime())
     const status = screen.getByRole("status")
-    expect(status).toHaveTextContent(`Read · ${formatClock(new Date(now))}`)
+    expect(status).toHaveTextContent("Read")
     expect(status).toHaveAttribute("aria-live", "polite")
     expect(status).toHaveAttribute("aria-atomic", "true")
   })
 
-  it("shows sent with the time until a direct message is read", () => {
+  it("shows sent until a direct message is read", () => {
     renderChat(
       makeRuntime({
         messages: [
@@ -191,9 +191,7 @@ describe("F0Chat", () => {
       })
     )
 
-    expect(
-      screen.getByText(`Sent · ${formatClock(new Date(now))}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
   })
 
   it("updates the stable live region from sent to read", () => {
@@ -211,7 +209,7 @@ describe("F0Chat", () => {
       })
     )
     const status = screen.getByRole("status")
-    expect(status).toHaveTextContent(`Sent · ${formatClock(new Date(now))}`)
+    expect(status).toHaveTextContent("Sent")
 
     rerender(
       <F0ChatProvider
@@ -224,10 +222,13 @@ describe("F0Chat", () => {
     )
 
     expect(screen.getByRole("status")).toBe(status)
-    expect(status).toHaveTextContent(`Read · ${formatClock(new Date(now))}`)
+    expect(status).toHaveTextContent("Read")
   })
 
-  it("keeps the legacy bare time when the message status is omitted", () => {
+  // A host that reports no delivery status has nothing for this row to say —
+  // and the time it used to fall back to is on the bubble now. Skipping the row
+  // outright keeps the virtualizer from measuring an empty one.
+  it("omits the footer entirely when the message status is omitted", () => {
     renderChat(
       makeRuntime({
         messages: [
@@ -242,9 +243,26 @@ describe("F0Chat", () => {
       })
     )
 
-    const status = screen.getByRole("status")
-    expect(status).toHaveTextContent(formatClock(new Date(now)))
-    expect(status).not.toHaveTextContent(/Sent|Read/)
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(screen.getByText("No delivery status")).toBeInTheDocument()
+  })
+
+  it("omits the footer when the last message is incoming", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "incoming-last",
+            author: { id: "other", name: "María José" },
+            body: "Your turn",
+            createdAt: now,
+            isMine: false,
+          },
+        ],
+      })
+    )
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
   })
 
   it("deletes a message from its actions menu", async () => {
@@ -292,6 +310,39 @@ describe("F0Chat", () => {
     )
   })
 
+  it("focuses the composer when a reply starts, caret after what was typed", async () => {
+    renderChat(makeRuntime())
+    const input = screen.getByPlaceholderText(/write something here/i)
+    await userEvent.type(input, "draft")
+    input.blur()
+
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[0])
+    await userEvent.click(screen.getByRole("button", { name: /^Reply$/i }))
+
+    // The popover hands focus to the composer instead of back to its trigger.
+    await waitFor(() => expect(input).toHaveFocus())
+    expect((input as HTMLTextAreaElement).selectionStart).toBe("draft".length)
+  })
+
+  it("re-focuses the composer when replying again to the same message", async () => {
+    renderChat(makeRuntime())
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[0])
+    await userEvent.click(screen.getByRole("button", { name: /^Reply$/i }))
+
+    const input = screen.getByPlaceholderText(/write something here/i)
+    await waitFor(() => expect(input).toHaveFocus())
+    input.blur()
+
+    // Same reply target — the focus must not depend on the state changing.
+    await userEvent.click(
+      screen.getAllByRole("button", { name: /message actions/i })[0]
+    )
+    await userEvent.click(screen.getByRole("button", { name: /^Reply$/i }))
+    await waitFor(() => expect(input).toHaveFocus())
+  })
+
   it("edits my message from its actions menu, prefilling the composer", async () => {
     const editMessage = vi.fn()
     renderChat(makeRuntime({ editMessage, editWindowMs: 60_000 }))
@@ -313,6 +364,21 @@ describe("F0Chat", () => {
       "m2",
       expect.objectContaining({ body: "Hi back again" })
     )
+  })
+
+  it("keeps the real textarea visible while typing emoji", async () => {
+    renderChat(makeRuntime())
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "vale 🎉")
+
+    // The highlight overlay used to switch on for any emoji so it could paint
+    // twemoji over them, which meant hiding the textarea behind a transparent
+    // copy — and taking IME composition with it. Nothing paints emoji now, so
+    // the overlay stays off and the native field keeps its own text.
+    expect(input.className).toContain("text-f1-foreground")
+    expect(input.className).not.toContain("text-transparent")
+    expect(input).toHaveValue("vale 🎉")
   })
 
   it("cancels an edit, clearing the composer", async () => {
@@ -378,7 +444,9 @@ describe("F0Chat", () => {
         ],
       })
     )
-    expect(screen.getByText("edited")).toBeInTheDocument()
+    expect(screen.getAllByTestId("chat-message-time")[0]).toHaveTextContent(
+      /^edited · /
+    )
   })
 
   it("shows 'edited' on an edited attachment-only message (no text bubble)", () => {
@@ -400,7 +468,9 @@ describe("F0Chat", () => {
         ],
       })
     )
-    expect(screen.getByText("edited")).toBeInTheDocument()
+    expect(screen.getAllByTestId("chat-message-time")[0]).toHaveTextContent(
+      /^edited · /
+    )
   })
 
   it("colors media attachments but keeps file items neutral", () => {
@@ -457,21 +527,66 @@ describe("F0Chat", () => {
     const fileItem = screen.getByText("source-deck.pptx").parentElement
     expect(fileItem).toHaveClass("bg-f1-background-tertiary")
     expect(fileItem).not.toHaveClass(surfaceClassName)
-    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+    // Video letterboxes on a neutral dark surface instead: the sender colour
+    // tints chrome, never the bars around someone's pixels.
+    expect(screen.getByTestId("chat-video-attachment")).not.toHaveClass(
       surfaceClassName
     )
     expect(screen.getByTestId("chat-location-attachment")).toHaveClass(
       surfaceClassName
     )
-    expect(screen.getByTestId("chat-voice-placeholder")).toHaveClass(
+    expect(screen.getByTestId("chat-voice-attachment")).toHaveClass(
       surfaceClassName
     )
-    expect(screen.getByTestId("chat-image-attachment")).toHaveClass(
+    // The album container owns the chained corner and clips its cells, so the
+    // interior seams stay square (WhatsApp does the same).
+    expect(screen.getByTestId("chat-image-album")).toHaveClass("rounded-bl-sm")
+    expect(screen.getByTestId("chat-image-attachment")).not.toHaveClass(
       "rounded-bl-sm"
     )
-    expect(
-      screen.getByText("Attachment caption").closest(".rounded-2xl")
-    ).toHaveClass("rounded-tl-sm")
+    // …and the caption, being the bottom of the stack AND the end of the run,
+    // is where the squared point lands.
+    const caption = screen
+      .getByText("Attachment caption")
+      .closest(".rounded-2xl")
+    expect(caption).toHaveClass("rounded-tl-sm")
+    expect(caption).toHaveClass("rounded-bl-2xs")
+  })
+
+  it("gives a media-only message the run-end point on its card", () => {
+    const author = {
+      id: "other",
+      name: "María José",
+      avatarColor: "orange" as const,
+    }
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Team",
+          avatar: { type: "company", name: "Team" },
+          memberCount: 3,
+        },
+        messages: [
+          {
+            id: "media-only",
+            author,
+            body: "",
+            createdAt: now,
+            isMine: false,
+            attachments: [
+              { kind: "image", url: "blob:img", name: "photo.png" },
+            ],
+          },
+        ],
+      })
+    )
+
+    // No bubble at all here — the album carries the shape, which is exactly
+    // why the squared corner works everywhere and a protruding tail would not
+    // (these cards clip with overflow-hidden).
+    expect(screen.getByTestId("chat-image-album")).toHaveClass("rounded-bl-2xs")
   })
 
   it("keeps my attachment surfaces neutral", () => {
@@ -1329,9 +1444,7 @@ describe("F0Chat", () => {
         ],
       })
     )
-    expect(
-      screen.getByText(`Sent · ${formatClock(new Date(now))}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
     expect(screen.queryByText(/read by 2/i)).not.toBeInTheDocument()
 
     await userEvent.click(
@@ -1368,7 +1481,7 @@ describe("F0Chat", () => {
     expect(readers.contains(document.activeElement)).toBe(false)
   })
 
-  it("shows read with the time once every channel member has read it", () => {
+  it("shows read once every channel member has read it", () => {
     renderChat(
       makeRuntime({
         channel: {
@@ -1395,9 +1508,7 @@ describe("F0Chat", () => {
       })
     )
 
-    expect(
-      screen.getByText(`Read · ${formatClock(new Date(now))}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Read")).toBeInTheDocument()
     expect(screen.queryByText(/read by 2/i)).not.toBeInTheDocument()
   })
 
@@ -1424,9 +1535,7 @@ describe("F0Chat", () => {
       })
     )
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      `Sent · ${formatClock(new Date(now))}`
-    )
+    expect(screen.getByRole("status")).toHaveTextContent("Sent")
   })
 
   it("shows a single-member group as read without receipt rows", () => {
@@ -1452,9 +1561,7 @@ describe("F0Chat", () => {
       })
     )
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      `Read · ${formatClock(new Date(now))}`
-    )
+    expect(screen.getByRole("status")).toHaveTextContent("Read")
   })
 
   it("trusts the group message status when member count is unavailable", () => {
@@ -1480,9 +1587,7 @@ describe("F0Chat", () => {
       })
     )
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      `Read · ${formatClock(new Date(now))}`
-    )
+    expect(screen.getByRole("status")).toHaveTextContent("Read")
   })
 
   it("keeps the legacy group read count inside the info panel", async () => {
@@ -1508,9 +1613,7 @@ describe("F0Chat", () => {
         ],
       })
     )
-    expect(
-      screen.getByText(`Read · ${formatClock(new Date(now))}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Read")).toBeInTheDocument()
     expect(screen.queryByText(/read by 3/i)).not.toBeInTheDocument()
 
     await userEvent.click(

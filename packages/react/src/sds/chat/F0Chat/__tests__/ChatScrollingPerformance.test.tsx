@@ -300,9 +300,12 @@ describe("chat scrolling performance wiring", () => {
       top: 1200,
       bottom: 200,
     })
+    // The downward pixel budget is smaller than one media row, so the item
+    // floor is the reader's whole runway there — and now that media fetches on
+    // mount, that runway is what it gets to arrive in.
     expect(virtuosoHarness.minOverscanItemCount).toEqual({
       top: 6,
-      bottom: 3,
+      bottom: 5,
     })
     expect(virtuosoHarness.skipAnimationFrameInResizeObserver).toBe(true)
 
@@ -409,7 +412,7 @@ describe("chat scrolling performance wiring", () => {
     expect(screen.getAllByTestId("skeleton")).toHaveLength(2)
   })
 
-  it("coalesces a burst of measure-strip corrections before paint", async () => {
+  it("writes measure-strip corrections synchronously, skipping no-op repeats", async () => {
     const { container } = render(
       <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
         <F0Chat />
@@ -430,14 +433,19 @@ describe("chat scrolling performance wiring", () => {
       set: heightSetter,
     })
 
+    // Virtuoso reads this scroller's scrollHeight synchronously inside its own
+    // ResizeObserver, and the strip is what produces that height — deferring
+    // the write made it publish a stale one, and the late shrink then let the
+    // browser clamp scrollTop mid-resize.
     await act(async () => {
       virtuosoHarness.setHeight?.(100)
       virtuosoHarness.setHeight?.(200)
       virtuosoHarness.setHeight?.(300)
+      virtuosoHarness.setHeight?.(300)
       await Promise.resolve()
     })
 
-    expect(heightSetter).toHaveBeenCalledOnce()
-    expect(heightSetter).toHaveBeenCalledWith("300px")
+    expect(heightSetter).toHaveBeenCalledTimes(3)
+    expect(heightSetter).toHaveBeenLastCalledWith("300px")
   })
 })

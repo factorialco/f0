@@ -418,7 +418,7 @@ const StormHud = ({
   }, [commitsRef])
 
   return (
-    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-xs text-f1-foreground shadow-md">
+    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-sm text-f1-foreground shadow-md">
       <div>
         {fps} fps · {eventsPerSecond} ev/s
       </div>

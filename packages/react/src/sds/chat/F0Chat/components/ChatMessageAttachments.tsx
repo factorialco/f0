@@ -3,19 +3,26 @@ import { type ReactNode } from "react"
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { type F0ChatMessage } from "../types"
+import { albumCells } from "../utils/album-layout"
 import { partitionChatAttachments } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
+import {
+  CHAT_ALBUM_GAP_CLASS,
+  CHAT_ALBUM_MORE_CLASS,
+  CHAT_MEDIA_WIDTH_CLASS,
+} from "../utils/media-layout"
 import { messageSurfaceColorClass } from "../utils/sender-color"
 import { bubbleCornerClass } from "./ChatBubble"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
+import { ChatImageTile } from "./ChatImageTile"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
+import { ChatMessageMeta } from "./ChatMessageMeta"
 import { ChatVideoAttachment } from "./ChatVideoAttachment"
 import { ChatVoiceAttachment } from "./ChatVoiceAttachment"
-import { FadeInImage } from "./FadeInImage"
 
 /**
  * Attachments shown above a message bubble — images render inline (clickable to
@@ -54,9 +61,25 @@ export const ChatMessageAttachments = ({
     voices,
   } = partitionChatAttachments(attachments)
   const nonVideoFileCount = documentFiles.length + plainFiles.length
-  // A lone image gets full size; several flow side by side (wrap) as thumbnails
-  // so the message doesn't grow tall.
-  const singleImage = images.length === 1
+
+  // With no caption below, the message's own time has to live on the media.
+  // Rendering order is images → videos → locations → voices → documents →
+  // chips, so the LAST non-empty block hosts it. Surfaces with room take a
+  // scrim overlay; a voice card (fixed 58px, right slot already spoken for)
+  // and file chips (foreign markup) fall back to a line underneath.
+  const metaHost: "image" | "video" | "location" | "below" | null =
+    message.body.trim().length > 0 || message.replyTo || message.deleted
+      ? null
+      : nonVideoFileCount > 0 || voices.length > 0
+        ? "below"
+        : locations.length > 0
+          ? "location"
+          : videoFiles.length > 0
+            ? "video"
+            : images.length > 0
+              ? "image"
+              : null
+
   // Chained corners for the media cards, mirroring the bubble's run logic — but
   // aware of what stacks BELOW them inside the same message too: a card only
   // keeps its round bottom corner when nothing follows it (no more media, no
@@ -137,48 +160,52 @@ export const ChatMessageAttachments = ({
       )}
     >
       {images.length > 0 && (
-        <div className={cn("flex flex-wrap gap-1", isMine && "justify-end")}>
-          {images.map((image, i) => (
-            <button
-              key={`${image.url}-${i}`}
-              type="button"
-              onClick={() => openImagePreview(images, i)}
-              className={cn(
-                "flex overflow-hidden transition-opacity hover:opacity-90",
-                focusRing("focus-visible:ring-inset"),
-                singleImage ? imageCorners : "rounded-xl",
-                surfaceClassName
-              )}
-              aria-label={i18n.chat.openImage}
-              data-testid="chat-image-attachment"
-            >
-              <FadeInImage
-                src={image.thumbnailUrl ?? image.url}
-                alt={image.name}
-                // Native width/height reserve the box via aspect-ratio BEFORE
-                // the image loads — no late re-measure shifting the transcript
-                // (adapters should populate the dimensions; Stream sends
-                // original_width/height). Without both, a fixed fallback box
-                // avoids a late Virtuoso height correction.
-                width={singleImage ? image.width : undefined}
-                height={singleImage ? image.height : undefined}
-                className={cn(
-                  "border border-solid border-f1-border-secondary object-cover",
-                  surfaceClassName,
-                  // A lone image follows the bubble's chained corners; grid
-                  // thumbnails keep the uniform radius.
-                  singleImage
-                    ? cn(
-                        imageCorners,
-                        "h-auto max-h-60 w-auto max-w-full",
-                        (image.width == null || image.height == null) &&
-                          "h-60 w-80"
-                      )
-                    : "h-28 w-28 rounded-xl"
-                )}
+        // The mosaic clips its own cells, so the cells carry no radius — the
+        // interior seams stay square like WhatsApp's. The hairline lives on the
+        // container for the same reason mobile puts it there: a mostly-white
+        // photo would otherwise dissolve into the transcript background.
+        <div
+          className={cn(
+            "grid grid-cols-2 overflow-hidden border border-solid border-f1-border-secondary",
+            CHAT_MEDIA_WIDTH_CLASS,
+            CHAT_ALBUM_GAP_CLASS,
+            imageCorners
+          )}
+          data-testid="chat-image-album"
+        >
+          {albumCells(images).map((cell, cellIndex, cells) => {
+            const image = images[cell.index]
+            if (!image) return null
+            const hostsMeta =
+              metaHost === "image" && cellIndex === cells.length - 1
+            return (
+              <ChatImageTile
+                key={`${image.url}-${cell.index}`}
+                image={image}
+                aspectRatio={cell.aspectRatio}
+                spanFull={cell.span === 2}
+                surfaceClassName={surfaceClassName}
+                label={i18n.chat.openImage}
+                onOpen={() => openImagePreview(images, cell.index)}
+                overlay={
+                  cell.hiddenCount > 0 ? (
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute inset-0 flex items-center justify-center text-2xl font-semibold text-f1-foreground-inverse",
+                        CHAT_ALBUM_MORE_CLASS
+                      )}
+                      data-testid="chat-image-album-more"
+                    >
+                      {`+${cell.hiddenCount}`}
+                    </span>
+                  ) : hostsMeta ? (
+                    <ChatMessageMeta message={message} placement="overlay" />
+                  ) : undefined
+                }
               />
-            </button>
-          ))}
+            )
+          })}
         </div>
       )}
       {videoFiles.map((file, i) => (
@@ -187,6 +214,11 @@ export const ChatMessageAttachments = ({
           file={file}
           cornerClass={videoCorners(i)}
           surfaceClassName={surfaceClassName}
+          meta={
+            metaHost === "video" && i === videoFiles.length - 1 ? (
+              <ChatMessageMeta message={message} placement="overlay" />
+            ) : undefined
+          }
         />
       ))}
       {locations.map((location, i) => (
@@ -195,6 +227,11 @@ export const ChatMessageAttachments = ({
           location={location}
           cornerClass={locationCorners(i)}
           surfaceClassName={surfaceClassName}
+          meta={
+            metaHost === "location" && i === locations.length - 1 ? (
+              <ChatMessageMeta message={message} placement="overlay" />
+            ) : undefined
+          }
         />
       ))}
       {voices.map((voice, i) => (
@@ -233,6 +270,9 @@ export const ChatMessageAttachments = ({
             />
           ))}
         </div>
+      )}
+      {metaHost === "below" && (
+        <ChatMessageMeta message={message} placement="below" />
       )}
     </div>
   )

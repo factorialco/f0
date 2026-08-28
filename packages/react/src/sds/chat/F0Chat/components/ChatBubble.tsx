@@ -12,6 +12,7 @@ import {
   senderNameColorClass,
 } from "../utils/sender-color"
 import { ChatLinkPreview } from "./ChatLinkPreview"
+import { ChatMessageMeta, ChatMessageMetaLabel } from "./ChatMessageMeta"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
 
@@ -29,6 +30,9 @@ const bubbleCornerClasses = {
     base: "rounded-2xl",
     left: ["rounded-tl-sm", "rounded-bl-sm"],
     right: ["rounded-tr-sm", "rounded-br-sm"],
+    // Pulled in to 4px, so the run ends on a point aimed at its own side.
+    endLeft: "rounded-bl-2xs",
+    endRight: "rounded-br-2xs",
   },
   outer: {
     // The interaction surface wraps the bubble with 2px of padding. Adding
@@ -36,15 +40,26 @@ const bubbleCornerClasses = {
     base: "rounded-[22px]",
     left: ["rounded-tl-[10px]", "rounded-bl-[10px]"],
     right: ["rounded-tr-[10px]", "rounded-br-[10px]"],
+    // The one corner that doesn't take the +2px: at 4px the offset is below
+    // what the eye resolves, and matching the inner radius keeps the point
+    // itself sharp rather than letting the hover surface round it off.
+    endLeft: "rounded-bl-2xs",
+    endRight: "rounded-br-2xs",
   },
 } as const
 
 /**
  * Border-radius classes for a chat bubble given its position in a same-author
- * run: on the tail side, a corner tucks in only when it abuts another bubble
- * from the same author (top when continuing a run, bottom when another follows).
- * Exported so the highlight ring / hover surface in `ChatMessageItem` can follow
- * the exact same shape as the bubble it wraps.
+ * run.
+ *
+ * On the tail side the top corner tucks in while the run continues above, and
+ * the bottom corner takes one of three shapes: tucked while another bubble
+ * follows, and **squared** on the last one — the corner points down at the
+ * sender's own side, which is how Telegram and Messages mark where a stack
+ * ends. Only one bubble per run carries it.
+ *
+ * Exported so the highlight ring / hover surface in `ChatMessageItem`, and the
+ * media cards in `ChatMessageAttachments`, follow the exact same shape.
  */
 export const bubbleCornerClass = ({
   isMine,
@@ -54,14 +69,15 @@ export const bubbleCornerClass = ({
 }: BubbleCornerOptions): string => {
   const profile = bubbleCornerClasses[layer]
   const [topTailCorner, bottomTailCorner] = profile[isMine ? "right" : "left"]
+  const endCorner = isMine ? profile.endRight : profile.endLeft
 
   return cn(
     // The radius transitions because extending a run flips the previous
-    // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
+    // bubble's tail corner (square → sm) — animated, not a dry class swap.
     profile.base,
     "transition-[border-radius] duration-150 motion-reduce:transition-none",
     !isFirstOfRun && topTailCorner,
-    !isLastOfRun && bottomTailCorner
+    isLastOfRun ? endCorner : bottomTailCorner
   )
 }
 
@@ -134,7 +150,14 @@ const ChatBubbleImpl = ({
   // reads as its scraped page title instead of the raw address.
   const renderedBody = useMemo(
     () =>
-      renderBodyWithMentions(message.body, mentionTokens, message.linkPreviews),
+      renderBodyWithMentions(
+        // Trailing newlines survive sanitisation and `whitespace-pre-wrap`
+        // renders every one of them, which would strand the floated time at the
+        // top of a tall, empty bubble.
+        message.body.trimEnd(),
+        mentionTokens,
+        message.linkPreviews
+      ),
     [message.body, mentionTokens, message.linkPreviews]
   )
 
@@ -156,12 +179,13 @@ const ChatBubbleImpl = ({
         transition={{ duration: 0.15 }}
         className={cn(
           corners,
-          "w-fit max-w-full px-3.5 py-2.5",
+          "relative w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
           messageSurfaceColorClass(message.author, isMine)
         )}
       >
         {i18n.chat.deletedMessage}
+        <ChatMessageMeta message={message} placement="bubble" />
       </motion.div>
     )
   }
@@ -171,7 +195,7 @@ const ChatBubbleImpl = ({
       <div
         className={cn(
           corners,
-          "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
+          "flex w-fit max-w-full flex-col text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
           // Incoming bubbles share the author's hue at a quiet tint, while the
           // current user's bubble remains clearly neutral.
@@ -194,7 +218,7 @@ const ChatBubbleImpl = ({
             isFirstOfRun={message.replyTo ? true : isFirstOfRun}
           />
         )}
-        <div className="px-3.5 py-2.5">
+        <div className="relative px-3.5 py-2.5">
           {author && (
             <ChatUserHoverCard user={author}>
               {/* WhatsApp-style: tint the sender name to match their avatar colour. */}
@@ -209,13 +233,9 @@ const ChatBubbleImpl = ({
             </ChatUserHoverCard>
           )}
           {renderedBody}
-          {message.editedAt && (
-            // WhatsApp-style "edited" marker; sits at the end of the body (the
-            // bubble shows no timestamp, so there's no time to pair it with).
-            <span className="ml-1 align-baseline text-sm text-f1-foreground-secondary">
-              {i18n.chat.edited}
-            </span>
-          )}
+          {/* Trails the body so the time reads as the end of the message. */}
+          <ChatMessageMeta message={message} placement="bubble" />
+          <ChatMessageMetaLabel message={message} />
         </div>
       </div>
     </div>

@@ -1,5 +1,13 @@
-import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
+
+import {
+  type EmojiEntry,
+  findEmojiByShortcode,
+  searchEmoji,
+} from "../utils/emoji-index"
+import { detectMaxEmojiVersion } from "../utils/emoji-support"
+import { type EmojiLocaleTerms } from "../utils/emoji-locale"
+import { useEmojiLocaleTerms } from "./useEmojiLocaleTerms"
 
 import {
   getTextareaCaretCoordinates,
@@ -7,39 +15,12 @@ import {
 } from "./useMentions"
 
 const MAX_RESULTS = 8
-const DEFAULT_EMOJI_IDS = [
-  "+1",
-  "heart",
-  "joy",
-  "tada",
-  "smile",
-  "fire",
-  "eyes",
-  "white_check_mark",
-] as const
 
-type EmojiMartEmoji = {
-  id: string
-  name: string
-  keywords?: string[]
-  emoticons?: string[]
-  skins: { native: string }[]
-}
-
-export type EmojiAutocompleteCandidate = {
-  id: string
-  name: string
-  native: string
-}
-
-type IndexedEmoji = EmojiAutocompleteCandidate & {
-  aliases: string[]
-  keywords: string[]
-  normalizedName: string
-  normalizedShortcodes: string[]
-  normalizedKeywords: string[]
-  order: number
-}
+/** The list rows only need these three; the shared index carries more. */
+export type EmojiAutocompleteCandidate = Pick<
+  EmojiEntry,
+  "id" | "name" | "native"
+>
 
 type EmojiTrigger = {
   colonIndex: number
@@ -68,90 +49,25 @@ export type UseEmojiAutocompleteReturn = {
   close: () => void
 }
 
-const normalize = (value: string): string =>
-  value.toLowerCase().replace(/[_-]+/g, " ").trim()
-
-const aliasesByEmoji = new Map<string, string[]>()
-for (const [alias, emojiId] of Object.entries(
-  data.aliases as Record<string, string>
-)) {
-  const aliases = aliasesByEmoji.get(emojiId) ?? []
-  aliases.push(alias)
-  aliasesByEmoji.set(emojiId, aliases)
-}
-
-const EMOJI_INDEX: IndexedEmoji[] = (
-  Object.values(data.emojis) as EmojiMartEmoji[]
-).flatMap((emoji, order) => {
-  const native = emoji.skins[0]?.native
-  if (!native) return []
-  const aliases = aliasesByEmoji.get(emoji.id) ?? []
-  const keywords = emoji.keywords ?? []
-  return [
-    {
-      id: emoji.id,
-      name: emoji.name,
-      native,
-      aliases,
-      keywords,
-      normalizedName: normalize(emoji.name),
-      normalizedShortcodes: [emoji.id, ...aliases].map(normalize),
-      normalizedKeywords: keywords.map(normalize),
-      order,
-    },
-  ]
-})
-
-const EMOJI_BY_ID = new Map(EMOJI_INDEX.map((emoji) => [emoji.id, emoji]))
-const EMOJI_BY_SHORTCODE = new Map<string, IndexedEmoji>()
-for (const emoji of EMOJI_INDEX) {
-  EMOJI_BY_SHORTCODE.set(emoji.id.toLowerCase(), emoji)
-  for (const alias of emoji.aliases) {
-    EMOJI_BY_SHORTCODE.set(alias.toLowerCase(), emoji)
-  }
-}
-
-const defaultResults = DEFAULT_EMOJI_IDS.flatMap((id) => {
-  const emoji = EMOJI_BY_ID.get(id)
-  return emoji ? [emoji] : []
-})
-
-const scoreCandidate = (emoji: IndexedEmoji, query: string): number | null => {
-  if (emoji.normalizedShortcodes.some((term) => term === query)) return 0
-  if (emoji.normalizedShortcodes.some((term) => term.startsWith(query)))
-    return 10
-  if (emoji.normalizedKeywords.some((term) => term === query)) return 20
-  if (emoji.normalizedKeywords.some((term) => term.startsWith(query))) return 30
-  if (emoji.normalizedName.startsWith(query)) return 40
-  if (
-    emoji.normalizedShortcodes.some((term) => term.includes(query)) ||
-    emoji.normalizedKeywords.some((term) => term.includes(query)) ||
-    emoji.normalizedName.includes(query)
-  ) {
-    return 50
-  }
-  return null
-}
-
+/**
+ * Shortcode results for the composer, capped at {@link MAX_RESULTS}.
+ *
+ * The ranking used to live here on its own copy of the dataset, which meant the
+ * `:` list and the picker's search box could — and did — disagree. Both now go
+ * through the one index in `../utils/emoji-index`.
+ *
+ * Filtered to what this platform can draw: an autocomplete that offers an emoji
+ * arriving as a tofu box is worse than one that doesn't offer it.
+ */
 export const searchEmojiCandidates = (
-  rawQuery: string
-): EmojiAutocompleteCandidate[] => {
-  const query = normalize(rawQuery)
-  if (!query) return defaultResults.slice(0, MAX_RESULTS)
-
-  return EMOJI_INDEX.flatMap((emoji) => {
-    const score = scoreCandidate(emoji, query)
-    return score === null ? [] : [{ emoji, score }]
+  rawQuery: string,
+  localizedTerms?: EmojiLocaleTerms
+): EmojiAutocompleteCandidate[] =>
+  searchEmoji(rawQuery, {
+    limit: MAX_RESULTS,
+    maxVersion: detectMaxEmojiVersion(),
+    localizedTerms,
   })
-    .sort(
-      (a, b) =>
-        a.score - b.score ||
-        a.emoji.id.length - b.emoji.id.length ||
-        a.emoji.order - b.emoji.order
-    )
-    .slice(0, MAX_RESULTS)
-    .map(({ emoji }) => emoji)
-}
 
 export const findEmojiTrigger = (
   text: string,
@@ -177,7 +93,7 @@ export const replaceClosedEmojiShortcode = (
   const match = textBeforeCursor.match(/(^|\s):([a-zA-Z0-9_+-]+):$/)
   if (!match) return null
 
-  const emoji = EMOJI_BY_SHORTCODE.get(match[2]?.toLowerCase() ?? "")
+  const emoji = findEmojiByShortcode(match[2] ?? "")
   if (!emoji) return null
 
   const boundaryLength = match[1]?.length ?? 0
@@ -213,13 +129,17 @@ export function useEmojiAutocomplete({
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [dismissedTrigger, setDismissedTrigger] = useState<number | null>(null)
 
+  // The same localized layer the picker uses, so `:` and the picker's search
+  // box agree in every language, not just in English.
+  const localizedTerms = useEmojiLocaleTerms()
+
   const trigger = useMemo(
     () => findEmojiTrigger(inputValue, cursorPosition),
     [inputValue, cursorPosition]
   )
   const results = useMemo(
-    () => (trigger ? searchEmojiCandidates(trigger.query) : []),
-    [trigger]
+    () => (trigger ? searchEmojiCandidates(trigger.query, localizedTerms) : []),
+    [trigger, localizedTerms]
   )
   const isOpen =
     trigger !== null &&
