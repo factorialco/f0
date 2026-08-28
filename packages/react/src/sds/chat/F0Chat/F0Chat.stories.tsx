@@ -1199,6 +1199,73 @@ export const EmojiAutocomplete: Story = {
   },
 }
 
+/** Composer shortcuts: Arrow Up on an empty composer reopens the last editable
+ * own message, and a double-click on any message quotes it.
+ *
+ * Runs in a real browser on purpose: the actions popover keeps its content
+ * mounted for a 150ms CSS exit animation, and only then does Radix decide
+ * whether to pull focus back to the trigger. jsdom runs no CSS animations, so
+ * a unit test unmounts the popover immediately and cannot observe that. */
+export const ComposerHotkeys: Story = {
+  name: "Composer hotkeys",
+  render: () => <Conversation initialCount={8} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+    // The transcript is virtualized and stays hidden until the browser reports
+    // the viewport stable, so rows appear well after the runtime has messages.
+    const surfaces = () =>
+      canvas.findAllByTestId("chat-message-surface") as Promise<HTMLElement[]>
+    // Radix portals the popover to document.body, outside the story canvas.
+    const overlay = within(canvasElement.ownerDocument.body)
+
+    await step("Arrow Up reopens my last message", async () => {
+      await userEvent.click(composer)
+      await userEvent.keyboard("{ArrowUp}")
+      // The chip animates its height open, and animations are only skipped
+      // under Chromatic — so it is in the DOM before it is visible.
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /cancel edit/i })
+        ).toBeVisible()
+      )
+      await expect(composer).not.toHaveValue("")
+    })
+
+    await step("A quote replaces the edit and clears its draft", async () => {
+      const [firstMessage] = await surfaces()
+      await userEvent.dblClick(firstMessage)
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /remove quote/i })
+        ).toBeVisible()
+      )
+      await expect(composer).toHaveValue("")
+      await expect(composer).toHaveFocus()
+    })
+
+    await step("The menu's Reply hands focus to the composer", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: /remove quote/i })
+      )
+      const [row] = await surfaces()
+      // The row defers its real popover until interaction intent — hover first,
+      // or the click lands on the placeholder trigger instead.
+      await userEvent.hover(row)
+      const menu = await waitFor(
+        () => canvas.getAllByRole("button", { name: /message actions/i })[0]
+      )
+      await userEvent.click(menu)
+      await userEvent.click(overlay.getByRole("button", { name: /^Reply$/i }))
+      // Radix keeps the popover mounted for its exit animation and only then
+      // decides about focus — assert after that window, not before.
+      await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
+    })
+  },
+}
+
 /** Group chat with functional `@`-mentions (`@here` for everyone + members). */
 export const Group: Story = {
   name: "Group with mentions",

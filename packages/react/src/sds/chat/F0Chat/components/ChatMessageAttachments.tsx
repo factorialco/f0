@@ -130,6 +130,10 @@ export const ChatMessageAttachments = ({
 
   return (
     <div
+      // Read by SELF_HANDLING_DESCENDANTS in ChatMessageItem: a deferred
+      // placeholder is not focusable, and must not quote where the mounted
+      // preview would not.
+      data-chat-attachments=""
       className={cn(
         // w-full gives the column a definite width so the cards' `max-w-full`
         // resolves against real space (fit-content would ignore it and lock the
