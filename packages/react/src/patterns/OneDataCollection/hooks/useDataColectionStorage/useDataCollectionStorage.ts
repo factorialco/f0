@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
@@ -12,6 +12,7 @@ import {
 import { useDataCollectionStorage as useDataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 
 import { getFeatures } from "./getFeatures"
+import { pruneStoredStatus, StoredStatusDefinition } from "./pruneStoredStatus"
 import {
   DataCollectionStatus,
   DataCollectionStorageFeature,
@@ -29,6 +30,10 @@ type UseDataCollectionStorage = {
  * @param key - The storage key
  * @param featuresDef - The features definition
  * @param settings - The settings
+ * @param definition - The collection's declared shape. Stored state is
+ *   validated against it on hydration so state that no longer applies (schema
+ *   drift, or a payload written by a different collection under the same key)
+ *   never reaches the data source.
  * @returns The settings in storage and the settings storage ready
  */
 
@@ -48,6 +53,7 @@ export const useDataCollectionStorage = <
     Filters,
     NavigationFilters
   >,
+  definition: StoredStatusDefinition,
   disabled?: boolean
 ): UseDataCollectionStorage => {
   const [storageReady, setStorageReady] = useState(false)
@@ -76,6 +82,15 @@ export const useDataCollectionStorage = <
     return !disabled && !!key
   }, [disabled, key])
 
+  // Latest-value ref so the hydration effect can validate against the current
+  // definition without re-running every time the (inline) definition object is
+  // rebuilt. Seeded with the mount-time definition, which is the one hydration
+  // needs, and refreshed after every render for later key changes.
+  const definitionRef = useRef(definition)
+  useEffect(() => {
+    definitionRef.current = definition
+  })
+
   /** Gets the settings in storage when the key and features change */
   useEffect(() => {
     if (!active) {
@@ -89,7 +104,8 @@ export const useDataCollectionStorage = <
     // values left over from the previous key/inactive state.
     setStorageReady(false)
 
-    storageProvider.get(key!).then((status) => {
+    storageProvider.get(key!).then((rawStatus) => {
+      const status = pruneStoredStatus(rawStatus, definitionRef.current)
       Object.entries(featureProviders).forEach(
         ([featureName, featureProvider]) => {
           if (

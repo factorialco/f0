@@ -1209,6 +1209,17 @@ const OneDataCollectionComp = <
   )
 
   /**
+   * Saved views live in the persisted collection status, so they only survive a
+   * navigation when there is somewhere to write them: a storage key (`id`) and
+   * storage left enabled. Without both, `useDataCollectionStorage` is inactive
+   * and a saved view would exist only in this component's state until unmount.
+   */
+  const canPersistViews = useMemo(
+    () => storage !== false && !!id,
+    [storage, id]
+  )
+
+  /**
    * Whether to offer "Save view" (create a new view):
    * - a view is selected → "none" (diverging from it auto-deselects via the
    *   effect above; while it still matches there's nothing to save)
@@ -1224,6 +1235,9 @@ const OneDataCollectionComp = <
     // Consumer opted out of saving views (e.g. the org-chart graph): never show
     // the "Save view" chip regardless of how the view diverges from the baseline.
     if (savingViewsDisabled) return "none"
+    // Nothing can be persisted, so offering to save would silently discard the
+    // view on unmount.
+    if (!canPersistViews) return "none"
     // Compares everything except the view mode, so a visualization-only change
     // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
@@ -1256,6 +1270,7 @@ const OneDataCollectionComp = <
     return "none"
   }, [
     savingViewsDisabled,
+    canPersistViews,
     selectedPresetId,
     mergedPresets,
     capturedState,
@@ -1411,7 +1426,12 @@ const OneDataCollectionComp = <
   // just hit Save; strip the param afterwards so a reload doesn't reopen it.
   useEffect(() => {
     if (!sharedPreset) return
-    setPresetDialog({ mode: "create", shared: sharedPreset })
+    // Saving is the only way a shared view materializes, so skip the dialog
+    // when there is nowhere to persist it rather than offer a save that is
+    // discarded on unmount. The param is still stripped either way.
+    if (canPersistViews) {
+      setPresetDialog({ mode: "create", shared: sharedPreset })
+    }
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search)
       params.delete(SHARED_PRESET_PARAM)
@@ -1481,6 +1501,17 @@ const OneDataCollectionComp = <
             },
           }
         : {}),
+    },
+    {
+      // The collection-level filters, not `effectiveFilters`: validation must
+      // use the superset so state stored for one visualization is not dropped
+      // while another is active.
+      filters,
+      sortings,
+      grouping,
+      navigationFilters,
+      search,
+      visualizationCount: visualizations.length,
     },
     storage === false
   )
