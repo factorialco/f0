@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.66.2](https://github.com/factorialco/f0/compare/f0-react-v6.66.1...f0-react-v6.66.2) (2026-08-28)
+
+
+### Performance Improvements
+
+* **react:** spin the AI gradients in CSS, not per-frame JS ([#5296](https://github.com/factorialco/f0/issues/5296)) ([ed458c2](https://github.com/factorialco/f0/commit/ed458c26f01bdf57b0f9f0931e0f2cdc5d059d83))
+
 ## [6.66.1](https://github.com/factorialco/f0/compare/f0-react-v6.66.0...f0-react-v6.66.1) (2026-08-28)
 
 
