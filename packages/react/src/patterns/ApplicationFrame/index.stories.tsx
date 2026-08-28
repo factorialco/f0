@@ -833,6 +833,60 @@ export const EverythingChannel: Story = {
 }
 
 /**
+ * The announcement channel — Factorial's own noticeboard, and the welcome
+ * screen a new employee lands on. A `type: "announcement"` channel, so every
+ * capability defaults to off with no configuration at all.
+ *
+ * What it demonstrates, top to bottom:
+ * - a header with just the identity and the close button: no ellipsis, because
+ *   a fixed two-message transcript has nothing to search;
+ * - the day separator carrying the time ("Yesterday 22:14") while the messages
+ *   themselves carry none — their timestamp is seeded, not sent;
+ * - a card attachment (`kind: "card"`) rendered as an `F0Card`, the one thing
+ *   in here that IS interactive;
+ * - no hover ellipsis on either message: no reply, no reaction, no copy;
+ * - the read-only notice where the composer would be.
+ *
+ * What to exercise: hover both messages, drag a file over the panel (no drop
+ * affordance), and check the sidebar — badge of 2, no pin on hover, and no
+ * unread divider inside once opened.
+ */
+export const AnnouncementChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="dm-factorial"
+              tabsPersistKey="communications-announcement"
+            />
+          }
+        >
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
  * A fully-mocked conversation hosted in the side panel, driven by the shared
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
  * fullscreen/close to the panel via `useAiChat()`.

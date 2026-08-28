@@ -1,11 +1,12 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-import { BellOff } from "@/icons/app"
+import { BellOff, People } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
   isUserMessage,
   type F0ChatAttachment,
   type F0ChatChannelStatus,
+  type F0ChatChannelType,
   type F0ChatItem,
   type F0ChatLinkPreview,
   type F0ChatMessageStatus,
@@ -147,6 +148,26 @@ const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
 // No photo — initials + colour avatar.
 const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
 
+/** The brand mark, the same one the ApplicationFrame sidebar shows. */
+const FACTORIAL_AVATAR: AvatarVariant = {
+  type: "company",
+  name: "Factorial",
+  src: "/avatars/factorial.png",
+}
+
+/**
+ * The product itself, as the author of the announcement channel. Not a person:
+ * a company avatar and an explicit `avatarColor` so the incoming bubble takes
+ * the brand's own tint instead of a name hash.
+ */
+const FACTORIAL: MockPerson = {
+  id: "factorial",
+  name: "Factorial",
+  avatar: FACTORIAL_AVATAR,
+  avatarColor: "red",
+  online: false,
+}
+
 /** Extra members for the large read-receipt demo. Together with the named
  * participants, they make every Quarterly Reporting message expose 45 readers
  * so the message-info list has a realistic overflow state. */
@@ -207,9 +228,11 @@ const isSystemLine = (line: Line): line is SystemLine => "system" in line
 
 export type Seed = {
   id: string
-  type: "dm" | "group"
+  type: F0ChatChannelType
   title: string
   avatar: AvatarVariant
+  /** Announcement channels: the sentence shown in place of the composer. */
+  readOnlyNotice?: string
   presence?: "online" | "offline"
   /** Channel statuses shown consistently in the header and sidebar. */
   statuses?: F0ChatChannelStatus[]
@@ -248,6 +271,26 @@ const MIN = 1
 const HOUR = 60
 const DAY = 24 * HOUR
 const MONTH = 30 * DAY
+
+/**
+ * "Minutes ago" for a given wall-clock time yesterday, so a seed can land on a
+ * specific separator ("Yesterday 22:14") instead of drifting with the hour the
+ * demo happens to be opened at.
+ *
+ * Only the announcement seed needs this. Real announcements anchor to the
+ * viewer's own join date, which the mock has no equivalent of.
+ */
+const yesterdayAt = (hour: number, minute: number): number => {
+  const now = new Date()
+  const then = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1,
+    hour,
+    minute
+  )
+  return Math.round((now.getTime() - then.getTime()) / 60_000)
+}
 
 // Pool of short, varied lines for a busy group transcript (the big-unread demo).
 const BUSY_LINES = [
@@ -786,6 +829,46 @@ const everythingStressLines = (): Line[] => {
 }
 
 export const SEEDS: Seed[] = [
+  // ANNOUNCEMENT — the product's own noticeboard, and the welcome screen every
+  // employee lands on. Nothing here is sent: both messages are seeded, which is
+  // why the timestamp is anchored (see `yesterdayAt`) and the per-message clock
+  // doesn't render. Read-only comes from the channel TYPE, not `readOnly`.
+  {
+    id: "dm-factorial",
+    type: "announcement",
+    title: "Factorial",
+    avatar: FACTORIAL_AVATAR,
+    readOnlyNotice: "Only Factorial can send messages",
+    participants: [FACTORIAL],
+    // Badge in the sidebar, but no unread divider inside — see MockChatApp.
+    unread: 2,
+    myRole: "guest",
+    lines: [
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14),
+        body: `👋 Hi ${ME.name.split(" ")[0]}. This is your team's chat — right now only administrators can see it.`,
+      },
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14) - 1,
+        body: "",
+        attachments: [
+          {
+            kind: "card",
+            avatar: { type: "icon", icon: People },
+            title: "Give your team access",
+            description:
+              "One step. We've prepared 📣 General for when they join.",
+            action: {
+              label: "Give your team access",
+              onClick: () => {},
+            },
+          },
+        ],
+      },
+    ],
+  },
   // DM — always typing (online): sidebar "Writing…" + a dots bubble, non-stop.
   {
     id: "dm-eleanor",
@@ -1604,7 +1687,7 @@ export const groupReadersFor = (
   return [...uniqueParticipants.values()]
 }
 
-const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
+export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
     if (isSystemLine(line)) {
