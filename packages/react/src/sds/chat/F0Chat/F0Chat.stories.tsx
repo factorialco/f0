@@ -1214,25 +1214,34 @@ export const ComposerHotkeys: Story = {
     const composer = canvas.getByRole("combobox", {
       name: /write something here/i,
     })
+    // The transcript is virtualized and stays hidden until the browser reports
+    // the viewport stable, so rows appear well after the runtime has messages.
     const surfaces = () =>
-      canvas.getAllByTestId("chat-message-surface") as HTMLElement[]
+      canvas.findAllByTestId("chat-message-surface") as Promise<HTMLElement[]>
     // Radix portals the popover to document.body, outside the story canvas.
     const overlay = within(canvasElement.ownerDocument.body)
 
     await step("Arrow Up reopens my last message", async () => {
       await userEvent.click(composer)
       await userEvent.keyboard("{ArrowUp}")
-      await expect(
-        canvas.getByRole("button", { name: /cancel edit/i })
-      ).toBeVisible()
+      // The chip animates its height open, and animations are only skipped
+      // under Chromatic — so it is in the DOM before it is visible.
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /cancel edit/i })
+        ).toBeVisible()
+      )
       await expect(composer).not.toHaveValue("")
     })
 
     await step("A quote replaces the edit and clears its draft", async () => {
-      await userEvent.dblClick(surfaces()[0])
-      await expect(
-        canvas.getByRole("button", { name: /remove quote/i })
-      ).toBeVisible()
+      const [firstMessage] = await surfaces()
+      await userEvent.dblClick(firstMessage)
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /remove quote/i })
+        ).toBeVisible()
+      )
       await expect(composer).toHaveValue("")
       await expect(composer).toHaveFocus()
     })
@@ -1241,7 +1250,7 @@ export const ComposerHotkeys: Story = {
       await userEvent.click(
         canvas.getByRole("button", { name: /remove quote/i })
       )
-      const row = surfaces()[0]
+      const [row] = await surfaces()
       // The row defers its real popover until interaction intent — hover first,
       // or the click lands on the placeholder trigger instead.
       await userEvent.hover(row)
