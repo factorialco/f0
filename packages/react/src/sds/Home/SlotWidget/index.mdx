@@ -149,6 +149,29 @@ What the params CAN'T do by themselves is rebuild the widget's slots — only th
 app knows where that data comes from. Persist what `onChangeWidgetParams` hands
 you, pass it back as the widget's `params`, and rebuild the slots from it.
 
+### It is also how the widget is ADDED
+
+The same schema gives the widget a **second step in the catalog**. Picking a
+configurable widget doesn't add it: the CTA reads **"Continue"**, the picker's
+left column turns into these very fields, and the preview stays put beside them,
+following every valid edit. `onAdd` then receives the params along with the id:
+
+```tsx
+<WidgetCatalog
+  widgets={CATALOG}          // `preview` is the widget, so it already declares
+  onAdd={(id, params) => add(id, params)}   // its `paramsSchema` — nothing to repeat
+  rebuildPreview={(item, params) =>
+    item.id === "events" ? eventsWidget(params) : item.preview
+  }
+  isOpen={open}
+  onClose={close}
+/>
+```
+
+So a widget whose params are required is never on the Home half-built, and the
+app never has to open "Edit params" itself on a card the user just added. A
+widget that declares no schema is added in one press, as it always was.
+
 ## Previews: hand over the widget, not a render of it
 
 A widget is previewed twice — in the "Add widget" catalog and in "Edit params" —

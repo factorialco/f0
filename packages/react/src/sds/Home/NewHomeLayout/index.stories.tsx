@@ -1509,13 +1509,25 @@ const Home = () => {
         onClose={() => setOpen(false)}
         widgets={CATALOG}
         groups={CATALOG_GROUPS}
-        onAdd={(id) => {
+        onAdd={(id, params) => {
+          // A CONFIGURABLE widget arrives already set up: the picker walked the
+          // user through its params before adding it, and they are persisted
+          // exactly where its "Edit params" dialog persists them. Nothing here
+          // has to open a second dialog on a half-built card.
+          if (id === "events" && params) setEventsParams(params as EventsParams)
           // The picker only offers what the column can hold, so "which column"
           // is already decided — it is the side it was opened for.
           if (side === "main" && !mainIds.includes(id))
             setMainIds((ids) => [...ids, id])
           setOpen(false)
         }}
+        // The same rebuild the layout gets, for the params step's preview: the
+        // events follow the fields, not just the title that names them.
+        rebuildPreview={(item, params) =>
+          item.id === "events"
+            ? eventsWidget(params as EventsParams)
+            : item.preview
+        }
         // ONE LIST, TWO COLUMNS. The side the layout handed back is passed
         // straight through: the picker then drops the widgets that column can't
         // hold (Communities is `main`-only, Clock in is rail-only) and previews

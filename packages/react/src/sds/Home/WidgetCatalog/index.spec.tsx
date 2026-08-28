@@ -1,9 +1,16 @@
 import { describe, expect, test, vi } from "vitest"
+import { z } from "zod"
 
 import { Calendar, Clock, File } from "@/icons/app"
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { f0FormField } from "@/patterns/F0Form"
+import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
-import { EVENT_LIST_GAP, homeSlot, type HomeWidgetItem } from "../slotRenderers"
+import {
+  EVENT_LIST_GAP,
+  homeSlot,
+  type HomeWidgetItem,
+  type WidgetParams,
+} from "../slotRenderers"
 import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
 
 const GROUPS: WidgetCatalogGroup[] = [
@@ -286,6 +293,247 @@ describe("WidgetCatalog", () => {
       render({ widgets: WIDGETS, groups: undefined })
 
       expect(screen.getByText("clock")).toBeInTheDocument()
+    })
+  })
+  describe("a widget with params is added in two steps", () => {
+    /** One required param and one that isn't: enough to test both refusals. */
+    const schema = z.object({
+      rows: f0FormField(z.number().min(1).max(10), { label: "Rows" }),
+      note: f0FormField(z.string().optional(), { label: "Note" }),
+    })
+
+    /** The configurable entry, and one that isn't, to keep both paths in view. */
+    const configurable = {
+      id: "events",
+      title: "Events",
+      icon: Calendar,
+      preview: <p>events</p>,
+      paramsSchema: schema,
+      params: { rows: 3 },
+    }
+    const withParams = [configurable, WIDGETS[0]]
+
+    /** The dialog's own CTA, which changes what it says between the steps. */
+    const cta = (name: string) => screen.getByRole("button", { name })
+
+    const startConfiguring = async () => {
+      await userEvent.click(cta("Continue"))
+      await waitFor(() =>
+        expect(screen.getByLabelText(/Rows/)).toBeInTheDocument()
+      )
+    }
+
+    test("picking it opens its params instead of adding it", async () => {
+      const onAdd = vi.fn()
+      render({ widgets: withParams, groups: undefined, onAdd })
+
+      // The press that adds a plain widget only CONTINUES here, and the CTA
+      // says so before it is pressed.
+      expect(screen.queryByRole("button", { name: "Add widget" })).toBeNull()
+      await startConfiguring()
+
+      expect(onAdd).not.toHaveBeenCalled()
+      // The list it came from is gone; the widget it is configuring is named.
+      expect(screen.queryByRole("searchbox")).toBeNull()
+      expect(screen.getByText("Configure Events")).toBeInTheDocument()
+    })
+
+    test("a widget with nothing to configure is still one press", async () => {
+      const onAdd = vi.fn()
+      render({ widgets: withParams, groups: undefined, onAdd })
+
+      await userEvent.click(screen.getByText("Clock in"))
+      await userEvent.click(cta("Add widget"))
+
+      expect(onAdd).toHaveBeenCalledWith("clock")
+    })
+
+    test("adds it with the params it was configured with", async () => {
+      const onAdd = vi.fn()
+      render({ widgets: withParams, groups: undefined, onAdd })
+      await startConfiguring()
+
+      const rows = screen.getByLabelText(/Rows/)
+      await userEvent.clear(rows)
+      await userEvent.type(rows, "5")
+      await userEvent.click(cta("Add widget"))
+
+      await waitFor(() =>
+        expect(onAdd).toHaveBeenCalledWith(
+          "events",
+          expect.objectContaining({ rows: 5 })
+        )
+      )
+    })
+
+    test("it opens on the params the entry declares", async () => {
+      render({ widgets: withParams, groups: undefined })
+      await startConfiguring()
+
+      expect(screen.getByLabelText(/Rows/)).toHaveValue("3")
+    })
+
+    test("what the schema requires is what stops it being added", async () => {
+      const onAdd = vi.fn()
+      render({ widgets: withParams, groups: undefined, onAdd })
+      await startConfiguring()
+
+      await userEvent.clear(screen.getByLabelText(/Rows/))
+      await userEvent.click(cta("Add widget"))
+
+      // The form refuses on the widget's OWN schema — nothing here says which
+      // params are mandatory, and nothing here should.
+      await waitFor(() => expect(onAdd).not.toHaveBeenCalled())
+    })
+
+    test("Back returns to the list, keeping the values you typed", async () => {
+      render({ widgets: withParams, groups: undefined })
+      await startConfiguring()
+
+      const rows = screen.getByLabelText(/Rows/)
+      await userEvent.clear(rows)
+      await userEvent.type(rows, "7")
+      await userEvent.click(cta("Back"))
+
+      // The list is back, on the row it was left on.
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+      expect(listed()).toEqual(["Events", "Clock in"])
+
+      await startConfiguring()
+      // Not the entry's 3: the form is where it was left, so stepping out to
+      // check the list against it costs nothing.
+      expect(screen.getByLabelText(/Rows/)).toHaveValue("7")
+    })
+
+    test("another widget's params start from its own, not the last one's", async () => {
+      render({
+        widgets: [
+          configurable,
+          {
+            ...configurable,
+            id: "tasks",
+            title: "Tasks",
+            preview: <p>tasks</p>,
+            params: { rows: 1 },
+          },
+        ],
+        groups: undefined,
+      })
+      await startConfiguring()
+      await userEvent.clear(screen.getByLabelText(/Rows/))
+      await userEvent.type(screen.getByLabelText(/Rows/), "9")
+      await userEvent.click(cta("Back"))
+
+      await userEvent.click(screen.getByText("Tasks"))
+      await startConfiguring()
+
+      expect(screen.getByLabelText(/Rows/)).toHaveValue("1")
+    })
+
+    test("a widget handed over as DATA needs no schema of its own", async () => {
+      const asData: HomeWidgetItem = {
+        id: "events",
+        header: { title: "Events" },
+        paramsSchema: schema,
+        params: { rows: 4 },
+        slots: [homeSlot("indicators", { items: [] })],
+      }
+      render({
+        widgets: [
+          { id: "events", title: "Events", icon: Calendar, preview: asData },
+        ],
+        groups: undefined,
+      })
+
+      // The entry declares nothing: the widget already says what it can be
+      // configured into, and repeating it is how the two disagree.
+      await startConfiguring()
+      expect(screen.getByLabelText(/Rows/)).toHaveValue("4")
+    })
+
+    test("the sentence under it is read off the SAME widget as the card", async () => {
+      // THE REGRESSION THIS GUARDS: the info line was resolved from the entry's
+      // DECLARED preview while the card came from the app's rebuild, so a
+      // preview showed three events over a line that said two.
+      const events = (count: number): HomeWidgetItem => ({
+        id: "events",
+        header: { title: "Events", info: `The next ${count} events.` },
+        paramsSchema: schema,
+        params: { rows: count },
+        slots: [homeSlot("indicators", { items: [] })],
+      })
+      render({
+        widgets: [
+          { id: "events", title: "Events", icon: Calendar, preview: events(3) },
+        ],
+        groups: undefined,
+        rebuildPreview: (_item: unknown, params: WidgetParams) =>
+          events(Number(params.rows)),
+      })
+      await startConfiguring()
+
+      const rows = screen.getByLabelText(/Rows/)
+      await userEvent.clear(rows)
+      await userEvent.type(rows, "5")
+
+      await waitFor(() =>
+        expect(
+          screen.getAllByText("The next 5 events.").length
+        ).toBeGreaterThan(0)
+      )
+      expect(screen.queryByText("The next 3 events.")).toBeNull()
+    })
+
+    test("the preview follows the params being tried out", async () => {
+      render({
+        widgets: withParams,
+        groups: undefined,
+        rebuildPreview: (_item: unknown, params: WidgetParams) => (
+          <p>showing {String(params.rows)} rows</p>
+        ),
+      })
+
+      // Only while they are being tried out: the list previews the widget as
+      // the catalog declared it.
+      expect(screen.getByText("events")).toBeInTheDocument()
+      await startConfiguring()
+      expect(screen.getByText(/showing 3 rows/)).toBeInTheDocument()
+
+      const rows = screen.getByLabelText(/Rows/)
+      await userEvent.clear(rows)
+      await userEvent.type(rows, "6")
+
+      await waitFor(() =>
+        expect(screen.getByText(/showing 6 rows/)).toBeInTheDocument()
+      )
+    })
+
+    test("reopening the picker starts at the list again", async () => {
+      const { rerender } = render({ widgets: withParams, groups: undefined })
+      await startConfiguring()
+
+      rerender(
+        <WidgetCatalog
+          isOpen={false}
+          onClose={() => {}}
+          onAdd={() => {}}
+          widgets={withParams}
+        />
+      )
+      rerender(
+        <WidgetCatalog
+          isOpen
+          onClose={() => {}}
+          onAdd={() => {}}
+          widgets={withParams}
+        />
+      )
+
+      // A form for a widget you walked away from is a question nobody asked
+      // twice.
+      await waitFor(() =>
+        expect(screen.getByRole("searchbox")).toBeInTheDocument()
+      )
     })
   })
 })

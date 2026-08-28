@@ -1004,6 +1004,13 @@ export const defaultTranslations = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
+    /**
+     * Heads the picker's SECOND STEP, where the params of the widget being added
+     * are set. `{{title}}` is that widget's name.
+     */
+    configureWidget: "Configure {{title}}",
+    /** Back to the widget list from that step. */
+    back: "Back",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
