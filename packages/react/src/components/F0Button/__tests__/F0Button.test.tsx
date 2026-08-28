@@ -97,4 +97,61 @@ describe("F0Button", () => {
     expect(button).not.toBeDisabled()
     expect(onError).toHaveBeenCalled()
   })
+
+  describe("counter", () => {
+    it("renders the counter value", () => {
+      render(<F0Button label="To review" counterValue={3} />)
+      expect(screen.getByText("3")).toBeInTheDocument()
+    })
+
+    it("tightens the button's right padding when a counter is present", () => {
+      render(<F0Button label="To review" size="md" counterValue={3} />)
+      expect(screen.getByRole("button").className).toContain("[&_.main]:!pr-2")
+    })
+
+    it("keeps padding symmetric when there is no counter", () => {
+      render(<F0Button label="Review" size="md" />)
+      expect(screen.getByRole("button").className).not.toContain("!pr-2")
+    })
+
+    it("shows nothing when the count is 0 — no pill, no padding change", () => {
+      render(<F0Button label="Review" size="md" counterValue={0} />)
+      expect(screen.queryByText("0")).not.toBeInTheDocument()
+      expect(screen.getByRole("button").className).not.toContain("!pr-2")
+    })
+
+    it("uses the smaller counter on sm and the larger one on md/lg", () => {
+      const { container: sm } = render(
+        <F0Button label="To review" size="sm" counterValue={3} />
+      )
+      const { container: lg } = render(
+        <F0Button label="To review" size="lg" counterValue={3} />
+      )
+      const counterClass = (c: HTMLElement) =>
+        Array.from(c.querySelectorAll("div")).find((d) =>
+          d.className.includes("rounded")
+        )?.className ?? ""
+      expect(counterClass(sm)).toContain("min-w-4")
+      expect(counterClass(lg)).toContain("min-w-5")
+    })
+
+    const counterWrapper = () => screen.getByText("3").closest("span")
+
+    it("gives the primary counter a dark pill", () => {
+      render(<F0Button variant="default" label="To review" counterValue={3} />)
+      expect(counterWrapper()?.className).toContain("dark")
+    })
+
+    it("keeps the counter neutral on promote", () => {
+      render(<F0Button variant="promote" label="To review" counterValue={3} />)
+      expect(counterWrapper()?.className).not.toContain("dark")
+    })
+
+    it("darkens the critical counter only on hover", async () => {
+      render(<F0Button variant="critical" label="To review" counterValue={3} />)
+      expect(counterWrapper()?.className).not.toContain("dark")
+      await userEvent.hover(screen.getByRole("button"))
+      expect(counterWrapper()?.className).toContain("dark")
+    })
+  })
 })
