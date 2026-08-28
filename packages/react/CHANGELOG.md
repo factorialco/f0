@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.66.1](https://github.com/factorialco/f0/compare/f0-react-v6.66.0...f0-react-v6.66.1) (2026-08-28)
+
+
+### Performance Improvements
+
+* **F0AiChatTextArea:** spin the glow in CSS instead of per-frame JS ([#5293](https://github.com/factorialco/f0/issues/5293)) ([f2f912c](https://github.com/factorialco/f0/commit/f2f912cc3d400d29107de5a846a7f99b59688f70))
+
 ## [6.66.0](https://github.com/factorialco/f0/compare/f0-react-v6.65.1...f0-react-v6.66.0) (2026-08-28)
 
 
