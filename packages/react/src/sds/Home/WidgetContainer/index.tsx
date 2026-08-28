@@ -893,7 +893,7 @@ export function WidgetContainer({
             {activeId ? (
               <div
                 ref={mountGhost}
-                className="h-full w-full cursor-grabbing rounded-xl bg-f1-background/60 backdrop-blur-md [&_*]:shadow-none"
+                className="h-full w-full cursor-grabbing rounded-xl backdrop-blur-md [&_*]:shadow-none dark:backdrop-blur-2xl"
               />
             ) : null}
           </DragOverlay>
