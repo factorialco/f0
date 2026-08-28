@@ -52,7 +52,8 @@ const parents: Person[] = [
 const columns = [{ label: "name", render: (item: Person) => item.name }]
 
 const createSource = (
-  onSelectItems: () => void
+  onSelectItems: () => void,
+  { allPagesSelection = true }: { allPagesSelection?: boolean } = {}
 ): DataCollectionSource<
   Person,
   FiltersDefinition,
@@ -78,7 +79,7 @@ const createSource = (
     currentGrouping: undefined,
     setCurrentGrouping: vi.fn(),
     selectable: (item: Person) => (item.children?.length ? undefined : item.id),
-    allPagesSelection: true,
+    allPagesSelection,
     itemsWithChildren: (item: Person) => !!item.children?.length,
     fetchChildren: ({ item }: { item: Person }) => ({
       records: item.children ?? [],
@@ -145,7 +146,9 @@ describe("Table nested-row selection (registry-backed select all)", () => {
     render(
       <EditableTableCollection
         columns={columns}
-        source={createSource(vi.fn())}
+        // Page-only selection (the default) is where the page filter — and the
+        // bug — lives: `allPagesSelection` switches that path off entirely.
+        source={createSource(vi.fn(), { allPagesSelection: false })}
         onSelectItems={onSelectItems}
         onLoadData={vi.fn()}
         onLoadError={vi.fn()}
