@@ -39,6 +39,8 @@ export const takeCardGhost = (
 export interface PageSurfaceGhost {
   node: HTMLElement
   offset: { top: number; left: number; width: number; height: number }
+  /** The colour the page is painted on, under its own wash. */
+  base: string | null
 }
 
 /** A copy of the page's own surface, placed so it lines up under `card`. */
@@ -76,5 +78,17 @@ export const takePageSurface = (
       width: from.width,
       height: from.height,
     },
+    base: opaqueBackgroundOf(surface),
   }
+}
+
+const TRANSPARENT = ["rgba(0, 0, 0, 0)", "transparent", ""]
+
+const opaqueBackgroundOf = (from: Element): string | null => {
+  if (typeof getComputedStyle !== "function") return null
+  for (let el: Element | null = from; el; el = el.parentElement) {
+    const colour = getComputedStyle(el).backgroundColor
+    if (!TRANSPARENT.includes(colour)) return colour
+  }
+  return null
 }

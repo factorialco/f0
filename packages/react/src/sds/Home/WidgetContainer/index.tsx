@@ -480,6 +480,7 @@ export function WidgetContainer({
     host.style.left = `${surface.offset.left}px`
     host.style.width = `${surface.offset.width}px`
     host.style.height = `${surface.offset.height}px`
+    if (surface.base) host.style.backgroundColor = surface.base
 
     const overlay = host.parentElement?.parentElement
     if (!overlay || typeof DOMMatrix !== "function") return
@@ -934,10 +935,7 @@ export function WidgetContainer({
           <DragOverlay dropAnimation={DROP_ANIMATION}>
             {activeId ? (
               <div className="relative h-full w-full cursor-grabbing overflow-hidden rounded-xl bg-f1-background">
-                <div
-                  ref={mountSurface}
-                  className="absolute isolate hidden dark:block"
-                />
+                <div ref={mountSurface} className="absolute isolate" />
                 <div
                   ref={mountGhost}
                   className="relative h-full w-full [&_*]:shadow-none"
