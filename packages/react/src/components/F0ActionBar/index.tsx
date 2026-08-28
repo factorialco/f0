@@ -50,7 +50,11 @@ const WithReason = ({
 }) =>
   reason ? (
     <TooltipInternal label={reason}>
-      <span className="inline-flex">{children}</span>
+      {/* Focusable: the button inside is natively disabled, so without this the
+          reason is mouse-only and a keyboard user never learns why. */}
+      <span className="inline-flex" tabIndex={0}>
+        {children}
+      </span>
     </TooltipInternal>
   ) : (
     children
