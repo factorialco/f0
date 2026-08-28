@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
-  useChatComposeTarget,
+  useChatComposeActions,
   useChatHighlightedId,
 } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
@@ -32,10 +32,36 @@ import { SendingClock } from "./ChatMessageStatusIcon"
 const ARM_ACTIONS_ON_HOVER_MS = 150
 
 /** Descendants that own their own activation, so a double-click landing on one
- * must not also quote the message: the image lightbox, a file download, the
- * reply-quote jump, an autolinked URL. */
-const INTERACTIVE_DESCENDANTS =
-  'a, button, input, textarea, select, [role="button"], [role="link"]'
+ * must not also quote the message: attachment buttons, the reply-quote jump, an
+ * autolinked URL, the voice waveform, the inline video.
+ *
+ * Focusability rather than an element list: anything interactive inside a
+ * bubble carries a role or a tabindex, so the rule survives new attachment
+ * types. The consequence, which no test can catch: putting a tabindex on the
+ * ROW or the bubble (a roving-tabindex transcript) would make every message
+ * unquotable — only descendants may match, which is what `stopAt` below
+ * enforces. */
+const SELF_HANDLING_DESCENDANTS =
+  "a, button, input, textarea, select, video, audio, summary," +
+  ' [role="button"], [role="link"], [role="slider"], [contenteditable="true"],' +
+  ' [tabindex]:not([tabindex="-1"]), [data-chat-attachments]'
+
+/**
+ * Whether a double-clicked node sits inside something that handles its own
+ * activation. Walks up only as far as `stopAt` (the message's own wrapper):
+ * `closest` would climb past it and match the transcript viewport, which
+ * react-virtuoso renders with `tabIndex={0}` — that would make no message
+ * quotable at all. A node that never reaches `stopAt` came from a portal (a
+ * hover card): React routes its events here, but it is not part of this
+ * message, so it never quotes.
+ */
+const isSelfHandling = (target: Element, stopAt: Element): boolean => {
+  for (let node: Element | null = target; node; node = node.parentElement) {
+    if (node === stopAt) return false
+    if (node.matches(SELF_HANDLING_DESCENDANTS)) return true
+  }
+  return true
+}
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -108,9 +134,9 @@ export const ChatMessageItem = ({
     actionsWrapperRef.current?.querySelector("button")?.focus()
   }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
-  // Stable API (never re-renders this row when the target changes) — unlike the
-  // reply/edit VALUE contexts, which rows must stay out of.
-  const { startReply } = useChatComposeTarget()
+  // Stable API (never re-renders this row when the target changes) — unlike
+  // the compose-target VALUE context, which rows must stay out of.
+  const { startReply } = useChatComposeActions()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
   const { currentUserId } = useF0ChatStable()
@@ -137,7 +163,8 @@ export const ChatMessageItem = ({
     Boolean(message.replyTo)
   const hasContent = hasBubble || hasAttachments
   // A tombstone has nothing to quote, and an unsettled message has no
-  // server-side id to point a reply at — the same rows that get no actions menu.
+  // server-side id to point a reply at. Same rows the menu offers no Reply on —
+  // note a failed message DOES get a menu, reduced to Retry / Delete.
   const canQuote =
     !message.deleted &&
     message.status !== "sending" &&
@@ -150,10 +177,7 @@ export const ChatMessageItem = ({
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!canQuote) return
       if (!(event.target instanceof Element)) return
-      // Only a match INSIDE the message counts — `closest` would otherwise
-      // climb past this row into whatever chrome hosts the transcript.
-      const interactive = event.target.closest(INTERACTIVE_DESCENDANTS)
-      if (interactive && event.currentTarget.contains(interactive)) return
+      if (isSelfHandling(event.target, event.currentTarget)) return
       startReply(message)
     },
     [canQuote, message, startReply]
@@ -215,6 +239,7 @@ export const ChatMessageItem = ({
                 actionsOpen && "bg-f1-background-hover"
               )}
               onDoubleClick={handleDoubleClick}
+              data-testid="chat-message-surface"
             >
               {hasAttachments && (
                 <ChatMessageAttachments

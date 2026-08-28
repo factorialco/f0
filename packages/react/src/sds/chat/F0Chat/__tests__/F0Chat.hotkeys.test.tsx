@@ -1,6 +1,8 @@
+import { StrictMode } from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import {
+  fireEvent,
   zeroRender as render,
   screen,
   userEvent,
@@ -167,7 +169,10 @@ describe("F0Chat arrow-up editing", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("skips a message that can no longer be edited and takes the previous one", async () => {
+  // The shortcut targets only the NEWEST own message: walking back to find
+  // something editable would silently open a message the user is not looking
+  // at, which a blind keystroke must never do.
+  it("does nothing when the newest own message is no longer editable", async () => {
     const older: F0ChatMessage = { ...mine, id: "m0", body: "Older of mine" }
     renderChat(
       editable({
@@ -177,7 +182,86 @@ describe("F0Chat arrow-up editing", () => {
     )
     await pressArrowUp()
 
-    expect(composer()).toHaveValue("Older of mine")
+    expect(composer()).toHaveValue("")
+    expect(
+      screen.queryByRole("button", { name: /cancel edit/i })
+    ).not.toBeInTheDocument()
+  })
+
+  // Discriminator: the loaded window is not always anchored to the live tail.
+  it("does nothing while newer messages are outside the loaded window", async () => {
+    renderChat(editable({ hasMoreNewer: true }))
+    await pressArrowUp()
+
+    expect(composer()).toHaveValue("")
+    expect(
+      screen.queryByRole("button", { name: /cancel edit/i })
+    ).not.toBeInTheDocument()
+  })
+
+  // Discriminator: an attachment-only message has no text to edit, so loading
+  // it would turn the user's next Enter into a caption on the old image. The
+  // Edit action still offers it; only the blind shortcut declines.
+  it("does nothing when the newest own message carries only an attachment", async () => {
+    renderChat(
+      editable({
+        messages: [
+          { ...mine, id: "m0", body: "Older of mine" },
+          {
+            ...mine,
+            body: "",
+            attachments: [
+              {
+                kind: "image",
+                url: "https://example.test/a.png",
+                name: "a.png",
+              },
+            ],
+          },
+        ],
+      })
+    )
+    await pressArrowUp()
+
+    expect(composer()).toHaveValue("")
+  })
+
+  // Discriminator: the edit effect used to rebuild `attachments` from the
+  // message, so firing here would silently drop a pending upload.
+  it("does nothing while an attachment is pending", async () => {
+    const uploadFiles = vi
+      .fn()
+      .mockResolvedValue([
+        { kind: "image", url: "blob:img", name: "photo.png" },
+      ])
+    const { container } = renderChat(editable({ uploadFiles }))
+    fireEvent.change(
+      container.querySelector<HTMLInputElement>("input[type=file]")!,
+      {
+        target: {
+          files: [new File(["img"], "photo.png", { type: "image/png" })],
+        },
+      }
+    )
+    await screen.findByRole("img", { name: /photo\.png/i })
+
+    await pressArrowUp()
+
+    expect(composer()).toHaveValue("")
+    expect(
+      screen.queryByRole("button", { name: /cancel edit/i })
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("img", { name: /photo\.png/i })).toBeInTheDocument()
+  })
+
+  // PIN: modifier chords have no native meaning on an empty composer, so this
+  // asserts the rule rather than catching a live regression.
+  it("ignores a modified arrow-up", async () => {
+    renderChat(editable())
+    await userEvent.click(composer())
+    await userEvent.keyboard("{Shift>}{ArrowUp}{/Shift}")
+
+    expect(composer()).toHaveValue("")
   })
 
   it("is not offered once my last message is past the edit window", async () => {
@@ -226,9 +310,73 @@ describe("F0Chat double-click reply", () => {
     ).not.toBeInTheDocument()
   })
 
+  // Discriminator for the draft leak: before the fix the edit chip was
+  // replaced by the reply chip while the edited body stayed in the box, so
+  // Enter re-sent the old message as a reply.
+  it("clears the edit draft when the quote replaces it", async () => {
+    renderChat(editable())
+    await pressArrowUp()
+    expect(composer()).toHaveValue("Hi back")
+
+    await userEvent.dblClick(screen.getByText("Hello there"))
+
+    expect(composer()).toHaveValue("")
+    expect(
+      screen.getByRole("button", { name: /remove quote/i })
+    ).toBeInTheDocument()
+  })
+
+  it("keeps the typed draft when Edit is re-picked on the same message", async () => {
+    renderChat(editable())
+    await pressArrowUp()
+    await userEvent.type(composer(), " and more")
+
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+
+    expect(composer()).toHaveValue("Hi back and more")
+  })
+
   it("ignores a double-click on a deleted message", async () => {
     renderChat(makeRuntime({ messages: [{ ...theirs, deleted: true }, mine] }))
     await userEvent.dblClick(screen.getByText(/message deleted/i))
+
+    expect(
+      screen.queryByRole("button", { name: /remove quote/i })
+    ).not.toBeInTheDocument()
+  })
+
+  // Guards the bounded walk against being replaced by a plain `closest` over
+  // the focusability selector: react-virtuoso renders its scroller with
+  // tabIndex={0} (and ChatMessagesContainer forwards that onto the scroll
+  // viewport), so an unbounded lookup would match from any bubble text and no
+  // message would be quotable at all.
+  it("still quotes plain text when an ancestor of the row is focusable", async () => {
+    renderChat(makeRuntime())
+    screen.getByTestId("chat-message-viewport").setAttribute("tabindex", "0")
+
+    await userEvent.dblClick(screen.getByText("Hello there"))
+
+    expect(
+      screen.getByRole("button", { name: /remove quote/i })
+    ).toBeInTheDocument()
+  })
+
+  // SELECTOR PIN, not a behaviour test: it proves the rule treats a
+  // `[role="slider"]` descendant as self-handling. The real case is the voice
+  // waveform (ChatVoiceAttachment renders `role="slider"` with its own
+  // onClick), which cannot mount here — the transcript defers heavy previews
+  // until browser readiness — so the live widget is covered by the
+  // "Composer hotkeys" Storybook play function instead.
+  it("treats a role=slider descendant as self-handling", async () => {
+    renderChat(makeRuntime())
+    const slider = document.createElement("div")
+    slider.setAttribute("role", "slider")
+    slider.textContent = "seek"
+    screen.getByText("Hello there").append(slider)
+
+    await userEvent.dblClick(slider)
 
     expect(
       screen.queryByRole("button", { name: /remove quote/i })
@@ -258,5 +406,127 @@ describe("F0Chat double-click reply", () => {
     expect(
       screen.queryByRole("button", { name: /remove quote/i })
     ).not.toBeInTheDocument()
+  })
+})
+
+describe("F0Chat compose target lifecycle", () => {
+  // The composer registers its handle in an effect. StrictMode runs
+  // setup → cleanup → setup, and the cleanup nulls the ref, so a registration
+  // that does not re-register leaves the provider unable to drive the composer.
+  it("keeps the composer handle registered through a StrictMode replay", async () => {
+    render(
+      <StrictMode>
+        <F0ChatProvider runtime={editable()}>
+          <F0Chat />
+        </F0ChatProvider>
+      </StrictMode>
+    )
+    await pressArrowUp()
+
+    expect(composer()).toHaveValue("Hi back")
+  })
+
+  it("sets no quote on a read-only channel, where there is no composer", async () => {
+    renderChat(makeRuntime({ capabilities: { canSend: false } }))
+    await userEvent.dblClick(screen.getByText("Hello there"))
+
+    expect(
+      screen.queryByRole("button", { name: /remove quote/i })
+    ).not.toBeInTheDocument()
+  })
+
+  // Discriminator: the composer is unmounted on a read-only channel while the
+  // target lives in the provider. If the target survived, the composer would
+  // come back showing an edit chip over an EMPTY draft — one Enter from
+  // blanking the message it points at.
+  it("releases the target when the composer goes away and comes back", async () => {
+    const runtime = editable()
+    const { rerender } = render(
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    await pressArrowUp()
+    expect(composer()).toHaveValue("Hi back")
+
+    // The channel is frozen: F0Chat stops rendering the composer entirely.
+    rerender(
+      <F0ChatProvider
+        runtime={{ ...runtime, capabilities: { canSend: false } }}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    rerender(
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(composer()).toHaveValue("")
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /cancel edit/i })
+      ).not.toBeInTheDocument()
+    )
+  })
+
+  // Discriminator: `retarget` only discards on the way OUT of edit mode, so a
+  // typed REPLY draft used to survive the switch and could be sent to whoever
+  // the viewer moved to.
+  it("abandons a typed reply draft when the channel changes", async () => {
+    const runtime = makeRuntime()
+    const { rerender } = render(
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.type(composer(), "for your eyes only")
+    expect(composer()).toHaveValue("for your eyes only")
+
+    rerender(
+      <F0ChatProvider
+        runtime={{ ...runtime, channel: { ...runtime.channel, id: "c2" } }}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(composer()).toHaveValue("")
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /remove quote/i })
+      ).not.toBeInTheDocument()
+    )
+  })
+
+  // Discriminator: the provider and the composer both survive a channel
+  // switch, so without this Save would edit a message in the channel you left.
+  it("drops the target and the edit draft when the channel changes", async () => {
+    const runtime = editable()
+    const { rerender } = render(
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    await pressArrowUp()
+    expect(composer()).toHaveValue("Hi back")
+
+    rerender(
+      <F0ChatProvider
+        runtime={{ ...runtime, channel: { ...runtime.channel, id: "c2" } }}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    expect(composer()).toHaveValue("")
+    // The chip animates out, so it leaves the DOM a tick after the target.
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /cancel edit/i })
+      ).not.toBeInTheDocument()
+    )
   })
 })

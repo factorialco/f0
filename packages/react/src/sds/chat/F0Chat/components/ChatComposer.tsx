@@ -29,28 +29,25 @@ import {
   replaceClosedEmojiShortcode,
   useEmojiAutocomplete,
 } from "../hooks/useEmojiAutocomplete"
-import {
-  MENTION_EVERYONE_ID,
-  type MentionEntry,
-  useMentions,
-} from "../hooks/useMentions"
+import { MENTION_EVERYONE_ID, useMentions } from "../hooks/useMentions"
+import { useEditLastOwnMessage } from "../hooks/useEditLastOwnMessage"
 import { useTransientError } from "../hooks/useTransientError"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
+  useChatComposeActions,
   useChatComposeTarget,
   useChatDrop,
-  useChatEdit,
-  useChatReply,
+  type ChatComposeTarget,
+  type ChatComposerHandle,
 } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import {
-  isUserMessage,
   type F0ChatAttachment,
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
+  type F0ChatMessage,
 } from "../types"
 import { formatFileSize } from "../utils/attachments"
-import { canEditChatMessage } from "../utils/message-permissions"
 import {
   EASE_OUT_SWIFT,
   layoutTransition,
@@ -105,10 +102,8 @@ const localAttachmentFromFile = (
 export const ChatComposer = (): ReactNode => {
   const i18n = useI18n()
   const {
-    messages,
     sendMessage,
     editMessage,
-    editWindowMs,
     onInputActivity,
     stopTyping,
     uploadFiles,
@@ -123,15 +118,16 @@ export const ChatComposer = (): ReactNode => {
   // Uploads need both the runtime hook AND the capability (a frozen channel
   // can forbid attachments even when the transport could upload them).
   const canUpload = !!uploadFiles && capabilities?.canUpload !== false
-  const { replyTo, setReplyTo } = useChatReply()
-  const { editingMessage, setEditingMessage } = useChatEdit()
-  const { startEdit } = useChatComposeTarget()
+  const { target } = useChatComposeTarget()
+  const { clearComposeTarget, registerComposerHandle } = useChatComposeActions()
+  const editLastOwnMessage = useEditLastOwnMessage()
   const { registerFileDropHandler } = useChatDrop()
   const { reducedMotion: shouldReduceMotion } = useChatRenderConfig()
 
   const [value, setValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const [attachments, setAttachments] = useState<PendingAttachment[]>([])
+  const [isStartingRecording, setIsStartingRecording] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -247,6 +243,10 @@ export const ChatComposer = (): ReactNode => {
   // Partials stream into the textarea, appended to whatever was already typed.
   // The grid sizer in ChatTextareaField auto-grows the box, so no manual height.
   const baseValueRef = useRef("")
+  // Read inside the async recorder start, which must see the latest text
+  // rather than the value captured when the mic was pressed.
+  const valueRef = useRef(value)
+  valueRef.current = value
   const fillFromTranscript = useCallback((text: string) => {
     const base = baseValueRef.current
     const next = base ? `${base} ${text}` : text
@@ -321,6 +321,20 @@ export const ChatComposer = (): ReactNode => {
     (value.trim().length > 0 || attachments.length > 0) &&
     !isTranscribing &&
     !isUploading &&
+    !isSendingVoiceNote
+
+  // Nothing in the composer to lose and no capture in flight — the only state
+  // in which ↑ may take over the key. `value === ""` rather than a trimmed
+  // check: with any character present ↑ has a caret meaning the user may be
+  // relying on, and stealing a key that already does something is worse than a
+  // missed shortcut.
+  const isComposerIdle =
+    value === "" &&
+    attachments.length === 0 &&
+    target.kind === "none" &&
+    !isStartingRecording &&
+    !isRecording &&
+    !isTranscribing &&
     !isSendingVoiceNote
 
   // Activation pop for the send button: bump only on the false→true boundary
@@ -507,11 +521,14 @@ export const ChatComposer = (): ReactNode => {
     [canUpload, handleUpload]
   )
 
-  const isEditing = editingMessage !== null
+  const isEditing = target.kind === "edit"
+  const editingMessage = target.kind === "edit" ? target.message : null
+  const replyTo = target.kind === "reply" ? target.message : null
 
-  // Cancel an in-progress edit: drop the edit target and reset the composer.
-  const cancelEdit = useCallback(() => {
-    setEditingMessage(null)
+  // Empty the composer: text, attachments and seeded mentions. Does NOT touch
+  // the target — the provider owns that, and calling back into it here would
+  // recurse through `retarget`.
+  const discardDraft = useCallback(() => {
     mentions.close()
     mentions.seedMentions([])
     setValue("")
@@ -519,94 +536,96 @@ export const ChatComposer = (): ReactNode => {
     releaseUploadingPreviews(attachments)
     setAttachments([])
   }, [
-    setEditingMessage,
     mentions.close,
     mentions.seedMentions,
     releaseUploadingPreviews,
     attachments,
   ])
 
-  // Entering edit mode reloads the message into the composer — text, existing
-  // attachments (as ready chips) and its mentions — then focuses at the end.
-  useEffect(() => {
-    if (!editingMessage) return
-    setValue(editingMessage.body)
-    setCursorPosition(editingMessage.body.length)
-    setAttachments((prev) => {
-      releaseUploadingPreviews(prev)
-      return (editingMessage.attachments ?? []).map((attachment) => ({
-        id: `att-${attachmentSeq.current++}`,
-        status: "ready" as const,
-        attachment,
-      }))
-    })
-    const entries: MentionEntry[] = [
-      ...(editingMessage.mentions ?? []).map((m) => ({
-        id: m.id,
-        name: m.name,
-        avatar: m.avatar,
-        subtitle: m.subtitle,
-        profileHref: m.profileHref,
-      })),
-      ...(editingMessage.mentionedEveryone && channel.type === "group"
-        ? [{ id: MENTION_EVERYONE_ID, name: i18n.chat.mentionEveryone }]
-        : []),
+  // Load a message into the composer: text, existing attachments (as ready
+  // chips) and its mentions.
+  const loadEditDraft = useCallback(
+    (message: F0ChatMessage) => {
+      setValue(message.body)
+      setCursorPosition(message.body.length)
+      setAttachments((prev) => {
+        releaseUploadingPreviews(prev)
+        return (message.attachments ?? []).map((attachment) => ({
+          id: `att-${attachmentSeq.current++}`,
+          status: "ready" as const,
+          attachment,
+        }))
+      })
+      mentions.seedMentions([
+        ...(message.mentions ?? []).map((m) => ({
+          id: m.id,
+          name: m.name,
+          avatar: m.avatar,
+          subtitle: m.subtitle,
+          profileHref: m.profileHref,
+        })),
+        ...(message.mentionedEveryone && channel.type === "group"
+          ? [{ id: MENTION_EVERYONE_ID, name: i18n.chat.mentionEveryone }]
+          : []),
+      ])
+    },
+    [
+      channel.type,
+      i18n.chat.mentionEveryone,
+      mentions.seedMentions,
+      releaseUploadingPreviews,
     ]
-    mentions.seedMentions(entries)
-    requestAnimationFrame(() => {
-      const node = textareaRef.current
-      if (node) {
-        node.focus()
-        const end = editingMessage.body.length
-        node.setSelectionRange(end, end)
-      }
-    })
-  }, [
-    editingMessage,
-    channel.type,
-    i18n.chat.mentionEveryone,
-    mentions.seedMentions,
-    releaseUploadingPreviews,
-  ])
+  )
 
-  // A new reply target (the actions menu, or a double-click on a message) hands
-  // focus to the composer — a quote is only useful with the caret ready to
-  // type. One frame later, so the chip has grown the composer first.
+  const focusComposer = useCallback(() => {
+    const node = textareaRef.current
+    if (!node) return
+    // `preventScroll`: the panel can sit inside a longer host page, and taking
+    // a quote should never scroll it.
+    node.focus({ preventScroll: true })
+    const end = node.value.length
+    node.setSelectionRange(end, end)
+  }, [])
+
+  // How the composer follows the target. The provider calls this inside the
+  // user's gesture, so focus reaches the textarea in the same event (iOS only
+  // opens the keyboard for a focus inside a gesture) and the draft is reset
+  // before any paint.
+  const retarget = useCallback(
+    (previous: ChatComposeTarget, next: ChatComposeTarget) => {
+      const leavingEdit = previous.kind === "edit" && next.kind !== "edit"
+      // Re-picking Edit on the message already open must not wipe what the user
+      // has typed into it.
+      const sameEdit =
+        previous.kind === "edit" &&
+        next.kind === "edit" &&
+        previous.message.id === next.message.id
+
+      if (leavingEdit) discardDraft()
+      if (next.kind === "edit" && !sameEdit) loadEditDraft(next.message)
+      if (next.kind !== "none") focusComposer()
+    },
+    [discardDraft, loadEditDraft, focusComposer]
+  )
+
+  const handle = useMemo<ChatComposerHandle>(
+    () => ({ retarget, abandonDraft: discardDraft }),
+    [retarget, discardDraft]
+  )
+
+  // Re-registered whenever the handle's closures change (`discardDraft` reads
+  // the current attachments).
   useEffect(() => {
-    if (!replyTo) return
-    const frame = requestAnimationFrame(() => {
-      const node = textareaRef.current
-      if (!node) return
-      node.focus()
-      const end = node.value.length
-      node.setSelectionRange(end, end)
-    })
-    return () => cancelAnimationFrame(frame)
-  }, [replyTo])
+    registerComposerHandle(handle)
+    return () => registerComposerHandle(null)
+  }, [registerComposerHandle, handle])
 
-  // Reopen your newest still-editable message. The transcript runs oldest →
-  // newest, so scan backwards; skip messages that can no longer be edited (a
-  // voice note, one past the edit window) and take the next one down. Own
-  // messages only, even where a host capability allows editing other people's:
-  // a shortcut fires blind, and must never open someone else's message.
-  const startEditingLastOwnMessage = useCallback(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const item = messages[i]
-      if (!isUserMessage(item) || !item.isMine) continue
-      if (
-        !canEditChatMessage(item, {
-          hasEditMessage: !!editMessage,
-          capabilities,
-          editWindowMs,
-        })
-      ) {
-        continue
-      }
-      startEdit(item)
-      return true
-    }
-    return false
-  }, [messages, editMessage, capabilities, editWindowMs, startEdit])
+  // A target only means anything while a composer exists to hold its draft.
+  // The composer is unmounted on a read-only channel (see F0Chat), and a
+  // target that outlived it would come back to a fresh, EMPTY composer showing
+  // an edit chip — one Enter from blanking the message it points at. Releasing
+  // it here is why registration can stay a record of future transitions.
+  useEffect(() => clearComposeTarget, [clearComposeTarget])
 
   const handleSend = useCallback(() => {
     if (!canSend) return
@@ -626,7 +645,7 @@ export const ChatComposer = (): ReactNode => {
         mentions: mentioned.length > 0 ? mentioned : undefined,
         mentionedEveryone: mentionedEveryone || undefined,
       })
-      cancelEdit()
+      clearComposeTarget()
       return
     }
 
@@ -641,19 +660,18 @@ export const ChatComposer = (): ReactNode => {
     setValue("")
     setCursorPosition(0)
     setAttachments([])
-    setReplyTo(null)
+    clearComposeTarget()
   }, [
     attachments,
     canSend,
     mentions,
     replyTo,
     sendMessage,
-    setReplyTo,
+    clearComposeTarget,
     stopTyping,
     value,
     editingMessage,
     editMessage,
-    cancelEdit,
   ])
 
   // Insert a picked emoji at the caret (the textarea keeps its selection while
@@ -692,28 +710,21 @@ export const ChatComposer = (): ReactNode => {
       // Escape backs out of an edit (when the popover didn't claim it).
       if (e.key === "Escape" && isEditing) {
         e.preventDefault()
-        cancelEdit()
+        clearComposeTarget()
         return
       }
       // ↑ on an idle, empty composer reopens your last message for editing.
-      // Anything else in the composer keeps ↑ meaning "move the caret": text,
-      // an attachment, a pending quote (the user is mid-reply), a live
-      // recording. A modifier is a text-selection/navigation gesture, never
-      // this shortcut. When there is nothing editable left, ↑ falls through.
-      if (
+      // A modifier makes it a text-selection/navigation gesture, never this
+      // shortcut. When there is nothing editable left, ↑ falls through to its
+      // ordinary caret meaning — hence preventDefault only on a hit.
+      const isArrowUpShortcut =
         e.key === "ArrowUp" &&
         !e.shiftKey &&
         !e.altKey &&
         !e.metaKey &&
         !e.ctrlKey &&
-        !isEditing &&
-        !replyTo &&
-        value === "" &&
-        attachments.length === 0 &&
-        !isRecording &&
-        !isTranscribing &&
-        startEditingLastOwnMessage()
-      ) {
+        isComposerIdle
+      if (isArrowUpShortcut && editLastOwnMessage()) {
         e.preventDefault()
         return
       }
@@ -727,20 +738,32 @@ export const ChatComposer = (): ReactNode => {
       handleEmojiAutocompleteKeyDown,
       mentions,
       isEditing,
-      cancelEdit,
-      replyTo,
-      value,
-      attachments.length,
-      isRecording,
-      isTranscribing,
-      startEditingLastOwnMessage,
+      clearComposeTarget,
+      isComposerIdle,
+      editLastOwnMessage,
     ]
   )
 
+  // `recorder.start()` only reports "recording" AFTER the getUserMedia
+  // permission prompt resolves, so the composer stays idle-looking for as long
+  // as the prompt is open. `isStartingRecording` covers that window: without
+  // it, ↑ could load a message in the meantime and the first transcript partial
+  // would overwrite its body.
   const startRecording = useCallback(() => {
-    baseValueRef.current = value
-    void recorder.start()
-  }, [recorder, value])
+    setIsStartingRecording(true)
+    void (async () => {
+      try {
+        await recorder.start()
+        // Captured here, not at button press: the transcript is appended to
+        // whatever the textarea holds once capture really starts.
+        baseValueRef.current = valueRef.current
+      } catch {
+        // The recorder reports its own failures through onError.
+      } finally {
+        setIsStartingRecording(false)
+      }
+    })()
+  }, [recorder])
 
   const placeholder = i18n.chat.placeholder
 
@@ -790,7 +813,10 @@ export const ChatComposer = (): ReactNode => {
                   ease: EASE_OUT_SWIFT,
                 }}
               >
-                <ChatEditChip message={editingMessage} onRemove={cancelEdit} />
+                <ChatEditChip
+                  message={editingMessage}
+                  onRemove={clearComposeTarget}
+                />
               </motion.div>
             ) : replyTo ? (
               <motion.div
@@ -806,7 +832,7 @@ export const ChatComposer = (): ReactNode => {
               >
                 <ChatReplyChip
                   message={replyTo}
-                  onRemove={() => setReplyTo(null)}
+                  onRemove={clearComposeTarget}
                 />
               </motion.div>
             ) : null}
@@ -1045,8 +1071,15 @@ export const ChatComposer = (): ReactNode => {
                         }
                         icon={Microphone}
                         onClick={startRecording}
-                        // Spins while dictation transcribes or a voice note uploads.
-                        loading={isTranscribing || isSendingVoiceNote}
+                        // Spins while dictation transcribes or a voice note
+                        // uploads, and while the mic permission prompt is open —
+                        // a second press there opens a second getUserMedia and
+                        // orphans the first stream.
+                        loading={
+                          isStartingRecording ||
+                          isTranscribing ||
+                          isSendingVoiceNote
+                        }
                       />
                     )}
                     {/* The send button fades on ACTIVATION (boundary flip of

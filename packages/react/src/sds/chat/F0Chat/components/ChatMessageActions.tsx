@@ -19,7 +19,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import { useChatComposeTarget } from "../providers/ChatUIProvider"
+import { useChatComposeActions } from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { canEditChatMessage } from "../utils/message-permissions"
@@ -87,7 +87,7 @@ export const ChatMessageActions = ({
     retryMessage,
     capabilities,
   } = useF0ChatStable()
-  const { startReply, startEdit } = useChatComposeTarget()
+  const { startReply, startEdit } = useChatComposeActions()
   const [view, setView] = useState<"menu" | "info">("menu")
 
   // Same policy the composer's edit-last shortcut uses — see canEditChatMessage.
