@@ -115,6 +115,9 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    /** Returns to where you came from WITHOUT leaving — a step, a list, a
+        previous view. Closing is `close`. */
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -1006,11 +1009,10 @@ export const defaultTranslations = {
     addWidget: "Add widget",
     /**
      * Heads the picker's SECOND STEP, where the params of the widget being added
-     * are set. `{{title}}` is that widget's name.
+     * are set. `{{title}}` is that widget's name. Going BACK from it is the
+     * common `actions.back`.
      */
     configureWidget: "Configure {{title}}",
-    /** Back to the widget list from that step. */
-    back: "Back",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */

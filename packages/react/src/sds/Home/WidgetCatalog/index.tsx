@@ -532,7 +532,7 @@ export function WidgetCatalog({
       secondaryAction={
         configuring && selected
           ? {
-              label: t.widgets.back,
+              label: t.actions.back,
               icon: ArrowLeft,
               iconPosition: "left",
               onClick: () => {
