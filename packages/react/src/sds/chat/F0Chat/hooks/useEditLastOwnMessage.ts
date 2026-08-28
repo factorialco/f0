@@ -17,21 +17,14 @@ type EditPolicy = {
 }
 
 /**
- * The message a keyboard shortcut may reopen: the viewer's NEWEST own message,
- * and only if it is editable as text.
+ * Stops at the newest own message instead of searching past it: the user
+ * pressed a key without choosing a message, so opening an older one surprises
+ * them. The actions menu still reaches those.
  *
- * It does not look further back on purpose. The user presses a key without
- * choosing a message, so opening anything other than their newest one is a
- * surprise. When that message does not qualify the shortcut does nothing, and
- * the actions menu is still there for older messages.
- *
- * Stricter than the menu in two ways:
- * - own messages only, even where `capabilities.canEditMessage` allows editing
- *   other people's, so a moderator cannot open a colleague's message by
- *   accident;
- * - text only. A message with just an image would load an empty box plus that
- *   image, and the next Enter would add a caption to it instead of sending the
- *   message the user typed.
+ * Stricter than that menu in two ways. Own messages only, even where
+ * `capabilities.canEditMessage` allows editing other people's. And text only —
+ * a message with just an image loads an empty box plus the image, so the next
+ * Enter captions it rather than sending what the user typed.
  */
 export const findShortcutEditTarget = (
   messages: F0ChatItem[],
@@ -46,19 +39,15 @@ export const findShortcutEditTarget = (
   return null
 }
 
-/**
- * Reopen the viewer's last editable message. Returns whether it found one, so
- * the caller only swallows the keystroke when something actually happened.
- */
+/** Returns whether it found one, so the caller only swallows the key when
+ * something happened. */
 export const useEditLastOwnMessage = (): (() => boolean) => {
   const { messages, hasMoreNewer, editMessage, capabilities, editWindowMs } =
     useF0Chat()
   const { startEdit } = useChatComposeActions()
-  // What a search already found nothing in. Holding the key down repeats it
-  // about 30 times a second, and only a failed search repeats the work — a
-  // successful one opens an edit, which the caller's guard then blocks. The
-  // policy is part of the key because a permission change can arrive with the
-  // same message array, and the shortcut has to notice.
+  // Held keys repeat ~30 times a second, and only a failed search repeats the
+  // work. The policy is part of the key because a permission change can arrive
+  // with the same message array.
   const missRef = useRef<{ messages: F0ChatItem[]; policy: EditPolicy } | null>(
     null
   )
@@ -66,8 +55,7 @@ export const useEditLastOwnMessage = (): (() => boolean) => {
   return useCallback(() => {
     if (!editMessage) return false
     // The loaded messages do not always end at the newest one: after jumping to
-    // a search result the last one loaded can be months old, so "your last
-    // message" would mean the wrong message.
+    // a search result the last one can be months old.
     if (hasMoreNewer === true) return false
 
     const policy: EditPolicy = {
