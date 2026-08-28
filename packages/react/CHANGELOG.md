@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.71.0](https://github.com/factorialco/f0/compare/f0-react-v6.70.0...f0-react-v6.71.0) (2026-08-28)
+
+
+### Features
+
+* **Tooltip:** accept a title, body and bullets in cell tooltips ([#5289](https://github.com/factorialco/f0/issues/5289)) ([bf2836e](https://github.com/factorialco/f0/commit/bf2836eadd9f9671b6743d933e03363a92305aba))
+
 ## [6.70.0](https://github.com/factorialco/f0/compare/f0-react-v6.69.0...f0-react-v6.70.0) (2026-08-28)
 
 
