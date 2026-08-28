@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.65.1](https://github.com/factorialco/f0/compare/f0-react-v6.65.0...f0-react-v6.65.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** match the composer surface to the widgets ([#5290](https://github.com/factorialco/f0/issues/5290)) ([80da4bd](https://github.com/factorialco/f0/commit/80da4bd68a7e0bff9ea5fb9380b8a84edb14faf8))
+
+## [6.65.0](https://github.com/factorialco/f0/compare/f0-react-v6.64.0...f0-react-v6.65.0) (2026-08-28)
+
+
+### Features
+
+* **NewHomeLayout:** stop widget drag at the pinned widgets ([#5282](https://github.com/factorialco/f0/issues/5282)) ([88a190b](https://github.com/factorialco/f0/commit/88a190b046a4806052d0227c1f6cbd4f0badfa16))
+
+## [6.64.0](https://github.com/factorialco/f0/compare/f0-react-v6.63.2...f0-react-v6.64.0) (2026-08-28)
+
+
+### Features
+
+* **F0Select:** add inline variant ([#5095](https://github.com/factorialco/f0/issues/5095)) ([74f7de5](https://github.com/factorialco/f0/commit/74f7de5403d9bdb2272022bd5ba48df9325293a6))
+
 ## [6.63.2](https://github.com/factorialco/f0/compare/f0-react-v6.63.1...f0-react-v6.63.2) (2026-08-27)
 
 
