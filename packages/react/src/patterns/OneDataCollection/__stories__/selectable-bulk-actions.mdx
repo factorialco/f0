@@ -203,6 +203,28 @@ const { source } = useDataCollectionSource({
   visualizations. Card and Kanban enforce the exclusion but do not grey the
   control.
 
+### Selected through something else (`selectionInherited`)
+
+In a tree, picking a node usually takes everything under it. Those descendants
+are _included_ but they are not the user's own picks, and they must not enter the
+selection — an API that moves or deletes subtrees expects to be told only the
+node the user chose.
+
+`selectionInherited` renders exactly that: the row's checkbox shows the
+indeterminate mark, disabled, so it reads as "included, but not something you
+ticked" and cannot be unticked on its own. It implies `selectionDisabled`, and
+the row never joins the selection, so the payload keeps naming only real picks.
+
+```tsx
+const { source } = useDataCollectionSource({
+  ...
+  selectable: (item) => item.id,
+  // Anything below a picked node travels with it
+  selectionInherited: (item) => hasSelectedAncestor(item),
+  ...
+})
+```
+
 ### Removing "select all" (`disableSelectAll`)
 
 The header checkbox starts from an empty selection, so a rule that only locks
@@ -285,6 +307,30 @@ This works in the same way for the groups.
   of={DataCollectionStories.WithPagesPagination}
   meta={DataCollectionStories}
 />
+
+### Explaining an unavailable action (`disabledTooltip`)
+
+A `disabled` bulk action says nothing about _why_, and a native disabled button
+emits no pointer events, so a plain `title` never appears either. Give the action
+`disabledTooltip` and the bar hangs the reason off a wrapper that does receive
+hover:
+
+```tsx
+bulkActions: (selectedItems) => ({
+  primary: [
+    {
+      id: "move",
+      label: "Move to",
+      disabled: mixesKinds(selectedItems),
+      disabledTooltip: "You can't bulk move two nodes of different types",
+    },
+  ],
+})
+```
+
+It is only rendered while the action is disabled — an action the user can click
+explains itself by doing the thing. Prefer this over `warningMessage` when only
+_one_ action is unavailable: the warning form replaces the whole action set.
 
 ## Bulk actions
 

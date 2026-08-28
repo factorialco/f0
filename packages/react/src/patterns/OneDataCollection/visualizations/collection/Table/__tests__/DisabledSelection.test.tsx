@@ -57,7 +57,8 @@ type Source = DataCollectionSource<
 
 const createSource = ({
   disableSelectAll = false,
-}: { disableSelectAll?: boolean } = {}): Source => ({
+  inherited = false,
+}: { disableSelectAll?: boolean; inherited?: boolean } = {}): Source => ({
   currentFilters: {},
   setCurrentFilters: vi.fn(),
   currentSortings: null,
@@ -74,6 +75,7 @@ const createSource = ({
   setCurrentGrouping: vi.fn(),
   selectable: (item: Node) => item.id,
   selectionDisabled: (item: Node) => item.kind === "level",
+  selectionInherited: (item: Node) => inherited && item.kind === "level",
   disableSelectAll,
   dataAdapter: {
     fetchData: async (_options: BaseFetchOptions<FiltersDefinition>) => ({
@@ -100,6 +102,34 @@ const renderTable = (source: Source) =>
       onLoadError={vi.fn()}
     />
   )
+
+describe("Table selectionInherited", () => {
+  it("renders an inherited row as indeterminate, disabled and unselectable", async () => {
+    const user = userEvent.setup()
+    renderTable(createSource({ inherited: true }))
+
+    await waitFor(() =>
+      expect(screen.getByTitle("Select 3")).toBeInTheDocument()
+    )
+
+    const markOf = (title: string) =>
+      screen.getByTitle(title).querySelector("svg")?.innerHTML
+
+    expect(screen.getByTitle("Select 3")).toBeDisabled()
+
+    // Tick a row for real, so there is a genuine check to compare against: an
+    // inherited row must not look like a row the user picked.
+    await user.click(screen.getByTitle("Select 1"))
+    await waitFor(() => expect(screen.getByTitle("Select 1")).toBeChecked())
+    expect(markOf("Select 3")).toBeDefined()
+    expect(markOf("Select 3")).not.toEqual(markOf("Select 1"))
+
+    // And it stays out of the selection: select-all cannot reach it either.
+    await user.click(screen.getAllByRole("checkbox")[0] as HTMLElement)
+    await waitFor(() => expect(screen.getByTitle("Select 2")).toBeChecked())
+    expect(markOf("Select 3")).not.toEqual(markOf("Select 1"))
+  })
+})
 
 describe("Table selectionDisabled", () => {
   it("disables the blocked row's checkbox and leaves the others alone", async () => {

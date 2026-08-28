@@ -51,7 +51,14 @@ export function useSelectable<
   const isGrouped = data.type === "grouped"
   const isMultiSelection = selectionMode === "multi"
   const getSelectable = source.selectable
-  const getSelectionDisabled = source.selectionDisabled
+  // `selectionInherited` implies disabled: an inherited row is never the user's
+  // own pick, so nothing may put it in the selection.
+  const getSelectionDisabled = useCallback(
+    (item: R) =>
+      source.selectionInherited?.(item) === true ||
+      source.selectionDisabled?.(item) === true,
+    [source]
+  )
   // Same precedence as `allPagesSelection`: the hook prop wins, the source is
   // the fallback.
   const disableSelectAll =
@@ -596,7 +603,7 @@ export function useSelectable<
   // present (covers nested children), else `data.records`.
   const collectSelectableEntries = useCallback((): Array<[SelectionId, R]> => {
     const isDisabled = ([, item]: [SelectionId, R]) =>
-      getSelectionDisabled?.(item) === true
+      getSelectionDisabled(item) === true
 
     const rendered = getRenderedSelectableEntries?.() ?? []
     if (rendered.length > 0)
@@ -625,7 +632,7 @@ export function useSelectable<
   const handleSelectItemChange = useCallback(
     (itemOrId: R | SelectionId | readonly SelectionId[], checked: boolean) => {
       if (isRecordItem(itemOrId, getSelectable !== undefined)) {
-        if (getSelectionDisabled?.(itemOrId)) return
+        if (getSelectionDisabled(itemOrId)) return
         const id = getSelectable?.(itemOrId)
         if (id !== undefined) {
           handleSelectItemChangeInternal(id, checked, false, itemOrId)

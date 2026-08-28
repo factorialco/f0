@@ -17,6 +17,8 @@ import {
 } from "@/components/F0ButtonDropdown"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
+
 import CheckCircleAnimated from "@/icons/animated/CheckCircle"
 import { AlertCircle, AlertCircleLine } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
@@ -31,7 +33,28 @@ type ActionType = {
   critical?: boolean
   description?: string
   loading?: boolean
+  /** Shown on hover. Its reason for existing is a disabled action. */
+  tooltip?: string
 }
+
+/**
+ * A native `disabled` button emits no pointer events, so a tooltip explaining
+ * WHY an action is unavailable has to hang off a wrapper instead.
+ */
+const WithReason = ({
+  reason,
+  children,
+}: {
+  reason?: string
+  children: React.ReactNode
+}) =>
+  reason ? (
+    <TooltipInternal label={reason}>
+      <span className="inline-flex">{children}</span>
+    </TooltipInternal>
+  ) : (
+    children
+  )
 
 export type ActionBarGroup = {
   label?: string
@@ -424,18 +447,20 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                       loading={hasLoadingAction}
                     />
                   ) : (
-                    <F0Button
-                      label={singlePrimaryAction.label}
-                      icon={singlePrimaryAction.icon}
-                      onClick={singlePrimaryAction.onClick}
-                      disabled={
-                        isInteractionDisabled || singlePrimaryAction.disabled
-                      }
-                      loading={
-                        singlePrimaryAction.loading ?? status === "loading"
-                      }
-                      size="lg"
-                    />
+                    <WithReason reason={singlePrimaryAction.tooltip}>
+                      <F0Button
+                        label={singlePrimaryAction.label}
+                        icon={singlePrimaryAction.icon}
+                        onClick={singlePrimaryAction.onClick}
+                        disabled={
+                          isInteractionDisabled || singlePrimaryAction.disabled
+                        }
+                        loading={
+                          singlePrimaryAction.loading ?? status === "loading"
+                        }
+                        size="lg"
+                      />
+                    </WithReason>
                   )}
                 </Fragment>
               </div>
@@ -475,17 +500,19 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                       />
                     </>
                   ) : (
-                    <F0Button
-                      label={singlePrimaryAction.label}
-                      icon={singlePrimaryAction.icon}
-                      onClick={singlePrimaryAction.onClick}
-                      disabled={
-                        isInteractionDisabled || singlePrimaryAction.disabled
-                      }
-                      loading={
-                        singlePrimaryAction.loading ?? status === "loading"
-                      }
-                    />
+                    <WithReason reason={singlePrimaryAction.tooltip}>
+                      <F0Button
+                        label={singlePrimaryAction.label}
+                        icon={singlePrimaryAction.icon}
+                        onClick={singlePrimaryAction.onClick}
+                        disabled={
+                          isInteractionDisabled || singlePrimaryAction.disabled
+                        }
+                        loading={
+                          singlePrimaryAction.loading ?? status === "loading"
+                        }
+                      />
+                    </WithReason>
                   )}
                 </Fragment>
               </div>

@@ -598,7 +598,7 @@ const OneDataCollectionComp = <
    * Bulk actions
    */
   type MappedBulkAction =
-    | (BulkActionDefinition & { onClick: () => void })
+    | (BulkActionDefinition & { onClick: () => void; tooltip?: string })
     | { type: "separator" }
 
   const [bulkActions, setBulkActions] = useState<
@@ -825,6 +825,9 @@ const OneDataCollectionComp = <
       const bulkAction = action as BulkActionDefinition
       return {
         ...bulkAction,
+        // The action bar speaks of a generic `tooltip`; a bulk action only ever
+        // has one to explain why it is unavailable.
+        tooltip: bulkAction.disabled ? bulkAction.disabledTooltip : undefined,
         onClick: () => {
           const result = onBulkAction?.(
             bulkAction.id,

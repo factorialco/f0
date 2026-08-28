@@ -86,8 +86,11 @@ export const Row = <
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const isClickable = !!itemHref || !!itemOnClick
   const id = source.selectable ? source.selectable(item) : undefined
+  const selectionInherited =
+    id !== undefined && source.selectionInherited?.(item) === true
   const selectionDisabled =
-    id !== undefined && source.selectionDisabled?.(item) === true
+    id !== undefined &&
+    (selectionInherited || source.selectionDisabled?.(item) === true)
   const itemDef = itemDefinition(item)
 
   const {
@@ -122,7 +125,8 @@ export const Row = <
             )}
           >
             <F0Checkbox
-              checked={selectedItems.has(id)}
+              checked={selectionInherited || selectedItems.has(id)}
+              indeterminate={selectionInherited}
               onCheckedChange={(checked) =>
                 handleSelectItemChange(item, checked)
               }
@@ -196,7 +200,8 @@ export const Row = <
           )}
         >
           <F0Checkbox
-            checked={selectedItems.has(id)}
+            checked={selectionInherited || selectedItems.has(id)}
+            indeterminate={selectionInherited}
             onCheckedChange={(checked) => handleSelectItemChange(item, checked)}
             disabled={selectionDisabled}
             title={`Select ${source.selectable(item)}`}

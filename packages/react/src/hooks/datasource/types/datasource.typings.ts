@@ -92,6 +92,18 @@ export type DataSourceDefinition<
    */
   selectionDisabled?: (item: R) => boolean
   /**
+   * Marks a row as selected *through something else* — the usual case being a
+   * tree where picking a node takes everything under it. Its checkbox renders
+   * in the indeterminate state and disabled, so an inherited row reads as
+   * included without looking like a row the user ticked, and cannot be
+   * unticked on its own. Implies `selectionDisabled`.
+   *
+   * The row does NOT enter the selection: the payload keeps naming only what
+   * the user actually picked, which is what an API that acts on subtrees
+   * expects.
+   */
+  selectionInherited?: (item: R) => boolean
+  /**
    * Removes the header "select all" checkbox and the cross-page
    * "Select all N items" CTA, forcing row-by-row selection. Use it when a
    * valid selection is narrower than "everything on the page" — a rule the

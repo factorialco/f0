@@ -886,12 +886,17 @@ export const WithSelectableAndBulkActions: Story = {
  * other row goes disabled until the selection is cleared. `disableSelectAll`
  * removes the header checkbox, which would otherwise tick every department at
  * once and break the rule before it can lock anything.
+ *
+ * `selectionInherited` then shows the consequence of a pick: everyone reporting
+ * to a selected person is marked as coming along — the indeterminate mark,
+ * disabled — without joining the selection itself.
  */
 export const WithDisabledSelection: Story = {
   render: () => {
     const [lockedDepartment, setLockedDepartment] = useState<string | null>(
       null
     )
+    const [selectedManagers, setSelectedManagers] = useState<string[]>([])
 
     const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
 
@@ -901,6 +906,10 @@ export const WithDisabledSelection: Story = {
       selectable: (item) => item.id,
       selectionDisabled: (item) =>
         lockedDepartment !== null && item.department !== lockedDepartment,
+      // Everyone reporting to a picked manager travels with them: shown as
+      // included, never as the user's own pick.
+      selectionInherited: (item) =>
+        selectedManagers.length > 0 && selectedManagers.includes(item.manager),
       disableSelectAll: true,
       bulkActions: () => ({
         primary: [{ label: "Move", id: "move" }],
@@ -915,10 +924,11 @@ export const WithDisabledSelection: Story = {
       <OneDataCollection
         source={source}
         onSelectItems={(selectedItems) => {
-          const firstChecked = selectedItems.itemsStatus.find(
+          const checked = selectedItems.itemsStatus.filter(
             (status) => status.checked
           )
-          setLockedDepartment(firstChecked?.item.department ?? null)
+          setLockedDepartment(checked[0]?.item.department ?? null)
+          setSelectedManagers(checked.map((status) => status.item.name))
         }}
         onBulkAction={() => {}}
         visualizations={[mockVisualizations.table]}

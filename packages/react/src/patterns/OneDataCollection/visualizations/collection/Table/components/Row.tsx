@@ -184,8 +184,13 @@ const RowComponentInner = <
   // A selectable row the consumer is blocking right now: the checkbox renders
   // disabled and the row stays out of the selection registry, so "select all"
   // can reach a fully-checked state without it.
+  // Selected through an ancestor: shown, but not the user's own pick and not
+  // part of the selection.
+  const selectionInherited =
+    id !== undefined && source.selectionInherited?.(item) === true
   const selectionDisabled =
-    id !== undefined && source.selectionDisabled?.(item) === true
+    id !== undefined &&
+    (selectionInherited || source.selectionDisabled?.(item) === true)
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
   const i18n = useI18n()
@@ -349,7 +354,8 @@ const RowComponentInner = <
               )}
             >
               <Checkbox
-                checked={selectedItems.has(id)}
+                checked={selectionInherited || selectedItems.has(id)}
+                indeterminate={selectionInherited}
                 onCheckedChange={onCheckedChange}
                 disabled={selectionDisabled}
                 title={`Select ${source.selectable(item)}`}
