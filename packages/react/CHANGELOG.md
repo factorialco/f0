@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.69.0](https://github.com/factorialco/f0/compare/f0-react-v6.68.0...f0-react-v6.69.0) (2026-08-28)
+
+
+### Features
+
+* **WidgetCatalog:** configure a widget's params before adding it ([#5303](https://github.com/factorialco/f0/issues/5303)) ([dbf815f](https://github.com/factorialco/f0/commit/dbf815f1a6d79fbbbe0b1c950d4c33949d20065e))
+
 ## [6.68.0](https://github.com/factorialco/f0/compare/f0-react-v6.67.1...f0-react-v6.68.0) (2026-08-28)
 
 
