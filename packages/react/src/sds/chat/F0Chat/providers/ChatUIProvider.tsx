@@ -60,9 +60,9 @@ type ChatComposeTargetContextValue = {
 }
 
 /**
- * Called on every target move, inside the user's gesture. Not an effect: an
- * effect runs a frame late (losing the gesture, so iOS opens no keyboard) and
- * cannot see the previous target, which is what says whether to discard.
+ * Called on every target move, inside the user's gesture. Not an effect: that
+ * runs a frame late, losing the gesture so iOS opens no keyboard, and cannot
+ * see the previous target — which is what says whether to discard the draft.
  */
 export type ChatComposerHandle = {
   retarget: (previous: ChatComposeTarget, next: ChatComposeTarget) => void
@@ -73,13 +73,9 @@ export type ChatComposerHandle = {
 /** Identity-stable for the provider's lifetime, so message rows can move the
  * target without subscribing to it and re-rendering on every change. */
 type ChatComposeActionsContextValue = {
-  /** Quote a message in the composer. */
   startReply: (message: F0ChatMessage) => void
-  /** Reload a message into the composer for editing. */
   startEdit: (message: F0ChatMessage) => void
-  /** Drop the current target (the chip's remove button, Escape, a channel switch). */
   clearComposeTarget: () => void
-  /** The composer registers how it follows the target. */
   registerComposerHandle: (handle: ChatComposerHandle | null) => void
 }
 
@@ -525,7 +521,6 @@ export const useChatHighlightedId = (): ChatHighlightedIdContextValue =>
 export const useChatComposeTarget = (): ChatComposeTargetContextValue =>
   useCtx(ChatComposeTargetContext, "useChatComposeTarget")
 
-/** Stable identity, so message rows and the actions menu can consume it. */
 export const useChatComposeActions = (): ChatComposeActionsContextValue =>
   useCtx(ChatComposeActionsContext, "useChatComposeActions")
 

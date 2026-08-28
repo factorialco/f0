@@ -160,7 +160,6 @@ export const ChatMessageItem = ({
     message.status !== "sending" &&
     message.status !== "failed"
 
-  // Focusing the composer clears the word the double-click selected.
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!canQuote) return

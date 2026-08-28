@@ -1,8 +1,6 @@
 import { type F0ChatCapabilities, type F0ChatMessage } from "../types"
 
 /**
- * Whether a message can still be edited.
- *
  * Whose messages, and for how long, comes from `capabilities.canEditMessage`
  * when the host provides one, else the default: own messages within
  * `editWindowMs`. Whatever that says, editing also needs a host `editMessage`
@@ -19,7 +17,6 @@ export const canEditChatMessage = (
     capabilities,
     editWindowMs,
   }: {
-    /** Whether the runtime provides an `editMessage` handler at all. */
     hasEditMessage: boolean
     capabilities?: F0ChatCapabilities
     editWindowMs?: number
