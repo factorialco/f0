@@ -115,8 +115,6 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
-    /** Returns to where you came from WITHOUT leaving — a step, a list, a
-        previous view. Closing is `close`. */
     back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
@@ -1007,11 +1005,6 @@ export const defaultTranslations = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
-    /**
-     * Heads the picker's SECOND STEP, where the params of the widget being added
-     * are set. `{{title}}` is that widget's name. Going BACK from it is the
-     * common `actions.back`.
-     */
     configureWidget: "Configure {{title}}",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",

@@ -296,13 +296,11 @@ describe("WidgetCatalog", () => {
     })
   })
   describe("a widget with params is added in two steps", () => {
-    /** One required param and one that isn't: enough to test both refusals. */
     const schema = z.object({
       rows: f0FormField(z.number().min(1).max(10), { label: "Rows" }),
       note: f0FormField(z.string().optional(), { label: "Note" }),
     })
 
-    /** The configurable entry, and one that isn't, to keep both paths in view. */
     const configurable = {
       id: "events",
       title: "Events",
@@ -313,14 +311,8 @@ describe("WidgetCatalog", () => {
     }
     const withParams = [configurable, WIDGETS[0]]
 
-    /** The dialog's own CTA, which changes what it says between the steps. */
     const cta = (name: string) => screen.getByRole("button", { name })
 
-    /**
-     * THE STEP COLUMN around something in it — the box the slide is put on. The
-     * form's own scroll box shares its `min-h-0` but is not a flex column, so
-     * the pair of classes names one element either way.
-     */
     const stepColumn = (inside: HTMLElement) =>
       inside.closest(".min-h-0.flex-col") as HTMLElement
 
@@ -335,13 +327,10 @@ describe("WidgetCatalog", () => {
       const onAdd = vi.fn()
       render({ widgets: withParams, groups: undefined, onAdd })
 
-      // The press that adds a plain widget only CONTINUES here, and the CTA
-      // says so before it is pressed.
       expect(screen.queryByRole("button", { name: "Add widget" })).toBeNull()
       await startConfiguring()
 
       expect(onAdd).not.toHaveBeenCalled()
-      // The list it came from is gone; the widget it is configuring is named.
       expect(screen.queryByRole("searchbox")).toBeNull()
       expect(screen.getByText("Configure Events")).toBeInTheDocument()
     })
@@ -389,17 +378,12 @@ describe("WidgetCatalog", () => {
       await userEvent.clear(screen.getByLabelText(/Rows/))
       await userEvent.click(cta("Add widget"))
 
-      // The form refuses on the widget's OWN schema — nothing here says which
-      // params are mandatory, and nothing here should.
       await waitFor(() => expect(onAdd).not.toHaveBeenCalled())
     })
 
     test("opening the picker doesn't slide the list in", async () => {
       render({ widgets: withParams, groups: undefined })
 
-      // The dialog has an entrance of its own; a column sliding in behind it
-      // reads as a second animation competing with it, not as the list
-      // arriving. The slide belongs to the STEP.
       expect(stepColumn(screen.getByRole("searchbox"))).not.toHaveClass(
         "animate-in"
       )
@@ -416,7 +400,6 @@ describe("WidgetCatalog", () => {
 
       await userEvent.click(cta("Back"))
 
-      // Coming back, from the other side.
       expect(stepColumn(screen.getByRole("searchbox"))).toHaveClass(
         "animate-in",
         "slide-in-from-left-4"
@@ -432,13 +415,10 @@ describe("WidgetCatalog", () => {
       await userEvent.type(rows, "7")
       await userEvent.click(cta("Back"))
 
-      // The list is back, on the row it was left on.
       expect(screen.getByRole("searchbox")).toBeInTheDocument()
       expect(listed()).toEqual(["Events", "Clock in"])
 
       await startConfiguring()
-      // Not the entry's 3: the form is where it was left, so stepping out to
-      // check the list against it costs nothing.
       expect(screen.getByLabelText(/Rows/)).toHaveValue("7")
     })
 
@@ -482,16 +462,11 @@ describe("WidgetCatalog", () => {
         groups: undefined,
       })
 
-      // The entry declares nothing: the widget already says what it can be
-      // configured into, and repeating it is how the two disagree.
       await startConfiguring()
       expect(screen.getByLabelText(/Rows/)).toHaveValue("4")
     })
 
     test("the sentence under it is read off the SAME widget as the card", async () => {
-      // THE REGRESSION THIS GUARDS: the info line was resolved from the entry's
-      // DECLARED preview while the card came from the app's rebuild, so a
-      // preview showed three events over a line that said two.
       const events = (count: number): HomeWidgetItem => ({
         id: "events",
         header: { title: "Events", info: `The next ${count} events.` },
@@ -530,8 +505,6 @@ describe("WidgetCatalog", () => {
         ),
       })
 
-      // Only while they are being tried out: the list previews the widget as
-      // the catalog declared it.
       expect(screen.getByText("events")).toBeInTheDocument()
       await startConfiguring()
       expect(screen.getByText(/showing 3 rows/)).toBeInTheDocument()
@@ -566,8 +539,6 @@ describe("WidgetCatalog", () => {
         />
       )
 
-      // A form for a widget you walked away from is a question nobody asked
-      // twice.
       await waitFor(() =>
         expect(screen.getByRole("searchbox")).toBeInTheDocument()
       )

@@ -98,24 +98,7 @@ export interface WidgetCatalogItem {
    * retire an entry without deleting it.
    */
   areas?: WidgetContainerSide[]
-  /**
-   * THE WIDGET IS CONFIGURABLE: adding it goes through a SECOND STEP where these
-   * params are set, and they are handed back with the widget's id from
-   * `onAdd`. The schema is the widget's own `paramsSchema` — the same F0Form
-   * schema its "Edit params" dialog uses — so the fields, their types and what
-   * is required are declared once and read in both places.
-   *
-   * Taken from the widget itself when `preview` is a `HomeWidgetItem`, so for
-   * those it is usually nothing to pass: a widget the column can configure is
-   * already a widget the picker can configure.
-   */
   paramsSchema?: WidgetParamsSchema
-  /**
-   * What that step OPENS WITH. Defaults the user would have chosen anyway are
-   * what make the preview worth looking at before a field is touched — and, for
-   * a schema whose params are all optional, what makes "Add widget" the only
-   * press needed. Falls back to the widget's own `params` when the preview is one.
-   */
   params?: WidgetParams
 }
 
@@ -139,12 +122,7 @@ export interface WidgetCatalogProps {
   onClose: () => void
   /** The widgets that can be added, in the order to list them. */
   widgets: WidgetCatalogItem[]
-  /**
-   * Called with the chosen widget id when the CTA is pressed — and, for a widget
-   * that declares a `paramsSchema`, with the PARAMS it was configured with in
-   * the step before. Add the widget with them: they are what the user has just
-   * been previewing.
-   */
+  /** Called with the chosen widget id when the CTA is pressed. */
   onAdd: (id: string, params?: WidgetParams) => void
   /**
    * The DOMAINS the picker is organised into, in the order to show them. Omit it
@@ -176,16 +154,6 @@ export interface WidgetCatalogProps {
    * "No renderer for slot …" and then render properly once added.
    */
   slotRenderers?: SlotRenderers
-  /**
-   * REBUILDS a preview for the params being tried out in the configure step —
-   * the twin of `WidgetContainer`'s `rebuildWidget`, and there for the same
-   * reason: the picker resolves whatever the params merely SAY (the widget's
-   * title, its info) on its own, while SLOTS that depend on them can only be
-   * rebuilt by the app, which knows where their data comes from.
-   *
-   * Give back the widget as DATA (a `HomeWidgetItem`) and the picker draws it
-   * through the same `SlotWidget` a column would.
-   */
   rebuildPreview?: (
     item: WidgetCatalogItem,
     params: WidgetParams
@@ -193,18 +161,8 @@ export interface WidgetCatalogProps {
   title?: string
 }
 
-/**
- * The picker's two steps. The second one EXISTS ONLY for a widget with params to
- * set: everything else is added from the list, in one press, as it always was.
- */
 type WidgetCatalogStep = "pick" | "configure"
 
-/**
- * How long after the last keystroke the preview catches up — the same debounce
- * `WidgetUpdateDialog` puts on it, and for the same reason: F0Form's autosubmit
- * says the values changed AND validate, which is what a preview wants and a save
- * does not.
- */
 const PREVIEW_DELAY_MS = 250
 
 /**
@@ -233,7 +191,6 @@ const CatalogPreview = ({
   slotRenderers,
 }: {
   preview: WidgetCatalogItem["preview"]
-  /** The params being tried out, when the picker is configuring the widget. */
   params?: WidgetParams
   slotRenderers?: SlotRenderers
 }) => {
@@ -251,16 +208,7 @@ const CatalogPreview = ({
   )
 }
 
-/**
- * The sentence under a preview: the item's own, else the widget's — resolved
- * against the params in hand, so it is REWRITTEN as the widget is configured,
- * which is the fastest way to see what a param actually does.
- *
- * It reads the preview BEING DRAWN rather than the one the entry declared: while
- * params are being tried out that is the app's rebuild, and taking the sentence
- * from the original would leave the card saying one thing and the line under it
- * another.
- */
+/** The sentence under a preview: the item's own, else the widget's. */
 const previewInfo = (
   item: WidgetCatalogItem,
   preview: WidgetCatalogItem["preview"],
@@ -271,16 +219,10 @@ const previewInfo = (
     ? resolveWidgetHeader(preview.header, params ?? preview.params)?.info
     : undefined)
 
-/**
- * What the entry says about its params, else what the WIDGET says: a preview
- * handed over as data already declares the `paramsSchema` its column reads, and
- * a catalog that had to repeat it is a catalog that can disagree with the column.
- */
 const itemParamsSchema = (item: WidgetCatalogItem) =>
   item.paramsSchema ??
   (isWidgetItem(item.preview) ? item.preview.paramsSchema : undefined)
 
-/** The params that step opens with — same fallback. */
 const itemParams = (item: WidgetCatalogItem): WidgetParams =>
   item.params ??
   (isWidgetItem(item.preview) ? item.preview.params : undefined) ??
@@ -324,15 +266,6 @@ const SectionHeader = ({ label, icon }: { label: string; icon?: IconType }) => (
  * where they fit, entries that declare none are shown in both, and the preview
  * takes that column's width. So a Home keeps one list — the widgets it offers —
  * rather than two that have to be kept in step.
- *
- * A WIDGET WITH PARAMS IS ADDED IN TWO STEPS. Picking it doesn't add it: the CTA
- * reads "Continue" and the left column turns into its params — the widget's own
- * `paramsSchema` as F0Form fields, the same ones "Edit params" would show —
- * while the preview STAYS PUT beside them and follows every valid edit. So a
- * widget is configured where it is chosen, and `onAdd` receives it already set
- * up rather than the app having to open a second dialog on a half-built card.
- * "Back" returns to the list with the selection, the search and the values you
- * had typed intact.
  */
 export function WidgetCatalog({
   isOpen,
@@ -352,28 +285,11 @@ export function WidgetCatalog({
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [step, setStep] = useState<WidgetCatalogStep>("pick")
-  /**
-   * WHETHER A STEP HAS BEEN TAKEN since the picker opened. The column slides
-   * when you move between the steps, and ONLY then: opening the picker is the
-   * dialog's own entrance, and a list sliding in behind it read as a second
-   * animation competing with it rather than as the list arriving.
-   */
   const [stepped, setStepped] = useState(false)
-  /** Moving between the steps — the one thing that makes the column slide. */
   const goToStep = (next: WidgetCatalogStep) => {
     setStepped(true)
     setStep(next)
   }
-  /**
-   * The params being filled in, KEPT AGAINST THE WIDGET THEY BELONG TO: stepping
-   * back to the list and forward again finds the form as it was left, while
-   * landing on another widget starts from that widget's own defaults rather than
-   * from the last one's values.
-   *
-   * Only ever the last values that VALIDATED (F0Form's autosubmit), because this
-   * is also what the preview is drawn from — a half-typed number is not something
-   * to redraw a widget for.
-   */
   const [draft, setDraft] = useState<{
     id: string
     params: WidgetParams
@@ -447,28 +363,17 @@ export function WidgetCatalog({
 
   const schema = selected ? itemParamsSchema(selected) : undefined
   const configuring = step === "configure" && schema !== undefined
-  // What the widget is being previewed WITH: the values in hand while they are
-  // being set, the widget's own defaults before that.
   const params =
     selected && draft?.id === selected.id
       ? draft.params
       : selected
         ? itemParams(selected)
         : {}
-  /**
-   * THE WIDGET ACTUALLY DRAWN — the app's rebuild while params are being tried
-   * out, the entry's own preview otherwise. Taken once so the card and the
-   * sentence under it are read off the SAME widget: computing them apart is how
-   * a preview ends up showing three events over a line that says two.
-   */
   const previewed =
     configuring && selected && rebuildPreview
       ? rebuildPreview(selected, params)
       : selected?.preview
 
-  // REOPENING STARTS AT THE LIST. The picker can be closed from the second step
-  // — on params that were never added — and coming back into a form for a widget
-  // you had walked away from would be answering a question nobody asked again.
   useEffect(() => {
     if (isOpen) {
       setStep("pick")
@@ -477,10 +382,6 @@ export function WidgetCatalog({
     }
   }, [isOpen])
 
-  // A step that has LOST ITS WIDGET is not a step: if the offered list changes
-  // under the form (the app swaps `widgets`, or the `area` does), the selection
-  // moves to a widget that may have nothing to configure, and the picker falls
-  // back to what it can always do — show the list.
   useEffect(() => {
     if (step === "configure" && !schema) setStep("pick")
   }, [step, schema])
@@ -489,8 +390,6 @@ export function WidgetCatalog({
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      // The second step says WHICH widget is being set up, because its own row is
-      // no longer on screen to say it.
       title={
         configuring && selected
           ? t.widgets.configureWidget.replace("{{title}}", selected.title)
@@ -503,21 +402,13 @@ export function WidgetCatalog({
       primaryAction={
         configuring && selected
           ? {
-              // The end of the flow, whichever step it took to get here: the CTA
-              // is "Add widget" in both, so the second step reads as part of
-              // adding rather than as a dialog of its own.
               label: "Add widget",
-              // Validation before adding is the FORM's, not ours: `trigger`
-              // surfaces the same errors the fields would, and the schema is the
-              // only place "you must set this" is written down.
               onClick: async () => {
                 if (!(await trigger())) return
                 onAdd(selected.id, getValues())
               },
             }
           : {
-              // A widget with params isn't added by this press — it is opened.
-              // Saying "Continue" is what keeps that from being a surprise.
               label: schema ? t.wizard.next : "Add widget",
               disabled: !selected,
               onClick: () => {
@@ -527,8 +418,6 @@ export function WidgetCatalog({
               },
             }
       }
-      // BACK, not Cancel: the list is where you came from and the picker is
-      // still open on it. Closing is what the dialog's own close button does.
       secondaryAction={
         configuring && selected
           ? {
@@ -536,10 +425,6 @@ export function WidgetCatalog({
               icon: ArrowLeft,
               iconPosition: "left",
               onClick: () => {
-                // What is IN THE FIELDS right now, not just what last settled
-                // and validated: stepping out to check the list against the
-                // widget shouldn't cost the value typed a moment before, and a
-                // half-filled form is still the form you were filling.
                 setDraft({ id: selected.id, params: getValues() })
                 goToStep("pick")
               },
@@ -548,16 +433,6 @@ export function WidgetCatalog({
       }
     >
       <div className={bodyClassName}>
-        {/* THE LEFT COLUMN IS THE STEP — the widgets to choose from, or the
-            params of the one chosen. Keyed by the step so the swap SLIDES (in
-            from the right going forward, from the left coming back) while the
-            preview beside it holds still: the widget you were looking at is the
-            widget you are now configuring, and it should not have to re-arrive
-            to say so.
-
-            The slide belongs to the STEP, not to the picker: on the way in the
-            dialog has an entrance of its own, and the list is simply already
-            there (`stepped`). */}
         <div
           key={step}
           className={cn(
@@ -571,28 +446,18 @@ export function WidgetCatalog({
           )}
         >
           {configuring && selected && schema ? (
-            /* The params, as FIELDS: the widget's own schema handed to F0Form, so
-             a `z.date()` gets a date picker, a `z.enum()` a select, and a param
-             that isn't `.optional()` simply cannot be left empty — the same
-             fields "Edit params" shows once the widget is on the page. */
             <div className="min-h-0 flex-1 overflow-y-auto">
               <F0Form
-                // Keyed by the widget so switching to another one starts a fresh
-                // form rather than carrying the last one's values into it.
                 key={selected.id}
                 formRef={formRef}
                 name="widget-params"
                 schema={schema}
                 defaultValues={params}
-                // Autosubmit is the CHANGE SIGNAL, not an add: it hands us the
-                // values every time they settle and validate, which is what the
-                // preview wants. Nothing reaches the Home until the CTA.
                 submitConfig={{
                   type: "autosubmit",
                   delay: PREVIEW_DELAY_MS,
                   hideActionBar: true,
                 }}
-                // The dialog already provides the padding around this column.
                 styling={{ noPadding: true }}
                 onSubmit={(values: WidgetParams) => {
                   setDraft({ id: selected.id, params: values })
@@ -602,6 +467,7 @@ export function WidgetCatalog({
             </div>
           ) : (
             <>
+              {/* The picker: a search field leading the widget rows. */}
               <F0SearchInput
                 value={query}
                 onChange={setQuery}
@@ -652,10 +518,7 @@ export function WidgetCatalog({
         </div>
         {/* The preview: the real widget, centered on the page grey, at the width
             the target column will really give it — and it JUMPS in as you move
-            down the list, so each row you land on announces its widget.
-            Keyed by the WIDGET rather than by the step, so configuring one keeps
-            the card that is already there and only its content follows the
-            fields. */}
+            down the list, so each row you land on announces its widget. */}
         <WidgetPreviewPane
           previewKey={selected?.id}
           info={

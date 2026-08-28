@@ -1510,10 +1510,6 @@ const Home = () => {
         widgets={CATALOG}
         groups={CATALOG_GROUPS}
         onAdd={(id, params) => {
-          // A CONFIGURABLE widget arrives already set up: the picker walked the
-          // user through its params before adding it, and they are persisted
-          // exactly where its "Edit params" dialog persists them. Nothing here
-          // has to open a second dialog on a half-built card.
           if (id === "events" && params) setEventsParams(params as EventsParams)
           // The picker only offers what the column can hold, so "which column"
           // is already decided — it is the side it was opened for.
@@ -1521,8 +1517,6 @@ const Home = () => {
             setMainIds((ids) => [...ids, id])
           setOpen(false)
         }}
-        // The same rebuild the layout gets, for the params step's preview: the
-        // events follow the fields, not just the title that names them.
         rebuildPreview={(item, params) =>
           item.id === "events"
             ? eventsWidget(params as EventsParams)

@@ -216,11 +216,6 @@ export const Flat: Story = {
   args: { widgets: CATALOG, groups: undefined },
 }
 
-/**
- * The Events widget's params, as an F0Form schema — the SAME `paramsSchema` its
- * "Edit params" dialog would use. What is required is just what zod says:
- * `period` and `maxEvents` are, `onlyMine` isn't.
- */
 const EVENTS_PARAMS = z.object({
   period: f0FormField(z.enum(["week", "month"]), {
     label: "Period",
@@ -261,11 +256,6 @@ const EVENTS = [
   },
 ]
 
-/**
- * The widget the params produce — the app's own job, because only it knows where
- * the events come from. Handed back as DATA, so the picker draws it through the
- * same `SlotWidget` the rail will.
- */
 const eventsWidget = (params: WidgetParams): HomeWidgetItem => {
   const {
     maxEvents = 2,
@@ -298,17 +288,12 @@ const eventsWidget = (params: WidgetParams): HomeWidgetItem => {
   }
 }
 
-/** The catalog above, with Events made CONFIGURABLE. */
 const CONFIGURABLE_CATALOG: WidgetCatalogItem[] = GROUPED_CATALOG.map((item) =>
   item.id === "events"
     ? { ...item, preview: eventsWidget({ period: "week", maxEvents: 2 }) }
     : item
 )
 
-/**
- * The picker as a Home really wires it: `onAdd` receives the widget AND the
- * params it was set up with, which is the whole point of the second step.
- */
 const TwoStepCatalog = () => {
   const [added, setAdded] = useState<string | null>(null)
   return (
@@ -318,9 +303,6 @@ const TwoStepCatalog = () => {
         onClose={() => {}}
         widgets={CONFIGURABLE_CATALOG}
         groups={GROUPS}
-        // The preview rebuilds the widget the way the rail would, so the events
-        // in it are the events those params will really produce — not just the
-        // title following along.
         rebuildPreview={(item, params) =>
           item.id === "events" ? eventsWidget(params) : item.preview
         }
@@ -333,18 +315,4 @@ const TwoStepCatalog = () => {
   )
 }
 
-/**
- * A WIDGET WITH PARAMS IS ADDED IN TWO STEPS. Pick Events and the CTA reads
- * "Continue": pressing it turns the left column into the widget's params — its
- * own `paramsSchema` as F0Form fields, the same ones "Edit params" shows once it
- * is on the page — while the PREVIEW STAYS PUT and follows every valid edit.
- *
- * So the widget is configured where it is chosen, and `onAdd` gets it already
- * set up: no second dialog, and no moment where a half-built card is on the
- * Home. "Back" returns to the list with the selection, the search and the values
- * you had typed intact.
- *
- * Every other widget here declares no params and is still added in ONE press —
- * the step exists only where there is something to fill in.
- */
 export const WithParams: Story = { render: () => <TwoStepCatalog /> }

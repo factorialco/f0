@@ -157,8 +157,6 @@ left column turns into these very fields, and the preview stays put beside them,
 following every valid edit. `onAdd` then receives the params along with the id:
 
 ```tsx
-// Each entry's `preview` IS the widget, so the catalog already knows which
-// widgets are configurable — their `paramsSchema` is nothing to repeat here.
 <WidgetCatalog
   widgets={CATALOG}
   onAdd={(id, params) => add(id, params)}
