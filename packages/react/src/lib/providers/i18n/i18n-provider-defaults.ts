@@ -707,6 +707,7 @@ export const defaultTranslations = {
       ofTotal: "of total",
       total: "total",
       target: "target",
+      ofTarget: "of target",
       ofRange: "of range",
       fromPrevious: "from previous",
       fromStage: "from {{stage}}",
