@@ -574,7 +574,7 @@ export const F0AiChatTextArea = ({
           </div>
         )}
         <CreditWarningWrapper creditWarning={creditWarning}>
-          <motion.form
+          <form
             aria-busy={inProgress}
             ref={formRef}
             className={cn(
@@ -590,30 +590,26 @@ export const F0AiChatTextArea = ({
               "transition-all hover:cursor-text",
               "p-0",
               "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
-              "before:rounded-[inherit] before:bg-f1-background before:content-['']",
-              "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
-              "after:rounded-md after:blur-[6px] after:content-['']",
-              "after:scale-90 after:opacity-0",
+              "before:rounded-[inherit] before:content-['']",
+              "before:bg-f1-background-inverse-secondary dark:before:bg-f1-background-tertiary",
+              "after:pointer-events-none after:absolute after:-inset-2.5 after:z-[-2]",
+              "after:rounded-3xl after:border-[10px] after:border-solid after:border-transparent",
+              "after:p-0.5 after:blur-[6px] after:content-['']",
+              "after:[background-clip:content-box]",
+              "after:[mask:linear-gradient(#000,#000)_padding-box_exclude,linear-gradient(#000,#000)]",
+              "after:opacity-0",
               "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
               "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-              "after:transition-all after:delay-200 after:duration-300",
-              "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-              isClarifying &&
-                "after:scale-100 after:opacity-100 border-f1-background-tertiary"
+              "after:transition-opacity after:delay-200 after:duration-300",
+              "has-[textarea:focus]:after:opacity-100",
+              !shouldReduceMotion &&
+                !isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_paused] has-[textarea:focus]:after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              !shouldReduceMotion &&
+                isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              isClarifying && "after:opacity-100 border-f1-background-tertiary"
             )}
-            animate={{
-              "--gradient-angle": ["0deg", "360deg"],
-            }}
-            transition={{
-              duration: 6,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            style={
-              {
-                "--gradient-angle": "180deg",
-              } as React.CSSProperties
-            }
             onClick={() => {
               if (!isClarifying) {
                 textareaRef.current?.focus()
@@ -859,7 +855,7 @@ export const F0AiChatTextArea = ({
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.form>
+          </form>
         </CreditWarningWrapper>
       </div>
 

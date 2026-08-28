@@ -17,6 +17,7 @@ import {
   type CSSProperties,
   type PointerEvent,
   ReactNode,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -45,7 +46,8 @@ import {
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
-import { takeCardGhost } from "./dragGhost"
+import { takeCardGhost, takePageSurface } from "./dragGhost"
+import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
 import {
   useWidgetVirtualizer,
@@ -114,11 +116,13 @@ const DROP_ANIMATION = {
   easing: "cubic-bezier(0.4, 0, 0.1, 1)",
 }
 
-/**
- * Hoisted rather than written inline: dnd-kit reads this on every pointer move,
- * and a fresh array each render is a fresh dependency for it.
- */
-const DRAG_MODIFIERS = [verticalOnly]
+const findUp = (from: Element | null, selector: string): Element | null => {
+  for (let el: Element | null = from; el; el = el.parentElement) {
+    const found = el.querySelector(selector)
+    if (found) return found
+  }
+  return null
+}
 
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right"
@@ -239,6 +243,13 @@ export interface WidgetContainerProps {
    * are fixed (a curated feed, say) rather than user-arranged.
    */
   disableEdition?: boolean
+  /** Disables dragging without changing the tree: the sortables stay mounted. */
+  disableDrag?: boolean
+  /**
+   * Marks the element a dragged card should carry a copy of behind it — the
+   * page's own surface, so the card the pointer holds is the colour it was.
+   */
+  dragSurfaceSelector?: string
   /**
    * Called with a widget id when its "Remove widget" menu item is used. Omit it
    * and no widget offers removal.
@@ -372,6 +383,8 @@ export function WidgetContainer({
   slotRenderers,
   renderWidget,
   disableEdition = false,
+  disableDrag = false,
+  dragSurfaceSelector,
   onRemoveWidget,
   onClickAddNewWidget,
   onReorder,
@@ -394,7 +407,17 @@ export function WidgetContainer({
   const canEdit = !disableEdition
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
-  const canDrag = canEdit && onReorder != null && widgets.length > 1
+  /**
+   * WHETHER THERE IS AN ARRANGEMENT TO MAKE — two widgets that can actually
+   * move, not merely two widgets. A column of one free card among pinned ones
+   * has a single legal order, so its card is given no grab cursor and no drag:
+   * offering a gesture whose every outcome is the arrangement you already have
+   * is offering a refusal.
+   */
+  const canDrag =
+    canEdit &&
+    onReorder != null &&
+    widgets.filter((widget) => !widget.locked).length > 1
   // The widget being dragged: its in-list card hides while a copy of it rides
   // the pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -414,16 +437,59 @@ export function WidgetContainer({
   const columnRef = useRef<HTMLDivElement>(null)
   /** The static copy of the dragged card that rides the pointer — {@link takeCardGhost}. */
   const ghostRef = useRef<HTMLElement | null>(null)
+  /** The page surface that copy sits on — {@link takePageSurface}. */
+  const surfaceRef = useRef<ReturnType<typeof takePageSurface>>(null)
+  /**
+   * HOW FAR UP THE CARD BEING DRAGGED MAY GO, measured when the drag starts and
+   * null the rest of the time — see `lockedCeiling`.
+   */
+  const ceilingRef = useRef<number | null>(null)
+  /**
+   * The dragged card goes up and down only (`verticalOnly`), and no higher than
+   * the widgets pinned to the top of the column (`noHigherThan`).
+   *
+   * Built ONCE: dnd-kit reads this on every pointer move, and a fresh array each
+   * render is a fresh dependency for it — which is why the ceiling arrives
+   * through a ref instead of being baked into the modifier.
+   */
+  const modifiers = useMemo(
+    () => [verticalOnly, noHigherThan(() => ceilingRef.current)],
+    []
+  )
 
   const takeGhost = (id: string) => {
-    ghostRef.current = takeCardGhost(
-      columnRef.current?.querySelector(`[data-widget-id="${id}"]`)
-    )
+    const card = columnRef.current?.querySelector(`[data-widget-id="${id}"]`)
+    ghostRef.current = takeCardGhost(card)
+    surfaceRef.current = dragSurfaceSelector
+      ? takePageSurface(findUp(columnRef.current, dragSurfaceSelector), card)
+      : null
   }
 
   /** Puts the copy in the overlay dnd-kit positions for us. */
   const mountGhost = (host: HTMLDivElement | null) => {
     if (host && ghostRef.current) host.replaceChildren(ghostRef.current)
+  }
+  const pinFrame = useRef(0)
+  const unpinSurface = () => cancelAnimationFrame(pinFrame.current)
+  const mountSurface = (host: HTMLDivElement | null) => {
+    unpinSurface()
+    const surface = surfaceRef.current
+    if (!host || !surface) return
+    host.replaceChildren(surface.node)
+    host.style.top = `${surface.offset.top}px`
+    host.style.left = `${surface.offset.left}px`
+    host.style.width = `${surface.offset.width}px`
+    host.style.height = `${surface.offset.height}px`
+    if (surface.base) host.style.backgroundColor = surface.base
+
+    const overlay = host.parentElement?.parentElement
+    if (!overlay || typeof DOMMatrix !== "function") return
+    const pin = () => {
+      const { m41, m42 } = new DOMMatrix(getComputedStyle(overlay).transform)
+      host.style.transform = `translate3d(${-m41}px, ${-m42}px, 0)`
+      pinFrame.current = requestAnimationFrame(pin)
+    }
+    pin()
   }
   /**
    * WHICH WIDGETS ARE WORTH HAVING IN THE DOM — every one of them unless this
@@ -486,9 +552,16 @@ export function WidgetContainer({
     >
     const x = start.clientX == null ? null : start.clientX + delta.x
     const y = start.clientY == null ? null : start.clientY + delta.y
+    // THE PINS AT THE TOP WERE NEVER REACHABLE: the drag was held below them
+    // (`noHigherThan`), so the card cannot have covered one, and refusing the
+    // drop because the POINTER strayed up into one would refuse a card that is
+    // sitting in the highest slot it was allowed to reach. Only when the ceiling
+    // could not be measured at all does the card get up there, and then the
+    // refusal is again the only thing that explains the spring back.
+    const unreachable = ceilingRef.current == null ? [] : topPins(widgets)
 
     return widgets.find((widget) => {
-      if (!widget.locked) return false
+      if (!widget.locked || unreachable.includes(widget)) return false
       const box = columnRef.current
         ?.querySelector(`[data-widget-id="${widget.id}"]`)
         ?.getBoundingClientRect()
@@ -710,7 +783,7 @@ export function WidgetContainer({
       measureRef={virtual.measureRef}
     >
       {canDrag ? (
-        <SortableWidget id={widget.id} disabled={widget.locked}>
+        <SortableWidget id={widget.id} disabled={widget.locked || disableDrag}>
           {/* The arrival wrapper sits INSIDE the sortable rather than around it:
               dnd-kit measures the element it holds the ref to, and a transformed
               ancestor would offset every rect it reads while a drag is in
@@ -784,22 +857,37 @@ export function WidgetContainer({
           sensors={sensors}
           collisionDetection={closestCenter}
           // The card the pointer carries goes up and down only, like the
-          // shuffle underneath it — see `verticalOnly`.
-          modifiers={DRAG_MODIFIERS}
+          // shuffle underneath it, and it stops at the widgets pinned to the top
+          // of the column — see `verticalOnly` and `lockedCeiling`.
+          modifiers={modifiers}
           onDragStart={({ active }) => {
             // BEFORE the card is told it is being dragged: what the ghost
-            // should look like is what is on screen right now.
+            // should look like — and where the pinned cards are — is what is on
+            // screen right now, while nothing has moved yet.
             takeGhost(String(active.id))
+            ceilingRef.current = lockedCeiling(
+              widgets,
+              columnRef.current,
+              GAP_PX[side]
+            )
             setActiveId(String(active.id))
           }}
           onDragCancel={() => {
             setActiveId(null)
+            unpinSurface()
             ghostRef.current = null
+            surfaceRef.current = null
+            ceilingRef.current = null
           }}
           onDragEnd={(event) => {
             setActiveId(null)
             ghostRef.current = null
+            surfaceRef.current = null
+            // The ceiling outlives the drag by one call: whether the card was
+            // held below the pins is what decides whether a drop up there is
+            // worth refusing out loud (`lockedTargetOf`).
             handleDragEnd(event)
+            ceilingRef.current = null
           }}
         >
           {/* EVERY WIDGET'S ID, mounted or not: the order a drop commits is the
@@ -813,6 +901,31 @@ export function WidgetContainer({
           >
             {list}
           </SortableContext>
+          {/* ONE CURSOR FOR THE WHOLE GESTURE. The pointer is not always over
+              the card it is carrying: the card stops at the pinned widgets
+              (`lockedCeiling`) while the pointer keeps going, and the moment it
+              leaves the card it is over whatever lies beneath — a pinned widget,
+              a link inside it, the page — and the cursor becomes that thing's.
+              A hand that turns into an arrow reads as the drag having ended, or
+              as the pointer having lost the card; neither happened, and the drag
+              is still live and still refusing to go up.
+
+              So while a drag is in flight the pointer is over THIS: a sheet the
+              size of the viewport whose only job is to own the cursor. It sits
+              under the DragOverlay (z-999 there, so the card stays on top) and
+              over everything else, and it takes the hover states of the cards
+              beneath it out of the gesture too, which is the same argument.
+
+              dnd-kit is unaffected: its sensor listens on the document, and the
+              column's collision detection is rect-based (`closestCenter`), so
+              nothing here depends on which element the pointer is over. */}
+          {activeId ? (
+            <div
+              aria-hidden
+              data-drag-cursor
+              className="fixed inset-0 z-50 cursor-grabbing"
+            />
+          ) : null}
           {/* The card that follows the pointer is a COPY of the real one's DOM
               (`takeGhost`) in an overlay — the in-list card hides meanwhile
               (SortableWidget). On release the copy GLIDES from where it was
@@ -821,12 +934,13 @@ export function WidgetContainer({
               the real card's DOM slot and transform in one frame. */}
           <DragOverlay dropAnimation={DROP_ANIMATION}>
             {activeId ? (
-              // Solid backdrop: Card's own background is translucent, and the
-              // copy rides over whatever the column shows beneath it.
-              <div
-                ref={mountGhost}
-                className="h-full w-full cursor-grabbing rounded-xl bg-f1-background [&_*]:shadow-none"
-              />
+              <div className="relative h-full w-full cursor-grabbing overflow-hidden rounded-xl bg-f1-background">
+                <div ref={mountSurface} className="absolute isolate" />
+                <div
+                  ref={mountGhost}
+                  className="relative h-full w-full [&_*]:shadow-none"
+                />
+              </div>
             ) : null}
           </DragOverlay>
         </DndContext>

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { triggerDownload } from "../utils/download"
 import { FadeInImage } from "./FadeInImage"
@@ -36,13 +37,17 @@ export const ChatVideoAttachment = ({
   surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
+  const emit = useF0ChatEmit()
   const [failed, setFailed] = useState(false)
   const [mediaReady, setMediaReady] = useState(false)
   const { ref, shouldMount } = useTranscriptHeavyPreview(loadVideoPlayer)
   const downloadAction = {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
-    onClick: () => triggerDownload(file.url, file.name),
+    onClick: () => {
+      triggerDownload(file.url, file.name)
+      emit.onAttachmentDownloaded({ kind: "video" })
+    },
   }
 
   if (failed) {

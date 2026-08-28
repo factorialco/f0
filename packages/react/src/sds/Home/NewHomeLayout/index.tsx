@@ -292,6 +292,7 @@ const CollapsedGlyph = ({
   open,
   delayMs,
   onOpen,
+  onCancelOpen,
   onClose,
 }: {
   widget: HomeWidgetItem
@@ -300,7 +301,8 @@ const CollapsedGlyph = ({
   open: boolean
   /** When this strip's first glyph starts arriving. */
   delayMs: number
-  onOpen: (id: string, anchor: HTMLElement) => void
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  onCancelOpen: () => void
   onClose: () => void
 }) => {
   const reducedMotion = useReducedMotion()
@@ -396,7 +398,8 @@ const CollapsedGlyph = ({
               : "rounded-lg"
           )}
           onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
-          onFocus={(event) => onOpen(widget.id, event.currentTarget)}
+          onMouseLeave={onCancelOpen}
+          onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
           {...glyphMotion}
         >
           {text ? (
@@ -465,8 +468,9 @@ const CollapsedGlyph = ({
       aria-label={widgetTitle(widget)}
       aria-expanded={open}
       onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+      onMouseLeave={onCancelOpen}
       onClick={(event) =>
-        open ? onClose() : onOpen(widget.id, event.currentTarget)
+        open ? onClose() : onOpen(widget.id, event.currentTarget, true)
       }
       // See the strip: it takes no pointer events, so each glyph takes its own.
       className="pointer-events-auto rounded-lg"
@@ -495,6 +499,7 @@ const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
+const PANEL_OPEN_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
 const PANEL_GAP_PX = 8
 // The add control's name comes from the PROVIDER (`t.widgets.addWidget`) — it is
@@ -691,9 +696,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [openId, setOpenId] = useState<string | null>(null)
     const [panelTop, setPanelTop] = useState(0)
     // Whether the panel should GLIDE to `panelTop` or simply be there — see
-    // `openFromAnchor`.
+    // `showFromAnchor`.
     const [panelGlide, setPanelGlide] = useState(false)
     const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // The rail collapses when the grid can't give both columns their width —
     // measured (clientWidth is a layout metric), not media-queried, because
@@ -848,8 +854,19 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (!collapsed) setOpenId(null)
+      if (collapsed) return
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+      setOpenId(null)
     }, [collapsed])
+
+    useEffect(
+      () => () => {
+        if (openTimer.current) clearTimeout(openTimer.current)
+        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      },
+      []
+    )
 
     // How the rail moves, and the one number the grid template reads. The genie
     // lives in there; the geometry it moves through stays here.
@@ -874,6 +891,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      */
     const closingId = useRef<string | null>(null)
     if (openId) closingId.current = openId
+    const shownId = useRef<string | null>(null)
+    shownId.current = openId
     const panelWidgetId =
       openId ?? (rail.panelHidden ? null : closingId.current)
 
@@ -941,12 +960,17 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       if (leaveTimer.current) clearTimeout(leaveTimer.current)
       leaveTimer.current = null
     }
+    const cancelOpen = () => {
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+    }
     const scheduleLeave = () => {
       cancelLeave()
+      cancelOpen()
       leaveTimer.current = setTimeout(() => setOpenId(null), PANEL_LEAVE_MS)
     }
-    const openFromAnchor = (id: string, anchor: HTMLElement) => {
-      cancelLeave()
+    const showFromAnchor = (id: string, anchor: HTMLElement) => {
+      cancelOpen()
       const root = rootRef.current
       if (root) {
         const top =
@@ -957,8 +981,25 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       // there before it fades in. Moving between glyphs while it is already open
       // is the opposite: there it GLIDES, and that glide is what says the panel
       // is one thing showing a different widget rather than two panels.
-      setPanelGlide(openId != null)
+      setPanelGlide(shownId.current != null)
       setOpenId(id)
+    }
+    const openFromAnchor = (
+      id: string,
+      anchor: HTMLElement,
+      instant = false
+    ) => {
+      cancelLeave()
+      cancelOpen()
+      if (shownId.current === id) return
+      if (instant) {
+        showFromAnchor(id, anchor)
+        return
+      }
+      openTimer.current = setTimeout(
+        () => showFromAnchor(id, anchor),
+        PANEL_OPEN_MS
+      )
     }
 
     return (
@@ -1026,6 +1067,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             belongs: under everything in this (isolated) layout. */}
         <div
           aria-hidden
+          data-page-surface
           className="pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page"
           style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
         >
@@ -1143,6 +1185,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             ctx={ctx}
             virtualized={virtualizationFor("main")}
             disableEdition={!canEditSide("main")}
+            dragSurfaceSelector="[data-page-surface]"
             onReorder={
               onReorderWidgets
                 ? (ids) => onReorderWidgets("main", ids)
@@ -1241,6 +1284,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   open={openId === widget.id}
                   delayMs={rail.glyphDelayMs}
                   onOpen={openFromAnchor}
+                  onCancelOpen={cancelOpen}
                   onClose={() => setOpenId(null)}
                 />
               ))}
@@ -1301,9 +1345,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             className={cn(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
-              // Above the feed it floats over, and opaque: the widget behind it
-              // must not read through the card.
-              railInPanel && "absolute z-10 rounded-xl bg-f1-background",
+              railInPanel &&
+                "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
               rail.mode === "retracting" && "relative z-10"
@@ -1361,6 +1404,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
+              disableDrag={collapsed}
+              dragSurfaceSelector="[data-page-surface]"
               onReorder={
                 onReorderWidgets
                   ? (ids) => onReorderWidgets("right", ids)

@@ -57,6 +57,11 @@ const RAIL = [
   widget("events", { hasUpdates: true }),
 ]
 
+const DWELL_MS = 250
+
+const holdHover = () =>
+  act(() => new Promise<void>((resolve) => setTimeout(resolve, DWELL_MS)))
+
 /**
  * An icon a test can NAME. The real ones are anonymous paths, and a glyph that
  * flashes between two of them is only testable if the two can be told apart.
@@ -414,6 +419,7 @@ describe("NewHomeLayout", () => {
       renderLayout(1000, { rightWidgets: ACTION_RAIL })
 
       await userEvent.hover(glyph())
+      await holdHover()
 
       expect(screen.getByText("tracked today")).toBeVisible()
       expect(resumes).toBe(0)
@@ -448,6 +454,7 @@ describe("NewHomeLayout", () => {
       renderLayout(1000, { rightWidgets: ACTION_RAIL })
 
       await userEvent.hover(glyph())
+      await holdHover()
 
       vi.useFakeTimers()
       try {
@@ -550,6 +557,7 @@ describe("NewHomeLayout", () => {
         const before = paint()
 
         await userEvent.hover(button())
+        await holdHover()
 
         expect(screen.getByText("tracked today")).toBeVisible()
         expect(pill()).not.toHaveTextContent("7:12")
@@ -757,6 +765,7 @@ describe("NewHomeLayout", () => {
       await renderDeferredRail(1000)
 
       await userEvent.hover(screen.getByRole("button", { name: "clock" }))
+      await holdHover()
 
       expect(screen.getByText("08:00")).toBeVisible()
       // The rail's other widget is mounted beside it, not shown.
@@ -768,6 +777,7 @@ describe("NewHomeLayout", () => {
       await renderDeferredRail(1000)
 
       await userEvent.hover(screen.getByRole("button", { name: "clock" }))
+      await holdHover()
 
       expect(screen.queryByText("clocking in…")).not.toBeInTheDocument()
       expect(clockMounts).toBe(1)

@@ -1,6 +1,7 @@
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
 
 import {
+  type F0ChatAttachedKind,
   type F0ChatAttachment,
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
@@ -102,6 +103,21 @@ export const withinPreviewSizeLimit = (
   file: F0ChatFileAttachment,
   kind: ChatDocumentKind
 ): boolean => (file.size ?? 0) <= PREVIEW_MAX_BYTES[kind]
+
+/**
+ * Attachment family for reporting, mirroring how the transcript renders it.
+ *
+ * Deliberately unlike {@link partitionChatAttachments} in one way: a document
+ * too large to preview is still a document here. Previewability is a rendering
+ * concern; "what kinds of files do people share" is not.
+ */
+export const attachedKindOf = (
+  attachment: F0ChatImageAttachment | F0ChatFileAttachment
+): F0ChatAttachedKind => {
+  if (attachment.kind === "image") return "image"
+  if (isVideoFileAttachment(attachment)) return "video"
+  return documentPreviewKind(attachment) ? "document" : "file"
+}
 
 export type PartitionedChatAttachments = {
   images: F0ChatImageAttachment[]

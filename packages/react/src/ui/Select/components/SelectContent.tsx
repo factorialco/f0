@@ -23,6 +23,15 @@ import * as SelectPrimitive from "./radix-ui"
 
 const VIEWBOX_VERTICAL_PADDING = 8
 
+const TABBABLE_ELEMENT_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",")
+
 /**
  * Select Content component
  */
@@ -100,6 +109,10 @@ const SelectContent = forwardRef<
       showLoadingIndicator,
       asChild,
       portalContainer,
+      bottom,
+      "aria-label": ariaLabel,
+      "aria-labelledby": ariaLabelledBy,
+      "aria-describedby": ariaDescribedBy,
       ...props
     },
     ref
@@ -123,6 +136,7 @@ const SelectContent = forwardRef<
     // ----------- Virtual list -----------
     // The scrollable element for your list
     const parentRef = useRef(null)
+    const lastTabbedOptionRef = useRef<HTMLElement | null>(null)
     const isVirtual = Array.isArray(items)
 
     const isEmpty = useMemo(() => {
@@ -224,14 +238,79 @@ const SelectContent = forwardRef<
 
     const virtualItems = virtualizer.getVirtualItems()
 
+    const handleContentKeyDown: NonNullable<
+      ComponentPropsWithoutRef<typeof SelectPrimitive.Content>["onKeyDown"]
+    > = (event) => {
+      props.onKeyDown?.(event)
+
+      if (event.defaultPrevented || event.key !== "Tab") {
+        return
+      }
+
+      const eventTarget = event.target as HTMLElement
+      const content = event.currentTarget
+      const focusedOption = eventTarget.closest<HTMLElement>('[role="option"]')
+
+      if (
+        focusedOption &&
+        focusedOption.getAttribute("aria-disabled") !== "true"
+      ) {
+        lastTabbedOptionRef.current = focusedOption
+      }
+
+      const activeOption =
+        focusedOption ??
+        (lastTabbedOptionRef.current?.isConnected
+          ? lastTabbedOptionRef.current
+          : content.querySelector<HTMLElement>(
+              '[role="option"][data-highlighted]:not([aria-disabled="true"]), [role="option"][data-state="checked"]:not([aria-disabled="true"]), [role="option"]:not([aria-disabled="true"])'
+            ))
+      const controls = Array.from(
+        content.querySelectorAll<HTMLElement>(TABBABLE_ELEMENT_SELECTOR)
+      ).filter(
+        (element) =>
+          (element.tabIndex >= 0 ||
+            element.getAttribute("role") === "searchbox") &&
+          !element.matches("[data-radix-scroll-area-viewport]") &&
+          !element.closest(
+            '[hidden], [aria-hidden="true"], [inert], [role="listbox"]'
+          )
+      )
+      const currentControl =
+        !focusedOption &&
+        eventTarget !== content &&
+        !eventTarget.closest('[role="listbox"]')
+          ? eventTarget
+          : undefined
+      const focusTargets = Array.from(
+        new Set([
+          ...controls,
+          ...(activeOption ? [activeOption] : []),
+          ...(currentControl ? [currentControl] : []),
+        ])
+      ).sort((first, second) =>
+        first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING
+          ? -1
+          : 1
+      )
+      const currentFocusTarget = focusedOption ?? eventTarget
+      const currentIndex = focusTargets.indexOf(currentFocusTarget)
+      const nextFocusTarget =
+        currentIndex >= 0
+          ? focusTargets[currentIndex + (event.shiftKey ? -1 : 1)]
+          : undefined
+
+      if (nextFocusTarget) {
+        event.preventDefault()
+        nextFocusTarget.focus()
+      }
+    }
+
     const viewportContent = isEmpty ? (
       <div className="flex h-full w-full flex-col items-center justify-center p-2">
-        <p className="text-center">{emptyMessage || "-"}</p>
-        {emptyAction && (
-          <div className="mt-2 w-full border-0 border-t border-solid border-f1-border-secondary pt-2">
-            {emptyAction}
-          </div>
-        )}
+        <div role="option" aria-disabled="true">
+          <p className="text-center">{emptyMessage || "-"}</p>
+        </div>
       </div>
     ) : isVirtual ? (
       <div
@@ -257,6 +336,7 @@ const SelectContent = forwardRef<
         }}
       >
         <div
+          role="presentation"
           style={{
             top: 0,
             left: 0,
@@ -267,9 +347,9 @@ const SelectContent = forwardRef<
           {virtualItems.map((virtualItem, index) => (
             <div
               key={virtualItem.key}
+              role="presentation"
               data-index={virtualItem.index}
               ref={virtualizer.measureElement}
-              tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
                 <div className="flex w-full items-center justify-center py-4">
@@ -283,7 +363,7 @@ const SelectContent = forwardRef<
         </div>
       </div>
     ) : (
-      <>{children}</>
+      <div>{children}</div>
     )
 
     const loadingNewContent = isLoading && !isLoadingMore
@@ -325,6 +405,7 @@ const SelectContent = forwardRef<
         collisionPadding={16}
         avoidCollisions
         {...props}
+        onKeyDown={handleContentKeyDown}
         // Prevent the default focus restoration when the select closes.
         // This avoids infinite focus loops when the select is inside a modal
         // or other focus-trapping container.
@@ -399,25 +480,48 @@ const SelectContent = forwardRef<
                 scrollMargin={scrollMargin}
               >
                 {asList ? (
-                  <div className="min-h-0 p-1">{viewportContent}</div>
-                ) : (
-                  <SelectPrimitive.Viewport
+                  <SelectPrimitive.Listbox
                     asChild
-                    className={cn(
-                      "p-1",
-                      position === "popper" &&
-                        "h-[var(--radix-select-trigger-height)] w-full",
-                      isEmpty && "flex h-full"
-                    )}
+                    aria-label={ariaLabel}
+                    aria-labelledby={ariaLabelledBy}
+                    aria-describedby={ariaDescribedBy}
                   >
-                    {viewportContent}
-                  </SelectPrimitive.Viewport>
+                    <div className="min-h-0 p-1">{viewportContent}</div>
+                  </SelectPrimitive.Listbox>
+                ) : (
+                  <SelectPrimitive.Listbox
+                    asChild
+                    aria-label={ariaLabel}
+                    aria-labelledby={ariaLabelledBy}
+                    aria-describedby={ariaDescribedBy}
+                  >
+                    <SelectPrimitive.Viewport
+                      asChild
+                      className={cn(
+                        "p-1",
+                        position === "popper" &&
+                          "h-[var(--radix-select-trigger-height)] w-full",
+                        isEmpty && "flex h-full"
+                      )}
+                    >
+                      {viewportContent}
+                    </SelectPrimitive.Viewport>
+                  </SelectPrimitive.Listbox>
                 )}
               </ScrollArea>
             </div>
             {props.right}
           </div>
-          {props.bottom && <div className="shrink-0">{props.bottom}</div>}
+          {(isEmpty && emptyAction) || bottom ? (
+            <div className="shrink-0">
+              {isEmpty && emptyAction && (
+                <div className="w-full border-0 border-t border-solid border-f1-border-secondary p-2">
+                  {emptyAction}
+                </div>
+              )}
+              {bottom}
+            </div>
+          ) : null}
         </div>
       </SelectPrimitive.Content>
     )
