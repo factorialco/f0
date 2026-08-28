@@ -82,33 +82,20 @@ export type DataSourceDefinition<
   /** Selectable items value under the checkbox column (undefined if not selectable) */
   selectable?: (item: R) => string | number | undefined
   /**
-   * Marks a selectable item as not selectable *for now*: its checkbox renders
-   * disabled instead of vanishing, so the row keeps its place while a consumer
-   * rule blocks it (mutually-exclusive kinds, a permission, a pending state).
-   * Rows `selectable` already skipped never reach this predicate.
-   *
-   * A disabled row is also left out of "select all" and of the selection
-   * counts, so the header checkbox can still reach a fully-checked state.
+   * Renders the row's checkbox disabled instead of hiding it. A disabled row is
+   * left out of "select all" and of the selection counts, so the header
+   * checkbox can still reach a fully-checked state.
    */
   selectionDisabled?: (item: R) => boolean
   /**
-   * Marks a row as selected *through something else* — the usual case being a
-   * tree where picking a node takes everything under it. Its checkbox renders
-   * in the indeterminate state and disabled, so an inherited row reads as
-   * included without looking like a row the user ticked, and cannot be
-   * unticked on its own. Implies `selectionDisabled`.
-   *
-   * The row does NOT enter the selection: the payload keeps naming only what
-   * the user actually picked, which is what an API that acts on subtrees
-   * expects.
+   * A row selected through something else — a tree node picked above it, say.
+   * Renders indeterminate and disabled, and never enters the selection, so the
+   * payload keeps naming only real picks. Implies `selectionDisabled`.
    */
   selectionInherited?: (item: R) => boolean
   /**
-   * Removes the header "select all" checkbox and the cross-page
-   * "Select all N items" CTA, forcing row-by-row selection. Use it when a
-   * valid selection is narrower than "everything on the page" — a rule the
-   * header checkbox has no way to honor. Mirrors `F0Select`'s prop of the
-   * same name.
+   * Removes the header select-all and the cross-page "Select all N items" CTA,
+   * forcing row-by-row selection. Mirrors `F0Select`'s prop of the same name.
    */
   disableSelectAll?: boolean
   /** Default selected items */

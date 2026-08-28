@@ -407,8 +407,7 @@ export const TableCollection = <
     selectionRegistry.ids.length > 0
       ? selectionRegistry.ids
       : (data?.records ?? [])
-          // Disabled rows never register, so the registry branch is already
-          // free of them; this fallback over `data.records` is not.
+          // The registry is already free of them; this fallback is not.
           .filter((record) => !source.selectionDisabled?.(record))
           .map((record) => source.selectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)

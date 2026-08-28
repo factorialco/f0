@@ -825,8 +825,7 @@ const OneDataCollectionComp = <
       const bulkAction = action as BulkActionDefinition
       return {
         ...bulkAction,
-        // The action bar speaks of a generic `tooltip`; a bulk action only ever
-        // has one to explain why it is unavailable.
+        // The bar speaks of a generic `tooltip`; here it is always the reason.
         tooltip: bulkAction.disabled ? bulkAction.disabledTooltip : undefined,
         onClick: () => {
           const result = onBulkAction?.(

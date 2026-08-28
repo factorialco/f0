@@ -181,11 +181,8 @@ const RowComponentInner = <
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const id = source.selectable ? source.selectable(item) : undefined
-  // A selectable row the consumer is blocking right now: the checkbox renders
-  // disabled and the row stays out of the selection registry, so "select all"
-  // can reach a fully-checked state without it.
-  // Selected through an ancestor: shown, but not the user's own pick and not
-  // part of the selection.
+  // Out of the registry too, so "select all" can still reach fully-checked.
+  // Shown as included, but not a pick and not part of the selection.
   const selectionInherited =
     id !== undefined && source.selectionInherited?.(item) === true
   const selectionDisabled =
@@ -348,8 +345,7 @@ const RowComponentInner = <
             <div
               className={cn(
                 "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
-                // The row itself is clickable, so without this the padding
-                // around a disabled checkbox still shows the row's hand cursor.
+                // The row is clickable, so the padding would show its hand.
                 selectionDisabled && "cursor-not-allowed"
               )}
             >

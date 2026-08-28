@@ -51,16 +51,13 @@ export function useSelectable<
   const isGrouped = data.type === "grouped"
   const isMultiSelection = selectionMode === "multi"
   const getSelectable = source.selectable
-  // `selectionInherited` implies disabled: an inherited row is never the user's
-  // own pick, so nothing may put it in the selection.
+  // Inherited implies disabled: nothing may put such a row in the selection.
   const getSelectionDisabled = useCallback(
     (item: R) =>
       source.selectionInherited?.(item) === true ||
       source.selectionDisabled?.(item) === true,
     [source]
   )
-  // Same precedence as `allPagesSelection`: the hook prop wins, the source is
-  // the fallback.
   const disableSelectAll =
     disableSelectAllProp ?? source.disableSelectAll ?? false
   // Use allPagesSelection from props, falling back to source.allPagesSelection, default false

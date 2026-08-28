@@ -37,10 +37,7 @@ type ActionType = {
   tooltip?: string
 }
 
-/**
- * A native `disabled` button emits no pointer events, so a tooltip explaining
- * WHY an action is unavailable has to hang off a wrapper instead.
- */
+/** A native `disabled` button emits no pointer events, hence the wrapper. */
 const WithReason = ({
   reason,
   children,
@@ -50,8 +47,7 @@ const WithReason = ({
 }) =>
   reason ? (
     <TooltipInternal label={reason}>
-      {/* Focusable: the button inside is natively disabled, so without this the
-          reason is mouse-only and a keyboard user never learns why. */}
+      {/* Focusable, or the reason is mouse-only. */}
       <span className="inline-flex" tabIndex={0}>
         {children}
       </span>

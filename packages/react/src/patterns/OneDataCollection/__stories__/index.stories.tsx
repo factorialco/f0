@@ -880,16 +880,10 @@ export const WithSelectableAndBulkActions: Story = {
 }
 
 /**
- * `selectionDisabled` greys out a row's checkbox instead of hiding it, so the
- * row keeps its place while a consumer rule blocks it. Here the rule is
- * "one department at a time": the first pick locks the department and every
- * other row goes disabled until the selection is cleared. `disableSelectAll`
- * removes the header checkbox, which would otherwise tick every department at
- * once and break the rule before it can lock anything.
- *
- * `selectionInherited` then shows the consequence of a pick: everyone reporting
- * to a selected person is marked as coming along — the indeterminate mark,
- * disabled — without joining the selection itself.
+ * One department at a time: the first pick locks it and `selectionDisabled`
+ * greys out the rest, `disableSelectAll` removes the header checkbox that would
+ * break the rule before it can lock, and `selectionInherited` marks everyone
+ * reporting to a picked person as coming along without selecting them.
  */
 export const WithDisabledSelection: Story = {
   render: () => {
@@ -906,8 +900,7 @@ export const WithDisabledSelection: Story = {
       selectable: (item) => item.id,
       selectionDisabled: (item) =>
         lockedDepartment !== null && item.department !== lockedDepartment,
-      // Everyone reporting to a picked manager travels with them: shown as
-      // included, never as the user's own pick.
+      // Everyone reporting to a picked manager travels with them.
       selectionInherited: (item) =>
         selectedManagers.length > 0 && selectedManagers.includes(item.manager),
       disableSelectAll: true,
