@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.68.0](https://github.com/factorialco/f0/compare/f0-react-v6.67.1...f0-react-v6.68.0) (2026-08-28)
+
+
+### Features
+
+* **F0Button:** show a counter on buttons, styled right ([#5225](https://github.com/factorialco/f0/issues/5225)) ([2075450](https://github.com/factorialco/f0/commit/2075450abfae7bb88e88d2ec42a3f4be5a163d17))
+
 ## [6.67.1](https://github.com/factorialco/f0/compare/f0-react-v6.67.0...f0-react-v6.67.1) (2026-08-28)
 
 
