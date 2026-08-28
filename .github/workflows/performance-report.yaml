@@ -2,10 +2,21 @@ name: 🚀 Performance Report
 on:
   pull_request:
     branches: [main]
-    # Only story files are measured (perf-changed.ts keys off them), so nothing
-    # else can produce a report. See "Known scope limit" in the job below.
+    # Kept in step with perf-changed.ts's own filtering: it maps any changed
+    # source file to the stories that render it, so a component-only change
+    # counts, but test/snapshot/docs files cannot change what a story renders
+    # and are excluded there too. Without these negations the workflow would
+    # build Storybook only for perf-changed.ts to find nothing to measure.
     paths:
-      - "packages/react/src/**/*.stories.tsx"
+      - "packages/react/src/**"
+      - "!packages/react/src/**/__tests__/**"
+      - "!packages/react/src/**/__snapshots__/**"
+      - "!packages/react/src/**/*.test.ts"
+      - "!packages/react/src/**/*.test.tsx"
+      - "!packages/react/src/**/*.spec.ts"
+      - "!packages/react/src/**/*.spec.tsx"
+      - "!packages/react/src/**/*.md"
+      - "!packages/react/src/**/*.mdx"
       - ".github/workflows/performance-report.yaml"
       - ".github/agent-prompts/performance.md"
       - "packages/react/.scripts/perf-changed.ts"
