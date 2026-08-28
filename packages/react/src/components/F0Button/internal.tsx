@@ -80,9 +80,11 @@ const ButtonInternal = forwardRef<
   const hasCounter = counterValue !== undefined && counterValue > 0
   // The counter matches the button height — 20px on md/lg, 16px on sm.
   const counterSize = size === "sm" ? "sm" : "md"
-  // Solid colour fields wash out a light counter, so it becomes a dark pill.
-  const counterOnSolidField =
-    variant === "default" || variant === "critical" || variant === "promote"
+  // A dark counter pill: always on the primary (default) solid field, and on
+  // critical only while hovered, where the field darkens enough to wash out the
+  // light pill. Other variants (including promote) keep the neutral counter.
+  const counterIsDark =
+    variant === "default" || (variant === "critical" && isHovered)
   const buttonFontSize = fontSize ?? size
 
   const iconNode = icon ? (
@@ -193,9 +195,9 @@ const ButtonInternal = forwardRef<
           <span
             className={cn(
               "ml-1 inline-flex items-center",
-              // Scoping the dark theme to just the counter gives it a dark pill
-              // on a solid colour field, regardless of the app theme.
-              counterOnSolidField && "dark"
+              // Scoping the dark theme to just the counter gives it a dark
+              // pill regardless of the app theme.
+              counterIsDark && "dark"
             )}
           >
             <Counter value={counterValue} size={counterSize} type="default" />

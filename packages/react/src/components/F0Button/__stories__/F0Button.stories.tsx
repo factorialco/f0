@@ -558,51 +558,27 @@ export const WithDataTestId: Story = {
   },
 }
 
-/**
- * A button can carry a numeric `counterValue`, shown as a pill after the label.
- *
- * - Sizes track the button: 20px on `md`/`lg`, 16px on `sm`.
- * - A count of `0` (or no value) renders nothing — no pill, and no padding change.
- * - On solid colour fields (`default`, `critical`, `promote`) the counter is a
- *   dark pill so it stays legible; on light variants it is a neutral grey pill.
- * - The button's right padding tightens 4px when a counter is present, since the
- *   counter's own border supplies that edge; the left padding is unchanged.
- */
 export const Counter: Story = {
   tags: ["no-sidebar"],
   render: (args) => (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-4">
-        <F0Button {...args} size="lg" label="To review" counterValue={3} />
-        <F0Button {...args} size="md" label="To review" counterValue={3} />
-        <F0Button {...args} size="sm" label="To review" counterValue={3} />
-      </div>
-      <div className="flex items-center gap-4">
-        <F0Button
-          {...args}
-          variant="default"
-          label="To review"
-          counterValue={3}
-        />
-        <F0Button
-          {...args}
-          variant="critical"
-          label="To review"
-          counterValue={3}
-        />
-        <F0Button
-          {...args}
-          variant="outline"
-          label="To review"
-          counterValue={12}
-        />
-        <F0Button
-          {...args}
-          variant="neutral"
-          label="To review"
-          counterValue={128}
-        />
-      </div>
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      <F0Button {...args} variant="default" label="Default" counterValue={3} />
+      <F0Button {...args} variant="outline" label="Outline" counterValue={3} />
+      <F0Button {...args} variant="neutral" label="Neutral" counterValue={3} />
+      <F0Button {...args} variant="ghost" label="Ghost" counterValue={3} />
+      <F0Button
+        {...args}
+        variant="critical"
+        label="Critical"
+        counterValue={3}
+      />
+      <F0Button {...args} variant="promote" label="Promote" counterValue={3} />
+      <F0Button
+        {...args}
+        variant="outlinePromote"
+        label="Outline promote"
+        counterValue={3}
+      />
     </div>
   ),
 }

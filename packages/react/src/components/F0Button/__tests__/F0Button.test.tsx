@@ -135,10 +135,23 @@ describe("F0Button", () => {
       expect(counterClass(lg)).toContain("min-w-5")
     })
 
-    it("gives the counter a dark pill on solid colour variants", () => {
+    const counterWrapper = () => screen.getByText("3").closest("span")
+
+    it("gives the primary counter a dark pill", () => {
+      render(<F0Button variant="default" label="To review" counterValue={3} />)
+      expect(counterWrapper()?.className).toContain("dark")
+    })
+
+    it("keeps the counter neutral on promote", () => {
+      render(<F0Button variant="promote" label="To review" counterValue={3} />)
+      expect(counterWrapper()?.className).not.toContain("dark")
+    })
+
+    it("darkens the critical counter only on hover", async () => {
       render(<F0Button variant="critical" label="To review" counterValue={3} />)
-      const wrapper = screen.getByText("3").closest("span")
-      expect(wrapper?.className).toContain("dark")
+      expect(counterWrapper()?.className).not.toContain("dark")
+      await userEvent.hover(screen.getByRole("button"))
+      expect(counterWrapper()?.className).toContain("dark")
     })
   })
 })
