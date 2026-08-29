@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.72.0](https://github.com/factorialco/f0/compare/f0-react-v6.71.0...f0-react-v6.72.0) (2026-08-29)
+
+
+### Features
+
+* **F0Chat:** native emoji picker, transcript media and colour polish ([#5299](https://github.com/factorialco/f0/issues/5299)) ([e40311d](https://github.com/factorialco/f0/commit/e40311dc0af01beec8e6eccdb89c943f65367017))
+
 ## [6.71.0](https://github.com/factorialco/f0/compare/f0-react-v6.70.0...f0-react-v6.71.0) (2026-08-28)
 
 
