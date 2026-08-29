@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.73.0](https://github.com/factorialco/f0/compare/f0-react-v6.72.0...f0-react-v6.73.0) (2026-08-29)
+
+
+### Features
+
+* **F0Chat:** a read-only announcement channel, with cards in messages ([#5309](https://github.com/factorialco/f0/issues/5309)) ([08f4ebb](https://github.com/factorialco/f0/commit/08f4ebb65c175fbf78381a6f12dba523b991c789))
+
 ## [6.72.0](https://github.com/factorialco/f0/compare/f0-react-v6.71.0...f0-react-v6.72.0) (2026-08-29)
 
 
