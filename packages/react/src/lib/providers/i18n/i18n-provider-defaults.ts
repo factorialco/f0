@@ -115,6 +115,7 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -727,6 +728,7 @@ export const defaultTranslations = {
       ofTotal: "of total",
       total: "total",
       target: "target",
+      ofTarget: "of target",
       ofRange: "of range",
       fromPrevious: "from previous",
       fromStage: "from {{stage}}",
@@ -1025,6 +1027,7 @@ export const defaultTranslations = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
+    configureWidget: "Configure {{title}}",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */

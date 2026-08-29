@@ -181,6 +181,36 @@ export const WithTargets: Story = {
   },
 }
 
+/**
+ * `highlightOverachievement` splits a bar that ran past its target at the target
+ * itself, drawing the stretch beyond it in a darker shade — without it, Q2 and
+ * Q4 would read the same as a quarter that landed exactly on its number.
+ * `showTargetProgress` adds what that comes to (`value / target`) to the
+ * tooltip, under the target row.
+ */
+export const WithOverachievement: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["Q1", "Q2", "Q3", "Q4"],
+    series: [
+      {
+        name: "Attainment",
+        data: [
+          { value: 125_000, target: 185_000 },
+          { value: 200_000, target: 185_000 },
+          { value: 92_000, target: 185_000 },
+          { value: 268_000, target: 185_000 },
+        ],
+      },
+    ],
+    highlightOverachievement: true,
+    showTargetProgress: true,
+    showLegend: false,
+    valueFormatter: (v) => `${v / 1000}k €`,
+  },
+}
+
 /** Multiple series stacked into a single bar per category. */
 export const Stacked: Story = {
   render: (args) => <F0DataChart {...args} />,

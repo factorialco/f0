@@ -470,9 +470,11 @@ export type F0ChatStatus =
  * - `canCopy` (default true): false hides Copy.
  * - `canViewInfo` (default true): false hides Info (delivery / read receipts).
  * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
- *   overrides the edit policy per message. Structural gates still apply (the
- *   host must provide `editMessage`; deleted messages and voice notes are
- *   never editable).
+ *   overrides the edit policy per message, INCLUDING the edit window — a host
+ *   that supplies this and wants a time limit must apply it here. Structural
+ *   gates still apply and cannot be overridden (the host must provide
+ *   `editMessage`; deleted messages, voice notes, and messages that have not
+ *   settled server-side — `sending` / `failed` — are never editable).
  * - `canDeleteMessage` (default: own message): overrides the delete policy per
  *   message (e.g. moderators deleting others' messages). Failed local echoes
  *   are always discardable — they don't exist server-side.
