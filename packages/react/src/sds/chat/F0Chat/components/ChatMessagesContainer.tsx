@@ -28,6 +28,7 @@ import { isUserMessage, LATEST } from "../types"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { deliveryState } from "../utils/delivery-status"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
+import { chatHeightEstimates } from "../utils/virtuoso-chat"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { type TypingEntryState } from "./ChatTypingBubble"
 import { ChatViewportOverlays } from "./ChatViewportOverlays"
@@ -169,10 +170,20 @@ const ChatBottomGap = (): ReactNode => (
   />
 )
 
+/** Breathing room above the first row, as a constant Header — the mirror of
+ * ChatBottomGap. It used to be a smaller top padding on whatever row happened
+ * to be first, which tied a row's measured height to its position: paginating
+ * then resized a row Virtuoso had already measured, in the very frame where it
+ * is applying a prepend correction and cannot compensate. */
+const ChatTopGap = (): ReactNode => (
+  <div data-testid="chat-top-gap" className="h-2" />
+)
+
 const CHAT_VIRTUOSO_COMPONENTS = {
   Scroller: ChatVirtuosoScroller,
   List: ChatVirtuosoList,
   Item: ChatVirtuosoItem,
+  Header: ChatTopGap,
   Footer: ChatBottomGap,
 }
 
@@ -403,6 +414,14 @@ export const ChatMessagesContainer = (): ReactNode => {
     showTypingRow,
   ])
 
+  // Virtuoso only reads these while its size tree is empty (i.e. at mount), so
+  // recomputing them as rows change is harmless — and keeps the array right
+  // for the next remount without a second source of truth.
+  const heightEstimates = useMemo(
+    () => chatHeightEstimates(displayRows),
+    [displayRows]
+  )
+
   const prefetchGateRef = useRef(false)
 
   const {
@@ -523,13 +542,15 @@ export const ChatMessagesContainer = (): ReactNode => {
   }
   const animatedIds = animatedIdsRef.current ?? EMPTY_SET
 
+  // No `index` in here on purpose: a row's rendering must not depend on where
+  // it currently sits, or a prepend resizes rows Virtuoso already measured.
+  // It also keeps this callback stable across pagination.
   const renderItem = useCallback(
-    (index: number, row: ChatRow) =>
+    (_index: number, row: ChatRow) =>
       row ? (
         <ChatMessageRowRenderer
           row={row}
           isGroup={isGroup}
-          isFirstRow={index === firstItemIndex}
           enterAnimation={!reducedMotion}
           animatedIds={animatedIds}
           freshIds={freshIdsRef.current}
@@ -537,13 +558,7 @@ export const ChatMessagesContainer = (): ReactNode => {
           typingEntry={typingEntryRef.current}
         />
       ) : null,
-    [
-      animatedIds,
-      effectiveTypingLeaving,
-      firstItemIndex,
-      isGroup,
-      reducedMotion,
-    ]
+    [animatedIds, effectiveTypingLeaving, isGroup, reducedMotion]
   )
 
   // Sticky date pill: the date of the top-most visible row.
@@ -585,10 +600,16 @@ export const ChatMessagesContainer = (): ReactNode => {
         totalListHeightChanged={handleListHeightChanged}
         increaseViewportBy={CHAT_VIEWPORT_INCREASE}
         minOverscanItemCount={CHAT_MIN_OVERSCAN_ITEMS}
-        // Median measured row height in text-heavy transcripts (bubble +
-        // run spacing). Unmeasured history is estimated with this; the
-        // closer it sits to reality, the smaller the scroll correction when
-        // a row is first measured.
+        // Per-row estimates beat one number for a list whose rows run from a
+        // 24px delivery footer to a 380px photo album: the entry position, the
+        // scrollbar and the render window are all picked from these before a
+        // single row is measured, and every pixel of error becomes a scroll
+        // correction later. Only read while Virtuoso's size tree is empty, so
+        // it never fights a real measurement.
+        heightEstimates={heightEstimates}
+        // Fallback for the same window (and what lets Virtuoso skip its probe
+        // render). NOT the estimate for prepended history — Virtuoso reserves
+        // those with `lastSize`, the height of the last measured row.
         defaultItemHeight={64}
         // Reporting measurements in the ResizeObserver callback avoids an
         // extra provisional frame when a previously unseen row is mounted.

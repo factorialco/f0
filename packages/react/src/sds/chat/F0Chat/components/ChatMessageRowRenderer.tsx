@@ -26,9 +26,14 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
 )
 
 /** Top spacing baked into the row (virtual rows are absolutely positioned, so
- * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding). */
-const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
-  if (isFirstRow) return "pt-2"
+ * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding).
+ *
+ * A function of the row's CONTENT only: it used to shrink for whatever row was
+ * currently first, which made a row's measured height depend on its position,
+ * so paginating silently resized a row Virtuoso had already measured. The
+ * transcript's top breathing room is a constant `components.Header` instead
+ * (see ChatTopGap), exactly like the bottom gap. */
+const topSpacing = (row: ChatRow): string => {
   if (row.type === "message") return row.isFirstOfRun ? "pt-5" : "pt-0"
   // The status footer hugs its message (MessageStatus brings its own pt-1).
   if (row.type === "footer") return "pt-0"
@@ -46,7 +51,6 @@ const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
 const ChatMessageRowRendererComponent = ({
   row,
   isGroup,
-  isFirstRow,
   enterAnimation,
   animatedIds,
   freshIds,
@@ -55,7 +59,6 @@ const ChatMessageRowRendererComponent = ({
 }: {
   row: ChatRow
   isGroup: boolean
-  isFirstRow: boolean
   /** Whether enter animations are enabled at all (off for reduced motion). */
   enterAnimation: boolean
   /** Ids already shown — seeded with the initial set so only true arrivals animate. */
@@ -73,7 +76,7 @@ const ChatMessageRowRendererComponent = ({
   // No per-row bottom padding: the transcript's bottom breathing room lives on
   // the viewport (constant), so being/stopping-being the last row never
   // changes a row's height (stable measurements = no send-time churn).
-  const spacing = topSpacing(row, isFirstRow)
+  const spacing = topSpacing(row)
 
   // Decided once at mount: animate only genuinely fresh arrivals (in this
   // commit's appended tail and never shown before) — prepends, scroll-backs
