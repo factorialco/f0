@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/factorialco/f0/compare/f0-core-v2.1.0...f0-core-v2.2.0) (2026-08-29)
+
+
+### Features
+
+* **F0Chat:** native emoji picker, transcript media and colour polish ([#5299](https://github.com/factorialco/f0/issues/5299)) ([e40311d](https://github.com/factorialco/f0/commit/e40311dc0af01beec8e6eccdb89c943f65367017))
+
 ## [2.1.0](https://github.com/factorialco/f0/compare/f0-core-v2.0.0...f0-core-v2.1.0) (2026-08-11)
 
 
