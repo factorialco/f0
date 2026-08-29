@@ -6,7 +6,7 @@ import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Spinner } from "@/ui/Spinner"
 
-import { type F0ChatAttachment } from "../types"
+import { type F0ChatComposableAttachment } from "../types"
 import {
   documentPreviewKind,
   isVideoFileAttachment,
@@ -38,7 +38,7 @@ const ChatComposerAttachmentPreviewContent = ({
   uploading,
   onRemove,
 }: {
-  attachment: F0ChatAttachment
+  attachment: F0ChatComposableAttachment
   uploading: boolean
   onRemove: () => void
 }): ReactNode => {

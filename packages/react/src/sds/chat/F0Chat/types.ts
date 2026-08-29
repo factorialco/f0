@@ -1,4 +1,5 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
+import { type F0CardProps } from "@/components/F0Card"
 import { type IconType } from "@/components/F0Icon"
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
 import { type VideoPlayerContent } from "@/components/F0VideoPlayer"
@@ -41,7 +42,15 @@ export type F0ChatUser = {
   profileHref?: string
 }
 
-export type F0ChatChannelType = "dm" | "group"
+/**
+ * `announcement` is a one-way channel: a noticeboard (product changelog, company
+ * news) where only the people the host grants permission to can post, and
+ * everyone else reads. It renders like a DM — no avatar gutter, no sender names,
+ * no `@here` — and every capability defaults to off (see
+ * {@link F0ChatCapabilities}), so a read-only channel needs no configuration at
+ * all while a host that has a poster still turns `canSend` back on.
+ */
+export type F0ChatChannelType = "dm" | "group" | "announcement"
 
 /**
  * A person mentioned in a message. `id` matches an {@link F0ChatUser.id}; `name`
@@ -95,6 +104,13 @@ export type F0ChatChannel = {
   memberCount?: number
   /** DM only — the counterpart, used for the header identity hover card. */
   user?: F0ChatUser
+  /**
+   * Sentence shown where the composer would be when the current user can't
+   * send here ("Only Factorial can send messages"). Host-owned because only the
+   * host knows who *can* post — and has to translate it. Falls back to a
+   * generic i18n line.
+   */
+  readOnlyNotice?: string
 }
 
 export type F0ChatImageAttachment = {
@@ -169,11 +185,52 @@ export type F0ChatVoiceAttachment = {
   name?: string
 }
 
+/**
+ * A rich card inside a message — an {@link F0Card} the host describes as data.
+ *
+ * Deliberately a CURATED subset of `F0CardProps`, not a passthrough: selection,
+ * bookmarking, the overflow menu and the alert banner mean nothing in a
+ * transcript, and `children` isn't serialisable — which is exactly what a
+ * transport-backed card has to be (factorial → a Stream custom attachment
+ * `{ type: "card", … }`). Handlers stay optional so a card can be pure data
+ * (`href`) or host-wired (`onClick`).
+ */
+export type F0ChatCardAttachment = {
+  kind: "card"
+  title: string
+  description?: string
+  /** Leading avatar — the full F0Card set (emoji, icon, module, person, date…). */
+  avatar?: F0CardProps["avatar"]
+  /** Cover image above the content. */
+  image?: string
+  /** Call to action, rendered as a button in the card's divided footer. */
+  action?: {
+    label: string
+    /** Navigates. Takes precedence over `onClick` when both are set. */
+    href?: string
+    onClick?: () => void
+  }
+  /** Makes the whole card activate — the footer action still acts on its own. */
+  href?: string
+  onClick?: () => void
+}
+
 export type F0ChatAttachment =
   | F0ChatImageAttachment
   | F0ChatFileAttachment
   | F0ChatLocationAttachment
   | F0ChatVoiceAttachment
+  | F0ChatCardAttachment
+
+/**
+ * What the composer can produce. Cards are authored by the host (a seeded
+ * announcement, a transport's custom attachment) — there is no affordance to
+ * attach one, so they're excluded from sending, editing and uploading.
+ */
+export type F0ChatComposableAttachment = Exclude<
+  F0ChatAttachment,
+  F0ChatCardAttachment
+>
 
 /**
  * Open Graph preview of a URL in the body (WhatsApp-style card above the text).
@@ -358,7 +415,7 @@ export const isUserMessage = (item: F0ChatItem): item is F0ChatMessage =>
 
 export type F0ChatSendInput = {
   body: string
-  attachments?: F0ChatAttachment[]
+  attachments?: F0ChatComposableAttachment[]
   replyToId?: string
   /** People mentioned in the body (groups only). The host maps these to the
    * transport's mention field (factorial → Stream `mentioned_users`). */
@@ -375,7 +432,7 @@ export type F0ChatSendInput = {
  */
 export type F0ChatEditInput = {
   body: string
-  attachments?: F0ChatAttachment[]
+  attachments?: F0ChatComposableAttachment[]
   /** People mentioned in the edited body (groups only). */
   mentions?: F0ChatMention[]
   /** Whether the edited message mentions the whole group (`@here`). */
@@ -400,14 +457,18 @@ export type F0ChatStatus =
   | "error"
 
 /**
- * Per-channel permissions. Everything is optional and defaults to today's
- * behavior, so hosts only express what their transport restricts (frozen /
- * read-only channels, moderation roles…):
+ * Per-channel permissions, one per verb. Everything is optional and defaults to
+ * today's behavior, so hosts only express what their transport restricts
+ * (frozen / read-only channels, moderation roles…):
  * - `canSend` (default true): false hides the composer entirely.
+ * - `canReply` (default: `canSend`): false hides Reply. Replying needs a
+ *   composer to reply *into*, so it follows `canSend` unless stated otherwise.
  * - `canReact` (default true): false hides the quick-reaction row, the emoji
  *   pickers and disables toggling existing reaction pills.
  * - `canUpload` (default: whether `uploadFiles` exists): false disables the
  *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
+ * - `canCopy` (default true): false hides Copy.
+ * - `canViewInfo` (default true): false hides Info (delivery / read receipts).
  * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
  *   overrides the edit policy per message, INCLUDING the edit window — a host
  *   that supplies this and wants a time limit must apply it here. Structural
@@ -417,11 +478,21 @@ export type F0ChatStatus =
  * - `canDeleteMessage` (default: own message): overrides the delete policy per
  *   message (e.g. moderators deleting others' messages). Failed local echoes
  *   are always discardable — they don't exist server-side.
+ *
+ * On an `announcement` channel every boolean above defaults to **false**
+ * instead: a noticeboard is one-way by construction. An explicit value always
+ * wins, so a host with a poster passes `{ canSend: true }` and gets exactly
+ * that. See `utils/capabilities.ts`.
+ *
+ * When no action survives, the hover ellipsis is not rendered at all.
  */
 export type F0ChatCapabilities = {
   canSend?: boolean
+  canReply?: boolean
   canReact?: boolean
   canUpload?: boolean
+  canCopy?: boolean
+  canViewInfo?: boolean
   canEditMessage?: (message: F0ChatMessage) => boolean
   canDeleteMessage?: (message: F0ChatMessage) => boolean
 }
@@ -451,7 +522,7 @@ export type F0ChatHeaderAction = {
    * as its own icon button next to it. Inline requires `icon` — an inline
    * action without one falls back to the menu. */
   placement?: "menu" | "inline"
-  /** Restrict the action to a channel type. Omit for both. */
+  /** Restrict the action to given channel types. Omit for all of them. */
   channelTypes?: F0ChatChannelType[]
 }
 
@@ -536,6 +607,9 @@ export type F0ChatEvents = {
   onAttachmentDownloaded?: (p: { kind: F0ChatAttachedKind }) => void
   onLocationOpened?: () => void
   onLinkPreviewClicked?: () => void
+  /** A card attachment was activated — `source` tells the footer button apart
+   * from a click on the card body. Carries no title or URL. */
+  onCardActivated?: (p: { source: "card" | "action" }) => void
   onSearchOpened?: () => void
   onSearchResultNavigated?: (p: { direction: "next" | "prev" }) => void
   onJumpedToQuotedMessage?: () => void
@@ -659,7 +733,7 @@ export type F0ChatRuntime = {
    * `channel.stopTyping()`).
    */
   stopTyping?: () => void | Promise<void>
-  uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>
+  uploadFiles?: (files: File[]) => Promise<F0ChatComposableAttachment[]>
   /**
    * Max files attachable at once. When a selection/drop would exceed it, the
    * composer rejects the whole batch and flashes a transient error in the

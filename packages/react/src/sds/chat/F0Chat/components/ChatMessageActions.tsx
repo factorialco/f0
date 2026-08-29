@@ -21,7 +21,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useChatComposeActions } from "../providers/ChatUIProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
-import { canEditChatMessage } from "../utils/message-permissions"
+import {
+  canCopyAction,
+  canDeleteAction,
+  canEditAction,
+  canReactAction,
+  canReplyAction,
+  canViewInfoAction,
+  type MessageActionContext,
+} from "../utils/message-actions"
 import { formatClock } from "../utils/natural-time"
 import { emitReactionToggle } from "../utils/reactions"
 import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
@@ -87,6 +95,7 @@ export const ChatMessageActions = ({
     editWindowMs,
     retryMessage,
     capabilities,
+    channelType,
   } = useF0ChatStable()
   const { startReply, startEdit } = useChatComposeActions()
   const emit = useF0ChatEmit()
@@ -95,18 +104,22 @@ export const ChatMessageActions = ({
   // so the popover must not pull it back to the ellipsis trigger.
   const keepComposerFocusRef = useRef(false)
 
-  // Same policy the composer's edit-last shortcut uses — see canEditChatMessage.
-  // Its `Date.now()` is fine here: the popover content only mounts when open.
-  const canEdit = canEditChatMessage(message, {
-    hasEditMessage: !!editMessage,
+  // One shared context for every gate, so this menu and the un-armed trigger in
+  // `ChatMessageItem` can never disagree about whether there's anything here.
+  const actionContext: MessageActionContext = {
+    message,
+    isMine,
+    channelType,
     capabilities,
+    hasEditMessage: !!editMessage,
     editWindowMs,
-  })
-  // Delete policy: capability override, else own messages only.
-  const canDelete = capabilities?.canDeleteMessage
-    ? capabilities.canDeleteMessage(message)
-    : isMine
-  const canReact = capabilities?.canReact !== false
+  }
+  const canReact = canReactAction(actionContext)
+  const canReply = canReplyAction(actionContext)
+  const canCopy = canCopyAction(actionContext)
+  const canViewInfo = canViewInfoAction(actionContext)
+  const canEdit = canEditAction(actionContext)
+  const canDelete = canDeleteAction(actionContext)
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next)
@@ -225,44 +238,60 @@ export const ChatMessageActions = ({
                 <div className="h-px bg-f1-border-secondary" />
               </>
             )}
-            <div className="flex flex-col gap-0 p-1">
-              <MenuItem
-                icon={AlertCircleLine}
-                label={i18n.chat.info}
-                onClick={() => {
-                  emit.onMessageInfoViewed({ messageId: message.id })
-                  setView("info")
-                }}
-                trailing={
-                  <F0Icon
-                    icon={ChevronRight}
-                    size="md"
-                    className="text-f1-icon"
+            {(canViewInfo || canReply || canCopy) && (
+              <div className="flex flex-col gap-0 p-1">
+                {canViewInfo && (
+                  <MenuItem
+                    icon={AlertCircleLine}
+                    label={i18n.chat.info}
+                    onClick={() => {
+                      emit.onMessageInfoViewed({ messageId: message.id })
+                      setView("info")
+                    }}
+                    trailing={
+                      <F0Icon
+                        icon={ChevronRight}
+                        size="md"
+                        className="text-f1-icon"
+                      />
+                    }
                   />
-                }
-              />
-              <MenuItem
-                icon={Reply}
-                label={i18n.chat.reply}
-                onClick={runAndClose(() => {
-                  keepComposerFocusRef.current = true
-                  startReply(message)
-                })}
-              />
-              <MenuItem
-                icon={Files}
-                label={i18n.actions.copy}
-                onClick={runAndClose(() => {
-                  void navigator.clipboard
-                    ?.writeText(message.body)
-                    .then(() => emit.onMessageCopied({ messageId: message.id }))
-                    .catch(() => {})
-                })}
-              />
-            </div>
+                )}
+                {/* Gated on `canReply`, which follows `canSend`: without a
+                    composer this used to focus a node that isn't mounted. */}
+                {canReply && (
+                  <MenuItem
+                    icon={Reply}
+                    label={i18n.chat.reply}
+                    onClick={runAndClose(() => {
+                      keepComposerFocusRef.current = true
+                      startReply(message)
+                    })}
+                  />
+                )}
+                {canCopy && (
+                  <MenuItem
+                    icon={Files}
+                    label={i18n.actions.copy}
+                    onClick={runAndClose(() => {
+                      void navigator.clipboard
+                        ?.writeText(message.body)
+                        .then(() =>
+                          emit.onMessageCopied({ messageId: message.id })
+                        )
+                        .catch(() => {})
+                    })}
+                  />
+                )}
+              </div>
+            )}
             {(canEdit || canDelete) && (
               <>
-                <div className="h-px bg-f1-border-secondary" />
+                {/* Only a separator when there IS something above to separate
+                    from — a moderator-only menu opens straight on Delete. */}
+                {(canReact || canViewInfo || canReply || canCopy) && (
+                  <div className="h-px bg-f1-border-secondary" />
+                )}
                 <div className="flex flex-col gap-0 p-1">
                   {canEdit && (
                     <MenuItem

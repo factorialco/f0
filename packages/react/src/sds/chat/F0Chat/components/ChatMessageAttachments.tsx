@@ -18,6 +18,7 @@ import {
 } from "../utils/media-layout"
 import { messageSurfaceColorClass } from "../utils/sender-color"
 import { bubbleCornerClass } from "./ChatBubble"
+import { ChatCardAttachment } from "./ChatCardAttachment"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
 import { ChatImageTile } from "./ChatImageTile"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
@@ -64,6 +65,7 @@ export const ChatMessageAttachments = ({
     files: plainFiles,
     locations,
     voices,
+    cards,
   } = partitionChatAttachments(attachments)
   const nonVideoFileCount = documentFiles.length + plainFiles.length
 
@@ -75,7 +77,7 @@ export const ChatMessageAttachments = ({
   const metaHost: "image" | "video" | "location" | "below" | null =
     message.body.trim().length > 0 || message.replyTo || message.deleted
       ? null
-      : nonVideoFileCount > 0 || voices.length > 0
+      : nonVideoFileCount > 0 || voices.length > 0 || cards.length > 0
         ? "below"
         : locations.length > 0
           ? "location"
@@ -91,10 +93,14 @@ export const ChatMessageAttachments = ({
   // caption bubble, no further message of the run).
   const captionBelow =
     message.body.trim().length > 0 || Boolean(message.replyTo)
+  // Cards are the last block before the file chips, so every stacked surface
+  // above them loses its round bottom corner just as it does for a caption.
+  const hasCards = cards.length > 0
   const belowImages =
     videoFiles.length > 0 ||
     nonVideoFileCount > 0 ||
     voices.length > 0 ||
+    hasCards ||
     captionBelow ||
     !isLastOfRun
   const imageCorners = bubbleCornerClass({
@@ -107,6 +113,7 @@ export const ChatMessageAttachments = ({
     locations.length > 0 ||
     voices.length > 0 ||
     nonVideoFileCount > 0 ||
+    hasCards ||
     captionBelow ||
     !isLastOfRun
   const videoCorners = (index: number): string =>
@@ -117,7 +124,11 @@ export const ChatMessageAttachments = ({
       isLastOfRun: index === videoFiles.length - 1 && !belowVideos,
     })
   const belowLocations =
-    voices.length > 0 || nonVideoFileCount > 0 || captionBelow || !isLastOfRun
+    voices.length > 0 ||
+    nonVideoFileCount > 0 ||
+    hasCards ||
+    captionBelow ||
+    !isLastOfRun
   const locationCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
@@ -130,7 +141,8 @@ export const ChatMessageAttachments = ({
       isLastOfRun: index === locations.length - 1 && !belowLocations,
     })
   // Voice notes stack after the locations, before the files/caption.
-  const belowVoices = nonVideoFileCount > 0 || captionBelow || !isLastOfRun
+  const belowVoices =
+    nonVideoFileCount > 0 || hasCards || captionBelow || !isLastOfRun
   const voiceCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
@@ -144,7 +156,8 @@ export const ChatMessageAttachments = ({
       isLastOfRun: index === voices.length - 1 && !belowVoices,
     })
   // Document cards stack after the voices, before the plain files/caption.
-  const belowDocuments = plainFiles.length > 0 || captionBelow || !isLastOfRun
+  const belowDocuments =
+    plainFiles.length > 0 || hasCards || captionBelow || !isLastOfRun
   const documentCorners = (index: number): string =>
     bubbleCornerClass({
       isMine,
@@ -268,6 +281,9 @@ export const ChatMessageAttachments = ({
           cornerClass={documentCorners(i)}
           surfaceClassName={surfaceClassName}
         />
+      ))}
+      {cards.map((card, i) => (
+        <ChatCardAttachment key={`${card.title}-${i}`} card={card} />
       ))}
       {plainFiles.length > 0 && (
         // Files flow side by side and wrap, instead of stacking vertically.

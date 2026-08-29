@@ -11,6 +11,7 @@ import {
 
 import {
   type F0ChatCapabilities,
+  type F0ChatChannelType,
   type F0ChatEditInput,
   type F0ChatEmit,
   type F0ChatEvents,
@@ -32,6 +33,10 @@ const F0ChatContext = createContext<F0ChatRuntime | null>(null)
  */
 export type F0ChatStable = {
   currentUserId: string
+  /** The channel's type, not the channel: per-message components resolve
+   * permissions with it (see `utils/capabilities.ts`) and it only changes when
+   * the conversation does. */
+  channelType: F0ChatChannelType
   capabilities?: F0ChatCapabilities
   editWindowMs?: number
   toggleReaction: (messageId: string, emoji: string) => void
@@ -83,6 +88,7 @@ const NO_EMIT: F0ChatEmit = {
   onAttachmentDownloaded: noop,
   onLocationOpened: noop,
   onLinkPreviewClicked: noop,
+  onCardActivated: noop,
   onSearchOpened: noop,
   onSearchResultNavigated: noop,
   onJumpedToQuotedMessage: noop,
@@ -128,8 +134,11 @@ const useStableCapabilities = (
     (previous != null &&
       capabilities != null &&
       previous.canSend === capabilities.canSend &&
+      previous.canReply === capabilities.canReply &&
       previous.canReact === capabilities.canReact &&
       previous.canUpload === capabilities.canUpload &&
+      previous.canCopy === capabilities.canCopy &&
+      previous.canViewInfo === capabilities.canViewInfo &&
       previous.canEditMessage === capabilities.canEditMessage &&
       previous.canDeleteMessage === capabilities.canDeleteMessage)
   if (!same) previousRef.current = capabilities
@@ -276,6 +285,7 @@ export const F0ChatProvider = ({
       onLocationOpened: () => call((events) => events.onLocationOpened?.()),
       onLinkPreviewClicked: () =>
         call((events) => events.onLinkPreviewClicked?.()),
+      onCardActivated: (p) => call((events) => events.onCardActivated?.(p)),
       onSearchOpened: () => call((events) => events.onSearchOpened?.()),
       onSearchResultNavigated: (p) =>
         call((events) => events.onSearchResultNavigated?.(p)),
@@ -295,6 +305,7 @@ export const F0ChatProvider = ({
   const stable = useMemo<F0ChatStable>(
     () => ({
       currentUserId: runtime.currentUserId,
+      channelType: runtime.channel.type,
       capabilities,
       editWindowMs: runtime.editWindowMs,
       toggleReaction: delegates.toggleReaction,
@@ -310,6 +321,7 @@ export const F0ChatProvider = ({
     }),
     [
       runtime.currentUserId,
+      runtime.channel.type,
       capabilities,
       runtime.editWindowMs,
       hasEditMessage,
@@ -352,6 +364,17 @@ export function useF0ChatStable(): F0ChatStable {
     throw new Error("useF0ChatStable must be used within an F0ChatProvider")
   }
   return ctx
+}
+
+/**
+ * The current channel's type, or `"dm"` outside a provider.
+ *
+ * Non-throwing on purpose, like the emit context's `NO_EMIT`: leaf components
+ * that read it (the message meta, the media cards) are unit-tested on their own
+ * with no runtime around them, and `"dm"` is the neutral shape.
+ */
+export function useF0ChatChannelType(): F0ChatChannelType {
+  return useContext(F0ChatStableContext)?.channelType ?? "dm"
 }
 
 /**

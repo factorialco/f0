@@ -3,6 +3,7 @@ import { type F0DocumentKind } from "@/components/F0PdfViewer"
 import {
   type F0ChatAttachedKind,
   type F0ChatAttachment,
+  type F0ChatCardAttachment,
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
   type F0ChatLocationAttachment,
@@ -126,6 +127,7 @@ export type PartitionedChatAttachments = {
   files: F0ChatFileAttachment[]
   locations: F0ChatLocationAttachment[]
   voices: F0ChatVoiceAttachment[]
+  cards: F0ChatCardAttachment[]
 }
 
 /** Classifies each attachment exactly once for the transcript renderer. */
@@ -139,11 +141,16 @@ export const partitionChatAttachments = (
     files: [],
     locations: [],
     voices: [],
+    cards: [],
   }
 
   for (const attachment of attachments) {
     if (attachment.kind === "image") {
       result.images.push(attachment)
+      continue
+    }
+    if (attachment.kind === "card") {
+      result.cards.push(attachment)
       continue
     }
     if (attachment.kind === "location") {

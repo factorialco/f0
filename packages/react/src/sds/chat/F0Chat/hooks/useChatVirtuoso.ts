@@ -16,16 +16,14 @@ import {
   warmupRange,
 } from "../utils/media-warmup"
 import {
+  advanceChatWindow,
   type ChatEntryLocation,
-  classifyWindowChange,
+  type ChatWindowState,
   entryLocation,
   followDecision,
-  nextFirstItemIndex,
-  PREPEND_OFFSET,
+  initialChatWindow,
   shouldPrefetchOlder,
   shouldRepinOnGrowth,
-  type WindowEnds,
-  windowEnds,
 } from "../utils/virtuoso-chat"
 import { useTranscriptResizeAnchor } from "./useTranscriptResizeAnchor"
 
@@ -112,6 +110,12 @@ type ScrollMetrics = {
   scrollTop: number
   scrollHeight: number
   clientHeight: number
+  /** Read at scroller attach, before Virtuoso positioned or measured anything:
+   * `scrollHeight ≈ clientHeight` and `scrollTop === 0`, so the derived
+   * distance-from-bottom reads as zero for a reader who is nowhere near the
+   * bottom. Nothing may be derived from these until a real scroll replaces
+   * them. */
+  provisional: boolean
 }
 
 /** Finds the first row crossing the viewport's top edge from Virtuoso's own
@@ -176,11 +180,6 @@ export function useChatVirtuoso({
   const renderedItemsRef = useRef<ListItem<ChatRow>[]>([])
   const scrollMetricsRef = useRef<ScrollMetrics | null>(null)
 
-  // ---- window accounting (render-phase, like the container's freshIds) ----
-  const windowRef = useRef<WindowEnds | null>(null)
-  const prevRowCountRef = useRef(rows.length)
-  const firstItemIndexRef = useRef(PREPEND_OFFSET)
-  const epochRef = useRef(0)
   const pendingRef = useRef<PendingJump>(null)
   // Own message appended while scrolled up → glide home (consumed post-commit).
   const ownGlideRef = useRef(false)
@@ -188,51 +187,48 @@ export function useChatVirtuoso({
   // (below) or when the host reports the attempt finished (loadingOlder edge).
   const olderRequestedRef = useRef(false)
 
-  if (windowRef.current === null) {
-    windowRef.current = windowEnds(messages)
-  } else {
-    const prevEnds = windowRef.current
-    const nextEnds = windowEnds(messages)
-    // Does anything of the previous window survive? A cached head repainted
-    // before `watch()` widens it in both directions is a GROW, not a far jump —
-    // classifying it as a swap would remount the list mid-entry, which is the
-    // scroll jump every reopened conversation shows.
-    const survivingHeadIndex =
-      prevEnds.firstId != null ? indexById.get(prevEnds.firstId) : undefined
-    const overlaps =
-      survivingHeadIndex != null ||
-      (prevEnds.lastId != null && indexById.has(prevEnds.lastId))
-    const change = classifyWindowChange(prevEnds, nextEnds, overlaps)
-    if (change !== "none") {
-      olderRequestedRef.current = false
-      firstItemIndexRef.current = nextFirstItemIndex(
-        firstItemIndexRef.current,
-        change,
-        prevRowCountRef.current,
-        rows.length,
-        // Rows that landed ABOVE the surviving head — the only shift a grow
-        // may apply (the net row delta would also count the appended tail).
-        survivingHeadIndex ?? 0
-      )
-      // A swapped window (far jump) — and the FIRST page of an async-loading
-      // conversation — re-enter through the initial location instead of
-      // letting followOutput glide across the whole just-landed history.
-      if (change === "replace" || change === "initial") epochRef.current += 1
-      if (
-        (change === "append" || change === "grow") &&
-        !hasMoreNewer &&
-        nextEnds.lastId !== prevEnds.lastId
-      ) {
-        const last = messages[messages.length - 1]
-        if (last?.isMine) ownGlideRef.current = true
-      }
-      windowRef.current = nextEnds
-    }
-  }
-  prevRowCountRef.current = rows.length
+  // ---- window accounting ----
+  // Render-phase on purpose: `firstItemIndex` and `data` have to reach Virtuoso
+  // in the SAME commit, so this cannot be deferred to an effect (a commit late
+  // IS the jump). It is memoized on the exact inputs that produced it instead,
+  // so a render React re-runs or throws away (StrictMode's double invoke, an
+  // interrupted concurrent render) can never apply a shift twice.
+  const windowRef = useRef<{
+    messages: ScrollMessage[]
+    rows: ChatRow[]
+    hasMoreNewer: boolean
+    state: ChatWindowState
+  } | null>(null)
 
-  const listKey = `${conversationKey}:${epochRef.current}`
-  const firstItemIndex = firstItemIndexRef.current
+  if (
+    windowRef.current === null ||
+    windowRef.current.messages !== messages ||
+    windowRef.current.rows !== rows ||
+    windowRef.current.hasMoreNewer !== hasMoreNewer
+  ) {
+    const input = {
+      messages,
+      rowCount: rows.length,
+      indexById,
+      hasMoreNewer,
+    }
+    let state: ChatWindowState
+    if (windowRef.current === null) {
+      state = initialChatWindow(input)
+    } else {
+      const advance = advanceChatWindow(windowRef.current.state, input)
+      state = advance.state
+      if (advance.change !== "none") olderRequestedRef.current = false
+      if (advance.ownGlide) ownGlideRef.current = true
+    }
+    windowRef.current = { messages, rows, hasMoreNewer, state }
+  }
+
+  const listKey = `${conversationKey}:${windowRef.current.state.epoch}`
+  const firstItemIndex = windowRef.current.state.firstItemIndex
+  // Latest value, readable from the stable rAF callbacks below.
+  const firstItemIndexRef = useRef(firstItemIndex)
+  firstItemIndexRef.current = firstItemIndex
 
   // Entry location, computed ONCE per remount (Virtuoso only reads
   // initialTopMostItemIndex at mount). A pending far jump wins; the unread
@@ -327,6 +323,7 @@ export function useChatVirtuoso({
       scrollHeight: element.scrollHeight,
       scrollTop: element.scrollTop,
       clientHeight: element.clientHeight,
+      provisional: false,
     }
     distanceFromBottomRef.current =
       element.scrollHeight - element.scrollTop - element.clientHeight
@@ -469,19 +466,48 @@ export function useChatVirtuoso({
       if (resizingRef.current) return
       const metrics = scrollMetricsRef.current
       if (!metrics || !scrollerElRef.current) return
+      // Read at fire time: a prepend can update the global base between
+      // scheduling this frame and calculating the local row index.
+      const firstIndex = firstItemIndexRef.current
+
+      // `itemsRendered` fires at mount too, and the only metrics on file then
+      // are the attach's provisional ones — deriving a position from them puts
+      // a reader who entered at the unread divider one pixel from the bottom,
+      // which opens every re-pin gate and the prefetch with it. Only the
+      // media warm-up is position-independent enough to run (it leans on the
+      // rendered window, and "down" is the right default on entry).
+      if (metrics.provisional) {
+        warmMediaAhead("down", firstIndex)
+        return
+      }
+
       const distanceFromBottom =
         metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight
       distanceFromBottomRef.current = distanceFromBottom
       setScrolledUp(
         distanceFromBottom > metrics.clientHeight * SCROLLED_UP_VIEWPORTS
       )
+
+      // Virtuoso exposes no scroll direction, so derive it here — the warm-up
+      // has to lean the way the reader is going, and the window is far shorter
+      // ahead when scrolling down.
+      const previousTop = lastWarmScrollTopRef.current
+      const scrollingUp = previousTop != null && metrics.scrollTop < previousTop
+      lastWarmScrollTopRef.current = metrics.scrollTop
+
       // Prefetch the previous page while still viewports away from the top:
       // the prepend lands and gets measured far above the viewport instead of
       // right at the anchor (startReached below stays as the safety net).
-      if (shouldPrefetchOlder(metrics)) prefetchOlder()
-      // Read at fire time: a prepend can update the global base between
-      // scheduling this frame and calculating the local row index.
-      const firstIndex = firstItemIndexRef.current
+      //
+      // Only while actually heading up. A typical loaded window is under three
+      // viewports tall, so the threshold alone is satisfied the moment the
+      // transcript is revealed — and since Virtuoso reserves unmeasured
+      // prepended rows with `lastSize` (the last row's height, often the ~24px
+      // delivery footer), the landed page barely moves `scrollTop` and the
+      // threshold stays satisfied. That walked several pages back on entry,
+      // each with its own two-frame correction. Its own correction scrolls
+      // DOWN, so it can never masquerade as the reader heading up.
+      if (scrollingUp && shouldPrefetchOlder(metrics)) prefetchOlder()
       setStickyIndex(
         topVisibleRowIndex(
           renderedItemsRef.current,
@@ -498,15 +524,7 @@ export function useChatVirtuoso({
               firstIndex
             ) ?? anchorRef.current)
 
-      // Virtuoso exposes no scroll direction, so derive it here — the warm-up
-      // has to lean the way the reader is going, and the window is far shorter
-      // ahead when scrolling down.
-      const previousTop = lastWarmScrollTopRef.current
-      lastWarmScrollTopRef.current = metrics.scrollTop
-      warmMediaAhead(
-        previousTop != null && metrics.scrollTop < previousTop ? "up" : "down",
-        firstIndex
-      )
+      warmMediaAhead(scrollingUp ? "up" : "down", firstIndex)
     })
   }, [prefetchOlder, resizingRef, warmMediaAhead])
 
@@ -516,15 +534,32 @@ export function useChatVirtuoso({
 
     // The native scroll hot path reads each metric exactly once. Everything
     // derived from them is published at most once in the next paint frame.
+    const previous = scrollMetricsRef.current
     const metrics = {
       scrollHeight: element.scrollHeight,
       scrollTop: element.scrollTop,
       clientHeight: element.clientHeight,
+      provisional: false,
     }
     scrollMetricsRef.current = metrics
     const distanceFromBottom =
       metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight
     distanceFromBottomRef.current = distanceFromBottom
+    // Taking over is not a wheel gesture — it's moving UP, however you did it.
+    // `handleWheel` only pauses earlier (before the scroll lands); a scrollbar
+    // drag, Page Up / Home / the arrow keys and find-in-page produce no wheel
+    // at all and used to leave following armed. Every imperative scroll of ours
+    // that moves upward (a far jump, the entry re-assert, an anchor restore)
+    // also means the reader is no longer at the tail, so pausing there is right
+    // too — the pins that matter re-arm at the true bottom, just below.
+    if (
+      !resizingRef.current &&
+      previous != null &&
+      !previous.provisional &&
+      metrics.scrollTop < previous.scrollTop - BOTTOM_EDGE_EPSILON_PX
+    ) {
+      pauseFollowing()
+    }
     // A width change can shrink the content under the reader until the browser
     // CLAMPS scrollTop, which fires this as a real scroll. Re-arming the follow
     // there hands the bottom to someone who was three screens up.
@@ -532,20 +567,31 @@ export function useChatVirtuoso({
       resumeFollowing()
     }
     scheduleDerivedScrollState()
-  }, [resizingRef, resumeFollowing, scheduleDerivedScrollState])
+  }, [pauseFollowing, resizingRef, resumeFollowing, scheduleDerivedScrollState])
 
   // Existing rows can grow without changing the item count (reactions, edits,
-  // previews). Re-align through Virtuoso's measured index instead of assigning
-  // DOM scrollTop, so there is only one scroll-position authority.
-  const pinToBottom = useCallback(() => {
-    if (!scrollerElRef.current) return
+  // previews). Absorbed through Virtuoso's own `scrollBy`, so there is still
+  // one scroll-position authority but none of `scrollToIndex`'s baggage: that
+  // one holds `scrollingInProgress` for up to 1.2s and RE-ISSUES itself on
+  // every list refresh within 150ms — and measuring rows while the reader
+  // scrolls IS a list refresh. While it is up, Virtuoso skips the upward
+  // item-resize compensation that keeps unmeasured history stable, so a pin
+  // fired as the reader starts scrolling both drops the corrections and drags
+  // them back to the bottom. The landing point is identical: the growth
+  // happened below the fold, so it simply added to the pre-growth distance.
+  const pinToBottom = useCallback((growth: number) => {
+    const virtuoso = virtuosoRef.current
+    if (!scrollerElRef.current || !virtuoso) return
     if (followPausedRef.current) return
-    if (distanceFromBottomRef.current > AT_BOTTOM_THRESHOLD_PX) return
-    virtuosoRef.current?.scrollToIndex({
-      index: "LAST",
-      align: "end",
-      behavior: "auto",
-    })
+    const distance = distanceFromBottomRef.current
+    if (distance > AT_BOTTOM_THRESHOLD_PX) return
+    const top = Math.max(0, distance) + Math.max(0, growth)
+    if (top <= 0) return
+    virtuoso.scrollBy({ top })
+    // We just landed at the bottom. Claiming it now (instead of waiting for the
+    // scroll event) keeps a burst of growth frames from each re-adding the same
+    // stale distance; the next real scroll overwrites it from the DOM anyway.
+    distanceFromBottomRef.current = 0
   }, [])
 
   // In-place growth at the bottom with the SAME item count — a reaction row
@@ -579,7 +625,7 @@ export function useChatVirtuoso({
             distanceFromBottomRef.current <= AT_BOTTOM_THRESHOLD_PX,
         })
       ) {
-        pinToBottom()
+        pinToBottom(height - prev.height)
       }
     },
     [pinToBottom, resizingRef]
@@ -634,16 +680,18 @@ export function useChatVirtuoso({
       const next = scrollerElRef.current
       observeResize(next)
       if (next) {
-        // Metrics only. The attach is NOT a valid measurement — Virtuoso hasn't
-        // positioned or measured the list yet, so scrollHeight ≈ clientHeight
-        // and the distance reads as zero. Writing it here would open every
-        // re-pin gate for a conversation that entered at the unread divider.
-        // `distanceFromBottomRef` stays on the entry-derived seed until a real
-        // scroll (or Virtuoso's own at-bottom state) replaces it.
+        // Metrics only, and flagged PROVISIONAL. The attach is not a valid
+        // measurement — Virtuoso hasn't positioned or measured the list yet, so
+        // scrollHeight ≈ clientHeight and the distance reads as zero. Deriving
+        // from them would open every re-pin gate for a conversation that
+        // entered at the unread divider. `distanceFromBottomRef` stays on the
+        // entry-derived seed until a real scroll (or Virtuoso's own at-bottom
+        // state) replaces it.
         scrollMetricsRef.current = {
           scrollHeight: next.scrollHeight,
           scrollTop: next.scrollTop,
           clientHeight: next.clientHeight,
+          provisional: true,
         }
 
         // QA hook (the Storm story HUD traces scrollTop/scrollHeight per frame).

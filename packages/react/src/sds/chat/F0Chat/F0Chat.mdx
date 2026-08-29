@@ -349,6 +349,13 @@ memoization is required of the host.
   THEN it colours only the inline card chrome, placeholder, or letterbox; media
   pixels, rendered document content, maps, composer previews, reply quotes, and
   fullscreen viewers remain neutral.
+- WHEN a channel is `type: "announcement"` → THEN it is a one-way noticeboard: **every** capability defaults to off, so nobody can send, reply, react, upload, copy or inspect without the host explicitly granting it. It renders like a DM — no avatar gutter, no sender names, no `@here` — because a broadcast has one voice.
+- WHEN the host does grant a capability on an announcement channel, e.g. `{ canSend: true }` for an administrator → THEN only that one turns on; the rest stay off.
+- WHEN no per-message action survives its gates → THEN the hover ellipsis is not rendered at all, rather than opening an empty menu. A failed outgoing message keeps its critical alert regardless: retrying and discarding a local echo are not permissions.
+- WHEN `canSend` is false and the host does not set `canReply` → THEN Reply is hidden, because replying needs a composer to reply into.
+- WHEN the current user cannot send in a channel → THEN the composer is replaced by `channel.readOnlyNotice` (or a generic line), and dragging files over the panel no longer offers a drop affordance.
+- WHEN a channel is an announcement → THEN messages carry no per-message clock and the day separator carries the time instead, because those posts are seeded rather than sent and their minute would be invented. The header also drops its ellipsis: a fixed, short transcript has nothing to search.
+- WHEN a message carries a `kind: "card"` attachment → THEN F0 renders an `F0Card` at the shared media width from the host's data (avatar, title, description, image, one footer action). It keeps its own border and radius rather than chaining into the bubble stack, and it is not editable — the composer has no affordance for a card, so loading one into it could only drop it on save.
 - WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
 - WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.

@@ -92,8 +92,13 @@ export const ChatHeader = ({
   const inlineActions = channelActions.filter(isInline)
   const menuActions = channelActions.filter((action) => !isInline(action))
 
+  // A noticeboard is a short, fixed transcript — there is nothing to search
+  // through, and without host actions the menu would hold a single useless item.
+  const canSearch = channel.type !== "announcement"
   const menuItems: DropdownItem[] = [
-    { label: i18n.actions.search, icon: Search, onClick: openSearch },
+    ...(canSearch
+      ? [{ label: i18n.actions.search, icon: Search, onClick: openSearch }]
+      : []),
     ...menuActions.map((action) => ({
       label: action.label,
       icon: action.icon,
@@ -169,15 +174,18 @@ export const ChatHeader = ({
                 onClick={() => action.onClick(channel)}
               />
             ))}
-            {/* Search + the host's menu actions live behind the ellipsis menu. */}
-            <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
-              <ButtonInternal
-                variant="ghost"
-                hideLabel
-                label={i18n.chat.options}
-                icon={Ellipsis}
-              />
-            </Dropdown>
+            {/* Search + the host's menu actions live behind the ellipsis menu,
+                which only exists while it holds something. */}
+            {menuItems.length > 0 && (
+              <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
+                <ButtonInternal
+                  variant="ghost"
+                  hideLabel
+                  label={i18n.chat.options}
+                  icon={Ellipsis}
+                />
+              </Dropdown>
+            )}
             {onToggleFullscreen && !isSmallScreen && (
               <ButtonInternal
                 variant="ghost"

@@ -73,6 +73,7 @@ const dialogContentClassName = cva({
 })
 
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
+  dismissable = true,
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
@@ -108,8 +109,10 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     setContainerElement(node)
   }, [])
 
+  // Radix routes BOTH Escape and a click outside through here, so a single gate
+  // covers the two ways out that aren't the dialog's own actions.
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && dismissable) {
       onClose()
     }
   }
@@ -171,6 +174,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     resourceHeader,
     controls,
     headerStatus,
+    dismissable,
     tabs,
     activeTabId,
     setActiveTabId,

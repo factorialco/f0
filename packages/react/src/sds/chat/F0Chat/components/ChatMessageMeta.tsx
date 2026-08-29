@@ -3,6 +3,7 @@ import { type ReactNode } from "react"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { CHAT_MEDIA_SCRIM_CLASS } from "../utils/media-layout"
 import { formatClock } from "../utils/natural-time"
@@ -24,6 +25,10 @@ import { formatClock } from "../utils/natural-time"
  * piece of information wherever it lands, and a message with a photo above its
  * caption showed two different sizes of the same time.
  *
+ * Nothing renders on an announcement channel: those posts carry a SYNTHETIC
+ * timestamp (they're seeded client-side, not sent), so a per-message minute
+ * would be an invented precision. The day separator still carries the time.
+ *
  * Always `aria-hidden`: the transcript has exactly one live region (the
  * delivery-status footer), and N announced clocks would make it unusable with a
  * screen reader. Callers that own the reading order pair this with a `sr-only`
@@ -37,7 +42,10 @@ export const ChatMessageMeta = ({
   placement: "bubble" | "overlay" | "below"
 }): ReactNode => {
   const i18n = useI18n()
+  const channelType = useF0ChatChannelType()
   const label = metaLabel(message, i18n.chat.edited)
+
+  if (channelType === "announcement") return null
 
   if (placement === "overlay") {
     return (
@@ -113,6 +121,9 @@ export const ChatMessageMetaLabel = ({
   message: F0ChatMessage
 }): ReactNode => {
   const i18n = useI18n()
+  const channelType = useF0ChatChannelType()
+  // Announcing a made-up minute is worse than announcing nothing.
+  if (channelType === "announcement") return null
   return <span className="sr-only">{metaLabel(message, i18n.chat.edited)}</span>
 }
 

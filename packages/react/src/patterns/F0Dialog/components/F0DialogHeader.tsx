@@ -27,6 +27,7 @@ export const F0DialogHeader = ({
   resourceHeader,
   controls,
   headerStatus,
+  dismissable = true,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -98,15 +99,18 @@ export const F0DialogHeader = ({
       </span>
     ) : null
 
-  const CloseButton = () => (
-    <ButtonInternal
-      variant="outline"
-      icon={CrossIcon}
-      onClick={onClose}
-      label={translations.actions.close}
-      hideLabel
-    />
-  )
+  // Nothing to close with on a forced choice — a button that did nothing would
+  // be worse than none at all.
+  const CloseButton = () =>
+    dismissable ? (
+      <ButtonInternal
+        variant="outline"
+        icon={CrossIcon}
+        onClick={onClose}
+        label={translations.actions.close}
+        hideLabel
+      />
+    ) : null
 
   const TabsStrip = () =>
     tabs ? (

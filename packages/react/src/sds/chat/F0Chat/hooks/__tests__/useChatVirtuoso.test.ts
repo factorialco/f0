@@ -1,5 +1,13 @@
-import { type ListItem } from "react-virtuoso"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { type ListItem, type VirtuosoHandle } from "react-virtuoso"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from "vitest"
 
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
 
@@ -52,6 +60,18 @@ const hookOptions = (messages: { id: string; isMine?: boolean }[]) => ({
   conversationKey: "conversation-1",
   reducedMotion: false,
 })
+
+/** The two imperative scrolls the hook uses: deliberate jumps go through
+ * `scrollToIndex`, absorbing in-place growth goes through `scrollBy` (which
+ * doesn't arm Virtuoso's 1.2s retry loop). */
+const stubVirtuosoHandle = (virtuosoRef: {
+  current: VirtuosoHandle | null
+}): { scrollToIndex: Mock; scrollBy: Mock } => {
+  const scrollToIndex = vi.fn()
+  const scrollBy = vi.fn()
+  virtuosoRef.current = { scrollBy, scrollToIndex } as never
+  return { scrollBy, scrollToIndex }
+}
 
 const attachScroller = (
   handleScrollerRef: (element: HTMLElement | Window | null) => void
@@ -203,12 +223,11 @@ describe("useChatVirtuoso wheel takeover", () => {
   it("keeps following paused after the first small upward scroll", () => {
     const { result } = renderVirtuoso()
     const viewport = attachScroller(result.current.handleScrollerRef)
-    const scrollToIndex = vi.fn()
-    result.current.virtuosoRef.current = { scrollToIndex } as never
+    const { scrollBy } = stubVirtuosoHandle(result.current.virtuosoRef)
 
     act(() => result.current.handleTotalListHeightChanged(1000))
     expect(result.current.followOutput).not.toBe(false)
-    scrollToIndex.mockClear()
+    scrollBy.mockClear()
 
     act(() => {
       viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }))
@@ -222,37 +241,34 @@ describe("useChatVirtuoso wheel takeover", () => {
     viewport.setScrollHeight(1100)
     act(() => result.current.handleTotalListHeightChanged(1100))
     expect(viewport.getScrollTop()).toBe(470)
-    expect(scrollToIndex).not.toHaveBeenCalled()
+    expect(scrollBy).not.toHaveBeenCalled()
 
     act(() => vi.advanceTimersByTime(200))
     viewport.setScrollHeight(1200)
     act(() => result.current.handleTotalListHeightChanged(1200))
     expect(viewport.getScrollTop()).toBe(470)
-    expect(scrollToIndex).not.toHaveBeenCalled()
+    expect(scrollBy).not.toHaveBeenCalled()
 
     viewport.setScrollTop(700)
     act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
     expect(result.current.followOutput).not.toBe(false)
 
-    scrollToIndex.mockClear()
+    scrollBy.mockClear()
     const writesBeforeGrowth = viewport.getScrollWrites()
     viewport.setScrollHeight(1300)
     act(() => result.current.handleTotalListHeightChanged(1300))
     expect(viewport.getScrollTop()).toBe(700)
     expect(viewport.getScrollWrites()).toBe(writesBeforeGrowth)
-    expect(scrollToIndex).toHaveBeenCalledWith({
-      index: "LAST",
-      align: "end",
-      behavior: "auto",
-    })
+    // Pre-growth distance (0) plus the 100px the list just grew — the same
+    // landing point `scrollToIndex({ index: "LAST", align: "end" })` reached.
+    expect(scrollBy).toHaveBeenCalledWith({ top: 100 })
     act(() => result.current.handleScrollerRef(null))
   })
 
   it("restores following when an upward wheel cannot leave the bottom", () => {
     const { result } = renderVirtuoso()
     const viewport = attachScroller(result.current.handleScrollerRef)
-    const scrollToIndex = vi.fn()
-    result.current.virtuosoRef.current = { scrollToIndex } as never
+    const { scrollBy } = stubVirtuosoHandle(result.current.virtuosoRef)
 
     act(() => result.current.handleTotalListHeightChanged(1000))
     act(() => {
@@ -263,17 +279,13 @@ describe("useChatVirtuoso wheel takeover", () => {
     act(() => vi.advanceTimersByTime(200))
     expect(result.current.followOutput).not.toBe(false)
 
-    scrollToIndex.mockClear()
+    scrollBy.mockClear()
     const writesBeforeGrowth = viewport.getScrollWrites()
     viewport.setScrollHeight(1100)
     act(() => result.current.handleTotalListHeightChanged(1100))
     expect(viewport.getScrollTop()).toBe(500)
     expect(viewport.getScrollWrites()).toBe(writesBeforeGrowth)
-    expect(scrollToIndex).toHaveBeenCalledWith({
-      index: "LAST",
-      align: "end",
-      behavior: "auto",
-    })
+    expect(scrollBy).toHaveBeenCalledWith({ top: 100 })
     act(() => result.current.handleScrollerRef(null))
   })
 
@@ -323,8 +335,7 @@ describe("useChatVirtuoso wheel takeover", () => {
   it("resumes following for an explicit jump to bottom", () => {
     const { result } = renderVirtuoso()
     const viewport = attachScroller(result.current.handleScrollerRef)
-    const scrollToIndex = vi.fn()
-    result.current.virtuosoRef.current = { scrollToIndex } as never
+    const { scrollToIndex } = stubVirtuosoHandle(result.current.virtuosoRef)
 
     act(() => result.current.handleTotalListHeightChanged(1000))
     scrollToIndex.mockClear()
@@ -352,8 +363,7 @@ describe("useChatVirtuoso wheel takeover", () => {
       })
     )
     const viewport = attachScroller(result.current.handleScrollerRef)
-    const scrollToIndex = vi.fn()
-    result.current.virtuosoRef.current = { scrollToIndex } as never
+    const { scrollToIndex } = stubVirtuosoHandle(result.current.virtuosoRef)
     const writesBeforeJump = viewport.getScrollWrites()
 
     act(() => result.current.scrollToBottom())
@@ -374,8 +384,7 @@ describe("useChatVirtuoso wheel takeover", () => {
       { initialProps: { messages: initialMessages } }
     )
     const viewport = attachScroller(result.current.handleScrollerRef)
-    const scrollToIndex = vi.fn()
-    result.current.virtuosoRef.current = { scrollToIndex } as never
+    const { scrollToIndex } = stubVirtuosoHandle(result.current.virtuosoRef)
 
     act(() => {
       result.current.handleTotalListHeightChanged(1000)
@@ -441,13 +450,23 @@ describe("useChatVirtuoso wheel takeover", () => {
     // the prefetch band.
     const viewport = attachScroller(result.current.handleScrollerRef)
 
+    // Standing still inside the band is not a reason to pull history: on entry
+    // the whole loaded window is usually under three viewports tall.
     act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
     act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).not.toHaveBeenCalled()
+
+    const scrollUpTo = (top: number) => {
+      viewport.setScrollTop(top)
+      act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+      act(() => frameCallbacks.shift()?.(0))
+    }
+
+    scrollUpTo(400)
     expect(loadOlder).toHaveBeenCalledTimes(1)
 
     // Latched: further scrolls don't stack requests for the same attempt.
-    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
-    act(() => frameCallbacks.shift()?.(0))
+    scrollUpTo(300)
     expect(loadOlder).toHaveBeenCalledTimes(1)
     act(() => result.current.handleStartReached())
     expect(loadOlder).toHaveBeenCalledTimes(1)
@@ -455,8 +474,7 @@ describe("useChatVirtuoso wheel takeover", () => {
     // The host finishing the attempt (loadingOlder edge) re-arms the latch.
     rerender({ loadingOlder: true })
     rerender({ loadingOlder: false })
-    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
-    act(() => frameCallbacks.shift()?.(0))
+    scrollUpTo(200)
     expect(loadOlder).toHaveBeenCalledTimes(2)
     act(() => result.current.handleScrollerRef(null))
   })
@@ -482,6 +500,9 @@ describe("useChatVirtuoso wheel takeover", () => {
     expect(loadOlder).not.toHaveBeenCalled()
 
     canPrefetchRef.current = true
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    viewport.setScrollTop(400)
     act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
     act(() => frameCallbacks.shift()?.(0))
     expect(loadOlder).toHaveBeenCalledTimes(1)
@@ -523,16 +544,94 @@ describe("useChatVirtuoso wheel takeover", () => {
     act(() => farResult.current.handleScrollerRef(null))
   })
 
+  // Entering at the unread divider is the case the attach metrics used to
+  // break: `scrollHeight ≈ clientHeight` and `scrollTop 0` read as "one pixel
+  // from the bottom", and `itemsRendered` fires at mount with nothing else on
+  // file — so the first rows measuring taller than their estimate looked like
+  // in-place growth at the bottom and yanked the reader down.
+  it("derives nothing from the attach metrics until a real scroll", () => {
+    const loadOlder = vi.fn()
+    const dividerRows: ChatRow[] = [
+      { type: "divider", key: "unread-divider" },
+      {
+        type: "separator",
+        key: "sep-message-1",
+        at: "2026-01-01T12:00:00.000Z",
+        forId: "message-1",
+      },
+    ]
+    const { result } = renderHook(() =>
+      useChatVirtuoso({
+        ...hookOptions([{ id: "message-1" }]),
+        rows: dividerRows,
+        itemCount: dividerRows.length,
+        hasMoreOlder: true,
+        loadOlder,
+      })
+    )
+    expect(result.current.initialLocation.index).toBe(0)
+    const viewport = attachScroller(result.current.handleScrollerRef)
+    const { scrollBy, scrollToIndex } = stubVirtuosoHandle(
+      result.current.virtuosoRef
+    )
+
+    act(() => result.current.handleItemsRendered([]))
+    act(() => frameCallbacks.shift()?.(0))
+
+    // Every measured row grows the list while Virtuoso settles the entry.
+    act(() => result.current.handleTotalListHeightChanged(4000))
+    act(() => result.current.handleTotalListHeightChanged(5000))
+    expect(scrollBy).not.toHaveBeenCalled()
+    expect(scrollToIndex).not.toHaveBeenCalled()
+
+    // Virtuoso's own entry scroll lands: real metrics now, but the reader
+    // still hasn't moved, so nothing may pull history in either.
+    viewport.setScrollHeight(5000)
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    act(() => result.current.handleTotalListHeightChanged(6000))
+
+    expect(scrollBy).not.toHaveBeenCalled()
+    expect(scrollToIndex).not.toHaveBeenCalled()
+    expect(loadOlder).not.toHaveBeenCalled()
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  // Only a wheel used to count as taking over, so dragging the Radix scrollbar
+  // (or Page Up / Home / the arrow keys, which produce no wheel at all) left
+  // following armed and the next in-place growth pulled the reader back down.
+  it("pauses following for an upward scroll that never fired a wheel", () => {
+    const { result } = renderVirtuoso()
+    const viewport = attachScroller(result.current.handleScrollerRef)
+    const { scrollBy } = stubVirtuosoHandle(result.current.virtuosoRef)
+
+    act(() => result.current.handleTotalListHeightChanged(1000))
+    expect(result.current.followOutput).not.toBe(false)
+
+    // A first real scroll replaces the attach's provisional metrics.
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    scrollBy.mockClear()
+
+    viewport.setScrollTop(200)
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    expect(result.current.followOutput).toBe(false)
+
+    viewport.setScrollHeight(1100)
+    act(() => result.current.handleTotalListHeightChanged(1100))
+    expect(scrollBy).not.toHaveBeenCalled()
+    expect(viewport.getScrollTop()).toBe(200)
+    act(() => result.current.handleScrollerRef(null))
+  })
+
   it.each([0, 120])(
     "does not pause following for a %i downward/empty wheel delta",
     (deltaY) => {
       const { result } = renderVirtuoso()
       const viewport = attachScroller(result.current.handleScrollerRef)
-      const scrollToIndex = vi.fn()
-      result.current.virtuosoRef.current = { scrollToIndex } as never
+      const { scrollBy } = stubVirtuosoHandle(result.current.virtuosoRef)
 
       act(() => result.current.handleTotalListHeightChanged(1000))
-      scrollToIndex.mockClear()
+      scrollBy.mockClear()
       act(() => {
         viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY }))
       })
@@ -543,11 +642,7 @@ describe("useChatVirtuoso wheel takeover", () => {
       act(() => result.current.handleTotalListHeightChanged(1100))
       expect(viewport.getScrollTop()).toBe(500)
       expect(viewport.getScrollWrites()).toBe(writesBeforeGrowth)
-      expect(scrollToIndex).toHaveBeenCalledWith({
-        index: "LAST",
-        align: "end",
-        behavior: "auto",
-      })
+      expect(scrollBy).toHaveBeenCalledWith({ top: 100 })
       expect(frameCallbacks).toHaveLength(0)
       act(() => result.current.handleScrollerRef(null))
     }

@@ -6,7 +6,7 @@ import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import {
   isUserMessage,
-  type F0ChatAttachment,
+  type F0ChatComposableAttachment,
   type F0ChatChannel,
   type F0ChatEditInput,
   type F0ChatItem,
@@ -499,9 +499,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   }, [])
 
   const uploadFiles = useCallback(
-    (files: File[]): Promise<F0ChatAttachment[]> =>
+    (files: File[]): Promise<F0ChatComposableAttachment[]> =>
       Promise.resolve(
-        files.map((file): F0ChatAttachment => {
+        files.map((file): F0ChatComposableAttachment => {
           const url = URL.createObjectURL(file)
           return file.type.startsWith("image/")
             ? { kind: "image", url, name: file.name }

@@ -21,6 +21,7 @@ import {
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
+import { hasAnyMessageAction } from "../utils/message-actions"
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
@@ -134,7 +135,24 @@ export const ChatMessageItem = ({
   const { startReply } = useChatComposeActions()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
-  const { currentUserId } = useF0ChatStable()
+  const {
+    currentUserId,
+    channelType,
+    capabilities,
+    editMessage,
+    editWindowMs,
+  } = useF0ChatStable()
+  // An ellipsis that opens an empty popover is worse than no ellipsis: on a
+  // read-only noticeboard nothing survives the gates, so the trigger goes too.
+  // Same predicate the popover uses, so the two can't disagree.
+  const hasActions = hasAnyMessageAction({
+    message,
+    isMine,
+    channelType,
+    capabilities,
+    hasEditMessage: !!editMessage,
+    editWindowMs,
+  })
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0
   // Whether the row MOUNTED with its reactions already there (history, or a
@@ -181,7 +199,7 @@ export const ChatMessageItem = ({
         "group flex flex-col",
         isMine ? "items-end" : "items-start"
       )}
-      onPointerEnter={actionsArmed ? undefined : armActionsSoon}
+      onPointerEnter={actionsArmed || !hasActions ? undefined : armActionsSoon}
     >
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
@@ -272,64 +290,68 @@ export const ChatMessageItem = ({
                 shows until it settles. The menu stays visible while open (not
                 just on hover) so the ellipsis doesn't flicker. A FAILED message
                 swaps the hover ellipsis for an always-visible critical alert
-                (same popover, reduced to Retry / Delete). */}
-            {!message.deleted && message.status !== "sending" && (
-              <div
-                ref={actionsWrapperRef}
-                className={cn(
-                  message.status === "failed"
-                    ? "opacity-100"
-                    : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
-                  actionsOpen && "opacity-100"
-                )}
-              >
-                {message.status === "failed" ? (
-                  // The alert fades in on a live failure (the branch switch
-                  // remounts it, so `initial` applies) — never on a
-                  // scroll-back of an old failure.
-                  <motion.div
-                    initial={
-                      wasFailedAtMountRef.current || reducedMotion
-                        ? false
-                        : { opacity: 0, scale: 0.9 }
-                    }
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={microEnterTransition}
-                  >
+                (same popover, reduced to Retry / Delete) — which is why it
+                ignores `hasActions`: retrying and discarding a local echo are
+                never permissions. */}
+            {!message.deleted &&
+              message.status !== "sending" &&
+              (hasActions || message.status === "failed") && (
+                <div
+                  ref={actionsWrapperRef}
+                  className={cn(
+                    message.status === "failed"
+                      ? "opacity-100"
+                      : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
+                    actionsOpen && "opacity-100"
+                  )}
+                >
+                  {message.status === "failed" ? (
+                    // The alert fades in on a live failure (the branch switch
+                    // remounts it, so `initial` applies) — never on a
+                    // scroll-back of an old failure.
+                    <motion.div
+                      initial={
+                        wasFailedAtMountRef.current || reducedMotion
+                          ? false
+                          : { opacity: 0, scale: 0.9 }
+                      }
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={microEnterTransition}
+                    >
+                      <ChatMessageActions
+                        message={message}
+                        isMine={isMine}
+                        open={actionsOpen}
+                        onOpenChange={setActionsOpen}
+                      />
+                    </motion.div>
+                  ) : actionsArmed ? (
                     <ChatMessageActions
                       message={message}
                       isMine={isMine}
                       open={actionsOpen}
                       onOpenChange={setActionsOpen}
                     />
-                  </motion.div>
-                ) : actionsArmed ? (
-                  <ChatMessageActions
-                    message={message}
-                    isMine={isMine}
-                    open={actionsOpen}
-                    onOpenChange={setActionsOpen}
-                  />
-                ) : (
-                  // Same trigger the popover renders, minus the popover and
-                  // tooltip machinery — indistinguishable until interaction.
-                  // Activating it (click, tap, Enter) arms AND opens, so the
-                  // very first interaction behaves exactly like the real one.
-                  <ButtonInternal
-                    variant="outline"
-                    hideLabel
-                    noAutoTooltip
-                    label={i18n.chat.moreActions}
-                    icon={Ellipsis}
-                    pressed={false}
-                    onClick={() => {
-                      armActions()
-                      setActionsOpen(true)
-                    }}
-                  />
-                )}
-              </div>
-            )}
+                  ) : (
+                    // Same trigger the popover renders, minus the popover and
+                    // tooltip machinery — indistinguishable until interaction.
+                    // Activating it (click, tap, Enter) arms AND opens, so the
+                    // very first interaction behaves exactly like the real one.
+                    <ButtonInternal
+                      variant="outline"
+                      hideLabel
+                      noAutoTooltip
+                      label={i18n.chat.moreActions}
+                      icon={Ellipsis}
+                      pressed={false}
+                      onClick={() => {
+                        armActions()
+                        setActionsOpen(true)
+                      }}
+                    />
+                  )}
+                </div>
+              )}
           </div>
         </div>
       )}
