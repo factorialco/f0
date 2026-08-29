@@ -29,6 +29,22 @@ export type MockPerson = F0ChatUser & {
   vacation?: boolean
 }
 
+/**
+ * Stand-in for the ~40px derivative a real host supplies as `blurUrl` (Stream
+ * takes `?w=40&resize=clip` off the image URL). The mock images are static
+ * files with no resizing service behind them, so this approximates one: a few
+ * colour blocks that read correctly once blurred.
+ */
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="6">' +
+      '<rect width="8" height="6" fill="#8fb8d8"/>' +
+      '<rect x="3" width="5" height="4" fill="#c7d9e8"/>' +
+      '<rect y="4" width="8" height="2" fill="#e8d9c0"/>' +
+      "</svg>"
+  )
+
 const PHOTO_AVATAR_COLORS = [
   "viridian",
   "orange",
@@ -371,16 +387,100 @@ const everythingStressLines = (): Line[] => {
   })
   add({
     from: ELEANOR,
-    body: "A single image with explicit intrinsic dimensions",
+    body: "A single image with a blur-up source",
     attachments: [
       {
         kind: "image",
         url: mockImage("card", 0),
         thumbnailUrl: mockImage("card", 0),
+        blurUrl: BLUR_PLACEHOLDER,
         name: "dashboard-overview.webp",
         mimeType: "image/webp",
         width: 1200,
         height: 800,
+      },
+    ],
+  })
+  add({
+    from: ELEANOR,
+    body: "",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 5),
+        name: "tower-portrait.webp",
+        // 1:10 — the ratio clamp is what keeps this from eating the transcript.
+        width: 200,
+        height: 2000,
+      },
+    ],
+  })
+  add({
+    from: MARCUS,
+    body: "Two photos land as tall halves, not squares",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 6),
+        name: "pair-a.webp",
+        width: 1400,
+        height: 900,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 7),
+        name: "pair-b.webp",
+        width: 900,
+        height: 1400,
+      },
+    ],
+  })
+  add({
+    from: PRIYA,
+    body: "Three go hero-on-top",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 8),
+        name: "trio-hero.webp",
+        width: 1600,
+        height: 900,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 9),
+        name: "trio-b.webp",
+        width: 1000,
+        height: 1000,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 10),
+        name: "trio-c.webp",
+        width: 900,
+        height: 1200,
+      },
+    ],
+  })
+  add({
+    from: THEO,
+    body: "",
+    attachments: Array.from({ length: 7 }, (_, index) => ({
+      kind: "image" as const,
+      url: mockImage("card", 11 + index),
+      name: `album-${index + 1}.webp`,
+      width: index % 2 === 0 ? 1400 : 900,
+      height: index % 2 === 0 ? 900 : 1400,
+    })),
+  })
+  add({
+    from: NADIA,
+    body: "An image with no intrinsic dimensions falls back to a square",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 18),
+        name: "dimensionless.webp",
       },
     ],
   })

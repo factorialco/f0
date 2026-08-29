@@ -556,6 +556,24 @@ export const defaultTranslations = {
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
+    // The picker lives in F0Chat and is used only while having a conversation;
+    // everywhere else in the product keeps the emoji-mart one.
+    emojiPicker: {
+      search: "Search emoji",
+      frequentlyUsed: "Frequently used",
+      noResults: "No emoji found",
+      grid: "Emoji",
+      categories: {
+        people: "Smileys & people",
+        nature: "Animals & nature",
+        foods: "Food & drink",
+        activity: "Activity",
+        places: "Travel & places",
+        objects: "Objects",
+        symbols: "Symbols",
+        flags: "Flags",
+      },
+    },
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",

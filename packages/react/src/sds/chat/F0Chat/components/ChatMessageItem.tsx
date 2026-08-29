@@ -65,6 +65,7 @@ export const ChatMessageItem = ({
   belowGutter,
   isFirstOfRun = true,
   isLastOfRun = true,
+  hasAvatar = false,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -79,6 +80,9 @@ export const ChatMessageItem = ({
   isFirstOfRun?: boolean
   /** Last message of a same-author run — drives the bubble's chained corners. */
   isLastOfRun?: boolean
+  /** The gutter holds a real avatar, not a spacer: the only case where the run
+   * ends on a point (see `bubbleCornerClass`). */
+  hasAvatar?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
@@ -185,7 +189,11 @@ export const ChatMessageItem = ({
       {hasContent && (
         <div
           className={cn(
-            "flex w-full",
+            // 4px here + the outer surface's own 2px of padding stand the
+            // bubble 6px off the avatar, so the run-end corner points at it
+            // instead of touching it. The reaction and delivery-status rows
+            // below carry the same 6px, so every left edge lines up.
+            "flex w-full gap-0.5",
             isMine ? "flex-row-reverse items-center" : "items-end"
           )}
         >
@@ -206,6 +214,7 @@ export const ChatMessageItem = ({
                   isMine,
                   isFirstOfRun,
                   isLastOfRun,
+                  hasAvatar,
                   layer: "outer",
                 }),
                 // Shadow AND radius transition together (single property list —
@@ -220,10 +229,7 @@ export const ChatMessageItem = ({
                 // transcript surface — without it the gap defaults to white and
                 // reads as an aura in dark mode.
                 highlighted &&
-                  "ring-1 ring-f1-special-ring ring-offset-2 ring-offset-f1-background",
-                !message.deleted &&
-                  "group-hover:bg-f1-background-secondary focus-within:bg-f1-background-secondary",
-                actionsOpen && "bg-f1-background-hover"
+                  "ring-1 ring-f1-special-ring ring-offset-1 ring-offset-f1-background"
               )}
               onDoubleClick={handleDoubleClick}
               data-testid="chat-message-surface"
@@ -234,6 +240,7 @@ export const ChatMessageItem = ({
                   isMine={isMine}
                   isFirstOfRun={isFirstOfRun}
                   isLastOfRun={isLastOfRun}
+                  hasAvatar={hasAvatar}
                 />
               )}
               {hasBubble && (
@@ -248,15 +255,8 @@ export const ChatMessageItem = ({
                   // preview mirror the same corner).
                   isFirstOfRun={isFirstOfRun && !hasAttachments}
                   isLastOfRun={isLastOfRun}
+                  hasAvatar={hasAvatar}
                 />
-              )}
-              {/* The bubble anchors the "edited" mark to the body text. An
-                  attachment-only message has no bubble, so surface it here
-                  instead — otherwise an edited media message shows no mark. */}
-              {!hasBubble && message.editedAt && !message.deleted && (
-                <span className="px-1 text-sm text-f1-foreground-tertiary">
-                  {i18n.chat.edited}
-                </span>
               )}
             </div>
             {/* Sending indicator for own messages, in the slot next to the
@@ -342,7 +342,7 @@ export const ChatMessageItem = ({
           // popovers, so the overflow clip never cuts them.
           <motion.div
             key="reactions"
-            className="flex w-full gap-2 overflow-hidden"
+            className="flex w-full gap-1.5 overflow-hidden"
             initial={
               hadReactionsAtMountRef.current || reducedMotion
                 ? false

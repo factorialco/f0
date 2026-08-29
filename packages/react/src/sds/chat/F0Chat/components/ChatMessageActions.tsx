@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -13,7 +13,6 @@ import {
   Reply,
   Plus,
 } from "@/icons/app"
-import { Picker } from "@/sds/social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
@@ -25,6 +24,7 @@ import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
 import { canEditChatMessage } from "../utils/message-permissions"
 import { formatClock } from "../utils/natural-time"
 import { emitReactionToggle } from "../utils/reactions"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "😮", "🙏"]
@@ -91,6 +91,9 @@ export const ChatMessageActions = ({
   const { startReply, startEdit } = useChatComposeActions()
   const emit = useF0ChatEmit()
   const [view, setView] = useState<"menu" | "info">("menu")
+  // Set when the menu closes because a reply started: the composer takes focus,
+  // so the popover must not pull it back to the ellipsis trigger.
+  const keepComposerFocusRef = useRef(false)
 
   // Same policy the composer's edit-last shortcut uses — see canEditChatMessage.
   // Its `Date.now()` is fine here: the popover content only mounts when open.
@@ -170,6 +173,11 @@ export const ChatMessageActions = ({
       <PopoverContent
         align={isMine ? "end" : "start"}
         className="w-64 rounded-lg border border-solid border-f1-border-secondary p-0"
+        onCloseAutoFocus={(event) => {
+          if (!keepComposerFocusRef.current) return
+          keepComposerFocusRef.current = false
+          event.preventDefault()
+        }}
       >
         {isFailed ? (
           <div className="flex flex-col gap-0 p-1">
@@ -199,13 +207,14 @@ export const ChatMessageActions = ({
                       key={emoji}
                       label={emoji}
                       emoji={emoji}
+                      emojiMode="native"
                       variant="ghost"
                       aria-label={emoji}
                       onClick={() => react(emoji, "quickRow")}
                       className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
                     />
                   ))}
-                  <Picker
+                  <ChatEmojiPickerButton
                     size="md"
                     variant="ghost"
                     label={i18n.chat.react}
@@ -235,7 +244,10 @@ export const ChatMessageActions = ({
               <MenuItem
                 icon={Reply}
                 label={i18n.chat.reply}
-                onClick={runAndClose(() => startReply(message))}
+                onClick={runAndClose(() => {
+                  keepComposerFocusRef.current = true
+                  startReply(message)
+                })}
               />
               <MenuItem
                 icon={Files}

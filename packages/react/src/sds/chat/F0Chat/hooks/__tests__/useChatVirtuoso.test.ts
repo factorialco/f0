@@ -398,7 +398,7 @@ describe("useChatVirtuoso wheel takeover", () => {
     act(() => result.current.handleScrollerRef(null))
   })
 
-  it("does not resume through a missing scroller and rechecks its replacement", () => {
+  it("does not resume through a missing scroller, nor on the attach of its replacement", () => {
     const { result } = renderVirtuoso()
     const firstViewport = attachScroller(result.current.handleScrollerRef)
 
@@ -414,9 +414,14 @@ describe("useChatVirtuoso wheel takeover", () => {
     })
     expect(result.current.followOutput).toBe(false)
 
-    attachScroller(result.current.handleScrollerRef)
-    expect(result.current.followOutput).not.toBe(false)
+    // Attaching is NOT a measurement: Virtuoso hasn't positioned the list, so
+    // the metrics read there describe nothing. Only a real scroll may resume.
+    const nextViewport = attachScroller(result.current.handleScrollerRef)
+    expect(result.current.followOutput).toBe(false)
     expect(vi.getTimerCount()).toBe(0)
+
+    act(() => nextViewport.scroller.dispatchEvent(new Event("scroll")))
+    expect(result.current.followOutput).not.toBe(false)
     act(() => result.current.handleScrollerRef(null))
   })
 
@@ -453,6 +458,33 @@ describe("useChatVirtuoso wheel takeover", () => {
     act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
     act(() => frameCallbacks.shift()?.(0))
     expect(loadOlder).toHaveBeenCalledTimes(2)
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  it("holds the prefetch until the transcript is revealed", () => {
+    const loadOlder = vi.fn()
+    const canPrefetchRef = { current: false }
+    const { result } = renderHook(() =>
+      useChatVirtuoso({
+        ...hookOptions([{ id: "message-1" }]),
+        hasMoreOlder: true,
+        loadingOlder: false,
+        loadOlder,
+        canPrefetchRef,
+      })
+    )
+    const viewport = attachScroller(result.current.handleScrollerRef)
+
+    // `itemsRendered` fires at mount with no user scroll, and the entry window
+    // is still provisional — a page landing here shifts the anchor.
+    act(() => result.current.handleItemsRendered([]))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).not.toHaveBeenCalled()
+
+    canPrefetchRef.current = true
+    act(() => viewport.scroller.dispatchEvent(new Event("scroll")))
+    act(() => frameCallbacks.shift()?.(0))
+    expect(loadOlder).toHaveBeenCalledTimes(1)
     act(() => result.current.handleScrollerRef(null))
   })
 

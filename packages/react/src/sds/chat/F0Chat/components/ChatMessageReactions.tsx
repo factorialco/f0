@@ -3,21 +3,17 @@ import { type ReactNode } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { Picker } from "@/sds/social/Reactions/Picker"
-import { Reaction } from "@/sds/social/Reactions/reaction"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
-import {
-  layoutTransition,
-  microEnterTransition,
-  microExitTransition,
-} from "../utils/chat-motion"
+import { microEnterTransition, microExitTransition } from "../utils/chat-motion"
 import { emitReactionToggle } from "../utils/reactions"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
+import { ChatReactionPill } from "./ChatReactionPill"
 
 /**
- * Reaction pills under a bubble (Social Reactions kit). Once a message has at
+ * Reaction pills under a bubble. Once a message has at
  * least one reaction, an inline "add reaction" picker sits next to the pills so
  * more can be added without opening the message menu.
  */
@@ -50,15 +46,21 @@ export const ChatMessageReactions = ({
         isMine && "justify-end"
       )}
     >
-      {/* Each pill fades in discreetly and shrinks out; `layout` slides the
-          neighbours into a removed pill's gap instead of jumping. Presence is
-          keyed by emoji ALONE — count changes must not replay the entry —
-          and `initial={false}` keeps scroll-back remounts still. */}
-      <AnimatePresence initial={false} mode="popLayout">
+      {/* Each pill fades in discreetly and shrinks out. Presence is keyed by
+          emoji ALONE — count changes must not replay the entry — and
+          `initial={false}` keeps scroll-back remounts still.
+
+          NO `layout` / `popLayout` here. Layout projection measures in viewport
+          coordinates and only subtracts the scroll of ancestors marked
+          `layoutScroll`; the transcript's scroller is a plain Radix div, so it
+          cannot be compensated. Scrolling UP is exactly when Virtuoso applies
+          synchronous scrollTop corrections, and every one of them was read as a
+          layout delta — the pills visibly slid away from their bubble. The cost
+          is that neighbours snap into a removed pill's gap instead of gliding. */}
+      <AnimatePresence initial={false}>
         {message.reactions.map((reaction) => (
           <motion.span
             key={reaction.emoji}
-            layout="position"
             className="flex"
             initial={reducedMotion ? false : { scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -67,14 +69,11 @@ export const ChatMessageReactions = ({
                 ? undefined
                 : { scale: 0.9, opacity: 0, transition: microExitTransition }
             }
-            // Explicit `layout` key: the default transform transition is an
-            // underdamped spring (bounces) — see chat-motion.layoutTransition.
-            transition={{ ...microEnterTransition, layout: layoutTransition }}
+            transition={microEnterTransition}
           >
-            {/* Key includes count/own-state so the kit pill re-syncs with the
-                runtime after an external toggle (it's otherwise uncontrolled). */}
-            <Reaction
-              key={`${reaction.emoji}-${reaction.count}-${reaction.reactedByMe}`}
+            {/* No composite key: the pill syncs count/own-state from props, so
+                remounting it (and its measuring NumberFlow) is unnecessary. */}
+            <ChatReactionPill
               emoji={reaction.emoji}
               initialCount={reaction.count}
               hasReacted={reaction.reactedByMe}
@@ -99,7 +98,7 @@ export const ChatMessageReactions = ({
         ))}
       </AnimatePresence>
       {canReact && (
-        <Picker
+        <ChatEmojiPickerButton
           size="md"
           variant="outline"
           label={i18n.chat.react}

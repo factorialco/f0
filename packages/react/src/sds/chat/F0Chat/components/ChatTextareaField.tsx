@@ -3,7 +3,6 @@ import { type RefObject } from "react"
 import { cn } from "@/lib/utils"
 
 import { type HighlightSegment } from "../hooks/highlight-utils"
-import { renderTextWithEmojis } from "../utils/render-body"
 
 type ChatTextareaFieldProps = {
   textareaRef: RefObject<HTMLTextAreaElement>
@@ -90,6 +89,10 @@ export const ChatTextareaField = ({
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >
+          {/* Plain text. The overlay and the textarea beneath it now lay out
+              the same glyphs with the same font, so emoji line up on their own
+              — the invisible-twin trick that used to reserve each twemoji
+              image's width is gone with it. */}
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
               // Same colour pattern as the bubble: you / @here amber, others
@@ -111,14 +114,14 @@ export const ChatTextareaField = ({
                     : "bg-f1-background-info text-f1-foreground-info"
                 )}
               >
-                {renderTextWithEmojis(seg.text)}
+                {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
               <span key={i} className="text-f1-foreground-secondary opacity-50">
-                {renderTextWithEmojis(seg.text)}
+                {seg.text}
               </span>
             ) : (
-              <span key={i}>{renderTextWithEmojis(seg.text)}</span>
+              <span key={i}>{seg.text}</span>
             )
           )}
         </div>

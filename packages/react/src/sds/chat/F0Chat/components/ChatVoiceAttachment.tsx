@@ -5,15 +5,14 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
 
-import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
 import {
   useF0ChatEmit,
   useF0ChatVoicePlayLog,
 } from "../providers/F0ChatProvider"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
 const PLAYBACK_RATES = [1, 1.5, 2, 0.5]
@@ -259,9 +258,14 @@ const ChatVoiceAttachmentContent = ({
   return (
     <div
       className={cn(
-        // 320px by default, shrinking with the column when it doesn't fit.
-        // The fixed height is also used by the deferred placeholder.
-        "group/voice flex h-[58px] w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        // The shared media width, not `w-full`: a waveform reads better wide
+        // and shouldn't look like a stray chip next to an album, but sizing it
+        // off the column made the column stretch. The fixed height is also used
+        // by the deferred placeholder.
+        "group/voice flex h-[58px] min-w-0 items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        CHAT_MEDIA_WIDTH_CLASS,
+        // Carries the message's own bubble colour, so a voice note reads as
+        // part of the conversation rather than a neutral attachment.
         isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
         cornerClass,
         className,
@@ -363,36 +367,22 @@ export const ChatVoiceAttachment = ({
   /** Sender-aware surface supplied by a transcript message. */
   surfaceClassName?: string
 }): ReactNode => {
-  const i18n = useI18n()
-  const { ref, shouldMount } = useTranscriptHeavyPreview()
-
+  // Mounts with its row. The card has no chunk to fetch — the waveform decode
+  // it used to wait for is already serialized globally and cached per URL — so
+  // deferring it only ever showed a grey bar where the player was about to be.
+  // The card's own h-[58px] is what reserves the row now.
   return (
     <div
-      ref={ref}
       data-testid="chat-voice-attachment-shell"
       className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
     >
-      {shouldMount ? (
-        <ChatVoiceAttachmentContent
-          voice={voice}
-          isMine={isMine}
-          cornerClass={cornerClass}
-          className={className}
-          surfaceClassName={surfaceClassName}
-        />
-      ) : (
-        <Skeleton
-          role="status"
-          aria-busy={true}
-          aria-label={i18n.audioPlayer.label}
-          className={cn(
-            "h-[58px] w-80 max-w-full animate-none",
-            cornerClass,
-            surfaceClassName
-          )}
-          data-testid="chat-voice-placeholder"
-        />
-      )}
+      <ChatVoiceAttachmentContent
+        voice={voice}
+        isMine={isMine}
+        cornerClass={cornerClass}
+        className={className}
+        surfaceClassName={surfaceClassName}
+      />
     </div>
   )
 }

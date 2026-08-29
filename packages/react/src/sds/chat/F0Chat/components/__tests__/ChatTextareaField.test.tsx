@@ -40,7 +40,7 @@ describe("ChatTextareaField emoji overlay", () => {
     expect(composer).toHaveAttribute("aria-activedescendant", "emoji-smile")
   })
 
-  it("paints emoji as twemoji in the overlay when active", () => {
+  it("paints emoji as plain text in the overlay when active", () => {
     const segments: HighlightSegment[] = [{ type: "text", text: "hi 😀" }]
     const { container } = zeroRender(
       <ChatTextareaField
@@ -50,8 +50,12 @@ describe("ChatTextareaField emoji overlay", () => {
         hasOverlay
       />
     )
-    const img = container.querySelector("img")
-    expect(img?.getAttribute("src")).toContain("twemoji")
+    // No image, and therefore none of the invisible-twin scaffolding that used
+    // to reserve its width: overlay and textarea lay out the same glyph.
+    expect(container.querySelector("img")).toBeNull()
+    expect(
+      container.querySelector('[aria-hidden="true"]')?.textContent
+    ).toContain("hi 😀")
     // The textarea text is transparent while the overlay paints it.
     const textarea = container.querySelector("textarea")
     expect(textarea?.className).toContain("text-transparent")

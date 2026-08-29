@@ -20,9 +20,7 @@ import {
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { useI18n } from "@/lib/providers/i18n"
-import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
-import { Picker } from "@/sds/social/Reactions/Picker"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
 import {
@@ -57,6 +55,7 @@ import {
 } from "../utils/chat-motion"
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
 import { ChatEditChip } from "./ChatEditChip"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
 import {
   ChatMentionPopover,
@@ -189,13 +188,12 @@ export const ChatComposer = (): ReactNode => {
       currentUserId,
     ]
   )
-  // The overlay also turns on when the text has emoji, so the composer can
-  // paint twemoji (matching the bubble). Plain text keeps the native textarea
-  // visible, so IME composition stays visible for non-emoji typing.
+  // Mentions and ghost completions are the only things the overlay paints, so
+  // it's the only thing that turns it on. Emoji used to as well — the overlay
+  // had to paint twemoji over them — which meant typing one hid the real
+  // textarea behind a transparent copy and took IME composition with it.
   const hasOverlay =
-    mentions.mentions.length > 0 ||
-    mentions.inlineCompletion !== null ||
-    containsEmojis(value)
+    mentions.mentions.length > 0 || mentions.inlineCompletion !== null
   // Monotonic id for pending attachments (avoids Date.now/random in render).
   const attachmentSeq = useRef(0)
 
@@ -1089,7 +1087,7 @@ export const ChatComposer = (): ReactNode => {
                       disabled={!canUpload || isTranscribing}
                     />
                     {/* Insert emoji into the message (reuses the reactions picker). */}
-                    <Picker
+                    <ChatEmojiPickerButton
                       variant="outline"
                       size="md"
                       label={i18n.chat.addEmoji}

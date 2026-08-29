@@ -15,6 +15,12 @@ export type F0SearchInputProps = {
   threshold?: number
   debounceTime?: number
   autoFocus?: boolean
+  /**
+   * Defaults to `-1`, which is right for the search box of a list that is
+   * already reachable some other way. A search box that IS the way in — a
+   * combobox — has to be tabbable, or focus can leave it and never come back.
+   */
+  tabIndex?: number
 } & Pick<
   InputFieldProps<string>,
   | "size"
@@ -26,6 +32,17 @@ export type F0SearchInputProps = {
   | "onFocus"
   | "onChange"
   | "name"
+  // A search box that drives a list somewhere else on the page is a combobox,
+  // not a plain searchbox: it keeps focus while the arrows move a selection it
+  // doesn't contain. That needs the whole contract — the role, the keys, and
+  // `aria-activedescendant`, which is the only way to announce the active
+  // option when focus never moves.
+  | "role"
+  | "onKeyDown"
+  | "aria-controls"
+  | "aria-expanded"
+  | "aria-activedescendant"
+  | "aria-autocomplete"
 >
 
 const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
@@ -39,6 +56,14 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
       size = "sm",
       debounceTime = 0,
       clearable = false,
+      tabIndex = -1,
+      // A default, not a fixed value: a combobox has to be able to say so.
+      role = "searchbox",
+      onKeyDown,
+      "aria-controls": ariaControls,
+      "aria-expanded": ariaExpanded,
+      "aria-activedescendant": ariaActiveDescendant,
+      "aria-autocomplete": ariaAutocomplete,
       ...props
     },
     ref
@@ -113,7 +138,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         key="search-input"
         ref={input}
         type="search"
-        tabIndex={-1}
+        tabIndex={tabIndex}
         icon={Search}
         value={value}
         label={props.placeholder ?? "Search"}
@@ -121,7 +146,12 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         placeholder={props.placeholder}
         disabled={props.disabled}
         onChange={onChangeLocal}
-        role="searchbox"
+        role={role}
+        onKeyDown={onKeyDown}
+        aria-controls={ariaControls}
+        aria-expanded={ariaExpanded}
+        aria-activedescendant={ariaActiveDescendant}
+        aria-autocomplete={ariaAutocomplete}
         size={size}
         clearable={clearable}
         onBlur={onBlur}

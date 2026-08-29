@@ -55,6 +55,25 @@ describe("classifyWindowChange", () => {
       "replace"
     )
   })
+
+  // The cached-then-watch() path every conversation takes when its panel is
+  // reopened: both ends move, but the messages in between survive. Calling that
+  // a swap remounts the list mid-entry, which reads as a scroll jump.
+  it("classifies a window that widened at BOTH ends as grow, not replace", () => {
+    expect(
+      classifyWindowChange(
+        ends(["c", "d"]),
+        ends(["a", "b", "c", "d", "e"]),
+        true
+      )
+    ).toBe("grow")
+  })
+
+  it("still calls a both-ends change with no survivors a replace", () => {
+    expect(
+      classifyWindowChange(ends(["c", "d"]), ends(["x", "y"]), false)
+    ).toBe("replace")
+  })
 })
 
 describe("nextFirstItemIndex", () => {
@@ -78,6 +97,11 @@ describe("nextFirstItemIndex", () => {
   it("keeps the index on append and none", () => {
     expect(nextFirstItemIndex(1000, "append", 10, 11)).toBe(1000)
     expect(nextFirstItemIndex(1000, "none", 10, 10)).toBe(1000)
+  })
+
+  it("shifts a grow by the rows above the surviving head, not the net delta", () => {
+    // 3 rows landed on top and 5 at the bottom: only the 3 may move the base.
+    expect(nextFirstItemIndex(1000, "grow", 10, 18, 3)).toBe(997)
   })
 })
 

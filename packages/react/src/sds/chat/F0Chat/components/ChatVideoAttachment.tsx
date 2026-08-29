@@ -2,14 +2,21 @@ import { lazy, Suspense, type ReactNode, useState } from "react"
 
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
+import { SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
+import { formatFileSize } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
+import {
+  CHAT_MEDIA_BADGE_CLASS,
+  CHAT_MEDIA_OVERLAY_CLASS,
+  CHAT_MEDIA_WIDTH_CLASS,
+  CHAT_VIDEO_SURFACE_CLASS,
+} from "../utils/media-layout"
 import { FadeInImage } from "./FadeInImage"
 
 const loadVideoPlayer = () =>
@@ -28,6 +35,7 @@ export const ChatVideoAttachment = ({
   cornerClass,
   className,
   surfaceClassName,
+  meta,
 }: {
   file: F0ChatFileAttachment
   cornerClass: string
@@ -35,12 +43,14 @@ export const ChatVideoAttachment = ({
   className?: string
   /** Sender-aware surface supplied by a transcript message. */
   surfaceClassName?: string
+  /** Scrim + timestamp, when this card is the last thing in its message. */
+  meta?: ReactNode
 }): ReactNode => {
   const i18n = useI18n()
   const emit = useF0ChatEmit()
   const [failed, setFailed] = useState(false)
   const [mediaReady, setMediaReady] = useState(false)
-  const { ref, shouldMount } = useTranscriptHeavyPreview(loadVideoPlayer)
+  const sizeLabel = file.size != null ? formatFileSize(file.size) : null
   const downloadAction = {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
@@ -62,17 +72,20 @@ export const ChatVideoAttachment = ({
 
   return (
     <figure
-      ref={ref}
       aria-label={file.name}
       aria-busy={!mediaReady ? true : undefined}
       className={cn(
-        // A percentage width has no stable intrinsic size inside the message's
-        // shrink-to-fit flex column. Give the placeholder and the loaded player
-        // the same preferred width so mounting controls cannot resize the row.
-        "group/video relative m-0 aspect-video w-[36rem] max-w-full overflow-hidden bg-f1-background-secondary",
+        // Shares the transcript's single media width. The placeholder and the
+        // loaded player get the same box so mounting controls cannot resize the
+        // row. This used to be a fixed 36rem, which also made video the largest
+        // per-row height swing of any width change.
+        "group/video relative m-0 aspect-video max-w-full overflow-hidden",
+        CHAT_MEDIA_WIDTH_CLASS,
+        // Neutral dark letterbox, never the sender tint: the sender colour is
+        // for card chrome, not for the bars around someone's pixels.
+        CHAT_VIDEO_SURFACE_CLASS,
         cornerClass,
-        className,
-        surfaceClassName
+        className
       )}
       onErrorCapture={(event) => {
         if (event.target instanceof HTMLVideoElement) {
@@ -103,30 +116,58 @@ export const ChatVideoAttachment = ({
           announce={!mediaReady}
           surfaceClassName={surfaceClassName}
         />
+        {/* Wash + play affordance so a poster still reads as a video, and the
+            size badge WhatsApp shows before you commit to downloading it. */}
+        <span className="absolute inset-0 bg-[hsl(0_0%_0%/0.2)]" />
+        <span
+          className={cn(
+            "absolute left-1/2 top-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-f1-foreground-inverse",
+            CHAT_MEDIA_OVERLAY_CLASS
+          )}
+        >
+          <SolidPlay className="size-6" />
+        </span>
+        {sizeLabel && (
+          <span
+            className={cn(
+              "absolute bottom-2 left-2 rounded-full px-2 py-0.5 text-sm font-medium text-f1-foreground-inverse",
+              CHAT_MEDIA_BADGE_CLASS
+            )}
+            data-testid="chat-video-size"
+          >
+            {sizeLabel}
+          </span>
+        )}
       </div>
 
       <div
         className="relative z-10 h-full w-full"
         data-testid="chat-video-player-shell"
       >
-        {shouldMount && (
-          <Suspense fallback={null}>
-            <LazyVideoPlayer
-              src={file.url}
-              ariaLabel={i18n.t("chat.videoPlayerLabel", { name: file.name })}
-              poster={file.thumbnailUrl}
-              content={file.videoContent}
-              defaultLanguage={file.videoDefaultLanguage}
-              silent={file.videoSilent}
-              download={{
-                label: downloadAction.label,
-                onClick: downloadAction.onClick,
-              }}
-              data-testid="chat-video-player"
-            />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          <LazyVideoPlayer
+            src={file.url}
+            ariaLabel={i18n.t("chat.videoPlayerLabel", { name: file.name })}
+            poster={file.thumbnailUrl}
+            content={file.videoContent}
+            defaultLanguage={file.videoDefaultLanguage}
+            silent={file.videoSilent}
+            download={{
+              label: downloadAction.label,
+              onClick: downloadAction.onClick,
+            }}
+            data-testid="chat-video-player"
+          />
+        </Suspense>
       </div>
+
+      {/* Above the player shell so the time stays readable over the poster, and
+          hidden on hover so it never fights the player's own bottom controls. */}
+      {meta && (
+        <span className="pointer-events-none absolute inset-0 z-20 opacity-100 transition-opacity duration-150 group-hover/video:opacity-0 motion-reduce:transition-none">
+          {meta}
+        </span>
+      )}
 
       <figcaption className="sr-only">{file.name}</figcaption>
     </figure>

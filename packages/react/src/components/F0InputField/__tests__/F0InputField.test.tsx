@@ -483,6 +483,22 @@ describe("F0InputField", () => {
       expect(input).toHaveAttribute("aria-expanded", "false")
     })
 
+    it("keeps aria-expanded off a field that is not a combobox", () => {
+      // A Radix popover trigger spreads `aria-expanded` onto whatever it wraps.
+      // On a textbox that attribute is not allowed, and axe reports it as a
+      // critical violation.
+      render(
+        <F0InputField label="Answer" aria-controls="dialog" aria-expanded>
+          <input />
+        </F0InputField>
+      )
+
+      const input = screen.getByRole("textbox")
+      expect(input).not.toHaveAttribute("aria-expanded")
+      // `aria-controls` is global, so it stays.
+      expect(input).toHaveAttribute("aria-controls", "dialog")
+    })
+
     it("should set aria-busy when loading", () => {
       render(
         <F0InputField label="Test Label" loading>
