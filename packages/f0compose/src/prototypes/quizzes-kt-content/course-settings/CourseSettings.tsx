@@ -251,6 +251,7 @@ function ExpandableCard({
         <F0Box
           borderTop="default"
           borderColor="secondary"
+          background={flush ? undefined : "secondary"}
           paddingX={flush ? undefined : "lg"}
           paddingY={flush ? undefined : "lg"}
           gap={flush ? undefined : "lg"}
@@ -445,11 +446,11 @@ export function CompletionSection({ onSaved }: { onSaved: (msg: string) => void 
   return (
     <F0Box display="flex" flexDirection="column" gap="2xl" maxWidth="180">
       <ExpandableCard flush title={s.cModulesTitle} description={s.cModulesDesc} checked={moduleCompleted} onChange={(v) => { setModuleCompleted(v); onSaved(savedToggle(s.cModulesTitle, v)) }}>
-        <ToggleCard listMode title={s.cWatchFullTitle} description={s.cWatchFullDesc} checked={watchFull} onChange={(v) => { setWatchFull(v); onSaved(savedToggle(s.cWatchFullTitle, v)) }} />
-        <F0Box borderTop="default" borderColor="secondary" />
-        <F0Box paddingX="lg" paddingY="md" display="flex" flexDirection="column">
+        <F0Box background="secondary" paddingX="lg" paddingY="lg" display="flex" flexDirection="column">
           <TextField label={s.cModulesScoreTitle} hint={s.cModulesScoreDesc} value={moduleScore} onChange={setModuleScore} onCommit={() => onSaved(savedField(s.cModulesScoreTitle))} />
         </F0Box>
+        <F0Box borderTop="default" borderColor="secondary" />
+        <ToggleCard listMode title={s.cWatchFullTitle} description={s.cWatchFullDesc} checked={watchFull} onChange={(v) => { setWatchFull(v); onSaved(savedToggle(s.cWatchFullTitle, v)) }} />
       </ExpandableCard>
       <ExpandableCard title={s.cAttendanceTitle} description={s.cAttendanceDesc} checked={attendance} onChange={(v) => { setAttendance(v); onSaved(savedToggle(s.cAttendanceTitle, v)) }}>
         <TextField label={s.cAttendanceFieldTitle} hint={s.cAttendanceFieldDesc} value={attendancePercentage} onChange={setAttendancePercentage} onCommit={() => onSaved(savedField(s.cAttendanceFieldTitle))} />

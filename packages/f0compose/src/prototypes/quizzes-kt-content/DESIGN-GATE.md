@@ -518,7 +518,3 @@ Lo que se retira y por qué: `You changed what it takes to complete this course`
 
 - 2026-08-07 · **Restauración, no diseño.** Un script mío del 4-ago dejó en stub los fixtures de surveys, EndOfCourseScreen, NotificationsLayer y 15 funciones del clon original. Esta pasada NO toma ninguna decisión de diseño: repone **verbatim** el último estado bueno (3-ago), extraído de las escrituras guardadas en el transcript de la sesión, y las funciones del clon desde la semilla `~/code/f0-trainings-exact` (intacta desde el 1-jun, anterior a la copia). Todas las restricciones R1–R19 se conservan porque el contenido restaurado es exactamente el que ya las cumplía cuando se aprobó.
 - Regla nueva (R20): **ningún script de edición sin commit previo en git**. La carpeta ya está en git; cada edición scriptada va precedida de commit.
-
-## Required tag de vuelta (7-ago)
-
-- Decisión de Jon 7-ago: "yo creo que dejaría el tag de required por ahora". Se repone el render del 29-jul 10:03 (alertTag warning "Required", oculto cuando la evaluación ya está cumplida), extendido a los estados nuevos: oculto también en Passed (el intent original era esconderlo al cumplirse, entonces solo existía "Completed"). required: true en todos los KTs (la config es por training, todos o ninguno — Álvaro 31-jul).

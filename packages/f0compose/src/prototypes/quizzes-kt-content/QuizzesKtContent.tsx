@@ -318,10 +318,10 @@ type CourseResourceRow = {
 }
 
 export const meta: PrototypeMeta = {
-  slug: "surveys-course",
-  title: "Surveys in course content",
+  slug: "quizzes-kt-content",
+  title: "Quizzes & KT — Course content",
   description:
-    "Learner Evaluations in Course content (mobile parity), survey answer flow, Team evaluations for managers, and the end-of-course redirect states (waiting/scheduled/required).",
+    "Trainings clone exploring Quizzes & Knowledge Tests admin visibility: per-quiz KPIs (average attempts + question-failure warning) in the Course content tab.",
   category: "Talent",
   module: "my-training",
   audience: ["admin"],
@@ -1081,7 +1081,7 @@ const columns = [
   },
 ]
 
-export default function SurveysCourse() {
+export default function TrainingsExact() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [toast, setToast] = useState<ToastId>(null)
   const [courses, setCourses] = useState<ExactCourse[]>(exactCourses)
@@ -4122,8 +4122,7 @@ function LearnerCourseScreen() {
       <StandardLayout>
         <NotificationsLayer />
         <F0Box display="flex" flexDirection="column" gap="2xl">
-          <F0BoxWithClassName className="px-12 flex flex-col gap-4">
-          <F0Heading content="Modules" variant="heading" as="h2" />
+          <F0BoxWithClassName className="px-12">
           <OneDataCollection
             id={`${SLUG}/learner-content/v1`}
             storage={false}
@@ -4172,13 +4171,6 @@ function LearnerCourseScreen() {
                       avatar: { type: "icon" as const, icon: evaluation.kind === "Knowledge test" ? Question : Envelope },
                     }),
                     fields: [
-                      {
-                        label: "Required",
-                        render: (evaluation: LearnerEvaluation) =>
-                          evaluation.required
-                            ? { type: "alertTag" as const, value: { level: "warning" as const, label: "Required" } }
-                            : { type: "text" as const, value: "" },
-                      },
                       {
                         label: "Status",
                         render: (evaluation: LearnerEvaluation) =>
@@ -6450,7 +6442,6 @@ type LearnerEvaluation = {
   questions: number
   status: "Not started" | "Passed" | "Failed" | "Completed"
   opensAt?: string
-  required?: boolean
 }
 
 type TeamEvaluationRow = {
@@ -6468,15 +6459,15 @@ const OLD_MINIMUM = 50
 const TOTAL_FINISHED = 25
 
 const LEARNER_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started", required: true },
-  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed", required: true },
-  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed", required: true },
+  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started" },
+  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed" },
+  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed" },
   { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed" },
 ]
 
 /** Scheduled (not materialized yet): shown with the date it opens, not actionable. */
 const SCHEDULED_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug", required: true },
+  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug" },
   { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course" },
 ]
 const SCHEDULED_IDS = new Set(["kt-2", "sat-2"])
