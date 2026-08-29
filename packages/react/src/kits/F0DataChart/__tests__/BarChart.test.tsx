@@ -647,6 +647,31 @@ describe("BarChart — stacked segment polish", () => {
     expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
   })
 
+  it("assigns stable selection IDs to real and generated series", () => {
+    render(
+      <F0DataChart
+        {...base}
+        orientation="horizontal"
+        stacked
+        showLabels
+        categories={["A"]}
+        series={[
+          { name: "Headcount", data: [{ value: 18, target: 20 }] },
+          { name: "Open roles", data: [4] },
+        ]}
+      />
+    )
+
+    expect(
+      getMainSeries().map((series) => (series as { id?: string }).id)
+    ).toEqual([
+      "f0-bar-main-0",
+      "f0-bar-target-0",
+      "f0-bar-main-1",
+      "f0-bar-stack-total",
+    ])
+  })
+
   it("runs the blur cross-fade without animating entrance or updates", () => {
     render(<F0DataChart {...base} stacked />)
 

@@ -27,6 +27,7 @@ type AccessiblePointActionsProps = {
     legendSelection: Record<string, boolean> | undefined
     owner: "host" | "chat" | "none"
     title: string
+    areaSelectionMode?: "idle" | "drawing" | "selected" | "unavailable"
   }
   label: string
   triggerLabel: string
@@ -67,13 +68,29 @@ export function AccessiblePointActions({
   const getActionsRef = useRef(getActions)
   getActionsRef.current = getActions
 
-  const { data, isLoading, chartType, legendSelection, owner, title } = resetOn
+  const {
+    data,
+    isLoading,
+    chartType,
+    legendSelection,
+    owner,
+    title,
+    areaSelectionMode,
+  } = resetOn
 
   useEffect(() => {
     setActions(null)
     setPage(0)
     setOpen(false)
-  }, [data, isLoading, chartType, legendSelection, owner, title])
+  }, [
+    data,
+    isLoading,
+    chartType,
+    legendSelection,
+    owner,
+    title,
+    areaSelectionMode,
+  ])
 
   useEffect(() => {
     if (!shouldFocusPageRef.current) return

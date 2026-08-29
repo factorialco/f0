@@ -10,6 +10,7 @@ import * as ScatterStories from "./Scatter.stories"
 import * as SkeletonsStories from "./Skeletons.stories"
 import * as EmptyStatesStories from "./EmptyStates.stories"
 import * as PointClickStories from "./PointClick.stories"
+import * as AreaSelectionStories from "./AreaSelection.stories"
 
 <Meta title="F0DataChart/Overview" />
 
@@ -447,6 +448,86 @@ no legend, and heatmap uses a visual scale rather than an interactive legend,
 so neither variant accepts this prop.
 
 <Canvas of={PointClickStories.LegendSelectionChanges} />
+
+### Area selection
+
+Bar, line, heatmap, and scatter charts accept a controlled `areaSelection`
+configuration. Set `active` after a host action, then handle the real chart
+data contained by the completed polygon in `onSelect`. Set `selected` after a
+successful selection to keep its polygon visible while `active` is false, then
+clear `selected` when the downstream quote or action is dismissed or completed.
+Every integration must also provide a keyboard, touch, and single-pointer
+control while selection is active. That companion control must expose the
+visible chart points without requiring a path gesture and submit the same point
+contract with `source: "control"`. `F0AnalyticsDashboard` supplies this control
+internally; lower-level `F0DataChart` consumers own an equivalent control that
+fits their surface.
+
+`ChartSelectionControls` below represents that host-owned companion control:
+
+```tsx
+<div className="relative">
+  <F0DataChart
+    type="bar"
+    categories={categories}
+    series={series}
+    areaSelection={{
+      active: isSelecting,
+      selected: selectedArea !== null,
+      selectedArea: selectedArea ?? undefined,
+      onSelect: (_selection, area) => {
+        setSelectedArea(area)
+        setIsSelecting(false)
+      },
+      onCancel: () => setIsSelecting(false),
+    }}
+  />
+  {isSelecting && (
+    <ChartSelectionControls
+      actions={accessibleActions}
+      label="Select chart values without drawing"
+      submitLabel="Ask One about selected values ({{count}})"
+      previousLabel="Previous data points"
+      nextLabel="Next data points"
+      resetOn={data}
+      onSubmit={(points) => {
+        attachChartSelection({
+          source: "control",
+          points: points.slice(0, 100),
+          totalPointCount: points.length,
+        })
+        setIsSelecting(false)
+      }}
+    />
+  )}
+</div>
+```
+
+The second `onSelect` argument is the exact ECharts brush geometry. Retain that
+area and pass it back as `selectedArea` whenever `selected` is true so the same
+polygon can be replayed after an option update, resize, or chart remount. Use
+`onSelectedAreaPositionChange` when a companion control needs the retained
+polygon's current chart-surface pixels; F0 reports them again after ECharts
+reprojects the area for a changed chart layout.
+
+The payload carries at most 100 points and reports the uncapped
+`totalPointCount`, so consumers can disclose truncation without creating an
+unbounded prompt or analytics event. F0 uses ECharts coordinates and selected
+series indexes; it does not infer values from canvas pixels or surrounding DOM
+text. Hidden legend series are excluded. Pressing <kbd>Escape</kbd> calls
+`onCancel`.
+
+<Canvas of={AreaSelectionStories.PolygonSelection} />
+
+- WHEN `active` is false or `areaSelection` is omitted → THEN ordinary chart pointer interactions remain unchanged.
+- WHEN the reader completes a polygon → THEN `onSelect` receives only real data points contained by that polygon.
+- WHEN the reader cannot or does not want to draw a path → THEN the companion checkbox menu selects and submits the same data points without dragging.
+- WHEN `selected` remains true after completion → THEN the completed polygon remains visible without keeping drawing active.
+- WHEN `selected` becomes false → THEN the completed polygon is cleared.
+- WHEN the polygon contains no points → THEN the callback receives an empty `points` array and the host decides whether selection remains active.
+- WHEN more than 100 points are selected → THEN `points` is capped at 100 and `totalPointCount` reports the full count.
+- WHEN the reader presses <kbd>Escape</kbd> → THEN `onCancel` is called.
+- WHEN a chart uses a non-cartesian coordinate system → THEN area selection is not exposed on that variant.
 
 ### Value & Category Formatters
 

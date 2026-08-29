@@ -10,11 +10,17 @@ type ContainerSize = { width: number; height: number }
  * react to layout changes automatically.
  */
 export function useContainerSize(
-  ref: RefObject<HTMLElement | null>
+  ref: RefObject<HTMLElement | null>,
+  enabled = true
 ): ContainerSize {
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
 
   useEffect(() => {
+    if (!enabled) {
+      setSize({ width: 0, height: 0 })
+      return
+    }
+
     const el = ref.current
     if (!el) return
 
@@ -31,7 +37,7 @@ export function useContainerSize(
     observer.observe(el)
 
     return () => observer.disconnect()
-  }, [ref])
+  }, [enabled, ref])
 
   return size
 }

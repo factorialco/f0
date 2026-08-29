@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   fireEvent,
   screen,
@@ -8,8 +9,6 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   WIDGET_DRAG_START,
   type WidgetDragStartDetail,

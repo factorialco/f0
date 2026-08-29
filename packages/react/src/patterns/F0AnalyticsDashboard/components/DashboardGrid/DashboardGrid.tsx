@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
+import type { F0DataChartAreaSelectionArea } from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -70,8 +72,24 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   ) => void
   /** Overrides the built-in "Ask One" action on a widget. See `F0AnalyticsDashboardProps.onAskAi`. */
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
-  /** Observes built-in Ask One actions without replacing chat behavior. */
+  /** Observes built-in Ask One targets. See `F0AnalyticsDashboardProps.onAskAiTarget`. */
   onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
+  areaSelectionActive?: boolean
+  selectedAreaItemId?: string | null
+  selectedArea?: F0DataChartAreaSelectionArea | null
+  areaSelectableItemIds?: ReadonlySet<string>
+  areaSelectionUnavailableLabel?: string
+  onAreaSelectionComplete?: (
+    itemId: string,
+    quote: PendingQuote | null,
+    area?: F0DataChartAreaSelectionArea
+  ) => void
+  onAreaSelectionAvailabilityChange?: (
+    itemId: string,
+    available: boolean
+  ) => void
+  onAreaSelectionEmpty?: () => void
+  onAreaSelectionCancel?: () => void
   /**
    * Notifies the parent when the grid enters/exits a "fill height" mode —
    * triggered by click-to-fullscreen on a multi-item dashboard. The parent
@@ -101,6 +119,15 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   onTransformChart,
   onAskAi,
   onAskAiTarget,
+  areaSelectionActive,
+  selectedAreaItemId,
+  selectedArea,
+  areaSelectableItemIds,
+  areaSelectionUnavailableLabel,
+  onAreaSelectionComplete,
+  onAreaSelectionAvailabilityChange,
+  onAreaSelectionEmpty,
+  onAreaSelectionCancel,
   onFullscreenChange,
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -554,6 +581,15 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           onTransformChart={onTransformChart}
           onAskAi={onAskAi}
           onAskAiTarget={onAskAiTarget}
+          areaSelectionActive={areaSelectionActive}
+          selectedAreaItemId={selectedAreaItemId}
+          selectedArea={selectedArea}
+          areaSelectableItemIds={areaSelectableItemIds}
+          areaSelectionUnavailableLabel={areaSelectionUnavailableLabel}
+          onAreaSelectionComplete={onAreaSelectionComplete}
+          onAreaSelectionAvailabilityChange={onAreaSelectionAvailabilityChange}
+          onAreaSelectionEmpty={onAreaSelectionEmpty}
+          onAreaSelectionCancel={onAreaSelectionCancel}
           isFullscreen
         />
       </div>
@@ -595,6 +631,17 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             onTransformChart={onTransformChart}
             onAskAi={onAskAi}
             onAskAiTarget={onAskAiTarget}
+            areaSelectionActive={areaSelectionActive}
+            selectedAreaItemId={selectedAreaItemId}
+            selectedArea={selectedArea}
+            areaSelectableItemIds={areaSelectableItemIds}
+            areaSelectionUnavailableLabel={areaSelectionUnavailableLabel}
+            onAreaSelectionComplete={onAreaSelectionComplete}
+            onAreaSelectionAvailabilityChange={
+              onAreaSelectionAvailabilityChange
+            }
+            onAreaSelectionEmpty={onAreaSelectionEmpty}
+            onAreaSelectionCancel={onAreaSelectionCancel}
             isFullscreen
             onFullscreenChange={(fs) =>
               setFullscreenItemId(fs ? fullscreenItemId : null)
@@ -684,6 +731,19 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                       onTransformChart={onTransformChart}
                       onAskAi={onAskAi}
                       onAskAiTarget={onAskAiTarget}
+                      areaSelectionActive={areaSelectionActive}
+                      selectedAreaItemId={selectedAreaItemId}
+                      selectedArea={selectedArea}
+                      areaSelectableItemIds={areaSelectableItemIds}
+                      areaSelectionUnavailableLabel={
+                        areaSelectionUnavailableLabel
+                      }
+                      onAreaSelectionComplete={onAreaSelectionComplete}
+                      onAreaSelectionAvailabilityChange={
+                        onAreaSelectionAvailabilityChange
+                      }
+                      onAreaSelectionEmpty={onAreaSelectionEmpty}
+                      onAreaSelectionCancel={onAreaSelectionCancel}
                       onFullscreenChange={(fs) =>
                         setFullscreenItemId(fs ? id : null)
                       }
@@ -1096,6 +1156,15 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   onTransformChart,
   onAskAi,
   onAskAiTarget,
+  areaSelectionActive,
+  selectedAreaItemId,
+  selectedArea,
+  areaSelectableItemIds,
+  areaSelectionUnavailableLabel,
+  onAreaSelectionComplete,
+  onAreaSelectionAvailabilityChange,
+  onAreaSelectionEmpty,
+  onAreaSelectionCancel,
   isFullscreen,
   onFullscreenChange,
 }: {
@@ -1112,12 +1181,38 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   ) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
+  areaSelectionActive?: boolean
+  selectedAreaItemId?: string | null
+  selectedArea?: F0DataChartAreaSelectionArea | null
+  areaSelectableItemIds?: ReadonlySet<string>
+  areaSelectionUnavailableLabel?: string
+  onAreaSelectionComplete?: (
+    itemId: string,
+    quote: PendingQuote | null,
+    area?: F0DataChartAreaSelectionArea
+  ) => void
+  onAreaSelectionAvailabilityChange?: (
+    itemId: string,
+    available: boolean
+  ) => void
+  onAreaSelectionEmpty?: () => void
+  onAreaSelectionCancel?: () => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }) {
+  const itemContentRef = useRef<HTMLDivElement>(null)
+  const unavailable =
+    areaSelectionActive && !areaSelectableItemIds?.has(item.id)
+
+  useEffect(() => {
+    itemContentRef.current?.toggleAttribute("inert", Boolean(unavailable))
+  }, [unavailable])
+
+  let content: React.ReactNode
+
   switch (item.type) {
     case "chart":
-      return (
+      content = (
         <ChartItem
           item={item}
           filters={filters}
@@ -1127,13 +1222,28 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           handleDelete={onDelete}
           onAskAi={onAskAi}
           onAskAiTarget={onAskAiTarget}
+          areaSelectionMode={
+            selectedAreaItemId === item.id
+              ? "selected"
+              : areaSelectionActive
+                ? areaSelectableItemIds?.has(item.id)
+                  ? "drawing"
+                  : "unavailable"
+                : "idle"
+          }
+          selectedArea={selectedAreaItemId === item.id ? selectedArea : null}
+          onAreaSelectionComplete={onAreaSelectionComplete}
+          onAreaSelectionAvailabilityChange={onAreaSelectionAvailabilityChange}
+          onAreaSelectionEmpty={onAreaSelectionEmpty}
+          onAreaSelectionCancel={onAreaSelectionCancel}
           onTransformChart={onTransformChart}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
         />
       )
+      break
     case "metric":
-      return (
+      content = (
         <MetricItem
           item={item}
           filters={filters}
@@ -1147,8 +1257,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           onFullscreenChange={onFullscreenChange}
         />
       )
+      break
     case "collection":
-      return (
+      content = (
         <CollectionItem
           item={item}
           filters={filters}
@@ -1162,9 +1273,10 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           onFullscreenChange={onFullscreenChange}
         />
       )
+      break
     default: {
       const unknownItem = item as DashboardItemType<Filters>
-      return (
+      content = (
         <DashboardItem
           title={unknownItem.title ?? "Unknown"}
           isLoading={false}
@@ -1177,6 +1289,31 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           {null}
         </DashboardItem>
       )
+      break
     }
   }
+
+  return (
+    <div className="relative h-full min-h-0" data-dashboard-item-frame="">
+      <div
+        ref={itemContentRef}
+        className="h-full min-h-0"
+        aria-hidden={unavailable ? true : undefined}
+        data-dashboard-item-content=""
+      >
+        {content}
+      </div>
+      {unavailable && (
+        <div
+          className="absolute inset-0 z-30 flex items-center justify-center rounded-lg bg-f1-background/80 p-4 text-center backdrop-blur-[1px]"
+          data-dashboard-area-selection-unavailable=""
+        >
+          <span className="shadow-sm rounded-lg bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground-secondary">
+            <span className="sr-only">{item.title}: </span>
+            {areaSelectionUnavailableLabel}
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }

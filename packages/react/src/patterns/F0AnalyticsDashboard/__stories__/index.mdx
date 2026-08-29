@@ -1,7 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./index.stories"
 import * as AskOneStories from "./AskOne.stories"
-import * as WidgetDropStories from "@/kits/ai/F0AiChat/__stories__/F0AiChatWidgetDrop.stories"
+import * as WidgetDropStories from "../../../kits/ai/F0AiChat/__stories__/F0AiChatWidgetDrop.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
@@ -23,7 +23,7 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
 **When to use**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -55,7 +55,7 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
 **When not to use**
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -166,15 +166,15 @@ the mounted chat:
 ```
 
 Pass `onAskAiTarget` when the mounted chat should keep the built-in quote,
-open, and focus behavior while the host attaches structured analytical
-context. The observer receives the widget identity plus the exact `quote`
-object staged in the composer. Point asks also include the raw `point`.
+open, focus, and fullscreen behavior but the host also needs to attach hidden
+analytical context. The observer receives the widget identity plus the exact
+`quote` object that remains pending until the user submits or dismisses it:
 
 ```tsx
 <F0AnalyticsDashboard
   items={items}
-  onAskAiTarget={({ id, point, quote }) => {
-    attachAnalyticalContext({ widgetId: id, point, quote })
+  onAskAiTarget={({ id, point, selection, quote }) => {
+    stageAnalyticalContext({ widgetId: id, point, selection, quote })
   }}
 />
 ```
@@ -240,6 +240,7 @@ no pointer position to anchor to.
 - WHEN a keyboard user tabs to the chart's point action → THEN a visible **Ask One** trigger opens a menu containing every currently visible point, with the same formatted context as pointer selection.
 - WHEN a chart contains more than 100 points → THEN the keyboard menu pages them with **Previous** and **Next** actions instead of mounting the entire dataset at once.
 - WHEN the built-in action is chosen → THEN the quote keeps the chart title, visible point context, and tooltip-formatted values, opens the chat, and focuses its composer.
+- WHEN `onAskAiTarget` observes the built-in action → THEN it receives that exact pending quote together with the raw point.
 - WHEN a scatter point is quoted → THEN both the X and Y measures are included with their axis names and formatters.
 - WHEN a line category is quoted → THEN every visible series at that category is included, matching the axis tooltip.
 - WHEN `onAskAi` owns the action → THEN it receives the raw point and the built-in chat state remains unchanged.
@@ -247,6 +248,50 @@ no pointer position to anchor to.
 - WHEN the chart has no title → THEN pointer and keyboard point actions are hidden because there is no widget context to quote.
 - WHEN the chart moves because of scrolling or resizing, or the reader presses <kbd>Escape</kbd> or clicks elsewhere → THEN the anchored action closes.
 - WHEN a screen reader reaches the point action → THEN its trigger is named **Ask One: _chart title_** and each menu item exposes the complete formatted point context.
+
+### Ask One from a chart area
+
+The dashboard adds one **Draw to Ask One** action when an AI chat or host
+`onAskAi` handler is available and at least one bar, line, heatmap, or scatter
+widget can be selected. Activating it enables drawing on every compatible chart
+and places a blocking explanation over incompatible widgets. A completed area
+attaches the selected values to the composer without sending a message, so the
+reader can add a question such as “What happened here?” first.
+
+<Canvas of={AskOneStories.ChartAreaSelectionMode} />
+
+The companion icon in each compatible chart opens the same bounded selection
+contract without a drag. This reference story also demonstrates the
+non-overriding `onAskAiTarget` observer: the host receives the raw control
+selection while F0 still stages and retains its built-in quote.
+
+<Canvas of={AskOneStories.ChartAreaSelectionWithoutDrag} />
+
+The host-owned callback receives the bounded raw selection as `selection`.
+`selection.points` contains at most 100 real chart data points and
+`selection.totalPointCount` carries the uncapped count. `point` and `selection`
+are mutually exclusive. Polygon selections have `selection.source: "pointer"`;
+the no-drag companion emits the same contract with
+`selection.source: "control"`.
+
+```tsx
+<F0AnalyticsDashboard
+  items={items}
+  onAskAi={({ id, title, selection }) => {
+    openProductChat({ widgetId: id, quote: title, selection })
+  }}
+/>
+```
+
+- WHEN selection mode starts → THEN the dashboard action changes to **Cancel selection** and one persistent live region explains the drawing and cancellation path.
+- WHEN selection mode starts → THEN incompatible widgets receive a blocking overlay and compatible charts remain available for drawing.
+- WHEN the completed polygon contains data → THEN the built-in behavior exits fullscreen, attaches a bounded formatted quote, opens chat, focuses the composer without sending, and keeps the completed area visible.
+- WHEN `onAskAiTarget` observes the built-in area action → THEN it receives that exact pending quote together with the bounded raw selection.
+- WHEN the quote is sent, removed, replaced, or the reader chooses **Clear selection** → THEN the completed area is cleared.
+- WHEN `onAskAi` owns the action → THEN it receives the widget identity and raw selection without changing built-in chat state.
+- WHEN the completed polygon contains no data → THEN selection remains active and the status asks the reader to draw around at least one point.
+- WHEN the reader presses <kbd>Escape</kbd> or chooses **Cancel selection** → THEN selection mode closes without attaching anything.
+- WHEN the dashboard has no drawable bar, line, heatmap, or scatter chart → THEN the dashboard area-selection action is hidden. This includes compatible chart types with empty or failed data, a blank title, table view, or a heatmap whose plot is too narrow to draw reliably.
 
 ### Report filters
 
@@ -368,7 +413,7 @@ fallback without exposing selected values in the widget.
 ### Keyboard interaction
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Key</th>
@@ -395,7 +440,10 @@ fallback without exposing selected values in the widget.
         <td>
           <kbd>Escape</kbd>
         </td>
-        <td>Closes the filter dialog or an anchored chart-point action.</td>
+        <td>
+          Closes the filter dialog, an anchored chart-point action, or active
+          chart-area selection.
+        </td>
       </tr>
       <tr>
         <td>
@@ -421,4 +469,7 @@ fallback without exposing selected values in the widget.
 - The filter trigger keeps the stable name "Filters"; applied filter labels are exposed as its accessible description, while a visible counter shows how many report filters are active.
 - The filter popover has a dialog name, and filter options expose native checkbox semantics.
 - Applied filter removal buttons keep the stable name "Close"; the filter label and selected value are exposed as their accessible descriptions.
+- The dashboard area-selection action changes its name from "Draw to Ask One" to "Cancel selection" while drawing. After completion it returns to "Draw to Ask One", and the selected chart exposes an icon-only "Clear selection" button immediately outside the retained polygon. The button flips to another edge when needed so it remains inside the chart surface.
+- A persistent polite status region announces drawing instructions and empty selections. While drawing, incompatible widgets are inert and hidden from the accessibility tree; the dashboard instruction explains that those widgets are unavailable.
+- Each compatible chart exposes a compact icon-only "Select chart values without drawing" menu while drawing is active. Its accessible name also includes the widget title so assistive-technology users can distinguish charts. Keyboard, touch, and single-pointer users can select the same bounded data-point contract without a drag gesture; the normal idle dashboard still has no per-widget drawing controls.
 - Widget filter rows announce whether their draft is active, the compact list moves focus to its first control when opened, and returning from an editor restores focus to its row (or the next available row if the definition disappeared).

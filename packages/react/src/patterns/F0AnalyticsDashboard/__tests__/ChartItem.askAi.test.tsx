@@ -1,6 +1,18 @@
 import { useEffect, useRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import type {
+  F0DataChartAreaSelection,
+  F0DataChartAreaSelectionConfig,
+  F0DataChartPointClick,
+  F0DataChartProps,
+} from "@/kits/F0DataChart"
+
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import {
   screen,
   userEvent,
@@ -8,25 +20,53 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import type {
-  F0DataChartPointClick,
-  F0DataChartProps,
-} from "@/kits/F0DataChart"
-import {
-  AiChatStateProvider,
-  useAiChat,
-} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-
 import type { DashboardChartConfig, DashboardChartItem } from "../types"
 import type { F0AnalyticsDashboardPointClick } from "../types"
 
 import {
+  buildAreaQuoteText,
+  buildAccessibleAreaSelectionActions,
+  buildControlAreaSelection,
   buildPointQuoteText,
   buildAccessibleChartPoints,
   buildChartProps,
   ChartItem,
   hasAccessibleChartPoint,
+  resolveAreaSelectionClearPosition,
 } from "../components/ChartItem/ChartItem"
+
+const AREA_SELECTION: F0DataChartAreaSelection = {
+  source: "pointer",
+  totalPointCount: 2,
+  points: [
+    {
+      seriesName: "Male",
+      category: "Barcelona office",
+      value: 18,
+      values: [18],
+      series: [{ name: "Male", seriesIndex: 0, value: 18 }],
+      dataIndex: 0,
+      seriesIndex: 0,
+    },
+    {
+      seriesName: "Female",
+      category: "Barcelona office",
+      value: 22,
+      values: [22],
+      series: [{ name: "Female", seriesIndex: 1, value: 22 }],
+      dataIndex: 0,
+      seriesIndex: 1,
+    },
+  ],
+}
+const AREA = {
+  brushType: "polygon" as const,
+  coordRange: [
+    [0, 0],
+    [100, 0],
+    [100, 100],
+  ] as [number, number][],
+}
 
 /** The mark a click lands on, as `usePointClick` would report it. */
 const POINT: F0DataChartPointClick = {
@@ -50,12 +90,48 @@ vi.mock("@/kits/F0DataChart", async (importOriginal) => {
     ...actual,
     F0DataChart: ({
       onPointClick,
+      areaSelection,
     }: {
       onPointClick?: (point: F0DataChartPointClick) => void
+      areaSelection?: F0DataChartAreaSelectionConfig
     }) => (
-      <button type="button" onClick={() => onPointClick?.(POINT)}>
-        mark
-      </button>
+      <>
+        <button type="button" onClick={() => onPointClick?.(POINT)}>
+          mark
+        </button>
+        {areaSelection && (
+          <div
+            data-testid="area-selection"
+            data-active={areaSelection.active}
+            data-selected={areaSelection.selected}
+          >
+            <button
+              type="button"
+              onClick={() => areaSelection.onSelect(AREA_SELECTION, AREA)}
+            >
+              draw area
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                areaSelection.onSelect(
+                  {
+                    source: "pointer",
+                    points: [],
+                    totalPointCount: 0,
+                  },
+                  AREA
+                )
+              }
+            >
+              draw empty area
+            </button>
+            <button type="button" onClick={areaSelection.onCancel}>
+              cancel drawing
+            </button>
+          </div>
+        )}
+      </>
     ),
   }
 })
@@ -90,7 +166,7 @@ const pickAMark = async () => {
 const ChatProbe = ({
   onCapture,
 }: {
-  onCapture?: (quote: ReturnType<typeof useAiChat>["pendingQuote"]) => void
+  onCapture?: (quote: PendingQuote | null) => void
 } = {}) => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const { pendingQuote, open, setFocusChatInputFunction } = useAiChat()
@@ -564,6 +640,54 @@ describe("ChartItem — asking about a mark", () => {
     )
   })
 
+  it("dismisses a picked point when dashboard area selection starts", async () => {
+    const view = render(
+      <AiChatStateProvider enabled>
+        <ChartItem item={item} filters={{}} />
+      </AiChatStateProvider>
+    )
+
+    await userEvent.click(await screen.findByRole("button", { name: "mark" }))
+    expect(
+      await screen.findByRole("button", { name: "Ask One" })
+    ).toBeInTheDocument()
+
+    view.rerender(
+      <AiChatStateProvider enabled>
+        <ChartItem item={item} filters={{}} areaSelectionMode="drawing" />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: "Ask One" })
+      ).not.toBeInTheDocument()
+    )
+  })
+
+  it("dismisses a picked point when another widget owns area selection", async () => {
+    const view = render(
+      <AiChatStateProvider enabled>
+        <ChartItem item={item} filters={{}} />
+      </AiChatStateProvider>
+    )
+
+    await userEvent.click(await screen.findByRole("button", { name: "mark" }))
+    expect(
+      await screen.findByRole("button", { name: "Ask One" })
+    ).toBeInTheDocument()
+
+    view.rerender(
+      <AiChatStateProvider enabled>
+        <ChartItem item={item} filters={{}} areaSelectionMode="unavailable" />
+      </AiChatStateProvider>
+    )
+
+    expect(
+      screen.queryByRole("button", { name: "Ask One" })
+    ).not.toBeInTheDocument()
+  })
+
   it("returns focus to the keyboard point trigger after viewport movement", async () => {
     render(
       <AiChatStateProvider enabled>
@@ -668,6 +792,402 @@ describe("ChartItem — asking about a mark", () => {
         screen.queryByRole("button", { name: "Ask One" })
       ).not.toBeInTheDocument()
     )
+  })
+})
+
+describe("ChartItem — asking about a drawn area", () => {
+  it("reports exact area-selection availability and cleanup", async () => {
+    const onAreaSelectionAvailabilityChange = vi.fn()
+    const view = render(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={item}
+          filters={filters}
+          onAreaSelectionAvailabilityChange={onAreaSelectionAvailabilityChange}
+        />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() =>
+      expect(onAreaSelectionAvailabilityChange).toHaveBeenCalledWith(
+        item.id,
+        true
+      )
+    )
+
+    onAreaSelectionAvailabilityChange.mockClear()
+    view.unmount()
+    expect(onAreaSelectionAvailabilityChange).toHaveBeenCalledOnce()
+    expect(onAreaSelectionAvailabilityChange).toHaveBeenCalledWith(
+      item.id,
+      false
+    )
+  })
+
+  it("anchors the clear action beside the polygon edge", () => {
+    expect(
+      resolveAreaSelectionClearPosition(
+        [
+          [27, 76],
+          [50, 50],
+          [100, 40],
+          [156, 76],
+          [156, 118],
+          [140, 156],
+          [47, 156],
+        ],
+        200,
+        190
+      )
+    ).toEqual({ left: 160, top: 85 })
+  })
+
+  it("flips the clear action around selections near a chart boundary", () => {
+    expect(
+      resolveAreaSelectionClearPosition(
+        [
+          [300, 12],
+          [380, 12],
+          [380, 60],
+          [300, 60],
+        ],
+        400,
+        240
+      )
+    ).toEqual({ left: 272, top: 24 })
+  })
+
+  it("uses an edge position when a selection spans most of one axis", () => {
+    expect(
+      resolveAreaSelectionClearPosition(
+        [
+          [20, 48],
+          [380, 48],
+          [380, 192],
+          [20, 192],
+        ],
+        400,
+        240
+      )
+    ).toEqual({ left: 188, top: 20 })
+  })
+
+  it("falls back to the chart anchor when no outside position fits", () => {
+    expect(
+      resolveAreaSelectionClearPosition(
+        [
+          [0, 0],
+          [400, 0],
+          [400, 240],
+          [0, 240],
+        ],
+        400,
+        240
+      )
+    ).toBeNull()
+  })
+
+  it("hands the host the bounded data selection", async () => {
+    const onAskAi = vi.fn()
+    const onAreaSelectionComplete = vi.fn()
+    render(
+      <ChartItem
+        item={item}
+        filters={{}}
+        onAskAi={onAskAi}
+        areaSelectionMode="drawing"
+        onAreaSelectionComplete={onAreaSelectionComplete}
+      />
+    )
+
+    expect(await screen.findByTestId("area-selection")).toHaveAttribute(
+      "data-active",
+      "true"
+    )
+    await userEvent.click(
+      await screen.findByRole("button", { name: "draw area" })
+    )
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by workplace",
+      selection: AREA_SELECTION,
+    })
+    expect(onAreaSelectionComplete).toHaveBeenCalledWith(
+      "headcount",
+      null,
+      AREA
+    )
+  })
+
+  it("offers a keyboard and single-pointer multi-select with the same host contract", async () => {
+    const onAskAi = vi.fn()
+    render(
+      <ChartItem
+        item={item}
+        filters={{}}
+        onAskAi={onAskAi}
+        areaSelectionMode="drawing"
+      />
+    )
+
+    const trigger = await screen.findByRole("button", {
+      name: "Select chart values without drawing: Headcount by workplace",
+    })
+    expect(trigger.querySelector(".sr-only")).toHaveTextContent(
+      "Select chart values without drawing: Headcount by workplace"
+    )
+    await userEvent.click(trigger)
+    await userEvent.click(
+      await screen.findByRole("menuitemcheckbox", {
+        name: "Headcount by workplace — Barcelona office, Male: 18",
+      })
+    )
+    await userEvent.click(
+      screen.getByRole("menuitem", {
+        name: "Ask One about selected values (1)",
+      })
+    )
+
+    await waitFor(() =>
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+        selection: {
+          source: "control",
+          totalPointCount: 1,
+          points: [AREA_SELECTION.points[0]],
+        },
+      })
+    )
+  })
+
+  it("bounds control selections without losing their uncapped count", () => {
+    const points = Array.from({ length: 101 }, (_, dataIndex) => ({
+      ...AREA_SELECTION.points[0],
+      category: `Office ${dataIndex + 1}`,
+      dataIndex,
+    }))
+
+    expect(buildControlAreaSelection(points)).toEqual({
+      source: "control",
+      points: points.slice(0, 100),
+      totalPointCount: 101,
+    })
+  })
+
+  it("expands line categories into the same per-series area points as drawing", () => {
+    expect(
+      buildAccessibleAreaSelectionActions("Revenue", {
+        type: "line",
+        categories: ["Jan"],
+        series: [
+          { name: "Actual", data: [10] },
+          { name: "Target", data: [12] },
+        ],
+      }).map(({ point }) => point)
+    ).toEqual([
+      expect.objectContaining({
+        seriesName: "Actual",
+        seriesIndex: 0,
+        value: 10,
+      }),
+      expect.objectContaining({
+        seriesName: "Target",
+        seriesIndex: 1,
+        value: 12,
+      }),
+    ])
+  })
+
+  it("hydrates a remounted retained selection before tracking later changes", async () => {
+    const onAreaSelectionCancel = vi.fn()
+    const view = render(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={item}
+          filters={{}}
+          areaSelectionMode="selected"
+          selectedArea={AREA}
+          onAreaSelectionCancel={onAreaSelectionCancel}
+        />
+      </AiChatStateProvider>
+    )
+
+    await screen.findByRole("button", { name: "mark" })
+    expect(onAreaSelectionCancel).not.toHaveBeenCalled()
+
+    view.rerender(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={{ ...item, chart: { type: "line" } }}
+          filters={{}}
+          areaSelectionMode="selected"
+          selectedArea={AREA}
+          onAreaSelectionCancel={onAreaSelectionCancel}
+        />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() => expect(onAreaSelectionCancel).toHaveBeenCalledOnce())
+  })
+
+  it("cancels a retained selection when bar orientation changes", async () => {
+    const onAreaSelectionCancel = vi.fn()
+    const view = render(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={item}
+          filters={{}}
+          areaSelectionMode="selected"
+          selectedArea={AREA}
+          onAreaSelectionCancel={onAreaSelectionCancel}
+        />
+      </AiChatStateProvider>
+    )
+
+    await screen.findByRole("button", { name: "mark" })
+    expect(onAreaSelectionCancel).not.toHaveBeenCalled()
+
+    view.rerender(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={{
+            ...item,
+            chart: { type: "bar", orientation: "horizontal" },
+          }}
+          filters={{}}
+          areaSelectionMode="selected"
+          selectedArea={AREA}
+          onAreaSelectionCancel={onAreaSelectionCancel}
+        />
+      </AiChatStateProvider>
+    )
+
+    await waitFor(() => expect(onAreaSelectionCancel).toHaveBeenCalledOnce())
+  })
+
+  it("quotes selected values in the built-in composer without sending", async () => {
+    const onAskAiTarget = vi.fn()
+    const capturePendingQuote = vi.fn()
+    const onAreaSelectionComplete = vi.fn()
+    const onFullscreenChange = vi.fn()
+    render(
+      <AiChatStateProvider enabled>
+        <ChatProbe onCapture={capturePendingQuote} />
+        <ChartItem
+          item={item}
+          filters={{}}
+          isFullscreen
+          onAskAiTarget={onAskAiTarget}
+          onFullscreenChange={onFullscreenChange}
+          areaSelectionMode="drawing"
+          onAreaSelectionComplete={onAreaSelectionComplete}
+        />
+      </AiChatStateProvider>
+    )
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "draw area" })
+    )
+
+    expect(screen.getByTestId("probe")).toHaveAttribute(
+      "data-quote",
+      "Headcount by workplace — Selected chart area\nBarcelona office — Male: 18\nBarcelona office — Female: 22"
+    )
+    expect(screen.getByTestId("probe")).toHaveAttribute("data-open", "true")
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by workplace",
+      selection: AREA_SELECTION,
+      quote: {
+        text: "Headcount by workplace — Selected chart area\nBarcelona office — Male: 18\nBarcelona office — Female: 22",
+      },
+    })
+    const observedQuote = onAskAiTarget.mock.calls[0][0].quote
+    expect(onAreaSelectionComplete).toHaveBeenCalledWith(
+      "headcount",
+      observedQuote,
+      AREA
+    )
+    expect(screen.getByRole("textbox", { name: "Chat question" })).toHaveFocus()
+    await userEvent.click(
+      screen.getByRole("button", { name: "Capture pending quote" })
+    )
+    expect(capturePendingQuote.mock.calls[0][0]).toBe(observedQuote)
+    expect(onFullscreenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("keeps selection mode active when the drawing contains no points", async () => {
+    const onAreaSelectionEmpty = vi.fn()
+    render(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={item}
+          filters={{}}
+          areaSelectionMode="drawing"
+          onAreaSelectionEmpty={onAreaSelectionEmpty}
+        />
+      </AiChatStateProvider>
+    )
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "draw empty area" })
+    )
+
+    expect(onAreaSelectionEmpty).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("area-selection")).toHaveAttribute(
+      "data-active",
+      "true"
+    )
+  })
+
+  it("forwards drawing cancellation to the dashboard", async () => {
+    const onAreaSelectionCancel = vi.fn()
+    render(
+      <AiChatStateProvider enabled>
+        <ChartItem
+          item={item}
+          filters={{}}
+          areaSelectionMode="drawing"
+          onAreaSelectionCancel={onAreaSelectionCancel}
+        />
+      </AiChatStateProvider>
+    )
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "cancel drawing" })
+    )
+
+    expect(onAreaSelectionCancel).toHaveBeenCalledOnce()
+  })
+
+  it("bounds the composer quote independently from the selection payload", () => {
+    const selection: F0DataChartAreaSelection = {
+      ...AREA_SELECTION,
+      points: Array.from({ length: 20 }, (_, index) => ({
+        ...AREA_SELECTION.points[0],
+        category: `Office ${index + 1}`,
+        dataIndex: index,
+      })),
+      totalPointCount: 27,
+    }
+
+    expect(
+      buildAreaQuoteText(
+        item.title,
+        {
+          type: "bar",
+          categories: [],
+          series: [],
+        },
+        selection,
+        {
+          heading: "Selected chart area",
+          more: "Additional selected values: {{count}}",
+        }
+      )
+    ).toContain("Additional selected values: 7")
   })
 })
 

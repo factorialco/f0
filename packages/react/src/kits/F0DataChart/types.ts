@@ -99,6 +99,73 @@ export interface F0DataChartPointClick {
   clientY: number
 }
 
+/** A real chart datum contained by a user-drawn chart area. */
+export type F0DataChartAreaSelectionPoint = Omit<
+  F0DataChartPointClick,
+  "source" | "clientX" | "clientY"
+>
+
+/** The bounded set of chart data resolved from one completed area drawing. */
+export interface F0DataChartAreaSelection {
+  /** Interaction surface that created the selection. */
+  source: "pointer" | "control"
+  /**
+   * Selected points in chart order. F0 caps this array at 100 entries so a
+   * dense chart cannot accidentally create an unbounded downstream payload.
+   */
+  points: F0DataChartAreaSelectionPoint[]
+  /** Number of selected points before the payload cap was applied. */
+  totalPointCount: number
+}
+
+/** The completed ECharts polygon needed to keep a controlled selection visible. */
+export interface F0DataChartAreaSelectionArea {
+  brushType: "polygon"
+  /** Polygon vertices in chart coordinates so ECharts can reproject on resize. */
+  coordRange: [number, number][]
+  /** Stable ECharts coordinate-system panel identifier, when supplied. */
+  panelId?: string
+  /** Category-axis correction needed to preserve the drawn polygon's shape. */
+  rangeOffset?: {
+    offset: [number, number][]
+    xyMinMax: [number, number][]
+  }
+}
+
+/**
+ * Opt-in area-selection behavior for cartesian chart variants.
+ *
+ * Keep `active` controlled by the surrounding interaction. F0 resolves the
+ * finished polygon to real chart data and reports it without owning what the
+ * host does next. Pressing Escape calls `onCancel`.
+ */
+export interface F0DataChartAreaSelectionConfig {
+  active: boolean
+  /**
+   * Keeps the completed brush visible while drawing is inactive. Set this
+   * until the downstream action that owns the selection is completed or
+   * dismissed.
+   */
+  selected?: boolean
+  /** Replays a completed polygon after chart option updates or remounts. */
+  selectedArea?: F0DataChartAreaSelectionArea
+  onSelect: (
+    selection: F0DataChartAreaSelection,
+    area: F0DataChartAreaSelectionArea
+  ) => void
+  /** Reports the retained polygon in current chart-surface pixels. */
+  onSelectedAreaPositionChange?: (range: [number, number][] | null) => void
+  onCancel?: () => void
+}
+
+interface F0DataChartAreaSelectionProps {
+  /**
+   * Enables polygon selection for bar, line, heatmap, and scatter charts.
+   * Omit to preserve the chart's default pointer interactions.
+   */
+  areaSelection?: F0DataChartAreaSelectionConfig
+}
+
 /**
  * Props shared by every `F0DataChart` variant.
  */
@@ -197,7 +264,10 @@ export interface F0DataChartLineSeries {
 // ---------------------------------------------------------------------------
 
 interface F0DataChartBaseProps
-  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
+  extends
+    F0DataChartCommonProps,
+    F0DataChartLegendInteractionProps,
+    F0DataChartAreaSelectionProps {
   /** Labels for the category axis (one per data point) */
   categories: string[]
 
@@ -623,7 +693,8 @@ export interface F0DataChartGaugeProps extends F0DataChartCommonProps {
  * Uses two category axes (x for columns, y for rows) and a visualMap for
  * value→color mapping.
  */
-export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
+export interface F0DataChartHeatmapProps
+  extends F0DataChartCommonProps, F0DataChartAreaSelectionProps {
   /** Chart type */
   type: "heatmap"
   /** Column labels (x-axis) */
@@ -703,7 +774,10 @@ export interface F0DataChartScatterSeries {
  * Pass multiple `series` to color-split the points by a group dimension.
  */
 export interface F0DataChartScatterProps
-  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
+  extends
+    F0DataChartCommonProps,
+    F0DataChartLegendInteractionProps,
+    F0DataChartAreaSelectionProps {
   /** Chart type */
   type: "scatter"
   /** One or more point groups. Multiple series render as a color split. */

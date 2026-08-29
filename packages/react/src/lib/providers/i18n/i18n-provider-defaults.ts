@@ -469,6 +469,18 @@ export const defaultTranslations = {
        * out, so it owns its own key.
        */
       askOne: "Ask One",
+      selectChartArea: "Draw to Ask One",
+      cancelChartAreaSelection: "Cancel selection",
+      clearChartAreaSelection: "Clear selection",
+      chartAreaSelectionHint:
+        "Draw around data in one chart. Unavailable widgets are dimmed. Press Escape to cancel.",
+      emptyChartAreaSelection:
+        "No data points selected. Draw around at least one point",
+      chartAreaSelectionUnavailable: "Drawing isn't available for this widget",
+      selectChartDataPoints: "Select chart values without drawing",
+      useSelectedChartDataPoints: "Ask One about selected values ({{count}})",
+      selectedChartArea: "Selected chart area",
+      moreSelectedValues: "Additional selected values: {{count}}",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",

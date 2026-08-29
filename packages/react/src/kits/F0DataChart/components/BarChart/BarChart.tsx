@@ -4,6 +4,7 @@ import type { F0DataChartBarProps } from "../../types"
 
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
+import { useAreaSelection } from "../../utils/useAreaSelection"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
@@ -29,7 +30,11 @@ export const BarChart = (props: F0DataChartBarProps) => {
   > | null>(null)
   const options = useBarChartOptions(ref, props, size, legendSelection)
   const chartRef = useEChartsInstance(ref, options)
-  usePointClick(chartRef, props.onPointClick)
+  useAreaSelection(chartRef, props, options)
+  usePointClick(
+    chartRef,
+    props.areaSelection?.active ? undefined : props.onPointClick
+  )
   const theme = useChartTheme(ref)
   useAxisLabelTooltip(chartRef, ref, theme)
   useLegendInteraction(chartRef, props.onLegendSelectionChange)

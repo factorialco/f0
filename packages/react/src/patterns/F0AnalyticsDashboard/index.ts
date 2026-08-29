@@ -17,6 +17,7 @@ export type {
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
+  F0AnalyticsDashboardAreaSelection,
   F0AnalyticsDashboardPointClick,
   F0AnalyticsDashboardProps,
   FunnelChartConfig,

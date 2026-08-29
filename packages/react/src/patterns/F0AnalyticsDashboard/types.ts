@@ -4,6 +4,7 @@ import type {
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
+  F0DataChartAreaSelection,
   F0DataChartPointClick,
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
@@ -487,18 +488,35 @@ export type F0AnalyticsDashboardPointClick = Omit<
   source: "pointer" | "keyboard"
 }
 
+/** The real chart data contained by a completed area drawing. */
+export type F0AnalyticsDashboardAreaSelection = F0DataChartAreaSelection
+
 /**
- * What the user asked about: a whole widget, or one mark inside it.
+ * What the user asked about: a whole widget, one mark, or a drawn chart area.
  *
  * `point` is absent when the ask came from the widget's ⋯ menu and present
- * when it came from clicking a mark, which is the only thing that tells the
- * two apart.
+ * when it came from clicking a mark. `selection` is present only when the user
+ * drew around a set of data points. The two detail fields are mutually
+ * exclusive.
  */
-export interface F0AnalyticsDashboardAskAiTarget {
+interface F0AnalyticsDashboardAskAiTargetBase {
   id: string
   title: string
-  point?: F0AnalyticsDashboardPointClick
 }
+
+export type F0AnalyticsDashboardAskAiTarget =
+  F0AnalyticsDashboardAskAiTargetBase &
+    (
+      | {
+          point: F0AnalyticsDashboardPointClick
+          selection?: never
+        }
+      | {
+          point?: never
+          selection: F0AnalyticsDashboardAreaSelection
+        }
+      | { point?: never; selection?: never }
+    )
 
 /**
  * A built-in Ask One interaction together with the exact quote F0 staged.
@@ -620,18 +638,18 @@ export interface F0AnalyticsDashboardProps<
    * Without it the entry appears only where an AI chat is mounted and enabled,
    * and drives that chat directly.
    *
-   * `point` is set when the ask came from a clicked mark rather than the
-   * widget menu, so one handler answers both without the host having to tell
-   * them apart by anything other than its presence.
+   * `point` is set when the ask came from a clicked mark. `selection` is set
+   * when it came from a drawn chart area. One handler answers all three paths
+   * by checking those mutually exclusive fields.
    */
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
   /**
    * Observes built-in Ask One interactions without replacing them.
    *
-   * Called immediately before F0 stages the quoted widget or point in the
-   * mounted chat. `quote` is the same object the composer later submits or
-   * dismisses, so a host can bind structured analytical context to the exact
-   * pending interaction and clean it up by quote identity.
+   * Called immediately before F0 stages the quoted widget, point, or drawn
+   * area in the mounted chat. `quote` is the same object the composer later
+   * submits or dismisses, so a host can bind structured analytical context to
+   * the exact pending interaction and clean it up by quote identity.
    *
    * This observer does not make Ask One available by itself. A mounted,
    * enabled AI chat still owns the built-in behavior; use `onAskAi` instead
